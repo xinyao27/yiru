@@ -439,6 +439,45 @@ describe('applyWebSessionTabsSnapshot', () => {
     expect(patch.groupsByWorktree?.[WT]?.[0]?.tabOrder).toEqual([mirroredId])
   })
 
+  it('keeps stale local agent tabs when the host mirror is for a different agent', () => {
+    const staleLocalClaudeTab: TerminalTab = {
+      id: 'local-claude-tab',
+      ptyId: null,
+      worktreeId: WT,
+      title: 'Claude',
+      defaultTitle: 'Claude',
+      customTitle: null,
+      color: null,
+      sortOrder: 0,
+      createdAt: NOW,
+      launchAgent: 'claude'
+    }
+
+    const patch = applyWebSessionTabsSnapshot(
+      makeState({
+        tabsByWorktree: { [WT]: [staleLocalClaudeTab] }
+      }),
+      makeSnapshot([
+        {
+          type: 'terminal',
+          id: HOST_SURFACE_ID,
+          title: 'Codex',
+          parentTabId: 'host-tab-1',
+          leafId: LEAF_ID,
+          isActive: true,
+          launchAgent: 'codex',
+          status: 'ready',
+          terminal: 'terminal-1'
+        }
+      ]),
+      ENV,
+      NOW
+    ) as Partial<WebSessionTabsSyncState>
+
+    expect(patch.tabsByWorktree?.[WT]).toHaveLength(2)
+    expect(patch.tabsByWorktree?.[WT]?.some((tab) => tab.id === 'local-claude-tab')).toBe(true)
+  })
+
   it('hydrates ready host terminal surfaces as remote runtime terminal tabs', () => {
     const patch = applyWebSessionTabsSnapshot(
       makeState(),
