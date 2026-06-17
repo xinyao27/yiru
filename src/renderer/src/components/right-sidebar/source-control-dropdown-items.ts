@@ -2,6 +2,7 @@
 // Why: split from source-control-primary-action because the primary and dropdown are independent derivations with different priority ladders; together they exceed the max-lines budget and tangle unrelated concerns.
 
 import type { PrimaryActionInputs } from './source-control-primary-action'
+import { canSubmitCommit, resolveCommitDisabledReason } from './source-control-commit-eligibility'
 import type { GitConflictOperation } from '../../../../shared/types'
 import { shouldForcePushWithLeaseForUpstream } from '../../../../shared/git-upstream-status'
 import { supportsHostedReviewCreation } from '../../../../shared/hosted-review-creation-providers'
@@ -177,22 +178,23 @@ export function resolveDropdownItems(inputs: DropdownActionInputs): DropdownEntr
   // on a stale status snapshot.
   const globalBusy = isCommitting || isRemoteOperationActive || isPullRequestOperationActive
 
-  const commitDisabledReason = (() => {
-    if (hasUnresolvedConflicts) {
-      return 'Resolve conflicts before committing'
-    }
-    if (!hasStaged) {
-      return 'Stage at least one file to commit'
-    }
-    if (hasPartiallyStagedChanges) {
-      return 'Stage all changes before committing partially staged files'
-    }
-    if (!hasMessage) {
-      return 'Enter a commit message to commit'
-    }
-    return null
-  })()
-  const canCommit = !globalBusy && commitDisabledReason === null
+  const commitDisabledReason = resolveCommitDisabledReason({
+    stagedCount,
+    hasPartiallyStagedChanges,
+    hasMessage,
+    hasUnresolvedConflicts
+  })
+  const canCommit =
+    !globalBusy &&
+    canSubmitCommit({
+      stagedCount,
+      hasPartiallyStagedChanges,
+      hasMessage,
+      hasUnresolvedConflicts,
+      isCommitting,
+      isRemoteOperationActive,
+      isPullRequestOperationActive
+    })
   const commitItem: DropdownItem = {
     kind: 'commit',
     label: translate(

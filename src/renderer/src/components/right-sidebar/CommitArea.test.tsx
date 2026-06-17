@@ -39,6 +39,7 @@ function baseProps(overrides: Partial<PrimaryActionInputs> = {}) {
     isGenerating: false,
     generateError: null as string | null,
     stagedCount: inputs.stagedCount,
+    hasPartiallyStagedChanges: inputs.hasPartiallyStagedChanges,
     hasUnresolvedConflicts: inputs.hasUnresolvedConflicts,
     isRemoteOperationActive: inputs.isRemoteOperationActive,
     inFlightRemoteOpKind: inputs.inFlightRemoteOpKind ?? null,
@@ -116,12 +117,31 @@ describe('CommitArea', () => {
     expect(hasDisabledAttribute(firstButton(renderCommitArea(baseProps())))).toBe(false)
   })
 
-  it('keeps the textarea enabled while the commit is in flight', () => {
+  it('disables the textarea while the commit is in flight', () => {
     const markup = renderCommitArea({
       ...baseProps({ isCommitting: true }),
       isCommitting: true
     })
-    expect(textarea(markup)).not.toContain('disabled')
+    expect(hasDisabledAttribute(textarea(markup))).toBe(true)
+  })
+
+  it('disables the textarea when no files are staged', () => {
+    expect(hasDisabledAttribute(textarea(renderCommitArea(baseProps({ stagedCount: 0 }))))).toBe(
+      true
+    )
+  })
+
+  it('disables the textarea when unresolved conflicts exist', () => {
+    expect(
+      hasDisabledAttribute(textarea(renderCommitArea(baseProps({ hasUnresolvedConflicts: true }))))
+    ).toBe(true)
+  })
+
+  it('keeps the textarea enabled when staged files need a commit message', () => {
+    const props = baseProps({ hasMessage: false })
+    expect(hasDisabledAttribute(textarea(renderCommitArea({ ...props, commitMessage: '' })))).toBe(
+      false
+    )
   })
 
   it('clears the message and keeps error hidden after a successful commit lifecycle', () => {

@@ -8408,6 +8408,7 @@
             "createPrIntentPushing": "Subiendo commits…",
             "createPrIntentRemoteFailed": "No se pudo actualizar la rama remota. Vuelve a intentar Crear PR.",
             "createPrIntentGeneratingDetails": "Generating review details…",
+            "createPrIntentBranchChangedDuringDetails": "Branch changed while generating review details. Retry Create PR.",
             "createPrIntentCreatingReview": "Creating review…"
           },
           "SourceControlAgentActionDialog": {

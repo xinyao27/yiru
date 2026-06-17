@@ -63,6 +63,7 @@ import {
   type DropdownActionKind,
   type DropdownEntry
 } from './source-control-dropdown-items'
+import { isCommitMessageFieldDisabled } from './source-control-commit-eligibility'
 import { BulkActionBar } from './BulkActionBar'
 import { useSourceControlSelection, type FlatEntry } from './useSourceControlSelection'
 import {
@@ -146,6 +147,7 @@ import {
   getRuntimeGitHistory,
   stageRuntimeGitPath,
   unstageRuntimeGitPath,
+  type RuntimeGitContext,
   type RuntimeGenerateCommitMessageOverrides,
   type RuntimeGeneratePullRequestFieldsOverrides
 } from '@/runtime/runtime-git-client'
@@ -161,7 +163,9 @@ import type {
   GitBranchChangeEntry,
   GitBranchCompareSummary,
   GitConflictOperation,
+  GitPushTarget,
   GitStatusEntry,
+  GitUpstreamStatus,
   SourceControlViewMode,
   TuiAgent
 } from '../../../../shared/types'
@@ -209,6 +213,7 @@ import {
 } from '@/i18n/hosted-review-localized-copy'
 import {
   createCreatePrIntentRunToken,
+  createPrIntentCurrentTargetConflictsWithToken,
   createPrIntentGitStatusMatchesToken,
   createPrIntentRunTokenMatches,
   getCreatePrIntentStagePaths,
@@ -247,6 +252,17 @@ type AbortActionErrorKind = 'abort_merge' | 'abort_rebase'
 export type SourceControlActionError = {
   kind: RemoteOpKind | AbortActionErrorKind
   message: string
+}
+type SourceControlOperationTarget = RuntimeGitContext & {
+  worktreeId: string
+  pushTarget?: GitPushTarget
+}
+type HostedReviewCreatedContext = {
+  repoPath: string
+  repoId: string
+  branch: string
+  worktreeId: string | null
+  openChecks: boolean
 }
 type CreatePrIntentTone = 'muted' | 'destructive'
 type CreatePrIntentNotice = {
@@ -1011,6 +1027,28 @@ function SourceControlInner(): React.JSX.Element {
     },
     []
   )
+  const createPrIntentRunStillOwnsWorktree = useCallback(
+    (token: CreatePrIntentRunToken): boolean =>
+      createPrIntentRunTokenRef.current[token.worktreeId] === token,
+    []
+  )
+  const createPrIntentActiveTargetConflicts = useCallback(
+    (token: CreatePrIntentRunToken): boolean =>
+      createPrIntentCurrentTargetConflictsWithToken(token, createPrIntentCurrentTargetRef.current),
+    []
+  )
+  const getCreatePrIntentOperationTarget = useCallback(
+    (token: CreatePrIntentRunToken): SourceControlOperationTarget => ({
+      // Why: Create PR intent continues after navigation; keep git commands
+      // pinned to the worktree and runtime host that started the sequence.
+      settings: activeRepoSettings,
+      worktreeId: token.worktreeId,
+      worktreePath: token.worktreePath,
+      connectionId: getConnectionId(token.worktreeId) ?? undefined,
+      pushTarget: worktreeMap.get(token.worktreeId)?.pushTarget
+    }),
+    [activeRepoSettings, worktreeMap]
+  )
   const prGenerationRecords = useAppStore((s) => s.pullRequestGenerationRecords)
   const allocatePullRequestGenerationRequestId = useAppStore(
     (s) => s.allocatePullRequestGenerationRequestId
@@ -1127,36 +1165,6 @@ function SourceControlInner(): React.JSX.Element {
     }
   }, [refreshActiveGitStatus])
 
-  const refreshActiveGitStatusAfterMutationStrict = useCallback(async () => {
-    if (!activeWorktreeId || !worktreePath || isFolder) {
-      return null
-    }
-    const connectionId = getConnectionId(activeWorktreeId) ?? undefined
-    return await refreshGitStatusForWorktreeStrict({
-      // Why: the PR intent sequence chains decisions after refresh, so this
-      // variant must fail loudly instead of letting stale snapshots drive pushes.
-      settings: activeRepoSettings,
-      worktreeId: activeWorktreeId,
-      worktreePath,
-      connectionId,
-      pushTarget: activeWorktree?.pushTarget,
-      deps: {
-        setGitStatus,
-        updateWorktreeGitIdentity,
-        setUpstreamStatus
-      }
-    })
-  }, [
-    activeRepoSettings,
-    activeWorktree?.pushTarget,
-    activeWorktreeId,
-    isFolder,
-    setGitStatus,
-    setUpstreamStatus,
-    updateWorktreeGitIdentity,
-    worktreePath
-  ])
-
   // Why: when status is truncated at the entry limit, offer (once per worktree)
   // to .gitignore the folder most likely flooding it — the usual cause is a
   // build/dependency dir that should have been ignored. Accepting writes the
@@ -1220,7 +1228,7 @@ function SourceControlInner(): React.JSX.Element {
           worktreeId: context.worktreeId,
           worktreePath: context.worktreePath,
           connectionId: context.connectionId,
-          pushTarget: worktreeMap[context.worktreeId]?.pushTarget,
+          pushTarget: worktreeMap.get(context.worktreeId)?.pushTarget,
           deps: {
             setGitStatus,
             updateWorktreeGitIdentity,
@@ -1664,43 +1672,57 @@ function SourceControlInner(): React.JSX.Element {
   const handleCommit = useCallback(
     async (
       messageOverride?: string,
-      options?: { skipStagedSnapshotCheck?: boolean }
+      options?: {
+        skipStagedSnapshotCheck?: boolean
+        skipActiveConflictCheck?: boolean
+        target?: SourceControlOperationTarget
+      }
     ): Promise<boolean> => {
-      if (!activeWorktreeId || !worktreePath) {
+      const target =
+        options?.target ??
+        (activeWorktreeId && worktreePath
+          ? {
+              settings: activeRepoSettings,
+              worktreeId: activeWorktreeId,
+              worktreePath,
+              connectionId: getConnectionId(activeWorktreeId) ?? undefined,
+              pushTarget: activeWorktree?.pushTarget
+            }
+          : null)
+      if (!target) {
         return false
       }
       const message = (messageOverride ?? commitMessage).trim()
       if (
         !message ||
         (!options?.skipStagedSnapshotCheck && grouped.staged.length === 0) ||
-        unresolvedConflicts.length > 0
+        (!options?.skipActiveConflictCheck && unresolvedConflicts.length > 0)
       ) {
         return false
       }
 
-      if (commitInFlightRef.current[activeWorktreeId]) {
+      if (commitInFlightRef.current[target.worktreeId]) {
         return false
       }
-      commitInFlightRef.current[activeWorktreeId] = true
+      commitInFlightRef.current[target.worktreeId] = true
 
-      const connectionId = getConnectionId(activeWorktreeId) ?? undefined
-      setCommitInFlightByWorktree((prev) => ({ ...prev, [activeWorktreeId]: true }))
-      setCommitErrors((prev) => ({ ...prev, [activeWorktreeId]: null }))
+      setCommitInFlightByWorktree((prev) => ({ ...prev, [target.worktreeId]: true }))
+      setCommitErrors((prev) => ({ ...prev, [target.worktreeId]: null }))
       try {
         const commitResult = await commitRuntimeGit(
           {
             // Why: route the commit by the repo OWNER host, not the focused runtime.
-            settings: activeRepoSettings,
-            worktreeId: activeWorktreeId,
-            worktreePath,
-            connectionId
+            settings: target.settings,
+            worktreeId: target.worktreeId,
+            worktreePath: target.worktreePath,
+            connectionId: target.connectionId
           },
           message
         )
         if (!commitResult.success) {
           setCommitErrors((prev) => ({
             ...prev,
-            [activeWorktreeId]: commitResult.error ?? 'Commit failed'
+            [target.worktreeId]: commitResult.error ?? 'Commit failed'
           }))
           return false
         }
@@ -1712,15 +1734,17 @@ function SourceControlInner(): React.JSX.Element {
         // closure, so the dropped text would never have been committed either.
         // Only clear when the current draft still matches what we committed.
         updateCommitDrafts((prev) => {
-          const current = prev[activeWorktreeId]
+          const current = prev[target.worktreeId]
           if (current !== undefined && current.trim() !== message) {
             // User typed more after submit — preserve their in-progress edits.
             return prev
           }
-          return writeCommitDraftForWorktree(prev, activeWorktreeId, '')
+          return writeCommitDraftForWorktree(prev, target.worktreeId, '')
         })
-        setCommitErrors((prev) => ({ ...prev, [activeWorktreeId]: null }))
-        void refreshActiveGitStatusAfterMutation()
+        setCommitErrors((prev) => ({ ...prev, [target.worktreeId]: null }))
+        if (!options?.target) {
+          void refreshActiveGitStatusAfterMutation()
+        }
         // Why: flip branchSummary to 'loading' synchronously so the empty-state
         // guard
         //   (!hasUncommittedEntries && branchSummary.status === 'ready' &&
@@ -1736,29 +1760,32 @@ function SourceControlInner(): React.JSX.Element {
         // compound flows (runCompoundCommitAction) need handleCommit to
         // resolve immediately so the push step starts without delay. Errors
         // here are best-effort — the polling tick will retry.
-        if (effectiveBaseRef) {
+        if (!options?.target && effectiveBaseRef) {
           beginGitBranchCompareRequest(
-            activeWorktreeId,
-            `${activeWorktreeId}:${effectiveBaseRef}:${Date.now()}:post-commit`,
+            target.worktreeId,
+            `${target.worktreeId}:${effectiveBaseRef}:${Date.now()}:post-commit`,
             effectiveBaseRef
           )
         }
-        void refreshBranchCompareRef.current()
-        void refreshGitHistoryRef.current()
+        if (!options?.target) {
+          void refreshBranchCompareRef.current()
+          void refreshGitHistoryRef.current()
+        }
         return true
       } catch (error) {
         setCommitErrors((prev) => ({
           ...prev,
-          [activeWorktreeId]: error instanceof Error ? error.message : 'Commit failed'
+          [target.worktreeId]: error instanceof Error ? error.message : 'Commit failed'
         }))
         return false
       } finally {
-        setCommitInFlightByWorktree((prev) => ({ ...prev, [activeWorktreeId]: false }))
-        commitInFlightRef.current[activeWorktreeId] = false
+        setCommitInFlightByWorktree((prev) => ({ ...prev, [target.worktreeId]: false }))
+        commitInFlightRef.current[target.worktreeId] = false
       }
     },
     [
       activeRepoSettings,
+      activeWorktree?.pushTarget,
       activeWorktreeId,
       beginGitBranchCompareRequest,
       commitMessage,
@@ -1872,73 +1899,61 @@ function SourceControlInner(): React.JSX.Element {
     openCommitGenerationDialog()
   }, [activeRepo, handleGenerate, openCommitGenerationDialog, resolvedCommitMessageAi, settings])
 
-  const generateCommitMessageForCreatePrIntent = useCallback(async (): Promise<{
-    ok: boolean
-    message?: string
-    reason?: 'settings' | 'failed' | 'canceled'
-  }> => {
-    if (!activeWorktreeId || !worktreePath) {
-      return { ok: false, reason: 'failed' }
-    }
-    if (
-      !hasConfiguredCommitMessageGenerationDefaults({ settings, repo: activeRepo ?? null }) ||
-      resolvedCommitMessageAi?.ok !== true
-    ) {
-      return { ok: false, reason: 'settings' }
-    }
-    if (isCustomAgentId(resolvedCommitMessageAi.value.params.agentId)) {
-      const command = resolvedCommitMessageAi.value.params.customAgentCommand?.trim() ?? ''
-      if (!command) {
+  const generateCommitMessageForCreatePrIntent = useCallback(
+    async (
+      token: CreatePrIntentRunToken
+    ): Promise<{
+      ok: boolean
+      message?: string
+      reason?: 'settings' | 'failed' | 'canceled'
+    }> => {
+      if (
+        !hasConfiguredCommitMessageGenerationDefaults({ settings, repo: activeRepo ?? null }) ||
+        resolvedCommitMessageAi?.ok !== true
+      ) {
         return { ok: false, reason: 'settings' }
       }
-    }
-    if (generateInFlightRef.current[activeWorktreeId]) {
-      return { ok: false, reason: 'failed' }
-    }
-
-    generateInFlightRef.current[activeWorktreeId] = true
-    const connectionId = getConnectionId(activeWorktreeId) ?? undefined
-    setGenerateInFlightByWorktree((prev) => ({ ...prev, [activeWorktreeId]: true }))
-    setGenerateErrors((prev) => ({ ...prev, [activeWorktreeId]: null }))
-    try {
-      const result = await generateRuntimeCommitMessage(
-        {
-          // Why: route generation by the repo OWNER host, not the focused runtime.
-          settings: activeRepoSettings,
-          worktreeId: activeWorktreeId,
-          worktreePath,
-          connectionId
-        },
-        { sourceControlAiResolvedParams: resolvedCommitMessageAi.value.params }
-      )
-      if (!result.success) {
-        if (!result.canceled) {
-          setGenerateErrors((prev) => ({ ...prev, [activeWorktreeId]: result.error }))
+      if (isCustomAgentId(resolvedCommitMessageAi.value.params.agentId)) {
+        const command = resolvedCommitMessageAi.value.params.customAgentCommand?.trim() ?? ''
+        if (!command) {
+          return { ok: false, reason: 'settings' }
         }
-        return { ok: false, reason: result.canceled ? 'canceled' : 'failed' }
       }
-      useAppStore.getState().recordFeatureInteraction('ai-commit-generation')
-      setGenerateErrors((prev) => ({ ...prev, [activeWorktreeId]: null }))
-      return { ok: true, message: result.message }
-    } catch (error) {
-      setGenerateErrors((prev) => ({
-        ...prev,
-        [activeWorktreeId]:
-          error instanceof Error ? error.message : 'Failed to generate commit message'
-      }))
-      return { ok: false, reason: 'failed' }
-    } finally {
-      setGenerateInFlightByWorktree((prev) => ({ ...prev, [activeWorktreeId]: false }))
-      generateInFlightRef.current[activeWorktreeId] = false
-    }
-  }, [
-    activeRepo,
-    activeRepoSettings,
-    activeWorktreeId,
-    resolvedCommitMessageAi,
-    settings,
-    worktreePath
-  ])
+      const target = getCreatePrIntentOperationTarget(token)
+      if (generateInFlightRef.current[target.worktreeId]) {
+        return { ok: false, reason: 'failed' }
+      }
+
+      generateInFlightRef.current[target.worktreeId] = true
+      setGenerateInFlightByWorktree((prev) => ({ ...prev, [target.worktreeId]: true }))
+      setGenerateErrors((prev) => ({ ...prev, [target.worktreeId]: null }))
+      try {
+        const result = await generateRuntimeCommitMessage(target, {
+          sourceControlAiResolvedParams: resolvedCommitMessageAi.value.params
+        })
+        if (!result.success) {
+          if (!result.canceled) {
+            setGenerateErrors((prev) => ({ ...prev, [target.worktreeId]: result.error }))
+          }
+          return { ok: false, reason: result.canceled ? 'canceled' : 'failed' }
+        }
+        useAppStore.getState().recordFeatureInteraction('ai-commit-generation')
+        setGenerateErrors((prev) => ({ ...prev, [target.worktreeId]: null }))
+        return { ok: true, message: result.message }
+      } catch (error) {
+        setGenerateErrors((prev) => ({
+          ...prev,
+          [target.worktreeId]:
+            error instanceof Error ? error.message : 'Failed to generate commit message'
+        }))
+        return { ok: false, reason: 'failed' }
+      } finally {
+        setGenerateInFlightByWorktree((prev) => ({ ...prev, [target.worktreeId]: false }))
+        generateInFlightRef.current[target.worktreeId] = false
+      }
+    },
+    [activeRepo, getCreatePrIntentOperationTarget, resolvedCommitMessageAi, settings]
+  )
 
   const handleCancelGenerate = useCallback((): void => {
     if (!activeWorktreeId || !worktreePath) {
@@ -1974,102 +1989,126 @@ function SourceControlInner(): React.JSX.Element {
         | 'sync'
         | 'fetch'
         | 'publish'
-        | 'rebase'
+        | 'rebase',
+      options?: {
+        target?: SourceControlOperationTarget
+        remoteStatus?: GitUpstreamStatus
+        baseRef?: string | null
+      }
     ): Promise<boolean> => {
-      if (!activeWorktreeId || !worktreePath) {
+      const target =
+        options?.target ??
+        (activeWorktreeId && worktreePath
+          ? {
+              settings: activeRepoSettings,
+              worktreeId: activeWorktreeId,
+              worktreePath,
+              connectionId: getConnectionId(activeWorktreeId) ?? undefined,
+              pushTarget: activeWorktree?.pushTarget
+            }
+          : null)
+      if (!target) {
         return false
       }
-      const connectionId = getConnectionId(activeWorktreeId) ?? undefined
-      setRemoteActionErrors((prev) => ({ ...prev, [activeWorktreeId]: null }))
+      setRemoteActionErrors((prev) => ({ ...prev, [target.worktreeId]: null }))
       try {
         if (kind === 'publish') {
           await pushBranch(
-            activeWorktreeId,
-            worktreePath,
+            target.worktreeId,
+            target.worktreePath,
             true,
-            connectionId,
-            activeWorktree?.pushTarget,
-            { runtimeTargetSettings: activeRepoSettings }
+            target.connectionId,
+            target.pushTarget,
+            { runtimeTargetSettings: target.settings }
           )
           return true
         }
         if (kind === 'push') {
-          const forceWithLease = shouldForcePushWithLeaseForUpstream(remoteStatus)
+          const forceWithLease = shouldForcePushWithLeaseForUpstream(
+            options?.remoteStatus ?? remoteStatus
+          )
           await pushBranch(
-            activeWorktreeId,
-            worktreePath,
+            target.worktreeId,
+            target.worktreePath,
             false,
-            connectionId,
-            activeWorktree?.pushTarget,
+            target.connectionId,
+            target.pushTarget,
             forceWithLease
-              ? { forceWithLease: true, runtimeTargetSettings: activeRepoSettings }
-              : { runtimeTargetSettings: activeRepoSettings }
+              ? { forceWithLease: true, runtimeTargetSettings: target.settings }
+              : { runtimeTargetSettings: target.settings }
           )
           return true
         }
         if (kind === 'force_push') {
           await pushBranch(
-            activeWorktreeId,
-            worktreePath,
+            target.worktreeId,
+            target.worktreePath,
             false,
-            connectionId,
-            activeWorktree?.pushTarget,
-            { forceWithLease: true, runtimeTargetSettings: activeRepoSettings }
+            target.connectionId,
+            target.pushTarget,
+            { forceWithLease: true, runtimeTargetSettings: target.settings }
           )
           return true
         }
         if (kind === 'pull') {
           await pullBranch(
-            activeWorktreeId,
-            worktreePath,
-            connectionId,
-            activeWorktree?.pushTarget,
+            target.worktreeId,
+            target.worktreePath,
+            target.connectionId,
+            target.pushTarget,
             {
-              runtimeTargetSettings: activeRepoSettings
+              runtimeTargetSettings: target.settings
             }
           )
           return true
         }
         if (kind === 'fast_forward') {
           await fastForwardBranch(
-            activeWorktreeId,
-            worktreePath,
-            connectionId,
-            activeWorktree?.pushTarget,
-            { runtimeTargetSettings: activeRepoSettings }
+            target.worktreeId,
+            target.worktreePath,
+            target.connectionId,
+            target.pushTarget,
+            { runtimeTargetSettings: target.settings }
           )
           return true
         }
         if (kind === 'fetch') {
           await fetchBranch(
-            activeWorktreeId,
-            worktreePath,
-            connectionId,
-            activeWorktree?.pushTarget,
+            target.worktreeId,
+            target.worktreePath,
+            target.connectionId,
+            target.pushTarget,
             {
-              runtimeTargetSettings: activeRepoSettings
+              runtimeTargetSettings: target.settings
             }
           )
           return true
         }
         if (kind === 'rebase') {
-          if (!effectiveBaseRef) {
+          const baseRef = options?.baseRef ?? effectiveBaseRef
+          if (!baseRef) {
             return false
           }
           await rebaseFromBase(
-            activeWorktreeId,
-            worktreePath,
-            effectiveBaseRef,
-            connectionId,
-            activeWorktree?.pushTarget,
-            { runtimeTargetSettings: activeRepoSettings }
+            target.worktreeId,
+            target.worktreePath,
+            baseRef,
+            target.connectionId,
+            target.pushTarget,
+            { runtimeTargetSettings: target.settings }
           )
           return true
         }
-        await syncBranch(activeWorktreeId, worktreePath, connectionId, activeWorktree?.pushTarget, {
-          runtimeTargetSettings: activeRepoSettings
-        })
-        setRemoteActionErrors((prev) => ({ ...prev, [activeWorktreeId]: null }))
+        await syncBranch(
+          target.worktreeId,
+          target.worktreePath,
+          target.connectionId,
+          target.pushTarget,
+          {
+            runtimeTargetSettings: target.settings
+          }
+        )
+        setRemoteActionErrors((prev) => ({ ...prev, [target.worktreeId]: null }))
         return true
       } catch (error) {
         // Why: remote action failures are surfaced by editor-slice actions to keep
@@ -2078,18 +2117,20 @@ function SourceControlInner(): React.JSX.Element {
         // otherwise look like nothing happened once the menu closes.
         setRemoteActionErrors((prev) => ({
           ...prev,
-          [activeWorktreeId]: {
+          [target.worktreeId]: {
             kind,
             message: resolveRemoteActionError(kind, error)
           }
         }))
         return false
       } finally {
-        refreshSourceControlAfterRemoteAction({
-          refreshGitStatus: refreshActiveGitStatusAfterMutation,
-          refreshBranchCompare: refreshBranchCompareRef.current,
-          refreshGitHistory: refreshGitHistoryRef.current
-        })
+        if (!options?.target) {
+          refreshSourceControlAfterRemoteAction({
+            refreshGitStatus: refreshActiveGitStatusAfterMutation,
+            refreshBranchCompare: refreshBranchCompareRef.current,
+            refreshGitHistory: refreshGitHistoryRef.current
+          })
+        }
       }
     },
     [
@@ -2223,27 +2264,34 @@ function SourceControlInner(): React.JSX.Element {
   )
 
   const handlePullRequestCreated = useCallback(
-    async (result: CreatedHostedReview): Promise<void> => {
-      if (!activeRepo || !branchName) {
+    async (result: CreatedHostedReview, context?: HostedReviewCreatedContext): Promise<void> => {
+      const repoPath = context?.repoPath ?? activeRepo?.path
+      const repoId = context?.repoId ?? activeRepo?.id
+      const branch = context?.branch ?? branchName
+      const worktreeId = context?.worktreeId ?? activeWorktreeId ?? null
+      const openChecks = context?.openChecks ?? true
+      if (!repoPath || !repoId || !branch) {
         return
       }
       const copy = localizedHostedReviewCopy(
         resolveSupportedHostedReviewCopyProvider(result.provider)
       )
-      setRightSidebarOpen(true)
-      setRightSidebarTab('checks')
+      if (openChecks) {
+        setRightSidebarOpen(true)
+        setRightSidebarTab('checks')
+      }
       try {
-        if (activeWorktreeId && result.provider === 'github') {
-          await updateWorktreeMeta(activeWorktreeId, { linkedPR: result.number })
+        if (worktreeId && result.provider === 'github') {
+          await updateWorktreeMeta(worktreeId, { linkedPR: result.number })
         }
-        if (activeWorktreeId && result.provider === 'gitlab') {
-          await updateWorktreeMeta(activeWorktreeId, { linkedGitLabMR: result.number })
+        if (worktreeId && result.provider === 'gitlab') {
+          await updateWorktreeMeta(worktreeId, { linkedGitLabMR: result.number })
         }
-        if (activeWorktreeId && result.provider === 'azure-devops') {
-          await updateWorktreeMeta(activeWorktreeId, { linkedAzureDevOpsPR: result.number })
+        if (worktreeId && result.provider === 'azure-devops') {
+          await updateWorktreeMeta(worktreeId, { linkedAzureDevOpsPR: result.number })
         }
-        if (activeWorktreeId && result.provider === 'gitea') {
-          await updateWorktreeMeta(activeWorktreeId, { linkedGiteaPR: result.number })
+        if (worktreeId && result.provider === 'gitea') {
+          await updateWorktreeMeta(worktreeId, { linkedGiteaPR: result.number })
         }
         const linkedReviewNumbers = {
           linkedGitHubPR: result.provider === 'github' ? result.number : linkedGitHubPR,
@@ -2255,31 +2303,31 @@ function SourceControlInner(): React.JSX.Element {
           linkedGiteaPR: result.provider === 'gitea' ? result.number : linkedGiteaPR
         }
         if (result.provider === 'gitlab') {
-          await fetchHostedReviewForBranch(activeRepo.path, branchName, {
+          await fetchHostedReviewForBranch(repoPath, branch, {
             force: true,
-            repoId: activeRepo.id,
+            repoId,
             ...linkedReviewNumbers
           })
           return
         }
         if (result.provider !== 'github') {
-          await fetchHostedReviewForBranch(activeRepo.path, branchName, {
+          await fetchHostedReviewForBranch(repoPath, branch, {
             force: true,
-            repoId: activeRepo.id,
+            repoId,
             ...linkedReviewNumbers
           })
           return
         }
         await Promise.all([
-          fetchHostedReviewForBranch(activeRepo.path, branchName, {
+          fetchHostedReviewForBranch(repoPath, branch, {
             force: true,
-            repoId: activeRepo.id,
+            repoId,
             ...linkedReviewNumbers
           }),
-          fetchPRForBranch(activeRepo.path, branchName, {
+          fetchPRForBranch(repoPath, branch, {
             force: true,
-            repoId: activeRepo.id,
-            worktreeId: activeWorktreeId ?? undefined,
+            repoId,
+            worktreeId: worktreeId ?? undefined,
             linkedPRNumber: result.number
           })
         ])
@@ -2305,6 +2353,7 @@ function SourceControlInner(): React.JSX.Element {
     },
     [
       activeRepo,
+      activeWorktreeId,
       branchName,
       fallbackGitHubPRNumber,
       fetchHostedReviewForBranch,
@@ -2316,7 +2365,6 @@ function SourceControlInner(): React.JSX.Element {
       linkedGitLabMR,
       setRightSidebarOpen,
       setRightSidebarTab,
-      activeWorktreeId,
       updateWorktreeMeta
     ]
   )
@@ -2797,14 +2845,14 @@ function SourceControlInner(): React.JSX.Element {
       token: CreatePrIntentRunToken,
       eligibility: HostedReviewCreationEligibility
     ): Promise<boolean> => {
-      if (!activeRepo || !branchName || !eligibility.canCreate) {
+      if (!activeRepo || !token.branch || !eligibility.canCreate) {
         return false
       }
 
       const base = stripBaseRef(
         eligibility.defaultBaseRef ?? effectiveBaseRef ?? prBase ?? ''
       ).trim()
-      if (!base || stripBaseRef(base).toLowerCase() === stripBaseRef(branchName).toLowerCase()) {
+      if (!base || stripBaseRef(base).toLowerCase() === stripBaseRef(token.branch).toLowerCase()) {
         setCreatePrIntentNoticeForWorktree(token.worktreeId, {
           tone: 'destructive',
           message: translate(
@@ -2818,8 +2866,8 @@ function SourceControlInner(): React.JSX.Element {
 
       const fallbackTitle =
         eligibility.title?.trim() ||
-        humanizeBranchSlug(stripBaseRef(branchName).split('/').pop()?.replace(/_/g, '-') ?? '') ||
-        stripBaseRef(branchName)
+        humanizeBranchSlug(stripBaseRef(token.branch).split('/').pop()?.replace(/_/g, '-') ?? '') ||
+        stripBaseRef(token.branch)
       let fields = {
         base,
         title: fallbackTitle,
@@ -2841,22 +2889,23 @@ function SourceControlInner(): React.JSX.Element {
             'Generating review details…'
           )
         })
+        const target = getCreatePrIntentOperationTarget(token)
         try {
-          const generated = await generateRuntimePullRequestFields(
-            {
-              // Why: direct Create PR intent submission can run after focus
-              // changes; keep generation pinned to the original worktree.
-              settings: activeRepoSettings,
-              worktreeId: token.worktreeId,
-              worktreePath: token.worktreePath,
-              connectionId: getConnectionId(token.worktreeId) ?? undefined
-            },
-            {
-              ...fields,
-              provider: eligibility.provider,
-              useTemplate: resolvedPrCreationDefaults.useTemplate
-            }
-          )
+          const generated = await generateRuntimePullRequestFields(target, {
+            ...fields,
+            provider: eligibility.provider,
+            useTemplate: resolvedPrCreationDefaults.useTemplate
+          })
+          if (generated.branchChangedByPreparation) {
+            setCreatePrIntentNoticeForWorktree(token.worktreeId, {
+              tone: 'muted',
+              message: translate(
+                'auto.components.right.sidebar.SourceControl.createPrIntentBranchChangedDuringDetails',
+                'Branch changed while generating review details. Retry Create PR.'
+              )
+            })
+            return false
+          }
           if (generated.success) {
             fields = {
               // Why: Create PR intent auto-submits; generated details should
@@ -2872,9 +2921,14 @@ function SourceControlInner(): React.JSX.Element {
         }
       }
 
-      if (!createPrIntentRunTokenMatches(token, createPrIntentCurrentTargetRef.current)) {
+      if (
+        !createPrIntentRunStillOwnsWorktree(token) ||
+        createPrIntentActiveTargetConflicts(token)
+      ) {
         return false
       }
+      const createPrIntentIsForeground = (): boolean =>
+        createPrIntentRunTokenMatches(token, createPrIntentCurrentTargetRef.current)
 
       const title = fields.title.trim()
       if (!title) {
@@ -2903,7 +2957,7 @@ function SourceControlInner(): React.JSX.Element {
           repoId: activeRepo.id,
           provider: eligibility.provider,
           base: fields.base,
-          head: normalizeHostedReviewHeadRef(branchName),
+          head: normalizeHostedReviewHeadRef(token.branch),
           title,
           body: fields.body,
           draft: fields.draft,
@@ -2912,12 +2966,22 @@ function SourceControlInner(): React.JSX.Element {
         })
 
         if (result.ok) {
-          await handlePullRequestCreated({
-            provider: eligibility.provider,
-            number: result.number,
-            url: result.url
-          })
-          if (resolvedPrCreationDefaults.openAfterCreate) {
+          const openChecks = createPrIntentIsForeground()
+          await handlePullRequestCreated(
+            {
+              provider: eligibility.provider,
+              number: result.number,
+              url: result.url
+            },
+            {
+              repoPath: activeRepo.path,
+              repoId: activeRepo.id,
+              branch: token.branch,
+              worktreeId: token.worktreeId,
+              openChecks
+            }
+          )
+          if (openChecks && resolvedPrCreationDefaults.openAfterCreate) {
             window.api.shell.openUrl(result.url)
           }
           setCreatePrIntentNoticeForWorktree(token.worktreeId, null)
@@ -2925,11 +2989,21 @@ function SourceControlInner(): React.JSX.Element {
         }
 
         if (result.existingReview?.number && result.existingReview.url) {
-          await handlePullRequestCreated({
-            provider: eligibility.provider,
-            number: result.existingReview.number,
-            url: result.existingReview.url
-          })
+          const openChecks = createPrIntentIsForeground()
+          await handlePullRequestCreated(
+            {
+              provider: eligibility.provider,
+              number: result.existingReview.number,
+              url: result.existingReview.url
+            },
+            {
+              repoPath: activeRepo.path,
+              repoId: activeRepo.id,
+              branch: token.branch,
+              worktreeId: token.worktreeId,
+              openChecks
+            }
+          )
           setCreatePrIntentNoticeForWorktree(token.worktreeId, null)
           return true
         }
@@ -2960,10 +3034,11 @@ function SourceControlInner(): React.JSX.Element {
     },
     [
       activeRepo,
-      activeRepoSettings,
-      branchName,
       createHostedReview,
       effectiveBaseRef,
+      createPrIntentActiveTargetConflicts,
+      createPrIntentRunStillOwnsWorktree,
+      getCreatePrIntentOperationTarget,
       handlePullRequestCreated,
       hostedReviewCreateCopy.reviewLabel,
       prBase,
@@ -3002,20 +3077,22 @@ function SourceControlInner(): React.JSX.Element {
 
   const readHostedReviewCreationEligibilityForIntent = useCallback(
     async ({
+      token,
       hasUncommittedChanges,
       upstreamStatus
     }: {
+      token: CreatePrIntentRunToken
       hasUncommittedChanges: boolean
       upstreamStatus?: NonNullable<typeof remoteStatus>
     }): Promise<HostedReviewCreationEligibility | null> => {
-      if (!activeRepo || !activeWorktreeId || !branchName) {
+      if (!activeRepo || !token.branch) {
         return null
       }
       const result = await getHostedReviewCreationEligibility({
         repoPath: activeRepo.path,
         repoId: activeRepo.id,
-        ...(worktreePath ? { worktreePath } : {}),
-        branch: branchName,
+        worktreePath: token.worktreePath,
+        branch: token.branch,
         base: effectiveBaseRef ?? null,
         hasUncommittedChanges,
         hasUpstream: upstreamStatus?.hasUpstream,
@@ -3030,16 +3107,14 @@ function SourceControlInner(): React.JSX.Element {
       })
       setHostedReviewCreationState({
         repoId: activeRepo.id,
-        worktreeId: activeWorktreeId,
-        branch: branchName,
+        worktreeId: token.worktreeId,
+        branch: token.branch,
         data: result
       })
       return result
     },
     [
       activeRepo,
-      activeWorktreeId,
-      branchName,
       effectiveBaseRef,
       fallbackGitHubPRNumber,
       getHostedReviewCreationEligibility,
@@ -3047,8 +3122,37 @@ function SourceControlInner(): React.JSX.Element {
       linkedBitbucketPR,
       linkedGiteaPR,
       linkedGitHubPR,
-      linkedGitLabMR,
-      worktreePath
+      linkedGitLabMR
+    ]
+  )
+
+  const refreshGitStatusForCreatePrIntent = useCallback(
+    async (token: CreatePrIntentRunToken) => {
+      if (isFolder) {
+        return null
+      }
+      const target = getCreatePrIntentOperationTarget(token)
+      return await refreshGitStatusForWorktreeStrict({
+        // Why: Create PR intent can finish in the background after navigation,
+        // but branch-safety checks must inspect the worktree that started it.
+        settings: target.settings,
+        worktreeId: target.worktreeId,
+        worktreePath: target.worktreePath,
+        connectionId: target.connectionId,
+        pushTarget: target.pushTarget,
+        deps: {
+          setGitStatus,
+          updateWorktreeGitIdentity,
+          setUpstreamStatus
+        }
+      })
+    },
+    [
+      getCreatePrIntentOperationTarget,
+      isFolder,
+      setGitStatus,
+      setUpstreamStatus,
+      updateWorktreeGitIdentity
     ]
   )
 
@@ -3075,8 +3179,9 @@ function SourceControlInner(): React.JSX.Element {
       worktreePath,
       branch: branchName
     })
+    const operationTarget = getCreatePrIntentOperationTarget(token)
     const runIsCurrent = (): boolean =>
-      createPrIntentRunTokenMatches(token, createPrIntentCurrentTargetRef.current)
+      createPrIntentRunStillOwnsWorktree(token) && !createPrIntentActiveTargetConflicts(token)
     let abortedByStaleTarget = false
     const abortIfStale = (): boolean => {
       if (runIsCurrent()) {
@@ -3100,7 +3205,7 @@ function SourceControlInner(): React.JSX.Element {
       let latestStatusEntries = entries
       let latestUpstreamStatus = remoteStatus
       const refreshIntentSnapshot = async (): Promise<boolean> => {
-        const refreshed = await refreshActiveGitStatusAfterMutationStrict()
+        const refreshed = await refreshGitStatusForCreatePrIntent(token)
         if (!refreshed) {
           return false
         }
@@ -3128,16 +3233,7 @@ function SourceControlInner(): React.JSX.Element {
         }
         setIsExecutingBulk(true)
         try {
-          await bulkStageRuntimeGitPaths(
-            {
-              // Why: route staging by the repo OWNER host, not the focused runtime.
-              settings: activeRepoSettings,
-              worktreeId: token.worktreeId,
-              worktreePath: token.worktreePath,
-              connectionId: getConnectionId(token.worktreeId) ?? undefined
-            },
-            stagePaths
-          )
+          await bulkStageRuntimeGitPaths(operationTarget, stagePaths)
         } finally {
           setIsExecutingBulk(false)
         }
@@ -3166,7 +3262,7 @@ function SourceControlInner(): React.JSX.Element {
               'Generating commit message…'
             )
           })
-          const generated = await generateCommitMessageForCreatePrIntent()
+          const generated = await generateCommitMessageForCreatePrIntent(token)
           if (abortIfStale()) {
             return
           }
@@ -3210,7 +3306,11 @@ function SourceControlInner(): React.JSX.Element {
             'Committing changes…'
           )
         })
-        const committed = await handleCommit(message, { skipStagedSnapshotCheck: true })
+        const committed = await handleCommit(message, {
+          skipStagedSnapshotCheck: true,
+          skipActiveConflictCheck: true,
+          target: operationTarget
+        })
         if (abortIfStale()) {
           return
         }
@@ -3243,6 +3343,7 @@ function SourceControlInner(): React.JSX.Element {
         return
       }
       let eligibility = await readHostedReviewCreationEligibilityForIntent({
+        token,
         hasUncommittedChanges: latestStatusEntries.length > 0,
         upstreamStatus: latestUpstreamStatus
       })
@@ -3265,7 +3366,7 @@ function SourceControlInner(): React.JSX.Element {
         upstreamStatus: latestUpstreamStatus,
         hostedReviewCreation: eligibility,
         branchCommitsAhead: branchAhead,
-        hasCurrentBranch: Boolean(branchName)
+        hasCurrentBranch: Boolean(token.branch)
       })
       if (remoteStep === 'blocked' || remoteStep === 'none') {
         setCreatePrIntentNoticeForWorktree(token.worktreeId, {
@@ -3297,7 +3398,11 @@ function SourceControlInner(): React.JSX.Element {
               : 'Pushing commits…'
         )
       })
-      const remoteOk = await runRemoteAction(remoteStep)
+      const remoteOk = await runRemoteAction(remoteStep, {
+        target: operationTarget,
+        remoteStatus: latestUpstreamStatus,
+        baseRef: effectiveBaseRef
+      })
       if (abortIfStale()) {
         return
       }
@@ -3319,6 +3424,7 @@ function SourceControlInner(): React.JSX.Element {
         return
       }
       eligibility = await readHostedReviewCreationEligibilityForIntent({
+        token,
         hasUncommittedChanges: latestStatusEntries.length > 0,
         upstreamStatus: latestUpstreamStatus
       })
@@ -3365,12 +3471,15 @@ function SourceControlInner(): React.JSX.Element {
     }
   }, [
     activeRepo,
-    activeRepoSettings,
     activeWorktreeId,
     branchName,
+    createPrIntentActiveTargetConflicts,
+    createPrIntentRunStillOwnsWorktree,
     createHostedReviewForCreatePrIntent,
+    effectiveBaseRef,
     entries,
     generateCommitMessageForCreatePrIntent,
+    getCreatePrIntentOperationTarget,
     handleCommit,
     isCommitting,
     isCreatingPr,
@@ -3379,7 +3488,7 @@ function SourceControlInner(): React.JSX.Element {
     isRemoteOperationActive,
     prGenerating,
     readHostedReviewCreationEligibilityForIntent,
-    refreshActiveGitStatusAfterMutationStrict,
+    refreshGitStatusForCreatePrIntent,
     refreshBranchCompareForCreatePrIntent,
     remoteStatus,
     runRemoteAction,
@@ -5145,6 +5254,7 @@ function SourceControlInner(): React.JSX.Element {
                 isGenerating={isGenerating}
                 generateError={generateError}
                 stagedCount={grouped.staged.length}
+                hasPartiallyStagedChanges={hasPartiallyStagedChanges}
                 hasUnresolvedConflicts={unresolvedConflicts.length > 0}
                 isRemoteOperationActive={isRemoteOperationActive || isAbortingOperation}
                 inFlightRemoteOpKind={inFlightRemoteOpKind}
@@ -5866,6 +5976,7 @@ type CommitAreaProps = {
   isGenerating: boolean
   generateError: string | null
   stagedCount: number
+  hasPartiallyStagedChanges: boolean
   hasUnresolvedConflicts: boolean
   isRemoteOperationActive: boolean
   inFlightRemoteOpKind: RemoteOpKind | null
@@ -5907,6 +6018,7 @@ export function CommitArea({
   isGenerating,
   generateError,
   stagedCount,
+  hasPartiallyStagedChanges,
   hasUnresolvedConflicts,
   isRemoteOperationActive,
   inFlightRemoteOpKind,
@@ -6016,6 +6128,15 @@ export function CommitArea({
   const PrimaryIcon = PRIMARY_ICONS[primaryAction.kind]
 
   const hasMessage = commitMessage.trim().length > 0
+  const isCommitMessageDisabled = isCommitMessageFieldDisabled({
+    stagedCount,
+    hasPartiallyStagedChanges,
+    hasMessage,
+    hasUnresolvedConflicts,
+    isCommitting,
+    isRemoteOperationActive,
+    isPullRequestOperationActive: isCreatingPr
+  })
   const describedBy = [
     commitError ? 'commit-area-error' : null,
     remoteActionError ? 'commit-area-remote-error' : null,
@@ -6107,6 +6228,7 @@ export function CommitArea({
           <textarea
             rows={rows}
             value={commitMessage}
+            disabled={isCommitMessageDisabled}
             onChange={(e) => onCommitMessageChange(e.target.value)}
             placeholder={translate(
               'auto.components.right.sidebar.SourceControl.0d0a8359d3',
@@ -6119,7 +6241,7 @@ export function CommitArea({
             aria-describedby={describedBy || undefined}
             // Why: reserve right padding so typed text does not slide under the
             // absolute-positioned Generate icon in the top-right corner.
-            className={`mt-0.5 w-full resize-none rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground outline-none placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-ring ${
+            className={`mt-0.5 w-full resize-none rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground outline-none placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
               showGenerate ? 'pr-8' : ''
             }`}
           />

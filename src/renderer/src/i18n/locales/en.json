@@ -8408,6 +8408,7 @@
             "createPrIntentPushing": "Pushing commits…",
             "createPrIntentRemoteFailed": "Could not update the remote branch. Retry Create PR.",
             "createPrIntentGeneratingDetails": "Generating review details…",
+            "createPrIntentBranchChangedDuringDetails": "Branch changed while generating review details. Retry Create PR.",
             "createPrIntentCreatingReview": "Creating review…"
           },
           "SourceControlAgentActionDialog": {

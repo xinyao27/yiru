@@ -8408,6 +8408,7 @@
             "createPrIntentPushing": "コミットをプッシュ中…",
             "createPrIntentRemoteFailed": "リモートブランチを更新できませんでした。Create PR を再試行してください。",
             "createPrIntentGeneratingDetails": "Generating review details…",
+            "createPrIntentBranchChangedDuringDetails": "Branch changed while generating review details. Retry Create PR.",
             "createPrIntentCreatingReview": "Creating review…"
           },
           "SourceControlAgentActionDialog": {

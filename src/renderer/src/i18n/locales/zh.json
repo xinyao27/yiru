@@ -8408,6 +8408,7 @@
             "createPrIntentPushing": "正在推送 commits…",
             "createPrIntentRemoteFailed": "无法更新远程分支。请重试创建 PR。",
             "createPrIntentGeneratingDetails": "Generating review details…",
+            "createPrIntentBranchChangedDuringDetails": "Branch changed while generating review details. Retry Create PR.",
             "createPrIntentCreatingReview": "Creating review…"
           },
           "SourceControlAgentActionDialog": {
