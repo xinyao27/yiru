@@ -3782,7 +3782,7 @@
           "e091caab15": "找不到该项目",
           "439fa94d53": "更新",
           "579b1a8e61": "从父级中删除",
-          "8d9cd19d09": "打开父工作区",
+          "8d9cd19d09": "打开父工作树",
           "d35dfeae58": "从组中删除",
           "76865d827f": "移至群组",
           "503ec0f8e6": "来自项目的新组",
@@ -3798,7 +3798,9 @@
           "8dacff1fe0": "马克·里德",
           "3baa7d6507": "别针",
           "697d0f6e1b": "取消固定",
-          "250de158fd": "移除工作区"
+          "250de158fd": "移除工作区",
+          "changeParentWorkspace": "更改父工作树...",
+          "setParentWorkspace": "设置父工作树..."
         },
         "WorktreeList": {
           "d880ea0744": "创建一个组并将该项目移入其中。",
@@ -3839,7 +3841,8 @@
           "groupDeleteFailedDesc": "Something went wrong while deleting the group. No projects were removed.",
           "7a8b9c0d1e": "Update required",
           "hostAuthNeeded": "Authentication needed",
-          "hostDisconnected": "Disconnected"
+          "hostDisconnected": "Disconnected",
+          "failedNestWorkspace": "无法嵌套工作区"
         },
         "WorktreeMetaDialog": {
           "3db0a2a593": "取消",
@@ -4181,6 +4184,12 @@
           "c7d8e9f0a1": "已更新 {{value0}} 个",
           "d8e9f0a1b2": "已跳过 {{value0}} 个",
           "e9f0a1b2c3": "失败 {{value0}} 个"
+        },
+        "WorktreeParentPickerPopover": {
+          "failedSetParent": "无法设置父工作树",
+          "current": "当前",
+          "searchPlaceholder": "搜索工作树...",
+          "empty": "没有匹配的可用工作树。"
         }
       },
       "shared": {
@@ -11410,14 +11419,14 @@
           "summary": "已附加 {{value0}} 个 · 有 PR/MR {{value1}} 个 · 需注意 {{value2}} 个 · 等待中 {{value3}} 个 · 通过 {{value4}} 个 · 无 PR {{value5}} 个 · 未知 {{value6}} 个",
           "showDetails": "显示 {{value0}} 的 PR 检查详情",
           "hideDetails": "隐藏 {{value0}} 的 PR 检查详情",
-          "reviewChecks": "Review checks",
-          "allChecksPassing": "all checks passing",
-          "oneWorktree": "1 worktree",
-          "worktreeCount": "{{value0}} worktrees",
-          "oneFailing": "1 failing",
-          "failingCount": "{{value0}} failing",
-          "onePending": "1 pending",
-          "pendingCount": "{{value0}} pending"
+          "reviewChecks": "评审检查",
+          "allChecksPassing": "所有检查均通过",
+          "oneWorktree": "1 个工作树",
+          "worktreeCount": "{{value0}} 个工作树",
+          "oneFailing": "1 个失败",
+          "failingCount": "{{value0}} 个失败",
+          "onePending": "1 个等待中",
+          "pendingCount": "{{value0}} 个等待中"
         },
         "parentPrChecks": {
           "rowSummary": {

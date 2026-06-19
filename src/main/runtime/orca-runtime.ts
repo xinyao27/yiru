@@ -10605,22 +10605,48 @@ export class OrcaRuntimeService {
 
   private async ensureRemoteOrcaDirIgnored(
     fsProvider: IFilesystemProvider,
-    repoPath: string
+    repoPath: string,
+    options: { required?: boolean } = {}
   ): Promise<void> {
     const gitignorePath = joinWorktreeRelativePath(repoPath, '.gitignore')
+    let result: Awaited<ReturnType<IFilesystemProvider['readFile']>>
     try {
-      const result = await fsProvider.readFile(gitignorePath)
-      if (result.isBinary || /^\.orca\/?$/m.test(result.content)) {
+      result = await fsProvider.readFile(gitignorePath)
+    } catch (error) {
+      if (!isENOENT(error)) {
+        if (options.required) {
+          throw error
+        }
+        console.warn('[runtime] Could not inspect remote .gitignore for .orca', error)
         return
       }
-      const separator = result.content.endsWith('\n') ? '' : '\n'
-      await fsProvider.writeFile(gitignorePath, `${result.content}${separator}.orca\n`)
-    } catch {
       try {
         await fsProvider.writeFile(gitignorePath, '.orca\n')
-      } catch (error) {
-        console.warn('[runtime] Could not update remote .gitignore to exclude .orca', error)
+      } catch (writeError) {
+        if (options.required) {
+          throw writeError
+        }
+        console.warn('[runtime] Could not update remote .gitignore to exclude .orca', writeError)
       }
+      return
+    }
+    if (result.isBinary) {
+      if (options.required) {
+        throw new Error('Remote .gitignore is binary; cannot verify .orca is ignored')
+      }
+      return
+    }
+    if (/^\.orca\/?$/m.test(result.content)) {
+      return
+    }
+    const separator = result.content.endsWith('\n') ? '' : '\n'
+    try {
+      await fsProvider.writeFile(gitignorePath, `${result.content}${separator}.orca\n`)
+    } catch (writeError) {
+      if (options.required) {
+        throw writeError
+      }
+      console.warn('[runtime] Could not update remote .gitignore to exclude .orca', writeError)
     }
   }
 
@@ -12773,6 +12799,7 @@ export class OrcaRuntimeService {
       this.store.removeWorkspaceLineage?.(worktreeWorkspaceKey(worktree.id))
     } else if (lineage?.parentWorktree) {
       const parent = await this.resolveWorktreeSelector(lineage.parentWorktree)
+
       this.validateLineageParent(worktree, parent)
       if (!worktree.instanceId || !parent.instanceId) {
         throw new RuntimeLineageError(
@@ -14945,7 +14972,19 @@ export class OrcaRuntimeService {
     }
 
     if (selector.startsWith('id:')) {
-      candidates = worktrees.filter((worktree) => worktree.id === selector.slice(3))
+      const worktreeId = selector.slice(3)
+      candidates = worktrees.filter((worktree) => worktree.id === worktreeId)
+      if (candidates.length === 0) {
+        const parsed = splitWorktreeIdForFilesystem(worktreeId)
+        const repo = parsed ? this.store?.getRepo(parsed.repoId) : null
+        const fallback =
+          repo?.connectionId && this.store?.getWorktreeMeta(worktreeId)
+            ? this.buildResolvedWorktreeFromId(worktreeId)
+            : null
+        if (fallback !== null) {
+          candidates = [fallback]
+        }
+      }
     } else if (selector.startsWith('path:')) {
       candidates = worktrees.filter((worktree) =>
         runtimePathsEqual(worktree.path, selector.slice(5))

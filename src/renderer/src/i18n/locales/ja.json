@@ -3782,7 +3782,7 @@
           "e091caab15": "プロジェクトが見つかりませんでした",
           "439fa94d53": "アップデート",
           "579b1a8e61": "親から削除",
-          "8d9cd19d09": "親ワークスペースを開く",
+          "8d9cd19d09": "親ワークツリーを開く",
           "d35dfeae58": "グループから削除",
           "76865d827f": "グループに移動",
           "503ec0f8e6": "プロジェクトからの新規グループ",
@@ -3798,7 +3798,9 @@
           "8dacff1fe0": "既読マークを付ける",
           "3baa7d6507": "ピン",
           "697d0f6e1b": "固定を解除する",
-          "250de158fd": "Remove Workspace"
+          "250de158fd": "Remove Workspace",
+          "changeParentWorkspace": "親ワークツリーを変更...",
+          "setParentWorkspace": "親ワークツリーを設定..."
         },
         "WorktreeList": {
           "d880ea0744": "グループを作成し、このプロジェクトをそのグループに移動します。",
@@ -3839,7 +3841,8 @@
           "groupDeleteFailedDesc": "Something went wrong while deleting the group. No projects were removed.",
           "7a8b9c0d1e": "Update required",
           "hostAuthNeeded": "Authentication needed",
-          "hostDisconnected": "Disconnected"
+          "hostDisconnected": "Disconnected",
+          "failedNestWorkspace": "ワークスペースをネストできませんでした"
         },
         "WorktreeMetaDialog": {
           "3db0a2a593": "キャンセル",
@@ -4181,6 +4184,12 @@
           "c7d8e9f0a1": "{{value0}} 件更新",
           "d8e9f0a1b2": "{{value0}} 件スキップ",
           "e9f0a1b2c3": "{{value0}} 件失敗"
+        },
+        "WorktreeParentPickerPopover": {
+          "failedSetParent": "親ワークツリーを設定できませんでした",
+          "current": "現在",
+          "searchPlaceholder": "ワークツリーを検索...",
+          "empty": "一致する対象ワークツリーがありません。"
         }
       },
       "shared": {
@@ -11410,14 +11419,14 @@
           "summary": "{{value0}} 件添付 · PR/MR あり {{value1}} 件 · 要対応 {{value2}} 件 · 保留中 {{value3}} 件 · 成功 {{value4}} 件 · PR なし {{value5}} 件 · 不明 {{value6}} 件",
           "showDetails": "{{value0}} の PR チェック詳細を表示",
           "hideDetails": "{{value0}} の PR チェック詳細を非表示",
-          "reviewChecks": "Review checks",
-          "allChecksPassing": "all checks passing",
-          "oneWorktree": "1 worktree",
-          "worktreeCount": "{{value0}} worktrees",
-          "oneFailing": "1 failing",
-          "failingCount": "{{value0}} failing",
-          "onePending": "1 pending",
-          "pendingCount": "{{value0}} pending"
+          "reviewChecks": "レビューのチェック",
+          "allChecksPassing": "すべてのチェックが成功",
+          "oneWorktree": "1 件のワークツリー",
+          "worktreeCount": "{{value0}} 件のワークツリー",
+          "oneFailing": "1 件失敗",
+          "failingCount": "{{value0}} 件失敗",
+          "onePending": "1 件保留中",
+          "pendingCount": "{{value0}} 件保留中"
         },
         "parentPrChecks": {
           "rowSummary": {
