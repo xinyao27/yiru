@@ -1657,7 +1657,7 @@
         "1628fd7dfa": "没有活动的工作树、设置、操作或打开的选项卡",
         "b781ae05e3": "键入以搜索工作树、设置、选项卡和操作。",
         "f60f8730be": "没有其他工作树可供切换",
-        "c4afa68159": "尝试工作树、设置、操作、页面标题、模拟器、URL、PR 或端口。",
+        "c4afa68159": "尝试工作树、设置、操作、标签页标题、智能体提示、URL、PR 或端口。",
         "dbd9d87eec": "没有结果符合您的搜索",
         "2c38630a01": "工作区不再存在",
         "7726ce9970": "手机模拟器选项卡不再存在",
@@ -1674,7 +1674,8 @@
         "recentWorktreesHeader": "最近的工作树",
         "settingsBadge": "设置",
         "actionBadge": "操作",
-        "paletteHostBadge": "主机：{{value0}}"
+        "paletteHostBadge": "主机：{{value0}}",
+        "workspaceTabMissing": "标签页不再存在"
       },
       "github": {
         "pr": {

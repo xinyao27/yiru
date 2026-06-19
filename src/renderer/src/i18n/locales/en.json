@@ -1657,7 +1657,7 @@
         "1628fd7dfa": "No active worktrees, settings, actions, or open tabs",
         "b781ae05e3": "Type to search worktrees, settings, tabs, and actions.",
         "f60f8730be": "No other worktrees to switch to",
-        "c4afa68159": "Try a worktree, setting, action, page title, emulator, URL, PR, or port.",
+        "c4afa68159": "Try a worktree, setting, action, tab title, agent prompt, URL, PR, or port.",
         "dbd9d87eec": "No results match your search",
         "2c38630a01": "Workspace no longer exists",
         "7726ce9970": "Mobile emulator tab no longer exists",
@@ -1674,7 +1674,8 @@
         "recentWorktreesHeader": "Recent Worktrees",
         "settingsBadge": "Settings",
         "actionBadge": "Action",
-        "paletteHostBadge": "Host: {{value0}}"
+        "paletteHostBadge": "Host: {{value0}}",
+        "workspaceTabMissing": "Tab no longer exists"
       },
       "github": {
         "pr": {

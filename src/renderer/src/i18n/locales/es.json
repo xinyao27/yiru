@@ -1657,7 +1657,7 @@
         "1628fd7dfa": "No hay árboles de trabajo, configuraciones, acciones ni pestañas abiertas activas",
         "b781ae05e3": "Escriba para buscar árboles de trabajo, configuraciones, pestañas y acciones.",
         "f60f8730be": "No hay otros árboles de trabajo a los que cambiar",
-        "c4afa68159": "Pruebe con un árbol de trabajo, configuración, acción, título de página, emulador, URL, PR o puerto.",
+        "c4afa68159": "Pruebe con un árbol de trabajo, ajuste, acción, título de pestaña, prompt de agente, URL, PR o puerto.",
         "dbd9d87eec": "Ningún resultado coincide con tu búsqueda",
         "2c38630a01": "El espacio de trabajo ya no existe",
         "7726ce9970": "La pestaña del emulador móvil ya no existe",
@@ -1674,7 +1674,8 @@
         "recentWorktreesHeader": "Árboles de trabajo recientes",
         "settingsBadge": "Ajustes",
         "actionBadge": "Acción",
-        "paletteHostBadge": "Host: {{value0}}"
+        "paletteHostBadge": "Host: {{value0}}",
+        "workspaceTabMissing": "La pestaña ya no existe"
       },
       "github": {
         "pr": {
