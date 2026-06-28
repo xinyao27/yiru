@@ -667,6 +667,42 @@ describe('connectPanePty', () => {
     logSpy.mockRestore()
   }, 30_000)
 
+  // Why: orchestration workers and CLI `terminal create` (no --focus) mount
+  // hidden panes that legitimately connect at 0×0 and refit when shown, so the
+  // zero-dimensions diagnostic must stay silent while the pane is not visible.
+  it('does not surface the zero-dimensions diagnostic for a hidden pane', async () => {
+    const { connectPanePty } = await import('./pty-connection')
+    const transport = createMockTransport()
+    transportFactoryQueue.push(transport)
+    const pane = createPane(1)
+    pane.terminal.cols = 0
+    pane.terminal.rows = 0
+    const deps = createDeps({ isVisibleRef: { current: false } })
+
+    connectPanePty(pane as never, createManager(1) as never, deps as never)
+    await flushAsyncTicks()
+
+    expect(deps.onPtyErrorRef.current).not.toHaveBeenCalled()
+  })
+
+  it('still surfaces the zero-dimensions diagnostic for a visible pane', async () => {
+    const { connectPanePty } = await import('./pty-connection')
+    const transport = createMockTransport()
+    transportFactoryQueue.push(transport)
+    const pane = createPane(1)
+    pane.terminal.cols = 0
+    pane.terminal.rows = 0
+    const deps = createDeps({ isVisibleRef: { current: true } })
+
+    connectPanePty(pane as never, createManager(1) as never, deps as never)
+    await flushAsyncTicks()
+
+    expect(deps.onPtyErrorRef.current).toHaveBeenCalledWith(
+      pane.id,
+      expect.stringContaining('Terminal has zero dimensions (0×0)')
+    )
+  })
+
   it('threads the resolved local project runtime into IPC terminal transport options', async () => {
     const { connectPanePty } = await import('./pty-connection')
     const transport = createMockTransport()

@@ -95,6 +95,7 @@ import { isPrimarySelectionEnabled, readPrimarySelectionText } from '@/lib/prima
 import { APP_MENU_PASTE_EVENT } from '@/lib/app-menu-paste'
 import { WORKSPACE_FILE_PATH_MIME, WORKSPACE_FILE_PATHS_MIME } from '@/lib/workspace-file-drag'
 import { isTerminalSessionStateSaveFailure } from '../../../../shared/terminal-session-state-save-failure'
+import { isTerminalZeroDimensionsDiagnostic } from '../../../../shared/terminal-zero-dimensions-diagnostic'
 import {
   isSyntheticSinglePaneTitle,
   sanitizeTerminalLayoutPaneTitles
@@ -611,6 +612,12 @@ export default function TerminalPane({
       // Why: hidden startup measurement is only for first launch. Keeping it
       // after first visibility lets inactive agent tabs refit and SIGWINCH.
       setShouldMeasureHiddenStartup(false)
+    }
+    if (isVisible) {
+      // Why: a hidden pane that connected at 0×0 self-heals via the pane resize
+      // observer once shown, so clear that stale diagnostic. Scoped to the
+      // zero-dimensions message so genuine paste/save-failure errors survive.
+      setTerminalError((prev) => (prev && isTerminalZeroDimensionsDiagnostic(prev) ? null : prev))
     }
   }, [isVisible, shouldMeasureHiddenStartup])
 

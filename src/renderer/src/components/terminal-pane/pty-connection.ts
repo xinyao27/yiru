@@ -10,6 +10,7 @@ import { scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
 import { useAppStore } from '@/store'
 import { getWorktreeMapFromState } from '@/store/selectors'
 import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
+import { createTerminalZeroDimensionsMessage } from '../../../../shared/terminal-zero-dimensions-diagnostic'
 import type { PtyBufferSnapshot, PtyConnectResult } from './pty-transport'
 import { createIpcPtyTransport } from './pty-transport'
 import { createRemoteRuntimePtyTransport } from './remote-runtime-pty-transport'
@@ -2203,11 +2204,12 @@ export function connectPanePty(
     // Why: if fitAddon resolved to 0×0, the container likely has no layout
     // dimensions (display:none, unmounted, or zero-size parent). Surface a
     // diagnostic so the user sees something instead of a blank pane.
-    if (cols === 0 || rows === 0) {
-      deps.onPtyErrorRef?.current?.(
-        pane.id,
-        `Terminal has zero dimensions (${cols}×${rows}). The pane container may not be visible.`
-      )
+    // Gate on visibility: background/hidden tabs (orchestration workers, CLI
+    // `terminal create` without --focus) legitimately connect at 0×0 because
+    // safeFit skips fitting unmeasurable panes; they refit via the pane resize
+    // observer once shown, so the diagnostic must not fire while hidden.
+    if ((cols === 0 || rows === 0) && deps.isVisibleRef.current) {
+      deps.onPtyErrorRef?.current?.(pane.id, createTerminalZeroDimensionsMessage(cols, rows))
     }
 
     const reportError = (message: string): void => {
