@@ -435,15 +435,41 @@ export function shouldDetachPaneTransportOnUnmount(args: {
 /**
  * Self-gating dead-session reconcile pass scheduled from the isVisible effect.
  * Why self-gate: the effect fires on BOTH isVisible true and false, but we only
- * reconcile on resume (becoming visible), never on hide. Returns true when the
- * pass was scheduled so the resume-unit test can assert the gate.
+ * reconcile on resume (hidden to visible), never on hide or initial mount.
+ * Returns true when the pass was scheduled so the resume-unit test can assert
+ * the gate.
  */
+export function isTerminalPaneVisibilityResume(args: {
+  previousIsVisible: boolean | null
+  isVisible: boolean
+}): boolean {
+  return args.previousIsVisible === false && args.isVisible
+}
+
+type TerminalPaneVisibilitySnapshot = {
+  tabId: string
+  cwd: string | null | undefined
+  isVisible: boolean
+}
+
+export function getPreviousVisibleForTerminalPane(args: {
+  previous: TerminalPaneVisibilitySnapshot | null
+  tabId: string
+  cwd: string | null | undefined
+}): boolean | null {
+  if (args.previous?.tabId !== args.tabId || args.previous.cwd !== args.cwd) {
+    return null
+  }
+  return args.previous.isVisible
+}
+
 export function scheduleVisibilityReconcilePass(args: {
+  previousIsVisible: boolean | null
   isVisible: boolean
   bindings: Iterable<ReconcilableBinding>
   listSessions: () => Promise<{ id: string; cwd: string; title: string }[]>
 }): boolean {
-  if (!args.isVisible) {
+  if (!isTerminalPaneVisibilityResume(args)) {
     return false
   }
   // Why: fire-and-forget so the async listSessions IPC never blocks the
@@ -515,6 +541,7 @@ export function useTerminalPaneLifecycle({
   )
   const systemPrefersDarkRef = useRef(systemPrefersDark)
   systemPrefersDarkRef.current = systemPrefersDark
+  const previousVisibleForReconcileRef = useRef<TerminalPaneVisibilitySnapshot | null>(null)
   const linkProviderDisposablesRef = useRef(new Map<number, IDisposable>())
   const terminalHandleLinkDisposablesRef = useRef(new Map<number, IDisposable>())
   const fileLinkClickFallbackDisposablesRef = useRef(new Map<number, IDisposable>())
@@ -1639,7 +1666,14 @@ export function useTerminalPaneLifecycle({
   }, [tabId, cwd])
 
   useEffect(() => {
+    const previousIsVisible = getPreviousVisibleForTerminalPane({
+      previous: previousVisibleForReconcileRef.current,
+      tabId,
+      cwd
+    })
+    previousVisibleForReconcileRef.current = { tabId, cwd, isVisible }
     isVisibleRef.current = isVisible
+    const resumedFromHidden = isTerminalPaneVisibilityResume({ previousIsVisible, isVisible })
     for (const panePtyBinding of panePtyBindingsRef.current.values()) {
       const bindingWithVisibility = panePtyBinding as IDisposable & {
         syncProcessTracking?: () => void
@@ -1649,21 +1683,22 @@ export function useTerminalPaneLifecycle({
       // Why: re-arm the once-per-resume input liveness re-check so the typing
       // hot path stays off the listSessions IPC between resumes (the re-check
       // is only useful right after a hidden→visible flip).
-      if (isVisible) {
+      if (resumedFromHidden) {
         bindingWithVisibility.noteVisibilityResume?.()
       }
     }
     // Why: the reconcile pass self-gates on becoming visible (resume) — the
-    // effect also fires on hide — and runs fire-and-forget alongside
-    // syncProcessTracking. reconcileDeadSessions re-validates identity at apply
-    // time so a racing reattach is not clobbered.
+    // effect also fires on hide and initial mount. Initial visible mounts are
+    // fresh PTY startup, so an early listSessions snapshot must not close the
+    // newborn tab before the daemon lists it.
     scheduleVisibilityReconcilePass({
+      previousIsVisible,
       isVisible,
       bindings: panePtyBindingsRef.current.values() as Iterable<ReconcilableBinding>,
       listSessions: () => window.api.pty.listSessions()
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Why: visibility flips must refresh existing PTY process tracking even though the ref object identity is stable.
-  }, [isVisible, isVisibleRef, panePtyBindingsRef])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Why: visibility and terminal identity changes must refresh existing PTY process tracking even though the ref object identity is stable.
+  }, [cwd, isVisible, isVisibleRef, panePtyBindingsRef, tabId])
 
   useEffect(() => {
     const manager = managerRef.current
