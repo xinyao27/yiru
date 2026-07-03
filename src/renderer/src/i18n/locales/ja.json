@@ -2586,7 +2586,8 @@
             "openLocalWorkspace": "セッションを再開する前にローカルワークスペースを開いてください。",
             "sessionQueued": "セッションをキューに追加しました",
             "runtimeWorkspacesUnsupported": "Resume from history is not available in runtime-hosted workspaces.",
-            "openSupportedWorkspace": "Open a local or SSH workspace before resuming a session."
+            "openSupportedWorkspace": "Open a local or SSH workspace before resuming a session.",
+            "localSessionSshWorkspaceUnsupported": "このセッションの履歴はこのマシンに保存されているため、SSH ワークスペースでは再開できません。代わりにローカルワークスペースにドロップしてください。"
           },
           "TabGroupDropOverlay": {
             "paneColumnLabel": "新しい分割"
@@ -9572,7 +9573,8 @@
             "worktreeUnavailable": "ワークツリーは利用できなくなりました。",
             "runtimeBrowseLocalHistory": "Runtime-hosted workspaces can browse local history. Resume actions are available in local and SSH workspaces.",
             "runtimeWorkspacesUnsupported": "Resume from history is not available in runtime-hosted workspaces.",
-            "openSupportedWorkspace": "Open a local or SSH workspace before resuming a session."
+            "openSupportedWorkspace": "Open a local or SSH workspace before resuming a session.",
+            "localSessionSshWorkspaceUnsupported": "このセッションの履歴はこのマシンに保存されているため、SSH ワークスペースでは再開できません。代わりにローカルワークスペースを開いてください。"
           },
           "AiVaultPanelControls": {
             "scanningSessions": "Scanning sessions",
