@@ -49,6 +49,7 @@ import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 import { selectProjectGroupRemovalTargets } from './project-group-removal-targets'
 import { reconcileFetchedRepos } from './repo-identity-reconcile'
 import { splitRepoReorderByHost } from './repo-reorder-host-split'
+import { omitSparsePresetsForRepos } from './sparse-presets'
 import {
   findRepoForHost,
   getRepoHostIdentity,
@@ -2404,7 +2405,14 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
           repo && !projectHostSetups.some((setup) => setup.projectId === result.project.id)
             ? s.projects.filter((project) => project.id !== result.project.id)
             : s.projects
-        return { repos, projects, projectHostSetups }
+        const survivingRepoIds = new Set(repos.map((r) => r.id))
+        const removedRepoIds = s.repos.filter((r) => !survivingRepoIds.has(r.id)).map((r) => r.id)
+        return {
+          repos,
+          projects,
+          projectHostSetups,
+          ...omitSparsePresetsForRepos(s, removedRepoIds)
+        }
       })
       return { ...result, repo }
     } catch (err) {
@@ -2669,8 +2677,13 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
             delete nextLastVisitedAtByWorktreeId[id]
           }
         }
+        const survivingRepoIds = new Set(nextRepos.map((r) => r.id))
+        const removedRepoIds = s.repos.filter((r) => !survivingRepoIds.has(r.id)).map((r) => r.id)
         return {
           repos: nextRepos,
+          // Why: drop the removed repos' sparse-preset maps so they don't outlive
+          // the repo for the renderer's whole session.
+          ...omitSparsePresetsForRepos(s, removedRepoIds),
           ...mergeProjectCompatibilityForHostRepoChange({
             previous: { projects: s.projects, projectHostSetups: s.projectHostSetups },
             nextRepos,
