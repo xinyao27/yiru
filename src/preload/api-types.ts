@@ -1130,12 +1130,16 @@ export type PreloadApi = {
     >
     remove: (args: {
       worktreeId: string
+      hostId?: ExecutionHostId
       force?: boolean
       skipArchive?: boolean
     }) => Promise<RemoveWorktreeResult>
     // Forget a workspace from Orca only — no remote Git/filesystem work. Used
     // for workspaces pinned to a removed/disconnected SSH host.
-    forgetLocal: (args: { worktreeId: string }) => Promise<RemoveWorktreeResult>
+    forgetLocal: (args: {
+      worktreeId: string
+      hostId?: ExecutionHostId
+    }) => Promise<RemoveWorktreeResult>
     forceDeletePreservedBranch: (args: {
       worktreeId: string
       branchName: string
@@ -2131,7 +2135,7 @@ export type PreloadApi = {
   browser: BrowserApi
   emulator: EmulatorApi
   hooks: {
-    check: (args: { repoId: string }) => Promise<{
+    check: (args: { repoId: string; hostId?: ExecutionHostId }) => Promise<{
       status?: 'ok' | 'error'
       hasHooks: boolean
       hooks: OrcaHooks | null

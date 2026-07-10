@@ -142,6 +142,7 @@ import type { TelemetryConsentState } from '../shared/telemetry-consent-types'
 import type { PreflightRuntimeContext, RefreshAgentsResult } from './api-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../shared/telemetry-events'
 import type { AppStarSource } from '../shared/gh-star-source'
+import type { ExecutionHostId } from '../shared/execution-host'
 import type {
   Automation,
   AutomationCreateInput,
@@ -2478,6 +2479,7 @@ const api = {
   hooks: {
     check: (args: {
       repoId: string
+      hostId?: ExecutionHostId
     }): Promise<{
       status?: 'ok' | 'error'
       hasHooks: boolean
