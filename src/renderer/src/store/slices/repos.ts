@@ -276,14 +276,10 @@ function formatProjectPresenceProfileNames(profileNames: readonly string[]): str
     return names.join(', ')
   }
   // Why: the "+N more" overflow suffix is user-visible toast copy and must localize.
-  return translate(
-    'auto.store.slices.repos.presenceProfileOverflow',
-    '{{names}} +{{value0}} more',
-    {
-      names: names.slice(0, 3).join(', '),
-      value0: names.length - 3
-    }
-  )
+  return translate('auto.store.slices.repos.presenceProfileOverflow', '{{names}} +{{count}} more', {
+    names: names.slice(0, 3).join(', '),
+    count: names.length - 3
+  })
 }
 
 async function warnIfProjectKnownInAnotherProfile(

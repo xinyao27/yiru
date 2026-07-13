@@ -24,8 +24,7 @@ describe('native chat locale copy', () => {
         expect(localized.trim()).not.toBe('')
         expect(localized).not.toBe(english)
       }
-      // Why: intentional English lives only in translation state so current English always wins by fallback.
-      expect('grok' in search).toBe(false)
+      expect(search.grok).toBe('grok')
     }
   )
 })

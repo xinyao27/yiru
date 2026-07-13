@@ -2942,7 +2942,7 @@ function CommentCodeContext({
                   )
                 }
                 aria-label={translate(
-                  'auto.components.GitHubItemDialog.4e65770e91',
+                  'auto.components.GitHubItemDialog.307c98e8e3',
                   'Show {{value0}} more lines below',
                   { value0: CODE_CONTEXT_EXPAND_STEP }
                 )}

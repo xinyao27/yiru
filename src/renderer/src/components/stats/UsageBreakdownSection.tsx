@@ -26,10 +26,12 @@ export function UsageBreakdownSection({
   rows,
   eventsOrTurns
 }: UsageBreakdownSectionProps): React.JSX.Element {
-  const eventsOrTurnsLabel =
+  const eventsOrTurnsKey =
     eventsOrTurns === 'turns'
-      ? translate('auto.components.stats.UsageBreakdownSection.32176e1d44', 'turns')
-      : translate('auto.components.stats.UsageBreakdownSection.79a69522a5', 'events')
+      ? 'auto.components.stats.UsageBreakdownSection.32176e1d44'
+      : 'auto.components.stats.UsageBreakdownSection.79a69522a5'
+  const eventsOrTurnsLabel = eventsOrTurns === 'turns' ? 'turns' : 'events'
+  const sessionsKey = 'auto.components.stats.UsageBreakdownSection.02a046792e'
 
   return (
     <section className="rounded-lg border border-border/60 bg-card/40 p-4">
@@ -48,9 +50,8 @@ export function UsageBreakdownSection({
               <span className="shrink-0 text-muted-foreground">{formatTokens(row.tokens)}</span>
             </div>
             <div className="text-xs text-muted-foreground">
-              {row.sessions}{' '}
-              {translate('auto.components.stats.UsageBreakdownSection.02a046792e', 'sessions •')}{' '}
-              {row.eventsOrTurns} {eventsOrTurnsLabel}
+              {row.sessions} {translate(sessionsKey, 'sessions •')} {row.eventsOrTurns}{' '}
+              {translate(eventsOrTurnsKey, eventsOrTurnsLabel)}
               {row.hasInferredPricing
                 ? ` ${translate('auto.components.stats.UsageBreakdownSection.247c93ca92', '• inferred pricing')}`
                 : ''}

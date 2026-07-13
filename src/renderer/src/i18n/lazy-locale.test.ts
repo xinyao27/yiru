@@ -3,8 +3,6 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import {
   UI_LANGUAGE_CHINESE,
   UI_LANGUAGE_ENGLISH,
-  UI_LANGUAGE_JAPANESE,
-  UI_LANGUAGE_KOREAN,
   UI_LANGUAGE_SPANISH
 } from '../../../shared/ui-language'
 import { i18n, setRendererUiLanguage } from './i18n'
@@ -35,23 +33,6 @@ describe('renderer i18n lazy locale loading', () => {
   it('lazy-loads a catalog through a direct changeLanguage call', async () => {
     await i18n.changeLanguage(UI_LANGUAGE_CHINESE)
     expect(i18n.t('menu.file', { defaultValue: 'File' })).not.toBe('File')
-  })
-
-  it('loads every supported target locale and falls back for an absent target key', async () => {
-    for (const locale of [
-      UI_LANGUAGE_SPANISH,
-      UI_LANGUAGE_JAPANESE,
-      UI_LANGUAGE_KOREAN,
-      UI_LANGUAGE_CHINESE
-    ] as const) {
-      await setRendererUiLanguage(locale)
-      expect(i18n.t('menu.file', { defaultValue: 'File' })).not.toBe('File')
-      expect(
-        i18n.t('auto.components.sidebar.AddRepoSteps.remoteCloneParentPlaceholder', {
-          defaultValue: '/home/user/projects'
-        })
-      ).toBe('/home/user/projects')
-    }
   })
 
   it('returns to English from a lazily-loaded locale', async () => {

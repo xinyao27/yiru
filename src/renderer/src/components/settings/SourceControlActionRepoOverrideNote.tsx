@@ -69,8 +69,8 @@ export function SourceControlActionRepoOverrideNote({
         )
       : translate(
           'auto.components.settings.SourceControlActionRepoOverrideNote.plural',
-          "Global saves won't change {{value0}} repositories with their own recipes.",
-          { value0: summary.count }
+          "Global saves won't change {{count}} repositories with their own recipes.",
+          { count: summary.count }
         )
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-md bg-muted/40 px-2 py-1.5 text-[11px] leading-4 text-muted-foreground">
@@ -103,8 +103,8 @@ export function SourceControlActionRepoOverrideNote({
               <p className="text-[11px] text-muted-foreground">
                 {translate(
                   'auto.components.settings.SourceControlActionRepoOverrideNote.more',
-                  '+{{value0}} more',
-                  { value0: hiddenOverrideCount }
+                  '+{{count}} more',
+                  { count: hiddenOverrideCount }
                 )}
               </p>
             ) : null}

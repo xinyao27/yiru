@@ -6,20 +6,9 @@ import process from 'node:process'
 // TypeScript 7 is a native CLI; AST consumers still need the legacy JavaScript API.
 import ts from 'typescript-api'
 
-import {
-  findAllowlistCountMismatches,
-  findNewCandidates,
-  readAllowlist,
-  writeAllowlistSnapshot
-} from './localization-coverage-allowlist-diff.mjs'
-import { validateAllowlist } from './localization-coverage-allowlist-schema.mjs'
-import {
-  collectLocalizationSourceFiles,
-  expressionNameText,
-  parseLocalizationSource
-} from './localization-source-references.mjs'
-
-const LOCALIZATION_CALL_NAMES = new Set(['t', 'translate', 'translateMain'])
+const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mts', '.cts'])
+const SKIP_PATH_PARTS = new Set(['.git', 'dist', 'node_modules', 'out', '__snapshots__', 'assets'])
+const LOCALIZATION_CALL_NAMES = new Set(['t', 'translate'])
 const USER_VISIBLE_JSX_ATTRIBUTES = new Set([
   'ariaLabel',
   'aria-label',
@@ -71,8 +60,46 @@ const USER_VISIBLE_OBJECT_METHODS = new Set([
   'warning'
 ])
 const USER_VISIBLE_OBJECT_NAMES = new Set(['toast'])
+
 function normalizePath(root, filePath) {
   return path.relative(root, filePath).split(path.sep).join('/')
+}
+
+function isSkippedFile(root, filePath) {
+  const relative = normalizePath(root, filePath)
+  if (
+    relative.endsWith('.d.ts') ||
+    relative.includes('.test.') ||
+    relative.includes('.spec.') ||
+    relative.includes('/__tests__/')
+  ) {
+    return true
+  }
+  return relative.split('/').some((part) => SKIP_PATH_PARTS.has(part))
+}
+
+async function collectSourceFiles(root, dir) {
+  const entries = await fs.readdir(dir, { withFileTypes: true })
+  const files = []
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      if (!SKIP_PATH_PARTS.has(entry.name)) {
+        files.push(...(await collectSourceFiles(root, fullPath)))
+      }
+      continue
+    }
+    if (
+      entry.isFile() &&
+      SOURCE_EXTENSIONS.has(path.extname(entry.name)) &&
+      !isSkippedFile(root, fullPath)
+    ) {
+      files.push(fullPath)
+    }
+  }
+
+  return files
 }
 
 function hasHumanLanguageText(text) {
@@ -101,6 +128,16 @@ function propertyNameText(name) {
   }
   if (ts.isComputedPropertyName(name) && ts.isStringLiteralLike(name.expression)) {
     return name.expression.text
+  }
+  return undefined
+}
+
+function expressionNameText(node) {
+  if (ts.isIdentifier(node)) {
+    return node.text
+  }
+  if (ts.isPropertyAccessExpression(node)) {
+    return `${expressionNameText(node.expression) ?? ''}.${node.name.text}`.replace(/^\./, '')
   }
   return undefined
 }
@@ -344,12 +381,16 @@ function areaForFile(relativePath) {
   return `renderer/${parts[0] ?? 'root'}`
 }
 
-export function collectLocalizationCandidates(
-  filePath,
-  sourceText,
-  root = process.cwd(),
-  sourceFile = parseLocalizationSource(filePath, sourceText)
-) {
+export function collectLocalizationCandidates(filePath, sourceText, root = process.cwd()) {
+  const sourceKind =
+    filePath.endsWith('.tsx') || filePath.endsWith('.jsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    sourceText,
+    ts.ScriptTarget.Latest,
+    true,
+    sourceKind
+  )
   const reports = []
   const relativePath = normalizePath(root, filePath)
 
@@ -447,7 +488,6 @@ function parseArgs(argv) {
   const options = {
     allowlistPath: path.join('config', 'localization-coverage-allowlist.json'),
     check: false,
-    snapshotAllowlist: false,
     format: 'summary',
     outputPath: null,
     sourceRoot: path.join('src', 'renderer', 'src')
@@ -461,8 +501,6 @@ function parseArgs(argv) {
       options.format = 'markdown'
     } else if (arg === '--check') {
       options.check = true
-    } else if (arg === '--snapshot-allowlist') {
-      options.snapshotAllowlist = true
     } else if (arg === '--allowlist') {
       options.allowlistPath = argv[index + 1] ?? options.allowlistPath
       index += 1
@@ -478,57 +516,77 @@ function parseArgs(argv) {
   return options
 }
 
-export async function main(root = process.cwd(), argv = process.argv.slice(2), preparedSource) {
-  const options = parseArgs(argv)
-  const absoluteSourceRoot = path.resolve(root, options.sourceRoot)
-  const files =
-    preparedSource?.files ?? (await collectLocalizationSourceFiles(root, absoluteSourceRoot))
-  const hasPreparedReports = preparedSource?.reports !== undefined
-  const reports = preparedSource?.reports ? [...preparedSource.reports] : []
+function candidateSignature(candidate) {
+  return JSON.stringify({
+    filePath: candidate.filePath,
+    kind: candidate.kind,
+    text: candidate.text,
+    dynamic: candidate.dynamic
+  })
+}
 
-  if (!hasPreparedReports) {
-    for (const filePath of files) {
-      const sourceText = await fs.readFile(filePath, 'utf8')
-      reports.push(...collectLocalizationCandidates(filePath, sourceText, root))
+function countBySignature(reports) {
+  const counts = new Map()
+  for (const report of reports) {
+    const signature = candidateSignature(report)
+    counts.set(signature, (counts.get(signature) ?? 0) + 1)
+  }
+  return counts
+}
+
+async function readAllowlist(root, allowlistPath) {
+  const absolutePath = path.resolve(root, allowlistPath)
+  const raw = await fs.readFile(absolutePath, 'utf8')
+  return JSON.parse(raw)
+}
+
+function findNewCandidates(reports, allowlist) {
+  const allowedCounts = new Map(
+    allowlist.map((entry) => [
+      JSON.stringify({
+        filePath: entry.filePath,
+        kind: entry.kind,
+        text: entry.text,
+        dynamic: entry.dynamic
+      }),
+      entry.count
+    ])
+  )
+  const seenCounts = countBySignature(reports)
+  const newCandidates = []
+
+  for (const report of reports) {
+    const signature = candidateSignature(report)
+    const seenCount = seenCounts.get(signature) ?? 0
+    const allowedCount = allowedCounts.get(signature) ?? 0
+    if (seenCount > allowedCount) {
+      newCandidates.push(report)
+      seenCounts.set(signature, seenCount - 1)
     }
   }
 
-  if (options.snapshotAllowlist) {
-    await writeAllowlistSnapshot(root, options.allowlistPath, reports)
-    console.log(
-      `Snapshotted ${reports.length} localization candidates to ${options.allowlistPath}.`
-    )
-    return 0
+  return newCandidates
+}
+
+export async function main(root = process.cwd(), argv = process.argv.slice(2)) {
+  const options = parseArgs(argv)
+  const absoluteSourceRoot = path.resolve(root, options.sourceRoot)
+  const files = await collectSourceFiles(root, absoluteSourceRoot)
+  const reports = []
+
+  for (const filePath of files) {
+    const sourceText = await fs.readFile(filePath, 'utf8')
+    reports.push(...collectLocalizationCandidates(filePath, sourceText, root))
   }
 
   if (options.check) {
     const allowlist = await readAllowlist(root, options.allowlistPath)
-    const allowlistErrors = validateAllowlist(allowlist)
-    if (allowlistErrors.length > 0) {
-      console.error('Localization coverage allowlist is invalid.')
-      console.error(allowlistErrors.slice(0, 40).join('\n'))
-      if (allowlistErrors.length > 40) {
-        console.error(`...and ${allowlistErrors.length - 40} more error(s)`)
-      }
-      return 1
-    }
     const newCandidates = findNewCandidates(reports, allowlist)
     if (newCandidates.length > 0) {
       console.error('New unlocalized renderer strings were found.')
       console.error('Localize them or add a reviewed exclusion to the localization allowlist.')
       console.error('')
       console.error(formatReports(root, newCandidates))
-      return 1
-    }
-    const countMismatches = findAllowlistCountMismatches(reports, allowlist)
-    if (countMismatches.length > 0) {
-      console.error('Localization coverage allowlist contains stale candidate counts.')
-      console.error('Manually update the reviewed count or remove records whose candidate is gone.')
-      for (const { entry, actual } of countMismatches.slice(0, 40)) {
-        console.error(
-          `${entry.filePath}: ${JSON.stringify(entry.text)} expected=${entry.count} actual=${actual}`
-        )
-      }
       return 1
     }
     console.log(`Localization coverage check passed with ${reports.length} allowlisted candidates.`)

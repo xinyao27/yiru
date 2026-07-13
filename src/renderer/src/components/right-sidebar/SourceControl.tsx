@@ -513,19 +513,23 @@ const PRIMARY_ICONS: Partial<
   create_pr: GitPullRequestArrow
 }
 
-function getSourceControlSectionLabel(area: SourceControlSectionArea): string {
-  switch (area) {
-    case 'staged':
-      return translate('auto.components.right.sidebar.SourceControl.48a003c1b1', 'Staged Changes')
-    case 'unstaged':
-      return translate('auto.components.right.sidebar.SourceControl.d4ef4bafc5', 'Changes')
-    case 'untracked':
-      return translate('auto.components.right.sidebar.SourceControl.522f44dce5', 'Untracked Files')
+const SECTION_LABELS: Record<SourceControlSectionArea, { key: string; fallback: string }> = {
+  staged: {
+    key: 'auto.components.right.sidebar.SourceControl.48a003c1b1',
+    fallback: 'Staged Changes'
+  },
+  unstaged: {
+    key: 'auto.components.right.sidebar.SourceControl.d4ef4bafc5',
+    fallback: 'Changes'
+  },
+  untracked: {
+    key: 'auto.components.right.sidebar.SourceControl.522f44dce5',
+    fallback: 'Untracked Files'
   }
 }
-
-function getConflictsSectionLabel(): string {
-  return translate('auto.components.right.sidebar.SourceControl.conflictsSection', 'Conflicts')
+const CONFLICTS_SECTION_LABEL = {
+  key: 'auto.components.right.sidebar.SourceControl.conflictsSection',
+  fallback: 'Conflicts'
 }
 
 // Why: 5s branch compare polling churned git subprocesses in large repos.
@@ -5944,14 +5948,12 @@ function SourceControlInner(): React.JSX.Element {
                 const canUnstageAll = !normalizedFilter && unstageAllPaths.length > 0
                 const canRevertAll = !normalizedFilter && discardAllPaths.length > 0
                 const sectionLabel =
-                  id === 'conflicts'
-                    ? getConflictsSectionLabel()
-                    : getSourceControlSectionLabel(area)
+                  id === 'conflicts' ? CONFLICTS_SECTION_LABEL : SECTION_LABELS[area]
                 const sectionViewAction = getSourceControlSectionViewAction(actionSection)
                 return (
                   <div key={id}>
                     <SectionHeader
-                      label={sectionLabel}
+                      label={translate(sectionLabel.key, sectionLabel.fallback)}
                       count={items.length}
                       conflictCount={
                         items.filter((entry) => entry.conflictStatus === 'unresolved').length

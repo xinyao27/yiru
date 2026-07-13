@@ -164,7 +164,7 @@ export default function WorkspaceKanbanSettingsMenu({
                     disabled={index === workspaceStatuses.length - 1}
                     onClick={() => onMoveStatus(status.id, 1)}
                     aria-label={translate(
-                      'auto.components.sidebar.WorkspaceKanbanSettingsMenu.833d8a506e',
+                      'auto.components.sidebar.WorkspaceKanbanSettingsMenu.b45b350eb0',
                       'Move {{value0}} right',
                       { value0: status.label }
                     )}

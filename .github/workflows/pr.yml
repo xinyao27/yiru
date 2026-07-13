@@ -9,42 +9,7 @@ on:
       - ready_for_review
 
 jobs:
-  localization-extraction-platforms:
-    name: Localization extraction (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: package.json
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          run_install: false
-
-      # Why: extraction is build-time only; skipping unrelated native postinstalls keeps this matrix portable.
-      - name: Install extraction dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
-      - name: Verify deterministic localization extraction
-        run: pnpm run verify:localization-extraction
-
-      - name: Verify generated localization key types
-        run: pnpm run verify:localization-key-types
-
-  verify-core:
+  verify:
     runs-on: ubuntu-latest
 
     steps:
@@ -97,10 +62,6 @@ jobs:
 
       - name: Lint
         run: pnpm exec oxlint --format github
-
-      # Why: product checks share one AST pass; the matrix above independently gates extraction/types.
-      - name: Verify product localization catalogs, state, and coverage
-        run: pnpm run verify:product-localization
 
       - name: Check styled scrollbars
         run: pnpm check:styled-scrollbars
@@ -191,16 +152,3 @@ jobs:
       # temp copy so Node cannot mask missing package deps with repo node_modules.
       - name: Smoke packaged CLI
         run: node config/scripts/smoke-packaged-cli.mjs --app-dir=dist/linux-unpacked
-
-  verify:
-    needs: [verify-core, localization-extraction-platforms]
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    steps:
-      # Why: skipped required jobs can appear successful, so every dependency must complete successfully.
-      - name: Require core and localization verification
-        if: ${{ needs.verify-core.result != 'success' || needs.localization-extraction-platforms.result != 'success' }}
-        run: exit 1
-
-      - name: Verification complete
-        run: echo "Core and cross-platform localization verification passed."

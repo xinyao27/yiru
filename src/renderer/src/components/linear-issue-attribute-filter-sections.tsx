@@ -120,8 +120,8 @@ export function LinearIssueFilterSectionMenu({
         value.stateIds.length > 0
           ? translate(
               'auto.components.linear-issue-attribute-filter-sections.countSelected',
-              '{{value0}} selected',
-              { value0: value.stateIds.length }
+              '{{count}} selected',
+              { count: value.stateIds.length }
             )
           : ''
     },
@@ -135,8 +135,8 @@ export function LinearIssueFilterSectionMenu({
         value.priorities.length > 0
           ? translate(
               'auto.components.linear-issue-attribute-filter-sections.countSelected',
-              '{{value0}} selected',
-              { value0: value.priorities.length }
+              '{{count}} selected',
+              { count: value.priorities.length }
             )
           : ''
     },
@@ -162,8 +162,8 @@ export function LinearIssueFilterSectionMenu({
         value.labelIds.length > 0
           ? translate(
               'auto.components.linear-issue-attribute-filter-sections.countSelected',
-              '{{value0}} selected',
-              { value0: value.labelIds.length }
+              '{{count}} selected',
+              { count: value.labelIds.length }
             )
           : ''
     }

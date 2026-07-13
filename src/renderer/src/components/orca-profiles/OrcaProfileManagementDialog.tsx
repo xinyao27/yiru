@@ -208,8 +208,8 @@ export function OrcaProfileManagementDialog({
                   repos.length === 1
                     ? 'auto.components.orca.profiles.management.projectCountSingular'
                     : 'auto.components.orca.profiles.management.projectCountPlural',
-                  repos.length === 1 ? '{{value0}} project' : '{{value0}} projects',
-                  { value0: repos.length }
+                  repos.length === 1 ? '{{count}} project' : '{{count}} projects',
+                  { count: repos.length }
                 )}
               </div>
             </div>

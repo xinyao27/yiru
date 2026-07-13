@@ -3,36 +3,129 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import process from 'node:process'
 
-import {
-  flattenCatalog as flattenCatalogMap,
-  getCatalogEntry,
-  jsonText,
-  setCatalogEntry,
-  sourceHash,
-  stateDocument
-} from './localization-catalog-model.mjs'
-import {
-  LOCALIZATION_LOCALES,
-  reviewedAuditValueMatches,
-  reviewedByPolicy,
-  validateReviewedAudit
-} from './localization-reviewed-provenance.mjs'
-import {
-  collectCallSitePlaceholderErrors,
-  collectInterpolationVariables,
-  collectLocalizationKeyReferences,
-  collectLocalizationSourceFiles,
-  formatPlaceholderErrors
-} from './localization-source-references.mjs'
+// TypeScript 7 is a native CLI; AST consumers still need the legacy JavaScript API.
+import ts from 'typescript-api'
 
+const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mts', '.cts'])
+const SKIP_PATH_PARTS = new Set(['.git', 'dist', 'node_modules', 'out', '__snapshots__', 'assets'])
+const LOCALIZATION_FUNCTION_NAMES = new Set(['t', 'translate', 'translateMain'])
+const PLACEHOLDER_RE = /\{\{[^}]+\}\}/g
 const LOCALES_RELATIVE_DIR = path.join('src', 'renderer', 'src', 'i18n', 'locales')
-const STATE_RELATIVE_DIR = path.join('config', 'localization-state')
-const DYNAMIC_ALLOWLIST_PATH = path.join('config', 'localization-dynamic-call-allowlist.json')
-const REVIEWED_AUDIT_PATH = path.join('config', 'localization-reviewed-corrections.json')
 const SOURCE_RELATIVE_ROOTS = [path.join('src', 'renderer', 'src'), path.join('src', 'main')]
 
 function normalizePath(root, filePath) {
   return path.relative(root, filePath).split(path.sep).join('/')
+}
+
+function isSkippedFile(root, filePath) {
+  const relative = normalizePath(root, filePath)
+  if (
+    relative.endsWith('.d.ts') ||
+    relative.includes('.test.') ||
+    relative.includes('.spec.') ||
+    relative.includes('/__tests__/')
+  ) {
+    return true
+  }
+  return relative.split('/').some((part) => SKIP_PATH_PARTS.has(part))
+}
+
+async function collectSourceFiles(root, dir) {
+  const entries = await fs.readdir(dir, { withFileTypes: true })
+  const files = []
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      if (!SKIP_PATH_PARTS.has(entry.name)) {
+        files.push(...(await collectSourceFiles(root, fullPath)))
+      }
+      continue
+    }
+    if (
+      entry.isFile() &&
+      SOURCE_EXTENSIONS.has(path.extname(entry.name)) &&
+      !isSkippedFile(root, fullPath)
+    ) {
+      files.push(fullPath)
+    }
+  }
+
+  return files
+}
+
+function flattenCatalogKeys(value, prefix = '') {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return prefix ? [prefix] : []
+  }
+  return Object.entries(value).flatMap(([key, child]) =>
+    flattenCatalogKeys(child, prefix ? `${prefix}.${key}` : key)
+  )
+}
+
+function expressionNameText(node) {
+  if (ts.isIdentifier(node)) {
+    return node.text
+  }
+  if (ts.isPropertyAccessExpression(node)) {
+    return `${expressionNameText(node.expression) ?? ''}.${node.name.text}`.replace(/^\./, '')
+  }
+  return undefined
+}
+
+function reportAt(root, filePath, sourceFile, node, key, fallback) {
+  const position = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile))
+  return {
+    filePath: normalizePath(root, filePath),
+    line: position.line + 1,
+    column: position.character + 1,
+    key,
+    fallback
+  }
+}
+
+export function collectLocalizationKeyReferences(filePath, sourceText, root = process.cwd()) {
+  const sourceKind =
+    filePath.endsWith('.tsx') || filePath.endsWith('.jsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    sourceText,
+    ts.ScriptTarget.Latest,
+    true,
+    sourceKind
+  )
+  const references = []
+
+  function visit(node) {
+    if (ts.isCallExpression(node)) {
+      const name = expressionNameText(node.expression)
+      const functionName = name?.split('.').at(-1)
+      const firstArg = node.arguments[0]
+      if (
+        functionName &&
+        LOCALIZATION_FUNCTION_NAMES.has(functionName) &&
+        firstArg &&
+        ts.isStringLiteralLike(firstArg)
+      ) {
+        const secondArg = node.arguments[1]
+        references.push(
+          reportAt(
+            root,
+            filePath,
+            sourceFile,
+            firstArg,
+            firstArg.text,
+            secondArg && ts.isStringLiteralLike(secondArg) ? secondArg.text : undefined
+          )
+        )
+      }
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  return references
 }
 
 function formatMissingReferences(missing) {
@@ -41,39 +134,6 @@ function formatMissingReferences(missing) {
       (reference) => `${reference.filePath}:${reference.line}:${reference.column} ${reference.key}`
     )
     .join('\n')
-}
-
-function formatDynamicReferences(references) {
-  return references
-    .map(
-      ({ filePath, line, column, dynamicSignature }) =>
-        `${filePath}:${line}:${column} (${dynamicSignature})`
-    )
-    .join('\n')
-}
-
-function validateDynamicAllowlist(dynamicAllowlist) {
-  const errors = []
-  if (dynamicAllowlist.version !== 2) {
-    errors.push('dynamic localization allowlist must use version 2')
-  }
-  if (
-    !dynamicAllowlist.entries ||
-    typeof dynamicAllowlist.entries !== 'object' ||
-    Array.isArray(dynamicAllowlist.entries)
-  ) {
-    errors.push('dynamic localization allowlist entries must be an object')
-    return errors
-  }
-  for (const [signature, reason] of Object.entries(dynamicAllowlist.entries)) {
-    if (!/^[^#]+#sha256:[a-f0-9]{64}#\d+$/.test(signature)) {
-      errors.push(`dynamic localization allowlist signature is invalid: ${signature}`)
-    }
-    if (typeof reason !== 'string' || reason.trim().length < 12) {
-      errors.push(`dynamic localization allowlist reason is missing for ${signature}`)
-    }
-  }
-  return errors
 }
 
 function formatMissingKeys(label, keys) {
@@ -126,211 +186,88 @@ function collectInconsistentFallbackVariables(references) {
     .filter(({ uniqueFallbackVariableCount }) => uniqueFallbackVariableCount > 1)
 }
 
-function collectInconsistentFallbackValues(references) {
-  const byKey = new Map()
-  for (const reference of references) {
-    if (typeof reference.fallback !== 'string') {
-      continue
-    }
-    const keyReferences = byKey.get(reference.key) ?? []
-    keyReferences.push(reference)
-    byKey.set(reference.key, keyReferences)
+function collectInterpolationVariables(value) {
+  if (typeof value === 'string') {
+    const matches = value.match(PLACEHOLDER_RE) ?? []
+    return [...matches].sort()
   }
-  return [...byKey.entries()]
-    .map(([key, keyReferences]) => ({
-      key,
-      references: keyReferences,
-      values: new Set(keyReferences.map(({ fallback }) => fallback))
-    }))
-    .filter(({ values }) => values.size > 1)
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return []
+  }
+  return Object.values(value).flatMap((child) => collectInterpolationVariables(child))
 }
 
-function reviewedAuditMatches(reviewedAudit, localeName, key, localeEntries) {
-  const entry = reviewedAudit?.messages?.[localeName]?.[key]
-  if (typeof entry?.value !== 'string') {
+function flattenCatalogEntries(value, prefix = '', entries = new Map()) {
+  if (typeof value === 'string') {
+    entries.set(prefix, value)
+    return entries
+  }
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return entries
+  }
+  for (const [key, child] of Object.entries(value)) {
+    flattenCatalogEntries(child, prefix ? `${prefix}.${key}` : key, entries)
+  }
+  return entries
+}
+
+function getCatalogEntry(catalog, key) {
+  return key.split('.').reduce((cursor, part) => cursor?.[part], catalog)
+}
+
+function setCatalogEntry(catalog, key, value) {
+  const parts = key.split('.')
+  let cursor = catalog
+  for (const part of parts.slice(0, -1)) {
+    if (typeof cursor[part] !== 'object' || cursor[part] === null || Array.isArray(cursor[part])) {
+      cursor[part] = {}
+    }
+    cursor = cursor[part]
+  }
+  cursor[parts.at(-1)] = value
+}
+
+function deleteCatalogEntry(catalog, key) {
+  const parts = key.split('.')
+  const stack = []
+  let cursor = catalog
+
+  for (const part of parts.slice(0, -1)) {
+    if (
+      typeof cursor?.[part] !== 'object' ||
+      cursor[part] === null ||
+      Array.isArray(cursor[part])
+    ) {
+      return false
+    }
+    stack.push([cursor, part])
+    cursor = cursor[part]
+  }
+
+  const leafKey = parts.at(-1)
+  if (!Object.hasOwn(cursor, leafKey)) {
     return false
   }
-  return reviewedAuditValueMatches(entry, localeEntries.get(key))
-}
 
-function validateStateEntry(
-  localeName,
-  key,
-  entry,
-  enEntries,
-  localeEntries,
-  reviewedAudit,
-  errors
-) {
-  const label = `${localeName}:${key}`
-  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-    errors.push(`${label} must be an object`)
-    return { stale: false }
-  }
-  if (!enEntries.has(key)) {
-    errors.push(`${label} references an unknown English key`)
-  }
-  if (entry.state === 'intentional-english') {
-    if (Object.keys(entry).join('|') !== 'state') {
-      errors.push(`${label} has invalid sidecar fields`)
-    }
-    if (localeEntries.has(key)) {
-      errors.push(`${label} must not have a target catalog value`)
-    }
-    return { stale: false }
-  }
-  if (entry.state !== 'machine' && entry.state !== 'reviewed') {
-    errors.push(`${label} has unknown state ${JSON.stringify(entry.state)}`)
-    return { stale: false }
-  }
-  if (Object.keys(entry).join('|') !== 'state|sourceHash') {
-    errors.push(`${label} has invalid fields`)
-  }
-  if (!/^sha256:[a-f0-9]{64}$/.test(entry.sourceHash ?? '')) {
-    errors.push(`${label} has a malformed sourceHash`)
-  }
-  if (!localeEntries.has(key)) {
-    errors.push(`${label} requires exactly one target catalog value`)
-  }
-  const hasReviewedProvenance =
-    enEntries.has(key) &&
-    (reviewedByPolicy(localeName, key, enEntries.get(key)) ||
-      reviewedAuditMatches(reviewedAudit, localeName, key, localeEntries))
-  if (entry.state === 'reviewed' && !hasReviewedProvenance) {
-    errors.push(`${label} is marked reviewed without reviewed policy or audit provenance`)
-  }
-  if (entry.state === 'machine' && hasReviewedProvenance) {
-    errors.push(`${label} downgrades reviewed policy/audit provenance to machine`)
-  }
-  return { stale: enEntries.has(key) && entry.sourceHash !== sourceHash(enEntries.get(key)) }
-}
-
-async function readReviewedAudit(root) {
-  const auditPath = path.join(root, REVIEWED_AUDIT_PATH)
-  let raw
-  try {
-    raw = await fs.readFile(auditPath, 'utf8')
-  } catch {
-    console.error(`Missing reviewed localization audit: ${normalizePath(root, auditPath)}`)
-    return null
-  }
-  let audit
-  try {
-    audit = JSON.parse(raw)
-  } catch (error) {
-    console.error('Reviewed localization audit is invalid:')
-    console.error(`invalid JSON (${error instanceof Error ? error.message : String(error)})`)
-    return null
-  }
-  const errors = validateReviewedAudit(audit)
-  if (errors.length > 0) {
-    console.error(`Reviewed localization audit is invalid:\n${errors.join('\n')}`)
-    return null
-  }
-  return audit
-}
-
-async function verifyTranslationState(root, localeName, enCatalog, localeCatalog, reviewedAudit) {
-  const statePath = path.join(root, STATE_RELATIVE_DIR, `${localeName}.json`)
-  let raw
-  try {
-    raw = await fs.readFile(statePath, 'utf8')
-  } catch {
-    console.error(`Missing translation state: ${normalizePath(root, statePath)}`)
-    return 1
-  }
-  let document
-  try {
-    document = JSON.parse(raw)
-  } catch (error) {
-    console.error(`Translation state validation failed for ${localeName}.json:`)
-    console.error(
-      `${localeName}: invalid JSON (${error instanceof Error ? error.message : String(error)})`
-    )
-    return 1
-  }
-  const errors = []
-  if (Object.keys(document).join('|') !== 'version|locale|messages') {
-    errors.push(`${localeName}: state document has invalid fields or ordering`)
-  }
-  if (document.version !== 1) {
-    errors.push(`${localeName}: unsupported state schema version`)
-  }
-  if (document.locale !== localeName) {
-    errors.push(`${localeName}: filename/locale mismatch`)
-  }
-  if (
-    !document.messages ||
-    typeof document.messages !== 'object' ||
-    Array.isArray(document.messages)
-  ) {
-    errors.push(`${localeName}: messages must be an object`)
-    document.messages = {}
-  }
-  const canonicalState = stateDocument(localeName, new Map(Object.entries(document.messages)))
-  if (raw !== jsonText(canonicalState)) {
-    errors.push(`${localeName}: state file is not deterministic JSON`)
-  }
-  const enEntries = flattenCatalogMap(enCatalog)
-  const localeEntries = flattenCatalogMap(localeCatalog)
-  const counts = { untranslated: 0, intentionalEnglish: 0, stale: 0, machine: 0, reviewed: 0 }
-  for (const [key, entry] of Object.entries(document.messages)) {
-    const result = validateStateEntry(
-      localeName,
-      key,
-      entry,
-      enEntries,
-      localeEntries,
-      reviewedAudit,
-      errors
-    )
-    if (entry?.state === 'intentional-english') {
-      counts.intentionalEnglish += 1
-    }
-    if (entry?.state === 'machine') {
-      counts.machine += 1
-    }
-    if (entry?.state === 'reviewed') {
-      counts.reviewed += 1
-    }
-    if (result.stale) {
-      counts.stale += 1
+  delete cursor[leafKey]
+  for (let index = stack.length - 1; index >= 0; index -= 1) {
+    const [parent, part] = stack[index]
+    const child = parent[part]
+    if (
+      typeof child === 'object' &&
+      child !== null &&
+      !Array.isArray(child) &&
+      Object.keys(child).length === 0
+    ) {
+      delete parent[part]
     }
   }
-  for (const [key, value] of localeEntries) {
-    const entry = document.messages[key]
-    if (!entry || !['machine', 'reviewed'].includes(entry.state)) {
-      errors.push(`${localeName}:${key} has a target value without translation state`)
-    }
-    if (value.length === 0) {
-      errors.push(`${localeName}:${key} has an empty target value`)
-    }
-  }
-  for (const key of enEntries.keys()) {
-    if (!localeEntries.has(key) && !document.messages[key]) {
-      counts.untranslated += 1
-    }
-  }
-  const coverage = enEntries.size === 0 ? 100 : (localeEntries.size / enEntries.size) * 100
-  console.log(
-    `${localeName}: ${coverage.toFixed(1)}% translated; ${Object.entries(counts)
-      .map(([name, count]) => `${name}=${count}`)
-      .join(' ')}`
-  )
-  if (errors.length > 0) {
-    console.error(`Translation state validation failed for ${localeName}.json:`)
-    console.error(errors.slice(0, 40).join('\n'))
-    if (errors.length > 40) {
-      console.error(`...and ${errors.length - 40} more error(s)`)
-    }
-    return 1
-  }
-  return 0
+  return true
 }
 
 function collectLocaleParityIssues(enCatalog, localeCatalog) {
-  const enEntries = flattenCatalogMap(enCatalog)
-  const localeEntries = flattenCatalogMap(localeCatalog)
+  const enEntries = flattenCatalogEntries(enCatalog)
+  const localeEntries = flattenCatalogEntries(localeCatalog)
   const missingInLocale = [...enEntries.keys()].filter((key) => !localeEntries.has(key))
   const extraInLocale = [...localeEntries.keys()].filter((key) => !enEntries.has(key))
   const interpolationMismatches = []
@@ -347,6 +284,30 @@ function collectLocaleParityIssues(enCatalog, localeCatalog) {
   }
 
   return { enEntries, localeEntries, missingInLocale, extraInLocale, interpolationMismatches }
+}
+
+function repairLocaleParity(enCatalog, localeCatalog) {
+  const { enEntries, missingInLocale, extraInLocale, interpolationMismatches } =
+    collectLocaleParityIssues(enCatalog, localeCatalog)
+  let changed = 0
+
+  for (const key of missingInLocale) {
+    setCatalogEntry(localeCatalog, key, enEntries.get(key))
+    changed += 1
+  }
+
+  for (const key of extraInLocale) {
+    if (deleteCatalogEntry(localeCatalog, key)) {
+      changed += 1
+    }
+  }
+
+  for (const key of interpolationMismatches) {
+    setCatalogEntry(localeCatalog, key, enEntries.get(key))
+    changed += 1
+  }
+
+  return changed
 }
 
 function referencesMissingFallbacks(missing) {
@@ -387,8 +348,19 @@ function verifyLocaleParity(enCatalog, localeName, localeCatalog) {
   const { localeEntries, missingInLocale, extraInLocale, interpolationMismatches } =
     collectLocaleParityIssues(enCatalog, localeCatalog)
 
-  if (extraInLocale.length > 0 || interpolationMismatches.length > 0) {
-    console.error(`Locale catalog validation failed for ${localeName}.json.`)
+  if (
+    missingInLocale.length > 0 ||
+    extraInLocale.length > 0 ||
+    interpolationMismatches.length > 0
+  ) {
+    console.error(`Locale catalog parity failed for ${localeName}.json.`)
+    if (missingInLocale.length > 0) {
+      console.error('')
+      console.error(formatMissingKeys('missing', missingInLocale.slice(0, 20)))
+      if (missingInLocale.length > 20) {
+        console.error(`...and ${missingInLocale.length - 20} more missing keys`)
+      }
+    }
     if (extraInLocale.length > 0) {
       console.error('')
       console.error(formatMissingKeys('extra', extraInLocale.slice(0, 20)))
@@ -408,9 +380,7 @@ function verifyLocaleParity(enCatalog, localeName, localeCatalog) {
     return 1
   }
 
-  console.log(
-    `Verified ${localeName}.json structure (${localeEntries.size} translated, ${missingInLocale.length} fallback).`
-  )
+  console.log(`Verified locale parity for ${localeName}.json (${localeEntries.size} keys).`)
   return 0
 }
 
@@ -424,75 +394,26 @@ export async function main(root = process.cwd(), options = parseArgs(process.arg
   const localesDir = path.join(root, LOCALES_RELATIVE_DIR)
   const catalogPath = path.join(localesDir, 'en.json')
   const catalog = JSON.parse(await fs.readFile(catalogPath, 'utf8'))
-  let catalogKeys = new Set(flattenCatalogMap(catalog).keys())
+  let catalogKeys = new Set(flattenCatalogKeys(catalog))
   const sourceRoots = SOURCE_RELATIVE_ROOTS.map((sourceRoot) => path.join(root, sourceRoot))
-  const references = options.references ?? []
+  const references = []
 
-  if (!options.references) {
-    for (const sourceRoot of sourceRoots) {
-      const files = await collectLocalizationSourceFiles(root, sourceRoot)
-      for (const filePath of files) {
-        references.push(
-          ...collectLocalizationKeyReferences(filePath, await fs.readFile(filePath, 'utf8'), root)
-        )
-      }
+  for (const sourceRoot of sourceRoots) {
+    const files = await collectSourceFiles(root, sourceRoot)
+    for (const filePath of files) {
+      references.push(
+        ...collectLocalizationKeyReferences(filePath, await fs.readFile(filePath, 'utf8'), root)
+      )
     }
   }
 
-  const dynamicAllowlist = JSON.parse(await fs.readFile(path.join(root, DYNAMIC_ALLOWLIST_PATH)))
-  const dynamicAllowlistErrors = validateDynamicAllowlist(dynamicAllowlist)
-  if (dynamicAllowlistErrors.length > 0) {
-    console.error('Dynamic localization allowlist is invalid.')
-    console.error('')
-    console.error(dynamicAllowlistErrors.join('\n'))
-    return 1
-  }
-  const dynamicLocations = new Set(
-    references
-      .filter(({ key }) => key === undefined)
-      .map(({ dynamicSignature }) => dynamicSignature)
-  )
-  const staleAllowlistEntries = Object.keys(dynamicAllowlist.entries).filter(
-    (location) => !dynamicLocations.has(location)
-  )
-  if (staleAllowlistEntries.length > 0) {
-    console.error('Dynamic localization allowlist contains stale entries.')
-    console.error('')
-    console.error(staleAllowlistEntries.join('\n'))
-    return 1
-  }
-  const dynamicReferences = references.filter(({ key, dynamicSignature }) => {
-    if (key !== undefined) {
-      return false
-    }
-    return !dynamicAllowlist.entries[dynamicSignature]
-  })
-  if (dynamicReferences.length > 0) {
-    console.error('Localization calls must use statically extractable string identifiers.')
-    console.error('')
-    console.error(formatDynamicReferences(dynamicReferences))
-    return 1
-  }
-  const staticReferences = references.filter(({ key }) => key !== undefined)
-  // Why: bounded dynamic-key calls still carry statically provable fallback contracts.
-  const placeholderErrors = collectCallSitePlaceholderErrors(references)
-  if (placeholderErrors.length > 0) {
-    console.error('Localization interpolation options are invalid.')
-    console.error('')
-    console.error(formatPlaceholderErrors(placeholderErrors.slice(0, 40)))
-    if (placeholderErrors.length > 40) {
-      console.error(`...and ${placeholderErrors.length - 40} more error(s)`)
-    }
-    return 1
-  }
-
-  const missing = staticReferences.filter((reference) => !catalogKeys.has(reference.key))
+  const missing = references.filter((reference) => !catalogKeys.has(reference.key))
   if (missing.length > 0) {
     const missingFallbacks = referencesMissingFallbacks(missing)
     if (options.fix && missingFallbacks.length === 0) {
       const added = applyMissingEnglishEntries(catalog, missing)
       await fs.writeFile(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8')
-      catalogKeys = new Set(flattenCatalogMap(catalog).keys())
+      catalogKeys = new Set(flattenCatalogKeys(catalog))
       console.log(`Added ${added} missing localization key(s) to en.json.`)
     } else {
       if (options.fix && missingFallbacks.length > 0) {
@@ -510,7 +431,7 @@ export async function main(root = process.cwd(), options = parseArgs(process.arg
     }
   }
 
-  const remainingMissing = staticReferences.filter((reference) => !catalogKeys.has(reference.key))
+  const remainingMissing = references.filter((reference) => !catalogKeys.has(reference.key))
   if (remainingMissing.length > 0) {
     console.error('Localization keys are missing from src/renderer/src/i18n/locales/en.json.')
     console.error('')
@@ -518,7 +439,7 @@ export async function main(root = process.cwd(), options = parseArgs(process.arg
     return 1
   }
 
-  const inconsistentFallbackVariables = collectInconsistentFallbackVariables(staticReferences)
+  const inconsistentFallbackVariables = collectInconsistentFallbackVariables(references)
   if (inconsistentFallbackVariables.length > 0) {
     console.error('Localization keys are used with inconsistent interpolation placeholders.')
     console.error('')
@@ -526,26 +447,7 @@ export async function main(root = process.cwd(), options = parseArgs(process.arg
     return 1
   }
 
-  const inconsistentFallbackValues = collectInconsistentFallbackValues(staticReferences)
-  if (inconsistentFallbackValues.length > 0) {
-    console.error('Localization identifiers are used with conflicting English fallbacks.')
-    console.error('')
-    console.error(formatInconsistentFallbackVariables(inconsistentFallbackValues))
-    return 1
-  }
-
-  console.log(`Verified ${staticReferences.length} localization key references against en.json.`)
-
-  const reviewedAudit = await readReviewedAudit(root)
-  if (!reviewedAudit) {
-    return 1
-  }
-  for (const locale of LOCALIZATION_LOCALES) {
-    if (!reviewedAudit.messages[locale]) {
-      console.error(`Reviewed audit is missing locale ${locale}.`)
-      return 1
-    }
-  }
+  console.log(`Verified ${references.length} localization key references against en.json.`)
 
   const localeFiles = (await fs.readdir(localesDir))
     .filter(
@@ -561,18 +463,20 @@ export async function main(root = process.cwd(), options = parseArgs(process.arg
     const localeName = fileName.replace(/\.json$/, '')
     const localeCatalogPath = path.join(localesDir, fileName)
     const localeCatalog = JSON.parse(await fs.readFile(localeCatalogPath, 'utf8'))
+    if (options.fix) {
+      const repaired = repairLocaleParity(catalog, localeCatalog)
+      if (repaired > 0) {
+        await fs.writeFile(localeCatalogPath, `${JSON.stringify(localeCatalog, null, 2)}\n`, 'utf8')
+        console.log(`Repaired ${fileName} parity (${repaired} key update(s)).`)
+      }
+    }
     const exitCode = verifyLocaleParity(catalog, localeName, localeCatalog)
     if (exitCode !== 0) {
       if (!options.fix) {
         console.error('')
-        console.error('Fix the reported target value in a localization PR.')
+        console.error('Run `pnpm run sync:localization-catalog` to repair locale parity.')
       }
       return exitCode
-    }
-    if (
-      (await verifyTranslationState(root, localeName, catalog, localeCatalog, reviewedAudit)) !== 0
-    ) {
-      return 1
     }
   }
 

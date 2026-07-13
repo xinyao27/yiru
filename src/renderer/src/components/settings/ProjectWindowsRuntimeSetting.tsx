@@ -248,8 +248,8 @@ function getLiveTerminalCountLabel(count: number): string {
     count === 1
       ? 'auto.components.settings.ProjectWindowsRuntimeSetting.liveTerminalSingular'
       : 'auto.components.settings.ProjectWindowsRuntimeSetting.liveTerminalPlural',
-    count === 1 ? '{{value0}} live terminal' : '{{value0}} live terminals',
-    { value0: count }
+    count === 1 ? '{{count}} live terminal' : '{{count}} live terminals',
+    { count }
   )
 }
 
@@ -258,8 +258,8 @@ function getActiveTaskCountLabel(count: number): string {
     count === 1
       ? 'auto.components.settings.ProjectWindowsRuntimeSetting.activeTaskSingular'
       : 'auto.components.settings.ProjectWindowsRuntimeSetting.activeTaskPlural',
-    count === 1 ? '{{value0}} active task' : '{{value0}} active tasks',
-    { value0: count }
+    count === 1 ? '{{count}} active task' : '{{count}} active tasks',
+    { count }
   )
 }
 

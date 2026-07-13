@@ -13,8 +13,6 @@ import {
 
 const PLACEHOLDER_RE = /\{\{[^}]+\}\}/g
 const LOCALES_DIR = path.join('src', 'renderer', 'src', 'i18n', 'locales')
-const MIGRATION_FLAG = '--migration-rewrite-locales'
-const MIGRATION_ENV = 'ORCA_I18N_MIGRATION_REWRITE'
 
 const LOCALE_CONFIG = {
   zh: {
@@ -127,26 +125,17 @@ function parseLocaleArg(argv) {
   return argv[2]
 }
 
-export async function main(root = process.cwd(), locale, dependencies = {}) {
-  const argv = dependencies.argv ?? process.argv
-  const environment = dependencies.environment ?? process.env
-  if (!argv.includes(MIGRATION_FLAG) || environment[MIGRATION_ENV] !== '1') {
-    console.error(
-      `Refusing to rewrite locale catalogs. Set ${MIGRATION_ENV}=1 and pass ${MIGRATION_FLAG} for migration-only use.`
-    )
-    return 1
-  }
-  const requestedLocale = locale ?? parseLocaleArg(argv)
-  const config = LOCALE_CONFIG[requestedLocale]
+export async function main(root = process.cwd(), locale = parseLocaleArg(process.argv)) {
+  const config = LOCALE_CONFIG[locale]
   if (!config) {
     console.error(
-      `Unsupported locale "${requestedLocale}". Supported: ${Object.keys(LOCALE_CONFIG).join(', ')}`
+      `Unsupported locale "${locale}". Supported: ${Object.keys(LOCALE_CONFIG).join(', ')}`
     )
     return 1
   }
 
   const enPath = path.join(root, LOCALES_DIR, 'en.json')
-  const localePath = path.join(root, LOCALES_DIR, `${requestedLocale}.json`)
+  const localePath = path.join(root, LOCALES_DIR, `${locale}.json`)
   const cachePath = path.join(root, LOCALES_DIR, config.cacheFile)
   const enCatalog = JSON.parse(await fs.readFile(enPath, 'utf8'))
   const localeCatalog = structuredClone(enCatalog)
@@ -173,12 +162,7 @@ export async function main(root = process.cwd(), locale, dependencies = {}) {
     const restored = restorePlaceholders(translated, tokens)
     cache.set(
       value,
-      repairTranslatedValue({
-        key: '',
-        enValue: value,
-        localeValue: restored,
-        locale: requestedLocale
-      })
+      repairTranslatedValue({ key: '', enValue: value, localeValue: restored, locale })
     )
     await new Promise((resolve) => setTimeout(resolve, 200))
   })
@@ -200,12 +184,12 @@ export async function main(root = process.cwd(), locale, dependencies = {}) {
         key: leaf.key,
         enValue: leaf.value,
         localeValue: cached,
-        locale: requestedLocale
+        locale
       })
     )
   }
 
-  repairCatalog(enCatalog, localeCatalog, requestedLocale)
+  repairCatalog(enCatalog, localeCatalog, locale)
 
   await fs.writeFile(localePath, `${JSON.stringify(localeCatalog, null, 2)}\n`, 'utf8')
   console.log(`Wrote ${localePath}`)

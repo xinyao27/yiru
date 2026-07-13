@@ -34,9 +34,9 @@ function liveWorkLines(summary: OrcaProfileSwitchLiveWorkSummary): string[] {
           ? 'auto.components.orca.profiles.project.transfer.confirm.terminalSingular'
           : 'auto.components.orca.profiles.project.transfer.confirm.terminalPlural',
         summary.liveTerminalTabCount === 1
-          ? '{{value0}} live terminal tab'
-          : '{{value0}} live terminal tabs',
-        { value0: summary.liveTerminalTabCount }
+          ? '{{count}} live terminal tab'
+          : '{{count}} live terminal tabs',
+        { count: summary.liveTerminalTabCount }
       )
     )
   }
@@ -46,8 +46,8 @@ function liveWorkLines(summary: OrcaProfileSwitchLiveWorkSummary): string[] {
         summary.liveAgentCount === 1
           ? 'auto.components.orca.profiles.project.transfer.confirm.agentSingular'
           : 'auto.components.orca.profiles.project.transfer.confirm.agentPlural',
-        summary.liveAgentCount === 1 ? '{{value0}} active agent' : '{{value0}} active agents',
-        { value0: summary.liveAgentCount }
+        summary.liveAgentCount === 1 ? '{{count}} active agent' : '{{count}} active agents',
+        { count: summary.liveAgentCount }
       )
     )
   }
@@ -58,9 +58,9 @@ function liveWorkLines(summary: OrcaProfileSwitchLiveWorkSummary): string[] {
           ? 'auto.components.orca.profiles.project.transfer.confirm.browserSingular'
           : 'auto.components.orca.profiles.project.transfer.confirm.browserPlural',
         summary.browserWorkspaceCount === 1
-          ? '{{value0}} browser workspace'
-          : '{{value0}} browser workspaces',
-        { value0: summary.browserWorkspaceCount }
+          ? '{{count}} browser workspace'
+          : '{{count}} browser workspaces',
+        { count: summary.browserWorkspaceCount }
       )
     )
   }

@@ -31,8 +31,8 @@ async function renderProbe(): Promise<void> {
   })
 }
 
-function appearanceTitle(): string | undefined {
-  return latest?.find((section) => section.id === 'appearance')?.title
+function agentsTitle(): string | undefined {
+  return latest?.find((section) => section.id === 'agents')?.title
 }
 
 afterEach(async () => {
@@ -54,13 +54,13 @@ it('retranslates the settings nav labels when the UI language changes live', asy
     await i18n.changeLanguage('en')
   })
   await renderProbe()
-  expect(appearanceTitle()).toBe('Appearance')
+  expect(agentsTitle()).toBe('Agents')
 
   // Same path as the Settings → Appearance language switch.
   await act(async () => {
     await i18n.changeLanguage('es')
   })
 
-  // "Agents" is intentionally English under current terminology policy, so use translated copy here.
-  expect(appearanceTitle()).toBe('Apariencia')
+  // Without the active-locale memo dep this stays 'Agents' (stale cache).
+  expect(agentsTitle()).toBe('Agentes')
 })

@@ -33,8 +33,8 @@ function formatForkSyncResult(result: GitForkSyncResult): { title: string; descr
             )
           : translate(
               'auto.components.settings.RepositoryForkSyncSection.syncedDescriptionPlural',
-              'Fast-forwarded {{branch}} by {{value0}} commits.',
-              { branch, value0: result.behind }
+              'Fast-forwarded {{branch}} by {{count}} commits.',
+              { branch, count: result.behind }
             )
     }
   }

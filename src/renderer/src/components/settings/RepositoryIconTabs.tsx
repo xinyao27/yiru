@@ -164,7 +164,7 @@ export function RepositoryIconTabs({
                   className="size-8"
                   onClick={() => onSetIcon({ type: 'lucide', name: option.name })}
                   aria-label={translate(
-                    'auto.components.settings.RepositoryIconPicker.8fbd0654c1',
+                    'auto.components.settings.RepositoryIconPicker.2b7d27b93c',
                     'Use {{value0}} repo icon',
                     { value0: option.label }
                   )}
@@ -190,7 +190,7 @@ export function RepositoryIconTabs({
             className="size-8 text-base"
             onClick={() => onSetIcon({ type: 'emoji', emoji })}
             aria-label={translate(
-              'auto.components.settings.RepositoryIconPicker.8fbd0654c1',
+              'auto.components.settings.RepositoryIconPicker.2b7d27b93c',
               'Use {{value0}} repo icon',
               { value0: emoji }
             )}

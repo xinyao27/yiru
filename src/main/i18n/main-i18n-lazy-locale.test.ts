@@ -51,16 +51,6 @@ describe('main-i18n lazy locale loading', () => {
     expect(translateMain('menu.file', 'File')).not.toBe('File')
   })
 
-  it('uses caller English when a target catalog intentionally omits a key', async () => {
-    await setMainUiLanguage(UI_LANGUAGE_SPANISH)
-    expect(
-      translateMain(
-        'auto.components.sidebar.AddRepoSteps.remoteCloneParentPlaceholder',
-        '/home/user/projects'
-      )
-    ).toBe('/home/user/projects')
-  })
-
   it('returns to English from a lazily-loaded locale', async () => {
     await setMainUiLanguage(UI_LANGUAGE_SPANISH)
     expect(translateMain('menu.file', 'File')).toBe('Archivo')

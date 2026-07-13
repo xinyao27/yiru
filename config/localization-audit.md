@@ -50,52 +50,13 @@ Sync catalog keys after adding or removing `translate(...)` calls:
 
 ```sh
 pnpm run sync:localization-catalog
-pnpm run sync:localization-extraction
 ```
 
-The sync command adds missing `en.json` entries from each call's string fallback.
-It never edits target catalogs: missing values remain absent for runtime English
-fallback, while placeholder mismatches fail until a localization PR fixes or
-retires the target value. The legacy free-endpoint bootstrap and whole-catalog
-repair scripts intentionally have no package-script entry points.
-
-The extraction sync updates only the committed generated English template. For
-an added call it adds the extracted key; for changed fallback copy it records a
-fallback difference; and for a removed call it records an orphan. Existing
-dispositions are preserved exactly. New differences are written as
-`pending-human-classification` and deliberately keep the gate red until a
-localization owner replaces each one with a supported disposition and a
-key-specific reason. Neither sync command edits a target-language catalog.
-When an orphan/drift resolves, manually remove its obsolete disposition; when an
-allowlisted candidate count changes, manually update the reviewed count or
-remove the entry if the candidate is gone. Snapshot commands preserve those
-manual records intentionally and will not erase or silently refresh them.
-
-To mark a translation reviewed in the same localization PR, set its sidecar
-state to `reviewed` and add an exact-value entry to
-`config/localization-reviewed-corrections.json` with reason
-`localization-pr-review` and review evidence `{ provider, changeId, reviewer }`.
-The verifier accepts GitHub, GitLab, or another provider and rejects the state
-if the evidence is malformed or the reviewed value differs from the catalog.
-
-Run the translation-state and extraction gates with:
-
-```sh
-pnpm run verify:localization-catalog
-pnpm run verify:localization-extraction
-pnpm run verify:localization-main-process
-pnpm run localization:status
-```
-
-`config/localization-state/<locale>.json` is the versioned review-state source.
-`config/localization-extraction/en.json` is deterministic `i18next-cli` proof
-output; existing source orphans and inline-default drift have explicit committed
-dispositions and any new difference fails CI.
-
-`src/shared/localization-keys.ts` is a Phase 2 extraction/tooling evaluation
-artifact. Runtime translation wrappers do not consume it yet; runtime key
-typing remains a separately reviewed follow-up rather than an implied gate in
-this migration.
+The sync command adds missing `en.json` entries from each call's string fallback,
+copies untranslated English placeholders into other locale catalogs to keep
+parity, removes locale entries whose English key was deleted, and repairs
+placeholder mismatches. Run the machine-translation bootstrap commands only when
+refreshing real translations, not for ordinary UI copy changes.
 
 The coverage gate compares current candidates against
 `config/localization-coverage-allowlist.json`. The committed allowlist is empty:
@@ -136,8 +97,8 @@ Recommended migration order:
 The final gate should combine three checks:
 
 1. Scanner coverage: no unclassified localizable candidates remain.
-2. Catalog correctness: every existing target has state and matching
-   interpolation variables; completeness is reported rather than required.
+2. Catalog coverage: every supported locale has the same keys as English, with
+   matching interpolation variables.
 3. Runtime coverage: pseudo-localization and real locale smoke tests show no
    obvious English leftovers or layout clipping in core screens.
 

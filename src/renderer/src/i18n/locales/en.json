@@ -252,7 +252,7 @@
           "3be0f7df04": "Cannot open folder on selected runtime",
           "15cf5319ec": "{{path}} was checked on {{hostName}}, but that host did not report a usable folder.",
           "2dcd706774": "Project also exists in another profile",
-          "presenceProfileOverflow": "{{names}} +{{value0}} more"
+          "presenceProfileOverflow": "{{names}} +{{count}} more"
         },
         "settings": {
           "e12dab333b": "Failed to switch servers",
@@ -922,8 +922,7 @@
           "activity": "Activity",
           "noActivity": "No activity yet."
         },
-        "checkActionRequiredHint": "This check needs a manual action on GitHub (for example, approving the workflow run) before merging is unblocked.",
-        "4e65770e91": "Show {{value0}} more lines below"
+        "checkActionRequiredHint": "This check needs a manual action on GitHub (for example, approving the workflow run) before merging is unblocked."
       },
       "GitLabItemDialog": {
         "65e784c1f1": "Reopen",
@@ -1397,8 +1396,7 @@
         "8ff5ae8866": "Assignees",
         "82c87eceb9": "Edit assignees",
         "1ff5d979df": "No one assigned",
-        "checkActionRequiredHint": "This check needs a manual action on GitHub (for example, approving the workflow run) before merging is unblocked.",
-        "5ea92b8f34": "Show {{value0}} more lines below"
+        "checkActionRequiredHint": "This check needs a manual action on GitHub (for example, approving the workflow run) before merging is unblocked."
       },
       "QuickOpen": {
         "1dbd3f59ff": "Move",
@@ -2236,8 +2234,7 @@
               "df4bd63c1d": "Unassigned",
               "30402d2c6e": "Try search or refresh.",
               "a2f31c4cd6": "No Linear projects found",
-              "c9b6e9f90d": "Unable to load Linear projects",
-              "1e63a1b413": "Open {{value0}} in Linear"
+              "c9b6e9f90d": "Unable to load Linear projects"
             }
           }
         },
@@ -2633,8 +2630,7 @@
                 "internalPathsTooLarge": "Drop path list is too large for a safe terminal paste.",
                 "b4cf68e889": "Skipped {{value0}} {{value1}}.",
                 "writeTimeout": "File drop cancelled: terminal did not accept the path before the safety timeout.",
-                "writeRejected": "File drop cancelled: terminal could not accept the path.",
-                "e040850c0d": "Uploading {{value0}} file{{value1}} to remote…"
+                "writeRejected": "File drop cancelled: terminal could not accept the path."
               }
             }
           },
@@ -3094,8 +3090,7 @@
             "0583c806ac": "Workspace disk usage is not scanned.",
             "39786e3b73": "Scanning workspace sizes.",
             "bef4dc0457": "{{value0}} reclaimable · {{value1}} unavailable",
-            "3d8d47ce77": "{{value0}} · last result kept",
-            "28f967d2fb": "{{value0}} reclaimable · {{value1}} workspaces"
+            "3d8d47ce77": "{{value0}} · last result kept"
           },
           "WorkspaceSpaceManagerPanel": {
             "2965415393": "Force delete failed",
@@ -3514,10 +3509,7 @@
         },
         "UsageBreakdownSection": {
           "7765a4c3e1": "n/a",
-          "247c93ca92": "• inferred pricing",
-          "32176e1d44": "turns",
-          "79a69522a5": "events",
-          "02a046792e": "sessions •"
+          "247c93ca92": "• inferred pricing"
         },
         "UsageSessionsTable": {
           "1afc25eb06": "Turns",
@@ -3747,8 +3739,7 @@
           "32a7256d85": "Clone",
           "69f5b5380d": "Cloning...",
           "cloneOnHostDescription": "Enter the Git URL and choose where to clone it on {{value0}}.",
-          "cloneParentFolder": "Parent folder",
-          "remoteCloneParentPlaceholder": "/home/user/projects"
+          "cloneParentFolder": "Parent folder"
         },
         "AutoRenameFailedDialog": {
           "aed1623b1e": "Close",
@@ -4068,8 +4059,7 @@
           "2d74665a56": "Ports",
           "65a9820bd1": "Agent statuses",
           "219ebf1961": "Branch name",
-          "folderPathIdentity": "Branch / folder path",
-          "21083fb457": "Workspace options ({{value0}} active)"
+          "folderPathIdentity": "Branch / folder path"
         },
         "SshDisconnectedDialog": {
           "ca4a7892af": "Connecting...",
@@ -4110,8 +4100,7 @@
           "34f03eb0de": "Board settings",
           "26cbc92150": "Workspace board settings",
           "87d24a0c2f": "Sync board and issue status",
-          "4c2eaa78cc": "Moving a linked workspace updates its Linear issue status when a matching workflow state exists.",
-          "833d8a506e": "Move {{value0}} right"
+          "4c2eaa78cc": "Moving a linked workspace updates its Linear issue status when a matching workflow state exists."
         },
         "WorkspaceKanbanStatusLane": {
           "8ad104642b": "Empty",
@@ -4122,8 +4111,7 @@
           "8be427206b": "Icon",
           "2ac106f6b2": "Color",
           "74b1413279": "Appearance",
-          "ccbd1e2c69": "Customize {{value0}} appearance",
-          "2270c830c4": "Set {{value0}} icon to {{value1}}"
+          "ccbd1e2c69": "Customize {{value0}} appearance"
         },
         "WorktreeCard": {
           "a88c92d0e3": "{{value0}}/{{value1}} already exists.",
@@ -4506,9 +4494,9 @@
           "6f7a8b9c0d": "Cancel",
           "7a8b9c0d1e": "Open settings",
           "8b9c0d1e2f": "Remove host",
-          "workspacesFailed": "Could not remove {{value0}} of this host’s workspaces. The host was kept so you can retry.",
+          "workspacesFailed": "Could not remove {{count}} of this host’s workspaces. The host was kept so you can retry.",
           "oneWorkspace": "1 workspace",
-          "manyWorkspaces": "{{value0}} workspaces",
+          "manyWorkspaces": "{{count}} workspaces",
           "hostHasWorkspacesDefault": "Removes {{value0}} and its credentials from this computer. Its {{value1}} stay in Orca — remote files are not touched.",
           "alsoDeleteRemote": "Also delete these {{value0}} on {{value1}}",
           "alsoForgetLocal": "Also remove these {{value0}} from Orca",
@@ -6122,8 +6110,7 @@
           "f79972271a": "No GitHub remote found for this repo.",
           "4d039317f4": "Website favicon",
           "acf31559a0": "Enter a valid website URL.",
-          "868c5c9b56": "Failed to import repo icon",
-          "8fbd0654c1": "Use {{value0}} repo icon"
+          "868c5c9b56": "Failed to import repo icon"
         },
         "RepositoryPane": {
           "15a99d9b9f": "Relative paths resolve from this project root.",
@@ -8775,7 +8762,7 @@
           "defaultBranch": "default branch",
           "synced": "Fork updated",
           "syncedDescriptionSingular": "Fast-forwarded {{branch}} by 1 commit.",
-          "syncedDescriptionPlural": "Fast-forwarded {{branch}} by {{value0}} commits.",
+          "syncedDescriptionPlural": "Fast-forwarded {{branch}} by {{count}} commits.",
           "upToDate": "Fork already up to date",
           "upToDateDescription": "{{branch}} already matches upstream.",
           "missingOrigin": "origin remote is missing.",
@@ -8822,10 +8809,10 @@
           "projectWsl": "This project runs in {{value0}} via WSL.",
           "inheritedWindows": "No project override. General settings select Windows.",
           "projectWindows": "This project runs on Windows.",
-          "liveTerminalSingular": "{{value0}} live terminal",
-          "liveTerminalPlural": "{{value0}} live terminals",
-          "activeTaskSingular": "{{value0}} active task",
-          "activeTaskPlural": "{{value0}} active tasks",
+          "liveTerminalSingular": "{{count}} live terminal",
+          "liveTerminalPlural": "{{count}} live terminals",
+          "activeTaskSingular": "{{count}} active task",
+          "activeTaskPlural": "{{count}} active tasks",
           "runtimeSessionJoin": "{{value0}} and {{value1}}",
           "runtimeSessionWarning": "{{value0}} will keep running in the current runtime. Let tasks finish or restart terminals before continuing.",
           "pendingRuntimeChange": "Runtime change pending. New project work will use the selected runtime after you apply.",
@@ -8995,8 +8982,8 @@
           "agent": "Agent",
           "agentArgs": "CLI arguments",
           "commandTemplate": "Command template",
-          "more": "+{{value0}} more",
-          "plural": "Global saves won't change {{value0}} repositories with their own recipes.",
+          "more": "+{{count}} more",
+          "plural": "Global saves won't change {{count}} repositories with their own recipes.",
           "recipe": "Recipe",
           "review": "Review",
           "reviewFirst": "Review first",
@@ -9915,9 +9902,9 @@
             "7fb9435c86": "This permanently deletes the directory and its contents on the remote host. This cannot be undone.",
             "23e98f192f": "This permanently deletes the file on the remote host. This cannot be undone.",
             "8b8ee9d22f": "Couldn't determine which host owns this file. Check the workspace connection and try again.",
-            "af1270b90d": "Permanently delete {{value0}} items?",
+            "af1270b90d": "Permanently delete {{count}} items?",
             "dd029aa5cd": "This permanently deletes the selected items and any directory contents on the remote host. This cannot be undone.",
-            "77fdc36183": "Delete {{value0}} items?",
+            "77fdc36183": "Delete {{count}} items?",
             "fca915a67a": "Remote items are permanently deleted and cannot be undone. Local items move to the {{value0}}."
           },
           "useFileExplorerHandlers": {
@@ -9960,7 +9947,7 @@
             "searchSessions": "Search sessions",
             "clearSearch": "Clear search",
             "remoteBrowseLocalHistory": "Remote workspaces can browse local history. Resume actions run from local workspaces.",
-            "transcriptsSkipped": "{{value0}} transcript skipped",
+            "transcriptsSkipped": "{{count}} transcript skipped",
             "noAgentSessionsFound": "No agent sessions found",
             "noSessionsMatchFilters": "No sessions match the current filters",
             "sessionId": "Session ID",
@@ -12835,8 +12822,8 @@
             "2db945e4a0": "Copy or move projects from the active profile to another local profile.",
             "8668cb2946": "No projects in this profile.",
             "93034915ab": "Create another profile before copying projects.",
-            "projectCountSingular": "{{value0}} project",
-            "projectCountPlural": "{{value0}} projects"
+            "projectCountSingular": "{{count}} project",
+            "projectCountPlural": "{{count}} projects"
           },
           "project": {
             "transfer": {
@@ -12855,12 +12842,12 @@
                   "work": "Live work in this project"
                 },
                 "cancel": "Cancel",
-                "terminalSingular": "{{value0}} live terminal tab",
-                "terminalPlural": "{{value0}} live terminal tabs",
-                "agentSingular": "{{value0}} active agent",
-                "agentPlural": "{{value0}} active agents",
-                "browserSingular": "{{value0}} browser workspace",
-                "browserPlural": "{{value0}} browser workspaces"
+                "terminalSingular": "{{count}} live terminal tab",
+                "terminalPlural": "{{count}} live terminal tabs",
+                "agentSingular": "{{count}} active agent",
+                "agentPlural": "{{count}} active agents",
+                "browserSingular": "{{count}} browser workspace",
+                "browserPlural": "{{count}} browser workspaces"
               }
             }
           },
@@ -12882,12 +12869,12 @@
               },
               "cancel": "Cancel",
               "switch": "Switch profile",
-              "terminalSingular": "{{value0}} live terminal tab",
-              "terminalPlural": "{{value0}} live terminal tabs",
-              "agentSingular": "{{value0}} active agent",
-              "agentPlural": "{{value0}} active agents",
-              "browserSingular": "{{value0}} browser workspace",
-              "browserPlural": "{{value0}} browser workspaces"
+              "terminalSingular": "{{count}} live terminal tab",
+              "terminalPlural": "{{count}} live terminal tabs",
+              "agentSingular": "{{count}} active agent",
+              "agentPlural": "{{count}} active agents",
+              "browserSingular": "{{count}} browser workspace",
+              "browserPlural": "{{count}} browser workspaces"
             }
           },
           "org": {
@@ -12962,7 +12949,7 @@
         "assignee": "Assignee",
         "unassigned": "Unassigned",
         "labels": "Labels",
-        "countSelected": "{{value0}} selected",
+        "countSelected": "{{count}} selected",
         "selected": "selected",
         "searchPriority": "Filter priority…",
         "searchStatus": "Filter status…",
@@ -13008,9 +12995,7 @@
       },
       "tool": {
         "running": "Running…",
-        "result": "Result",
-        "countOne": "1 tool call",
-        "countN": "{{value0}} tool calls"
+        "result": "Result"
       },
       "status": {
         "responding": "Agent is responding"

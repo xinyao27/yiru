@@ -355,8 +355,8 @@ export default function AiVaultPanel(): React.JSX.Element {
         <div className="border-b border-sidebar-border px-3 py-1.5 text-[11px] text-muted-foreground">
           {translate(
             'auto.components.right.sidebar.AiVaultPanel.transcriptsSkipped',
-            '{{value0}} transcript skipped',
-            { value0: scanResult.issues.length }
+            '{{count}} transcript skipped',
+            { count: scanResult.issues.length }
           )}
         </div>
       ) : null}

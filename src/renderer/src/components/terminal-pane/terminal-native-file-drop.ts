@@ -231,7 +231,7 @@ async function uploadRemoteDropPaths(
 ): Promise<void> {
   const pending = toast.loading(
     translate(
-      'auto.components.terminal.pane.terminal.drop.handler.e040850c0d',
+      'auto.components.terminal.pane.terminal.drop.handler.29c031b49a',
       'Uploading {{value0}} file{{value1}} to remote…',
       { value0: args.dataPaths.length, value1: args.dataPaths.length === 1 ? '' : 's' }
     )

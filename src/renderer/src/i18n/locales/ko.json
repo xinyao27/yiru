@@ -13,6 +13,7 @@
         "title": "언어",
         "description": "Orca 인터페이스에서 사용되는 언어를 선택합니다.",
         "system": "시스템",
+        "english": "English",
         "chinese": "中文（简体）",
         "korean": "한국어",
         "japanese": "日本語",
@@ -100,6 +101,7 @@
       "df1d56bf87": "워크스페이스 셸에 오류가 발생했습니다.",
       "9e0b441a91": "오른쪽 사이드바 표시/숨기기",
       "e81217c1b7": "앱 이름 숨기기",
+      "5096cbbc86": "Orca",
       "8b0b8eb54f": "애플리케이션 메뉴",
       "caea5b51b9": "지금 재시작",
       "0a9e810705": "다시 시작할 때까지 변경사항이 저장되지 않습니다. 이전 탭은 디스크에 안전합니다.",
@@ -109,6 +111,7 @@
       "c9d6f98459": "최대화",
       "66f0a552e5": "복원",
       "bbb7f90669": "최소화",
+      "d54e66004c": "터미널",
       "9f0152563e": "모바일",
       "62ca9895a7": "스페이스",
       "844eb0f4f4": "활동",
@@ -129,6 +132,7 @@
         "b411ec0069": "연결",
         "2cf9e5a294": "저장된 서버 지우기",
         "4a4c017be1": "엔드포인트:",
+        "27393856e4": "orca://pair?code=...",
         "7a566540de": "페어링 URL 또는 코드",
         "cb4d287238": "서버 이름",
         "3affe7de3a": "이 브라우저가 연결할 수 있는 Orca 서버의 페어링 URL을 붙여넣습니다.",
@@ -248,7 +252,7 @@
           "3be0f7df04": "선택한 런타임에서 폴더를 열 수 없습니다.",
           "15cf5319ec": "{{path}}이(가) {{hostName}}에서 확인되었지만 해당 호스트가 사용 가능한 폴더를 보고하지 않았습니다.",
           "2dcd706774": "프로젝트가 다른 프로필에도 있습니다",
-          "presenceProfileOverflow": "{{names}} 외 {{value0}}개"
+          "presenceProfileOverflow": "{{names}} 외 {{count}}개"
         },
         "settings": {
           "e12dab333b": "서버를 전환하지 못했습니다.",
@@ -286,6 +290,42 @@
     },
     "lib": {
       "agent": {
+        "catalog": {
+          "5dff448636": "OpenClaw",
+          "8a9ba743cc": "Hermes",
+          "4e63c7b956": "Rovo Dev",
+          "bee242fe3d": "Qwen Code",
+          "ca73055bd0": "Mistral Vibe",
+          "28810273af": "Kimi",
+          "739a930554": "Droid",
+          "667c104cff": "Cursor",
+          "9e2a9bb87b": "Continue",
+          "6f8056a565": "Command Code",
+          "4238b771b5": "Codebuff",
+          "cbaf0c2e0b": "Cline",
+          "1f8a19e9ad": "Autohand Code",
+          "5e8eff11b3": "Auggie",
+          "9477377a2a": "Charm",
+          "e0247254f2": "Kiro",
+          "918ba4ffed": "Kilocode",
+          "c73c573939": "Amp",
+          "8da11d876c": "Goose",
+          "b32627f09b": "Aider",
+          "691dd11789": "Antigravity",
+          "12e6baa4f7": "Gemini",
+          "09973b4d84": "OMP",
+          "302934c5d9": "Pi",
+          "e7a4ca5103": "OpenCode",
+          "706b0fe68b": "GitHub Copilot",
+          "0baad2d5d2": "Grok",
+          "760bc6883d": "Codex",
+          "a5fc0cb622": "OpenClaude",
+          "bf53f09bf8": "Claude Agent Teams",
+          "0708ed89f1": "Claude",
+          "fc80296033": "Devin",
+          "da41abbdd4": "Ante",
+          "mimo_code_label": "MiMo Code"
+        },
         "skill": {
           "cli": {
             "prerequisite": {
@@ -378,6 +418,15 @@
         }
       },
       "open": {
+        "in": {
+          "app": {
+            "catalog": {
+              "f8b8ca2711": "Zed",
+              "d62b12e98a": "Cursor",
+              "173553f73a": "VS Code"
+            }
+          }
+        },
         "mobile": {
           "emulator": {
             "tab": {
@@ -614,6 +663,7 @@
         "42ae40842f": "전역적으로 또는 프로젝트별로 범위가 지정된 저장된 terminal 명령입니다.",
         "3fc3db144f": "빠른 명령어",
         "c33bfd664c": "셸, 렌더러, 세션 및 terminal 동작.",
+        "a9fb10afca": "터미널",
         "5235c215ca": "작업 페이지와 사이드바에 표시할 작업 제공자를 선택합니다.",
         "85f4fd7710": "작업 소스",
         "ab4b21b58e": "브랜치 이름 지정, 기본 참조, 속성 및 Git AI Author.",
@@ -641,8 +691,14 @@
         "b49abbd2f7": "에이전트",
         "dev": "개발자 도구",
         "devDescription": "UI 상태를 테스트하기 위한 개발자 전용 도구.",
+        "devBadge": "Dev",
         "devSearchNotificationPlayground": "알림 플레이그라운드",
-        "devSearchNotificationPlaygroundDescription": "대표적인 토스트 및 알림 UI 상태를 트리거합니다."
+        "devSearchNotificationPlaygroundDescription": "대표적인 토스트 및 알림 UI 상태를 트리거합니다.",
+        "devSearchKeywordDev": "dev",
+        "devSearchKeywordToast": "toast",
+        "devSearchKeywordSonner": "sonner",
+        "devSearchKeywordError": "error",
+        "devSearchKeywordNotification": "notification"
       },
       "useAppMenuPaste": {
         "pasteTooLarge": "붙여넣기 내용이 너무 큽니다."
@@ -754,6 +810,7 @@
         "aba792c8b3": "PR을 병합하지 못했습니다.",
         "dbe5e2448e": "PR이 병합되었습니다",
         "a27ee5ca1a": "그러면 GitHub의 PR이 업데이트됩니다.",
+        "03d7216d62": "{{value0}} PR #{{value1}}?",
         "e9b7cb7d17": "{{value0}} PR에 실패했습니다.",
         "bd3b4492a0": "PR이 다시 열렸습니다",
         "9f88657c4e": "PR이 종료되었습니다.",
@@ -836,7 +893,9 @@
         "28d0d3374f": "스레드",
         "080d071d48": "@{{value0}}에 답장",
         "86f809e2ce": "이 리뷰 스레드에 답변하기",
+        "136542c9ba": ":L{{value0}}",
         "283699bc82": "답글을 게시하지 못했습니다.",
+        "d1c0dad471": "-L{{value0}}",
         "31770bef03": "나란히",
         "6e43a16435": "인라인",
         "d00a0a7f8f": "모두 축소",
@@ -850,10 +909,16 @@
         "timeline": {
           "completed": "를 완료로",
           "notPlanned": "미계획으로",
+          "someone": "someone",
+          "assigned": "assigned",
+          "unassigned": "unassigned",
           "mentioned": "이 이슈를 언급했습니다",
+          "in": "in",
           "closed": "이 이슈를 닫았습니다",
           "reopened": "이 이슈를 다시 열었습니다",
           "moved": "이 이슈를 이동했습니다",
+          "from": "from",
+          "to": "to",
           "activity": "활동",
           "noActivity": "아직 활동이 없습니다."
         },
@@ -982,6 +1047,7 @@
         "preflightDismiss": "닫기"
       },
       "LinearIssueMarkdownDescriptionEditor": {
+        "d9c47069ef": "Markdown",
         "a7301a11f3": "저장",
         "632096eb1c": "링크",
         "340160f4e8": "링크 삭제",
@@ -1043,6 +1109,7 @@
         "ca8778c124": "알 수 없음",
         "8a33c85e9c": "누군가",
         "f5a6b38a14": "시트",
+        "65239a714b": "Linear",
         "af6e02c44a": "페이지",
         "76ffd3c937": "추가할 프로젝트를 검색하세요.",
         "c11b4e3cc2": "프로젝트를 찾을 수 없습니다.",
@@ -1090,17 +1157,20 @@
         "f0470c7383": "고급",
         "ba64270bdb": "agents 구성",
         "ab63f25397": "agent 설정 열기",
+        "01d1e8f601": "에이전트",
         "0c5d6a479c": "[선택 사항]",
         "b5a0796911": "연결",
         "dccd26d4e4": "프로젝트 선택",
         "d6b0a96f32": "프로젝트 추가",
         "969a8bff66": "프로젝트",
+        "23bb365554": "orca.yaml",
         "a239038146": "SSH 연결 오류",
         "9a70e4859e": "이 워크스페이스를 만들기 전에 설정을 실행할지 여부를 선택하세요.",
         "803b7fe72f": "설정 구성을 확인하는 중...",
         "92e34f0311": "로컬 설정",
         "326a578923": "orca.yaml + 로컬",
         "2132b670da": "둘 다",
+        "0e587e31fb": "yaml",
         "ac3748dcda": "이름 또는 '다음에서 만들기'",
         "f660aa1454": "연결 중",
         "7711ad5122": "로컬 설정 명령",
@@ -1120,9 +1190,12 @@
         "runOn": "실행 위치",
         "setupHostExistingFolderTitle": "{{value0}} 설정",
         "cloneProjectOnHost": "프로젝트 클론",
+        "cloneUrlPlaceholder": "https://github.com/owner/repo.git",
+        "cloneDestinationPlaceholder": "/parent/directory/on/host",
         "cloningHostSetup": "클론 중...",
         "cloneHostSetup": "클론",
         "importExistingFolderOnHost": "기존 폴더 가져오기",
+        "setupHostExistingFolderPlaceholder": "/path/to/project/on/host",
         "setupKindGit": "Git 리포지토리",
         "setupKindFolder": "폴더",
         "setupHostExistingFolderHelp": "해당 호스트에 이미 있는 체크아웃을 연결한 다음, 그 호스트에서 이 워크스페이스를 만듭니다.",
@@ -1142,7 +1215,7 @@
         "noRunTargets": "이 프로젝트에는 실행 대상이 준비되어 있지 않습니다.",
         "perWorkspaceEnvHint": "레시피에서 온디맨드 환경 프로비저닝",
         "branchName": "브랜치 이름",
-        "0e587e31fb": "yaml"
+        "branchNamePlaceholder": "feature/my-branch"
       },
       "NewWorkspaceComposerModal": {
         "createWorktree": "작업 트리 만들기",
@@ -1223,6 +1296,7 @@
         "aae645d36d": "PR을 병합하지 못했습니다.",
         "c57873d721": "PR이 병합되었습니다",
         "a63b3c159c": "그러면 GitHub의 PR이 업데이트됩니다.",
+        "eec3706a6a": "{{value0}} PR #{{value1}}?",
         "b8c6cbb8c4": "PR {{value0}}에 실패했습니다.",
         "710e47aa06": "PR이 다시 열렸습니다",
         "7aa3b5f706": "PR이 종료되었습니다.",
@@ -1302,7 +1376,9 @@
         "345b68254c": "스레드",
         "31a7b202f2": "@{{value0}}에 답장",
         "408e634fbb": "이 리뷰 스레드에 답변하기",
+        "34b9f7c264": ":L{{value0}}",
         "5821aab360": "답글을 게시하지 못했습니다.",
+        "84fc40769a": "-L{{value0}}",
         "1378d79e83": "나란히",
         "e5f4a24f78": "인라인",
         "dd94111c18": "모두 축소",
@@ -1319,11 +1395,13 @@
         "checkActionRequiredHint": "머지가 해제되려면 이 검사에 대해 GitHub에서 수동 작업(예: 워크플로우 실행 승인)이 필요합니다.",
         "dd5d9a4f17": "{{value0}}에 업데이트됨",
         "71a3c0f9d2": "워크스페이스 시작",
+        "filesUnavailable": "Couldn't load changed files.",
         "filesRetry": "Retry"
       },
       "QuickOpen": {
         "1dbd3f59ff": "이동",
         "73b2c581f1": "닫기",
+        "95fccbae88": "Esc",
         "61b1c871a6": "열기",
         "250e5b2dfb": "Enter",
         "74e2e1b3e4": "일치하는 파일이 없습니다.",
@@ -1333,12 +1411,12 @@
         "ec31e058f7": "파일로 이동",
         "73b44e7bde": "설치 명령 복사",
         "1cf8561ab4": "빠르고 gitignore를 인식하는 목록을 활성화하려면 원격 호스트에서 다음을 수행하세요:",
+        "5d80dc39bb": "ripgrep",
         "2ca749c15d": "설치",
         "4725b0e931": "Quick Open 스캔이 너무 큼(",
         "b227d88520": "{{value0}} 파일을 찾았습니다.",
         "995be8ea22": "복사",
-        "cf144856dc": "복사됨",
-        "5d80dc39bb": "ripgrep"
+        "cf144856dc": "복사됨"
       },
       "SelectedTextCopyMenu": {
         "9b40d7b018": "복사"
@@ -1366,6 +1444,8 @@
         "246c2b3dd3": "Atlassian 계정 설정",
         "59c14d34a2": "토큰을 생성하세요",
         "b95623e93f": "Atlassian API 토큰",
+        "68df347677": "you@example.com",
+        "163df31e0e": "https://example.atlassian.net",
         "33fc2bcb30": "Jira Cloud 사이트 URL, Atlassian 이메일, API 토큰을 사용하여 이슈를 찾아보세요.",
         "60f806ce99": "Jira 사이트 연결",
         "8ff6fdc368": "만드는 중…",
@@ -1442,6 +1522,7 @@
         "d47248df4d": "Linear 보기 모드",
         "f397d513e3": "뒤로",
         "b39fe6511d": "프로젝트",
+        "8675cd6188": "Linear",
         "733b8f2421": "Linear / 보기",
         "bc06ed0fb0": "보기로 돌아가기",
         "3cb855080f": "보기",
@@ -1463,6 +1544,7 @@
         "a150c59da7": "Jira 사이트 연결",
         "bcdc1330b2": "GitLab에서 열기",
         "00b7ffb952": "유형 / 상태",
+        "eb10c32872": "ID",
         "e9b6955dcd": "이슈 #{{value0}}",
         "a0544fb653": "MR !{{value0}}",
         "8396825a14": "작업",
@@ -1520,6 +1602,7 @@
         "b73717af92": "다음",
         "0c8df28045": "다음 페이지",
         "ae859c816b": "페이지 {{value0}}",
+        "cd171f3391": "...",
         "297a805b64": "이전",
         "6cd6b3ae6a": "이전 페이지",
         "e65757a338": "페이지네이션",
@@ -1531,6 +1614,7 @@
         "88f478cdef": "PR을 병합하지 못했습니다.",
         "a161925adc": "PR이 병합되었습니다",
         "0506a78337": "그러면 GitHub의 PR이 업데이트됩니다.",
+        "844dc193c7": "{{value0}} PR #{{value1}}?",
         "995dd6af9b": "PR 체크 열기",
         "8a22eb3f7b": "일치하는 리뷰어가 없습니다.",
         "67755a83a1": "다른 사람들",
@@ -1570,6 +1654,8 @@
         "bd9965df51": "신고됨",
         "1301d376f1": "할당됨",
         "9cd11ba218": "Jira",
+        "11a828abf8": "GitLab",
+        "acef77f7ca": "GitHub",
         "524f095d55": "리뷰 필요",
         "7698af5263": "내 항목",
         "94f0339621": "나에게 할당됨",
@@ -1732,6 +1818,7 @@
       "WorktreeJumpPalette": {
         "ac037cfac2": "이동",
         "75499e01d9": "닫기",
+        "66b5a67bee": "Esc",
         "45def60329": "열기",
         "f65d992a11": "Enter",
         "c5081f2814": "현재 워크트리",
@@ -1877,7 +1964,9 @@
             "44b2c6326b": "보기를 로드하지 못했습니다: {{value0}}",
             "ab1a2c357d": "로드맵(지원되지 않음)",
             "d34ef9b554": "보드(지원되지 않음)",
-            "1a2b8e512e": "테이블"
+            "43a88ae574": "BOARD_LAYOUT",
+            "1a2b8e512e": "테이블",
+            "cafb908f34": "TABLE_LAYOUT"
           },
           "ProjectRow": {
             "75b5d816e3": "작업 시작",
@@ -1952,6 +2041,7 @@
         "GitHubMarkdownComposer": {
           "015b4e607d": "취소",
           "e3bd59143c": "삽입",
+          "f24783f470": "https://...",
           "ec6310b731": "http:// 또는 https:// 이미지 URL을 사용하세요.",
           "b7e4a1c902": "붙여넣거나, 끌어다 놓거나, 클릭해서 파일 추가",
           "8f1c2d4e6a": "미리 볼 내용이 없습니다",
@@ -2022,10 +2112,13 @@
                 "58c5f88216": "GitHub API 예산",
                 "6da1858354": "남음 · 재설정까지",
                 "f42790d150": "/",
+                "01f7323e58": "GraphQL API",
+                "1daf0f22a9": "GraphQL",
                 "1f2f28a4de": "검색 API",
                 "c377a4f06a": "검색",
-                "budget_scope_prefix": "예산 범위",
-                "bb227706a6": "REST"
+                "c392c749a6": "REST API",
+                "bb227706a6": "REST",
+                "budget_scope_prefix": "예산 범위"
               }
             }
           }
@@ -2118,6 +2211,7 @@
               "3ad562bdf4": "범위 내 이슈",
               "563501f191": "진행률",
               "bb5664d456": "프로젝트 설명이 없습니다.",
+              "7b147907dc": "Linear",
               "a9785c7158": "새로고침",
               "ee3d2caabd": "이슈",
               "5f79bc76b0": "프로젝트로 돌아가기",
@@ -2214,6 +2308,7 @@
             "a9957007eb": "{{value0}} 무시",
             "1bffc07ba7": "{{value0}} 보기",
             "bef0adef9b": "브랜치",
+            "0b1766738a": "Repo",
             "bbb1ab6a6f": "{{value0}}을(를) 선택하세요",
             "d1094dd529": "리뷰 필요",
             "4b93a235d8": "제안",
@@ -2262,6 +2357,7 @@
             "searchPlaceholder": "워크스페이스 검색",
             "ageFilter": "나이",
             "reviewFilter": "리뷰",
+            "gitFilter": "Git",
             "contextFilter": "문맥",
             "sortBy": "정렬 기준",
             "sortDirection": "방향",
@@ -2281,9 +2377,13 @@
             "failed": "삭제되지 않은 워크스페이스: {{value0}}",
             "error": "워크스페이스 정리 실패",
             "skippedAncestor": "중첩된 워크스페이스를 제거할 수 없어 건너뛰었습니다.",
-            "timedOut": "{{value0}} 제거가 예상보다 오래 걸리고 있습니다. 백그라운드에서 계속 실행됩니다."
+            "timedOut": "{{value0}} 제거가 예상보다 오래 걸리고 있습니다. 백그라운드에서 계속 실행됩니다.",
+            "stillRemoving": "Still removing workspaces: {{value0}}",
+            "skippedPendingAncestor": "Skipped because a nested workspace has not finished removing."
           },
           "candidateRow": {
+            "gitLabel": "Git",
+            "commitsLabel": "커밋",
             "contextLabel": "문맥",
             "flagsLabel": "플래그",
             "collapseDetails": "세부 정보 접기",
@@ -2334,6 +2434,7 @@
         "repo": {
           "multi": {
             "combobox": {
+              "286ce70256": "SSH",
               "4471d4a1c0": "검색어와 일치하는 프로젝트가 없습니다.",
               "bfd8ce21c6": "모든 프로젝트",
               "a58a0cd100": "프로젝트 검색...",
@@ -2374,6 +2475,7 @@
               "577a342c7d": "agent에게 이 워크스페이스를 조사하도록 요청하세요.",
               "026cfb232a": "프롬프트 명령을 지원하지 않습니다",
               "346d409ab2": "agent 선택",
+              "0adba8fa0c": "에이전트",
               "ec8f081919": "작업",
               "ed04233b3e": "빠른 액세스를 위해 terminal 명령이나 agent 프롬프트를 저장하세요.",
               "ca414324ee": "명령 텍스트",
@@ -2397,7 +2499,8 @@
               "2264edd5d3": "목록에 없는 프로젝트",
               "3834d24243": "프로젝트",
               "b83efc79e2": "글로벌",
-              "c25cf350ef": "범위"
+              "c25cf350ef": "범위",
+              "f0631e4999": "repo"
             }
           }
         },
@@ -2585,6 +2688,7 @@
             "9acaf92093": "창 작업",
             "1bce81dba6": "시뮬레이터",
             "1ff1c77616": "브라우저",
+            "586d2ac445": "터미널",
             "addSplitPane": "분할 창 추가",
             "closePaneColumn": "분할 창 닫기"
           },
@@ -2685,12 +2789,13 @@
             "4833fb2cbe": "새 브라우저 탭",
             "d364f3c8d4": "새로운 Terminal",
             "7c1313d237": "새로운 Terminal:",
+            "d1afac112b": "WSL",
             "efb33546ff": "Git Bash",
             "1a8af49530": "CMD 프롬프트",
+            "2148f65e04": "PowerShell",
             "ab589350e5": "{{value0}}에 대한 실행 명령을 작성할 수 없습니다.",
             "7a9b4af2af": "탭을 왼쪽으로 스크롤",
-            "232e075b07": "탭을 오른쪽으로 스크롤",
-            "2148f65e04": "PowerShell"
+            "232e075b07": "탭을 오른쪽으로 스크롤"
           },
           "TabBarCreateEntry": {
             "d62d63b807": "파일 생성",
@@ -2719,6 +2824,12 @@
             "f3a8c2d1e7": "빠른 명령 검색...",
             "b4e7f9a2c1": "일치하는 명령 없음"
           },
+          "shell": {
+            "icons": {
+              "d4ceaa227c": "Git",
+              "e9b2e70613": "WSL"
+            }
+          },
           "tab": {
             "create": {
               "entry": {
@@ -2733,14 +2844,19 @@
               },
               "menu": {
                 "options": {
+                  "5501c2fb7a": "터미널",
+                  "9630dd5494": "shell",
                   "a094576900": "새 terminal",
                   "4f23f4d01d": "새 shell",
                   "4f2a91e15b": "브라우저",
                   "6d0e6a4b7a": "새 브라우저",
                   "c87ad57785": "브라우저 탭",
                   "cce7ef1d2c": "웹",
+                  "5f17fb9d0c": "markdown",
+                  "44caaf7b36": "md",
                   "fb50e3d874": "새 Markdown",
                   "6d8b6b4117": "새 파일",
+                  "b330f72434": "mark",
                   "37ff3ddca1": "Markdown 열기",
                   "164c394bab": "파일 열기",
                   "bbaf4f85a4": "모바일 에뮬레이터",
@@ -2767,11 +2883,6 @@
           },
           "TerminalTabSplitMenuSection": {
             "splitTerminal": "터미널 분할"
-          },
-          "shell": {
-            "icons": {
-              "d4ceaa227c": "Git"
-            }
           }
         }
       },
@@ -2784,6 +2895,7 @@
             "59b5955621": "직접 업로드하세요…",
             "0608ad02a2": "애완동물 선택",
             "b75484a01a": "애완동물 크기",
+            "c6aa805b1b": "px",
             "2f7bbaa457": "크기",
             "34c25dfe9c": "애완 동물",
             "aec479308a": "애완동물 메뉴",
@@ -2819,6 +2931,7 @@
             "92924a14e3": "비활성 워크스페이스 검토 ({{value0}})",
             "27a74f91f0": "지금은 실행 중인 항목이 없습니다.",
             "1b24a32d3a": "메모리",
+            "298f4be7f2": "CPU",
             "2aa2de6cb9": "이름",
             "30ff2c3c31": "고아 {{value0}}개",
             "6449a95c78": "Orca 추적 프로세스가 사용 중인 이 시스템의 물리적 RAM 크기입니다.",
@@ -2839,6 +2952,7 @@
             "bbcd9b7b85": "워크스페이스 축소",
             "c4a8968bdd": "워크스페이스 확장",
             "b10695d6ce": "세션 종료",
+            "288a4dd177": "Orca",
             "53dd5560ae": "Orca 접기",
             "e419d27083": "Orca 확장",
             "41ae4fa725": "종료 중…",
@@ -2898,9 +3012,14 @@
             "7657e3db9c": "Codex 계정",
             "38b5647724": "Codex 사용 런타임",
             "ba55303942": "Codex 세부정보 및 계정 전환 도구 열기",
+            "4dff061aab": "·",
+            "2483c60695": "···",
             "c35af53b73": "로그인",
             "f19a63e7cd": "사용량을 보려면 로그인하세요.",
             "5c938d39ac": "주간",
+            "54e8d6bb2d": "Fable",
+            "d79c3362c4": "5h",
+            "a79c64f87e": "Fable",
             "8295903d17": "전환 후 이전 대화를 계속하기 전에 라이브 Claude terminals을 다시 시작하십시오.",
             "c98ea88392": "다른 계정 없음",
             "9332ba8684": "다음으로 전환",
@@ -2913,6 +3032,10 @@
             "fda8146810": "Kimi 사용 세부정보 열기",
             "629251f4b6": "OpenCode Go 사용 세부정보 열기",
             "d2375976eb": "Gemini 사용 세부정보 열기",
+            "3d79122c3f": "kimi",
+            "d7a0668acc": "opencode-go",
+            "68efc0345c": "gemini",
+            "76b06d4da5": "claude",
             "a28a5dd9b1": "오류",
             "cd9d7b40ff": "{{value0}} 세션 다시 시작",
             "6cd6650b4c": "세션 다시 시작",
@@ -3009,6 +3132,7 @@
             "b9b4a3a25d": "브랜치",
             "c432278ec7": "편집기 버퍼",
             "0bc756efaf": "Git 변경사항",
+            "e9528a89b3": "터미널",
             "a8d9e0de79": "에이전트",
             "d384a4ce9f": "삭제 판단",
             "7d7745bb8f": "삭제할 수 있음",
@@ -3066,6 +3190,7 @@
             "6d6df77f41": "데이터가 없습니다",
             "7f7f208060": "월간",
             "252c096536": "주간",
+            "a79c64f87e": "Fable",
             "94038ad2fa": "세션",
             "2c35eca8d4": "사용량을 가져올 수 없습니다.",
             "1292d4f2ee": "사용할 수 없음",
@@ -3099,7 +3224,10 @@
             "remaining": "{{value0}}% 남음"
           },
           "UsagePercentageDisplayChangeNotice": {
+            "title": "Usage now shows % used",
+            "body": "Prefer remaining? Change it in Settings.",
             "dismiss": "Dismiss",
+            "openSettings": "Open Settings",
             "gotIt": "Got it"
           }
         }
@@ -3269,6 +3397,7 @@
           "2d9eb39264": "총 토큰",
           "beb6f24f37": "예상 비용",
           "da62578d9d": "사용량",
+          "0eb31e79ee": "Orca IDE",
           "960324e9b8": "이벤트",
           "6adac63cfe": "턴"
         },
@@ -3279,8 +3408,14 @@
           "1c96f433e2": "agents 작업 시간",
           "9dbec9e675": "시작된 Agents",
           "73ed07859c": "추적을 시작하려면 첫 번째 agent를 시작하세요",
+          "1e696db2f6": "OpenCode",
+          "7d26110cea": "Codex",
+          "85457c02fe": "Claude",
           "b2cf4310ce": "개요",
-          "eee19cfade": "개요"
+          "908c470587": "codex",
+          "eb6a066185": "claude",
+          "eee19cfade": "개요",
+          "grokUsageTab": "Grok"
         },
         "UsageOverviewPane": {
           "22ed1b7669": "세션",
@@ -3321,6 +3456,9 @@
           "search": {
             "cb6a9f0334": "캐시",
             "eaf251e183": "토큰",
+            "6953af58e6": "opencode",
+            "b77826fca3": "codex",
+            "e9dc37d889": "claude",
             "8efeae0b22": "추적",
             "5acbe1fdf2": "시간",
             "ef8bbf7739": "PR",
@@ -3330,13 +3468,20 @@
             "372debfac0": "통계",
             "26bb901fcd": "Orca 통계와 Claude, Codex, OpenCode 토큰 분석 및 Grok 구독 사용량.",
             "cb2430ae6a": "통계 및 사용량",
+            "f8a1b2c3d4": "grok",
             "e7f0a1b2c3": "구독",
             "d6e9f0a1b2": "크레딧",
-            "a3b6c7d8e9": "grok 사용량"
+            "a3b6c7d8e9": "grok 사용량",
+            "9f2a3b4c5d": "xai"
           }
         },
         "usage": {
           "overview": {
+            "model": {
+              "bc474051e5": "OpenCode",
+              "eb220d193b": "Codex",
+              "544d6d4c16": "Claude"
+            },
             "sections": {
               "9564a3b21b": "세션 -",
               "32330a6e66": "{{value0}}: {{value1}} 토큰",
@@ -3363,6 +3508,7 @@
           }
         },
         "UsageBreakdownSection": {
+          "7765a4c3e1": "n/a",
           "247c93ca92": "• 추정 가격"
         },
         "UsageSessionsTable": {
@@ -3381,6 +3527,7 @@
           "g8h9i0j1k2": "Grok 사용량",
           "b2d3e4f5c6": "Grok CLI OAuth(~/.grok/auth.json)의 주간 구독 크레딧입니다. 상태 표시줄과 같은 출처입니다.",
           "c3e4f5a6b7": "계정에서 설정",
+          "h9i0j1k2l3": " • {{value0}}",
           "i0j1k2l3m4": "Grok 사용량 새로 고침",
           "d4f5a6b7c8": "새로 고침",
           "e5a6b7c8d9": "사용한 주간 크레딧",
@@ -3425,6 +3572,8 @@
           "571c5818c1": "홈",
           "0bc1379f4c": "모든 소스",
           "38e0951c3a": "Agent 스킬",
+          "fb6bf60b52": "Claude",
+          "426be2aac6": "Codex",
           "39b6998ddb": "모든 제공업체",
           "a68dee6a32": "스킬 검색",
           "e46e162e2e": "~에서",
@@ -3494,6 +3643,7 @@
         },
         "AddRepoRemoteStep": {
           "5b205b5281": "스캔 중지",
+          "6680289908": "/home/user/project",
           "ef410aa881": "원격 경로",
           "0416bde073": "설정에 추가",
           "df6fbcf880": "구성된 SSH 대상이 없습니다.",
@@ -3513,6 +3663,7 @@
           "e1710bf831": "폴더로 열기",
           "8da4d1a5be": "Git 프로젝트 추가",
           "ac66a3ed2d": "서버 파일 시스템 찾아보기",
+          "92d25420a0": "/home/user/project",
           "867692f505": "서버 경로",
           "423b5d3d31": "선택한 호스트에 이미 있는 Git 리포지토리 또는 폴더를 추가하세요.",
           "3d0c035483": "호스트 프로젝트 열기",
@@ -3542,7 +3693,10 @@
         "AddRepoSteps": {
           "569326d9cc": "폴더 선택",
           "a93ef169b5": "서버 파일 시스템 찾아보기",
+          "2ce3f6edf8": "/path/to/destination",
           "04a4c4e84a": "클론 위치",
+          "b698a4a29d": "https://github.com/user/repo.git",
+          "3d4acbe693": "Git URL",
           "5b2ea674b1": "Git URL을 입력하고 복제할 위치를 선택하세요.",
           "c05f88a31f": "URL에서 복제",
           "fe8e629fe3": "디렉터리로 이동한 후 선택을 클릭하여 선택합니다.",
@@ -3551,9 +3705,7 @@
           "32a7256d85": "클론",
           "69f5b5380d": "복제 중...",
           "cloneOnHostDescription": "Git URL을 입력하고 {{value0}}에서 클론할 위치를 선택하세요.",
-          "cloneParentFolder": "상위 폴더",
-          "2ce3f6edf8": "/path/to/destination",
-          "3d4acbe693": "Git URL"
+          "cloneParentFolder": "상위 폴더"
         },
         "AutoRenameFailedDialog": {
           "aed1623b1e": "닫기",
@@ -3569,6 +3721,7 @@
           "632b456b1b": "변경",
           "afaf54f245": "상위 폴더 변경",
           "f520f83a97": "서버 파일 시스템 찾아보기",
+          "2a20a603a3": "/home/user/projects",
           "134e37f711": "위치",
           "b589b77997": "디렉터리로 이동한 후 선택을 클릭하여 선택합니다."
         },
@@ -3624,6 +3777,7 @@
           "f3e2b868fb": "후크 실행",
           "43b7bec4cd": "실행 안 함",
           "c494b3ccb1": "~에",
+          "79afc6772b": "orca.yaml",
           "531689199b": "항상 신뢰",
           "bf800b7e04": ". 믿을 수 있는 경우에만 실행하세요.",
           "831f2cd9f0": "내 컴퓨터에서 실행",
@@ -3672,7 +3826,8 @@
           "d36883e046": "취소",
           "8c097ef04e": "Orca에서. 아직 디스크에 있습니다.",
           "e62415c3d0": "다음 항목만 제거합니다",
-          "b79b39d865": "프로젝트 제거"
+          "b79b39d865": "프로젝트 제거",
+          "fromOrcaSsh": "from Orca. Its files stay on {{value0}} — re-add that SSH host to recover it."
         },
         "ScrollToCurrentWorkspaceToolbarButton": {
           "23989bb663": "활성 워크스페이스로 이동"
@@ -3700,6 +3855,7 @@
           "b56d1322f7": "다음에서 설정 명령을 찾았습니다.",
           "aef6c0a213": "Orca가 작업 트리를 생성할 때마다 실행되도록 감지된 명령을 저장합니다.",
           "660cdc17f8": "설정 스크립트. 로컬 명령을 추가하거나 설정에서 소스를 변경하세요.",
+          "8f6be51aa1": "orca.yaml",
           "bb879db364": "이 repo는 공유를 무시합니다",
           "0155fb9ed3": "지금은 이 repo의 설정 스크립트를 확인할 수 없습니다.",
           "eefa756190": "수동으로 구성",
@@ -3715,6 +3871,7 @@
           "8de03e23c5": "입력한 피드백만 제출하거나 'gh'를 연결하여 GitHub ID를 포함하세요.",
           "d20439c560": "GitHub ID 확인 중…",
           "5b120b9634": "익명으로 제출",
+          "c9e5ea0791": "GitHub:",
           "d46ddd66fc": "무엇을 개선할 수 있나요?",
           "3460258a54": "X에서 팔로우",
           "26108d3699": "Discord 참여",
@@ -3731,6 +3888,7 @@
         "SidebarFilter": {
           "e3b3898218": "프로젝트 추가",
           "92a23e6d07": "필터 재설정",
+          "81ded53722": "SSH",
           "b9e8802e73": "일치하는 프로젝트가 없습니다.",
           "779b7ba05d": "지우기",
           "139877b384": "모두 선택",
@@ -3769,6 +3927,7 @@
           "d3a9c4cea1": "지우기",
           "7679f0c268": "프로젝트",
           "f10ca29601": "{{value0}} 필터 제거",
+          "2656053db4": "SSH",
           "83a820fa71": "프로젝트 필터링...",
           "5a273fbfce": "프로젝트 추가...",
           "4815c70605": "일치하는 프로젝트가 없습니다.",
@@ -3778,6 +3937,7 @@
           "ad3d3ed7f1": "Orca 재시작",
           "29c56f30ee": "업데이트 확인",
           "eb9884e55b": "Discord",
+          "5687ab246a": "GitHub",
           "5f83d86d92": "변경 내역",
           "cdc87f897e": "문서",
           "e565171a7c": "키보드 단축키",
@@ -3788,7 +3948,8 @@
           "5161eef55d": "Orca를 다시 시작하는 중…",
           "d396773ef0": "확인 중",
           "f8a2c91d4e": "마일스톤",
-          "b7e4d2a19c": "온보딩"
+          "b7e4d2a19c": "온보딩",
+          "c4f8e1b72a": "X"
         },
         "SidebarToolbar": {
           "19e32d0e5f": "폴더 선택기를 열어 프로젝트를 추가하세요.",
@@ -3840,6 +4001,7 @@
           "e029a2d775": "상태",
           "c2c7a45cda": "없음",
           "680043342f": "콤팩트",
+          "c7591b6014": "repo",
           "hosts": "호스트",
           "allHostsDetail": "모든 호스트 표시",
           "configuredSshHost": "구성된 SSH",
@@ -3940,6 +4102,7 @@
           "1b0a156717": "에이전트"
         },
         "WorktreeCardReviewDetailSection": {
+          "reviewHeader": "{{value0}} #{{value1}}",
           "copyLink": "링크 복사"
         },
         "WorktreeCardMeta": {
@@ -3952,6 +4115,7 @@
           "ad25c3ff05": "{{value0}}에서 보기",
           "2c67730e07": "Orca에서 열기",
           "e42941631a": "Linear에서 보기",
+          "5e982e6128": "Linear {{value0}}",
           "807b13b9ec": "이슈 편집",
           "b22f058067": "GitHub에서 보기",
           "e97d8f2876": "이슈 #{{value0}}",
@@ -4049,6 +4213,7 @@
           "ebc5c7dcef": "하위 워크스페이스 숨기기",
           "84a2238242": "하위 워크스페이스 표시",
           "045a8aed48": "하위",
+          "2ca6e29a3c": "repo",
           "bb85cd86ba": "{{value0}}에 대한 워크스페이스 만들기",
           "ebadb7eadb": "{{value0}} {{value1}} 하위 {{value2}}",
           "20bebf9c7f": "{{value0}}개 하위 워크스페이스 표시",
@@ -4075,6 +4240,7 @@
           "9c1d1e9b71": "댓글",
           "5ae06f40fd": "PR URL을 붙여넣거나 숫자를 입력하세요. 링크를 제거하려면 비워두세요.",
           "077a4f7b5c": "PR # 또는 GitHub URL",
+          "1b91db7e14": "GH PR",
           "7c454be4c5": "이슈 URL을 붙여넣거나 숫자를 입력하세요. 링크를 제거하려면 비워두세요.",
           "029ea5ec57": "GitHub 이슈 열기",
           "741279e7b7": "이슈 # 또는 GitHub URL",
@@ -4288,7 +4454,9 @@
                   "f15fd80989": "새 워크트리는 최신 상태이지만 로컬 {{value0}}이(가) {{value1}} {{value2}} 뒤처져 있어 AI diff가 오래된 기록과 비교될 수 있습니다. Orca가 자동으로 최신 상태를 유지하도록 하세요. 언제든지 여기에서 변경할 수 있습니다",
                   "3d260e1a5d": "설정 › {{value0}}",
                   "34a03a6565": "{{value0}} 최신 상태로 유지",
-                  "4a18052018": "로컬 {{value0}}이(가) {{value1}}보다 뒤처져 있습니다"
+                  "4a18052018": "로컬 {{value0}}이(가) {{value1}}보다 뒤처져 있습니다",
+                  "commit": "commit",
+                  "commits": "commits"
                 }
               }
             }
@@ -4351,6 +4519,7 @@
           "host": "호스트",
           "local": "로컬",
           "runtime": "서버",
+          "ssh": "SSH",
           "connecting": "연결 중",
           "connect": "연결",
           "addSshHost": "SSH 호스트 추가",
@@ -4378,9 +4547,9 @@
           "6f7a8b9c0d": "취소",
           "7a8b9c0d1e": "설정 열기",
           "8b9c0d1e2f": "호스트 제거",
-          "workspacesFailed": "이 호스트에서 워크트리 {{value0}}개를 제거할 수 없었습니다. 재시도할 수 있도록 호스트가 유지되었습니다.",
+          "workspacesFailed": "이 호스트에서 워크트리 {{count}}개를 제거할 수 없었습니다. 재시도할 수 있도록 호스트가 유지되었습니다.",
           "oneWorkspace": "워크트리 1개",
-          "manyWorkspaces": "워크트리 {{value0}}개",
+          "manyWorkspaces": "워크트리 {{count}}개",
           "hostHasWorkspacesDefault": "이 컴퓨터에서 {{value0}}과(와) 해당 자격 증명을 제거합니다. {{value1}}은(는) Orca에 남아 있습니다 — 원격 파일은 변경되지 않습니다.",
           "alsoDeleteRemote": "{{value1}}에서 이러한 {{value0}}도 삭제",
           "alsoForgetLocal": "Orca에서 이러한 {{value0}}도 제거",
@@ -4478,14 +4647,20 @@
           "saving": "저장 중...",
           "save": "저장",
           "label": "레이블",
+          "sshLabelPlaceholder": "Dev box",
           "sshHost": "호스트 또는 별칭",
+          "sshHostPlaceholder": "deploy@server:22",
           "username": "사용자 이름",
+          "usernamePlaceholder": "deploy",
           "port": "포트",
           "identityFile": "신원 파일",
           "identityFilePlaceholder": "~/.ssh/id_ed25519 (선택 사항)",
           "serverName": "서버 이름",
+          "serverNamePlaceholder": "Dev box",
           "pairingCode": "페어링 코드",
+          "pairingCodePlaceholder": "orca://pair?code=...",
           "pairingHelpPrefix": "서버에서 실행",
+          "pairingCommand": "orca serve --pairing-address <host>",
           "pairingHelpSuffix": "한 다음 출력된 페어링 URL을 붙여넣으세요.",
           "sshImportAlreadySynced": "~/.ssh/config가 이미 동기화되어 있습니다.",
           "sshImportSynced": "{{value0}} 호스트{{value1}}을(를) 동기화했습니다.",
@@ -4497,7 +4672,9 @@
         "ForgetSshWorkspaceDialog": {
           "reconnectFailed": "재연결 실패",
           "forgetBody": "이 작업 공간을 Orca에서만 제거합니다. 파일, Git 워크트리, {{host}}의 브랜치는 그대로 유지됩니다.",
+          "title": "Delete “{{name}}”?",
           "disconnectedBody": "이 워크트리의 SSH 호스트가 연결되어 있지 않습니다. 재연결하여 원격에서도 삭제하거나 Orca에서만 제거하세요.",
+          "ghostBody": "{{host}} is no longer a saved SSH host, so this workspace is no longer connected to a live host. It can only be removed from Orca — files and branches on the remote are left untouched.",
           "cancel": "취소",
           "forget": "Orca에서 제거",
           "reconnectAndDelete": "재연결 후 삭제"
@@ -4555,6 +4732,7 @@
           "63843e37e2": "Claude 계정을 삭제하시겠습니까?",
           "99c8f9e498": "Orca는 저장된 계정에 대해 관리되는 Codex 홈을 삭제합니다. 현재 활성화된 경우 Orca는 시스템 기본 Codex 로그인으로 대체됩니다.",
           "0d47394635": "Codex 계정을 제거하시겠습니까?",
+          "ae3b21eb6c": "opencode.ai/workspace/wrk_…/go",
           "51c9104e13": "opencode.ai에 로그인한 후 URL에서 이를 찾으세요(예:",
           "b398b834c9": "지우기",
           "316ca4e610": "쿠키 잊기",
@@ -4565,17 +4743,20 @@
           "7ce0e1907c": "). 브라우저의 DevTools -> Network -> opencode.ai 요청 -> Cookie 헤더에서 찾으세요. OpenCode Go 인증은 웹 기반이며 Windows 및 WSL terminals에서 공유됩니다.",
           "8951c5309f": "auth=Fe26.2**…",
           "338820326a": ") 또는 전체 쿠키 헤더(예:",
+          "922b51e02d": "Fe26.2**…",
           "0023cc336e": "원시 토큰 값(예:",
           "a7e38affcd": "Fe26.2**… 토큰 또는 auth=Fe26.2**… 헤더",
           "67e3c33670": "OpenCode Go 세션 쿠키",
           "b2b1aa936d": "속도 제한을 가져오려면 opencode.ai 세션 쿠키를 붙여넣으세요.",
           "36223200ac": "OpenCode Go 세션 쿠키",
           "ea631977b5": "OpenCode Go 공급자 설정을 구성합니다.",
+          "4ac10b4d08": "OpenCode Go",
           "c2aee76420": "{{value0}}에서 Google에 인증하기 위해 로컬 Gemini CLI 설치에서 OAuth 자격 증명을 추출합니다. 이는 Orca가 아닌 Gemini CLI 앱에 발급된 자격 증명을 사용합니다. Google이 CLI를 업데이트하면 중단될 수 있습니다. 자신의 책임하에 사용하십시오.",
           "96f3649526": "Gemini CLI 자격 증명 사용(실험적)",
           "d676c41fc6": "Google 인증을 위해 로컬 Gemini CLI 설치에서 OAuth 자격 증명을 추출합니다. 이는 Orca가 아닌 Gemini CLI 앱에 발급된 자격 증명을 사용합니다. Google이 CLI를 업데이트하면 중단될 수 있습니다. 자신의 책임하에 사용하십시오.",
           "0c7f915b01": "Gemini CLI 자격 증명 사용",
           "973741a871": "Gemini 공급자 설정을 구성합니다.",
+          "0c64dc2a64": "Gemini",
           "db209ee572": "제거",
           "8a0f870153": "재인증",
           "3d245ef7d9": "Codex에서 이 로그인이 오래되었다고 보고했습니다.",
@@ -4591,12 +4772,14 @@
           "3180536c7a": "Codex 계정",
           "340d6f7a85": "각 계정은 Orca에서 자체 로컬 로그인 컨텍스트를 유지합니다. 계정 인증은 이 기기에 유지됩니다.",
           "cedfab35ab": "선택 사항. Orca는 일반 Codex 로그인을 사용할 수 있습니다. Orca에서 빠른 전환을 원하는 경우에만 계정을 추가하세요.",
+          "ef91cfa06b": "Codex",
           "3fe7862418": "{{value0}}에 대한 관리된 Claude 계정이 없습니다. Orca는 여기에 추가할 때까지 해당 환경의 시스템 기본 Claude 로그인을 사용합니다.",
           "3455cf43fa": "Claude 로그인.",
           "fcc4093fc1": "현재 {{value0}} Codex 로그인을 사용하세요.",
           "79e484c3b2": "공유 Claude 인증 파일에 대한 선택적 계정 전환기입니다.",
           "8bbfd74556": "Claude 계정",
           "72b36ea174": "선택 사항. Orca는 일반적인 Claude 로그인을 사용할 수 있습니다. 채팅 세션을 이동하지 않고 빠르게 전환하려는 경우에만 계정을 추가하세요.",
+          "26ef4b55be": "Claude",
           "2743cdc0af": "Claude 계정 업데이트에 실패했습니다.",
           "b15ce90870": "{{value0}} -> {{value1}}. 이전 세션을 계속하기 전에 실행 중인 Claude terminals을 다시 시작하세요.",
           "f921d32606": "Claude 계정이 업데이트되었습니다.",
@@ -4604,6 +4787,7 @@
           "9baf45d071": "이 기기",
           "2358ac71d2": "WSL 기본값",
           "ad47a33f72": "WSL 로드 중",
+          "8619f9afa9": "WSL",
           "46cf7e7495": "계정 위치",
           "0b4591ff93": "검사할 로컬 환경과 새로운 관리 Claude 및 Codex 계정이 추가되는 위치를 선택하세요.",
           "0c67a2a1aa": "이 컴퓨터에서는 WSL을 사용할 수 없습니다.",
@@ -4615,17 +4799,20 @@
           "b10cb4f696": "추가 중",
           "e4a28e8894": "Codex는 {{value0}} 로그인에 새로 로그인해야 한다고 보고했습니다. 새 Codex 세션을 시작하기 전에 다시 로그인하세요.",
           "75ca9b718e": "Codex는 활성 계정에 새로 로그인해야 한다고 보고했습니다. 새 Codex 세션을 시작하기 전에 다시 인증하세요.",
+          "b11078a9c2": "wsl",
           "350b2a1aa7": "현재 사용 중인",
           "e05d0ff737": "현재 {{value0}} Claude 로그인을 사용하세요.",
           "2f24f244a4": "MiniMax Cookie가 필요합니다.",
           "8e6f0cb1d8": "MiniMax Cookie가 저장되지 않았습니다.",
           "8d61637a77": "MiniMax Cookie가 저장되었습니다.",
           "b43e761fe5": "MiniMax Cookie 업데이트에 실패했습니다.",
+          "5d63bbfbec": "MiniMax",
           "15e831350e": "platform.minimax.io에서 MiniMax 사용량 추적을 설정합니다.",
           "21d6eb141e": "MiniMax 세션 Cookie",
           "33bba5ad83": "로컬 rate-limit 가져오기에 사용할 MiniMax 세션 Cookie를 붙여넣으세요.",
           "73ea15f24b": "저장됨",
           "23afe8f226": "저장되지 않음",
+          "566d9a99ab": "_token=…; minimax_group_id_v2=…",
           "f38b9cc4bd": "교체",
           "590a3130f9": "저장",
           "79418c782a": "브라우저에서 platform.minimax.io/console/usage 를 열고 로그인한 다음 DevTools(네트워크 → 임의의 remains 요청 → Cookie)에서 Cookie 요청 헤더를 복사하세요.",
@@ -4636,6 +4823,7 @@
           "0747d6391a": "Cookie의 Group ID 사용",
           "4ff2af7524": "사용 모델 이름",
           "5cf4b0f85f": "선택적인 쉼표로 구분된 모델 이름. MiniMax가 모델 관련 오류를 반환하지 않는 한 general로 두세요.",
+          "3c92b0d31c": "general",
           "0d8e77bc40": "콘솔 열기",
           "0b8c1c7e02": "로컬에 저장됨",
           "1fd1b1b6b4": "Cookie가 설정되지 않음",
@@ -4676,9 +4864,11 @@
         "AgentLocationSetting": {
           "92f4238f1a": "WSL 기본값",
           "fc806485ae": "WSL 로드 중",
+          "43663b5e69": "WSL",
           "9bccf48906": "Agent 위치",
           "d00949e59b": "{{value0}}에서 설치된 agents를 표시합니다. 새로 고침은 해당 환경에서 PATH를 다시 ​​확인합니다.",
-          "c7c516946f": "이 컴퓨터에서는 WSL을 사용할 수 없습니다."
+          "c7c516946f": "이 컴퓨터에서는 WSL을 사용할 수 없습니다.",
+          "f97b986b7f": "wsl"
         },
         "AgentSkillSetupPanel": {
           "0b810ec59f": "Enter를 눌러 명령을 실행하세요.",
@@ -4735,6 +4925,7 @@
           "agentPermissionsInfo": "Agent 권한 정보",
           "agentPermissionsTooltip": "Custom agent arguments stay unchanged when switching modes.",
           "agentPermissionsDescription": "Orca가 agents를 실행할 때 권한 프롬프트를 줄일지, 수동 확인을 유지할지 선택합니다.",
+          "agentPermissionsYolo": "Yolo",
           "agentPermissionsManual": "수동",
           "3f1bdf3cb4": "환경 텍스트가 너무 커서 안전하게 파싱할 수 없습니다.",
           "codexSessionSource": "가져올 Codex 홈",
@@ -4797,14 +4988,17 @@
           "interfaceDefaultFont": "기본 글꼴",
           "terminalDefaultFont": "기본 글꼴",
           "interfaceTitle": "인터페이스",
+          "terminalTitle": "터미널",
           "windowSidebarTitle": "창 및 사이드바",
           "windowSidebarSummary": "사이드바, 상태 표시줄 및 파일 탐색기",
           "statusBarCount": "{{value0}}개 표시기가 보입니다.",
-          "gitIgnoredGlossary": ".gitignore와 일치하는 파일."
+          "gitIgnoredGlossary": ".gitignore와 일치하는 파일.",
+          "statusBarDescription": "Choose which indicators appear in the status bar."
         },
         "AutoRenameBranchFromWorkSetting": {
           "1626524572": "Nautilus",
           "0de9fda203": "버리기",
+          "c71770c455": "{basePrompt}",
           "f19a56498d": "; 브랜치 접두사 설정이 계속 적용됩니다.",
           "800edb1e54": "fix-login-flow",
           "5d569f5199": ". Orca는 다음과 같은 마지막 세그먼트만 생성합니다.",
@@ -4863,6 +5057,7 @@
         },
         "BrowserHomePageSetting": {
           "d4ddcd0056": "저장",
+          "37a30c5bfd": "https://google.com",
           "c6cbd1c105": "홈페이지가 저장되었습니다.",
           "6a37540f4b": "새 브라우저 탭을 만들 때 열리는 URL입니다. 빈 탭을 열려면 비워 두세요.",
           "70224e37b1": "기본 홈 페이지"
@@ -4886,11 +5081,11 @@
           "64898ecdab": "생성",
           "7b649a578a": "만드는 중…",
           "4399c77caa": "기본",
+          "4af9a17947": "kagi",
           "c0f85056d9": "이 Orca 서버의 브라우저 프로필입니다.",
           "86b7c83fee": "이 컴퓨터",
           "6480776a03": "선택한 호스트의 브라우저 프로필입니다.",
-          "5e19a692f7": "호스트",
-          "4af9a17947": "kagi"
+          "5e19a692f7": "호스트"
         },
         "BrowserProfileRow": {
           "8e636cae25": "프로필 '{{value0}}'이(가) 삭제되었습니다.",
@@ -4917,6 +5112,8 @@
         "BrowserUseExamples": {
           "1199258ace": "복사",
           "1188e56af4": "예시 프롬프트 복사",
+          "b84807f228": "\"",
+          "59722f31b4": "\"",
           "c5325e91f6": "이 중 하나를 Claude Code, Codex 또는 해당 스킬이 설치된 프로젝트의 다른 agent에 붙여넣으세요.",
           "2a180694f7": "시도해 보세요 - 예시 프롬프트",
           "5ec620ccc4": "복사하지 못했습니다.",
@@ -4971,6 +5168,7 @@
           "52e640f3a0": "CLI 상태 새로 고침",
           "38edbb5721": "쉘 명령",
           "6930feda9e": "terminals에서 Orca를 사용하여 앱을 열고, 작업 트리를 관리하고, Orca terminals과 상호 작용할 수 있습니다.",
+          "c5c0f2641d": "Orca CLI",
           "d77352f2df": "PATH에서 `{{value0}}`을(를) 제거하지 못했습니다.",
           "af5540930c": "PATH에서 `{{value0}}`을 제거했습니다.",
           "a2b13efa94": "PATH에 `{{value0}}`을(를) 등록하지 못했습니다.",
@@ -4991,6 +5189,7 @@
           "d363e5929b": "CLI 등록 확인 중…"
         },
         "CliSkillRuntimeSetup": {
+          "04325573f8": "WSL",
           "a58ba464ad": "스킬 위치",
           "0ed08febc5": "WSL 셸 명령을 등록하지 못했습니다.",
           "3728a94fb6": "WSL 셸 명령에 주의가 필요함",
@@ -4998,6 +5197,7 @@
           "c47127f222": "WSL 기본값",
           "0c9f3cf9da": "Orca가 글로벌 agent 스킬을 확인하고 설치하는 위치를 선택합니다.",
           "f00d6aa9b5": "이 컴퓨터에서는 WSL을 사용할 수 없습니다.",
+          "7c776ff9d8": "wsl",
           "fc0fcf72fd": "스킬 설정 전 WSL 쉘 명령어를 등록하세요."
         },
         "CommitMessageAiPane": {
@@ -5023,8 +5223,11 @@
           "d5b45a3628": "소스 제어 AI 작업 표시",
           "7bcad2b200": "소스 제어 commit, PR, 브랜치 이름 및 수정 작업에 대한 작업 레시피를 추가합니다.",
           "d54c64163d": "활성화됨",
+          "4ec89c319e": "agent",
           "34d0348e34": "생성",
           "8cd2be0948": "메시지",
+          "ca433708cb": "commit",
+          "0b7eafe55f": "ai",
           "2c5436c018": "열림",
           "6c84ba6de3": "템플릿",
           "ebed4d2a29": "초안",
@@ -5038,7 +5241,7 @@
           "1df7d71313": "바이너리",
           "407d28bde6": "CLI",
           "54038660e0": "명령",
-          "0b7eafe55f": "ai"
+          "25350d670f": "custom"
         },
         "ComputerUsePane": {
           "1735461723": "agents가 로컬 데스크톱 앱을 검사하고 작동할 수 있습니다.",
@@ -5169,6 +5372,8 @@
           "05b6df93b3": "인라인",
           "7311f67ee7": "기본 차이점 보기",
           "b492397d34": "기본적으로 git diff를 표시하기 위해 선호되는 프레젠테이션 형식입니다.",
+          "a5db1d3975": "ms",
+          "fc5c5306ff": "ms.",
           "8112cd6dcf": "Orca가 마지막 편집 후 자동으로 저장되기까지 기다리는 시간입니다. 첫 번째 실행의 기본값은 다음과 같습니다.",
           "d6cf227ca0": "자동 저장 지연",
           "1bec6d8318": "Orca가 마지막 편집 후 자동으로 저장되기까지 기다리는 시간입니다.",
@@ -5180,6 +5385,8 @@
           "4aa4d9fb73": "가로 스크롤을 요구하는 대신 diff 편집기에서 긴 줄을 줄 바꿈합니다.",
           "bf16ef0af2": "끄다",
           "3f6892f307": "~에",
+          "b82f86d7d2": "Rich Markdown Spellcheck",
+          "5195f0b9ef": "Show browser spelling underlines and suggestions while editing rich Markdown.",
           "7ddd66fede": "편집기 자동 줄 바꿈",
           "9b18de6eea": "가로 스크롤 대신 파일 편집기에서 긴 줄을 자동으로 줄 바꿈합니다."
         },
@@ -5189,6 +5396,7 @@
           "f6d76cc8f4": "프록시 우회 규칙",
           "fb7130dcb9": "구성된 HTTP 프록시를 우회해야 하는 호스트입니다.",
           "0adfce9fa7": "http, https, SOCKS, SOCKS4, SOCKS5 URL을 지원합니다.",
+          "476f302aca": "http://proxy.example.com:8080",
           "1e214e265a": "시스템 프록시 설정 및 상속된 프록시 환경 변수를 사용하려면 비워 두세요.",
           "f00daf6324": "HTTP 프록시",
           "823e0f15b1": "Orca 네트워크 요청 및 로컬 terminal 하위 항목에 대한 프록시 URL입니다.",
@@ -5242,7 +5450,8 @@
           "82465b2444": "사용 가능",
           "31fd7150cf": "업데이트 확인 중...",
           "3394d1f663": "확인 중",
-          "d69a09b672": "업데이트는 시작 시 자동으로 확인됩니다."
+          "d69a09b672": "업데이트는 시작 시 자동으로 확인됩니다.",
+          "7173352632": "idle"
         },
         "GeneralWorkspaceSettingsSection": {
           "3d538a98f7": "워크스페이스의 열기 메뉴에서 사용 가능한 앱을 선택하세요.",
@@ -5279,6 +5488,7 @@
         "GitPane": {
           "d2eede4c54": "commits, PR 및 이슈에 Orca 속성을 추가합니다.",
           "e02ea23a32": "Orca 표기",
+          "e71ce09c42": "orca",
           "b9b5771bb1": "표기",
           "b5f534717a": "공동 작성",
           "9838c921ed": "공저자",
@@ -5294,14 +5504,18 @@
           "8a527d48e3": "gitlab",
           "aa204f185f": "현재 GitHub CLI REST, 검색 및 GraphQL 속도 제한.",
           "612a440e57": "GitHub API 예산",
+          "2cde9044a8": "graphql",
           "36e3de3619": "오래된 기록과 비교하지 않도록 합니다. Orca는 해당 브랜치에 commits 되지 않은 변경 사항이나 로컬 전용 commits이 있으면 업데이트를 건너뜁니다.",
           "d072a12995": "git diff main...HEAD",
           "db3a127eb1": "이렇게 하면 다음과 같은 명령이 유지됩니다",
+          "3ae3de8898": "master",
           "5bf885be48": "또는",
+          "ffba483bae": "main",
           "976afc6b3e": "워크스페이스를 만들면 Orca가 원격 기준 브랜치를 새로고침하고, 일치하는 로컬 브랜치를 안전하게 fast-forward합니다. 예:",
           "1ec5c91e1d": "브랜치 이름에 Git 사용자 이름, 사용자 지정 접두사 또는 접두사 없음을 사용할지 선택합니다.",
           "330f584b50": "브랜치 접두사",
           "1ffaadf0a0": "작업 트리를 생성할 때 브랜치 이름에 접두사가 추가됩니다.",
+          "813e15b346": "custom",
           "2351aa5a31": "Git 사용자 이름",
           "cc63fce906": "브랜치 이름 지정",
           "b559bf9899": "예: feature",
@@ -5318,10 +5532,7 @@
           "compareAgainstUpstreamTitle": "기본 비교 기준",
           "compareAgainstUpstreamDescription": "소스 제어가 커밋된 변경 사항 비교에 기본으로 사용할 기준을 선택합니다. 브랜치 업스트림은 현재 브랜치를 자동으로 따라가며, 업스트림이 없으면 저장소 기본 브랜치로 돌아갑니다. 비교 기준은 해당 worktree의 Git 패널에서 worktree별로 변경할 수 있습니다. Pull Request 및 리베이스 대상은 변경되지 않습니다.",
           "compareBaseRepositoryDefault": "저장소 기본값",
-          "compareBaseBranchUpstream": "브랜치 업스트림",
-          "2cde9044a8": "graphql",
-          "3ae3de8898": "master",
-          "ffba483bae": "main"
+          "compareBaseBranchUpstream": "브랜치 업스트림"
         },
         "HiddenExperimentalGroup": {
           "d0f914a528": "자리 표시자 토글",
@@ -5340,33 +5551,46 @@
           "f5c5246514": "Linear 액세스 추가",
           "6432f6522e": "연결됨",
           "077844591a": "워크스페이스 액세스 추가",
+          "264a9b6128": "Linear",
           "4831ba1083": "재확인",
           "01f6c7582e": "자세히 알아보기",
           "1a62c295c6": "Gitea 자격 증명이 구성되었지만 인증할 수 없습니다. 토큰, API 기본 URL, repos 권한을 확인한 후 환경 변수가 변경된 경우 Orca를 다시 시작하세요.",
           "5a1f86225a": "Orca가 원격지에서 API URL을 파생할 수 없는 경우에만 가능합니다.",
+          "6193444689": "ORCA_GITEA_API_BASE_URL",
           "2c0330ec3e": "비공개 repos의 경우, 그리고",
+          "e678d89e8c": "ORCA_GITEA_TOKEN",
           "d9467ab026": "공개 repos는 Git 원격에서 감지됩니다. 설정하세요",
           "4ab9b96925": "Gitea",
           "953b7bf6f7": "Azure DevOps 자격 증명이 구성되었지만 인증할 수 없습니다. 토큰, API 기본 URL 및 repos 권한을 확인한 후 환경 변수가 변경된 경우 Orca를 다시 시작하십시오.",
           "6f317f5132": "Orca가 git 원격에서 API 기본 URL을 파생할 수 없는 경우에만 가능합니다.",
+          "ae6b7f5f40": "ORCA_AZURE_DEVOPS_API_BASE_URL",
           "67a9f26a80": ". 설정",
+          "8f960935c1": "ORCA_AZURE_DEVOPS_ACCESS_TOKEN",
           "ce3c58cd63": "또는 설정",
+          "5ee6ef6405": "ORCA_AZURE_DEVOPS_TOKEN",
           "4ee74d1470": "설정",
           "5efce6953d": "Azure DevOps",
           "3c3cf05c63": "Bitbucket 자격 증명이 구성되었지만 인증할 수 없습니다. 토큰 및 repos 권한을 확인한 후 환경 변수가 변경된 경우 Orca를 다시 시작하십시오.",
+          "6e0ff3403e": "ORCA_BITBUCKET_ACCESS_TOKEN",
+          "44cde4aa01": "ORCA_BITBUCKET_API_TOKEN",
           "a6c2816115": "그리고",
+          "b8a7efb3f6": "ORCA_BITBUCKET_EMAIL",
+          "8489c0aa49": "Bitbucket",
           "e74de656ce": "glab auth login",
           "05e5245af7": "GitLab CLI가 설치되어 있지만 인증되지 않았습니다. terminal에서 다음 명령을 실행하세요.",
           "a83cac5726": "GitLab CLI 설치",
           "35a3379372": "MR, 이슈 및 파이프라인을 활성화하려면 GitLab CLI를 설치하세요.",
+          "ea160a9978": "CLI.",
           "a3326f6f1b": "glab",
           "027440e1cb": "MR, 이슈, 할 일, 파이프라인을 다음 도구로 사용합니다.",
+          "513abfe47d": "GitLab",
           "51000487c4": "gh 인증 로그인",
           "09285e9fe6": "GitHub CLI가 설치되어 있지만 인증되지 않았습니다. terminal에서 다음 명령을 실행하세요.",
           "399cf46867": "GitHub CLI 설치",
           "c0c8575e05": "PR, 이슈 및 검사를 활성화하려면 GitHub CLI를 설치하세요.",
           "f36365ed45": "gh",
           "de6a0d13ab": "PR, 이슈 및 검사는 다음을 통해 이루어집니다.",
+          "70c5f74f36": "GitHub",
           "8e078e480c": "{{value0}} 연결 끊기",
           "95b9a87e7e": "테스트",
           "62b20292de": "오류",
@@ -5395,14 +5619,14 @@
           "3ba07f933b": "Orca가 작업을 탐색하고 연결된 컨텍스트로 워크스페이스를 시작하는 데 사용할 이슈 트래커를 연결합니다.",
           "70e885705b": "작업 제공자",
           "1683acbac4": "Orca가 PR, MR, 체크, 리뷰 상태에 사용할 소스 호스트를 연결합니다.",
-          "298c65ecac": "리뷰 제공자",
-          "8489c0aa49": "Bitbucket"
+          "298c65ecac": "리뷰 제공자"
         },
         "KagiSessionLinkForm": {
           "92f0b4e472": "지우기",
           "9f741627a7": "Kagi 세션 링크가 삭제되었습니다.",
           "d5c8b94c5b": "저장",
           "ff450194cd": "Kagi 비공개 세션 링크",
+          "e383683485": "https://kagi.com/search?token=...",
           "81409d9362": "Kagi 인증을 위한 선택적 비공개 세션 링크입니다.",
           "3e5b7c6c25": "Kagi 세션 링크가 저장되었습니다.",
           "0911d5fa4c": "https://kagi.com/search?token=...에서 Kagi 비공개 세션 링크를 입력하세요."
@@ -5461,6 +5685,7 @@
           "6bac9ddfc6": "SSH repos는 원격 파일 시스템을 통해 읽힙니다. 스타터 생성은 워크스페이스 루트 구성으로 제한됩니다.",
           "96f5609b04": "이 repo에서 작업하는 동안 agents가 사용할 수 있는 MCP 서버 정의를 검사하세요.",
           "55eea3ef47": "MCP 구성",
+          "9ee215caf6": ".mcp.json",
           "1f3665e35a": "MCP 구성이 생성되었습니다.",
           "82436439eb": "MCP 구성 추가",
           "0a5c1ead54": "빈 구성 만들기"
@@ -5484,6 +5709,8 @@
         "MobileEmulatorExamples": {
           "edf13dd03b": "복사",
           "c12b253997": "예시 프롬프트 복사",
+          "d151e25078": "\"",
+          "b525ff2b12": "\"",
           "4daa95f25a": "Orca CLI 스킬이 설치된 프로젝트의 Claude Code, Codex 또는 다른 agent에 이들 중 하나를 붙여넣으세요.",
           "0820b3f84f": "시도해 보세요 - 예시 프롬프트",
           "1f608e7d60": "프롬프트를 복사하지 못했습니다.",
@@ -5514,6 +5741,7 @@
           "87985ba6f5": "이 네트워크 인터페이스 메뉴에서 Tailscale 주소(일반적으로 100.x.y.z IP)를 선택합니다.",
           "1f7c26d36a": "두 장치 모두에서 동일한 tailnet에 로그인합니다.",
           "668016be7a": "컴퓨터와 휴대폰에서.",
+          "1dc87a7fbc": "Tailscale",
           "51d29927eb": "설치",
           "9fc5d203ff": "Orca Mobile은 이 컴퓨터에 직접 연결됩니다. 동일한 로컬 네트워크가 아닌 곳에서 사용하려면 컴퓨터와 휴대폰을 동일한 개인 오버레이 네트워크에 놓은 다음 해당 네트워크 주소를 선택하여 QR 코드를 생성하세요.",
           "39fad211d9": "tailnet을 사용하여 Wi-Fi 외부에서 연결",
@@ -5522,8 +5750,7 @@
           "d536b5e20d": "QR 코드에 광고할 네트워크 주소를 선택하세요. 동일한 네트워크 페어링에는 LAN 주소를 사용하고, 교차 네트워크 액세스에는 오버레이 네트워크 주소(Tailscale, ZeroTier)를 사용하세요.",
           "406a35121c": "네트워크 인터페이스",
           "c541f67790": "QR 코드 생성",
-          "1e64659126": "재생성",
-          "1dc87a7fbc": "Tailscale"
+          "1e64659126": "재생성"
         },
         "MobilePane": {
           "dd3cd78d04": "Orca 모바일로 스캔",
@@ -5594,6 +5821,7 @@
           "fa83512e48": "키 저장",
           "07b26f2742": "키 지우기",
           "d246b2bdb3": "로컬 런타임 키는 가능한 경우 Electron 암호화 저장소를 사용하여 ~/.orca에 저장됩니다.",
+          "c3380e4ca5": "sk-...",
           "2f797018f0": "API 키가 구성됨",
           "16015322f9": "API 키",
           "07ed3e512e": "OpenAI 음성 모델이 선택된 경우에만 오디오가 OpenAI로 전송됩니다.",
@@ -5690,7 +5918,8 @@
           "e3970bbbf5": "CI 환경 변수가 설정되었기 때문에 텔레메트리가 비활성화되었습니다. 설정을 해제하고 다시 시작하세요.",
           "fe904ac984": "익명의 사용 데이터 공유",
           "77410e0566": "개인 정보 보호 정책",
-          "8bfdd23a88": "다음에 무엇을 빌드할지 알아내도록 도와주세요. Orca는 귀하가 사용하는 기능과 문제가 발생한 부분에 대한 개수를 익명으로 보냅니다."
+          "8bfdd23a88": "다음에 무엇을 빌드할지 알아내도록 도와주세요. Orca는 귀하가 사용하는 기능과 문제가 발생한 부분에 대한 개수를 익명으로 보냅니다.",
+          "afec8b03be": "ci"
         },
         "QuickCommandsPane": {
           "8764c6e9e4": "{{value0}} 제거",
@@ -5704,7 +5933,9 @@
           "3edf3deaf8": "'{{value0}}'을 삭제하시겠습니까?",
           "9fcfc29519": "삽입",
           "9b3e338d62": "입력",
+          "4ccc63da87": "에이전트",
           "0252ddd578": "명령 텍스트 없음",
+          "7784912ed6": "repo",
           "2bb9e38e93": "제목 없음",
           "3eb9897ab0": "선택한 범위에는 명령이 없습니다.",
           "38d61927e6": "저장된 빠른 명령이 없습니다.",
@@ -5721,6 +5952,7 @@
         "RepositoryHooksSection": {
           "af49e2a19e": "파일이 있지만 Orca가 유효한 `scripts` 또는 `issueCommand` 정의를 찾을 수 없습니다.",
           "3397879bee": "로컬 명령이 존재하는 경우 실행할 명령을 선택하십시오.",
+          "39da2ae12f": "orca.yaml",
           "ac9038d2cc": "둘 다일 때",
           "32fec28f5b": "명령 소스",
           "bbbd6e0bc4": "명령 소스 및 orca.yaml",
@@ -5790,6 +6022,7 @@
           "8dbe6bedf5": "유효하지 않음",
           "0e0dd5b9a5": "로드됨",
           "9b12f15b1e": "하나가 존재할 때.",
+          "c85c2c88a2": "{{artifact_url}}",
           "fac13f8c1e": "기준",
           "0518758f38": "둘 다",
           "d2b3016c20": "공유됨",
@@ -5809,6 +6042,7 @@
           "2b7d27b93c": "{{value0}} repo 색상 사용",
           "fde066a63b": "PNG 업로드는 256KB 이하여야 합니다.",
           "cc1286e263": "파비콘",
+          "03ca1a4e9b": "example.com",
           "381b4844fd": "PNG 업로드",
           "7da623abcc": "기본적으로 사용됨 — GitHub는 소유자가 사용자 정의 이미지를 설정하지 않은 경우에도 항상 하나를 제공합니다.",
           "39da8a10bf": "GitHub 아바타 사용",
@@ -5861,7 +6095,9 @@
           "setupProjectOnHostHelp": "호스트를 선택한 뒤 기존 체크아웃을 가져오거나, repos를 클론하거나, 나중에 준비될 설정을 추적합니다.",
           "setupExistingFolder": "기존 폴더 가져오기",
           "setupExistingFolderHelp": "해당 호스트에 이미 있는 체크아웃을 연결해 이 프로젝트를 다른 호스트에서도 사용할 수 있게 합니다.",
+          "setupExistingFolderPathPlaceholder": "/path/to/project/on/host",
           "cloneUrlPlaceholder": "리포지토리 URL",
+          "cloneDestinationPlaceholder": "/destination/on/host",
           "setupKindGit": "Git 리포지토리",
           "setupKindFolder": "폴더",
           "settingUpHost": "가져오는 중...",
@@ -5896,6 +6132,7 @@
           "7a3a8e431d": "CLI 인수",
           "2b2f38652b": "사용자 정의 명령",
           "0ffb081b3a": "기본 agent 사용",
+          "f4310cf63f": "에이전트",
           "1cd88d470a": "사용자 정의",
           "403876bb48": "글로벌 사용",
           "f0aa2cfaea": "액션 레시피"
@@ -5963,7 +6200,9 @@
           "9a3758d983": "저장된 서버가 없습니다.",
           "9bee6bbeeb": "서버 추가",
           "55fcc964cd": "을(를) 서버에서 실행하고 출력된 페어링 URL을 붙여넣으세요.",
+          "960e901ae4": "orca serve --pairing-address <host>",
           "163671f7b5": "실행",
+          "c3d772c514": "orca://pair?code=...",
           "9bc9b83474": "페어링 코드",
           "e038625857": "개발 환경",
           "54ebacc600": "서버 이름",
@@ -6095,6 +6334,7 @@
           "6742c7932c": "전역 또는 프로젝트별로 적용되는 저장된 terminal 명령입니다.",
           "13d4fe30ad": "빠른 명령어",
           "b79b5b31e9": "셸, 렌더러, 세션, terminal 동작.",
+          "3de4bbb841": "터미널",
           "dd72ed437a": "작업 페이지와 사이드바에 표시할 작업 제공자를 선택합니다.",
           "11faa2f7dd": "작업 소스",
           "cfa34f4465": "브랜치 이름 지정, 기본 참조, 속성 및 Git AI Author.",
@@ -6115,6 +6355,7 @@
           "ad6c529693": "AI 제공업체 계정",
           "ec1ba547f7": "AI agents를 관리하고, 기본값을 설정하고, 명령을 사용자 정의하세요.",
           "8afa676615": "에이전트",
+          "add3b97ee6": "\"",
           "3c88ec55d6": "\"에 대한 설정을 찾을 수 없습니다.",
           "c7ad095d96": "설정 로드 중...",
           "acc7bbdefd": "설정을 종료하려면 ESC를 다시 누르세요.",
@@ -6128,7 +6369,9 @@
           "9abb9be3bc": "설정 시작",
           "23c6874fdf": "AI 기능",
           "2309068a6f": "파괴적",
-          "65358016ea": "버리기"
+          "65358016ea": "버리기",
+          "dev": "Dev Tools",
+          "devDescription": "Dev-only tools for exercising UI states."
         },
         "SettingsFormControls": {
           "42a4d15a30": "일치하는 글꼴이 없습니다.",
@@ -6151,6 +6394,7 @@
           "search_terminal_themes": "terminal 테마 검색"
         },
         "SettingsSidebar": {
+          "e0900f83e7": "SSH",
           "5c9669ff9c": "프로젝트",
           "dbceaa8840": "설정 검색",
           "60f8a673a7": "앱으로 돌아가기",
@@ -6187,7 +6431,9 @@
           "2a0e8aeccf": "Orca 먼저",
           "3c0fac059a": "terminal에 키보드 포커스가 있는 동안에도 계속 실행됩니다.",
           "25b0004fbf": "Terminal 활성",
-          "781cb74d22": "terminal 패널에서 실행됩니다."
+          "781cb74d22": "terminal 패널에서 실행됩니다.",
+          "cb02e00202": "터미널",
+          "d8c988dab4": "~/.orca/keybindings.json"
         },
         "SourceControlAiActionRecipeDefaults": {
           "2576299196": "인수",
@@ -6206,13 +6452,15 @@
           "9d3cc627f8": "저장됨",
           "817128d94e": "저장되지 않은 변경사항",
           "7ab1437a12": "PR",
+          "e5b24893ba": "commit",
           "06a9dab64d": "검사",
           "cb67b938c5": "수정",
           "2037c78a6f": "템플릿",
           "eb7e8f3b39": "모델",
           "d74fdc776c": "명령",
           "673369fe0c": "CLI",
-          "db9bd75d10": "인수"
+          "db9bd75d10": "인수",
+          "926d58e87f": "agent"
         },
         "SparsePresetSettingsSection": {
           "6fa754d20f": "삭제",
@@ -6324,6 +6572,7 @@
           "71fc546097": "재설정할 때까지 터미널 유지",
           "92f80edbfd": "원격 터미널 지속성",
           "feae1d1e69": "선택 사항. ProxyJump / ssh -J와 동일합니다.",
+          "11bcb4507a": "bastion.example.com",
           "b2ab248ded": "점프 호스트",
           "3b01ca44a0": "선택 사항. 터널링에 사용됩니다(예: Cloudflare Access, ProxyCommand).",
           "f42d844544": "예: cloudflared access ssh --hostname %h",
@@ -6357,8 +6606,11 @@
           "8e1305fcc6": "작업 소스 선택기 및 사이드바 바로가기에 Jira를 표시합니다.",
           "6b23a34f6d": "Jira",
           "e4170c9615": "작업 소스 선택기 및 사이드바 바로가기에 Linear를 표시합니다.",
+          "09ae2d7c51": "Linear",
           "dd67a1b6e1": "작업 소스 선택기 및 사이드바 바로가기에 GitLab을 표시합니다.",
-          "1db47236cd": "작업 소스 선택기 및 사이드바 바로가기에 GitHub를 표시합니다."
+          "7c5d7fdc20": "GitLab",
+          "1db47236cd": "작업 소스 선택기 및 사이드바 바로가기에 GitHub를 표시합니다.",
+          "e14063e727": "GitHub"
         },
         "TerminalAppearanceSection": {
           "a14a427ae4": "창 구분선의 두께입니다.",
@@ -6405,6 +6657,7 @@
           "dimUnfocusedPanes": "포커스되지 않은 창을 흐리게 표시합니다."
         },
         "TerminalFontSizeSetting": {
+          "9b5252c85a": "px",
           "0f4c92e595": "새 창 및 라이브 업데이트의 기본 terminal 글꼴 크기입니다.",
           "a4a352b1e9": "글꼴 크기"
         },
@@ -6472,19 +6725,25 @@
           "219aaa59f4": "WSL 배포판",
           "2503f1e86b": "활성 워크스페이스가 아직 WSL 내부에 있지 않은 경우 새 WSL terminal 패널 및 로컬 agent 감지에 사용됩니다.",
           "5fe79a5e56": "새 WSL terminals 및 로컬 agent 검색에서 사용할 WSL 배포를 선택합니다.",
+          "b637dd57a7": "WSL",
           "f61ac77f16": "Git Bash",
           "0f1b8669e6": "명령 프롬프트",
+          "eb7fc4d98a": "PowerShell",
           "27e301f22c": "기본 쉘",
           "09bf02de9a": "새 terminals 패널을 열 때 사용할 셸입니다. 새 terminals에 적용됩니다.",
           "bd68f3170d": "Windows의 새 terminal 패널에 대한 기본 셸을 선택합니다.",
           "a55eee649f": "Windows의 새 terminal 패널에 대한 기본 셸입니다.",
           "87e678a8af": "윈도우 셸",
+          "05efc0bada": "true",
+          "348246b06f": "false",
           "5936387ddd": "자동",
+          "adbafefe56": "custom",
           "16753eea48": "마우스 오른쪽 버튼을 클릭하여 클립보드를 붙여넣습니다. Ctrl+마우스 오른쪽 버튼을 클릭하면 컨텍스트 메뉴가 열립니다.",
           "9c178cf8aa": "붙여넣으려면 마우스 오른쪽 버튼을 클릭하세요.",
           "af0c3b6e39": "마우스 오른쪽 버튼을 클릭하여 클립보드를 terminal에 붙여넣습니다. 컨텍스트 메뉴를 열려면 Ctrl+오른쪽 클릭을 사용하세요.",
           "29154326bb": "켜기",
           "ab20575a8a": "끄기",
+          "ab3a1f9068": "wsl.exe",
           "ask_before_closing_running_terminals_title": "실행 중인 Terminals을 닫기 전에 확인",
           "ask_before_closing_running_terminals_description": "실행 중인 명령이나 agent가 있는 terminal을 닫기 전에 확인 창을 표시합니다.",
           "scrollSpeed": {
@@ -6496,11 +6755,9 @@
             "normalDescription": "스크롤백 휠 배율.",
             "fast": "빠름",
             "fastDescription": "수정 키로 스크롤할 때 적용되는 추가 배율.",
+            "tui": "TUI",
             "tuiDescription": "전체 화면 터미널 앱을 위한 개별 휠 보고."
-          },
-          "05efc0bada": "true",
-          "348246b06f": "false",
-          "eb7fc4d98a": "PowerShell"
+          }
         },
         "TerminalSettingsPreview": {
           "a63953a48a": "{{value0}} 테마 미리보기",
@@ -6595,6 +6852,7 @@
           "7f4063076c": "커서 아래의 텍스트 색상(블록 커서)",
           "a2d9f095a7": "Cursor 텍스트",
           "cd0700762b": "Cursor 색상",
+          "c9e1fdf42f": "Cursor",
           "da64e8f4c1": "Terminal 배경색",
           "cc1b2ffeb2": "배경",
           "026a0b8013": "본문 색상",
@@ -6687,6 +6945,7 @@
             "7e67d7d1b6": "wrk",
             "421c6be25e": "ID",
             "be8b621bdc": "워크스페이스",
+            "8dcbef1856": "opencode",
             "38d22ff8d6": "자동 조회가 실패하면 선택적 워크스페이스 ID가 재정의됩니다.",
             "4ee2029e9c": "OpenCode Go 워크스페이스 ID",
             "9c4e40cf6b": "세션",
@@ -6697,6 +6956,7 @@
             "7118d2f908": "자격 증명",
             "933deaf732": "OAuth",
             "8630464352": "CLI",
+            "e8e1ff3887": "gemini",
             "bada4a3218": "Google 인증을 위해 로컬 Gemini CLI 설치에서 OAuth 자격 증명을 추출합니다.",
             "d819755b02": "Gemini CLI 자격 증명 사용",
             "35b461d817": "로그인",
@@ -6704,6 +6964,7 @@
             "8b06729e0f": "활성",
             "5b3f18ef4a": "전환",
             "06662af91e": "계정",
+            "70d1b8def5": "codex",
             "87a4a8584e": "실시간 할당량 읽기를 지원하는 선택적 저장된 Codex 계정을 선택하세요.",
             "a4bcfd6f86": "활성 Codex 계정",
             "042885c07c": "오래됨",
@@ -6712,11 +6973,13 @@
             "c759741d77": "할당량",
             "b40d5b6570": "Codex 및 실시간 속도 제한 가져오기를 위한 선택적 계정 전환.",
             "17c5d244eb": "Codex 계정",
+            "e14049e1a8": "claude",
             "dd75a73991": "공유 채팅 컨텍스트를 유지하면서 Claude의 선택적 계정 전환.",
             "75682e1b62": "Claude 계정",
             "e02c136ad0": "인증",
             "9f70aa706c": "공급자",
             "488a7e9206": "리눅스",
+            "0b4d948eb5": "wsl",
             "bdbd1e668e": "Windows",
             "593720c17f": "위치",
             "b84a5b0c8a": "이 장치 또는 WSL에서 공급자 계정을 검사하고 추가할지 선택합니다.",
@@ -6725,6 +6988,8 @@
             "f8374c3151": "로컬 rate-limit 가져오기에 사용할 platform.minimax.io 세션 Cookie를 붙여넣으세요.",
             "f4a8c2e1b7": "Grok(xAI) 사용량",
             "e3b7d1f9a2": "주간 크레딧 사용량을 위한 Grok CLI(grok login) OAuth 로그인.",
+            "d2c6a0e8f1": "grok",
+            "c1b5f9d7e0": "xai",
             "b0a4e8c6d9": "OAuth",
             "a9f3d7b5c8": "로그인"
           }
@@ -6738,6 +7003,11 @@
             "4383251647": "VPN",
             "f98a60af11": "프록시",
             "65bf6af262": "호환성",
+            "621233008b": "http/1.1",
+            "f8ff125ebe": "http1",
+            "a0f71bd909": "http/2",
+            "4b4ae4345a": "http2",
+            "48a1c8f534": "http",
             "4d44352eea": "네트워크",
             "2b4d26d11e": "네트워킹",
             "e04e9db503": "고급",
@@ -6751,6 +7021,7 @@
             "719f53350c": "경로",
             "839e82c81f": "감지",
             "f622b8eb2a": "리눅스",
+            "d608654c03": "wsl",
             "77c02fa3c3": "Windows",
             "d2952dfd74": "위치",
             "96ba2373b6": "agent",
@@ -6783,6 +7054,8 @@
             "c1317fe641": "복원",
             "5963143e00": "설정",
             "042c551bc5": "구성",
+            "f412abbba5": "claude",
+            "5ded38b843": "codex",
             "be7ea3553b": "탭",
             "6956646a1e": "제목",
             "32836788b0": "생성된 제목",
@@ -6807,6 +7080,7 @@
             "651f35b2c6": "스위처",
             "e5bc35d59e": "창",
             "d18b54ca90": "독",
+            "1f2880a9d5": "orca",
             "2cfb3420c0": "앱 아이콘",
             "e80c2af428": "Dock 및 창 전환기에 표시된 앱 아이콘을 선택합니다.",
             "2b313598c6": "앱 아이콘",
@@ -6837,10 +7111,13 @@
             "fdd31b00d0": "제목 표시줄 앱 이름",
             "c1bca1885a": "파일 탐색기",
             "9f2df826ac": "무시됨",
+            "08c86bf58e": "gitignore",
             "bce3ac317a": "git",
             "7164edf71a": "파일 탐색기에서 .gitignore와 일치하는 파일을 흐리게 표시합니다.",
             "f8129fb544": "Git이 무시한 파일 표시",
+            "2f12e1aa3a": "ui",
             "5095258df2": "인터페이스",
+            "fab91464dd": "ide",
             "8b36fb3f64": "타이포그래피",
             "a0e09aed9c": "서체",
             "24094af355": "폰트",
@@ -6886,22 +7163,30 @@
             "3a6c028ea8": "Kimi 사용량",
             "25e51b62ee": "사용 한도",
             "d9e7cef86f": "쿠키",
+            "d16378a88f": "minimax",
             "e46178eb1b": "상태 표시줄에 MiniMax 구독 사용량을 표시합니다.",
             "0f08f6b483": "MiniMax 사용량",
             "edbf0f63a0": "비용",
             "afbb6a3767": "토큰",
+            "d77537b580": "opencode-go",
+            "a9d56852eb": "opencode",
             "7f72de7cbe": "상태 표시줄에 OpenCode Go 토큰 및 비용 사용량을 표시합니다.",
             "bc046e7899": "OpenCode Go 사용량",
             "51b0ccd6a2": "Google",
+            "2804a920ad": "gemini",
             "9660c5b2f1": "상태 표시줄에 Gemini 토큰과 비용 사용량을 표시합니다.",
             "5bfb874d05": "Gemini 사용량",
             "97957e374e": "OpenAI",
+            "8dfd676c28": "codex",
             "e9e4412545": "상태 표시줄에 Codex 토큰 및 비용 사용량을 표시합니다.",
             "54b1acf24f": "Codex 사용량",
+            "dea0a9a665": "anthropic",
+            "c9fe3a7876": "claude",
             "de50c6f516": "상태 표시줄에 Claude 토큰 및 비용 사용량을 표시합니다.",
             "9dc15020d7": "Claude 사용량",
             "language": {
               "locale": "로케일",
+              "i18n": "i18n",
               "translation": "번역"
             },
             "leftSidebarAppearance": {
@@ -6923,12 +7208,13 @@
             },
             "antigravityUsageTitle": "Antigravity 사용량",
             "antigravityUsageDescription": "상태 표시줄에 Antigravity 구독 사용량을 표시합니다.",
+            "antigravityKeyword": "antigravity",
             "f8e2a1c4b6": "Grok 사용량",
             "e7d1b0f3a5": "Grok CLI OAuth에서 Grok 주간 크레딧 사용량을 표시합니다.",
+            "d6c0a9e2f4": "grok",
+            "c5b9f8d1e3": "xai",
             "usagePercentageDisplayTitle": "사용량 백분율",
-            "usagePercentageDisplayDescription": "공급자 한도를 사용한 비율 또는 남은 비율로 표시할지 선택합니다.",
-            "2f12e1aa3a": "ui",
-            "fab91464dd": "ide"
+            "usagePercentageDisplayDescription": "공급자 한도를 사용한 비율 또는 남은 비율로 표시할지 선택합니다."
           }
         },
         "auto": {
@@ -6973,6 +7259,7 @@
             "96afedcb5c": "세션 및 쿠키",
             "a7a07d5415": "편집기",
             "8dd4805991": "파일",
+            "68d1db8929": "markdown",
             "90425d313c": "Shift",
             "72c58f7792": "웹뷰",
             "82ba1c80ea": "로컬호스트",
@@ -6988,7 +7275,10 @@
             "c3d89ed4d0": "새로 열린 브라우저 탭에 적용되는 확대/축소 수준입니다.",
             "072b7f5c1f": "기본 줌",
             "0bb34eacc9": "쿼리",
+            "8b8ed06e4b": "omnibox",
+            "3538b3aaeb": "token",
             "0732ebe6fb": "비공개",
+            "e1c2a57f07": "kagi",
             "ad40e75d13": "Bing",
             "1f8153acfb": "DuckDuckGo",
             "8a489aab8d": "Google",
@@ -7004,9 +7294,7 @@
             "a942905148": "새 브라우저 탭을 만들 때 열리는 URL입니다. 빈 탭을 열려면 비워 두세요.",
             "c3903322d2": "기본 홈 페이지",
             "19ea5607cf": "로컬호스트 작업 트리 레이블",
-            "4e0fdf0a3f": "브라우저 탭을 더 쉽게 구분할 수 있도록 작업 트리별 Orca 로컬 호스트 URL로 워크스페이스 포트를 엽니다.",
-            "3538b3aaeb": "token",
-            "e1c2a57f07": "kagi"
+            "4e0fdf0a3f": "브라우저 탭을 더 쉽게 구분할 수 있도록 작업 트리별 Orca 로컬 호스트 URL로 워크스페이스 포트를 엽니다."
           },
           "use": {
             "search": {
@@ -7030,6 +7318,8 @@
               "614c756ab1": "브라우저 쿠키 가져오기",
               "cee44fb442": "오토메이션",
               "a57c2172dc": "agent-browser",
+              "6ea88e5206": "npx",
+              "f5b8fdddf5": "orca-cli",
               "e5a784bc54": "설치",
               "9d97446873": "agent",
               "a2d489263e": "스킬",
@@ -7040,6 +7330,7 @@
               "7e0dcb257a": "셸",
               "3ffafc9b95": "명령",
               "30c74aaa1f": "경로",
+              "ff05cbc344": "orca",
               "85fab5e12c": "CLI",
               "890ddf943d": "agents가 브라우저를 구동할 수 있도록 Orca CLI를 등록하세요.",
               "50f0860e18": "Orca CLI 활성화"
@@ -7060,7 +7351,9 @@
                 "001ca3f2af": "Create PR 작성기가 열릴 때 사용되는 기본값입니다.",
                 "eefd33788c": "PR 생성 기본값",
                 "d32936bb2a": "브랜치",
+                "127d512e75": "commit",
                 "d22a6459e4": "충돌",
+                "53e8504fb2": "ci",
                 "c46e665f7e": "검사",
                 "37c65bbb44": "수정",
                 "402f101af8": "프롬프트",
@@ -7073,10 +7366,12 @@
                 "3c4e5e5938": "액션 레시피",
                 "ee14a9e9f7": "활성화됨",
                 "82109d627d": "소스 제어",
+                "542e1a00a7": "codex",
+                "f121bec167": "claude",
                 "93e5210da8": "메시지",
+                "c33cb1b982": "ai",
                 "0b946b2abe": "소스 제어 commit, PR, 브랜치 이름 및 수정 작업에 대한 작업 레시피를 추가합니다.",
-                "24dbdfca78": "소스 제어 AI 작업 표시",
-                "c33cb1b982": "ai"
+                "24dbdfca78": "소스 제어 AI 작업 표시"
               }
             }
           }
@@ -7100,11 +7395,13 @@
             "search": {
               "3363889768": "로컬 네트워크, USB 및 블루투스",
               "6c82846f66": "장치",
+              "11653d3f42": "mdns",
               "78a10b826f": "Bonjour",
               "e3fbc48083": "블루투스",
               "c4a4a02ea4": "USB",
               "fa3239cd42": "로컬 네트워크",
               "acad3d4743": "terminal 세션에서 사용되는 장치 및 로컬 네트워크 도구를 허용합니다.",
+              "3e0131e45d": "icloud",
               "ce07159ff5": "데스크탑",
               "a0c19119fb": "다운로드",
               "4438f81bfa": "문서",
@@ -7119,6 +7416,7 @@
               "2e5d98ab56": "스크린샷, 화면 검사, 키 입력 및 창 자동화를 허용합니다.",
               "39bb49e662": "화면 녹화 및 접근성",
               "00e954319e": "Whisper",
+              "1e6e27b202": "ffmpeg",
               "f061f08b7b": "sox",
               "a765112513": "동영상",
               "b192432ef0": "오디오",
@@ -7129,16 +7427,17 @@
               "302c0c42f9": "마이크 및 카메라",
               "4e225e7c56": "개발자 도구",
               "6db4fca386": "macOS",
+              "0c13b249e3": "tcc",
               "2270ccff3f": "개인정보 보호",
               "a98aa11a9c": "권한",
               "bc8ac95310": "terminal에서 실행되는 개발자 도구에 대한 macOS 권한입니다.",
-              "e92cb0896d": "개발자 권한",
-              "3e0131e45d": "icloud"
+              "e92cb0896d": "개발자 권한"
             }
           }
         },
         "experimental": {
           "search": {
+            "44c7f209d5": "node_modules",
             "4ad605f222": "환경",
             "3021571c30": "공유됨",
             "f082788cfe": "링크",
@@ -7194,11 +7493,14 @@
               "menu": "메뉴",
               "metadata": "메타데이터",
               "status": "상태",
-              "title": "새 카드 스타일"
+              "title": "새 카드 스타일",
+              "worktree": "worktree",
+              "worktrees": "worktrees"
             },
             "nativeChat": {
               "title": "네이티브 채팅",
-              "description": "지원되는 에이전트 터미널 세션의 데스크톱 채팅 화면을 미리 봅니다."
+              "description": "지원되는 에이전트 터미널 세션의 데스크톱 채팅 화면을 미리 봅니다.",
+              "grok": "grok"
             }
           }
         },
@@ -7211,6 +7513,7 @@
               "a38bfc3f77": "퀵 패널",
               "52db6e3baf": "메모",
               "156ffeee08": "메모",
+              "884e5e6132": "markdown",
               "49db74a92d": "브라우저",
               "6410fe83d8": "터미널",
               "2b5efa55c9": "글로벌",
@@ -7234,15 +7537,21 @@
             "c61b14be7c": "그로크",
             "5d9ba08673": "Copilot",
             "f472e97440": "aider",
+            "3c30fe2d51": "gemini",
             "5fdf1dc2d1": "omp",
             "9b0bc30160": "Pi",
+            "882c4896fd": "opencode",
+            "27d9b996ba": "codex",
+            "5baf51c4d9": "open claude",
             "aea7d2cccb": "OpenClaude",
+            "95b63edde7": "claude",
             "41c2f9a025": "기본값",
             "8ea37a05bc": "agent",
             "e2da948f59": "새 워크스페이스 작성기에서 AI 코딩 agent를 미리 선택하세요.",
             "db11502270": "기본 Agent",
             "3462308bd3": "토큰",
             "660528b048": "비용",
+            "585beac3f8": "ttl",
             "0efc9d96ad": "프롬프트",
             "939b80f5fd": "타이머",
             "b2601a778c": "캐시",
@@ -7254,6 +7563,7 @@
             "f89a94773c": "업데이트",
             "79ff46776e": "앱 업데이트를 확인하고 최신 Orca 버전을 설치하세요.",
             "e15af4eb64": "업데이트 확인",
+            "6382fe9724": "npx",
             "baa263d6d8": "에이전트",
             "bda108e66c": "스킬",
             "244e3fb4c8": "agents가 Orca CLI를 사용하도록 Orca 스킬을 설치하세요.",
@@ -7264,6 +7574,7 @@
             "fb4f338a3d": "경로",
             "924a660a78": "CLI",
             "ca529079bf": "Orca CLI 명령을 등록하거나 제거합니다.",
+            "327e3fa70d": "Orca CLI",
             "fb84767421": "전환",
             "f8f0ac213a": "순차적",
             "12ecc640a8": "mru",
@@ -7277,6 +7588,7 @@
             "22572e99c1": "주석",
             "1ff67ba40c": "메모",
             "4dd5684836": "리뷰",
+            "d05f629d2c": "markdown",
             "694613d47f": "리치 에디터 모드에서 로컬 markdown 리뷰 노트 컨트롤을 표시합니다.",
             "128bc09325": "Markdown 리뷰 노트",
             "a0014961ae": "스크롤",
@@ -7308,17 +7620,22 @@
             "ae21e806ce": "자동 저장 파일",
             "c56cb6f1c2": "네트워크",
             "3566fce83f": "로컬호스트",
+            "91a46caafc": "no_proxy",
             "3a73054565": "우회",
             "20b711ac9e": "프록시",
             "eb8946b2c9": "구성된 HTTP 프록시를 우회해야 하는 호스트입니다.",
             "8436ff6f8e": "프록시 우회 규칙",
             "e55d62dfa4": "런치패드",
             "9da6c875e5": "독",
+            "b9096a44cf": "https_proxy",
+            "8f03d44672": "http_proxy",
             "e3b1d42f95": "Orca 네트워크 요청 및 로컬 terminal 하위 항목에 대한 프록시 URL입니다.",
             "c29f23ab57": "HTTP 프록시",
             "6c2ce8457c": "파일 탐색기",
             "c9d9636f24": "파인더",
+            "68d03d9980": "vscode",
             "ebf8f056b5": "zed",
+            "0cb3d94f00": "cursor",
             "8fb00fcd05": "런처",
             "e1ee631696": "편집기",
             "5a9df5566f": "메뉴 열기",
@@ -7348,12 +7665,15 @@
             "8e593f04fc": "고정된 탭을 닫기 전에 확인 대화상자를 표시합니다.",
             "defaultProjectRuntime": "기본 프로젝트 런타임",
             "defaultProjectRuntimeDescription": "로컬 Windows 프로젝트가 상속할 런타임을 선택합니다.",
+            "d2d2d929c0": "Rich Markdown Spellcheck",
+            "4497e2e2bb": "Show browser spelling underlines and suggestions while editing rich Markdown.",
             "e61157e926": "편집기 자동 줄 바꿈",
             "005be5c699": "가로 스크롤 대신 파일 편집기에서 긴 줄을 자동으로 줄 바꿈합니다."
           }
         },
         "git": {
           "search": {
+            "61eab13403": "orca",
             "1b93c1143c": "속성",
             "8461c908ae": "공동 집필",
             "61f9f5d1fc": "공저자",
@@ -7369,6 +7689,7 @@
             "4808f065b3": "gitlab",
             "2b4a72885d": "사용 가능한 경우 현재 GitLab CLI REST 속도 제한 헤더입니다.",
             "83ecb3f470": "GitLab API 예산",
+            "65b69d9f80": "graphql",
             "1139f61512": "현재 GitHub CLI REST, 검색 및 GraphQL 속도 제한.",
             "ff86e354c4": "GitHub API 예산",
             "035134fcd9": "작업 트리",
@@ -7381,8 +7702,11 @@
             "c41e345153": "메인 뒤에",
             "6ee3cfff02": "git diff",
             "564942ffc5": "origin/main",
+            "28192e3a63": "master",
+            "e3e9adde59": "main",
             "0e993bf00f": "워크스페이스를 만들면 Orca가 원격 기준 브랜치를 새로고침하고, main 또는 master처럼 일치하는 로컬 브랜치를 안전하게 fast-forward합니다. 이렇게 하면 git diff main...HEAD 같은 명령이 오래된 기록과 비교되지 않습니다. 해당 브랜치에 commits 되지 않은 변경 사항이나 로컬 전용 commits이 있으면 Orca가 업데이트를 건너뜁니다.",
             "f8bda25f29": "로컬 메인을 최신 상태로 유지",
+            "769ddd7f81": "custom",
             "1d2fae1fa2": "Git 사용자 이름",
             "f83c8937c4": "브랜치 이름 지정",
             "5ecd91c5ef": "작업 트리를 생성할 때 브랜치 이름에 접두사가 추가됩니다.",
@@ -7401,20 +7725,19 @@
             "currentBranch": "현재 브랜치",
             "upstream": "업스트림",
             "localChanges": "로컬 변경 사항",
+            "originMaster": "origin/master",
             "committedChanges": "커밋된 변경 사항",
             "defaultCompareBase": "기본 비교 기준",
             "defaultBranch": "기본 브랜치",
             "repositoryDefault": "저장소 기본값",
-            "branchUpstream": "브랜치 업스트림",
-            "28192e3a63": "master",
-            "65b69d9f80": "graphql",
-            "e3e9adde59": "main"
+            "branchUpstream": "브랜치 업스트림"
           }
         },
         "input": {
           "search": {
             "886597d6b3": "macOS",
             "26c83b06c5": "리눅스",
+            "71905435dd": "x11",
             "7059cfb00a": "클립보드",
             "c4440c3986": "붙여넣기",
             "5fb84ba77f": "가운데 마우스",
@@ -7479,6 +7802,8 @@
               "5936977fcd": "취소",
               "1666f8d562": "Atlassian API 토큰 만들기",
               "1ab7f551f3": "Atlassian API 토큰",
+              "09d310e42d": "you@example.com",
+              "27dae4ab60": "https://example.atlassian.net",
               "a28f417220": "Jira 연결",
               "9bb34706ca": "연결됨",
               "efaab83c5d": "사이트 추가",
@@ -7508,6 +7833,7 @@
               "ea3eac39bb": "Agent CLI 제어",
               "8ef0f08d36": "런타임",
               "27397fe8e9": "Xcode 명령줄 도구",
+              "7650063d17": "simctl",
               "3211e7acf9": "xcrun",
               "42bfab45d8": "가용성",
               "ea1f51b980": "Xcode, simctl, serve-sim 및 에뮬레이터 장치가 준비되었는지 확인하세요.",
@@ -7521,6 +7847,7 @@
               "b8ddd13195": "agent 에뮬레이터",
               "1ad6fb6230": "기본 장치",
               "ac0a985873": "에뮬레이터 스킬",
+              "9353854ff3": "orca emulator",
               "d4b7833894": "orca cli",
               "84e5706975": "serve-sim",
               "7c5a8a2bee": "Xcode",
@@ -7557,6 +7884,7 @@
               "d0c89bc4a9": "오버레이",
               "87711f4b8f": "VPN",
               "16bff559a0": "tailnet",
+              "c690e3ee38": "tailscale",
               "a023683767": "인터페이스",
               "7b37c2e557": "네트워크",
               "3190ef67a4": "모바일 페어링에 사용할 네트워크 주소를 선택하세요.",
@@ -7570,9 +7898,9 @@
               "2128a21096": "스캔",
               "e518cbd61c": "페어링",
               "4a0c826f3d": "코드",
+              "3c1807a81a": "qr",
               "7fb728fb2b": "QR 코드를 스캔하여 모바일 장치를 페어링하세요.",
-              "d49925710a": "모바일 페어링",
-              "c690e3ee38": "tailscale"
+              "d49925710a": "모바일 페어링"
             }
           },
           "settings": {
@@ -7580,17 +7908,18 @@
               "b730ff7049": "실험적인",
               "8d4ba0ef09": "베타",
               "6bfa001752": "APK",
+              "a7eececc1d": "android",
               "7e801801ac": "원격",
               "0b7e585cb9": "스캔",
               "59b1d75fd1": "코드",
+              "87816d1c59": "qr",
               "cf2c93b479": "페어링",
               "f4ed142753": "핸드폰",
               "f213400800": "모바일",
               "671eb4173c": "휴대폰에서 terminals과 agents를 제어하세요.",
               "ffd52a96e4": "모바일",
               "1de96ec8a6": "Orca Mobile 버튼 표시",
-              "682293cadf": "왼쪽 사이드바 상단에 Orca Mobile 버튼을 표시합니다.",
-              "a7eececc1d": "android"
+              "682293cadf": "왼쪽 사이드바 상단에 Orca Mobile 버튼을 표시합니다."
             }
           }
         },
@@ -7607,8 +7936,12 @@
             "aace1a62c6": "알림 볼륨",
             "ef86a782cc": "봉 소리",
             "3014ad1b8f": "딩",
+            "079c29aeb5": "flac",
+            "722face52f": "aac",
+            "6ecb8418cb": "m4a",
             "d16ae23645": "ogg",
             "57e34a31cd": "wav",
+            "5362074f19": "mp3",
             "6e08f78315": "오디오",
             "c718793e95": "Orca가 데스크톱 알림을 위해 재생하는 내장, 시스템 또는 로컬 오디오 파일을 선택합니다.",
             "ea8cb8d9ce": "알림음",
@@ -7623,6 +7956,7 @@
             "d3f1c48677": "백그라운드 terminal이 벨 문자를 내보낼 때 이를 알립니다.",
             "a5edee1d99": "Terminal 벨",
             "193e1f107c": "작업",
+            "dd9d3e5f0f": "idle",
             "5f7472d3fb": "완료",
             "7fa07e9600": "agent",
             "10d83ef8dc": "코딩 agent가 작업 중에서 유휴 상태로 전환되면 알립니다.",
@@ -7639,6 +7973,8 @@
             "f5d39af41e": "하위 agents",
             "c766a01978": "핸드오프",
             "08c65b12a2": "예시",
+            "f278fd04db": "codex",
+            "32c5098e7b": "claude",
             "21c28ccdf7": "코디네이터",
             "741dfc03fa": "워커",
             "ca54c69806": "DAG",
@@ -7660,6 +7996,9 @@
             "d8191ae5ca": "환경 변수",
             "94e04427f6": "환경",
             "664f1a8984": "지속적인 통합",
+            "5854a5c752": "ci",
+            "69637f4dc4": "orca_telemetry_disabled",
+            "058550f6bc": "do_not_track",
             "83a6cd79b3": "추적하지 마세요",
             "f7a2d9f137": "텔레메트리 전송을 비활성화하는 환경 변수입니다.",
             "e058a3c98d": "텔레메트리 환경 변수",
@@ -7685,9 +8024,13 @@
         "quick": {
           "commands": {
             "search": {
+              "3c316e6ef8": "yarn",
+              "b86c727100": "npm",
+              "b949a7c0a0": "pnpm",
               "0b78c4a165": "실행",
               "2d8aff42be": "실행",
               "1c5bdcd0f2": "repos",
+              "89d2a9ad9f": "repo",
               "f58b92a48f": "프로젝트",
               "8bf43c2dad": "글로벌",
               "a26ecdb77b": "스니펫",
@@ -7697,13 +8040,14 @@
               "fecb031823": "명령",
               "236d4cfac8": "빠른",
               "d691c4e8d8": "전역적으로 또는 특정 프로젝트로 범위가 지정된 모든 terminal에서 실행할 수 있는 저장된 terminal 명령입니다.",
-              "4c8945952b": "빠른 명령어",
-              "3c316e6ef8": "yarn"
+              "4c8945952b": "빠른 명령어"
             }
           }
         },
         "repository": {
           "search": {
+            "bc7e504b8e": ".orca/issue-command",
+            "603c68b68c": "orca.yaml",
             "9dc60d7f6d": "GitHub",
             "ec70364df2": "작업 흐름",
             "66b584bd6c": "이슈 명령",
@@ -7725,6 +8069,7 @@
             "19f58d6d89": "고급의",
             "d141897c90": "명령 소스 및 orca.yaml 세부정보",
             "cc11699c3d": "고급",
+            "bf460fded8": "yaml",
             "9cad92fe77": "orca.yaml 후크",
             "6b80f7d3c8": "로컬 설정 스크립트",
             "a1a4c51d58": "아카이브 명령",
@@ -7738,9 +8083,15 @@
             "5590388dfa": "설정",
             "baaf70bb37": "새 작업 트리가 생성된 후 실행되는 로컬 및 공유 스크립트입니다.",
             "b79df26937": "설정 스크립트",
+            "d73fb47b45": ".claude/mcp.json",
+            "db11b337c4": ".claude.json",
+            "26f42fe773": ".cursor/mcp.json",
+            "e760e3fae7": ".mcp.json",
             "16dc7a4637": "모델 컨텍스트 프로토콜",
+            "343f0a508c": "mcp",
             "3c31801626": "프로젝트 수준 MCP 서버 구성 파일을 검사합니다.",
             "31bd0a2420": "MCP 구성",
+            "84da7fa2d7": "node_modules",
             "0a3a582794": "환경",
             "3c180a251c": "링크",
             "f1c53f2820": "작업 트리",
@@ -7755,6 +8106,7 @@
             "8068d8d0f1": "PR",
             "5ff7fe1ade": "PR",
             "eec39b3de6": "commit 메시지",
+            "cfad7ce5f3": "ai",
             "a47f51127e": "소스 제어",
             "6cc5c65e64": "프로젝트별 Git 생성이 재정의됩니다.",
             "eec3995dc6": "Git AI Author",
@@ -7798,12 +8150,17 @@
             "7e1e456a95": "표시 이름",
             "availableHosts": "사용 가능한 호스트",
             "availableHostsDescription": "이 프로젝트가 설정된 호스트입니다.",
+            "host": "host",
+            "ssh": "ssh",
+            "remote": "remote",
+            "vm": "vm",
             "keepForkUpToDate": "포크를 최신 상태로 유지",
             "keepForkUpToDateDescription": "이 포크를 upstream에서 안전하게 fast-forward합니다.",
             "projectRuntime": "프로젝트 런타임",
             "projectRuntimeDescription": "이 프로젝트를 Windows에서 실행할지 WSL에서 실행할지 선택합니다.",
-            "bf460fded8": "yaml",
-            "cfad7ce5f3": "ai"
+            "copy": "copy",
+            "clone": "clone",
+            "apfs": "apfs"
           }
         },
         "runtime": {
@@ -7890,20 +8247,24 @@
               "a38508c419": "복사",
               "d106f44fb4": "원격",
               "043b32faa1": "SSH",
+              "9fda309db9": "fzf",
+              "64533e30cc": "nvim",
               "2061d8db1a": "neovim",
               "5ffcd13c90": "tmux",
               "10d73e22d3": "클립보드",
+              "9dfc125cd3": "osc52",
               "62d1208b90": "OSC 52",
               "459fea094a": "SSH를 포함하여 OSC 52를 통해 terminal의 프로그램이 시스템 클립보드에 복사할 수 있도록 허용합니다.",
               "74db8721e4": "TUI 클립보드 쓰기 허용(OSC 52)",
+              "4043e294d2": "gnome",
               "cf83ac3dbd": "리눅스",
+              "737cef6de1": "x11",
               "e87c6d776d": "자동",
               "664789b73a": "자동",
               "c38c18be15": "선택",
               "797fdfe4ca": "선택",
               "603818e8d8": "terminal 선택 영역이 만들어지는 즉시 자동으로 클립보드에 복사합니다.",
-              "3bdc84f059": "선택 시 복사",
-              "4043e294d2": "gnome"
+              "3bdc84f059": "선택 시 복사"
             }
           },
           "search": {
@@ -7969,6 +8330,7 @@
             "10f9fb6fea": "설정",
             "2ade3ea490": "구성",
             "fd752b3cac": "가져오기",
+            "82b63d07fe": "ghostty",
             "73e9422f19": "지원되는 Ghostty terminal 설정을 한 번만 가져옵니다.",
             "a979df0083": "Ghostty에서 가져오기",
             "4cec42dbf7": "국제",
@@ -8051,6 +8413,7 @@
             "8f9f953de7": "terminal이 xterm.js WebGL 렌더링을 사용하는지 여부를 제어합니다. 렌더러가 지원되면 자동으로 WebGL을 시도하며, 소프트웨어나 알 수 없는 GPU 렌더러에 대한 보수적인 폴백을 사용합니다.",
             "13a2502dfc": "GPU 가속",
             "d5e6c7fab1": "글꼴 기능",
+            "a16224d16a": "calt",
             "6ded6297fe": "Iosevka",
             "e3aeea308e": "Cascadia Code",
             "35c2311a33": "JetBrains Mono",
@@ -8074,11 +8437,17 @@
             "5930244899": "글꼴 크기",
             "warp_import": {
               "title": "Warp에서 가져오기",
-              "description": "Warp 테마를 Orca terminal 테마로 가져옵니다."
+              "description": "Warp 테마를 Orca terminal 테마로 가져옵니다.",
+              "keyword_warp": "warp",
+              "keyword_themes": "themes",
+              "keyword_yaml": "yaml",
+              "keyword_legacy_title": "Import themes from Warp"
             },
             "yaml_import": {
               "title": "YAML에서 가져오기",
-              "description": "테마 YAML 파일을 Orca terminal 테마로 가져옵니다."
+              "description": "테마 YAML 파일을 Orca terminal 테마로 가져옵니다.",
+              "keyword_yaml": "yaml",
+              "keyword_custom": "custom"
             },
             "ask_before_closing_running_terminals_title": "실행 중인 Terminals을 닫기 전에 확인",
             "ask_before_closing_running_terminals_description": "실행 중인 명령이나 agent가 있는 terminal을 닫기 전에 확인을 표시합니다.",
@@ -8090,9 +8459,7 @@
               "title": "테마 모드",
               "keyword_target": "대상",
               "keyword_editing": "편집"
-            },
-            "82b63d07fe": "ghostty",
-            "a16224d16a": "calt"
+            }
           },
           "windows": {
             "search": {
@@ -8109,22 +8476,25 @@
               "5074ad8b5f": "배포판",
               "2b4a340ce0": "배포판",
               "02c772582a": "리눅스",
+              "6e3adf4cba": "wsl",
               "978457945b": "새 WSL terminals 및 로컬 agent 검색에서 사용할 WSL 배포를 선택합니다.",
               "1f402b3651": "WSL 배포",
               "d57f870938": "고급",
               "4af2f7526e": "버전",
+              "d414022016": "pwsh",
               "768613e483": "파워셸 7",
               "f9162f0b8e": "윈도우 파워셸",
+              "2d99cd91be": "powershell",
               "41a69bc24d": "PowerShell 셸 옵션이 새 terminal 패널에 대해 Windows PowerShell을 시작할지 아니면 PowerShell 7+를 시작할지 선택합니다.",
               "860e0e6402": "파워셸 버전",
+              "07ec155fb6": "bash.exe",
+              "5a2db98d23": "bash",
               "591912177b": "Git Bash",
               "12519edb5d": "명령 프롬프트",
+              "6cd20b9e64": "cmd",
               "7c7056940a": "셸",
               "713c4a2f92": "Windows의 새 terminal 패널에 대한 기본 셸을 선택합니다.",
-              "13715f9d23": "기본 쉘",
-              "2d99cd91be": "powershell",
-              "5a2db98d23": "bash",
-              "d414022016": "pwsh"
+              "13715f9d23": "기본 쉘"
             }
           }
         },
@@ -8135,6 +8505,7 @@
               "2d206de105": "API 키",
               "04c25a6fb0": "openai",
               "b9dee49cd7": "다운로드",
+              "10d45a9fce": "stt",
               "3d8b853963": "음성",
               "080202facb": "모델",
               "7640ed9848": "음성",
@@ -8247,13 +8618,17 @@
             "control": {
               "integration": {
                 "cards": {
+                  "d5b3be8ecd": "Re-check",
                   "8cbc39f862": "자세히 알아보기",
+                  "707180d09c": "glab auth login",
                   "4be0616873": "GitLab CLI가 설치되어 있지만 인증되지 않았습니다. terminal에서 다음 명령을 실행하세요.",
                   "54a640af7a": "GitLab CLI 설치",
                   "b56fd5676a": "MR, 이슈 및 파이프라인을 활성화하려면 GitLab CLI를 설치하세요.",
                   "faddeb763d": "이 런타임에서는 아직 GitLab CLI 상태를 사용할 수 없습니다.",
+                  "a47f71e357": "CLI.",
                   "2a6b359e75": "glab",
                   "1f2b347bd3": "다음을 통해 MR, 이슈, 할 일, 파이프라인을 병합합니다.",
+                  "8d90249d22": "gh auth login",
                   "2e44dda68a": "GitHub CLI가 설치되어 있지만 인증되지 않았습니다. terminal에서 다음 명령을 실행하세요.",
                   "7755c28af5": "GitHub CLI 설치",
                   "23cb5a0dee": "PR, 이슈 및 검사를 활성화하려면 GitHub CLI를 설치하세요.",
@@ -8304,7 +8679,9 @@
                   "1a9475dace": "자세히 알아보기",
                   "19fb419c12": "Gitea 자격 증명이 구성되어 있지만 인증할 수 없습니다. 토큰, API 기본 URL, repos 권한을 확인하고, 환경 변수가 변경되었다면 Orca를 다시 시작하세요.",
                   "60708f23da": "Orca가 원격에서 API URL을 추론할 수 없는 경우에만 사용하세요.",
+                  "709057ad91": "ORCA_GITEA_API_BASE_URL",
                   "6da9dfa5de": "비공개 repos의 경우, 그리고",
+                  "6d5c2a3005": "ORCA_GITEA_TOKEN",
                   "fcbe0469fd": "공개 repos는 Git 원격에서 감지됩니다. 설정하세요",
                   "0613928cb3": "이 런타임에서는 아직 Gitea 상태를 사용할 수 없습니다.",
                   "05863d2599": "Gitea REST API를 통한 PR 및 commit 상태입니다.",
@@ -8312,15 +8689,21 @@
                   "0b5242f8a2": "{{value0}} · PR 및 commit 상태",
                   "40f678df73": "Azure DevOps 자격 증명이 구성되어 있지만 인증할 수 없습니다. 토큰, API 기본 URL, repos 권한을 확인하고, 환경 변수가 변경되었다면 Orca를 다시 시작하세요.",
                   "7bd345e3f6": "Orca가 Git 원격에서 API 기본 URL을 추론할 수 없는 경우에만 사용하세요.",
+                  "186a6689df": "ORCA_AZURE_DEVOPS_API_BASE_URL",
                   "b8a10b07c1": ". 설정하세요",
+                  "fbfd237f5e": "ORCA_AZURE_DEVOPS_ACCESS_TOKEN",
                   "087feb92f1": ", 또는 설정",
+                  "48842720d2": "ORCA_AZURE_DEVOPS_TOKEN",
                   "7bbc9c64f0": "설정",
                   "f3f47dc7de": "이 런타임에서는 아직 Azure DevOps 상태를 사용할 수 없습니다.",
                   "0eb50d5593": "Azure DevOps REST API 토큰을 통한 PR 및 빌드 상태입니다.",
                   "54636c65d4": "감지된 Azure Repos의 PR 및 빌드 상태",
                   "ea204f5e03": "{{value0}} · PR 및 빌드 상태",
                   "6154b02093": "Bitbucket 자격 증명이 구성되어 있지만 인증할 수 없습니다. 토큰과 repos 권한을 확인하고, 환경 변수가 변경되었다면 Orca를 다시 시작하세요.",
+                  "e63fe8f627": "ORCA_BITBUCKET_ACCESS_TOKEN",
+                  "19416c874c": "ORCA_BITBUCKET_API_TOKEN",
                   "fc71a0e7aa": "및",
+                  "63a7f47392": "ORCA_BITBUCKET_EMAIL",
                   "24ac1c69dc": "이 런타임에서는 아직 Bitbucket 상태를 사용할 수 없습니다.",
                   "a924e8dcd1": "Bitbucket Cloud API 토큰을 통한 PR 및 빌드 상태입니다.",
                   "0fa5629dad": "PR 및 빌드 상태"
@@ -8351,6 +8734,7 @@
           "6f7a8b9cad": "상대 경로(예: .orca/worktrees)를 사용하면 프로젝트별 위치가 되고, 절대 경로를 사용하면 모든 프로젝트가 하나의 폴더를 공유합니다."
         },
         "ProviderHostScopeControl": {
+          "scope_label": "{{value0}}: {{value1}}",
           "change_host": "원격 서버 열기"
         },
         "providerAccountScope": {
@@ -8378,7 +8762,7 @@
           "defaultBranch": "기본 브랜치",
           "synced": "포크가 업데이트됨",
           "syncedDescriptionSingular": "{{branch}} 브랜치를 1개 commit 만큼 fast-forward했습니다.",
-          "syncedDescriptionPlural": "{{branch}} 브랜치를 {{value0}}개 commits 만큼 fast-forward했습니다.",
+          "syncedDescriptionPlural": "{{branch}} 브랜치를 {{count}}개 commits 만큼 fast-forward했습니다.",
           "upToDate": "포크가 이미 최신 상태입니다",
           "upToDateDescription": "{{branch}} 브랜치가 이미 upstream과 일치합니다.",
           "missingOrigin": "origin 원격이 없습니다.",
@@ -8403,6 +8787,8 @@
         },
         "DefaultWindowsProjectRuntimeSetting": {
           "defaultRuntime": "기본 프로젝트 런타임",
+          "windows": "Windows",
+          "wsl": "WSL",
           "selectDistro": "배포판 선택",
           "windowsDescription": "프로젝트에서 재정의하지 않는 한 Windows를 상속합니다.",
           "wslUnavailable": "WSL을 사용할 수 없습니다. WSL을 상속하는 프로젝트는 복구가 필요합니다.",
@@ -8412,6 +8798,8 @@
         "ProjectWindowsRuntimeSetting": {
           "projectRuntime": "프로젝트 런타임",
           "defaultRuntime": "기본값({{value0}})",
+          "windows": "Windows",
+          "wsl": "WSL",
           "selectDistro": "배포판 선택",
           "runtimeChangeHelp": "런타임 변경은 이 프로젝트의 새 terminals, agent 확인, 스킬 검색에 적용됩니다. 기존 terminals은 현재 런타임을 유지합니다.",
           "wslUnavailable": "WSL을 사용할 수 없습니다. 이 프로젝트를 Windows로 전환하거나 WSL을 복구하세요.",
@@ -8421,10 +8809,10 @@
           "projectWsl": "이 프로젝트는 WSL을 통해 {{value0}}에서 실행됩니다.",
           "inheritedWindows": "프로젝트 재정의가 없습니다. 일반 설정에서 Windows를 선택합니다.",
           "projectWindows": "이 프로젝트는 Windows에서 실행됩니다.",
-          "liveTerminalSingular": "{{value0}}개의 실행 중인 terminal",
-          "liveTerminalPlural": "{{value0}}개의 실행 중인 terminals",
-          "activeTaskSingular": "{{value0}}개의 활성 작업",
-          "activeTaskPlural": "{{value0}}개의 활성 작업",
+          "liveTerminalSingular": "{{count}}개의 실행 중인 terminal",
+          "liveTerminalPlural": "{{count}}개의 실행 중인 terminals",
+          "activeTaskSingular": "{{count}}개의 활성 작업",
+          "activeTaskPlural": "{{count}}개의 활성 작업",
           "runtimeSessionJoin": "{{value0}} 및 {{value1}}",
           "runtimeSessionWarning": "{{value0}}은 현재 런타임에서 계속 실행됩니다. 계속하기 전에 작업이 끝나게 하거나 terminals을 다시 시작하세요.",
           "pendingRuntimeChange": "런타임 변경이 대기 중입니다. 적용한 뒤 새 프로젝트 작업은 선택한 런타임을 사용합니다.",
@@ -8439,20 +8827,34 @@
           "e27c8d45bf": "환경 변수로 인해 진단이 비활성화되었습니다."
         },
         "ShortcutCommandBlock": {
+          "eb72c52c28": "Press a shortcut, or double-tap a modifier (e.g. {{value0}}). Esc cancels.",
+          "70b5d25583": "{{value0}} shortcut",
+          "287e07ddde": "Modified",
           "3c83cd7d1c": "Disabled",
+          "07939d084e": "Reset {{value0}} to default",
+          "9b02917027": "Reset to default",
+          "a799f90f82": "Disable {{value0}}",
           "25e6e76618": "단축키 비활성화",
           "035a822ef0": "단축키 추가",
+          "a0e2ef0e61": "Add another shortcut for {{value0}}",
           "245c83af24": "다른 단축키 추가",
-          "6287677c37": "활성화"
+          "482a60225d": "Enable {{value0}}",
+          "6287677c37": "활성화",
+          "01481b964c": "Add shortcut for {{value0}}"
         },
         "ShortcutRecorderButton": {
+          "1a13bb054d": "Press shortcut keys for {{value0}}. Escape cancels.",
+          "3732775d74": "Add shortcut for {{value0}}",
+          "88764af2c1": "Change shortcut for {{value0}}",
+          "30feb099d6": "Change shortcut {{value0}} of {{value1}} for {{value2}}",
           "5d982a2a1f": "단축키 대기 중",
           "152e0bcd64": "단축키 추가",
           "5bd56445da": "단축키 변경",
           "f5ed5dcbf6": "키를 누르세요…"
         },
         "ShortcutRemoveButton": {
-          "9e29aff18b": "{{value0}} 바로가기 {{value1}} 제거"
+          "9e29aff18b": "{{value0}} 바로가기 {{value1}} 제거",
+          "2a9588b1c2": "Remove this binding"
         },
         "BrowserLocalhostWorktreeLabelsSetting": {
           "8ac8c3ad19": "로컬호스트 작업 트리 레이블",
@@ -8460,6 +8862,7 @@
         },
         "AgentRuntimeSetting": {
           "label": "Agent 런타임",
+          "wsl": "WSL",
           "loadingWsl": "WSL 로드 중",
           "selectDistro": "배포판 선택",
           "windowsDescription": "런타임을 재정의하지 않는 프로젝트에 대해 Windows에서 agents를 감지하고 시작합니다.",
@@ -8470,12 +8873,14 @@
         "MobileEmulatorSdkStatus": {
           "536026130e": "에뮬레이터 SDK",
           "dde0ec1cd8": "Orca가 에뮬레이터를 실행하는 데 사용하는 도구 체인입니다. Android는 Android SDK를 통해 모든 OS에서 작동합니다. iOS 시뮬레이터에는 macOS에서 Xcode가 필요합니다.",
+          "027cbf668a": "Android SDK",
           "f6d080d128": "구성된 경로 사용",
           "7fe4bd5907": "다음에서 감지됨",
           "2784f0b22d": "찾을 수 없습니다. Android Studio를 설치한 다음 가상 장치를 만듭니다.",
           "b94ff260e6": "안드로이드 스튜디오 다운로드",
           "18925b082d": "SDK 폴더 찾기",
           "8c52684db8": "지우기",
+          "76eb88b88e": "iOS Simulator (Xcode)",
           "c6f3ea4f12": "준비됨",
           "e4f14b50d7": "Xcode를 설치하고 iOS 시뮬레이터 런타임을 추가하세요.",
           "63fe73a1ea": "Android SDK 폴더를 업데이트할 수 없습니다."
@@ -8484,13 +8889,35 @@
           "advanced": "고급"
         },
         "DevToolsPane": {
+          "nativeActionLayoutCheck": "Native action layout check",
+          "secondary": "Secondary",
+          "secondaryActionClicked": "Secondary action clicked",
+          "primaryAction": "Primary action",
+          "primaryActionClicked": "Primary action clicked",
+          "branchHasChanges": "branch has changes",
+          "viewChangesClicked": "View Changes clicked",
+          "forceDeleteClicked": "Force Delete clicked",
+          "devOnlyCallback": "Dev-only callback.",
+          "infoToast": "Info toast",
           "infoToastDescription": "명시적 작업이 없는 긴 정보 메시지입니다.",
+          "localCanaryBehind": "Local canary is behind origin/canary",
+          "successToast": "Success toast",
           "successToastDescription": "짧은 확인 상태입니다.",
+          "settingsSaved": "Settings saved",
           "shortSuccessCopy": "짧은 성공 메시지입니다.",
+          "errorToast": "Error toast",
           "errorToastDescription": "복구 작업이 없는 긴 오류 메시지입니다.",
+          "failedToSyncWorkspaceMetadata": "Failed to sync workspace metadata",
+          "nativeActionToast": "Native action toast",
           "nativeActionToastDescription": "Sonner 작업 및 취소 슬롯을 사용합니다.",
+          "deleteFailureToast": "Delete failure toast",
           "deleteFailureToastDescription": "보기 및 강제 삭제가 포함된 사용자 정의 바닥글입니다.",
+          "behindBaseRefToast": "Behind base ref toast",
           "behindBaseRefToastDescription": "인라인 설정 링크와 바닥글 작업이 있는 영구 프롬프트입니다.",
+          "notificationPlayground": "Notification playground",
+          "notificationPlaygroundDescription": "Dev-only triggers for checking toast layout, recovery actions, and long-copy wrapping.",
+          "devOnly": "Dev only",
+          "orcaCloud": "Orca Cloud",
           "orcaCloudDescription": "1方클라우드 로그인의 개발자 전용 미리보기. 프로덕션에서는 숨겨집니다. 개발 환경에서는 ORCA_CLOUD_API_URL과 ORCA_CLOUD_CLIENT_ID가 설정되면 사이드바 계정 전환기에도 표시됩니다.",
           "orcaCloudStatus": "상태",
           "orcaCloudSignOut": "로그아웃",
@@ -8555,8 +8982,8 @@
           "agent": "에이전트",
           "agentArgs": "CLI 인수",
           "commandTemplate": "명령 템플릿",
-          "more": "+{{value0}}개",
-          "plural": "전역 저장이 자체 레시피를 가진 {{value0}}개의 저장소를 변경하지 않습니다.",
+          "more": "+{{count}}개",
+          "plural": "전역 저장이 자체 레시피를 가진 {{count}}개의 저장소를 변경하지 않습니다.",
           "recipe": "레시피",
           "review": "검토",
           "reviewFirst": "먼저 검토",
@@ -8584,6 +9011,7 @@
           }
         },
         "GrokAccountsSection": {
+          "a1b2c3d4e5": "Grok (xAI)",
           "f6e5d4c3b2": "Grok CLI 로그인에서 주간 크레딧 사용량을 표시합니다(세션 파일 ~/.grok/auth.json).",
           "0d8e77bc40": "Grok CLI 문서",
           "ad47a33f72": "로드 중…",
@@ -8600,6 +9028,10 @@
         "AppearanceWindowSidebarSection": {
           "usagePercentageDisplayUsed": "사용",
           "usagePercentageDisplayRemaining": "남음"
+        },
+        "TerminalInteractionSection": {
+          "567633ff50": "Right-click pastes the clipboard into the terminal. Control-click to open the context menu.",
+          "c64497148a": "Right-click pastes the clipboard. Control-click opens the context menu."
         }
       },
       "right": {
@@ -8657,6 +9089,7 @@
             "02b2ce911f": "설명(선택사항)",
             "1cd53359db": "설명",
             "68314b4369": "제목",
+            "694550a610": "main",
             "0fad57a14c": "원격 브랜치를 검색하거나 브랜치 이름을 입력하세요.",
             "8584ccb43c": "기본 브랜치",
             "6f5f1962b6": "헤드 브랜치",
@@ -8667,8 +9100,7 @@
             "edc35a7027": "{{value0}} #{{value1}}은(는) 이미 열려 있습니다.",
             "a154fe55e6": "푸시 및 생성 {{value0}}",
             "21c7a1daa0": "{{value0}}이(가) 이미 열려 있습니다",
-            "db9cee18f7": "{{value0}} 만들기",
-            "694550a610": "main"
+            "db9cee18f7": "{{value0}} 만들기"
           },
           "CreateHostedReviewComposer": {
             "741ff8a0d2": "푸시 및 생성 {{value0}}"
@@ -8711,6 +9143,7 @@
             "e26010014a": ".gitignore에 의해 무시됨",
             "a06551beee": "입력",
             "128a99ed5e": "할당되지 않음",
+            "2de3b21934": "markdown",
             "66a29dde82": "상대 경로 복사",
             "42e10cbf57": "상대 경로 복사",
             "b5d436aa30": "경로 복사",
@@ -8740,8 +9173,10 @@
             "d0fb0f4bf2": "commits 새로 고침",
             "9f7535d22b": "Refs는 정확한 commit을 가리키는 브랜치 또는 태그 이름입니다. Git에 commit에 대한 명명된 참조가 있는 경우에만 나타납니다.",
             "9289ba0cb9": "refs란 무엇인가요?",
+            "d836037d02": "Commits",
             "8232c8b2f2": "{{value0}} commit 열기: {{value1}}",
             "9a8b85882d": "로드 중",
+            "62e685d5ec": "idle",
             "111e1d0db4": "오류",
             "e5e81e59a6": "commits 크기 조정",
             "6d1e0a7c3b": "commit 파일을 로드하지 못했습니다"
@@ -8792,6 +9227,7 @@
             "409afcc145": "브라우저에 대해 선택된 워크스페이스가 없습니다.",
             "153145e675": "증거",
             "c7b4702b7b": "워크스페이스",
+            "57d930fa45": "PID",
             "5dd86dcf2f": "프로세스",
             "b1ff94fa27": "프로토콜",
             "729be0b4e5": "종류",
@@ -8910,6 +9346,7 @@
             "4f76c0a9de": "베이스 브랜치는 head 브랜치와 달라야 합니다.",
             "c5e4175139": "더 많은 {{value0}} 및 원격 작업",
             "78ddfd0bb4": "초안으로 만들기",
+            "e64a632456": "main",
             "6055949c50": "{{value0}} 기본 브랜치",
             "1f7119f604": "베이스",
             "9484270f45": "제목 및 설명 생성 중…",
@@ -8969,6 +9406,8 @@
             "c105a61960": "병합",
             "d7a5942e41": "{{value0}}: {{value1}} 해결되지 않음",
             "c56ba7fa06": "차이점",
+            "94c42b252e": "MD",
+            "e59bca888a": "markdown",
             "b6922abb13": "브랜치 비교를 로드할 수 없습니다.",
             "715d229c86": "브랜치 비교 불가",
             "97d8b03cdf": "브랜치 비교 실패",
@@ -8995,6 +9434,7 @@
             "ce41708855": "모두 폐기",
             "2f609a2e7c": "추적되지 않은 모든 항목 삭제",
             "9bb062a886": "commit 되지 않음",
+            "9febd8ab5f": "create_pr",
             "f62ce91ade": "origin",
             "3a231c845b": "알 수 없음",
             "3baf6c77b4": "모든 메모를 클립보드에 복사",
@@ -9054,6 +9494,7 @@
             "c8e4a1f902": "필터: {{value0}}",
             "b3c8f1a902": "파일 이름으로 필터링",
             "d4f8c2a901": "필터 지우고 닫기",
+            "e8a1c4b203": "vs",
             "f9b2441bb6": "{{value0}}보다 1 commit 앞서 있음",
             "b715ef615b": "{{value1}}보다 {{value0}} commits 앞서 있음",
             "c1a8f3e204": "{{value0}}보다 1 commit 뒤처짐",
@@ -9075,8 +9516,7 @@
               "a9bf7c171a": "푸시 실패",
               "834cb3f23d": "AI로 수정",
               "783a808870": "닫기"
-            },
-            "e64a632456": "main"
+            }
           },
           "SourceControlAgentActionDialog": {
             "8e856842d1": "선택한 agent를 시작할 수 없습니다.",
@@ -9092,7 +9532,9 @@
             "fe119187bb": "--model sonnet",
             "bc8dc39f4b": "CLI 인수",
             "b99c33cec5": "설정",
+            "15c5d85706": "에이전트",
             "3e8f21954f": "오류",
+            "74168d7ada": "idle",
             "1d47db9bf0": "활성화된 agents가 없습니다.",
             "c7ff8cef11": "agents 감지 중...",
             "013c9ac04a": "저장 대상",
@@ -9105,7 +9547,8 @@
             "ea4788705e": "취소",
             "b0da3a4d3e": "실행 레시피가 이미 저장되었습니다",
             "bff4795a6d": "저장된 레시피를 업데이트하려면 agent, 인수 또는 프롬프트 템플릿을 변경하세요.",
-            "5c75b24735": "Orca가 시작하기 전에 agent가 받을 내용을 사용자 지정합니다."
+            "5c75b24735": "Orca가 시작하기 전에 agent가 받을 내용을 사용자 지정합니다.",
+            "repoAgentOverrideNote": "This repository overrides your global default ({{global}}) and currently runs {{effective}}. Save to this repository to change what runs here."
           },
           "SourceControlTextGenerationDialog": {
             "c5b7fa7cb6": "전역 기본값으로 저장",
@@ -9120,7 +9563,8 @@
             "551ffd111b": "--model sonnet",
             "4eab815004": "CLI 인수",
             "914c8f6ac2": "사용자 정의 명령",
-            "cce2cbd01d": "agent 선택"
+            "cce2cbd01d": "agent 선택",
+            "9c14186dd2": "에이전트"
           },
           "activity": {
             "bar": {
@@ -9187,6 +9631,7 @@
                 "b652f38caf": "실패한 체크",
                 "87cd07c69a": "이 브랜치에는 해결해야 할 충돌이 있습니다.",
                 "0975eeaaef": "충돌하는 파일",
+                "6fa7f8723f": "commit",
                 "2b2be92919": "댓글 추가",
                 "7440d09d2c": "대화 시작",
                 "b37ebdc51c": "댓글을 달 수 없습니다.",
@@ -9199,7 +9644,11 @@
                 "066fedd446": "실패한 작업",
                 "ae8a04ef17": "충돌 파일 세부정보를 사용할 수 없습니다.",
                 "73d0675356": "충돌 세부정보 새로고침 중…",
+                "f5bc5c4cf1": "The hosting provider reports conflicts, but local Git did not reproduce them. Refresh the review or push the branch to recalculate mergeability.",
+                "5bc9bda2af": "Run from this worktree",
+                "e87fb3d929": "Copy mergeability refresh commands",
                 "1e53e45072": "복사됨",
+                "084c516efb": "Copy commands",
                 "5dc3af25c0": "댓글 선택",
                 "d7a2f9c401": "해결되지 않은 댓글 {{value0}}개 보내기",
                 "d91f2a6c39": "대기 중인 댓글 {{value0}}개를 AI로 보내기",
@@ -9207,15 +9656,23 @@
                 "49ea0937e4": "댓글을 해결 목록에 추가",
                 "9fecebb29d": "추가",
                 "b8c4e2a1f7": "전체 로그 보기",
+                "f8a2c91d04": "Queue for agent",
+                "b4e8a1c902": "Queued",
                 "7c1f0a2b11": "열기",
+                "e8b4c1a903": "Resolved · {{value0}}",
+                "c3a8e5d710": "Needs review · {{value0}}",
+                "a7f0c7e8d1": "Queue",
                 "8a621a2c4f": "그룹화",
                 "b13f85d75c": "타임라인",
+                "f5cf324efa": "Comment display options",
                 "5e6e5a13fa": "보기",
+                "actionRequiredHint": "This check needs a manual action on GitHub (for example, approving the workflow run) before merging is unblocked.",
                 "b3195cba33": "작성자의 봇 지정 해제",
                 "f588b46a6c": "작성자를 봇으로 지정"
               },
               "empty": {
                 "state": {
+                  "3322603418": "Pull request status unavailable",
                   "5b0cfae9a5": "체크와 리뷰를 시작하려면 {{value0}}을(를) 만드세요.",
                   "13e1c7d5ed": "{{value0}}을(를) 찾을 수 없습니다.",
                   "d372072df1": "현재 속도 제한 예산으로 인해 GitHub 새로 고침이 일시 중지되었습니다.",
@@ -9230,7 +9687,8 @@
                   "f8543140cc": "{{value0}}을 만들기 전에 이 브랜치를 게시하세요.",
                   "41252bc53f": "게시되지 않은 브랜치",
                   "05e4aec17b": "{{value0}} 검사는 작업이 완료된 후에 사용할 수 있습니다.",
-                  "d77c513c1e": "{{value0}} 진행 중"
+                  "d77c513c1e": "{{value0}} 진행 중",
+                  "b597440265": "Refresh GitHub status for this branch to load checks and review."
                 }
               }
             }
@@ -9368,11 +9826,14 @@
                   "7aad2c0240": "호스팅 리뷰 작업 진행 중…",
                   "9e779995dd": "{{value0}} 만들기",
                   "226b85a3a7": "가져오기",
-                  "323bb614aa": "Commit 및 동기화"
+                  "323bb614aa": "Commit 및 동기화",
+                  "2b8e6595fd": "Commit",
+                  "04d709801d": "Fetch from remote without merging"
                 }
               },
               "primary": {
                 "action": {
+                  "ed93b4f14f": "Commit",
                   "946a8a05ea": "이 브랜치에 대해 {{value0}}을 만듭니다.",
                   "e7ffa46946": "{{value0}} 만들기",
                   "95550cff15": "푸시",
@@ -9392,6 +9853,8 @@
                   "2d8f185fbc": "부분적으로 준비된 파일을 commit 하기 전에 모든 변경 사항을 준비합니다.",
                   "a6457b46a7": "commit 하기 전에 충돌을 해결하세요.",
                   "484f45c439": "{{value0}} 진행 중…",
+                  "6f7a8b9c0d": "Remote operation in progress…",
+                  "7f8a9b0c1d": "Remote operation in progress — try again once it finishes",
                   "74fc171e99": "강제 푸시 진행 중…",
                   "16aee3a5c1": "Commit 진행 중…",
                   "e61b0d7a3c": "commits을 게시하기 전에 브랜치를 체크아웃하세요.",
@@ -9439,8 +9902,10 @@
             "7fb9435c86": "원격 호스트의 디렉터리와 그 안의 내용을 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없습니다.",
             "23e98f192f": "원격 호스트의 파일을 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없습니다.",
             "8b8ee9d22f": "이 파일을 소유한 호스트를 확인할 수 없습니다. 워크스페이스 연결을 확인한 후 다시 시도하세요.",
-            "af1270b90d": "{{value0}}개 항목을 영구적으로 삭제하시겠습니까?",
-            "dd029aa5cd": "원격 호스트의 선택한 항목과 디렉터리 내용을 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없습니다."
+            "af1270b90d": "{{count}}개 항목을 영구적으로 삭제하시겠습니까?",
+            "dd029aa5cd": "원격 호스트의 선택한 항목과 디렉터리 내용을 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없습니다.",
+            "77fdc36183": "Delete {{count}} items?",
+            "fca915a67a": "Remote items are permanently deleted and cannot be undone. Local items move to the {{value0}}."
           },
           "useFileExplorerHandlers": {
             "32cd9fd991": "심볼릭 링크 대상을 열 수 없습니다"
@@ -9451,6 +9916,9 @@
           },
           "useFileExplorerKeys": {
             "8adb953095": "작업 실패"
+          },
+          "GitHistoryGraphSvg": {
+            "47eff48230": "HEAD"
           },
           "create": {
             "pull": {
@@ -9477,7 +9945,7 @@
             "searchSessions": "세션 검색",
             "clearSearch": "검색 지우기",
             "remoteBrowseLocalHistory": "원격 워크스페이스는 로컬 기록을 탐색할 수 있습니다. 재개 작업은 로컬 워크스페이스에서 실행됩니다.",
-            "transcriptsSkipped": "대화 기록 {{value0}}개 건너뜀",
+            "transcriptsSkipped": "대화 기록 {{count}}개 건너뜀",
             "noAgentSessionsFound": "agent 세션을 찾을 수 없습니다",
             "noSessionsMatchFilters": "현재 필터와 일치하는 세션이 없습니다",
             "sessionId": "세션 ID",
@@ -9486,6 +9954,7 @@
             "sessionsShownCompact": "{{value0}} 표시됨",
             "originalPaneUnavailable": "원래 창은 더 이상 사용할 수 없습니다.",
             "worktreeUnavailable": "워크트리는 더 이상 사용할 수 없습니다.",
+            "openSupportedWorkspace": "Open a workspace before resuming a session.",
             "localSessionSshWorkspaceUnsupported": "이 세션의 기록은 이 컴퓨터에 저장되어 있어 SSH 워크스페이스에서는 재개할 수 없습니다. 대신 로컬 워크스페이스를 여세요.",
             "sessionHostMismatchUnsupported": "이 세션은 다른 호스트에 속합니다. 재개하려면 같은 호스트의 워크스페이스를 여세요."
           },
@@ -9508,6 +9977,7 @@
             "created": "생성됨",
             "group": "그룹",
             "folder": "폴더",
+            "agent": "에이전트",
             "resetView": "보기 재설정",
             "hideEmptySessions": "빈 세션 숨기기",
             "workspaceScope": "워크스페이스",
@@ -9516,6 +9986,7 @@
             "projectScope": "프로젝트",
             "currentProjectLower": "현재 프로젝트",
             "project": "프로젝트",
+            "hostScopeAriaLabel": "Session History host: {{value0}}",
             "host": "호스트"
           },
           "AiVaultSessionDetails": {
@@ -9562,6 +10033,7 @@
             "noPreviewAvailable": "대화 미리보기를 사용할 수 없습니다",
             "messageCount": "메시지 {{value0}}개",
             "userRole": "나",
+            "agentRole": "에이전트",
             "toolRole": "도구",
             "systemRole": "시스템",
             "sessionRole": "세션",
@@ -9594,6 +10066,7 @@
             "noPreviewAvailable": "대화 미리보기를 사용할 수 없습니다",
             "dragToResume": "새 탭에서 재개하려면 드래그",
             "userRole": "나",
+            "agentRole": "에이전트",
             "toolRole": "도구",
             "systemRole": "시스템",
             "sessionRole": "세션",
@@ -9631,11 +10104,14 @@
           "pull": {
             "policy": {
               "notice": {
+                "merge": "Merge",
                 "mergeDescription": "로컬과 원격이 모두 변경된 경우 병합 commit을 만듭니다.",
+                "rebase": "Rebase",
                 "rebaseDescription": "로컬 commits을 원격 브랜치 위에 다시 적용합니다.",
                 "fastForwardOnly": "fast-forward만 허용",
                 "fastForwardOnlyDescription": "병합이나 리베이스가 필요 없을 때만 pull합니다.",
                 "title": "Pull 정책 필요",
+                "diverged": "Diverged",
                 "body": "이 브랜치에는 로컬 commits과 원격 commits이 모두 있습니다. 이 워크트리 또는 SSH 호스트에서 명령 하나를 실행한 다음 풀 또는 동기화를 다시 시도하세요.",
                 "copyAria": "{{value0}} pull 정책 명령 복사",
                 "copied": "복사됨",
@@ -9659,8 +10135,10 @@
             "messageCount": "{{value0}}개 메시지",
             "viewLog": "로그 보기"
           },
-          "GitHistoryGraphSvg": {
-            "47eff48230": "HEAD"
+          "aiVaultSessionLogOpen": {
+            "workspaceGone": "Couldn't open log — workspace is no longer available.",
+            "notAuthorized": "Couldn't open log — path not authorized.",
+            "alreadyEditable": "Log is already open for editing."
           }
         }
       },
@@ -9679,6 +10157,7 @@
         "RepoCombobox": {
           "b3e15f4525": "프로젝트 추가",
           "b4a235e886": "프로젝트 추가 중",
+          "3639fd9da2": "SSH",
           "e7ed739236": "검색과 일치하는 프로젝트/폴더가 없습니다.",
           "a0c48f5f29": "프로젝트/폴더 검색...",
           "116812151a": "프로젝트 추가 중…"
@@ -9694,12 +10173,15 @@
             "4ab9433660": "작업",
             "febfbe0cd5": "도구",
             "ecf63ec3ef": "실행",
+            "31826b712e": "API",
             "70bef15d40": "레이어",
             "b5fac337aa": "컴퓨팅",
             "d37b4e2641": "서버",
             "3c5a593bc8": "웹",
             "477b28c948": "데이터베이스",
             "787490e9bd": "패키지",
+            "07012dc113": "에이전트",
+            "3eba7387ab": "터미널",
             "65b437c381": "코드",
             "bed2674f9d": "폴더"
           }
@@ -9709,6 +10191,7 @@
         "pet": {
           "models": {
             "7433516faf": "그렘린",
+            "a84d5677ff": "OpenCode",
             "2528586aa7": "클라우디노"
           }
         }
@@ -9749,6 +10232,7 @@
           "04ef416712": "Linear 연결 추가",
           "dd9c186a8b": "워크스페이스 액세스 추가",
           "c91a5782f1": "연결됨",
+          "27743304b1": "Linear",
           "af69f42372": "Enter를 눌러 GitHub CLI 인증을 실행하세요. 브라우저 또는 장치 흐름이 완료된 후 GitHub를 다시 확인하세요.",
           "f9d2e12d17": "GitHub 로그인 명령",
           "6d469169f2": "GitHub 설정",
@@ -9757,6 +10241,7 @@
           "c1547656f0": "확인 중…",
           "8405043962": "로그인이 필요합니다",
           "5c115cb713": "CLI가 설치되지 않았습니다.",
+          "217beb0658": "GitHub",
           "4983ae7433": "개인 API 키로 Linear를 연결하세요. 전체 액세스 키는 키 소유자가 접근할 수 있는 모든 팀을 표시할 수 있습니다.",
           "b08a6ac93c": "{{value0}} 워크스페이스{{value1}}이 연결되었습니다. 언제든지 다른 워크스페이스를 추가하거나 제한된 키를 교체하세요.",
           "93f0c49ad1": "인증되지 않은",
@@ -9792,6 +10277,7 @@
           "1b5e182e9f": "Orca에 오신 것을 환영합니다",
           "4db04f2f57": "/",
           "adaa0aa627": "온보딩 단계 {{value0}}: {{value1}}로 이동",
+          "a249f81538": "Orca",
           "277ba45540": "Orca 온보딩",
           "97c42cda00": "GitHub CLI를 설치하여 다음을 수행합니다.",
           "ae3b00ca82": "GitHub 작업 설정",
@@ -9804,9 +10290,9 @@
           "a5e5da02f7": "연동",
           "35bbaf5ae0": "알림",
           "984338477a": "테마",
+          "c47e1bd149": "agent",
           "windowsTerminalTitle": "Windows terminal 기본값 설정",
-          "windowsTerminalSubtitle": "새 창에서 사용할 기본 셸과 terminal에서 오른쪽 클릭이 동작하는 방식을 선택하세요.",
-          "c47e1bd149": "agent"
+          "windowsTerminalSubtitle": "새 창에서 사용할 기본 셸과 terminal에서 오른쪽 클릭이 동작하는 방식을 선택하세요."
         },
         "OnboardingFooter": {
           "ba58547306": "뒤로",
@@ -9830,6 +10316,7 @@
           "7b679207e4": "워크스페이스",
           "24c7c8696c": "서버 경로로 복제",
           "7932e95f68": "클론",
+          "955134915e": "git@github.com:org/repo.git",
           "288d8444b7": "HTTPS 또는 SSH URL을 붙여넣습니다.",
           "132425a3e3": "repo 복제",
           "6558d50c69": "한 번에 여러 repos를 가져오고 싶으신가요? 상위 폴더를 선택하세요.",
@@ -9837,6 +10324,7 @@
           "f4e9c8dcf8": "폴더 찾아보기",
           "e8214aa632": "폴더로 열기",
           "3863747c56": "Git 프로젝트 추가",
+          "2ebbc26343": "/home/user/project",
           "466108ab89": "선택한 호스트에 존재하는 경로를 입력하세요.",
           "8cab104e3c": "서버 프로젝트 열기",
           "2d20200346": "repos 가져오기",
@@ -9845,6 +10333,7 @@
           "c7af322fc3": "스캔 중지",
           "c3d9d44ca2": "스캔 중지",
           "cf23006ba7": "선택한 호스트",
+          "7ec3f48820": "/home/user",
           "2e6438dd34": "{{value0}}이 폴더에서 {{value1}} {{value2}}을(를) 찾았습니다."
         },
         "ThemeStep": {
@@ -9855,6 +10344,7 @@
           "86c0f1caa2": "패딩",
           "06a24f4f2d": "색상",
           "c021e9dddd": "테마 팔레트",
+          "ab2a583a97": "Cursor",
           "cc1858e19e": "글꼴",
           "248c812283": "가져오기",
           "7ee9234e54": "Ghostty 설정을 찾았습니다.",
@@ -9883,6 +10373,7 @@
           "97dcdc010f": "기능 활성화"
         },
         "WindowsTerminalStep": {
+          "powerShell": "PowerShell",
           "powerShellPwsh": "사용할 수 있으면 PowerShell 7+를 사용하고, 없으면 Windows PowerShell을 사용합니다.",
           "powerShellInbox": "지원되는 모든 Windows 설치에 포함된 Windows PowerShell을 사용합니다.",
           "commandPrompt": "명령 프롬프트",
@@ -9890,6 +10381,7 @@
           "gitBash": "Git Bash",
           "gitBashDescription": "Unix 스타일 셸 작업에는 Git for Windows의 bash.exe를 사용합니다.",
           "gitBashUnavailable": "선택되었지만 이 컴퓨터에서 Git Bash를 찾지 못했습니다.",
+          "wsl": "WSL",
           "wslDescription": "Windows Subsystem for Linux의 기본 환경에서 새 terminal 창을 시작합니다.",
           "wslUnavailable": "선택되었지만 이 컴퓨터에서 WSL을 찾지 못했습니다.",
           "rightClickPaste": "오른쪽 클릭으로 붙여넣기",
@@ -9923,6 +10415,8 @@
           "SmartWorkspaceNameField": {
             "2a0d535f69": "새 브랜치 만들기",
             "a44229ce4d": "워크스페이스 이름으로",
+            "766083a596": "\"",
+            "34ca97bce3": "\"",
             "b1a7d679ba": "사용",
             "e57c53727c": "프로젝트 추가...",
             "a76fcb4fa0": "다음으로 전환",
@@ -9937,6 +10431,9 @@
             "2c69728c2a": "브라우저에서 링크 열기",
             "6f07a18604": "이름",
             "2e4c7c95fe": "브랜치",
+            "2cfc6be192": "GitLab",
+            "7a47af0565": "Linear",
+            "0a180280bd": "GitHub",
             "b3c60c2b7c": "스마트",
             "26824f60dd": "모두",
             "6fad211c66": "닫힘",
@@ -9974,6 +10471,7 @@
       },
       "mobile": {
         "MobileHero": {
+          "a8fb43cf1c": "Continue",
           "3f90dbd274": "완료",
           "b622eba64d": "뒤로",
           "65b3f2e8bc": "생성 중…",
@@ -9994,6 +10492,7 @@
           "7af266b80d": "QR코드 설치",
           "aa97420ba4": "설치 링크 복사",
           "ac1eb64952": "Android",
+          "711e6f4b47": "iOS",
           "e75647ace0": "휴대폰으로 QR을 스캔하거나 설치 링크를 열어 Orca Mobile을 다운로드하세요.",
           "0d9b33299e": "앱을 받으세요.",
           "92ddfdfa1f": "2단계 중 1단계",
@@ -10036,6 +10535,7 @@
           "9883b58693": "Orca 모바일 닫기",
           "fb5f28330e": "사이드바에 표시",
           "c669abcf8f": "사이드바에서 숨기기",
+          "e1c7b4a92d": "Configure in Settings > Mobile.",
           "a4f8c2d91e": "왼쪽 사이드바에서 Orca Mobile 제거",
           "b7e3d1c84a": "왼쪽 사이드바에 Orca Mobile 표시",
           "f3d8e5b71a": "단축키를 왼쪽 사이드바에 다시 추가합니다."
@@ -10068,8 +10568,10 @@
             "4405f3c440": "데스크탑 페어링",
             "0b00c98506": "빠른 작업",
             "0bad5b07c8": "GitHub 및 Linear",
+            "d047197480": "GitHub · Linear",
             "a4c3f7b7aa": "작업",
             "d33d7a9c29": "orca  ·  feat/mobile-page",
+            "25d6e8a491": "feat/mobile-page",
             "c791677f2f": "재개",
             "cf3f98fa3f": "연결이 끊김",
             "091355da3d": "M1 미니 · 집",
@@ -10081,38 +10583,46 @@
             "00a6903322": "시작된 Agents",
             "c0e2e9dcd9": "다시 오신 것을 환영합니다",
             "af761a0c0d": "설정",
-            "25d6e8a491": "feat/mobile-page"
+            "5d94e8ddcc": "Orca"
           },
           "TerminalSlide": {
             "0bb39f8fe6": "보내기",
             "69334b4b10": "음성 받아쓰기",
             "29f2d13839": "명령을 입력하세요…",
+            "817090af40": "Ctrl+C",
             "53ff909568": "Tab",
+            "4930eaaae7": "Esc",
             "fa22927f13": "붙여넣기",
             "985373052e": "휴대폰 모드로 전환",
             "58a9ee6003": "도구 호출 형식. 다음으로 diff를 추가할까요?",
             "aa64b519c6": "terminal 화면. Tokyonight palette, Menlo, real claude",
             "e75112c834": "페어 스캔 슬라이드를 고화질로 교체했습니다.",
             "3ce3e8c892": "14개 통과, 1개 건너뛰기(1.8초)",
+            "4b3666f9a9": "src/cache/worktree-cache.test.ts",
             "1d448b69f7": "통과",
+            "d39445686a": "src/transport/host-store.test.ts",
             "a6e7cdc688": "pnpm test --filter mobile",
+            "21b67dfc92": "Bash",
             "d6d1041a1c": "⎿ 페어 스캔 슬라이드를 terminal 세션으로 대체했습니다.",
+            "336c0e070e": "mobile/orca-mobile-sidebar-mock-v3.html",
             "6d4ebd5833": "편집",
             "fc83e0d5ef": "⎿ 2103줄 읽기",
             "80cc356591": "읽기",
+            "2c10d43745": "claude",
             "e0f98be657": "orca/feat-mobile-page",
             "2defc05141": "dev@mac",
+            "da121ba48d": "PLAN.md",
             "e4befee569": "셸",
             "606aa93192": "파일",
             "94febb0976": "소스 제어",
             "8d6516312d": "terminals 2개 · claude 활성",
-            "8fd998acd3": "뒤로",
-            "21b67dfc92": "Bash",
-            "8432787c4e": "feat/mobile-page"
+            "8432787c4e": "feat/mobile-page",
+            "8fd998acd3": "뒤로"
           },
           "WorktreeListSlide": {
             "357a519567": "활성",
             "79a24ff530": "고정됨",
+            "22971156df": "Repo",
             "17f9e0d226": "최근",
             "0e3e809a4b": "필터",
             "b4271864bd": "맥북 프로",
@@ -10133,6 +10643,17 @@
           "trigger-label": "알릴 네트워크 주소",
           "custom-option": "{{address}} (사용자 지정)",
           "add-custom": "사용자 지정 주소 추가…"
+        },
+        "WindowsFirewallNotice": {
+          "repair-success": "Windows Firewall now allows Orca Mobile on private networks",
+          "repair-failed": "Could not add the Windows Firewall rule",
+          "public-title": "Windows marks this network as public",
+          "missing-title": "Allow phone connections through Windows Firewall",
+          "public-description": "Change this trusted Wi-Fi network to Private before allowing Orca Mobile connections.",
+          "missing-description": "Windows may block the pairing server. Add a rule for this Orca app and TCP port {{port}} on Private networks.",
+          "open-settings": "Open network settings",
+          "waiting": "Waiting for Windows…",
+          "allow": "Allow phone connections"
         }
       },
       "gitlab": {
@@ -10147,6 +10668,7 @@
                 "14e144f7a7": "GitLab API 예산",
                 "3e2c982cfa": "남음, 재설정까지",
                 "ea8ad0bae8": "/",
+                "0a891e8935": "REST API",
                 "953f7c6062": "이 GitLab 호스트는 속도 제한 헤더를 반환하지 않았습니다.",
                 "budget_scope_prefix": "예산 범위"
               }
@@ -10187,7 +10709,8 @@
             "d6b563ae24": "편집기 로드 중...",
             "8b14ba6c17": "새 브라우저 탭",
             "b085fb58b5": "이 파일에는 저장되지 않은 변경사항이 있습니다.",
-            "5ddc688c52": "'{{value0}}'에 저장되지 않은 변경사항이 있습니다. 닫기 전에 저장하시겠습니까?"
+            "5ddc688c52": "'{{value0}}'에 저장되지 않은 변경사항이 있습니다. 닫기 전에 저장하시겠습니까?",
+            "25d7817f79": "터미널"
           },
           "FloatingTerminalToggleButton": {
             "3b04b065b5": "플로팅 워크스페이스 표시",
@@ -10231,6 +10754,7 @@
             "be8917699e": "모델",
             "4d9b6d84df": "지원되지 않습니다. Claude, Codex 또는 Custom을 선택하세요.",
             "560d4feb00": "사용자 정의",
+            "29d119fe95": "에이전트",
             "f9382b48a1": "AI author 활성화",
             "1c0cb4fabb": "AI 작성자",
             "bd14e9c42a": "구성되지 않음",
@@ -10242,12 +10766,16 @@
             "59ae327405": "Starter",
             "9e0f530390": "가격",
             "0ce7c24b4d": "작업 중…",
+            "f2034c4930": ">",
+            "6e4616d039": "Claude",
             "0f8481e1a7": "Claude에게 보내기",
             "3d2352f94b": "변경사항을 설명하세요…",
+            "d8856b604a": "div.pricing-grid > div.card.starter:nth-of-type(1) > a.cta",
             "7da6eed7bf": "localhost:3000",
             "0a2bd01c02": "새 브라우저 탭",
             "04096318ab": "Terminal 1",
             "eb88125c6f": "✓ 검증됨 — 무료 체험판은 여전히 작동합니다.",
+            "051c97d15a": ".pp-card[data-card=\"starter\"] .pp-cta",
             "4fa59ca545": "✓ 업데이트됨",
             "1bec24acc1": "@keyframes browserFlash { 0% { opacity: 0; } 20% { opacity: 0.85; } 100% { opacity: 0; } } @keyframes browserTabIn { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } @keyframes browserViewIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }",
             "73bbb46073": "/pricing",
@@ -10263,13 +10791,14 @@
             "6804cb356f": "클릭 전송됨",
             "1719b28a81": "'승인'을 찾았습니다.",
             "79445f7512": "내 앱에서 메모 승인",
+            "99a8624bcb": ">",
             "2adb561b44": "Claude Code 세션이 시작되었습니다.",
+            "94787f01f8": "Claude Code",
             "9cddfe96b2": "로컬 앱",
             "9634d870d1": "승인",
             "3cc2df3671": "완료",
             "bdd5312213": "보류 중",
-            "c11dda000b": "승인됨",
-            "94787f01f8": "Claude Code"
+            "c11dda000b": "승인됨"
           },
           "EditorAnimatedVisual": {
             "7a763daf2f": "이탤릭체",
@@ -10292,27 +10821,37 @@
             "e16479c1c5": "[data-slash-menu] [data-slash-row].slash-active { background: rgba(24,24,27,0.07); box-shadow: inset 0 0 0 1px rgba(24,24,27,0.06); } [data-md-active-line][data-role=\"active\"] { color: rgb(113 113 122); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; } [data-md-active-line][data-role=\"h1\"] { color: inherit; font-family: inherit; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; margin-top: 6px; } [data-md-caret] { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: md-caret-blink 1.05s steps(1) infinite; } @keyframes md-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } } @keyframes md-block-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } @keyframes md-cursor-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } [data-clicking=\"1\"] [data-cursor-ripple] { animation: md-cursor-ripple 460ms ease-out forwards; }"
           },
           "FeatureTourPreview": {
+            "1170621527": ">",
             "304ad0dfc1": "생각 중...",
             "ef8b164dd1": "src/auth 리뷰",
             "952d3ddd9a": "세션이 시작되었습니다",
+            "771d8881c2": "claude",
             "6ed43cb0e0": "dashboard.spec.ts",
+            "24fedd5a52": "login.spec.ts",
             "8279e9d95b": "12개 테스트 실행",
             "6218a9014d": "pnpm playwright test",
             "04d54d50ec": "orca · zsh",
             "1aa8a9a24a": "분할 가능한 terminal",
             "2a7cfc82c8": "GH #1842와 연결됨",
             "3822d8d14b": "fix/worktree-picker-truncates",
+            "d54aefe09e": "LIN-329",
             "40bbd92ef4": "시작",
             "c1f28c03b2": "작업 트리 선택 도구가 잘립니다.",
+            "fc0cc0b267": "GH #1842",
+            "0688842445": "GH #1799",
             "bee6b4088d": "GitHub 및 Linear 작업",
             "5171768676": "agents 3개 조율",
             "cebc7769cd": "인증 흐름 재설계",
             "e44269e97d": "Agent 오케스트레이션",
+            "ec4a73f5e6": "PR 3/3",
+            "cfdfd4d6b4": "PR 2/3",
+            "b1f17bcc74": "PR 1/3",
             "e38112b289": "청구 웹훅 리팩터링",
             "9c812e0d7c": "CI 파이프라인 속도 향상",
             "3c4adfd821": "로그인 경쟁 조건 수정",
             "56a0271428": "격리된 워크스페이스",
             "ef737dcee1": "GitHub 및 Linear 작업",
+            "ac51c061e2": "codex",
             "47f16ecf34": "여러 작업을 동시에 진행하세요. 각 워크스페이스는 브랜치, terminal, agent 활동을 함께 보관합니다.",
             "70aa182266": "목표를 넘겨두고 자리를 비우세요. 코디네이터 agent가 작업을 나누어 병렬 PR을 만듭니다.",
             "f10c14dd9d": "탭을 오갈 필요 없이 GitHub 또는 Linear 백로그에서 선택하고 한 번의 클릭으로 워크스페이스를 시작하세요.",
@@ -10357,13 +10896,14 @@
             "209713d3c7": "선택 사항"
           },
           "ReviewNotesAnimatedVisual": {
+            "5dbd27c4c2": "Codex",
+            "09094f25e2": "Claude Code",
             "294aaff104": "메모 보내기",
             "ea4e45b71b": "메모 추가",
             "271ea0cbf3": "취소",
             "a7a89d8f94": "줄",
             "5cb213f967": "AI 메모",
-            "1eee3a397e": "src/server/migrate.ts (diff)",
-            "09094f25e2": "Claude Code"
+            "1eee3a397e": "src/server/migrate.ts (diff)"
           },
           "ReviewPRViewAnimatedVisual": {
             "7c2808ecff": "병합 전 잘림.",
@@ -10395,15 +10935,16 @@
             "3774b80eae": "설명",
             "07da9245cc": "PR 제목",
             "54a093c52d": "제목",
+            "3b9b96d6a6": "main",
             "ce7d5d3a18": "기본 브랜치",
             "e4473d438f": "AI로 생성",
             "c30cd930ff": "PR 생성",
             "ea0100dd15": "모두 보기",
             "e725000cd7": "변경 사항",
+            "a079083a6c": "Commit",
             "7347fa5839": "메시지",
             "d1a7f15876": "AI로 commit 메시지 생성",
-            "cd8a3a39d7": "commits 3개 앞섬",
-            "3b9b96d6a6": "main"
+            "cd8a3a39d7": "commits 3개 앞섬"
           },
           "TasksAnimatedVisual": {
             "efba6f77eb": "이슈 # 읽는 중",
@@ -10416,18 +10957,23 @@
           },
           "WorkbenchAnimatedVisual": {
             "633a91e358": "생각 중…",
+            "932c4b3a97": ">",
             "ca2cfbf188": "Terminal을 아래로 분할",
             "e370fa8c2b": "Terminal을 오른쪽으로 분할",
+            "b85eab49dd": "src/auth/session.ts",
             "99f5224f1e": "편집",
             "0d93c298a7": "src/auth 던지기",
             "17cfdc3344": "Grep",
             "9923847785": "Read",
             "c0eb94125e": "인증 예외 사례 리뷰",
             "431ca9842a": "Claude Code 세션이 시작되었습니다.",
+            "000106adfe": "claude",
             "7d9f1d5f7d": "(0.8초)",
             "944199e54a": "› 장바구니 합계 업데이트",
+            "623881d72e": "checkout.spec.ts",
             "5c5cbd783f": "(1.2초)",
             "3261c6853b": "› 로그인 가능",
+            "defe550fe2": "login.spec.ts",
             "0b20782e0f": "워커 4개로 12개 테스트 실행",
             "4371cc9931": "pnpm playwright test",
             "16877e038d": "아래로 분할",
@@ -10463,6 +11009,31 @@
             }
           },
           "review": {
+            "animated": {
+              "visual": {
+                "shared": {
+                  "e7894927a2": "Codex",
+                  "9deecb021c": "Claude"
+                },
+                "notes": {
+                  "styles": {
+                    "db6691aa0a": ".ravs-window { position: absolute; inset: 0; --ravs-soft-surface: color-mix(in srgb, var(--foreground) 2%, var(--card)); --ravs-soft-fill: color-mix(in srgb, var(--foreground) 6%, transparent); --ravs-panel-border: color-mix(in srgb, var(--foreground) 18%, var(--border)); --ravs-emphasis-border: color-mix(in srgb, var(--foreground) 44%, var(--border)); --ravs-floating-shadow: 0 14px 30px rgb(0 0 0 / 0.22), 0 2px 6px rgb(0 0 0 / 0.12); background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); } .ravs-difftoolbar { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--border); background: var(--ravs-soft-surface); font-size: 11px; color: var(--muted-foreground); } .ravs-diff-path { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--foreground); } .ravs-ai-chip { margin-left: auto; display: inline-flex; align-items: stretch; overflow: hidden; border-radius: 6px; border: 1px solid var(--border); background: var(--ravs-soft-surface); opacity: 0; transform: translateY(-2px); transition: opacity 320ms ease, transform 320ms ease; } .ravs-ai-chip.is-visible { opacity: 1; transform: none; } .ravs-ai-chip .ravs-count-btn, .ravs-ai-chip .ravs-send-btn { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; font-size: 11px; color: var(--muted-foreground); background: transparent; line-height: 1; } .ravs-ai-chip .ravs-count-btn { border-right: 1px solid var(--border); } .ravs-ai-chip .ravs-send-btn { padding: 3px 7px; position: relative; } .ravs-send-glow { position: absolute; inset: 0; background: rgba(34, 197, 94, 0.18); opacity: 0; transition: opacity 280ms ease; pointer-events: none; } .ravs-ai-chip .ravs-send-btn.is-flash .ravs-send-glow { opacity: 1; } .ravs-count-num { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--foreground); font-weight: 600; } .ravs-diffbody { flex: 1; min-height: 0; position: relative; background: var(--editor-surface, var(--card)); } .ravs-diffscroll { position: absolute; inset: 0; overflow: hidden; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.55; color: var(--foreground); padding: 4px 0 8px; transition: opacity 240ms ease; } .ravs-diffscroll.is-hidden { opacity: 0; pointer-events: none; } .ravs-term { position: absolute; inset: 0; background: var(--editor-surface, var(--card)); color: var(--foreground); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; line-height: 1.45; overflow: hidden; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 240ms ease; z-index: 4; } .ravs-term.is-visible { opacity: 1; } .ravs-term-body { flex: 1; min-height: 0; padding: 10px 12px; overflow: hidden; display: flex; flex-direction: column; gap: 6px; } .ravs-term-line { white-space: pre-wrap; word-break: break-word; line-height: 1.45; } .ravs-term-muted { color: var(--muted-foreground); } .ravs-term-glyph { color: rgb(217 119 6); margin-right: 6px; } .ravs-term-check { color: rgb(16 185 129); font-weight: 700; margin-right: 6px; } .ravs-term-spinner { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 999px; border: 1.5px solid color-mix(in srgb, var(--foreground) 20%, transparent); border-top-color: var(--foreground); vertical-align: -1px; animation: ravs-term-spin 0.9s linear infinite; } @keyframes ravs-term-spin { to { transform: rotate(360deg) } } .ravs-hunk-header { display: grid; grid-template-columns: 36px 36px 16px minmax(0,1fr); align-items: center; padding: 1px 8px 1px 0; background: rgba(99, 102, 241, 0.06); color: var(--muted-foreground); font-size: 10.5px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); } .ravs-hunk-header .ravs-text { grid-column: 4 / -1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgb(99 102 241); font-size: 10.5px; } .ravs-diff-line { display: grid; grid-template-columns: 36px 36px 16px minmax(0,1fr); align-items: stretch; position: relative; } .ravs-ln { text-align: right; padding: 0 6px 0 0; color: var(--muted-foreground); font-size: 10.5px; user-select: none; opacity: 0.85; } .ravs-marker { text-align: center; color: var(--muted-foreground); font-weight: 700; opacity: 0.7; } .ravs-text-cell { padding-right: 8px; white-space: pre; overflow: hidden; } .ravs-tok-kw { color: #a855f7; } .ravs-tok-id { color: #2563eb; } .ravs-tok-str { color: #16a34a; } .ravs-diff-line.is-add { background: color-mix(in srgb, var(--git-decoration-added) 14%, transparent); } .ravs-diff-line.is-add .ravs-marker { color: color-mix(in srgb, var(--git-decoration-added) 72%, transparent); opacity: 1; } .ravs-diff-line.is-rem { background: color-mix(in srgb, var(--git-decoration-deleted) 14%, transparent); } .ravs-diff-line.is-rem .ravs-marker { color: color-mix(in srgb, var(--git-decoration-deleted) 72%, transparent); opacity: 1; } .ravs-add-note-btn { position: absolute; left: 4px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 1px solid color-mix(in srgb, currentColor 22%, var(--border)); border-radius: 4px; background: var(--ravs-soft-fill); color: var(--foreground); z-index: 5; opacity: 0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.14); pointer-events: none; transition: opacity 160ms ease; } .ravs-add-note-btn.is-visible { opacity: 1; } .ravs-note-row { padding: 4px 8px 4px 0; max-height: 0; overflow: hidden; opacity: 0; transition: max-height 360ms cubic-bezier(.4,0,.2,1), opacity 280ms ease 60ms, padding 360ms cubic-bezier(.4,0,.2,1); } .ravs-note-row.is-visible { max-height: 90px; opacity: 1; } .ravs-note-card { margin: 0 12px; position: relative; border: 1px solid var(--ravs-panel-border); border-left: 3px solid var(--ravs-emphasis-border); border-radius: 6px; background-color: var(--card); padding: 5px 8px 5px 10px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.16); } .ravs-note-meta { font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-foreground); } .ravs-note-body { font-size: 11.5px; color: var(--foreground); line-height: 1.35; margin-top: 2px; } .ravs-popover { position: absolute; left: 12px; right: 12px; max-width: none; z-index: 20; padding: 8px 10px; border: 1px solid var(--ravs-panel-border); border-left: 3px solid var(--ravs-emphasis-border); border-radius: 6px; background-color: var(--card); color: var(--foreground); box-shadow: var(--ravs-floating-shadow); display: flex; flex-direction: column; gap: 6px; opacity: 0; transform: translateY(-4px) scale(0.985); pointer-events: none; transition: opacity 180ms ease, transform 180ms ease; } .ravs-popover.is-visible { opacity: 1; transform: none; pointer-events: auto; } .ravs-pop-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-foreground); } .ravs-pop-input { min-height: 38px; max-height: 80px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--editor-surface, var(--card)); font-size: 12px; line-height: 1.4; color: var(--foreground); white-space: pre-wrap; word-break: break-word; overflow: hidden; } .ravs-pop-footer { display: flex; justify-content: flex-end; gap: 6px; } .ravs-pop-btn { font-size: 11px; font-weight: 500; padding: 4px 9px; border-radius: 5px; line-height: 1; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 5px; } .ravs-pop-btn.is-cancel { color: var(--muted-foreground); background: transparent; } .ravs-pop-btn.is-add { color: var(--primary-foreground); background: var(--primary); } .ravs-send-menu { position: absolute; z-index: 30; right: 8px; top: 6px; min-width: 200px; background: var(--popover); color: var(--popover-foreground); border: 1px solid var(--border); border-radius: 8px; padding: 4px; box-shadow: var(--ravs-floating-shadow); opacity: 0; transform: translateY(-4px) scale(0.985); pointer-events: none; transition: opacity 180ms ease, transform 180ms ease; } .ravs-send-menu.is-visible { opacity: 1; transform: none; pointer-events: auto; } .ravs-menu-section { padding: 4px 8px 2px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted-foreground); } .ravs-menu-row { display: grid; grid-template-columns: 16px minmax(0,1fr); align-items: center; gap: 8px; padding: 6px 8px; border-radius: 5px; font-size: 12px; color: var(--popover-foreground); } .ravs-menu-row.is-hot { background: var(--accent); box-shadow: inset 0 0 0 1px var(--border); } .ravs-cursor { position: absolute; z-index: 40; pointer-events: none; transition: transform 600ms cubic-bezier(.45,.05,.2,1), opacity 200ms ease; transform: translate(-30px, 220px); opacity: 0; } .ravs-cursor.is-visible { opacity: 1; } .ravs-cursor .ravs-ripple { position: absolute; left: -6px; top: -6px; width: 28px; height: 28px; border-radius: 999px; border: 2px solid color-mix(in srgb, var(--foreground) 52%, transparent); opacity: 0; } .ravs-cursor.is-clicking .ravs-ripple { animation: ravs-ripple 460ms ease-out forwards; } @keyframes ravs-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } .ravs-caret { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: ravs-caret-blink 1.05s steps(1) infinite; } @keyframes ravs-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } }"
+                  }
+                },
+                "pr": {
+                  "view": {
+                    "styles": {
+                      "fc9a23c83d": ".ravpr-stage { position: absolute; inset: 0; overflow: hidden; } .ravpr-stack { position: absolute; inset: 0; display: flex; justify-content: flex-end; padding: 4px 34px 4px 2px; overflow: hidden; } .ravpr-sidebar, .ravpr-card { position: absolute; top: 4px; right: 2px; width: 464px; height: calc(100% - 8px); background: var(--card, #fff); border: 1px solid var(--border); border-radius: 10px; color: var(--foreground, #18181b); overflow: hidden; box-shadow: 0 1px 2px rgba(24,24,27,0.04); } .ravpr-sidebar { opacity: 0; transition: opacity 220ms ease; } .ravpr-sidebar.is-visible { opacity: 1; } .ravpr-sidebar.is-hiding { opacity: 0; } .ravpr-card { display: flex; flex-direction: column; min-width: 0; opacity: 0; transition: opacity 260ms ease; } .ravpr-card.is-visible { opacity: 1; } .ravpr-tabs { position: relative; display: flex; align-items: center; gap: 14px; height: 36px; padding: 0 14px; background: rgba(24,24,27,0.015); color: var(--muted-foreground, #71717a); } .ravpr-tab { position: relative; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted-foreground, #71717a); } .ravpr-tab.is-active, .ravpr-tab.is-hovered { color: var(--foreground, #18181b); } .ravpr-tab.is-active::after { content: ''; position: absolute; left: -5px; right: -5px; bottom: -10px; height: 1px; background: var(--foreground, #18181b); } .ravpr-tooltip { position: absolute; top: 34px; left: 106px; z-index: 6; padding: 7px 11px; border-radius: 8px; background: var(--card, #fff); color: var(--foreground, #18181b); font-size: 12px; line-height: 1; box-shadow: 0 8px 22px rgba(0,0,0,0.22); opacity: 0; transform: translateY(-3px); pointer-events: none; transition: opacity 160ms ease, transform 160ms ease; } .ravpr-tooltip.is-visible { opacity: 1; transform: translateY(0); } .ravpr-explorer { padding: 10px 12px 12px; } .ravpr-heading { color: var(--muted-foreground, #71717a); font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; } .ravpr-file-list { margin-top: 8px; display: flex; flex-direction: column; gap: 2px; } .ravpr-file { display: grid; grid-template-columns: 14px minmax(0,1fr) 22px; align-items: center; gap: 8px; min-height: 28px; padding: 4px 6px; border-radius: 6px; } .ravpr-file.is-active { background: rgba(24,24,27,0.06); box-shadow: inset 0 0 0 1px rgba(24,24,27,0.06); } .ravpr-file-icon { width: 12px; height: 12px; border-radius: 3px; background: rgba(24,24,27,0.14); } .ravpr-file-name { height: 8px; border-radius: 999px; background: rgba(24,24,27,0.14); } .ravpr-file-status { width: 14px; height: 8px; border-radius: 999px; background: rgba(24,24,27,0.12); } .ravpr-body { padding: 10px 12px 18px; display: flex; flex-direction: column; gap: 5px; min-height: 0; } .ravpr-number-row { display: flex; align-items: center; gap: 7px; } .ravpr-number { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; font-weight: 700; } .ravpr-open { display: inline-flex; align-items: center; justify-content: center; height: 18px; padding: 0 7px; border-radius: 5px; background: rgba(16,185,129,0.10); border: 1px solid rgba(16,185,129,0.28); color: rgb(4 120 87); font-size: 9px; font-weight: 700; line-height: 1; } .ravpr-title { font-size: 12px; font-weight: 600; line-height: 1.35; color: var(--foreground, #18181b); margin-bottom: 2px; } .ravpr-merge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 30px; min-height: 30px; flex: 0 0 30px; border-radius: 7px; background: rgb(22 163 74); color: #fff; font-size: 11.5px; font-weight: 700; margin-bottom: 2px; box-shadow: 0 1px 2px rgba(22,163,74,0.18); transition: box-shadow 220ms ease, filter 220ms ease; } .ravpr-merge.is-ready { box-shadow: 0 0 0 3px rgba(34,197,94,0.22), 0 1px 2px rgba(22,163,74,0.18); } .ravpr-section-row, .ravpr-check-row { display: grid; grid-template-columns: 18px minmax(0,1fr) auto; align-items: center; gap: 7px; padding: 5px 0; font-size: 11.5px; color: var(--foreground, #18181b); } .ravpr-check-row { padding: 5px 7px; font-size: 10.5px; } .ravpr-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ravpr-meta, .ravpr-check-state { color: var(--muted-foreground, #71717a); font-size: 10.5px; } .ravpr-check-state { font-size: 10px; } .ravpr-ring { display: inline-block; width: 14px; height: 14px; border-radius: 999px; border: 2px solid rgba(245,158,11,0.35); border-top-color: rgb(245 158 11); animation: ravpr-spin 1.1s linear infinite; } .ravpr-check { width: 15px; height: 15px; border-radius: 999px; display: none; align-items: center; justify-content: center; background: rgba(34,197,94,0.14); color: rgb(22 163 74); } .ravpr-section-row.is-done .ravpr-ring, .ravpr-check-row.is-done .ravpr-ring { display: none; } .ravpr-section-row.is-done .ravpr-check, .ravpr-check-row.is-done .ravpr-check { display: inline-flex; } .ravpr-reveal { display: flex; flex-direction: column; gap: 3px; opacity: 0; transform: translateY(4px); transition: opacity 260ms ease, transform 260ms ease; pointer-events: none; } .ravpr-reveal.is-visible { opacity: 1; transform: translateY(0); pointer-events: auto; } .ravpr-check-list, .ravpr-comment-list { display: flex; flex-direction: column; gap: 4px; min-height: 0; } .ravpr-comment-card { border: 1px solid var(--border); border-radius: 8px; background: var(--card, #fff); overflow: hidden; opacity: 0; transform: translateY(4px); transition: opacity 260ms ease, transform 260ms ease; } .ravpr-comment-card.is-visible { opacity: 1; transform: translateY(0); } .ravpr-comment-head { display: grid; grid-template-columns: 18px minmax(0,1fr) auto; align-items: center; gap: 7px; padding: 5px 7px; background: rgba(24,24,27,0.015); } .ravpr-avatar { width: 16px; height: 16px; border-radius: 999px; background: rgba(24,24,27,0.16); } .ravpr-author { width: 78px; height: 8px; border-radius: 999px; background: rgba(24,24,27,0.18); } .ravpr-comment-path { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; color: var(--muted-foreground, #71717a); } .ravpr-comment-body { padding: 5px 7px 6px; font-size: 11px; line-height: 1.32; color: var(--foreground, #18181b); } .ravpr-comment-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; padding: 1px 4px; border-radius: 4px; background: rgba(24,24,27,0.06); } .ravpr-cursor { position: absolute; z-index: 40; pointer-events: none; transition: transform 600ms cubic-bezier(.45,.05,.2,1), opacity 200ms ease; transform: translate(-30px, 220px); opacity: 0; } .ravpr-cursor.is-visible { opacity: 1; } .ravpr-ripple { position: absolute; left: -6px; top: -6px; width: 28px; height: 28px; border-radius: 999px; border: 2px solid rgba(24,24,27,0.5); opacity: 0; } .ravpr-cursor.is-clicking .ravpr-ripple { animation: ravpr-ripple 460ms ease-out forwards; } @keyframes ravpr-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } @keyframes ravpr-spin { to { transform: rotate(360deg); } }"
+                    }
+                  }
+                },
+                "ship": {
+                  "styles": {
+                    "90cdcd2ecc": ".ravs-ship-root { position: absolute; inset: 0; } .ravs-ship-stack { position: absolute; inset: 0; display: grid; grid-template-columns: 232px minmax(0,1fr); gap: 14px; padding: 4px 2px; /* Why: cards size to their content rather than stretch to the parent's full height, so the two cards don't show empty space below their content. */ align-items: start; } /* Source Control mini-sidebar — ahead-count header, commit textarea + split Commit button, then a CHANGES section with file rows. The file rows are the surface the \"reading\" pulse animates over. */ .ravs-sc-card { display: flex; flex-direction: column; background: var(--card, #fff); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(24,24,27,0.04); } /* Both card headers share the same fixed height so the SC card and PR dialog align across the top edge regardless of header content. */ .ravs-sc-header, .ravs-pr-head { height: 36px; box-sizing: border-box; } .ravs-sc-header { display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border-bottom: 1px solid var(--border); } .ravs-sc-ahead { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; color: var(--foreground, #18181b); } .ravs-sc-ahead svg { color: var(--muted-foreground, #71717a); } .ravs-sc-commit-area { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; } .ravs-sc-textarea { position: relative; border: 1px solid var(--border); border-radius: 6px; background: var(--editor-surface, var(--card)); padding: 6px 26px 6px 8px; min-height: 56px; font-size: 12px; line-height: 1.45; color: var(--foreground, #18181b); white-space: pre-wrap; word-break: break-word; overflow: hidden; } .ravs-sc-textarea .ravs-placeholder { color: rgba(113,113,122,0.7); } .ravs-sc-sparkle { position: absolute; right: 6px; top: 6px; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; color: var(--muted-foreground, #71717a); background: transparent; transition: color 160ms ease, background 160ms ease; } .ravs-sc-sparkle.is-scanning { color: rgb(109 40 217); background: color-mix(in srgb, rgb(139 92 246) 18%, transparent); } .ravs-sc-split { display: flex; align-items: stretch; } /* Why: Commit + Create PR are surrounding chrome — the violet AI affordances are the focal points. Render them as quiet secondary buttons so they don't compete with the sparkle/scan signals. */ .ravs-sc-split .ravs-primary { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 5px 10px; background: var(--secondary, #f5f5f5); color: var(--secondary-foreground, #171717); font-size: 11px; font-weight: 500; border-radius: 6px 0 0 6px; border: 1px solid var(--border); transition: background 240ms ease, border-color 240ms ease, color 240ms ease; } .ravs-sc-split .ravs-chev { display: inline-flex; align-items: center; justify-content: center; width: 22px; background: var(--secondary, #f5f5f5); color: var(--muted-foreground, #71717a); border-radius: 0 6px 6px 0; border: 1px solid var(--border); border-left: 1px solid var(--border); transition: background 240ms ease, border-color 240ms ease, color 240ms ease; } /* Why: when AI has filled the commit message, tint the Commit button green to signal \"ready to commit\". Uses the same success-green family as the PR flash so the two beats rhyme. Mix is intentionally strong (~28%) — at 14% it disappeared next to the violet sparkle and PR flash, so users only saw the PR change color. */ .ravs-sc-split.is-ready .ravs-primary, .ravs-sc-split.is-ready .ravs-chev { background: color-mix(in srgb, rgb(34 197 94) 28%, var(--secondary, #f5f5f5)); border-color: rgb(34 197 94); color: rgb(21 128 61); transition: background 220ms ease, border-color 220ms ease, color 220ms ease; } .ravs-sc-split.is-ready .ravs-chev { border-left-color: rgba(34, 197, 94, 0.55); } .ravs-sc-changes-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground, #71717a); } .ravs-sc-changes-count { color: var(--foreground, #18181b); font-weight: 600; margin-left: 2px; } .ravs-sc-view-all { font-size: 10px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted-foreground, #71717a); } .ravs-sc-files { display: flex; flex-direction: column; padding: 2px 6px 8px; flex: 1; min-height: 0; overflow: hidden; } .ravs-sc-file { display: grid; grid-template-columns: 14px minmax(0,1fr) 12px; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 4px; font-size: 11px; line-height: 1.35; color: var(--foreground, #18181b); position: relative; transition: background 220ms ease; } .ravs-sc-ficon { color: rgb(180 83 9); display: inline-flex; } .ravs-sc-fname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ravs-sc-fmark { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; text-align: right; color: rgb(180 83 9); } .ravs-sc-file.is-reading { background: color-mix(in srgb, rgb(139 92 246) 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, rgb(139 92 246) 28%, transparent); } /* PR dialog — matches the .ravs-sc-card chrome (same border, radius, elevation) so the two cards read as one design language. */ .ravs-pr-dialog { background: var(--card, #fff); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 1px 2px rgba(24,24,27,0.04); display: flex; flex-direction: column; min-width: 0; overflow: hidden; } .ravs-pr-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 10px; border-bottom: 1px solid var(--border); } .ravs-pr-title-text { font-size: 11px; font-weight: 500; color: var(--foreground, #18181b); } /* Icon-only AI-assist chip — mirrors .ravs-sc-sparkle so the affordance reads identically across both cards. */ .ravs-pr-gen-btn { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; padding: 0; border-radius: 4px; color: var(--muted-foreground, #71717a); background: transparent; border: 0; cursor: pointer; transition: color 160ms ease, background 160ms ease; } .ravs-pr-gen-btn:hover { background: rgba(24,24,27,0.06); color: var(--foreground, #18181b); } .ravs-pr-gen-btn.is-scanning { color: rgb(109 40 217); background: color-mix(in srgb, rgb(139 92 246) 18%, transparent); } .ravs-pr-body { display: flex; flex-direction: column; gap: 8px; padding: 10px; } .ravs-pr-field { display: flex; flex-direction: column; gap: 4px; } .ravs-pr-field-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground, #71717a); } .ravs-pr-base { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid var(--border); border-radius: 6px; font-size: 11px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--foreground, #18181b); background: var(--editor-surface, var(--card)); align-self: flex-start; } .ravs-pr-base svg { color: var(--muted-foreground, #71717a); } .ravs-pr-input { position: relative; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--editor-surface, var(--card)); min-height: 28px; font-size: 12px; line-height: 1.45; color: var(--foreground, #18181b); white-space: pre-wrap; word-break: break-word; overflow: hidden; } .ravs-pr-input.is-body { min-height: 50px; font-size: 11px; line-height: 1.4; } .ravs-pr-input .ravs-placeholder { color: rgba(113,113,122,0.7); } .ravs-pr-footer { display: flex; align-items: center; gap: 6px; justify-content: flex-end; margin-top: 2px; } .ravs-pr-btn { font-size: 11px; font-weight: 500; padding: 5px 10px; border-radius: 6px; line-height: 1; border: 1px solid transparent; outline: none; } .ravs-pr-btn:focus, .ravs-pr-btn:focus-visible { outline: none; } /* Cancel reads as a quiet ghost button so it doesn't compete with the affirmative Create PR action. */ .ravs-pr-btn.is-outline { background: transparent; color: var(--muted-foreground, #71717a); border-color: transparent; } .ravs-pr-btn.is-outline:hover { background: rgba(24,24,27,0.05); color: var(--foreground, #18181b); } /* Quiet secondary fill — see the .ravs-sc-split note above. The flash ring still uses success-green so the \"PR created\" beat reads. The Create-PR button is slightly larger than Cancel so the affirmative action remains the bigger target. */ .ravs-pr-btn.is-solid { background: var(--secondary, #f5f5f5); color: var(--secondary-foreground, #171717); border-color: var(--border); font-size: 12px; padding: 7px 14px; transition: background 220ms ease, border-color 220ms ease, color 220ms ease, box-shadow 220ms ease; } .ravs-pr-btn.is-solid.is-ready { background: color-mix(in srgb, rgb(34 197 94) 28%, var(--secondary, #f5f5f5)); border-color: rgb(34 197 94); color: rgb(21 128 61); } .ravs-pr-btn.is-solid.is-flash { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.30); } .ravs-cursor { position: absolute; z-index: 40; pointer-events: none; transition: transform 600ms cubic-bezier(.45,.05,.2,1), opacity 200ms ease; transform: translate(-30px, 220px); opacity: 0; } .ravs-cursor.is-visible { opacity: 1; } .ravs-cursor .ravs-ripple { position: absolute; left: -6px; top: -6px; width: 28px; height: 28px; border-radius: 999px; border: 2px solid rgba(24,24,27,0.5); opacity: 0; } .ravs-cursor.is-clicking .ravs-ripple { animation: ravs-ripple 460ms ease-out forwards; } @keyframes ravs-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } .ravs-caret { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: ravs-caret-blink 1.05s steps(1) infinite; } @keyframes ravs-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } }"
+                  }
+                }
+              }
+            },
             "notes": {
               "diff": {
                 "rows": {
@@ -10478,6 +11049,7 @@
                 "862605d066": "2개의 하위 워크스페이스"
               },
               "StatusesPage": {
+                "2f549fc0ba": "src/auth/session.test.ts",
                 "139e3d7458": "업데이트됨",
                 "7b26349cb2": "pnpm migrate latest",
                 "78f0318ac1": "실행하려고 함",
@@ -10501,7 +11073,8 @@
                 "05ce4ecdd3": "38% 사용",
                 "0470aaed99": "주간",
                 "f421abf962": "세션",
-                "5e45fb1238": "1분 전에 업데이트됨"
+                "5e45fb1238": "1분 전에 업데이트됨",
+                "6a4b1d3c38": "Codex"
               },
               "orchestration": {
                 "cards": {
@@ -10511,6 +11084,8 @@
             }
           },
           "FeatureTourWorkspaceCard": {
+            "a23ed9da7f": "codex",
+            "2f33dc932b": "claude",
             "9220794f6a": "작업 중"
           },
           "ReviewAnimatedVisual": {
@@ -10534,6 +11109,8 @@
             "33b650af52": "팀이 작업을 추적하는 서비스를 연결하세요. Orca는 이슈 제목, 링크, 컨텍스트가 이미 첨부된 워크스페이스를 시작합니다.",
             "5b3577a492": "리뷰 상태용으로 연결됨",
             "list_end": ", 그리고 ",
+            "list_pair": " and ",
+            "list_mid": ", ",
             "code_host_tasks_summary": "이슈를 작업으로 사용할 수 있음 · 팀이 Linear 또는 Jira에서 작업을 계획한다면 추가하세요",
             "code_host_tasks_caption": "코드 호스트의 이슈도 작업으로 사용할 수 있습니다.",
             "review_step_title": "agents가 작업하는 동안 PR 상태 보기",
@@ -10564,6 +11141,7 @@
         },
         "tips": {
           "CliFeatureTipVisual": {
+            "badb4fc342": ">",
             "22e62f3bab": "Claude Code 세션이 시작되었습니다."
           },
           "CliSkillSetupTerminal": {
@@ -10728,6 +11306,11 @@
                 }
               }
             }
+          },
+          "useEmulatorScreenKeyboard": {
+            "pasteTooLarge": "Paste is too large for emulator keyboard input.",
+            "unsupportedPasteText": "Emulator keyboard paste supports US keyboard text only.",
+            "pasteTargetUnavailable": "Emulator keyboard paste failed because the device is not ready."
           }
         }
       },
@@ -10751,7 +11334,8 @@
           "4cc7b83ffe": "파일 필터링...",
           "21783df79f": "파일 트리 축소",
           "481e63ca52": "파일",
-          "d5ac717d65": "commit 안 됨"
+          "d5ac717d65": "commit 안 됨",
+          "39b6b9e4e4": "Committed on Branch"
         },
         "CombinedDiffViewer": {
           "35cc27aeb2": "소스 제어에서",
@@ -10915,6 +11499,7 @@
           "10ed04a685": "노트북 셀은 노트북 폴더에서 이 컴퓨터의 로컬 Python을 실행합니다. 신뢰하는 파일의 셀만 실행하세요.",
           "9e06ae5d36": "노트북 코드를 실행하시겠습니까?",
           "d6f37a640b": "빈 노트북",
+          "8c3b21369a": "nbformat",
           "329764e9fc": "베타",
           "15ec40a735": "노트북 저장",
           "07e7d96612": "셀",
@@ -10928,8 +11513,10 @@
           "27e064e2db": "셀을 아래로 이동",
           "fd8ac707bc": "셀을 위로 이동",
           "3e4cbf15ea": "원시",
+          "1833dbbc43": "Markdown",
           "7005960d73": "코드",
-          "59b6cd874b": "코드"
+          "59b6cd874b": "코드",
+          "ba149053d5": "markdown"
         },
         "MarkdownPreview": {
           "e4683f70c4": "취소",
@@ -11023,20 +11610,30 @@
         "RichMarkdownCodeBlock": {
           "232d9ed853": "복사됨",
           "c72beafc0f": "코드 복사",
-          "d01f55be57": "Shell",
-          "a209c57063": "JavaScript",
-          "bf6ee5caaa": "차이점",
-          "13822cdfda": "일반 텍스트",
-          "2391f9cda9": "Python",
-          "36536ad539": "Java",
-          "4227cf50fe": "Bash",
+          "74eab1d9b2": "YAML",
+          "5ef5605cb7": "XML",
           "88d777bc07": "TypeScript",
-          "89d6cc14fb": "Mermaid",
-          "96182a2f64": "Ruby",
           "9e384d48dc": "Swift",
-          "bcb236e2d8": "Kotlin",
+          "3009f722b9": "SQL",
+          "d01f55be57": "Shell",
+          "5af8251002": "SCSS",
           "e72e6b03f4": "Rust",
-          "edfcc64182": "Go"
+          "96182a2f64": "Ruby",
+          "2391f9cda9": "Python",
+          "89d6cc14fb": "Mermaid",
+          "983b9576b4": "Markdown",
+          "bcb236e2d8": "Kotlin",
+          "78eba32de4": "JSON",
+          "a209c57063": "JavaScript",
+          "36536ad539": "Java",
+          "8c4a3fa02d": "HTML",
+          "706fd85738": "GraphQL",
+          "edfcc64182": "Go",
+          "bf6ee5caaa": "차이점",
+          "026653f21f": "CSS",
+          "4daed43ae3": "C++",
+          "4227cf50fe": "Bash",
+          "13822cdfda": "일반 텍스트"
         },
         "RichMarkdownDocLinkMenu": {
           "e17b987473": "↑↓ 탐색  ↵ 선택  esc 해제",
@@ -11119,6 +11716,7 @@
           "725868c75d": "폴더 찾아보기",
           "5e7f0d8a80": "원격 파일에는 폴더 선택기를 사용할 수 없습니다.",
           "30099dca46": "폴더",
+          "2d7d39dc63": ".md",
           "c8ac7868e6": "파일 이름",
           "b6ed807cc6": "이름",
           "e365f3c638": "markdown 파일의 이름을 지정하고 폴더를 선택하세요.",
@@ -11237,12 +11835,14 @@
           "fd46a70f1a": "시작됨",
           "00e1c1658a": "완료됨",
           "aa8494ae3c": "체크 #",
+          "2dd5ddabc4": "workflow #",
           "1f2b980522": "체크 세부 정보 불러오는 중…",
           "d098e5529a": "출력",
           "f2fe8a4e8f": "주석",
           "cdbfda4dec": "주석",
           "066fedd446": "실패한 작업",
           "49731703ea": "작업",
+          "ee07b33924": "unknown",
           "07eccfa397": "이 체크에 대한 세부 정보를 사용할 수 없습니다.",
           "a916648574": "세부 정보 열기",
           "834cb3f23d": "AI로 수정",
@@ -11278,7 +11878,8 @@
           "1c0a4d7e02": "성공했다",
           "2d3b8f1a55": "건너뛰었습니다",
           "3e6c9a2b71": "보류 중",
-          "4f7d0c3e88": "단계 실패"
+          "4f7d0c3e88": "단계 실패",
+          "5a8e1d4f23": " · "
         },
         "ExternalFileChangeBanner": {
           "7c41e90d12": "저장하지 않은 편집이 있는 동안 이 파일이 디스크에서 변경되었습니다. 저장하면 최신 디스크 내용을 덮어씁니다.",
@@ -11375,6 +11976,7 @@
             "88fea8e84e": "보내지 않음",
             "50b00dc327": "세부정보 복사",
             "6d3ebe216a": "진단 텍스트",
+            "835037edc9": "· Orca",
             "56a3dfa283": "크래시 보고서를 보내지 못했습니다.",
             "8e24fe4f75": "크래시 보고서가 전송되었습니다.",
             "8b8473c544": "크래시 보고서가 복사되었습니다.",
@@ -11384,6 +11986,18 @@
             "ead6fc0510": "자동 크래시 보고서가 캡처되지 않았습니다. 그래도 세부 정보를 보내고, 가능한 경우 최근 진단 로그를 포함할 수 있습니다.",
             "b082f27490": "최근 진단 로그 첨부",
             "e59f0b9427": "보고서와 함께 크기가 제한되고 민감 정보가 제거된 로그 묶음을 보냅니다."
+          },
+          "submit": {
+            "notice": {
+              "unknownError": "The crash report request failed before it returned a reason.",
+              "ticketUploaded": "Diagnostic ticket {{value0}} was uploaded but not linked.",
+              "uncheckDiagnostics": "Uncheck \"Attach recent diagnostic logs\" and try again, or copy the details.",
+              "checkConnection": "Check your connection and try again, or copy the details.",
+              "notSent": "Crash report wasn't sent",
+              "copyDetails": "Copy Details",
+              "sentWithoutDiagnostics": "Crash report sent without diagnostic logs",
+              "diagnosticsReason": "Diagnostic logs were not attached: {{value0}}"
+            }
           },
           "copy": {
             "copyFailed": "충돌 보고서 세부 정보를 복사하지 못했습니다."
@@ -11560,6 +12174,7 @@
             "b733a91bd9": "선택한 요소에 대한 피드백을 추가합니다.",
             "4328a0a062": "가져오기 실패: {{value0}}",
             "26615e116b": "오류",
+            "8aec5bc044": "idle",
             "759f32af29": "다운로드 중",
             "c8bc7f1f9e": "요청됨",
             "4300f38145": "{{value0}}{{value1}}에서 다운로드 중",
@@ -11572,6 +12187,13 @@
             "c13693fe27": "{{value0}}개 주석",
             "074f0ed10b": "{{value0}}개 주석이 준비되었습니다. 다른 요소를 선택하거나 모든 피드백을 복사하세요.",
             "a2164a6e5a": "{{value0}}개 주석이 준비되었습니다. 다른 요소를 선택하거나 모든 피드백을 복사하세요.",
+            "9f6f2e8c19": "The downloaded file path is unavailable.",
+            "0c79b7634d": "Could not open the downloaded file. It may have been moved or deleted.",
+            "397d9dc923": "Could not show the downloaded file. It may have been moved or deleted.",
+            "39c04fed61": "Downloading paused",
+            "5c3d530a68": "Downloaded",
+            "4bb7424d6b": "Canceled",
+            "6e776f9ef9": "Download failed",
             "756bfc25c9": "열기",
             "09a9489aa5": "표시",
             "2a4c4b8e1f": "복사"
@@ -11607,7 +12229,9 @@
             "26fd87f4df": "복사",
             "87d97bdd6d": "취소",
             "effd75e330": "주변 컨텍스트",
+            "7d1480fbf1": "HTML",
             "9098b118ab": "페이지",
+            "eb98a0971a": "\"",
             "d053db279d": "역할=",
             "a759d8f866": "선택된 요소",
             "9c6ce0632a": "선택한 요소 스크린샷",
@@ -11639,6 +12263,7 @@
           "449fc83bf7": "토큰",
           "401f40ae79": "예상 경비",
           "a7c312430d": "마지막 실행",
+          "2df8970cd5": "에이전트",
           "e353ab9516": "사전 확인",
           "620b22145e": "유예 시간",
           "15ea446b93": "세션",
@@ -11661,6 +12286,7 @@
         },
         "AutomationEditorDialog": {
           "fb1896a5e7": "취소",
+          "57b722cbba": "에이전트",
           "6ff66f9012": "새로운 실행",
           "a2e688226d": "워크트리",
           "6f9610e667": "작업 트리는 선택한 워크스페이스에서 실행됩니다. 새로 실행하면 매번 선택한 브랜치에서 새 워크스페이스가 생성됩니다.",
@@ -11680,6 +12306,8 @@
         },
         "AutomationEditorDialogHeader": {
           "31f9253920": "템플릿 사용",
+          "7e35393632": "Hermes",
+          "6f309eef8d": "Orca",
           "58f56b73d9": "자동화 이름",
           "1d9826933e": "평일 repo 감사",
           "4133d33862": "자동화 생성",
@@ -11732,7 +12360,8 @@
           "6b914c5fbb": "요일",
           "233b8c94b6": "반복 주기",
           "b08ccb4d06": "매시간",
-          "8cc026fd73": "주간"
+          "8cc026fd73": "주간",
+          "c3e39e17cf": "custom"
         },
         "AutomationSessionField": {
           "f3c76dce51": "재사용",
@@ -11835,6 +12464,8 @@
           "844f1acb72": "발견됨",
           "20fd7a3a15": "다음",
           "c6695e6fbd": "외부 자동화",
+          "5524365227": "OpenClaw",
+          "766abf833c": "Hermes",
           "bf5f67b590": "Hermes",
           "e66091daf4": "실행",
           "8e9165af08": "실행",
@@ -11921,7 +12552,8 @@
         },
         "AutomationSetupDecisionField": {
           "5a7863909c": "새 워크스페이스마다 설정 실행",
-          "18f000ad4e": "고급"
+          "18f000ad4e": "고급",
+          "874b72195b": "When this automation creates a workspace, prepare it the same way creating a worktree by hand does — run the project's setup and open its terminal tabs."
         }
       },
       "agent": {
@@ -11953,6 +12585,7 @@
           "a472a14700": "추가 옵션",
           "db8a1878b5": "스레드 목록 옵션",
           "d1a88df9a8": "읽지 않은 스레드만 표시",
+          "f6396e1f85": "에이전트",
           "b29191b3e0": "워크트리",
           "8c3b621ddf": "프로젝트",
           "4a3986b200": "상태",
@@ -11987,7 +12620,9 @@
             "8090504a3e": "다음에서 토큰 생성:",
             "7b3967c12f": "Atlassian API 토큰",
             "3d81bf3ab3": "API 토큰",
+            "e91b9a4073": "you@example.com",
             "2849ddb295": "Atlassian 이메일",
+            "70fcd360c4": "https://example.atlassian.net",
             "e176f9d0c5": "Jira Cloud 사이트 URL",
             "d785c42b8b": "Jira Cloud 사이트 URL, Atlassian 이메일, API 토큰을 사용해 이슈를 탐색합니다.",
             "8388bdea2b": "Jira 사이트 연결"
@@ -12137,7 +12772,8 @@
             "starOnGithub": "GitHub에서 별표 누르기",
             "onboardingCompleted": "온보딩 완료!",
             "body": "Orca가 마음에 드신다면 GitHub 별표가 다른 개발자가 Orca를 발견하는 데 도움이 됩니다.",
-            "dismiss": "닫기"
+            "dismiss": "닫기",
+            "later": "Later"
           }
         }
       },
@@ -12186,8 +12822,8 @@
             "2db945e4a0": "활성 프로필의 프로젝트를 다른 로컬 프로필로 복사하거나 이동합니다.",
             "8668cb2946": "이 프로필에는 프로젝트가 없습니다.",
             "93034915ab": "프로젝트를 복사하려면 먼저 다른 프로필을 만드세요.",
-            "projectCountSingular": "{{value0}}개의 프로젝트",
-            "projectCountPlural": "{{value0}}개의 프로젝트"
+            "projectCountSingular": "{{count}}개의 프로젝트",
+            "projectCountPlural": "{{count}}개의 프로젝트"
           },
           "project": {
             "transfer": {
@@ -12206,12 +12842,12 @@
                   "work": "이 프로젝트의 활성 작업"
                 },
                 "cancel": "취소",
-                "terminalSingular": "활성 터미널 탭 {{value0}}개",
-                "terminalPlural": "활성 터미널 탭 {{value0}}개",
-                "agentSingular": "활성 에이전트 {{value0}}개",
-                "agentPlural": "활성 에이전트 {{value0}}개",
-                "browserSingular": "브라우저 작업 공간 {{value0}}개",
-                "browserPlural": "브라우저 작업 공간 {{value0}}개"
+                "terminalSingular": "활성 터미널 탭 {{count}}개",
+                "terminalPlural": "활성 터미널 탭 {{count}}개",
+                "agentSingular": "활성 에이전트 {{count}}개",
+                "agentPlural": "활성 에이전트 {{count}}개",
+                "browserSingular": "브라우저 작업 공간 {{count}}개",
+                "browserPlural": "브라우저 작업 공간 {{count}}개"
               }
             }
           },
@@ -12233,12 +12869,12 @@
               },
               "cancel": "취소",
               "switch": "프로필 전환",
-              "terminalSingular": "활성 터미널 탭 {{value0}}개",
-              "terminalPlural": "활성 터미널 탭 {{value0}}개",
-              "agentSingular": "활성 에이전트 {{value0}}개",
-              "agentPlural": "활성 에이전트 {{value0}}개",
-              "browserSingular": "브라우저 작업 공간 {{value0}}개",
-              "browserPlural": "브라우저 작업 공간 {{value0}}개"
+              "terminalSingular": "활성 터미널 탭 {{count}}개",
+              "terminalPlural": "활성 터미널 탭 {{count}}개",
+              "agentSingular": "활성 에이전트 {{count}}개",
+              "agentPlural": "활성 에이전트 {{count}}개",
+              "browserSingular": "브라우저 작업 공간 {{count}}개",
+              "browserPlural": "브라우저 작업 공간 {{count}}개"
             }
           },
           "org": {
@@ -12270,6 +12906,7 @@
               },
               "invite": {
                 "title": "초대",
+                "placeholder": "teammate@example.com",
                 "role": "초대 역할",
                 "submit": "보내기"
               },
@@ -12312,7 +12949,7 @@
         "assignee": "담당자",
         "unassigned": "미배정",
         "labels": "레이블",
-        "countSelected": "{{value0}}개 선택됨",
+        "countSelected": "{{count}}개 선택됨",
         "selected": "선택됨",
         "searchPriority": "우선순위 필터…",
         "searchStatus": "상태 필터…",
@@ -12327,8 +12964,11 @@
           "f0a4b8c2d1": "PR",
           "e9f3a7b1c0": "PR",
           "d8e2f6a0b9": "PR",
+          "c7d1e5f9a8": "GitHub",
+          "c4e8f1a2b9": "MR",
           "b3d7e0f1a8": "MR",
-          "a2c6d9e0f7": "머지 리퀘스트"
+          "a2c6d9e0f7": "머지 리퀘스트",
+          "91b5c8d7e6": "GitLab"
         }
       }
     }
@@ -12418,6 +13058,10 @@
       "cleanup": {
         "presentationFixtures": {
           "reviewAlphaCleanup": "알파 정리 검토"
+        },
+        "presentation": {
+          "gitlabMergeRequestNumber": "MR #{{value0}}",
+          "githubPullRequestNumber": "PR #{{value0}}"
         }
       }
     }

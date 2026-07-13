@@ -107,12 +107,11 @@ export function NativeChatToolRun({
 
   const callCount = countToolCalls(blocks) || blocks.length
   const summary = summarizeToolRun(blocks)
-  const fallbackLabel =
-    callCount === 1
-      ? translate('components.native-chat.tool.countOne', '1 tool call')
-      : translate('components.native-chat.tool.countN', '{{value0}} tool calls', {
-          value0: callCount
-        })
+  const fallbackLabel = translate(
+    callCount === 1 ? 'components.native-chat.tool.countOne' : 'components.native-chat.tool.countN',
+    callCount === 1 ? '1 tool call' : `${callCount} tool calls`,
+    { count: callCount }
+  )
 
   return (
     <div className="mt-1">
