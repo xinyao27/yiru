@@ -8,6 +8,20 @@ export const SPOOL_MAX_ENCRYPTED_FRAME_BYTES = 8 * 1024 * 1024
 // Leaves room for the NaCl nonce/MAC before base64 expands the encrypted frame to 8 MiB.
 export const SPOOL_MAX_RPC_PLAINTEXT_BYTES = 6 * 1024 * 1024 - 64
 
+export const SPOOL_RPC_ERROR_CODES = [
+  'invalid_argument',
+  'method_not_found',
+  'outcome_unknown',
+  'resource_busy',
+  'resource_not_found',
+  'resource_unavailable',
+  'result_too_large',
+  'unauthorized',
+  'internal_error'
+] as const
+
+export type SpoolRpcErrorCode = (typeof SPOOL_RPC_ERROR_CODES)[number]
+
 export type SpoolOsFamily = 'macos' | 'linux' | 'windows'
 
 export type SpoolProbeRequest = {
@@ -44,16 +58,7 @@ export type SpoolRpcFailure = {
   id: string
   ok: false
   error: {
-    code:
-      | 'invalid_argument'
-      | 'method_not_found'
-      | 'outcome_unknown'
-      | 'resource_busy'
-      | 'resource_not_found'
-      | 'resource_unavailable'
-      | 'result_too_large'
-      | 'unauthorized'
-      | 'internal_error'
+    code: SpoolRpcErrorCode
     message: string
   }
   ownerRuntimeId: string

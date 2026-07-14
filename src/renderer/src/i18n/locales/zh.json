@@ -4848,7 +4848,7 @@
           "delete": "删除",
           "saving": "正在保存…",
           "save": "保存",
-          "truncatedFile": "此预览已截断。为避免用部分内容覆盖完整文件，已禁用编辑。",
+          "truncatedFile": "当前仅显示文件的一个分块。为避免用部分内容覆盖完整文件，已禁用编辑。",
           "editorLabel": "文件内容",
           "loadingDiff": "正在加载 diff…",
           "truncatedDiff": "此 diff 已截断。",
@@ -4856,7 +4856,10 @@
           "binaryDescription": "二进制预览 · {{value1}} 字节中的 {{value0}} 字节",
           "binaryUnavailable": "无法显示二进制预览。",
           "fileUnavailable": "此文件不可用。",
-          "diffUnavailable": "此 diff 不可用。"
+          "diffUnavailable": "此 diff 不可用。",
+          "previousChunk": "上一分块",
+          "nextChunk": "下一分块",
+          "byteRange": "{{value0}}–{{value1}} / {{value2}} 字节"
         },
         "SpoolFileTree": {
           "up": "返回上一级目录",

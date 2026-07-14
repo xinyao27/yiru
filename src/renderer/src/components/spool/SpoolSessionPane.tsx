@@ -50,7 +50,6 @@ function SpoolHistoricalSessionPane({
 
   useEffect(() => {
     let disposed = false
-    setStatus('loading')
     void window.api.spoolSharing
       .invoke({
         desktopRef: route.desktopRef,
@@ -116,7 +115,7 @@ function SpoolHistoricalSessionPane({
 
   return (
     <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--editor-surface)]">
-      <header className="flex h-9 shrink-0 items-center gap-2 border-b border-border bg-card px-3">
+      <header className="flex h-9 shrink-0 items-center gap-2 border-b border-border bg-card px-3 text-card-foreground">
         <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
           {translate(
             'auto.components.spool.SpoolSessionPane.transcriptTitle',
@@ -163,7 +162,10 @@ function SpoolHistoricalSessionPane({
             type="button"
             size="xs"
             variant="outline"
-            onClick={() => setReadAttempt((n) => n + 1)}
+            onClick={() => {
+              setStatus('loading')
+              setReadAttempt((n) => n + 1)
+            }}
           >
             <RotateCcw aria-hidden="true" />
             {translate('auto.components.spool.SpoolSessionPane.retry', 'Retry')}
@@ -202,7 +204,7 @@ function TranscriptMessage({
   message: SpoolSessionTranscriptMessage
 }): React.JSX.Element {
   return (
-    <article className="rounded-lg border border-border bg-card px-3 py-2.5">
+    <article className="rounded-lg border border-border bg-card px-3 py-2.5 text-card-foreground">
       <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
         {getRoleLabel(message.role)}
       </div>

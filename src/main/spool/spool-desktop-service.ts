@@ -208,6 +208,9 @@ export class SpoolDesktopService implements SpoolSharingIpcController {
       return
     }
     await this.options.visibility.reconcile({ kind: 'registered-roots-changed' })
+    // Why: host suspension/recovery preserves the share epoch and therefore
+    // does not emit an authority invalidation, but owner UI still needs the new status.
+    this.emit()
   }
 
   async reportIngressUnavailable(error: Error): Promise<void> {

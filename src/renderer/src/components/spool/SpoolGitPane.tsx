@@ -1,5 +1,5 @@
 import type React from 'react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import type {
   SpoolGitDiffResult,
@@ -31,16 +31,10 @@ import {
 } from './spool-workspace-operation'
 import { reportSpoolGitMutationError } from './spool-workspace-mutation-feedback'
 import { SpoolMutationOutcomeNotice } from './SpoolMutationOutcomeNotice'
+import { useSpoolWorktreeOperationRoute } from './spool-worktree-route'
 
 export function SpoolGitPane({ route }: { route: SpoolWorkspaceRoute }): React.JSX.Element {
-  const operationRoute = useMemo(
-    () => ({
-      desktopRef: route.desktopRef,
-      worktreeRef: route.worktreeRef,
-      connectionEpoch: route.connectionEpoch
-    }),
-    [route.connectionEpoch, route.desktopRef, route.worktreeRef]
-  )
+  const operationRoute = useSpoolWorktreeOperationRoute(route)
   const canControl = useAppStore((state) => selectSpoolCanControl(state, operationRoute))
   const [status, setStatus] = useState<SpoolGitStatusResult | null>(null)
   const [history, setHistory] = useState<SpoolGitHistoryResult | null>(null)
@@ -58,7 +52,6 @@ export function SpoolGitPane({ route }: { route: SpoolWorkspaceRoute }): React.J
   const canMutate = canControl && !mutationOutcomeUnknown
   const requestSequence = useRef(0)
   const diffRequestSequence = useRef(0)
-  const routeKey = `${route.desktopRef}:${route.worktreeRef}:${route.connectionEpoch}`
 
   const refresh = useCallback(async (): Promise<void> => {
     const request = ++requestSequence.current
@@ -90,20 +83,12 @@ export function SpoolGitPane({ route }: { route: SpoolWorkspaceRoute }): React.J
   }, [operationRoute])
 
   useEffect(() => {
-    setStatus(null)
-    setHistory(null)
-    setSelectedStatus(null)
-    setSelectedHistory(null)
-    setDiff(null)
-    setUnavailable(false)
-    setDiffUnavailable(false)
-    setCommitMessage('')
     void refresh()
     return () => {
       requestSequence.current += 1
       diffRequestSequence.current += 1
     }
-  }, [refresh, routeKey])
+  }, [refresh])
 
   const selectStatus = async (entry: SpoolGitStatusEntry): Promise<void> => {
     const request = ++diffRequestSequence.current

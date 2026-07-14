@@ -34,7 +34,7 @@ export type SpoolRpcMethodSpec = {
 export type SpoolRpcRegistry = ReadonlyMap<string, SpoolRpcMethodSpec>
 
 export type SpoolConnectionTransport = {
-  sendJson: (frame: string) => void
+  sendJson: (frame: string, streamKey?: string) => void
   close: (code: number, reason: string) => void
 }
 

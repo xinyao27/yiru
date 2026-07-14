@@ -289,7 +289,7 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
     }
     const frame = JSON.stringify(response)
     if (Buffer.byteLength(frame, 'utf8') <= SPOOL_MAX_RPC_PLAINTEXT_BYTES) {
-      this.transport.sendJson(frame)
+      this.transport.sendJson(frame, response.ok && response.streaming ? response.id : undefined)
       return true
     }
     if (response.ok) {

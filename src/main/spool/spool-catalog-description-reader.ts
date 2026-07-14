@@ -7,7 +7,14 @@ import type {
   SpoolCatalogWorktreeDescription,
   SpoolShareCatalogSource
 } from './spool-share-catalog'
-import type { SpoolWorktreeVisibility } from './spool-worktree-visibility'
+import type {
+  SpoolPublicWorktreeInstance,
+  SpoolWorktreeVisibility
+} from './spool-worktree-visibility'
+
+type PublicationResolution =
+  | { status: 'available'; instance: SpoolPublicWorktreeInstance }
+  | { status: 'fallback'; description: ResolvedSpoolCatalogWorktree | null }
 
 /** Reads fresh sanitized rows and owns the connection-scoped outage fallback. */
 export class SpoolCatalogDescriptionReader {
@@ -51,61 +58,57 @@ export class SpoolCatalogDescriptionReader {
     shareEpoch: string
   ): Promise<ResolvedSpoolCatalogWorktree | null> {
     const cached = this.cached.resolve(instanceId, shareEpoch)
-    let instance
-    try {
-      instance = await this.visibility.resolvePublicInstance(instanceId, shareEpoch)
-    } catch (error) {
-      if (isResourceUnavailable(error) && this.visibility.isPublic(instanceId, shareEpoch)) {
-        return cached
-      }
-      throw error
+    const initial = await this.resolvePublicationOrFallback(instanceId, shareEpoch, cached)
+    if (initial.status === 'fallback') {
+      return initial.description
     }
-    if (!instance) {
-      this.cached.invalidate(instanceId)
-      return null
-    }
+    const instance = initial.instance
     let description: SpoolCatalogWorktreeDescription | null
     try {
       description = await this.source.describeWorktree(instance)
     } catch {
       // Why: only the previous sanitized row survives a source outage; raw owner data is not cached.
-      try {
-        const current = await this.visibility.resolvePublicInstance(instanceId, shareEpoch)
-        if (!current) {
-          this.cached.invalidate(instanceId)
-          return null
-        }
-        return cached
-      } catch (error) {
-        if (isResourceUnavailable(error) && this.visibility.isPublic(instanceId, shareEpoch)) {
-          return cached
-        }
-        throw error
-      }
+      const current = await this.resolvePublicationOrFallback(instanceId, shareEpoch, cached)
+      return current.status === 'available' ? cached : current.description
     }
     if (!description) {
       this.cached.invalidate(instanceId)
       return null
     }
-    let current
-    try {
-      current = await this.visibility.resolvePublicInstance(instanceId, shareEpoch)
-    } catch (error) {
-      if (isResourceUnavailable(error) && this.visibility.isPublic(instanceId, shareEpoch)) {
-        return cached
-      }
-      throw error
+    const current = await this.resolvePublicationOrFallback(instanceId, shareEpoch, cached)
+    if (current.status === 'fallback') {
+      return current.description
     }
-    if (!current || current.worktreeId !== instance.worktreeId) {
+    if (current.instance.worktreeId !== instance.worktreeId) {
       this.cached.invalidate(instanceId)
       return null
     }
-    const sanitized = sanitizeCatalogWorktreeDescription(current, description)
+    const sanitized = sanitizeCatalogWorktreeDescription(current.instance, description)
     if (!sanitized) {
       this.cached.invalidate(instanceId)
       return null
     }
     return this.cached.remember(sanitized)
+  }
+
+  private async resolvePublicationOrFallback(
+    instanceId: string,
+    shareEpoch: string,
+    cached: ResolvedSpoolCatalogWorktree | null
+  ): Promise<PublicationResolution> {
+    try {
+      const instance = await this.visibility.resolvePublicInstance(instanceId, shareEpoch)
+      if (instance) {
+        return { status: 'available', instance }
+      }
+      this.cached.invalidate(instanceId)
+      return { status: 'fallback', description: null }
+    } catch (error) {
+      if (isResourceUnavailable(error) && this.visibility.isPublic(instanceId, shareEpoch)) {
+        return { status: 'fallback', description: cached }
+      }
+      throw error
+    }
   }
 }
 

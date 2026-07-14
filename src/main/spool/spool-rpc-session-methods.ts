@@ -185,7 +185,13 @@ function createTerminalSessionStream(
         terminalRef: invocation.session.terminalHandle,
         ...(scrollbackRows === undefined ? {} : { scrollbackRows })
       },
-      (event) => sink.next(event)
+      (event) => {
+        sink.next(event)
+        if (event.kind === 'closed') {
+          // Why: a naturally ended PTY must release the RPC request id even when the viewer stays mounted.
+          sink.complete()
+        }
+      }
     )
     return () => subscription.close()
   })

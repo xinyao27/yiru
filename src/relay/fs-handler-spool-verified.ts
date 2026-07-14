@@ -5,6 +5,7 @@ import {
   SPOOL_FILE_READ_MAX_BYTES,
   SPOOL_FILE_WRITE_MAX_BYTES
 } from '../shared/spool/spool-operation-contract'
+import { hasExactSpoolWireKeys } from '../shared/spool/spool-exact-wire-record'
 import { assertNoClobberRenameDestinationAvailable } from '../shared/filesystem-rename-collision'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import {
@@ -257,11 +258,7 @@ function requireDirectChild(pathValue: string, parent: RelaySpoolExistingPathPro
 }
 
 function requireOnlyKeys(params: Record<string, unknown>, keys: readonly string[]): void {
-  const allowed = new Set(keys)
-  if (
-    Object.keys(params).length !== keys.length ||
-    Object.keys(params).some((key) => !allowed.has(key))
-  ) {
+  if (!hasExactSpoolWireKeys(params, keys)) {
     throw new Error('spool_verified_parameter_invalid')
   }
 }

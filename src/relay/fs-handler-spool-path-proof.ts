@@ -3,6 +3,7 @@ import type { Stats } from 'node:fs'
 import { lstat, open, realpath } from 'node:fs/promises'
 import type { FileHandle } from 'node:fs/promises'
 import { isAbsolute } from 'node:path'
+import { hasExactSpoolWireKeys } from '../shared/spool/spool-exact-wire-record'
 
 const MAX_PATH_BYTES = 256 * 1_024
 const MAX_IDENTITY_BYTES = 512
@@ -18,7 +19,7 @@ export type RelaySpoolExistingPathProof = {
 export function relaySpoolExistingPathProof(value: unknown): RelaySpoolExistingPathProof {
   if (
     !isRecord(value) ||
-    !hasOnlyKeys(value, ['path', 'expectedRealPath', 'expectedStatIdentity'])
+    !hasExactSpoolWireKeys(value, ['path', 'expectedRealPath', 'expectedStatIdentity'])
   ) {
     throw new Error('spool_verified_parameter_invalid')
   }
@@ -220,11 +221,4 @@ function boundedString(value: unknown, maxBytes: number): string {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function hasOnlyKeys(value: Record<string, unknown>, keys: readonly string[]): boolean {
-  const allowed = new Set(keys)
-  return (
-    Object.keys(value).length === keys.length && Object.keys(value).every((key) => allowed.has(key))
-  )
 }

@@ -8,6 +8,7 @@ import {
   SPOOL_SUPPORTED_PROTOCOL_VERSIONS
 } from '../../shared/spool/spool-wire-contract'
 import { normalizeTailnetIp } from './tailscale-json-projection'
+import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
 
 const MAX_PROBE_BODY_BYTES = 4 * 1024
 const MAX_CONCURRENT_PROBES = 32
@@ -92,7 +93,13 @@ export class SpoolProbeService {
   }
 
   private admitSource(sourceAddress: string): boolean {
-    const cutoff = this.now() - 60_000
+    const now = this.now()
+    const cutoff = now - 60_000
+    for (const [address, attempts] of this.attemptsBySource) {
+      if (address !== sourceAddress && (attempts.at(-1) ?? 0) <= cutoff) {
+        this.attemptsBySource.delete(address)
+      }
+    }
     const recent = (this.attemptsBySource.get(sourceAddress) ?? []).filter(
       (timestamp) => timestamp > cutoff
     )
@@ -100,7 +107,7 @@ export class SpoolProbeService {
       this.attemptsBySource.set(sourceAddress, recent)
       return false
     }
-    recent.push(this.now())
+    recent.push(now)
     this.attemptsBySource.set(sourceAddress, recent)
     return true
   }
@@ -138,7 +145,7 @@ async function readProbeBody(request: IncomingMessage): Promise<SpoolProbeReques
   }
   const record = parsed as Record<string, unknown>
   if (
-    !hasOnlyKeys(record, ['protocolVersions', 'clientPublicKeyB64']) ||
+    !hasExactSpoolWireKeys(record, ['protocolVersions', 'clientPublicKeyB64']) ||
     !Array.isArray(record.protocolVersions) ||
     record.protocolVersions.length === 0 ||
     record.protocolVersions.length > 8 ||
@@ -152,14 +159,6 @@ async function readProbeBody(request: IncomingMessage): Promise<SpoolProbeReques
     protocolVersions: record.protocolVersions as number[],
     clientPublicKeyB64: record.clientPublicKeyB64
   }
-}
-
-function hasOnlyKeys(record: Record<string, unknown>, keys: readonly string[]): boolean {
-  const allowed = new Set(keys)
-  return (
-    Object.keys(record).length === keys.length &&
-    Object.keys(record).every((key) => allowed.has(key))
-  )
 }
 
 function selectProtocolVersion(versions: readonly number[]): number | null {

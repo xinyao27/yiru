@@ -10,6 +10,7 @@ import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
+import { SpoolTruncatedPathLabel } from './SpoolTruncatedPathLabel'
 
 export type SpoolGitSidebarMode = 'changes' | 'history'
 
@@ -54,7 +55,7 @@ export function SpoolGitSidebar({
 }): React.JSX.Element {
   const stagedCount = status?.entries.filter((entry) => entry.area === 'staged').length ?? 0
   return (
-    <aside className="flex w-80 shrink-0 flex-col border-r border-border bg-card">
+    <aside className="flex w-80 shrink-0 flex-col border-r border-border bg-card text-card-foreground">
       <header className="border-b border-border px-3 py-2">
         <div className="flex items-center gap-2">
           <GitCommitHorizontal aria-hidden="true" className="size-4 text-muted-foreground" />
@@ -206,7 +207,7 @@ function ChangesList({
         />
       ) : (
         entries.map((entry) => {
-          const key = gitStatusEntryKey(entry)
+          const key = getSpoolGitStatusEntryKey(entry)
           return (
             <div
               key={key}
@@ -229,9 +230,7 @@ function ChangesList({
                 >
                   {getGitStatusLabel(entry)}
                 </span>
-                <span className="min-w-0 flex-1 truncate font-mono text-xs">
-                  {entry.relativePath}
-                </span>
+                <SpoolTruncatedPathLabel path={entry.relativePath} className="flex-1" />
               </button>
               <Button
                 type="button"
@@ -334,7 +333,7 @@ function SidebarMessage({ text }: { text: string }): React.JSX.Element {
   return <p className="px-2 py-3 text-xs text-muted-foreground">{text}</p>
 }
 
-function gitStatusEntryKey(entry: SpoolGitStatusEntry): string {
+export function getSpoolGitStatusEntryKey(entry: SpoolGitStatusEntry): string {
   return `${entry.area}:${entry.relativePath}`
 }
 
@@ -389,8 +388,4 @@ function formatUpstream(status: SpoolGitStatusResult | null): string {
     '{{value0}} · ↑{{value1}} ↓{{value2}}',
     { value0: status.upstream.name, value1: status.upstream.ahead, value2: status.upstream.behind }
   )
-}
-
-export function getSpoolGitStatusEntryKey(entry: SpoolGitStatusEntry): string {
-  return gitStatusEntryKey(entry)
 }

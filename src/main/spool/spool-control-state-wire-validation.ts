@@ -1,4 +1,5 @@
 import type { SpoolRequesterControlState } from '../../shared/spool/spool-access-contract'
+import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
 
 export function readRequesterControlState(
   value: unknown,
@@ -12,23 +13,15 @@ export function readRequesterControlState(
     return null
   }
   if (record.status === 'read-only' || record.status === 'pending') {
-    return hasOnlyKeys(record, ['worktreeRef', 'status'])
+    return hasExactSpoolWireKeys(record, ['worktreeRef', 'status'])
       ? { worktreeRef, status: record.status }
       : null
   }
   return record.status === 'granted' &&
-    hasOnlyKeys(record, ['worktreeRef', 'status', 'approvedAt']) &&
+    hasExactSpoolWireKeys(record, ['worktreeRef', 'status', 'approvedAt']) &&
     typeof record.approvedAt === 'number' &&
     Number.isSafeInteger(record.approvedAt) &&
     record.approvedAt >= 0
     ? { worktreeRef, status: record.status, approvedAt: record.approvedAt }
     : null
-}
-
-function hasOnlyKeys(record: Record<string, unknown>, keys: readonly string[]): boolean {
-  const allowed = new Set(keys)
-  return (
-    Object.keys(record).length === keys.length &&
-    Object.keys(record).every((key) => allowed.has(key))
-  )
 }

@@ -150,7 +150,6 @@ export function SpoolTerminalPane({
     let started = false
     const subscriptionId = crypto.randomUUID()
     lastSequenceRef.current = -1
-    setStatus('connecting')
     terminalRef.current?.reset()
 
     const dispatch = (event: SpoolRequesterSubscriptionEvent): void => {
@@ -209,9 +208,9 @@ export function SpoolTerminalPane({
       {mutationUncertain ? (
         <div
           role="status"
-          className="absolute left-3 right-3 top-2 flex items-center justify-between gap-3 rounded-md border border-border bg-card/95 px-3 py-2 text-xs text-muted-foreground shadow-xs"
+          className="absolute left-3 right-3 top-2 flex items-center justify-between gap-3 rounded-md border border-border bg-card/95 px-3 py-2 text-xs text-card-foreground shadow-xs"
         >
-          <span>
+          <span className="text-muted-foreground">
             {translate(
               'auto.components.spool.SpoolTerminalPane.outcomeUnknownPersistent',
               'A terminal action may have succeeded. Inspect the output before resuming input.'
@@ -231,8 +230,8 @@ export function SpoolTerminalPane({
           </Button>
         </div>
       ) : status !== 'live' ? (
-        <div className="pointer-events-none absolute right-3 top-2 rounded-md border border-border bg-card/90 px-2 py-1 text-[11px] text-muted-foreground shadow-xs">
-          {getTerminalStatusLabel(status)}
+        <div className="pointer-events-none absolute right-3 top-2 rounded-md border border-border bg-card/90 px-2 py-1 text-[11px] text-card-foreground shadow-xs">
+          <span className="text-muted-foreground">{getTerminalStatusLabel(status)}</span>
         </div>
       ) : null}
     </div>

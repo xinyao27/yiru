@@ -119,13 +119,6 @@ export class SpoolSessionProvenanceIndex {
     )
   }
 
-  purgeIncarnation(spoolIncarnationId: string): void {
-    this.purge(
-      (entry) => entry.spoolIncarnationId === spoolIncarnationId,
-      (entry) => entry.spoolIncarnationId === spoolIncarnationId
-    )
-  }
-
   private purge(
     entryPredicate: (entry: SpoolSessionProvenance) => boolean,
     attestationPredicate: (entry: SpoolLegacyPublicationAttestation) => boolean

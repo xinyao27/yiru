@@ -7,6 +7,12 @@ import type {
 import { isSpoolMutationOperation } from '../../shared/spool/spool-operation-contract'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
 import { asSpoolExecutionError, SpoolExecutionError } from './spool-execution-error'
+import {
+  SpoolTerminalSubscriptionCapacity,
+  type SpoolHostSubscription
+} from './spool-terminal-subscription-capacity'
+
+export type { SpoolHostSubscription } from './spool-terminal-subscription-capacity'
 
 export type BoundWorktreeTarget = {
   connectionId: string
@@ -17,10 +23,6 @@ export type BoundWorktreeTarget = {
 
 export type ExecutionAdmissionGuard = {
   beforeSideEffect(): Promise<void>
-}
-
-export type SpoolHostSubscription = {
-  close(): void
 }
 
 export type SpoolHostOperationContext = {
@@ -54,7 +56,7 @@ export type SpoolExecutionGatewayOptions = {
 
 export class SpoolExecutionGateway {
   private readonly connectionOperations = new Map<string, Map<AbortController, string>>()
-  private readonly connectionSubscriptions = new Map<string, Set<SpoolHostSubscription>>()
+  private readonly subscriptionCapacity = new SpoolTerminalSubscriptionCapacity()
   private readonly connectionAdapters = new Map<string, Set<SpoolHostAdapter>>()
 
   constructor(private readonly options: SpoolExecutionGatewayOptions) {}
@@ -127,12 +129,18 @@ export class SpoolExecutionGateway {
             unsubscribeInvalidation?.()
           } finally {
             this.untrackOperation(target.connectionId, controller)
-            this.connectionSubscriptions.get(target.connectionId)?.delete(subscription)
+            this.subscriptionCapacity.release(target.connectionId, subscription)
           }
         }
       }
     }
     try {
+      // Why: reserve before opening the host stream so concurrent requests cannot bypass the cap.
+      this.subscriptionCapacity.reserve(
+        target.connectionId,
+        target.worktree.instanceId,
+        subscription
+      )
       downstream = adapter.subscribe(
         target.worktree,
         operation,
@@ -150,7 +158,13 @@ export class SpoolExecutionGateway {
             return
           }
           try {
-            emit(event as SpoolSubscriptionEvent<TOperation>)
+            const projectedEvent = event as SpoolSubscriptionEvent<TOperation>
+            emit(projectedEvent)
+            if (projectedEvent.kind === 'closed') {
+              // Why: downstream completion must release the per-worktree slot even if the client
+              // keeps the rendered terminal mounted and never sends an explicit unsubscribe.
+              subscription.close()
+            }
           } catch {
             subscription.close()
           }
@@ -170,20 +184,11 @@ export class SpoolExecutionGateway {
       subscription.close()
       throw asSpoolExecutionError(error)
     }
-    this.addSubscription(target.connectionId, subscription)
     return subscription
   }
 
   closeConnection(connectionId: string): void {
-    const subscriptions = this.connectionSubscriptions.get(connectionId)
-    this.connectionSubscriptions.delete(connectionId)
-    for (const subscription of subscriptions ?? []) {
-      try {
-        subscription.close()
-      } catch {
-        // The connection has already lost authority; continue releasing siblings.
-      }
-    }
+    this.subscriptionCapacity.closeConnection(connectionId)
     const operations = this.connectionOperations.get(connectionId)
     this.connectionOperations.delete(connectionId)
     for (const controller of operations?.keys() ?? []) {
@@ -201,6 +206,7 @@ export class SpoolExecutionGateway {
   }
 
   revokeWorktree(connectionId: string, instanceId: string): void {
+    this.subscriptionCapacity.closeWorktree(connectionId, instanceId)
     for (const [controller, operationInstanceId] of this.connectionOperations.get(connectionId) ??
       []) {
       if (operationInstanceId === instanceId) {
@@ -283,14 +289,5 @@ export class SpoolExecutionGateway {
     if (operations?.size === 0) {
       this.connectionOperations.delete(connectionId)
     }
-  }
-
-  private addSubscription(connectionId: string, subscription: SpoolHostSubscription): void {
-    let subscriptions = this.connectionSubscriptions.get(connectionId)
-    if (!subscriptions) {
-      subscriptions = new Set()
-      this.connectionSubscriptions.set(connectionId, subscriptions)
-    }
-    subscriptions.add(subscription)
   }
 }

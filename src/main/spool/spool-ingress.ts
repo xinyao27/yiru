@@ -1,5 +1,5 @@
 import { createServer, type IncomingMessage, type Server } from 'node:http'
-import { isIP } from 'node:net'
+import { isIP, type Socket } from 'node:net'
 import type { Duplex } from 'node:stream'
 import { WebSocketServer, type WebSocket } from 'ws'
 import type { SpoolE2EEKeypair } from './spool-e2ee-keypair'
@@ -19,6 +19,8 @@ import {
 const RECONCILE_INTERVAL_MS = 5_000
 const MAX_SPOOL_CONNECTIONS = 128
 const MAX_SPOOL_CONNECTIONS_PER_NODE = 8
+const MAX_SPOOL_TRANSPORT_SOCKETS = MAX_SPOOL_CONNECTIONS + 32
+const MAX_SPOOL_TRANSPORT_SOCKETS_PER_SOURCE = 16
 
 type SpoolListener = {
   server: Server
@@ -45,6 +47,8 @@ export class SpoolIngress {
   })
   private readonly connectionCountByNode = new Map<string, number>()
   private readonly connectionCleanups = new Map<WebSocket, () => void>()
+  private readonly transportSockets = new Set<Socket>()
+  private readonly transportSocketCountBySource = new Map<string, number>()
   private reconcileTimer: ReturnType<typeof setInterval> | null = null
   private started = false
   private pendingUpgrades = 0
@@ -81,6 +85,9 @@ export class SpoolIngress {
         this.connectionCleanups.get(socket)?.()
         socket.terminate()
       }
+    }
+    for (const socket of this.transportSockets) {
+      socket.destroy()
     }
     const closePromises = [...this.listeners.values()].map(
       (listener) =>
@@ -153,6 +160,7 @@ export class SpoolIngress {
     server.on('upgrade', (request, socket, head) => {
       void this.handleUpgrade(address, sockets, request, socket, head)
     })
+    server.on('connection', (socket) => this.admitTransportSocket(socket))
     await listenOnTailnetAddress(server, address)
     return { server, sockets }
   }
@@ -224,10 +232,34 @@ export class SpoolIngress {
       onClosed: () => {
         this.connectionCleanups.delete(webSocket)
         this.listeners.get(listenerAddress)?.sockets.delete(webSocket)
-        decrementNodeCount(this.connectionCountByNode, requester.nodeId)
+        decrementConnectionCount(this.connectionCountByNode, requester.nodeId)
       }
     })
     this.connectionCleanups.set(webSocket, cleanup)
+  }
+
+  private admitTransportSocket(socket: Socket): void {
+    const sourceAddress = normalizeTailnetIp(socket.remoteAddress ?? '')
+    if (
+      !sourceAddress ||
+      this.transportSockets.size >= MAX_SPOOL_TRANSPORT_SOCKETS ||
+      (this.transportSocketCountBySource.get(sourceAddress) ?? 0) >=
+        MAX_SPOOL_TRANSPORT_SOCKETS_PER_SOURCE
+    ) {
+      socket.destroy()
+      return
+    }
+    this.transportSockets.add(socket)
+    this.transportSocketCountBySource.set(
+      sourceAddress,
+      (this.transportSocketCountBySource.get(sourceAddress) ?? 0) + 1
+    )
+    socket.once('close', () => {
+      if (!this.transportSockets.delete(socket)) {
+        return
+      }
+      decrementConnectionCount(this.transportSocketCountBySource, sourceAddress)
+    })
   }
 }
 
@@ -265,11 +297,11 @@ function rejectUpgrade(socket: Duplex, status: 403 | 503): void {
   }
 }
 
-function decrementNodeCount(counts: Map<string, number>, nodeId: string): void {
-  const next = (counts.get(nodeId) ?? 1) - 1
+function decrementConnectionCount(counts: Map<string, number>, key: string): void {
+  const next = (counts.get(key) ?? 1) - 1
   if (next <= 0) {
-    counts.delete(nodeId)
+    counts.delete(key)
   } else {
-    counts.set(nodeId, next)
+    counts.set(key, next)
   }
 }

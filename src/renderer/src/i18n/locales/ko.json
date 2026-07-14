@@ -4848,7 +4848,7 @@
           "delete": "삭제",
           "saving": "저장 중…",
           "save": "저장",
-          "truncatedFile": "이 미리보기는 잘렸습니다. 일부 내용으로 전체 파일을 덮어쓰지 않도록 편집을 비활성화했습니다.",
+          "truncatedFile": "현재 파일의 한 청크만 표시됩니다. 일부 내용으로 전체 파일을 덮어쓰지 않도록 편집을 비활성화했습니다.",
           "editorLabel": "파일 내용",
           "loadingDiff": "diff를 불러오는 중…",
           "truncatedDiff": "이 diff는 잘렸습니다.",
@@ -4856,7 +4856,10 @@
           "binaryDescription": "바이너리 미리보기 · {{value1}}바이트 중 {{value0}}바이트",
           "binaryUnavailable": "바이너리 미리보기를 표시할 수 없습니다.",
           "fileUnavailable": "이 파일을 사용할 수 없습니다.",
-          "diffUnavailable": "이 diff를 사용할 수 없습니다."
+          "diffUnavailable": "이 diff를 사용할 수 없습니다.",
+          "previousChunk": "이전 청크",
+          "nextChunk": "다음 청크",
+          "byteRange": "{{value0}}–{{value1}} / {{value2}}바이트"
         },
         "SpoolFileTree": {
           "up": "상위 디렉터리로 이동",

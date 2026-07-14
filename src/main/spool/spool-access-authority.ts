@@ -75,6 +75,11 @@ export class SpoolAccessAuthority {
     if (!principal || !this.isPublic(target.instanceId, target.shareEpoch)) {
       throw new SpoolAccessError('resource_not_found')
     }
+    if (this.getControlGrant(target.connectionId, target.instanceId, target.shareEpoch)) {
+      // Why: one connection/worktree has one authority generation; duplicate
+      // grants would let revoking one visible row leave another grant active.
+      throw new SpoolAccessError('resource_busy')
+    }
     const existing = this.findRequest(target.connectionId, target.instanceId, target.shareEpoch)
     if (existing) {
       return existing
@@ -119,6 +124,14 @@ export class SpoolAccessAuthority {
     const principal = this.connections.get(request.connectionId)
     if (!principal || !this.isPublic(request.instanceId, request.shareEpoch)) {
       return { status: 'cancelled', requestId: request.requestId }
+    }
+    const existingGrant = this.getControlGrant(
+      request.connectionId,
+      request.instanceId,
+      request.shareEpoch
+    )
+    if (existingGrant) {
+      return { status: 'granted', requestId: request.requestId, grant: existingGrant }
     }
     const grant: SpoolControlGrant = {
       grantId: this.createId(),

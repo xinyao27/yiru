@@ -1,5 +1,10 @@
-import type { SpoolRpcFailure, SpoolRpcResponse } from '../../shared/spool/spool-wire-contract'
+import {
+  SPOOL_RPC_ERROR_CODES,
+  type SpoolRpcFailure,
+  type SpoolRpcResponse
+} from '../../shared/spool/spool-wire-contract'
 import type { SpoolSink } from './spool-peer-connection-contract'
+import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
 
 export type SpoolPendingPeerRequest = {
   mutation: boolean
@@ -90,7 +95,7 @@ function parseResponse(plaintext: string): SpoolRpcResponse | null {
           ? ['id', 'ok', 'result', 'streaming', 'ownerRuntimeId']
           : ['id', 'ok', 'result', 'ownerRuntimeId']
       if (
-        !hasOnlyKeys(record, expectedKeys) ||
+        !hasExactSpoolWireKeys(record, expectedKeys) ||
         !Object.prototype.hasOwnProperty.call(record, 'result')
       ) {
         return null
@@ -99,7 +104,7 @@ function parseResponse(plaintext: string): SpoolRpcResponse | null {
     }
     if (
       record.ok !== false ||
-      !hasOnlyKeys(record, ['id', 'ok', 'error', 'ownerRuntimeId']) ||
+      !hasExactSpoolWireKeys(record, ['id', 'ok', 'error', 'ownerRuntimeId']) ||
       !isFailureError(record.error)
     ) {
       return null
@@ -110,17 +115,7 @@ function parseResponse(plaintext: string): SpoolRpcResponse | null {
   }
 }
 
-const FAILURE_CODES: ReadonlySet<SpoolRpcFailure['error']['code']> = new Set([
-  'invalid_argument',
-  'method_not_found',
-  'outcome_unknown',
-  'resource_busy',
-  'resource_not_found',
-  'resource_unavailable',
-  'result_too_large',
-  'unauthorized',
-  'internal_error'
-])
+const FAILURE_CODES: ReadonlySet<SpoolRpcFailure['error']['code']> = new Set(SPOOL_RPC_ERROR_CODES)
 
 function isFailureError(value: unknown): value is SpoolRpcFailure['error'] {
   if (!value || typeof value !== 'object') {
@@ -128,7 +123,7 @@ function isFailureError(value: unknown): value is SpoolRpcFailure['error'] {
   }
   const record = value as Record<string, unknown>
   return (
-    hasOnlyKeys(record, ['code', 'message']) &&
+    hasExactSpoolWireKeys(record, ['code', 'message']) &&
     typeof record.code === 'string' &&
     FAILURE_CODES.has(record.code as SpoolRpcFailure['error']['code']) &&
     typeof record.message === 'string' &&
@@ -148,12 +143,4 @@ function callPeerCallback(
     options.onProtocolViolation()
     return false
   }
-}
-
-function hasOnlyKeys(record: Record<string, unknown>, keys: readonly string[]): boolean {
-  const allowed = new Set(keys)
-  return (
-    Object.keys(record).length === keys.length &&
-    Object.keys(record).every((key) => allowed.has(key))
-  )
 }

@@ -1,5 +1,6 @@
 import type { TailnetPrincipal } from '../rpc-principal'
 import type { SpoolRemoteDesktop } from './spool-catalog-contract'
+import { SPOOL_RPC_ERROR_CODES, type SpoolRpcErrorCode } from './spool-wire-contract'
 
 export const SPOOL_REQUESTER_INVOKE_METHODS = [
   'files.list',
@@ -56,17 +57,9 @@ export type SpoolRequesterSubscriptionStopResult = {
 
 export type SpoolRequesterTransportErrorCode =
   | 'disconnected'
-  | 'outcome_unknown'
   | 'protocol_error'
   | 'timeout'
-  | 'invalid_argument'
-  | 'method_not_found'
-  | 'resource_busy'
-  | 'resource_not_found'
-  | 'resource_unavailable'
-  | 'result_too_large'
-  | 'unauthorized'
-  | 'internal_error'
+  | SpoolRpcErrorCode
 
 export type SpoolRequesterSubscriptionEvent =
   | { subscriptionId: string; type: 'next'; value: unknown }
@@ -87,20 +80,7 @@ const SPOOL_REQUESTER_MUTATION_METHODS: ReadonlySet<SpoolRequesterInvokeMethod> 
 ])
 
 const SPOOL_REQUESTER_TRANSPORT_ERROR_CODES: ReadonlySet<SpoolRequesterTransportErrorCode> =
-  new Set([
-    'disconnected',
-    'outcome_unknown',
-    'protocol_error',
-    'timeout',
-    'invalid_argument',
-    'method_not_found',
-    'resource_busy',
-    'resource_not_found',
-    'resource_unavailable',
-    'result_too_large',
-    'unauthorized',
-    'internal_error'
-  ])
+  new Set(['disconnected', 'protocol_error', 'timeout', ...SPOOL_RPC_ERROR_CODES])
 
 export function isSpoolRequesterInvokeMethod(value: string): value is SpoolRequesterInvokeMethod {
   return (SPOOL_REQUESTER_INVOKE_METHODS as readonly string[]).includes(value)

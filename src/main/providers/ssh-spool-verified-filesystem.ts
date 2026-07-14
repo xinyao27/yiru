@@ -2,6 +2,7 @@ import {
   SPOOL_FILE_READ_MAX_BYTES,
   SPOOL_FILE_WRITE_MAX_BYTES
 } from '../../shared/spool/spool-operation-contract'
+import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
 import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
 import { isMethodNotFoundError } from '../ssh/ssh-filesystem-stream-reader'
 import type {
@@ -91,7 +92,7 @@ function parseDirectoryEntries(
   return value.map((entry) => {
     if (
       !isRecord(entry) ||
-      !hasOnlyKeys(entry, ['name', 'kind']) ||
+      !hasExactSpoolWireKeys(entry, ['name', 'kind']) ||
       typeof entry.name !== 'string' ||
       !entry.name ||
       entry.name.length > 4_096 ||
@@ -125,7 +126,7 @@ function parseReadResult(
   offset: number,
   maxBytes: number
 ): SpoolVerifiedRemoteFileRead {
-  if (!isRecord(value) || !hasOnlyKeys(value, ['contentBase64', 'totalBytes'])) {
+  if (!isRecord(value) || !hasExactSpoolWireKeys(value, ['contentBase64', 'totalBytes'])) {
     throw new Error('remote_spool_read_invalid')
   }
   const contentBase64 = value.contentBase64
@@ -156,7 +157,7 @@ function decodeCanonicalBase64(value: string): Buffer {
 }
 
 function requireOk(value: unknown): void {
-  if (!isRecord(value) || !hasOnlyKeys(value, ['ok']) || value.ok !== true) {
+  if (!isRecord(value) || !hasExactSpoolWireKeys(value, ['ok']) || value.ok !== true) {
     throw new Error('remote_spool_mutation_invalid')
   }
 }
@@ -169,11 +170,4 @@ function requireInteger(value: number, min: number, max: number): void {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function hasOnlyKeys(value: Record<string, unknown>, keys: readonly string[]): boolean {
-  const allowed = new Set(keys)
-  return (
-    Object.keys(value).length === keys.length && Object.keys(value).every((key) => allowed.has(key))
-  )
 }

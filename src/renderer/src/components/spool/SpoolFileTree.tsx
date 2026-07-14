@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import { SpoolTruncatedPathLabel } from './SpoolTruncatedPathLabel'
 
 export function SpoolFileTree({
   canControl,
@@ -56,7 +57,7 @@ export function SpoolFileTree({
 }): React.JSX.Element {
   const entries = listing ? sortFileEntries(listing.entries) : []
   return (
-    <aside className="flex w-72 shrink-0 flex-col border-r border-border bg-card">
+    <aside className="flex w-72 shrink-0 flex-col border-r border-border bg-card text-card-foreground">
       <header className="flex min-h-9 items-center gap-1 border-b border-border px-2 py-1">
         <FileTreeToolbarButton
           disabled={!directory}
@@ -65,9 +66,11 @@ export function SpoolFileTree({
         >
           <ChevronUp aria-hidden="true" />
         </FileTreeToolbarButton>
-        <span className="min-w-0 flex-1 truncate px-1 font-mono text-xs text-muted-foreground">
-          {directory || translate('auto.components.spool.SpoolFileTree.root', 'Worktree root')}
-        </span>
+        <SpoolTruncatedPathLabel
+          path={directory}
+          emptyLabel={translate('auto.components.spool.SpoolFileTree.root', 'Worktree root')}
+          className="flex-1 px-1 text-muted-foreground"
+        />
         <FileTreeToolbarButton
           onClick={onRefresh}
           label={translate('auto.components.spool.SpoolFileTree.refresh', 'Refresh files')}

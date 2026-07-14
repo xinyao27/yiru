@@ -1,5 +1,5 @@
 import type React from 'react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
   SPOOL_FILE_READ_MAX_BYTES,
@@ -36,16 +36,10 @@ import {
   nextSelectedSpoolFileEntry,
   parentSpoolRelativePath
 } from './spool-file-mutation'
+import { useSpoolWorktreeOperationRoute } from './spool-worktree-route'
 
 export function SpoolFilesPane({ route }: { route: SpoolWorkspaceRoute }): React.JSX.Element {
-  const operationRoute = useMemo(
-    () => ({
-      desktopRef: route.desktopRef,
-      worktreeRef: route.worktreeRef,
-      connectionEpoch: route.connectionEpoch
-    }),
-    [route.connectionEpoch, route.desktopRef, route.worktreeRef]
-  )
+  const operationRoute = useSpoolWorktreeOperationRoute(route)
   const canControl = useAppStore((state) => selectSpoolCanControl(state, operationRoute))
   const [directory, setDirectory] = useState('')
   const [listing, setListing] = useState<SpoolFileListResult | null>(null)
@@ -66,7 +60,6 @@ export function SpoolFilesPane({ route }: { route: SpoolWorkspaceRoute }): React
   const listRequestSequence = useRef(0)
   const fileRequestSequence = useRef(0)
   const diffRequestSequence = useRef(0)
-  const routeKey = `${route.desktopRef}:${route.worktreeRef}:${route.connectionEpoch}`
 
   const loadDirectory = useCallback(
     async (relativePath: string): Promise<void> => {
@@ -101,7 +94,7 @@ export function SpoolFilesPane({ route }: { route: SpoolWorkspaceRoute }): React
   )
 
   const loadFile = useCallback(
-    async (entry: SpoolFileTreeEntry): Promise<void> => {
+    async (entry: SpoolFileTreeEntry, offset = 0): Promise<void> => {
       const request = ++fileRequestSequence.current
       diffRequestSequence.current += 1
       setSelectedEntry(entry)
@@ -113,7 +106,7 @@ export function SpoolFilesPane({ route }: { route: SpoolWorkspaceRoute }): React
       try {
         const value = await invokeSpoolWorkspaceRead(operationRoute, 'files.read', {
           relativePath: entry.relativePath,
-          offset: 0,
+          offset,
           maxBytes: SPOOL_FILE_READ_MAX_BYTES
         })
         const result = parseSpoolFileReadResult(value)
@@ -141,19 +134,13 @@ export function SpoolFilesPane({ route }: { route: SpoolWorkspaceRoute }): React
   )
 
   useEffect(() => {
-    setSelectedEntry(null)
-    setFile(null)
-    setDiff(null)
-    setListUnavailable(false)
-    setFileUnavailable(false)
-    setDiffUnavailable(false)
     void loadDirectory('')
     return () => {
       listRequestSequence.current += 1
       fileRequestSequence.current += 1
       diffRequestSequence.current += 1
     }
-  }, [loadDirectory, routeKey])
+  }, [loadDirectory])
 
   useEffect(() => {
     if (!canMutate) {
@@ -326,7 +313,9 @@ export function SpoolFilesPane({ route }: { route: SpoolWorkspaceRoute }): React
           onRename={(entry) => setAction({ kind: 'rename', entry })}
           onDelete={(entry) => setAction({ kind: 'delete', entry })}
         />
+        {/* Why: each read clears `file`, so this boundary resets preview mode before new bytes appear. */}
         <SpoolFilePreview
+          key={file?.relativePath ?? 'empty'}
           canControl={canMutate}
           draft={draft}
           file={file}
@@ -339,7 +328,15 @@ export function SpoolFilesPane({ route }: { route: SpoolWorkspaceRoute }): React
           diffUnavailable={diffUnavailable}
           onDraftChange={setDraft}
           onLoadDiff={(staged) => void loadDiff(staged)}
-          onRefresh={() => selectedEntry && void loadFile(selectedEntry)}
+          onNextChunk={() =>
+            selectedEntry && file && void loadFile(selectedEntry, file.offset + file.bytesRead)
+          }
+          onPreviousChunk={() =>
+            selectedEntry &&
+            file &&
+            void loadFile(selectedEntry, Math.max(0, file.offset - SPOOL_FILE_READ_MAX_BYTES))
+          }
+          onRefresh={() => selectedEntry && void loadFile(selectedEntry, file?.offset ?? 0)}
           onSave={() => void saveFile()}
           onRename={() => selectedEntry && setAction({ kind: 'rename', entry: selectedEntry })}
           onDelete={() => selectedEntry && setAction({ kind: 'delete', entry: selectedEntry })}
