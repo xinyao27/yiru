@@ -4849,7 +4849,7 @@
           "delete": "Delete",
           "saving": "Saving…",
           "save": "Save",
-          "truncatedFile": "This preview is truncated. Editing is disabled to avoid replacing the full file with partial content.",
+          "truncatedFile": "This is one chunk of the file. Editing is disabled to avoid replacing the full file with partial content.",
           "editorLabel": "File content",
           "loadingDiff": "Loading diff…",
           "truncatedDiff": "This diff is truncated.",
@@ -4857,7 +4857,10 @@
           "binaryDescription": "Binary preview · {{value0}} of {{value1}} bytes",
           "binaryUnavailable": "Binary preview unavailable.",
           "fileUnavailable": "This file is unavailable.",
-          "diffUnavailable": "This diff is unavailable."
+          "diffUnavailable": "This diff is unavailable.",
+          "previousChunk": "Previous chunk",
+          "nextChunk": "Next chunk",
+          "byteRange": "{{value0}}–{{value1}} / {{value2}} bytes"
         },
         "SpoolFileTree": {
           "up": "Up one directory",

@@ -4849,7 +4849,7 @@
           "delete": "Eliminar",
           "saving": "Guardando…",
           "save": "Guardar",
-          "truncatedFile": "Esta vista previa está truncada. La edición está desactivada para evitar sustituir el archivo completo con contenido parcial.",
+          "truncatedFile": "Se muestra un solo fragmento del archivo. La edición está desactivada para evitar sustituir el archivo completo con contenido parcial.",
           "editorLabel": "Contenido del archivo",
           "loadingDiff": "Cargando diff…",
           "truncatedDiff": "Este diff está truncado.",
@@ -4857,7 +4857,10 @@
           "binaryDescription": "Vista previa binaria · {{value0}} de {{value1}} bytes",
           "binaryUnavailable": "La vista previa binaria no está disponible.",
           "fileUnavailable": "Este archivo no está disponible.",
-          "diffUnavailable": "Este diff no está disponible."
+          "diffUnavailable": "Este diff no está disponible.",
+          "previousChunk": "Fragmento anterior",
+          "nextChunk": "Fragmento siguiente",
+          "byteRange": "{{value0}}–{{value1}} / {{value2}} bytes"
         },
         "SpoolFileTree": {
           "up": "Subir un directorio",

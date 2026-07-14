@@ -24,7 +24,6 @@ export {
   isSpoolRefExpanded,
   resolveSpoolWorkspaceRoute,
   selectActiveSpoolWorkspace,
-  selectCurrentSpoolControlRequest,
   selectSpoolCanControl,
   selectSpoolRequesterControlState
 } from './spool-sharing-selectors'

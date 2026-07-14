@@ -9,14 +9,11 @@ import {
 } from '../../shared/spool/spool-paired-runtime-host-contract'
 import {
   SpoolPairedRuntimeCanonicalizeResultSchema,
-  SpoolPairedRuntimeInspectionSchema,
-  SpoolPairedRuntimeInvokeResponseSchema,
-  parseSpoolPairedRuntimeResult
+  SpoolPairedRuntimeInspectionSchema
 } from '../../shared/spool/spool-paired-runtime-result-contract'
-import {
-  isSpoolMutationOperation,
-  type SpoolExecutionOperation,
-  type SpoolSubscriptionOperation
+import type {
+  SpoolExecutionOperation,
+  SpoolSubscriptionOperation
 } from '../../shared/spool/spool-operation-contract'
 import {
   callRuntimeEnvironmentExistingRoute,
@@ -26,7 +23,6 @@ import type {
   SpoolCanonicalHostPathResult,
   SpoolPairedRuntimeWorktreeHostAdapter
 } from './spool-actual-host-path-resolver'
-import { SpoolExecutionError } from './spool-execution-error'
 import type {
   SpoolHostAdapter,
   SpoolHostOperationContext,
@@ -38,6 +34,7 @@ import type {
   SpoolOwnerWorktree
 } from './spool-worktree-incarnation'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
+import { invokeAdmittedPairedRuntimeOperation } from './spool-paired-runtime-admitted-invocation'
 import { PairedRuntimeTerminalSubscription } from './spool-paired-runtime-terminal-subscription'
 import { SpoolPairedRuntimeChannelRegistry } from './spool-paired-runtime-channel-registry'
 import { invokePairedRuntimeSession } from './spool-paired-runtime-session-invocation'
@@ -136,47 +133,11 @@ export class OrcaSpoolPairedRuntimeHostAdapter
       channelRef: channel.channelRef,
       operation
     })
-    let admitted = false
-    try {
-      const response = await this.call(environmentId, 'spool.host.invoke', params, {
-        beforeSend: async () => {
-          if (context.signal.aborted) {
-            throw new SpoolExecutionError('resource_not_found')
-          }
-          if (isSpoolMutationOperation(operation)) {
-            if (!context.admissionGuard) {
-              throw new SpoolExecutionError('unauthorized')
-            }
-            await context.admissionGuard.beforeSideEffect()
-            admitted = true
-          }
-        }
-      })
-      context.signal.throwIfAborted()
-      if (!response.ok) {
-        // Why: old runtimes and broad RPC failures never trigger a less-restricted fallback.
-        throw new SpoolExecutionError('resource_unavailable')
-      }
-      const envelope = SpoolPairedRuntimeInvokeResponseSchema.safeParse(response.result)
-      if (!envelope.success) {
-        throw new SpoolExecutionError(
-          isSpoolMutationOperation(operation) && admitted
-            ? 'outcome_unknown'
-            : 'resource_unavailable'
-        )
-      }
-      if (envelope.data.status === 'error') {
-        throw new SpoolExecutionError(envelope.data.code)
-      }
-      return parseSpoolPairedRuntimeResult(operation, envelope.data.result)
-    } catch (error) {
-      if (error instanceof SpoolExecutionError) {
-        throw error
-      }
-      throw new SpoolExecutionError(
-        isSpoolMutationOperation(operation) && admitted ? 'outcome_unknown' : 'resource_unavailable'
-      )
-    }
+    return await invokeAdmittedPairedRuntimeOperation({
+      operation,
+      context,
+      send: (beforeSend) => this.call(environmentId, 'spool.host.invoke', params, { beforeSend })
+    })
   }
 
   subscribe(

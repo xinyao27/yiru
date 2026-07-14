@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import type { SpoolExecutionOperation } from './spool-operation-contract'
+import { SPOOL_RPC_ERROR_CODES } from './spool-wire-contract'
 
 const boundedText = z.string().max(8 * 1_024 * 1_024)
 const pathText = z.string().max(32_768)
@@ -41,17 +42,7 @@ export const SpoolPairedRuntimeCanonicalizeResultSchema = z.discriminatedUnion('
   z.object({ status: z.literal('unavailable') }).strict()
 ])
 
-export const SpoolPairedRuntimeErrorCodeSchema = z.enum([
-  'invalid_argument',
-  'method_not_found',
-  'outcome_unknown',
-  'resource_busy',
-  'resource_not_found',
-  'resource_unavailable',
-  'result_too_large',
-  'unauthorized',
-  'internal_error'
-])
+export const SpoolPairedRuntimeErrorCodeSchema = z.enum(SPOOL_RPC_ERROR_CODES)
 
 export const SpoolPairedRuntimeInvokeResponseSchema = z.discriminatedUnion('status', [
   z.object({ status: z.literal('ok'), result: z.unknown() }).strict(),

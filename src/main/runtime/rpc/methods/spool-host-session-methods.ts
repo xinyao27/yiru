@@ -4,12 +4,15 @@ import {
   SpoolPairedRuntimeListHistoricalSessionsParamsSchema,
   SpoolPairedRuntimeListLiveSessionsParamsSchema,
   SpoolPairedRuntimeLiveSessionsResponseSchema,
-  SpoolPairedRuntimeSessionInvokeParamsSchema
+  SpoolPairedRuntimeSessionChangedEventSchema,
+  SpoolPairedRuntimeSessionInvokeParamsSchema,
+  SpoolPairedRuntimeSubscribeSessionChangesParamsSchema,
+  SpoolPairedRuntimeUnsubscribeSessionChangesParamsSchema
 } from '../../../../shared/spool/spool-paired-runtime-session-contract'
 import { parseSpoolPairedRuntimeResult } from '../../../../shared/spool/spool-paired-runtime-result-contract'
 import type { SpoolExecutionOperation } from '../../../../shared/spool/spool-operation-contract'
 import { SpoolExecutionError } from '../../../spool/spool-execution-error'
-import { defineMethod, type RpcAnyMethod } from '../core'
+import { defineMethod, defineStreamingMethod, type RpcAnyMethod, type RpcContext } from '../core'
 import {
   getHostBundle,
   operationContext,
@@ -23,6 +26,8 @@ import {
   projectPairedRuntimeHistoricalSessions,
   projectPairedRuntimeLiveSessions
 } from './spool-host-session-projection'
+
+const SESSION_CHANGED_EVENT = SpoolPairedRuntimeSessionChangedEventSchema.parse({ kind: 'changed' })
 
 export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
   defineMethod({
@@ -51,6 +56,26 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
       } catch (error) {
         return { status: 'error' as const, code: pairedRuntimeErrorCode(error) }
       }
+    }
+  }),
+  defineStreamingMethod({
+    name: 'spool.host.subscribeSessionChanges',
+    params: SpoolPairedRuntimeSubscribeSessionChangesParamsSchema,
+    handler: async (params, context, emit) => {
+      requirePairedRuntimePrincipal(context)
+      const worktree = await resolveIncarnationBoundActualWorktree(context.runtime, params.target)
+      await runSessionChangesSubscription(context, worktree.worktreeId, emit)
+    }
+  }),
+  defineMethod({
+    name: 'spool.host.unsubscribeSessionChanges',
+    params: SpoolPairedRuntimeUnsubscribeSessionChangesParamsSchema,
+    handler: (params, context) => {
+      requirePairedRuntimePrincipal(context)
+      context.runtime.cleanupSubscription(
+        sessionChangesCleanupId(context.connectionId, params.requestId)
+      )
+      return { ok: true }
     }
   }),
   defineMethod({
@@ -98,4 +123,57 @@ function remoteSessionOperation(
   kind: 'session.read' | 'session.continue'
 ): Extract<SpoolExecutionOperation, { kind: 'session.read' | 'session.continue' }> {
   return { kind, ownerRecordKey: randomUUID() }
+}
+
+async function runSessionChangesSubscription(
+  context: RpcContext,
+  worktreeId: string,
+  emit: (result: unknown) => void
+): Promise<void> {
+  const signal = context.signal ?? new AbortController().signal
+  await new Promise<void>((resolve) => {
+    let finished = false
+    let unsubscribe = (): void => {}
+    const requestId = context.requestId ?? randomUUID()
+    const cleanupId = sessionChangesCleanupId(context.connectionId, requestId)
+    const finish = (): void => {
+      if (finished) {
+        return
+      }
+      finished = true
+      signal.removeEventListener('abort', finish)
+      context.runtime.cleanupSubscription(cleanupId)
+      unsubscribe()
+      resolve()
+    }
+    // Why: logical subscriptions share the owner's physical runtime route and must clean up alone.
+    context.runtime.registerSubscriptionCleanup(cleanupId, finish, context.connectionId)
+    if (signal.aborted) {
+      finish()
+      return
+    }
+    signal.addEventListener('abort', finish, { once: true })
+    try {
+      unsubscribe = context.runtime.onMobileSessionTabsChanged((snapshot) => {
+        if (finished || snapshot.worktree !== worktreeId) {
+          return
+        }
+        try {
+          // Why: subscribers only need invalidation; session metadata stays on the owner.
+          emit(SESSION_CHANGED_EVENT)
+        } catch {
+          finish()
+        }
+      })
+    } catch {
+      finish()
+    }
+    if (finished) {
+      unsubscribe()
+    }
+  })
+}
+
+function sessionChangesCleanupId(connectionId: string | undefined, requestId: string): string {
+  return `spool.host.session-changes:${connectionId ?? 'local'}:${requestId}`
 }

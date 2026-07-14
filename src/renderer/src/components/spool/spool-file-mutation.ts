@@ -1,12 +1,12 @@
 import type { SpoolFileTreeEntry } from '../../../../shared/spool/spool-operation-contract'
 import { basename, dirname, joinPath, normalizeRelativePath } from '@/lib/path'
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 import type { SpoolFileAction } from './SpoolFileActionDialog'
 import { parseSpoolMutationResult } from './spool-owner-result-validation'
+import type { SpoolWorktreeRoute } from './spool-worktree-route'
 import { invokeSpoolWorkspaceMutation } from './spool-workspace-operation'
 
 export async function executeSpoolFileAction(
-  route: SpoolWorkspaceRoute,
+  route: SpoolWorktreeRoute,
   directory: string,
   action: SpoolFileAction,
   name: string

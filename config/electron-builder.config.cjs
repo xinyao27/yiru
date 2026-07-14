@@ -208,10 +208,9 @@ module.exports = {
     shortcutName: '${productName}',
     uninstallDisplayName: '${productName}',
     createDesktopShortcut: 'always',
-    // Why: on a real uninstall, stop and remove the relocated terminal daemon
-    // (which lives outside the install dir under LOCALAPPDATA by design). Guarded
-    // by ${isUpdated} inside so it never runs during an update's uninstallOldVersion.
-    include: resolve(__dirname, 'nsis', 'daemon-host-uninstall.nsh')
+    // Why: install-time firewall setup and real-uninstall cleanup share hooks;
+    // daemon cleanup stays guarded from an update's uninstallOldVersion pass.
+    include: resolve(__dirname, 'nsis', 'windows-installer-hooks.nsh')
   },
   mac: {
     icon: 'resources/build/icon.icns',

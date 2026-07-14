@@ -4,8 +4,8 @@ import {
   resolveSpoolWorkspaceRoute,
   selectSpoolCanControl
 } from '@/store/slices/spool-sharing-selectors'
-import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 import { getSpoolRequesterTransportErrorCode } from './spool-requester-error'
+import type { SpoolWorktreeRoute } from './spool-worktree-route'
 
 type SpoolWorkspaceReadMethod =
   | 'files.list'
@@ -32,7 +32,7 @@ export class SpoolWorkspaceOperationError extends Error {
 }
 
 export async function invokeSpoolWorkspaceRead(
-  route: SpoolWorkspaceRoute,
+  route: SpoolWorktreeRoute,
   method: SpoolWorkspaceReadMethod,
   params: Record<string, unknown>
 ): Promise<unknown> {
@@ -43,7 +43,7 @@ export async function invokeSpoolWorkspaceRead(
 }
 
 export async function invokeSpoolWorkspaceMutation(
-  route: SpoolWorkspaceRoute,
+  route: SpoolWorktreeRoute,
   method: SpoolWorkspaceMutationMethod,
   params: Record<string, unknown>
 ): Promise<unknown> {
@@ -64,7 +64,7 @@ export async function invokeSpoolWorkspaceMutation(
 }
 
 async function invokeRequester(
-  route: SpoolWorkspaceRoute,
+  route: SpoolWorktreeRoute,
   method: SpoolWorkspaceReadMethod | SpoolWorkspaceMutationMethod,
   params: Record<string, unknown>
 ): Promise<unknown> {
@@ -84,7 +84,7 @@ async function invokeRequester(
   }
 }
 
-function requireNoConflictingActiveRoute(route: SpoolWorkspaceRoute): void {
+function requireNoConflictingActiveRoute(route: SpoolWorktreeRoute): void {
   const activeRoute = useAppStore.getState().activeSpoolWorkspaceRoute
   if (
     !activeRoute ||
@@ -96,7 +96,7 @@ function requireNoConflictingActiveRoute(route: SpoolWorkspaceRoute): void {
   }
 }
 
-function requireCurrentRoute(route: SpoolWorkspaceRoute, requireControl: boolean): void {
+function requireCurrentRoute(route: SpoolWorktreeRoute, requireControl: boolean): void {
   const state = useAppStore.getState()
   const activeRoute = state.activeSpoolWorkspaceRoute
   if (

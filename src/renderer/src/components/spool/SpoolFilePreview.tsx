@@ -1,6 +1,6 @@
 import type React from 'react'
-import { useEffect, useState } from 'react'
-import { FileDiff, RefreshCw, Save, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronLeft, ChevronRight, FileDiff, RefreshCw, Save, Trash2 } from 'lucide-react'
 import type {
   SpoolFileDiffResult,
   SpoolFileReadResult,
@@ -9,6 +9,7 @@ import type {
 import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { SpoolTruncatedPathLabel } from './SpoolTruncatedPathLabel'
 
 type FilePreviewMode = 'content' | 'working-diff' | 'staged-diff'
 
@@ -26,6 +27,8 @@ export function SpoolFilePreview({
   onDelete,
   onDraftChange,
   onLoadDiff,
+  onNextChunk,
+  onPreviousChunk,
   onRefresh,
   onRename,
   onSave
@@ -43,12 +46,13 @@ export function SpoolFilePreview({
   onDelete: () => void
   onDraftChange: (value: string) => void
   onLoadDiff: (staged: boolean) => void
+  onNextChunk: () => void
+  onPreviousChunk: () => void
   onRefresh: () => void
   onRename: () => void
   onSave: () => void
 }): React.JSX.Element {
   const [mode, setMode] = useState<FilePreviewMode>('content')
-  useEffect(() => setMode('content'), [file?.relativePath])
 
   if (loading) {
     return (
@@ -79,14 +83,45 @@ export function SpoolFilePreview({
   }
 
   const dirty = file.encoding === 'utf8' && draft !== file.content
-  const editable = canControl && file.encoding === 'utf8' && !file.truncated
+  const completeFile = file.offset === 0 && file.bytesRead === file.totalBytes
+  const editable = canControl && file.encoding === 'utf8' && completeFile
   const showDiff = mode !== 'content'
+  const hasPreviousChunk = file.offset > 0
+  const hasNextChunk = file.bytesRead > 0 && file.offset + file.bytesRead < file.totalBytes
   return (
     <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--editor-surface)]">
-      <header className="flex min-h-9 shrink-0 flex-wrap items-center gap-1 border-b border-border bg-card px-2 py-1">
-        <span className="min-w-28 flex-1 truncate px-1 font-mono text-xs text-foreground">
-          {file.relativePath}
-        </span>
+      <header className="flex min-h-9 shrink-0 flex-wrap items-center gap-1 border-b border-border bg-card px-2 py-1 text-card-foreground">
+        <SpoolTruncatedPathLabel
+          path={file.relativePath}
+          className="min-w-28 flex-1 px-1 text-foreground"
+        />
+        {!showDiff && (hasPreviousChunk || hasNextChunk) ? (
+          <>
+            <span className="shrink-0 px-1 text-[11px] text-muted-foreground">
+              {formatFileByteRange(file)}
+            </span>
+            <Button
+              type="button"
+              size="xs"
+              variant="ghost"
+              disabled={!hasPreviousChunk}
+              onClick={onPreviousChunk}
+            >
+              <ChevronLeft aria-hidden="true" />
+              {translate('auto.components.spool.SpoolFilePreview.previousChunk', 'Previous chunk')}
+            </Button>
+            <Button
+              type="button"
+              size="xs"
+              variant="ghost"
+              disabled={!hasNextChunk}
+              onClick={onNextChunk}
+            >
+              {translate('auto.components.spool.SpoolFilePreview.nextChunk', 'Next chunk')}
+              <ChevronRight aria-hidden="true" />
+            </Button>
+          </>
+        ) : null}
         <Button type="button" size="xs" variant="ghost" onClick={onRefresh}>
           <RefreshCw aria-hidden="true" />
           {translate('auto.components.spool.SpoolFilePreview.reload', 'Reload')}
@@ -125,8 +160,7 @@ export function SpoolFilePreview({
         <Button
           type="button"
           size="xs"
-          variant="ghost"
-          className="text-destructive hover:text-destructive"
+          variant="destructive"
           disabled={!canControl}
           onClick={onDelete}
         >
@@ -176,11 +210,11 @@ function TextProjection({
 }): React.JSX.Element {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      {file.truncated ? (
+      {file.offset > 0 || file.truncated ? (
         <FileNotice
           message={translate(
             'auto.components.spool.SpoolFilePreview.truncatedFile',
-            'This preview is truncated. Editing is disabled to avoid replacing the full file with partial content.'
+            'This is one chunk of the file. Editing is disabled to avoid replacing the full file with partial content.'
           )}
         />
       ) : null}
@@ -265,13 +299,13 @@ function BinaryProjection({ file }: { file: SpoolFileReadResult }): React.JSX.El
         )}
       />
       <pre className="mt-3 whitespace-pre-wrap font-mono text-xs leading-5 text-foreground">
-        {projectBase64AsHex(file.content)}
+        {projectBase64AsHex(file.content, file.offset)}
       </pre>
     </div>
   )
 }
 
-function projectBase64AsHex(content: string): string {
+function projectBase64AsHex(content: string, baseOffset: number): string {
   try {
     const bytes = Uint8Array.from(atob(content), (character) => character.charCodeAt(0)).slice(
       0,
@@ -280,7 +314,7 @@ function projectBase64AsHex(content: string): string {
     const rows: string[] = []
     for (let offset = 0; offset < bytes.length; offset += 16) {
       const row = bytes.slice(offset, offset + 16)
-      const address = offset.toString(16).padStart(8, '0')
+      const address = (baseOffset + offset).toString(16).padStart(8, '0')
       const hex = [...row].map((byte) => byte.toString(16).padStart(2, '0')).join(' ')
       const ascii = [...row]
         .map((byte) => (byte >= 32 && byte <= 126 ? String.fromCharCode(byte) : '.'))
@@ -294,6 +328,20 @@ function projectBase64AsHex(content: string): string {
       'Binary preview unavailable.'
     )
   }
+}
+
+function formatFileByteRange(file: SpoolFileReadResult): string {
+  const firstByte = file.bytesRead === 0 ? 0 : file.offset + 1
+  const lastByte = file.offset + file.bytesRead
+  return translate(
+    'auto.components.spool.SpoolFilePreview.byteRange',
+    '{{value0}}–{{value1}} / {{value2}} bytes',
+    {
+      value0: firstByte.toLocaleString(),
+      value1: lastByte.toLocaleString(),
+      value2: file.totalBytes.toLocaleString()
+    }
+  )
 }
 
 function FileNotice({ message }: { message: string }): React.JSX.Element {

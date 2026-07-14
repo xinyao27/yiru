@@ -97,7 +97,11 @@ export class DefaultTailnetPeerDirectory implements TailnetPeerDirectory {
     try {
       peers = (await this.tailnet.readSnapshot()).peers
     } catch {
-      this.recordMisses(new Set())
+      if (this.recordMisses(new Set())) {
+        // Why: after two failed passes, subscribers must close the stale
+        // requester connection instead of retaining an offline Desktop row.
+        this.emit()
+      }
       return
     }
     const discovered = await mapWithConcurrency(peers, PEER_PROBE_CONCURRENCY, (peer) =>

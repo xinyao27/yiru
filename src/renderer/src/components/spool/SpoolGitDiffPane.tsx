@@ -33,7 +33,7 @@ export function SpoolGitDiffPane({
   }
   return (
     <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--editor-surface)]">
-      <header className="flex min-h-9 shrink-0 items-center gap-2 border-b border-border bg-card px-3 py-1">
+      <header className="flex min-h-9 shrink-0 items-center gap-2 border-b border-border bg-card px-3 py-1 text-card-foreground">
         <GitCompareArrows aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
         <span className="min-w-0 flex-1 truncate font-mono text-xs text-foreground">{title}</span>
         {historyEntry ? (

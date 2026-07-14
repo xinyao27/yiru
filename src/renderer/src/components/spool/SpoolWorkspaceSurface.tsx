@@ -1,5 +1,5 @@
 import type React from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { FileText, GitCompareArrows, LockKeyhole, ShieldCheck, SquareTerminal } from 'lucide-react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
@@ -9,6 +9,7 @@ import {
   selectSpoolCanControl,
   selectSpoolRequesterControlState
 } from '@/store/slices/spool-sharing-selectors'
+import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -17,6 +18,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SpoolFilesPane } from './SpoolFilesPane'
 import { SpoolGitPane } from './SpoolGitPane'
 import { SpoolSessionPane } from './SpoolSessionPane'
+import { getSpoolSessionRouteKey } from './spool-session-route'
+import { getSpoolWorktreeRouteKey } from './spool-worktree-route'
 
 type SpoolWorkspaceTab = 'sessions' | 'files' | 'changes'
 
@@ -45,8 +48,20 @@ function isSpoolWorkspaceTab(value: string): value is SpoolWorkspaceTab {
 }
 
 export default function SpoolWorkspaceSurface(): React.JSX.Element | null {
-  const workspace = useAppStore(useShallow(selectActiveSpoolWorkspace))
   const route = useAppStore((state) => state.activeSpoolWorkspaceRoute)
+  if (!route) {
+    return null
+  }
+  // Why: worktree-local tabs and in-flight UI state must reset atomically when the route changes.
+  return <SpoolWorkspaceSurfaceContent key={getSpoolWorktreeRouteKey(route)} route={route} />
+}
+
+function SpoolWorkspaceSurfaceContent({
+  route
+}: {
+  route: SpoolWorkspaceRoute
+}): React.JSX.Element | null {
+  const workspace = useAppStore(useShallow(selectActiveSpoolWorkspace))
   const canControl = useAppStore((state) => selectSpoolCanControl(state, route))
   const controlState = useAppStore((state) => selectSpoolRequesterControlState(state, route))
   const markControlPending = useAppStore((state) => state.markSpoolControlPending)
@@ -54,16 +69,8 @@ export default function SpoolWorkspaceSurface(): React.JSX.Element | null {
   const [activeTab, setActiveTab] = useState<SpoolWorkspaceTab>('sessions')
   const [requesting, setRequesting] = useState(false)
 
-  const routeKey = route
-    ? `${route.desktopRef}:${route.worktreeRef}:${route.connectionEpoch}`
-    : null
-  useEffect(() => {
-    setRequesting(false)
-    setActiveTab('sessions')
-  }, [routeKey])
-
   const requestControl = useCallback(async (): Promise<void> => {
-    if (!route || requesting || controlState !== 'read-only') {
+    if (requesting || controlState !== 'read-only') {
       return
     }
     setRequesting(true)
@@ -85,7 +92,7 @@ export default function SpoolWorkspaceSurface(): React.JSX.Element | null {
     }
   }, [controlState, markControlPending, requesting, route])
 
-  if (!workspace || !route) {
+  if (!workspace) {
     return null
   }
 
@@ -102,7 +109,7 @@ export default function SpoolWorkspaceSurface(): React.JSX.Element | null {
       data-can-control={canControl ? 'true' : 'false'}
       className="flex min-h-0 min-w-0 flex-1 flex-col bg-background"
     >
-      <header className="flex h-9 shrink-0 items-center gap-3 border-b border-border bg-card px-3">
+      <header className="flex h-9 shrink-0 items-center gap-3 border-b border-border bg-card px-3 text-card-foreground">
         <div className="min-w-0 flex-1 truncate text-[13px]">
           <span className="text-muted-foreground">{workspace.desktop.userDisplayName}</span>
           <span className="px-1.5 text-muted-foreground">/</span>
@@ -143,7 +150,7 @@ export default function SpoolWorkspaceSurface(): React.JSX.Element | null {
       >
         <TabsList
           variant="line"
-          className="h-9 w-full shrink-0 justify-start rounded-none border-b border-border bg-card px-2 py-0"
+          className="h-9 w-full shrink-0 justify-start rounded-none border-b border-border bg-card px-2 py-0 text-card-foreground"
         >
           {WORKSPACE_TABS.map((tab) => {
             const Icon = tab.icon
@@ -162,7 +169,7 @@ export default function SpoolWorkspaceSurface(): React.JSX.Element | null {
 
         <TabsContent value="sessions" className="min-h-0 overflow-hidden">
           <div className="flex h-full min-h-0">
-            <aside className="scrollbar-sleek w-56 shrink-0 overflow-y-auto border-r border-border bg-card p-2">
+            <aside className="scrollbar-sleek w-56 shrink-0 overflow-y-auto border-r border-border bg-card p-2 text-card-foreground">
               <div className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
                 {translate('auto.components.spool.SpoolWorkspaceSurface.sessions', 'Sessions')}
               </div>
@@ -198,7 +205,7 @@ export default function SpoolWorkspaceSurface(): React.JSX.Element | null {
             </aside>
             {workspace.session && route.sessionRef ? (
               <SpoolSessionPane
-                key={`${route.connectionEpoch}:${route.sessionRef}`}
+                key={getSpoolSessionRouteKey({ ...route, sessionRef: route.sessionRef })}
                 route={{ ...route, sessionRef: route.sessionRef }}
               />
             ) : (
@@ -215,10 +222,10 @@ export default function SpoolWorkspaceSurface(): React.JSX.Element | null {
           </div>
         </TabsContent>
         <TabsContent value="files" className="min-h-0 overflow-hidden">
-          <SpoolFilesPane key={`files:${routeKey}`} route={route} />
+          <SpoolFilesPane route={route} />
         </TabsContent>
         <TabsContent value="changes" className="min-h-0 overflow-hidden">
-          <SpoolGitPane key={`git:${routeKey}`} route={route} />
+          <SpoolGitPane route={route} />
         </TabsContent>
       </Tabs>
     </main>

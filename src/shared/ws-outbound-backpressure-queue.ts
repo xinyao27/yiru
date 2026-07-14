@@ -29,6 +29,8 @@ export type WsOutboundBackpressureQueueOptions<TFrame> = {
   softCapBytes?: number
   /** Hard cap on bytes held in this queue before onOverflow fires. */
   maxQueuedBytes?: number
+  /** Optional hard cap on queued bytes attributed to one caller-defined group. */
+  maxQueuedBytesPerGroup?: number
   /** Poll interval used to re-check bufferedAmount while parked. */
   drainPollMs?: number
   /** Injectable scheduler for deterministic tests. */
@@ -38,7 +40,7 @@ export type WsOutboundBackpressureQueueOptions<TFrame> = {
 
 export type WsOutboundBackpressureQueue<TFrame> = {
   /** Queue-or-send a frame. Preserves order across all prior frames. */
-  enqueue: (frame: TFrame) => void
+  enqueue: (frame: TFrame, groupKey?: string) => void
   /** Bytes currently held (not yet handed to the wire). */
   queuedBytes: () => number
   /** Drop the backlog and stop the drain timer (call on close). */
@@ -56,6 +58,7 @@ export function createWsOutboundBackpressureQueue<TFrame>(
 ): WsOutboundBackpressureQueue<TFrame> {
   const softCapBytes = options.softCapBytes ?? DEFAULT_SOFT_CAP_BYTES
   const maxQueuedBytes = options.maxQueuedBytes ?? DEFAULT_MAX_QUEUED_BYTES
+  const maxQueuedBytesPerGroup = options.maxQueuedBytesPerGroup
   const drainPollMs = options.drainPollMs ?? DEFAULT_DRAIN_POLL_MS
   const setTimer = options.setTimer ?? ((cb, ms) => setTimeout(cb, ms))
   const clearTimer = options.clearTimer ?? ((timer) => clearTimeout(timer))
@@ -67,7 +70,8 @@ export function createWsOutboundBackpressureQueue<TFrame>(
     return Number.isFinite(value) ? value : 0
   }
 
-  const queue: { frame: TFrame; bytes: number }[] = []
+  const queue: { frame: TFrame; bytes: number; groupKey?: string }[] = []
+  const queuedBytesByGroup = new Map<string, number>()
   let queueHead = 0
   let queued = 0
   let timer: ReturnType<typeof setTimeout> | null = null
@@ -85,7 +89,21 @@ export function createWsOutboundBackpressureQueue<TFrame>(
     queue.length = 0
     queueHead = 0
     queued = 0
+    queuedBytesByGroup.clear()
     stopTimer()
+  }
+
+  const adjustGroupBytes = (groupKey: string | undefined, delta: number): number => {
+    if (groupKey === undefined) {
+      return 0
+    }
+    const next = (queuedBytesByGroup.get(groupKey) ?? 0) + delta
+    if (next === 0) {
+      queuedBytesByGroup.delete(groupKey)
+    } else {
+      queuedBytesByGroup.set(groupKey, next)
+    }
+    return next
   }
 
   // Drain as many queued frames as the wire will take without crossing the
@@ -102,6 +120,7 @@ export function createWsOutboundBackpressureQueue<TFrame>(
     while (queueHead < queue.length && bufferedAmount() <= softCapBytes) {
       const entry = queue[queueHead++]
       queued -= entry.bytes
+      adjustGroupBytes(entry.groupKey, -entry.bytes)
       options.send(entry.frame)
     }
     if (queueHead < queue.length) {
@@ -116,7 +135,7 @@ export function createWsOutboundBackpressureQueue<TFrame>(
   }
 
   return {
-    enqueue(frame: TFrame): void {
+    enqueue(frame: TFrame, groupKey?: string): void {
       if (disposed || overflowed) {
         return
       }
@@ -126,9 +145,13 @@ export function createWsOutboundBackpressureQueue<TFrame>(
         return
       }
       const bytes = options.byteLengthOf(frame)
-      queue.push({ frame, bytes })
+      queue.push({ frame, bytes, ...(groupKey !== undefined ? { groupKey } : {}) })
       queued += bytes
-      if (queued > maxQueuedBytes) {
+      const groupQueued = adjustGroupBytes(groupKey, bytes)
+      if (
+        queued > maxQueuedBytes ||
+        (maxQueuedBytesPerGroup !== undefined && groupQueued > maxQueuedBytesPerGroup)
+      ) {
         overflowed = true
         dropBacklog()
         options.onOverflow()

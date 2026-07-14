@@ -101,6 +101,12 @@ export function getCleanupRequest(
       params: { subscriptionId: `spool.host.terminal:${subscription.requestId}` }
     }
   }
+  if (subscription.method === 'spool.host.subscribeSessionChanges') {
+    return {
+      method: 'spool.host.unsubscribeSessionChanges',
+      params: { requestId: subscription.requestId }
+    }
+  }
   return null
 }
 

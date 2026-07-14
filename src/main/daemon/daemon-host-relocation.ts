@@ -50,7 +50,7 @@ const MARKER_NAME = '.materialized.json'
 // LOCAL appData, not the roaming userData dir, so a roaming profile or OneDrive
 // Known-Folder-Move never syncs it (slow login/logout, sync bloat). This folder
 // name is shared verbatim with the NSIS uninstall cleanup
-// (config/nsis/daemon-host-uninstall.nsh), which removes
+// (config/nsis/windows-installer-hooks.nsh), which removes
 // %LOCALAPPDATA%\<LOCAL_HOST_ROOT_NAME>\daemon-host — keep the two in sync.
 const LOCAL_HOST_ROOT_NAME = 'Orca'
 

@@ -5,6 +5,7 @@ import type { SpoolE2EEKeypair } from './spool-e2ee-keypair'
 import type { SpoolRpcGateway, SpoolServerConnection } from './spool-rpc-gateway'
 import type { SpoolTicketAuthority } from './spool-ticket-authority'
 import type { TailnetPrincipal } from './tailnet-control'
+import { SPOOL_MAX_STREAM_QUEUED_BYTES } from '../../shared/spool/spool-resource-limits'
 import { SPOOL_PROTOCOL_VERSION } from '../../shared/spool/spool-wire-contract'
 import { startSpoolWebSocketHeartbeat } from './spool-websocket-heartbeat'
 
@@ -30,6 +31,8 @@ export function openSpoolEncryptedConnection(
   )
   const channel = new E2EEChannel(options.webSocket, {
     serverSecretKey: options.keypair.secretKey,
+    // Why: one noisy terminal must not consume the whole ordered connection queue.
+    maxTextReplyQueuedBytesPerGroup: SPOOL_MAX_STREAM_QUEUED_BYTES,
     authenticate: (authFrame, context) => {
       const ticket = readSpoolTicket(authFrame)
       if (!ticket) {
@@ -55,13 +58,20 @@ export function openSpoolEncryptedConnection(
         return
       }
       rpcConnection = options.gateway.openConnection(principal, {
-        sendJson: (frame) => void readyChannel.sendText(frame),
+        sendJson: (frame, streamKey) => void readyChannel.sendText(frame, streamKey),
         // Why: authorization invalidation must discard application and kernel
         // backlogs; a graceful close may flush frames from the former epoch.
         close: () => options.webSocket.terminate()
       })
     },
-    onError: (code, reason) => options.webSocket.close(code, reason)
+    onError: (code, reason) => {
+      if (code === 1013) {
+        // Why: an overflowed peer must not flush stale queued frames during a close handshake.
+        options.webSocket.terminate()
+        return
+      }
+      options.webSocket.close(code, reason)
+    }
   })
   channel.onMessage((plaintext) => rpcConnection?.dispatchJson(plaintext))
   channel.onBinaryMessage((frame) => rpcConnection?.dispatchBinary(frame))

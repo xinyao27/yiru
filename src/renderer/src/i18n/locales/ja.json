@@ -4849,7 +4849,7 @@
           "delete": "削除",
           "saving": "保存しています…",
           "save": "保存",
-          "truncatedFile": "このプレビューは切り詰められています。部分的な内容でファイル全体を置き換えないよう、編集は無効です。",
+          "truncatedFile": "現在はファイルの1チャンクのみを表示しています。部分的な内容でファイル全体を置き換えないよう、編集は無効です。",
           "editorLabel": "ファイルの内容",
           "loadingDiff": "差分を読み込んでいます…",
           "truncatedDiff": "この差分は切り詰められています。",
@@ -4857,7 +4857,10 @@
           "binaryDescription": "バイナリプレビュー · {{value1}} バイト中 {{value0}} バイト",
           "binaryUnavailable": "バイナリプレビューを表示できません。",
           "fileUnavailable": "このファイルは利用できません。",
-          "diffUnavailable": "この差分は利用できません。"
+          "diffUnavailable": "この差分は利用できません。",
+          "previousChunk": "前のチャンク",
+          "nextChunk": "次のチャンク",
+          "byteRange": "{{value0}}–{{value1}} / {{value2}} バイト"
         },
         "SpoolFileTree": {
           "up": "1 つ上のディレクトリへ",

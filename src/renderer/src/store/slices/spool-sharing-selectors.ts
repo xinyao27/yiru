@@ -4,10 +4,7 @@ import type {
   SpoolSessionCatalogEntry,
   SpoolWorktreeCatalogEntry
 } from '../../../../shared/spool/spool-catalog-contract'
-import type {
-  SpoolOwnerControlRequestView,
-  SpoolRequesterControlView
-} from '../../../../shared/spool/spool-ipc-contract'
+import type { SpoolRequesterControlView } from '../../../../shared/spool/spool-ipc-contract'
 import type {
   SpoolExpandedRefsByDesktop,
   SpoolSharingState,
@@ -121,10 +118,4 @@ export function selectSpoolRequesterControlState(
     isSpoolRequesterControlCurrent(state.spoolRemoteDesktops, binding)
     ? binding.status
     : 'read-only'
-}
-
-export function selectCurrentSpoolControlRequest(
-  state: Pick<SpoolSharingState, 'spoolControlRequestQueue'>
-): SpoolOwnerControlRequestView | null {
-  return state.spoolControlRequestQueue[0] ?? null
 }

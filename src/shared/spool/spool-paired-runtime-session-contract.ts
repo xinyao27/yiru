@@ -35,6 +35,18 @@ export const SpoolPairedRuntimeListHistoricalSessionsParamsSchema = z
   })
   .strict()
 
+export const SpoolPairedRuntimeSubscribeSessionChangesParamsSchema = z
+  .object({ target: SpoolPairedRuntimeSessionWorktreeSchema })
+  .strict()
+
+export const SpoolPairedRuntimeUnsubscribeSessionChangesParamsSchema = z
+  .object({ requestId: z.string().uuid() })
+  .strict()
+
+export const SpoolPairedRuntimeSessionChangedEventSchema = z
+  .object({ kind: z.literal('changed') })
+  .strict()
+
 export const SpoolPairedRuntimeLiveSessionSchema = z
   .object({
     terminalRef: z.string().min(1).max(2_048).refine(withoutNull),

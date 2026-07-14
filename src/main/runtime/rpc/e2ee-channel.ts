@@ -48,6 +48,7 @@ export type E2EEAuthenticationContext = {
 }
 
 export type E2EEChannelOptions = E2EEChannelCommonOptions & {
+  maxTextReplyQueuedBytesPerGroup?: number
   resolveAuthenticatedDevice?: (token: string) => E2EEAuthenticatedDevice | null
   authenticate?: (
     authFrame: unknown,
@@ -65,6 +66,7 @@ export class E2EEChannel {
   private handshakeTimer: ReturnType<typeof setTimeout> | null = null
   private readonly ws: WebSocket
   private readonly serverSecretKey: Uint8Array
+  private readonly maxTextReplyQueuedBytesPerGroup: number | undefined
   private readonly resolveAuthenticatedDevice:
     | ((token: string) => E2EEAuthenticatedDevice | null)
     | undefined
@@ -109,6 +111,7 @@ export class E2EEChannel {
   constructor(ws: WebSocket, options: E2EEChannelOptions) {
     this.ws = ws
     this.serverSecretKey = options.serverSecretKey
+    this.maxTextReplyQueuedBytesPerGroup = options.maxTextReplyQueuedBytesPerGroup
     if (options.authenticate) {
       this.resolveAuthenticatedDevice = undefined
       this.authenticate = options.authenticate
@@ -415,13 +418,16 @@ export class E2EEChannel {
         isWritable: () => Boolean(this.sharedKey) && this.ws.readyState === this.ws.OPEN,
         // 1013 (Try Again Later): the link is wedged; drop the channel so the
         // client reconnects and replays a full snapshot instead of unbounded RSS.
-        onOverflow: () => this.onError(1013, 'Outbound reply buffer overflow')
+        onOverflow: () => this.onError(1013, 'Outbound reply buffer overflow'),
+        ...(this.maxTextReplyQueuedBytesPerGroup !== undefined
+          ? { maxQueuedBytesPerGroup: this.maxTextReplyQueuedBytesPerGroup }
+          : {})
       })
     }
     return this.textReplyQueue
   }
 
-  sendText(plaintext: string): boolean {
+  sendText(plaintext: string, groupKey?: string): boolean {
     if (this.state !== 'ready' || this.ws.readyState !== this.ws.OPEN) {
       return false
     }
@@ -432,7 +438,7 @@ export class E2EEChannel {
     if (!this.sharedKey) {
       return false
     }
-    this.ensureTextReplyQueue().enqueue(encrypt(plaintext, this.sharedKey))
+    this.ensureTextReplyQueue().enqueue(encrypt(plaintext, this.sharedKey), groupKey)
     return true
   }
 

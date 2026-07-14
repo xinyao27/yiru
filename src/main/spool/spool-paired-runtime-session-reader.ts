@@ -1,14 +1,20 @@
 import { createHash } from 'node:crypto'
 import type { AiVaultSession } from '../../shared/ai-vault-types'
 import { parseExecutionHostId } from '../../shared/execution-host'
+import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime-client'
 import type { RuntimeMobileSessionTerminalClientTab } from '../../shared/runtime-types'
 import {
   SpoolPairedRuntimeHistoricalSessionsResponseSchema,
   SpoolPairedRuntimeListHistoricalSessionsParamsSchema,
   SpoolPairedRuntimeListLiveSessionsParamsSchema,
-  SpoolPairedRuntimeLiveSessionsResponseSchema
+  SpoolPairedRuntimeLiveSessionsResponseSchema,
+  SpoolPairedRuntimeSessionChangedEventSchema,
+  SpoolPairedRuntimeSubscribeSessionChangesParamsSchema
 } from '../../shared/spool/spool-paired-runtime-session-contract'
-import { callRuntimeEnvironmentExistingRoute } from '../ipc/runtime-environment-existing-route'
+import {
+  callRuntimeEnvironmentExistingRoute,
+  subscribeRuntimeEnvironmentExistingRoute
+} from '../ipc/runtime-environment-existing-route'
 import { SpoolExecutionError } from './spool-execution-error'
 import type {
   SpoolExecutionHostSessionReader,
@@ -22,8 +28,16 @@ export type OrcaSpoolPairedRuntimeSessionReaderOptions = {
   timeoutMs?: number
 }
 
+type SessionChangesBinding = {
+  targetIdentity: string
+  subscription: RemoteRuntimeSubscription | null
+}
+
 /** Reads a strict projection while locator material remains on the paired owner channel. */
 export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSessionReader {
+  private readonly listeners = new Set<() => void>()
+  private readonly sessionChangesBindings = new Map<string, SessionChangesBinding>()
+
   constructor(private readonly options: OrcaSpoolPairedRuntimeSessionReaderOptions) {}
 
   async listMobileSessionTabs(request: SpoolExecutionHostSessionReadRequest) {
@@ -42,6 +56,7 @@ export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSe
     if (envelope.data.status === 'error') {
       throw new SpoolExecutionError(envelope.data.code)
     }
+    this.ensureSessionChangesSubscription(environmentId, request)
     const tabs = envelope.data.result.sessions.map((session) => projectLiveTab(session))
     return {
       worktree: request.worktreeId,
@@ -71,6 +86,7 @@ export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSe
     if (envelope.data.status === 'error') {
       throw new SpoolExecutionError(envelope.data.code)
     }
+    this.ensureSessionChangesSubscription(environmentId, request)
     const result = envelope.data.result
     return {
       sessions: result.sessions.map((session) =>
@@ -78,6 +94,21 @@ export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSe
       ),
       issues: [],
       scannedAt: result.scannedAt
+    }
+  }
+
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener)
+    let subscribed = true
+    return () => {
+      if (!subscribed) {
+        return
+      }
+      subscribed = false
+      this.listeners.delete(listener)
+      if (this.listeners.size === 0) {
+        this.closeSessionChangesBindings()
+      }
     }
   }
 
@@ -97,6 +128,89 @@ export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSe
       throw new SpoolExecutionError('resource_unavailable')
     }
   }
+
+  private ensureSessionChangesSubscription(
+    environmentId: string,
+    request: SpoolExecutionHostSessionReadRequest
+  ): void {
+    if (this.listeners.size === 0) {
+      return
+    }
+    const bindingKey = sessionChangesBindingKey(environmentId, request.worktreeId)
+    const targetIdentity = sessionTargetIdentity(request)
+    const existing = this.sessionChangesBindings.get(bindingKey)
+    if (existing?.targetIdentity === targetIdentity) {
+      return
+    }
+    if (existing) {
+      this.closeSessionChangesBinding(bindingKey, existing)
+    }
+    const params = SpoolPairedRuntimeSubscribeSessionChangesParamsSchema.parse({
+      target: sessionTarget(request)
+    })
+    const binding: SessionChangesBinding = { targetIdentity, subscription: null }
+    this.sessionChangesBindings.set(bindingKey, binding)
+    void subscribeRuntimeEnvironmentExistingRoute(
+      this.options.userDataPath,
+      environmentId,
+      'spool.host.subscribeSessionChanges',
+      params,
+      {
+        onEvent: (event) => this.handleSessionChangesEvent(bindingKey, binding, event),
+        onClose: () => this.closeSessionChangesBinding(bindingKey, binding)
+      }
+    )
+      .then((subscription) => {
+        if (this.sessionChangesBindings.get(bindingKey) !== binding) {
+          subscription.close()
+          return
+        }
+        binding.subscription = subscription
+      })
+      .catch(() => this.closeSessionChangesBinding(bindingKey, binding))
+  }
+
+  private handleSessionChangesEvent(
+    bindingKey: string,
+    binding: SessionChangesBinding,
+    event: Parameters<Parameters<typeof subscribeRuntimeEnvironmentExistingRoute>[4]['onEvent']>[0]
+  ): void {
+    if (this.sessionChangesBindings.get(bindingKey) !== binding) {
+      return
+    }
+    if (event.type !== 'response' || !event.response.ok) {
+      this.closeSessionChangesBinding(bindingKey, binding)
+      return
+    }
+    const changed = SpoolPairedRuntimeSessionChangedEventSchema.safeParse(event.response.result)
+    if (!changed.success) {
+      this.closeSessionChangesBinding(bindingKey, binding)
+      return
+    }
+    const listeners = Array.from(this.listeners)
+    for (const listener of listeners) {
+      try {
+        listener()
+      } catch {
+        // One catalog observer must not prevent the others from refreshing.
+      }
+    }
+  }
+
+  private closeSessionChangesBinding(bindingKey: string, binding: SessionChangesBinding): void {
+    if (this.sessionChangesBindings.get(bindingKey) !== binding) {
+      return
+    }
+    this.sessionChangesBindings.delete(bindingKey)
+    binding.subscription?.close()
+    binding.subscription = null
+  }
+
+  private closeSessionChangesBindings(): void {
+    for (const [bindingKey, binding] of this.sessionChangesBindings) {
+      this.closeSessionChangesBinding(bindingKey, binding)
+    }
+  }
 }
 
 function requireRuntimeEnvironment(request: SpoolExecutionHostSessionReadRequest): string {
@@ -113,6 +227,14 @@ function sessionTarget(request: SpoolExecutionHostSessionReadRequest) {
     instanceId: request.worktreeInstanceId,
     spoolIncarnationId: request.spoolIncarnationId
   }
+}
+
+function sessionChangesBindingKey(environmentId: string, worktreeId: string): string {
+  return JSON.stringify([environmentId, worktreeId])
+}
+
+function sessionTargetIdentity(request: SpoolExecutionHostSessionReadRequest): string {
+  return JSON.stringify([request.worktreeInstanceId, request.spoolIncarnationId])
 }
 
 function projectLiveTab(session: {

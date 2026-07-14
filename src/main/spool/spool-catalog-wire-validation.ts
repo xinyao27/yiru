@@ -13,6 +13,7 @@ import {
   SPOOL_CATALOG_MAX_WORKTREES
 } from '../../shared/spool/spool-catalog-contract'
 import { SPOOL_PROTOCOL_VERSION } from '../../shared/spool/spool-wire-contract'
+import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
 
 type CatalogCounts = { worktrees: number }
 
@@ -26,7 +27,7 @@ export function isSpoolDesktopCatalog(
   const record = value as Record<string, unknown>
   const counts: CatalogCounts = { worktrees: 0 }
   return (
-    hasOnlyKeys(record, [
+    hasExactSpoolWireKeys(record, [
       'protocolVersion',
       'ownerRuntimeId',
       'catalogRevision',
@@ -49,7 +50,7 @@ function isProject(value: unknown, counts: CatalogCounts): value is SpoolProject
   const record = asRecord(value)
   return Boolean(
     record &&
-    hasOnlyKeys(record, ['projectRef', 'name', 'worktrees']) &&
+    hasExactSpoolWireKeys(record, ['projectRef', 'name', 'worktrees']) &&
     isReference(record.projectRef) &&
     isLabel(record.name) &&
     Array.isArray(record.worktrees) &&
@@ -64,7 +65,7 @@ function isWorktree(value: unknown, counts: CatalogCounts): value is SpoolWorktr
     return false
   }
   return Boolean(
-    hasOnlyKeys(record, [
+    hasExactSpoolWireKeys(record, [
       'worktreeRef',
       'shareEpoch',
       'name',
@@ -91,7 +92,7 @@ export function isSpoolSessionCatalogPage(
   const record = asRecord(value)
   return Boolean(
     record &&
-    hasOnlyKeys(record, [
+    hasExactSpoolWireKeys(record, [
       'catalogRevision',
       'worktreeRef',
       'shareEpoch',
@@ -117,7 +118,7 @@ function isOwnerSessionCatalogState(value: unknown): value is SpoolSessionCatalo
 
 function isSessionCatalogState(value: unknown): value is SpoolSessionCatalogPageState {
   const record = asRecord(value)
-  if (!record || !hasOnlyKeys(record, ['status', 'nextCursor'])) {
+  if (!record || !hasExactSpoolWireKeys(record, ['status', 'nextCursor'])) {
     return false
   }
   if (record.status === 'loading') {
@@ -130,7 +131,7 @@ function isSession(value: unknown): value is SpoolSessionCatalogEntry {
   const record = asRecord(value)
   return Boolean(
     record &&
-    hasOnlyKeys(record, ['sessionRef', 'provider', 'title']) &&
+    hasExactSpoolWireKeys(record, ['sessionRef', 'provider', 'title']) &&
     isReference(record.sessionRef) &&
     (record.provider === 'claude' || record.provider === 'codex' || record.provider === 'other') &&
     isLabel(record.title)
@@ -141,7 +142,7 @@ function isProviderQuota(value: unknown): value is SpoolProviderQuota {
   const record = asRecord(value)
   return Boolean(
     record &&
-    hasOnlyKeys(record, ['provider', 'status', 'updatedAt', 'fiveHour', 'sevenDay']) &&
+    hasExactSpoolWireKeys(record, ['provider', 'status', 'updatedAt', 'fiveHour', 'sevenDay']) &&
     (record.provider === 'claude' || record.provider === 'codex') &&
     (record.status === 'ok' || record.status === 'unavailable') &&
     (record.updatedAt === null || isFiniteNumber(record.updatedAt)) &&
@@ -157,7 +158,7 @@ function isQuotaWindow(value: unknown): boolean {
   const record = asRecord(value)
   return Boolean(
     record &&
-    hasOnlyKeys(record, ['usedPercent', 'resetsAt']) &&
+    hasExactSpoolWireKeys(record, ['usedPercent', 'resetsAt']) &&
     isFiniteNumber(record.usedPercent) &&
     record.usedPercent >= 0 &&
     record.usedPercent <= 100 &&
@@ -181,12 +182,4 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null
-}
-
-function hasOnlyKeys(record: Record<string, unknown>, keys: readonly string[]): boolean {
-  const allowed = new Set(keys)
-  return (
-    Object.keys(record).length === keys.length &&
-    Object.keys(record).every((key) => allowed.has(key))
-  )
 }

@@ -7,6 +7,7 @@ import {
   SPOOL_PROBE_PATH,
   SPOOL_SUPPORTED_PROTOCOL_VERSIONS
 } from '../../shared/spool/spool-wire-contract'
+import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
 
 const PROBE_TIMEOUT_MS = 3_000
 const MAX_PROBE_RESPONSE_BYTES = 16 * 1024
@@ -94,7 +95,7 @@ function validateProbeResponse(value: unknown): asserts value is SpoolProbeRespo
   }
   const response = value as Record<string, unknown>
   if (
-    !hasOnlyKeys(response, [
+    !hasExactSpoolWireKeys(response, [
       'protocolVersion',
       'ownerRuntimeId',
       'ownerPublicKeyB64',
@@ -146,12 +147,4 @@ function hasControlCharacter(value: string): boolean {
     }
   }
   return false
-}
-
-function hasOnlyKeys(record: Record<string, unknown>, keys: readonly string[]): boolean {
-  const allowed = new Set(keys)
-  return (
-    Object.keys(record).length === keys.length &&
-    Object.keys(record).every((key) => allowed.has(key))
-  )
 }
