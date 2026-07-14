@@ -1,7 +1,11 @@
 import type WebSocket from 'ws'
 import { logSharedControlSocketClose } from './remote-runtime-shared-control-diagnostics-log'
 import { closeSharedControlSocketState } from './remote-runtime-shared-control-state'
-import { finishCloseAfterReadySubscriptions } from './remote-runtime-shared-control-subscriptions'
+import {
+  finishCloseAfterReadySubscriptions,
+  finishNonReplayableSharedControlSubscriptions
+} from './remote-runtime-shared-control-subscriptions'
+import { remoteRuntimeUnavailableError } from './remote-runtime-request-frames'
 import type {
   SharedControlConnectionState,
   SharedControlLogicalSubscription,
@@ -33,6 +37,7 @@ export function closeSharedControlSocket(args: {
   }
   args.clearReadyStableTimer()
   finishCloseAfterReadySubscriptions(args.subscriptions)
+  finishNonReplayableSharedControlSubscriptions(args.subscriptions, remoteRuntimeUnavailableError())
   closeSharedControlSocketState({
     readyWaiters: args.readyWaiters,
     pendingRequests: args.pendingRequests,

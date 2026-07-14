@@ -1,0 +1,137 @@
+import type { OrcaRuntimeService } from '../../orca-runtime'
+import type {
+  SpoolPairedRuntimeBoundWorktree,
+  SpoolPairedRuntimeResolvedWorktree,
+  SpoolPairedRuntimeWorktreeSelector
+} from '../../../../shared/spool/spool-paired-runtime-host-contract'
+import type { SpoolPairedRuntimeSessionWorktree } from '../../../../shared/spool/spool-paired-runtime-session-contract'
+import {
+  SpoolExecutionError,
+  type SpoolExecutionErrorCode
+} from '../../../spool/spool-execution-error'
+import type { SpoolHostOperationContext } from '../../../spool/spool-execution-gateway'
+import { createOrcaSpoolHostAdapter } from '../../../spool/spool-orca-host-adapter'
+import type { SpoolOwnerWorktree } from '../../../spool/spool-worktree-incarnation'
+import { SpoolActualHostWorktreeIncarnationHost } from '../../../spool/spool-worktree-incarnation-host'
+import type { SpoolPublicWorktreeInstance } from '../../../spool/spool-worktree-publication-state'
+import type { RpcContext } from '../core'
+
+const bundles = new WeakMap<OrcaRuntimeService, ReturnType<typeof createOrcaSpoolHostAdapter>>()
+
+export function requirePairedRuntimePrincipal(context: RpcContext): void {
+  if (context.principal?.kind !== 'paired-device' || context.principal.scope !== 'runtime') {
+    // Why: these methods are downstream owner operations, never a second Spool admission path.
+    throw new Error('paired_runtime_spool_host_forbidden')
+  }
+}
+
+export async function resolveActualHostWorktree(
+  runtime: OrcaRuntimeService,
+  selector: SpoolPairedRuntimeWorktreeSelector
+): Promise<SpoolPairedRuntimeResolvedWorktree> {
+  return await runtime.resolvePairedRuntimeSpoolWorktree(selector)
+}
+
+export async function resolveIncarnationBoundActualWorktree(
+  runtime: OrcaRuntimeService,
+  selector: SpoolPairedRuntimeSessionWorktree
+): Promise<SpoolPairedRuntimeResolvedWorktree> {
+  const resolved = await resolveActualHostWorktree(runtime, selector)
+  const inspected = await createIncarnationHost(resolved).inspect(
+    toOwnerWorktree(resolved),
+    'resolve-or-create-marker'
+  )
+  if (inspected.status !== 'resolved') {
+    throw new SpoolExecutionError('resource_unavailable')
+  }
+  if (inspected.markerId !== selector.spoolIncarnationId) {
+    throw new SpoolExecutionError('resource_not_found')
+  }
+  return resolved
+}
+
+export async function resolveBoundActualHostWorktree(
+  runtime: OrcaRuntimeService,
+  selector: SpoolPairedRuntimeBoundWorktree
+): Promise<SpoolPublicWorktreeInstance> {
+  const resolved = await resolveIncarnationBoundActualWorktree(runtime, selector)
+  return {
+    worktreeId: resolved.worktreeId,
+    instanceId: resolved.instanceId,
+    projectId: resolved.projectId,
+    shareEpoch: selector.shareEpoch,
+    spoolIncarnationId: selector.spoolIncarnationId,
+    target: toOwnerWorktree(resolved)
+  }
+}
+
+export function toOwnerWorktree(resolved: SpoolPairedRuntimeResolvedWorktree): SpoolOwnerWorktree {
+  return {
+    kind: 'git',
+    worktreeId: resolved.worktreeId,
+    instanceId: resolved.instanceId,
+    projectId: resolved.projectId,
+    repoId: resolved.repoId,
+    executionHostId: resolved.executionHostId,
+    connectionId: resolved.connectionId,
+    ...(resolved.projectHostSetupId ? { projectHostSetupId: resolved.projectHostSetupId } : {}),
+    worktreePath: resolved.worktreePath
+  }
+}
+
+export function createIncarnationHost(
+  resolved: SpoolPairedRuntimeResolvedWorktree
+): SpoolActualHostWorktreeIncarnationHost {
+  return new SpoolActualHostWorktreeIncarnationHost({
+    resolveLocalWslDistro: () => resolved.localWslDistro
+  })
+}
+
+export function getHostBundle(runtime: OrcaRuntimeService) {
+  const existing = bundles.get(runtime)
+  if (existing) {
+    return existing
+  }
+  const created = createOrcaSpoolHostAdapter({
+    store: runtime.getPairedRuntimeSpoolStore(),
+    runtime
+  })
+  bundles.set(runtime, created)
+  return created
+}
+
+export function requireActualHostAdapter(
+  runtime: OrcaRuntimeService,
+  target: SpoolPublicWorktreeInstance
+) {
+  const adapter = getHostBundle(runtime).resolveAdapter(target)
+  if (!adapter) {
+    throw new SpoolExecutionError('resource_unavailable')
+  }
+  return adapter
+}
+
+export function operationContext(
+  channelRef: string,
+  context: RpcContext,
+  mutation: boolean
+): SpoolHostOperationContext {
+  const signal = context.signal ?? new AbortController().signal
+  return {
+    connectionId: channelRef,
+    signal,
+    ...(mutation
+      ? {
+          admissionGuard: {
+            // Why: this request exists only after owner admission at authenticated transmission.
+            beforeSideEffect: () => Promise.resolve()
+          }
+        }
+      : {}),
+    origin: 'spool-owner'
+  }
+}
+
+export function pairedRuntimeErrorCode(error: unknown): SpoolExecutionErrorCode {
+  return error instanceof SpoolExecutionError ? error.code : 'resource_unavailable'
+}

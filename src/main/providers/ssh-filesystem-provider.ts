@@ -12,6 +12,8 @@ import {
   stopSshFilesystemWatchRegistration,
   type WatchRegistration
 } from './ssh-filesystem-provider-watch'
+import { createSshSpoolVerifiedFilesystem } from './ssh-spool-verified-filesystem'
+import type { SpoolVerifiedRemoteFilesystem } from './spool-verified-filesystem-types'
 import type {
   IFilesystemProvider,
   FileStat,
@@ -25,6 +27,7 @@ import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace-s
 const WORKSPACE_SPACE_SCAN_TIMEOUT_MS = 130_000
 
 export class SshFilesystemProvider implements IFilesystemProvider {
+  readonly spoolVerifiedFiles: SpoolVerifiedRemoteFilesystem
   private connectionId: string
   private mux: SshChannelMultiplexer
   private watchListeners = new Map<string, WatchRegistration>()
@@ -41,6 +44,7 @@ export class SshFilesystemProvider implements IFilesystemProvider {
   ) {
     this.connectionId = connectionId
     this.mux = mux
+    this.spoolVerifiedFiles = createSshSpoolVerifiedFilesystem(mux)
 
     this.unsubscribeNotifications = mux.onNotification((method, params) => {
       if (method === 'fs.changed') {

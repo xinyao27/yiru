@@ -4190,7 +4190,10 @@
           "setParentWorkspace": "親ワークツリーを設定...",
           "workspaceSection": "ワークスペース",
           "primaryDeleteDisabled": "プライマリワークツリーは削除できません。代わりにプロジェクトを削除してください。",
-          "deleteWorktree": "ワークツリーを削除"
+          "deleteWorktree": "ワークツリーを削除",
+          "makeSpoolPrivate": "非公開にする",
+          "makeSpoolPublic": "公開する",
+          "spoolPrivateFailed": "この worktree を非公開にできませんでした。"
         },
         "WorktreeList": {
           "d880ea0744": "グループを作成し、このプロジェクトをそのグループに移動します。",
@@ -4234,7 +4237,10 @@
           "hostDisconnected": "切断済み",
           "failedNestWorkspace": "ワークスペースをネストできませんでした",
           "sidebarRowMissing": "対象はもう存在しません",
-          "failedUnnestWorkspace": "ワークスペースの展開に失敗しました"
+          "failedUnnestWorkspace": "ワークスペースの展開に失敗しました",
+          "makeSpoolProjectPrivate": "すべての worktree を非公開にする",
+          "makeSpoolProjectPublic": "すべての worktree を公開する",
+          "spoolProjectPrivateFailed": "これらの worktree を非公開にできませんでした。"
         },
         "WorktreeMetaDialog": {
           "3db0a2a593": "キャンセル",
@@ -4687,7 +4693,8 @@
           "meterLabel": "{{value0}}: {{value1}}% used in {{value2}}",
           "windowUnavailable": "{{value0}}: {{value1}} usage unavailable",
           "fiveHour": "5h",
-          "sevenDay": "7d"
+          "sevenDay": "7d",
+          "resetsAt": "{{value0}} にリセット"
         },
         "SpoolDesktopRow": {
           "connecting": "Connecting…",
@@ -4698,7 +4705,227 @@
         },
         "SpoolWorktreeRow": {
           "collapse": "Collapse {{value0}}",
-          "expand": "Expand {{value0}}"
+          "expand": "Expand {{value0}}",
+          "loadingSessions": "セッションを読み込み中…",
+          "public": "公開",
+          "sessionsUnavailable": "セッション一覧を利用できません"
+        },
+        "SpoolSidebarProjectedRow": {
+          "heading": "Spool"
+        }
+      },
+      "spool": {
+        "SpoolAvailabilityNotice": {
+          "title": "Spool を利用できません",
+          "checkAgain": "もう一度確認",
+          "checking": "確認中…",
+          "tailscaleUnavailable": "このデスクトップで Tailscale が見つかりませんでした。",
+          "tailscaleNotRunning": "Tailscale はインストールされていますが、サービスが実行されていません。",
+          "tailscalePermissionDenied": "Orca には Tailscale の状態を読み取る権限がありません。",
+          "tailscaleTimedOut": "Tailscale が時間内に応答しませんでした。Spool は確認を続けます。",
+          "tailscaleUnsupportedOutput": "Tailscale から、このバージョンの Orca では読み取れない状態データが返されました。",
+          "portUnavailable": "TCP ポート {{port}} はすでに使用中です。競合するプロセスを終了してください。Spool は確認を続けます。",
+          "permissionDenied": "システム権限により、Orca は Tailnet 上で Spool のリスナーを開けませんでした。",
+          "persistenceUnavailable": "Spool は共有設定を安全に読み込めなかったため、共有は無効のままです。",
+          "unavailable": "このデスクトップで Spool を起動できませんでした。"
+        },
+        "SpoolWindowsFirewallNotice": {
+          "repairSuccess": "Windows ファイアウォール規則を修復しました。",
+          "title": "Spool は Windows ファイアウォールによってブロックされています",
+          "readyTitle": "Spool 共有を再起動",
+          "readyDescription": "必要な規則が利用可能になりました。再適用すると、このアプリセッションで Spool が起動します。",
+          "inspectUnavailable": "ファイアウォール規則を確認できませんでした。管理者の承認で再作成してください。",
+          "ruleMissing": "インストール済みの Orca アプリに必要なプライベートネットワーク規則がありません。",
+          "ruleDetails": "Orca.Spool · TCP {{port}} · プライベート",
+          "waiting": "Windows を待機中…",
+          "repair": "ファイアウォール規則を修復",
+          "reapply": "再適用して起動",
+          "repairFailed": "Windows ファイアウォール規則を修復できませんでした。"
+        },
+        "SpoolControlRequestDialog": {
+          "decisionFailed": "制御の決定を送信できませんでした。",
+          "title": "{{value0}} にこの worktree の制御を許可しますか？",
+          "worktree": "Worktree: {{value0}}",
+          "capabilities": "相手は terminal 入力の送信、ファイルの変更、コマンドの実行、およびあなたの Claude/Codex アカウントの使用が可能になります。",
+          "shellWarning": "Terminal コマンドはこの worktree 内に制限されません。",
+          "queued": "他に {{value0}} 件の制御リクエストが待機しています。",
+          "deny": "拒否",
+          "allow": "この接続を許可"
+        },
+        "SpoolOwnerControlGrants": {
+          "revokeFailed": "リモート制御を取り消せませんでした。",
+          "heading": "リモート制御",
+          "hasAccess": "{{value0}} がアクセス中",
+          "revoke": "取り消す"
+        },
+        "SpoolSessionPane": {
+          "transcriptTitle": "セッションのトランスクリプト",
+          "continue": "セッションを続ける",
+          "continueFailed": "このセッションを続けられませんでした。",
+          "continueOutcomeUnknown": "このセッションは所有者のデスクトップですでに再開されている可能性があります。もう一度再開する前に、セッション一覧とターミナルを確認してください。",
+          "continueOutcomeUnknownPersistent": "セッションは再開されている可能性があります。もう一度再開する前に、セッション一覧とターミナルを確認してください。",
+          "transcriptUnavailable": "このセッションのトランスクリプトは利用できません。",
+          "retry": "再試行",
+          "transcriptTruncated": "このトランスクリプトは最近の部分のみ表示しています。",
+          "image": "画像",
+          "toolResult": "ツールの結果",
+          "role": {
+            "user": "ユーザー",
+            "assistant": "アシスタント",
+            "tool": "ツール",
+            "reasoning": "推論",
+            "system": "システム"
+          }
+        },
+        "SpoolTerminalPane": {
+          "connecting": "ターミナルに接続中…",
+          "closed": "ターミナルは終了しました",
+          "unavailable": "ターミナルを利用できません",
+          "outcomeUnknown": "このターミナル操作は所有者のデスクトップで成功している可能性があります。ターミナル出力を確認してから、入力を続けてください。",
+          "outcomeUnknownPersistent": "ターミナル操作は成功している可能性があります。出力を確認してから入力を再開してください。",
+          "resumeInput": "入力を再開"
+        },
+        "SpoolWorktreeVisibilityDialog": {
+          "publishFailed": "この worktree を公開できませんでした。",
+          "title": "{{value0}} を公開しますか？",
+          "description": "Tailnet 上で Orca Desktop を使用しているメンバーがこの worktree を開けるようになります。",
+          "historyWarning": "既存のすべてのセッション、トランスクリプト、ターミナルのスクロールバック、今後の出力が閲覧可能になります。",
+          "shellWarning": "ターミナル履歴には、この worktree 外で生成された内容が含まれる場合があります。",
+          "cancel": "キャンセル",
+          "confirm": "公開する",
+          "projectPublishFailed": "これらの worktree を公開できませんでした。",
+          "projectTitle": "{{value0}} に現在あるすべての worktree を公開しますか？",
+          "projectDescription": "この操作はプロジェクトに現在ある worktree に一度だけ適用されます。今後の worktree は非公開のままです。",
+          "projectHistoryWarning": "対象 worktree のすべてのセッション、トランスクリプト、ターミナルのスクロールバック、今後の出力が閲覧可能になります。",
+          "projectShellWarning": "ターミナル履歴には、対象 worktree 外で生成された内容が含まれる場合があります。",
+          "projectConfirm": "すべて公開する"
+        },
+        "SpoolWorkspaceSurface": {
+          "requestFailed": "制御をリクエストできませんでした。",
+          "controlGranted": "制御が許可されました",
+          "disconnected": "接続が切れました",
+          "readOnly": "読み取り専用",
+          "requestPending": "リクエスト承認待ち",
+          "requestControl": "制御をリクエスト",
+          "tabs": {
+            "sessions": "Sessions",
+            "files": "ファイル",
+            "changes": "変更"
+          },
+          "sessions": "Sessions",
+          "terminalDescription": "リモート session が利用可能になると、terminal のスナップショットとリアルタイム出力がここに表示されます。",
+          "selectSession": "Session を選択してリモート terminal を開きます。",
+          "fileBrowser": "ファイル",
+          "fileDescription": "リモートファイルは所有者の実行ホストに残り、Spool workspace モデルを通じてここで開かれます。",
+          "changesAndGit": "変更と Git",
+          "changesDescription": "Worktree の状態、diff、履歴、ブランチ、upstream の状態がここに表示されます。",
+          "mutableMode": "この接続では worktree の変更操作を使用できます。",
+          "readOnlyMode": "この公開 worktree は、所有者が制御を許可するまで読み取り専用です。"
+        },
+        "SpoolFileActionDialog": {
+          "nameLabel": "名前",
+          "cancel": "キャンセル",
+          "newFileTitle": "新しいファイル",
+          "newDirectoryTitle": "新しいディレクトリ",
+          "renameTitle": "項目の名前を変更",
+          "deleteTitle": "項目を削除しますか？",
+          "newFileDescription": "現在のリモートフォルダーに空のファイルを作成します。",
+          "newDirectoryDescription": "現在のリモートフォルダーにディレクトリを作成します。",
+          "renameDescription": "{{value0}} の新しい名前を入力してください。",
+          "deleteDescription": "所有者のワークツリーから {{value0}} を完全に削除します。",
+          "create": "作成",
+          "rename": "名前を変更",
+          "delete": "削除"
+        },
+        "SpoolFilePreview": {
+          "loading": "ファイルを読み込んでいます…",
+          "selectFile": "確認するファイルを選択してください。",
+          "reload": "再読み込み",
+          "workingDiff": "作業ツリーの差分",
+          "stagedDiff": "ステージ済みの差分",
+          "content": "内容",
+          "rename": "名前を変更",
+          "delete": "削除",
+          "saving": "保存しています…",
+          "save": "保存",
+          "truncatedFile": "このプレビューは切り詰められています。部分的な内容でファイル全体を置き換えないよう、編集は無効です。",
+          "editorLabel": "ファイルの内容",
+          "loadingDiff": "差分を読み込んでいます…",
+          "truncatedDiff": "この差分は切り詰められています。",
+          "noDiff": "このファイルに差分はありません。",
+          "binaryDescription": "バイナリプレビュー · {{value1}} バイト中 {{value0}} バイト",
+          "binaryUnavailable": "バイナリプレビューを表示できません。",
+          "fileUnavailable": "このファイルは利用できません。",
+          "diffUnavailable": "この差分は利用できません。"
+        },
+        "SpoolFileTree": {
+          "up": "1 つ上のディレクトリへ",
+          "root": "ワークツリーのルート",
+          "refresh": "ファイルを更新",
+          "newFile": "新しいファイル",
+          "newDirectory": "新しいディレクトリ",
+          "loading": "ファイルを読み込んでいます…",
+          "empty": "このディレクトリは空です。",
+          "truncated": "このディレクトリの一部のみを表示しています。",
+          "itemActions": "ファイル操作",
+          "rename": "名前を変更",
+          "delete": "削除",
+          "unavailable": "ファイルを利用できません。"
+        },
+        "SpoolFilesPane": {
+          "listFailed": "ファイルを読み込めませんでした。",
+          "readFailed": "このファイルを読み取れませんでした。",
+          "diffFailed": "この差分を読み込めませんでした。",
+          "fileTooLarge": "このファイルは大きすぎるため、Spool 経由で保存できません。",
+          "saved": "ファイルを保存しました。",
+          "saveFailed": "このファイルを保存できませんでした。",
+          "invalidName": "有効なファイル名を 1 つ入力してください。",
+          "mutationFailed": "このファイルを変更できませんでした。",
+          "outcomeUnknown": "このファイル変更は所有者の worktree で成功している可能性があります。別の変更を行う前に、更新して対象を確認してください。",
+          "outcomeUnknownPersistent": "ファイル変更は成功している可能性があります。別の変更を行う前に、更新して対象を確認してください。"
+        },
+        "SpoolGitDiffPane": {
+          "selectItem": "変更またはコミットを選択して差分を確認してください。",
+          "loading": "差分を読み込んでいます…",
+          "noDiff": "テキスト差分はありません。",
+          "truncated": "この差分は切り詰められています。",
+          "staged": "ステージ済み",
+          "untracked": "未追跡",
+          "unstaged": "未ステージ",
+          "unavailable": "この差分は利用できません。"
+        },
+        "SpoolGitPane": {
+          "refreshFailed": "Git の状態を読み込めませんでした。",
+          "diffFailed": "この差分を読み込めませんでした。",
+          "commitTooLong": "コミットメッセージが長すぎます。",
+          "committed": "コミットを作成しました。",
+          "mutationFailed": "このワークツリーを変更できませんでした。",
+          "outcomeUnknown": "この Git 操作は所有者の worktree で成功している可能性があります。別の変更を行う前に、更新して Git の状態を確認してください。",
+          "outcomeUnknownPersistent": "Git 操作は成功している可能性があります。別の変更を行う前に、更新して Git の状態を確認してください。"
+        },
+        "SpoolMutationOutcomeNotice": {
+          "title": "結果の確認が必要です",
+          "dismiss": "確認後に閉じる"
+        },
+        "SpoolGitSidebar": {
+          "detached": "デタッチされた HEAD",
+          "refresh": "更新",
+          "changes": "変更",
+          "history": "履歴",
+          "commitMessage": "コミットメッセージ",
+          "commitPlaceholder": "コミットメッセージ",
+          "commit": "ステージ済みの変更をコミット",
+          "loadingChanges": "変更を読み込んでいます…",
+          "clean": "ワークツリーに変更はありません。",
+          "unstage": "ステージ解除",
+          "stage": "ステージ",
+          "loadingHistory": "履歴を読み込んでいます…",
+          "noHistory": "コミットが見つかりません。",
+          "historyLimited": "最新のコミットを表示しています。",
+          "noUpstream": "アップストリームなし",
+          "upstream": "{{value0}} · ↑{{value1}} ↓{{value2}}",
+          "stateUnavailable": "Git の状態を利用できません。",
+          "changesLimited": "ステータスの一部のみを表示しています。"
         }
       },
       "shared": {

@@ -1,0 +1,268 @@
+export const SPOOL_FILE_LIST_DEFAULT_LIMIT = 1_000
+export const SPOOL_FILE_LIST_MAX_LIMIT = 5_000
+export const SPOOL_FILE_READ_DEFAULT_BYTES = 512 * 1_024
+export const SPOOL_FILE_READ_MAX_BYTES = 2 * 1_024 * 1_024
+export const SPOOL_FILE_WRITE_MAX_BYTES = 4 * 1_024 * 1_024
+export const SPOOL_GIT_DIFF_MAX_BYTES = 4 * 1_024 * 1_024
+export const SPOOL_GIT_HISTORY_DEFAULT_LIMIT = 50
+export const SPOOL_GIT_HISTORY_MAX_LIMIT = 200
+export const SPOOL_SESSION_TRANSCRIPT_MAX_MESSAGES = 2_000
+export const SPOOL_SESSION_TRANSCRIPT_MAX_BLOCK_CHARS = 4_000
+
+export type SpoolFileListOperation = {
+  kind: 'files.list'
+  relativePath: string
+  limit?: number
+}
+
+export type SpoolFileReadOperation = {
+  kind: 'files.read'
+  relativePath: string
+  offset?: number
+  maxBytes?: number
+}
+
+export type SpoolFileDiffOperation = {
+  kind: 'files.diff'
+  relativePath: string
+  staged: boolean
+}
+
+export type SpoolFileWriteOperation = {
+  kind: 'files.write'
+  relativePath: string
+  content: string
+  encoding: 'utf8' | 'base64'
+  mode: 'create' | 'replace'
+}
+
+export type SpoolFileCreateDirectoryOperation = {
+  kind: 'files.mkdir'
+  relativePath: string
+}
+
+export type SpoolFileRenameOperation = {
+  kind: 'files.rename'
+  relativePath: string
+  destinationRelativePath: string
+}
+
+export type SpoolFileDeleteOperation = {
+  kind: 'files.delete'
+  relativePath: string
+  recursive?: boolean
+}
+
+export type SpoolGitStatusOperation = { kind: 'git.status' }
+
+export type SpoolGitDiffOperation = {
+  kind: 'git.diff'
+  source: 'working-tree' | 'index' | 'commit'
+  relativePath?: string
+  commitRef?: string
+}
+
+export type SpoolGitHistoryOperation = {
+  kind: 'git.history'
+  limit?: number
+}
+
+export type SpoolGitStageOperation = {
+  kind: 'git.stage'
+  relativePaths: readonly string[]
+}
+
+export type SpoolGitUnstageOperation = {
+  kind: 'git.unstage'
+  relativePaths: readonly string[]
+}
+
+export type SpoolGitCommitOperation = {
+  kind: 'git.commit'
+  message: string
+}
+
+export type SpoolTerminalInputOperation = {
+  kind: 'terminal.input'
+  terminalRef: string
+  data: string
+}
+
+export type SpoolTerminalResizeOperation = {
+  kind: 'terminal.resize'
+  terminalRef: string
+  cols: number
+  rows: number
+}
+
+export type SpoolSessionReadOperation = {
+  kind: 'session.read'
+  /** Why: owner-side lookup keeps transcript paths out of the wire operation. */
+  ownerRecordKey: string
+}
+
+export type SpoolSessionContinueOperation = {
+  kind: 'session.continue'
+  /** Why: owner-side lookup keeps resume commands out of the wire operation. */
+  ownerRecordKey: string
+}
+
+export type SpoolExecutionOperation =
+  | SpoolFileListOperation
+  | SpoolFileReadOperation
+  | SpoolFileDiffOperation
+  | SpoolFileWriteOperation
+  | SpoolFileCreateDirectoryOperation
+  | SpoolFileRenameOperation
+  | SpoolFileDeleteOperation
+  | SpoolGitStatusOperation
+  | SpoolGitDiffOperation
+  | SpoolGitHistoryOperation
+  | SpoolGitStageOperation
+  | SpoolGitUnstageOperation
+  | SpoolGitCommitOperation
+  | SpoolTerminalInputOperation
+  | SpoolTerminalResizeOperation
+  | SpoolSessionReadOperation
+  | SpoolSessionContinueOperation
+
+export type SpoolFileTreeEntry = {
+  relativePath: string
+  name: string
+  kind: 'file' | 'directory' | 'symlink'
+  size: number | null
+  modifiedAt: number | null
+}
+
+export type SpoolFileListResult = {
+  relativePath: string
+  entries: readonly SpoolFileTreeEntry[]
+  truncated: boolean
+}
+
+export type SpoolFileReadResult = {
+  relativePath: string
+  encoding: 'utf8' | 'base64'
+  content: string
+  offset: number
+  bytesRead: number
+  totalBytes: number
+  truncated: boolean
+}
+
+export type SpoolFileDiffResult = {
+  relativePath: string
+  staged: boolean
+  patch: string
+  truncated: boolean
+}
+
+export type SpoolGitStatusEntry = {
+  relativePath: string
+  oldRelativePath?: string
+  status: 'modified' | 'added' | 'deleted' | 'renamed' | 'untracked' | 'copied'
+  area: 'staged' | 'unstaged' | 'untracked'
+  conflicted?: boolean
+}
+
+export type SpoolGitStatusResult = {
+  branch: string | null
+  upstream: { name: string; ahead: number; behind: number } | null
+  entries: readonly SpoolGitStatusEntry[]
+  truncated: boolean
+}
+
+export type SpoolGitDiffResult = {
+  source: SpoolGitDiffOperation['source']
+  relativePath: string | null
+  patch: string
+  truncated: boolean
+}
+
+export type SpoolGitHistoryEntry = {
+  commitRef: string
+  parentRefs: readonly string[]
+  subject: string
+  message: string
+  author: string | null
+  committedAt: number | null
+}
+
+export type SpoolGitHistoryResult = {
+  entries: readonly SpoolGitHistoryEntry[]
+  hasMore: boolean
+}
+
+export type SpoolMutationResult = { ok: true }
+
+export type SpoolSessionTranscriptBlock =
+  | { type: 'text'; text: string }
+  | { type: 'tool-call'; name: string; input: string }
+  | { type: 'tool-result'; output: string; isError: boolean }
+  | { type: 'image'; alt: string | null }
+
+export type SpoolSessionTranscriptMessage = {
+  role: 'user' | 'assistant' | 'tool' | 'reasoning' | 'system'
+  blocks: readonly SpoolSessionTranscriptBlock[]
+  timestamp: number | null
+}
+
+export type SpoolSessionReadResult = {
+  messages: readonly SpoolSessionTranscriptMessage[]
+  truncated: boolean
+}
+
+export type SpoolExecutionResultByKind = {
+  'files.list': SpoolFileListResult
+  'files.read': SpoolFileReadResult
+  'files.diff': SpoolFileDiffResult
+  'files.write': SpoolMutationResult
+  'files.mkdir': SpoolMutationResult
+  'files.rename': SpoolMutationResult
+  'files.delete': SpoolMutationResult
+  'git.status': SpoolGitStatusResult
+  'git.diff': SpoolGitDiffResult
+  'git.history': SpoolGitHistoryResult
+  'git.stage': SpoolMutationResult
+  'git.unstage': SpoolMutationResult
+  'git.commit': SpoolMutationResult
+  'terminal.input': SpoolMutationResult
+  'terminal.resize': SpoolMutationResult
+  'session.read': SpoolSessionReadResult
+  'session.continue': SpoolMutationResult
+}
+
+export type SpoolExecutionResult<TOperation extends SpoolExecutionOperation> =
+  SpoolExecutionResultByKind[TOperation['kind']]
+
+export type SpoolTerminalSubscribeOperation = {
+  kind: 'terminal.subscribe'
+  terminalRef: string
+  scrollbackRows?: number
+}
+
+export type SpoolSubscriptionOperation = SpoolTerminalSubscribeOperation
+
+export type SpoolTerminalSubscriptionEvent =
+  | { kind: 'snapshot'; data: string; cols: number; rows: number; sequence: number }
+  | { kind: 'output'; data: string; sequence: number }
+  | { kind: 'resized'; cols: number; rows: number; sequence: number }
+  | { kind: 'closed' }
+
+export type SpoolSubscriptionEvent<TOperation extends SpoolSubscriptionOperation> =
+  TOperation extends SpoolTerminalSubscribeOperation ? SpoolTerminalSubscriptionEvent : never
+
+export function isSpoolMutationOperation(operation: SpoolExecutionOperation): boolean {
+  return (
+    operation.kind === 'files.write' ||
+    operation.kind === 'files.mkdir' ||
+    operation.kind === 'files.rename' ||
+    operation.kind === 'files.delete' ||
+    operation.kind === 'git.stage' ||
+    operation.kind === 'git.unstage' ||
+    operation.kind === 'git.commit' ||
+    operation.kind === 'terminal.input' ||
+    operation.kind === 'terminal.resize' ||
+    operation.kind === 'session.continue'
+  )
+}

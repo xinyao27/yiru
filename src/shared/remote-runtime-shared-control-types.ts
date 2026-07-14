@@ -36,6 +36,9 @@ export type SharedControlLogicalSubscription<TResult = unknown> = {
   closed: boolean
   closeAfterReady: boolean
   remoteSubscriptionId: string | null
+  // Why: borrowed callers may use an already-online route but must not keep it alive
+  // or regain access when the owner connection later reconnects.
+  replayOnReconnect: boolean
   // Why: set while awaiting the first response after a reconnect replay; that
   // response is the authoritative re-emitted snapshot and gets tagged so
   // monotonic freshness gates don't drop it (#7718).

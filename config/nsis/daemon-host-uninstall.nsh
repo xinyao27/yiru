@@ -13,8 +13,17 @@
 ; The image name and the LOCALAPPDATA folder name must stay in sync with
 ; DAEMON_HOST_EXE_NAME and LOCAL_HOST_ROOT_NAME in
 ; src/main/daemon/daemon-host-relocation.ts.
+; Seed the packaged executable's fixed-port rule during install. Runtime
+; validation offers an elevated repair when this installer context cannot write it.
+; Keep 52777 in sync with SPOOL_INGRESS_PORT in spool-wire-contract.ts.
+!macro customInstall
+  nsExec::Exec 'netsh advfirewall firewall delete rule name="Orca.Spool"'
+  nsExec::Exec 'netsh advfirewall firewall add rule name="Orca.Spool" description="Allows Orca Spool sharing over Tailscale." dir=in action=allow enable=yes profile=private protocol=TCP localport=52777 program="$INSTDIR\Orca.exe" edge=no'
+!macroend
+
 !macro customUnInstall
   ${ifNot} ${isUpdated}
+    nsExec::Exec 'netsh advfirewall firewall delete rule name="Orca.Spool"'
     nsExec::Exec 'taskkill /F /IM orca-terminal-daemon.exe'
     ; Give the OS a moment to release the image lock before removing the tree.
     Sleep 500

@@ -23,6 +23,10 @@ import type { WorkspaceSpaceDirectoryScanResult } from '../../shared/workspace-s
 import type { StartupCommandDelivery } from '../../shared/codex-startup-delivery'
 import type { TerminalOscLinkRange } from '../../shared/terminal-osc-link-ranges'
 import type { TerminalGitHubPRLink } from '../../shared/terminal-github-pr-link-detector'
+import type { SpoolVerifiedRemoteFilesystem } from './spool-verified-filesystem-types'
+import type { IGitMutationProvider } from './git-provider-mutation-contract'
+
+export type { GitProviderMutationOptions } from './git-provider-mutation-contract'
 
 // ─── PTY Provider ───────────────────────────────────────────────────
 
@@ -243,6 +247,8 @@ export type FileReadResult = {
 }
 
 export type IFilesystemProvider = {
+  /** Why: Spool cannot fall back to ordinary SSH file calls after binding a physical path. */
+  readonly spoolVerifiedFiles?: SpoolVerifiedRemoteFilesystem
   readDir(dirPath: string): Promise<DirEntry[]>
   readFile(filePath: string): Promise<FileReadResult>
   readTerminalArtifact?(
@@ -309,7 +315,7 @@ export type GitProviderStatusOptions = {
   signal?: AbortSignal
 }
 
-export type IGitProvider = {
+export type IGitProvider = IGitMutationProvider & {
   getStatus(worktreePath: string, options?: GitProviderStatusOptions): Promise<GitStatusResult>
   getSubmoduleStatus(
     worktreePath: string,
@@ -318,7 +324,6 @@ export type IGitProvider = {
   ): Promise<GitStatusResult>
   checkIgnoredPaths(worktreePath: string, relativePaths: string[]): Promise<string[]>
   getHistory(worktreePath: string, options?: GitHistoryOptions): Promise<GitHistoryResult>
-  commit(worktreePath: string, message: string): Promise<{ success: boolean; error?: string }>
   getStagedCommitContext(worktreePath: string): Promise<CommitMessageDraftContext | null>
   getDiff(
     worktreePath: string,
@@ -326,10 +331,6 @@ export type IGitProvider = {
     staged: boolean,
     compareAgainstHead?: boolean
   ): Promise<GitDiffResult>
-  stageFile(worktreePath: string, filePath: string): Promise<void>
-  unstageFile(worktreePath: string, filePath: string): Promise<void>
-  bulkStageFiles(worktreePath: string, filePaths: string[]): Promise<void>
-  bulkUnstageFiles(worktreePath: string, filePaths: string[]): Promise<void>
   discardChanges(worktreePath: string, filePath: string): Promise<void>
   bulkDiscardChanges(worktreePath: string, filePaths: string[]): Promise<void>
   detectConflictOperation(worktreePath: string): Promise<GitConflictOperation>

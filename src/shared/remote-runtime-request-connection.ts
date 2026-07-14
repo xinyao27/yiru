@@ -46,7 +46,8 @@ export class RemoteRuntimeRequestConnection {
   request<TResult>(
     method: string,
     params: unknown,
-    timeoutMs: number
+    timeoutMs: number,
+    options: { beforeSend?: () => void | Promise<void> } = {}
   ): Promise<RuntimeRpcResponse<TResult>> {
     this.clearIdleCloseTimer()
     const requestId = randomUUID()
@@ -68,7 +69,15 @@ export class RemoteRuntimeRequestConnection {
       })
 
       void this.ensureReady().then(
-        () => this.sendRequest(requestId, method, params),
+        async () => {
+          try {
+            // Why: a queued mutation must revalidate after reconnect, immediately before send.
+            await options.beforeSend?.()
+            this.sendRequest(requestId, method, params)
+          } catch (error) {
+            this.rejectPendingRequest(requestId, toClientError(error))
+          }
+        },
         (error) => this.rejectPendingRequest(requestId, toClientError(error))
       )
     })

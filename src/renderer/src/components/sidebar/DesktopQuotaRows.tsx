@@ -3,12 +3,20 @@ import { clampUsedPercent } from '../../../../shared/usage-percentage-display'
 import type { SpoolProviderQuota } from '../../../../shared/spool/spool-catalog-contract'
 import { translate } from '@/i18n/i18n'
 import type { SpoolDesktopQuotaSidebarRow } from './spool-sidebar-rows'
+import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 
 type QuotaWindow = SpoolProviderQuota['fiveHour']
 
 type DesktopQuotaRowsProps = {
   row: SpoolDesktopQuotaSidebarRow
 }
+
+const quotaResetFormatter = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit'
+})
 
 function QuotaMeter({
   label,
@@ -20,6 +28,12 @@ function QuotaMeter({
   window: QuotaWindow
 }): React.JSX.Element {
   const usedPercent = clampUsedPercent(window?.usedPercent ?? 0)
+  const resetAt = formatQuotaResetAt(window?.resetsAt ?? null)
+  const resetLabel = resetAt
+    ? translate('auto.components.sidebar.DesktopQuotaRows.resetsAt', 'Resets {{value0}}', {
+        value0: resetAt
+      })
+    : null
   const ariaLabel = window
     ? translate(
         'auto.components.sidebar.DesktopQuotaRows.meterLabel',
@@ -53,8 +67,22 @@ function QuotaMeter({
         />
       </div>
       {!window ? <span className="sr-only">{ariaLabel}</span> : null}
+      {resetLabel ? (
+        <TruncatedSidebarLabel
+          text={resetLabel}
+          className="mt-0.5 text-[11px] leading-3 text-muted-foreground"
+        />
+      ) : null}
     </div>
   )
+}
+
+function formatQuotaResetAt(timestamp: number | null): string | null {
+  if (timestamp === null || !Number.isFinite(timestamp)) {
+    return null
+  }
+  const date = new Date(timestamp)
+  return Number.isNaN(date.getTime()) ? null : quotaResetFormatter.format(date)
 }
 
 function ProviderQuotaRow({

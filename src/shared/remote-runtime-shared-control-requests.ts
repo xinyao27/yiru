@@ -15,6 +15,7 @@ export function requestSharedControl<TResult>(args: {
   params: unknown
   timeoutMs: number
   ensureReady: () => Promise<void>
+  beforeSend?: () => void | Promise<void>
   send: (requestId: string, method: string, params: unknown) => void
   onTimeout?: (error: RemoteRuntimeClientError) => void
   // Why: default off — ordinary short RPCs keep an absolute deadline. Only
@@ -48,7 +49,19 @@ export function requestSharedControl<TResult>(args: {
       refreshTimeoutOnKeepalive: args.refreshTimeoutOnKeepalive ?? false
     })
     void args.ensureReady().then(
-      () => args.send(requestId, args.method, args.params),
+      async () => {
+        try {
+          // Why: queued Spool mutations must revalidate after connection setup, at transmission.
+          await args.beforeSend?.()
+          args.send(requestId, args.method, args.params)
+        } catch (error) {
+          rejectSharedControlPendingRequest(
+            args.pendingRequests,
+            requestId,
+            error instanceof Error ? error : toRemoteRuntimeClientError(error)
+          )
+        }
+      },
       (error) =>
         rejectSharedControlPendingRequest(
           args.pendingRequests,

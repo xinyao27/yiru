@@ -90,6 +90,7 @@ import { useGitStatusPolling } from './components/right-sidebar/useGitStatusPoll
 import { useEditorExternalWatch } from './hooks/useEditorExternalWatch'
 import { useAutoAckViewedAgent } from './hooks/useAutoAckViewedAgent'
 import { useUnreadDockBadge } from './hooks/useUnreadDockBadge'
+import { useSpoolSharingBridge } from './hooks/useSpoolSharingBridge'
 import {
   resolvePrimarySelectionMiddleClickPaste,
   usePrimarySelectionPaste
@@ -177,6 +178,7 @@ import {
   hasRequestedBackgroundTerminalWorktreeMount,
   subscribeBackgroundTerminalWorktreeMountRequests
 } from './components/terminal/background-terminal-worktree-mount'
+import { SpoolControlRequestDialog } from './components/spool/SpoolControlRequestDialog'
 
 // Why: agents alive during a hard kill (crash, forced update install) need a
 // reasonably fresh resume record on disk; one minute bounds the lost window
@@ -316,6 +318,7 @@ const WorkspaceCleanupDialog = lazy(
   () => import('./components/workspace-cleanup/WorkspaceCleanupDialog')
 )
 const Terminal = lazy(() => import('./components/Terminal'))
+const SpoolWorkspaceSurface = lazy(() => import('./components/spool/SpoolWorkspaceSurface'))
 const StatusBar = lazy(() =>
   import('./components/status-bar/StatusBar').then((module) => ({ default: module.StatusBar }))
 )
@@ -409,6 +412,7 @@ function App(): React.JSX.Element {
   const clearUnreadDockBadge = useUnreadDockBadge()
   useRadixBodyPointerEventsRecovery()
   useWebSessionTabsSync()
+  useSpoolSharingBridge()
   const [floatingTerminalOpen, setFloatingTerminalOpen] = useState(false)
   const floatingWorkspaceTourInteractionSnapshotRef = useRef<{
     wasPreviouslyInteracted?: boolean
@@ -467,6 +471,8 @@ function App(): React.JSX.Element {
   )
 
   const activeView = useAppStore((s) => s.activeView)
+  const activeSpoolWorkspaceRoute = useAppStore((s) => s.activeSpoolWorkspaceRoute)
+  const hasActiveSpoolWorkspace = activeView === 'terminal' && activeSpoolWorkspaceRoute !== null
   const activeModal = useAppStore((s) => s.activeModal)
   const featureTipsSeenIds = useAppStore((s) => s.featureTipsSeenIds)
   const featureInteractions = useAppStore((s) => s.featureInteractions)
@@ -511,6 +517,7 @@ function App(): React.JSX.Element {
   )
   const statusBarVisible = useAppStore((s) => s.statusBarVisible)
   const showFloatingTerminalButton =
+    !hasActiveSpoolWorkspace &&
     floatingTerminalEnabled &&
     (floatingTerminalTriggerLocation === 'floating-button' || !statusBarVisible)
   const hasMountedTerminalWorkbenchRef = useRef(false)
@@ -527,15 +534,21 @@ function App(): React.JSX.Element {
   // Why: visible worktree creation owns its faux tab strip from start to finish;
   // the previous workspace must stay mounted for retention without rendering
   // real chrome.
-  const creationLayoutActive = shouldShowWorktreeCreationSurface({
-    activeView,
-    activePendingCreationId,
-    hasActivePendingCreation: activePendingCreationExists
-  })
+  const creationLayoutActive =
+    shouldShowWorktreeCreationSurface({
+      activeView,
+      activePendingCreationId,
+      hasActivePendingCreation: activePendingCreationExists
+    }) && !hasActiveSpoolWorkspace
   const workspaceChromeActive =
-    activeView === 'terminal' && activeWorktreeId !== null && !creationLayoutActive
+    activeView === 'terminal' &&
+    (activeWorktreeId !== null || hasActiveSpoolWorkspace) &&
+    !creationLayoutActive
   const terminalWorkbenchVisible =
-    activeView === 'terminal' && activeWorktreeId !== null && !creationLayoutActive
+    activeView === 'terminal' &&
+    activeWorktreeId !== null &&
+    !hasActiveSpoolWorkspace &&
+    !creationLayoutActive
   // Why: a closed empty floating workspace is not startup-critical. Once it owns
   // tabs, keep it mounted while closed so hidden terminal/browser/editor panes
   // retain their local state.
@@ -1524,7 +1537,8 @@ function App(): React.JSX.Element {
   }, [actions])
 
   const hasTabBar = tabCount >= 2
-  const showTitlebarExpandButton = workspaceChromeActive && !hasTabBar && effectiveActiveTabExpanded
+  const showTitlebarExpandButton =
+    workspaceChromeActive && !hasActiveSpoolWorkspace && !hasTabBar && effectiveActiveTabExpanded
   // Why: Activity and Space are full-page navigation surfaces — same
   // treatment as Settings — so the worktree sidebar is removed for those views.
   const showSidebar =
@@ -1547,7 +1561,8 @@ function App(): React.JSX.Element {
   })
   // Why: suppress right sidebar controls on full-page navigation surfaces
   // since those surfaces intentionally own the full content area.
-  const showRightSidebarControls = !creationLayoutActive && canShowRightSidebarForView(activeView)
+  const showRightSidebarControls =
+    !hasActiveSpoolWorkspace && !creationLayoutActive && canShowRightSidebarForView(activeView)
   const showProfileSwitcherInSidebarFooter = showSidebar && sidebarOpen
   const showProfileSwitcherInTopRight = !showProfileSwitcherInSidebarFooter
 
@@ -1562,6 +1577,7 @@ function App(): React.JSX.Element {
     )
   }
 
+  const localWorkspaceChromeActive = workspaceChromeActive && !hasActiveSpoolWorkspace
   const globalShortcutStateRef = useRef({
     activeView,
     activeWorktreeId,
@@ -1572,7 +1588,7 @@ function App(): React.JSX.Element {
     keybindings,
     terminalShortcutPolicy: settings?.terminalShortcutPolicy,
     setFloatingTerminalOpenWithFocus,
-    workspaceChromeActive,
+    workspaceChromeActive: localWorkspaceChromeActive,
     creationLayoutActive
   })
   // Why: window key listeners are global and long-lived; keep one registration
@@ -1587,7 +1603,7 @@ function App(): React.JSX.Element {
     keybindings,
     terminalShortcutPolicy: settings?.terminalShortcutPolicy,
     setFloatingTerminalOpenWithFocus,
-    workspaceChromeActive,
+    workspaceChromeActive: localWorkspaceChromeActive,
     creationLayoutActive
   }
 
@@ -2204,6 +2220,7 @@ function App(): React.JSX.Element {
   const workspaceProfileSwitcher =
     showProfileSwitcherInTopRight &&
     workspaceChromeActive &&
+    !hasActiveSpoolWorkspace &&
     leftTitlebarChromeLayout.shouldMount &&
     !stackedSidebarOpen ? (
       <div
@@ -2243,6 +2260,7 @@ function App(): React.JSX.Element {
         <ConfirmationDialogProvider>
           <LinkRoutingPreferenceDialogProvider>
             <WorkspacePortScanner enabled={workspaceSessionReady} />
+            <SpoolControlRequestDialog />
             {/* Why: leaf-mounted retention sync keeps agent-status retention
             subscriptions from re-rendering the App tree. */}
             <RetainedAgentsSyncGate />
@@ -2444,6 +2462,7 @@ function App(): React.JSX.Element {
                               {activeView === 'activity' ? <ActivityPrototypePage /> : null}
                               {activeView === 'space' ? <WorkspaceSpacePage /> : null}
                               {activeView === 'mobile' ? <MobilePage /> : null}
+                              {hasActiveSpoolWorkspace ? <SpoolWorkspaceSurface /> : null}
                               {activeView === 'terminal' &&
                               creationLayoutActive &&
                               activePendingCreationId ? (
@@ -2456,6 +2475,7 @@ function App(): React.JSX.Element {
                               ) : null}
                               {activeView === 'terminal' &&
                               !activeWorktreeId &&
+                              !hasActiveSpoolWorkspace &&
                               !creationLayoutActive ? (
                                 <Landing />
                               ) : null}
@@ -2517,7 +2537,7 @@ function App(): React.JSX.Element {
                 </RecoverableRenderErrorBoundary>
               </Suspense>
             ) : null}
-            {statusBarVisible ? (
+            {statusBarVisible && !hasActiveSpoolWorkspace ? (
               <Suspense
                 fallback={
                   <div className="h-6 min-h-[24px] shrink-0 border-t border-border bg-[var(--bg-titlebar,var(--card))]" />

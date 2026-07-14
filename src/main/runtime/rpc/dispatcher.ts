@@ -15,6 +15,7 @@ import {
   type RpcResponse
 } from './core'
 import type { TerminalStreamFrame } from '../../../shared/terminal-stream-protocol'
+import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
 import type { FeatureInteractionId } from '../../../shared/feature-interactions'
 import { isBrowserPaneUiRuntimeRpcParams } from '../../../shared/runtime-rpc-feature-interaction-source'
 import {
@@ -102,6 +103,7 @@ export class RpcDispatcher {
       signal?: AbortSignal
       clientId?: string
       clientKind?: 'mobile' | 'runtime'
+      principal?: AuthenticatedRpcPrincipal
       sendBinary?: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
       registerBinaryStreamHandler?: (
         streamId: number,
@@ -135,6 +137,7 @@ export class RpcDispatcher {
           connectionId: options?.connectionId,
           clientId: options?.clientId,
           clientKind: options?.clientKind,
+          principal: options?.principal,
           sendBinary: options?.sendBinary,
           registerBinaryStreamHandler: options?.registerBinaryStreamHandler
         })
@@ -169,6 +172,7 @@ export class RpcDispatcher {
           connectionId: options?.connectionId,
           clientId: options?.clientId,
           clientKind: options?.clientKind,
+          principal: options?.principal,
           sendBinary: options?.sendBinary,
           registerBinaryStreamHandler: options?.registerBinaryStreamHandler
         },

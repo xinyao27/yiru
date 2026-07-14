@@ -4190,7 +4190,10 @@
           "setParentWorkspace": "상위 워크트리 설정...",
           "workspaceSection": "워크스페이스",
           "primaryDeleteDisabled": "기본 작업 트리는 삭제할 수 없습니다. 대신 프로젝트를 제거하세요.",
-          "deleteWorktree": "작업 트리 삭제"
+          "deleteWorktree": "작업 트리 삭제",
+          "makeSpoolPrivate": "비공개로 전환",
+          "makeSpoolPublic": "공개로 전환",
+          "spoolPrivateFailed": "이 worktree를 비공개로 전환할 수 없습니다."
         },
         "WorktreeList": {
           "d880ea0744": "그룹을 만들고 이 프로젝트를 그룹으로 이동하세요.",
@@ -4234,7 +4237,10 @@
           "hostDisconnected": "연결 끊김",
           "failedNestWorkspace": "워크스페이스를 중첩하지 못했습니다",
           "sidebarRowMissing": "대상이 더 이상 존재하지 않습니다",
-          "failedUnnestWorkspace": "워크트리 펼치기 실패"
+          "failedUnnestWorkspace": "워크트리 펼치기 실패",
+          "makeSpoolProjectPrivate": "모든 worktree를 비공개로 전환",
+          "makeSpoolProjectPublic": "모든 worktree를 공개로 전환",
+          "spoolProjectPrivateFailed": "이 worktree들을 비공개로 전환할 수 없습니다."
         },
         "WorktreeMetaDialog": {
           "3db0a2a593": "취소",
@@ -4687,7 +4693,8 @@
           "meterLabel": "{{value0}}: {{value1}}% used in {{value2}}",
           "windowUnavailable": "{{value0}}: {{value1}} usage unavailable",
           "fiveHour": "5h",
-          "sevenDay": "7d"
+          "sevenDay": "7d",
+          "resetsAt": "{{value0}}에 재설정"
         },
         "SpoolDesktopRow": {
           "connecting": "Connecting…",
@@ -4698,7 +4705,227 @@
         },
         "SpoolWorktreeRow": {
           "collapse": "Collapse {{value0}}",
-          "expand": "Expand {{value0}}"
+          "expand": "Expand {{value0}}",
+          "loadingSessions": "세션 불러오는 중…",
+          "public": "공개",
+          "sessionsUnavailable": "세션 목록을 사용할 수 없음"
+        },
+        "SpoolSidebarProjectedRow": {
+          "heading": "Spool"
+        }
+      },
+      "spool": {
+        "SpoolAvailabilityNotice": {
+          "title": "Spool을 사용할 수 없음",
+          "checkAgain": "다시 확인",
+          "checking": "확인 중…",
+          "tailscaleUnavailable": "이 데스크톱에서 Tailscale을 찾을 수 없습니다.",
+          "tailscaleNotRunning": "Tailscale이 설치되어 있지만 서비스가 실행 중이 아닙니다.",
+          "tailscalePermissionDenied": "Orca에 Tailscale 상태를 읽을 권한이 없습니다.",
+          "tailscaleTimedOut": "Tailscale이 제시간에 응답하지 않았습니다. Spool이 계속 확인합니다.",
+          "tailscaleUnsupportedOutput": "Tailscale에서 이 Orca 버전이 읽을 수 없는 상태 데이터를 반환했습니다.",
+          "portUnavailable": "TCP 포트 {{port}}가 이미 사용 중입니다. 충돌하는 프로세스를 종료하세요. Spool이 계속 확인합니다.",
+          "permissionDenied": "시스템 권한 때문에 Orca가 Tailnet에서 Spool 리스너를 열지 못했습니다.",
+          "persistenceUnavailable": "Spool이 공유 설정을 안전하게 불러오지 못해 공유가 꺼진 상태로 유지됩니다.",
+          "unavailable": "이 데스크톱에서 Spool을 시작하지 못했습니다."
+        },
+        "SpoolWindowsFirewallNotice": {
+          "repairSuccess": "Windows 방화벽 규칙을 복구했습니다.",
+          "title": "Windows 방화벽이 Spool을 차단하고 있습니다",
+          "readyTitle": "Spool 공유 다시 시작",
+          "readyDescription": "필요한 규칙을 사용할 수 있습니다. 규칙을 다시 적용해 이 앱 세션에서 Spool을 시작하세요.",
+          "inspectUnavailable": "방화벽 규칙을 확인할 수 없습니다. 관리자 승인을 받아 다시 만드세요.",
+          "ruleMissing": "설치된 Orca 앱에 필요한 개인 네트워크 규칙이 없습니다.",
+          "ruleDetails": "Orca.Spool · TCP {{port}} · 개인",
+          "waiting": "Windows 대기 중…",
+          "repair": "방화벽 규칙 복구",
+          "reapply": "다시 적용하고 시작",
+          "repairFailed": "Windows 방화벽 규칙을 복구할 수 없습니다."
+        },
+        "SpoolControlRequestDialog": {
+          "decisionFailed": "제어 결정을 전송할 수 없습니다.",
+          "title": "{{value0}} 님이 이 worktree를 제어하도록 허용할까요?",
+          "worktree": "Worktree: {{value0}}",
+          "capabilities": "상대방은 terminal 입력 전송, 파일 수정, 명령 실행 및 사용자의 Claude/Codex 계정 사용이 가능해집니다.",
+          "shellWarning": "Terminal 명령은 이 worktree 안으로 제한되지 않습니다.",
+          "queued": "제어 요청 {{value0}}개가 더 대기 중입니다.",
+          "deny": "거부",
+          "allow": "이 연결 허용"
+        },
+        "SpoolOwnerControlGrants": {
+          "revokeFailed": "원격 제어를 취소할 수 없습니다.",
+          "heading": "원격 제어",
+          "hasAccess": "{{value0}} 님이 액세스 중",
+          "revoke": "취소"
+        },
+        "SpoolSessionPane": {
+          "transcriptTitle": "세션 대화 기록",
+          "continue": "세션 계속하기",
+          "continueFailed": "이 세션을 계속할 수 없습니다.",
+          "continueOutcomeUnknown": "이 세션이 소유자의 데스크톱에서 이미 계속되었을 수 있습니다. 다시 계속하기 전에 세션 목록과 터미널을 확인하세요.",
+          "continueOutcomeUnknownPersistent": "세션이 이미 계속되었을 수 있습니다. 다시 계속하기 전에 세션 목록과 터미널을 확인하세요.",
+          "transcriptUnavailable": "이 세션의 대화 기록을 사용할 수 없습니다.",
+          "retry": "다시 시도",
+          "transcriptTruncated": "이 대화 기록의 최근 부분만 표시됩니다.",
+          "image": "이미지",
+          "toolResult": "도구 결과",
+          "role": {
+            "user": "사용자",
+            "assistant": "어시스턴트",
+            "tool": "도구",
+            "reasoning": "추론",
+            "system": "시스템"
+          }
+        },
+        "SpoolTerminalPane": {
+          "connecting": "터미널 연결 중…",
+          "closed": "터미널 종료됨",
+          "unavailable": "터미널을 사용할 수 없음",
+          "outcomeUnknown": "이 터미널 작업이 소유자의 데스크톱에서 성공했을 수 있습니다. 터미널 출력을 확인하고 추가 입력을 보내세요.",
+          "outcomeUnknownPersistent": "터미널 작업이 성공했을 수 있습니다. 출력을 확인한 후 입력을 다시 시작하세요.",
+          "resumeInput": "입력 다시 시작"
+        },
+        "SpoolWorktreeVisibilityDialog": {
+          "publishFailed": "이 worktree를 공개로 전환할 수 없습니다.",
+          "title": "{{value0}}을(를) 공개할까요?",
+          "description": "Tailnet에서 Orca Desktop을 사용하는 구성원이 이 worktree를 열 수 있게 됩니다.",
+          "historyWarning": "기존의 모든 세션, 대화 기록, 터미널 스크롤백 및 이후 출력이 읽기 가능해집니다.",
+          "shellWarning": "터미널 기록에는 이 worktree 외부에서 생성된 내용이 포함될 수 있습니다.",
+          "cancel": "취소",
+          "confirm": "공개로 전환",
+          "projectPublishFailed": "이 worktree들을 공개로 전환할 수 없습니다.",
+          "projectTitle": "{{value0}}의 현재 모든 worktree를 공개할까요?",
+          "projectDescription": "이 작업은 프로젝트에 현재 있는 모든 worktree에 한 번 적용됩니다. 이후 worktree는 비공개로 유지됩니다.",
+          "projectHistoryWarning": "해당 worktree의 모든 세션, 대화 기록, 터미널 스크롤백 및 이후 출력이 읽기 가능해집니다.",
+          "projectShellWarning": "터미널 기록에는 해당 worktree 외부에서 생성된 내용이 포함될 수 있습니다.",
+          "projectConfirm": "모두 공개로 전환"
+        },
+        "SpoolWorkspaceSurface": {
+          "requestFailed": "제어를 요청할 수 없습니다.",
+          "controlGranted": "제어 권한 허용됨",
+          "disconnected": "연결 끊김",
+          "readOnly": "읽기 전용",
+          "requestPending": "요청 승인 대기 중",
+          "requestControl": "제어 요청",
+          "tabs": {
+            "sessions": "Sessions",
+            "files": "파일",
+            "changes": "변경 사항"
+          },
+          "sessions": "Sessions",
+          "terminalDescription": "원격 session을 사용할 수 있게 되면 terminal 스냅샷과 실시간 출력이 여기에 표시됩니다.",
+          "selectSession": "Session을 선택하여 원격 terminal을 엽니다.",
+          "fileBrowser": "파일",
+          "fileDescription": "원격 파일은 소유자의 실행 호스트에 유지되며 Spool workspace 모델을 통해 여기에서 열립니다.",
+          "changesAndGit": "변경 사항 및 Git",
+          "changesDescription": "Worktree 상태, diff, 기록, 브랜치 및 upstream 상태가 여기에 표시됩니다.",
+          "mutableMode": "이 연결은 worktree 변경 작업을 사용할 수 있습니다.",
+          "readOnlyMode": "이 공개 worktree는 소유자가 제어를 허용할 때까지 읽기 전용입니다."
+        },
+        "SpoolFileActionDialog": {
+          "nameLabel": "이름",
+          "cancel": "취소",
+          "newFileTitle": "새 파일",
+          "newDirectoryTitle": "새 디렉터리",
+          "renameTitle": "항목 이름 바꾸기",
+          "deleteTitle": "항목을 삭제할까요?",
+          "newFileDescription": "현재 원격 폴더에 빈 파일을 만듭니다.",
+          "newDirectoryDescription": "현재 원격 폴더에 디렉터리를 만듭니다.",
+          "renameDescription": "{{value0}}의 새 이름을 입력하세요.",
+          "deleteDescription": "소유자의 워크트리에서 {{value0}}을(를) 영구적으로 삭제합니다.",
+          "create": "만들기",
+          "rename": "이름 바꾸기",
+          "delete": "삭제"
+        },
+        "SpoolFilePreview": {
+          "loading": "파일을 불러오는 중…",
+          "selectFile": "검사할 파일을 선택하세요.",
+          "reload": "다시 불러오기",
+          "workingDiff": "작업 트리 diff",
+          "stagedDiff": "스테이징된 diff",
+          "content": "내용",
+          "rename": "이름 바꾸기",
+          "delete": "삭제",
+          "saving": "저장 중…",
+          "save": "저장",
+          "truncatedFile": "이 미리보기는 잘렸습니다. 일부 내용으로 전체 파일을 덮어쓰지 않도록 편집을 비활성화했습니다.",
+          "editorLabel": "파일 내용",
+          "loadingDiff": "diff를 불러오는 중…",
+          "truncatedDiff": "이 diff는 잘렸습니다.",
+          "noDiff": "이 파일에는 diff가 없습니다.",
+          "binaryDescription": "바이너리 미리보기 · {{value1}}바이트 중 {{value0}}바이트",
+          "binaryUnavailable": "바이너리 미리보기를 표시할 수 없습니다.",
+          "fileUnavailable": "이 파일을 사용할 수 없습니다.",
+          "diffUnavailable": "이 diff를 사용할 수 없습니다."
+        },
+        "SpoolFileTree": {
+          "up": "상위 디렉터리로 이동",
+          "root": "워크트리 루트",
+          "refresh": "파일 새로 고침",
+          "newFile": "새 파일",
+          "newDirectory": "새 디렉터리",
+          "loading": "파일을 불러오는 중…",
+          "empty": "이 디렉터리는 비어 있습니다.",
+          "truncated": "이 디렉터리의 일부만 표시됩니다.",
+          "itemActions": "파일 작업",
+          "rename": "이름 바꾸기",
+          "delete": "삭제",
+          "unavailable": "파일을 사용할 수 없습니다."
+        },
+        "SpoolFilesPane": {
+          "listFailed": "파일을 불러오지 못했습니다.",
+          "readFailed": "이 파일을 읽지 못했습니다.",
+          "diffFailed": "이 diff를 불러오지 못했습니다.",
+          "fileTooLarge": "이 파일은 너무 커서 Spool을 통해 저장할 수 없습니다.",
+          "saved": "파일을 저장했습니다.",
+          "saveFailed": "이 파일을 저장하지 못했습니다.",
+          "invalidName": "유효한 파일 이름 하나를 입력하세요.",
+          "mutationFailed": "이 파일을 변경하지 못했습니다.",
+          "outcomeUnknown": "이 파일 변경이 소유자의 worktree에서 성공했을 수 있습니다. 다른 변경을 하기 전에 새로 고침하고 항목을 확인하세요.",
+          "outcomeUnknownPersistent": "파일 변경이 성공했을 수 있습니다. 다른 변경을 하기 전에 새로 고침하고 항목을 확인하세요."
+        },
+        "SpoolGitDiffPane": {
+          "selectItem": "변경 사항이나 커밋을 선택하여 diff를 확인하세요.",
+          "loading": "diff를 불러오는 중…",
+          "noDiff": "사용 가능한 텍스트 diff가 없습니다.",
+          "truncated": "이 diff는 잘렸습니다.",
+          "staged": "스테이징됨",
+          "untracked": "추적되지 않음",
+          "unstaged": "스테이징되지 않음",
+          "unavailable": "이 diff를 사용할 수 없습니다."
+        },
+        "SpoolGitPane": {
+          "refreshFailed": "Git 상태를 불러오지 못했습니다.",
+          "diffFailed": "이 diff를 불러오지 못했습니다.",
+          "commitTooLong": "커밋 메시지가 너무 깁니다.",
+          "committed": "커밋을 만들었습니다.",
+          "mutationFailed": "이 워크트리를 변경하지 못했습니다.",
+          "outcomeUnknown": "이 Git 작업이 소유자의 worktree에서 성공했을 수 있습니다. 다른 변경을 하기 전에 새로 고침하고 Git 상태를 확인하세요.",
+          "outcomeUnknownPersistent": "Git 작업이 성공했을 수 있습니다. 다른 변경을 하기 전에 새로 고침하고 Git 상태를 확인하세요."
+        },
+        "SpoolMutationOutcomeNotice": {
+          "title": "결과 확인 필요",
+          "dismiss": "확인 후 닫기"
+        },
+        "SpoolGitSidebar": {
+          "detached": "분리된 HEAD",
+          "refresh": "새로 고침",
+          "changes": "변경 사항",
+          "history": "기록",
+          "commitMessage": "커밋 메시지",
+          "commitPlaceholder": "커밋 메시지",
+          "commit": "스테이징된 변경 사항 커밋",
+          "loadingChanges": "변경 사항을 불러오는 중…",
+          "clean": "워크트리에 변경 사항이 없습니다.",
+          "unstage": "스테이징 해제",
+          "stage": "스테이징",
+          "loadingHistory": "기록을 불러오는 중…",
+          "noHistory": "커밋을 찾지 못했습니다.",
+          "historyLimited": "최근 커밋을 표시합니다.",
+          "noUpstream": "업스트림 없음",
+          "upstream": "{{value0}} · ↑{{value1}} ↓{{value2}}",
+          "stateUnavailable": "Git 상태를 사용할 수 없습니다.",
+          "changesLimited": "상태의 일부만 표시됩니다."
         }
       },
       "shared": {

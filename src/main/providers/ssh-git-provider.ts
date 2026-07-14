@@ -3,7 +3,7 @@
    indirection — every method is a 1:1 forwarder to a relay RPC plus a
    small amount of param plumbing. */
 import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
-import type { GitProviderStatusOptions, IGitProvider } from './types'
+import type { GitProviderMutationOptions, GitProviderStatusOptions, IGitProvider } from './types'
 import type {
   GitStatusResult,
   GitDiffResult,
@@ -162,14 +162,16 @@ export class SshGitProvider implements IGitProvider {
 
   async commit(
     worktreePath: string,
-    message: string
+    message: string,
+    options?: GitProviderMutationOptions
   ): Promise<{ success: boolean; error?: string }> {
     return this.runWithDiffDedupeClear(
       async () =>
-        (await this.mux.request('git.commit', {
-          worktreePath,
-          message
-        })) as { success: boolean; error?: string }
+        (await this.mux.request(
+          'git.commit',
+          { worktreePath, message },
+          options?.signal ? { signal: options.signal } : undefined
+        )) as { success: boolean; error?: string }
     )
   }
 
@@ -402,19 +404,35 @@ export class SshGitProvider implements IGitProvider {
     }
   }
 
-  async bulkStageFiles(worktreePath: string, filePaths: string[]): Promise<void> {
+  async bulkStageFiles(
+    worktreePath: string,
+    filePaths: string[],
+    options?: GitProviderMutationOptions
+  ): Promise<void> {
     this.gitDiffReadDedupe.clear()
     try {
-      await this.mux.request('git.bulkStage', { worktreePath, filePaths })
+      await this.mux.request(
+        'git.bulkStage',
+        { worktreePath, filePaths },
+        options?.signal ? { signal: options.signal } : undefined
+      )
     } finally {
       this.gitDiffReadDedupe.clear()
     }
   }
 
-  async bulkUnstageFiles(worktreePath: string, filePaths: string[]): Promise<void> {
+  async bulkUnstageFiles(
+    worktreePath: string,
+    filePaths: string[],
+    options?: GitProviderMutationOptions
+  ): Promise<void> {
     this.gitDiffReadDedupe.clear()
     try {
-      await this.mux.request('git.bulkUnstage', { worktreePath, filePaths })
+      await this.mux.request(
+        'git.bulkUnstage',
+        { worktreePath, filePaths },
+        options?.signal ? { signal: options.signal } : undefined
+      )
     } finally {
       this.gitDiffReadDedupe.clear()
     }
@@ -760,12 +778,25 @@ export class SshGitProvider implements IGitProvider {
   async exec(
     args: string[],
     cwd: string,
-    options?: { signal?: AbortSignal; timeoutMs?: number }
+    options?: {
+      signal?: AbortSignal
+      timeoutMs?: number
+      disableOptionalLocks?: boolean
+      nonInteractive?: boolean
+      maxBuffer?: number
+    }
   ): Promise<{ stdout: string; stderr: string }> {
+    const params = {
+      args,
+      cwd,
+      ...(options?.disableOptionalLocks ? { disableOptionalLocks: true } : {}),
+      ...(options?.nonInteractive ? { nonInteractive: true } : {}),
+      ...(options?.maxBuffer === undefined ? {} : { maxBuffer: options.maxBuffer })
+    }
     const run = () =>
       options
-        ? requestGitStreamable(this.mux, 'git.exec', { args, cwd }, options)
-        : requestGitStreamable(this.mux, 'git.exec', { args, cwd })
+        ? requestGitStreamable(this.mux, 'git.exec', params, options)
+        : requestGitStreamable(this.mux, 'git.exec', params)
     const result = gitExecMutatesRepository(args)
       ? await this.runWithDiffDedupeClear(run)
       : await run()

@@ -215,6 +215,10 @@ export function activateAndRevealFolderWorkspace(
     return false
   }
 
+  // Why: remote workspaces use opaque Spool routes, not local WorkspaceKeys;
+  // any explicit local activation must leave that independent namespace.
+  state.setActiveSpoolWorkspaceRoute(null)
+
   if (state.activeView !== 'terminal') {
     state.setActiveView('terminal')
   }
@@ -301,6 +305,9 @@ export function activateAndRevealWorktree(
   if (!wt) {
     return false
   }
+  // Why: a local selection must win even when it reselects the worktree that
+  // remained mounted behind an active remote Spool surface.
+  state.setActiveSpoolWorkspaceRoute(null)
   const hasActivationWork = Boolean(
     opts?.startup || opts?.setup || opts?.defaultTabs || opts?.issueCommand
   )

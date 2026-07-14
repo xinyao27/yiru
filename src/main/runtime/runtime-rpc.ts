@@ -8,6 +8,7 @@ import { randomBytes } from 'node:crypto'
 import { readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import type { RuntimeMetadata, RuntimeTransportMetadata } from '../../shared/runtime-bootstrap'
+import type { AuthenticatedRpcPrincipal } from '../../shared/rpc-principal'
 import type { OrcaRuntimeService } from './orca-runtime'
 import { writeRuntimeMetadata } from './runtime-metadata'
 import { RpcDispatcher } from './rpc/dispatcher'
@@ -735,7 +736,23 @@ export class OrcaRuntimeRpcServer {
             this.wsConnectionIds.set(ws, randomBytes(8).toString('hex'))
             channel = new E2EEChannel(ws, {
               serverSecretKey: this.e2eeKeypair!.secretKey,
-              validateToken: (token) => this.deviceRegistry?.validateToken(token) != null,
+              authenticate: (authFrame) => {
+                const auth = authFrame as { type?: unknown; deviceToken?: unknown } | null
+                if (!auth || auth.type !== 'e2ee_auth' || typeof auth.deviceToken !== 'string') {
+                  return null
+                }
+                const device = this.deviceRegistry?.validateToken(auth.deviceToken)
+                return device
+                  ? {
+                      principal: {
+                        kind: 'paired-device' as const,
+                        deviceId: device.deviceId,
+                        scope: device.scope
+                      },
+                      legacyDeviceToken: auth.deviceToken
+                    }
+                  : null
+              },
               onReady: (ch) => {
                 if (ch.deviceToken) {
                   wsTransport.setClientId(ws, ch.deviceToken)
@@ -762,7 +779,8 @@ export class OrcaRuntimeRpcServer {
                 encryptedBinaryReply,
                 wsTransport,
                 ws,
-                authenticatedDeviceToken
+                authenticatedDeviceToken,
+                this.e2eeChannels.get(ws)?.principal ?? null
               )
             })
             channel.onBinaryMessage((bytes) => this.handleWebSocketBinaryMessage(bytes, ws))
@@ -935,7 +953,8 @@ export class OrcaRuntimeRpcServer {
     sendBinary: (response: Uint8Array<ArrayBufferLike>) => boolean | void,
     wsTransport?: WebSocketTransport,
     ws?: WebSocket,
-    authenticatedDeviceToken?: string | null
+    authenticatedDeviceToken?: string | null,
+    authenticatedPrincipal?: AuthenticatedRpcPrincipal | null
   ): Promise<void> {
     let request: RpcRequest
     try {
@@ -1024,6 +1043,7 @@ export class OrcaRuntimeRpcServer {
       await this.dispatcher.dispatchStreaming(request, replyForRequest, {
         connectionId,
         clientId: token,
+        ...(authenticatedPrincipal ? { principal: authenticatedPrincipal } : {}),
         // Why: gates the mobile-only payload diet (native-chat char clipping) so
         // full-screen web/desktop runtime clients aren't truncated.
         clientKind: device.scope,

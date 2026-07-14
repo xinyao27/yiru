@@ -27,6 +27,7 @@ import { disposeWorktreeBaseDirectoryWatchers } from './ipc/worktree-base-direct
 import { registerCoreHandlers } from './ipc/register-core-handlers'
 import { initObservability, shutdownObservability } from './observability'
 import { registerMobileHandlers } from './ipc/mobile'
+import { registerSpoolSharingHandlers } from './ipc/spool-sharing'
 import { initTelemetry, shutdownTelemetry, trackAppOpenedOnce, track } from './telemetry/client'
 import { classifyError } from './telemetry/classify-error'
 import { runManagedHookInstallers } from './agent-hooks/install-telemetry'
@@ -197,6 +198,11 @@ import { CliInstaller } from './cli/cli-installer'
 import { installLinuxBareOrcaDispatcher } from './cli/linux-bare-orca-dispatcher'
 import { reconcileManagedWslCliRegistrations } from './cli/wsl-cli-registration-reconciliation'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
+import {
+  createSpoolDesktopComposition,
+  type SpoolDesktopComposition
+} from './spool/spool-desktop-composition'
+import { SpoolUnavailableDesktopService } from './spool/spool-unavailable-desktop-service'
 
 let mainWindow: BrowserWindow | null = null
 /** Whether a manual app.quit() (Cmd+Q, etc.) is in progress. Shared with the
@@ -215,6 +221,8 @@ let claudeRuntimeAuth: ClaudeRuntimeAuthService | null = null
 let runtime: OrcaRuntimeService | null = null
 let rateLimits: RateLimitService | null = null
 let runtimeRpc: OrcaRuntimeRpcServer | null = null
+let spoolDesktop: SpoolDesktopComposition | null = null
+let unregisterSpoolSharingHandlers: (() => void) | null = null
 // Why: set during early startup; gates whether headless serve installs the
 // offscreen browser backend (and thus advertises browser pane support).
 let headlessBrowserDisplayAvailable = false
@@ -2205,6 +2213,29 @@ app.whenReady().then(async () => {
     return
   }
 
+  try {
+    spoolDesktop = createSpoolDesktopComposition({
+      store,
+      runtime: runtimeService,
+      rateLimits,
+      userDataPath: getCanonicalUserDataPath(),
+      profileId: activeOrcaProfile.profile.id,
+      ownerRuntimeId: runtimeService.getRuntimeId(),
+      orcaVersion: app.getVersion(),
+      isPackaged: app.isPackaged,
+      executablePath: process.execPath,
+      osFamily:
+        process.platform === 'darwin' ? 'macos' : process.platform === 'win32' ? 'windows' : 'linux'
+    })
+    unregisterSpoolSharingHandlers = registerSpoolSharingHandlers(spoolDesktop.service)
+  } catch (error) {
+    // Why: corrupt sharing state or a missing platform dependency disables only Spool.
+    console.error('[spool] Failed to compose Desktop sharing:', error)
+    unregisterSpoolSharingHandlers = registerSpoolSharingHandlers(
+      new SpoolUnavailableDesktopService()
+    )
+  }
+
   // Why: window creation and runtime RPC startup are independent. Local PTY
   // spawns are gated inside registerPtyHandlers so RPC can bind immediately
   // without racing the daemon provider swap.
@@ -2212,7 +2243,8 @@ app.whenReady().then(async () => {
     Promise.resolve(openMainWindow()),
     runtimeRpc.start().catch((error) => {
       console.error('[runtime] Failed to start local RPC transport:', error)
-    })
+    }),
+    spoolDesktop?.start()
   ])
 
   // Why: the macOS notification permission dialog must fire after the window
@@ -2301,6 +2333,8 @@ app.on('will-quit', (e) => {
   // app.quit() re-fires will-quit, but the second pass skips straight through.
   if (!daemonDisconnectDone) {
     e.preventDefault()
+    unregisterSpoolSharingHandlers?.()
+    unregisterSpoolSharingHandlers = null
     // Why: capture ownership synchronously (before any await) so the guard
     // still has the right pid/runtimeId to compare against if shutdown
     // partially clears global state. Evaluating these inside .then() would
@@ -2328,6 +2362,11 @@ app.on('will-quit', (e) => {
             console.error('[runtime] Failed to stop local RPC transport:', error)
           })
       : Promise.resolve()
+    const spoolStop = spoolDesktop
+      ? spoolDesktop.stop().catch((error) => {
+          console.error('[spool] Failed to stop Desktop sharing:', error)
+        })
+      : Promise.resolve()
     // Why: Promise.allSettled — we need BOTH the daemon disconnect and the
     // RPC stop + owned-metadata clear to complete before Electron exits.
     // Using allSettled (not all) preserves the existing fail-open posture:
@@ -2341,7 +2380,13 @@ app.on('will-quit', (e) => {
     // Why: normal quits preserve the detached daemon for warm reattach, but a
     // dev parent dying means the temp/dev profile has no owner left to reattach.
     const daemonTeardown = isDevParentShutdownRequested() ? shutdownDaemon() : disconnectDaemon()
-    Promise.allSettled([daemonTeardown, rpcStopAndClear, watcherShutdown, emulatorShutdown])
+    Promise.allSettled([
+      daemonTeardown,
+      rpcStopAndClear,
+      spoolStop,
+      watcherShutdown,
+      emulatorShutdown
+    ])
       .then(() => shutdownTelemetry())
       .then(() => shutdownObservability())
       .catch(() => {

@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import type { RemoteRuntimeClientError } from './remote-runtime-client-error'
 import type { RuntimeRpcResponse } from './runtime-rpc-envelope'
 import { getCleanupRequest, getSubscriptionId } from './remote-runtime-shared-control-protocol'
 import {
@@ -15,6 +16,7 @@ export function createSharedControlSubscription<TResult>(args: {
   method: string
   params: unknown
   callbacks: SharedControlSubscriptionCallbacks<TResult>
+  replayOnReconnect?: boolean
 }): SharedControlLogicalSubscription<TResult> {
   return {
     requestId: args.requestId,
@@ -24,7 +26,8 @@ export function createSharedControlSubscription<TResult>(args: {
     sent: false,
     closed: false,
     closeAfterReady: false,
-    remoteSubscriptionId: null
+    remoteSubscriptionId: null,
+    replayOnReconnect: args.replayOnReconnect ?? true
   }
 }
 
@@ -100,7 +103,7 @@ export function replaySharedControlSubscriptions(args: {
   tagReplayedResponses?: boolean
 }): void {
   for (const subscription of args.subscriptions.values()) {
-    if (subscription.closeAfterReady) {
+    if (subscription.closeAfterReady || !subscription.replayOnReconnect) {
       continue
     }
     subscription.sent = false
@@ -113,6 +116,17 @@ export function replaySharedControlSubscriptions(args: {
       subscription.pendingReplayTag = true
     }
     args.send(subscription)
+  }
+}
+
+export function finishNonReplayableSharedControlSubscriptions(
+  subscriptions: Map<string, SharedControlLogicalSubscription<unknown>>,
+  error: RemoteRuntimeClientError
+): void {
+  for (const subscription of Array.from(subscriptions.values())) {
+    if (!subscription.replayOnReconnect) {
+      finishSharedControlSubscription(subscriptions, subscription, true, error)
+    }
   }
 }
 

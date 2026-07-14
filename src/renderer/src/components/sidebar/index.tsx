@@ -16,6 +16,7 @@ import { useWorkspaceBoardPanel } from './useWorkspaceBoardPanel'
 import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
 import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-prefers-dark'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
+import { SpoolOwnerControlGrants } from '@/components/spool/SpoolOwnerControlGrants'
 
 const WorktreeMetaDialog = lazyWithRetry(() => import('./WorktreeMetaDialog'))
 const RemoveFolderDialog = lazyWithRetry(() => import('./RemoveFolderDialog'))
@@ -154,6 +155,7 @@ function Sidebar({
               onWorkspaceBoardDragPreviewCancel={cancelWorkspaceBoardDragPreview}
             />
 
+            <SpoolOwnerControlGrants />
             <SetupScriptPromptCard />
 
             {/* Fixed bottom toolbar */}

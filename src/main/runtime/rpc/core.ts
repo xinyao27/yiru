@@ -4,6 +4,7 @@
 // against the same shape the handler consumed during development.
 import { ZodError, type ZodType } from 'zod'
 import type { TerminalStreamFrame } from '../../../shared/terminal-stream-protocol'
+import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
 import type { OrcaRuntimeService } from '../orca-runtime'
 
 export type RpcEnvelopeMeta = {
@@ -40,6 +41,8 @@ export type RpcRequest = {
 
 export type RpcContext = {
   runtime: OrcaRuntimeService
+  /** Immutable identity established by the encrypted transport, when present. */
+  principal?: AuthenticatedRpcPrincipal
   // Why: long-poll handlers (e.g. orchestration.check with wait=true) need to
   // observe the underlying socket's lifetime so they can release their slot
   // and resolve their inner waiters immediately when a client disconnects
