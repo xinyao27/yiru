@@ -4683,6 +4683,23 @@
           "cancel": "取消",
           "forget": "从 Orca 中移除",
           "reconnectAndDelete": "重新连接并删除"
+        },
+        "DesktopQuotaRows": {
+          "meterLabel": "{{value0}}: {{value1}}% used in {{value2}}",
+          "windowUnavailable": "{{value0}}: {{value1}} usage unavailable",
+          "fiveHour": "5h",
+          "sevenDay": "7d"
+        },
+        "SpoolDesktopRow": {
+          "connecting": "Connecting…",
+          "disconnected": "Disconnected"
+        },
+        "SpoolSessionRow": {
+          "otherProvider": "Other"
+        },
+        "SpoolWorktreeRow": {
+          "collapse": "Collapse {{value0}}",
+          "expand": "Expand {{value0}}"
         }
       },
       "shared": {
