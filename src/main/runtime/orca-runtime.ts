@@ -152,6 +152,10 @@ import {
 import type { SleepingAgentLaunchConfig } from '../../shared/agent-session-resume'
 import type { RuntimeClientEvent } from '../../shared/runtime-client-events'
 import { toRuntimeActivateWorktreeEvent } from '../../shared/runtime-client-events'
+import type {
+  SpoolPairedRuntimeResolvedWorktree,
+  SpoolPairedRuntimeWorktreeSelector
+} from '../../shared/spool/spool-paired-runtime-host-contract'
 import type { SshConnectionState } from '../../shared/ssh-types'
 import type {
   LinearCurrentIssueContextHints,
@@ -1061,6 +1065,10 @@ type TerminalCreateOptions = {
   // intermediate pty-backed publish so the new tab doesn't briefly flash in
   // the wrong (active) group before the corrected snapshot lands.
   deferMobileSessionPublish?: boolean
+  /** Why: Spool grants can be revoked during async launch preparation. */
+  beforeSpawn?: () => void | Promise<void>
+  /** Why: agent trust persistence is also a launch side effect, before PTY spawn. */
+  beforeAgentTrust?: () => void | Promise<void>
 }
 
 type PtyForegroundAgentRefresh = {
@@ -14646,6 +14654,49 @@ export class OrcaRuntimeService {
     return await this.resolveWorktreeSelector(worktreeSelector)
   }
 
+  async resolvePairedRuntimeSpoolWorktree(
+    selector: SpoolPairedRuntimeWorktreeSelector
+  ): Promise<SpoolPairedRuntimeResolvedWorktree> {
+    const store = this.requireStore()
+    const worktree = await this.resolveWorktreeSelector(`id:${selector.worktreeId}`)
+    const repo = store.getRepo(worktree.repoId)
+    if (
+      !repo ||
+      worktree.id !== selector.worktreeId ||
+      worktree.instanceId !== selector.instanceId
+    ) {
+      throw new Error('selector_not_found')
+    }
+    const executionHostId = getRepoExecutionHostId(repo)
+    const host = parseExecutionHostId(executionHostId)
+    if (!host || host.kind === 'runtime') {
+      // Why: an internal actual-host call must terminate here, never become a recursive gateway.
+      throw new Error('recursive_runtime_host')
+    }
+    if (worktree.hostId && worktree.hostId !== executionHostId) {
+      throw new Error('worktree_host_mismatch')
+    }
+    return {
+      worktreeId: worktree.id,
+      instanceId: selector.instanceId,
+      projectId: worktree.projectId ?? null,
+      repoId: worktree.repoId,
+      executionHostId,
+      connectionId: host.kind === 'ssh' ? host.targetId : null,
+      ...(worktree.projectHostSetupId ? { projectHostSetupId: worktree.projectHostSetupId } : {}),
+      worktreePath: worktree.path,
+      localWslDistro:
+        host.kind === 'local'
+          ? (getLocalProjectWorktreeGitOptions(store, repo).wslDistro ?? null)
+          : null
+    }
+  }
+
+  getPairedRuntimeSpoolStore(): Store {
+    // Why: only the internal paired-runtime host adapter needs Store-backed path authorization.
+    return this.requireStore()
+  }
+
   async scanWorkspacePorts(repoId?: string): Promise<WorkspacePortScanResult> {
     return scanWorkspacePortProbes(await this.getWorkspacePortProbes(repoId))
   }
@@ -18193,6 +18244,7 @@ export class OrcaRuntimeService {
       return opts
     }
 
+    await opts.beforeAgentTrust?.()
     if (workspace.connectionId) {
       await this.markRemoteWorkspaceTrustedForAgent(agent, workspace.connectionId, workspace.path)
     } else {
@@ -18323,6 +18375,7 @@ export class OrcaRuntimeService {
         tabId,
         agentTeamsPlan?.env
       )
+      await launchOpts.beforeSpawn?.()
       const result = await this.ptyController.spawn({
         cols: 120,
         rows: 40,
@@ -18446,6 +18499,7 @@ export class OrcaRuntimeService {
     // Why: terminal creation is a renderer-side Zustand store operation (like
     // browser tab creation). The main process sends a request, the renderer
     // creates the tab and replies with the tabId so we can resolve the handle.
+    await launchOpts.beforeSpawn?.()
     const reply = await new Promise<{ tabId: string; title: string }>((resolve, reject) => {
       const timer = setTimeout(() => {
         ipcMain.removeListener('terminal:tabCreateReply', handler)

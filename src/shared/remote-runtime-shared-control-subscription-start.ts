@@ -16,13 +16,15 @@ export async function startSharedControlSubscription<TResult>(args: {
   ensureReady: () => Promise<void>
   sendSubscription: (subscription: SharedControlLogicalSubscription<unknown>) => void
   closeSubscription: (requestId: string) => void
+  replayOnReconnect?: boolean
 }): Promise<RemoteRuntimeSharedSubscription> {
   const requestId = randomUUID()
   const subscription = createSharedControlSubscription({
     requestId,
     method: args.method,
     params: args.params,
-    callbacks: args.callbacks
+    callbacks: args.callbacks,
+    replayOnReconnect: args.replayOnReconnect
   })
   args.subscriptions.set(requestId, subscription as SharedControlLogicalSubscription<unknown>)
   try {

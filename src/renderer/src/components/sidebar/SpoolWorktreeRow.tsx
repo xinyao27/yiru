@@ -2,6 +2,7 @@ import type React from 'react'
 import { ChevronRight, GitBranch } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 import type { SpoolWorktreeSidebarRow } from './spool-sidebar-rows'
 
@@ -21,12 +22,33 @@ function getDisclosureLabel(row: SpoolWorktreeSidebarRow): string {
       })
 }
 
+function getSessionCatalogLabel(
+  status: SpoolWorktreeSidebarRow['sessionCatalogStatus']
+): string | null {
+  switch (status) {
+    case 'loading':
+      return translate(
+        'auto.components.sidebar.SpoolWorktreeRow.loadingSessions',
+        'Loading sessions…'
+      )
+    case 'error':
+      return translate(
+        'auto.components.sidebar.SpoolWorktreeRow.sessionsUnavailable',
+        'Session list unavailable'
+      )
+    case 'complete':
+      return null
+  }
+}
+
 export function SpoolWorktreeRow({
   row,
   onToggle,
   onSelect
 }: SpoolWorktreeRowProps): React.JSX.Element {
   const hasSessions = row.sessionCount > 0
+  const sessionCatalogLabel = getSessionCatalogLabel(row.sessionCatalogStatus)
+  const metadata = [row.branch, sessionCatalogLabel].filter(Boolean).join(' · ')
   return (
     <div
       data-current={row.active ? 'true' : undefined}
@@ -38,21 +60,28 @@ export function SpoolWorktreeRow({
       )}
     >
       {hasSessions ? (
-        <button
-          type="button"
-          aria-label={getDisclosureLabel(row)}
-          aria-expanded={row.expanded}
-          onClick={onToggle}
-          className="flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring"
-        >
-          <ChevronRight
-            aria-hidden="true"
-            className={cn(
-              'size-3 transition-transform motion-reduce:transition-none',
-              row.expanded && 'rotate-90'
-            )}
-          />
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              aria-label={getDisclosureLabel(row)}
+              aria-expanded={row.expanded}
+              onClick={onToggle}
+              className="flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring"
+            >
+              <ChevronRight
+                aria-hidden="true"
+                className={cn(
+                  'size-3 transition-transform motion-reduce:transition-none',
+                  row.expanded && 'rotate-90'
+                )}
+              />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" sideOffset={4}>
+            {getDisclosureLabel(row)}
+          </TooltipContent>
+        </Tooltip>
       ) : (
         <span className="block size-5 shrink-0" />
       )}
@@ -64,10 +93,18 @@ export function SpoolWorktreeRow({
       >
         <GitBranch aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
         <span className="min-w-0 flex-1">
-          <TruncatedSidebarLabel text={row.name} className="text-[13px] font-medium leading-4" />
-          {row.branch ? (
+          <span className="flex min-w-0 items-center gap-1">
             <TruncatedSidebarLabel
-              text={row.branch}
+              text={row.name}
+              className="min-w-0 flex-1 text-[13px] font-medium leading-4"
+            />
+            <span className="shrink-0 text-[10px] text-muted-foreground">
+              {translate('auto.components.sidebar.SpoolWorktreeRow.public', 'Public')}
+            </span>
+          </span>
+          {metadata ? (
+            <TruncatedSidebarLabel
+              text={metadata}
               className="text-[11px] leading-4 text-muted-foreground"
             />
           ) : null}

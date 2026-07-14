@@ -93,6 +93,17 @@ type RuntimeCommitMessageSettingsOverride = Partial<
   sourceControlAiResolvedParams?: ResolvedSourceControlAiGenerationParams
 }
 
+type RuntimeGitMutationAdmission = {
+  signal?: AbortSignal
+  beforeSideEffect?: () => void | Promise<void>
+}
+
+async function admitRuntimeGitMutation(admission?: RuntimeGitMutationAdmission): Promise<void> {
+  admission?.signal?.throwIfAborted()
+  await admission?.beforeSideEffect?.()
+  admission?.signal?.throwIfAborted()
+}
+
 function getRuntimeGitGenerationSettings(
   settings: GlobalSettings,
   settingsOverride: RuntimeCommitMessageSettingsOverride | undefined,
@@ -557,7 +568,8 @@ export class RuntimeGitCommands {
 
   async commitRuntimeGit(
     worktreeSelector: string,
-    message: string
+    message: string,
+    admission?: RuntimeGitMutationAdmission
   ): Promise<{ success: boolean; error?: string }> {
     if (message.trim().length === 0) {
       throw new Error('Commit message is required')
@@ -568,9 +580,14 @@ export class RuntimeGitCommands {
       if (!provider) {
         throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
       }
-      return provider.commit(target.worktree.path, message)
+      await admitRuntimeGitMutation(admission)
+      return provider.commit(target.worktree.path, message, { signal: admission?.signal })
     }
-    return commitChanges(target.worktree.path, message, localGitOptionsForTarget(target))
+    await admitRuntimeGitMutation(admission)
+    return commitChanges(target.worktree.path, message, {
+      ...localGitOptionsForTarget(target),
+      signal: admission?.signal
+    })
   }
 
   async generateRuntimeCommitMessage(
@@ -849,7 +866,8 @@ export class RuntimeGitCommands {
 
   async bulkStageRuntimeGitPaths(
     worktreeSelector: string,
-    filePaths: string[]
+    filePaths: string[],
+    admission?: RuntimeGitMutationAdmission
   ): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const relativePaths = filePaths.map((path) => normalizeRuntimeGitRelativePath(path))
@@ -858,16 +876,24 @@ export class RuntimeGitCommands {
       if (!provider) {
         throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
       }
-      await provider.bulkStageFiles(target.worktree.path, relativePaths)
+      await admitRuntimeGitMutation(admission)
+      await provider.bulkStageFiles(target.worktree.path, relativePaths, {
+        signal: admission?.signal
+      })
       return { ok: true }
     }
-    await bulkStageFiles(target.worktree.path, relativePaths, localGitOptionsForTarget(target))
+    await admitRuntimeGitMutation(admission)
+    await bulkStageFiles(target.worktree.path, relativePaths, {
+      ...localGitOptionsForTarget(target),
+      signal: admission?.signal
+    })
     return { ok: true }
   }
 
   async bulkUnstageRuntimeGitPaths(
     worktreeSelector: string,
-    filePaths: string[]
+    filePaths: string[],
+    admission?: RuntimeGitMutationAdmission
   ): Promise<{ ok: true }> {
     const target = await this.host.resolveRuntimeGitTarget(worktreeSelector)
     const relativePaths = filePaths.map((path) => normalizeRuntimeGitRelativePath(path))
@@ -876,10 +902,17 @@ export class RuntimeGitCommands {
       if (!provider) {
         throw new Error(SSH_GIT_PROVIDER_UNAVAILABLE_MESSAGE)
       }
-      await provider.bulkUnstageFiles(target.worktree.path, relativePaths)
+      await admitRuntimeGitMutation(admission)
+      await provider.bulkUnstageFiles(target.worktree.path, relativePaths, {
+        signal: admission?.signal
+      })
       return { ok: true }
     }
-    await bulkUnstageFiles(target.worktree.path, relativePaths, localGitOptionsForTarget(target))
+    await admitRuntimeGitMutation(admission)
+    await bulkUnstageFiles(target.worktree.path, relativePaths, {
+      ...localGitOptionsForTarget(target),
+      signal: admission?.signal
+    })
     return { ok: true }
   }
 

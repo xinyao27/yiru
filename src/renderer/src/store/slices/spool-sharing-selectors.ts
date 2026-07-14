@@ -4,9 +4,11 @@ import type {
   SpoolSessionCatalogEntry,
   SpoolWorktreeCatalogEntry
 } from '../../../../shared/spool/spool-catalog-contract'
-import type { SpoolControlRequest } from '../../../../shared/spool/spool-access-contract'
 import type {
-  SpoolControlGrantBinding,
+  SpoolOwnerControlRequestView,
+  SpoolRequesterControlView
+} from '../../../../shared/spool/spool-ipc-contract'
+import type {
   SpoolExpandedRefsByDesktop,
   SpoolSharingState,
   SpoolWorkspaceRoute
@@ -63,9 +65,9 @@ export function resolveSpoolWorkspaceRoute(
   return null
 }
 
-export function isSpoolControlGrantBindingCurrent(
+export function isSpoolRequesterControlCurrent(
   desktops: readonly SpoolRemoteDesktop[],
-  binding: SpoolControlGrantBinding
+  binding: SpoolRequesterControlView
 ): boolean {
   const resolved = resolveSpoolWorkspaceRoute(
     { spoolRemoteDesktops: desktops },
@@ -75,12 +77,7 @@ export function isSpoolControlGrantBindingCurrent(
       connectionEpoch: binding.connectionEpoch
     }
   )
-  return Boolean(
-    resolved &&
-    resolved.desktop.connectionStatus === 'connected' &&
-    resolved.desktop.catalog?.ownerRuntimeId === binding.grant.ownerRuntimeId &&
-    resolved.worktree.shareEpoch === binding.grant.shareEpoch
-  )
+  return Boolean(resolved && resolved.desktop.connectionStatus === 'connected')
 }
 
 export function selectActiveSpoolWorkspace(
@@ -92,24 +89,42 @@ export function selectActiveSpoolWorkspace(
 }
 
 export function selectSpoolCanControl(
-  state: Pick<SpoolSharingState, 'spoolRemoteDesktops' | 'spoolControlGrantsByWorktree'>,
+  state: Pick<SpoolSharingState, 'spoolRemoteDesktops' | 'spoolRequesterControlByWorktree'>,
   route: SpoolWorkspaceRoute | null
 ): boolean {
   if (!route) {
     return false
   }
-  const binding = state.spoolControlGrantsByWorktree.get(
+  const binding = state.spoolRequesterControlByWorktree.get(
     getSpoolWorktreeBindingKey(route.desktopRef, route.worktreeRef)
   )
   return Boolean(
     binding &&
+    binding.status === 'granted' &&
     binding.connectionEpoch === route.connectionEpoch &&
-    isSpoolControlGrantBindingCurrent(state.spoolRemoteDesktops, binding)
+    isSpoolRequesterControlCurrent(state.spoolRemoteDesktops, binding)
   )
+}
+
+export function selectSpoolRequesterControlState(
+  state: Pick<SpoolSharingState, 'spoolRemoteDesktops' | 'spoolRequesterControlByWorktree'>,
+  route: SpoolWorkspaceRoute | null
+): SpoolRequesterControlView['status'] {
+  if (!route) {
+    return 'read-only'
+  }
+  const binding = state.spoolRequesterControlByWorktree.get(
+    getSpoolWorktreeBindingKey(route.desktopRef, route.worktreeRef)
+  )
+  return binding &&
+    binding.connectionEpoch === route.connectionEpoch &&
+    isSpoolRequesterControlCurrent(state.spoolRemoteDesktops, binding)
+    ? binding.status
+    : 'read-only'
 }
 
 export function selectCurrentSpoolControlRequest(
   state: Pick<SpoolSharingState, 'spoolControlRequestQueue'>
-): SpoolControlRequest | null {
+): SpoolOwnerControlRequestView | null {
   return state.spoolControlRequestQueue[0] ?? null
 }

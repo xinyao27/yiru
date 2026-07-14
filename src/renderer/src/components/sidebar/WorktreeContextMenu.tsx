@@ -29,8 +29,11 @@ import {
   Workflow,
   FolderInput,
   FolderPlus,
-  FolderTree
+  FolderTree,
+  Globe2,
+  LockKeyhole
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 import { useAllWorktrees, useRepoById, useRepoMap, useWorktreeMap } from '@/store/selectors'
@@ -54,6 +57,7 @@ import {
   parseWorkspaceKey,
   worktreeWorkspaceKey
 } from '../../../../shared/workspace-scope'
+import { SpoolWorktreeVisibilityDialog } from '@/components/spool/SpoolWorktreeVisibilityDialog'
 
 type Props = {
   worktree: Worktree
@@ -289,6 +293,8 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
     effectiveSelectedWorktrees
   )
   const [createGroupDialogOpen, setCreateGroupDialogOpen] = useState(false)
+  const [spoolPublicationDialogOpen, setSpoolPublicationDialogOpen] = useState(false)
+  const [spoolVisibilityPending, setSpoolVisibilityPending] = useState(false)
   const [parentPicker, setParentPicker] = useState<{
     childWorktreeId: string
     anchorElement: HTMLElement
@@ -330,6 +336,11 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
   )
   const deleteStateByWorktreeId = useAppStore((s) =>
     selectMenuScopedMap(menuOpen, s.deleteStateByWorktreeId, EMPTY_DELETE_STATE_BY_WORKTREE_ID)
+  )
+  const spoolOwnerWorktree = useAppStore((state) =>
+    menuOpen || spoolPublicationDialogOpen
+      ? (state.spoolOwnerWorktrees.find((entry) => entry.worktreeId === worktree.id) ?? null)
+      : null
   )
   const scopeRef = useRef<HTMLDivElement>(null)
   const contextMenuOpenedAtRef = useRef<number | null>(null)
@@ -435,6 +446,28 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
   const handleTogglePin = useCallback(() => {
     setWorktreesPinnedAndReveal([worktree.id], !worktree.isPinned)
   }, [worktree.id, worktree.isPinned, setWorktreesPinnedAndReveal])
+
+  const handleSpoolVisibility = useCallback(() => {
+    if (!spoolOwnerWorktree || spoolVisibilityPending) {
+      return
+    }
+    if (spoolOwnerWorktree.visibility === 'private') {
+      setSpoolPublicationDialogOpen(true)
+      return
+    }
+    setSpoolVisibilityPending(true)
+    void window.api.spoolSharing
+      .setWorktreeVisibility({ worktreeId: worktree.id, visibility: 'private' })
+      .catch(() => {
+        toast.error(
+          translate(
+            'auto.components.sidebar.WorktreeContextMenu.spoolPrivateFailed',
+            'Could not make this worktree private.'
+          )
+        )
+      })
+      .finally(() => setSpoolVisibilityPending(false))
+  }, [spoolOwnerWorktree, spoolVisibilityPending, worktree.id])
 
   const handleCreateGroupFromRepo = useCallback(() => {
     if (!repo) {
@@ -743,6 +776,27 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
                 <Copy className="size-3.5" />
                 {translate('auto.components.sidebar.WorktreeContextMenu.3350101edb', 'Copy Path')}
               </DropdownMenuItem>
+              {spoolOwnerWorktree ? (
+                <DropdownMenuItem
+                  onSelect={handleSpoolVisibility}
+                  disabled={isDeleting || spoolVisibilityPending}
+                >
+                  {spoolOwnerWorktree.visibility === 'public' ? (
+                    <LockKeyhole className="size-3.5" />
+                  ) : (
+                    <Globe2 className="size-3.5" />
+                  )}
+                  {spoolOwnerWorktree.visibility === 'public'
+                    ? translate(
+                        'auto.components.sidebar.WorktreeContextMenu.makeSpoolPrivate',
+                        'Make private'
+                      )
+                    : translate(
+                        'auto.components.sidebar.WorktreeContextMenu.makeSpoolPublic',
+                        'Make public'
+                      )}
+                </DropdownMenuItem>
+              ) : null}
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={handleTogglePin} disabled={isDeleting}>
                 {worktree.isPinned ? <PinOff className="size-3.5" /> : <Pin className="size-3.5" />}
@@ -938,6 +992,12 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <SpoolWorktreeVisibilityDialog
+        open={spoolPublicationDialogOpen}
+        worktreeId={worktree.id}
+        worktreeName={worktree.displayName || worktree.branch || worktree.id}
+        onOpenChange={setSpoolPublicationDialogOpen}
+      />
       <ProjectGroupNameDialog
         open={createGroupDialogOpen}
         title={translate(

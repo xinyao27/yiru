@@ -1,19 +1,18 @@
 import type { StateCreator } from 'zustand'
+import type { SpoolRequesterControlView } from '../../../../shared/spool/spool-ipc-contract'
 import type { AppState } from '../types'
 import {
   getSpoolWorktreeBindingKey,
-  isSpoolControlGrantBindingCurrent,
+  isSpoolRequesterControlCurrent,
   resolveSpoolWorkspaceRoute
 } from './spool-sharing-selectors'
 import type {
-  SpoolControlGrantBinding,
   SpoolExpandedRefsByDesktop,
   SpoolSharingSlice,
   SpoolSharingState
 } from './spool-sharing-types'
 
 export type {
-  SpoolControlGrantBinding,
   SpoolExpandedRefsByDesktop,
   SpoolSharingActions,
   SpoolSharingSlice,
@@ -26,18 +25,23 @@ export {
   resolveSpoolWorkspaceRoute,
   selectActiveSpoolWorkspace,
   selectCurrentSpoolControlRequest,
-  selectSpoolCanControl
+  selectSpoolCanControl,
+  selectSpoolRequesterControlState
 } from './spool-sharing-selectors'
 
 function createInitialSpoolSharingState(): SpoolSharingState {
   return {
+    spoolSharingStatus: 'starting',
+    spoolSharingDiagnostic: null,
     spoolRemoteDesktops: [],
+    spoolOwnerWorktrees: [],
+    spoolOwnerControlGrants: [],
     spoolExpandedDesktopRefs: new Set(),
     spoolExpandedProjectRefsByDesktop: new Map(),
     spoolExpandedWorktreeRefsByDesktop: new Map(),
     activeSpoolWorkspaceRoute: null,
     spoolControlRequestQueue: [],
-    spoolControlGrantsByWorktree: new Map()
+    spoolRequesterControlByWorktree: new Map()
   }
 }
 
@@ -83,23 +87,56 @@ function updateExpandedResourceRefs(
   return next
 }
 
-function retainCurrentSpoolGrants(
+function projectCurrentRequesterControl(
   desktops: AppState['spoolRemoteDesktops'],
-  current: ReadonlyMap<string, SpoolControlGrantBinding>
-): ReadonlyMap<string, SpoolControlGrantBinding> {
-  const next = new Map<string, SpoolControlGrantBinding>()
+  current: AppState['spoolRequesterControlByWorktree']
+): AppState['spoolRequesterControlByWorktree'] {
+  const next = new Map(current)
   for (const [key, binding] of current) {
-    if (isSpoolControlGrantBindingCurrent(desktops, binding)) {
-      next.set(key, binding)
+    if (!isSpoolRequesterControlCurrent(desktops, binding)) {
+      next.delete(key)
     }
   }
   return next
+}
+
+function requesterControlMap(
+  controls: readonly SpoolRequesterControlView[]
+): AppState['spoolRequesterControlByWorktree'] {
+  return new Map(
+    controls.map((control) => [
+      getSpoolWorktreeBindingKey(control.desktopRef, control.worktreeRef),
+      control
+    ])
+  )
 }
 
 export const createSpoolSharingSlice: StateCreator<AppState, [], [], SpoolSharingSlice> = (
   set
 ) => ({
   ...createInitialSpoolSharingState(),
+
+  applySpoolSharingSnapshot: (snapshot) =>
+    set((state) => {
+      const spoolRemoteDesktops = [...snapshot.remoteDesktops]
+      const activeSpoolWorkspaceRoute =
+        state.activeSpoolWorkspaceRoute &&
+        resolveSpoolWorkspaceRoute({ spoolRemoteDesktops }, state.activeSpoolWorkspaceRoute)
+          ? state.activeSpoolWorkspaceRoute
+          : null
+      return {
+        spoolSharingStatus: snapshot.status,
+        spoolSharingDiagnostic: snapshot.diagnostic,
+        spoolRemoteDesktops,
+        spoolOwnerWorktrees: [...snapshot.ownerWorktrees],
+        spoolOwnerControlGrants: [...snapshot.ownerControlGrants],
+        spoolControlRequestQueue: [...snapshot.ownerControlRequests],
+        activeSpoolWorkspaceRoute,
+        // Why: requester control is a main-process projection bound to the
+        // physical connection; replacing it wholesale prevents stale grants.
+        spoolRequesterControlByWorktree: requesterControlMap(snapshot.requesterControlStates)
+      }
+    }),
 
   setSpoolRemoteDesktops: (desktops) =>
     set((state) => {
@@ -114,9 +151,9 @@ export const createSpoolSharingSlice: StateCreator<AppState, [], [], SpoolSharin
         activeSpoolWorkspaceRoute,
         // Why: connection, runtime, and share epochs are all authority bounds;
         // one catalog transition must demote every renderer surface together.
-        spoolControlGrantsByWorktree: retainCurrentSpoolGrants(
+        spoolRequesterControlByWorktree: projectCurrentRequesterControl(
           spoolRemoteDesktops,
-          state.spoolControlGrantsByWorktree
+          state.spoolRequesterControlByWorktree
         )
       }
     }),
@@ -166,27 +203,31 @@ export const createSpoolSharingSlice: StateCreator<AppState, [], [], SpoolSharin
       )
     })),
 
-  setSpoolControlGrant: (binding) =>
+  markSpoolControlPending: (route) =>
     set((state) => {
-      const next = new Map(state.spoolControlGrantsByWorktree)
-      next.set(getSpoolWorktreeBindingKey(binding.desktopRef, binding.worktreeRef), binding)
-      return { spoolControlGrantsByWorktree: next }
-    }),
-
-  removeSpoolControlGrant: (grantId) =>
-    set((state) => {
-      const next = new Map(state.spoolControlGrantsByWorktree)
-      for (const [key, binding] of next) {
-        if (binding.grant.grantId === grantId) {
-          next.delete(key)
-        }
+      if (!resolveSpoolWorkspaceRoute(state, route)) {
+        return state
       }
-      return { spoolControlGrantsByWorktree: next }
+      const key = getSpoolWorktreeBindingKey(route.desktopRef, route.worktreeRef)
+      const current = state.spoolRequesterControlByWorktree.get(key)
+      if (current?.connectionEpoch === route.connectionEpoch && current.status === 'granted') {
+        // Why: the authoritative control stream can grant access before the
+        // request invoke resolves; its ACK must never downgrade that grant.
+        return state
+      }
+      const next = new Map(state.spoolRequesterControlByWorktree)
+      next.set(key, {
+        desktopRef: route.desktopRef,
+        worktreeRef: route.worktreeRef,
+        connectionEpoch: route.connectionEpoch,
+        status: 'pending'
+      })
+      return { spoolRequesterControlByWorktree: next }
     }),
 
   clearSpoolConnectionAuthority: (desktopRef, connectionEpoch) =>
     set((state) => {
-      const next = new Map(state.spoolControlGrantsByWorktree)
+      const next = new Map(state.spoolRequesterControlByWorktree)
       for (const [key, binding] of next) {
         if (
           binding.desktopRef === desktopRef &&
@@ -195,7 +236,7 @@ export const createSpoolSharingSlice: StateCreator<AppState, [], [], SpoolSharin
           next.delete(key)
         }
       }
-      return { spoolControlGrantsByWorktree: next }
+      return { spoolRequesterControlByWorktree: next }
     }),
 
   resetSpoolSharing: () => set(createInitialSpoolSharingState())

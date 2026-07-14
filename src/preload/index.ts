@@ -15,6 +15,24 @@ import type { SleepingAgentLaunchConfig } from '../shared/agent-session-resume'
 import type { MobileRelayStatus } from '../shared/mobile-relay-status'
 import type { MobilePairingConnectionMode } from '../shared/mobile-pairing-connection-mode'
 import type {
+  SpoolDecideControlArgs,
+  SpoolRequestControlArgs,
+  SpoolRequesterInvokeArgs,
+  SpoolRequesterSubscriptionArgs,
+  SpoolRequesterSubscriptionEvent,
+  SpoolRequesterSubscriptionStartResult,
+  SpoolRequesterSubscriptionStopArgs,
+  SpoolRequesterSubscriptionStopResult,
+  SpoolRevokeControlArgs,
+  SpoolSetProjectVisibilityArgs,
+  SpoolSetWorktreeVisibilityArgs,
+  SpoolSharingSnapshot
+} from '../shared/spool/spool-ipc-contract'
+import type {
+  SpoolWindowsFirewallRepairResult,
+  SpoolWindowsFirewallStatus
+} from '../shared/spool/spool-windows-firewall-contract'
+import type {
   BaseRefSearchResult,
   BaseRefDefaultResult,
   BrowserViewportOverride,
@@ -4081,6 +4099,52 @@ const api = {
       return () => ipcRenderer.removeListener('rateLimits:update', listener)
     }
   },
+
+  spoolSharing: {
+    getSnapshot: (): Promise<SpoolSharingSnapshot> =>
+      ipcRenderer.invoke('spoolSharing:getSnapshot'),
+    setWorktreeVisibility: (args: SpoolSetWorktreeVisibilityArgs): Promise<void> =>
+      ipcRenderer.invoke('spoolSharing:setWorktreeVisibility', args),
+    setProjectVisibility: (args: SpoolSetProjectVisibilityArgs): Promise<void> =>
+      ipcRenderer.invoke('spoolSharing:setProjectVisibility', args),
+    requestControl: (args: SpoolRequestControlArgs): Promise<void> =>
+      ipcRenderer.invoke('spoolSharing:requestControl', args),
+    decideControl: (args: SpoolDecideControlArgs): Promise<void> =>
+      ipcRenderer.invoke('spoolSharing:decideControl', args),
+    revokeControl: (args: SpoolRevokeControlArgs): Promise<void> =>
+      ipcRenderer.invoke('spoolSharing:revokeControl', args),
+    getWindowsFirewallStatus: (): Promise<SpoolWindowsFirewallStatus> =>
+      ipcRenderer.invoke('spoolSharing:getWindowsFirewallStatus'),
+    repairWindowsFirewall: (): Promise<SpoolWindowsFirewallRepairResult> =>
+      ipcRenderer.invoke('spoolSharing:repairWindowsFirewall'),
+    retryAvailability: (): Promise<void> => ipcRenderer.invoke('spoolSharing:retryAvailability'),
+    invoke: (args: SpoolRequesterInvokeArgs): Promise<unknown> =>
+      ipcRenderer.invoke('spoolSharing:invoke', args),
+    startSubscription: (
+      args: SpoolRequesterSubscriptionArgs
+    ): Promise<SpoolRequesterSubscriptionStartResult> =>
+      ipcRenderer.invoke('spoolSharing:startSubscription', args),
+    stopSubscription: (
+      args: SpoolRequesterSubscriptionStopArgs
+    ): Promise<SpoolRequesterSubscriptionStopResult> =>
+      ipcRenderer.invoke('spoolSharing:stopSubscription', args),
+    onSubscriptionEvent: (
+      callback: (event: SpoolRequesterSubscriptionEvent) => void
+    ): (() => void) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        subscriptionEvent: SpoolRequesterSubscriptionEvent
+      ): void => callback(subscriptionEvent)
+      ipcRenderer.on('spoolSharing:subscriptionEvent', listener)
+      return () => ipcRenderer.removeListener('spoolSharing:subscriptionEvent', listener)
+    },
+    onChanged: (callback: (snapshot: SpoolSharingSnapshot) => void): (() => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, snapshot: SpoolSharingSnapshot): void =>
+        callback(snapshot)
+      ipcRenderer.on('spoolSharing:changed', listener)
+      return () => ipcRenderer.removeListener('spoolSharing:changed', listener)
+    }
+  } satisfies PreloadApi['spoolSharing'],
 
   minimaxCredentials: {
     getStatus: (): Promise<{ configured: boolean }> =>

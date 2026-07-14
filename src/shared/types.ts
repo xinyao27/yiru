@@ -575,6 +575,10 @@ export type GitHubPrStartPoint = {
 export type WorktreeMeta = {
   /** Immutable per-workspace-instance ID used to reject stale lineage after path reuse. */
   instanceId?: string
+  /** Remote sharing is private unless the owner explicitly publishes this worktree. */
+  spoolVisibility?: 'public' | 'private'
+  /** Host-side Git worktree marker that prevents path reuse from inheriting sharing. */
+  spoolIncarnationId?: string
   /** See Worktree.projectId. Persisted for project-first workspace ownership. */
   projectId?: string
   /** See Worktree.hostId. Persisted for project-first workspace ownership. */

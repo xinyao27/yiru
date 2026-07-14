@@ -68,7 +68,8 @@ export async function sendRemoteRuntimeRequest<TResult>(
   pairing: PairingOffer,
   method: string,
   params: unknown,
-  timeoutMs: number
+  timeoutMs: number,
+  options: { beforeSend?: () => void | Promise<void> } = {}
 ): Promise<RuntimeRpcResponse<TResult>> {
   return await new Promise((resolve, reject) => {
     const requestId = randomUUID()
@@ -219,7 +220,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
       }
 
       if (state === 'awaiting_authenticated') {
-        handleAuthenticatedFrame(plaintext)
+        void handleAuthenticatedFrame(plaintext)
         return
       }
 
@@ -265,7 +266,7 @@ export async function sendRemoteRuntimeRequest<TResult>(
       )
     }
 
-    function handleAuthenticatedFrame(plaintext: string): void {
+    async function handleAuthenticatedFrame(plaintext: string): Promise<void> {
       let authenticated: unknown
       try {
         authenticated = JSON.parse(plaintext)
@@ -297,6 +298,19 @@ export async function sendRemoteRuntimeRequest<TResult>(
         return
       }
       state = 'ready'
+      try {
+        // Why: handshake latency must not let a revoked queued mutation cross the wire.
+        await options.beforeSend?.()
+      } catch (error) {
+        finish({
+          ok: false,
+          error: error instanceof Error ? error : new Error(String(error))
+        })
+        return
+      }
+      if (settled || !ws || ws.readyState !== WebSocket.OPEN) {
+        return
+      }
       ws?.send(
         encrypt(
           JSON.stringify({

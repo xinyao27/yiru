@@ -203,12 +203,12 @@ export class GitHandler {
     this.dispatcher.onRequest('git.submoduleStatus', (p) => this.getSubmoduleStatus(p))
     this.dispatcher.onRequest('git.checkIgnored', (p) => this.checkIgnored(p))
     this.dispatcher.onRequest('git.history', (p) => this.history(p))
-    this.dispatcher.onRequest('git.commit', (p) => this.commit(p))
+    this.dispatcher.onRequest('git.commit', (p, context) => this.commit(p, context))
     this.dispatcher.onRequest('git.diff', (p, context) => this.getDiff(p, context))
     this.dispatcher.onRequest('git.stage', (p) => this.stage(p))
     this.dispatcher.onRequest('git.unstage', (p) => this.unstage(p))
-    this.dispatcher.onRequest('git.bulkStage', (p) => this.bulkStage(p))
-    this.dispatcher.onRequest('git.bulkUnstage', (p) => this.bulkUnstage(p))
+    this.dispatcher.onRequest('git.bulkStage', (p, context) => this.bulkStage(p, context))
+    this.dispatcher.onRequest('git.bulkUnstage', (p, context) => this.bulkUnstage(p, context))
     this.dispatcher.onRequest('git.abortMerge', (p) => this.abortMerge(p))
     this.dispatcher.onRequest('git.abortRebase', (p) => this.abortRebase(p))
     this.dispatcher.onRequest('git.checkout', (p) => this.checkout(p))
@@ -501,13 +501,18 @@ export class GitHandler {
   }
 
   private async commit(
-    params: Record<string, unknown>
+    params: Record<string, unknown>,
+    context: RequestContext
   ): Promise<{ success: boolean; error?: string }> {
     this.clearGitMutationReadCaches()
     const worktreePath = params.worktreePath as string
     const message = params.message as string
     try {
-      return await commitChangesRelay(this.git.bind(this), worktreePath, message)
+      return await commitChangesRelay(
+        (args, cwd) => this.git(args, cwd, { signal: context.signal }),
+        worktreePath,
+        message
+      )
     } finally {
       this.clearGitMutationReadCaches()
     }
@@ -524,7 +529,7 @@ export class GitHandler {
     }
   }
 
-  private async bulkStage(params: Record<string, unknown>) {
+  private async bulkStage(params: Record<string, unknown>, context: RequestContext) {
     this.clearGitMutationReadCaches()
     const worktreePath = params.worktreePath as string
     const filePaths = params.filePaths as string[]
@@ -533,7 +538,8 @@ export class GitHandler {
         const chunk = filePaths.slice(i, i + BULK_CHUNK_SIZE)
         await this.git(
           ['add', '--', ...chunk.map((filePath) => this.literalPathspec(filePath))],
-          worktreePath
+          worktreePath,
+          { signal: context.signal }
         )
       }
     } finally {
@@ -541,7 +547,7 @@ export class GitHandler {
     }
   }
 
-  private async bulkUnstage(params: Record<string, unknown>) {
+  private async bulkUnstage(params: Record<string, unknown>, context: RequestContext) {
     this.clearGitMutationReadCaches()
     const worktreePath = params.worktreePath as string
     const filePaths = params.filePaths as string[]
@@ -550,7 +556,8 @@ export class GitHandler {
         const chunk = filePaths.slice(i, i + BULK_CHUNK_SIZE)
         await this.git(
           ['restore', '--staged', '--', ...chunk.map((filePath) => this.literalPathspec(filePath))],
-          worktreePath
+          worktreePath,
+          { signal: context.signal }
         )
       }
     } finally {
@@ -1152,7 +1159,18 @@ export class GitHandler {
     const cwd = params.cwd as string
 
     validateGitExecArgs(args)
-    const run = () => this.git(args, cwd, { signal: context?.signal })
+    const requestedMaxBuffer = params.maxBuffer
+    const maxBuffer =
+      typeof requestedMaxBuffer === 'number' && Number.isSafeInteger(requestedMaxBuffer)
+        ? Math.max(1_024, Math.min(MAX_GIT_BUFFER, requestedMaxBuffer))
+        : undefined
+    const run = () =>
+      this.git(args, cwd, {
+        signal: context?.signal,
+        ...(params.disableOptionalLocks === true ? { disableOptionalLocks: true } : {}),
+        ...(params.nonInteractive === true ? { nonInteractive: true } : {}),
+        ...(maxBuffer === undefined ? {} : { maxBuffer })
+      })
     const { stdout, stderr } = gitExecMutatesRepository(args)
       ? await this.runWithGitReadCacheClear(run)
       : await run()

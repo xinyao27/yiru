@@ -4233,7 +4233,10 @@
           "setParentWorkspace": "Set Parent Worktree...",
           "workspaceSection": "Workspace",
           "primaryDeleteDisabled": "Primary worktree — can't be deleted. Remove the project instead.",
-          "deleteWorktree": "Delete Worktree"
+          "deleteWorktree": "Delete Worktree",
+          "makeSpoolPrivate": "Make private",
+          "makeSpoolPublic": "Make public",
+          "spoolPrivateFailed": "Could not make this worktree private."
         },
         "WorktreeList": {
           "7a8b9c0d1e": "Update required",
@@ -4277,7 +4280,10 @@
           "groupDeleteFailedDesc": "Something went wrong while deleting the group. No projects were removed.",
           "failedNestWorkspace": "Failed to nest workspace",
           "sidebarRowMissing": "Target no longer exists",
-          "failedUnnestWorkspace": "Failed to unnest workspace"
+          "failedUnnestWorkspace": "Failed to unnest workspace",
+          "makeSpoolProjectPrivate": "Make all worktrees private",
+          "makeSpoolProjectPublic": "Make all worktrees public",
+          "spoolProjectPrivateFailed": "Could not make these worktrees private."
         },
         "WorktreeMetaDialog": {
           "3db0a2a593": "Cancel",
@@ -4688,7 +4694,8 @@
           "meterLabel": "{{value0}}: {{value1}}% used in {{value2}}",
           "windowUnavailable": "{{value0}}: {{value1}} usage unavailable",
           "fiveHour": "5h",
-          "sevenDay": "7d"
+          "sevenDay": "7d",
+          "resetsAt": "Resets {{value0}}"
         },
         "SpoolDesktopRow": {
           "connecting": "Connecting…",
@@ -4699,7 +4706,227 @@
         },
         "SpoolWorktreeRow": {
           "collapse": "Collapse {{value0}}",
-          "expand": "Expand {{value0}}"
+          "expand": "Expand {{value0}}",
+          "loadingSessions": "Loading sessions…",
+          "public": "Public",
+          "sessionsUnavailable": "Session list unavailable"
+        },
+        "SpoolSidebarProjectedRow": {
+          "heading": "Spool"
+        }
+      },
+      "spool": {
+        "SpoolAvailabilityNotice": {
+          "title": "Spool is unavailable",
+          "checkAgain": "Check again",
+          "checking": "Checking…",
+          "tailscaleUnavailable": "Tailscale could not be found on this desktop.",
+          "tailscaleNotRunning": "Tailscale is installed, but its service is not running.",
+          "tailscalePermissionDenied": "Orca does not have permission to read Tailscale status.",
+          "tailscaleTimedOut": "Tailscale did not respond in time. Spool will keep checking.",
+          "tailscaleUnsupportedOutput": "Tailscale returned status data that this Orca version cannot read.",
+          "portUnavailable": "TCP port {{port}} is already in use. Close the conflicting process; Spool will keep checking.",
+          "permissionDenied": "System permissions prevented Orca from opening the Spool Tailnet listener.",
+          "persistenceUnavailable": "Spool could not safely load sharing settings, so sharing remains off.",
+          "unavailable": "Spool could not start on this desktop."
+        },
+        "SpoolWindowsFirewallNotice": {
+          "repairSuccess": "Windows Firewall rule repaired.",
+          "title": "Spool is blocked by Windows Firewall",
+          "readyTitle": "Restart Spool sharing",
+          "readyDescription": "The required rule is available now. Reapply it to restart Spool in this app session.",
+          "inspectUnavailable": "The firewall rule could not be inspected. Recreate it with administrator approval.",
+          "ruleMissing": "The packaged Orca app does not have the required Private-network rule.",
+          "ruleDetails": "Orca.Spool · TCP {{port}} · Private",
+          "waiting": "Waiting for Windows…",
+          "repair": "Repair firewall rule",
+          "reapply": "Reapply and restart",
+          "repairFailed": "Could not repair the Windows Firewall rule."
+        },
+        "SpoolControlRequestDialog": {
+          "decisionFailed": "Could not send the control decision.",
+          "title": "Allow {{value0}} to control this worktree?",
+          "worktree": "Worktree: {{value0}}",
+          "capabilities": "They will be able to send terminal input, modify files, run commands, and use your Claude/Codex accounts.",
+          "shellWarning": "Terminal commands are not confined to this worktree.",
+          "queued": "{{value0}} more control request(s) are queued.",
+          "deny": "Deny",
+          "allow": "Allow this connection"
+        },
+        "SpoolOwnerControlGrants": {
+          "revokeFailed": "Could not revoke remote control.",
+          "heading": "Remote control",
+          "hasAccess": "{{value0}} has access",
+          "revoke": "Revoke"
+        },
+        "SpoolSessionPane": {
+          "transcriptTitle": "Session transcript",
+          "continue": "Continue session",
+          "continueFailed": "Could not continue this session.",
+          "continueOutcomeUnknown": "Continuing this session may have succeeded on the owner’s desktop. Inspect the session list and terminal before continuing it again.",
+          "continueOutcomeUnknownPersistent": "Continuing may have succeeded. Inspect the session list and terminal before continuing again.",
+          "transcriptUnavailable": "This session transcript is unavailable.",
+          "retry": "Retry",
+          "transcriptTruncated": "Only the most recent part of this transcript is available.",
+          "image": "Image",
+          "toolResult": "Tool result",
+          "role": {
+            "user": "User",
+            "assistant": "Assistant",
+            "tool": "Tool",
+            "reasoning": "Reasoning",
+            "system": "System"
+          }
+        },
+        "SpoolTerminalPane": {
+          "connecting": "Connecting terminal…",
+          "closed": "Terminal closed",
+          "unavailable": "Terminal unavailable",
+          "outcomeUnknown": "This terminal action may have succeeded on the owner’s desktop. Inspect the terminal output before sending more input.",
+          "outcomeUnknownPersistent": "A terminal action may have succeeded. Inspect the output before resuming input.",
+          "resumeInput": "Resume input"
+        },
+        "SpoolWorktreeVisibilityDialog": {
+          "publishFailed": "Could not make this worktree public.",
+          "title": "Make {{value0}} public?",
+          "description": "People using Orca Desktop on your Tailnet will be able to open this worktree.",
+          "historyWarning": "All existing sessions, transcripts, terminal scrollback, and future terminal output will be readable.",
+          "shellWarning": "Terminal history may include content produced outside this worktree.",
+          "cancel": "Cancel",
+          "confirm": "Make public",
+          "projectPublishFailed": "Could not make these worktrees public.",
+          "projectTitle": "Make every current worktree in {{value0}} public?",
+          "projectDescription": "This applies once to every worktree currently in the project. Future worktrees remain private.",
+          "projectHistoryWarning": "All sessions, transcripts, terminal scrollback, and future terminal output in those worktrees will be readable.",
+          "projectShellWarning": "Terminal history may include content produced outside those worktrees.",
+          "projectConfirm": "Make all public"
+        },
+        "SpoolWorkspaceSurface": {
+          "requestFailed": "Could not request control.",
+          "controlGranted": "Control granted",
+          "disconnected": "Disconnected",
+          "readOnly": "Read-only",
+          "requestPending": "Request pending",
+          "requestControl": "Request control",
+          "tabs": {
+            "sessions": "Sessions",
+            "files": "Files",
+            "changes": "Changes"
+          },
+          "sessions": "Sessions",
+          "terminalDescription": "Terminal snapshots and realtime output appear here when the remote session is available.",
+          "selectSession": "Select a session to open its remote terminal.",
+          "fileBrowser": "Files",
+          "fileDescription": "Remote files stay on the owner’s execution host and open here through the Spool workspace model.",
+          "changesAndGit": "Changes and Git",
+          "changesDescription": "Worktree status, diffs, history, branch, and upstream state appear here.",
+          "mutableMode": "This connection can use worktree mutation controls.",
+          "readOnlyMode": "This public worktree is read-only until its owner grants control."
+        },
+        "SpoolFileActionDialog": {
+          "nameLabel": "Name",
+          "cancel": "Cancel",
+          "newFileTitle": "New file",
+          "newDirectoryTitle": "New directory",
+          "renameTitle": "Rename item",
+          "deleteTitle": "Delete item?",
+          "newFileDescription": "Create an empty file in the current remote folder.",
+          "newDirectoryDescription": "Create a directory in the current remote folder.",
+          "renameDescription": "Enter a new name for {{value0}}.",
+          "deleteDescription": "This permanently deletes {{value0}} from the owner’s worktree.",
+          "create": "Create",
+          "rename": "Rename",
+          "delete": "Delete"
+        },
+        "SpoolFilePreview": {
+          "loading": "Loading file…",
+          "selectFile": "Select a file to inspect it.",
+          "reload": "Reload",
+          "workingDiff": "Working diff",
+          "stagedDiff": "Staged diff",
+          "content": "Content",
+          "rename": "Rename",
+          "delete": "Delete",
+          "saving": "Saving…",
+          "save": "Save",
+          "truncatedFile": "This preview is truncated. Editing is disabled to avoid replacing the full file with partial content.",
+          "editorLabel": "File content",
+          "loadingDiff": "Loading diff…",
+          "truncatedDiff": "This diff is truncated.",
+          "noDiff": "No diff for this file.",
+          "binaryDescription": "Binary preview · {{value0}} of {{value1}} bytes",
+          "binaryUnavailable": "Binary preview unavailable.",
+          "fileUnavailable": "This file is unavailable.",
+          "diffUnavailable": "This diff is unavailable."
+        },
+        "SpoolFileTree": {
+          "up": "Up one directory",
+          "root": "Worktree root",
+          "refresh": "Refresh files",
+          "newFile": "New file",
+          "newDirectory": "New directory",
+          "loading": "Loading files…",
+          "empty": "This directory is empty.",
+          "truncated": "Only part of this directory is shown.",
+          "itemActions": "File actions",
+          "rename": "Rename",
+          "delete": "Delete",
+          "unavailable": "Files are unavailable."
+        },
+        "SpoolFilesPane": {
+          "listFailed": "Could not load files.",
+          "readFailed": "Could not read this file.",
+          "diffFailed": "Could not load this diff.",
+          "fileTooLarge": "This file is too large to save through Spool.",
+          "saved": "File saved.",
+          "saveFailed": "Could not save this file.",
+          "invalidName": "Enter a single valid file name.",
+          "mutationFailed": "Could not change this file.",
+          "outcomeUnknown": "This file change may have succeeded on the owner’s worktree. Refresh and inspect the item before making another change.",
+          "outcomeUnknownPersistent": "The file change may have succeeded. Refresh and inspect the item before making another change."
+        },
+        "SpoolGitDiffPane": {
+          "selectItem": "Select a change or commit to inspect its diff.",
+          "loading": "Loading diff…",
+          "noDiff": "No textual diff is available.",
+          "truncated": "This diff is truncated.",
+          "staged": "Staged",
+          "untracked": "Untracked",
+          "unstaged": "Unstaged",
+          "unavailable": "This diff is unavailable."
+        },
+        "SpoolGitPane": {
+          "refreshFailed": "Could not load Git state.",
+          "diffFailed": "Could not load this diff.",
+          "commitTooLong": "The commit message is too long.",
+          "committed": "Commit created.",
+          "mutationFailed": "Could not change this worktree.",
+          "outcomeUnknown": "This Git action may have succeeded on the owner’s worktree. Refresh and inspect Git state before making another change.",
+          "outcomeUnknownPersistent": "The Git action may have succeeded. Refresh and inspect Git state before making another change."
+        },
+        "SpoolMutationOutcomeNotice": {
+          "title": "Result needs confirmation",
+          "dismiss": "Dismiss after checking"
+        },
+        "SpoolGitSidebar": {
+          "detached": "Detached HEAD",
+          "refresh": "Refresh",
+          "changes": "Changes",
+          "history": "History",
+          "commitMessage": "Commit message",
+          "commitPlaceholder": "Commit message",
+          "commit": "Commit staged changes",
+          "loadingChanges": "Loading changes…",
+          "clean": "No worktree changes.",
+          "unstage": "Unstage",
+          "stage": "Stage",
+          "loadingHistory": "Loading history…",
+          "noHistory": "No commits found.",
+          "historyLimited": "Showing the latest commits.",
+          "noUpstream": "No upstream",
+          "upstream": "{{value0}} · ↑{{value1}} ↓{{value2}}",
+          "stateUnavailable": "Git state is unavailable.",
+          "changesLimited": "Only part of this status is shown."
         }
       },
       "shared": {

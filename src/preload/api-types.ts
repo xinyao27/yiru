@@ -52,6 +52,24 @@ import type { ProjectExecutionRuntimeResolution } from '../shared/project-execut
 import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
 import type { SleepingAgentLaunchConfig } from '../shared/agent-session-resume'
 import type {
+  SpoolDecideControlArgs,
+  SpoolRequestControlArgs,
+  SpoolRequesterInvokeArgs,
+  SpoolRequesterSubscriptionArgs,
+  SpoolRequesterSubscriptionEvent,
+  SpoolRequesterSubscriptionStartResult,
+  SpoolRequesterSubscriptionStopArgs,
+  SpoolRequesterSubscriptionStopResult,
+  SpoolRevokeControlArgs,
+  SpoolSetProjectVisibilityArgs,
+  SpoolSetWorktreeVisibilityArgs,
+  SpoolSharingSnapshot
+} from '../shared/spool/spool-ipc-contract'
+import type {
+  SpoolWindowsFirewallRepairResult,
+  SpoolWindowsFirewallStatus
+} from '../shared/spool/spool-windows-firewall-contract'
+import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
 } from '../shared/localhost-worktree-labels'
@@ -3036,6 +3054,26 @@ export type PreloadApi = {
     refreshMiniMax: () => Promise<RateLimitState>
     refreshGrok: () => Promise<RateLimitState>
     onUpdate: (callback: (state: RateLimitState) => void) => () => void
+  }
+  spoolSharing: {
+    getSnapshot: () => Promise<SpoolSharingSnapshot>
+    setWorktreeVisibility: (args: SpoolSetWorktreeVisibilityArgs) => Promise<void>
+    setProjectVisibility: (args: SpoolSetProjectVisibilityArgs) => Promise<void>
+    requestControl: (args: SpoolRequestControlArgs) => Promise<void>
+    decideControl: (args: SpoolDecideControlArgs) => Promise<void>
+    revokeControl: (args: SpoolRevokeControlArgs) => Promise<void>
+    getWindowsFirewallStatus: () => Promise<SpoolWindowsFirewallStatus>
+    repairWindowsFirewall: () => Promise<SpoolWindowsFirewallRepairResult>
+    retryAvailability: () => Promise<void>
+    invoke: (args: SpoolRequesterInvokeArgs) => Promise<unknown>
+    startSubscription: (
+      args: SpoolRequesterSubscriptionArgs
+    ) => Promise<SpoolRequesterSubscriptionStartResult>
+    stopSubscription: (
+      args: SpoolRequesterSubscriptionStopArgs
+    ) => Promise<SpoolRequesterSubscriptionStopResult>
+    onSubscriptionEvent: (callback: (event: SpoolRequesterSubscriptionEvent) => void) => () => void
+    onChanged: (callback: (snapshot: SpoolSharingSnapshot) => void) => () => void
   }
   minimaxCredentials: {
     getStatus: () => Promise<{ configured: boolean }>

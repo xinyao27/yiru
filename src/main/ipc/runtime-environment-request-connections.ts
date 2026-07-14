@@ -6,6 +6,7 @@ import type {
   RemoteRuntimeSharedConnectionDiagnostics,
   RemoteRuntimeSharedSubscription
 } from '../../shared/remote-runtime-shared-control-types'
+import { remoteRuntimeUnavailableError } from '../../shared/remote-runtime-request-frames'
 
 type CachedRuntimeConnection = {
   pairingKey: string
@@ -25,7 +26,8 @@ export function sendRemoteRuntimeConnectionRequest<TResult>(
   pairing: PairingOffer,
   method: string,
   params: unknown,
-  timeoutMs: number
+  timeoutMs: number,
+  options: { beforeSend?: () => void | Promise<void> } = {}
 ): Promise<RuntimeRpcResponse<TResult>> {
   const pairingKey = getPairingKey(pairing)
   let cached = requestConnections.get(environmentId)
@@ -37,7 +39,7 @@ export function sendRemoteRuntimeConnectionRequest<TResult>(
     }
     requestConnections.set(environmentId, cached)
   }
-  return cached.connection.request(method, params, timeoutMs)
+  return cached.connection.request(method, params, timeoutMs, options)
 }
 
 export function closeRemoteRuntimeRequestConnection(environmentId: string): void {
@@ -61,9 +63,29 @@ export function sendRemoteRuntimeSharedControlRequest<TResult>(
   pairing: PairingOffer,
   method: string,
   params: unknown,
-  timeoutMs: number
+  timeoutMs: number,
+  options: { beforeSend?: () => void | Promise<void> } = {}
 ): Promise<RuntimeRpcResponse<TResult>> {
-  return getSharedControlConnection(environmentId, pairing).request(method, params, timeoutMs)
+  return getSharedControlConnection(environmentId, pairing).request(
+    method,
+    params,
+    timeoutMs,
+    options
+  )
+}
+
+export function sendRemoteRuntimeExistingSharedControlRequest<TResult>(
+  environmentId: string,
+  pairing: PairingOffer,
+  method: string,
+  params: unknown,
+  timeoutMs: number,
+  options: { beforeSend?: () => void | Promise<void> } = {}
+): Promise<RuntimeRpcResponse<TResult>> {
+  const connection = getExistingSharedControlConnection(environmentId, pairing)
+  return connection
+    ? connection.existingRoute.request(method, params, timeoutMs, options)
+    : Promise.reject(remoteRuntimeUnavailableError())
 }
 
 export function subscribeRemoteRuntimeSharedControlRequest<TResult>(
@@ -85,6 +107,24 @@ export function subscribeRemoteRuntimeSharedControlRequest<TResult>(
     timeoutMs,
     callbacks
   )
+}
+
+export function subscribeRemoteRuntimeExistingSharedControlRequest<TResult>(
+  environmentId: string,
+  pairing: PairingOffer,
+  method: string,
+  params: unknown,
+  callbacks: {
+    onResponse: (response: RuntimeRpcResponse<TResult>) => void
+    onBinary?: (bytes: Uint8Array<ArrayBufferLike>) => void
+    onError: (error: { code: string; message: string }) => void
+    onClose?: () => void
+  }
+): Promise<RemoteRuntimeSharedSubscription> {
+  const connection = getExistingSharedControlConnection(environmentId, pairing)
+  return connection
+    ? connection.existingRoute.subscribe(method, params, callbacks)
+    : Promise.reject(remoteRuntimeUnavailableError())
 }
 
 export function closeRemoteRuntimeSharedControlConnection(environmentId: string): void {
@@ -114,6 +154,14 @@ function getSharedControlConnection(
     sharedControlConnections.set(environmentId, cached)
   }
   return cached.connection
+}
+
+function getExistingSharedControlConnection(
+  environmentId: string,
+  pairing: PairingOffer
+): RemoteRuntimeSharedControlConnection | null {
+  const cached = sharedControlConnections.get(environmentId)
+  return cached?.pairingKey === getPairingKey(pairing) ? cached.connection : null
 }
 
 function getPairingKey(pairing: PairingOffer): string {

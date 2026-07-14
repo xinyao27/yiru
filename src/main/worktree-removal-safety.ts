@@ -19,6 +19,9 @@ const ORCA_CREATION_SOURCES = new Set<NonNullable<WorktreeMeta['orcaCreationSour
   'ssh'
 ])
 const ORCA_OWNED_PROVENANCE_META_KEYS = [
+  'instanceId',
+  'spoolVisibility',
+  'spoolIncarnationId',
   'orcaCreatedAt',
   'orcaCreationSource',
   'orcaCreationWorkspaceLayout',

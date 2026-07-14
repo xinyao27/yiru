@@ -30,6 +30,7 @@ import {
   readVerifiedTerminalArtifact,
   writeVerifiedTerminalArtifact
 } from './fs-handler-terminal-artifact'
+import { registerSpoolVerifiedFilesystemHandlers } from './fs-handler-spool-verified'
 import { RelayStreamRegistry } from './fs-stream-registry'
 import { scanWorkspaceSpaceDirectory } from './workspace-space-scan'
 import { buildRelayCommandEnv } from './relay-command-env'
@@ -101,6 +102,7 @@ export class FsHandler {
   }
 
   private registerHandlers(): void {
+    registerSpoolVerifiedFilesystemHandlers(this.dispatcher)
     this.dispatcher.onRequest('fs.readDir', (p) => this.readDir(p))
     this.dispatcher.onRequest('fs.readFile', (p) => this.readFile(p))
     this.dispatcher.onRequest('fs.readFileStream', (p, c) => this.readFileStream(p, c))

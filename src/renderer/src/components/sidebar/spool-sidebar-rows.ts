@@ -1,6 +1,7 @@
 import type {
   SpoolProviderQuota,
-  SpoolRemoteDesktop
+  SpoolRemoteDesktop,
+  SpoolWorktreeCatalogEntry
 } from '../../../../shared/spool/spool-catalog-contract'
 import type {
   SpoolExpandedRefsByDesktop,
@@ -50,6 +51,7 @@ export type SpoolWorktreeSidebarRow = {
   expanded: boolean
   active: boolean
   sessionCount: number
+  sessionCatalogStatus: SpoolWorktreeCatalogEntry['sessionCatalog']['status']
 }
 
 export type SpoolSessionSidebarRow = {
@@ -171,7 +173,8 @@ export function projectSpoolSidebarRows(input: SpoolSidebarProjectionInput): Spo
           branch: worktree.branch,
           expanded: worktreeExpanded,
           active: worktreeActive && !input.activeRoute?.sessionRef,
-          sessionCount: worktree.sessions.length
+          sessionCount: worktree.sessions.length,
+          sessionCatalogStatus: worktree.sessionCatalog.status
         })
         if (!worktreeExpanded) {
           continue

@@ -1,0 +1,62 @@
+import type { Store } from '../persistence'
+import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import type {
+  SpoolCatalogWorktreeDescription,
+  SpoolShareCatalogSource
+} from './spool-share-catalog'
+import type { SpoolSessionCatalog } from './spool-session-catalog'
+import type { SpoolPublicWorktreeInstance } from './spool-worktree-visibility'
+
+type SpoolDescriptionRuntime = Pick<OrcaRuntimeService, 'showManagedWorktree' | 'onClientEvent'>
+
+/** Joins owner metadata with the sanitized SessionCatalog at request time. */
+export class SpoolOwnerShareSource implements SpoolShareCatalogSource {
+  constructor(
+    private readonly store: Store,
+    private readonly runtime: SpoolDescriptionRuntime,
+    private readonly sessions: SpoolSessionCatalog
+  ) {}
+
+  async describeWorktree(
+    instance: SpoolPublicWorktreeInstance
+  ): Promise<SpoolCatalogWorktreeDescription | null> {
+    const [worktree, sessions] = await Promise.all([
+      this.runtime.showManagedWorktree(`id:${instance.worktreeId}`),
+      this.sessions.listSessions(instance)
+    ])
+    if (
+      worktree.id !== instance.worktreeId ||
+      worktree.instanceId !== instance.instanceId ||
+      worktree.repoId !== instance.target.repoId
+    ) {
+      return null
+    }
+    const repo = this.store.getRepo(instance.target.repoId)
+    if (!repo) {
+      return null
+    }
+    const project = instance.projectId
+      ? this.store.getProjects().find((entry) => entry.id === instance.projectId)
+      : null
+    return {
+      projectKey: project ? `project:${project.id}` : `repo:${repo.id}`,
+      projectName: project?.displayName ?? repo.displayName,
+      worktreeName: worktree.displayName,
+      branch: worktree.branch || null,
+      sessions
+    }
+  }
+
+  subscribe(listener: () => void): () => void {
+    const unsubscribeSessions = this.sessions.subscribe(listener)
+    const unsubscribeRuntime = this.runtime.onClientEvent((event) => {
+      if (event.type === 'reposChanged' || event.type === 'worktreesChanged') {
+        listener()
+      }
+    })
+    return () => {
+      unsubscribeSessions()
+      unsubscribeRuntime()
+    }
+  }
+}
