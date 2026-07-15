@@ -40,7 +40,9 @@ export function WorkspaceTabStripViewport({
   })
 
   return (
-    <div className="flex h-full min-w-0 flex-1 items-stretch overflow-hidden">
+    // Why: content-sized growth keeps the native new-tab button beside the
+    // final tab; flex shrink still bounds overflowing local and remote strips.
+    <div className="flex h-full min-w-0 flex-[0_1_auto] items-stretch overflow-hidden">
       {tabStripOverflowState.hasOverflow ? (
         <TabStripScrollButton
           direction="start"

@@ -20,6 +20,8 @@ export type ResolvedSpoolWorkspaceRoute = {
   session: SpoolSessionCatalogEntry | null
 }
 
+export type ResolvedSpoolWorktreeRoute = Omit<ResolvedSpoolWorkspaceRoute, 'session'>
+
 export function getSpoolWorktreeBindingKey(desktopRef: string, worktreeRef: string): string {
   return JSON.stringify([desktopRef, worktreeRef])
 }
@@ -32,10 +34,10 @@ export function isSpoolRefExpanded(
   return refsByDesktop.get(desktopRef)?.has(resourceRef) ?? false
 }
 
-export function resolveSpoolWorkspaceRoute(
+export function resolveSpoolWorktreeRoute(
   state: SpoolDesktopState,
   route: SpoolWorkspaceRoute
-): ResolvedSpoolWorkspaceRoute | null {
+): ResolvedSpoolWorktreeRoute | null {
   const desktop = state.spoolRemoteDesktops.find(
     (candidate) =>
       candidate.desktopRef === route.desktopRef &&
@@ -51,14 +53,26 @@ export function resolveSpoolWorkspaceRoute(
     if (!worktree) {
       continue
     }
-    const session = route.sessionRef
-      ? (worktree.sessions.find((candidate) => candidate.sessionRef === route.sessionRef) ?? null)
-      : null
-    // Why: session pagination is rebuilt after an owner resumes an agent; keep
-    // the selected worktree surface mounted while its stable terminal handoff attaches.
-    return { desktop, project, worktree, session }
+    return { desktop, project, worktree }
   }
   return null
+}
+
+export function resolveSpoolWorkspaceRoute(
+  state: SpoolDesktopState,
+  route: SpoolWorkspaceRoute
+): ResolvedSpoolWorkspaceRoute | null {
+  const resolved = resolveSpoolWorktreeRoute(state, route)
+  if (!resolved) {
+    return null
+  }
+  const session = route.sessionRef
+    ? (resolved.worktree.sessions.find((candidate) => candidate.sessionRef === route.sessionRef) ??
+      null)
+    : null
+  // Why: session pagination is rebuilt after an owner resumes an agent; keep
+  // the selected worktree surface mounted while its stable terminal handoff attaches.
+  return { ...resolved, session }
 }
 
 export function isSpoolRequesterControlCurrent(

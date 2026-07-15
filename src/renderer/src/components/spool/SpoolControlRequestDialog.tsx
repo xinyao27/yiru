@@ -81,8 +81,11 @@ export function SpoolControlRequestDialog(): React.JSX.Element | null {
           <DialogDescription>
             {translate(
               'auto.components.spool.SpoolControlRequestDialog.worktree',
-              'Worktree: {{value0}}',
-              { value0: request.worktreeDisplayName }
+              'Worktree: {{value0}} / {{value1}}',
+              {
+                value0: request.projectDisplayName,
+                value1: request.worktreeDisplayName
+              }
             )}
           </DialogDescription>
         </DialogHeader>
@@ -112,7 +115,7 @@ export function SpoolControlRequestDialog(): React.JSX.Element | null {
           <p className="text-[11px] text-muted-foreground">
             {translate(
               'auto.components.spool.SpoolControlRequestDialog.queued',
-              '{{value0}} more control request(s) are queued.',
+              'Queued control requests: {{value0}}.',
               { value0: requestCount - 1 }
             )}
           </p>

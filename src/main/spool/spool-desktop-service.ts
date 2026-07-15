@@ -24,7 +24,10 @@ import type {
   SpoolDesktopCatalogSnapshot,
   SpoolRequesterSubscriptionSink
 } from './spool-desktop-catalog'
-import type { SpoolDesktopServiceOptions } from './spool-desktop-service-options'
+import type {
+  SpoolDesktopServiceOptions,
+  SpoolOwnerWorktreeDescriptor
+} from './spool-desktop-service-options'
 import { SpoolDesktopStartRecovery } from './spool-desktop-start-recovery'
 import { SpoolWindowsFirewallRecovery } from './spool-windows-firewall-recovery'
 
@@ -242,6 +245,7 @@ export class SpoolDesktopService implements SpoolSharingIpcController {
           requestId: request.requestId,
           requester: { ...request.requester },
           worktreeId: target.worktreeId,
+          projectDisplayName: target.projectDisplayName,
           worktreeDisplayName: target.displayName,
           requestedAt: request.requestedAt
         }
@@ -262,14 +266,14 @@ export class SpoolDesktopService implements SpoolSharingIpcController {
       : null
   }
 
-  private findOwnerTarget(instanceId: string): { worktreeId: string; displayName: string } | null {
+  private findOwnerTarget(
+    instanceId: string
+  ): (SpoolOwnerWorktreeDescriptor & { worktreeId: string }) | null {
     const state = this.options.visibility
       .snapshot()
       .worktrees.find((worktree) => worktree.instanceId === instanceId)
     const descriptor = state ? this.options.describeOwnerWorktree(state.worktreeId) : null
-    return state && descriptor
-      ? { worktreeId: state.worktreeId, displayName: descriptor.displayName }
-      : null
+    return state && descriptor ? { ...descriptor, worktreeId: state.worktreeId } : null
   }
 
   private async recoverWindowsFirewall(): Promise<void> {

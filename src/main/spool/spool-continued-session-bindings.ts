@@ -1,4 +1,7 @@
-import type { SpoolOwnerHistoricalSessionRecord } from './spool-session-source'
+import type {
+  SpoolOwnerHistoricalSessionRecord,
+  SpoolSessionWorktreeIdentity
+} from './spool-session-source'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
 
 const MAX_CONTINUED_BINDINGS = 2_000
@@ -70,7 +73,7 @@ export class SpoolContinuedSessionBindings {
 
   resolve(
     worktree: Pick<
-      SpoolPublicWorktreeInstance,
+      SpoolSessionWorktreeIdentity,
       'instanceId' | 'spoolIncarnationId' | 'actualHostScope' | 'target'
     >,
     terminalHandle: string

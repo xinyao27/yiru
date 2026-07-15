@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import { SpoolTooltipIconButton } from './SpoolTooltipIconButton'
 import { SpoolTruncatedPathLabel } from './SpoolTruncatedPathLabel'
 
 export function SpoolFileTree({
@@ -31,7 +32,6 @@ export function SpoolFileTree({
   directory,
   listing,
   loading,
-  surface = 'workspace',
   unavailable,
   selectedPath,
   onDelete,
@@ -46,7 +46,6 @@ export function SpoolFileTree({
   directory: string
   listing: SpoolFileListResult | null
   loading: boolean
-  surface?: 'workspace' | 'sidebar'
   unavailable: boolean
   selectedPath: string | null
   onDelete: (entry: SpoolFileTreeEntry) => void
@@ -59,47 +58,40 @@ export function SpoolFileTree({
 }): React.JSX.Element {
   const entries = listing ? sortFileEntries(listing.entries) : []
   return (
-    <aside
-      className={cn(
-        'flex min-h-0 shrink-0 flex-col',
-        surface === 'sidebar'
-          ? 'w-full flex-1 bg-sidebar text-sidebar-foreground'
-          : 'w-72 border-r border-border bg-card text-card-foreground'
-      )}
-    >
+    <aside className="flex min-h-0 w-full flex-1 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
       <header className="flex min-h-9 items-center gap-1 border-b border-border px-2 py-1">
-        <FileTreeToolbarButton
+        <SpoolTooltipIconButton
           disabled={!directory}
           onClick={onUp}
           label={translate('auto.components.spool.SpoolFileTree.up', 'Up one directory')}
         >
           <ChevronUp aria-hidden="true" />
-        </FileTreeToolbarButton>
+        </SpoolTooltipIconButton>
         <SpoolTruncatedPathLabel
           path={directory}
           emptyLabel={translate('auto.components.spool.SpoolFileTree.root', 'Worktree root')}
           className="flex-1 px-1 text-muted-foreground"
         />
-        <FileTreeToolbarButton
+        <SpoolTooltipIconButton
           onClick={onRefresh}
           label={translate('auto.components.spool.SpoolFileTree.refresh', 'Refresh files')}
         >
           <RefreshCw aria-hidden="true" />
-        </FileTreeToolbarButton>
-        <FileTreeToolbarButton
+        </SpoolTooltipIconButton>
+        <SpoolTooltipIconButton
           disabled={!canControl}
           onClick={onNewFile}
           label={translate('auto.components.spool.SpoolFileTree.newFile', 'New file')}
         >
           <FilePlus2 aria-hidden="true" />
-        </FileTreeToolbarButton>
-        <FileTreeToolbarButton
+        </SpoolTooltipIconButton>
+        <SpoolTooltipIconButton
           disabled={!canControl}
           onClick={onNewDirectory}
           label={translate('auto.components.spool.SpoolFileTree.newDirectory', 'New directory')}
         >
           <FolderPlus aria-hidden="true" />
-        </FileTreeToolbarButton>
+        </SpoolTooltipIconButton>
       </header>
       <div className="scrollbar-sleek min-h-0 flex-1 overflow-y-auto p-1">
         {loading ? (
@@ -161,12 +153,12 @@ function FileTreeRow({
       data-current={selected ? 'true' : undefined}
       className={cn(
         'group flex items-center rounded-md text-[13px]',
-        selected ? 'bg-accent text-accent-foreground' : 'hover:bg-accent'
+        selected ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent'
       )}
     >
       <button
         type="button"
-        className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring"
         onClick={onOpen}
       >
         <Icon aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
@@ -207,25 +199,6 @@ function FileTreeRow({
         </DropdownMenu>
       ) : null}
     </div>
-  )
-}
-
-function FileTreeToolbarButton({
-  children,
-  label,
-  ...props
-}: React.ComponentProps<typeof Button> & { label: string }): React.JSX.Element {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button type="button" size="icon-xs" variant="ghost" aria-label={label} {...props}>
-          {children}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={4}>
-        {label}
-      </TooltipContent>
-    </Tooltip>
   )
 }
 

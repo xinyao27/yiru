@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useCallback, useMemo, useState } from 'react'
-import { LoaderCircle, LockKeyhole, ShieldCheck, SquareTerminal, TriangleAlert } from 'lucide-react'
+import { Loader2, LockKeyhole, ShieldCheck, SquareTerminal, TriangleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 import type { SpoolSessionCatalogPageState } from '../../../../shared/spool/spool-catalog-contract'
@@ -15,9 +15,15 @@ import { translate } from '@/i18n/i18n'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { WorkspacePaneFrame } from '@/components/tab-group/WorkspacePaneFrame'
+import {
+  WORKSPACE_COLUMN_BODY_CLASS_NAME,
+  WORKSPACE_COLUMN_DRAG_REGION_CLASS_NAME,
+  WORKSPACE_COLUMN_FRAME_CLASS_NAME
+} from '@/components/tab-group/workspace-column-chrome'
 import { SpoolSessionPane } from './SpoolSessionPane'
 import { SpoolSessionTabStrip } from './SpoolSessionTabStrip'
 import { getSpoolSessionRouteKey } from './spool-session-route'
+import { getSpoolSessionCatalogStatusLabel } from './spool-session-catalog-status'
 import { getSpoolWorktreeRouteKey } from './spool-worktree-route'
 
 export default function SpoolWorkspaceSurface(): React.JSX.Element | null {
@@ -129,33 +135,39 @@ function SpoolWorkspaceSurfaceContent({
     <main
       data-spool-workspace=""
       data-can-control={canControl ? 'true' : 'false'}
-      className="flex min-h-0 min-w-0 flex-1 bg-background"
+      className={WORKSPACE_COLUMN_FRAME_CLASS_NAME}
     >
-      <WorkspacePaneFrame
-        worktreeId={worktreeRouteKey}
-        stripId={`spool:${worktreeRouteKey}`}
-        tabBar={
-          <SpoolSessionTabStrip
-            sessions={workspace.worktree.sessions}
-            activeSessionRef={route.sessionRef ?? null}
-            onSelect={selectSession}
-          />
-        }
-        trailingActions={accessControls}
-        reserveCollapsedSidebarHeaderSpace
-        reserveClosedExplorerToggleSpace
-        bodyClassName="flex bg-[var(--editor-surface)]"
-      >
-        {sessionRoute ? (
-          <SpoolSessionPane key={getSpoolSessionRouteKey(sessionRoute)} route={sessionRoute} />
-        ) : (
-          <SpoolWorkspaceEmptyPane
-            title={workspace.worktree.name}
-            hasSessions={workspace.worktree.sessions.length > 0}
-            sessionCatalogStatus={workspace.worktree.sessionCatalog.status}
-          />
-        )}
-      </WorkspacePaneFrame>
+      <div
+        className={WORKSPACE_COLUMN_DRAG_REGION_CLASS_NAME}
+        data-terminal-focus-release-surface="true"
+      />
+      <div className={WORKSPACE_COLUMN_BODY_CLASS_NAME}>
+        <WorkspacePaneFrame
+          worktreeId={worktreeRouteKey}
+          stripId={`spool:${worktreeRouteKey}`}
+          tabBar={
+            <SpoolSessionTabStrip
+              sessions={workspace.worktree.sessions}
+              activeSessionRef={route.sessionRef ?? null}
+              onSelect={selectSession}
+            />
+          }
+          trailingActions={accessControls}
+          reserveCollapsedSidebarHeaderSpace
+          reserveClosedExplorerToggleSpace
+          bodyClassName="flex bg-[var(--editor-surface)]"
+        >
+          {sessionRoute ? (
+            <SpoolSessionPane key={getSpoolSessionRouteKey(sessionRoute)} route={sessionRoute} />
+          ) : (
+            <SpoolWorkspaceEmptyPane
+              title={workspace.worktree.name}
+              hasSessions={workspace.worktree.sessions.length > 0}
+              sessionCatalogStatus={workspace.worktree.sessionCatalog.status}
+            />
+          )}
+        </WorkspacePaneFrame>
+      </div>
     </main>
   )
 }
@@ -175,9 +187,9 @@ function SpoolWorkspaceEmptyPane({
         'Select a Terminal or agent session from the tab bar.'
       )
     : sessionCatalogStatus === 'loading'
-      ? getSessionCatalogStatusLabel('loading')
+      ? getSpoolSessionCatalogStatusLabel('loading')
       : sessionCatalogStatus === 'error'
-        ? getSessionCatalogStatusLabel('error')
+        ? getSpoolSessionCatalogStatusLabel('error')
         : translate(
             'auto.components.spool.SpoolWorkspaceSurface.noSessions',
             'This shared worktree has no Terminal or agent sessions yet.'
@@ -208,22 +220,11 @@ function SpoolSessionCatalogStatus({
       className="flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground"
     >
       {loading ? (
-        <LoaderCircle aria-hidden="true" className="size-3 animate-spin" />
+        <Loader2 aria-hidden="true" className="size-4 animate-spin" />
       ) : (
         <TriangleAlert aria-hidden="true" className="size-3" />
       )}
-      {getSessionCatalogStatusLabel(status)}
+      {getSpoolSessionCatalogStatusLabel(status)}
     </span>
   )
-}
-
-function getSessionCatalogStatusLabel(
-  status: Exclude<SpoolSessionCatalogPageState['status'], 'complete'>
-): string {
-  return status === 'loading'
-    ? translate('auto.components.sidebar.SpoolWorktreeRow.loadingSessions', 'Loading sessions…')
-    : translate(
-        'auto.components.sidebar.SpoolWorktreeRow.sessionsUnavailable',
-        'Session list unavailable'
-      )
 }

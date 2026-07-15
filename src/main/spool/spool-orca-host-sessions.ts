@@ -47,7 +47,7 @@ export class OrcaSpoolHostSessions {
     const record = this.records.resolve(operation.ownerRecordKey)
     if (
       !record ||
-      record.executionHostId !== target.target.executionHostId ||
+      record.executionHostId !== target.ownerWorktree.executionHostId ||
       record.actualHostScope !== target.actualHostScope ||
       record.worktreeInstanceId !== target.instanceId ||
       record.spoolIncarnationId !== target.spoolIncarnationId
@@ -78,7 +78,7 @@ export class OrcaSpoolHostSessions {
     context.signal.throwIfAborted()
     const created = await this.runtime.createTerminal(`id:${target.worktreeId}`, {
       command: record.resumeCommand,
-      cwd: target.target.worktreePath,
+      cwd: target.ownerWorktree.worktreePath,
       launchAgent: record.provider,
       viewMode: 'chat',
       presentation: 'background',

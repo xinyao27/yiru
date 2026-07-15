@@ -4737,7 +4737,7 @@
         "SpoolControlRequestDialog": {
           "decisionFailed": "无法发送控制决定。",
           "title": "允许 {{value0}} 控制这个 worktree？",
-          "worktree": "Worktree：{{value0}}",
+          "worktree": "Worktree：{{value0}} / {{value1}}",
           "capabilities": "对方将能够发送终端输入、修改文件、运行命令，并使用你的 Claude/Codex 账号。",
           "shellWarning": "终端命令不会被限制在这个 worktree 内。",
           "queued": "还有 {{value0}} 个控制请求正在排队。",

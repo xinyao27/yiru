@@ -103,6 +103,7 @@ export type SpoolOwnerControlRequestView = {
   requestId: string
   requester: TailnetPrincipal
   worktreeId: string
+  projectDisplayName: string
   worktreeDisplayName: string
   requestedAt: number
 }

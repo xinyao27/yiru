@@ -30,12 +30,12 @@ export class OrcaSpoolHostGit implements SpoolGitReadCommandHost, SpoolGitMutati
     command: SpoolGitReadCommand
   ): Promise<SpoolGitReadCommandResult> {
     requireSupportedRoute(target)
-    if (target.target.connectionId) {
-      const provider = getSshGitProvider(target.target.connectionId)
+    if (target.ownerWorktree.connectionId) {
+      const provider = getSshGitProvider(target.ownerWorktree.connectionId)
       if (!provider) {
         throw new SpoolExecutionError('resource_unavailable')
       }
-      const result = await provider.exec([...command.args], target.target.worktreePath, {
+      const result = await provider.exec([...command.args], target.ownerWorktree.worktreePath, {
         signal: command.signal,
         timeoutMs: command.timeoutMs,
         disableOptionalLocks: true,
@@ -45,13 +45,13 @@ export class OrcaSpoolHostGit implements SpoolGitReadCommandHost, SpoolGitMutati
       requireOutputBound(result.stdout, command.maxOutputBytes)
       return { stdout: result.stdout }
     }
-    const repo = this.store.getRepo(target.target.repoId)
+    const repo = this.store.getRepo(target.ownerWorktree.repoId)
     if (!repo || repo.connectionId) {
       throw new SpoolExecutionError('resource_not_found')
     }
     try {
       const result = await gitExecFileAsync([...command.args], {
-        cwd: target.target.worktreePath,
+        cwd: target.ownerWorktree.worktreePath,
         ...getLocalProjectWorktreeGitOptions(this.store, repo),
         env: { ...process.env, ...command.env },
         timeout: command.timeoutMs,
@@ -127,7 +127,7 @@ export class OrcaSpoolHostGit implements SpoolGitReadCommandHost, SpoolGitMutati
 }
 
 function requireSupportedRoute(target: SpoolPublicWorktreeInstance): void {
-  const host = parseExecutionHostId(target.target.executionHostId)
+  const host = parseExecutionHostId(target.ownerWorktree.executionHostId)
   if (!host || host.kind === 'runtime') {
     // Why: requester traffic cannot create or pair a missing downstream runtime route.
     throw new SpoolExecutionError('resource_unavailable')

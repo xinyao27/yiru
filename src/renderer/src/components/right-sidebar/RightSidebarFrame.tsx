@@ -4,7 +4,7 @@ import type { CheckStatus } from '../../../../shared/types'
 import type { ActiveRightSidebarTab, ActivityBarPosition } from '@/store/slices/editor'
 import { cn } from '@/lib/utils'
 import { useSidebarResize } from '@/hooks/useSidebarResize'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -133,7 +133,7 @@ export function RightSidebarFrame({
           <ContextMenu>
             <div className="right-sidebar-header-inset right-sidebar-header-drag flex h-[36px] min-h-[36px] items-center overflow-hidden border-b border-border">
               {!hasDesktopWindowChrome ? (
-                <TooltipProvider delayDuration={400}>
+                <>
                   <ContextMenuTrigger asChild>
                     <div
                       ref={topActivityStripRef}
@@ -156,37 +156,33 @@ export function RightSidebarFrame({
                   >
                     {closeButton}
                   </div>
-                </TooltipProvider>
+                </>
               ) : (
-                <TooltipProvider delayDuration={400}>
-                  <div
-                    className={cn(
-                      'ml-auto flex shrink-0 items-center pr-1',
-                      RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
-                    )}
-                  >
-                    {closeButton}
-                  </div>
-                </TooltipProvider>
+                <div
+                  className={cn(
+                    'ml-auto flex shrink-0 items-center pr-1',
+                    RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
+                  )}
+                >
+                  {closeButton}
+                </div>
               )}
             </div>
             {hasDesktopWindowChrome ? (
-              <TooltipProvider delayDuration={400}>
-                <ContextMenuTrigger asChild>
-                  <div
-                    ref={topActivityStripRef}
-                    className={RIGHT_SIDEBAR_WINDOWS_TOP_ACTIVITY_STRIP_CLASS_NAME}
-                  >
-                    {/* Why: desktop controls own the titlebar; navigation moves below them. */}
-                    <TopActivityItems
-                      activeTab={activeTab}
-                      checksStatus={checksStatus}
-                      layout={topActivityLayout}
-                      onSelectTab={onSelectTab}
-                    />
-                  </div>
-                </ContextMenuTrigger>
-              </TooltipProvider>
+              <ContextMenuTrigger asChild>
+                <div
+                  ref={topActivityStripRef}
+                  className={RIGHT_SIDEBAR_WINDOWS_TOP_ACTIVITY_STRIP_CLASS_NAME}
+                >
+                  {/* Why: desktop controls own the titlebar; navigation moves below them. */}
+                  <TopActivityItems
+                    activeTab={activeTab}
+                    checksStatus={checksStatus}
+                    layout={topActivityLayout}
+                    onSelectTab={onSelectTab}
+                  />
+                </div>
+              </ContextMenuTrigger>
             ) : null}
             <ActivityBarPositionMenu
               currentPosition={activityBarPosition}
@@ -198,9 +194,7 @@ export function RightSidebarFrame({
             <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground">
               {items.find((item) => item.id === activeTab)?.title ?? ''}
             </span>
-            <TooltipProvider delayDuration={400}>
-              <div className="flex items-center">{closeButton}</div>
-            </TooltipProvider>
+            <div className="flex items-center">{closeButton}</div>
           </div>
         )}
 
@@ -220,18 +214,16 @@ export function RightSidebarFrame({
         <ContextMenu>
           <ContextMenuTrigger asChild>
             <div className="side-activity-bar-windows-inset flex w-10 min-w-[40px] flex-col items-center border-l border-border bg-sidebar">
-              <TooltipProvider delayDuration={400}>
-                {items.map((item) => (
-                  <ActivityBarButton
-                    key={item.id}
-                    item={item}
-                    active={activeTab === item.id}
-                    onClick={() => onSelectTab(item.id)}
-                    layout="side"
-                    statusIndicator={item.id === 'checks' ? checksStatus : null}
-                  />
-                ))}
-              </TooltipProvider>
+              {items.map((item) => (
+                <ActivityBarButton
+                  key={item.id}
+                  item={item}
+                  active={activeTab === item.id}
+                  onClick={() => onSelectTab(item.id)}
+                  layout="side"
+                  statusIndicator={item.id === 'checks' ? checksStatus : null}
+                />
+              ))}
             </div>
           </ContextMenuTrigger>
           <ActivityBarPositionMenu

@@ -89,7 +89,9 @@ export class SpoolFileOperationExecutor {
     signal: AbortSignal
   ): Promise<SpoolFileListResult> {
     const normalized = normalizeSpoolRelativePath(relativePath, true)
-    const path = await this.containment.bindExisting(target.target, normalized, { allowRoot: true })
+    const path = await this.containment.bindExisting(target.ownerWorktree, normalized, {
+      allowRoot: true
+    })
     await requireRevalidation(path)
     const limit = boundedInteger(
       requestedLimit,
@@ -114,7 +116,7 @@ export class SpoolFileOperationExecutor {
     signal: AbortSignal
   ): Promise<SpoolFileReadResult> {
     const normalized = normalizeSpoolRelativePath(relativePath)
-    const path = await this.containment.bindExisting(target.target, normalized)
+    const path = await this.containment.bindExisting(target.ownerWorktree, normalized)
     await requireRevalidation(path)
     const offset = boundedInteger(requestedOffset, 0, 0, Number.MAX_SAFE_INTEGER)
     const maxBytes = boundedInteger(
@@ -152,8 +154,8 @@ export class SpoolFileOperationExecutor {
     const bytes = decodeSpoolFileWriteContent(operation.content, operation.encoding)
     const path =
       operation.mode === 'create'
-        ? await this.containment.bindForCreate(target.target, operation.relativePath)
-        : await this.containment.bindExisting(target.target, operation.relativePath)
+        ? await this.containment.bindForCreate(target.ownerWorktree, operation.relativePath)
+        : await this.containment.bindExisting(target.ownerWorktree, operation.relativePath)
     if (operation.mode === 'create' && path.exists) {
       throw new SpoolExecutionError('invalid_argument')
     }
@@ -169,7 +171,7 @@ export class SpoolFileOperationExecutor {
     guard: ExecutionAdmissionGuard,
     signal: AbortSignal
   ): Promise<SpoolMutationResult> {
-    const path = await this.containment.bindForCreate(target.target, relativePath)
+    const path = await this.containment.bindForCreate(target.ownerWorktree, relativePath)
     if (path.exists) {
       throw new SpoolExecutionError('invalid_argument')
     }
@@ -186,8 +188,8 @@ export class SpoolFileOperationExecutor {
     signal: AbortSignal
   ): Promise<SpoolMutationResult> {
     const [source, destination] = await Promise.all([
-      this.containment.bindExisting(target.target, operation.relativePath),
-      this.containment.bindForCreate(target.target, operation.destinationRelativePath)
+      this.containment.bindExisting(target.ownerWorktree, operation.relativePath),
+      this.containment.bindForCreate(target.ownerWorktree, operation.destinationRelativePath)
     ])
     if (destination.exists) {
       throw new SpoolExecutionError('invalid_argument')
@@ -204,7 +206,7 @@ export class SpoolFileOperationExecutor {
     guard: ExecutionAdmissionGuard,
     signal: AbortSignal
   ): Promise<SpoolMutationResult> {
-    const path = await this.containment.bindExisting(target.target, operation.relativePath)
+    const path = await this.containment.bindExisting(target.ownerWorktree, operation.relativePath)
     await requireRevalidation(path)
     await guard.beforeSideEffect()
     await this.host.deleteVerified(path, operation.recursive === true, signal)

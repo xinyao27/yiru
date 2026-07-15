@@ -113,10 +113,10 @@ export class OrcaSpoolPairedRuntimeHostAdapter
     operationInput: SpoolExecutionOperation,
     context: SpoolHostOperationContext
   ): Promise<unknown> {
-    const environmentId = pairedRuntimeEnvironmentId(target.target)
+    const environmentId = pairedRuntimeEnvironmentId(target.ownerWorktree)
     const operation = parseSpoolPairedRuntimeOperation(operationInput)
     if (
-      target.target.kind === 'folder' &&
+      target.ownerWorktree.kind === 'folder' &&
       (operation.kind === 'files.diff' || operation.kind.startsWith('git.'))
     ) {
       // Why: outer policy must hold even if paired-runtime repository metadata has drifted.
@@ -154,7 +154,7 @@ export class OrcaSpoolPairedRuntimeHostAdapter
     context: SpoolHostOperationContext,
     emit: (event: unknown) => void
   ): SpoolHostSubscription {
-    const environmentId = pairedRuntimeEnvironmentId(target.target)
+    const environmentId = pairedRuntimeEnvironmentId(target.ownerWorktree)
     const channel = this.registry.channel(context.connectionId, environmentId)
     channel.instanceIds.add(target.instanceId)
     const params = SpoolPairedRuntimeSubscribeParamsSchema.parse({

@@ -323,7 +323,7 @@ Selecting a live session attaches a read subscription to its terminal. Selecting
 
 The bounded `session.read` operation remains available at the protocol boundary for compatibility, but the Desktop session-selection flow does not call it or render a separate transcript UI.
 
-On the normal success path, historical-to-live handoff does not wait for catalog invalidation and session pagination. `SpoolTerminalAttachmentRegistry` binds the original connection-scoped opaque session reference to the new owner-only PTY handle before `session.continue` responds. Terminal subscribe/input/resize resolve that attachment first, then fall back to the current catalog. The original session alias is pinned before launch: if a paired-runtime response becomes `outcome_unknown` before its PTY handle reaches the owner process, requester retries wait for the refreshed catalog to expose that same opaque reference and never invoke `session.continue` again. The actual-host projection reuses the short-lived continued-session binding before an agent hook reports its provider session ID, and binding changes invalidate the paired session catalog. A genuine PTY close removes the attachment and may expose provider continuation; paired transport loss is a subscription error and cannot masquerade as a PTY close. Attachments and pinned aliases are scoped to the physical connection, revalidate the current Public worktree identity on every bind, and are cleared on disconnect; control authorization and the final PTY side-effect guard remain unchanged.
+On the normal success path, historical-to-live handoff does not wait for catalog invalidation and session pagination. `SpoolTerminalAttachmentRegistry` binds the original connection-scoped opaque session reference to the new owner-only PTY handle before `session.continue` responds. Terminal subscribe/input/resize resolve that attachment first, then fall back to the current catalog. The original session alias is pinned before launch: if a paired-runtime response becomes `outcome_unknown` before its PTY handle reaches the owner process, requester retries wait for the refreshed catalog to expose that same opaque reference and never invoke `session.continue` again. A successful explicit live `terminal.subscribe` pins its alias through the same connection-scoped reference table so a catalog generation rebuild can rebind the active terminal when the stable session key reappears. After pagination reaches `complete` or `error`, the renderer clears an ordinary active alias that is still absent; it preserves aliases participating in a pending or attached historical continuation. The actual-host projection reuses the short-lived continued-session binding before an agent hook reports its provider session ID, and binding changes invalidate the paired session catalog. A genuine PTY close removes the attachment and may expose provider continuation; paired transport loss is a subscription error and cannot masquerade as a PTY close. Attachments and pinned aliases are scoped to the physical connection, revalidate the current Public worktree identity on every bind, and are cleared on disconnect; control authorization and the final PTY side-effect guard remain unchanged.
 
 ### Quota projection
 
@@ -621,13 +621,13 @@ type SpoolWorkspaceRoute = {
 
 A pure `spool-sidebar-rows.ts` projection creates Desktop, Project, Worktree, and Session row kinds. A new `workspace-sidebar-row-projection.ts` is the explicit high-level Seam that combines existing local `RenderRow[]` with `SpoolSidebarRow[]` and owns virtual-row keys, measured sizes, sticky behavior, and ordering. `worktree-list-groups.ts` and `WorktreeCard` continue to model only local worktrees.
 
-The rows use the existing sidebar presentation Modules rather than Spool-specific approximations. Desktop and Project rows share the native Project-header shell and disclosure; Worktree rows share the native Worktree-card surface; every disclosure therefore has one size, position, color, and rotation source. Spool adds no alternate hover background. The anchors are Desktop 10px, Project 20px, Worktree content 30px, and Session 48px. Plain terminal sessions use the Terminal glyph, while Claude and Codex use their provider glyphs. There are no Live/Stopped/Resumable pills. A Desktop can remain present with quota and no Public projects.
+The rows use the existing sidebar presentation Modules rather than Spool-specific approximations. Desktop and Project rows share the native Project-header shell and disclosure; Worktree rows share the native Worktree-card surface; every disclosure therefore has one size, position, color, and rotation source. Spool adds no alternate hover background. The anchors are Desktop 10px, Project 20px, Worktree content 30px, and Session 48px. Plain terminal sessions use the Terminal glyph, while Claude and Codex use their provider glyphs. There are no Live/Stopped/Resumable pills. A Desktop can remain present with quota and no Public projects. Owner-side active grants are projected once by `WorktreeList` and rendered inside the corresponding native `WorktreeCard` with direct Revoke actions; cards do not subscribe independently and there is no separate global grant panel.
 
 Quota does not occupy permanent tree rows. `SpoolDesktopUsageHoverCard` adapts the sanitized quota snapshot to `ProviderRateLimits` and renders the same `ProviderPanel` used by the status-bar hover surface, including usage bars, reset copy, and the global used/remaining preference. It does not import the large `StatusBar` Module or raw account slices.
 
 ### Workspace surface
 
-At the content root, `SpoolWorkspaceSurface` is selected instead of the local workspace controller, but it reuses the normal Worktree presentation shell. `WorkspacePaneFrame` owns the same 32px tab strip, border, surface, window-drag region, and titlebar-control clearances used by local tab groups. `WorkspaceTabStripViewport` is shared with the local `TabBar`, so overflow arrows, fade masks, wheel navigation, active-tab scroll-into-view, and unused titlebar drag space have one implementation. Spool's select-only tab uses the same sizing, border, active, and focus tokens but cannot drag, close, rename, pin, create local state, or enter persistence.
+At the content root, `SpoolWorkspaceSurface` is selected instead of the local workspace controller, but it reuses the normal Worktree presentation shell. `workspace-column-chrome.ts` is shared with `TabGroupSplitLayout` and owns the 4px top drag region, 36px total top-band alignment, and full-height left divider. `WorkspacePaneFrame` owns the same 32px tab strip, border, surface, window-drag region, and titlebar-control clearances used by local tab groups. `WorkspaceTabStripViewport` is shared with the local `TabBar`, so overflow arrows, fade masks, wheel navigation, active-tab scroll-into-view, and unused titlebar drag space have one implementation. Spool's select-only tab uses the same sizing, border, active, and focus tokens but cannot drag, close, rename, pin, create local state, or enter persistence.
 
 The virtualized left tree remains the complete navigator for every materialized session. The center strip is intentionally bounded to 24 entries: it prioritizes the catalog's leading entries plus recently and currently selected sessions, and always brings the active session into view. This prevents the paged history ceiling from turning into as many as 55,000 mounted horizontal buttons while preserving direct access to every session on the left. Catalog `loading` and `error` remain visible in the workbench; a partial or empty page chain is never presented as complete. No session is attached or continued until the user explicitly selects it.
 
@@ -858,6 +858,7 @@ src/renderer/src/components/sidebar/
   SidebarDisclosure.tsx
   SidebarProjectHeader.tsx
   WorktreeCardSurface.tsx
+  WorktreeCardControlGrants.tsx
 
 src/renderer/src/components/tab-bar/
   WorkspaceSelectableTab.tsx
@@ -865,6 +866,7 @@ src/renderer/src/components/tab-bar/
 
 src/renderer/src/components/tab-group/
   WorkspacePaneFrame.tsx
+  workspace-column-chrome.ts
 
 src/renderer/src/components/right-sidebar/
   RightSidebarFrame.tsx
@@ -883,11 +885,13 @@ src/renderer/src/components/spool/
   SpoolFileTree.tsx
   SpoolFilePreview.tsx
   SpoolFilePreviewToolbar.tsx
+  SpoolTooltipIconButton.tsx
   SpoolGitPane.tsx
   SpoolGitSidebar.tsx
   SpoolGitDiffPane.tsx
   SpoolControlRequestDialog.tsx
   SpoolWorktreeVisibilityDialog.tsx
+  spool-session-catalog-status.ts
 ```
 
 The implementation also changes these existing Seams deliberately:

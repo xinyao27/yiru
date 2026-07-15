@@ -24,11 +24,11 @@ export class SpoolOwnerShareSource implements SpoolShareCatalogSource {
     if (
       worktree.id !== instance.worktreeId ||
       worktree.instanceId !== instance.instanceId ||
-      worktree.repoId !== instance.target.repoId
+      worktree.repoId !== instance.ownerWorktree.repoId
     ) {
       return null
     }
-    const repo = this.store.getRepo(instance.target.repoId)
+    const repo = this.store.getRepo(instance.ownerWorktree.repoId)
     if (!repo) {
       return null
     }
@@ -36,7 +36,7 @@ export class SpoolOwnerShareSource implements SpoolShareCatalogSource {
       ? this.store.getProjects().find((entry) => entry.id === instance.projectId)
       : null
     return {
-      kind: instance.target.kind,
+      kind: instance.ownerWorktree.kind,
       projectKey: project ? `project:${project.id}` : `repo:${repo.id}`,
       projectName: project?.displayName ?? repo.displayName,
       worktreeName: worktree.displayName,

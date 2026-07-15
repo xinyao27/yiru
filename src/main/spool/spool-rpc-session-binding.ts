@@ -191,11 +191,11 @@ function matchesTerminalAttachment(
     expected.shareEpoch === worktree.shareEpoch &&
     expected.spoolIncarnationId === worktree.spoolIncarnationId &&
     expected.actualHostScope === worktree.actualHostScope &&
-    sameSpoolOwnerWorktreeSnapshotTarget(expected.target, worktree.target) &&
+    sameSpoolOwnerWorktreeSnapshotTarget(expected.ownerWorktree, worktree.ownerWorktree) &&
     session.worktreeInstanceId === worktree.instanceId &&
     session.spoolIncarnationId === worktree.spoolIncarnationId &&
     session.actualHostScope === worktree.actualHostScope &&
-    session.executionHostId === worktree.target.executionHostId
+    session.executionHostId === worktree.ownerWorktree.executionHostId
   )
 }
 

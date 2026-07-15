@@ -94,7 +94,7 @@ export async function resolveBoundActualHostWorktree(
     shareEpoch: selector.shareEpoch,
     spoolIncarnationId: selector.spoolIncarnationId,
     actualHostScope: resolved.actualHostScope,
-    target: toOwnerWorktree(resolved)
+    ownerWorktree: toOwnerWorktree(resolved)
   }
 }
 

@@ -8,6 +8,7 @@ import type { SpoolWorktreeVisibility } from './spool-worktree-visibility'
 export type SpoolOwnerWorktreeDescriptor = {
   displayName: string
   projectId: string | null
+  projectDisplayName: string
 }
 
 export type SpoolDesktopServiceOptions = {

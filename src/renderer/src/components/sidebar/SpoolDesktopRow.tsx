@@ -1,13 +1,14 @@
 import type React from 'react'
 import { Monitor } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
+import { ProjectHeaderActions } from './ProjectHeaderActions'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 import type { SpoolDesktopSidebarRow } from './spool-sidebar-rows'
 import { SpoolDesktopUsageHoverCard } from './SpoolDesktopUsageHoverCard'
 import { getProjectGroupHeaderPaddingLeft } from './worktree-list-indentation'
 import { SidebarDisclosure } from './SidebarDisclosure'
+import { SidebarProjectHeader } from './SidebarProjectHeader'
 
 type SpoolDesktopRowProps = {
   row: SpoolDesktopSidebarRow
@@ -28,40 +29,52 @@ function getConnectionLabel(status: SpoolDesktopSidebarRow['connectionStatus']):
 export function SpoolDesktopRow({ row, onToggle }: SpoolDesktopRowProps): React.JSX.Element {
   const hasProjects = row.projectCount > 0
   const connectionLabel = getConnectionLabel(row.connectionStatus)
-  const content = (
-    <>
-      <Monitor aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-      <span className="flex min-w-0 flex-1 items-baseline gap-1.5">
-        <TruncatedSidebarLabel
-          text={row.userDisplayName}
-          className="min-w-0 text-[12px] font-semibold leading-none text-foreground"
-        />
-        <span className="flex min-w-0 items-center gap-1 text-[10px] leading-none text-muted-foreground/70">
+  // Why: Desktop is the extra outer tree level, but its chrome remains the
+  // native Project header so Spool cannot drift to a parallel hover treatment.
+  const trigger = (
+    <SidebarProjectHeader
+      role="button"
+      tabIndex={hasProjects ? 0 : -1}
+      aria-expanded={hasProjects ? row.expanded : undefined}
+      aria-disabled={!hasProjects}
+      onClick={hasProjects ? onToggle : undefined}
+      onKeyDown={(event) => {
+        if (
+          event.target !== event.currentTarget ||
+          !hasProjects ||
+          (event.key !== 'Enter' && event.key !== ' ')
+        ) {
+          return
+        }
+        event.preventDefault()
+        onToggle()
+      }}
+      className={hasProjects ? 'cursor-pointer' : 'cursor-default'}
+      paddingLeft={getProjectGroupHeaderPaddingLeft(0)}
+      icon={<Monitor aria-hidden="true" className="size-3" />}
+      iconClassName="text-muted-foreground"
+      label={row.userDisplayName}
+      labelAfter={
+        <span className="flex min-w-0 items-center gap-1 text-[10px] font-normal leading-none text-muted-foreground/70">
           <TruncatedSidebarLabel text={row.nodeDisplayName} className="min-w-0 flex-1" />
           {connectionLabel ? <span className="shrink-0">· {connectionLabel}</span> : null}
         </span>
-      </span>
-      {hasProjects ? <SidebarDisclosure expanded={row.expanded} /> : null}
-    </>
-  )
-  const className = cn(
-    'flex h-8 w-full min-w-0 items-center gap-2 rounded-md pr-1 text-left',
-    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring',
-    row.connectionStatus === 'disconnected'
-      ? 'text-muted-foreground'
-      : 'text-worktree-sidebar-foreground'
-  )
-  // Why: Desktop anchors the shared catalog tree at the sidebar's base inset.
-  const trigger = (
-    <button
-      type="button"
-      aria-expanded={hasProjects ? row.expanded : undefined}
-      onClick={hasProjects ? onToggle : undefined}
-      className={className}
-      style={{ paddingLeft: getProjectGroupHeaderPaddingLeft(0) }}
+      }
     >
-      {content}
-    </button>
+      {hasProjects ? (
+        <ProjectHeaderActions>
+          <SidebarDisclosure
+            expanded={row.expanded}
+            itemLabel={row.userDisplayName}
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              onToggle()
+            }}
+          />
+        </ProjectHeaderActions>
+      ) : null}
+    </SidebarProjectHeader>
   )
   return (
     <div className="pt-1">
