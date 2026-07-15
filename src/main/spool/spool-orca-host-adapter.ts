@@ -66,7 +66,7 @@ export function createOrcaSpoolHostAdapter(
     continuedSessions,
     sessionReader,
     resolveAdapter: (target) => {
-      const host = parseExecutionHostId(target.target.executionHostId)
+      const host = parseExecutionHostId(target.ownerWorktree.executionHostId)
       if (!host) {
         return null
       }

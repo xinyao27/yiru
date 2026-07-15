@@ -13,7 +13,7 @@ export function toSessionWorktree(
     instanceId: instance.instanceId,
     spoolIncarnationId: instance.spoolIncarnationId,
     actualHostScope: instance.actualHostScope,
-    target: instance.target
+    target: instance.ownerWorktree
   }
 }
 

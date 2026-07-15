@@ -43,7 +43,7 @@ export function SpoolSessionContinuationNotice({
         <Icon
           aria-hidden="true"
           className={
-            loading ? 'size-5 animate-spin text-muted-foreground' : 'size-5 text-muted-foreground'
+            loading ? 'size-4 animate-spin text-muted-foreground' : 'size-5 text-muted-foreground'
           }
         />
         <p className="text-xs leading-5 text-muted-foreground">{message}</p>

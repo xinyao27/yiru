@@ -17,7 +17,7 @@ export function pairedRuntimeTargetSelector(target: SpoolOwnerWorktree) {
 
 export function boundPairedRuntimeTargetSelector(target: SpoolPublicWorktreeInstance) {
   return {
-    ...pairedRuntimeTargetSelector(target.target),
+    ...pairedRuntimeTargetSelector(target.ownerWorktree),
     shareEpoch: target.shareEpoch,
     spoolIncarnationId: target.spoolIncarnationId
   }

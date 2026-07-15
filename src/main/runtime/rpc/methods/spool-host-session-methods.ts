@@ -194,7 +194,7 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
         const operation = remoteSessionOperation(params.operation.kind)
         const remembered = bundle.sessionRecords.rememberResolved({
           ownerRecordKey: operation.ownerRecordKey,
-          executionHostId: target.target.executionHostId,
+          executionHostId: target.ownerWorktree.executionHostId,
           actualHostScope: target.actualHostScope,
           worktreeInstanceId: target.instanceId,
           spoolIncarnationId: target.spoolIncarnationId,

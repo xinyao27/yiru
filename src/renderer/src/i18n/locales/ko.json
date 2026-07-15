@@ -4738,7 +4738,7 @@
         "SpoolControlRequestDialog": {
           "decisionFailed": "제어 결정을 전송할 수 없습니다.",
           "title": "{{value0}} 님이 이 worktree를 제어하도록 허용할까요?",
-          "worktree": "Worktree: {{value0}}",
+          "worktree": "Worktree: {{value0}} / {{value1}}",
           "capabilities": "상대방은 terminal 입력 전송, 파일 수정, 명령 실행 및 사용자의 Claude/Codex 계정 사용이 가능해집니다.",
           "shellWarning": "Terminal 명령은 이 worktree 안으로 제한되지 않습니다.",
           "queued": "제어 요청 {{value0}}개가 더 대기 중입니다.",

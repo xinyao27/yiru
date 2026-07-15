@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { Files, GitBranch } from 'lucide-react'
 import { useShallow } from 'zustand/react/shallow'
 import { useAppStore } from '@/store'
-import { resolveSpoolWorkspaceRoute } from '@/store/slices/spool-sharing-selectors'
+import { resolveSpoolWorktreeRoute } from '@/store/slices/spool-sharing-selectors'
 import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 import { useShortcutLabel } from '@/hooks/useShortcutLabel'
@@ -28,11 +28,13 @@ function SpoolRightSidebarContent({
 }: {
   route: SpoolWorkspaceRoute
 }): React.JSX.Element | null {
-  const workspace = useAppStore(useShallow((state) => resolveSpoolWorkspaceRoute(state, route)))
   const rightSidebarShortcut = useShortcutLabel('sidebar.right.toggle')
   const explorerShortcut = useShortcutLabel('sidebar.explorer.toggle')
   const sourceControlShortcut = useShortcutLabel('sidebar.sourceControl.toggle')
   const rightSidebarOpen = useAppStore((state) => state.rightSidebarOpen)
+  const workspace = useAppStore(
+    useShallow((state) => (rightSidebarOpen ? resolveSpoolWorktreeRoute(state, route) : null))
+  )
   const rightSidebarWidth = useAppStore((state) => state.rightSidebarWidth)
   const rightSidebarTab = useAppStore((state) => state.rightSidebarTab)
   const activityBarPosition = useAppStore((state) => state.activityBarPosition)
@@ -66,7 +68,7 @@ function SpoolRightSidebarContent({
   const activeTab: ActiveRightSidebarTab =
     supportsGit && rightSidebarTab === 'source-control' ? 'source-control' : 'explorer'
 
-  if (!workspace) {
+  if (rightSidebarOpen && !workspace) {
     return null
   }
 
@@ -92,9 +94,9 @@ function SpoolRightSidebarContent({
       width={rightSidebarWidth}
     >
       {activeTab === 'source-control' && supportsGit ? (
-        <SpoolGitPane layout="sidebar" route={route} />
+        <SpoolGitPane route={route} />
       ) : (
-        <SpoolFilesPane layout="sidebar" route={route} supportsDiff={supportsGit} />
+        <SpoolFilesPane route={route} supportsDiff={supportsGit} />
       )}
     </RightSidebarFrame>
   )

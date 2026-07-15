@@ -19,7 +19,6 @@ export function SpoolFilePreview({
   fileUnavailable,
   loading,
   saving,
-  surface = 'workspace',
   supportsDiff,
   diff,
   diffLoading,
@@ -41,13 +40,12 @@ export function SpoolFilePreview({
   fileUnavailable: boolean
   loading: boolean
   saving: boolean
-  surface?: 'workspace' | 'sidebar'
   supportsDiff: boolean
   diff: SpoolFileDiffResult | null
   diffLoading: boolean
   diffUnavailable: boolean
   onDelete: () => void
-  onBack?: () => void
+  onBack: () => void
   onDraftChange: (value: string) => void
   onLoadDiff: (staged: boolean) => void
   onNextChunk: () => void
@@ -62,7 +60,7 @@ export function SpoolFilePreview({
     return (
       <FilePreviewMessage
         message={translate('auto.components.spool.SpoolFilePreview.loading', 'Loading file…')}
-        onBack={surface === 'sidebar' ? onBack : undefined}
+        onBack={onBack}
       />
     )
   }
@@ -73,7 +71,7 @@ export function SpoolFilePreview({
           'auto.components.spool.SpoolFilePreview.fileUnavailable',
           'This file is unavailable.'
         )}
-        onBack={surface === 'sidebar' ? onBack : undefined}
+        onBack={onBack}
       />
     )
   }
@@ -84,7 +82,7 @@ export function SpoolFilePreview({
           'auto.components.spool.SpoolFilePreview.selectFile',
           'Select a file to inspect it.'
         )}
-        onBack={surface === 'sidebar' ? onBack : undefined}
+        onBack={onBack}
       />
     )
   }
@@ -117,7 +115,6 @@ export function SpoolFilePreview({
         onSave={onSave}
         saving={saving}
         supportsDiff={supportsDiff}
-        surface={surface}
       />
       {showDiff ? (
         <DiffProjection
@@ -125,7 +122,6 @@ export function SpoolFilePreview({
           loading={diffLoading}
           unavailable={diffUnavailable}
           expectedStaged={mode === 'staged-diff'}
-          surface={surface}
         />
       ) : file.encoding === 'utf8' ? (
         <TextProjection
@@ -133,10 +129,9 @@ export function SpoolFilePreview({
           draft={draft}
           editable={editable}
           onDraftChange={onDraftChange}
-          surface={surface}
         />
       ) : (
-        <BinaryProjection file={file} surface={surface} />
+        <BinaryProjection file={file} />
       )}
     </section>
   )
@@ -146,14 +141,12 @@ function TextProjection({
   draft,
   editable,
   file,
-  onDraftChange,
-  surface
+  onDraftChange
 }: {
   draft: string
   editable: boolean
   file: SpoolFileReadResult
   onDraftChange: (value: string) => void
-  surface: 'workspace' | 'sidebar'
 }): React.JSX.Element {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -173,7 +166,7 @@ function TextProjection({
         onChange={(event) => onDraftChange(event.currentTarget.value)}
         className={cn(
           'scrollbar-editor min-h-0 flex-1 resize-none bg-[var(--editor-surface)] font-mono text-xs leading-5 text-foreground outline-none',
-          surface === 'sidebar' ? 'p-3' : 'p-4',
+          'p-3',
           'focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring',
           !editable && 'cursor-default'
         )}
@@ -186,13 +179,11 @@ function DiffProjection({
   diff,
   expectedStaged,
   loading,
-  unavailable,
-  surface
+  unavailable
 }: {
   diff: SpoolFileDiffResult | null
   expectedStaged: boolean
   loading: boolean
-  surface: 'workspace' | 'sidebar'
   unavailable: boolean
 }): React.JSX.Element {
   if (loading) {
@@ -223,12 +214,7 @@ function DiffProjection({
         />
       ) : null}
       {diff.patch ? (
-        <pre
-          className={cn(
-            'min-w-max whitespace-pre font-mono text-xs leading-5 text-foreground',
-            surface === 'sidebar' ? 'p-3' : 'p-4'
-          )}
-        >
+        <pre className="min-w-max whitespace-pre p-3 font-mono text-xs leading-5 text-foreground">
           {diff.patch}
         </pre>
       ) : (
@@ -243,20 +229,9 @@ function DiffProjection({
   )
 }
 
-function BinaryProjection({
-  file,
-  surface
-}: {
-  file: SpoolFileReadResult
-  surface: 'workspace' | 'sidebar'
-}): React.JSX.Element {
+function BinaryProjection({ file }: { file: SpoolFileReadResult }): React.JSX.Element {
   return (
-    <div
-      className={cn(
-        'scrollbar-editor min-h-0 flex-1 overflow-auto',
-        surface === 'sidebar' ? 'p-3' : 'p-4'
-      )}
-    >
+    <div className="scrollbar-editor min-h-0 flex-1 overflow-auto p-3">
       <FileNotice
         message={translate(
           'auto.components.spool.SpoolFilePreview.binaryDescription',

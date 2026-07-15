@@ -1,6 +1,7 @@
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { useShallow } from 'zustand/react/shallow'
 import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/spool-ipc-contract'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
@@ -27,9 +28,16 @@ const UNKNOWN_ATTACH_RETRY_MS = [100, 250, 500, 1_000, 2_000, 4_000, 8_000] as c
 
 export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React.JSX.Element {
   const canControl = useAppStore((state) => selectSpoolCanControl(state, route))
-  const catalogSession = useAppStore(
-    (state) => resolveSpoolWorkspaceRoute(state, route)?.session ?? null
+  const { catalogSession, sessionCatalogStatus } = useAppStore(
+    useShallow((state) => {
+      const workspace = resolveSpoolWorkspaceRoute(state, route)
+      return {
+        catalogSession: workspace?.session ?? null,
+        sessionCatalogStatus: workspace?.worktree.sessionCatalog.status ?? null
+      }
+    })
   )
+  const setActiveRoute = useAppStore((state) => state.setActiveSpoolWorkspaceRoute)
   const [phase, setPhase] = useState<SessionPanePhase>('terminal')
   const [terminalAttempt, setTerminalAttempt] = useState(0)
   const continuationRef = useRef<ContinuationState>('not-started')
@@ -115,6 +123,27 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
   }, [canControl, continueSession, phase])
 
   useEffect(() => clearRetryTimer, [clearRetryTimer])
+
+  useEffect(() => {
+    if (
+      catalogSession ||
+      sessionCatalogStatus === null ||
+      sessionCatalogStatus === 'loading' ||
+      retainsMissingHistoricalContinuation(continuationRef.current)
+    ) {
+      return
+    }
+    if (!isSameSpoolSessionRoute(useAppStore.getState().activeSpoolWorkspaceRoute, route)) {
+      return
+    }
+    // Why: completed pagination is authoritative for ordinary aliases; keeping
+    // a missing ref mounted leaves a terminal that can render but cannot accept input.
+    setActiveRoute({
+      desktopRef: route.desktopRef,
+      worktreeRef: route.worktreeRef,
+      connectionEpoch: route.connectionEpoch
+    })
+  }, [catalogSession, phase, route, sessionCatalogStatus, setActiveRoute])
 
   useEffect(() => {
     if (
@@ -334,4 +363,13 @@ function isContinuedSessionResult(value: unknown, sessionRef: string): boolean {
   }
   const result = value as Record<string, unknown>
   return Object.keys(result).length === 1 && result.sessionRef === sessionRef
+}
+
+function retainsMissingHistoricalContinuation(state: ContinuationState): boolean {
+  return (
+    state === 'pending' ||
+    state === 'attached' ||
+    state === 'outcome-unknown' ||
+    state === 'awaiting-historical'
+  )
 }

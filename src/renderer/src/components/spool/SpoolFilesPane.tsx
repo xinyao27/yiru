@@ -39,11 +39,9 @@ import {
 import { useSpoolWorktreeOperationRoute } from './spool-worktree-route'
 
 export function SpoolFilesPane({
-  layout = 'workspace',
   route,
   supportsDiff
 }: {
-  layout?: 'workspace' | 'sidebar'
   route: SpoolWorkspaceRoute
   supportsDiff: boolean
 }): React.JSX.Element {
@@ -170,9 +168,7 @@ export function SpoolFilesPane({
       void loadDirectory(entry.relativePath)
       return
     }
-    if (layout === 'sidebar') {
-      setSidebarView('preview')
-    }
+    setSidebarView('preview')
     void loadFile(entry)
   }
 
@@ -312,13 +308,12 @@ export function SpoolFilesPane({
         />
       ) : null}
       <div className="flex min-h-0 flex-1">
-        {layout === 'workspace' || sidebarView === 'tree' ? (
+        {sidebarView === 'tree' ? (
           <SpoolFileTree
             canControl={canMutate}
             directory={directory}
             listing={listing}
             loading={listLoading}
-            surface={layout}
             unavailable={listUnavailable}
             selectedPath={selectedEntry?.relativePath ?? null}
             onOpen={openEntry}
@@ -330,7 +325,7 @@ export function SpoolFilesPane({
             onDelete={(entry) => setAction({ kind: 'delete', entry })}
           />
         ) : null}
-        {layout === 'workspace' || sidebarView === 'preview' ? (
+        {sidebarView === 'preview' ? (
           <SpoolFilePreview
             // Why: each read clears `file`, so this boundary resets preview mode before new bytes appear.
             key={file?.relativePath ?? 'empty'}
@@ -341,12 +336,11 @@ export function SpoolFilesPane({
             fileUnavailable={fileUnavailable}
             loading={fileLoading}
             saving={mutating}
-            surface={layout}
             supportsDiff={supportsDiff}
             diff={diff}
             diffLoading={diffLoading}
             diffUnavailable={diffUnavailable}
-            onBack={layout === 'sidebar' ? () => setSidebarView('tree') : undefined}
+            onBack={() => setSidebarView('tree')}
             onDraftChange={setDraft}
             onLoadDiff={(staged) => void loadDiff(staged)}
             onNextChunk={() =>

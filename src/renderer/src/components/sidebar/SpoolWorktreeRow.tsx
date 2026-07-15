@@ -1,6 +1,6 @@
 import type React from 'react'
 import { Folder, GitBranch } from 'lucide-react'
-import { translate } from '@/i18n/i18n'
+import { getSpoolSessionCatalogStatusLabel } from '@/components/spool/spool-session-catalog-status'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 import type { SpoolWorktreeSidebarRow } from './spool-sidebar-rows'
 import {
@@ -16,32 +16,13 @@ type SpoolWorktreeRowProps = {
   onSelect: () => void
 }
 
-function getSessionCatalogLabel(
-  status: SpoolWorktreeSidebarRow['sessionCatalogStatus']
-): string | null {
-  switch (status) {
-    case 'loading':
-      return translate(
-        'auto.components.sidebar.SpoolWorktreeRow.loadingSessions',
-        'Loading sessions…'
-      )
-    case 'error':
-      return translate(
-        'auto.components.sidebar.SpoolWorktreeRow.sessionsUnavailable',
-        'Session list unavailable'
-      )
-    case 'complete':
-      return null
-  }
-}
-
 export function SpoolWorktreeRow({
   row,
   onToggle,
   onSelect
 }: SpoolWorktreeRowProps): React.JSX.Element {
   const hasSessions = row.sessionCount > 0
-  const sessionCatalogLabel = getSessionCatalogLabel(row.sessionCatalogStatus)
+  const sessionCatalogLabel = getSpoolSessionCatalogStatusLabel(row.sessionCatalogStatus)
   const metadata = [row.branch, sessionCatalogLabel].filter(Boolean).join(' · ')
   // Why: Worktrees advance one more compact step beneath their Project.
   return (

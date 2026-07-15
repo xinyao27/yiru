@@ -7,6 +7,11 @@ import TabDragPreview from '../tab-bar/TabDragPreview'
 import { TabDragProvider } from './tab-drag-context'
 import TabPaneColumnSplitDragOverlay from './TabPaneColumnSplitDragOverlay'
 import { type HoveredTabInsertion, useTabDragSplit } from './useTabDragSplit'
+import {
+  WORKSPACE_COLUMN_BODY_CLASS_NAME,
+  WORKSPACE_COLUMN_DRAG_REGION_CLASS_NAME,
+  WORKSPACE_COLUMN_FRAME_CLASS_NAME
+} from './workspace-column-chrome'
 
 const MIN_RATIO = 0.15
 const MAX_RATIO = 0.85
@@ -281,12 +286,12 @@ export default function TabGroupSplitLayout({
           state. The leftmost pane suppresses its own `border-l` via
           `touchesLeftEdge`, so the seam is always exactly 1px — previously
           both painted and stacked into a 2px bar below the drag strip. */}
-        <div
-          ref={dragSplit.setDragRootNode}
-          className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden border-l border-border"
-        >
-          <div className="h-[4px] shrink-0 bg-card" data-terminal-focus-release-surface="true" />
-          <div className="flex flex-1 min-w-0 min-h-0 overflow-hidden">
+        <div ref={dragSplit.setDragRootNode} className={WORKSPACE_COLUMN_FRAME_CLASS_NAME}>
+          <div
+            className={WORKSPACE_COLUMN_DRAG_REGION_CLASS_NAME}
+            data-terminal-focus-release-surface="true"
+          />
+          <div className={WORKSPACE_COLUMN_BODY_CLASS_NAME}>
             <SplitNode
               node={layout}
               nodePath=""

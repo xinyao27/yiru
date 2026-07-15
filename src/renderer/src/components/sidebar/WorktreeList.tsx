@@ -70,6 +70,7 @@ import type {
   WorkspaceStatusDefinition
 } from '../../../../shared/types'
 import { DEFAULT_SHOW_SLEEPING_WORKSPACES } from '../../../../shared/constants'
+import type { SpoolOwnerControlGrantView } from '../../../../shared/spool/spool-ipc-contract'
 import { buildWorktreeComparator, compareWorktreeSortLabel } from './smart-sort'
 import {
   buildAttentionByWorktree,
@@ -1334,7 +1335,12 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
   scrollAnchorRef
 }: VirtualizedWorktreeViewportProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const spoolOwnerWorktrees = useAppStore((state) => state.spoolOwnerWorktrees)
+  const { spoolOwnerWorktrees, spoolOwnerControlGrants } = useAppStore(
+    useShallow((state) => ({
+      spoolOwnerWorktrees: state.spoolOwnerWorktrees,
+      spoolOwnerControlGrants: state.spoolOwnerControlGrants
+    }))
+  )
   const [spoolProjectPublicationTarget, setSpoolProjectPublicationTarget] = useState<{
     projectId: string
     projectName: string
@@ -1357,6 +1363,43 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
     }
     return byProject
   }, [spoolOwnerWorktrees])
+  const spoolControlGrantsByWorktreeId = useMemo(() => {
+    // Why: virtual worktree cards receive owner grants as data instead of each
+    // subscribing to the global store independently.
+    const result = new Map<string, SpoolOwnerControlGrantView[]>()
+    for (const grant of spoolOwnerControlGrants) {
+      const worktreeGrants = result.get(grant.worktreeId) ?? []
+      worktreeGrants.push(grant)
+      result.set(grant.worktreeId, worktreeGrants)
+    }
+    return result
+  }, [spoolOwnerControlGrants])
+  const [spoolRevokingGrantIds, setSpoolRevokingGrantIds] = useState<ReadonlySet<string>>(new Set())
+  // Why: revoke IPC can reply before the authority snapshot removes its row;
+  // keep the action disabled until that authoritative removal arrives.
+  useEffect(() => {
+    const liveGrantIds = new Set(spoolOwnerControlGrants.map((grant) => grant.grantId))
+    setSpoolRevokingGrantIds((current) => {
+      const retained = new Set([...current].filter((grantId) => liveGrantIds.has(grantId)))
+      return retained.size === current.size ? current : retained
+    })
+  }, [spoolOwnerControlGrants])
+  const revokeSpoolControlGrant = useCallback((grantId: string): void => {
+    setSpoolRevokingGrantIds((current) => new Set(current).add(grantId))
+    void window.api.spoolSharing.revokeControl({ grantId }).catch(() => {
+      setSpoolRevokingGrantIds((current) => {
+        const next = new Set(current)
+        next.delete(grantId)
+        return next
+      })
+      toast.error(
+        translate(
+          'auto.components.spool.SpoolOwnerControlGrants.revokeFailed',
+          'Could not revoke remote control.'
+        )
+      )
+    })
+  }, [])
   const makeSpoolProjectPrivate = useCallback((projectId: string) => {
     setSpoolProjectVisibilityPending((current) => new Set(current).add(projectId))
     void window.api.spoolSharing
@@ -4980,6 +5023,9 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                           }
                         : undefined
                     }
+                    spoolControlGrants={spoolControlGrantsByWorktreeId.get(itemRow.worktree.id)}
+                    spoolRevokingGrantIds={spoolRevokingGrantIds}
+                    onRevokeSpoolControlGrant={revokeSpoolControlGrant}
                   />
                 </div>
               )
@@ -5205,6 +5251,9 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                       onSelectionGesture={onSelectionGesture}
                       onContextMenuSelect={onContextMenuSelect}
                       statusPrDisplay={folderPrDisplay}
+                      spoolControlGrants={spoolControlGrantsByWorktreeId.get(folderWorktree.id)}
+                      spoolRevokingGrantIds={spoolRevokingGrantIds}
+                      onRevokeSpoolControlGrant={revokeSpoolControlGrant}
                     />
                     <div className="pointer-events-auto absolute right-3 top-1.5">
                       <FolderPathStatusIndicator status={folderWorkspacePathStatus} />

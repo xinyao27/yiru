@@ -83,7 +83,9 @@ import { recordRendererCrashBreadcrumb } from '@/lib/crash-diagnostics'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace-scope'
 import { isRuntimeOwnedSshTargetId, parseExecutionHostId } from '../../../../shared/execution-host'
 import { DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE } from '../../../../shared/constants'
+import type { SpoolOwnerControlGrantView } from '../../../../shared/spool/spool-ipc-contract'
 import { WorktreeCardSurface, type WorktreeCardSurfaceActiveVariant } from './WorktreeCardSurface'
+import { WorktreeCardControlGrants } from './WorktreeCardControlGrants'
 
 type WorktreeRenameRequest = {
   worktreeId: string
@@ -132,9 +134,14 @@ type WorktreeCardProps = {
   nativeDragEnabled?: boolean
   affiliateListMode?: boolean
   statusPrDisplay?: WorktreeCardPrDisplay | null
+  spoolControlGrants?: readonly SpoolOwnerControlGrantView[]
+  spoolRevokingGrantIds?: ReadonlySet<string>
+  onRevokeSpoolControlGrant?: (grantId: string) => void
 }
 
 const EMPTY_WORKSPACE_PORTS = []
+const EMPTY_SPOOL_CONTROL_GRANTS: readonly SpoolOwnerControlGrantView[] = []
+const EMPTY_SPOOL_REVOKING_GRANT_IDS: ReadonlySet<string> = new Set()
 const HOSTED_REVIEW_CARD_REFRESH_INTERVAL_MS = 60_000
 
 export function shouldBeginWorktreeRename(
@@ -224,7 +231,10 @@ const WorktreeCard = React.memo(function WorktreeCard({
   onLineageToggle,
   isLineageDropTarget = false,
   affiliateListMode = false,
-  statusPrDisplay = null
+  statusPrDisplay = null,
+  spoolControlGrants = EMPTY_SPOOL_CONTROL_GRANTS,
+  spoolRevokingGrantIds = EMPTY_SPOOL_REVOKING_GRANT_IDS,
+  onRevokeSpoolControlGrant
 }: WorktreeCardProps) {
   const openModal = useAppStore((s) => s.openModal)
   const openTaskPage = useAppStore((s) => s.openTaskPage)
@@ -1354,7 +1364,11 @@ const WorktreeCard = React.memo(function WorktreeCard({
     <div className="ml-auto flex shrink-0 items-center gap-1 pr-1.5">{detailsAndPorts}</div>
   ) : null
   const hasSecondaryCardContent =
-    hasMetaRow || !!remoteBranchConflict || showInlineAgentList || showLineageChildChip
+    hasMetaRow ||
+    !!remoteBranchConflict ||
+    spoolControlGrants.length > 0 ||
+    showInlineAgentList ||
+    showLineageChildChip
   const titleOnlyCard = !hasSecondaryCardContent
 
   const parentCardContent = (
@@ -1728,6 +1742,14 @@ const WorktreeCard = React.memo(function WorktreeCard({
           </div>
         )}
 
+        {spoolControlGrants.length > 0 && onRevokeSpoolControlGrant ? (
+          <WorktreeCardControlGrants
+            grants={spoolControlGrants}
+            revokingGrantIds={spoolRevokingGrantIds}
+            onRevoke={onRevokeSpoolControlGrant}
+          />
+        ) : null}
+
         {isActive && worktree.linkedLinearIssue ? (
           <LinearAgentSkillSetupPrompt
             linked
@@ -1748,7 +1770,9 @@ const WorktreeCard = React.memo(function WorktreeCard({
           <WorktreeCardAgents
             worktreeId={worktree.id}
             agents={agentActivityDisplayMode === 'compact' ? compactInlineAgentRows : undefined}
-            className={hasMetaRow || remoteBranchConflict ? 'mt-0' : '-mt-1'}
+            className={
+              hasMetaRow || remoteBranchConflict || spoolControlGrants.length > 0 ? 'mt-0' : '-mt-1'
+            }
           />
         )}
 

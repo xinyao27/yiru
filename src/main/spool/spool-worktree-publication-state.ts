@@ -24,7 +24,7 @@ export type SpoolPublicWorktreeInstance = {
   shareEpoch: string
   spoolIncarnationId: string
   actualHostScope: string
-  target: SpoolOwnerWorktree
+  ownerWorktree: SpoolOwnerWorktree
 }
 
 export type SpoolWorktreeVisibilityState = {
@@ -292,7 +292,7 @@ function clonePublicInstance(value: PublishedWorktree): SpoolPublicWorktreeInsta
     shareEpoch: value.shareEpoch,
     spoolIncarnationId: value.markerId,
     actualHostScope: value.root.scopeKey,
-    target: cloneTarget(value.target)
+    ownerWorktree: cloneTarget(value.target)
   }
 }
 

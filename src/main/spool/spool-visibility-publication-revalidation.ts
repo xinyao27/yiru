@@ -112,7 +112,7 @@ export class SpoolVisibilityPublicationRevalidation {
     // Why: bind already proved every registered root; the per-keystroke guard
     // rechecks this host marker without rescanning unrelated repositories.
     const resolution = await this.options.incarnation.preparePublication(
-      published.target,
+      published.ownerWorktree,
       meta.spoolIncarnationId
     )
     if (resolution.status === 'unavailable') {
@@ -126,7 +126,7 @@ export class SpoolVisibilityPublicationRevalidation {
       return null
     }
     const prepared = {
-      target: published.target,
+      target: published.ownerWorktree,
       markerId: resolution.markerId,
       root: resolution.root
     }

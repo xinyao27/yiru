@@ -67,7 +67,7 @@ function recordMatchesTarget(
   target: SpoolPublicWorktreeInstance
 ): boolean {
   return (
-    record.executionHostId === target.target.executionHostId &&
+    record.executionHostId === target.ownerWorktree.executionHostId &&
     record.actualHostScope === target.actualHostScope &&
     record.worktreeInstanceId === target.instanceId &&
     record.spoolIncarnationId === target.spoolIncarnationId

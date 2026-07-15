@@ -33,13 +33,7 @@ import { reportSpoolGitMutationError } from './spool-workspace-mutation-feedback
 import { SpoolMutationOutcomeNotice } from './SpoolMutationOutcomeNotice'
 import { useSpoolWorktreeOperationRoute } from './spool-worktree-route'
 
-export function SpoolGitPane({
-  layout = 'workspace',
-  route
-}: {
-  layout?: 'workspace' | 'sidebar'
-  route: SpoolWorkspaceRoute
-}): React.JSX.Element {
+export function SpoolGitPane({ route }: { route: SpoolWorkspaceRoute }): React.JSX.Element {
   const operationRoute = useSpoolWorktreeOperationRoute(route)
   const canControl = useAppStore((state) => selectSpoolCanControl(state, operationRoute))
   const [status, setStatus] = useState<SpoolGitStatusResult | null>(null)
@@ -105,9 +99,7 @@ export function SpoolGitPane({
     setDiff(null)
     setDiffLoading(true)
     setDiffUnavailable(false)
-    if (layout === 'sidebar') {
-      setSidebarView('diff')
-    }
+    setSidebarView('diff')
     try {
       const value = await invokeSpoolWorkspaceRead(operationRoute, 'git.diff', {
         source: entry.area === 'staged' ? 'index' : 'working-tree',
@@ -138,9 +130,7 @@ export function SpoolGitPane({
     setDiff(null)
     setDiffLoading(true)
     setDiffUnavailable(false)
-    if (layout === 'sidebar') {
-      setSidebarView('diff')
-    }
+    setSidebarView('diff')
     try {
       const value = await invokeSpoolWorkspaceRead(operationRoute, 'git.diff', {
         source: 'commit',
@@ -235,7 +225,7 @@ export function SpoolGitPane({
         />
       ) : null}
       <div className="flex min-h-0 flex-1">
-        {layout === 'workspace' || sidebarView === 'list' ? (
+        {sidebarView === 'list' ? (
           <SpoolGitSidebar
             canControl={canMutate}
             commitMessage={commitMessage}
@@ -245,7 +235,6 @@ export function SpoolGitPane({
             mutating={mutating}
             selectedKey={selectedKey}
             status={status}
-            surface={layout}
             unavailable={unavailable}
             onCommit={() => void commit()}
             onCommitMessageChange={setCommitMessage}
@@ -263,14 +252,13 @@ export function SpoolGitPane({
             onToggleStage={(entry) => void toggleStage(entry)}
           />
         ) : null}
-        {layout === 'workspace' || sidebarView === 'diff' ? (
+        {sidebarView === 'diff' ? (
           <SpoolGitDiffPane
             diff={diff}
             historyEntry={selectedHistory}
             loading={diffLoading}
-            onBack={layout === 'sidebar' ? () => setSidebarView('list') : undefined}
+            onBack={() => setSidebarView('list')}
             statusEntry={selectedStatus}
-            surface={layout}
             unavailable={diffUnavailable}
           />
         ) : null}

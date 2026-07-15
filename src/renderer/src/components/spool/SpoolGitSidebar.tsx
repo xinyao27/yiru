@@ -25,7 +25,6 @@ export function SpoolGitSidebar({
   loading,
   mode,
   mutating,
-  surface = 'workspace',
   unavailable,
   selectedKey,
   status,
@@ -43,7 +42,6 @@ export function SpoolGitSidebar({
   loading: boolean
   mode: SpoolGitSidebarMode
   mutating: boolean
-  surface?: 'workspace' | 'sidebar'
   unavailable: boolean
   selectedKey: string | null
   status: SpoolGitStatusResult | null
@@ -57,14 +55,7 @@ export function SpoolGitSidebar({
 }): React.JSX.Element {
   const stagedCount = status?.entries.filter((entry) => entry.area === 'staged').length ?? 0
   return (
-    <aside
-      className={cn(
-        'flex min-h-0 shrink-0 flex-col',
-        surface === 'sidebar'
-          ? 'w-full flex-1 bg-sidebar text-sidebar-foreground'
-          : 'w-80 border-r border-border bg-card text-card-foreground'
-      )}
-    >
+    <aside className="flex min-h-0 w-full flex-1 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
       <header className="border-b border-border px-3 py-2">
         <div className="flex items-center gap-2">
           <GitCommitHorizontal aria-hidden="true" className="size-4 text-muted-foreground" />
@@ -223,12 +214,14 @@ function ChangesList({
               data-current={selectedKey === key ? 'true' : undefined}
               className={cn(
                 'group flex items-center rounded-md text-[13px]',
-                selectedKey === key ? 'bg-accent text-accent-foreground' : 'hover:bg-accent'
+                selectedKey === key
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                  : 'hover:bg-sidebar-accent'
               )}
             >
               <button
                 type="button"
-                className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring"
                 onClick={() => onSelect(entry)}
               >
                 <span
@@ -310,10 +303,10 @@ function HistoryList({
             data-current={selectedKey === entry.commitRef ? 'true' : undefined}
             onClick={() => onSelect(entry)}
             className={cn(
-              'block w-full rounded-md px-2 py-2 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+              'block w-full rounded-md px-2 py-2 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring',
               selectedKey === entry.commitRef
-                ? 'bg-accent text-accent-foreground'
-                : 'hover:bg-accent'
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                : 'hover:bg-sidebar-accent'
             )}
           >
             <span className="block truncate text-xs font-medium">

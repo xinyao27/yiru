@@ -108,13 +108,19 @@ export function createSpoolSessionRpcMethods(
       streaming: true,
       bind: async (params, context) => {
         const parsed = TerminalSubscribeParams.parse(params)
-        return bindSpoolSession(
+        const bound = await bindSpoolSession(
           dependencies,
           context.principal.connectionId,
           parsed.sessionRef,
           'live',
           parsed
         )
+        // Why: an explicitly opened live terminal must regain the same opaque
+        // alias after a session-catalog generation rebuild, just like continuation.
+        dependencies.catalog
+          .getProjection(context.principal.connectionId)
+          ?.retainSessionReference(parsed.sessionRef)
+        return bound
       },
       execute: (bound, context) => {
         const invocation = asLiveSessionInvocation(bound)

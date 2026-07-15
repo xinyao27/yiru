@@ -4738,10 +4738,10 @@
         "SpoolControlRequestDialog": {
           "decisionFailed": "No se pudo enviar la decisión de control.",
           "title": "¿Permitir que {{value0}} controle este worktree?",
-          "worktree": "Worktree: {{value0}}",
+          "worktree": "Worktree: {{value0}} / {{value1}}",
           "capabilities": "Podrá enviar entradas al terminal, modificar archivos, ejecutar comandos y usar tus cuentas de Claude/Codex.",
           "shellWarning": "Los comandos del terminal no están limitados a este worktree.",
-          "queued": "Hay {{value0}} solicitud(es) de control más en cola.",
+          "queued": "Solicitudes de control en cola: {{value0}}.",
           "deny": "Denegar",
           "allow": "Permitir esta conexión"
         },

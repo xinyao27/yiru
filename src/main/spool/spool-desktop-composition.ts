@@ -258,9 +258,14 @@ export function createSpoolDesktopComposition(
       if (!meta || !repo) {
         return null
       }
+      const projectId = meta.projectId ?? null
+      const project = projectId
+        ? options.store.getProjects().find((candidate) => candidate.id === projectId)
+        : null
       return {
         displayName: meta.displayName,
-        projectId: meta.projectId ?? null
+        projectId,
+        projectDisplayName: project?.displayName ?? repo.displayName
       }
     }
   })
