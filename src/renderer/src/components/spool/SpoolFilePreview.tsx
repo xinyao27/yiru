@@ -1,17 +1,15 @@
 import type React from 'react'
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight, FileDiff, RefreshCw, Save, Trash2 } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import type {
   SpoolFileDiffResult,
   SpoolFileReadResult,
   SpoolFileTreeEntry
 } from '../../../../shared/spool/spool-operation-contract'
 import { translate } from '@/i18n/i18n'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { SpoolTruncatedPathLabel } from './SpoolTruncatedPathLabel'
-
-type FilePreviewMode = 'content' | 'working-diff' | 'staged-diff'
+import { Button } from '@/components/ui/button'
+import { SpoolFilePreviewToolbar, type SpoolFilePreviewMode } from './SpoolFilePreviewToolbar'
 
 export function SpoolFilePreview({
   canControl,
@@ -21,11 +19,13 @@ export function SpoolFilePreview({
   fileUnavailable,
   loading,
   saving,
+  surface = 'workspace',
   supportsDiff,
   diff,
   diffLoading,
   diffUnavailable,
   onDelete,
+  onBack,
   onDraftChange,
   onLoadDiff,
   onNextChunk,
@@ -41,11 +41,13 @@ export function SpoolFilePreview({
   fileUnavailable: boolean
   loading: boolean
   saving: boolean
+  surface?: 'workspace' | 'sidebar'
   supportsDiff: boolean
   diff: SpoolFileDiffResult | null
   diffLoading: boolean
   diffUnavailable: boolean
   onDelete: () => void
+  onBack?: () => void
   onDraftChange: (value: string) => void
   onLoadDiff: (staged: boolean) => void
   onNextChunk: () => void
@@ -54,12 +56,13 @@ export function SpoolFilePreview({
   onRename: () => void
   onSave: () => void
 }): React.JSX.Element {
-  const [mode, setMode] = useState<FilePreviewMode>('content')
+  const [mode, setMode] = useState<SpoolFilePreviewMode>('content')
 
   if (loading) {
     return (
       <FilePreviewMessage
         message={translate('auto.components.spool.SpoolFilePreview.loading', 'Loading file…')}
+        onBack={surface === 'sidebar' ? onBack : undefined}
       />
     )
   }
@@ -70,6 +73,7 @@ export function SpoolFilePreview({
           'auto.components.spool.SpoolFilePreview.fileUnavailable',
           'This file is unavailable.'
         )}
+        onBack={surface === 'sidebar' ? onBack : undefined}
       />
     )
   }
@@ -80,6 +84,7 @@ export function SpoolFilePreview({
           'auto.components.spool.SpoolFilePreview.selectFile',
           'Select a file to inspect it.'
         )}
+        onBack={surface === 'sidebar' ? onBack : undefined}
       />
     )
   }
@@ -88,106 +93,39 @@ export function SpoolFilePreview({
   const completeFile = file.offset === 0 && file.bytesRead === file.totalBytes
   const editable = canControl && file.encoding === 'utf8' && completeFile
   const showDiff = supportsDiff && mode !== 'content'
-  const hasPreviousChunk = file.offset > 0
-  const hasNextChunk = file.bytesRead > 0 && file.offset + file.bytesRead < file.totalBytes
+  const changeMode = (nextMode: SpoolFilePreviewMode): void => {
+    setMode(nextMode)
+    if (nextMode !== 'content') {
+      onLoadDiff(nextMode === 'staged-diff')
+    }
+  }
   return (
     <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--editor-surface)]">
-      <header className="flex min-h-9 shrink-0 flex-wrap items-center gap-1 border-b border-border bg-card px-2 py-1 text-card-foreground">
-        <SpoolTruncatedPathLabel
-          path={file.relativePath}
-          className="min-w-28 flex-1 px-1 text-foreground"
-        />
-        {!showDiff && (hasPreviousChunk || hasNextChunk) ? (
-          <>
-            <span className="shrink-0 px-1 text-[11px] text-muted-foreground">
-              {formatFileByteRange(file)}
-            </span>
-            <Button
-              type="button"
-              size="xs"
-              variant="ghost"
-              disabled={!hasPreviousChunk}
-              onClick={onPreviousChunk}
-            >
-              <ChevronLeft aria-hidden="true" />
-              {translate('auto.components.spool.SpoolFilePreview.previousChunk', 'Previous chunk')}
-            </Button>
-            <Button
-              type="button"
-              size="xs"
-              variant="ghost"
-              disabled={!hasNextChunk}
-              onClick={onNextChunk}
-            >
-              {translate('auto.components.spool.SpoolFilePreview.nextChunk', 'Next chunk')}
-              <ChevronRight aria-hidden="true" />
-            </Button>
-          </>
-        ) : null}
-        <Button type="button" size="xs" variant="ghost" onClick={onRefresh}>
-          <RefreshCw aria-hidden="true" />
-          {translate('auto.components.spool.SpoolFilePreview.reload', 'Reload')}
-        </Button>
-        {supportsDiff ? (
-          <>
-            <Button
-              type="button"
-              size="xs"
-              variant={mode === 'working-diff' ? 'secondary' : 'ghost'}
-              onClick={() => {
-                setMode('working-diff')
-                onLoadDiff(false)
-              }}
-            >
-              <FileDiff aria-hidden="true" />
-              {translate('auto.components.spool.SpoolFilePreview.workingDiff', 'Working diff')}
-            </Button>
-            <Button
-              type="button"
-              size="xs"
-              variant={mode === 'staged-diff' ? 'secondary' : 'ghost'}
-              onClick={() => {
-                setMode('staged-diff')
-                onLoadDiff(true)
-              }}
-            >
-              {translate('auto.components.spool.SpoolFilePreview.stagedDiff', 'Staged diff')}
-            </Button>
-          </>
-        ) : null}
-        {showDiff ? (
-          <Button type="button" size="xs" variant="ghost" onClick={() => setMode('content')}>
-            {translate('auto.components.spool.SpoolFilePreview.content', 'Content')}
-          </Button>
-        ) : null}
-        <Button type="button" size="xs" variant="ghost" disabled={!canControl} onClick={onRename}>
-          {translate('auto.components.spool.SpoolFilePreview.rename', 'Rename')}
-        </Button>
-        <Button
-          type="button"
-          size="xs"
-          variant="destructive"
-          disabled={!canControl}
-          onClick={onDelete}
-        >
-          <Trash2 aria-hidden="true" />
-          {translate('auto.components.spool.SpoolFilePreview.delete', 'Delete')}
-        </Button>
-        {!showDiff && file.encoding === 'utf8' ? (
-          <Button type="button" size="xs" disabled={!editable || !dirty || saving} onClick={onSave}>
-            <Save aria-hidden="true" />
-            {saving
-              ? translate('auto.components.spool.SpoolFilePreview.saving', 'Saving…')
-              : translate('auto.components.spool.SpoolFilePreview.save', 'Save')}
-          </Button>
-        ) : null}
-      </header>
+      <SpoolFilePreviewToolbar
+        canControl={canControl}
+        dirty={dirty}
+        editable={editable}
+        file={file}
+        mode={mode}
+        onBack={onBack}
+        onDelete={onDelete}
+        onModeChange={changeMode}
+        onNextChunk={onNextChunk}
+        onPreviousChunk={onPreviousChunk}
+        onRefresh={onRefresh}
+        onRename={onRename}
+        onSave={onSave}
+        saving={saving}
+        supportsDiff={supportsDiff}
+        surface={surface}
+      />
       {showDiff ? (
         <DiffProjection
           diff={diff}
           loading={diffLoading}
           unavailable={diffUnavailable}
           expectedStaged={mode === 'staged-diff'}
+          surface={surface}
         />
       ) : file.encoding === 'utf8' ? (
         <TextProjection
@@ -195,9 +133,10 @@ export function SpoolFilePreview({
           draft={draft}
           editable={editable}
           onDraftChange={onDraftChange}
+          surface={surface}
         />
       ) : (
-        <BinaryProjection file={file} />
+        <BinaryProjection file={file} surface={surface} />
       )}
     </section>
   )
@@ -207,12 +146,14 @@ function TextProjection({
   draft,
   editable,
   file,
-  onDraftChange
+  onDraftChange,
+  surface
 }: {
   draft: string
   editable: boolean
   file: SpoolFileReadResult
   onDraftChange: (value: string) => void
+  surface: 'workspace' | 'sidebar'
 }): React.JSX.Element {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -231,7 +172,8 @@ function TextProjection({
         aria-label={translate('auto.components.spool.SpoolFilePreview.editorLabel', 'File content')}
         onChange={(event) => onDraftChange(event.currentTarget.value)}
         className={cn(
-          'scrollbar-editor min-h-0 flex-1 resize-none bg-[var(--editor-surface)] p-4 font-mono text-xs leading-5 text-foreground outline-none',
+          'scrollbar-editor min-h-0 flex-1 resize-none bg-[var(--editor-surface)] font-mono text-xs leading-5 text-foreground outline-none',
+          surface === 'sidebar' ? 'p-3' : 'p-4',
           'focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring',
           !editable && 'cursor-default'
         )}
@@ -244,11 +186,13 @@ function DiffProjection({
   diff,
   expectedStaged,
   loading,
-  unavailable
+  unavailable,
+  surface
 }: {
   diff: SpoolFileDiffResult | null
   expectedStaged: boolean
   loading: boolean
+  surface: 'workspace' | 'sidebar'
   unavailable: boolean
 }): React.JSX.Element {
   if (loading) {
@@ -279,7 +223,12 @@ function DiffProjection({
         />
       ) : null}
       {diff.patch ? (
-        <pre className="min-w-max whitespace-pre p-4 font-mono text-xs leading-5 text-foreground">
+        <pre
+          className={cn(
+            'min-w-max whitespace-pre font-mono text-xs leading-5 text-foreground',
+            surface === 'sidebar' ? 'p-3' : 'p-4'
+          )}
+        >
           {diff.patch}
         </pre>
       ) : (
@@ -294,9 +243,20 @@ function DiffProjection({
   )
 }
 
-function BinaryProjection({ file }: { file: SpoolFileReadResult }): React.JSX.Element {
+function BinaryProjection({
+  file,
+  surface
+}: {
+  file: SpoolFileReadResult
+  surface: 'workspace' | 'sidebar'
+}): React.JSX.Element {
   return (
-    <div className="scrollbar-editor min-h-0 flex-1 overflow-auto p-4">
+    <div
+      className={cn(
+        'scrollbar-editor min-h-0 flex-1 overflow-auto',
+        surface === 'sidebar' ? 'p-3' : 'p-4'
+      )}
+    >
       <FileNotice
         message={translate(
           'auto.components.spool.SpoolFilePreview.binaryDescription',
@@ -336,20 +296,6 @@ function projectBase64AsHex(content: string, baseOffset: number): string {
   }
 }
 
-function formatFileByteRange(file: SpoolFileReadResult): string {
-  const firstByte = file.bytesRead === 0 ? 0 : file.offset + 1
-  const lastByte = file.offset + file.bytesRead
-  return translate(
-    'auto.components.spool.SpoolFilePreview.byteRange',
-    '{{value0}}–{{value1}} / {{value2}} bytes',
-    {
-      value0: firstByte.toLocaleString(),
-      value1: lastByte.toLocaleString(),
-      value2: file.totalBytes.toLocaleString()
-    }
-  )
-}
-
 function FileNotice({ message }: { message: string }): React.JSX.Element {
   return (
     <p className="border-b border-border bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
@@ -358,10 +304,26 @@ function FileNotice({ message }: { message: string }): React.JSX.Element {
   )
 }
 
-function FilePreviewMessage({ message }: { message: string }): React.JSX.Element {
+function FilePreviewMessage({
+  message,
+  onBack
+}: {
+  message: string
+  onBack?: () => void
+}): React.JSX.Element {
   return (
-    <div className="flex min-h-0 flex-1 items-center justify-center p-6 text-xs text-muted-foreground">
-      {message}
+    <div className="flex min-h-0 flex-1 flex-col">
+      {onBack ? (
+        <header className="flex h-9 shrink-0 items-center border-b border-border bg-sidebar px-1.5 text-sidebar-foreground">
+          <Button type="button" size="xs" variant="ghost" onClick={onBack}>
+            <ChevronLeft aria-hidden="true" />
+            {translate('auto.components.spool.SpoolFilePreview.back', 'Back to files')}
+          </Button>
+        </header>
+      ) : null}
+      <div className="flex min-h-0 flex-1 items-center justify-center p-6 text-xs text-muted-foreground">
+        {message}
+      </div>
     </div>
   )
 }

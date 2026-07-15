@@ -1,22 +1,28 @@
 import type React from 'react'
-import { GitCompareArrows } from 'lucide-react'
+import { ChevronLeft, GitCompareArrows } from 'lucide-react'
 import type {
   SpoolGitDiffResult,
   SpoolGitHistoryEntry,
   SpoolGitStatusEntry
 } from '../../../../shared/spool/spool-operation-contract'
 import { translate } from '@/i18n/i18n'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export function SpoolGitDiffPane({
   diff,
   historyEntry,
   loading,
+  onBack,
+  surface = 'workspace',
   statusEntry,
   unavailable
 }: {
   diff: SpoolGitDiffResult | null
   historyEntry: SpoolGitHistoryEntry | null
   loading: boolean
+  onBack?: () => void
+  surface?: 'workspace' | 'sidebar'
   statusEntry: SpoolGitStatusEntry | null
   unavailable: boolean
 }): React.JSX.Element {
@@ -33,14 +39,27 @@ export function SpoolGitDiffPane({
   }
   return (
     <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--editor-surface)]">
-      <header className="flex min-h-9 shrink-0 items-center gap-2 border-b border-border bg-card px-3 py-1 text-card-foreground">
+      <header
+        className={cn(
+          'flex min-h-9 shrink-0 items-center gap-2 border-b border-border px-3 py-1',
+          surface === 'sidebar'
+            ? 'bg-sidebar text-sidebar-foreground'
+            : 'bg-card text-card-foreground'
+        )}
+      >
+        {surface === 'sidebar' && onBack ? (
+          <Button type="button" size="xs" variant="ghost" onClick={onBack}>
+            <ChevronLeft aria-hidden="true" />
+            {translate('auto.components.spool.SpoolGitDiffPane.back', 'Back')}
+          </Button>
+        ) : null}
         <GitCompareArrows aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
         <span className="min-w-0 flex-1 truncate font-mono text-xs text-foreground">{title}</span>
-        {historyEntry ? (
+        {surface === 'workspace' && historyEntry ? (
           <span className="shrink-0 font-mono text-[11px] text-muted-foreground">
             {historyEntry.commitRef.slice(0, 12)}
           </span>
-        ) : statusEntry ? (
+        ) : surface === 'workspace' && statusEntry ? (
           <span className="shrink-0 text-[11px] text-muted-foreground">
             {formatChangeArea(statusEntry)}
           </span>
@@ -74,7 +93,12 @@ export function SpoolGitDiffPane({
               )}
             </p>
           ) : null}
-          <pre className="min-w-max whitespace-pre p-4 font-mono text-xs leading-5 text-foreground">
+          <pre
+            className={cn(
+              'min-w-max whitespace-pre font-mono text-xs leading-5 text-foreground',
+              surface === 'sidebar' ? 'p-3' : 'p-4'
+            )}
+          >
             {diff.patch}
           </pre>
         </div>

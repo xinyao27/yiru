@@ -621,15 +621,19 @@ type SpoolWorkspaceRoute = {
 
 A pure `spool-sidebar-rows.ts` projection creates Desktop, Project, Worktree, and Session row kinds. A new `workspace-sidebar-row-projection.ts` is the explicit high-level Seam that combines existing local `RenderRow[]` with `SpoolSidebarRow[]` and owns virtual-row keys, measured sizes, sticky behavior, and ordering. `worktree-list-groups.ts` and `WorktreeCard` continue to model only local worktrees.
 
-The rows use existing sidebar typography, spacing, hover/selection tokens, disclosure behavior, and shadcn primitives from `docs/STYLEGUIDE.md`. The Spool title shares the Projects header geometry; Desktop rows share the existing Host-card density; Project, Worktree, and Session rows use the existing 10/20/38px tree anchors. There are no Live/Stopped/Resumable pills. A Desktop can remain present with quota and no Public projects.
+The rows use the existing sidebar presentation Modules rather than Spool-specific approximations. Desktop and Project rows share the native Project-header shell and disclosure; Worktree rows share the native Worktree-card surface; every disclosure therefore has one size, position, color, and rotation source. Spool adds no alternate hover background. The anchors are Desktop 10px, Project 20px, Worktree content 30px, and Session 48px. Plain terminal sessions use the Terminal glyph, while Claude and Codex use their provider glyphs. There are no Live/Stopped/Resumable pills. A Desktop can remain present with quota and no Public projects.
 
 Quota does not occupy permanent tree rows. `SpoolDesktopUsageHoverCard` adapts the sanitized quota snapshot to `ProviderRateLimits` and renders the same `ProviderPanel` used by the status-bar hover surface, including usage bars, reset copy, and the global used/remaining preference. It does not import the large `StatusBar` Module or raw account slices.
 
 ### Workspace surface
 
-At the content root, `SpoolWorkspaceSurface` is selected instead of the local workspace surface. It resolves the opaque route through `spool-sharing-selectors.ts` and renders three isolated surfaces: the selected terminal, Files, and, for Git targets only, Changes. The global sidebar is the single session navigator; the workspace does not render a second session list. Folder targets omit Changes and every diff control. No surface receives a local `Worktree` or owner absolute path.
+At the content root, `SpoolWorkspaceSurface` is selected instead of the local workspace controller, but it reuses the normal Worktree presentation shell. `WorkspacePaneFrame` owns the same 32px tab strip, border, surface, window-drag region, and titlebar-control clearances used by local tab groups. `WorkspaceTabStripViewport` is shared with the local `TabBar`, so overflow arrows, fade masks, wheel navigation, active-tab scroll-into-view, and unused titlebar drag space have one implementation. Spool's select-only tab uses the same sizing, border, active, and focus tokens but cannot drag, close, rename, pin, create local state, or enter persistence.
 
-`SpoolSessionPane` resolves live versus historical selection and always converges on `SpoolTerminalPane`; it does not render provider transcripts itself. `SpoolFilesPane`, `SpoolFileTree`, and `SpoolFilePreview` own relative-path browsing and requester-side previews. `SpoolGitPane`, `SpoolGitSidebar`, and `SpoolGitDiffPane` own the bounded Git surface. They invoke the checked Spool IPC methods instead of adapting local Explorer, editor, Source Control, or `PtyTransport` state.
+The virtualized left tree remains the complete navigator for every materialized session. The center strip is intentionally bounded to 24 entries: it prioritizes the catalog's leading entries plus recently and currently selected sessions, and always brings the active session into view. This prevents the paged history ceiling from turning into as many as 55,000 mounted horizontal buttons while preserving direct access to every session on the left. Catalog `loading` and `error` remain visible in the workbench; a partial or empty page chain is never presented as complete. No session is attached or continued until the user explicitly selects it.
+
+The standard `RightSidebarFrame` is also a presentation Seam. `SpoolRightSidebar` supplies Explorer and, only for Git targets, Source Control; folder targets expose Explorer alone. Because remote previews use checked relative-path and patch contracts rather than local editor models, file and change selection uses a single-column drill-in within the sidebar and an explicit Back action. `SpoolFilesPane`, `SpoolFileTree`, and `SpoolFilePreview` continue to own relative-path RPC and requester-side previews. `SpoolGitPane`, `SpoolGitSidebar`, and `SpoolGitDiffPane` continue to own the bounded Git surface. They invoke checked Spool IPC rather than local filesystem, editor, Source Control, or `PtyTransport` clients. This preserves the normal Worktree layout without synthesizing a `Repo`, `Worktree`, persisted `WorkspaceKey`, or owner absolute path.
+
+`SpoolSessionPane` resolves live versus historical selection and always converges on `SpoolTerminalPane`; it never renders a separate provider transcript UI. The center therefore shows both raw terminals and resumed agent terminals through the same xterm-backed remote surface, while the right sidebar owns file and Git browsing.
 
 `SpoolTerminalPane` starts `terminal.subscribe`, applies one bounded snapshot followed by monotonically sequenced output/resize events, and drops duplicate or stale sequences. A disconnect or new connection epoch tears down the subscription; reopening starts a fresh subscription and snapshot. There is no terminal ACK/resync or separate PTY transport protocol in V1. Terminal input and resize consult the current `canControl` selector and enter the same ordered mutation queue used to surface uncertain outcomes. The queue coalesces short adjacent input bursts up to the terminal chunk limit, including bytes that arrive while the previous acknowledged mutation is in flight; resize remains an ordering barrier.
 
@@ -851,18 +855,34 @@ src/renderer/src/components/sidebar/
   SpoolProjectRow.tsx
   SpoolWorktreeRow.tsx
   SpoolSessionRow.tsx
+  SidebarDisclosure.tsx
+  SidebarProjectHeader.tsx
+  WorktreeCardSurface.tsx
+
+src/renderer/src/components/tab-bar/
+  WorkspaceSelectableTab.tsx
+  WorkspaceTabStripViewport.tsx
+
+src/renderer/src/components/tab-group/
+  WorkspacePaneFrame.tsx
+
+src/renderer/src/components/right-sidebar/
+  RightSidebarFrame.tsx
 
 src/renderer/src/components/status-bar/
   ProviderUsageSegment.tsx
 
 src/renderer/src/components/spool/
   SpoolWorkspaceSurface.tsx
+  SpoolSessionTabStrip.tsx
+  SpoolRightSidebar.tsx
   SpoolTerminalPane.tsx
   SpoolSessionPane.tsx
   SpoolSessionContinuationNotice.tsx
   SpoolFilesPane.tsx
   SpoolFileTree.tsx
   SpoolFilePreview.tsx
+  SpoolFilePreviewToolbar.tsx
   SpoolGitPane.tsx
   SpoolGitSidebar.tsx
   SpoolGitDiffPane.tsx

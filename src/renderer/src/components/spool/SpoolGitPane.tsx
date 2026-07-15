@@ -33,7 +33,13 @@ import { reportSpoolGitMutationError } from './spool-workspace-mutation-feedback
 import { SpoolMutationOutcomeNotice } from './SpoolMutationOutcomeNotice'
 import { useSpoolWorktreeOperationRoute } from './spool-worktree-route'
 
-export function SpoolGitPane({ route }: { route: SpoolWorkspaceRoute }): React.JSX.Element {
+export function SpoolGitPane({
+  layout = 'workspace',
+  route
+}: {
+  layout?: 'workspace' | 'sidebar'
+  route: SpoolWorkspaceRoute
+}): React.JSX.Element {
   const operationRoute = useSpoolWorktreeOperationRoute(route)
   const canControl = useAppStore((state) => selectSpoolCanControl(state, operationRoute))
   const [status, setStatus] = useState<SpoolGitStatusResult | null>(null)
@@ -49,6 +55,7 @@ export function SpoolGitPane({ route }: { route: SpoolWorkspaceRoute }): React.J
   const [mutating, setMutating] = useState(false)
   const [commitMessage, setCommitMessage] = useState('')
   const [mutationOutcomeUnknown, setMutationOutcomeUnknown] = useState(false)
+  const [sidebarView, setSidebarView] = useState<'list' | 'diff'>('list')
   const canMutate = canControl && !mutationOutcomeUnknown
   const requestSequence = useRef(0)
   const diffRequestSequence = useRef(0)
@@ -98,6 +105,9 @@ export function SpoolGitPane({ route }: { route: SpoolWorkspaceRoute }): React.J
     setDiff(null)
     setDiffLoading(true)
     setDiffUnavailable(false)
+    if (layout === 'sidebar') {
+      setSidebarView('diff')
+    }
     try {
       const value = await invokeSpoolWorkspaceRead(operationRoute, 'git.diff', {
         source: entry.area === 'staged' ? 'index' : 'working-tree',
@@ -128,6 +138,9 @@ export function SpoolGitPane({ route }: { route: SpoolWorkspaceRoute }): React.J
     setDiff(null)
     setDiffLoading(true)
     setDiffUnavailable(false)
+    if (layout === 'sidebar') {
+      setSidebarView('diff')
+    }
     try {
       const value = await invokeSpoolWorkspaceRead(operationRoute, 'git.diff', {
         source: 'commit',
@@ -222,37 +235,45 @@ export function SpoolGitPane({ route }: { route: SpoolWorkspaceRoute }): React.J
         />
       ) : null}
       <div className="flex min-h-0 flex-1">
-        <SpoolGitSidebar
-          canControl={canMutate}
-          commitMessage={commitMessage}
-          history={history}
-          loading={loading}
-          mode={mode}
-          mutating={mutating}
-          selectedKey={selectedKey}
-          status={status}
-          unavailable={unavailable}
-          onCommit={() => void commit()}
-          onCommitMessageChange={setCommitMessage}
-          onModeChange={(nextMode) => {
-            diffRequestSequence.current += 1
-            setMode(nextMode)
-            setSelectedStatus(null)
-            setSelectedHistory(null)
-            setDiff(null)
-          }}
-          onRefresh={() => void refresh()}
-          onSelectChange={(entry) => void selectStatus(entry)}
-          onSelectHistory={(entry) => void selectHistory(entry)}
-          onToggleStage={(entry) => void toggleStage(entry)}
-        />
-        <SpoolGitDiffPane
-          diff={diff}
-          historyEntry={selectedHistory}
-          loading={diffLoading}
-          statusEntry={selectedStatus}
-          unavailable={diffUnavailable}
-        />
+        {layout === 'workspace' || sidebarView === 'list' ? (
+          <SpoolGitSidebar
+            canControl={canMutate}
+            commitMessage={commitMessage}
+            history={history}
+            loading={loading}
+            mode={mode}
+            mutating={mutating}
+            selectedKey={selectedKey}
+            status={status}
+            surface={layout}
+            unavailable={unavailable}
+            onCommit={() => void commit()}
+            onCommitMessageChange={setCommitMessage}
+            onModeChange={(nextMode) => {
+              diffRequestSequence.current += 1
+              setMode(nextMode)
+              setSidebarView('list')
+              setSelectedStatus(null)
+              setSelectedHistory(null)
+              setDiff(null)
+            }}
+            onRefresh={() => void refresh()}
+            onSelectChange={(entry) => void selectStatus(entry)}
+            onSelectHistory={(entry) => void selectHistory(entry)}
+            onToggleStage={(entry) => void toggleStage(entry)}
+          />
+        ) : null}
+        {layout === 'workspace' || sidebarView === 'diff' ? (
+          <SpoolGitDiffPane
+            diff={diff}
+            historyEntry={selectedHistory}
+            loading={diffLoading}
+            onBack={layout === 'sidebar' ? () => setSidebarView('list') : undefined}
+            statusEntry={selectedStatus}
+            surface={layout}
+            unavailable={diffUnavailable}
+          />
+        ) : null}
       </div>
     </div>
   )

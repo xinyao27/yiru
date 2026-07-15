@@ -25,6 +25,7 @@ export function SpoolGitSidebar({
   loading,
   mode,
   mutating,
+  surface = 'workspace',
   unavailable,
   selectedKey,
   status,
@@ -42,6 +43,7 @@ export function SpoolGitSidebar({
   loading: boolean
   mode: SpoolGitSidebarMode
   mutating: boolean
+  surface?: 'workspace' | 'sidebar'
   unavailable: boolean
   selectedKey: string | null
   status: SpoolGitStatusResult | null
@@ -55,7 +57,14 @@ export function SpoolGitSidebar({
 }): React.JSX.Element {
   const stagedCount = status?.entries.filter((entry) => entry.area === 'staged').length ?? 0
   return (
-    <aside className="flex w-80 shrink-0 flex-col border-r border-border bg-card text-card-foreground">
+    <aside
+      className={cn(
+        'flex min-h-0 shrink-0 flex-col',
+        surface === 'sidebar'
+          ? 'w-full flex-1 bg-sidebar text-sidebar-foreground'
+          : 'w-80 border-r border-border bg-card text-card-foreground'
+      )}
+    >
       <header className="border-b border-border px-3 py-2">
         <div className="flex items-center gap-2">
           <GitCommitHorizontal aria-hidden="true" className="size-4 text-muted-foreground" />

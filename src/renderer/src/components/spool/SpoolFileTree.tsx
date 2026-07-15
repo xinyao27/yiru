@@ -31,6 +31,7 @@ export function SpoolFileTree({
   directory,
   listing,
   loading,
+  surface = 'workspace',
   unavailable,
   selectedPath,
   onDelete,
@@ -45,6 +46,7 @@ export function SpoolFileTree({
   directory: string
   listing: SpoolFileListResult | null
   loading: boolean
+  surface?: 'workspace' | 'sidebar'
   unavailable: boolean
   selectedPath: string | null
   onDelete: (entry: SpoolFileTreeEntry) => void
@@ -57,7 +59,14 @@ export function SpoolFileTree({
 }): React.JSX.Element {
   const entries = listing ? sortFileEntries(listing.entries) : []
   return (
-    <aside className="flex w-72 shrink-0 flex-col border-r border-border bg-card text-card-foreground">
+    <aside
+      className={cn(
+        'flex min-h-0 shrink-0 flex-col',
+        surface === 'sidebar'
+          ? 'w-full flex-1 bg-sidebar text-sidebar-foreground'
+          : 'w-72 border-r border-border bg-card text-card-foreground'
+      )}
+    >
       <header className="flex min-h-9 items-center gap-1 border-b border-border px-2 py-1">
         <FileTreeToolbarButton
           disabled={!directory}

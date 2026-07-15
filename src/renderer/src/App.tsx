@@ -320,6 +320,7 @@ const WorkspaceCleanupDialog = lazy(
 )
 const Terminal = lazy(() => import('./components/Terminal'))
 const SpoolWorkspaceSurface = lazy(() => import('./components/spool/SpoolWorkspaceSurface'))
+const SpoolRightSidebar = lazy(() => import('./components/spool/SpoolRightSidebar'))
 const StatusBar = lazy(() =>
   import('./components/status-bar/StatusBar').then((module) => ({ default: module.StatusBar }))
 )
@@ -1556,8 +1557,7 @@ function App(): React.JSX.Element {
   })
   // Why: suppress right sidebar controls on full-page navigation surfaces
   // since those surfaces intentionally own the full content area.
-  const showRightSidebarControls =
-    !hasActiveSpoolWorkspace && !creationLayoutActive && canShowRightSidebarForView(activeView)
+  const showRightSidebarControls = !creationLayoutActive && canShowRightSidebarForView(activeView)
   const showProfileSwitcherInSidebarFooter = showSidebar && sidebarOpen
   const showProfileSwitcherInTopRight = !showProfileSwitcherInSidebarFooter
 
@@ -2489,16 +2489,23 @@ function App(): React.JSX.Element {
                 </div>
                 {/* Why: keep the right-sidebar shell mounted for layout stability.
               Its heavy panels disconnect while closed so workspace wake stays
-              responsive. Unmount on the tasks view since that surface is
-              intentionally distraction-free. */}
+              responsive. Remote panel state is route-scoped, so its boundary
+              also resets when the owning Desktop/worktree binding changes. */}
                 {showRightSidebarControls ? (
                   <RecoverableRenderErrorBoundary
                     boundaryId="right-sidebar"
                     surface="right-sidebar"
                     resetKey={
-                      rightSidebarTab === 'explorer'
-                        ? `${rightSidebarTab}:${rightSidebarExplorerView}`
-                        : rightSidebarTab
+                      hasActiveSpoolWorkspace && activeSpoolWorkspaceRoute
+                        ? JSON.stringify([
+                            activeSpoolWorkspaceRoute.desktopRef,
+                            activeSpoolWorkspaceRoute.worktreeRef,
+                            activeSpoolWorkspaceRoute.connectionEpoch,
+                            rightSidebarTab
+                          ])
+                        : rightSidebarTab === 'explorer'
+                          ? `${rightSidebarTab}:${rightSidebarExplorerView}`
+                          : rightSidebarTab
                     }
                     title={translate('auto.App.ed6b168d00', 'The right sidebar hit an error.')}
                     description={translate(
@@ -2506,7 +2513,13 @@ function App(): React.JSX.Element {
                       'Retry the sidebar or switch tabs to reload this surface.'
                     )}
                   >
-                    <RightSidebar />
+                    <Suspense fallback={null}>
+                      {hasActiveSpoolWorkspace && activeSpoolWorkspaceRoute ? (
+                        <SpoolRightSidebar route={activeSpoolWorkspaceRoute} />
+                      ) : (
+                        <RightSidebar />
+                      )}
+                    </Suspense>
                   </RecoverableRenderErrorBoundary>
                 ) : null}
               </div>
