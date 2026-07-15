@@ -1,4 +1,5 @@
 import type { SpoolExecutionGateway } from './spool-execution-gateway'
+import type { BoundSpoolSession, SpoolCatalogProjection } from './spool-catalog-projection'
 import { SpoolRpcError, type BoundSpoolInvocation } from './spool-rpc-gateway'
 import type {
   SpoolResolvedHistoricalSession,
@@ -46,27 +47,54 @@ export async function bindSpoolSession(
 ): Promise<BoundSpoolInvocation> {
   const projection = dependencies.catalog.getProjection(connectionId)
   const reference = await projection?.resolveSession(sessionRef)
-  const worktree = reference
-    ? await dependencies.visibility.resolvePublicInstance(
-        reference.instanceId,
-        reference.shareEpoch
-      )
-    : null
-  const session = worktree
-    ? await dependencies.sessions.resolveSession(worktree, reference?.sessionKey ?? '')
-    : null
-  const current = worktree
-    ? await dependencies.visibility.resolvePublicInstance(worktree.instanceId, worktree.shareEpoch)
-    : null
-  if (
-    !projection ||
-    !reference ||
-    !worktree ||
-    !current ||
-    current.worktreeId !== worktree.worktreeId ||
-    worktree.worktreeId !== reference.worktreeId ||
-    session?.kind !== expectedKind
-  ) {
+  if (!projection || !reference) {
+    throw new SpoolRpcError('resource_not_found')
+  }
+  return bindResolvedSpoolSession(
+    dependencies,
+    connectionId,
+    projection,
+    sessionRef,
+    reference,
+    expectedKind,
+    requestParams
+  )
+}
+
+export function bindSpoolTerminalMutationSession(
+  dependencies: SpoolSessionMethodDependencies,
+  connectionId: string,
+  sessionRef: string,
+  requestParams: Record<string, unknown>
+): BoundSpoolInvocation {
+  const projection = dependencies.catalog.getProjection(connectionId)
+  const reference = projection?.resolvePublishedSession(sessionRef)
+  if (!projection || !reference) {
+    throw new SpoolRpcError('resource_not_found')
+  }
+  return bindResolvedSpoolSession(
+    dependencies,
+    connectionId,
+    projection,
+    sessionRef,
+    reference,
+    'live',
+    requestParams
+  )
+}
+
+function bindResolvedSpoolSession(
+  dependencies: SpoolSessionMethodDependencies,
+  connectionId: string,
+  projection: SpoolCatalogProjection,
+  sessionRef: string,
+  reference: BoundSpoolSession,
+  expectedKind: 'live' | 'historical',
+  requestParams: Record<string, unknown>
+): BoundSpoolInvocation {
+  const { worktree, sessionKey } = reference
+  const session = dependencies.sessions.resolveSession(worktree, sessionKey)
+  if (session?.kind !== expectedKind) {
     throw new SpoolRpcError('resource_not_found')
   }
   const isCurrent = (): boolean =>
@@ -80,7 +108,7 @@ export async function bindSpoolSession(
     })
   const base = {
     sessionRef,
-    worktree: current,
+    worktree,
     requestParams,
     isCurrent,
     subscribeInvalidation

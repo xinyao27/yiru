@@ -28,14 +28,10 @@ import type {
 
 const MAX_CATALOG_SNAPSHOT_ATTEMPTS = 4
 
-export type BoundSpoolWorktree = {
-  worktreeId: string
-  instanceId: string
-  shareEpoch: string
-  target: SpoolPublicWorktreeInstance['target']
-}
+export type BoundSpoolWorktree = SpoolPublicWorktreeInstance
 
-export type BoundSpoolSession = BoundSpoolWorktree & {
+export type BoundSpoolSession = {
+  worktree: BoundSpoolWorktree
   sessionKey: string
 }
 
@@ -115,17 +111,35 @@ export class SpoolCatalogProjection {
   }
 
   async resolveSession(sessionRef: string): Promise<BoundSpoolSession | null> {
-    const binding = this.references.resolve(sessionRef)
+    const binding = this.resolveCurrentSessionBinding(sessionRef)
+    if (!binding) {
+      return null
+    }
+    const worktree = await this.resolveCurrentWorktree(binding)
     if (
-      !binding ||
-      binding.kind !== 'session' ||
+      !worktree ||
+      this.closed ||
       binding.catalogRevision !== this.revision ||
       binding.generation !== this.generation
     ) {
       return null
     }
-    const worktree = await this.resolveCurrentWorktree(binding)
-    return worktree ? { ...worktree, sessionKey: binding.sessionKey } : null
+    return { worktree, sessionKey: binding.sessionKey }
+  }
+
+  resolvePublishedSession(sessionRef: string): BoundSpoolSession | null {
+    const binding = this.resolveCurrentSessionBinding(sessionRef)
+    if (!binding) {
+      return null
+    }
+    const worktree = this.visibility.getPublishedInstance(binding.instanceId, binding.shareEpoch)
+    if (!worktree || worktree.worktreeId !== binding.worktreeId) {
+      this.references.invalidateInstance(binding.instanceId)
+      return null
+    }
+    // Why: terminal mutations still run the actual-host incarnation guard at
+    // the PTY commit point; binding only needs the current connection alias.
+    return { worktree, sessionKey: binding.sessionKey }
   }
 
   async sessionPage(
@@ -206,12 +220,19 @@ export class SpoolCatalogProjection {
       this.references.invalidateInstance(binding.instanceId)
       return null
     }
-    return {
-      worktreeId: binding.worktreeId,
-      instanceId: binding.instanceId,
-      shareEpoch: binding.shareEpoch,
-      target: instance.target
-    }
+    return instance
+  }
+
+  private resolveCurrentSessionBinding(
+    sessionRef: string
+  ): Extract<SpoolCatalogReferenceBinding, { kind: 'session' }> | null {
+    const binding = this.references.resolve(sessionRef)
+    return !this.closed &&
+      binding?.kind === 'session' &&
+      binding.catalogRevision === this.revision &&
+      binding.generation === this.generation
+      ? binding
+      : null
   }
 
   private reconcileReferences(): void {

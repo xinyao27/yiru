@@ -7,6 +7,7 @@ import {
   asHistoricalSessionInvocation,
   asLiveSessionInvocation,
   bindSpoolSession,
+  bindSpoolTerminalMutationSession,
   spoolSessionExecutionTarget,
   type SpoolLiveSessionInvocation,
   type SpoolSessionMethodDependencies
@@ -113,11 +114,10 @@ export function createSpoolSessionRpcMethods(
       access: 'worktree-control',
       bind: async (params, context) => {
         const parsed = TerminalInputParams.parse(params)
-        return bindSpoolSession(
+        return bindSpoolTerminalMutationSession(
           dependencies,
           context.principal.connectionId,
           parsed.sessionRef,
-          'live',
           parsed
         )
       },
@@ -143,11 +143,10 @@ export function createSpoolSessionRpcMethods(
       access: 'worktree-control',
       bind: async (params, context) => {
         const parsed = TerminalResizeParams.parse(params)
-        return bindSpoolSession(
+        return bindSpoolTerminalMutationSession(
           dependencies,
           context.principal.connectionId,
           parsed.sessionRef,
-          'live',
           parsed
         )
       },
