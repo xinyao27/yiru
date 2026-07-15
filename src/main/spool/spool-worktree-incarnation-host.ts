@@ -10,6 +10,7 @@ import {
   withSpoolOuterActualHostScope
 } from './spool-canonical-host-path'
 import { SpoolIncarnationMarkerStore } from './spool-incarnation-marker-store'
+import { SpoolFolderWorkspaceIncarnation } from './spool-folder-workspace-incarnation'
 import type {
   SpoolHostWorktreeInspection,
   SpoolHostWorktreeInspectionMode,
@@ -32,9 +33,11 @@ export type SpoolActualHostWorktreeIncarnationOptions = {
 export class SpoolActualHostWorktreeIncarnationHost implements SpoolWorktreeIncarnationHost {
   private readonly paths: SpoolActualHostPathResolver
   private readonly markers = new SpoolIncarnationMarkerStore()
+  private readonly folders: SpoolFolderWorkspaceIncarnation
 
   constructor(private readonly options: SpoolActualHostWorktreeIncarnationOptions = {}) {
     this.paths = new SpoolActualHostPathResolver(options)
+    this.folders = new SpoolFolderWorkspaceIncarnation(this.paths, options)
   }
 
   async inspect(
@@ -51,6 +54,9 @@ export class SpoolActualHostWorktreeIncarnationHost implements SpoolWorktreeInca
         return await this.inspectPairedRuntime(target, mode)
       }
       actualHostScope = await this.paths.resolveActualHostScope(target)
+      if (target.kind === 'folder') {
+        return await this.folders.inspect(target, mode, actualHostScope)
+      }
       const resolved = await this.paths.resolveGitWorktree(target)
       if (mode === 'resolve-root') {
         return { status: 'resolved', root: resolved.root, markerId: null, actualHostScope }

@@ -77,7 +77,8 @@ export class SpoolLegacySessionAttestor {
       const matcher = this.roots.prepare({
         actualHostScope: scanTarget.root.scopeKey,
         inventoryTarget: scanTarget.target,
-        registeredRoots
+        registeredRoots,
+        binding: 'legacy-cwd-attribution'
       })
       for await (const page of readSpoolHistoricalSessionPages(
         this.source,

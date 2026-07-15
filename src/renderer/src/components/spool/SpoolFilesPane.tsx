@@ -38,7 +38,13 @@ import {
 } from './spool-file-mutation'
 import { useSpoolWorktreeOperationRoute } from './spool-worktree-route'
 
-export function SpoolFilesPane({ route }: { route: SpoolWorkspaceRoute }): React.JSX.Element {
+export function SpoolFilesPane({
+  route,
+  supportsDiff
+}: {
+  route: SpoolWorkspaceRoute
+  supportsDiff: boolean
+}): React.JSX.Element {
   const operationRoute = useSpoolWorktreeOperationRoute(route)
   const canControl = useAppStore((state) => selectSpoolCanControl(state, operationRoute))
   const [directory, setDirectory] = useState('')
@@ -164,7 +170,7 @@ export function SpoolFilesPane({ route }: { route: SpoolWorkspaceRoute }): React
   }
 
   const loadDiff = async (staged: boolean): Promise<void> => {
-    if (!selectedEntry || selectedEntry.kind === 'directory') {
+    if (!supportsDiff || !selectedEntry || selectedEntry.kind === 'directory') {
       return
     }
     const request = ++diffRequestSequence.current
@@ -323,6 +329,7 @@ export function SpoolFilesPane({ route }: { route: SpoolWorkspaceRoute }): React
           fileUnavailable={fileUnavailable}
           loading={fileLoading}
           saving={mutating}
+          supportsDiff={supportsDiff}
           diff={diff}
           diffLoading={diffLoading}
           diffUnavailable={diffUnavailable}

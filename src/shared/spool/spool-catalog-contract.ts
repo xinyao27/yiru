@@ -1,3 +1,5 @@
+import type { SpoolWorktreeKind } from './spool-worktree-kind'
+
 export const SPOOL_CATALOG_MAX_PROJECTS = 128
 export const SPOOL_CATALOG_MAX_WORKTREES = 128
 // Why: session history is unbounded across time, so this is a wire-page cap,
@@ -29,6 +31,7 @@ export type SpoolSessionCatalogPageState = {
 }
 
 export type SpoolWorktreeCatalogEntry = {
+  kind: SpoolWorktreeKind
   worktreeRef: string
   shareEpoch: string
   name: string

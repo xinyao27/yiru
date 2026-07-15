@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { ExecutionHostId } from '../execution-host'
 import type { SpoolExecutionOperation } from './spool-operation-contract'
+import type { SpoolWorktreeKind } from './spool-worktree-kind'
 
 const identifier = z
   .string()
@@ -16,6 +17,7 @@ const safeString = z.string().max(8 * 1_024 * 1_024)
 
 export const SpoolPairedRuntimeWorktreeSelectorSchema = z
   .object({
+    kind: z.enum(['git', 'folder']),
     worktreeId: identifier,
     instanceId: identifier
   })
@@ -204,6 +206,7 @@ export const SpoolPairedRuntimeRevokeWorktreeParamsSchema = z
   .strict()
 
 export type SpoolPairedRuntimeResolvedWorktree = {
+  kind: SpoolWorktreeKind
   worktreeId: string
   instanceId: string
   projectId: string | null

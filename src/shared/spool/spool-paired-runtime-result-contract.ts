@@ -48,6 +48,7 @@ export const SpoolPairedRuntimeInspectionSchema = z.discriminatedUnion('status',
 export const SpoolPairedRuntimeCanonicalizeResultSchema = z.discriminatedUnion('status', [
   z.object({ status: z.literal('resolved'), path: SpoolPairedRuntimeCanonicalPathSchema }).strict(),
   z.object({ status: z.literal('missing') }).strict(),
+  z.object({ status: z.literal('invalid') }).strict(),
   z.object({ status: z.literal('unavailable') }).strict()
 ])
 

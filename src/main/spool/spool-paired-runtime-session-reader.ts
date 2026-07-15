@@ -275,6 +275,7 @@ function requireRuntimeEnvironment(request: SpoolExecutionHostSessionReadRequest
 
 function sessionTarget(request: SpoolExecutionHostSessionReadRequest) {
   return {
+    kind: request.worktreeKind,
     worktreeId: request.worktreeId,
     instanceId: request.worktreeInstanceId,
     spoolIncarnationId: request.spoolIncarnationId
@@ -286,5 +287,9 @@ function sessionChangesBindingKey(environmentId: string, worktreeId: string): st
 }
 
 function sessionTargetIdentity(request: SpoolExecutionHostSessionReadRequest): string {
-  return JSON.stringify([request.worktreeInstanceId, request.spoolIncarnationId])
+  return JSON.stringify([
+    request.worktreeKind,
+    request.worktreeInstanceId,
+    request.spoolIncarnationId
+  ])
 }

@@ -1,3 +1,4 @@
+import type { SpoolWorktreeKind } from '../../shared/spool/spool-worktree-kind'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-visibility'
 
 export type SpoolCatalogSessionDescription = {
@@ -7,6 +8,7 @@ export type SpoolCatalogSessionDescription = {
 }
 
 export type SpoolCatalogWorktreeDescription = {
+  kind: SpoolWorktreeKind
   projectKey: string
   projectName: string
   worktreeName: string

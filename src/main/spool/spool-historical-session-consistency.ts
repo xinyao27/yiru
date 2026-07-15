@@ -47,7 +47,8 @@ export class SpoolCanonicalHistoricalSessionConsistency implements SpoolHistoric
     const matcher = this.roots.prepare({
       actualHostScope: worktree.actualHostScope,
       inventoryTarget: worktree.target,
-      registeredRoots
+      registeredRoots,
+      binding: 'proven-target-consistency'
     })
     return {
       retainConsistent: async (candidates, readSignal) =>

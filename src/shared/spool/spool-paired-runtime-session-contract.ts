@@ -1,5 +1,8 @@
 import { z } from 'zod'
-import { SpoolPairedRuntimeBoundWorktreeSchema } from './spool-paired-runtime-host-contract'
+import {
+  SpoolPairedRuntimeBoundWorktreeSchema,
+  SpoolPairedRuntimeWorktreeSelectorSchema
+} from './spool-paired-runtime-host-contract'
 import { SpoolPairedRuntimeErrorCodeSchema } from './spool-paired-runtime-result-contract'
 import { SPOOL_MAX_LIVE_SESSIONS_PER_WORKTREE } from './spool-resource-limits'
 
@@ -22,8 +25,7 @@ export const SPOOL_PAIRED_RUNTIME_HISTORICAL_SESSION_PAGE_SIZE = 512
 
 export const SpoolPairedRuntimeSessionWorktreeSchema = z
   .object({
-    worktreeId: identifier,
-    instanceId: identifier,
+    ...SpoolPairedRuntimeWorktreeSelectorSchema.shape,
     spoolIncarnationId: z.string().uuid()
   })
   .strict()

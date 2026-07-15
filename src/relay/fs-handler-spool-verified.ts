@@ -2,6 +2,8 @@ import { constants } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { mkdir, opendir, rename, rm } from 'node:fs/promises'
 import {
+  SPOOL_FILE_LIST_VERIFIED_HOST_MAX_LIMIT,
+  SPOOL_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT,
   SPOOL_FILE_READ_MAX_BYTES,
   SPOOL_FILE_WRITE_MAX_BYTES
 } from '../shared/spool/spool-operation-contract'
@@ -24,8 +26,10 @@ import {
   writeRelaySpoolFile,
   type RelaySpoolExistingPathProof
 } from './fs-handler-spool-path-proof'
+import { registerSpoolIncarnationMarkerHandler } from './fs-handler-spool-incarnation-marker'
 
 export function registerSpoolVerifiedFilesystemHandlers(dispatcher: RelayDispatcher): void {
+  registerSpoolIncarnationMarkerHandler(dispatcher)
   dispatcher.onRequest('fs.spoolListVerified', listSpoolDirectoryVerified)
   dispatcher.onRequest('fs.spoolReadVerified', readSpoolFileVerified)
   dispatcher.onRequest('fs.spoolWriteVerified', writeSpoolFileVerified)
@@ -37,10 +41,14 @@ export function registerSpoolVerifiedFilesystemHandlers(dispatcher: RelayDispatc
 async function listSpoolDirectoryVerified(
   params: Record<string, unknown>,
   context: RequestContext
-): Promise<readonly { name: string; kind: 'file' | 'directory' | 'symlink' }[]> {
-  requireOnlyKeys(params, ['target', 'limit'])
+): Promise<{
+  entries: readonly { name: string; kind: 'file' | 'directory' | 'symlink' }[]
+  nextOffset: number | null
+}> {
+  requireOnlyKeys(params, ['target', 'offset', 'limit'])
   const target = relaySpoolExistingPathProof(params.target)
-  const limit = relaySpoolInteger(params.limit, 1, 5_001)
+  const offset = relaySpoolInteger(params.offset, 0, SPOOL_FILE_LIST_VERIFIED_HOST_MAX_LIMIT)
+  const limit = relaySpoolInteger(params.limit, 1, SPOOL_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT)
   relaySpoolThrowIfAborted(context.signal)
   const { handle } = await openRelaySpoolVerifiedDirectory(target)
   try {
@@ -56,13 +64,18 @@ async function listSpoolDirectoryVerified(
         await verifyRelaySpoolPath(target, 'directory')
       }
       const entries: { name: string; kind: 'file' | 'directory' | 'symlink' }[] = []
+      let seen = 0
       for await (const entry of directory) {
         relaySpoolThrowIfAborted(context.signal)
+        if (seen < offset) {
+          seen += 1
+          continue
+        }
         entries.push({
           name: entry.name,
           kind: entry.isSymbolicLink() ? 'symlink' : entry.isDirectory() ? 'directory' : 'file'
         })
-        if (entries.length >= limit) {
+        if (entries.length > limit) {
           break
         }
       }
@@ -72,7 +85,10 @@ async function listSpoolDirectoryVerified(
         // sandwich because Node cannot expose handle-relative scandir there.
         await verifyRelaySpoolPath(target, 'directory')
       }
-      return entries
+      return {
+        entries: entries.slice(0, limit),
+        nextOffset: entries.length > limit ? offset + limit : null
+      }
     } finally {
       await directory.close().catch(() => {})
     }

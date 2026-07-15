@@ -1,6 +1,5 @@
 import { getRepoExecutionHostId, parseExecutionHostId } from '../../shared/execution-host'
 import { mapWithConcurrency } from '../../shared/map-with-concurrency'
-import { isFolderRepo } from '../../shared/repo-kind'
 import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import type { DetectedWorktreeListResult, ProjectHostSetup, Repo } from '../../shared/types'
 import type { Store } from '../persistence'
@@ -34,7 +33,7 @@ export type DefaultSpoolOwnerWorktreeCatalogOptions = {
   ) => Promise<SpoolPairedRuntimeWorktreeCatalog>
 }
 
-/** Reads every registered Git root from the host that actually owns it. */
+/** Reads every registered workspace root from the host that actually owns it. */
 export class DefaultSpoolOwnerWorktreeCatalog implements SpoolOwnerWorktreeCatalog {
   private readonly store: Store
   private readonly runtime: SpoolWorktreeRuntime
@@ -46,7 +45,7 @@ export class DefaultSpoolOwnerWorktreeCatalog implements SpoolOwnerWorktreeCatal
 
   async getWorktree(worktreeId: string): Promise<SpoolOwnerWorktree | null> {
     const repo = this.store.getRepo(getRepoIdFromWorktreeId(worktreeId))
-    if (!repo || isFolderRepo(repo)) {
+    if (!repo) {
       return null
     }
     return (
@@ -72,7 +71,7 @@ export class DefaultSpoolOwnerWorktreeCatalog implements SpoolOwnerWorktreeCatal
     const setups = this.store.getProjectHostSetups()
     const metas = this.store.getAllWorktreeMeta()
     assertWorktreeInventoryCapacity(Object.keys(metas).length)
-    const registeredRepos = this.store.getRepos().filter((repo) => !isFolderRepo(repo))
+    const registeredRepos = this.store.getRepos()
     assertRepoInventoryCapacity(registeredRepos)
     const repos = registeredRepos.filter((repo) =>
       spoolRepoMayContainProject(repo, projectId, setups, metas)
@@ -84,7 +83,7 @@ export class DefaultSpoolOwnerWorktreeCatalog implements SpoolOwnerWorktreeCatal
 
   async inspectRegisteredWorktrees(): Promise<SpoolOwnerWorktreeCatalogInventory> {
     const setups = this.store.getProjectHostSetups()
-    const repos = this.store.getRepos().filter((repo) => !isFolderRepo(repo))
+    const repos = this.store.getRepos()
     const detectedByRepo = await this.inspectRepos(repos, setups)
     const targets = detectedByRepo.flatMap((entry) => entry.targets)
     assertUniqueCatalogIdentities(targets)

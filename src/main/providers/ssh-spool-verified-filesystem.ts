@@ -1,7 +1,10 @@
 import {
+  SPOOL_FILE_LIST_VERIFIED_HOST_MAX_LIMIT,
+  SPOOL_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT,
   SPOOL_FILE_READ_MAX_BYTES,
   SPOOL_FILE_WRITE_MAX_BYTES
 } from '../../shared/spool/spool-operation-contract'
+import { isSpoolIncarnationMarkerId } from '../../shared/spool/spool-incarnation-marker-id'
 import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
 import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
 import { isMethodNotFoundError } from '../ssh/ssh-filesystem-stream-reader'
@@ -17,10 +20,57 @@ export function createSshSpoolVerifiedFilesystem(
   mux: SshChannelMultiplexer
 ): SpoolVerifiedRemoteFilesystem {
   return {
-    list: async (target, limit, signal) => {
-      requireInteger(limit, 1, 5_001)
-      const result = await verifiedRequest(mux, 'fs.spoolListVerified', { target, limit }, signal)
-      return parseDirectoryEntries(result, limit)
+    inspectDirectoryIdentity: async (directoryPath, signal) => {
+      const result = await verifiedRequest(
+        mux,
+        'fs.spoolInspectDirectoryIdentity',
+        { directoryPath },
+        signal
+      )
+      if (
+        !isRecord(result) ||
+        !hasExactSpoolWireKeys(result, ['canonicalPath', 'deviceId', 'inodeId']) ||
+        typeof result.canonicalPath !== 'string' ||
+        !result.canonicalPath ||
+        typeof result.deviceId !== 'string' ||
+        !/^\d+$/u.test(result.deviceId) ||
+        typeof result.inodeId !== 'string' ||
+        !/^[1-9]\d*$/u.test(result.inodeId)
+      ) {
+        throw new Error('remote_spool_directory_identity_invalid')
+      }
+      return {
+        canonicalPath: result.canonicalPath,
+        deviceId: result.deviceId,
+        inodeId: result.inodeId
+      }
+    },
+    readOrCreateIncarnationMarker: async (directoryPath, filename, proposedMarkerId, signal) => {
+      const result = await verifiedRequest(
+        mux,
+        'fs.spoolReadOrCreateIncarnationMarker',
+        { directoryPath, filename, proposedMarkerId },
+        signal
+      )
+      if (
+        !isRecord(result) ||
+        !hasExactSpoolWireKeys(result, ['markerId']) ||
+        !isSpoolIncarnationMarkerId(result.markerId)
+      ) {
+        throw new Error('remote_spool_marker_invalid')
+      }
+      return result.markerId
+    },
+    list: async (target, offset, limit, signal) => {
+      requireInteger(offset, 0, SPOOL_FILE_LIST_VERIFIED_HOST_MAX_LIMIT)
+      requireInteger(limit, 1, SPOOL_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT)
+      const result = await verifiedRequest(
+        mux,
+        'fs.spoolListVerified',
+        { target, offset, limit },
+        signal
+      )
+      return parseDirectoryPage(result, offset, limit)
     },
     read: async (target, offset, maxBytes, signal) => {
       requireInteger(offset, 0, Number.MAX_SAFE_INTEGER)
@@ -82,26 +132,45 @@ export function createSshSpoolVerifiedFilesystem(
   }
 }
 
-function parseDirectoryEntries(
+function parseDirectoryPage(
   value: unknown,
+  offset: number,
   limit: number
-): readonly { name: string; kind: 'file' | 'directory' | 'symlink' }[] {
-  if (!Array.isArray(value) || value.length > limit) {
+): {
+  entries: readonly { name: string; kind: 'file' | 'directory' | 'symlink' }[]
+  nextOffset: number | null
+} {
+  if (!isRecord(value) || !hasExactSpoolWireKeys(value, ['entries', 'nextOffset'])) {
     throw new Error('remote_spool_list_invalid')
   }
-  return value.map((entry) => {
-    if (
-      !isRecord(entry) ||
-      !hasExactSpoolWireKeys(entry, ['name', 'kind']) ||
-      typeof entry.name !== 'string' ||
-      !entry.name ||
-      entry.name.length > 4_096 ||
-      (entry.kind !== 'file' && entry.kind !== 'directory' && entry.kind !== 'symlink')
-    ) {
-      throw new Error('remote_spool_list_invalid')
+  const { entries, nextOffset } = value
+  if (
+    !Array.isArray(entries) ||
+    entries.length > limit ||
+    (nextOffset !== null &&
+      (!Number.isSafeInteger(nextOffset) ||
+        nextOffset !== offset + entries.length ||
+        entries.length !== limit ||
+        nextOffset > SPOOL_FILE_LIST_VERIFIED_HOST_MAX_LIMIT))
+  ) {
+    throw new Error('remote_spool_list_invalid')
+  }
+  const projected: { name: string; kind: 'file' | 'directory' | 'symlink' }[] = entries.map(
+    (entry) => {
+      if (
+        !isRecord(entry) ||
+        !hasExactSpoolWireKeys(entry, ['name', 'kind']) ||
+        typeof entry.name !== 'string' ||
+        !entry.name ||
+        entry.name.length > 4_096 ||
+        (entry.kind !== 'file' && entry.kind !== 'directory' && entry.kind !== 'symlink')
+      ) {
+        throw new Error('remote_spool_list_invalid')
+      }
+      return { name: entry.name, kind: entry.kind }
     }
-    return { name: entry.name, kind: entry.kind }
-  })
+  )
+  return { entries: projected, nextOffset: nextOffset as number | null }
 }
 
 async function verifiedRequest(

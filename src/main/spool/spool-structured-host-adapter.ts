@@ -50,6 +50,13 @@ export class SpoolStructuredHostAdapter implements SpoolHostAdapter {
     operation: SpoolExecutionOperation,
     context: SpoolHostOperationContext
   ): Promise<unknown> {
+    if (
+      target.target.kind === 'folder' &&
+      (operation.kind === 'files.diff' || operation.kind.startsWith('git.'))
+    ) {
+      // Why: a folder workspace has no repository boundary on which Git operations can be proven.
+      throw new SpoolExecutionError('method_not_found')
+    }
     if (this.files.supports(operation)) {
       return await this.files.invoke(target, operation, context.signal, context.admissionGuard)
     }

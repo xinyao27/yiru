@@ -21,6 +21,7 @@ export function SpoolFilePreview({
   fileUnavailable,
   loading,
   saving,
+  supportsDiff,
   diff,
   diffLoading,
   diffUnavailable,
@@ -40,6 +41,7 @@ export function SpoolFilePreview({
   fileUnavailable: boolean
   loading: boolean
   saving: boolean
+  supportsDiff: boolean
   diff: SpoolFileDiffResult | null
   diffLoading: boolean
   diffUnavailable: boolean
@@ -85,7 +87,7 @@ export function SpoolFilePreview({
   const dirty = file.encoding === 'utf8' && draft !== file.content
   const completeFile = file.offset === 0 && file.bytesRead === file.totalBytes
   const editable = canControl && file.encoding === 'utf8' && completeFile
-  const showDiff = mode !== 'content'
+  const showDiff = supportsDiff && mode !== 'content'
   const hasPreviousChunk = file.offset > 0
   const hasNextChunk = file.bytesRead > 0 && file.offset + file.bytesRead < file.totalBytes
   return (
@@ -126,29 +128,33 @@ export function SpoolFilePreview({
           <RefreshCw aria-hidden="true" />
           {translate('auto.components.spool.SpoolFilePreview.reload', 'Reload')}
         </Button>
-        <Button
-          type="button"
-          size="xs"
-          variant={mode === 'working-diff' ? 'secondary' : 'ghost'}
-          onClick={() => {
-            setMode('working-diff')
-            onLoadDiff(false)
-          }}
-        >
-          <FileDiff aria-hidden="true" />
-          {translate('auto.components.spool.SpoolFilePreview.workingDiff', 'Working diff')}
-        </Button>
-        <Button
-          type="button"
-          size="xs"
-          variant={mode === 'staged-diff' ? 'secondary' : 'ghost'}
-          onClick={() => {
-            setMode('staged-diff')
-            onLoadDiff(true)
-          }}
-        >
-          {translate('auto.components.spool.SpoolFilePreview.stagedDiff', 'Staged diff')}
-        </Button>
+        {supportsDiff ? (
+          <>
+            <Button
+              type="button"
+              size="xs"
+              variant={mode === 'working-diff' ? 'secondary' : 'ghost'}
+              onClick={() => {
+                setMode('working-diff')
+                onLoadDiff(false)
+              }}
+            >
+              <FileDiff aria-hidden="true" />
+              {translate('auto.components.spool.SpoolFilePreview.workingDiff', 'Working diff')}
+            </Button>
+            <Button
+              type="button"
+              size="xs"
+              variant={mode === 'staged-diff' ? 'secondary' : 'ghost'}
+              onClick={() => {
+                setMode('staged-diff')
+                onLoadDiff(true)
+              }}
+            >
+              {translate('auto.components.spool.SpoolFilePreview.stagedDiff', 'Staged diff')}
+            </Button>
+          </>
+        ) : null}
         {showDiff ? (
           <Button type="button" size="xs" variant="ghost" onClick={() => setMode('content')}>
             {translate('auto.components.spool.SpoolFilePreview.content', 'Content')}

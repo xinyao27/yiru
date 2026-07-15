@@ -2,7 +2,6 @@ import type {
   SpoolExecutionOperation,
   SpoolFileListResult,
   SpoolFileReadResult,
-  SpoolFileTreeEntry,
   SpoolMutationResult
 } from '../../shared/spool/spool-operation-contract'
 import {
@@ -15,6 +14,8 @@ import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-s
 import type { ExecutionAdmissionGuard } from './spool-execution-gateway'
 import { asSpoolExecutionError, SpoolExecutionError } from './spool-execution-error'
 import { decodeSpoolFileBytes, decodeSpoolFileWriteContent } from './spool-file-content-codec'
+import type { SpoolFileOperationHost } from './spool-file-operation-host'
+import { listVisibleSpoolFiles } from './spool-visible-file-listing'
 import type { SpoolContainedPath } from './spool-worktree-containment'
 import {
   normalizeSpoolRelativePath,
@@ -33,45 +34,6 @@ type SpoolFileOperation = Extract<
       | 'files.delete'
   }
 >
-
-export type SpoolFileHostEntry = {
-  name: string
-  kind: 'file' | 'directory' | 'symlink'
-  size?: number
-  modifiedAt?: number
-}
-
-export type SpoolVerifiedFileRead = {
-  bytes: Uint8Array<ArrayBufferLike>
-  totalBytes: number
-}
-
-export type SpoolFileOperationHost = {
-  listVerified(
-    path: SpoolContainedPath,
-    limit: number,
-    signal: AbortSignal
-  ): Promise<readonly SpoolFileHostEntry[]>
-  readVerified(
-    path: SpoolContainedPath,
-    offset: number,
-    maxBytes: number,
-    signal: AbortSignal
-  ): Promise<SpoolVerifiedFileRead>
-  writeVerified(
-    path: SpoolContainedPath,
-    bytes: Uint8Array<ArrayBufferLike>,
-    mode: 'create' | 'replace',
-    signal: AbortSignal
-  ): Promise<void>
-  createDirectoryVerified(path: SpoolContainedPath, signal: AbortSignal): Promise<void>
-  renameVerified(
-    source: SpoolContainedPath,
-    destination: SpoolContainedPath,
-    signal: AbortSignal
-  ): Promise<void>
-  deleteVerified(path: SpoolContainedPath, recursive: boolean, signal: AbortSignal): Promise<void>
-}
 
 export class SpoolFileOperationExecutor {
   constructor(
@@ -135,26 +97,13 @@ export class SpoolFileOperationExecutor {
       1,
       SPOOL_FILE_LIST_MAX_LIMIT
     )
-    const hostLimit = limit + path.gitAdministrativePathCount + 1
-    const rawEntries = await this.host.listVerified(path, hostLimit, signal)
-    if (rawEntries.length > hostLimit) {
-      throw new SpoolExecutionError('result_too_large')
-    }
-    const entries: SpoolFileTreeEntry[] = []
-    for (const entry of rawEntries) {
-      const projected = projectEntry(normalized, entry)
-      if (projected && !path.isGitAdministrativeChild(entry.name)) {
-        entries.push(projected)
-      }
-      if (entries.length > limit) {
-        break
-      }
-    }
-    return {
+    return await listVisibleSpoolFiles({
+      host: this.host,
+      path,
       relativePath: normalized,
-      entries: entries.slice(0, limit),
-      truncated: entries.length > limit || rawEntries.length > limit
-    }
+      limit,
+      signal
+    })
   }
 
   private async read(
@@ -260,25 +209,6 @@ export class SpoolFileOperationExecutor {
     await guard.beforeSideEffect()
     await this.host.deleteVerified(path, operation.recursive === true, signal)
     return { ok: true }
-  }
-}
-
-function projectEntry(parent: string, entry: SpoolFileHostEntry): SpoolFileTreeEntry | null {
-  if (!entry.name || entry.name.includes('/') || entry.name.includes('\\')) {
-    return null
-  }
-  const relativePath = parent ? `${parent}/${entry.name}` : entry.name
-  try {
-    normalizeSpoolRelativePath(relativePath)
-  } catch {
-    return null
-  }
-  return {
-    relativePath,
-    name: entry.name,
-    kind: entry.kind,
-    size: Number.isSafeInteger(entry.size) && Number(entry.size) >= 0 ? (entry.size ?? null) : null,
-    modifiedAt: Number.isFinite(entry.modifiedAt) ? (entry.modifiedAt ?? null) : null
   }
 }
 

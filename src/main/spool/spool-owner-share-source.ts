@@ -36,6 +36,7 @@ export class SpoolOwnerShareSource implements SpoolShareCatalogSource {
       ? this.store.getProjects().find((entry) => entry.id === instance.projectId)
       : null
     return {
+      kind: instance.target.kind,
       projectKey: project ? `project:${project.id}` : `repo:${repo.id}`,
       projectName: project?.displayName ?? repo.displayName,
       worktreeName: worktree.displayName,

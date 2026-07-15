@@ -267,6 +267,7 @@ export class SpoolWorktreePublicationState {
 
 function publicationChanged(left: PublishedWorktree, right: PublishedWorktree): boolean {
   return (
+    left.target.kind !== right.target.kind ||
     left.target.worktreeId !== right.target.worktreeId ||
     left.target.instanceId !== right.target.instanceId ||
     left.target.projectId !== right.target.projectId ||

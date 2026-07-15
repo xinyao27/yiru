@@ -14672,10 +14672,12 @@ export class OrcaRuntimeService {
     const store = this.requireStore()
     const worktree = await this.resolveWorktreeSelector(`id:${selector.worktreeId}`)
     const repo = store.getRepo(worktree.repoId)
+    const kind = repo && isFolderRepo(repo) ? 'folder' : 'git'
     if (
       !repo ||
       worktree.id !== selector.worktreeId ||
-      worktree.instanceId !== selector.instanceId
+      worktree.instanceId !== selector.instanceId ||
+      kind !== selector.kind
     ) {
       throw new Error('selector_not_found')
     }
@@ -14689,6 +14691,7 @@ export class OrcaRuntimeService {
       throw new Error('worktree_host_mismatch')
     }
     return {
+      kind,
       worktreeId: worktree.id,
       instanceId: selector.instanceId,
       projectId: worktree.projectId ?? null,

@@ -1,221 +1,99 @@
 import { randomUUID } from 'node:crypto'
-import { link, lstat, open, readFile, rm } from 'node:fs/promises'
 import { parseWslUncPath } from '../../shared/wsl-paths'
 import type { IFilesystemProvider } from '../providers/types'
-import { joinRemotePath, type RemoteHostPlatform } from '../ssh/ssh-remote-platform'
-import {
-  isDefinitiveSpoolFilesystemFailure,
-  isExistingSpoolFilesystemError,
-  isMissingSpoolFilesystemError,
-  joinSpoolLocalPath
-} from './spool-canonical-host-path'
-import {
-  inspectSpoolWslFile,
-  resolveSpoolWslCanonicalDirectory
-} from './spool-wsl-canonical-directory'
+import { classifySpoolIncarnationMarkerIoError } from './spool-incarnation-marker-error'
+import { readOrCreateSpoolLocalIncarnationMarker } from './spool-local-incarnation-marker'
+import { readOrCreateSpoolWslIncarnationMarker } from './spool-wsl-incarnation-marker'
 import { SpoolWorktreeIncarnationHostError } from './spool-worktree-incarnation'
 
 const INCARNATION_MARKER_FILENAME = 'orca-spool-incarnation-v1'
-const MAX_MARKER_BYTES = 128
-const MARKER_ID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu
+export const SPOOL_FOLDER_INCARNATION_MARKER_FILENAME = '.orca-spool-incarnation-v1'
+export const SPOOL_FOLDER_INCARNATION_TEMP_PREFIX = `${SPOOL_FOLDER_INCARNATION_MARKER_FILENAME}.tmp-`
 
 export type SpoolIncarnationMarkerLocation =
-  | { kind: 'local'; gitDirectory: string }
+  | { kind: 'local'; directory: string }
   | {
       kind: 'ssh'
       filesystem: IFilesystemProvider
-      platform: RemoteHostPlatform
-      gitDirectory: string
+      directory: string
     }
 
 export class SpoolIncarnationMarkerStore {
-  private readonly pendingOperations = new Map<string, Promise<string>>()
+  private readonly localPendingOperations = new Map<string, Promise<string>>()
+  private readonly remotePendingOperations = new WeakMap<
+    IFilesystemProvider,
+    Map<string, Promise<string>>
+  >()
 
-  readOrCreate(location: SpoolIncarnationMarkerLocation): Promise<string> {
-    const markerPath =
-      location.kind === 'local'
-        ? joinSpoolLocalPath(location.gitDirectory, INCARNATION_MARKER_FILENAME)
-        : joinRemotePath(location.platform, location.gitDirectory, INCARNATION_MARKER_FILENAME)
-    const key = `${location.kind}\0${markerPath}`
-    const existing = this.pendingOperations.get(key)
+  readOrCreate(
+    location: SpoolIncarnationMarkerLocation,
+    filename = INCARNATION_MARKER_FILENAME
+  ): Promise<string> {
+    const pendingOperations = this.pendingOperationsFor(location)
+    const key = `${location.directory}\0${filename}`
+    const existing = pendingOperations.get(key)
     if (existing) {
       return existing
     }
-    const pending = (
-      location.kind === 'local'
-        ? readOrCreateLocalMarker(markerPath, location.gitDirectory)
-        : readOrCreateRemoteMarker(location.filesystem, markerPath)
-    ).finally(() => {
-      if (this.pendingOperations.get(key) === pending) {
-        this.pendingOperations.delete(key)
+    const pending = readOrCreateMarkerAtLocation(location, filename).finally(() => {
+      if (pendingOperations.get(key) === pending) {
+        pendingOperations.delete(key)
       }
     })
-    this.pendingOperations.set(key, pending)
+    pendingOperations.set(key, pending)
     return pending
   }
-}
 
-async function readOrCreateLocalMarker(markerPath: string, gitDirectory: string): Promise<string> {
-  let existing: string | null
-  try {
-    existing = await readLocalMarker(markerPath)
-  } catch (error) {
-    throw classifyMarkerIoError(error)
-  }
-  if (existing) {
-    return existing
-  }
-  const markerId = randomUUID()
-  const temporaryPath = `${markerPath}.tmp-${process.pid}-${randomUUID()}`
-  let handle: Awaited<ReturnType<typeof open>> | null = null
-  try {
-    handle = await open(temporaryPath, 'wx', 0o600)
-    await handle.writeFile(`${markerId}\n`, 'utf8')
-    await handle.sync()
-    await handle.close()
-    handle = null
-    try {
-      // Why: hard-link publication is atomic and cannot replace another process's marker.
-      await link(temporaryPath, markerPath)
-      await syncDirectoryBestEffort(gitDirectory)
-      return markerId
-    } catch (error) {
-      if (!isExistingSpoolFilesystemError(error)) {
-        throw error
-      }
-      const racedMarker = await readLocalMarker(markerPath)
-      if (racedMarker) {
-        return racedMarker
-      }
-      throw error
+  private pendingOperationsFor(
+    location: SpoolIncarnationMarkerLocation
+  ): Map<string, Promise<string>> {
+    if (location.kind === 'local') {
+      return this.localPendingOperations
     }
-  } catch (error) {
-    if (isMissingSpoolFilesystemError(error) && parseWslUncPath(markerPath)) {
-      const gitDirectoryEvidence = await resolveSpoolWslCanonicalDirectory(gitDirectory)
-      if (
-        gitDirectoryEvidence.status === 'resolved' ||
-        gitDirectoryEvidence.status === 'unavailable'
-      ) {
-        throw new SpoolWorktreeIncarnationHostError('host-unavailable', { cause: error })
-      }
+    let operations = this.remotePendingOperations.get(location.filesystem)
+    if (!operations) {
+      operations = new Map()
+      this.remotePendingOperations.set(location.filesystem, operations)
     }
-    throw classifyMarkerIoError(error)
-  } finally {
-    await handle?.close().catch(() => undefined)
-    await rm(temporaryPath, { force: true }).catch(() => undefined)
+    return operations
   }
 }
 
-async function readLocalMarker(markerPath: string): Promise<string | null> {
-  try {
-    const stat = await lstat(markerPath)
-    if (!stat.isFile() || stat.size > MAX_MARKER_BYTES) {
-      throw new SpoolWorktreeIncarnationHostError('marker-unavailable')
-    }
-    return requireMarkerId(await readFile(markerPath, 'utf8'))
-  } catch (error) {
-    if (isMissingSpoolFilesystemError(error)) {
-      if (parseWslUncPath(markerPath)) {
-        const evidence = await inspectSpoolWslFile(markerPath)
-        if (evidence !== 'missing') {
-          throw new SpoolWorktreeIncarnationHostError('host-unavailable', { cause: error })
-        }
-      }
-      return null
-    }
-    throw error
+function readOrCreateMarkerAtLocation(
+  location: SpoolIncarnationMarkerLocation,
+  filename: string
+): Promise<string> {
+  if (location.kind === 'ssh') {
+    return readOrCreateRemoteMarker(location.filesystem, location.directory, filename)
   }
+  if (parseWslUncPath(location.directory)) {
+    // Why: Win32 cannot publish hardlinks inside a WSL distro filesystem.
+    return readOrCreateSpoolWslIncarnationMarker(location.directory, filename, randomUUID())
+  }
+  return readOrCreateSpoolLocalIncarnationMarker(location.directory, filename)
 }
 
 async function readOrCreateRemoteMarker(
   filesystem: IFilesystemProvider,
-  markerPath: string
+  directory: string,
+  filename: string
 ): Promise<string> {
   try {
-    const existing = await readRemoteMarker(filesystem, markerPath)
-    if (existing) {
-      return existing
+    const verified = filesystem.spoolVerifiedFiles
+    if (!verified) {
+      throw new SpoolWorktreeIncarnationHostError('host-unavailable')
     }
-    const markerId = randomUUID()
-    try {
-      // Why: the relay's createFile uses exclusive-create, so concurrent owners cannot replace IDs.
-      await filesystem.createFile(markerPath)
-    } catch (error) {
-      if (!isExistingSpoolFilesystemError(error)) {
-        throw error
-      }
-      const racedMarker = await readRemoteMarker(filesystem, markerPath)
-      if (racedMarker) {
-        return racedMarker
-      }
-      throw error
-    }
-    if (!filesystem.lstat || (await filesystem.lstat(markerPath)).type !== 'file') {
-      throw new SpoolWorktreeIncarnationHostError('marker-unavailable')
-    }
-    await filesystem.writeFile(markerPath, `${markerId}\n`)
-    return markerId
+    // Why: marker creation must remain exclusive and no-follow on the remote host.
+    return await verified.readOrCreateIncarnationMarker(directory, filename, randomUUID())
   } catch (error) {
-    throw classifyMarkerIoError(error)
-  }
-}
-
-async function readRemoteMarker(
-  filesystem: IFilesystemProvider,
-  markerPath: string
-): Promise<string | null> {
-  if (!filesystem.lstat) {
-    throw new Error('remote lstat unavailable')
-  }
-  try {
-    const stat = await filesystem.lstat(markerPath)
-    if (stat.type !== 'file' || stat.size > MAX_MARKER_BYTES) {
-      throw new SpoolWorktreeIncarnationHostError('marker-unavailable')
+    if (isRemoteMarkerIntegrityError(error)) {
+      throw new SpoolWorktreeIncarnationHostError('marker-unavailable', { cause: error })
     }
-    const result = await filesystem.readFile(markerPath)
-    if (result.isBinary) {
-      throw new SpoolWorktreeIncarnationHostError('marker-unavailable')
-    }
-    return requireMarkerId(result.content)
-  } catch (error) {
-    if (isMissingSpoolFilesystemError(error)) {
-      return null
-    }
-    throw error
+    throw classifySpoolIncarnationMarkerIoError(error)
   }
 }
 
-function requireMarkerId(content: string): string {
-  const markerId = content.endsWith('\n') ? content.slice(0, -1) : content
-  if (!MARKER_ID_PATTERN.test(markerId)) {
-    throw new SpoolWorktreeIncarnationHostError('marker-unavailable')
-  }
-  return markerId
-}
-
-function classifyMarkerIoError(error: unknown): SpoolWorktreeIncarnationHostError {
-  if (error instanceof SpoolWorktreeIncarnationHostError) {
-    return error
-  }
-  return new SpoolWorktreeIncarnationHostError(
-    isMissingSpoolFilesystemError(error) ||
-      isExistingSpoolFilesystemError(error) ||
-      isDefinitiveSpoolFilesystemFailure(error)
-      ? 'marker-unavailable'
-      : 'host-unavailable',
-    { cause: error }
-  )
-}
-
-async function syncDirectoryBestEffort(directory: string): Promise<void> {
-  let handle: Awaited<ReturnType<typeof open>> | null = null
-  try {
-    handle = await open(directory, 'r')
-    await handle.sync()
-  } catch {
-    // The marker is already durable enough on hosts that cannot fsync directories (notably Windows).
-  } finally {
-    await handle?.close().catch(() => undefined)
-  }
+function isRemoteMarkerIntegrityError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : ''
+  return message.startsWith('spool_marker_') || message === 'remote_spool_marker_invalid'
 }

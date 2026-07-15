@@ -33,6 +33,7 @@ import { SpoolWorktreeIncarnationHostError } from './spool-worktree-incarnation'
 export type SpoolCanonicalHostPathResult =
   | { status: 'resolved'; path: SpoolWorktreeRootComparison }
   | { status: 'missing' }
+  | { status: 'invalid' }
   | { status: 'unavailable' }
 
 export type SpoolPairedRuntimeWorktreeHostAdapter = {
@@ -103,16 +104,13 @@ export class SpoolActualHostPathResolver {
     if (!candidatePath.trim()) {
       return { status: 'missing' }
     }
+    const parsed = parseExecutionHostId(target.executionHostId)
+    if (!parsed || (parsed.kind === 'local' && target.connectionId?.trim())) {
+      return { status: 'invalid' }
+    }
     try {
-      const parsed = parseExecutionHostId(target.executionHostId)
-      if (!parsed) {
-        return { status: 'unavailable' }
-      }
       if (parsed.kind === 'runtime') {
         return await this.canonicalizeRuntime(target, candidatePath)
-      }
-      if (parsed.kind === 'local' && target.connectionId?.trim()) {
-        return { status: 'unavailable' }
       }
       const resolved =
         parsed.kind === 'ssh'
@@ -130,9 +128,14 @@ export class SpoolActualHostPathResolver {
         ? { status: 'resolved', path: resolved.path }
         : resolved.status === 'missing'
           ? resolved
-          : { status: 'unavailable' }
-    } catch {
-      return { status: 'unavailable' }
+          : resolved.status === 'invalid'
+            ? resolved
+            : { status: 'unavailable' }
+    } catch (error) {
+      return error instanceof SpoolWorktreeIncarnationHostError &&
+        error.reason !== 'host-unavailable'
+        ? { status: 'invalid' }
+        : { status: 'unavailable' }
     }
   }
 
@@ -172,7 +175,7 @@ export class SpoolActualHostPathResolver {
     }
     return {
       root: root.path,
-      markerLocation: { kind: 'local', gitDirectory: gitDirectory.accessPath }
+      markerLocation: { kind: 'local', directory: gitDirectory.accessPath }
     }
   }
 
@@ -208,8 +211,7 @@ export class SpoolActualHostPathResolver {
       markerLocation: {
         kind: 'ssh',
         filesystem: context.filesystem,
-        platform: context.platform,
-        gitDirectory: gitDirectory.accessPath
+        directory: gitDirectory.accessPath
       }
     }
   }
@@ -291,7 +293,7 @@ export class SpoolActualHostPathResolver {
     }
     const result = await adapter.canonicalizePath({ target, path: candidatePath })
     if (result.status !== 'resolved' || !isValidSpoolCanonicalPath(result.path)) {
-      return result.status === 'resolved' ? { status: 'unavailable' } : result
+      return result.status === 'resolved' ? { status: 'invalid' } : result
     }
     return {
       status: 'resolved',

@@ -79,6 +79,7 @@ export type SpoolSessionRootMatcher = {
     actualHostScope: string
     inventoryTarget: SpoolOwnerWorktree
     registeredRoots: readonly SpoolRegisteredWorktreeRoot[]
+    binding: 'legacy-cwd-attribution' | 'proven-target-consistency'
   }): SpoolPreparedSessionRootMatcher
 }
 
@@ -127,6 +128,7 @@ export type SpoolSessionSource = {
 }
 
 export type SpoolExecutionHostSessionReadRequest = {
+  worktreeKind: SpoolOwnerWorktree['kind']
   executionHostId: ExecutionHostId
   worktreeId: string
   worktreeInstanceId: string

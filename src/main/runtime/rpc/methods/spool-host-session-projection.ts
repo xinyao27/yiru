@@ -122,6 +122,7 @@ export function pairedRuntimeHistoricalSessionReadRequest(
   inventoryScope: string
 ) {
   return {
+    worktreeKind: worktree.kind,
     executionHostId: worktree.executionHostId,
     worktreeId: worktree.worktreeId,
     worktreeInstanceId: worktree.instanceId,

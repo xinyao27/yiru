@@ -1,5 +1,8 @@
 export const SPOOL_FILE_LIST_DEFAULT_LIMIT = 1_000
 export const SPOOL_FILE_LIST_MAX_LIMIT = 5_000
+export const SPOOL_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT = 256
+// Why: owner-only entries are filtered across bounded internal host pages.
+export const SPOOL_FILE_LIST_VERIFIED_HOST_MAX_LIMIT = SPOOL_FILE_LIST_MAX_LIMIT + 256
 export const SPOOL_FILE_READ_DEFAULT_BYTES = 512 * 1_024
 export const SPOOL_FILE_READ_MAX_BYTES = 2 * 1_024 * 1_024
 export const SPOOL_FILE_WRITE_MAX_BYTES = 4 * 1_024 * 1_024

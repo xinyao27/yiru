@@ -31,6 +31,7 @@ const WORKSPACE_TABS: readonly {
   { id: 'files', icon: FileText },
   { id: 'changes', icon: GitCompareArrows }
 ]
+const FOLDER_WORKSPACE_TABS = WORKSPACE_TABS.filter((tab) => tab.id !== 'changes')
 
 function getWorkspaceTabLabel(tab: SpoolWorkspaceTab): string {
   switch (tab) {
@@ -97,6 +98,9 @@ function SpoolWorkspaceSurfaceContent({
   }
 
   const connected = workspace.desktop.connectionStatus === 'connected'
+  // Why: folder projects have no repository boundary, so their wire surface omits Git reads too.
+  const workspaceTabs =
+    workspace.worktree.kind === 'folder' ? FOLDER_WORKSPACE_TABS : WORKSPACE_TABS
   const accessLabel = !connected
     ? translate('auto.components.spool.SpoolWorkspaceSurface.disconnected', 'Disconnected')
     : canControl
@@ -152,7 +156,7 @@ function SpoolWorkspaceSurfaceContent({
           variant="line"
           className="h-9 w-full shrink-0 justify-start rounded-none border-b border-border bg-card px-2 py-0 text-card-foreground"
         >
-          {WORKSPACE_TABS.map((tab) => {
+          {workspaceTabs.map((tab) => {
             const Icon = tab.icon
             return (
               <TabsTrigger
@@ -222,11 +226,13 @@ function SpoolWorkspaceSurfaceContent({
           </div>
         </TabsContent>
         <TabsContent value="files" className="min-h-0 overflow-hidden">
-          <SpoolFilesPane route={route} />
+          <SpoolFilesPane route={route} supportsDiff={workspace.worktree.kind === 'git'} />
         </TabsContent>
-        <TabsContent value="changes" className="min-h-0 overflow-hidden">
-          <SpoolGitPane route={route} />
-        </TabsContent>
+        {workspace.worktree.kind === 'git' ? (
+          <TabsContent value="changes" className="min-h-0 overflow-hidden">
+            <SpoolGitPane route={route} />
+          </TabsContent>
+        ) : null}
       </Tabs>
     </main>
   )

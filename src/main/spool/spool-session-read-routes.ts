@@ -218,6 +218,7 @@ export function spoolSessionReadRouteBinding(
       worktree.worktreeId,
       worktree.instanceId,
       worktree.spoolIncarnationId,
+      worktree.target.kind,
       worktree.target.executionHostId,
       worktree.actualHostScope,
       worktree.target.worktreePath,

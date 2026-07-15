@@ -64,7 +64,7 @@ export function getClonePathComparisonKey(clonePath: string): string {
     // Why: WSL UNC paths cross into a case-sensitive Linux filesystem, so only
     // the Windows UNC server alias and distro segment should be case-folded.
     const linuxPath = (wslUncMatch[2] ?? '').replace(/\/+$/, '')
-    return `//wsl/${wslUncMatch[1].toLowerCase()}${linuxPath}`
+    return `//wsl.localhost/${wslUncMatch[1].toLowerCase()}${linuxPath}`
   }
   return normalizeRuntimePathForComparison(resolvedClonePath)
 }

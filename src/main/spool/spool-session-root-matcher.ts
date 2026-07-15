@@ -9,6 +9,7 @@ import type {
   SpoolSessionRootMatch,
   SpoolSessionRootMatcher
 } from './spool-session-source'
+import { sameSpoolFolderRepoRoot } from './spool-publication-root-availability'
 
 const CWD_CANONICALIZATION_CONCURRENCY = 8
 
@@ -23,6 +24,7 @@ export class SpoolActualHostSessionRootMatcher implements SpoolSessionRootMatche
     actualHostScope: string
     inventoryTarget: SpoolOwnerWorktree
     registeredRoots: readonly SpoolRegisteredWorktreeRoot[]
+    binding: 'legacy-cwd-attribution' | 'proven-target-consistency'
   }): SpoolPreparedSessionRootMatcher {
     const roots = args.registeredRoots.filter(
       (entry) => entry.root.scopeKey === args.actualHostScope
@@ -36,7 +38,14 @@ export class SpoolActualHostSessionRootMatcher implements SpoolSessionRootMatche
     return {
       matchMostSpecificRoots: async (cwds, signal) =>
         valid
-          ? await matchCandidateRoots(this.paths, args.inventoryTarget, index, cwds, signal)
+          ? await matchCandidateRoots(
+              this.paths,
+              args.inventoryTarget,
+              index,
+              cwds,
+              args.binding,
+              signal
+            )
           : cwds.map(() => ({ status: 'ambiguous' as const }))
     }
   }
@@ -47,6 +56,7 @@ async function matchCandidateRoots(
   inventoryTarget: SpoolOwnerWorktree,
   roots: RootIndex,
   cwds: readonly string[],
+  binding: 'legacy-cwd-attribution' | 'proven-target-consistency',
   signal?: AbortSignal
 ): Promise<SpoolSessionRootMatch[]> {
   const uniqueCwds = [...new Set(cwds)]
@@ -65,17 +75,21 @@ async function matchCandidateRoots(
       }
     })
   }
-  return cwds.map((cwd) => matchCanonicalCandidate(resolvedByCwd.get(cwd), roots))
+  return cwds.map((cwd) =>
+    matchCanonicalCandidate(resolvedByCwd.get(cwd), inventoryTarget, roots, binding)
+  )
 }
 
 function matchCanonicalCandidate(
   candidate: SpoolCanonicalHostPathResult | undefined,
-  roots: RootIndex
+  inventoryTarget: SpoolOwnerWorktree,
+  roots: RootIndex,
+  binding: 'legacy-cwd-attribution' | 'proven-target-consistency'
 ): SpoolSessionRootMatch {
   if (!candidate || candidate.status === 'unavailable') {
     return { status: 'unavailable' }
   }
-  if (candidate.status === 'missing') {
+  if (candidate.status === 'missing' || candidate.status === 'invalid') {
     return { status: 'unmatched' }
   }
   const rootsByPath = roots.get(candidate.path.scopeKey)
@@ -87,10 +101,12 @@ function matchCanonicalCandidate(
     if (!matches) {
       continue
     }
-    if (matches.length !== 1) {
-      return { status: 'ambiguous' }
-    }
-    const [match] = matches
+    const match =
+      matches.length === 1
+        ? matches[0]
+        : binding === 'proven-target-consistency'
+          ? provenFolderTargetMatch(inventoryTarget, matches)
+          : null
     return match
       ? {
           status: 'matched',
@@ -100,6 +116,23 @@ function matchCanonicalCandidate(
       : { status: 'ambiguous' }
   }
   return { status: 'unmatched' }
+}
+
+function provenFolderTargetMatch(
+  inventoryTarget: SpoolOwnerWorktree,
+  matches: readonly SpoolRegisteredWorktreeRoot[]
+): SpoolRegisteredWorktreeRoot | null {
+  const expected = matches.find((entry) => sameTarget(entry.target, inventoryTarget))
+  if (
+    !expected ||
+    !matches.every((entry) =>
+      sameSpoolFolderRepoRoot(expected.target, expected.root, entry.target, entry.root)
+    )
+  ) {
+    return null
+  }
+  // Why: durable provenance already selected the instance; this check only disproves a conflicting CWD.
+  return expected
 }
 
 function indexRoots(roots: readonly SpoolRegisteredWorktreeRoot[]): RootIndex {
