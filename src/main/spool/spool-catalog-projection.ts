@@ -142,6 +142,10 @@ export class SpoolCatalogProjection {
     return { worktree, sessionKey: binding.sessionKey }
   }
 
+  retainSessionReference(sessionRef: string): boolean {
+    return !this.closed && this.references.pinSession(sessionRef)
+  }
+
   async sessionPage(
     request: SpoolCatalogSessionPageRequest,
     signal: AbortSignal

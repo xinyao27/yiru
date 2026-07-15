@@ -73,26 +73,23 @@ Desktop
 Example:
 
 ```text
-SPOOL
+Spool
 
 ▾ Alice · MacBook Pro
-  Claude   5h 32% used · 7d 16% used
-  Codex    5h 68% used · resets in 2h
-
   ▾ orca
-    ▾ feature/session-sharing                 Public
-        Claude · Sharing UI
-        Codex · RPC review
-        Claude · Initial exploration
+    ▾ feature/session-sharing
+        [Claude] Sharing UI
+        [Codex]  RPC review
+        [Claude] Initial exploration
 
 ▸ Alice · Linux workstation
-  Claude   Usage unavailable
-  Codex    5h 14% used
 ```
+
+Desktop rows use the same compact machine-card treatment as Orca's existing Host rows. Hovering a Desktop opens a card with its Claude and Codex usage, rendered with the same provider segments and global used/remaining preference as the status bar. Quota does not consume permanent rows in the narrow navigation tree.
 
 The owner still sees Private worktrees in their normal local Orca sidebar. Another Desktop receives only Public worktrees, so a Private worktree's name, path, branch, sessions, counts, and activity do not cross the connection.
 
-Session rows are deliberately simple. Spool lists every session the owner can attribute to a Public worktree without adding `Live`, `Stopped`, or `Resumable` categories to the navigation. Selecting a session asks the host to resolve it and renders the result in the requester's workspace. If a live terminal exists, the workspace attaches to it; a historical session opens read-only until control is granted. An unavailable session reports the observed failure only after the user tries to open it.
+Session rows are deliberately simple. Spool lists every session the owner can attribute to a Public worktree without adding `Live`, `Stopped`, or `Resumable` categories to the navigation. Selecting a live session attaches its terminal. Selecting a historical session does not open a separate transcript UI: once control is granted, the owner Desktop resumes the exact Claude or Codex session in that worktree and Spool immediately attaches the resulting terminal. Without control, the existing worktree-level request flow remains the only way to authorize that quota-consuming mutation. An unavailable session reports the observed failure only after the user tries to open it.
 
 The UI follows `docs/STYLEGUIDE.md`: existing sidebar tokens, quiet monochrome chrome, shadcn primitives, existing list-row states, and color reserved for meaningful application state.
 
@@ -100,7 +97,7 @@ The UI follows `docs/STYLEGUIDE.md`: existing sidebar tokens, quiet monochrome c
 
 Each discovered Desktop publishes the observable rate-limit state for its current active Claude and Codex accounts.
 
-When available, Spool can show the same normalized fields Orca already uses:
+When available, the Desktop hover card shows the same normalized fields and visual treatment Orca's status bar already uses:
 
 - Five-hour utilization and reset time.
 - Seven-day utilization and reset time.

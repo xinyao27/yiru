@@ -7,17 +7,28 @@ import type {
   SpoolExecutionHostSessionReader,
   SpoolHistoricalSessionPurpose
 } from '../../../spool/spool-session-source'
+import type { SpoolContinuedSessionBindings } from '../../../spool/spool-continued-session-bindings'
 import { SpoolExecutionError } from '../../../spool/spool-execution-error'
 import type { OrcaRuntimeService } from '../../orca-runtime'
 import type { SpoolPairedRuntimeResolvedWorktree } from '../../../../shared/spool/spool-paired-runtime-host-contract'
+import type { RuntimeMobileSessionTerminalClientTab } from '../../../../shared/runtime-types'
 
 type SessionRuntime = Pick<OrcaRuntimeService, 'listMobileSessionTabs'>
+type ReadyMobileSessionTerminalTab = Extract<
+  RuntimeMobileSessionTerminalClientTab,
+  { status: 'ready' }
+>
+type PairedRuntimeLiveSessionWorktree = SpoolPairedRuntimeResolvedWorktree & {
+  actualHostScope: string
+  spoolIncarnationId: string
+}
 
 const MAX_HISTORICAL_SESSION_PAGE_BYTES = 4 * 1024 * 1024
 
 export async function projectPairedRuntimeLiveSessions(
   runtime: SessionRuntime,
-  worktree: SpoolPairedRuntimeResolvedWorktree,
+  continued: SpoolContinuedSessionBindings,
+  worktree: PairedRuntimeLiveSessionWorktree,
   signal?: AbortSignal
 ) {
   const snapshot = await runtime.listMobileSessionTabs(`id:${worktree.worktreeId}`)
@@ -25,22 +36,25 @@ export async function projectPairedRuntimeLiveSessions(
   if (snapshot.worktree !== worktree.worktreeId) {
     throw new Error('paired_runtime_session_worktree_mismatch')
   }
+  const readyTabs = snapshot.tabs.filter(
+    (tab): tab is ReadyMobileSessionTerminalTab =>
+      tab.type === 'terminal' &&
+      tab.status === 'ready' &&
+      tab.worktreeInstanceId === worktree.instanceId
+  )
+  continued.reconcile(worktree, new Set(readyTabs.map((tab) => tab.terminal)))
   const sessions: ReturnType<typeof SpoolPairedRuntimeLiveSessionSchema.parse>[] = []
-  for (const tab of snapshot.tabs) {
-    if (
-      tab.type !== 'terminal' ||
-      tab.status !== 'ready' ||
-      tab.worktreeInstanceId !== worktree.instanceId
-    ) {
-      continue
-    }
+  for (const tab of readyTabs) {
+    const binding = continued.resolveForExecutionHost(worktree, tab.terminal)
     const agent = tab.agentStatus?.agentType ?? tab.launchAgent
-    const provider = agent === 'claude' || agent === 'codex' ? agent : 'other'
+    const detectedProvider = agent === 'claude' || agent === 'codex' ? agent : 'other'
+    const provider = binding?.provider ?? detectedProvider
     const providerSessionId =
-      provider === 'other' ? null : normalizeIdentifier(tab.agentStatus?.providerSession?.id, 512)
+      binding?.providerSessionId ??
+      (provider === 'other' ? null : normalizeIdentifier(tab.agentStatus?.providerSession?.id, 512))
     const parsed = SpoolPairedRuntimeLiveSessionSchema.safeParse({
       terminalRef: tab.terminal,
-      title: tab.title,
+      title: binding?.title ?? tab.title,
       provider,
       providerSessionId
     })

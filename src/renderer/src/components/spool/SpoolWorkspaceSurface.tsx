@@ -1,5 +1,5 @@
 import type React from 'react'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { FileText, GitCompareArrows, LockKeyhole, ShieldCheck, SquareTerminal } from 'lucide-react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
@@ -11,7 +11,6 @@ import {
 } from '@/store/slices/spool-sharing-selectors'
 import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -66,9 +65,20 @@ function SpoolWorkspaceSurfaceContent({
   const canControl = useAppStore((state) => selectSpoolCanControl(state, route))
   const controlState = useAppStore((state) => selectSpoolRequesterControlState(state, route))
   const markControlPending = useAppStore((state) => state.markSpoolControlPending)
-  const setRoute = useAppStore((state) => state.setActiveSpoolWorkspaceRoute)
   const [activeTab, setActiveTab] = useState<SpoolWorkspaceTab>('sessions')
   const [requesting, setRequesting] = useState(false)
+  const sessionRoute = useMemo(
+    () =>
+      route.sessionRef
+        ? {
+            desktopRef: route.desktopRef,
+            worktreeRef: route.worktreeRef,
+            connectionEpoch: route.connectionEpoch,
+            sessionRef: route.sessionRef
+          }
+        : null,
+    [route.connectionEpoch, route.desktopRef, route.sessionRef, route.worktreeRef]
+  )
 
   const requestControl = useCallback(async (): Promise<void> => {
     if (requesting || controlState !== 'read-only') {
@@ -172,58 +182,19 @@ function SpoolWorkspaceSurfaceContent({
         </TabsList>
 
         <TabsContent value="sessions" className="min-h-0 overflow-hidden">
-          <div className="flex h-full min-h-0">
-            <aside className="scrollbar-sleek w-56 shrink-0 overflow-y-auto border-r border-border bg-card p-2 text-card-foreground">
-              <div className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-                {translate('auto.components.spool.SpoolWorkspaceSurface.sessions', 'Sessions')}
-              </div>
-              <div className="space-y-0.5">
-                {workspace.worktree.sessions.map((session) => {
-                  const selected = route.sessionRef === session.sessionRef
-                  return (
-                    <button
-                      key={session.sessionRef}
-                      type="button"
-                      data-current={selected ? 'true' : undefined}
-                      onClick={() =>
-                        setRoute({
-                          ...route,
-                          sessionRef: session.sessionRef
-                        })
-                      }
-                      className={cn(
-                        'flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px]',
-                        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                        selected ? 'bg-accent text-accent-foreground' : 'hover:bg-accent'
-                      )}
-                    >
-                      <SquareTerminal
-                        aria-hidden="true"
-                        className="size-3.5 shrink-0 text-muted-foreground"
-                      />
-                      <span className="min-w-0 flex-1 truncate">{session.title}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </aside>
-            {workspace.session && route.sessionRef ? (
-              <SpoolSessionPane
-                key={getSpoolSessionRouteKey({ ...route, sessionRef: route.sessionRef })}
-                route={{ ...route, sessionRef: route.sessionRef }}
-              />
-            ) : (
-              <SpoolWorkspaceEmptyPane
-                icon={SquareTerminal}
-                title={workspace.worktree.name}
-                description={translate(
-                  'auto.components.spool.SpoolWorkspaceSurface.selectSession',
-                  'Select a session to open its remote terminal.'
-                )}
-                canControl={canControl}
-              />
-            )}
-          </div>
+          {sessionRoute ? (
+            <SpoolSessionPane key={getSpoolSessionRouteKey(sessionRoute)} route={sessionRoute} />
+          ) : (
+            <SpoolWorkspaceEmptyPane
+              icon={SquareTerminal}
+              title={workspace.worktree.name}
+              description={translate(
+                'auto.components.spool.SpoolWorkspaceSurface.selectSession',
+                'Select a session from the sidebar to open its remote terminal.'
+              )}
+              canControl={canControl}
+            />
+          )}
         </TabsContent>
         <TabsContent value="files" className="min-h-0 overflow-hidden">
           <SpoolFilesPane route={route} supportsDiff={workspace.worktree.kind === 'git'} />

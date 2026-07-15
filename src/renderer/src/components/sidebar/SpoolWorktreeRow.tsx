@@ -5,6 +5,7 @@ import { translate } from '@/i18n/i18n'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 import type { SpoolWorktreeSidebarRow } from './spool-sidebar-rows'
+import { getProjectGroupHeaderPaddingLeft } from './worktree-list-indentation'
 
 type SpoolWorktreeRowProps = {
   row: SpoolWorktreeSidebarRow
@@ -53,12 +54,35 @@ export function SpoolWorktreeRow({
     <div
       data-current={row.active ? 'true' : undefined}
       className={cn(
-        'flex min-h-8 min-w-0 items-center rounded-md pl-5 pr-1 transition-colors',
+        'flex min-h-8 min-w-0 items-center rounded-md pr-1 transition-colors',
         row.active
           ? 'bg-worktree-sidebar-accent text-worktree-sidebar-accent-foreground'
           : 'text-worktree-sidebar-foreground hover:bg-worktree-sidebar-accent'
       )}
+      style={{ paddingLeft: getProjectGroupHeaderPaddingLeft(1) }}
     >
+      <button
+        type="button"
+        aria-current={row.active ? 'page' : undefined}
+        onClick={onSelect}
+        className="flex min-w-0 flex-1 items-center gap-1.5 py-1 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring"
+      >
+        <GitBranch aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
+        <span className="min-w-0 flex-1">
+          <span className="flex min-w-0 items-center gap-1">
+            <TruncatedSidebarLabel
+              text={row.name}
+              className="min-w-0 flex-1 text-[13px] font-normal leading-5"
+            />
+          </span>
+          {metadata ? (
+            <TruncatedSidebarLabel
+              text={metadata}
+              className="text-[11px] leading-4 text-muted-foreground"
+            />
+          ) : null}
+        </span>
+      </button>
       {hasSessions ? (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -82,34 +106,7 @@ export function SpoolWorktreeRow({
             {getDisclosureLabel(row)}
           </TooltipContent>
         </Tooltip>
-      ) : (
-        <span className="block size-5 shrink-0" />
-      )}
-      <button
-        type="button"
-        aria-current={row.active ? 'page' : undefined}
-        onClick={onSelect}
-        className="flex min-w-0 flex-1 items-center gap-1.5 py-1 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring"
-      >
-        <GitBranch aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-        <span className="min-w-0 flex-1">
-          <span className="flex min-w-0 items-center gap-1">
-            <TruncatedSidebarLabel
-              text={row.name}
-              className="min-w-0 flex-1 text-[13px] font-medium leading-4"
-            />
-            <span className="shrink-0 text-[11px] text-muted-foreground">
-              {translate('auto.components.sidebar.SpoolWorktreeRow.public', 'Public')}
-            </span>
-          </span>
-          {metadata ? (
-            <TruncatedSidebarLabel
-              text={metadata}
-              className="text-[11px] leading-4 text-muted-foreground"
-            />
-          ) : null}
-        </span>
-      </button>
+      ) : null}
     </div>
   )
 }

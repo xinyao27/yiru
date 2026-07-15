@@ -113,7 +113,9 @@ export class OrcaSpoolHostTerminal implements SpoolTerminalSubscriptionHost {
     void this.startSubscription(target, operation, context, emit, subscription, cleanup).catch(
       () => {
         if (!closed) {
-          emit({ kind: 'closed' } satisfies SpoolTerminalSubscriptionEvent)
+          // Why: setup failure does not prove the PTY exited and must not make
+          // provider continuation available while the agent may still run.
+          emit({ kind: 'unavailable' } satisfies SpoolTerminalSubscriptionEvent)
           close()
         }
       }
@@ -200,7 +202,12 @@ export class OrcaSpoolHostTerminal implements SpoolTerminalSubscriptionHost {
         emitEvent({ kind: 'closed' })
         subscription.close()
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!context.signal.aborted) {
+          emit({ kind: 'unavailable' } satisfies SpoolTerminalSubscriptionEvent)
+          subscription.close()
+        }
+      })
   }
 
   private async resolveTerminal(target: SpoolPublicWorktreeInstance, handle: string) {

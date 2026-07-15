@@ -15,10 +15,17 @@ export type SpoolContinuedSessionBinding = {
   title: string
 }
 
+type SpoolContinuedSessionExecutionHostIdentity = {
+  instanceId: string
+  spoolIncarnationId: string
+  actualHostScope: string
+  executionHostId: string
+}
+
 /** Bridges a resumed PTY to its provider session before the first agent hook arrives. */
 export class SpoolContinuedSessionBindings {
   private readonly bindings = new Map<string, SpoolContinuedSessionBinding>()
-  private readonly listeners = new Set<() => void>()
+  private readonly listeners = new Set<(instanceId: string) => void>()
 
   remember(
     worktree: SpoolPublicWorktreeInstance,
@@ -27,6 +34,11 @@ export class SpoolContinuedSessionBindings {
   ): void {
     if (!terminalHandle || terminalHandle.length > 2048) {
       return
+    }
+    const changedInstances = new Set([worktree.instanceId])
+    const replaced = this.bindings.get(terminalHandle)
+    if (replaced) {
+      changedInstances.add(replaced.worktreeInstanceId)
     }
     this.bindings.delete(terminalHandle)
     this.bindings.set(terminalHandle, {
@@ -45,9 +57,15 @@ export class SpoolContinuedSessionBindings {
       if (!oldest) {
         break
       }
+      const evicted = this.bindings.get(oldest)
+      if (evicted) {
+        changedInstances.add(evicted.worktreeInstanceId)
+      }
       this.bindings.delete(oldest)
     }
-    this.emitChange()
+    for (const instanceId of changedInstances) {
+      this.emitChange(instanceId)
+    }
   }
 
   resolve(
@@ -57,12 +75,27 @@ export class SpoolContinuedSessionBindings {
     >,
     terminalHandle: string
   ): SpoolContinuedSessionBinding | null {
+    return this.resolveForExecutionHost(
+      {
+        instanceId: worktree.instanceId,
+        spoolIncarnationId: worktree.spoolIncarnationId,
+        actualHostScope: worktree.actualHostScope,
+        executionHostId: worktree.target.executionHostId
+      },
+      terminalHandle
+    )
+  }
+
+  resolveForExecutionHost(
+    worktree: SpoolContinuedSessionExecutionHostIdentity,
+    terminalHandle: string
+  ): SpoolContinuedSessionBinding | null {
     const binding = this.bindings.get(terminalHandle)
     return binding &&
       binding.worktreeInstanceId === worktree.instanceId &&
       binding.spoolIncarnationId === worktree.spoolIncarnationId &&
       binding.actualHostScope === worktree.actualHostScope &&
-      binding.executionHostId === worktree.target.executionHostId
+      binding.executionHostId === worktree.executionHostId
       ? { ...binding }
       : null
   }
@@ -71,7 +104,7 @@ export class SpoolContinuedSessionBindings {
     worktree: Pick<SpoolPublicWorktreeInstance, 'worktreeId' | 'instanceId' | 'spoolIncarnationId'>,
     liveHandles: ReadonlySet<string>
   ): void {
-    let changed = false
+    const changedInstances = new Set<string>()
     for (const [handle, binding] of this.bindings) {
       const replaced =
         binding.worktreeId === worktree.worktreeId &&
@@ -83,23 +116,23 @@ export class SpoolContinuedSessionBindings {
         !liveHandles.has(handle)
       if (replaced || closed) {
         this.bindings.delete(handle)
-        changed = true
+        changedInstances.add(binding.worktreeInstanceId)
       }
     }
-    if (changed) {
-      this.emitChange()
+    for (const instanceId of changedInstances) {
+      this.emitChange(instanceId)
     }
   }
 
-  subscribe(listener: () => void): () => void {
+  subscribe(listener: (instanceId: string) => void): () => void {
     this.listeners.add(listener)
     return () => this.listeners.delete(listener)
   }
 
-  private emitChange(): void {
+  private emitChange(instanceId: string): void {
     for (const listener of this.listeners) {
       try {
-        listener()
+        listener(instanceId)
       } catch {
         // Why: a catalog observer cannot turn a completed terminal spawn into a failed mutation.
         console.error('[spool] Continued-session observer failed')

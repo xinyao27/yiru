@@ -198,6 +198,9 @@ export type SpoolGitHistoryResult = {
 
 export type SpoolMutationResult = { ok: true }
 
+/** Internal owner/paired-runtime result; requester RPC retains its connection-scoped opaque ref. */
+export type SpoolSessionContinueHostResult = { terminalHandle: string }
+
 export type SpoolSessionTranscriptBlock =
   | { type: 'text'; text: string }
   | { type: 'tool-call'; name: string; input: string }
@@ -232,7 +235,7 @@ export type SpoolExecutionResultByKind = {
   'terminal.input': SpoolMutationResult
   'terminal.resize': SpoolMutationResult
   'session.read': SpoolSessionReadResult
-  'session.continue': SpoolMutationResult
+  'session.continue': SpoolSessionContinueHostResult
 }
 
 export type SpoolExecutionResult<TOperation extends SpoolExecutionOperation> =
@@ -250,7 +253,8 @@ export type SpoolTerminalSubscriptionEvent =
   | { kind: 'snapshot'; data: string; cols: number; rows: number; sequence: number }
   | { kind: 'output'; data: string; sequence: number }
   | { kind: 'resized'; cols: number; rows: number; sequence: number }
-  | { kind: 'closed' }
+  | { kind: 'closed'; canContinue?: boolean }
+  | { kind: 'unavailable' }
 
 export type SpoolSubscriptionEvent<TOperation extends SpoolSubscriptionOperation> =
   TOperation extends SpoolTerminalSubscribeOperation ? SpoolTerminalSubscriptionEvent : never

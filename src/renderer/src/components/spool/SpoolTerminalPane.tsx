@@ -29,14 +29,22 @@ import {
 } from './spool-terminal-mutation-queue'
 
 type TerminalConnectionStatus = 'connecting' | 'live' | 'closed' | 'error'
+type RenderableSpoolTerminalSubscriptionEvent = Exclude<
+  SpoolTerminalSubscriptionEvent,
+  { kind: 'unavailable' }
+>
 const SPOOL_TERMINAL_INPUT_FLUSH_MS = 8
 
 export function SpoolTerminalPane({
   route,
-  onSubscriptionError
+  onSubscriptionError,
+  onLive,
+  onClosed
 }: {
   route: SpoolSessionRoute
-  onSubscriptionError?: (code: SpoolRequesterTransportErrorCode) => void
+  onSubscriptionError?: (code: SpoolRequesterTransportErrorCode | null) => void
+  onLive?: () => void
+  onClosed?: (canContinue: boolean) => void
 }): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null)
   const terminalRef = useRef<Terminal | null>(null)
@@ -145,18 +153,32 @@ export function SpoolTerminalPane({
     const api = window.api.spoolSharing
     let disposed = false
     let started = false
+    let closedNotified = false
     const subscriptionId = crypto.randomUUID()
     lastSequenceRef.current = -1
     terminalRef.current?.reset()
 
+    const notifyClosed = (canContinue: boolean): void => {
+      if (closedNotified) {
+        return
+      }
+      closedNotified = true
+      onClosed?.(canContinue)
+    }
     const dispatch = (event: SpoolRequesterSubscriptionEvent): void => {
       if (event.type === 'next') {
         applyTerminalEvent(event.value, terminalRef.current, lastSequenceRef, suppressResizeRef)
         if (isSpoolTerminalSubscriptionEvent(event.value)) {
           setStatus(event.value.kind === 'closed' ? 'closed' : 'live')
+          if (event.value.kind === 'closed') {
+            notifyClosed(event.value.canContinue === true)
+          } else {
+            onLive?.()
+          }
         }
       } else if (event.type === 'complete') {
         setStatus('closed')
+        notifyClosed(false)
       } else {
         setStatus('error')
         onSubscriptionError?.(event.code)
@@ -184,9 +206,11 @@ export function SpoolTerminalPane({
           void api.stopSubscription({ subscriptionId })
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (!disposed) {
           setStatus('error')
+          const code = getSpoolRequesterTransportErrorCode(error)
+          onSubscriptionError?.(code)
         }
       })
 
@@ -197,7 +221,14 @@ export function SpoolTerminalPane({
         void api.stopSubscription({ subscriptionId })
       }
     }
-  }, [onSubscriptionError, route.connectionEpoch, route.desktopRef, route.sessionRef])
+  }, [
+    onClosed,
+    onLive,
+    onSubscriptionError,
+    route.connectionEpoch,
+    route.desktopRef,
+    route.sessionRef
+  ])
 
   return (
     <div className="pane-manager-root relative min-h-0 min-w-0 flex-1 overflow-hidden bg-[var(--editor-surface)]">
@@ -315,13 +346,15 @@ function applyTerminalEvent(
   }
 }
 
-function isSpoolTerminalSubscriptionEvent(value: unknown): value is SpoolTerminalSubscriptionEvent {
+function isSpoolTerminalSubscriptionEvent(
+  value: unknown
+): value is RenderableSpoolTerminalSubscriptionEvent {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return false
   }
   const event = value as Record<string, unknown>
   if (event.kind === 'closed') {
-    return true
+    return event.canContinue === undefined || typeof event.canContinue === 'boolean'
   }
   if (!Number.isSafeInteger(event.sequence) || Number(event.sequence) < 0) {
     return false

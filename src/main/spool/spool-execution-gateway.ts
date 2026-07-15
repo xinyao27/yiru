@@ -160,7 +160,7 @@ export class SpoolExecutionGateway {
           try {
             const projectedEvent = event as SpoolSubscriptionEvent<TOperation>
             emit(projectedEvent)
-            if (projectedEvent.kind === 'closed') {
+            if (projectedEvent.kind === 'closed' || projectedEvent.kind === 'unavailable') {
               // Why: downstream completion must release the per-worktree slot even if the client
               // keeps the rendered terminal mounted and never sends an explicit unsubscribe.
               subscription.close()

@@ -1,12 +1,18 @@
 import type { SpoolExecutionGateway } from './spool-execution-gateway'
-import type { BoundSpoolSession, SpoolCatalogProjection } from './spool-catalog-projection'
+import type { SpoolCatalogProjection } from './spool-catalog-projection'
 import { SpoolRpcError, type BoundSpoolInvocation } from './spool-rpc-gateway'
 import type {
   SpoolResolvedHistoricalSession,
   SpoolResolvedLiveSession,
+  SpoolResolvedSession,
   SpoolSessionCatalog
 } from './spool-session-catalog'
 import type { SpoolShareCatalog } from './spool-share-catalog'
+import type {
+  SpoolTerminalAttachment,
+  SpoolTerminalAttachmentRegistry
+} from './spool-terminal-attachment-registry'
+import { sameSpoolOwnerWorktreeSnapshotTarget } from './spool-publication-snapshot-guard'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
 import type { SpoolWorktreeVisibility } from './spool-worktree-visibility'
 
@@ -14,6 +20,7 @@ export type SpoolSessionMethodDependencies = {
   catalog: SpoolShareCatalog
   visibility: SpoolWorktreeVisibility
   sessions: SpoolSessionCatalog
+  attachments: SpoolTerminalAttachmentRegistry
   execution: SpoolExecutionGateway
 }
 
@@ -46,16 +53,43 @@ export async function bindSpoolSession(
   requestParams: Record<string, unknown>
 ): Promise<BoundSpoolInvocation> {
   const projection = dependencies.catalog.getProjection(connectionId)
-  const reference = await projection?.resolveSession(sessionRef)
-  if (!projection || !reference) {
+  if (!projection) {
     throw new SpoolRpcError('resource_not_found')
   }
+  if (expectedKind === 'live') {
+    const attachment = dependencies.attachments.resolve(connectionId, sessionRef)
+    if (attachment) {
+      const worktree = await dependencies.visibility.resolvePublicInstance(
+        attachment.worktree.instanceId,
+        attachment.worktree.shareEpoch
+      )
+      if (!worktree || !matchesTerminalAttachment(attachment, worktree)) {
+        throw new SpoolRpcError('resource_not_found')
+      }
+      return bindResolvedSpoolSession(
+        dependencies,
+        connectionId,
+        projection,
+        sessionRef,
+        worktree,
+        attachment.session,
+        expectedKind,
+        requestParams
+      )
+    }
+  }
+  const reference = await projection.resolveSession(sessionRef)
+  if (!reference) {
+    throw new SpoolRpcError('resource_not_found')
+  }
+  const session = dependencies.sessions.resolveSession(reference.worktree, reference.sessionKey)
   return bindResolvedSpoolSession(
     dependencies,
     connectionId,
     projection,
     sessionRef,
-    reference,
+    reference.worktree,
+    session,
     expectedKind,
     requestParams
   )
@@ -68,16 +102,41 @@ export function bindSpoolTerminalMutationSession(
   requestParams: Record<string, unknown>
 ): BoundSpoolInvocation {
   const projection = dependencies.catalog.getProjection(connectionId)
-  const reference = projection?.resolvePublishedSession(sessionRef)
-  if (!projection || !reference) {
+  if (!projection) {
     throw new SpoolRpcError('resource_not_found')
   }
+  const attachment = dependencies.attachments.resolve(connectionId, sessionRef)
+  if (attachment) {
+    const worktree = dependencies.visibility.getPublishedInstance(
+      attachment.worktree.instanceId,
+      attachment.worktree.shareEpoch
+    )
+    if (!worktree || !matchesTerminalAttachment(attachment, worktree)) {
+      throw new SpoolRpcError('resource_not_found')
+    }
+    return bindResolvedSpoolSession(
+      dependencies,
+      connectionId,
+      projection,
+      sessionRef,
+      worktree,
+      attachment.session,
+      'live',
+      requestParams
+    )
+  }
+  const reference = projection.resolvePublishedSession(sessionRef)
+  if (!reference) {
+    throw new SpoolRpcError('resource_not_found')
+  }
+  const session = dependencies.sessions.resolveSession(reference.worktree, reference.sessionKey)
   return bindResolvedSpoolSession(
     dependencies,
     connectionId,
     projection,
     sessionRef,
-    reference,
+    reference.worktree,
+    session,
     'live',
     requestParams
   )
@@ -88,12 +147,11 @@ function bindResolvedSpoolSession(
   connectionId: string,
   projection: SpoolCatalogProjection,
   sessionRef: string,
-  reference: BoundSpoolSession,
+  worktree: SpoolPublicWorktreeInstance,
+  session: SpoolResolvedSession | null,
   expectedKind: 'live' | 'historical',
   requestParams: Record<string, unknown>
 ): BoundSpoolInvocation {
-  const { worktree, sessionKey } = reference
-  const session = dependencies.sessions.resolveSession(worktree, sessionKey)
   if (session?.kind !== expectedKind) {
     throw new SpoolRpcError('resource_not_found')
   }
@@ -118,6 +176,27 @@ function bindResolvedSpoolSession(
       ? ({ ...base, kind: 'live-session', session } satisfies SpoolLiveSessionInvocation)
       : historicalInvocation(dependencies.sessions, base, session)
   return { value, isCurrent, subscribeInvalidation }
+}
+
+function matchesTerminalAttachment(
+  attachment: SpoolTerminalAttachment,
+  worktree: SpoolPublicWorktreeInstance
+): boolean {
+  const expected = attachment.worktree
+  const session = attachment.session
+  return (
+    expected.worktreeId === worktree.worktreeId &&
+    expected.instanceId === worktree.instanceId &&
+    expected.projectId === worktree.projectId &&
+    expected.shareEpoch === worktree.shareEpoch &&
+    expected.spoolIncarnationId === worktree.spoolIncarnationId &&
+    expected.actualHostScope === worktree.actualHostScope &&
+    sameSpoolOwnerWorktreeSnapshotTarget(expected.target, worktree.target) &&
+    session.worktreeInstanceId === worktree.instanceId &&
+    session.spoolIncarnationId === worktree.spoolIncarnationId &&
+    session.actualHostScope === worktree.actualHostScope &&
+    session.executionHostId === worktree.target.executionHostId
+  )
 }
 
 export function asSpoolSessionInvocation(value: unknown): SpoolSessionInvocation {

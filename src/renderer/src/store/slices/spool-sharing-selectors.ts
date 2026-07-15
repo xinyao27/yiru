@@ -54,9 +54,8 @@ export function resolveSpoolWorkspaceRoute(
     const session = route.sessionRef
       ? (worktree.sessions.find((candidate) => candidate.sessionRef === route.sessionRef) ?? null)
       : null
-    if (route.sessionRef && !session) {
-      return null
-    }
+    // Why: session pagination is rebuilt after an owner resumes an agent; keep
+    // the selected worktree surface mounted while its stable terminal handoff attaches.
     return { desktop, project, worktree, session }
   }
   return null

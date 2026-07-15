@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { TERMINAL_INPUT_MAX_BYTES } from '../../shared/terminal-input'
 import type { SpoolExecutionOperation } from '../../shared/spool/spool-operation-contract'
 import type { SpoolExecutionGateway } from './spool-execution-gateway'
-import type { SpoolRpcMethodSpec } from './spool-rpc-gateway'
+import { SpoolRpcError, type SpoolRpcMethodSpec } from './spool-rpc-gateway'
 import {
   asHistoricalSessionInvocation,
   asLiveSessionInvocation,
@@ -72,11 +72,31 @@ export function createSpoolSessionRpcMethods(
       },
       execute: async (bound, context) => {
         const invocation = asHistoricalSessionInvocation(bound)
-        await dependencies.execution.invoke(
+        const projection = dependencies.catalog.getProjection(context.principal.connectionId)
+        if (!projection?.retainSessionReference(invocation.sessionRef)) {
+          throw new SpoolRpcError('resource_not_found')
+        }
+        // Why: paired-runtime outcome uncertainty may hide the new PTY handle;
+        // retaining this alias lets catalog fallback attach without relaunching.
+        const continued = await dependencies.execution.invoke(
           spoolSessionExecutionTarget(invocation, context.principal.connectionId),
           { kind: 'session.continue', ownerRecordKey: invocation.ownerRecordKey }
         )
-        // Why: the requester can attach through the same alias after the live tab appears.
+        const terminalHandle = requireContinuedTerminalHandle(continued.terminalHandle)
+        if (context.signal.aborted || !invocation.isCurrent()) {
+          // Why: a completed launch must not resurrect an attachment after its
+          // physical connection was closed or replaced.
+          throw new SpoolRpcError('outcome_unknown')
+        }
+        // Why: retaining the already-known alias makes a lost continue response
+        // recoverable by subscribing, without repeating the agent launch.
+        dependencies.attachments.remember(
+          context.principal.connectionId,
+          invocation.sessionRef,
+          invocation.worktree,
+          invocation.session,
+          terminalHandle
+        )
         return { sessionRef: invocation.sessionRef }
       },
       project: identityProjector
@@ -100,7 +120,7 @@ export function createSpoolSessionRpcMethods(
         const invocation = asLiveSessionInvocation(bound)
         const parsed = TerminalSubscribeParams.parse(invocation.requestParams)
         return createTerminalSessionStream(
-          dependencies.execution,
+          dependencies,
           invocation,
           context.principal.connectionId,
           parsed.scrollbackRows
@@ -171,13 +191,13 @@ export function createSpoolSessionRpcMethods(
 }
 
 function createTerminalSessionStream(
-  execution: SpoolExecutionGateway,
+  dependencies: SpoolSessionMethodDependencies,
   invocation: SpoolLiveSessionInvocation,
   connectionId: string,
   scrollbackRows?: number
 ) {
   return createSpoolRpcStream(async (sink) => {
-    const subscription = await execution.subscribe(
+    const subscription = await dependencies.execution.subscribe(
       spoolSessionExecutionTarget(invocation, connectionId),
       {
         kind: 'terminal.subscribe',
@@ -185,11 +205,23 @@ function createTerminalSessionStream(
         ...(scrollbackRows === undefined ? {} : { scrollbackRows })
       },
       (event) => {
-        sink.next(event)
+        if (event.kind === 'unavailable') {
+          sink.error(new SpoolRpcError('resource_unavailable'))
+          return
+        }
         if (event.kind === 'closed') {
+          dependencies.attachments.forget(connectionId, invocation.sessionRef)
+          sink.next({
+            kind: 'closed',
+            canContinue:
+              invocation.session.providerSessionId !== null &&
+              invocation.session.provider !== 'other'
+          })
           // Why: a naturally ended PTY must release the RPC request id even when the viewer stays mounted.
           sink.complete()
+          return
         }
+        sink.next(event)
       }
     )
     return () => subscription.close()
@@ -210,5 +242,19 @@ function invokeTerminalSessionMutation(
 }
 
 function identityProjector(value: unknown): unknown {
+  return value
+}
+
+function requireContinuedTerminalHandle(value: unknown): string {
+  if (
+    typeof value !== 'string' ||
+    value.length === 0 ||
+    value.length > 2_048 ||
+    value.includes('\0')
+  ) {
+    // Why: the agent may already be running, so an invalid host handoff is an
+    // ambiguous mutation result rather than a safe invitation to retry.
+    throw new SpoolRpcError('outcome_unknown')
+  }
   return value
 }

@@ -4689,29 +4689,21 @@
           "forget": "Orca에서 제거",
           "reconnectAndDelete": "재연결 후 삭제"
         },
-        "DesktopQuotaRows": {
-          "meterLabel": "{{value0}}: {{value1}}% used in {{value2}}",
-          "windowUnavailable": "{{value0}}: {{value1}} usage unavailable",
-          "fiveHour": "5h",
-          "sevenDay": "7d",
-          "resetsAt": "{{value0}}에 재설정"
-        },
         "SpoolDesktopRow": {
           "connecting": "Connecting…",
           "disconnected": "Disconnected"
-        },
-        "SpoolSessionRow": {
-          "otherProvider": "Other"
         },
         "SpoolWorktreeRow": {
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "세션 불러오는 중…",
-          "public": "공개",
           "sessionsUnavailable": "세션 목록을 사용할 수 없음"
         },
         "SpoolSidebarProjectedRow": {
           "heading": "Spool"
+        },
+        "SpoolDesktopUsageHoverCard": {
+          "usage": "Usage"
         }
       },
       "spool": {
@@ -4759,23 +4751,20 @@
           "revoke": "취소"
         },
         "SpoolSessionPane": {
-          "transcriptTitle": "세션 대화 기록",
-          "continue": "세션 계속하기",
           "continueFailed": "이 세션을 계속할 수 없습니다.",
           "continueOutcomeUnknown": "이 세션이 소유자의 데스크톱에서 이미 계속되었을 수 있습니다. 다시 계속하기 전에 세션 목록과 터미널을 확인하세요.",
-          "continueOutcomeUnknownPersistent": "세션이 이미 계속되었을 수 있습니다. 다시 계속하기 전에 세션 목록과 터미널을 확인하세요.",
-          "transcriptUnavailable": "이 세션의 대화 기록을 사용할 수 없습니다.",
-          "retry": "다시 시도",
-          "transcriptTruncated": "이 대화 기록의 최근 부분만 표시됩니다.",
-          "image": "이미지",
-          "toolResult": "도구 결과",
-          "role": {
-            "user": "사용자",
-            "assistant": "어시스턴트",
-            "tool": "도구",
-            "reasoning": "추론",
-            "system": "시스템"
-          }
+          "retryContinue": "Try again",
+          "retryAttach": "Reconnect terminal",
+          "startingAfterGrant": "Starting the agent on the owner’s desktop…",
+          "controlRequired": "Request control to continue this agent session on the owner’s desktop.",
+          "continuing": "Continuing the agent on the owner’s desktop…",
+          "attaching": "Connecting to the agent terminal…",
+          "attachFailed": "The agent started, but its terminal could not be connected.",
+          "continueAgent": "Continue agent",
+          "sessionEnded": "This agent session has ended.",
+          "controlRequiredAfterClose": "Request control to continue this agent session again.",
+          "terminalEnded": "This terminal session has ended.",
+          "terminalConnectionLost": "The remote terminal connection was lost."
         },
         "SpoolTerminalPane": {
           "connecting": "터미널 연결 중…",
