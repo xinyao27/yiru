@@ -104,32 +104,33 @@ export class DefaultTailnetPeerDirectory implements TailnetPeerDirectory {
       }
       return
     }
-    const discovered = await mapWithConcurrency(peers, PEER_PROBE_CONCURRENCY, (peer) =>
-      this.probePeer(peer)
+    const successfulNodes = new Set<string>()
+    await runWithConcurrency(
+      peers.filter((peer) => peer.online !== false),
+      PEER_PROBE_CONCURRENCY,
+      async (peer) => {
+        const desktop = await this.probePeer(peer)
+        if (!desktop || this.stopped) {
+          return
+        }
+        successfulNodes.add(desktop.tailnetNodeId)
+        const existing = this.desktopsByNode.get(desktop.tailnetNodeId)
+        const changed = !existing || !desktopsEqual(existing.desktop, desktop)
+        this.desktopsByNode.set(desktop.tailnetNodeId, {
+          desktop,
+          missedReconciliations: 0
+        })
+        if (changed) {
+          // Why: reachable Desktops should appear as soon as their probe succeeds,
+          // without waiting for unrelated offline Tailnet peers to time out.
+          this.emit()
+        }
+      }
     )
     if (this.stopped) {
       return
     }
-    const successfulNodes = new Set<string>()
-    let changed = false
-    for (const desktop of discovered) {
-      if (!desktop) {
-        continue
-      }
-      successfulNodes.add(desktop.tailnetNodeId)
-      const existing = this.desktopsByNode.get(desktop.tailnetNodeId)
-      if (!existing || !desktopsEqual(existing.desktop, desktop)) {
-        changed = true
-      }
-      this.desktopsByNode.set(desktop.tailnetNodeId, {
-        desktop,
-        missedReconciliations: 0
-      })
-    }
     if (this.recordMisses(successfulNodes)) {
-      changed = true
-    }
-    if (changed) {
       this.emit()
     }
   }
@@ -199,19 +200,17 @@ function desktopsEqual(left: DiscoveredSpoolDesktop, right: DiscoveredSpoolDeskt
   )
 }
 
-async function mapWithConcurrency<T, TResult>(
+async function runWithConcurrency<T>(
   values: readonly T[],
   concurrency: number,
-  operation: (value: T) => Promise<TResult>
-): Promise<TResult[]> {
-  const results: TResult[] = []
+  operation: (value: T) => Promise<void>
+): Promise<void> {
   let nextIndex = 0
   async function worker(): Promise<void> {
     while (nextIndex < values.length) {
       const index = nextIndex++
-      results[index] = await operation(values[index])
+      await operation(values[index])
     }
   }
   await Promise.all(Array.from({ length: Math.min(concurrency, values.length) }, () => worker()))
-  return results
 }
