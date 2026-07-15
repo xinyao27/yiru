@@ -6,6 +6,7 @@ import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 import type { SpoolDesktopSidebarRow } from './spool-sidebar-rows'
 import { SpoolDesktopUsageHoverCard } from './SpoolDesktopUsageHoverCard'
+import { getProjectGroupHeaderPaddingLeft } from './worktree-list-indentation'
 
 type SpoolDesktopRowProps = {
   row: SpoolDesktopSidebarRow
@@ -53,24 +54,26 @@ export function SpoolDesktopRow({ row, onToggle }: SpoolDesktopRowProps): React.
     </>
   )
   const className = cn(
-    'flex h-8 w-full min-w-0 items-center gap-2 rounded-md border px-2 text-left transition-all',
+    'flex h-8 w-full min-w-0 items-center gap-2 rounded-md pr-2 text-left transition-colors',
+    'hover:bg-worktree-sidebar-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring',
     row.connectionStatus === 'disconnected'
-      ? 'border-worktree-sidebar-border/70 bg-worktree-sidebar-accent/35 text-muted-foreground'
-      : 'border-worktree-sidebar-border bg-worktree-sidebar-accent/70',
-    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+      ? 'text-muted-foreground'
+      : 'text-worktree-sidebar-foreground'
   )
+  // Why: Desktop and Project rows share one top-level sidebar alignment.
   const trigger = (
     <button
       type="button"
       aria-expanded={hasProjects ? row.expanded : undefined}
       onClick={hasProjects ? onToggle : undefined}
       className={className}
+      style={{ paddingLeft: getProjectGroupHeaderPaddingLeft(0) }}
     >
       {content}
     </button>
   )
   return (
-    <div className="px-2 pt-1">
+    <div className="pt-1">
       <HoverCard openDelay={200} closeDelay={100}>
         <HoverCardTrigger asChild>{trigger}</HoverCardTrigger>
         <SpoolDesktopUsageHoverCard row={row} />
