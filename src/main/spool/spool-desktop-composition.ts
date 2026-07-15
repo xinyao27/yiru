@@ -32,6 +32,7 @@ import { SpoolSessionProvenanceIndex } from './spool-session-provenance-index'
 import { SpoolActualHostSessionRootMatcher } from './spool-session-root-matcher'
 import { SpoolShareCatalog } from './spool-share-catalog'
 import { SpoolTicketAuthority } from './spool-ticket-authority'
+import { SpoolTerminalAttachmentRegistry } from './spool-terminal-attachment-registry'
 import { DefaultTailnetPeerDirectory } from './tailnet-peer-directory'
 import { TailscaleCommandAdapter } from './tailscale-command-adapter'
 import { SpoolVisibilityDenyJournal } from './spool-visibility-deny-journal'
@@ -146,6 +147,7 @@ export function createSpoolDesktopComposition(
     ownerRuntimeId: options.ownerRuntimeId,
     isPublic: (instanceId, shareEpoch) => visibility.isPublic(instanceId, shareEpoch)
   })
+  const terminalAttachments = new SpoolTerminalAttachmentRegistry()
   const execution = new SpoolExecutionGateway({
     resolveAdapter: host.resolveAdapter,
     revalidateTarget: async (target) => {
@@ -167,7 +169,8 @@ export function createSpoolDesktopComposition(
     visibility,
     access,
     execution,
-    sessions
+    sessions,
+    attachments: terminalAttachments
   })
   const gateway = new SpoolRpcGateway({
     ownerRuntimeId: options.ownerRuntimeId,
@@ -187,7 +190,11 @@ export function createSpoolDesktopComposition(
         try {
           execution.closeConnection(connectionId)
         } finally {
-          shareCatalog.closeProjection(connectionId)
+          try {
+            terminalAttachments.closeConnection(connectionId)
+          } finally {
+            shareCatalog.closeProjection(connectionId)
+          }
         }
       }
     }

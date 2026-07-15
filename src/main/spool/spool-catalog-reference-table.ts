@@ -1,5 +1,7 @@
 import { randomBytes } from 'node:crypto'
 
+const MAX_PINNED_SESSION_REFERENCES = 2_000
+
 export type SpoolCatalogReferenceBinding =
   | { kind: 'project'; aliasKey: string; projectKey: string }
   | {
@@ -34,6 +36,7 @@ export type SpoolCatalogReferenceBinding =
 export class SpoolCatalogReferenceTable {
   private readonly referenceByAliasKey = new Map<string, string>()
   private readonly bindingByReference = new Map<string, SpoolCatalogReferenceBinding>()
+  private readonly pinnedSessionReferences = new Map<string, string>()
 
   reconcile(bindings: readonly SpoolCatalogReferenceBinding[]): void {
     const nextReferences = new Map<string, string>()
@@ -42,6 +45,7 @@ export class SpoolCatalogReferenceTable {
     for (const binding of bindings) {
       const reference =
         nextReferences.get(binding.aliasKey) ??
+        this.pinnedSessionReferences.get(binding.aliasKey) ??
         this.referenceByAliasKey.get(binding.aliasKey) ??
         this.createReference(reservedReferences)
       nextReferences.set(binding.aliasKey, reference)
@@ -70,7 +74,30 @@ export class SpoolCatalogReferenceTable {
     return this.bindingByReference.get(reference) ?? null
   }
 
+  pinSession(reference: string): boolean {
+    const binding = this.bindingByReference.get(reference)
+    if (binding?.kind !== 'session') {
+      return false
+    }
+    this.pinnedSessionReferences.delete(binding.aliasKey)
+    this.pinnedSessionReferences.set(binding.aliasKey, reference)
+    while (this.pinnedSessionReferences.size > MAX_PINNED_SESSION_REFERENCES) {
+      const oldest = this.pinnedSessionReferences.keys().next().value
+      if (!oldest) {
+        break
+      }
+      this.pinnedSessionReferences.delete(oldest)
+    }
+    return true
+  }
+
   invalidateInstance(instanceId: string): void {
+    for (const [aliasKey, reference] of this.pinnedSessionReferences) {
+      const binding = this.bindingByReference.get(reference)
+      if (binding && binding.kind !== 'project' && binding.instanceId === instanceId) {
+        this.pinnedSessionReferences.delete(aliasKey)
+      }
+    }
     this.reconcile(
       [...this.bindingByReference.values()].filter(
         (binding) => binding.kind === 'project' || binding.instanceId !== instanceId
@@ -81,13 +108,27 @@ export class SpoolCatalogReferenceTable {
   clear(): void {
     this.referenceByAliasKey.clear()
     this.bindingByReference.clear()
+    this.pinnedSessionReferences.clear()
   }
 
   private createReference(reservedReferences: ReadonlySet<string>): string {
     let reference: string
     do {
       reference = randomBytes(16).toString('base64url')
-    } while (this.bindingByReference.has(reference) || reservedReferences.has(reference))
+    } while (
+      this.bindingByReference.has(reference) ||
+      reservedReferences.has(reference) ||
+      this.isPinnedSessionReference(reference)
+    )
     return reference
+  }
+
+  private isPinnedSessionReference(reference: string): boolean {
+    for (const pinned of this.pinnedSessionReferences.values()) {
+      if (pinned === reference) {
+        return true
+      }
+    }
+    return false
   }
 }

@@ -2,7 +2,7 @@ import { lstat } from 'node:fs/promises'
 import { Readable } from 'node:stream'
 import type {
   SpoolExecutionOperation,
-  SpoolMutationResult,
+  SpoolSessionContinueHostResult,
   SpoolSessionReadResult
 } from '../../shared/spool/spool-operation-contract'
 import { parseExecutionHostId } from '../../shared/execution-host'
@@ -43,7 +43,7 @@ export class OrcaSpoolHostSessions {
     target: SpoolPublicWorktreeInstance,
     operation: SessionOperation,
     context: SpoolHostOperationContext
-  ): Promise<SpoolSessionReadResult | SpoolMutationResult> {
+  ): Promise<SpoolSessionReadResult | SpoolSessionContinueHostResult> {
     const record = this.records.resolve(operation.ownerRecordKey)
     if (
       !record ||
@@ -92,7 +92,7 @@ export class OrcaSpoolHostSessions {
       }
     })
     this.continued.remember(target, record, created.handle)
-    return { ok: true }
+    return { terminalHandle: created.handle }
   }
 
   private async readLocalTranscript(

@@ -119,19 +119,19 @@ export function estimateWorkspaceSidebarRowSize(args: {
   if (projected.kind === 'spool-availability') {
     return 144
   }
-  if (projected.kind === 'spool-section' || projected.row.type === 'spool-project') {
+  if (projected.kind === 'spool-section') {
+    return 32
+  }
+  if (projected.row.type === 'spool-project') {
     return 28
   }
   if (projected.row.type === 'spool-desktop') {
-    return 42
-  }
-  if (projected.row.type === 'spool-desktop-quota') {
-    return 76
+    return 36
   }
   if (projected.row.type === 'spool-worktree') {
-    return 38
+    return projected.row.branch || projected.row.sessionCatalogStatus !== 'complete' ? 44 : 32
   }
-  return 28
+  return 24
 }
 
 export function extractWorkspaceSidebarVirtualRowIndexes(args: {

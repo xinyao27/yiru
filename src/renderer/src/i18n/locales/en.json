@@ -4690,29 +4690,21 @@
           "forget": "Remove from Orca",
           "reconnectAndDelete": "Reconnect & Delete"
         },
-        "DesktopQuotaRows": {
-          "meterLabel": "{{value0}}: {{value1}}% used in {{value2}}",
-          "windowUnavailable": "{{value0}}: {{value1}} usage unavailable",
-          "fiveHour": "5h",
-          "sevenDay": "7d",
-          "resetsAt": "Resets {{value0}}"
-        },
         "SpoolDesktopRow": {
           "connecting": "Connecting…",
           "disconnected": "Disconnected"
-        },
-        "SpoolSessionRow": {
-          "otherProvider": "Other"
         },
         "SpoolWorktreeRow": {
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "Loading sessions…",
-          "public": "Public",
           "sessionsUnavailable": "Session list unavailable"
         },
         "SpoolSidebarProjectedRow": {
           "heading": "Spool"
+        },
+        "SpoolDesktopUsageHoverCard": {
+          "usage": "Usage"
         }
       },
       "spool": {
@@ -4760,23 +4752,20 @@
           "revoke": "Revoke"
         },
         "SpoolSessionPane": {
-          "transcriptTitle": "Session transcript",
-          "continue": "Continue session",
           "continueFailed": "Could not continue this session.",
           "continueOutcomeUnknown": "Continuing this session may have succeeded on the owner’s desktop. Inspect the session list and terminal before continuing it again.",
-          "continueOutcomeUnknownPersistent": "Continuing may have succeeded. Inspect the session list and terminal before continuing again.",
-          "transcriptUnavailable": "This session transcript is unavailable.",
-          "retry": "Retry",
-          "transcriptTruncated": "Only the most recent part of this transcript is available.",
-          "image": "Image",
-          "toolResult": "Tool result",
-          "role": {
-            "user": "User",
-            "assistant": "Assistant",
-            "tool": "Tool",
-            "reasoning": "Reasoning",
-            "system": "System"
-          }
+          "retryContinue": "Try again",
+          "retryAttach": "Reconnect terminal",
+          "startingAfterGrant": "Starting the agent on the owner’s desktop…",
+          "controlRequired": "Request control to continue this agent session on the owner’s desktop.",
+          "continuing": "Continuing the agent on the owner’s desktop…",
+          "attaching": "Connecting to the agent terminal…",
+          "attachFailed": "The agent started, but its terminal could not be connected.",
+          "continueAgent": "Continue agent",
+          "sessionEnded": "This agent session has ended.",
+          "controlRequiredAfterClose": "Request control to continue this agent session again.",
+          "terminalEnded": "This terminal session has ended.",
+          "terminalConnectionLost": "The remote terminal connection was lost."
         },
         "SpoolTerminalPane": {
           "connecting": "Connecting terminal…",

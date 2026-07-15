@@ -2,7 +2,6 @@
 interaction menus, and compact-layout behavior together so the hover/click
 states stay consistent across Claude and Codex. */
 import {
-  AlertTriangle,
   Activity,
   RotateCcw,
   Plug,
@@ -44,20 +43,11 @@ import type {
 } from '../../../../shared/types'
 import type {
   ProviderRateLimits,
-  RateLimitRuntimeTarget,
-  RateLimitWindow
+  RateLimitRuntimeTarget
 } from '../../../../shared/rate-limit-types'
-import {
-  ProviderIcon,
-  ProviderPanel,
-  barColor,
-  clampUsedPercent,
-  formatResetCreditExpiry,
-  getProviderUsageStatusLabel
-} from './tooltip'
+import { ProviderPanel, barColor, clampUsedPercent, formatResetCreditExpiry } from './tooltip'
 import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon } from './icons'
 import { AgentIcon } from '@/lib/agent-catalog'
-import { formatWindowLabel } from '@/lib/window-label-formatter'
 import { markLiveCodexSessionsForRestart } from '@/lib/codex-session-restart'
 import { UpdateStatusSegment } from './UpdateStatusSegment'
 import { isStatusBarItemAvailable } from './status-bar-agent-gating'
@@ -82,10 +72,10 @@ import {
 import { translate } from '@/i18n/i18n'
 import {
   getDisplayedUsagePercentage,
-  normalizeUsagePercentageDisplay,
-  type UsagePercentageDisplay
+  normalizeUsagePercentageDisplay
 } from '../../../../shared/usage-percentage-display'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
+import { ProviderUsageSegment } from './ProviderUsageSegment'
 
 type StatusBarProps = {
   floatingTerminalOpen: boolean
@@ -945,27 +935,6 @@ function ClaudeSwitcherMenu({
 }
 
 // ---------------------------------------------------------------------------
-// Mini progress bar (follows the selected usage percentage meaning, grey)
-// ---------------------------------------------------------------------------
-
-function MiniBar({
-  usedPct,
-  display
-}: {
-  usedPct: number
-  display: UsagePercentageDisplay
-}): React.JSX.Element {
-  return (
-    <div className="w-[48px] h-[6px] rounded-full bg-muted overflow-hidden flex-shrink-0">
-      <div
-        className="h-full rounded-full transition-all duration-300 bg-muted-foreground/40"
-        style={{ width: `${getDisplayedUsagePercentage(usedPct, display)}%` }}
-      />
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
 // Inline usage bars (compact bars for inactive accounts in the switcher)
 // ---------------------------------------------------------------------------
 
@@ -1089,165 +1058,6 @@ function InlineUsageSkeleton(): React.JSX.Element {
       <div className="h-[4px] flex-1 rounded-full bg-muted" />
       <div className="h-[4px] flex-1 rounded-full bg-muted" />
     </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Window label
-// ---------------------------------------------------------------------------
-
-function WindowLabel({
-  w,
-  label,
-  display
-}: {
-  w: RateLimitWindow
-  label: string
-  display: UsagePercentageDisplay
-}): React.JSX.Element {
-  return (
-    <span className="tabular-nums">
-      {formatUsagePercentageLabel(w.usedPercent, display)} {label}
-    </span>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Provider segment
-// ---------------------------------------------------------------------------
-
-// Why: only Flash and the latest Pro are shown in the status bar —
-// the rest (Flash Lite, experimental) are secondary and would clutter the bar.
-const STATUS_BAR_BUCKET_NAMES = new Set(['Flash', 'Pro', '1.5 Pro'])
-
-export function ProviderSegment({
-  p,
-  compact,
-  display
-}: {
-  p: ProviderRateLimits | null
-  compact: boolean
-  display: UsagePercentageDisplay
-}): React.JSX.Element {
-  const provider = p?.provider ?? 'claude'
-  const statusLabel = p ? getProviderUsageStatusLabel(p) : ''
-
-  // Idle / initial load
-  if (!p || p.status === 'idle') {
-    return (
-      <span className="inline-flex items-center gap-1 text-muted-foreground">
-        <ProviderIcon provider={provider} />
-        <span className="animate-pulse">···</span>
-      </span>
-    )
-  }
-
-  // Fetching with no prior data
-  if (p.status === 'fetching' && !p.session && !p.weekly && !p.fableWeekly && !p.monthly) {
-    return (
-      <span className="inline-flex items-center gap-1 text-muted-foreground">
-        <ProviderIcon provider={provider} />
-        <span className="animate-pulse">···</span>
-      </span>
-    )
-  }
-
-  // Unavailable (CLI not installed)
-  if (p.status === 'unavailable') {
-    return (
-      <span className="inline-flex items-center gap-1 text-muted-foreground/50">
-        <ProviderIcon provider={provider} /> --
-      </span>
-    )
-  }
-
-  // Error with no data
-  if (p.status === 'error' && !p.session && !p.weekly && !p.fableWeekly && !p.monthly) {
-    return (
-      <span className="inline-flex items-center gap-1 text-muted-foreground">
-        <ProviderIcon provider={provider} />
-        <AlertTriangle size={11} className="text-muted-foreground/80" />
-        {!compact && <span className="text-[11px] font-medium">{statusLabel}</span>}
-      </span>
-    )
-  }
-
-  // Has data (ok, fetching with stale data, or error with stale data)
-  const isStale = p.status === 'error'
-
-  if (p.buckets && p.buckets.length > 0) {
-    const visibleBuckets = p.buckets.filter((b) => STATUS_BAR_BUCKET_NAMES.has(b.name))
-    return (
-      <span className="inline-flex items-center gap-1.5">
-        <ProviderIcon provider={provider} />
-        {visibleBuckets.map((bucket, i) => (
-          <React.Fragment key={bucket.name}>
-            {i > 0 && <span className="text-muted-foreground">·</span>}
-            <span className="tabular-nums">
-              {bucket.name} {formatUsagePercentageLabel(bucket.usedPercent, display)}
-            </span>
-          </React.Fragment>
-        ))}
-        {visibleBuckets.length === 0 && p.session && (
-          <WindowLabel
-            w={p.session}
-            label={formatWindowLabel(p.session.windowMinutes)}
-            display={display}
-          />
-        )}
-        {isStale && <AlertTriangle size={11} className="text-muted-foreground/80" />}
-      </span>
-    )
-  }
-
-  const visibleWindows = [
-    p.session
-      ? {
-          key: 'session',
-          window: p.session,
-          label: formatWindowLabel(p.session.windowMinutes)
-        }
-      : null,
-    p.weekly
-      ? {
-          key: 'weekly',
-          window: p.weekly,
-          label: formatWindowLabel(p.weekly.windowMinutes)
-        }
-      : null,
-    p.fableWeekly
-      ? {
-          key: 'fableWeekly',
-          window: p.fableWeekly,
-          label: translate('auto.components.status.bar.StatusBar.a79c64f87e', 'Fable')
-        }
-      : null,
-    // Why: monthly is chip-visible only when it's the sole window (Grok
-    // unified billing); providers with session/weekly data (OpenCode Go)
-    // keep monthly tooltip-only so the chip stays uncluttered.
-    p.monthly && !p.session && !p.weekly
-      ? {
-          key: 'monthly',
-          window: p.monthly,
-          label: formatWindowLabel(p.monthly.windowMinutes)
-        }
-      : null
-  ].filter((w): w is { key: string; window: RateLimitWindow; label: string } => w !== null)
-
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <ProviderIcon provider={provider} />
-      {p.session && !compact && (
-        <MiniBar usedPct={clampUsedPercent(p.session.usedPercent)} display={display} />
-      )}
-      {visibleWindows.map((window, index) => (
-        <React.Fragment key={window.key}>
-          {index > 0 && <span className="text-muted-foreground">·</span>}
-          <WindowLabel w={window.window} label={window.label} display={display} />
-        </React.Fragment>
-      ))}
-      {isStale && <AlertTriangle size={11} className="text-muted-foreground/80" />}
-    </span>
   )
 }
 
@@ -1822,7 +1632,11 @@ export function ProviderDetailsMenu({
               </span>
             </span>
           ) : (
-            <ProviderSegment p={provider} compact={compact} display={usagePercentageDisplay} />
+            <ProviderUsageSegment
+              limits={provider}
+              compact={compact}
+              display={usagePercentageDisplay}
+            />
           )}
         </button>
       </DropdownMenuTrigger>

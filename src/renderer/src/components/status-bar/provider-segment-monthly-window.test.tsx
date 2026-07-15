@@ -39,22 +39,26 @@ function grokMonthlyLimits(status: ProviderRateLimits['status']): ProviderRateLi
   }
 }
 
-describe('ProviderSegment monthly window', () => {
+describe('ProviderUsageSegment monthly window', () => {
   it('renders a monthly-only snapshot in the chip instead of a bare icon', async () => {
-    const { ProviderSegment } = await import('./StatusBar')
+    const { ProviderUsageSegment } = await import('./ProviderUsageSegment')
 
     const markup = renderToStaticMarkup(
-      <ProviderSegment p={grokMonthlyLimits('ok')} compact={false} display="used" />
+      <ProviderUsageSegment limits={grokMonthlyLimits('ok')} compact={false} display="used" />
     )
 
     expect(markup).toContain('25% used 30d')
   })
 
   it('shows monthly data while fetching instead of the loading placeholder', async () => {
-    const { ProviderSegment } = await import('./StatusBar')
+    const { ProviderUsageSegment } = await import('./ProviderUsageSegment')
 
     const markup = renderToStaticMarkup(
-      <ProviderSegment p={grokMonthlyLimits('fetching')} compact={false} display="used" />
+      <ProviderUsageSegment
+        limits={grokMonthlyLimits('fetching')}
+        compact={false}
+        display="used"
+      />
     )
 
     expect(markup).toContain('25% used 30d')
@@ -64,7 +68,7 @@ describe('ProviderSegment monthly window', () => {
   // Why: providers with session/weekly windows (OpenCode Go) keep monthly
   // tooltip-only so the chip stays uncluttered.
   it('keeps monthly out of the chip when session and weekly windows exist', async () => {
-    const { ProviderSegment } = await import('./StatusBar')
+    const { ProviderUsageSegment } = await import('./ProviderUsageSegment')
 
     const limits: ProviderRateLimits = {
       provider: 'opencode-go',
@@ -76,7 +80,7 @@ describe('ProviderSegment monthly window', () => {
       status: 'ok'
     }
     const markup = renderToStaticMarkup(
-      <ProviderSegment p={limits} compact={false} display="used" />
+      <ProviderUsageSegment limits={limits} compact={false} display="used" />
     )
 
     expect(markup).toContain('10% used 5h')

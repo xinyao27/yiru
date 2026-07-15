@@ -19,12 +19,6 @@ export type SpoolDesktopSidebarRow = {
   connectionStatus: SpoolRemoteDesktop['connectionStatus']
   expanded: boolean
   projectCount: number
-}
-
-export type SpoolDesktopQuotaSidebarRow = {
-  type: 'spool-desktop-quota'
-  key: string
-  desktopRef: string
   quota: readonly SpoolProviderQuota[]
 }
 
@@ -68,7 +62,6 @@ export type SpoolSessionSidebarRow = {
 
 export type SpoolSidebarRow =
   | SpoolDesktopSidebarRow
-  | SpoolDesktopQuotaSidebarRow
   | SpoolProjectSidebarRow
   | SpoolWorktreeSidebarRow
   | SpoolSessionSidebarRow
@@ -113,16 +106,9 @@ export function projectSpoolSidebarRows(input: SpoolSidebarProjectionInput): Spo
       nodeDisplayName: desktop.nodeDisplayName,
       connectionStatus: desktop.connectionStatus,
       expanded,
-      projectCount: catalog?.projects.length ?? 0
+      projectCount: catalog?.projects.length ?? 0,
+      quota: catalog?.quota ?? []
     })
-    if (catalog) {
-      rows.push({
-        type: 'spool-desktop-quota',
-        key: createSpoolSidebarRowKey('spool-desktop-quota', desktop.desktopRef),
-        desktopRef: desktop.desktopRef,
-        quota: catalog.quota
-      })
-    }
     if (!expanded || !catalog) {
       continue
     }

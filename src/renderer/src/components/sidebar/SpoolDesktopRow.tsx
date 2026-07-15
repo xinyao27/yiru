@@ -1,9 +1,11 @@
 import type React from 'react'
-import { ChevronRight, Monitor } from 'lucide-react'
+import { ChevronDown, Monitor } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
+import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 import type { SpoolDesktopSidebarRow } from './spool-sidebar-rows'
+import { SpoolDesktopUsageHoverCard } from './SpoolDesktopUsageHoverCard'
 
 type SpoolDesktopRowProps = {
   row: SpoolDesktopSidebarRow
@@ -26,43 +28,53 @@ export function SpoolDesktopRow({ row, onToggle }: SpoolDesktopRowProps): React.
   const connectionLabel = getConnectionLabel(row.connectionStatus)
   const content = (
     <>
-      <span className="flex size-3 shrink-0 items-center justify-center">
-        {hasProjects ? (
-          <ChevronRight
-            aria-hidden="true"
-            className={cn(
-              'size-3 text-muted-foreground transition-transform motion-reduce:transition-none',
-              row.expanded && 'rotate-90'
-            )}
-          />
-        ) : (
-          <span className="size-3" />
-        )}
-      </span>
       <Monitor aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-      <span className="min-w-0 flex-1">
+      <span className="flex min-w-0 flex-1 items-baseline gap-1.5">
         <TruncatedSidebarLabel
           text={row.userDisplayName}
-          className="text-[13px] font-medium leading-4"
+          className="min-w-0 text-[12px] font-semibold leading-none text-foreground"
         />
-        <span className="flex min-w-0 items-center gap-1 text-[11px] leading-4 text-muted-foreground">
+        <span className="flex min-w-0 items-center gap-1 text-[10px] leading-none text-muted-foreground/70">
           <TruncatedSidebarLabel text={row.nodeDisplayName} className="min-w-0 flex-1" />
           {connectionLabel ? <span className="shrink-0">· {connectionLabel}</span> : null}
         </span>
       </span>
+      {hasProjects ? (
+        <span className="flex size-4 shrink-0 items-center justify-center text-muted-foreground/60">
+          <ChevronDown
+            aria-hidden="true"
+            className={cn(
+              'size-3.5 transition-transform motion-reduce:transition-none',
+              !row.expanded && '-rotate-90'
+            )}
+          />
+        </span>
+      ) : null}
     </>
   )
   const className = cn(
-    'flex min-h-8 w-full min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-left',
-    'text-worktree-sidebar-foreground transition-colors',
-    hasProjects &&
-      'hover:bg-worktree-sidebar-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring'
+    'flex h-8 w-full min-w-0 items-center gap-2 rounded-md border px-2 text-left transition-all',
+    row.connectionStatus === 'disconnected'
+      ? 'border-worktree-sidebar-border/70 bg-worktree-sidebar-accent/35 text-muted-foreground'
+      : 'border-worktree-sidebar-border bg-worktree-sidebar-accent/70',
+    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
   )
-  return hasProjects ? (
-    <button type="button" aria-expanded={row.expanded} onClick={onToggle} className={className}>
+  const trigger = (
+    <button
+      type="button"
+      aria-expanded={hasProjects ? row.expanded : undefined}
+      onClick={hasProjects ? onToggle : undefined}
+      className={className}
+    >
       {content}
     </button>
-  ) : (
-    <div className={className}>{content}</div>
+  )
+  return (
+    <div className="px-2 pt-1">
+      <HoverCard openDelay={200} closeDelay={100}>
+        <HoverCardTrigger asChild>{trigger}</HoverCardTrigger>
+        <SpoolDesktopUsageHoverCard row={row} />
+      </HoverCard>
+    </div>
   )
 }

@@ -3,7 +3,6 @@ import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
 import { SpoolWindowsFirewallNotice } from '@/components/spool/SpoolWindowsFirewallNotice'
 import { SpoolAvailabilityNotice } from '@/components/spool/SpoolAvailabilityNotice'
-import { DesktopQuotaRows } from './DesktopQuotaRows'
 import { SpoolDesktopRow } from './SpoolDesktopRow'
 import { SpoolProjectRow } from './SpoolProjectRow'
 import { SpoolSessionRow } from './SpoolSessionRow'
@@ -25,8 +24,13 @@ export function SpoolSidebarProjectedRow({
 
   if (projected.kind === 'spool-section') {
     return (
-      <div className="flex h-7 items-center px-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-        {translate('auto.components.sidebar.SpoolSidebarProjectedRow.heading', 'Spool')}
+      <div className="flex h-8 items-center pl-3 pr-2">
+        <span
+          className="select-none text-xs font-semibold text-muted-foreground/80"
+          data-sidebar-section-title="spool"
+        >
+          {translate('auto.components.sidebar.SpoolSidebarProjectedRow.heading', 'Spool')}
+        </span>
       </div>
     )
   }
@@ -46,8 +50,6 @@ export function SpoolSidebarProjectedRow({
           onToggle={() => setDesktopExpanded(row.desktopRef, !row.expanded)}
         />
       )
-    case 'spool-desktop-quota':
-      return <DesktopQuotaRows row={row} />
     case 'spool-project':
       return (
         <SpoolProjectRow

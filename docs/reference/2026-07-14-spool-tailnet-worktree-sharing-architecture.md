@@ -319,7 +319,11 @@ Agent session ID is the preferred deduplication key. Execution host plus canonic
 
 The first time an owner makes an existing worktree Public, the publication confirmation bulk-attests legacy candidates whose execution host and canonical CWD resolve to that worktree as the most-specific registered root. Those candidates are written to the provenance index before Public is committed; there is no per-session visibility toggle. A candidate with a missing host/CWD or ambiguous root is not attributable to that worktree and remains undisclosed. After this one-time migration, all newly observed sessions carry durable provenance.
 
-Selecting a live session attaches a read subscription to its terminal. Selecting a historical session returns a sanitized transcript for requester-side rendering. Continuing a historical session is a control mutation: the owner resolves the saved record and constructs its resume command internally after authorization. The requester never receives or supplies a resume command.
+Selecting a live session attaches a read subscription to its terminal. Selecting a historical session does not create a requester-side transcript surface. After worktree control is granted, the owner resolves the saved record, constructs its resume command internally, starts the exact Claude or Codex agent session, and returns directly to the terminal surface. The requester never receives or supplies a resume command.
+
+The bounded `session.read` operation remains available at the protocol boundary for compatibility, but the Desktop session-selection flow does not call it or render a separate transcript UI.
+
+On the normal success path, historical-to-live handoff does not wait for catalog invalidation and session pagination. `SpoolTerminalAttachmentRegistry` binds the original connection-scoped opaque session reference to the new owner-only PTY handle before `session.continue` responds. Terminal subscribe/input/resize resolve that attachment first, then fall back to the current catalog. The original session alias is pinned before launch: if a paired-runtime response becomes `outcome_unknown` before its PTY handle reaches the owner process, requester retries wait for the refreshed catalog to expose that same opaque reference and never invoke `session.continue` again. The actual-host projection reuses the short-lived continued-session binding before an agent hook reports its provider session ID, and binding changes invalidate the paired session catalog. A genuine PTY close removes the attachment and may expose provider continuation; paired transport loss is a subscription error and cannot masquerade as a PTY close. Attachments and pinned aliases are scoped to the physical connection, revalidate the current Public worktree identity on every bind, and are cleared on disconnect; control authorization and the final PTY side-effect guard remain unchanged.
 
 ### Quota projection
 
@@ -467,7 +471,7 @@ No policy is inferred from a method-name prefix. A test snapshots every exposed 
 | Area                       | Public                                                                           | With control                                                                | Always owner-only / denied remotely                                                                 |
 | -------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | Catalog                    | Sanitized Desktop/project/worktree/session list and cached quota                 | Same                                                                        | Raw repos, projects, accounts, settings, AI Vault, host inventory                                   |
-| Sessions                   | List, read transcript, attach terminal output                                    | Continue a proven historical Claude/Codex session in an owner-side terminal | Structured create/rename/close; move across worktrees; account selection; global administration     |
+| Sessions                   | List, bounded transcript read, and attach live terminal output                   | Continue a proven historical Claude/Codex session in an owner-side terminal | Structured create/rename/close; move across worktrees; account selection; global administration     |
 | Terminal                   | Subscribe, bounded snapshot/scrollback, sequenced output and resize events       | Input and resize                                                            | Owner OS clipboard, auto-download, host notification or external-open side effects                  |
 | Files                      | List tree, read/chunk/preview; view diff on Git targets                          | Create, write, rename, delete inside the worktree                           | OS file dialogs, reveal/open on owner Desktop, paths outside root, owner's clipboard                |
 | Git                        | Git targets only: current worktree/index/HEAD status, diff, HEAD history, branch | Git targets only: stage, unstage, and commit through structured methods     | All Git APIs for folder targets; checkout/merge/rebase/fetch/pull/push; worktree administration     |
@@ -615,17 +619,17 @@ type SpoolWorkspaceRoute = {
 
 ### Sidebar
 
-A pure `spool-sidebar-rows.ts` projection creates Desktop, Project, Worktree, quota, and Session row kinds. A new `workspace-sidebar-row-projection.ts` is the explicit high-level Seam that combines existing local `RenderRow[]` with `SpoolSidebarRow[]` and owns virtual-row keys, measured sizes, sticky behavior, and ordering. `worktree-list-groups.ts` and `WorktreeCard` continue to model only local worktrees.
+A pure `spool-sidebar-rows.ts` projection creates Desktop, Project, Worktree, and Session row kinds. A new `workspace-sidebar-row-projection.ts` is the explicit high-level Seam that combines existing local `RenderRow[]` with `SpoolSidebarRow[]` and owns virtual-row keys, measured sizes, sticky behavior, and ordering. `worktree-list-groups.ts` and `WorktreeCard` continue to model only local worktrees.
 
-The rows use existing sidebar typography, spacing, hover/selection tokens, disclosure behavior, and shadcn primitives from `docs/STYLEGUIDE.md`. There are no Live/Stopped/Resumable pills. A Desktop can remain present with quota and no Public projects.
+The rows use existing sidebar typography, spacing, hover/selection tokens, disclosure behavior, and shadcn primitives from `docs/STYLEGUIDE.md`. The Spool title shares the Projects header geometry; Desktop rows share the existing Host-card density; Project, Worktree, and Session rows use the existing 10/20/38px tree anchors. There are no Live/Stopped/Resumable pills. A Desktop can remain present with quota and no Public projects.
 
-`DesktopQuotaRows` is a small presentational Module using the same normalized meter tokens as the status bar; it does not import the large `StatusBar` Module or raw account slices.
+Quota does not occupy permanent tree rows. `SpoolDesktopUsageHoverCard` adapts the sanitized quota snapshot to `ProviderRateLimits` and renders the same `ProviderPanel` used by the status-bar hover surface, including usage bars, reset copy, and the global used/remaining preference. It does not import the large `StatusBar` Module or raw account slices.
 
 ### Workspace surface
 
-At the content root, `SpoolWorkspaceSurface` is selected instead of the local workspace surface. It resolves the opaque route through `spool-sharing-selectors.ts` and renders three isolated read surfaces: Sessions, Files, and, for Git targets only, Changes. Folder targets omit Changes and every diff control. No surface receives a local `Worktree` or owner absolute path.
+At the content root, `SpoolWorkspaceSurface` is selected instead of the local workspace surface. It resolves the opaque route through `spool-sharing-selectors.ts` and renders three isolated surfaces: the selected terminal, Files, and, for Git targets only, Changes. The global sidebar is the single session navigator; the workspace does not render a second session list. Folder targets omit Changes and every diff control. No surface receives a local `Worktree` or owner absolute path.
 
-`SpoolSessionPane` and `SpoolTerminalPane` render transcripts and a direct xterm subscription. `SpoolFilesPane`, `SpoolFileTree`, and `SpoolFilePreview` own relative-path browsing and requester-side previews. `SpoolGitPane`, `SpoolGitSidebar`, and `SpoolGitDiffPane` own the bounded Git surface. They invoke the checked Spool IPC methods instead of adapting local Explorer, editor, Source Control, or `PtyTransport` state.
+`SpoolSessionPane` resolves live versus historical selection and always converges on `SpoolTerminalPane`; it does not render provider transcripts itself. `SpoolFilesPane`, `SpoolFileTree`, and `SpoolFilePreview` own relative-path browsing and requester-side previews. `SpoolGitPane`, `SpoolGitSidebar`, and `SpoolGitDiffPane` own the bounded Git surface. They invoke the checked Spool IPC methods instead of adapting local Explorer, editor, Source Control, or `PtyTransport` state.
 
 `SpoolTerminalPane` starts `terminal.subscribe`, applies one bounded snapshot followed by monotonically sequenced output/resize events, and drops duplicate or stale sequences. A disconnect or new connection epoch tears down the subscription; reopening starts a fresh subscription and snapshot. There is no terminal ACK/resync or separate PTY transport protocol in V1. Terminal input and resize consult the current `canControl` selector and enter the same ordered mutation queue used to surface uncertain outcomes. The queue coalesces short adjacent input bursts up to the terminal chunk limit, including bytes that arrive while the previous acknowledged mutation is in flight; resize remains an ordering barrier.
 
@@ -770,7 +774,7 @@ Security race tests use controllable barriers between bind, authorize, execute, 
 ### Renderer and E2E
 
 - Sidebar projects Desktop → Project → Worktree → every attributable Session, never merges Desktops by person, and shows no session-status pills.
-- Light/dark, 220 px sidebar density, truncation, disclosure, virtual scrolling, and quota rows follow `docs/STYLEGUIDE.md` and canonical CSS tokens.
+- Light/dark, 220 px sidebar density, truncation, disclosure, virtual scrolling, and Desktop usage hover cards follow `docs/STYLEGUIDE.md` and canonical CSS tokens.
 - Public surfaces are consistently read-only; one grant ACK enables all allowed controls; revoke/disconnect/Private disables them in one render turn.
 - Approval dialog warning, safe initial focus, cancellation, multi-grant list, and exact revoke action.
 - Two fake-Tailnet Desktop processes prove discover → Public read → request → approve → mutate → disconnect → reconnect read-only.
@@ -784,7 +788,7 @@ P0 merge gates are default-deny registry coverage, projection sanitization, term
 
 - Add the persisted Private-by-default visibility fields, incarnation proof, deny journal, and atomic Store operation.
 - Add owner worktree/project visibility actions and first-publication warning.
-- Add static/fixture-backed Spool sidebar rows, quota rows, remote route, read-only workspace shell, approval queue, and dynamic `canControl` gates.
+- Add static/fixture-backed Spool sidebar rows, Desktop usage hover cards, remote route, read-only workspace shell, approval queue, and dynamic `canControl` gates.
 - Validate the UX in light/dark and narrow sidebar layouts before networking.
 
 ### Slice 2: dedicated ingress and Public reads
@@ -824,6 +828,7 @@ src/main/spool/
   spool-visibility-deny-journal.ts
   spool-share-catalog.ts
   spool-session-catalog.ts
+  spool-terminal-attachment-registry.ts
   spool-session-provenance-index.ts
   spool-quota-projection.ts
   spool-access-authority.ts
@@ -842,15 +847,19 @@ src/renderer/src/components/sidebar/
   workspace-sidebar-row-projection.ts
   spool-sidebar-rows.ts
   SpoolDesktopRow.tsx
+  SpoolDesktopUsageHoverCard.tsx
   SpoolProjectRow.tsx
   SpoolWorktreeRow.tsx
   SpoolSessionRow.tsx
-  DesktopQuotaRows.tsx
+
+src/renderer/src/components/status-bar/
+  ProviderUsageSegment.tsx
 
 src/renderer/src/components/spool/
   SpoolWorkspaceSurface.tsx
   SpoolTerminalPane.tsx
   SpoolSessionPane.tsx
+  SpoolSessionContinuationNotice.tsx
   SpoolFilesPane.tsx
   SpoolFileTree.tsx
   SpoolFilePreview.tsx

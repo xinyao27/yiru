@@ -7,6 +7,7 @@ import type { SpoolAccessAuthority } from './spool-access-authority'
 import type { SpoolExecutionGateway } from './spool-execution-gateway'
 import type { SpoolSessionCatalog } from './spool-session-catalog'
 import type { SpoolShareCatalog } from './spool-share-catalog'
+import type { SpoolTerminalAttachmentRegistry } from './spool-terminal-attachment-registry'
 import { createSpoolCatalogRpcMethods } from './spool-rpc-catalog-registry'
 import {
   asWorktreeInvocation,
@@ -94,6 +95,7 @@ export type SpoolRpcRegistryDependencies = {
   access: SpoolAccessAuthority
   execution: SpoolExecutionGateway
   sessions: SpoolSessionCatalog
+  attachments: SpoolTerminalAttachmentRegistry
 }
 
 export function createDefaultSpoolRpcRegistry(

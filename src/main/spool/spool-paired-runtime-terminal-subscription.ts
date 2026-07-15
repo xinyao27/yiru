@@ -9,12 +9,12 @@ type PairedRuntimeTerminalSubscriptionOptions = {
   onClosed: () => void
 }
 
-/** Owns one forwarded terminal stream and never projects downstream transport errors. */
+/** Owns one forwarded terminal stream without confusing transport loss for PTY exit. */
 export class PairedRuntimeTerminalSubscription implements SpoolHostSubscription {
   readonly instanceId: string
   private downstream: RemoteRuntimeSubscription | null = null
   private closed = false
-  private emittedClosed = false
+  private terminalClosed = false
 
   constructor(private readonly options: PairedRuntimeTerminalSubscriptionOptions) {
     this.instanceId = options.instanceId
@@ -54,16 +54,17 @@ export class PairedRuntimeTerminalSubscription implements SpoolHostSubscription 
       return
     }
     if (parsed.data.kind === 'closed') {
-      this.emittedClosed = true
+      this.terminalClosed = true
       this.close()
     }
   }
 
   handleTransportClose(): void {
-    if (!this.emittedClosed && !this.closed) {
-      this.emittedClosed = true
+    if (!this.terminalClosed && !this.closed) {
       try {
-        this.options.emit({ kind: 'closed' })
+        // Why: the downstream agent may still be running; only a genuine PTY
+        // event may unlock provider-level continuation in the requester UI.
+        this.options.emit({ kind: 'unavailable' })
       } catch {
         // The upstream subscription is already unusable; cleanup still must run.
       }

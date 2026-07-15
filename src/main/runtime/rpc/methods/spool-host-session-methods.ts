@@ -13,6 +13,7 @@ import {
 import { parseSpoolPairedRuntimeResult } from '../../../../shared/spool/spool-paired-runtime-result-contract'
 import type { SpoolExecutionOperation } from '../../../../shared/spool/spool-operation-contract'
 import { SpoolExecutionError } from '../../../spool/spool-execution-error'
+import type { SpoolContinuedSessionBindings } from '../../../spool/spool-continued-session-bindings'
 import { defineMethod, defineStreamingMethod, type RpcAnyMethod, type RpcContext } from '../core'
 import {
   getHostBundle,
@@ -44,9 +45,11 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
       requirePairedRuntimePrincipal(context)
       try {
         const worktree = await resolveIncarnationBoundActualWorktree(context.runtime, params.target)
+        const continued = getHostBundle(context.runtime).continuedSessions
         const result = await projectPairedRuntimeLiveSessions(
           context.runtime,
-          worktree,
+          continued,
+          { ...worktree, spoolIncarnationId: params.target.spoolIncarnationId },
           context.signal
         )
         return SpoolPairedRuntimeLiveSessionsResponseSchema.parse({ status: 'ok', result })
@@ -160,7 +163,13 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
     handler: async (params, context, emit) => {
       requirePairedRuntimePrincipal(context)
       const worktree = await resolveIncarnationBoundActualWorktree(context.runtime, params.target)
-      await runSessionChangesSubscription(context, worktree.worktreeId, emit)
+      await runSessionChangesSubscription(
+        context,
+        worktree.worktreeId,
+        worktree.instanceId,
+        getHostBundle(context.runtime).continuedSessions,
+        emit
+      )
     }
   }),
   defineMethod({
@@ -225,12 +234,15 @@ function remoteSessionOperation(
 async function runSessionChangesSubscription(
   context: RpcContext,
   worktreeId: string,
+  instanceId: string,
+  continued: SpoolContinuedSessionBindings,
   emit: (result: unknown) => void
 ): Promise<void> {
   const signal = context.signal ?? new AbortController().signal
   await new Promise<void>((resolve) => {
     let finished = false
-    let unsubscribe = (): void => {}
+    let unsubscribeTabs = (): void => {}
+    let unsubscribeContinued = (): void => {}
     const requestId = context.requestId ?? randomUUID()
     const cleanupId = sessionChangesCleanupId(context.connectionId, requestId)
     const finish = (): void => {
@@ -240,7 +252,8 @@ async function runSessionChangesSubscription(
       finished = true
       signal.removeEventListener('abort', finish)
       context.runtime.cleanupSubscription(cleanupId)
-      unsubscribe()
+      unsubscribeTabs()
+      unsubscribeContinued()
       resolve()
     }
     // Why: logical subscriptions share the owner's physical runtime route and must clean up alone.
@@ -251,8 +264,8 @@ async function runSessionChangesSubscription(
     }
     signal.addEventListener('abort', finish, { once: true })
     try {
-      unsubscribe = context.runtime.onMobileSessionTabsChanged((snapshot) => {
-        if (finished || snapshot.worktree !== worktreeId) {
+      const emitChange = (): void => {
+        if (finished) {
           return
         }
         try {
@@ -261,12 +274,26 @@ async function runSessionChangesSubscription(
         } catch {
           finish()
         }
+      }
+      unsubscribeTabs = context.runtime.onMobileSessionTabsChanged((snapshot) => {
+        if (finished || snapshot.worktree !== worktreeId) {
+          return
+        }
+        emitChange()
+      })
+      unsubscribeContinued = continued.subscribe((changedInstanceId) => {
+        if (changedInstanceId === instanceId) {
+          // Why: createTerminal can publish its tab before the continued-session
+          // identity bridge exists, so that bridge must cause a second projection.
+          emitChange()
+        }
       })
     } catch {
       finish()
     }
     if (finished) {
-      unsubscribe()
+      unsubscribeTabs()
+      unsubscribeContinued()
     }
   })
 }

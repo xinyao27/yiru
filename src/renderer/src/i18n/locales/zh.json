@@ -4690,29 +4690,21 @@
           "forget": "从 Orca 中移除",
           "reconnectAndDelete": "重新连接并删除"
         },
-        "DesktopQuotaRows": {
-          "meterLabel": "{{value0}}: {{value1}}% used in {{value2}}",
-          "windowUnavailable": "{{value0}}: {{value1}} usage unavailable",
-          "fiveHour": "5h",
-          "sevenDay": "7d",
-          "resetsAt": "{{value0}} 重置"
-        },
         "SpoolDesktopRow": {
           "connecting": "Connecting…",
           "disconnected": "Disconnected"
-        },
-        "SpoolSessionRow": {
-          "otherProvider": "Other"
         },
         "SpoolWorktreeRow": {
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "正在加载会话…",
-          "public": "公开",
           "sessionsUnavailable": "会话列表不可用"
         },
         "SpoolSidebarProjectedRow": {
           "heading": "Spool"
+        },
+        "SpoolDesktopUsageHoverCard": {
+          "usage": "Usage"
         }
       },
       "spool": {
@@ -4760,23 +4752,20 @@
           "revoke": "撤销"
         },
         "SpoolSessionPane": {
-          "transcriptTitle": "Session 记录",
-          "continue": "继续 Session",
           "continueFailed": "无法继续此 session。",
           "continueOutcomeUnknown": "此 session 可能已在所有者的电脑上继续运行。请先检查 session 列表和终端，再次执行继续操作。",
-          "continueOutcomeUnknownPersistent": "此 session 可能已继续运行。请先检查 session 列表和终端，再次执行继续操作。",
-          "transcriptUnavailable": "此 session 记录不可用。",
-          "retry": "重试",
-          "transcriptTruncated": "这里只显示此记录最近的一部分。",
-          "image": "图片",
-          "toolResult": "工具结果",
-          "role": {
-            "user": "用户",
-            "assistant": "助手",
-            "tool": "工具",
-            "reasoning": "推理",
-            "system": "系统"
-          }
+          "retryContinue": "Try again",
+          "retryAttach": "Reconnect terminal",
+          "startingAfterGrant": "Starting the agent on the owner’s desktop…",
+          "controlRequired": "Request control to continue this agent session on the owner’s desktop.",
+          "continuing": "Continuing the agent on the owner’s desktop…",
+          "attaching": "Connecting to the agent terminal…",
+          "attachFailed": "The agent started, but its terminal could not be connected.",
+          "continueAgent": "Continue agent",
+          "sessionEnded": "This agent session has ended.",
+          "controlRequiredAfterClose": "Request control to continue this agent session again.",
+          "terminalEnded": "This terminal session has ended.",
+          "terminalConnectionLost": "The remote terminal connection was lost."
         },
         "SpoolTerminalPane": {
           "connecting": "正在连接终端…",

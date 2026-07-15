@@ -60,6 +60,7 @@ export const SpoolPairedRuntimeInvokeResponseSchema = z.discriminatedUnion('stat
 ])
 
 const mutationResult = z.object({ ok: z.literal(true) }).strict()
+const sessionContinueResult = z.object({ terminalHandle: z.string().min(1).max(2_048) }).strict()
 const fileListResult = z
   .object({
     relativePath: pathText,
@@ -232,7 +233,8 @@ export function parseSpoolPairedRuntimeResult(
     case 'git.commit':
     case 'terminal.input':
     case 'terminal.resize':
-    case 'session.continue':
       return mutationResult.parse(value)
+    case 'session.continue':
+      return sessionContinueResult.parse(value)
   }
 }
