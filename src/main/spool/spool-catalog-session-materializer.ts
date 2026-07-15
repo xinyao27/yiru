@@ -191,7 +191,12 @@ function seedLoadingSessions(
           }
           return worktree
         }
-        const retained = previousWorktree?.sessions ?? []
+        // Why: session refs are revision-bound; retaining them across a new catalog leaves
+        // requester rows visible after the owner has already invalidated their bindings.
+        const retained =
+          previous?.catalogRevision === catalog.catalogRevision
+            ? (previousWorktree?.sessions ?? [])
+            : []
         return budget.retain(retained) ? { ...worktree, sessions: [...retained] } : worktree
       })
     }))
