@@ -142,6 +142,11 @@ export function getActiveSshAiVaultHostInfo(targetId: string): SshRelayAiVaultHo
   return activeSessions.get(targetId)?.getAiVaultHostInfo() ?? null
 }
 
+/** Owner-only Spool lookup; runtime-owned targets stay hidden from every renderer API. */
+export function getActiveSshSpoolHostInfo(targetId: string): SshRelayAiVaultHostInfo | null {
+  return activeSessions.get(targetId)?.getAiVaultHostInfo() ?? null
+}
+
 export function getActiveSshAiVaultHostInfos(): SshRelayAiVaultHostInfo[] {
   return [...activeSessions.values()].flatMap((session) => {
     if (isRuntimeOwnedSshTargetId(session.targetId)) {

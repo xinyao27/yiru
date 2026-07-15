@@ -4,13 +4,14 @@ import type {
   SpoolSessionCatalogPage,
   SpoolWorktreeCatalogEntry
 } from '../../shared/spool/spool-catalog-contract'
-import { SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE } from '../../shared/spool/spool-catalog-contract'
-import type { SpoolCatalogReferenceBinding } from './spool-catalog-reference-table'
-import type { SpoolCatalogReferenceTable } from './spool-catalog-reference-table'
+import type {
+  SpoolCatalogReferenceBinding,
+  SpoolCatalogReferenceTable
+} from './spool-catalog-reference-table'
 import type {
   SpoolCatalogSessionDescription,
   SpoolCatalogWorktreeDescription
-} from './spool-share-catalog'
+} from './spool-share-catalog-source'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-visibility'
 
 const MAX_CATALOG_LABEL_LENGTH = 240
@@ -30,15 +31,6 @@ export function sanitizeCatalogWorktreeDescription(
   if (!projectKey || !projectName || !worktreeName) {
     return null
   }
-  const sessions = description.sessions
-    .map((session) => ({
-      sessionKey: boundedIdentity(session.sessionKey),
-      provider: session.provider,
-      title: catalogLabel(session.title)
-    }))
-    .filter((session): session is SpoolCatalogSessionDescription =>
-      Boolean(session.sessionKey && session.title)
-    )
   return {
     // Why: cached catalog rows retain binding identity, never owner paths or host locators.
     instance: {
@@ -50,10 +42,23 @@ export function sanitizeCatalogWorktreeDescription(
       projectKey,
       projectName,
       worktreeName,
-      branch: description.branch ? catalogLabel(description.branch) : null,
-      sessions
+      branch: description.branch ? catalogLabel(description.branch) : null
     }
   }
+}
+
+export function sanitizeCatalogSessionDescriptions(
+  sessions: readonly SpoolCatalogSessionDescription[]
+): SpoolCatalogSessionDescription[] {
+  return sessions.map((session) => {
+    const sessionKey = boundedIdentity(session.sessionKey)
+    const title = catalogLabel(session.title)
+    if (!sessionKey || !title) {
+      // Why: silently omitting an invalid row could turn a partial owner page into completeness.
+      throw new Error('Invalid Spool catalog session description')
+    }
+    return { sessionKey, provider: session.provider, title }
+  })
 }
 
 export function buildCatalogReferenceBindings(
@@ -76,32 +81,42 @@ export function buildCatalogReferenceBindings(
       instanceId: instance.instanceId,
       shareEpoch: instance.shareEpoch
     })
-    for (const session of description.sessions) {
-      bindings.push({
-        kind: 'session',
-        aliasKey: sessionAliasKey(worktreeAlias, session.sessionKey),
-        worktreeId: instance.worktreeId,
-        instanceId: instance.instanceId,
-        shareEpoch: instance.shareEpoch,
-        sessionKey: session.sessionKey
-      })
-    }
-    for (
-      let offset = 0;
-      offset < description.sessions.length;
-      offset += SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE
-    ) {
-      bindings.push({
-        kind: 'session-page',
-        aliasKey: sessionPageAliasKey(worktreeAlias, offset, catalogRevision, generation),
-        worktreeId: instance.worktreeId,
-        instanceId: instance.instanceId,
-        shareEpoch: instance.shareEpoch,
-        offset,
-        catalogRevision,
-        generation
-      })
-    }
+    bindings.push(sessionPageBinding(instance, worktreeAlias, catalogRevision, generation, 0, null))
+  }
+  return bindings
+}
+
+export function buildCatalogSessionPageBindings(
+  description: ResolvedSpoolCatalogWorktree,
+  binding: Extract<SpoolCatalogReferenceBinding, { kind: 'session-page' }>,
+  sessions: readonly SpoolCatalogSessionDescription[],
+  nextSourceCursor: string | null
+): SpoolCatalogReferenceBinding[] {
+  const worktreeAlias = worktreeAliasKey(
+    description.instance.instanceId,
+    description.instance.shareEpoch
+  )
+  const bindings: SpoolCatalogReferenceBinding[] = sessions.map((session) => ({
+    kind: 'session',
+    aliasKey: sessionAliasKey(worktreeAlias, session.sessionKey),
+    worktreeId: description.instance.worktreeId,
+    instanceId: description.instance.instanceId,
+    shareEpoch: description.instance.shareEpoch,
+    sessionKey: session.sessionKey,
+    catalogRevision: binding.catalogRevision,
+    generation: binding.generation
+  }))
+  if (nextSourceCursor !== null) {
+    bindings.push(
+      sessionPageBinding(
+        description.instance,
+        worktreeAlias,
+        binding.catalogRevision,
+        binding.generation,
+        binding.pageIndex + 1,
+        nextSourceCursor
+      )
+    )
   }
   return bindings
 }
@@ -121,15 +136,12 @@ export function projectCatalogEntries(
       name: description.worktreeName,
       branch: description.branch,
       sessions: [],
-      sessionCatalog:
-        description.sessions.length > 0
-          ? {
-              status: 'loading',
-              nextCursor: references.referenceFor(
-                sessionPageAliasKey(worktreeAlias, 0, catalogRevision, generation)
-              )
-            }
-          : { status: 'complete', nextCursor: null }
+      sessionCatalog: {
+        status: 'loading',
+        nextCursor: references.referenceFor(
+          sessionPageAliasKey(worktreeAlias, 0, catalogRevision, generation)
+        )
+      }
     }
     const existing = projects.get(description.projectKey)
     if (existing) {
@@ -152,42 +164,59 @@ export function projectCatalogSessionPage(
   worktreeRef: string,
   binding: Extract<SpoolCatalogReferenceBinding, { kind: 'session-page' }>,
   description: ResolvedSpoolCatalogWorktree,
-  catalogRevision: number,
+  sessions: readonly SpoolCatalogSessionDescription[],
+  nextSourceCursor: string | null,
   references: SpoolCatalogReferenceTable
 ): SpoolSessionCatalogPage {
   const worktreeAlias = worktreeAliasKey(
     description.instance.instanceId,
     description.instance.shareEpoch
   )
-  const pageSessions = description.description.sessions.slice(
-    binding.offset,
-    binding.offset + SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE
-  )
-  const sessions: SpoolSessionCatalogEntry[] = pageSessions.map((session) => ({
+  const projected: SpoolSessionCatalogEntry[] = sessions.map((session) => ({
     sessionRef: references.referenceFor(sessionAliasKey(worktreeAlias, session.sessionKey)),
     provider: session.provider,
     title: session.title
   }))
-  const nextOffset = binding.offset + pageSessions.length
-  const hasNext = nextOffset < description.description.sessions.length
   return {
-    catalogRevision,
+    catalogRevision: binding.catalogRevision,
     worktreeRef,
     shareEpoch: description.instance.shareEpoch,
-    sessions,
-    sessionCatalog: hasNext
-      ? {
-          status: 'loading',
-          nextCursor: references.referenceFor(
-            sessionPageAliasKey(
-              worktreeAlias,
-              nextOffset,
-              binding.catalogRevision,
-              binding.generation
+    sessions: projected,
+    sessionCatalog:
+      nextSourceCursor === null
+        ? { status: 'complete', nextCursor: null }
+        : {
+            status: 'loading',
+            nextCursor: references.referenceFor(
+              sessionPageAliasKey(
+                worktreeAlias,
+                binding.pageIndex + 1,
+                binding.catalogRevision,
+                binding.generation
+              )
             )
-          )
-        }
-      : { status: 'complete', nextCursor: null }
+          }
+  }
+}
+
+function sessionPageBinding(
+  instance: Pick<SpoolPublicWorktreeInstance, 'worktreeId' | 'instanceId' | 'shareEpoch'>,
+  worktreeAlias: string,
+  catalogRevision: number,
+  generation: number,
+  pageIndex: number,
+  sourceCursor: string | null
+): Extract<SpoolCatalogReferenceBinding, { kind: 'session-page' }> {
+  return {
+    kind: 'session-page',
+    aliasKey: sessionPageAliasKey(worktreeAlias, pageIndex, catalogRevision, generation),
+    worktreeId: instance.worktreeId,
+    instanceId: instance.instanceId,
+    shareEpoch: instance.shareEpoch,
+    pageIndex,
+    sourceCursor,
+    catalogRevision,
+    generation
   }
 }
 
@@ -205,11 +234,11 @@ function sessionAliasKey(worktreeAlias: string, sessionKey: string): string {
 
 function sessionPageAliasKey(
   worktreeAlias: string,
-  offset: number,
+  pageIndex: number,
   catalogRevision: number,
   generation: number
 ): string {
-  return `session-page\0${worktreeAlias}\0${catalogRevision}\0${generation}\0${offset}`
+  return `session-page\0${worktreeAlias}\0${catalogRevision}\0${generation}\0${pageIndex}`
 }
 
 function boundedIdentity(value: string): string {

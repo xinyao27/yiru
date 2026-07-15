@@ -37,9 +37,6 @@ function cloneResolvedDescription(
 ): ResolvedSpoolCatalogWorktree {
   return {
     instance: { ...value.instance },
-    description: {
-      ...value.description,
-      sessions: value.description.sessions.map((session) => ({ ...session }))
-    }
+    description: { ...value.description }
   }
 }

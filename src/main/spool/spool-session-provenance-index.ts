@@ -1,19 +1,23 @@
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import type { ExecutionHostId } from '../../shared/execution-host'
-import { normalizeExecutionHostId } from '../../shared/execution-host'
 import { hardenExistingSecureFile, writeSecureJsonFile } from '../../shared/secure-file'
+import {
+  sameSpoolSessionProvenance,
+  spoolLegacyAttestationKey,
+  spoolSessionProvenanceKey
+} from './spool-session-provenance-identity'
+import { collectLegacyProvenanceCandidates } from './spool-legacy-provenance-merge'
 
 const SPOOL_SESSION_PROVENANCE_FILENAME = 'spool-session-provenance.json'
-const SPOOL_SESSION_PROVENANCE_VERSION = 2
+const SPOOL_SESSION_PROVENANCE_VERSION = 3
 const MAX_PROVENANCE_FILE_BYTES = 8 * 1024 * 1024
-const MAX_PROVENANCE_ENTRIES = 50_000
+export const SPOOL_SESSION_PROVENANCE_MAX_ENTRIES = 50_000
 const MAX_LEGACY_ATTESTATIONS = 10_000
 
 export type SpoolProvenanceProvider = 'claude' | 'codex'
 
 export type SpoolSessionProvenanceKey = {
-  executionHostId: ExecutionHostId
+  actualHostScope: string
   provider: SpoolProvenanceProvider
   providerSessionId: string
 }
@@ -24,9 +28,15 @@ export type SpoolSessionProvenance = SpoolSessionProvenanceKey & {
 }
 
 export type SpoolLegacyPublicationAttestation = {
-  executionHostId: ExecutionHostId
+  actualHostScope: string
   worktreeInstanceId: string
   spoolIncarnationId: string
+}
+
+export type SpoolLegacyPublicationProof = {
+  attestation: SpoolLegacyPublicationAttestation
+  entries: readonly SpoolSessionProvenance[]
+  forceRefresh?: boolean
 }
 
 type SpoolSessionProvenanceFile = {
@@ -36,8 +46,7 @@ type SpoolSessionProvenanceFile = {
 }
 
 type LegacySpoolSessionProvenanceFile = {
-  version: 1
-  entries: SpoolSessionProvenance[]
+  version: 1 | 2
 }
 
 type LoadedSpoolSessionProvenance = {
@@ -54,15 +63,15 @@ export class SpoolSessionProvenanceIndex {
     this.filePath = join(userDataPath, SPOOL_SESSION_PROVENANCE_FILENAME)
     const loaded = loadProvenance(this.filePath)
     for (const entry of loaded.entries) {
-      this.entries.set(toSessionKey(entry), entry)
+      this.entries.set(spoolSessionProvenanceKey(entry), entry)
     }
     for (const attestation of loaded.legacyAttestations) {
-      this.legacyAttestations.set(toLegacyAttestationKey(attestation), attestation)
+      this.legacyAttestations.set(spoolLegacyAttestationKey(attestation), attestation)
     }
   }
 
   resolve(key: SpoolSessionProvenanceKey): SpoolSessionProvenance | null {
-    const entry = this.entries.get(toSessionKey(key))
+    const entry = this.entries.get(spoolSessionProvenanceKey(key))
     return entry ? { ...entry } : null
   }
 
@@ -80,34 +89,53 @@ export class SpoolSessionProvenanceIndex {
 
   hasLegacyPublicationAttestation(attestation: SpoolLegacyPublicationAttestation): boolean {
     requireValidLegacyAttestation(attestation)
-    return this.legacyAttestations.has(toLegacyAttestationKey(attestation))
+    return this.legacyAttestations.has(spoolLegacyAttestationKey(attestation))
   }
 
-  attestLegacyPublication(
-    attestation: SpoolLegacyPublicationAttestation,
-    entries: readonly SpoolSessionProvenance[]
-  ): boolean {
-    requireValidLegacyAttestation(attestation)
-    if (this.legacyAttestations.has(toLegacyAttestationKey(attestation))) {
+  attestLegacyPublicationProofs(publications: readonly SpoolLegacyPublicationProof[]): boolean {
+    const pending = publications.filter(({ attestation, forceRefresh }) => {
+      requireValidLegacyAttestation(attestation)
+      return forceRefresh || !this.legacyAttestations.has(spoolLegacyAttestationKey(attestation))
+    })
+    if (pending.length === 0) {
       return false
     }
-    for (const entry of entries) {
-      requireValidEntry(entry)
-      if (!belongsToAttestation(entry, attestation)) {
-        throw new Error('Legacy Spool session provenance does not match its publication')
+    for (const { entries } of pending) {
+      for (const entry of entries) {
+        requireValidEntry(entry)
       }
     }
+    const candidates = collectLegacyProvenanceCandidates(pending)
     const nextEntries = new Map(this.entries)
+    for (const [key, entry] of candidates) {
+      // Why: a live/current durable proof always wins over a stale legacy scan.
+      if (entry && !nextEntries.has(key)) {
+        nextEntries.set(key, { ...entry })
+      }
+    }
+    if (nextEntries.size === this.entries.size) {
+      return false
+    }
+    this.commit(nextEntries, new Map(this.legacyAttestations))
+    return true
+  }
+
+  completeLegacyPublications(attestations: readonly SpoolLegacyPublicationAttestation[]): boolean {
     const nextAttestations = new Map(this.legacyAttestations)
-    addEntries(nextEntries, entries)
-    nextAttestations.set(toLegacyAttestationKey(attestation), { ...attestation })
-    this.commit(nextEntries, nextAttestations)
+    for (const attestation of attestations) {
+      requireValidLegacyAttestation(attestation)
+      nextAttestations.set(spoolLegacyAttestationKey(attestation), { ...attestation })
+    }
+    if (nextAttestations.size === this.legacyAttestations.size) {
+      return false
+    }
+    this.commit(new Map(this.entries), nextAttestations)
     return true
   }
 
   remove(key: SpoolSessionProvenanceKey): void {
     const nextEntries = new Map(this.entries)
-    if (nextEntries.delete(toSessionKey(key))) {
+    if (nextEntries.delete(spoolSessionProvenanceKey(key))) {
       this.commit(nextEntries, new Map(this.legacyAttestations))
     }
   }
@@ -138,7 +166,7 @@ export class SpoolSessionProvenanceIndex {
     nextAttestations: Map<string, SpoolLegacyPublicationAttestation>
   ): void {
     if (
-      nextEntries.size > MAX_PROVENANCE_ENTRIES ||
+      nextEntries.size > SPOOL_SESSION_PROVENANCE_MAX_ENTRIES ||
       nextAttestations.size > MAX_LEGACY_ATTESTATIONS
     ) {
       throw new Error('Spool session provenance limit exceeded')
@@ -173,7 +201,8 @@ function loadProvenance(filePath: string): LoadedSpoolSessionProvenance {
       return value
     }
     if (isLegacyProvenanceFile(value)) {
-      return { entries: value.entries, legacyAttestations: [] }
+      // Why: old route-only host keys cannot distinguish native, WSL, or paired inner hosts.
+      return { entries: [], legacyAttestations: [] }
     }
   } catch {
     // Why: provenance is positive proof; corruption must hide sessions, never infer ownership.
@@ -200,11 +229,15 @@ function isLegacyProvenanceFile(value: unknown): value is LegacySpoolSessionProv
     return false
   }
   const record = value as Record<string, unknown>
-  return record.version === 1 && isValidEntryArray(record.entries)
+  return record.version === 1 || record.version === 2
 }
 
 function isValidEntryArray(value: unknown): value is SpoolSessionProvenance[] {
-  return Array.isArray(value) && value.length <= MAX_PROVENANCE_ENTRIES && value.every(isValidEntry)
+  return (
+    Array.isArray(value) &&
+    value.length <= SPOOL_SESSION_PROVENANCE_MAX_ENTRIES &&
+    value.every(isValidEntry)
+  )
 }
 
 function isValidEntry(value: unknown): value is SpoolSessionProvenance {
@@ -213,7 +246,7 @@ function isValidEntry(value: unknown): value is SpoolSessionProvenance {
   }
   const record = value as Record<string, unknown>
   return (
-    normalizeExecutionHostId(asString(record.executionHostId)) !== null &&
+    isBoundedActualHostScope(record.actualHostScope) &&
     (record.provider === 'claude' || record.provider === 'codex') &&
     isBoundedString(record.providerSessionId) &&
     isBoundedString(record.worktreeInstanceId) &&
@@ -227,7 +260,7 @@ function isValidLegacyAttestation(value: unknown): value is SpoolLegacyPublicati
   }
   const record = value as Record<string, unknown>
   return (
-    normalizeExecutionHostId(asString(record.executionHostId)) !== null &&
+    isBoundedActualHostScope(record.actualHostScope) &&
     isBoundedString(record.worktreeInstanceId) &&
     isBoundedString(record.spoolIncarnationId)
   )
@@ -240,9 +273,9 @@ function addEntries(
   let changed = false
   for (const entry of entries) {
     requireValidEntry(entry)
-    const key = toSessionKey(entry)
+    const key = spoolSessionProvenanceKey(entry)
     const existing = target.get(key)
-    if (!existing || !sameEntry(existing, entry)) {
+    if (!existing || !sameSpoolSessionProvenance(existing, entry)) {
       target.set(key, { ...entry })
       changed = true
     }
@@ -267,27 +300,6 @@ function replaceMap<T>(target: Map<string, T>, source: ReadonlyMap<string, T>): 
   }
 }
 
-function belongsToAttestation(
-  entry: SpoolSessionProvenance,
-  attestation: SpoolLegacyPublicationAttestation
-): boolean {
-  return (
-    entry.executionHostId === attestation.executionHostId &&
-    entry.worktreeInstanceId === attestation.worktreeInstanceId &&
-    entry.spoolIncarnationId === attestation.spoolIncarnationId
-  )
-}
-
-function sameEntry(left: SpoolSessionProvenance, right: SpoolSessionProvenance): boolean {
-  return (
-    left.executionHostId === right.executionHostId &&
-    left.provider === right.provider &&
-    left.providerSessionId === right.providerSessionId &&
-    left.worktreeInstanceId === right.worktreeInstanceId &&
-    left.spoolIncarnationId === right.spoolIncarnationId
-  )
-}
-
 function requireValidEntry(entry: SpoolSessionProvenance): void {
   if (!isValidEntry(entry)) {
     throw new Error('Invalid Spool session provenance')
@@ -301,17 +313,13 @@ function requireValidLegacyAttestation(attestation: SpoolLegacyPublicationAttest
 }
 
 function isBoundedString(value: unknown): value is string {
-  return typeof value === 'string' && value.length > 0 && value.length <= 2048
+  return (
+    typeof value === 'string' && value.length > 0 && value.length <= 2048 && !value.includes('\0')
+  )
 }
 
-function asString(value: unknown): string | null {
-  return typeof value === 'string' ? value : null
-}
-
-function toSessionKey(key: SpoolSessionProvenanceKey): string {
-  return JSON.stringify([key.executionHostId, key.provider, key.providerSessionId])
-}
-
-function toLegacyAttestationKey(key: SpoolLegacyPublicationAttestation): string {
-  return JSON.stringify([key.executionHostId, key.worktreeInstanceId, key.spoolIncarnationId])
+function isBoundedActualHostScope(value: unknown): value is string {
+  return (
+    typeof value === 'string' && value.length > 0 && value.length <= 4096 && !value.includes('\0')
+  )
 }

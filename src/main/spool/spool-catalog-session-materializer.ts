@@ -3,13 +3,24 @@ import type {
   SpoolSessionCatalogEntry,
   SpoolWorktreeCatalogEntry
 } from '../../shared/spool/spool-catalog-contract'
+import { SPOOL_SESSION_PAGE_REQUEST_TIMEOUT_MS } from '../../shared/spool/spool-resource-limits'
 import { isSpoolSessionCatalogPage } from './spool-catalog-wire-validation'
+import { SpoolCatalogSessionBudget, spoolCatalogSessionBytes } from './spool-catalog-session-budget'
 import type { SpoolPeerConnection } from './spool-peer-connection'
+
+// Why: the owner inventory is capped at 50k historical rows plus 5k live rows.
+const MAX_MATERIALIZED_SESSIONS_PER_WORKTREE = 55_000
+// Why: honest scanners consume about 512 candidates per wire page; this leaves retry headroom.
+const MAX_SESSION_CATALOG_PAGES = 128
+// Why: malformed candidates can yield empty pages, but a peer cannot stream them indefinitely.
+const MAX_CONSECUTIVE_EMPTY_SESSION_PAGES = 112
+const MAX_MATERIALIZED_SESSION_BYTES = 64 * 1024 * 1024
 
 type MaterializeSpoolCatalogSessionsOptions = {
   baseCatalog: SpoolDesktopCatalog
   previousCatalog: SpoolDesktopCatalog | null
   connection: SpoolPeerConnection
+  signal: AbortSignal
   isCurrent(): boolean
   publish(catalog: SpoolDesktopCatalog): void
 }
@@ -17,7 +28,8 @@ type MaterializeSpoolCatalogSessionsOptions = {
 export async function materializeSpoolCatalogSessions(
   options: MaterializeSpoolCatalogSessionsOptions
 ): Promise<'complete' | 'error' | 'cancelled'> {
-  let catalog = seedLoadingSessions(options.baseCatalog, options.previousCatalog)
+  const seeded = seedLoadingSessions(options.baseCatalog, options.previousCatalog)
+  let catalog = seeded.catalog
   options.publish(catalog)
   for (const project of options.baseCatalog.projects) {
     for (const worktree of project.worktrees) {
@@ -28,8 +40,7 @@ export async function materializeSpoolCatalogSessions(
       if (materialized?.sessionCatalog.status !== 'loading') {
         continue
       }
-      const retained = findWorktree(options.previousCatalog, worktree)?.sessions ?? []
-      catalog = await materializeWorktree(options, catalog, worktree, retained)
+      catalog = await materializeWorktree(options, catalog, worktree, seeded.budget)
     }
   }
   if (!options.isCurrent()) {
@@ -62,25 +73,34 @@ async function materializeWorktree(
   options: MaterializeSpoolCatalogSessionsOptions,
   initialCatalog: SpoolDesktopCatalog,
   worktree: SpoolWorktreeCatalogEntry,
-  retained: readonly SpoolSessionCatalogEntry[]
+  budget: SpoolCatalogSessionBudget
 ): Promise<SpoolDesktopCatalog> {
   let catalog = initialCatalog
   let cursor = worktree.sessionCatalog.nextCursor
   const loaded: SpoolSessionCatalogEntry[] = []
   const loadedRefs = new Set<string>()
   const cursors = new Set<string>()
+  let consecutiveEmptyPages = 0
+  let loadedBytes = 0
   try {
     while (cursor) {
       if (cursors.has(cursor)) {
         throw new Error('spool_catalog_session_cursor_repeated')
       }
+      if (cursors.size >= MAX_SESSION_CATALOG_PAGES) {
+        throw new Error('spool_catalog_session_page_limit_exceeded')
+      }
       cursors.add(cursor)
-      const value = await options.connection.request<unknown>('catalog.sessions.page', {
-        worktreeRef: worktree.worktreeRef,
-        shareEpoch: worktree.shareEpoch,
-        catalogRevision: options.baseCatalog.catalogRevision,
-        cursor
-      })
+      const value = await options.connection.request<unknown>(
+        'catalog.sessions.page',
+        {
+          worktreeRef: worktree.worktreeRef,
+          shareEpoch: worktree.shareEpoch,
+          catalogRevision: options.baseCatalog.catalogRevision,
+          cursor
+        },
+        { signal: options.signal, timeoutMs: SPOOL_SESSION_PAGE_REQUEST_TIMEOUT_MS }
+      )
       if (!options.isCurrent()) {
         return catalog
       }
@@ -93,20 +113,30 @@ async function materializeWorktree(
       ) {
         throw new Error('invalid_spool_catalog_session_page')
       }
+      consecutiveEmptyPages = value.sessions.length === 0 ? consecutiveEmptyPages + 1 : 0
+      if (
+        loaded.length + value.sessions.length > MAX_MATERIALIZED_SESSIONS_PER_WORKTREE ||
+        consecutiveEmptyPages > MAX_CONSECUTIVE_EMPTY_SESSION_PAGES
+      ) {
+        throw new Error('spool_catalog_session_capacity_exceeded')
+      }
       for (const session of value.sessions) {
         if (loadedRefs.has(session.sessionRef)) {
           throw new Error('duplicate_spool_catalog_session_ref')
         }
         loadedRefs.add(session.sessionRef)
+        loadedBytes += spoolCatalogSessionBytes(session)
+        if (loadedBytes > MAX_MATERIALIZED_SESSION_BYTES) {
+          throw new Error('spool_catalog_session_byte_limit_exceeded')
+        }
         loaded.push(session)
       }
-      const sessions =
-        value.sessionCatalog.status === 'complete'
-          ? loaded
-          : [...loaded, ...retained.filter((session) => !loadedRefs.has(session.sessionRef))]
+      const publishedSessions = [...loaded]
+      const previousSessions = findWorktree(catalog, worktree)?.sessions ?? []
+      budget.replace(previousSessions, publishedSessions)
       catalog = replaceWorktree(catalog, worktree.worktreeRef, {
         ...worktree,
-        sessions,
+        sessions: publishedSessions,
         sessionCatalog: value.sessionCatalog
       })
       options.publish(catalog)
@@ -122,9 +152,10 @@ async function materializeWorktree(
     }
     // Why: a partial fetch must remain visibly incomplete; it must never be
     // mistaken for the complete session set promised by a Public worktree.
+    const retainedSessions = findWorktree(catalog, worktree)?.sessions ?? []
     catalog = replaceWorktree(catalog, worktree.worktreeRef, {
       ...worktree,
-      sessions: [...loaded, ...retained.filter((session) => !loadedRefs.has(session.sessionRef))],
+      sessions: retainedSessions,
       sessionCatalog: { status: 'error', nextCursor: null }
     })
     options.publish(catalog)
@@ -135,13 +166,17 @@ async function materializeWorktree(
 function seedLoadingSessions(
   catalog: SpoolDesktopCatalog,
   previous: SpoolDesktopCatalog | null
-): SpoolDesktopCatalog {
-  return {
+): { catalog: SpoolDesktopCatalog; budget: SpoolCatalogSessionBudget } {
+  const budget = new SpoolCatalogSessionBudget()
+  const seeded = {
     ...catalog,
     projects: catalog.projects.map((project) => ({
       ...project,
       worktrees: project.worktrees.map((worktree) => {
         if (worktree.sessionCatalog.status !== 'loading') {
+          if (!budget.retain(worktree.sessions)) {
+            return { ...worktree, sessions: [] }
+          }
           return worktree
         }
         const previousWorktree = findWorktree(previous, worktree)
@@ -151,13 +186,17 @@ function seedLoadingSessions(
         ) {
           // Why: catalogRevision excludes quota-only changes, so a completed
           // worktree can keep its full materialized set without another crawl.
-          return previousWorktree
+          if (budget.retain(previousWorktree.sessions)) {
+            return { ...previousWorktree, sessions: [...previousWorktree.sessions] }
+          }
+          return worktree
         }
         const retained = previousWorktree?.sessions ?? []
-        return { ...worktree, sessions: retained }
+        return budget.retain(retained) ? { ...worktree, sessions: [...retained] } : worktree
       })
     }))
   }
+  return { catalog: seeded, budget }
 }
 
 function findWorktree(

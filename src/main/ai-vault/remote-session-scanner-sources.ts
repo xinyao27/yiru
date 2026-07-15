@@ -20,6 +20,10 @@ import type {
   RemoteScannerContext,
   RemoteSessionSource
 } from './remote-session-scanner-types'
+import {
+  parseRemoteClaudeSessionStream,
+  parseRemoteCodexSessionStream
+} from './remote-session-stream-parsers'
 
 type RemoteContentParser = (
   file: FileWithMtime,
@@ -33,22 +37,7 @@ export function remoteSessionSources(
   hostPlatform: RemoteHostPlatform
 ): RemoteSessionSource[] {
   return [
-    ...remoteCodexSources(remoteHome, hostPlatform),
-    {
-      ...jsonlSource(
-        'claude',
-        remoteHome,
-        hostPlatform,
-        ['.claude', 'projects'],
-        parseClaudeSessionContent
-      ),
-      // The remote host owns the transcript disk, so the local readdir in the
-      // Claude parser is skipped; the walked listing supplies the sibling
-      // subagent counts instead. Partitioning also prunes the subagent
-      // transcripts themselves, which would otherwise list as phantom
-      // top-level sessions carrying the parent's sessionId.
-      collectSubagentSiblingCounts: true
-    },
+    ...remoteClaudeCodexSessionSources(remoteHome, hostPlatform),
     source(
       'gemini',
       remoteHome,
@@ -105,6 +94,28 @@ export function remoteSessionSources(
       parseDroidSessionContent
     ),
     ...remoteOpenClawSources(remoteHome, hostPlatform)
+  ]
+}
+
+export function remoteClaudeCodexSessionSources(
+  remoteHome: string,
+  hostPlatform: RemoteHostPlatform
+): RemoteSessionSource[] {
+  return [
+    ...remoteCodexSources(remoteHome, hostPlatform),
+    {
+      ...jsonlSource(
+        'claude',
+        remoteHome,
+        hostPlatform,
+        ['.claude', 'projects'],
+        parseClaudeSessionContent
+      ),
+      parseIncrementally: parseRemoteClaudeSessionStream,
+      // The remote host owns the transcript disk, so the walked listing must
+      // supply sibling counts and prune subagent transcripts from the inventory.
+      collectSubagentSiblingCounts: true
+    }
   ]
 }
 
@@ -174,7 +185,9 @@ function remoteCodexSources(
               titleCaches: context.titleCaches
             })
           ).get(sessionId) ?? null
-      })
+      }),
+    parseIncrementally: (file, context, signal) =>
+      parseRemoteCodexSessionStream(file, context, signal, codexHome, hostPlatform)
   }))
 }
 

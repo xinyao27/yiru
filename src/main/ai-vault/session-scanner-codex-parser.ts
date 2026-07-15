@@ -72,7 +72,7 @@ export async function parseCodexSessionContent(args: {
   })
 }
 
-type CodexSessionParseState = {
+export type CodexSessionParseState = {
   accumulator: SessionAccumulator
   previousTotals: CodexUsageSnapshot | null
   rejectedWorkerSession: boolean
@@ -82,7 +82,7 @@ type CodexSessionParseState = {
   titleSource: 'meta' | 'user' | null
 }
 
-function createCodexParseState(file: FileWithMtime): CodexSessionParseState {
+export function createCodexSessionParseState(file: FileWithMtime): CodexSessionParseState {
   return {
     accumulator: createAccumulator({
       agent: 'codex',
@@ -104,7 +104,7 @@ function cloneCodexParseState(state: CodexSessionParseState): CodexSessionParseS
   }
 }
 
-function consumeCodexRecordLine(state: CodexSessionParseState, line: string): void {
+export function consumeCodexSessionLine(state: CodexSessionParseState, line: string): void {
   if (state.rejectedWorkerSession) {
     return
   }
@@ -222,7 +222,7 @@ function consumeCodexRecordLine(state: CodexSessionParseState, line: string): vo
   }
 }
 
-async function finalizeCodexParseState(
+export async function finalizeCodexSessionParseState(
   state: CodexSessionParseState,
   platform: NodeJS.Platform,
   args: {
@@ -257,8 +257,10 @@ export function createCodexSessionResumeState(
   file: FileWithMtime,
   codexHome: string | null
 ): ResumableSessionParseState {
-  return codexResumeStateFromParseState(createCodexParseState(file), codexHome, (sessionId) =>
-    readCodexSessionIndexTitle(file.path, codexHome, sessionId)
+  return codexResumeStateFromParseState(
+    createCodexSessionParseState(file),
+    codexHome,
+    (sessionId) => readCodexSessionIndexTitle(file.path, codexHome, sessionId)
   )
 }
 
@@ -268,14 +270,14 @@ function codexResumeStateFromParseState(
   titleReader: (sessionId: string) => Promise<string | null>
 ): ResumableSessionParseState {
   return {
-    consumeLine: (line) => consumeCodexRecordLine(state, line),
+    consumeLine: (line) => consumeCodexSessionLine(state, line),
     clone: () =>
       codexResumeStateFromParseState(cloneCodexParseState(state), codexHome, titleReader),
     touchFile: (file) => {
       state.accumulator.modifiedAt = file.modifiedAt
     },
     finalize: (platform, options?: ResumableParseFinalizeOptions) =>
-      finalizeCodexParseState(state, platform, { codexHome, titleReader, ...options })
+      finalizeCodexSessionParseState(state, platform, { codexHome, titleReader, ...options })
   }
 }
 
@@ -288,15 +290,15 @@ async function parseCodexSessionLines(args: {
   executionHostPlatform?: NodeJS.Platform | null
   titleReader?: (sessionId: string) => Promise<string | null>
 }): Promise<AiVaultSession | null> {
-  const state = createCodexParseState(args.file)
+  const state = createCodexSessionParseState(args.file)
   for await (const line of args.lines) {
-    consumeCodexRecordLine(state, line)
+    consumeCodexSessionLine(state, line)
     if (state.rejectedWorkerSession) {
       // Worker transcripts are excluded outright; stop reading early.
       return null
     }
   }
-  return finalizeCodexParseState(state, args.platform, {
+  return finalizeCodexSessionParseState(state, args.platform, {
     codexHome: args.codexHome,
     titleReader: args.titleReader,
     executionHostId: args.executionHostId,

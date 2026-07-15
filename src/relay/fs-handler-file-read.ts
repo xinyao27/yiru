@@ -1,42 +1,18 @@
-import { open, readFile, stat } from 'node:fs/promises'
+import { open, stat } from 'node:fs/promises'
 import { extname } from 'node:path'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { STREAM_ACK_WINDOW_CHUNKS, STREAM_CHUNK_SIZE, RelayErrorCode } from './protocol'
 import type { RelayStreamRegistry, TooManyStreamsError } from './fs-stream-registry'
 import {
-  BINARY_PROBE_BYTES,
+  SPOOL_SESSION_INVENTORY_STREAM_PROFILE,
+  SPOOL_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
+} from '../shared/spool/spool-resource-limits'
+import {
   IMAGE_MIME_TYPES,
   MAX_PREVIEWABLE_BINARY_SIZE,
   MAX_TEXT_FILE_SIZE,
-  isBinaryBuffer,
   isBinaryFilePrefix
 } from './fs-handler-utils'
-
-export async function readRelayFileContent(filePath: string) {
-  const stats = await stat(filePath)
-  const mimeType = IMAGE_MIME_TYPES[extname(filePath).toLowerCase()]
-  const sizeLimit = mimeType ? MAX_PREVIEWABLE_BINARY_SIZE : MAX_TEXT_FILE_SIZE
-  if (stats.size > sizeLimit) {
-    throw new Error(
-      `File too large: ${(stats.size / 1024 / 1024).toFixed(1)}MB exceeds ${sizeLimit / 1024 / 1024}MB limit`
-    )
-  }
-
-  if (mimeType) {
-    const buffer = await readFile(filePath)
-    return { content: buffer.toString('base64'), isBinary: true, isImage: true, mimeType }
-  }
-
-  if (stats.size > BINARY_PROBE_BYTES && (await isBinaryFilePrefix(filePath))) {
-    return { content: '', isBinary: true }
-  }
-
-  const buffer = await readFile(filePath)
-  if (isBinaryBuffer(buffer)) {
-    return { content: '', isBinary: true }
-  }
-  return { content: buffer.toString('utf-8'), isBinary: false }
-}
 
 export type StreamMetadata = {
   streamId?: number
@@ -70,16 +46,34 @@ export type StreamPumpOptions = {
   paceWithAcks: boolean
 }
 
+export type RelayFileStreamProfile = typeof SPOOL_SESSION_INVENTORY_STREAM_PROFILE | undefined
+
+export function parseRelayFileStreamProfile(value: unknown): RelayFileStreamProfile {
+  if (value === undefined || value === SPOOL_SESSION_INVENTORY_STREAM_PROFILE) {
+    return value
+  }
+  throw new Error('Invalid fs.readFileStream profile')
+}
+
 export async function readRelayFileStreamMetadata(
   filePath: string,
   dispatcher: RelayDispatcher,
   registry: RelayStreamRegistry,
   context: RequestContext,
-  pumpOptions?: StreamPumpOptions
+  pumpOptions?: StreamPumpOptions,
+  profile?: RelayFileStreamProfile
 ): Promise<StreamMetadata> {
   const stats = await stat(filePath)
   const mimeType = IMAGE_MIME_TYPES[extname(filePath).toLowerCase()]
-  const sizeLimit = mimeType ? MAX_PREVIEWABLE_BINARY_SIZE : MAX_TEXT_FILE_SIZE
+  if (profile === SPOOL_SESSION_INVENTORY_STREAM_PROFILE && mimeType) {
+    throw new Error('Session inventory streams require text files')
+  }
+  const sizeLimit =
+    profile === SPOOL_SESSION_INVENTORY_STREAM_PROFILE
+      ? SPOOL_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
+      : mimeType
+        ? MAX_PREVIEWABLE_BINARY_SIZE
+        : MAX_TEXT_FILE_SIZE
   if (stats.size > sizeLimit) {
     throw new Error(
       `File too large: ${(stats.size / 1024 / 1024).toFixed(1)}MB exceeds ${sizeLimit / 1024 / 1024}MB limit`
@@ -226,15 +220,22 @@ async function pumpChunks(
     }
 
     try {
+      const notificationTarget =
+        pumpOptions.clientId !== undefined ? { clientId: pumpOptions.clientId } : undefined
       if (endReason === 'end') {
-        dispatcher.notify('fs.streamEnd', { streamId })
+        // Why: file-stream frames and their completion belong only to the requesting SSH client.
+        await dispatcher.notifyBulk('fs.streamEnd', { streamId }, notificationTarget)
         process.stderr.write(`[relay] stream end id=${streamId}\n`)
       } else if (endReason === 'error') {
-        dispatcher.notify('fs.streamError', {
-          streamId,
-          code: errorCode ?? 'ESTREAMERROR',
-          message: errorMessage ?? 'stream error'
-        })
+        await dispatcher.notifyBulk(
+          'fs.streamError',
+          {
+            streamId,
+            code: errorCode ?? 'ESTREAMERROR',
+            message: errorMessage ?? 'stream error'
+          },
+          notificationTarget
+        )
         process.stderr.write(`[relay] stream error id=${streamId} code=${errorCode}\n`)
       } else if (endReason === 'aborted') {
         process.stderr.write(`[relay] stream cancel id=${streamId}\n`)

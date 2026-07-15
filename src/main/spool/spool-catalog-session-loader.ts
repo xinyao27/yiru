@@ -28,6 +28,7 @@ export function reconcileSpoolCatalogSessionLoad(options: SpoolCatalogSessionLoa
     options.onCatalogChanged()
     return
   }
+  abortActiveLoad(record)
   cancelRetryTimer(record)
   record.catalogLoadIdentity = loadIdentity
   record.catalogRetryAttempt = 0
@@ -38,6 +39,7 @@ export function cancelSpoolCatalogSessionLoad(record: SpoolDesktopRecord): void 
   record.catalogLoadGeneration++
   record.catalogLoadIdentity = null
   record.catalogRetryAttempt = 0
+  abortActiveLoad(record)
   cancelRetryTimer(record)
 }
 
@@ -47,8 +49,12 @@ function startMaterialization(
   loadIdentity: string
 ): void {
   const { record, connection, catalog } = options
+  abortActiveLoad(record)
+  const abort = new AbortController()
+  record.catalogLoadAbort = abort
   const loadGeneration = ++record.catalogLoadGeneration
   const isCurrent = (): boolean =>
+    !abort.signal.aborted &&
     options.isConnected() &&
     record.catalogLoadIdentity === loadIdentity &&
     record.catalogLoadGeneration === loadGeneration
@@ -56,6 +62,7 @@ function startMaterialization(
     baseCatalog: catalog,
     previousCatalog,
     connection,
+    signal: abort.signal,
     isCurrent,
     publish: (materialized) => {
       if (!isCurrent()) {
@@ -68,26 +75,32 @@ function startMaterialization(
       record.catalog = { ...materialized, quota }
       options.onCatalogChanged()
     }
-  }).then(
-    (result) => {
-      if (!isCurrent()) {
-        return
-      }
-      if (result === 'error') {
+  })
+    .then(
+      (result) => {
+        if (!isCurrent()) {
+          return
+        }
+        if (result === 'error') {
+          scheduleRetry(options, loadIdentity)
+        } else if (result === 'complete') {
+          record.catalogRetryAttempt = 0
+        }
+      },
+      () => {
+        if (!isCurrent() || !record.catalog) {
+          return
+        }
+        record.catalog = markSpoolCatalogSessionLoadError(record.catalog)
+        options.onCatalogChanged()
         scheduleRetry(options, loadIdentity)
-      } else if (result === 'complete') {
-        record.catalogRetryAttempt = 0
       }
-    },
-    () => {
-      if (!isCurrent() || !record.catalog) {
-        return
+    )
+    .finally(() => {
+      if (record.catalogLoadAbort === abort) {
+        record.catalogLoadAbort = null
       }
-      record.catalog = markSpoolCatalogSessionLoadError(record.catalog)
-      options.onCatalogChanged()
-      scheduleRetry(options, loadIdentity)
-    }
-  )
+    })
 }
 
 function scheduleRetry(options: SpoolCatalogSessionLoadOptions, loadIdentity: string): void {
@@ -116,6 +129,11 @@ function cancelRetryTimer(record: SpoolDesktopRecord): void {
   }
   clearTimeout(record.catalogRetryTimer)
   record.catalogRetryTimer = null
+}
+
+function abortActiveLoad(record: SpoolDesktopRecord): void {
+  record.catalogLoadAbort?.abort()
+  record.catalogLoadAbort = null
 }
 
 function catalogSessionLoadIdentity(catalog: SpoolDesktopCatalog): string {

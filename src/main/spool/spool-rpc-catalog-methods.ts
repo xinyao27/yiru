@@ -1,5 +1,5 @@
 import type { SpoolCatalogSessionPageRequest } from './spool-catalog-session-pages'
-import type { SpoolCatalogProjection } from './spool-share-catalog'
+import type { SpoolCatalogProjection } from './spool-catalog-projection'
 import { SpoolRpcError } from './spool-rpc-gateway'
 import { createSpoolRpcStream } from './spool-rpc-stream'
 
@@ -7,7 +7,7 @@ export type CatalogInvocation = {
   kind: 'catalog'
   projection: SpoolCatalogProjection
   snapshot(): Promise<unknown>
-  sessionPage(request: SpoolCatalogSessionPageRequest): Promise<unknown>
+  sessionPage(request: SpoolCatalogSessionPageRequest, signal: AbortSignal): Promise<unknown>
   renew(): void
   isCurrent(): boolean
 }
@@ -22,8 +22,8 @@ export function createCatalogInvocation(projection: SpoolCatalogProjection): Cat
       generation = snapshot.generation
       return snapshot.catalog
     },
-    sessionPage: async (request) => {
-      const result = await projection.sessionPage(request)
+    sessionPage: async (request, signal) => {
+      const result = await projection.sessionPage(request, signal)
       if (!result || result.generation !== generation) {
         throw new SpoolRpcError('resource_not_found')
       }

@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path'
 import { app } from 'electron'
 import type { ClaudeManagedAccount } from '../../shared/types'
 import type { Store } from '../persistence'
+import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session-root-configuration'
 import { writeFileAtomically } from '../codex-accounts/fs-utils'
 import type { ClaudeEnvPatch } from './environment'
 import {
@@ -15,7 +16,7 @@ import {
   writeClaudeManagedAuthFile
 } from './managed-auth-path'
 import { parseWslUncPath } from '../../shared/wsl-paths'
-import { getDefaultWslDistro, getWslHome, toWindowsWslPath } from '../wsl'
+import { getDefaultWslDistro, getWslHome, getWslHomeAsync, toWindowsWslPath } from '../wsl'
 import { buildEncodedWslBashCommand } from '../wsl-bash-command'
 import { hasLiveClaudePtys } from './live-pty-gate'
 import { isOauthTokenExpiring, refreshClaudeOauthCredentials } from './oauth-refresh'
@@ -157,6 +158,33 @@ export class ClaudeRuntimeAuthService {
 
   getRuntimeConfigDir(): string {
     return this.pathResolver.getRuntimePaths().configDir
+  }
+
+  async resolveSessionProjectRoots(target: AiVaultSessionRuntimeTarget): Promise<string[]> {
+    if (target.runtime === 'host') {
+      return [join(this.getRuntimeConfigDir(), 'projects')]
+    }
+    const distro = target.wslDistro.trim()
+    const home = distro ? await getWslHomeAsync(distro) : null
+    if (!home) {
+      throw new Error('Claude WSL session root is unavailable')
+    }
+    const roots = [join(home, '.claude', 'projects')]
+    for (const account of this.store.getSettings().claudeManagedAccounts) {
+      if (
+        account.managedAuthRuntime !== 'wsl' ||
+        account.wslDistro?.trim().toLowerCase() !== distro.toLowerCase()
+      ) {
+        continue
+      }
+      const managedAuthPath = this.getOwnedManagedAuthPath(account)
+      if (!managedAuthPath) {
+        // Why: omitting a configured managed root could permanently under-attest first publication.
+        throw new Error('Claude managed WSL session root is unavailable')
+      }
+      roots.push(join(managedAuthPath, 'projects'))
+    }
+    return [...new Set(roots)]
   }
 
   private initializeLastSyncedState(): void {

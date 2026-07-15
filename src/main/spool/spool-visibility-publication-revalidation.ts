@@ -3,6 +3,7 @@ import type {
   SpoolVisibilityStore
 } from './spool-visibility-persistence-transitions'
 import { SpoolExecutionError } from './spool-execution-error'
+import { revalidateSpoolPublicationSnapshot } from './spool-publication-final-guard'
 import type { SpoolWorktreeIncarnation } from './spool-worktree-incarnation'
 import type {
   SpoolPublicWorktreeInstance,
@@ -10,11 +11,13 @@ import type {
 } from './spool-worktree-publication-state'
 import {
   SpoolOwnerWorktreeCatalogError,
+  isPublicationResourceLimit,
   type SpoolPublicationValidation,
   type SpoolOwnerWorktreeCatalog,
   type SpoolPublicationCandidate,
   type SpoolWorktreePublicationValidator
 } from './spool-worktree-publication-validation'
+import type { SpoolWorktreeVisibilityOptions } from './spool-worktree-visibility-contract'
 
 type SpoolVisibilityPublicationRevalidationOptions = {
   store: SpoolVisibilityStore
@@ -23,6 +26,7 @@ type SpoolVisibilityPublicationRevalidationOptions = {
   validator: SpoolWorktreePublicationValidator
   publicationState: SpoolWorktreePublicationState
   persistence: SpoolVisibilityPersistenceTransitions
+  prepareFirstPublication: NonNullable<SpoolWorktreeVisibilityOptions['prepareFirstPublication']>
   isPublic(instanceId: string, shareEpoch: string): boolean
 }
 
@@ -52,13 +56,22 @@ export class SpoolVisibilityPublicationRevalidation {
       this.options.publicationState.invalidate([instanceId], 'private')
       return null
     }
-    const validation = await this.options.validator.validate([
-      {
-        target,
-        expectedMarkerId: meta.spoolIncarnationId,
-        requirePersistedMarker: true
+    let validation
+    try {
+      validation = await this.options.validator.validate([
+        {
+          target,
+          expectedMarkerId: meta.spoolIncarnationId,
+          requirePersistedMarker: true
+        }
+      ])
+    } catch (error) {
+      if (isPublicationResourceLimit(error)) {
+        this.options.publicationState.suspend([instanceId], 'incarnation-unavailable')
+        throw new SpoolExecutionError('resource_unavailable')
       }
-    ])
+      throw error
+    }
     if (validation.replaced.length > 0) {
       this.options.persistence.rotateReplaced(validation.replaced)
       return null
@@ -155,7 +168,19 @@ export class SpoolVisibilityPublicationRevalidation {
     if (candidates.length === 0) {
       return
     }
-    const validation = await this.options.validator.validate(candidates)
+    let validation
+    try {
+      validation = await this.options.validator.validate(candidates)
+    } catch (error) {
+      if (isPublicationResourceLimit(error)) {
+        this.options.publicationState.suspend(
+          candidates.map((candidate) => candidate.target.instanceId),
+          'incarnation-unavailable'
+        )
+        return
+      }
+      throw error
+    }
     this.options.publicationState.applyValidationSuspensions(validation)
     if (validation.replaced.length > 0) {
       this.options.persistence.rotateReplaced(validation.replaced)
@@ -172,7 +197,45 @@ export class SpoolVisibilityPublicationRevalidation {
       return true
     })
     if (continuing.length > 0) {
-      this.options.persistence.commitPublic(continuing)
+      const preparedPersistence = await this.options.prepareFirstPublication(
+        continuing,
+        validation.registeredRoots,
+        new Set()
+      )
+      let finalGuard
+      try {
+        finalGuard = await revalidateSpoolPublicationSnapshot(
+          this.options.validator,
+          validation,
+          continuing
+        )
+      } catch (error) {
+        if (isPublicationResourceLimit(error)) {
+          this.options.publicationState.suspend(
+            continuing.map((entry) => entry.target.instanceId),
+            'incarnation-unavailable'
+          )
+          return
+        }
+        throw error
+      }
+      const finalValidationUsable = this.options.publicationState.applyValidationSuspensions(
+        finalGuard.validation
+      )
+      if (finalGuard.validation.replaced.length > 0) {
+        this.options.persistence.rotateReplaced(finalGuard.validation.replaced)
+        return
+      }
+      if (!finalValidationUsable || !finalGuard.stable) {
+        if (!finalGuard.stable) {
+          this.options.publicationState.suspend(
+            continuing.map((entry) => entry.target.instanceId),
+            'incarnation-unavailable'
+          )
+        }
+        return
+      }
+      this.options.persistence.commitPublic(finalGuard.validation.ready, preparedPersistence)
     }
   }
 
@@ -188,7 +251,7 @@ export class SpoolVisibilityPublicationRevalidation {
   }
 
   private suspendCatalogFailure(instanceId: string, error: unknown): void {
-    if (isAmbiguousCatalogFailure(error)) {
+    if (isAmbiguousCatalogFailure(error) || isPublicationResourceLimit(error)) {
       this.options.publicationState.suspend([instanceId], 'incarnation-unavailable')
     } else {
       // Why: route/scan availability says nothing about the already-proven marker identity.

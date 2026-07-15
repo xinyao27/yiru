@@ -1,5 +1,6 @@
 import type { TailnetPrincipal } from '../rpc-principal'
 import type { SpoolRemoteDesktop } from './spool-catalog-contract'
+import { isSpoolMutationKind } from './spool-operation-contract'
 import { SPOOL_RPC_ERROR_CODES, type SpoolRpcErrorCode } from './spool-wire-contract'
 
 export const SPOOL_REQUESTER_INVOKE_METHODS = [
@@ -66,19 +67,6 @@ export type SpoolRequesterSubscriptionEvent =
   | { subscriptionId: string; type: 'error'; code: SpoolRequesterTransportErrorCode }
   | { subscriptionId: string; type: 'complete' }
 
-const SPOOL_REQUESTER_MUTATION_METHODS: ReadonlySet<SpoolRequesterInvokeMethod> = new Set([
-  'files.write',
-  'files.mkdir',
-  'files.rename',
-  'files.delete',
-  'git.stage',
-  'git.unstage',
-  'git.commit',
-  'session.continue',
-  'terminal.input',
-  'terminal.resize'
-])
-
 const SPOOL_REQUESTER_TRANSPORT_ERROR_CODES: ReadonlySet<SpoolRequesterTransportErrorCode> =
   new Set(['disconnected', 'protocol_error', 'timeout', ...SPOOL_RPC_ERROR_CODES])
 
@@ -93,7 +81,7 @@ export function isSpoolRequesterSubscriptionMethod(
 }
 
 export function isSpoolRequesterMutationMethod(method: SpoolRequesterInvokeMethod): boolean {
-  return SPOOL_REQUESTER_MUTATION_METHODS.has(method)
+  return isSpoolMutationKind(method)
 }
 
 export function isSpoolRequesterTransportErrorCode(

@@ -426,6 +426,80 @@ function getRelayPtyId(connectionId: string | null | undefined, ptyId: string): 
   return connectionId ? toRelaySshPtyId(connectionId, ptyId) : ptyId
 }
 
+function normalizePtyWorktreeInstanceId(value: string | null | undefined): string | null {
+  const trimmed = value?.trim()
+  return trimmed && trimmed.length <= 512 && !trimmed.includes('\0') ? trimmed : null
+}
+
+function readPersistedPtyWorktreeInstanceId(
+  store: Store,
+  binding: {
+    worktreeId: string
+    tabId?: string
+    leafId?: string | null
+    ptyId: string
+    connectionId?: string | null
+  }
+): string | null {
+  const tab = binding.tabId
+    ? store
+        .getWorkspaceSession()
+        .tabsByWorktree[binding.worktreeId]?.find((candidate) => candidate.id === binding.tabId)
+    : undefined
+  const layoutPtyId =
+    tab && binding.leafId
+      ? store.getWorkspaceSession().terminalLayoutsByTabId[tab.id]?.ptyIdsByLeafId?.[binding.leafId]
+      : undefined
+  const tabInstanceId =
+    tab && (tab.ptyId === binding.ptyId || layoutPtyId === binding.ptyId)
+      ? normalizePtyWorktreeInstanceId(tab.worktreeInstanceId)
+      : null
+  const relayPtyId = getRelayPtyId(binding.connectionId, binding.ptyId)
+  const lease = binding.connectionId
+    ? store
+        .getSshRemotePtyLeases(binding.connectionId)
+        .find(
+          (candidate) =>
+            candidate.ptyId === relayPtyId &&
+            candidate.worktreeId === binding.worktreeId &&
+            (binding.tabId === undefined || candidate.tabId === binding.tabId) &&
+            (binding.leafId == null || candidate.leafId === binding.leafId)
+        )
+    : undefined
+  const leaseInstanceId = normalizePtyWorktreeInstanceId(lease?.worktreeInstanceId)
+  if (tabInstanceId && leaseInstanceId && tabInstanceId !== leaseInstanceId) {
+    return null
+  }
+  return tabInstanceId ?? leaseInstanceId
+}
+
+function resolveSpawnPtyWorktreeInstanceId(
+  store: Store | undefined,
+  binding: {
+    worktreeId?: string
+    tabId?: string
+    leafId?: string | null
+    ptyId: string
+    connectionId?: string | null
+    isReattach: boolean
+  }
+): string | null {
+  if (!store || !binding.worktreeId) {
+    return null
+  }
+  if (!binding.isReattach) {
+    return normalizePtyWorktreeInstanceId(store.getWorktreeMeta(binding.worktreeId)?.instanceId)
+  }
+  // Why: a surviving PTY must keep its original instance instead of inheriting a reused path.
+  return readPersistedPtyWorktreeInstanceId(store, {
+    worktreeId: binding.worktreeId,
+    tabId: binding.tabId,
+    leafId: binding.leafId,
+    ptyId: binding.ptyId,
+    connectionId: binding.connectionId
+  })
+}
+
 function stripRemotePaneEnvWhenHooksDisabled(
   connectionId: string | null | undefined,
   env: Record<string, string> | undefined
@@ -3241,6 +3315,14 @@ export function registerPtyHandlers(
             trustedTerminalHandleEnv.delete(args.preAllocatedHandle)
           }
         }
+        const worktreeInstanceId = resolveSpawnPtyWorktreeInstanceId(store, {
+          ...(args.worktreeId ? { worktreeId: args.worktreeId } : {}),
+          ...(args.tabId ? { tabId: args.tabId } : {}),
+          ...(metadataLeafId ? { leafId: metadataLeafId } : {}),
+          ptyId: result.id,
+          connectionId: args.connectionId,
+          isReattach: result.isReattach === true
+        })
         ptyOwnership.set(result.id, args.connectionId ?? null)
         // Why: Phase-5 ConPTY DA1 — record the native-Windows-local-PTY
         // determination from the spawn record before any byte reaches the
@@ -3265,6 +3347,7 @@ export function registerPtyHandlers(
             targetId: args.connectionId,
             ptyId: relayResultId,
             ...(typeof args.worktreeId === 'string' ? { worktreeId: args.worktreeId } : {}),
+            worktreeInstanceId,
             ...(typeof args.tabId === 'string' ? { tabId: args.tabId } : {}),
             ...(typeof args.leafId === 'string' && isTerminalLeafId(args.leafId)
               ? { leafId: args.leafId }
@@ -3284,6 +3367,7 @@ export function registerPtyHandlers(
           try {
             hostSessionBinding.store.persistPtyBinding({
               worktreeId: hostSessionBinding.worktreeId,
+              worktreeInstanceId,
               tabId: hostSessionBinding.tabId,
               leafId: hostSessionBinding.leafId,
               ptyId: result.id,
@@ -3323,7 +3407,8 @@ export function registerPtyHandlers(
               : undefined,
             !args.connectionId
               ? shouldSkipCodexHomeEnvForWindowsShell(daemonShellOverride, cwd)
-              : undefined
+              : undefined,
+            worktreeInstanceId
           )
         }
         // Why: arms main's per-PTY Command Code output detector from the launch
@@ -4234,6 +4319,14 @@ export function registerPtyHandlers(
             trustedTerminalHandleEnv.delete(preAllocatedHandle)
           }
         }
+        const worktreeInstanceId = resolveSpawnPtyWorktreeInstanceId(store, {
+          ...(typeof args.worktreeId === 'string' ? { worktreeId: args.worktreeId } : {}),
+          ...(typeof args.tabId === 'string' ? { tabId: args.tabId } : {}),
+          ...(validatedLeafId ? { leafId: validatedLeafId } : {}),
+          ptyId: result.id,
+          connectionId: args.connectionId,
+          isReattach: result.isReattach === true
+        })
         spawnTiming.log(result.id, {
           daemon: isDaemonHostSpawn,
           reattach: result.isReattach ?? false
@@ -4290,6 +4383,7 @@ export function registerPtyHandlers(
             targetId: args.connectionId,
             ptyId: relayResultId,
             ...(typeof args.worktreeId === 'string' ? { worktreeId: args.worktreeId } : {}),
+            worktreeInstanceId,
             ...(typeof args.tabId === 'string' ? { tabId: args.tabId } : {}),
             ...(validatedLeafId ? { leafId: validatedLeafId } : {}),
             state: 'attached',
@@ -4316,6 +4410,7 @@ export function registerPtyHandlers(
           try {
             store.persistPtyBinding({
               worktreeId: args.worktreeId,
+              worktreeInstanceId,
               tabId: args.tabId,
               leafId: validatedLeafId,
               ptyId: result.id,
@@ -4424,7 +4519,8 @@ export function registerPtyHandlers(
               : undefined,
             !args.connectionId
               ? shouldSkipCodexHomeEnvForWindowsShell(effectiveShellOverride, cwd)
-              : undefined
+              : undefined,
+            worktreeInstanceId
           )
         }
         // Why: arms main's per-PTY Command Code output detector from the launch

@@ -48,6 +48,7 @@ export class OrcaSpoolHostSessions {
     if (
       !record ||
       record.executionHostId !== target.target.executionHostId ||
+      record.actualHostScope !== target.actualHostScope ||
       record.worktreeInstanceId !== target.instanceId ||
       record.spoolIncarnationId !== target.spoolIncarnationId
     ) {

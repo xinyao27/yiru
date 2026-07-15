@@ -23,6 +23,7 @@ export type SpoolPublicWorktreeInstance = {
   projectId: string | null
   shareEpoch: string
   spoolIncarnationId: string
+  actualHostScope: string
   target: SpoolOwnerWorktree
 }
 
@@ -289,6 +290,7 @@ function clonePublicInstance(value: PublishedWorktree): SpoolPublicWorktreeInsta
     projectId: value.target.projectId,
     shareEpoch: value.shareEpoch,
     spoolIncarnationId: value.markerId,
+    actualHostScope: value.root.scopeKey,
     target: cloneTarget(value.target)
   }
 }

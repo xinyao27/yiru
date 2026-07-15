@@ -1,29 +1,37 @@
 import { getRepoExecutionHostId, parseExecutionHostId } from '../../shared/execution-host'
-import { getProjectHostSetupForRepo } from '../../shared/project-host-setup-projection'
+import { mapWithConcurrency } from '../../shared/map-with-concurrency'
 import { isFolderRepo } from '../../shared/repo-kind'
 import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
-import type {
-  DetectedWorktree,
-  DetectedWorktreeListResult,
-  ProjectHostSetup,
-  Repo,
-  WorktreeMeta
-} from '../../shared/types'
+import type { DetectedWorktreeListResult, ProjectHostSetup, Repo } from '../../shared/types'
 import type { Store } from '../persistence'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
-import type { SpoolOwnerWorktree } from './spool-worktree-incarnation'
+import type { SpoolPairedRuntimeWorktreeCatalog } from './spool-paired-runtime-worktree-catalog'
 import {
-  SpoolOwnerWorktreeCatalogError,
-  type SpoolOwnerWorktreeCatalog,
-  type SpoolOwnerWorktreeCatalogInventory
-} from './spool-worktree-publication-validation'
+  projectRegisteredSpoolWorktree,
+  spoolRepoMayContainProject
+} from './spool-owner-worktree-projection'
+import {
+  SPOOL_PUBLICATION_MAX_REGISTERED_REPOS,
+  SPOOL_PUBLICATION_MAX_REGISTERED_WORKTREES,
+  SPOOL_PUBLICATION_REPO_SCAN_CONCURRENCY
+} from './spool-publication-inventory-limits'
+import type { SpoolOwnerWorktree } from './spool-worktree-incarnation'
+import type {
+  SpoolOwnerWorktreeCatalog,
+  SpoolOwnerWorktreeCatalogInventory
+} from './spool-owner-worktree-catalog-contract'
+import { SpoolOwnerWorktreeCatalogError } from './spool-worktree-publication-validation'
+import { resolveDirectSpoolRepoActualHostScope } from './spool-repo-actual-host-scope'
 
 type SpoolWorktreeRuntime = Pick<OrcaRuntimeService, 'listDetectedManagedWorktrees'>
 
 export type DefaultSpoolOwnerWorktreeCatalogOptions = {
   store: Store
   runtime: SpoolWorktreeRuntime
-  listRuntimeWorktrees?: (environmentId: string, repo: Repo) => Promise<DetectedWorktreeListResult>
+  listRuntimeWorktrees?: (
+    environmentId: string,
+    repo: Repo
+  ) => Promise<SpoolPairedRuntimeWorktreeCatalog>
 }
 
 /** Reads every registered Git root from the host that actually owns it. */
@@ -48,8 +56,10 @@ export class DefaultSpoolOwnerWorktreeCatalog implements SpoolOwnerWorktreeCatal
   }
 
   async getWorktreeByInstance(instanceId: string): Promise<SpoolOwnerWorktree | null> {
-    const worktreeIds = Object.entries(this.store.getAllWorktreeMeta()).flatMap(
-      ([worktreeId, meta]) => (meta.instanceId === instanceId ? [worktreeId] : [])
+    const metas = this.store.getAllWorktreeMeta()
+    assertWorktreeInventoryCapacity(Object.keys(metas).length)
+    const worktreeIds = Object.entries(metas).flatMap(([worktreeId, meta]) =>
+      meta.instanceId === instanceId ? [worktreeId] : []
     )
     if (worktreeIds.length > 1) {
       throw new SpoolOwnerWorktreeCatalogError('ambiguous')
@@ -61,37 +71,36 @@ export class DefaultSpoolOwnerWorktreeCatalog implements SpoolOwnerWorktreeCatal
   async listProjectWorktrees(projectId: string): Promise<readonly SpoolOwnerWorktree[]> {
     const setups = this.store.getProjectHostSetups()
     const metas = this.store.getAllWorktreeMeta()
-    const repos = this.store
-      .getRepos()
-      .filter(
-        (repo) => !isFolderRepo(repo) && repoMayContainProject(repo, projectId, setups, metas)
-      )
-    const targets = (
-      await Promise.all(repos.map((repo) => this.readAuthoritativeRepo(repo)))
-    ).flat()
+    assertWorktreeInventoryCapacity(Object.keys(metas).length)
+    const registeredRepos = this.store.getRepos().filter((repo) => !isFolderRepo(repo))
+    assertRepoInventoryCapacity(registeredRepos)
+    const repos = registeredRepos.filter((repo) =>
+      spoolRepoMayContainProject(repo, projectId, setups, metas)
+    )
+    const targets = await this.readAuthoritativeRepos(repos)
     assertUniqueCatalogIdentities(targets)
     return targets.filter((entry) => entry.projectId === projectId)
   }
 
   async inspectRegisteredWorktrees(): Promise<SpoolOwnerWorktreeCatalogInventory> {
     const setups = this.store.getProjectHostSetups()
-    const detectedByRepo = await Promise.all(
-      this.store
-        .getRepos()
-        .filter((repo) => !isFolderRepo(repo))
-        .map(async (repo) => await this.inspectRepo(repo, setups))
-    )
+    const repos = this.store.getRepos().filter((repo) => !isFolderRepo(repo))
+    const detectedByRepo = await this.inspectRepos(repos, setups)
     const targets = detectedByRepo.flatMap((entry) => entry.targets)
     assertUniqueCatalogIdentities(targets)
     return {
       worktrees: targets,
-      unavailableExecutionHostIds: [
-        ...new Set(
-          detectedByRepo.flatMap((entry) =>
-            entry.authoritative ? [] : [getRepoExecutionHostId(entry.repo)]
-          )
-        )
-      ]
+      unavailableSources: detectedByRepo.flatMap((entry) =>
+        entry.authoritative
+          ? []
+          : [
+              {
+                repoId: entry.repo.id,
+                executionHostId: getRepoExecutionHostId(entry.repo),
+                actualHostScope: entry.actualHostScope
+              }
+            ]
+      )
     }
   }
 
@@ -104,25 +113,84 @@ export class DefaultSpoolOwnerWorktreeCatalog implements SpoolOwnerWorktreeCatal
     return inspected.targets
   }
 
+  private async readAuthoritativeRepos(
+    repos: readonly Repo[]
+  ): Promise<readonly SpoolOwnerWorktree[]> {
+    const inspected = await this.inspectRepos(repos, this.store.getProjectHostSetups())
+    const targets: SpoolOwnerWorktree[] = []
+    for (const entry of inspected) {
+      if (!entry.authoritative) {
+        throw new SpoolOwnerWorktreeCatalogError('unavailable')
+      }
+      targets.push(...entry.targets)
+    }
+    return targets
+  }
+
+  private async inspectRepos(
+    repos: readonly Repo[],
+    setups: readonly ProjectHostSetup[]
+  ): Promise<readonly SpoolRepoInspection[]> {
+    assertRepoInventoryCapacity(repos)
+    const inspected: SpoolRepoInspection[] = []
+    let worktreeCount = 0
+    for (let index = 0; index < repos.length; index += SPOOL_PUBLICATION_REPO_SCAN_CONCURRENCY) {
+      const batch = repos.slice(index, index + SPOOL_PUBLICATION_REPO_SCAN_CONCURRENCY)
+      const entries = await mapWithConcurrency(
+        batch,
+        SPOOL_PUBLICATION_REPO_SCAN_CONCURRENCY,
+        async (repo) => await this.inspectRepo(repo, setups)
+      )
+      worktreeCount += entries.reduce((count, entry) => count + entry.inventoryWorktreeCount, 0)
+      if (worktreeCount > SPOOL_PUBLICATION_MAX_REGISTERED_WORKTREES) {
+        throw new SpoolOwnerWorktreeCatalogError('resource-limit')
+      }
+      inspected.push(...entries)
+    }
+    return inspected
+  }
+
   private async inspectRepo(
     repo: Repo,
     setups: readonly ProjectHostSetup[]
-  ): Promise<{ repo: Repo; authoritative: boolean; targets: readonly SpoolOwnerWorktree[] }> {
+  ): Promise<SpoolRepoInspection> {
     let detected: DetectedWorktreeListResult
+    let actualHostScope = resolveDirectSpoolRepoActualHostScope(this.store, repo)
     try {
-      detected = await this.listDetected(repo)
+      const result = await this.listDetected(repo)
+      detected = result.inventory
+      actualHostScope = result.actualHostScope
     } catch {
-      return { repo, authoritative: false, targets: [] }
+      return {
+        repo,
+        authoritative: false,
+        actualHostScope,
+        targets: [],
+        inventoryWorktreeCount: 0
+      }
     }
+    assertWorktreeInventoryCapacity(detected.worktrees.length)
     if (!detected.authoritative || detected.repoId !== repo.id) {
-      return { repo, authoritative: false, targets: [] }
+      return {
+        repo,
+        authoritative: false,
+        actualHostScope,
+        targets: [],
+        inventoryWorktreeCount: detected.worktrees.length
+      }
     }
     if (detected.worktrees.some((worktree) => worktree.repoId !== repo.id)) {
-      return { repo, authoritative: false, targets: [] }
+      return {
+        repo,
+        authoritative: false,
+        actualHostScope,
+        targets: [],
+        inventoryWorktreeCount: detected.worktrees.length
+      }
     }
     try {
       const targets = detected.worktrees.flatMap((worktree) => {
-        const target = projectRegisteredWorktree(
+        const target = projectRegisteredSpoolWorktree(
           repo,
           worktree,
           this.store.getWorktreeMeta(worktree.id),
@@ -130,14 +198,29 @@ export class DefaultSpoolOwnerWorktreeCatalog implements SpoolOwnerWorktreeCatal
         )
         return target ? [target] : []
       })
-      return { repo, authoritative: true, targets }
+      return {
+        repo,
+        authoritative: true,
+        actualHostScope,
+        targets,
+        inventoryWorktreeCount: detected.worktrees.length
+      }
     } catch {
       // Why: malformed metadata on one host cannot collapse unrelated host inventories.
-      return { repo, authoritative: false, targets: [] }
+      return {
+        repo,
+        authoritative: false,
+        actualHostScope,
+        targets: [],
+        inventoryWorktreeCount: detected.worktrees.length
+      }
     }
   }
 
-  private async listDetected(repo: Repo): Promise<DetectedWorktreeListResult> {
+  private async listDetected(repo: Repo): Promise<{
+    inventory: DetectedWorktreeListResult
+    actualHostScope: string | null
+  }> {
     const host = parseExecutionHostId(getRepoExecutionHostId(repo))
     if (host?.kind === 'runtime') {
       if (!this.options.listRuntimeWorktrees) {
@@ -145,38 +228,30 @@ export class DefaultSpoolOwnerWorktreeCatalog implements SpoolOwnerWorktreeCatal
       }
       return await this.options.listRuntimeWorktrees(host.environmentId, repo)
     }
-    return await this.runtime.listDetectedManagedWorktrees(`id:${repo.id}`)
+    return {
+      inventory: await this.runtime.listDetectedManagedWorktrees(`id:${repo.id}`),
+      actualHostScope: resolveDirectSpoolRepoActualHostScope(this.store, repo)
+    }
   }
 }
 
-function projectRegisteredWorktree(
-  repo: Repo,
-  worktree: DetectedWorktree,
-  meta: WorktreeMeta | undefined,
-  setups: readonly ProjectHostSetup[]
-): SpoolOwnerWorktree | null {
-  if (!meta?.instanceId || (worktree.instanceId && worktree.instanceId !== meta.instanceId)) {
-    return null
+type SpoolRepoInspection = {
+  repo: Repo
+  authoritative: boolean
+  actualHostScope: string | null
+  targets: readonly SpoolOwnerWorktree[]
+  inventoryWorktreeCount: number
+}
+
+function assertRepoInventoryCapacity(repos: readonly Repo[]): void {
+  if (repos.length > SPOOL_PUBLICATION_MAX_REGISTERED_REPOS) {
+    throw new SpoolOwnerWorktreeCatalogError('resource-limit')
   }
-  const setup = getProjectHostSetupForRepo(setups, repo)
-  const repoExecutionHostId = getRepoExecutionHostId(repo)
-  const runtimeBacked = parseExecutionHostId(repoExecutionHostId)?.kind === 'runtime'
-  return {
-    kind: 'git',
-    worktreeId: worktree.id,
-    instanceId: meta.instanceId,
-    projectId: worktree.projectId ?? meta.projectId ?? setup.projectId,
-    repoId: repo.id,
-    // Why: detected runtime rows describe the inner host; the owner gateway
-    // must route through the outer paired runtime and let it resolve that host.
-    executionHostId: runtimeBacked
-      ? repoExecutionHostId
-      : (worktree.hostId ?? meta.hostId ?? repoExecutionHostId),
-    ...(!runtimeBacked && repo.connectionId !== undefined
-      ? { connectionId: repo.connectionId }
-      : {}),
-    projectHostSetupId: worktree.projectHostSetupId ?? meta.projectHostSetupId ?? setup.id,
-    worktreePath: worktree.path
+}
+
+function assertWorktreeInventoryCapacity(count: number): void {
+  if (count > SPOOL_PUBLICATION_MAX_REGISTERED_WORKTREES) {
+    throw new SpoolOwnerWorktreeCatalogError('resource-limit')
   }
 }
 
@@ -190,19 +265,4 @@ function assertUniqueCatalogIdentities(targets: readonly SpoolOwnerWorktree[]): 
     worktreeIds.add(target.worktreeId)
     instanceIds.add(target.instanceId)
   }
-}
-
-function repoMayContainProject(
-  repo: Repo,
-  projectId: string,
-  setups: readonly ProjectHostSetup[],
-  metas: Readonly<Record<string, WorktreeMeta>>
-): boolean {
-  if (getProjectHostSetupForRepo(setups, repo).projectId === projectId) {
-    return true
-  }
-  return Object.entries(metas).some(
-    ([worktreeId, meta]) =>
-      getRepoIdFromWorktreeId(worktreeId) === repo.id && meta.projectId === projectId
-  )
 }

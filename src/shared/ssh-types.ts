@@ -124,6 +124,8 @@ export type SshRemotePtyLease = {
   targetId: string
   ptyId: string
   worktreeId?: string
+  /** Spawn-time identity prevents a surviving relay PTY following a reused path. */
+  worktreeInstanceId?: string
   tabId?: string
   leafId?: string
   state: SshRemotePtyLeaseState

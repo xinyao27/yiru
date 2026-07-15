@@ -16,6 +16,8 @@ export type SpoolCatalogReferenceBinding =
       instanceId: string
       shareEpoch: string
       sessionKey: string
+      catalogRevision: number
+      generation: number
     }
   | {
       kind: 'session-page'
@@ -23,7 +25,8 @@ export type SpoolCatalogReferenceBinding =
       worktreeId: string
       instanceId: string
       shareEpoch: string
-      offset: number
+      pageIndex: number
+      sourceCursor: string | null
       catalogRevision: number
       generation: number
     }

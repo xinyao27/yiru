@@ -13,12 +13,27 @@ import {
   type SpoolSink,
   type SpoolSubscription
 } from './spool-peer-connection-contract'
-import { SPOOL_CANCEL_SUBSCRIPTION_METHOD } from './spool-rpc-stream'
 import {
+  SPOOL_CONNECT_TIMEOUT_MS,
+  SPOOL_REQUEST_TIMEOUT_MS,
+  type SpoolPeerState
+} from './spool-peer-connection-policy'
+import {
+  SPOOL_CANCEL_REQUEST_METHOD,
+  SPOOL_CANCEL_SUBSCRIPTION_METHOD
+} from './spool-rpc-cancellation'
+import {
+  abortSpoolPendingPeerRequest,
+  sendSpoolPeerCancellation
+} from './spool-peer-request-cancellation'
+import {
+  clearPendingRequest,
   clearPendingTimeout,
   dispatchSpoolPeerResponse,
   type SpoolPendingPeerRequest
 } from './spool-peer-response-dispatch'
+import { rejectSpoolPendingPeerRequests } from './spool-peer-request-rejection'
+import { SpoolPeerStatePublisher } from './spool-peer-state-publisher'
 import {
   formatSpoolPeerAddress,
   isSpoolAuthenticatedFrame,
@@ -32,18 +47,13 @@ export {
   type SpoolSubscription
 } from './spool-peer-connection-contract'
 
-const SPOOL_CONNECT_TIMEOUT_MS = 10_000
-const SPOOL_REQUEST_TIMEOUT_MS = 30_000
-
-type PeerState = 'idle' | 'awaiting-ready' | 'awaiting-authenticated' | 'ready' | 'closed'
-
 export class SpoolPeerConnection {
   private socket: WebSocket | null = null
   private sharedKey: Uint8Array | null = null
-  private state: PeerState = 'idle'
+  private state: SpoolPeerState = 'idle'
   private connectionEpoch = 0
   private readonly pending = new Map<string, SpoolPendingPeerRequest>()
-  private readonly stateListeners = new Set<(state: SpoolConnectionState) => void>()
+  private readonly states = new SpoolPeerStatePublisher()
   private readyWaiter: { resolve: () => void; reject: (error: Error) => void } | null = null
   private stopHeartbeat: (() => void) | null = null
 
@@ -55,7 +65,7 @@ export class SpoolPeerConnection {
         ? Promise.resolve()
         : Promise.reject(new SpoolPeerConnectionError('protocol_error'))
     }
-    this.publish({ status: 'connecting', connectionEpoch: this.connectionEpoch })
+    this.states.publish({ status: 'connecting', connectionEpoch: this.connectionEpoch })
     this.state = 'awaiting-ready'
     const endpoint = `ws://${formatSpoolPeerAddress(this.admission.address)}:${SPOOL_INGRESS_PORT}${SPOOL_CONNECT_PATH}`
     const socket = new WebSocket(endpoint, {
@@ -91,15 +101,17 @@ export class SpoolPeerConnection {
   request<TResult>(
     method: string,
     params: unknown,
-    options: { mutation?: boolean; timeoutMs?: number } = {}
+    options: { mutation?: boolean; timeoutMs?: number; signal?: AbortSignal } = {}
   ): Promise<TResult> {
+    options.signal?.throwIfAborted()
     return new Promise<TResult>((resolve, reject) => {
       this.sendRequest(method, params, {
         mutation: options.mutation === true,
         streaming: false,
         timeoutMs: options.timeoutMs ?? SPOOL_REQUEST_TIMEOUT_MS,
         resolve: resolve as (value: unknown) => void,
-        reject
+        reject,
+        signal: options.signal
       })
     })
   }
@@ -117,7 +129,7 @@ export class SpoolPeerConnection {
       close: () => {
         const pending = requestId ? this.pending.get(requestId) : null
         if (requestId && pending) {
-          this.sendSubscriptionCancellation(requestId)
+          this.sendCancellation(SPOOL_CANCEL_SUBSCRIPTION_METHOD, requestId)
           clearPendingTimeout(pending)
           this.pending.delete(requestId)
           try {
@@ -131,8 +143,7 @@ export class SpoolPeerConnection {
   }
 
   subscribeState(listener: (state: SpoolConnectionState) => void): () => void {
-    this.stateListeners.add(listener)
-    return () => this.stateListeners.delete(listener)
+    return this.states.subscribe(listener)
   }
 
   close(): void {
@@ -140,7 +151,7 @@ export class SpoolPeerConnection {
       return
     }
     this.state = 'closed'
-    this.rejectAll(false)
+    rejectSpoolPendingPeerRequests(this.pending, false)
     this.readyWaiter?.reject(new SpoolPeerConnectionError('disconnected'))
     this.readyWaiter = null
     this.sharedKey = null
@@ -149,7 +160,7 @@ export class SpoolPeerConnection {
     this.socket?.terminate()
     this.socket = null
     this.connectionEpoch++
-    this.publish({
+    this.states.publish({
       status: 'disconnected',
       connectionEpoch: this.connectionEpoch,
       reason: 'stopped'
@@ -172,9 +183,27 @@ export class SpoolPeerConnection {
         return
       }
       this.pending.delete(requestId)
+      clearPendingRequest(pending)
+      if (!pending.mutation) {
+        this.sendCancellation(SPOOL_CANCEL_REQUEST_METHOD, requestId)
+      }
       pending.reject(new SpoolPeerConnectionError(pending.mutation ? 'outcome_unknown' : 'timeout'))
     }, request.timeoutMs)
-    this.pending.set(requestId, { ...request, timeout })
+    const { timeoutMs: _timeoutMs, ...requestWithoutTimeout } = request
+    const pending: SpoolPendingPeerRequest = { ...requestWithoutTimeout, timeout }
+    pending.abortListener = () =>
+      abortSpoolPendingPeerRequest({
+        pendingRequests: this.pending,
+        requestId,
+        pending,
+        sendCancellation: () => this.sendCancellation(SPOOL_CANCEL_REQUEST_METHOD, requestId)
+      })
+    this.pending.set(requestId, pending)
+    request.signal?.addEventListener('abort', pending.abortListener, { once: true })
+    if (request.signal?.aborted) {
+      pending.abortListener()
+      return requestId
+    }
     this.socket.send(encrypt(JSON.stringify({ id: requestId, method, params }), this.sharedKey))
     return requestId
   }
@@ -218,7 +247,7 @@ export class SpoolPeerConnection {
       this.state = 'ready'
       this.readyWaiter?.resolve()
       this.readyWaiter = null
-      this.publish({
+      this.states.publish({
         status: 'connected',
         connectionEpoch: this.connectionEpoch,
         ownerRuntimeId: this.admission.response.ownerRuntimeId
@@ -234,20 +263,13 @@ export class SpoolPeerConnection {
     })
   }
 
-  private sendSubscriptionCancellation(requestId: string): void {
-    if (this.state !== 'ready' || !this.socket || !this.sharedKey) {
-      return
-    }
-    this.socket.send(
-      encrypt(
-        JSON.stringify({
-          id: randomUUID(),
-          method: SPOOL_CANCEL_SUBSCRIPTION_METHOD,
-          params: { requestId }
-        }),
-        this.sharedKey
-      )
-    )
+  private sendCancellation(method: string, requestId: string): void {
+    sendSpoolPeerCancellation({
+      socket: this.state === 'ready' ? this.socket : null,
+      sharedKey: this.sharedKey,
+      method,
+      requestId
+    })
   }
 
   private handleLoss(error: Error): void {
@@ -258,7 +280,7 @@ export class SpoolPeerConnection {
     this.state = 'closed'
     this.readyWaiter?.reject(error)
     this.readyWaiter = null
-    this.rejectAll(true)
+    rejectSpoolPendingPeerRequests(this.pending, true)
     this.sharedKey = null
     this.stopHeartbeat?.()
     this.stopHeartbeat = null
@@ -267,30 +289,10 @@ export class SpoolPeerConnection {
     // protocol failure must tear it down instead of only changing client state.
     socket?.terminate()
     this.connectionEpoch++
-    this.publish({
+    this.states.publish({
       status: 'disconnected',
       connectionEpoch: this.connectionEpoch,
       reason: 'closed'
     })
-  }
-
-  private rejectAll(outcomeMayBeUnknown: boolean): void {
-    for (const [id, pending] of this.pending) {
-      clearPendingTimeout(pending)
-      this.pending.delete(id)
-      const code = outcomeMayBeUnknown && pending.mutation ? 'outcome_unknown' : 'disconnected'
-      const error = new SpoolPeerConnectionError(code)
-      try {
-        pending.reject(error)
-      } catch {
-        // A renderer-facing sink must not escape into the WebSocket event callback.
-      }
-    }
-  }
-
-  private publish(state: SpoolConnectionState): void {
-    for (const listener of this.stateListeners) {
-      listener(state)
-    }
   }
 }

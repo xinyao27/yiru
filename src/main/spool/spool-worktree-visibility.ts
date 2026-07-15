@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto'
-import { SPOOL_CATALOG_MAX_WORKTREES } from '../../shared/spool/spool-catalog-contract'
-import { SpoolVisibilityError } from './spool-visibility-errors'
+import { SpoolVisibilityError, rethrowPublicationResourceLimit } from './spool-visibility-errors'
 import {
+  createEmptySpoolPublicationPersistence,
   SpoolVisibilityPersistenceTransitions,
   type SpoolVisibilityStore
 } from './spool-visibility-persistence-transitions'
-import type { SpoolOwnerWorktree } from './spool-worktree-incarnation'
+import { SpoolPublicVisibilityTransition } from './spool-public-visibility-transition'
 import {
   SpoolWorktreePublicationState,
   type SpoolPublicWorktreeInstance,
@@ -48,9 +48,7 @@ export class SpoolWorktreeVisibility {
   private readonly persistence: SpoolVisibilityPersistenceTransitions
   private readonly revalidation: SpoolVisibilityPublicationRevalidation
   private readonly targets: SpoolVisibilityTargetResolution
-  private readonly attestFirstPublication: NonNullable<
-    SpoolWorktreeVisibilityOptions['attestFirstPublication']
-  >
+  private readonly publicTransition: SpoolPublicVisibilityTransition
   private readonly transitionSerializer: SpoolVisibilityTransitionSerializer
   private initialized = false
   private degraded = false
@@ -84,6 +82,8 @@ export class SpoolWorktreeVisibility {
       this.publicationState,
       options.createWorktreeInstanceId ?? randomUUID
     )
+    const prepareFirstPublication =
+      options.prepareFirstPublication ?? (async () => createEmptySpoolPublicationPersistence())
     this.revalidation = new SpoolVisibilityPublicationRevalidation({
       store: options.store,
       catalog: options.catalog,
@@ -91,10 +91,18 @@ export class SpoolWorktreeVisibility {
       validator: this.validator,
       publicationState: this.publicationState,
       persistence: this.persistence,
+      prepareFirstPublication,
       isPublic: (instanceId, shareEpoch) => this.isPublic(instanceId, shareEpoch)
     })
     this.targets = new SpoolVisibilityTargetResolution(options.store, this.publicationState)
-    this.attestFirstPublication = options.attestFirstPublication ?? (async () => {})
+    this.publicTransition = new SpoolPublicVisibilityTransition({
+      store: options.store,
+      targets: this.targets,
+      validator: this.validator,
+      publicationState: this.publicationState,
+      persistence: this.persistence,
+      prepareFirstPublication
+    })
   }
 
   initialize(): Promise<void> {
@@ -158,7 +166,12 @@ export class SpoolWorktreeVisibility {
         this.persistence.makePrivate([target])
         return
       }
-      const target = await this.catalog.getWorktree(worktreeId)
+      let target
+      try {
+        target = await this.catalog.getWorktree(worktreeId)
+      } catch (error) {
+        rethrowPublicationResourceLimit(error)
+      }
       if (!target) {
         const instanceId = this.store.getWorktreeMeta(worktreeId)?.instanceId
         if (instanceId) {
@@ -166,7 +179,7 @@ export class SpoolWorktreeVisibility {
         }
         throw new SpoolVisibilityError('resource-not-found')
       }
-      await this.makePublic([target])
+      await this.publicTransition.commit([target])
     })
   }
 
@@ -177,9 +190,14 @@ export class SpoolWorktreeVisibility {
         this.persistence.makePrivate(this.targets.persistedProject(projectId))
         return
       }
-      const targets = [...(await this.catalog.listProjectWorktrees(projectId))]
+      let targets
+      try {
+        targets = [...(await this.catalog.listProjectWorktrees(projectId))]
+      } catch (error) {
+        rethrowPublicationResourceLimit(error)
+      }
       this.targets.requireProject(projectId, targets)
-      await this.makePublic(targets)
+      await this.publicTransition.commit(targets)
     })
   }
 
@@ -221,49 +239,6 @@ export class SpoolWorktreeVisibility {
       this.requireInitialized()
       return await this.revalidation.revalidateMutationTarget(instanceId, shareEpoch)
     })
-  }
-
-  private async makePublic(targets: readonly SpoolOwnerWorktree[]): Promise<void> {
-    this.targets.requireUnique(targets)
-    if (targets.length === 0) {
-      return
-    }
-    const currentTargets = targets.map((target) => ({
-      target,
-      meta: this.targets.requireCurrentMeta(target)
-    }))
-    const metaByWorktreeId = this.store.getAllWorktreeMeta()
-    const currentPublicCount = Object.values(metaByWorktreeId).filter(
-      (meta) => meta.spoolVisibility === 'public'
-    ).length
-    const newPublicCount = currentTargets.filter(
-      ({ meta }) => meta.spoolVisibility !== 'public'
-    ).length
-    if (currentPublicCount + newPublicCount > SPOOL_CATALOG_MAX_WORKTREES) {
-      // Why: the V1 wire cap is an owner-side publication limit, never a truncation rule.
-      throw new SpoolVisibilityError('resource-limit')
-    }
-    const candidates = currentTargets.map(({ target, meta }) => {
-      return {
-        target,
-        expectedMarkerId: meta.spoolIncarnationId,
-        requirePersistedMarker: meta.spoolVisibility === 'public'
-      }
-    })
-    const validation = await this.validator.validate(candidates)
-    const validationUsable = this.publicationState.applyValidationSuspensions(validation)
-    if (validation.replaced.length > 0) {
-      this.persistence.rotateReplaced(validation.replaced)
-      throw new SpoolVisibilityError('incarnation-changed')
-    }
-    if (!validationUsable || validation.ready.length !== targets.length) {
-      throw new SpoolVisibilityError(
-        validation.overlappingInstanceIds.length > 0 ? 'overlapping-root' : 'not-shareable'
-      )
-    }
-    // Why: legacy transcript proofs must be durable before the share epoch can expose them.
-    await this.attestFirstPublication(validation.ready)
-    this.persistence.commitPublic(validation.ready)
   }
 
   private requireInitialized(): void {

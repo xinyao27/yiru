@@ -13,6 +13,8 @@ export type SpoolPendingPeerRequest = {
   resolve: (value: unknown) => void
   reject: (error: Error) => void
   sink?: SpoolSink<unknown>
+  signal?: AbortSignal
+  abortListener?: () => void
 }
 
 export function dispatchSpoolPeerResponse(options: {
@@ -36,7 +38,7 @@ export function dispatchSpoolPeerResponse(options: {
     return
   }
   if (!response.ok) {
-    clearPendingTimeout(pending)
+    clearPendingRequest(pending)
     options.pending.delete(response.id)
     callPeerCallback(() => pending.reject(new Error(response.error.code)), options)
     return
@@ -60,7 +62,7 @@ export function dispatchSpoolPeerResponse(options: {
     }
     pending.resolve(response.result)
   }
-  clearPendingTimeout(pending)
+  clearPendingRequest(pending)
   options.pending.delete(response.id)
   callPeerCallback(() => pending.sink?.complete(), options)
 }
@@ -69,6 +71,13 @@ export function clearPendingTimeout(pending: SpoolPendingPeerRequest): void {
   if (pending.timeout) {
     clearTimeout(pending.timeout)
     pending.timeout = null
+  }
+}
+
+export function clearPendingRequest(pending: SpoolPendingPeerRequest): void {
+  clearPendingTimeout(pending)
+  if (pending.signal && pending.abortListener) {
+    pending.signal.removeEventListener('abort', pending.abortListener)
   }
 }
 

@@ -276,6 +276,7 @@ import {
   configureAiVaultSessionSources,
   listAiVaultSessions
 } from '../ai-vault/cached-session-list'
+import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session-root-configuration'
 import type { AiVaultListArgs, AiVaultListResult } from '../../shared/ai-vault-types'
 import type {
   WorkspacePortKillRequest,
@@ -1005,6 +1006,8 @@ function isCursorAgentOrchestrationTarget(
 type RuntimePtyWorktreeRecord = {
   ptyId: string
   worktreeId: string
+  /** Trusted spawn-time identity; null means the PTY must not cross a Spool boundary. */
+  worktreeInstanceId: string | null
   connectionId: string | null
   // Why: a Windows host can own both native and WSL panes; preamble command
   // selection must follow the pane that executes it, not process.platform.
@@ -2600,11 +2603,11 @@ export class OrcaRuntimeService {
       // terminal output. worktree.ps reads this at query time so mobile shows the
       // same inline agent rows the desktop sidebar does — same source, 1:1.
       getAgentStatusSnapshot?: () => AgentStatusIpcPayload[]
-      // Why: codex-home paths for the Agent Session History scan must be sourced
-      // here, not via the window-only registerCoreHandlers path — that path never
-      // runs under `orca serve`, so remote/SSH hosts would silently drop
-      // managed-Codex sessions. The runtime ctor runs in BOTH window and serve.
+      // Why: Claude and Codex history roots must also be available under headless `orca serve`.
       getAdditionalAiVaultCodexHomePaths?: () => readonly string[]
+      resolveAiVaultClaudeProjectsDirs?: (
+        target: AiVaultSessionRuntimeTarget
+      ) => Promise<readonly string[]>
       buildAgentHookPtyEnv?: () => Record<string, string>
       getDesktopWindowStatus?: () => RuntimeDesktopWindowStatus
     }
@@ -2615,12 +2618,11 @@ export class OrcaRuntimeService {
       this.agentDetector = new AgentDetector(stats)
     }
     this.getAgentStatusSnapshotFn = deps?.getAgentStatusSnapshot ?? null
-    // Why: configure the shared AiVault scan cache from a serve-mode-reachable
-    // seam so the aiVault.listSessions RPC includes managed-Codex + WSL sessions
-    // even on headless `orca serve` hosts where registerCoreHandlers never runs.
-    if (deps?.getAdditionalAiVaultCodexHomePaths) {
+    // Why: both managed-provider root resolvers must work without desktop IPC registration.
+    if (deps?.getAdditionalAiVaultCodexHomePaths || deps?.resolveAiVaultClaudeProjectsDirs) {
       configureAiVaultSessionSources({
-        getAdditionalCodexHomePaths: deps.getAdditionalAiVaultCodexHomePaths
+        getAdditionalCodexHomePaths: deps.getAdditionalAiVaultCodexHomePaths,
+        resolveClaudeProjectsDirs: deps.resolveAiVaultClaudeProjectsDirs
       })
     }
     // Why: the daemon adapter is installed via `setLocalPtyProvider()` during
@@ -5812,7 +5814,8 @@ export class OrcaRuntimeService {
     worktreeId: string,
     connectionId: string | null = null,
     binding?: { tabId: string; leafId: string },
-    isWsl?: boolean
+    isWsl?: boolean,
+    trustedWorktreeInstanceId?: string | null
   ): void {
     // Why: record the renderer pane identity at spawn time so a stalled graph
     // sync can't hide that a live PTY already backs a pending mobile create.
@@ -5820,12 +5823,21 @@ export class OrcaRuntimeService {
       binding && isValidTerminalTabId(binding.tabId) && isTerminalLeafId(binding.leafId)
         ? makePaneKey(binding.tabId, binding.leafId)
         : null
-    this.recordPtyWorktree(ptyId, worktreeId, {
+    const hadRecord = this.ptysById.has(ptyId)
+    const pty = this.recordPtyWorktree(ptyId, worktreeId, {
       connected: true,
       connectionId,
       ...(isWsl !== undefined ? { isWsl } : {}),
       ...(binding && paneKey ? { tabId: binding.tabId, paneKey } : {})
     })
+    if (trustedWorktreeInstanceId !== undefined) {
+      pty.worktreeInstanceId = normalizeRuntimeWorktreeInstanceId(trustedWorktreeInstanceId)
+    } else if (!hadRecord) {
+      // Why: direct runtime spawns may bypass IPC; only a newly-created record may bind current meta.
+      pty.worktreeInstanceId = normalizeRuntimeWorktreeInstanceId(
+        this.store?.getWorktreeMeta(worktreeId)?.instanceId
+      )
+    }
     // Why: the renderer's own PTY spawn is the reliable signal that the pending
     // mobile create's tab is live; publish its surface main-side (#7587).
     if (binding && paneKey) {
@@ -20957,6 +20969,7 @@ export class OrcaRuntimeService {
       pty = {
         ptyId,
         worktreeId,
+        worktreeInstanceId: null,
         connectionId: state.connectionId ?? parseAppSshPtyId(ptyId)?.connectionId ?? null,
         isWsl: state.isWsl ?? null,
         tabId: state.tabId ?? null,
@@ -20996,7 +21009,11 @@ export class OrcaRuntimeService {
       return pty
     }
 
-    pty.worktreeId = worktreeId
+    if (pty.worktreeId !== worktreeId) {
+      pty.worktreeId = worktreeId
+      // Why: path/controller inference can relocate a PTY but cannot attest a new instance.
+      pty.worktreeInstanceId = null
+    }
     if (state.connectionId !== undefined) {
       pty.connectionId = state.connectionId
     }
@@ -21241,6 +21258,9 @@ export class OrcaRuntimeService {
       handle: this.issueHandle(leaf),
       ptyId: leaf.ptyId,
       worktreeId: leaf.worktreeId,
+      worktreeInstanceId: leaf.ptyId
+        ? (this.ptysById.get(leaf.ptyId)?.worktreeInstanceId ?? null)
+        : null,
       worktreePath: worktree?.path ?? '',
       branch: worktree?.branch ?? '',
       tabId: leaf.tabId,
@@ -21734,17 +21754,14 @@ export class OrcaRuntimeService {
           : null
       // Why: web/mobile clients hold these handles across renderer graph syncs;
       // leaf handles are graph-epoch-bound, but PTY handles remain streamable.
-      const terminalHandle = liveLeafPtyId
-        ? this.issuePtyHandle(
-            this.recordPtyWorktree(liveLeafPtyId, snapshot.worktree, {
-              tabId: tab.parentTabId,
-              paneKey,
-              connected: true
-            })
-          )
+      const terminalPty = liveLeafPtyId
+        ? this.recordPtyWorktree(liveLeafPtyId, snapshot.worktree, {
+            tabId: tab.parentTabId,
+            paneKey,
+            connected: true
+          })
         : livePty
-          ? this.issuePtyHandle(livePty)
-          : null
+      const terminalHandle = terminalPty ? this.issuePtyHandle(terminalPty) : null
       tabs.push({
         type: 'terminal',
         id: tab.id,
@@ -21762,7 +21779,11 @@ export class OrcaRuntimeService {
         ...(tab.viewMode ? { viewMode: tab.viewMode } : {}),
         isActive: tab.isActive,
         ...(terminalHandle
-          ? { status: 'ready' as const, terminal: terminalHandle }
+          ? {
+              status: 'ready' as const,
+              terminal: terminalHandle,
+              worktreeInstanceId: terminalPty?.worktreeInstanceId ?? null
+            }
           : { status: 'pending-handle' as const, terminal: null })
       })
     }
@@ -22473,6 +22494,7 @@ export class OrcaRuntimeService {
       handle: this.issuePtyHandle(pty),
       ptyId: pty.ptyId,
       worktreeId: pty.worktreeId,
+      worktreeInstanceId: pty.worktreeInstanceId,
       worktreePath: worktree?.path ?? '',
       branch: worktree?.branch ?? '',
       tabId: `pty:${pty.ptyId}`,
@@ -27804,6 +27826,11 @@ function trimPendingAnsiControl(value: string): string {
   const introducer = value.slice(0, Math.min(2, value.length))
   const suffixBudget = Math.max(0, MAX_TAIL_PENDING_ANSI_CHARS - introducer.length)
   return `${introducer}${value.slice(-suffixBudget)}`
+}
+
+function normalizeRuntimeWorktreeInstanceId(value: string | null | undefined): string | null {
+  const trimmed = value?.trim()
+  return trimmed && trimmed.length <= 512 && !trimmed.includes('\0') ? trimmed : null
 }
 
 function isTerminalPreviewLineControl(parsed: {

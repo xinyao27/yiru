@@ -56,17 +56,8 @@ export async function discoverAiVaultSessionSources(args: {
   issues: AiVaultScanIssue[]
 }): Promise<SessionFileDiscovery[]> {
   const { options, limitPerAgent, issues } = args
-  const wslHomeDirs = normalizedWslHomeDirs(options.wslHomeDirs)
-  const codexSessionsDirs = uniqueCodexSessionsDirs([
-    options.codexSessionsDir ?? CODEX_SESSIONS_DIR,
-    ...wslHomeDirs.map((homeDir) => join(homeDir, '.codex', 'sessions')),
-    // Why: Orca-launched WSL Codex sessions use an Orca-owned CODEX_HOME,
-    // not the user's default ~/.codex history root.
-    ...wslHomeDirs.map((homeDir) =>
-      join(homeDir, '.local', 'share', 'orca', 'codex-runtime-home', 'home', 'sessions')
-    ),
-    ...(options.additionalCodexSessionsDirs ?? [])
-  ])
+  const wslHomeDirs = normalizeAiVaultWslHomeDirs(options.wslHomeDirs)
+  const codexSessionsDirs = codexSessionRootDirs(options, wslHomeDirs)
 
   return Promise.all([
     // Why: OpenCode 1.17.x migrated sessions from per-session JSON files to a
@@ -115,6 +106,22 @@ function codexDiscoveries(
   return rootDirs.map((rootDir) =>
     discoverFiles({ rootDir, limit, agent: 'codex', issues, extensions: ['.jsonl'] })
   )
+}
+
+export function codexSessionRootDirs(
+  options: AiVaultScanOptions,
+  wslHomeDirs: readonly string[]
+): string[] {
+  return uniqueCodexSessionsDirs([
+    options.codexSessionsDir ?? CODEX_SESSIONS_DIR,
+    ...wslHomeDirs.map((homeDir) => join(homeDir, '.codex', 'sessions')),
+    // Why: Orca-launched WSL Codex sessions use an Orca-owned CODEX_HOME,
+    // not the user's default ~/.codex history root.
+    ...wslHomeDirs.map((homeDir) =>
+      join(homeDir, '.local', 'share', 'orca', 'codex-runtime-home', 'home', 'sessions')
+    ),
+    ...(options.additionalCodexSessionsDirs ?? [])
+  ])
 }
 
 function standardDiscoveries(
@@ -295,7 +302,7 @@ function openClawDiscovery(
   })
 }
 
-function normalizedWslHomeDirs(homeDirs: readonly string[] | undefined): string[] {
+export function normalizeAiVaultWslHomeDirs(homeDirs: readonly string[] | undefined): string[] {
   const seen = new Set<string>()
   const unique: string[] = []
   for (const homeDir of homeDirs ?? []) {

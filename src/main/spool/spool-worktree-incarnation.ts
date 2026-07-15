@@ -37,6 +37,11 @@ export type SpoolWorktreeRootComparison = {
   ancestorKeys: readonly string[]
 }
 
+export type SpoolRegisteredWorktreeRoot = {
+  target: SpoolOwnerWorktree
+  root: SpoolWorktreeRootComparison
+}
+
 export type SpoolWorktreeIncarnationUnavailableReason =
   | 'ambiguous-root'
   | 'host-unavailable'
@@ -49,10 +54,12 @@ export type SpoolHostWorktreeInspection =
       status: 'resolved'
       root: SpoolWorktreeRootComparison
       markerId: string | null
+      actualHostScope: string
     }
   | {
       status: 'unavailable'
       reason: SpoolWorktreeIncarnationUnavailableReason
+      actualHostScope?: string
     }
 
 export type SpoolHostWorktreeInspectionMode = 'resolve-root' | 'resolve-or-create-marker'
@@ -76,7 +83,11 @@ export class SpoolWorktreeIncarnationHostError extends Error {
 
 export type SpoolWorktreeRootResolution =
   | { status: 'resolved'; root: SpoolWorktreeRootComparison }
-  | { status: 'unavailable'; reason: SpoolWorktreeIncarnationUnavailableReason }
+  | {
+      status: 'unavailable'
+      reason: SpoolWorktreeIncarnationUnavailableReason
+      actualHostScope?: string
+    }
 
 export type SpoolWorktreeIncarnationResolution =
   | {
@@ -92,6 +103,7 @@ export type SpoolWorktreeIncarnationResolution =
   | {
       status: 'unavailable'
       reason: SpoolWorktreeIncarnationUnavailableReason
+      actualHostScope?: string
     }
 
 /**
@@ -110,7 +122,11 @@ export class SpoolWorktreeIncarnation {
       return inspected
     }
     if (!inspected.markerId) {
-      return { status: 'unavailable', reason: 'marker-unavailable' }
+      return {
+        status: 'unavailable',
+        reason: 'marker-unavailable',
+        actualHostScope: inspected.actualHostScope
+      }
     }
     // Why: the marker lives in Git's per-worktree admin directory, so a change
     // proves that this path no longer names the instance the owner attested.
@@ -159,10 +175,18 @@ export class SpoolWorktreeIncarnation {
     }
     const root = cloneValidRoot(inspected.root)
     const markerId = inspected.markerId
-    if (!root || (markerId !== null && !markerId.trim())) {
-      return { status: 'unavailable', reason: 'invalid-host-response' }
+    if (
+      !root ||
+      root.scopeKey !== inspected.actualHostScope ||
+      (markerId !== null && !markerId.trim())
+    ) {
+      return {
+        status: 'unavailable',
+        reason: 'invalid-host-response',
+        actualHostScope: inspected.actualHostScope
+      }
     }
-    return { status: 'resolved', root, markerId }
+    return { status: 'resolved', root, markerId, actualHostScope: inspected.actualHostScope }
   }
 }
 

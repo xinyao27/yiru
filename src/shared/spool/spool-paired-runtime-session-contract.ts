@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { SpoolPairedRuntimeBoundWorktreeSchema } from './spool-paired-runtime-host-contract'
 import { SpoolPairedRuntimeErrorCodeSchema } from './spool-paired-runtime-result-contract'
+import { SPOOL_MAX_LIVE_SESSIONS_PER_WORKTREE } from './spool-resource-limits'
 
 const identifier = z
   .string()
@@ -15,6 +16,9 @@ const resumeCommand = z
   .min(1)
   .max(128 * 1_024)
   .refine(withoutNull)
+const historicalSessionCursor = z.string().uuid()
+
+export const SPOOL_PAIRED_RUNTIME_HISTORICAL_SESSION_PAGE_SIZE = 512
 
 export const SpoolPairedRuntimeSessionWorktreeSchema = z
   .object({
@@ -28,10 +32,21 @@ export const SpoolPairedRuntimeListLiveSessionsParamsSchema = z
   .object({ target: SpoolPairedRuntimeSessionWorktreeSchema })
   .strict()
 
-export const SpoolPairedRuntimeListHistoricalSessionsParamsSchema = z
+export const SpoolPairedRuntimeListHistoricalSessionPageParamsSchema = z
   .object({
     target: SpoolPairedRuntimeSessionWorktreeSchema,
-    purpose: z.enum(['catalog', 'legacy-attestation'])
+    purpose: z.enum(['catalog', 'legacy-attestation']),
+    inventoryScope: z.string().uuid(),
+    cursor: historicalSessionCursor.nullable()
+  })
+  .strict()
+
+export const SpoolPairedRuntimeReleaseHistoricalSessionPageParamsSchema = z
+  .object({
+    target: SpoolPairedRuntimeSessionWorktreeSchema,
+    purpose: z.enum(['catalog', 'legacy-attestation']),
+    inventoryScope: z.string().uuid(),
+    cursor: historicalSessionCursor.nullable()
   })
   .strict()
 
@@ -69,18 +84,24 @@ export const SpoolPairedRuntimeHistoricalSessionSchema = z
   .strict()
 
 const liveSessionsResult = z
-  .object({ sessions: z.array(SpoolPairedRuntimeLiveSessionSchema).max(5_000) })
-  .strict()
-const historicalSessionsResult = z
   .object({
-    sessions: z.array(SpoolPairedRuntimeHistoricalSessionSchema).max(5_000),
-    scannedAt: z.string().min(1).max(128)
+    sessions: z.array(SpoolPairedRuntimeLiveSessionSchema).max(SPOOL_MAX_LIVE_SESSIONS_PER_WORKTREE)
+  })
+  .strict()
+const historicalSessionPageResult = z
+  .object({
+    sessions: z
+      .array(SpoolPairedRuntimeHistoricalSessionSchema)
+      .max(SPOOL_PAIRED_RUNTIME_HISTORICAL_SESSION_PAGE_SIZE),
+    nextCursor: historicalSessionCursor.nullable(),
+    scannedAt: z.iso.datetime()
   })
   .strict()
 
 export const SpoolPairedRuntimeLiveSessionsResponseSchema = sessionResponse(liveSessionsResult)
-export const SpoolPairedRuntimeHistoricalSessionsResponseSchema =
-  sessionResponse(historicalSessionsResult)
+export const SpoolPairedRuntimeHistoricalSessionPageResponseSchema = sessionResponse(
+  historicalSessionPageResult
+)
 
 export const SpoolPairedRuntimeSessionRecordSchema = z
   .object({

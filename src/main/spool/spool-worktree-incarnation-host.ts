@@ -4,7 +4,11 @@ import {
   type SpoolCanonicalHostPathResult,
   type SpoolPairedRuntimeWorktreeHostAdapter
 } from './spool-actual-host-path-resolver'
-import { withSpoolActualHostScope, isValidSpoolCanonicalPath } from './spool-canonical-host-path'
+import {
+  isValidSpoolCanonicalPath,
+  withSpoolActualHostScope,
+  withSpoolOuterActualHostScope
+} from './spool-canonical-host-path'
 import { SpoolIncarnationMarkerStore } from './spool-incarnation-marker-store'
 import type {
   SpoolHostWorktreeInspection,
@@ -37,6 +41,7 @@ export class SpoolActualHostWorktreeIncarnationHost implements SpoolWorktreeInca
     target: SpoolOwnerWorktree,
     mode: SpoolHostWorktreeInspectionMode
   ): Promise<SpoolHostWorktreeInspection> {
+    let actualHostScope: string | undefined
     try {
       const parsed = parseExecutionHostId(target.executionHostId)
       if (!parsed || !target.worktreePath.trim()) {
@@ -45,17 +50,19 @@ export class SpoolActualHostWorktreeIncarnationHost implements SpoolWorktreeInca
       if (parsed.kind === 'runtime') {
         return await this.inspectPairedRuntime(target, mode)
       }
+      actualHostScope = await this.paths.resolveActualHostScope(target)
       const resolved = await this.paths.resolveGitWorktree(target)
       if (mode === 'resolve-root') {
-        return { status: 'resolved', root: resolved.root, markerId: null }
+        return { status: 'resolved', root: resolved.root, markerId: null, actualHostScope }
       }
       const markerId = await this.markers.readOrCreate(resolved.markerLocation)
-      return { status: 'resolved', root: resolved.root, markerId }
+      return { status: 'resolved', root: resolved.root, markerId, actualHostScope }
     } catch (error) {
       return {
         status: 'unavailable',
         reason:
-          error instanceof SpoolWorktreeIncarnationHostError ? error.reason : 'host-unavailable'
+          error instanceof SpoolWorktreeIncarnationHostError ? error.reason : 'host-unavailable',
+        ...(actualHostScope ? { actualHostScope } : {})
       }
     }
   }
@@ -77,11 +84,18 @@ export class SpoolActualHostWorktreeIncarnationHost implements SpoolWorktreeInca
     }
     const result = await adapter.inspectWorktree(target, mode)
     if (result.status !== 'resolved') {
-      return result
+      const actualHostScope = result.actualHostScope
+        ? withSpoolOuterActualHostScope(target.executionHostId, result.actualHostScope)
+        : undefined
+      return { ...result, ...(actualHostScope ? { actualHostScope } : {}) }
     }
     if (!isValidSpoolCanonicalPath(result.root)) {
       throw new SpoolWorktreeIncarnationHostError('invalid-host-response')
     }
-    return { ...result, root: withSpoolActualHostScope(target.executionHostId, result.root) }
+    return {
+      ...result,
+      root: withSpoolActualHostScope(target.executionHostId, result.root),
+      actualHostScope: withSpoolOuterActualHostScope(target.executionHostId, result.actualHostScope)
+    }
   }
 }

@@ -1,323 +1,173 @@
-import type { SshChannelMultiplexer } from './ssh-channel-multiplexer'
-import { STREAM_CHUNK_SIZE, JsonRpcErrorCode, RelayErrorCode } from './relay-protocol'
+import { TextDecoder } from 'node:util'
+import {
+  SPOOL_SESSION_INVENTORY_JSONL_LINE_MAX_BYTES,
+  SPOOL_SESSION_INVENTORY_STREAM_PROFILE,
+  SPOOL_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES
+} from '../../shared/spool/spool-resource-limits'
 import type { FileReadResult } from '../providers/types'
+import type { SshChannelMultiplexer } from './ssh-channel-multiplexer'
+import {
+  consumeSshFileStream,
+  StreamProtocolError,
+  type SshFileStreamMetadata
+} from './ssh-filesystem-stream-consumer'
 
-const RESULT_ENCODING_BASE64 = 'base64'
-const SENTINEL_STREAM_ID = -1
+export { isMethodNotFoundError, StreamProtocolError } from './ssh-filesystem-stream-consumer'
 
 const MAX_PREVIEWABLE_BINARY_SIZE = 50 * 1024 * 1024
 const MAX_TEXT_FILE_SIZE = 10 * 1024 * 1024
 
-type StreamMetadataResponse = {
-  streamId?: number
-  totalSize: number
-  isBinary: boolean
-  isImage?: boolean
-  mimeType?: string
-  resultEncoding?: 'base64' | 'utf-8'
-  empty?: boolean
-}
-
-export function isMethodNotFoundError(err: unknown): boolean {
-  if (!err || typeof err !== 'object') {
-    return false
-  }
-  const code = (err as { code?: unknown }).code
-  return code === JsonRpcErrorCode.MethodNotFound
-}
-
-export class StreamProtocolError extends Error {
-  readonly code = RelayErrorCode.StreamProtocolError
-  constructor(message: string) {
-    super(message)
-  }
-}
-
 export async function readFileViaStream(
   mux: SshChannelMultiplexer,
-  filePath: string
+  filePath: string,
+  signal?: AbortSignal
 ): Promise<FileReadResult> {
-  // Why: subscribe BEFORE awaiting the metadata response so a chunk arriving
-  // immediately after the response cannot beat the listener registration.
-  // streamIdRef stays at SENTINEL_STREAM_ID until metadata resolves; chunk
-  // handlers compare against it and drop unmatched ids cleanly.
-  const streamIdRef = { current: SENTINEL_STREAM_ID }
-  const unsubscribers: (() => void)[] = []
-  const cleanup = (): void => {
-    while (unsubscribers.length > 0) {
-      const fn = unsubscribers.pop()
-      try {
-        fn?.()
-      } catch {
-        // Best-effort cleanup
+  let buffer: Buffer | null = null
+  let offset = 0
+  const metadata = await consumeSshFileStream(mux, filePath, {
+    maxBytes: MAX_PREVIEWABLE_BINARY_SIZE,
+    signal,
+    onMetadata: (value) => {
+      const cap = value.isBinary ? MAX_PREVIEWABLE_BINARY_SIZE : MAX_TEXT_FILE_SIZE
+      if (value.totalSize > cap) {
+        throw new StreamProtocolError(
+          `Reported totalSize ${value.totalSize} exceeds client cap ${cap}`
+        )
       }
+      if (!value.empty) {
+        try {
+          buffer = Buffer.alloc(value.totalSize)
+        } catch (error) {
+          throw new Error(
+            `Failed to allocate ${value.totalSize} bytes: ${error instanceof Error ? error.message : String(error)}`
+          )
+        }
+      }
+    },
+    onChunk: (chunk) => {
+      if (!buffer) {
+        throw new StreamProtocolError('File stream emitted content without an output buffer')
+      }
+      chunk.copy(buffer, offset)
+      offset += chunk.length
+    }
+  })
+
+  return fileReadResult(metadata, buffer)
+}
+
+export async function consumeSessionInventoryJsonLines(
+  mux: SshChannelMultiplexer,
+  filePath: string,
+  consumeLine: (line: string) => void,
+  signal?: AbortSignal
+): Promise<void> {
+  const decoder = new BoundedUtf8LineDecoder(
+    SPOOL_SESSION_INVENTORY_JSONL_LINE_MAX_BYTES,
+    consumeLine
+  )
+  await consumeSshFileStream(mux, filePath, {
+    maxBytes: SPOOL_SESSION_INVENTORY_TRANSCRIPT_MAX_BYTES,
+    profile: SPOOL_SESSION_INVENTORY_STREAM_PROFILE,
+    signal,
+    onMetadata: (metadata) => {
+      if (metadata.isBinary || metadata.isImage || metadata.resultEncoding === 'base64') {
+        throw new StreamProtocolError('Session inventory transcript is not UTF-8 text')
+      }
+    },
+    onChunk: (chunk) => decoder.consume(chunk)
+  })
+  signal?.throwIfAborted()
+  decoder.finish()
+  signal?.throwIfAborted()
+}
+
+function fileReadResult(metadata: SshFileStreamMetadata, buffer: Buffer | null): FileReadResult {
+  if (metadata.empty) {
+    return {
+      content: '',
+      isBinary: metadata.isBinary,
+      ...(metadata.isImage !== undefined ? { isImage: metadata.isImage } : {}),
+      ...(metadata.mimeType !== undefined ? { mimeType: metadata.mimeType } : {})
+    }
+  }
+  if (!buffer) {
+    throw new StreamProtocolError('File stream completed without content')
+  }
+  return {
+    content:
+      metadata.resultEncoding === 'utf-8' ? buffer.toString('utf-8') : buffer.toString('base64'),
+    isBinary: metadata.isBinary,
+    ...(metadata.isImage !== undefined ? { isImage: metadata.isImage } : {}),
+    ...(metadata.mimeType !== undefined ? { mimeType: metadata.mimeType } : {})
+  }
+}
+
+class BoundedUtf8LineDecoder {
+  private decoder = new TextDecoder('utf-8', { fatal: true })
+  private decodedSegments: string[] = []
+  private pendingBytes = 0
+
+  constructor(
+    private readonly maxLineBytes: number,
+    private readonly consumeLine: (line: string) => void
+  ) {}
+
+  consume(chunk: Buffer): void {
+    let segmentStart = 0
+    for (let index = 0; index < chunk.length; index++) {
+      if (chunk[index] !== 0x0a) {
+        continue
+      }
+      this.append(chunk.subarray(segmentStart, index))
+      this.emitLine()
+      segmentStart = index + 1
+    }
+    this.append(chunk.subarray(segmentStart))
+  }
+
+  finish(): void {
+    if (this.pendingBytes === 0) {
+      return
+    }
+    this.emitLine()
+  }
+
+  private append(bytes: Buffer): void {
+    if (bytes.length === 0) {
+      return
+    }
+    this.pendingBytes += bytes.length
+    if (this.pendingBytes > this.maxLineBytes) {
+      throw new StreamProtocolError(
+        `Session inventory JSONL record exceeds ${this.maxLineBytes} bytes`
+      )
+    }
+    try {
+      const decoded = this.decoder.decode(bytes, { stream: true })
+      if (decoded) {
+        this.decodedSegments.push(decoded)
+      }
+    } catch {
+      throw new StreamProtocolError('Session inventory transcript contains invalid UTF-8')
     }
   }
 
-  return new Promise<FileReadResult>((resolve, reject) => {
-    let buffer: Buffer | null = null
-    let resultEncoding: 'base64' | 'utf-8' = RESULT_ENCODING_BASE64
-    let isBinary = false
-    let isImage: boolean | undefined
-    let mimeType: string | undefined
-    let totalSize = 0
-    let expectedSeq = 0
-    let receivedChunks = 0
-    let totalChunks = 0
-    let bytesReceived = 0
-    let settled = false
-
-    // Why: chunk/end/error frames may arrive in the same dispatch tick as the
-    // metadata response. Queue them until streamIdRef is set, then drain.
-    type PendingFrame =
-      | { kind: 'chunk'; params: Record<string, unknown> }
-      | { kind: 'end'; params: Record<string, unknown> }
-      | { kind: 'error'; params: Record<string, unknown> }
-    const pending: PendingFrame[] = []
-    let metadataReady = false
-
-    const cancel = (): void => {
-      if (streamIdRef.current !== SENTINEL_STREAM_ID && !mux.isDisposed()) {
-        try {
-          mux.notify('fs.cancelStream', { streamId: streamIdRef.current })
-        } catch {
-          // Best-effort
-        }
+  private emitLine(): void {
+    try {
+      const tail = this.decoder.decode()
+      if (tail) {
+        this.decodedSegments.push(tail)
       }
+    } catch {
+      throw new StreamProtocolError('Session inventory transcript contains invalid UTF-8')
     }
-
-    const fail = (err: Error): void => {
-      if (settled) {
-        return
-      }
-      settled = true
-      cancel()
-      cleanup()
-      reject(err)
+    let line = this.decodedSegments.join('')
+    if (line.endsWith('\r')) {
+      line = line.slice(0, -1)
     }
-
-    const succeed = (value: FileReadResult): void => {
-      if (settled) {
-        return
-      }
-      settled = true
-      cleanup()
-      resolve(value)
-    }
-
-    const handleChunk = (params: Record<string, unknown>): void => {
-      if (settled) {
-        return
-      }
-      const id = params.streamId as number | undefined
-      if (id !== streamIdRef.current) {
-        return
-      }
-      const seq = params.seq as number
-      const data = params.data as string
-      if (typeof seq !== 'number' || typeof data !== 'string') {
-        fail(new StreamProtocolError(`Malformed chunk for stream ${id}`))
-        return
-      }
-      if (seq !== expectedSeq) {
-        fail(
-          new StreamProtocolError(
-            `Out-of-order chunk for stream ${id}: expected ${expectedSeq}, got ${seq}`
-          )
-        )
-        return
-      }
-      const offset = seq * STREAM_CHUNK_SIZE
-      const decoded = Buffer.from(data, 'base64')
-      // Why: a short chunk would leave the pre-allocated buffer zero-filled and
-      // resolve as silently-corrupt data; validate each chunk's exact length.
-      const expectedLength = Math.min(STREAM_CHUNK_SIZE, totalSize - offset)
-      if (decoded.length !== expectedLength) {
-        fail(
-          new StreamProtocolError(
-            `Chunk length mismatch for stream ${id}: seq=${seq} expected=${expectedLength} got=${decoded.length}`
-          )
-        )
-        return
-      }
-      if (!buffer) {
-        fail(new StreamProtocolError(`Chunk arrived before metadata for stream ${id}`))
-        return
-      }
-      decoded.copy(buffer, offset)
-      expectedSeq += 1
-      receivedChunks += 1
-      bytesReceived += decoded.length
-      // Why: credit-based flow control — the relay caps unacked chunks so bulk
-      // stream frames cannot queue unbounded ahead of interactive pty.data
-      // frames on the shared SSH channel. Old relays ignore this notification.
-      mux.notify('fs.streamAck', { streamId: id, seq })
-    }
-
-    const handleEnd = (params: Record<string, unknown>): void => {
-      if (settled) {
-        return
-      }
-      const id = params.streamId as number | undefined
-      if (id !== streamIdRef.current) {
-        return
-      }
-      if (receivedChunks !== totalChunks) {
-        fail(
-          new StreamProtocolError(
-            `Chunk count mismatch for stream ${id}: expected ${totalChunks}, received ${receivedChunks}`
-          )
-        )
-        return
-      }
-      // Why: redundant given the per-chunk length + count checks, but kept as a
-      // last-line invariant guard; never resolve with fewer bytes than declared.
-      if (bytesReceived !== totalSize) {
-        fail(
-          new StreamProtocolError(
-            `Byte count mismatch for stream ${id}: expected ${totalSize}, received ${bytesReceived}`
-          )
-        )
-        return
-      }
-      if (!buffer) {
-        fail(new StreamProtocolError(`Stream end before metadata for stream ${id}`))
-        return
-      }
-      const content =
-        resultEncoding === RESULT_ENCODING_BASE64
-          ? buffer.toString('base64')
-          : buffer.toString('utf-8')
-      succeed({
-        content,
-        isBinary,
-        ...(isImage !== undefined ? { isImage } : {}),
-        ...(mimeType !== undefined ? { mimeType } : {})
-      })
-    }
-
-    const handleStreamError = (params: Record<string, unknown>): void => {
-      if (settled) {
-        return
-      }
-      const id = params.streamId as number | undefined
-      if (id !== streamIdRef.current) {
-        return
-      }
-      const message = (params.message as string | undefined) ?? 'stream error'
-      const code = (params.code as string | undefined) ?? 'ESTREAMERROR'
-      const err = new Error(message) as Error & { code: string }
-      err.code = code
-      fail(err)
-    }
-
-    const drainPending = (): void => {
-      while (!settled && pending.length > 0) {
-        const frame = pending.shift()!
-        if (frame.kind === 'chunk') {
-          handleChunk(frame.params)
-        } else if (frame.kind === 'end') {
-          handleEnd(frame.params)
-        } else {
-          handleStreamError(frame.params)
-        }
-      }
-    }
-
-    unsubscribers.push(
-      mux.onNotificationByMethod('fs.streamChunk', (params) => {
-        if (!metadataReady) {
-          pending.push({ kind: 'chunk', params })
-          return
-        }
-        handleChunk(params)
-      })
-    )
-    unsubscribers.push(
-      mux.onNotificationByMethod('fs.streamEnd', (params) => {
-        if (!metadataReady) {
-          pending.push({ kind: 'end', params })
-          return
-        }
-        handleEnd(params)
-      })
-    )
-    unsubscribers.push(
-      mux.onNotificationByMethod('fs.streamError', (params) => {
-        if (!metadataReady) {
-          pending.push({ kind: 'error', params })
-          return
-        }
-        handleStreamError(params)
-      })
-    )
-
-    const onDispose = mux.onDispose((reason) => {
-      const message =
-        reason === 'connection_lost'
-          ? 'SSH connection lost, reconnecting...'
-          : 'Multiplexer disposed'
-      const err = new Error(message) as Error & { code: string }
-      err.code = reason === 'connection_lost' ? 'CONNECTION_LOST' : 'DISPOSED'
-      fail(err)
-    })
-    unsubscribers.push(onDispose)
-
-    void mux
-      // Why: flowControl declares this client acks each chunk, letting a new
-      // relay pace the pump. Old relays ignore the extra param and flood.
-      .request('fs.readFileStream', { filePath, flowControl: 'ack' })
-      .then((rawMetadata) => {
-        if (settled) {
-          return
-        }
-        const metadata = rawMetadata as StreamMetadataResponse
-        isBinary = metadata.isBinary
-        isImage = metadata.isImage
-        mimeType = metadata.mimeType
-        resultEncoding = metadata.resultEncoding ?? RESULT_ENCODING_BASE64
-
-        if (metadata.empty) {
-          succeed({
-            content: '',
-            isBinary: metadata.isBinary,
-            ...(metadata.isImage !== undefined ? { isImage: metadata.isImage } : {}),
-            ...(metadata.mimeType !== undefined ? { mimeType: metadata.mimeType } : {})
-          })
-          return
-        }
-
-        if (typeof metadata.streamId !== 'number') {
-          fail(new StreamProtocolError('Metadata missing streamId for non-empty stream'))
-          return
-        }
-
-        const cap = metadata.isBinary ? MAX_PREVIEWABLE_BINARY_SIZE : MAX_TEXT_FILE_SIZE
-        if (metadata.totalSize < 0 || metadata.totalSize > cap) {
-          streamIdRef.current = metadata.streamId
-          fail(
-            new StreamProtocolError(
-              `Reported totalSize ${metadata.totalSize} exceeds client cap ${cap}`
-            )
-          )
-          return
-        }
-
-        totalSize = metadata.totalSize
-        totalChunks = totalSize === 0 ? 0 : Math.ceil(totalSize / STREAM_CHUNK_SIZE)
-        try {
-          buffer = Buffer.alloc(totalSize)
-        } catch (err) {
-          streamIdRef.current = metadata.streamId
-          fail(new Error(`Failed to allocate ${totalSize} bytes: ${(err as Error).message}`))
-          return
-        }
-        streamIdRef.current = metadata.streamId
-        metadataReady = true
-        drainPending()
-      })
-      .catch((err) => {
-        fail(err as Error)
-      })
-  })
+    this.consumeLine(line)
+    this.decodedSegments = []
+    this.pendingBytes = 0
+  }
 }

@@ -1,108 +1,123 @@
-import type { ExecutionHostId } from '../../shared/execution-host'
-import type { SpoolSessionRootMatch, SpoolSessionRootMatcher } from './spool-session-source'
+import { isValidSpoolCanonicalPath } from './spool-canonical-host-path'
 import type {
   SpoolCanonicalHostPathResult,
   SpoolActualHostWorktreeIncarnationHost
 } from './spool-worktree-incarnation-host'
-import type { SpoolOwnerWorktree } from './spool-worktree-incarnation'
+import type { SpoolOwnerWorktree, SpoolRegisteredWorktreeRoot } from './spool-worktree-incarnation'
+import type {
+  SpoolPreparedSessionRootMatcher,
+  SpoolSessionRootMatch,
+  SpoolSessionRootMatcher
+} from './spool-session-source'
+
+const CWD_CANONICALIZATION_CONCURRENCY = 8
 
 type CanonicalPathResolver = Pick<SpoolActualHostWorktreeIncarnationHost, 'canonicalizePath'>
+type RootIndex = Map<string, Map<string, SpoolRegisteredWorktreeRoot[]>>
 
-type MatchedRoot = {
-  target: SpoolOwnerWorktree
-  depth: number
-  rootKey: string
-}
-
-/** Selects the deepest registered root using canonical paths from the owning host. */
+/** Indexes registered roots once, then canonicalizes each candidate only on its inventory host. */
 export class SpoolActualHostSessionRootMatcher implements SpoolSessionRootMatcher {
   constructor(private readonly paths: CanonicalPathResolver) {}
 
-  async matchMostSpecificRoot(args: {
-    executionHostId: ExecutionHostId
-    cwd: string
-    registeredWorktrees: readonly SpoolOwnerWorktree[]
-  }): Promise<SpoolSessionRootMatch> {
-    const candidates = args.registeredWorktrees.filter(
-      (target) => target.executionHostId === args.executionHostId
+  prepare(args: {
+    actualHostScope: string
+    inventoryTarget: SpoolOwnerWorktree
+    registeredRoots: readonly SpoolRegisteredWorktreeRoot[]
+  }): SpoolPreparedSessionRootMatcher {
+    const roots = args.registeredRoots.filter(
+      (entry) => entry.root.scopeKey === args.actualHostScope
     )
-    if (!args.cwd.trim() || candidates.length === 0) {
-      return { status: 'unmatched' }
+    const valid =
+      Boolean(args.actualHostScope.trim()) &&
+      haveUniqueIdentities(roots) &&
+      roots.filter((entry) => sameTarget(entry.target, args.inventoryTarget)).length === 1 &&
+      roots.every((entry) => isValidSpoolCanonicalPath(entry.root))
+    const index = valid ? indexRoots(roots) : new Map()
+    return {
+      matchMostSpecificRoots: async (cwds, signal) =>
+        valid
+          ? await matchCandidateRoots(this.paths, args.inventoryTarget, index, cwds, signal)
+          : cwds.map(() => ({ status: 'ambiguous' as const }))
     }
-    if (!haveUniqueIdentities(candidates)) {
-      return { status: 'ambiguous' }
-    }
+  }
+}
+
+async function matchCandidateRoots(
+  paths: CanonicalPathResolver,
+  inventoryTarget: SpoolOwnerWorktree,
+  roots: RootIndex,
+  cwds: readonly string[],
+  signal?: AbortSignal
+): Promise<SpoolSessionRootMatch[]> {
+  const uniqueCwds = [...new Set(cwds)]
+  const resolvedByCwd = new Map<string, SpoolCanonicalHostPathResult>()
+  for (let index = 0; index < uniqueCwds.length; index += CWD_CANONICALIZATION_CONCURRENCY) {
+    signal?.throwIfAborted()
+    const batch = uniqueCwds.slice(index, index + CWD_CANONICALIZATION_CONCURRENCY)
     const resolved = await Promise.all(
-      candidates.map((target) => this.matchTarget(target, args.cwd))
+      batch.map(async (cwd) => await paths.canonicalizePath(inventoryTarget, cwd))
     )
-    if (resolved.some((entry) => entry.status === 'unavailable')) {
-      // Why: an unknown registered root could be more specific than a visible candidate.
-      return { status: 'unavailable' }
+    signal?.throwIfAborted()
+    batch.forEach((cwd, offset) => {
+      const result = resolved[offset]
+      if (result) {
+        resolvedByCwd.set(cwd, result)
+      }
+    })
+  }
+  return cwds.map((cwd) => matchCanonicalCandidate(resolvedByCwd.get(cwd), roots))
+}
+
+function matchCanonicalCandidate(
+  candidate: SpoolCanonicalHostPathResult | undefined,
+  roots: RootIndex
+): SpoolSessionRootMatch {
+  if (!candidate || candidate.status === 'unavailable') {
+    return { status: 'unavailable' }
+  }
+  if (candidate.status === 'missing') {
+    return { status: 'unmatched' }
+  }
+  const rootsByPath = roots.get(candidate.path.scopeKey)
+  if (!rootsByPath) {
+    return { status: 'unmatched' }
+  }
+  for (const pathKey of [candidate.path.rootKey, ...candidate.path.ancestorKeys]) {
+    const matches = rootsByPath.get(pathKey)
+    if (!matches) {
+      continue
     }
-    const matches = resolved.flatMap((entry) => (entry.status === 'matched' ? [entry.match] : []))
-    if (matches.length === 0) {
-      return { status: 'unmatched' }
-    }
-    const greatestDepth = Math.max(...matches.map((match) => match.depth))
-    const mostSpecific = matches.filter((match) => match.depth === greatestDepth)
-    if (mostSpecific.length !== 1 || haveDuplicateCanonicalRoot(matches)) {
+    if (matches.length !== 1) {
       return { status: 'ambiguous' }
     }
-    const [match] = mostSpecific
+    const [match] = matches
     return match
       ? {
           status: 'matched',
           worktreeId: match.target.worktreeId,
           instanceId: match.target.instanceId
         }
-      : { status: 'unavailable' }
+      : { status: 'ambiguous' }
   }
-
-  private async matchTarget(
-    target: SpoolOwnerWorktree,
-    cwd: string
-  ): Promise<
-    { status: 'matched'; match: MatchedRoot } | { status: 'unmatched' } | { status: 'unavailable' }
-  > {
-    const [root, candidate] = await Promise.all([
-      this.paths.canonicalizePath(target, target.worktreePath),
-      this.paths.canonicalizePath(target, cwd)
-    ])
-    if (root.status !== 'resolved') {
-      return { status: 'unavailable' }
-    }
-    if (candidate.status === 'unavailable') {
-      return { status: 'unavailable' }
-    }
-    if (candidate.status === 'missing' || !containsCanonicalPath(root, candidate)) {
-      return { status: 'unmatched' }
-    }
-    return {
-      status: 'matched',
-      match: {
-        target,
-        depth: root.path.ancestorKeys.length,
-        rootKey: root.path.rootKey
-      }
-    }
-  }
+  return { status: 'unmatched' }
 }
 
-function containsCanonicalPath(
-  root: Extract<SpoolCanonicalHostPathResult, { status: 'resolved' }>,
-  candidate: Extract<SpoolCanonicalHostPathResult, { status: 'resolved' }>
-): boolean {
-  return (
-    root.path.scopeKey === candidate.path.scopeKey &&
-    (root.path.rootKey === candidate.path.rootKey ||
-      candidate.path.ancestorKeys.includes(root.path.rootKey))
-  )
+function indexRoots(roots: readonly SpoolRegisteredWorktreeRoot[]): RootIndex {
+  const index: RootIndex = new Map()
+  for (const root of roots) {
+    const byPath = index.get(root.root.scopeKey) ?? new Map()
+    const matches = byPath.get(root.root.rootKey) ?? []
+    matches.push(root)
+    byPath.set(root.root.rootKey, matches)
+    index.set(root.root.scopeKey, byPath)
+  }
+  return index
 }
 
-function haveUniqueIdentities(targets: readonly SpoolOwnerWorktree[]): boolean {
+function haveUniqueIdentities(roots: readonly SpoolRegisteredWorktreeRoot[]): boolean {
   const worktreeIds = new Set<string>()
   const instanceIds = new Set<string>()
-  for (const target of targets) {
+  for (const { target } of roots) {
     if (
       !target.worktreeId ||
       !target.instanceId ||
@@ -117,13 +132,6 @@ function haveUniqueIdentities(targets: readonly SpoolOwnerWorktree[]): boolean {
   return true
 }
 
-function haveDuplicateCanonicalRoot(matches: readonly MatchedRoot[]): boolean {
-  const roots = new Set<string>()
-  for (const match of matches) {
-    if (roots.has(match.rootKey)) {
-      return true
-    }
-    roots.add(match.rootKey)
-  }
-  return false
+function sameTarget(left: SpoolOwnerWorktree, right: SpoolOwnerWorktree): boolean {
+  return left.worktreeId === right.worktreeId && left.instanceId === right.instanceId
 }

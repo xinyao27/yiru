@@ -15,26 +15,21 @@ import type {
 } from './spool-rpc-gateway'
 import { projectSpoolRpcErrorCode } from './spool-rpc-error'
 import {
-  isSpoolRpcStream,
-  SPOOL_CANCEL_SUBSCRIPTION_METHOD,
-  type SpoolRpcStream
-} from './spool-rpc-stream'
+  SPOOL_CANCEL_REQUEST_METHOD,
+  SPOOL_CANCEL_SUBSCRIPTION_METHOD
+} from './spool-rpc-cancellation'
+import { isSpoolRpcStream, type SpoolRpcStream } from './spool-rpc-stream'
+import { parseSpoolRpcRequest } from './spool-rpc-request-validation'
+import { handleSpoolRpcCancellation } from './spool-rpc-server-cancellation'
 import {
-  parseSpoolRpcRequest,
-  readSpoolSubscriptionRequestId
-} from './spool-rpc-request-validation'
-
-const MAX_CONCURRENT_SPOOL_RPCS = 32
-const MAX_SPOOL_SUBSCRIPTIONS = 64
-
-type ActiveSpoolSubscription = {
-  abort: AbortController
-  cleanup: (() => void) | null
-  unsubscribeInvalidation: (() => void) | null
-}
+  MAX_CONCURRENT_SPOOL_RPCS,
+  MAX_SPOOL_SUBSCRIPTIONS,
+  safelyCleanupSpoolSubscription,
+  type ActiveSpoolSubscription
+} from './spool-rpc-server-policy'
 
 export class SpoolGatewayConnection implements SpoolServerConnection {
-  private readonly abortControllers = new Set<AbortController>()
+  private readonly requestAborts = new Map<string, AbortController>()
   private readonly subscriptions = new Map<string, ActiveSpoolSubscription>()
   private readonly requestIds = new Set<string>()
   private activeRequests = 0
@@ -57,7 +52,11 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
       return
     }
     if (request.method === SPOOL_CANCEL_SUBSCRIPTION_METHOD) {
-      this.cancelRequestedSubscription(request)
+      this.cancelRequested(request, (requestId) => this.finishSubscription(requestId, false))
+      return
+    }
+    if (request.method === SPOOL_CANCEL_REQUEST_METHOD) {
+      this.cancelRequested(request, (requestId) => this.requestAborts.get(requestId)?.abort())
       return
     }
     if (this.requestIds.has(request.id)) {
@@ -85,7 +84,7 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
     }
     const abort = new AbortController()
     this.requestIds.add(request.id)
-    this.abortControllers.add(abort)
+    this.requestAborts.set(request.id, abort)
     this.activeRequests++
     const context: SpoolRpcInvocationContext = {
       principal: this.principal,
@@ -93,7 +92,7 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
       signal: abort.signal
     }
     void this.invoke(method, parsed.data, context).finally(() => {
-      this.abortControllers.delete(abort)
+      this.requestAborts.delete(request.id)
       this.activeRequests--
       if (!this.subscriptions.has(request.id)) {
         this.requestIds.delete(request.id)
@@ -120,10 +119,10 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
       return
     }
     this.closed = true
-    for (const abort of this.abortControllers) {
+    for (const abort of this.requestAborts.values()) {
       abort.abort()
     }
-    this.abortControllers.clear()
+    this.requestAborts.clear()
     for (const requestId of this.subscriptions.keys()) {
       this.finishSubscription(requestId, false)
     }
@@ -235,22 +234,19 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
     }
   }
 
-  private cancelRequestedSubscription(request: SpoolRpcRequest): void {
-    const targetRequestId = readSpoolSubscriptionRequestId(request.params)
-    if (this.requestIds.has(request.id)) {
-      this.disconnect(1008, 'Duplicate request id')
-      return
-    }
-    if (!targetRequestId) {
-      this.sendFailure(request.id, 'invalid_argument')
-      return
-    }
-    this.finishSubscription(targetRequestId, false)
-    this.send({
-      id: request.id,
-      ok: true,
-      result: { cancelled: true },
-      ownerRuntimeId: this.options.ownerRuntimeId
+  private cancelRequested(request: SpoolRpcRequest, cancel: (requestId: string) => void): void {
+    handleSpoolRpcCancellation(request, {
+      activeRequestIds: this.requestIds,
+      cancel,
+      disconnectDuplicate: () => this.disconnect(1008, 'Duplicate request id'),
+      sendInvalidArgument: () => this.sendFailure(request.id, 'invalid_argument'),
+      sendCancelled: () =>
+        void this.send({
+          id: request.id,
+          ok: true,
+          result: { cancelled: true },
+          ownerRuntimeId: this.options.ownerRuntimeId
+        })
     })
   }
 
@@ -262,8 +258,8 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
     this.subscriptions.delete(requestId)
     this.requestIds.delete(requestId)
     active.abort.abort()
-    safelyCleanup(active.unsubscribeInvalidation)
-    safelyCleanup(active.cleanup)
+    safelyCleanupSpoolSubscription(active.unsubscribeInvalidation)
+    safelyCleanupSpoolSubscription(active.cleanup)
     if (notifyRequester && !this.closed) {
       this.send({
         id: requestId,
@@ -298,13 +294,5 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
     }
     this.disconnect(1011, 'Oversized RPC failure')
     return false
-  }
-}
-
-function safelyCleanup(cleanup: (() => void) | null): void {
-  try {
-    cleanup?.()
-  } catch {
-    // Cleanup is best-effort after the stream has already lost authority.
   }
 }

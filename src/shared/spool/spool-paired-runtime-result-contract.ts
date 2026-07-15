@@ -14,12 +14,20 @@ export const SpoolPairedRuntimeCanonicalPathSchema = z
   })
   .strict()
 
+export const SpoolPairedRuntimeWorktreeCatalogSchema = z
+  .object({
+    actualHostScope: z.string().min(1).max(4_096),
+    inventory: z.unknown()
+  })
+  .strict()
+
 export const SpoolPairedRuntimeInspectionSchema = z.discriminatedUnion('status', [
   z
     .object({
       status: z.literal('resolved'),
       root: SpoolPairedRuntimeCanonicalPathSchema,
-      markerId: z.string().uuid().nullable()
+      markerId: z.string().uuid().nullable(),
+      actualHostScope: z.string().min(1).max(4_096)
     })
     .strict(),
   z
@@ -31,7 +39,8 @@ export const SpoolPairedRuntimeInspectionSchema = z.discriminatedUnion('status',
         'invalid-host-response',
         'marker-unavailable',
         'not-git-worktree'
-      ])
+      ]),
+      actualHostScope: z.string().min(1).max(4_096).optional()
     })
     .strict()
 ])

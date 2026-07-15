@@ -12,6 +12,8 @@ import {
   isValidSpoolCanonicalPath,
   requireMatchingSpoolGitRoot,
   requireSingleSpoolGitPath,
+  spoolActualHostScopeKey,
+  spoolLocalActualHostScopeKey,
   toSpoolLocalAccessPath,
   withSpoolActualHostScope
 } from './spool-canonical-host-path'
@@ -79,6 +81,19 @@ export class SpoolActualHostPathResolver {
       return await this.resolveLocalGitWorktree(target)
     }
     return await this.resolveSshGitWorktree(target, parsed.targetId)
+  }
+
+  async resolveActualHostScope(target: SpoolOwnerWorktree): Promise<string> {
+    const parsed = parseExecutionHostId(target.executionHostId)
+    if (!parsed || parsed.kind === 'runtime') {
+      throw new SpoolWorktreeIncarnationHostError('invalid-host-response')
+    }
+    return parsed.kind === 'local'
+      ? spoolLocalActualHostScopeKey(
+          target.executionHostId,
+          (await this.resolveLocalContext(target)).wslDistro
+        )
+      : spoolActualHostScopeKey(target.executionHostId)
   }
 
   async canonicalizePath(

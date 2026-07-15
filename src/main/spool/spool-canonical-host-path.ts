@@ -29,11 +29,37 @@ export function spoolActualHostScopeKey(executionHostId: ExecutionHostId): strin
   return `spool-actual-host:${executionHostId}`
 }
 
+export function spoolLocalActualHostScopeKey(
+  executionHostId: ExecutionHostId,
+  wslDistro: string | null
+): string {
+  const runtimeScope = wslDistro ? `wsl:${wslDistro.trim().toLowerCase()}` : 'native'
+  return JSON.stringify([spoolActualHostScopeKey(executionHostId), runtimeScope])
+}
+
+export function withSpoolOuterActualHostScope(
+  executionHostId: ExecutionHostId,
+  innerScopeKey: string
+): string {
+  return JSON.stringify([spoolActualHostScopeKey(executionHostId), innerScopeKey])
+}
+
 export function withSpoolActualHostScope(
   executionHostId: ExecutionHostId,
   path: SpoolWorktreeRootComparison
 ): SpoolWorktreeRootComparison {
-  return { ...path, scopeKey: spoolActualHostScopeKey(executionHostId) }
+  // Why: one paired runtime can route worktrees to several inner local/WSL/SSH filesystems.
+  return {
+    ...path,
+    scopeKey: withSpoolOuterActualHostScope(executionHostId, path.scopeKey)
+  }
+}
+
+export function withSpoolActualHostSubscope(
+  path: SpoolWorktreeRootComparison,
+  subscope: string
+): SpoolWorktreeRootComparison {
+  return { ...path, scopeKey: JSON.stringify([path.scopeKey, subscope]) }
 }
 
 export function resolveSpoolCanonicalHostPath(

@@ -10,6 +10,7 @@ import {
   isMissingSpoolFilesystemError,
   resolveSpoolCanonicalHostPath,
   toSpoolLocalAccessPath,
+  withSpoolActualHostSubscope,
   type SpoolInternalHostPathResult
 } from './spool-canonical-host-path'
 import { resolveSpoolWslCanonicalDirectory } from './spool-wsl-canonical-directory'
@@ -24,16 +25,30 @@ export async function canonicalizeSpoolLocalHostPath(
     return { status: 'invalid' }
   }
   try {
-    return resolveSpoolCanonicalHostPath(executionHostId, await realpath(accessPath))
+    return scopeLocalRuntimePath(
+      resolveSpoolCanonicalHostPath(executionHostId, await realpath(accessPath)),
+      context.wslDistro
+    )
   } catch (error) {
     if (isMissingSpoolFilesystemError(error) && parseWslUncPath(accessPath)) {
       const resolved = await resolveSpoolWslCanonicalDirectory(accessPath)
       return resolved.status === 'resolved'
-        ? resolveSpoolCanonicalHostPath(executionHostId, resolved.path)
+        ? scopeLocalRuntimePath(
+            resolveSpoolCanonicalHostPath(executionHostId, resolved.path),
+            context.wslDistro
+          )
         : resolved
     }
     return classifyCanonicalizationFailure(error)
   }
+}
+
+function scopeLocalRuntimePath(
+  result: Extract<SpoolInternalHostPathResult, { status: 'resolved' }>,
+  wslDistro: string | null
+): SpoolInternalHostPathResult {
+  const runtimeScope = wslDistro ? `wsl:${wslDistro.trim().toLowerCase()}` : 'native'
+  return { ...result, path: withSpoolActualHostSubscope(result.path, runtimeScope) }
 }
 
 export async function canonicalizeSpoolSshHostPath(

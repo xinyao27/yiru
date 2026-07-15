@@ -6,7 +6,7 @@ import { SpoolExecutionError } from './spool-execution-error'
 import type {
   SpoolCatalogWorktreeDescription,
   SpoolShareCatalogSource
-} from './spool-share-catalog'
+} from './spool-share-catalog-source'
 import type {
   SpoolPublicWorktreeInstance,
   SpoolWorktreeVisibility
@@ -66,7 +66,10 @@ export class SpoolCatalogDescriptionReader {
     let description: SpoolCatalogWorktreeDescription | null
     try {
       description = await this.source.describeWorktree(instance)
-    } catch {
+    } catch (error) {
+      if (!isResourceUnavailable(error)) {
+        throw error
+      }
       // Why: only the previous sanitized row survives a source outage; raw owner data is not cached.
       const current = await this.resolvePublicationOrFallback(instanceId, shareEpoch, cached)
       return current.status === 'available' ? cached : current.description

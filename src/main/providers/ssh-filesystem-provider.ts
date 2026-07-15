@@ -1,18 +1,27 @@
 import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
-import { isMethodNotFoundError, readFileViaStream } from '../ssh/ssh-filesystem-stream-reader'
+import {
+  consumeSessionInventoryJsonLines,
+  isMethodNotFoundError
+} from '../ssh/ssh-filesystem-stream-reader'
 import { uploadBuffer } from '../ssh/sftp-upload'
-import { fastGetViaSftp, lstatViaSftp } from './ssh-filesystem-provider-sftp'
+import { fastGetViaSftp } from './ssh-filesystem-provider-sftp'
 import {
   openSshFileUploadSession,
   type SftpFactory,
   type SshRawTransferOptions
 } from './ssh-filesystem-file-upload'
+import { readSshFilesystemFile } from './ssh-filesystem-file-reader'
 import {
   closeSshFilesystemWatch,
   registerSshFilesystemWatch,
   stopSshFilesystemWatchRegistration,
   type WatchRegistration
 } from './ssh-filesystem-provider-watch'
+import {
+  readSshDirectory,
+  readSshFileLstat,
+  readSshFileStat
+} from './ssh-filesystem-metadata-reader'
 import { createSshSpoolVerifiedFilesystem } from './ssh-spool-verified-filesystem'
 import type { SpoolVerifiedRemoteFilesystem } from './spool-verified-filesystem-types'
 import type {
@@ -35,7 +44,6 @@ export class SshFilesystemProvider implements IFilesystemProvider {
   private unsubscribeNotifications: (() => void) | null = null
   private tempDirPromise: Promise<string> | null = null
   private disposed = false
-  private loggedStreamFallback = false
 
   constructor(
     connectionId: string,
@@ -71,30 +79,28 @@ export class SshFilesystemProvider implements IFilesystemProvider {
     return this.connectionId
   }
 
-  async readDir(dirPath: string): Promise<DirEntry[]> {
-    return (await this.mux.request('fs.readDir', { dirPath })) as DirEntry[]
+  async readDir(
+    dirPath: string,
+    options: { limit?: number; signal?: AbortSignal } = {}
+  ): Promise<DirEntry[]> {
+    return readSshDirectory(this.mux, dirPath, options)
   }
 
-  async readFile(filePath: string): Promise<FileReadResult> {
-    // Why: streaming is the default path so previews above the legacy single-
-    // frame budget (~12 MB after base64) don't hit MAX_MESSAGE_SIZE. Old relays
-    // that don't implement fs.readFileStream surface as MethodNotFound; we fall
-    // back to the legacy single-shot fs.readFile (which retains the old 10 MB
-    // cap on those hosts).
-    try {
-      return await readFileViaStream(this.mux, filePath)
-    } catch (err) {
-      if (isMethodNotFoundError(err)) {
-        if (!this.loggedStreamFallback) {
-          this.loggedStreamFallback = true
-          console.warn(
-            '[ssh-fs] Relay does not implement fs.readFileStream; falling back to fs.readFile (10 MB cap)'
-          )
-        }
-        return (await this.mux.request('fs.readFile', { filePath })) as FileReadResult
-      }
-      throw err
-    }
+  async readFile(
+    filePath: string,
+    options: { signal?: AbortSignal } = {}
+  ): Promise<FileReadResult> {
+    return readSshFilesystemFile(this.mux, filePath, options.signal)
+  }
+
+  async consumeSessionInventoryJsonLines(
+    filePath: string,
+    consumeLine: (line: string) => void,
+    options: { signal?: AbortSignal } = {}
+  ): Promise<void> {
+    // Why: falling back to fs.readFile would reintroduce both the legacy 10 MB
+    // cap and whole-transcript buffering; stale relays fail closed instead.
+    await consumeSessionInventoryJsonLines(this.mux, filePath, consumeLine, options.signal)
   }
 
   async readTerminalArtifact(
@@ -214,29 +220,12 @@ export class SshFilesystemProvider implements IFilesystemProvider {
     }
   }
 
-  async stat(filePath: string): Promise<FileStat> {
-    return (await this.mux.request('fs.stat', { filePath })) as FileStat
+  async stat(filePath: string, options: { signal?: AbortSignal } = {}): Promise<FileStat> {
+    return readSshFileStat(this.mux, filePath, options.signal)
   }
 
   async lstat(filePath: string): Promise<FileStat> {
-    try {
-      return (await this.mux.request('fs.lstat', { filePath })) as FileStat
-    } catch (err) {
-      if (!isMethodNotFoundError(err)) {
-        throw err
-      }
-      if (!this.createSftp) {
-        throw new Error('remote_lstat_unavailable')
-      }
-      const sftp = await this.createSftp()
-      try {
-        // Why: older relays predate fs.lstat, but SFTP can still preserve
-        // symlink identity for orphaned-worktree safety checks.
-        return await lstatViaSftp(sftp, filePath)
-      } finally {
-        sftp.end()
-      }
-    }
+    return readSshFileLstat(this.mux, filePath, this.createSftp)
   }
 
   async scanWorkspaceSpace(

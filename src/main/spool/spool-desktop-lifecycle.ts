@@ -1,8 +1,3 @@
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../shared/execution-host'
 import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import type { Store } from '../persistence'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
@@ -16,8 +11,8 @@ const PUBLICATION_RECONCILE_INTERVAL_MS = 5_000
 /** Owns Spool startup, runtime reconciliation, and teardown as one lifecycle unit. */
 export class SpoolDesktopComposition {
   readonly service: SpoolDesktopService
-  private readonly initialKnownInstances: Map<string, ExecutionHostId | null>
-  private knownInstances = new Map<string, ExecutionHostId | null>()
+  private readonly initialKnownInstances: Map<string, string | null>
+  private knownInstances = new Map<string, string | null>()
   private reconcileTail: Promise<void> = Promise.resolve()
   private unsubscribeRuntime: (() => void) | null = null
   private reconcileTimer: ReturnType<typeof setInterval> | null = null
@@ -41,12 +36,7 @@ export class SpoolDesktopComposition {
           return []
         }
         const repo = repos.get(getRepoIdFromWorktreeId(worktreeId))
-        const repoHost = repo ? getRepoExecutionHostId(repo) : null
-        // Why: runtime-backed rows route through the outer paired runtime, so outage
-        // reconciliation must use that host instead of a stale inner-host metadata value.
-        const executionHostId =
-          parseExecutionHostId(repoHost)?.kind === 'runtime' ? repoHost : (meta.hostId ?? repoHost)
-        return [[meta.instanceId, executionHostId] as const]
+        return [[meta.instanceId, repo?.id ?? null] as const]
       })
     )
   }
@@ -119,7 +109,7 @@ export class SpoolDesktopComposition {
   }
 
   private async reconcileRegisteredWorktrees(
-    previous: ReadonlyMap<string, ExecutionHostId | null>
+    previous: ReadonlyMap<string, string | null>
   ): Promise<void> {
     let inventory
     try {
@@ -128,14 +118,14 @@ export class SpoolDesktopComposition {
       await this.service.reconcileRegisteredWorktrees().catch(() => {})
       return
     }
-    const current = new Map<string, ExecutionHostId | null>(
-      inventory.worktrees.map((target) => [target.instanceId, target.executionHostId] as const)
+    const current = new Map<string, string | null>(
+      inventory.worktrees.map((target) => [target.instanceId, target.repoId] as const)
     )
-    const unavailableHosts = new Set(inventory.unavailableExecutionHostIds)
-    for (const [instanceId, executionHostId] of previous) {
-      if (!current.has(instanceId) && executionHostId && unavailableHosts.has(executionHostId)) {
+    const unavailableRepos = new Set(inventory.unavailableSources.map((source) => source.repoId))
+    for (const [instanceId, repoId] of previous) {
+      if (!current.has(instanceId) && repoId && unavailableRepos.has(repoId)) {
         await this.visibility.reconcile({ kind: 'host-unavailable', instanceId })
-        current.set(instanceId, executionHostId)
+        current.set(instanceId, repoId)
       } else if (!current.has(instanceId)) {
         await this.visibility.reconcile({ kind: 'deleted', instanceId })
       }

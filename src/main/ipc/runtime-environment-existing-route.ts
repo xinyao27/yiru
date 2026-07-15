@@ -16,7 +16,7 @@ export async function callRuntimeEnvironmentExistingRoute(
   method: string,
   params: unknown,
   timeoutMs = DEFAULT_REMOTE_RUNTIME_TIMEOUT_MS,
-  options: { beforeSend?: () => void | Promise<void> } = {}
+  options: { beforeSend?: () => void | Promise<void>; signal?: AbortSignal } = {}
 ): Promise<RuntimeRpcResponse<unknown>> {
   const environment = resolveEnvironment(userDataPath, selector)
   return enqueueRuntimeCall(environment.id, method, async () => {

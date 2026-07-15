@@ -225,6 +225,8 @@ export type RuntimeMobileSessionTerminalClientTab =
   | (RuntimeMobileSessionTerminalTab & {
       status: 'ready'
       terminal: string
+      /** Main-owned PTY binding; null/absent legacy terminals are not shareable. */
+      worktreeInstanceId?: string | null
     })
 
 export type RuntimeMobileSessionClientTab =
@@ -379,6 +381,8 @@ export type RuntimeTerminalSummary = {
   handle: string
   ptyId: string | null
   worktreeId: string
+  /** Missing legacy summaries fail closed at consumers that require an instance binding. */
+  worktreeInstanceId?: string | null
   worktreePath: string
   branch: string
   tabId: string

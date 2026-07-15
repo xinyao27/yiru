@@ -21,6 +21,10 @@ export const SpoolPairedRuntimeWorktreeSelectorSchema = z
   })
   .strict()
 
+export const SpoolPairedRuntimeWorktreeCatalogParamsSchema = z
+  .object({ repoId: identifier })
+  .strict()
+
 export const SpoolPairedRuntimeBoundWorktreeSchema =
   SpoolPairedRuntimeWorktreeSelectorSchema.extend({
     shareEpoch: identifier,
