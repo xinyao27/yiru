@@ -58,8 +58,13 @@ export const SPOOL_HOST_METHODS: RpcAnyMethod[] = [
           params.mode
         )
         return SpoolPairedRuntimeInspectionSchema.parse(result)
-      } catch {
-        return { status: 'unavailable', reason: 'host-unavailable' as const }
+      } catch (error) {
+        return {
+          status: 'unavailable',
+          reason: isInvalidPairedRuntimeTarget(error)
+            ? ('invalid-host-response' as const)
+            : ('host-unavailable' as const)
+        }
       }
     }
   }),
@@ -75,8 +80,10 @@ export const SPOOL_HOST_METHODS: RpcAnyMethod[] = [
           params.path
         )
         return SpoolPairedRuntimeCanonicalizeResultSchema.parse(result)
-      } catch {
-        return { status: 'unavailable' as const }
+      } catch (error) {
+        return isInvalidPairedRuntimeTarget(error)
+          ? { status: 'invalid' as const }
+          : { status: 'unavailable' as const }
       }
     }
   }),
@@ -145,6 +152,15 @@ export const SPOOL_HOST_METHODS: RpcAnyMethod[] = [
   }),
   ...SPOOL_HOST_SESSION_METHODS
 ]
+
+function isInvalidPairedRuntimeTarget(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : ''
+  return (
+    message === 'selector_not_found' ||
+    message === 'recursive_runtime_host' ||
+    message === 'worktree_host_mismatch'
+  )
+}
 
 async function runTerminalSubscription(
   context: RpcContext,

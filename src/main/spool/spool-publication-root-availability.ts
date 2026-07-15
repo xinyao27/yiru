@@ -59,3 +59,18 @@ export function sameSpoolWorktreeRoot(
     left.ancestorKeys.every((key, index) => key === right.ancestorKeys[index])
   )
 }
+
+export function sameSpoolFolderRepoRoot(
+  leftTarget: SpoolOwnerWorktree,
+  leftRoot: SpoolWorktreeRootComparison,
+  rightTarget: SpoolOwnerWorktree,
+  rightRoot: SpoolWorktreeRootComparison
+): boolean {
+  // Why: synthetic workspaces of one folder repo share files while retaining instance-bound sessions.
+  return (
+    leftTarget.kind === 'folder' &&
+    rightTarget.kind === 'folder' &&
+    leftTarget.repoId === rightTarget.repoId &&
+    sameSpoolWorktreeRoot(leftRoot, rightRoot)
+  )
+}

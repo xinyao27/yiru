@@ -8,9 +8,10 @@ import type {
 } from '../providers/spool-verified-filesystem-types'
 import type {
   SpoolFileHostEntry,
+  SpoolFileHostPage,
   SpoolFileOperationHost,
   SpoolVerifiedFileRead
-} from './spool-file-operation-executor'
+} from './spool-file-operation-host'
 import { SpoolExecutionError } from './spool-execution-error'
 import {
   localSpoolPathIdentity,
@@ -28,13 +29,14 @@ const OPEN_DIRECTORY = typeof constants.O_DIRECTORY === 'number' ? constants.O_D
 export class OrcaSpoolVerifiedFileOperations implements SpoolFileOperationHost {
   async listVerified(
     contained: SpoolContainedPath,
+    offset: number,
     limit: number,
     signal: AbortSignal
-  ): Promise<readonly SpoolFileHostEntry[]> {
+  ): Promise<SpoolFileHostPage> {
     signal.throwIfAborted()
     const remote = verifiedRemoteFilesystem(contained.root)
     if (remote) {
-      return await remote.list(remotePathProof(contained.target), limit, signal)
+      return await remote.list(remotePathProof(contained.target), offset, limit, signal)
     }
     const handle = await open(
       contained.target.absolutePath,
@@ -58,13 +60,18 @@ export class OrcaSpoolVerifiedFileOperations implements SpoolFileOperationHost {
           await requireLocalDirectoryPath(contained.target)
         }
         const entries: SpoolFileHostEntry[] = []
+        let seen = 0
         for await (const entry of directory) {
           signal.throwIfAborted()
+          if (seen < offset) {
+            seen += 1
+            continue
+          }
           entries.push({
             name: entry.name,
             kind: entry.isSymbolicLink() ? 'symlink' : entry.isDirectory() ? 'directory' : 'file'
           })
-          if (entries.length >= limit) {
+          if (entries.length > limit) {
             break
           }
         }
@@ -74,7 +81,10 @@ export class OrcaSpoolVerifiedFileOperations implements SpoolFileOperationHost {
           // complete buffered result behind an identity sandwich instead of streaming it.
           await requireLocalDirectoryPath(contained.target)
         }
-        return entries
+        return {
+          entries: entries.slice(0, limit),
+          nextOffset: entries.length > limit ? offset + limit : null
+        }
       } finally {
         await directory.close().catch(() => {})
       }

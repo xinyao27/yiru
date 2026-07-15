@@ -39,6 +39,7 @@ export function sanitizeCatalogWorktreeDescription(
       shareEpoch: instance.shareEpoch
     },
     description: {
+      kind: description.kind,
       projectKey,
       projectName,
       worktreeName,
@@ -131,6 +132,7 @@ export function projectCatalogEntries(
   for (const { instance, description } of descriptions) {
     const worktreeAlias = worktreeAliasKey(instance.instanceId, instance.shareEpoch)
     const worktree: SpoolWorktreeCatalogEntry = {
+      kind: description.kind,
       worktreeRef: references.referenceFor(worktreeAlias),
       shareEpoch: instance.shareEpoch,
       name: description.worktreeName,

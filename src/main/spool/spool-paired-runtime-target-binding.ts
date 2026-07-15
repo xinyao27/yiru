@@ -12,7 +12,7 @@ export function pairedRuntimeEnvironmentId(target: SpoolOwnerWorktree): string {
 }
 
 export function pairedRuntimeTargetSelector(target: SpoolOwnerWorktree) {
-  return { worktreeId: target.worktreeId, instanceId: target.instanceId }
+  return { kind: target.kind, worktreeId: target.worktreeId, instanceId: target.instanceId }
 }
 
 export function boundPairedRuntimeTargetSelector(target: SpoolPublicWorktreeInstance) {

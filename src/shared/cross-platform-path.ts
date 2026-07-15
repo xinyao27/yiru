@@ -16,7 +16,7 @@ export function normalizeRuntimePathForComparison(value: string): string {
   if (wslUnc) {
     // Why: Windows exposes the same case-sensitive WSL filesystem through two
     // UNC aliases, while the distro/server portion remains case-insensitive.
-    return `//wsl/${wslUnc[1].toLowerCase()}${wslUnc[2] ?? ''}`
+    return `//wsl.localhost/${wslUnc[1].toLowerCase()}${wslUnc[2] ?? ''}`
   }
   return isWindowsAbsolutePathLike(value) ? normalized.toLowerCase() : normalized
 }
@@ -79,7 +79,7 @@ export function relativePathInsideRoot(rootPath: string, candidatePath: string):
   }
   // WSL comparison keys fold the UNC alias but preserve Linux path casing, so
   // their suffix is both aligned across aliases and safe to return directly.
-  return comparisonRoot.startsWith('//wsl/')
+  return comparisonRoot.startsWith('//wsl.localhost/')
     ? comparisonCandidate.slice(comparisonPrefix.length)
     : normalizedCandidate.slice(comparisonPrefix.length)
 }

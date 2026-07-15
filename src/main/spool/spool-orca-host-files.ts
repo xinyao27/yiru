@@ -95,6 +95,19 @@ export class OrcaSpoolHostFiles
     }
   }
 
+  async resolveCanonicalAlias(
+    root: SpoolCanonicalHostPath,
+    segments: readonly string[],
+    signal: AbortSignal
+  ): Promise<SpoolCanonicalHostPath | null> {
+    // Why: listing filters need only the symlink target path; probing identity adds remote RPCs
+    // and would pair the target path with the symlink's own lstat identity.
+    signal.throwIfAborted()
+    const result = await this.tryCanonicalPath(root, joinSpoolHostPath(root, segments))
+    signal.throwIfAborted()
+    return result
+  }
+
   async resolveGitAdministrativePaths(
     root: SpoolCanonicalHostPath
   ): Promise<readonly SpoolCanonicalHostPath[]> {
@@ -172,6 +185,24 @@ export class OrcaSpoolHostFiles
   ): Promise<SpoolCanonicalHostPath | null> {
     try {
       return await this.canonicalExisting(root, absolutePath)
+    } catch (error) {
+      if (isMissingSpoolPath(error)) {
+        return null
+      }
+      throw error
+    }
+  }
+
+  private async tryCanonicalPath(
+    root: SpoolCanonicalHostPath,
+    absolutePath: string
+  ): Promise<SpoolCanonicalHostPath | null> {
+    try {
+      const provider = spoolFilesystemProvider(root)
+      const canonical = provider
+        ? await provider.realpath(absolutePath)
+        : await realpath(await resolveAuthorizedPath(absolutePath, this.store))
+      return canonicalSpoolHostPath(root.scopeKey, canonical, null)
     } catch (error) {
       if (isMissingSpoolPath(error)) {
         return null

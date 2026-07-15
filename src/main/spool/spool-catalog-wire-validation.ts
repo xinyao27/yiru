@@ -66,6 +66,7 @@ function isWorktree(value: unknown, counts: CatalogCounts): value is SpoolWorktr
   }
   return Boolean(
     hasExactSpoolWireKeys(record, [
+      'kind',
       'worktreeRef',
       'shareEpoch',
       'name',
@@ -73,6 +74,7 @@ function isWorktree(value: unknown, counts: CatalogCounts): value is SpoolWorktr
       'sessions',
       'sessionCatalog'
     ]) &&
+    (record.kind === 'git' || record.kind === 'folder') &&
     isReference(record.worktreeRef) &&
     isReference(record.shareEpoch) &&
     isLabel(record.name) &&

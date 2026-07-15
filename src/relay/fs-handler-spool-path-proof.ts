@@ -117,13 +117,16 @@ export async function openRelaySpoolVerifiedDirectory(
   }
 }
 
-export async function openRelaySpoolExclusiveFile(pathValue: string): Promise<FileHandle> {
+export async function openRelaySpoolExclusiveFile(
+  pathValue: string,
+  mode = 0o666
+): Promise<FileHandle> {
   let handle: FileHandle | null = null
   try {
     handle = await open(
       pathValue,
       constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | (OPEN_NOFOLLOW ?? 0),
-      0o666
+      mode
     )
     const stats = await handle.stat()
     if (!stats.isFile()) {

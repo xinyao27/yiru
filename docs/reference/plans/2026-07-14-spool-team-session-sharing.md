@@ -8,13 +8,16 @@
 
 Spool has two access levels and one visibility setting:
 
-| State                                | What a remote Desktop can do                                                                 |
-| ------------------------------------ | -------------------------------------------------------------------------------------------- |
-| Private worktree                     | Discover nothing about the worktree or its sessions.                                         |
-| Public worktree                      | Read all attributed sessions, terminals, files, diffs, and scoped Git state in the worktree. |
-| Public worktree with a control grant | Mutate terminals, sessions, files, and Git state for the lifetime of the current connection. |
+| State                                | What a remote Desktop can do                                                                                                             |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Private worktree                     | Discover nothing about the worktree or its sessions.                                                                                     |
+| Public Git worktree                  | Read all attributed sessions, terminals, files, diffs, and scoped Git state in the worktree.                                             |
+| Public folder-project workspace      | Read attributed sessions, terminals, and files. `.git`, file diffs, and Git operations are unavailable.                                  |
+| Public worktree with a control grant | Mutate the operations supported by that target for the lifetime of the current connection; a folder target still does not gain Git APIs. |
 
 `Public` and `Private` belong only to worktrees. Projects and sessions do not have their own persisted visibility setting.
+
+This includes the synthetic workspaces under a `Repo.kind = 'folder'` project: the root uses `repoId::path`, and additional instances use `repoId::path::workspace:<uuid>`. It does not include independent ProjectGroup-backed `FolderWorkspace` entries keyed as `folder:<uuid>`.
 
 ## Product principles
 
@@ -141,8 +144,9 @@ Opening a Public worktree without a grant provides the complete V1 read-only wor
 - List and open every session attributed to the worktree.
 - Watch terminal snapshots, scrollback, ANSI/TUI state, and realtime output.
 - Browse files and read file contents.
-- Inspect diffs.
-- Inspect the current worktree/index/HEAD status, diffs, HEAD history, current branch, and upstream state.
+- For Git worktrees, inspect diffs and the current worktree/index/HEAD status, HEAD history, current branch, and upstream state.
+
+A folder-project workspace deliberately has no Git surface. Its file browser hides every `.git` entry at every depth and rejects every path containing a `.git` segment, case-insensitively. Its incarnation proof combines a hidden random root marker with the actual-host scope and stable directory `dev`/`ino`; Files also hides and rejects that marker. Renaming the same directory preserves the proof, while replacement or a copied marker does not. Synthetic workspaces from the same folder repo may share the same exact file root and proof, while cross-repo and ancestor/descendant overlaps remain unavailable.
 
 The server is authoritative. Hiding or disabling controls in the remote renderer is not sufficient: terminal input, file writes, Git mutations, process creation, session creation, and every other mutation must be rejected unless the current connection holds an approved grant for that worktree.
 
@@ -291,7 +295,7 @@ Provider, Git, SSH, and system credentials stay on the host, but a granted shell
 - Enumerate Tailnet peers and probe for running Orca Desktops on macOS, Linux, and Windows.
 - Authenticate discovered peer identity and establish encrypted RPC connections.
 - Publish active-account quota summaries and Public worktree metadata only.
-- Support read-only sessions, terminal streaming, files, diffs, and Git state.
+- Support read-only sessions, terminal streaming, and files for every supported target; add diffs and Git state for Git worktrees.
 - Prove that every mutation is rejected server-side without a grant.
 - Route SSH, WSL, and runtime-backed worktrees through the owner Desktop correctly.
 
@@ -319,7 +323,7 @@ Provider, Git, SSH, and system credentials stay on the host, but a granted shell
 - Sandboxing terminal commands to the selected worktree.
 - Moving credentials, PTYs, sessions, or worktrees to the requester's machine.
 - Creating requester-owned remote worktrees or sessions as part of control.
-- Sharing `FolderWorkspace` entries before they have a durable cross-platform incarnation identity.
+- Sharing independent ProjectGroup-backed `FolderWorkspace` entries keyed as `folder:<uuid>`; `Repo.kind = 'folder'` synthetic workspaces are supported.
 - Browser profiles/panes, cookies, hosted-review or issue-tracker mutations, automations, emulator/computer control, settings, account selection, and SSH/runtime administration.
 - Invented quota estimates when provider usage data is unavailable.
 - Session lifecycle labels or status-based grouping in the sidebar.

@@ -21,7 +21,9 @@ The architecture has six security-critical properties:
 
 ## Scope decisions
 
-This design covers Orca Git worktrees on local, WSL, SSH, and paired runtime execution hosts. `FolderWorkspace` sharing is deferred: a Git worktree has a private administrative directory in which Orca can keep a durable incarnation marker, while a plain folder has no equally strong cross-platform identity without writing a visible file into the user's folder.
+This design covers Orca Git worktrees and the synthetic workspaces of a `Repo.kind = 'folder'` project on local, WSL, SSH, and paired runtime execution hosts. A folder project's root workspace uses `repoId::path`; additional workspace instances use `repoId::path::workspace:<uuid>`. Independent ProjectGroup-backed `FolderWorkspace` entries keyed as `folder:<uuid>` remain deferred; they do not yet participate in Spool visibility or publication.
+
+A folder-project workspace gets a durable incarnation from a random `.orca-spool-incarnation-v1` marker created at its canonical root. The marker is owner-only Spool metadata: Files hides it and rejects direct or symlinked access. The actual host sandwiches marker access between stable directory `dev`/`ino` checks, then derives the published UUID from the marker, actual-host scope, and directory identity. Renaming or moving the same directory preserves the proof, while replacing the directory or copying its marker does not. A host that cannot provide stable directory identity or durable marker storage cannot publish that folder workspace.
 
 The first version does not expose browser profiles, cookies, OS dialogs, the owner's clipboard, settings, account selection, hosted-review mutations, issue trackers, automations, emulator/computer control, pairing administration, or SSH trust and credential prompts. These are not reliably worktree-scoped and are not covered by the approval copy.
 
@@ -36,7 +38,7 @@ Once a control grant exists, a terminal is still a normal shell and can exercise
 | **Tailnet principal** | Tailscale-authenticated source node identity obtained from the inbound network flow. It identifies a machine/node, not a human account inside Spool.             |
 | **Connection**        | One physical E2EE WebSocket. It is the smallest grant lifetime and has one server-generated `connectionId`.                                                      |
 | **Connection epoch**  | Requester-side generation that changes immediately whenever the physical socket changes. UI control state is keyed by it.                                        |
-| **Worktree instance** | One durable Git worktree incarnation, represented internally by `WorktreeMeta.instanceId` and validated against a host-side marker.                              |
+| **Worktree instance** | One durable workspace incarnation, represented by `WorktreeMeta.instanceId` and validated against an owner-only Git or folder marker on the actual host.         |
 | **Share epoch**       | A generation for one worktree's current Public publication. It rotates on Private, delete, incarnation change, and later re-publication.                         |
 | **Public projection** | The sanitized Desktop → Project → Worktree → Session catalog serialized by the owner.                                                                            |
 | **Control grant**     | An in-memory capability for one connection and one Public worktree instance. Several connections may hold separate grants concurrently.                          |
@@ -215,20 +217,20 @@ spoolVisibility?: 'public' | 'private' // missing means private
 spoolIncarnationId?: string
 ```
 
-The current path-derived `Worktree.id` is not an authorization identity. `instanceId` survives a rename, and `spoolIncarnationId` proves that the Git administrative worktree still represents the instance that the owner published.
+The current path-derived `Worktree.id` is not an authorization identity. `instanceId` names the logical workspace, while `spoolIncarnationId` proves that its current Git worktree or folder directory is the incarnation that the owner published.
 
 Publishing a worktree performs these steps on its actual execution host:
 
-1. Resolve its per-worktree Git administrative directory using the host's Git binary.
-2. Read or create a random marker in that administrative directory. The marker is outside the checked-out files and is not committed.
+1. Resolve its canonical root and actual-host scope.
+2. For a Git target, resolve the per-worktree Git administrative directory and read or create its private random marker. For a folder target, read or create the hidden random marker at the canonical root while stable `dev`/`ino` evidence proves that the root did not change around marker access.
 3. Compare it with persisted `spoolIncarnationId`; a mismatch rotates `instanceId`, clears session provenance, and leaves the worktree Private.
-4. Reject overlapping registered worktree roots. A Public ancestor and Private descendant cannot both satisfy the product's disclosure promises.
+4. Reject overlapping registered roots. Synthetic workspaces from the same folder repo may share one exactly equal root; cross-repo overlap and ancestor/descendant overlap remain rejected.
 5. Persist Public synchronously and atomically.
 6. Rotate the share epoch and only then publish the worktree.
 
-Every startup and host reconnection revalidates the marker before initial publication. Missing Git support, an unavailable execution host, an unreadable marker, or an ambiguous/overlapping root is `not shareable`, never an optimistic Public state. After a successful publication, a transport-classified host outage may retain only the same-epoch sanitized catalog row; every operation remains unavailable until marker revalidation succeeds again. If a new overlapping worktree appears beneath a Public root, publication is suspended fail closed until the owner resolves the overlap.
+Every startup and host reconnection revalidates the incarnation proof before initial publication. Missing Git support for a Git target, unavailable stable directory identity or marker storage for a folder target, an unavailable execution host, or an ambiguous/overlapping root is `not shareable`, never an optimistic Public state. After a successful publication, a transport-classified host outage may retain only the same-epoch sanitized catalog row; every operation remains unavailable until incarnation revalidation succeeds again. If a new disallowed overlapping root appears beneath a Public root, publication is suspended fail closed until the owner resolves the overlap.
 
-`resolvePublicInstance` also revalidates the marker when binding every structured file, Git, session, and terminal subscription operation, and mutation admission revalidates it again at its commit/spawn guard. A host-side worktree watcher/reconciliation loop invalidates long-lived streams when the marker or root disappears; it is an acceleration, not a substitute for bind/commit checks.
+`resolvePublicInstance` also revalidates the incarnation proof when binding every supported structured file, Git, session, and terminal subscription operation, and mutation admission revalidates it again at its commit/spawn guard. A host-side reconciliation loop invalidates long-lived streams when the proof or root disappears; it is an acceleration, not a substitute for bind/commit checks.
 
 ### Visibility durability
 
@@ -273,6 +275,7 @@ type SpoolProjectCatalogEntry = {
 }
 
 type SpoolWorktreeCatalogEntry = {
+  kind: 'git' | 'folder'
   worktreeRef: string
   shareEpoch: string
   name: string
@@ -461,17 +464,17 @@ No policy is inferred from a method-name prefix. A test snapshots every exposed 
 
 ## Capability matrix
 
-| Area                       | Public                                                                                | With control                                                                | Always owner-only / denied remotely                                                                 |
-| -------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Catalog                    | Sanitized Desktop/project/worktree/session list and cached quota                      | Same                                                                        | Raw repos, projects, accounts, settings, AI Vault, host inventory                                   |
-| Sessions                   | List, read transcript, attach terminal output                                         | Continue a proven historical Claude/Codex session in an owner-side terminal | Structured create/rename/close; move across worktrees; account selection; global administration     |
-| Terminal                   | Subscribe, snapshot, scrollback, output, ACK/resync                                   | Input, resize, viewport claim, terminal query replies                       | Owner OS clipboard, auto-download, host notification or external-open side effects                  |
-| Files                      | List tree, read/chunk/preview, view diff                                              | Create, write, rename, delete inside the worktree                           | OS file dialogs, reveal/open on owner Desktop, paths outside root, owner's clipboard                |
-| Git                        | Current worktree/index/HEAD status, diff, HEAD history, current branch/upstream state | Stage, unstage, and commit through structured methods                       | Structured checkout/merge/rebase/fetch/pull/push; arbitrary refs/OIDs; worktree administration      |
-| Claude/Codex               | Observe existing session content and sanitized active quota                           | Continue a proven session; run a new agent command in a granted terminal    | Structured session creation; select/authenticate accounts; reveal credentials or account identity   |
-| Browser/integrations       | None in V1                                                                            | None in V1                                                                  | Profiles, cookies, hosted reviews, GitHub/GitLab/Linear/Jira writes, automations, emulator/computer |
-| Worktree administration    | None                                                                                  | None                                                                        | Public/Private, approve/deny/revoke, delete worktree, create other worktrees                        |
-| SSH/runtime administration | Observe `resource_unavailable` only                                                   | Use an already-authorized route                                             | Host-key trust, credentials, pairing, interactive reconnect prompts, target management              |
+| Area                       | Public                                                                           | With control                                                                | Always owner-only / denied remotely                                                                 |
+| -------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Catalog                    | Sanitized Desktop/project/worktree/session list and cached quota                 | Same                                                                        | Raw repos, projects, accounts, settings, AI Vault, host inventory                                   |
+| Sessions                   | List, read transcript, attach terminal output                                    | Continue a proven historical Claude/Codex session in an owner-side terminal | Structured create/rename/close; move across worktrees; account selection; global administration     |
+| Terminal                   | Subscribe, bounded snapshot/scrollback, sequenced output and resize events       | Input and resize                                                            | Owner OS clipboard, auto-download, host notification or external-open side effects                  |
+| Files                      | List tree, read/chunk/preview; view diff on Git targets                          | Create, write, rename, delete inside the worktree                           | OS file dialogs, reveal/open on owner Desktop, paths outside root, owner's clipboard                |
+| Git                        | Git targets only: current worktree/index/HEAD status, diff, HEAD history, branch | Git targets only: stage, unstage, and commit through structured methods     | All Git APIs for folder targets; checkout/merge/rebase/fetch/pull/push; worktree administration     |
+| Claude/Codex               | Observe existing session content and sanitized active quota                      | Continue a proven session; run a new agent command in a granted terminal    | Structured session creation; select/authenticate accounts; reveal credentials or account identity   |
+| Browser/integrations       | None in V1                                                                       | None in V1                                                                  | Profiles, cookies, hosted reviews, GitHub/GitLab/Linear/Jira writes, automations, emulator/computer |
+| Worktree administration    | None                                                                             | None                                                                        | Public/Private, approve/deny/revoke, delete worktree, create other worktrees                        |
+| SSH/runtime administration | Observe `resource_unavailable` only                                              | Use an already-authorized route                                             | Host-key trust, credentials, pairing, interactive reconnect prompts, target management              |
 
 The matrix is the product-level rule; the checked-in registry is its executable inventory. The granted terminal remains a normal owner-side shell, so it can run commands beyond the narrower structured GUI methods without turning those commands into Spool RPC capabilities. Adding an exposed operation requires updating both and adding a security-contract test.
 
@@ -494,7 +497,7 @@ interface SpoolExecutionGateway {
 - SSH worktrees reuse the already-established SSH relay and providers.
 - Paired runtime-backed worktrees forward through the owner's persisted runtime connection.
 
-The gateway chooses an actual-host `SpoolHostAdapter`. Besides normal operations, each Adapter must provide `resolveWorktreeIncarnation` and `openVerified`. The paired-runtime Adapter therefore adds narrow owner-only downstream operations for incarnation markers and verified file access; the Owner Desktop cannot inspect a runtime host's `.git` or file handles directly. These internal operations are authenticated by the existing paired-runtime principal and are absent from the external Spool registry.
+The gateway chooses an actual-host `SpoolHostAdapter`. Besides normal operations, each Adapter must provide `resolveWorktreeIncarnation` and `openVerified`. The paired-runtime Adapter therefore adds narrow owner-only downstream operations for Git or folder markers, folder directory identity, and verified file access; the Owner Desktop cannot inspect a runtime host's marker, directory identity, or file handles directly. These internal operations are authenticated by the existing paired-runtime principal and are absent from the external Spool registry.
 
 Authorization always happens on the Owner Desktop before forwarding. The downstream call receives internal owner credentials, never the requester's ticket or principal. Upstream and downstream cancellation are linked. A forwarded Spool call cannot recursively expose another Spool gateway.
 
@@ -526,7 +529,7 @@ For every GUI file operation:
 4. Require containment beneath the canonical root using platform-aware path comparison.
 5. Recheck the worktree instance/share epoch and control grant at read enqueue or write commit.
 
-The file binder hides and rejects the in-root `.git` file/directory and every resolved per-worktree or common Git administrative path, regardless of casing or symlink spelling. Only the internal incarnation and Git Adapters may touch Git administration metadata; it is never part of the Public file tree.
+For a Git target, the file binder hides and rejects the in-root `.git` file/directory and every resolved per-worktree or common Git administrative path, preserving the existing Git containment rules. A folder target has no Git administrative root: it rejects every relative path containing a `.git` segment and hides every `.git` entry at every depth, case-insensitively. It also hides and rejects the root incarnation marker, including aliases and symlinks. Structured `files.diff` and all `git.*` operations are unavailable for folder targets. Only internal host Adapters may touch incarnation or Git administration metadata; it is never part of the Public file tree.
 
 Containment covers symlink escapes and symlink retargeting within the endpoint threat boundary. Public reads use a host-side `openVerified` operation: traverse with no-follow semantics where the platform supports it, resolve and stat the canonical target, open a handle, compare the handle identity with the resolved identity, read through that handle, and recheck the share epoch before returning bytes. The SSH/runtime relay implements the operation on the execution host. Where a backend cannot prove a symlink-containing traversal, it rejects that path rather than falling back to path-only checks. Create/write operations use a verified parent handle or reject symlink components, then verify the parent again at their commit guard.
 
@@ -559,7 +562,7 @@ A granted terminal can run fetch, checkout, merge, rebase, and ref updates that 
 
 Spool V1 deliberately uses the separate checked JSON methods `terminal.subscribe`, `terminal.input`, and `terminal.resize` over the single encrypted socket. It does not register the broad paired-device `terminal.multiplex` handler. The subscription binds a connection-scoped session alias to one owner terminal, emits a bounded initial snapshot followed by sequenced output/resize events, and closes on publication invalidation.
 
-`terminal.input` and `terminal.resize` each bind the alias again, require the exact current worktree grant, and run the actual-host marker plus grant-generation guard immediately before the PTY or viewport side effect. A binary frame sent to the Spool listener is a protocol violation and terminates the physical connection, which also revokes its grants.
+`terminal.input` and `terminal.resize` each bind the alias again, require the exact current worktree grant, and run the actual-host incarnation plus grant-generation guard immediately before the PTY or viewport side effect. A binary frame sent to the Spool listener is a protocol violation and terminates the physical connection, which also revokes its grants.
 
 A Public viewer does not register as a terminal driver, viewport owner, query authority, or display subscriber with owner-side effects. The first granted resize/input may register requester viewport state, and revoke removes that state. No lease or conflict arbitration is added; owner and approved requesters may race.
 
@@ -569,7 +572,7 @@ Requester-side terminal rendering treats remote output as untrusted active conte
 
 One socket must not let terminal output grow memory indefinitely or preserve authority after invalidation. Encrypted JSON replies therefore use one ordered bounded queue. If the transport backlog crosses the hard cap, the socket is terminated and the requester must rebuild read subscriptions from fresh snapshots. Terminal events carry monotonically increasing sequence numbers so the renderer drops duplicates and stale events.
 
-Private, delete, marker/root drift, and incarnation changes terminate the physical Spool socket rather than attempting to selectively purge an encrypted WebSocket backlog. That teardown discards application queues, closes streams, and revokes all connection grants. Bytes already delivered to the peer cannot be recalled; revocation prevents later admission and enqueueing but does not roll back a started process.
+Private, delete, incarnation-proof/root drift, and incarnation changes terminate the physical Spool socket rather than attempting to selectively purge an encrypted WebSocket backlog. That teardown discards application queues, closes streams, and revokes all connection grants. Bytes already delivered to the peer cannot be recalled; revocation prevents later admission and enqueueing but does not roll back a started process.
 
 ## Resource limits
 
@@ -620,13 +623,13 @@ The rows use existing sidebar typography, spacing, hover/selection tokens, discl
 
 ### Workspace surface
 
-At the content root, `SpoolWorkspaceSurface` is selected instead of the local workspace surface. A `SpoolWorkspaceModel` exposes sanitized terminal, relative-file, editor, diff, Git, and session view models/actions keyed by opaque route. It never exposes a local `Worktree` or absolute path.
+At the content root, `SpoolWorkspaceSurface` is selected instead of the local workspace surface. It resolves the opaque route through `spool-sharing-selectors.ts` and renders three isolated read surfaces: Sessions, Files, and, for Git targets only, Changes. Folder targets omit Changes and every diff control. No surface receives a local `Worktree` or owner absolute path.
 
-The current `TerminalPane`, `pty-connection.ts`, File Explorer, editor, and Source Control read local worktree IDs and Zustand ownership state; they are not assumed to be reusable presentational Modules. V1 adds `SpoolTerminalPane`, `SpoolFileExplorer`, `SpoolEditorSurface`, and `SpoolSourceControl` backed by `SpoolWorkspaceModel`, extracting lower-level visual primitives from existing surfaces only when those primitives are truly target-agnostic.
+`SpoolSessionPane` and `SpoolTerminalPane` render transcripts and a direct xterm subscription. `SpoolFilesPane`, `SpoolFileTree`, and `SpoolFilePreview` own relative-path browsing and requester-side previews. `SpoolGitPane`, `SpoolGitSidebar`, and `SpoolGitDiffPane` own the bounded Git surface. They invoke the checked Spool IPC methods instead of adapting local Explorer, editor, Source Control, or `PtyTransport` state.
 
-Terminal rendering still reuses the lower-level xterm integration and the existing `PtyTransport` Interface through a `spool-pty-transport.ts` Adapter. Attaching/detaching a Public viewer is a read lifecycle; creating/destroying a host PTY is a control mutation. `connect`, `destroy`, `sendInput`, `sendInputImmediate`, `resize`, and `claimViewport` read current `canControl` dynamically where they can mutate host state; they cannot capture a stale grant in a closure.
+`SpoolTerminalPane` starts `terminal.subscribe`, applies one bounded snapshot followed by monotonically sequenced output/resize events, and drops duplicate or stale sequences. A disconnect or new connection epoch tears down the subscription; reopening starts a fresh subscription and snapshot. There is no terminal ACK/resync or separate PTY transport protocol in V1. Terminal input and resize consult the current `canControl` selector and enter the same mutation queue used to surface uncertain outcomes.
 
-All Spool-specific editor, file-tree, Source Control, session/tab lifecycle, and worktree-scoped drag/drop/import actions consume the same dynamic `canControl` selector. Browser and integration entry points remain unavailable in V1 regardless of the grant. On epoch change, revoke, or Private, one state transition makes every exposed surface read-only in the same render turn. The server remains authoritative if a renderer path misses a gate.
+All Spool file, Git, terminal, and session mutation controls consume the dynamic `canControl` selector. Browser and integration entry points remain unavailable in V1 regardless of the grant. On epoch change, revoke, or Private, one state transition makes every exposed surface read-only in the same render turn. The server remains authoritative if a renderer path misses a gate.
 
 ### Owner approval surface
 
@@ -689,19 +692,19 @@ Mutations are never automatically retried. If the socket dies after the commit/s
 
 ## Reconciliation and failures
 
-| Event                                           | Owner behavior                                                                      | Requester behavior                                                 |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Tailnet peer misses one scan                    | No change                                                                           | Keep current row while reconciling                                 |
-| Peer misses two scans / probe fails             | No change                                                                           | Close requester connection and remove Desktop after reconciliation |
-| Heartbeat or socket loss                        | Delete connection grants, pending requests, streams, aliases                        | Increment epoch immediately; show disconnected/read-only           |
-| Fresh socket, same owner runtime                | Issue new aliases; Public catalog can return                                        | Replay only read subscriptions; require new control request        |
-| Owner restart                                   | New runtime ID; no grants exist                                                     | Treat as a new catalog epoch and read-only connection              |
-| Public SSH/WSL/runtime host unavailable         | Keep visibility but publish resource unavailable from validated cached catalog only | Preserve row; opening reports sanitized unavailable state          |
-| Worktree disappears                             | Invalidate share epoch; revoke and remove                                           | Remove worktree and close its views                                |
-| Same path reappears with a new marker           | Rotate instance ID and persist Private                                              | Old references remain permanently invalid                          |
-| Worktree becomes Private during an awaited read | Cancel/purge stream and discard late result                                         | Remove worktree; never render late content                         |
-| Grant revoked during a queued mutation          | Commit/spawn guard rejects if not started                                           | Demote to read; no replay                                          |
-| Already-started mutation loses connection       | Process may continue                                                                | Report `outcome_unknown`; do not retry                             |
+| Event                                            | Owner behavior                                                                      | Requester behavior                                                 |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Tailnet peer misses one scan                     | No change                                                                           | Keep current row while reconciling                                 |
+| Peer misses two scans / probe fails              | No change                                                                           | Close requester connection and remove Desktop after reconciliation |
+| Heartbeat or socket loss                         | Delete connection grants, pending requests, streams, aliases                        | Increment epoch immediately; show disconnected/read-only           |
+| Fresh socket, same owner runtime                 | Issue new aliases; Public catalog can return                                        | Replay only read subscriptions; require new control request        |
+| Owner restart                                    | New runtime ID; no grants exist                                                     | Treat as a new catalog epoch and read-only connection              |
+| Public SSH/WSL/runtime host unavailable          | Keep visibility but publish resource unavailable from validated cached catalog only | Preserve row; opening reports sanitized unavailable state          |
+| Worktree disappears                              | Invalidate share epoch; revoke and remove                                           | Remove worktree and close its views                                |
+| Same path reappears with a new incarnation proof | Rotate instance ID and persist Private                                              | Old references remain permanently invalid                          |
+| Worktree becomes Private during an awaited read  | Cancel/purge stream and discard late result                                         | Remove worktree; never render late content                         |
+| Grant revoked during a queued mutation           | Commit/spawn guard rejects if not started                                           | Demote to read; no replay                                          |
+| Already-started mutation loses connection        | Process may continue                                                                | Report `outcome_unknown`; do not retry                             |
 
 The requester may retain a last successful Public row during a brief execution-host outage, but never across a visibility/share-epoch change. Cached content is scoped to the same connection/runtime/share generations.
 
@@ -735,7 +738,7 @@ Security race tests use controllable barriers between bind, authorize, execute, 
 - Defensive Tailnet status/whois parsing, CLI location, address normalization, timeout/output caps, and peer deduplication.
 - Ticket TTL, one-use consumption, source/node/client-key/runtime/version binding, and replay rejection.
 - E2EE principal immutability and compatibility with existing device-token clients.
-- Visibility default, atomic project bulk, deny-journal recovery, rename continuity, marker mismatch, same-path replacement, and overlap rejection.
+- Visibility default, atomic project bulk, deny-journal recovery, rename continuity, incarnation-proof mismatch, same-path replacement, and overlap rejection.
 - Public-only catalog projection, connection-scoped opaque references, generation handling, session provenance/deduplication, and quota sanitization.
 - Session privacy fixtures cover nested roots, identical paths on different execution hosts, stale/cross-worktree provenance, and ambiguous legacy records.
 - Recursive fixtures containing email, IDs, auth sources, paths, errors, tokens, cookies, and raw metadata prove those fields/values never serialize.
@@ -753,7 +756,7 @@ Security race tests use controllable barriers between bind, authorize, execute, 
 - A grant cannot move to a second socket on the same node, another channel key, worktree/share epoch, or stale owner decision.
 - Requester and owner restart tests separately prove that grants, requests, aliases, streams, and `canControl` never survive.
 - Public → Private closes catalog/terminal/file/Git streams and discards reads that finish late.
-- Delete, marker mismatch, incarnation rotation, and Private invalidate active requests, grants, aliases, and streams through the same path.
+- Delete, incarnation-proof mismatch, incarnation rotation, and Private invalidate active requests, grants, aliases, and streams through the same path.
 - Crash injection after each deny-journal, metadata, and epoch step never publishes uncertain visibility.
 - Revoke between authorization and commit/spawn prevents the side effect; revoke after start does not claim rollback.
 - Revoke/Private invalidation terminates saturated connections so stale queued replies cannot survive the publication epoch.
@@ -779,7 +782,7 @@ P0 merge gates are default-deny registry coverage, projection sanitization, term
 
 ### Slice 1: visibility, projections, and UI shell
 
-- Add the persisted Private-by-default visibility fields, incarnation marker, deny journal, and atomic Store operation.
+- Add the persisted Private-by-default visibility fields, incarnation proof, deny journal, and atomic Store operation.
 - Add owner worktree/project visibility actions and first-publication warning.
 - Add static/fixture-backed Spool sidebar rows, quota rows, remote route, read-only workspace shell, approval queue, and dynamic `canControl` gates.
 - Validate the UX in light/dark and narrow sidebar layouts before networking.
@@ -845,17 +848,17 @@ src/renderer/src/components/sidebar/
   DesktopQuotaRows.tsx
 
 src/renderer/src/components/spool/
-  spool-workspace-model.ts
   SpoolWorkspaceSurface.tsx
   SpoolTerminalPane.tsx
-  SpoolFileExplorer.tsx
-  SpoolEditorSurface.tsx
-  SpoolSourceControl.tsx
+  SpoolSessionPane.tsx
+  SpoolFilesPane.tsx
+  SpoolFileTree.tsx
+  SpoolFilePreview.tsx
+  SpoolGitPane.tsx
+  SpoolGitSidebar.tsx
+  SpoolGitDiffPane.tsx
   SpoolControlRequestDialog.tsx
-  SpoolWorktreeHeader.tsx
-
-src/renderer/src/components/terminal-pane/
-  spool-pty-transport.ts
+  SpoolWorktreeVisibilityDialog.tsx
 ```
 
 The implementation also changes these existing Seams deliberately:

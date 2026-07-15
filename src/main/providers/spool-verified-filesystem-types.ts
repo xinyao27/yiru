@@ -14,6 +14,17 @@ export type SpoolVerifiedRemoteDirectoryEntry = {
   kind: 'file' | 'directory' | 'symlink'
 }
 
+export type SpoolVerifiedRemoteDirectoryPage = {
+  entries: readonly SpoolVerifiedRemoteDirectoryEntry[]
+  nextOffset: number | null
+}
+
+export type SpoolVerifiedRemoteDirectoryIdentity = {
+  canonicalPath: string
+  deviceId: string
+  inodeId: string
+}
+
 export type SpoolVerifiedRemoteFileWrite =
   | {
       mode: 'create'
@@ -29,11 +40,22 @@ export type SpoolVerifiedRemoteFileWrite =
     }
 
 export type SpoolVerifiedRemoteFilesystem = {
+  inspectDirectoryIdentity(
+    directoryPath: string,
+    signal?: AbortSignal
+  ): Promise<SpoolVerifiedRemoteDirectoryIdentity>
+  readOrCreateIncarnationMarker(
+    directoryPath: string,
+    filename: string,
+    proposedMarkerId: string,
+    signal?: AbortSignal
+  ): Promise<string>
   list(
     target: SpoolVerifiedRemoteExistingPath,
+    offset: number,
     limit: number,
     signal?: AbortSignal
-  ): Promise<readonly SpoolVerifiedRemoteDirectoryEntry[]>
+  ): Promise<SpoolVerifiedRemoteDirectoryPage>
   read(
     target: SpoolVerifiedRemoteExistingPath,
     offset: number,

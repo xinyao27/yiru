@@ -28,6 +28,7 @@ import type {
   SpoolHostOperationContext,
   SpoolHostSubscription
 } from './spool-execution-gateway'
+import { SpoolExecutionError } from './spool-execution-error'
 import type {
   SpoolHostWorktreeInspection,
   SpoolHostWorktreeInspectionMode,
@@ -101,7 +102,7 @@ export class OrcaSpoolPairedRuntimeHostAdapter
         return { status: 'unavailable' }
       }
       const result = SpoolPairedRuntimeCanonicalizeResultSchema.safeParse(response.result)
-      return result.success ? result.data : { status: 'unavailable' }
+      return result.success ? result.data : { status: 'invalid' }
     } catch {
       return { status: 'unavailable' }
     }
@@ -114,6 +115,13 @@ export class OrcaSpoolPairedRuntimeHostAdapter
   ): Promise<unknown> {
     const environmentId = pairedRuntimeEnvironmentId(target.target)
     const operation = parseSpoolPairedRuntimeOperation(operationInput)
+    if (
+      target.target.kind === 'folder' &&
+      (operation.kind === 'files.diff' || operation.kind.startsWith('git.'))
+    ) {
+      // Why: outer policy must hold even if paired-runtime repository metadata has drifted.
+      throw new SpoolExecutionError('method_not_found')
+    }
     const channel = this.registry.channel(context.connectionId, environmentId)
     channel.instanceIds.add(target.instanceId)
     if (operation.kind === 'session.read' || operation.kind === 'session.continue') {

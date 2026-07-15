@@ -25,6 +25,7 @@ export function sessionChainBindingKey(
     worktree.worktreeId,
     worktree.instanceId,
     worktree.spoolIncarnationId,
+    worktree.target.kind,
     worktree.actualHostScope,
     worktree.target.executionHostId,
     worktree.target.worktreePath,

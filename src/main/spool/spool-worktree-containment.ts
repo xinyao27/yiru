@@ -1,5 +1,12 @@
 import type { SpoolOwnerWorktree } from './spool-worktree-incarnation'
 import { SpoolExecutionError } from './spool-execution-error'
+import { SPOOL_FOLDER_INCARNATION_MARKER_FILENAME } from './spool-incarnation-marker-store'
+import {
+  isSpoolFolderHiddenMetadataChild,
+  isSpoolFolderIncarnationMetadataPath,
+  requireVisibleSpoolFolderPath,
+  spoolFolderPathContainsGitSegment
+} from './spool-folder-metadata-policy'
 
 const MAX_RELATIVE_PATH_BYTES = 4_096
 
@@ -24,8 +31,11 @@ export type SpoolContainedPath = {
   target: SpoolCanonicalHostPath
   parent: SpoolCanonicalHostPath
   exists: boolean
-  gitAdministrativePathCount: number
-  isGitAdministrativeChild(name: string): boolean
+  isHiddenMetadataChild(
+    name: string,
+    kind: 'file' | 'directory' | 'symlink',
+    signal: AbortSignal
+  ): boolean | Promise<boolean>
   revalidate(): Promise<boolean>
 }
 
@@ -39,6 +49,11 @@ export type SpoolWorktreeContainmentHost = {
     root: SpoolCanonicalHostPath,
     segments: readonly string[]
   ): Promise<SpoolHostPathResolution | null>
+  resolveCanonicalAlias(
+    root: SpoolCanonicalHostPath,
+    segments: readonly string[],
+    signal: AbortSignal
+  ): Promise<SpoolCanonicalHostPath | null>
   resolveGitAdministrativePaths(
     root: SpoolCanonicalHostPath
   ): Promise<readonly SpoolCanonicalHostPath[]>
@@ -61,12 +76,14 @@ export class SpoolWorktreeContainment {
   ): Promise<SpoolContainedPath> {
     const parsed = parseRelativePath(relativePath, options.allowRoot === true)
     const root = await this.resolveRoot(target)
+    requireVisibleSpoolFolderPath(target, root, parsed.segments)
     const resolution = await this.host.resolveExisting(root, parsed.segments)
     if (!resolution?.exists) {
       throw new SpoolExecutionError('resource_not_found')
     }
-    const administrativePaths = await this.requireContained(root, resolution)
+    const administrativePaths = await this.requireContained(target, root, resolution)
     return this.toContainedPath(
+      target,
       parsed.normalized,
       parsed.segments,
       root,
@@ -81,12 +98,14 @@ export class SpoolWorktreeContainment {
   ): Promise<SpoolContainedPath> {
     const parsed = parseRelativePath(relativePath, false)
     const root = await this.resolveRoot(target)
+    requireVisibleSpoolFolderPath(target, root, parsed.segments)
     const resolution = await this.host.resolveForCreate(root, parsed.segments)
     if (!resolution) {
       throw new SpoolExecutionError('resource_not_found')
     }
-    const administrativePaths = await this.requireContained(root, resolution)
+    const administrativePaths = await this.requireContained(target, root, resolution)
     return this.toContainedPath(
+      target,
       parsed.normalized,
       parsed.segments,
       root,
@@ -105,10 +124,14 @@ export class SpoolWorktreeContainment {
     if (!isValidCanonicalPath(root)) {
       throw new SpoolExecutionError('resource_unavailable')
     }
+    if (target.kind === 'folder' && spoolFolderPathContainsGitSegment(root.absolutePath)) {
+      throw new SpoolExecutionError('resource_not_found')
+    }
     return root
   }
 
   private async requireContained(
+    target: SpoolOwnerWorktree,
     root: SpoolCanonicalHostPath,
     resolution: SpoolHostPathResolution
   ): Promise<readonly SpoolCanonicalHostPath[]> {
@@ -125,6 +148,28 @@ export class SpoolWorktreeContainment {
     }
     requireInside(this.host.relationship(root, resolution.parent))
     requireInside(this.host.relationship(root, resolution.target))
+    if (target.kind === 'folder') {
+      if (
+        spoolFolderPathContainsGitSegment(resolution.parent.absolutePath) ||
+        spoolFolderPathContainsGitSegment(resolution.target.absolutePath) ||
+        isSpoolFolderIncarnationMetadataPath(root, resolution.target) ||
+        isSameOrDescendant(
+          this.host.relationship(
+            {
+              scopeKey: root.scopeKey,
+              absolutePath: this.host.joinPath(root, [SPOOL_FOLDER_INCARNATION_MARKER_FILENAME]),
+              identity: null
+            },
+            resolution.target
+          )
+        )
+      ) {
+        // Why: canonical checks also catch aliases and symlinks to owner-only metadata.
+        throw new SpoolExecutionError('resource_not_found')
+      }
+      // Why: folder workspaces have no trusted repository boundary beyond .git denial.
+      return []
+    }
     let administrativePaths: readonly SpoolCanonicalHostPath[]
     try {
       administrativePaths = await this.host.resolveGitAdministrativePaths(root)
@@ -147,6 +192,7 @@ export class SpoolWorktreeContainment {
   }
 
   private toContainedPath(
+    target: SpoolOwnerWorktree,
     relativePath: string,
     segments: readonly string[],
     root: SpoolCanonicalHostPath,
@@ -160,9 +206,17 @@ export class SpoolWorktreeContainment {
       target: { ...resolution.target },
       parent: { ...resolution.parent },
       exists: resolution.exists,
-      gitAdministrativePathCount: administrativePaths.length,
-      isGitAdministrativeChild: (name) =>
-        this.isGitAdministrativeChild(root, segments, name, administrativePaths),
+      isHiddenMetadataChild: (name, kind, signal) =>
+        target.kind === 'folder'
+          ? isSpoolFolderHiddenMetadataChild({
+              host: this.host,
+              root,
+              parentSegments: segments,
+              name,
+              kind,
+              signal
+            })
+          : this.isGitAdministrativeChild(root, segments, name, administrativePaths),
       revalidate: async () => {
         try {
           return await this.host.revalidate(root, resolution)

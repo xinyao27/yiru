@@ -24,6 +24,7 @@ import type {
   SpoolOwnerWorktreeCatalogInventory
 } from './spool-owner-worktree-catalog-contract'
 import {
+  sameSpoolFolderRepoRoot,
   sameSpoolWorktreeRoot,
   unavailableSourceAffectsTarget,
   unresolvedRegisteredRootReason,
@@ -117,8 +118,8 @@ export class SpoolWorktreePublicationValidator {
           markerId: resolution.markerId,
           root: resolution.root
         }
-        // Why: persisted Public metadata without its marker cannot prove which
-        // path incarnation the owner originally published, even if a new marker was created.
+        // Why: persisted Public metadata without its proof cannot establish
+        // which path incarnation the owner originally published.
         if (
           resolution.status === 'replaced' ||
           (candidate.requirePersistedMarker && !candidate.expectedMarkerId)
@@ -181,7 +182,8 @@ export class SpoolWorktreePublicationValidator {
           spoolPublicationTargetIdentityKey(entry.target) !==
             spoolPublicationTargetIdentityKey(candidate.target) &&
           entry.root &&
-          this.incarnation.rootsOverlap(candidate.root, entry.root)
+          this.incarnation.rootsOverlap(candidate.root, entry.root) &&
+          !sameSpoolFolderRepoRoot(candidate.target, candidate.root, entry.target, entry.root)
         ) {
           overlapping.add(candidate.target.instanceId)
           // Why: a newly registered Private descendant can disclose through an

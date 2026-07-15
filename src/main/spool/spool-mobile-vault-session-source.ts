@@ -259,6 +259,7 @@ function toReadRequest(
   localWslDistro: string | null
 ) {
   return {
+    worktreeKind: worktree.target.kind,
     executionHostId: worktree.target.executionHostId,
     worktreeId: worktree.worktreeId,
     worktreeInstanceId: worktree.instanceId,

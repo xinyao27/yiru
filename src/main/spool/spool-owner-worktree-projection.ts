@@ -1,5 +1,6 @@
 import { getRepoExecutionHostId, parseExecutionHostId } from '../../shared/execution-host'
 import { getProjectHostSetupForRepo } from '../../shared/project-host-setup-projection'
+import { getRepoKind } from '../../shared/repo-kind'
 import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import type { DetectedWorktree, ProjectHostSetup, Repo, WorktreeMeta } from '../../shared/types'
 import type { SpoolOwnerWorktree } from './spool-worktree-incarnation'
@@ -17,7 +18,7 @@ export function projectRegisteredSpoolWorktree(
   const repoExecutionHostId = getRepoExecutionHostId(repo)
   const runtimeBacked = parseExecutionHostId(repoExecutionHostId)?.kind === 'runtime'
   return {
-    kind: 'git',
+    kind: getRepoKind(repo),
     worktreeId: worktree.id,
     instanceId: meta.instanceId,
     projectId: worktree.projectId ?? meta.projectId ?? setup.projectId,

@@ -1,6 +1,5 @@
 import type { OrcaRuntimeService } from '../../orca-runtime'
 import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
-import { isFolderRepo } from '../../../../shared/repo-kind'
 import type {
   SpoolPairedRuntimeBoundWorktree,
   SpoolPairedRuntimeResolvedWorktree,
@@ -46,7 +45,7 @@ export function resolvePairedRuntimeRepoActualHostScope(
 ): string {
   const store = runtime.getPairedRuntimeSpoolStore()
   const repo = store.getRepo(repoId)
-  if (!repo || isFolderRepo(repo)) {
+  if (!repo) {
     throw new Error('repo_not_found')
   }
   const executionHostId = getRepoExecutionHostId(repo)
@@ -101,7 +100,7 @@ export async function resolveBoundActualHostWorktree(
 
 export function toOwnerWorktree(resolved: SpoolPairedRuntimeResolvedWorktree): SpoolOwnerWorktree {
   return {
-    kind: 'git',
+    kind: resolved.kind,
     worktreeId: resolved.worktreeId,
     instanceId: resolved.instanceId,
     projectId: resolved.projectId,

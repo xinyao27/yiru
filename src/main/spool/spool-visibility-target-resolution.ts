@@ -1,4 +1,3 @@
-import { FOLDER_WORKSPACE_INSTANCE_SEPARATOR } from '../../shared/worktree-id'
 import type { WorktreeMeta } from '../../shared/types'
 import { SpoolVisibilityError } from './spool-visibility-errors'
 import type {
@@ -48,11 +47,7 @@ export class SpoolVisibilityTargetResolution {
   persistedProject(projectId: string): readonly SpoolPersistedWorktreeIdentity[] {
     const targets: SpoolPersistedWorktreeIdentity[] = []
     for (const [worktreeId, meta] of Object.entries(this.store.getAllWorktreeMeta())) {
-      if (
-        meta.projectId === projectId &&
-        meta.instanceId &&
-        !worktreeId.includes(FOLDER_WORKSPACE_INSTANCE_SEPARATOR)
-      ) {
+      if (meta.projectId === projectId && meta.instanceId) {
         targets.push({ worktreeId, instanceId: meta.instanceId })
       }
     }

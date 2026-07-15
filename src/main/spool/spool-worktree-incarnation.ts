@@ -1,7 +1,8 @@
 import type { ExecutionHostId } from '../../shared/execution-host'
+import type { SpoolWorktreeKind } from '../../shared/spool/spool-worktree-kind'
 
 export type SpoolOwnerWorktree = {
-  kind: 'git'
+  kind: SpoolWorktreeKind
   worktreeId: string
   instanceId: string
   projectId: string | null
@@ -128,8 +129,8 @@ export class SpoolWorktreeIncarnation {
         actualHostScope: inspected.actualHostScope
       }
     }
-    // Why: the marker lives in Git's per-worktree admin directory, so a change
-    // proves that this path no longer names the instance the owner attested.
+    // Why: the marker is bound to durable host evidence, so a change proves
+    // that this path no longer names the instance the owner attested.
     if (expectedMarkerId && inspected.markerId !== expectedMarkerId) {
       return { status: 'replaced', markerId: inspected.markerId, root: inspected.root }
     }
