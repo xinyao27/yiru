@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { join } from 'node:path'
+import { isFolderRepo } from '../../shared/repo-kind'
 import { SPOOL_INGRESS_PORT, type SpoolOsFamily } from '../../shared/spool/spool-wire-contract'
+import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
 import type { Store } from '../persistence'
 import type { RateLimitService } from '../rate-limits/service'
@@ -246,12 +248,15 @@ export function createSpoolDesktopComposition(
     onAvailabilityRecovered: () => composition?.recoverAfterAvailability() ?? Promise.resolve(),
     describeOwnerWorktree: (worktreeId) => {
       const meta = options.store.getWorktreeMeta(worktreeId)
-      return meta
-        ? {
-            displayName: meta.displayName,
-            projectId: meta.projectId ?? null
-          }
-        : null
+      const repo = options.store.getRepo(getRepoIdFromWorktreeId(worktreeId))
+      // Why: plain folders lack the durable incarnation marker required for safe publication.
+      if (!meta || !repo || isFolderRepo(repo)) {
+        return null
+      }
+      return {
+        displayName: meta.displayName,
+        projectId: meta.projectId ?? null
+      }
     }
   })
   const unsubscribeProvenance = visibility.subscribe((change) => {
