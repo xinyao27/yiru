@@ -1,9 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import {
-  SpoolPairedRuntimeHistoricalSessionsResponseSchema,
-  SpoolPairedRuntimeListHistoricalSessionsParamsSchema,
+  SpoolPairedRuntimeHistoricalSessionPageResponseSchema,
+  SpoolPairedRuntimeListHistoricalSessionPageParamsSchema,
   SpoolPairedRuntimeListLiveSessionsParamsSchema,
   SpoolPairedRuntimeLiveSessionsResponseSchema,
+  SpoolPairedRuntimeReleaseHistoricalSessionPageParamsSchema,
   SpoolPairedRuntimeSessionChangedEventSchema,
   SpoolPairedRuntimeSessionInvokeParamsSchema,
   SpoolPairedRuntimeSubscribeSessionChangesParamsSchema,
@@ -23,9 +24,15 @@ import {
   resolveIncarnationBoundActualWorktree
 } from './spool-host-runtime-authority'
 import {
-  projectPairedRuntimeHistoricalSessions,
+  pairedRuntimeHistoricalSessionReadRequest,
+  projectPairedRuntimeHistoricalSessionPage,
   projectPairedRuntimeLiveSessions
 } from './spool-host-session-projection'
+import { getSpoolHostSessionPageCursors } from './spool-host-session-page-cursor-registry'
+import {
+  spoolHostSessionPageBinding,
+  spoolHostSessionPageReleaseBinding
+} from './spool-host-session-page-binding'
 
 const SESSION_CHANGED_EVENT = SpoolPairedRuntimeSessionChangedEventSchema.parse({ kind: 'changed' })
 
@@ -37,7 +44,11 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
       requirePairedRuntimePrincipal(context)
       try {
         const worktree = await resolveIncarnationBoundActualWorktree(context.runtime, params.target)
-        const result = await projectPairedRuntimeLiveSessions(context.runtime, worktree)
+        const result = await projectPairedRuntimeLiveSessions(
+          context.runtime,
+          worktree,
+          context.signal
+        )
         return SpoolPairedRuntimeLiveSessionsResponseSchema.parse({ status: 'ok', result })
       } catch (error) {
         return { status: 'error' as const, code: pairedRuntimeErrorCode(error) }
@@ -45,17 +56,102 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
     }
   }),
   defineMethod({
-    name: 'spool.host.listHistoricalSessions',
-    params: SpoolPairedRuntimeListHistoricalSessionsParamsSchema,
+    name: 'spool.host.listHistoricalSessionPage',
+    params: SpoolPairedRuntimeListHistoricalSessionPageParamsSchema,
     handler: async (params, context) => {
       requirePairedRuntimePrincipal(context)
       try {
         const worktree = await resolveIncarnationBoundActualWorktree(context.runtime, params.target)
-        const result = await projectPairedRuntimeHistoricalSessions(context.runtime, worktree)
-        return SpoolPairedRuntimeHistoricalSessionsResponseSchema.parse({ status: 'ok', result })
+        context.signal?.throwIfAborted()
+        const binding = spoolHostSessionPageBinding(context, params, worktree)
+        const cursors = getSpoolHostSessionPageCursors(context.runtime)
+        cursors.ensureConnection(context.runtime, binding.physicalConnectionId)
+        const resolvedCursor = cursors.resolve(binding, params.cursor)
+        const reader = getHostBundle(context.runtime).sessionReader
+        const innerRequest = pairedRuntimeHistoricalSessionReadRequest(
+          worktree,
+          params.target.spoolIncarnationId,
+          params.purpose,
+          params.inventoryScope
+        )
+        const opening =
+          params.cursor === null
+            ? cursors.beginOpening(binding, async () => {
+                await reader.releaseAiVaultSessionPage(innerRequest, null)
+              })
+            : null
+        let releaseCursor = resolvedCursor.innerCursor
+        let boundCursor: string | null = null
+        try {
+          const result = await projectPairedRuntimeHistoricalSessionPage(
+            reader,
+            worktree,
+            params.target.spoolIncarnationId,
+            params.purpose,
+            params.inventoryScope,
+            resolvedCursor.innerCursor,
+            context.signal
+          )
+          releaseCursor = result.nextCursor
+          // Why: cancellation can win after the inner page minted its cursor; take cleanup
+          // ownership before observing abort so the frozen inventory cannot leak to its TTL.
+          context.signal?.throwIfAborted()
+          boundCursor = cursors.bind(
+            binding,
+            resolvedCursor,
+            result.nextCursor,
+            async (cursor) => await reader.releaseAiVaultSessionPage(innerRequest, cursor)
+          )
+          const page = {
+            ...result,
+            nextCursor: boundCursor
+          }
+          return SpoolPairedRuntimeHistoricalSessionPageResponseSchema.parse({
+            status: 'ok',
+            result: page
+          })
+        } catch (error) {
+          // Why: a failed page cannot be resumed safely and must not consume chain capacity.
+          let cursorToRelease = resolvedCursor
+          if (boundCursor) {
+            try {
+              cursorToRelease = cursors.resolve(binding, boundCursor)
+            } catch {
+              // A disconnect cleanup may already have removed the newly bound alias.
+            }
+          }
+          cursors.release(binding, cursorToRelease, false)
+          try {
+            await reader.releaseAiVaultSessionPage(innerRequest, releaseCursor)
+          } catch {
+            // Preserve the page failure; the inner store also reclaims abandoned cursors by TTL.
+          }
+          throw error
+        } finally {
+          if (opening) {
+            cursors.finishOpening(opening)
+          }
+        }
       } catch (error) {
         return { status: 'error' as const, code: pairedRuntimeErrorCode(error) }
       }
+    }
+  }),
+  defineMethod({
+    name: 'spool.host.releaseHistoricalSessionPage',
+    params: SpoolPairedRuntimeReleaseHistoricalSessionPageParamsSchema,
+    handler: async (params, context) => {
+      requirePairedRuntimePrincipal(context)
+      const binding = spoolHostSessionPageReleaseBinding(context, params)
+      const cursors = getSpoolHostSessionPageCursors(context.runtime)
+      cursors.ensureConnection(context.runtime, binding.physicalConnectionId)
+      if (params.cursor === null) {
+        // Why: opening cancellation must use the request frozen before any host retarget.
+        cursors.releaseOpening(binding)
+        return { ok: true }
+      }
+      cursors.releaseOpaque(binding, params.cursor)
+      return { ok: true }
     }
   }),
   defineStreamingMethod({
@@ -90,6 +186,7 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
         const remembered = bundle.sessionRecords.rememberResolved({
           ownerRecordKey: operation.ownerRecordKey,
           executionHostId: target.target.executionHostId,
+          actualHostScope: target.actualHostScope,
           worktreeInstanceId: target.instanceId,
           spoolIncarnationId: target.spoolIncarnationId,
           ...params.record

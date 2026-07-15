@@ -1,4 +1,6 @@
 import type { OrcaRuntimeService } from '../../orca-runtime'
+import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
+import { isFolderRepo } from '../../../../shared/repo-kind'
 import type {
   SpoolPairedRuntimeBoundWorktree,
   SpoolPairedRuntimeResolvedWorktree,
@@ -13,6 +15,12 @@ import type { SpoolHostOperationContext } from '../../../spool/spool-execution-g
 import { createOrcaSpoolHostAdapter } from '../../../spool/spool-orca-host-adapter'
 import type { SpoolOwnerWorktree } from '../../../spool/spool-worktree-incarnation'
 import { SpoolActualHostWorktreeIncarnationHost } from '../../../spool/spool-worktree-incarnation-host'
+import {
+  spoolActualHostScopeKey,
+  spoolLocalActualHostScopeKey
+} from '../../../spool/spool-canonical-host-path'
+import { getLocalProjectWorktreeGitOptions } from '../../../project-runtime-git-options'
+import { resolveSpoolRepoLocalWslDistro } from '../../../spool/spool-repo-actual-host-scope'
 import type { SpoolPublicWorktreeInstance } from '../../../spool/spool-worktree-publication-state'
 import type { RpcContext } from '../core'
 
@@ -32,10 +40,35 @@ export async function resolveActualHostWorktree(
   return await runtime.resolvePairedRuntimeSpoolWorktree(selector)
 }
 
+export function resolvePairedRuntimeRepoActualHostScope(
+  runtime: OrcaRuntimeService,
+  repoId: string
+): string {
+  const store = runtime.getPairedRuntimeSpoolStore()
+  const repo = store.getRepo(repoId)
+  if (!repo || isFolderRepo(repo)) {
+    throw new Error('repo_not_found')
+  }
+  const executionHostId = getRepoExecutionHostId(repo)
+  const host = parseExecutionHostId(executionHostId)
+  if (!host || host.kind === 'runtime') {
+    throw new Error('recursive_runtime_host')
+  }
+  return host.kind === 'local'
+    ? spoolLocalActualHostScopeKey(
+        executionHostId,
+        resolveSpoolRepoLocalWslDistro(
+          repo.path,
+          getLocalProjectWorktreeGitOptions(store, repo).wslDistro ?? null
+        )
+      )
+    : spoolActualHostScopeKey(executionHostId)
+}
+
 export async function resolveIncarnationBoundActualWorktree(
   runtime: OrcaRuntimeService,
   selector: SpoolPairedRuntimeSessionWorktree
-): Promise<SpoolPairedRuntimeResolvedWorktree> {
+): Promise<SpoolPairedRuntimeResolvedWorktree & { actualHostScope: string }> {
   const resolved = await resolveActualHostWorktree(runtime, selector)
   const inspected = await createIncarnationHost(resolved).inspect(
     toOwnerWorktree(resolved),
@@ -47,7 +80,7 @@ export async function resolveIncarnationBoundActualWorktree(
   if (inspected.markerId !== selector.spoolIncarnationId) {
     throw new SpoolExecutionError('resource_not_found')
   }
-  return resolved
+  return { ...resolved, actualHostScope: inspected.actualHostScope }
 }
 
 export async function resolveBoundActualHostWorktree(
@@ -61,6 +94,7 @@ export async function resolveBoundActualHostWorktree(
     projectId: resolved.projectId,
     shareEpoch: selector.shareEpoch,
     spoolIncarnationId: selector.spoolIncarnationId,
+    actualHostScope: resolved.actualHostScope,
     target: toOwnerWorktree(resolved)
   }
 }

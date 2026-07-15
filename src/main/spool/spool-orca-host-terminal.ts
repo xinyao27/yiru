@@ -205,7 +205,11 @@ export class OrcaSpoolHostTerminal implements SpoolTerminalSubscriptionHost {
 
   private async resolveTerminal(target: SpoolPublicWorktreeInstance, handle: string) {
     const terminal = await this.runtime.showTerminal(handle)
-    if (!terminal.ptyId || terminal.worktreeId !== target.worktreeId) {
+    if (
+      !terminal.ptyId ||
+      terminal.worktreeId !== target.worktreeId ||
+      terminal.worktreeInstanceId !== target.instanceId
+    ) {
       throw new SpoolExecutionError('resource_not_found')
     }
     return { ptyId: terminal.ptyId }

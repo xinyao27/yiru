@@ -13,7 +13,7 @@ import type { OrcaRuntimeService } from './orca-runtime'
 import { writeRuntimeMetadata } from './runtime-metadata'
 import { RpcDispatcher } from './rpc/dispatcher'
 import type { RpcRequest, RpcResponse } from './rpc/core'
-import { errorResponse } from './rpc/errors'
+import { errorResponse, successResponse } from './rpc/errors'
 import type { RpcMessageContext, RpcTransport } from './rpc/transport'
 import { UnixSocketTransport } from './rpc/unix-socket-transport'
 import { WebSocketTransport } from './rpc/ws-transport'
@@ -27,6 +27,10 @@ import {
   decodeTerminalStreamFrame,
   type TerminalStreamFrame
 } from '../../shared/terminal-stream-protocol'
+import {
+  readRemoteRuntimeCancellationRequestId,
+  REMOTE_RUNTIME_CANCEL_REQUEST_METHOD
+} from '../../shared/remote-runtime-request-cancellation'
 
 const DEFAULT_WS_PORT = 6768
 
@@ -430,7 +434,11 @@ export class OrcaRuntimeRpcServer {
   >()
   private readonly wsDispatchAbortStates = new Map<
     WebSocket,
-    { controllers: Set<AbortController>; abortOnClose: () => void }
+    {
+      controllers: Set<AbortController>
+      requests: Map<string, AbortController>
+      abortOnClose: () => void
+    }
   >()
   // Why: separate from Node's server.maxConnections because we need to count
   // only long-running dispatches, not every in-flight short RPC. See §3.1 +
@@ -580,10 +588,13 @@ export class OrcaRuntimeRpcServer {
     this.binaryStreamHandlers.get(connectionId)?.get(frame.streamId)?.(frame)
   }
 
-  private registerWebSocketDispatchAbort(ws: WebSocket): {
+  private registerWebSocketDispatchAbort(
+    ws: WebSocket,
+    requestId: string
+  ): {
     signal: AbortSignal
     dispose: () => void
-  } {
+  } | null {
     const abortController = new AbortController()
     if (ws.readyState !== ws.OPEN) {
       abortController.abort()
@@ -594,6 +605,7 @@ export class OrcaRuntimeRpcServer {
     if (!state) {
       state = {
         controllers: new Set(),
+        requests: new Map(),
         abortOnClose: () => this.abortWebSocketDispatches(ws)
       }
       this.wsDispatchAbortStates.set(ws, state)
@@ -602,7 +614,11 @@ export class OrcaRuntimeRpcServer {
       ws.on('close', state.abortOnClose)
       ws.on('error', state.abortOnClose)
     }
+    if (state.requests.has(requestId)) {
+      return null
+    }
     state.controllers.add(abortController)
+    state.requests.set(requestId, abortController)
 
     return {
       signal: abortController.signal,
@@ -612,6 +628,9 @@ export class OrcaRuntimeRpcServer {
           return
         }
         current.controllers.delete(abortController)
+        if (current.requests.get(requestId) === abortController) {
+          current.requests.delete(requestId)
+        }
         if (current.controllers.size > 0) {
           return
         }
@@ -634,6 +653,11 @@ export class OrcaRuntimeRpcServer {
       controller.abort()
     }
     state.controllers.clear()
+    state.requests.clear()
+  }
+
+  private cancelWebSocketDispatch(ws: WebSocket, requestId: string): void {
+    this.wsDispatchAbortStates.get(ws)?.requests.get(requestId)?.abort()
   }
 
   async start(): Promise<void> {
@@ -1006,6 +1030,31 @@ export class OrcaRuntimeRpcServer {
       return
     }
 
+    if (request.method === REMOTE_RUNTIME_CANCEL_REQUEST_METHOD) {
+      const targetRequestId = readRemoteRuntimeCancellationRequestId(request.params)
+      if (!ws || !targetRequestId) {
+        reply(
+          JSON.stringify(
+            this.buildError(request.id, 'invalid_argument', 'Invalid cancellation request')
+          )
+        )
+        return
+      }
+      this.cancelWebSocketDispatch(ws, targetRequestId)
+      reply(
+        JSON.stringify(
+          successResponse(
+            request.id,
+            { runtimeId: this.runtime.getRuntimeId() },
+            {
+              cancelled: true
+            }
+          )
+        )
+      )
+      return
+    }
+
     // Why: associate the deviceToken with this WebSocket so ws.on('close')
     // can notify the runtime which mobile client disconnected.
     if (wsTransport && ws) {
@@ -1026,7 +1075,11 @@ export class OrcaRuntimeRpcServer {
       return
     }
 
-    const abortRegistration = ws ? this.registerWebSocketDispatchAbort(ws) : null
+    const abortRegistration = ws ? this.registerWebSocketDispatchAbort(ws, request.id) : null
+    if (ws && !abortRegistration) {
+      reply(JSON.stringify(this.buildError(request.id, 'bad_request', 'Duplicate request id')))
+      return
+    }
     if (longPoll) {
       this.activeLongPolls += 1
     }

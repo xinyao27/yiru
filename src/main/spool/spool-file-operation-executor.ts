@@ -135,14 +135,15 @@ export class SpoolFileOperationExecutor {
       1,
       SPOOL_FILE_LIST_MAX_LIMIT
     )
-    const rawEntries = await this.host.listVerified(path, limit + 1, signal)
-    if (rawEntries.length > limit + 1) {
+    const hostLimit = limit + path.gitAdministrativePathCount + 1
+    const rawEntries = await this.host.listVerified(path, hostLimit, signal)
+    if (rawEntries.length > hostLimit) {
       throw new SpoolExecutionError('result_too_large')
     }
     const entries: SpoolFileTreeEntry[] = []
     for (const entry of rawEntries) {
       const projected = projectEntry(normalized, entry)
-      if (projected) {
+      if (projected && !path.isGitAdministrativeChild(entry.name)) {
         entries.push(projected)
       }
       if (entries.length > limit) {

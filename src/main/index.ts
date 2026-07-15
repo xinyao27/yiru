@@ -983,6 +983,8 @@ function openMainWindow(): BrowserWindow {
     {
       getAdditionalAiVaultCodexHomePaths: () =>
         codexRuntimeHome ? [codexRuntimeHome.getHostRuntimeHomePath()] : [],
+      resolveAiVaultClaudeProjectsDirs: (target) =>
+        claudeRuntimeAuth!.resolveSessionProjectRoots(target),
       onBeforeRelaunch: async () => {
         isQuitting = true
         await preserveAgentAuthBeforeRestart({ codexRuntimeHome, claudeRuntimeAuth, store })
@@ -1832,11 +1834,11 @@ app.whenReady().then(async () => {
     // Why: hook-reported agent status is the same source the desktop sidebar
     // reads. worktree.ps pulls it at query time so mobile shows the same agents.
     getAgentStatusSnapshot: () => agentHookServer.getStatusSnapshot(),
-    // Why: source codex-home here (runs in BOTH window and serve modes) so the
-    // aiVault.listSessions RPC includes managed-Codex sessions on remote/SSH
-    // hosts; the window-only registerCoreHandlers path never runs under serve.
+    // Why: Claude and Codex history roots must be wired before either desktop or serve mode starts.
     getAdditionalAiVaultCodexHomePaths: () =>
       codexRuntimeHome ? [codexRuntimeHome.getHostRuntimeHomePath()] : [],
+    resolveAiVaultClaudeProjectsDirs: (target) =>
+      claudeRuntimeAuth!.resolveSessionProjectRoots(target),
     buildAgentHookPtyEnv: () =>
       isAgentStatusHooksEnabled(store?.getSettings()) ? agentHookServer.buildPtyEnv() : {}
   })

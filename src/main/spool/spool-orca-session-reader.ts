@@ -1,4 +1,9 @@
 import { parseExecutionHostId } from '../../shared/execution-host'
+import {
+  listLocalSpoolSessionInventoryPage,
+  releaseLocalSpoolSessionInventoryPage
+} from '../ai-vault/local-spool-session-inventory'
+import { SessionFileDiscoveryLimitError } from '../ai-vault/session-scanner-discovery'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import { SpoolExecutionError } from './spool-execution-error'
 import type {
@@ -8,7 +13,7 @@ import type {
 
 type SpoolSessionRuntime = Pick<
   OrcaRuntimeService,
-  'listMobileSessionTabs' | 'listAiVaultSessions' | 'onMobileSessionTabsChanged'
+  'listMobileSessionTabs' | 'onMobileSessionTabsChanged'
 >
 
 /** Reads only owner-side session projections; it never opens an execution route. */
@@ -19,32 +24,77 @@ export class OrcaSpoolExecutionHostSessionReader implements SpoolExecutionHostSe
     private readonly ssh?: SpoolExecutionHostSessionReader
   ) {}
 
-  async listMobileSessionTabs(request: SpoolExecutionHostSessionReadRequest) {
+  async listMobileSessionTabs(request: SpoolExecutionHostSessionReadRequest, signal?: AbortSignal) {
     const host = requireExecutionHost(request)
     if (host.kind === 'runtime') {
-      return await this.requirePairedRuntime().listMobileSessionTabs(request)
+      return await this.requirePairedRuntime().listMobileSessionTabs(request, signal)
     }
     // Why: SSH PTYs are already represented by the owner runtime's session graph.
-    return await this.runtime.listMobileSessionTabs(`id:${request.worktreeId}`)
+    const tabs = await this.runtime.listMobileSessionTabs(`id:${request.worktreeId}`)
+    signal?.throwIfAborted()
+    return tabs
   }
 
-  async listAiVaultSessions(request: SpoolExecutionHostSessionReadRequest) {
+  async listAiVaultSessionPage(
+    request: SpoolExecutionHostSessionReadRequest,
+    cursor: string | null,
+    signal?: AbortSignal
+  ) {
     const host = requireExecutionHost(request)
     if (host.kind === 'runtime') {
-      return await this.requirePairedRuntime().listAiVaultSessions(request)
+      return await this.requirePairedRuntime().listAiVaultSessionPage(request, cursor, signal)
     }
     if (host.kind === 'ssh') {
       if (this.ssh) {
-        return await this.ssh.listAiVaultSessions(request)
+        return await this.ssh.listAiVaultSessionPage(request, cursor, signal)
       }
       // Why: owner-local AI Vault data must never be projected as an SSH host's history.
-      return { sessions: [], issues: [], scannedAt: new Date().toISOString() }
+      throw new SpoolExecutionError('resource_unavailable')
     }
-    return await this.runtime.listAiVaultSessions({
-      limit: 5_000,
-      force: false,
-      scopePaths: [request.worktreePath],
-      executionHostScope: request.executionHostId
+    try {
+      return await listLocalSpoolSessionInventoryPage({
+        bindingKey: inventoryBindingKey(request),
+        cursor,
+        executionHostId: request.executionHostId,
+        inventoryScope: request.inventoryScope,
+        worktreePath: request.worktreePath,
+        localWslDistro: request.localWslDistro,
+        signal
+      })
+    } catch (error) {
+      if (error instanceof SessionFileDiscoveryLimitError) {
+        throw new SpoolExecutionError('result_too_large')
+      }
+      throw error instanceof SpoolExecutionError
+        ? error
+        : new SpoolExecutionError(
+            error instanceof Error && error.message.includes('capacity')
+              ? 'resource_busy'
+              : 'resource_unavailable'
+          )
+    }
+  }
+
+  async releaseAiVaultSessionPage(
+    request: SpoolExecutionHostSessionReadRequest,
+    cursor: string | null
+  ): Promise<void> {
+    const host = requireExecutionHost(request)
+    if (host.kind === 'runtime') {
+      await this.requirePairedRuntime().releaseAiVaultSessionPage(request, cursor)
+      return
+    }
+    if (host.kind === 'ssh') {
+      await this.ssh?.releaseAiVaultSessionPage(request, cursor)
+      return
+    }
+    releaseLocalSpoolSessionInventoryPage({
+      bindingKey: inventoryBindingKey(request),
+      cursor,
+      executionHostId: request.executionHostId,
+      inventoryScope: request.inventoryScope,
+      worktreePath: request.worktreePath,
+      localWslDistro: request.localWslDistro
     })
   }
 
@@ -66,6 +116,18 @@ export class OrcaSpoolExecutionHostSessionReader implements SpoolExecutionHostSe
     }
     return this.pairedRuntime
   }
+}
+
+function inventoryBindingKey(request: SpoolExecutionHostSessionReadRequest): string {
+  return JSON.stringify([
+    request.worktreeId,
+    request.worktreeInstanceId,
+    request.spoolIncarnationId,
+    request.worktreePath,
+    request.localWslDistro,
+    request.purpose,
+    request.inventoryScope
+  ])
 }
 
 function requireExecutionHost(request: SpoolExecutionHostSessionReadRequest) {

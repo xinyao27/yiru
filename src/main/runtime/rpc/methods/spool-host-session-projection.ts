@@ -3,22 +3,35 @@ import {
   SpoolPairedRuntimeHistoricalSessionSchema,
   SpoolPairedRuntimeLiveSessionSchema
 } from '../../../../shared/spool/spool-paired-runtime-session-contract'
+import type {
+  SpoolExecutionHostSessionReader,
+  SpoolHistoricalSessionPurpose
+} from '../../../spool/spool-session-source'
+import { SpoolExecutionError } from '../../../spool/spool-execution-error'
 import type { OrcaRuntimeService } from '../../orca-runtime'
 import type { SpoolPairedRuntimeResolvedWorktree } from '../../../../shared/spool/spool-paired-runtime-host-contract'
 
-type SessionRuntime = Pick<OrcaRuntimeService, 'listMobileSessionTabs' | 'listAiVaultSessions'>
+type SessionRuntime = Pick<OrcaRuntimeService, 'listMobileSessionTabs'>
+
+const MAX_HISTORICAL_SESSION_PAGE_BYTES = 4 * 1024 * 1024
 
 export async function projectPairedRuntimeLiveSessions(
   runtime: SessionRuntime,
-  worktree: SpoolPairedRuntimeResolvedWorktree
+  worktree: SpoolPairedRuntimeResolvedWorktree,
+  signal?: AbortSignal
 ) {
   const snapshot = await runtime.listMobileSessionTabs(`id:${worktree.worktreeId}`)
+  signal?.throwIfAborted()
   if (snapshot.worktree !== worktree.worktreeId) {
     throw new Error('paired_runtime_session_worktree_mismatch')
   }
   const sessions: ReturnType<typeof SpoolPairedRuntimeLiveSessionSchema.parse>[] = []
   for (const tab of snapshot.tabs) {
-    if (tab.type !== 'terminal' || tab.status !== 'ready') {
+    if (
+      tab.type !== 'terminal' ||
+      tab.status !== 'ready' ||
+      tab.worktreeInstanceId !== worktree.instanceId
+    ) {
       continue
     }
     const agent = tab.agentStatus?.agentType ?? tab.launchAgent
@@ -38,39 +51,86 @@ export async function projectPairedRuntimeLiveSessions(
   return { sessions }
 }
 
-export async function projectPairedRuntimeHistoricalSessions(
-  runtime: SessionRuntime,
-  worktree: SpoolPairedRuntimeResolvedWorktree
+export async function projectPairedRuntimeHistoricalSessionPage(
+  reader: Pick<
+    SpoolExecutionHostSessionReader,
+    'listAiVaultSessionPage' | 'releaseAiVaultSessionPage'
+  >,
+  worktree: SpoolPairedRuntimeResolvedWorktree,
+  spoolIncarnationId: string,
+  purpose: SpoolHistoricalSessionPurpose,
+  inventoryScope: string,
+  cursor: string | null,
+  signal?: AbortSignal
 ) {
-  const result = await runtime.listAiVaultSessions({
-    limit: 5_000,
-    force: false,
-    scopePaths: [worktree.worktreePath],
-    executionHostScope: worktree.executionHostId
-  })
-  const sessions: ReturnType<typeof SpoolPairedRuntimeHistoricalSessionSchema.parse>[] = []
-  for (const session of result.sessions) {
-    if (
-      session.subagent !== null ||
-      (session.agent !== 'claude' && session.agent !== 'codex') ||
-      normalizeExecutionHostId(session.executionHostId) !== worktree.executionHostId
-    ) {
-      continue
+  const request = pairedRuntimeHistoricalSessionReadRequest(
+    worktree,
+    spoolIncarnationId,
+    purpose,
+    inventoryScope
+  )
+  const result = await reader.listAiVaultSessionPage(request, cursor, signal)
+  try {
+    signal?.throwIfAborted()
+    const sessions: ReturnType<typeof SpoolPairedRuntimeHistoricalSessionSchema.parse>[] = []
+    let projectedBytes = 2
+    for (const session of result.sessions) {
+      if (
+        session.subagent !== null ||
+        (session.agent !== 'claude' && session.agent !== 'codex') ||
+        normalizeExecutionHostId(session.executionHostId) !== worktree.executionHostId
+      ) {
+        // Why: silently dropping a malformed row could turn a partial page into completeness.
+        throw new Error('paired_runtime_historical_session_scope_mismatch')
+      }
+      const providerSessionId = normalizeIdentifier(session.sessionId, 512)
+      if (!providerSessionId) {
+        throw new Error('paired_runtime_historical_session_identifier_invalid')
+      }
+      const parsed = SpoolPairedRuntimeHistoricalSessionSchema.parse({
+        sessionRef: session.id,
+        title: session.title,
+        provider: session.agent,
+        providerSessionId,
+        cwd: session.cwd,
+        transcriptPath: session.filePath,
+        resumeCommand: session.resumeCommand
+      })
+      projectedBytes +=
+        Buffer.byteLength(JSON.stringify(parsed), 'utf8') + (sessions.length > 0 ? 1 : 0)
+      sessions.push(parsed)
+      if (projectedBytes > MAX_HISTORICAL_SESSION_PAGE_BYTES) {
+        // Why: locator-heavy pages fail explicitly before they can saturate the encrypted route.
+        throw new SpoolExecutionError('result_too_large')
+      }
     }
-    const parsed = SpoolPairedRuntimeHistoricalSessionSchema.safeParse({
-      sessionRef: session.id,
-      title: session.title,
-      provider: session.agent,
-      providerSessionId: session.sessionId,
-      cwd: session.cwd,
-      transcriptPath: session.filePath,
-      resumeCommand: session.resumeCommand
-    })
-    if (parsed.success) {
-      sessions.push(parsed.data)
+    return { sessions, nextCursor: result.nextCursor, scannedAt: result.scannedAt }
+  } catch (error) {
+    try {
+      await reader.releaseAiVaultSessionPage(request, result.nextCursor ?? cursor)
+    } catch {
+      // Preserve the projection failure; cursor expiry remains a bounded cleanup fallback.
     }
+    throw error
   }
-  return { sessions, scannedAt: result.scannedAt }
+}
+
+export function pairedRuntimeHistoricalSessionReadRequest(
+  worktree: SpoolPairedRuntimeResolvedWorktree,
+  spoolIncarnationId: string,
+  purpose: SpoolHistoricalSessionPurpose,
+  inventoryScope: string
+) {
+  return {
+    executionHostId: worktree.executionHostId,
+    worktreeId: worktree.worktreeId,
+    worktreeInstanceId: worktree.instanceId,
+    spoolIncarnationId,
+    worktreePath: worktree.worktreePath,
+    localWslDistro: worktree.localWslDistro,
+    purpose,
+    inventoryScope
+  }
 }
 
 function normalizeIdentifier(value: string | null | undefined, maxLength: number): string | null {

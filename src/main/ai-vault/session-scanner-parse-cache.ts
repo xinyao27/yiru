@@ -117,8 +117,10 @@ function storeEntry(path: string, entry: SessionParseCacheEntry): void {
 export async function parseAgentSessionFileCached(
   candidate: SessionFileCandidate,
   platform: NodeJS.Platform,
-  stats?: SessionParseStats
+  stats?: SessionParseStats,
+  signal?: AbortSignal
 ): Promise<AiVaultSession | null> {
+  signal?.throwIfAborted()
   const { file } = candidate
   const entry = cache.get(file.path)
 
@@ -137,6 +139,7 @@ export async function parseAgentSessionFileCached(
     // so refresh the cheap directory count on reuse.
     if (entry.session && candidate.agent === 'claude' && entry.session.messageCount === 0) {
       const subagentTranscriptCount = await countSubagentTranscripts(file.path)
+      signal?.throwIfAborted()
       if (subagentTranscriptCount !== entry.session.subagentTranscriptCount) {
         entry.session = { ...entry.session, subagentTranscriptCount }
       }
@@ -152,7 +155,8 @@ export async function parseAgentSessionFileCached(
       platform,
       entry,
       stats,
-      stateFactory
+      stateFactory,
+      signal
     })
     storeEntry(file.path, parsed)
     return parsed.session
@@ -163,6 +167,7 @@ export async function parseAgentSessionFileCached(
     stats.bytesRead += file.sizeBytes ?? 0
   }
   const session = await parseAgentSessionFile(candidate, platform)
+  signal?.throwIfAborted()
   storeEntry(file.path, {
     mtimeMs: file.mtimeMs,
     sizeBytes: file.sizeBytes ?? null,
@@ -179,6 +184,7 @@ async function parseResumableCandidate(args: {
   entry: SessionParseCacheEntry | undefined
   stats?: SessionParseStats
   stateFactory: () => ResumableSessionParseState
+  signal?: AbortSignal
 }): Promise<SessionParseCacheEntry> {
   const { file } = args.candidate
   const resume = args.entry?.platform === args.platform ? args.entry.resume : null
@@ -188,6 +194,7 @@ async function parseResumableCandidate(args: {
     typeof file.sizeBytes === 'number' &&
     file.sizeBytes >= resume.byteOffset &&
     (resume.byteOffset === 0 || (await endsWithNewlineAt(file.path, resume.byteOffset)))
+  args.signal?.throwIfAborted()
 
   // Clone before consuming: a failed read must not corrupt the cached state,
   // or the next resume would double-count the lines applied before the error.
@@ -204,7 +211,8 @@ async function parseResumableCandidate(args: {
   const readResult = await consumeCompleteJsonlLines({
     path: file.path,
     start: startOffset,
-    onLine: (line) => state.consumeLine(line)
+    onLine: (line) => state.consumeLine(line),
+    signal: args.signal
   })
   if (args.stats) {
     args.stats.bytesRead += readResult.bytesRead
@@ -222,11 +230,13 @@ async function parseResumableCandidate(args: {
     displayState.consumeLine(readResult.trailingPartialLine)
   }
 
+  const session = await displayState.finalize(args.platform)
+  args.signal?.throwIfAborted()
   return {
     mtimeMs: file.mtimeMs,
     sizeBytes: file.sizeBytes ?? null,
     platform: args.platform,
-    session: await displayState.finalize(args.platform),
+    session,
     resume: { state, byteOffset: readResult.consumedThrough }
   }
 }
@@ -259,13 +269,15 @@ async function consumeCompleteJsonlLines(args: {
   path: string
   start: number
   onLine: (line: string) => void
+  signal?: AbortSignal
 }): Promise<JsonlReadResult> {
   let consumedThrough = args.start
   let bytesRead = 0
   let remainder: Buffer | null = null
 
-  const stream = createReadStream(args.path, { start: args.start })
+  const stream = createReadStream(args.path, { start: args.start, signal: args.signal })
   for await (const chunk of stream as AsyncIterable<Buffer>) {
+    args.signal?.throwIfAborted()
     bytesRead += chunk.length
     const data = remainder ? Buffer.concat([remainder, chunk]) : chunk
     let lineStart = 0
@@ -283,6 +295,8 @@ async function consumeCompleteJsonlLines(args: {
     // Copy the tail so retaining it doesn't pin the whole chunk buffer.
     remainder = lineStart < data.length ? Buffer.from(data.subarray(lineStart)) : null
   }
+
+  args.signal?.throwIfAborted()
 
   return {
     consumedThrough,

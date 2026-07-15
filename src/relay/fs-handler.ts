@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- Why: relay filesystem request handling shares
    path expansion, file IO, search, streaming reads, and Space scans. */
-import { readdir, writeFile, stat, lstat, mkdir, rename, cp, rm, realpath } from 'node:fs/promises'
+import { opendir, writeFile, stat, lstat, mkdir, rename, cp, rm, realpath } from 'node:fs/promises'
 import { execFile } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -25,7 +25,8 @@ import {
 import { isQuickOpenReaddirBudgetError } from '../shared/quick-open-readdir-walk'
 import { buildExcludePathPrefixes } from '../shared/quick-open-filter'
 import { buildInstallRgMessage } from './fs-handler-install-rg'
-import { readRelayFileContent, readRelayFileStreamMetadata } from './fs-handler-file-read'
+import { readRelayFileContent } from './fs-handler-file-content'
+import { startRelayFileStream } from './fs-handler-file-stream-request'
 import {
   readVerifiedTerminalArtifact,
   writeVerifiedTerminalArtifact
@@ -37,6 +38,22 @@ import { buildRelayCommandEnv } from './relay-command-env'
 import { assertNoClobberRenameDestinationAvailable } from '../shared/filesystem-rename-collision'
 import { RelayFilesystemWatchRegistry } from './relay-filesystem-watch-registry'
 import type { RelayWatcherProcessPool } from './relay-watcher-process-pool'
+
+const MAX_READ_DIRECTORY_LIMIT = 100_001
+
+function readDirectoryLimit(value: unknown): number | null {
+  if (value === undefined) {
+    return null
+  }
+  if (
+    !Number.isInteger(value) ||
+    (value as number) <= 0 ||
+    (value as number) > MAX_READ_DIRECTORY_LIMIT
+  ) {
+    throw new Error('Invalid fs.readDir limit')
+  }
+  return value as number
+}
 
 async function isDirectoryEntry(
   dirPath: string,
@@ -99,7 +116,7 @@ export class FsHandler {
 
   private registerHandlers(): void {
     registerSpoolVerifiedFilesystemHandlers(this.dispatcher)
-    this.dispatcher.onRequest('fs.readDir', (p) => this.readDir(p))
+    this.dispatcher.onRequest('fs.readDir', (p, context) => this.readDir(p, context))
     this.dispatcher.onRequest('fs.readFile', (p) => this.readFile(p))
     this.dispatcher.onRequest('fs.readFileStream', (p, c) => this.readFileStream(p, c))
     this.dispatcher.onRequest('fs.readTerminalArtifact', (p) => this.readTerminalArtifact(p))
@@ -129,16 +146,24 @@ export class FsHandler {
     this.dispatcher.onNotification('fs.streamAck', (p) => this.streamAck(p))
   }
 
-  private async readDir(params: Record<string, unknown>) {
+  private async readDir(params: Record<string, unknown>, context?: RequestContext) {
     const dirPath = expandTilde(params.dirPath as string)
-    const entries = await readdir(dirPath, { withFileTypes: true })
-    const mapped = await Promise.all(
-      entries.map(async (entry) => ({
+    const limit = readDirectoryLimit(params.limit)
+    const directory = await opendir(dirPath)
+    const mapped: { name: string; isDirectory: boolean; isSymlink: boolean }[] = []
+    for await (const entry of directory) {
+      if (context?.isStale()) {
+        throw new Error('fs.readDir cancelled')
+      }
+      mapped.push({
         name: entry.name,
         isDirectory: await isDirectoryEntry(dirPath, entry),
         isSymlink: entry.isSymbolicLink()
-      }))
-    )
+      })
+      if (limit !== null && mapped.length >= limit) {
+        break
+      }
+    }
     return mapped.sort((a, b) => {
       if (a.isDirectory !== b.isDirectory) {
         return a.isDirectory ? -1 : 1
@@ -160,15 +185,13 @@ export class FsHandler {
   }
 
   private async readFileStream(params: Record<string, unknown>, context?: RequestContext) {
-    const filePath = expandTilde(params.filePath as string)
-    const ctx = context ?? { clientId: 0, isStale: () => false }
-    return readRelayFileStreamMetadata(filePath, this.dispatcher, this.streamRegistry, ctx, {
-      // Why: only target the requesting client when the dispatcher actually
-      // routed this request (context present) — direct-call tests and legacy
-      // paths keep broadcast semantics.
-      ...(context ? { clientId: context.clientId } : {}),
-      paceWithAcks: params.flowControl === 'ack'
-    })
+    return startRelayFileStream(
+      expandTilde(params.filePath as string),
+      params,
+      this.dispatcher,
+      this.streamRegistry,
+      context
+    )
   }
 
   private async tempDir(): Promise<string> {

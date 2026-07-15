@@ -6,6 +6,7 @@ const MAX_CONTINUED_BINDINGS = 2_000
 export type SpoolContinuedSessionBinding = {
   terminalHandle: string
   executionHostId: SpoolOwnerHistoricalSessionRecord['executionHostId']
+  actualHostScope: string
   worktreeId: string
   worktreeInstanceId: string
   spoolIncarnationId: string
@@ -31,6 +32,7 @@ export class SpoolContinuedSessionBindings {
     this.bindings.set(terminalHandle, {
       terminalHandle,
       executionHostId: record.executionHostId,
+      actualHostScope: record.actualHostScope,
       worktreeId: worktree.worktreeId,
       worktreeInstanceId: worktree.instanceId,
       spoolIncarnationId: worktree.spoolIncarnationId,
@@ -49,13 +51,17 @@ export class SpoolContinuedSessionBindings {
   }
 
   resolve(
-    worktree: Pick<SpoolPublicWorktreeInstance, 'instanceId' | 'spoolIncarnationId' | 'target'>,
+    worktree: Pick<
+      SpoolPublicWorktreeInstance,
+      'instanceId' | 'spoolIncarnationId' | 'actualHostScope' | 'target'
+    >,
     terminalHandle: string
   ): SpoolContinuedSessionBinding | null {
     const binding = this.bindings.get(terminalHandle)
     return binding &&
       binding.worktreeInstanceId === worktree.instanceId &&
       binding.spoolIncarnationId === worktree.spoolIncarnationId &&
+      binding.actualHostScope === worktree.actualHostScope &&
       binding.executionHostId === worktree.target.executionHostId
       ? { ...binding }
       : null

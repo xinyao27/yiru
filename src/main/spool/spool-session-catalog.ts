@@ -1,28 +1,30 @@
-import { normalizeExecutionHostId } from '../../shared/execution-host'
+import {
+  matchesHistoricalSession,
+  SpoolSessionInventoryCache
+} from './spool-session-inventory-cache'
+import {
+  SpoolSessionPageChains,
+  type SpoolSessionCatalogPageResult
+} from './spool-session-page-chains'
+import { SpoolSessionPageProjector } from './spool-session-page-projector'
 import type {
-  SpoolHistoricalSessionCandidate,
+  SpoolResolvedHistoricalSession,
+  SpoolResolvedSession
+} from './spool-session-resolution'
+import type {
   SpoolHistoricalSessionConsistency,
-  SpoolLiveSessionCandidate,
   SpoolOwnerHistoricalSessionRecord,
   SpoolSessionSource,
   SpoolSessionWorktreeIdentity
 } from './spool-session-source'
 import type {
   SpoolProvenanceProvider,
-  SpoolSessionProvenance,
   SpoolSessionProvenanceIndex
 } from './spool-session-provenance-index'
-import {
-  resolveHistoricalSession,
-  resolveLiveSession,
-  sessionDedupeKey,
-  toSessionDescription,
-  type SpoolResolvedHistoricalSession,
-  type SpoolResolvedSession,
-  type SpoolSessionCatalogDescription
-} from './spool-session-resolution'
+import { requireExactWorktreeIdentity, toSessionWorktree } from './spool-session-worktree-binding'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-visibility'
 
+export type { SpoolSessionCatalogPageResult } from './spool-session-page-chains'
 export type {
   SpoolResolvedHistoricalSession,
   SpoolResolvedLiveSession,
@@ -32,43 +34,74 @@ export type {
 
 export class SpoolSessionCatalog {
   private readonly listeners = new Set<() => void>()
+  private readonly inventories = new SpoolSessionInventoryCache()
+  private readonly pages: SpoolSessionPageChains
   private readonly unsubscribeSource: () => void
 
   constructor(
     private readonly provenance: SpoolSessionProvenanceIndex,
     private readonly source: SpoolSessionSource,
-    private readonly historicalConsistency: SpoolHistoricalSessionConsistency,
+    historicalConsistency: SpoolHistoricalSessionConsistency,
     private readonly onListenerError: (error: unknown) => void = defaultListenerError
   ) {
-    this.unsubscribeSource = source.subscribe?.(() => this.emitChange()) ?? (() => {})
+    this.pages = new SpoolSessionPageChains(
+      new SpoolSessionPageProjector(
+        provenance,
+        source,
+        historicalConsistency,
+        this.inventories,
+        () => this.provenanceChanged()
+      )
+    )
+    this.unsubscribeSource =
+      source.subscribe?.(() => {
+        this.clearSessionState()
+        this.emitChange()
+      }) ?? (() => {})
   }
 
-  async listSessions(
-    instance: SpoolPublicWorktreeInstance
-  ): Promise<readonly SpoolSessionCatalogDescription[]> {
-    return (await this.resolveAll(instance)).map(toSessionDescription)
+  async listSessionPage(
+    instance: SpoolPublicWorktreeInstance,
+    cursor: string | null,
+    inventoryScope: string,
+    signal: AbortSignal
+  ): Promise<SpoolSessionCatalogPageResult> {
+    return await this.pages.listPage(instance, cursor, inventoryScope, signal)
   }
 
-  async resolveSession(
+  releaseSessionPage(
+    instance: SpoolPublicWorktreeInstance,
+    cursor: string | null,
+    inventoryScope: string
+  ): void {
+    this.pages.release(instance, cursor, inventoryScope)
+  }
+
+  resolveSession(
     instance: SpoolPublicWorktreeInstance,
     sessionKey: string
-  ): Promise<SpoolResolvedSession | null> {
-    const sessions = await this.resolveAll(instance)
-    return sessions.find((session) => session.sessionKey === sessionKey) ?? null
+  ): SpoolResolvedSession | null {
+    const worktree = toSessionWorktree(instance)
+    requireExactWorktreeIdentity(worktree)
+    // Why: a wire session reference only exists after its page populated this owner-only cache.
+    return this.inventories.resolveSession(worktree, sessionKey)
   }
 
   resolveHistoricalRecord(
     session: SpoolResolvedHistoricalSession
   ): SpoolOwnerHistoricalSessionRecord | null {
+    const cached = this.inventories.resolveHistoricalRecord(session)
+    if (cached) {
+      // Why: only a selected proven record enters the bounded executor locator store.
+      return this.source.retainOwnerHistoricalRecord(cached) ? cached : null
+    }
     const record = this.source.resolveOwnerHistoricalRecord(session.ownerRecordKey)
-    return record &&
-      record.executionHostId === session.executionHostId &&
-      record.worktreeInstanceId === session.worktreeInstanceId &&
-      record.spoolIncarnationId === session.spoolIncarnationId &&
-      record.provider === session.provider &&
-      record.providerSessionId === session.providerSessionId
-      ? record
-      : null
+    return record && matchesHistoricalSession(record, session) ? record : null
+  }
+
+  invalidateInstance(instanceId: string): void {
+    this.pages.invalidateInstance(instanceId)
+    this.inventories.clearInstance(instanceId)
   }
 
   subscribe(listener: () => void): () => void {
@@ -84,7 +117,7 @@ export class SpoolSessionCatalog {
     requireExactWorktreeIdentity(worktree)
     const changed = this.provenance.attest([
       {
-        executionHostId: worktree.target.executionHostId,
+        actualHostScope: worktree.actualHostScope,
         provider,
         providerSessionId,
         worktreeInstanceId: worktree.instanceId,
@@ -92,114 +125,24 @@ export class SpoolSessionCatalog {
       }
     ])
     if (changed) {
-      this.emitChange()
+      this.provenanceChanged()
     }
   }
 
   close(): void {
     this.unsubscribeSource()
+    this.clearSessionState()
     this.listeners.clear()
   }
 
-  private async resolveAll(
-    instance: SpoolPublicWorktreeInstance
-  ): Promise<readonly SpoolResolvedSession[]> {
-    const worktree = toSessionWorktree(instance)
-    requireExactWorktreeIdentity(worktree)
-    const [live, historical] = await Promise.all([
-      this.source.listLiveSessions(worktree),
-      this.source.listHistoricalSessions(worktree, 'catalog')
-    ])
-    const liveSessions = live.filter((candidate) => hasExactLiveBinding(worktree, candidate))
-    this.attestProviderSessions(worktree, liveSessions)
-    const provenHistorical = historical
-      .map((candidate) => ({
-        candidate,
-        resolved: this.resolveHistoricalSession(worktree, candidate)
-      }))
-      .filter(
-        (
-          entry
-        ): entry is {
-          candidate: SpoolHistoricalSessionCandidate
-          resolved: SpoolResolvedHistoricalSession
-        } => entry.resolved !== null
-      )
-    const consistentHistorical = new Set(
-      await this.historicalConsistency.retainConsistent(
-        worktree,
-        provenHistorical.map((entry) => entry.candidate)
-      )
-    )
-
-    const sessions = new Map<string, SpoolResolvedSession>()
-    const dedupeKeys = new Set<string>()
-    for (const candidate of liveSessions) {
-      const resolved = resolveLiveSession(worktree, candidate)
-      const dedupeKey = sessionDedupeKey(resolved)
-      if (!dedupeKeys.has(dedupeKey)) {
-        dedupeKeys.add(dedupeKey)
-        sessions.set(resolved.sessionKey, resolved)
-      }
-    }
-    for (const { candidate, resolved } of provenHistorical) {
-      if (!consistentHistorical.has(candidate)) {
-        continue
-      }
-      const dedupeKey = sessionDedupeKey(resolved)
-      if (!dedupeKeys.has(dedupeKey)) {
-        dedupeKeys.add(dedupeKey)
-        sessions.set(resolved.sessionKey, resolved)
-      }
-    }
-    return [...sessions.values()]
+  private clearSessionState(): void {
+    this.pages.clear()
+    this.inventories.clear()
   }
 
-  private attestProviderSessions(
-    worktree: SpoolSessionWorktreeIdentity,
-    sessions: readonly SpoolLiveSessionCandidate[]
-  ): void {
-    const entries: SpoolSessionProvenance[] = []
-    for (const session of sessions) {
-      if (
-        (session.provider === 'claude' || session.provider === 'codex') &&
-        session.providerSessionId
-      ) {
-        entries.push({
-          executionHostId: worktree.target.executionHostId,
-          provider: session.provider,
-          providerSessionId: session.providerSessionId,
-          worktreeInstanceId: worktree.instanceId,
-          spoolIncarnationId: worktree.spoolIncarnationId
-        })
-      }
-    }
-    // Why: a proven live binding becomes the durable proof used after the terminal exits.
-    if (this.provenance.attest(entries)) {
-      this.emitChange()
-    }
-  }
-
-  private resolveHistoricalSession(
-    worktree: SpoolSessionWorktreeIdentity,
-    candidate: SpoolHistoricalSessionCandidate
-  ): SpoolResolvedHistoricalSession | null {
-    if (candidate.executionHostId !== worktree.target.executionHostId) {
-      return null
-    }
-    const provenance = this.provenance.resolve({
-      executionHostId: candidate.executionHostId,
-      provider: candidate.provider,
-      providerSessionId: candidate.providerSessionId
-    })
-    if (
-      !provenance ||
-      provenance.worktreeInstanceId !== worktree.instanceId ||
-      provenance.spoolIncarnationId !== worktree.spoolIncarnationId
-    ) {
-      return null
-    }
-    return resolveHistoricalSession(worktree, candidate)
+  private provenanceChanged(): void {
+    this.clearSessionState()
+    this.emitChange()
   }
 
   private emitChange(): void {
@@ -211,39 +154,6 @@ export class SpoolSessionCatalog {
         this.onListenerError(error)
       }
     }
-  }
-}
-
-function toSessionWorktree(instance: SpoolPublicWorktreeInstance): SpoolSessionWorktreeIdentity {
-  return {
-    worktreeId: instance.worktreeId,
-    instanceId: instance.instanceId,
-    spoolIncarnationId: instance.spoolIncarnationId,
-    target: instance.target
-  }
-}
-
-function hasExactLiveBinding(
-  worktree: SpoolSessionWorktreeIdentity,
-  candidate: SpoolLiveSessionCandidate
-): boolean {
-  return (
-    candidate.executionHostId === worktree.target.executionHostId &&
-    candidate.worktreeInstanceId === worktree.instanceId &&
-    candidate.spoolIncarnationId === worktree.spoolIncarnationId &&
-    candidate.terminalHandle.length > 0 &&
-    candidate.terminalHandle.length <= 2048
-  )
-}
-
-function requireExactWorktreeIdentity(worktree: SpoolSessionWorktreeIdentity): void {
-  if (
-    worktree.target.worktreeId !== worktree.worktreeId ||
-    worktree.target.instanceId !== worktree.instanceId ||
-    worktree.target.executionHostId !== normalizeExecutionHostId(worktree.target.executionHostId) ||
-    !worktree.spoolIncarnationId.trim()
-  ) {
-    throw new Error('Invalid Spool session worktree identity')
   }
 }
 

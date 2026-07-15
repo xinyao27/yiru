@@ -16,7 +16,7 @@ export function spoolSshHostScope(connectionId: string, pathFlavor: RemotePathFl
 export function spoolFilesystemProvider(
   pathValue: SpoolCanonicalHostPath
 ): IFilesystemProvider | null {
-  const connectionId = spoolSshConnectionId(pathValue.scopeKey)
+  const connectionId = spoolSshConnectionIdFromScope(pathValue.scopeKey)
   return connectionId ? (getSshFilesystemProvider(connectionId) ?? null) : null
 }
 
@@ -122,7 +122,7 @@ export function isMissingSpoolPath(error: unknown): boolean {
   return code === 'ENOENT' || /ENOENT|not found|no such file/i.test(message)
 }
 
-function spoolSshConnectionId(scopeKey: string): string | null {
+export function spoolSshConnectionIdFromScope(scopeKey: string): string | null {
   const match = /^ssh:(?:posix|windows):(.+)$/.exec(scopeKey)
   return match?.[1] ?? null
 }

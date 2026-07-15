@@ -27,7 +27,7 @@ export function sendRemoteRuntimeConnectionRequest<TResult>(
   method: string,
   params: unknown,
   timeoutMs: number,
-  options: { beforeSend?: () => void | Promise<void> } = {}
+  options: { beforeSend?: () => void | Promise<void>; signal?: AbortSignal } = {}
 ): Promise<RuntimeRpcResponse<TResult>> {
   const pairingKey = getPairingKey(pairing)
   let cached = requestConnections.get(environmentId)
@@ -64,7 +64,7 @@ export function sendRemoteRuntimeSharedControlRequest<TResult>(
   method: string,
   params: unknown,
   timeoutMs: number,
-  options: { beforeSend?: () => void | Promise<void> } = {}
+  options: { beforeSend?: () => void | Promise<void>; signal?: AbortSignal } = {}
 ): Promise<RuntimeRpcResponse<TResult>> {
   return getSharedControlConnection(environmentId, pairing).request(
     method,
@@ -80,7 +80,7 @@ export function sendRemoteRuntimeExistingSharedControlRequest<TResult>(
   method: string,
   params: unknown,
   timeoutMs: number,
-  options: { beforeSend?: () => void | Promise<void> } = {}
+  options: { beforeSend?: () => void | Promise<void>; signal?: AbortSignal } = {}
 ): Promise<RuntimeRpcResponse<TResult>> {
   const connection = getExistingSharedControlConnection(environmentId, pairing)
   return connection

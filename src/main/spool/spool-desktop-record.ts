@@ -21,6 +21,7 @@ export type SpoolDesktopRecord = {
   connectionGeneration: number
   catalogLoadGeneration: number
   catalogLoadIdentity: string | null
+  catalogLoadAbort: AbortController | null
   catalogRetryAttempt: number
   catalogRetryTimer: ReturnType<typeof setTimeout> | null
   reconnectTimer: ReturnType<typeof setTimeout> | null
@@ -41,6 +42,7 @@ export function createSpoolDesktopRecord(descriptor: DiscoveredSpoolDesktop): Sp
     connectionGeneration: 0,
     catalogLoadGeneration: 0,
     catalogLoadIdentity: null,
+    catalogLoadAbort: null,
     catalogRetryAttempt: 0,
     catalogRetryTimer: null,
     reconnectTimer: null

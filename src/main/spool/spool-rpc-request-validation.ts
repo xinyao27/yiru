@@ -22,7 +22,7 @@ export function parseSpoolRpcRequest(frame: string): SpoolRpcRequest | null {
   return { id: record.id, method: record.method, params: record.params }
 }
 
-export function readSpoolSubscriptionRequestId(value: unknown): string | null {
+export function readSpoolCancellationRequestId(value: unknown): string | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return null
   }

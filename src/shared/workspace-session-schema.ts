@@ -68,6 +68,7 @@ const terminalTabSchema = z.object({
   id: terminalTabIdSchema,
   ptyId: z.string().nullable(),
   worktreeId: z.string(),
+  worktreeInstanceId: z.string().min(1).max(512).optional(),
   title: z.string(),
   defaultTitle: z.string().optional(),
   generatedTitle: z.string().nullable().optional(),

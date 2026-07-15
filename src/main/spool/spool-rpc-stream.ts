@@ -1,7 +1,5 @@
 import type { SpoolRpcInvocationContext } from './spool-rpc-gateway'
 
-export const SPOOL_CANCEL_SUBSCRIPTION_METHOD = 'spool.subscription.cancel'
-
 export type SpoolRpcStreamSink = {
   next(value: unknown): void
   error(error: unknown): void

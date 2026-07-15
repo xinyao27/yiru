@@ -1,21 +1,23 @@
-import { join } from 'node:path'
 import { scanAiVaultSessions } from './session-scanner'
 import { getWslHomeAsync, listWslDistrosAsync } from '../wsl'
 import type { AiVaultListArgs, AiVaultListResult } from '../../shared/ai-vault-types'
 import { LOCAL_EXECUTION_HOST_ID } from '../../shared/execution-host'
+import {
+  getConfiguredAiVaultAdditionalCodexSessionsDirs,
+  resetAiVaultSessionRootConfigurationForTests
+} from './session-root-configuration'
 
 // Why: ONE module owns the scan cache so the desktop IPC handler AND the runtime
 // RPC method share a single cache instance — opening the desktop panel and the
 // mobile screen for the same scope must not double-scan hundreds of transcripts.
 const AI_VAULT_CACHE_TTL_MS = 15_000
 
-// Why: codex-home + WSL home dirs must be sourced from a serve-mode-reachable
-// seam (the OrcaRuntimeService deps), NOT the window-only registerCoreHandlers
-// path — `orca serve` never runs that path, so sourcing it there would silently
-// drop managed-Codex sessions from remote/SSH results.
-export type AiVaultSessionSources = {
-  getAdditionalCodexHomePaths?: () => readonly string[]
-}
+export {
+  configureAiVaultSessionSources,
+  getConfiguredAiVaultAdditionalCodexSessionsDirs,
+  getConfiguredAiVaultClaudeProjectsDirs
+} from './session-root-configuration'
+export type { AiVaultSessionSources } from './session-root-configuration'
 
 type CachedAiVaultList = {
   key: string
@@ -26,12 +28,6 @@ type CachedAiVaultList = {
 let cachedList: CachedAiVaultList | null = null
 let inflightList: Promise<AiVaultListResult> | null = null
 let inflightKey: string | null = null
-let sources: AiVaultSessionSources = {}
-
-export function configureAiVaultSessionSources(next: AiVaultSessionSources): void {
-  sources = next
-}
-
 export async function listAiVaultSessions(args?: AiVaultListArgs): Promise<AiVaultListResult> {
   // Scope paths change the result set, so they must be part of the cache key.
   const key = JSON.stringify({
@@ -49,8 +45,7 @@ export async function listAiVaultSessions(args?: AiVaultListArgs): Promise<AiVau
   }
 
   inflightKey = key
-  const additionalCodexSessionsDirs =
-    sources.getAdditionalCodexHomePaths?.().map((homePath) => join(homePath, 'sessions')) ?? []
+  const additionalCodexSessionsDirs = getConfiguredAiVaultAdditionalCodexSessionsDirs()
   inflightList = (async () =>
     scanAiVaultSessions({
       limit: args?.limit,
@@ -97,5 +92,5 @@ export function resetAiVaultSessionListCacheForTests(): void {
   cachedList = null
   inflightList = null
   inflightKey = null
-  sources = {}
+  resetAiVaultSessionRootConfigurationForTests()
 }

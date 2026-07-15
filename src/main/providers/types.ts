@@ -249,8 +249,14 @@ export type FileReadResult = {
 export type IFilesystemProvider = {
   /** Why: Spool cannot fall back to ordinary SSH file calls after binding a physical path. */
   readonly spoolVerifiedFiles?: SpoolVerifiedRemoteFilesystem
-  readDir(dirPath: string): Promise<DirEntry[]>
-  readFile(filePath: string): Promise<FileReadResult>
+  readDir(dirPath: string, options?: { limit?: number; signal?: AbortSignal }): Promise<DirEntry[]>
+  readFile(filePath: string, options?: { signal?: AbortSignal }): Promise<FileReadResult>
+  /** Why: inventory must parse large JSONL without materializing the transcript. */
+  consumeSessionInventoryJsonLines?(
+    filePath: string,
+    consumeLine: (line: string) => void,
+    options?: { signal?: AbortSignal }
+  ): Promise<void>
   readTerminalArtifact?(
     filePath: string,
     options: TerminalArtifactAccessOptions
@@ -266,7 +272,7 @@ export type IFilesystemProvider = {
   ): Promise<FileStat>
   writeFileBase64(filePath: string, contentBase64: string): Promise<void>
   writeFileBase64Chunk(filePath: string, contentBase64: string, append: boolean): Promise<void>
-  stat(filePath: string): Promise<FileStat>
+  stat(filePath: string, options?: { signal?: AbortSignal }): Promise<FileStat>
   lstat?(filePath: string): Promise<FileStat>
   deletePath(targetPath: string, recursive?: boolean): Promise<void>
   createFile(filePath: string): Promise<void>

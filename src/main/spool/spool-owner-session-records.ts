@@ -1,10 +1,5 @@
-import type { AiVaultSession } from '../../shared/ai-vault-types'
 import { normalizeExecutionHostId } from '../../shared/execution-host'
-import type {
-  SpoolHistoricalSessionCandidate,
-  SpoolOwnerHistoricalSessionRecord,
-  SpoolSessionWorktreeIdentity
-} from './spool-session-source'
+import type { SpoolOwnerHistoricalSessionRecord } from './spool-session-source'
 
 const MAX_OWNER_RECORDS = 10_000
 const MAX_TRANSCRIPT_PATH_LENGTH = 32_768
@@ -17,26 +12,8 @@ const MAX_PROVIDER_SESSION_ID_LENGTH = 512
 export class SpoolOwnerSessionRecords {
   private readonly records = new Map<string, SpoolOwnerHistoricalSessionRecord>()
 
-  remember(
-    worktree: SpoolSessionWorktreeIdentity,
-    candidate: SpoolHistoricalSessionCandidate,
-    session: AiVaultSession
-  ): boolean {
-    return this.rememberResolved({
-      ownerRecordKey: candidate.ownerRecordKey,
-      executionHostId: candidate.executionHostId,
-      worktreeInstanceId: worktree.instanceId,
-      spoolIncarnationId: worktree.spoolIncarnationId,
-      provider: candidate.provider,
-      providerSessionId: candidate.providerSessionId,
-      title: session.title,
-      transcriptPath: session.filePath,
-      resumeCommand: session.resumeCommand
-    })
-  }
-
   rememberResolved(record: SpoolOwnerHistoricalSessionRecord): boolean {
-    const accepted = normalizeRecord(record)
+    const accepted = normalizeOwnerHistoricalSessionRecord(record)
     if (!accepted) {
       return false
     }
@@ -67,13 +44,14 @@ export class SpoolOwnerSessionRecords {
   }
 }
 
-function normalizeRecord(
+export function normalizeOwnerHistoricalSessionRecord(
   record: SpoolOwnerHistoricalSessionRecord
 ): SpoolOwnerHistoricalSessionRecord | null {
   const ownerRecordKey = boundedValue(record.ownerRecordKey, MAX_IDENTIFIER_LENGTH)
   const executionHostId = normalizeExecutionHostId(
     boundedValue(record.executionHostId, MAX_IDENTIFIER_LENGTH)
   )
+  const actualHostScope = boundedValue(record.actualHostScope, MAX_IDENTIFIER_LENGTH)
   const worktreeInstanceId = boundedValue(record.worktreeInstanceId, MAX_IDENTIFIER_LENGTH)
   const spoolIncarnationId = boundedValue(record.spoolIncarnationId, MAX_IDENTIFIER_LENGTH)
   const providerSessionId = boundedValue(record.providerSessionId, MAX_PROVIDER_SESSION_ID_LENGTH)
@@ -83,6 +61,7 @@ function normalizeRecord(
   if (
     !ownerRecordKey ||
     !executionHostId ||
+    !actualHostScope ||
     !worktreeInstanceId ||
     !spoolIncarnationId ||
     !providerSessionId ||
@@ -96,6 +75,7 @@ function normalizeRecord(
     ...record,
     ownerRecordKey,
     executionHostId,
+    actualHostScope,
     worktreeInstanceId,
     spoolIncarnationId,
     providerSessionId,

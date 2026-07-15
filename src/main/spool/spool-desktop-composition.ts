@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { join } from 'node:path'
 import { SPOOL_INGRESS_PORT, type SpoolOsFamily } from '../../shared/spool/spool-wire-contract'
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
@@ -33,7 +34,7 @@ import { SpoolTicketAuthority } from './spool-ticket-authority'
 import { DefaultTailnetPeerDirectory } from './tailnet-peer-directory'
 import { TailscaleCommandAdapter } from './tailscale-command-adapter'
 import { SpoolVisibilityDenyJournal } from './spool-visibility-deny-journal'
-import { SpoolWorktreeIncarnation } from './spool-worktree-incarnation'
+import { SpoolWorktreeIncarnation, type SpoolOwnerWorktree } from './spool-worktree-incarnation'
 import { SpoolActualHostWorktreeIncarnationHost } from './spool-worktree-incarnation-host'
 import { SpoolWorktreeVisibility } from './spool-worktree-visibility'
 import {
@@ -77,16 +78,18 @@ export function createSpoolDesktopComposition(
   const pairedRuntimeSessionReader = new OrcaSpoolPairedRuntimeSessionReader({
     userDataPath: options.userDataPath
   })
+  const resolveLocalWslDistro = (target: SpoolOwnerWorktree): string | null => {
+    const repo = options.store.getRepo(target.repoId)
+    if (!repo || repo.connectionId) {
+      return null
+    }
+    return getLocalProjectWorktreeGitOptions(options.store, repo).wslDistro ?? null
+  }
   const incarnationHost = new SpoolActualHostWorktreeIncarnationHost({
     pairedRuntimeAdapter,
-    resolveLocalWslDistro: (target) => {
-      const repo = options.store.getRepo(target.repoId)
-      if (!repo || repo.connectionId) {
-        return null
-      }
-      return getLocalProjectWorktreeGitOptions(options.store, repo).wslDistro ?? null
-    }
+    resolveLocalWslDistro
   })
+  const incarnation = new SpoolWorktreeIncarnation(incarnationHost)
   const roots = new SpoolActualHostSessionRootMatcher(incarnationHost)
   host = createOrcaSpoolHostAdapter({
     store: options.store,
@@ -98,14 +101,15 @@ export function createSpoolDesktopComposition(
   const sessionSource = new SpoolMobileVaultSessionSource(
     host.sessionReader,
     host.sessionRecords,
-    host.continuedSessions
+    host.continuedSessions,
+    resolveLocalWslDistro
   )
   const sessions = new SpoolSessionCatalog(
     provenance,
     sessionSource,
-    new SpoolCanonicalHistoricalSessionConsistency(catalog, roots)
+    new SpoolCanonicalHistoricalSessionConsistency(catalog, incarnation, roots)
   )
-  const attestor = new SpoolLegacySessionAttestor(provenance, sessionSource, catalog, roots)
+  const attestor = new SpoolLegacySessionAttestor(provenance, sessionSource, roots)
   const visibility = new SpoolWorktreeVisibility({
     store: options.store,
     denyJournal: new SpoolVisibilityDenyJournal(
@@ -113,10 +117,17 @@ export function createSpoolDesktopComposition(
       options.profileId
     ),
     catalog,
-    incarnation: new SpoolWorktreeIncarnation(incarnationHost),
-    attestFirstPublication: async (entries) => {
-      await Promise.all(
-        entries.map((entry) => attestor.attestFirstPublication(entry.target, entry.markerId))
+    incarnation,
+    prepareFirstPublication: async (entries, registeredRoots, refreshInstanceIds) => {
+      return await attestor.prepareFirstPublications(
+        entries.map((entry) => ({
+          target: entry.target,
+          spoolIncarnationId: entry.markerId,
+          root: entry.root,
+          forceRefresh: refreshInstanceIds.has(entry.target.instanceId)
+        })),
+        randomUUID(),
+        registeredRoots
       )
     }
   })

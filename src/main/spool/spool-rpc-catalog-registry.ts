@@ -49,9 +49,9 @@ export function createSpoolCatalogRpcMethods(
       access: 'catalog-read',
       bind: (params, context) =>
         bindCatalogSessionPage(catalog, CatalogSessionPageParams.parse(params), context),
-      execute: (bound) => {
+      execute: (bound, context) => {
         const page = asCatalogSessionPageInvocation(bound)
-        return page.catalog.sessionPage(page.request)
+        return page.catalog.sessionPage(page.request, context.signal)
       },
       project: identityProjector
     }

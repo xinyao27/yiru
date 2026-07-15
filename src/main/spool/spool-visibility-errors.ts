@@ -1,3 +1,5 @@
+import { isPublicationResourceLimit } from './spool-publication-errors'
+
 export type SpoolVisibilityErrorCode =
   | 'incarnation-changed'
   | 'not-initialized'
@@ -16,4 +18,11 @@ export class SpoolVisibilityError extends Error {
     super(`spool_visibility_${code}`, options)
     this.name = 'SpoolVisibilityError'
   }
+}
+
+export function rethrowPublicationResourceLimit(error: unknown): never {
+  if (isPublicationResourceLimit(error)) {
+    throw new SpoolVisibilityError('resource-limit', { cause: error })
+  }
+  throw error
 }

@@ -1,16 +1,15 @@
-import { createHash } from 'node:crypto'
-import type { AiVaultSession } from '../../shared/ai-vault-types'
 import { parseExecutionHostId } from '../../shared/execution-host'
 import type { RemoteRuntimeSubscription } from '../../shared/remote-runtime-client'
-import type { RuntimeMobileSessionTerminalClientTab } from '../../shared/runtime-types'
 import {
-  SpoolPairedRuntimeHistoricalSessionsResponseSchema,
-  SpoolPairedRuntimeListHistoricalSessionsParamsSchema,
+  SpoolPairedRuntimeHistoricalSessionPageResponseSchema,
+  SpoolPairedRuntimeListHistoricalSessionPageParamsSchema,
   SpoolPairedRuntimeListLiveSessionsParamsSchema,
   SpoolPairedRuntimeLiveSessionsResponseSchema,
+  SpoolPairedRuntimeReleaseHistoricalSessionPageParamsSchema,
   SpoolPairedRuntimeSessionChangedEventSchema,
   SpoolPairedRuntimeSubscribeSessionChangesParamsSchema
 } from '../../shared/spool/spool-paired-runtime-session-contract'
+import { SPOOL_SESSION_PAGE_REQUEST_TIMEOUT_MS } from '../../shared/spool/spool-resource-limits'
 import {
   callRuntimeEnvironmentExistingRoute,
   subscribeRuntimeEnvironmentExistingRoute
@@ -20,6 +19,10 @@ import type {
   SpoolExecutionHostSessionReader,
   SpoolExecutionHostSessionReadRequest
 } from './spool-session-source'
+import {
+  projectPairedRuntimeHistoricalSession,
+  projectPairedRuntimeLiveTab
+} from './spool-paired-runtime-session-projection'
 
 const DEFAULT_TIMEOUT_MS = 15_000
 
@@ -40,12 +43,12 @@ export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSe
 
   constructor(private readonly options: OrcaSpoolPairedRuntimeSessionReaderOptions) {}
 
-  async listMobileSessionTabs(request: SpoolExecutionHostSessionReadRequest) {
+  async listMobileSessionTabs(request: SpoolExecutionHostSessionReadRequest, signal?: AbortSignal) {
     const environmentId = requireRuntimeEnvironment(request)
     const params = SpoolPairedRuntimeListLiveSessionsParamsSchema.parse({
       target: sessionTarget(request)
     })
-    const response = await this.call(environmentId, 'spool.host.listLiveSessions', params)
+    const response = await this.call(environmentId, 'spool.host.listLiveSessions', params, signal)
     if (!response.ok) {
       throw new SpoolExecutionError('resource_unavailable')
     }
@@ -57,7 +60,9 @@ export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSe
       throw new SpoolExecutionError(envelope.data.code)
     }
     this.ensureSessionChangesSubscription(environmentId, request)
-    const tabs = envelope.data.result.sessions.map((session) => projectLiveTab(session))
+    const tabs = envelope.data.result.sessions.map((session) =>
+      projectPairedRuntimeLiveTab(session, request.worktreeInstanceId)
+    )
     return {
       worktree: request.worktreeId,
       publicationEpoch: request.spoolIncarnationId,
@@ -69,17 +74,31 @@ export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSe
     }
   }
 
-  async listAiVaultSessions(request: SpoolExecutionHostSessionReadRequest) {
+  async listAiVaultSessionPage(
+    request: SpoolExecutionHostSessionReadRequest,
+    cursor: string | null,
+    signal?: AbortSignal
+  ) {
     const environmentId = requireRuntimeEnvironment(request)
-    const params = SpoolPairedRuntimeListHistoricalSessionsParamsSchema.parse({
+    const params = SpoolPairedRuntimeListHistoricalSessionPageParamsSchema.parse({
       target: sessionTarget(request),
-      purpose: request.purpose
+      purpose: request.purpose,
+      inventoryScope: request.inventoryScope,
+      cursor
     })
-    const response = await this.call(environmentId, 'spool.host.listHistoricalSessions', params)
+    const response = await this.call(
+      environmentId,
+      'spool.host.listHistoricalSessionPage',
+      params,
+      signal,
+      this.options.timeoutMs ?? SPOOL_SESSION_PAGE_REQUEST_TIMEOUT_MS
+    )
     if (!response.ok) {
       throw new SpoolExecutionError('resource_unavailable')
     }
-    const envelope = SpoolPairedRuntimeHistoricalSessionsResponseSchema.safeParse(response.result)
+    const envelope = SpoolPairedRuntimeHistoricalSessionPageResponseSchema.safeParse(
+      response.result
+    )
     if (!envelope.success) {
       throw new SpoolExecutionError('resource_unavailable')
     }
@@ -90,10 +109,36 @@ export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSe
     const result = envelope.data.result
     return {
       sessions: result.sessions.map((session) =>
-        projectHistoricalSession(request, result.scannedAt, session)
+        projectPairedRuntimeHistoricalSession(request, result.scannedAt, session)
       ),
-      issues: [],
+      nextCursor: result.nextCursor,
       scannedAt: result.scannedAt
+    }
+  }
+
+  async releaseAiVaultSessionPage(
+    request: SpoolExecutionHostSessionReadRequest,
+    cursor: string | null
+  ): Promise<void> {
+    const environmentId = requireRuntimeEnvironment(request)
+    const params = SpoolPairedRuntimeReleaseHistoricalSessionPageParamsSchema.parse({
+      target: sessionTarget(request),
+      purpose: request.purpose,
+      inventoryScope: request.inventoryScope,
+      cursor
+    })
+    const response = await this.call(
+      environmentId,
+      'spool.host.releaseHistoricalSessionPage',
+      params
+    )
+    if (
+      !response.ok ||
+      !response.result ||
+      typeof response.result !== 'object' ||
+      (response.result as { ok?: unknown }).ok !== true
+    ) {
+      throw new SpoolExecutionError('resource_unavailable')
     }
   }
 
@@ -112,14 +157,21 @@ export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSe
     }
   }
 
-  private async call(environmentId: string, method: string, params: unknown) {
+  private async call(
+    environmentId: string,
+    method: string,
+    params: unknown,
+    signal?: AbortSignal,
+    timeoutMs = this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS
+  ) {
     try {
       return await callRuntimeEnvironmentExistingRoute(
         this.options.userDataPath,
         environmentId,
         method,
         params,
-        this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS
+        timeoutMs,
+        { signal }
       )
     } catch (error) {
       if (error instanceof SpoolExecutionError) {
@@ -235,81 +287,4 @@ function sessionChangesBindingKey(environmentId: string, worktreeId: string): st
 
 function sessionTargetIdentity(request: SpoolExecutionHostSessionReadRequest): string {
   return JSON.stringify([request.worktreeInstanceId, request.spoolIncarnationId])
-}
-
-function projectLiveTab(session: {
-  terminalRef: string
-  title: string
-  provider: 'claude' | 'codex' | 'other'
-  providerSessionId: string | null
-}): RuntimeMobileSessionTerminalClientTab {
-  const id = `spool-paired-${shortHash(session.terminalRef)}`
-  const knownProvider = session.provider === 'other' ? null : session.provider
-  return {
-    type: 'terminal',
-    id,
-    title: session.title,
-    parentTabId: id,
-    leafId: id,
-    isActive: false,
-    status: 'ready',
-    terminal: session.terminalRef,
-    ...(knownProvider ? { launchAgent: knownProvider } : {}),
-    ...(knownProvider && session.providerSessionId
-      ? {
-          agentStatus: {
-            state: 'done',
-            prompt: '',
-            updatedAt: 0,
-            stateStartedAt: 0,
-            agentType: knownProvider,
-            paneKey: id,
-            stateHistory: [],
-            providerSession: { key: 'session_id', id: session.providerSessionId }
-          }
-        }
-      : {})
-  }
-}
-
-function projectHistoricalSession(
-  request: SpoolExecutionHostSessionReadRequest,
-  scannedAt: string,
-  session: {
-    sessionRef: string
-    title: string
-    provider: 'claude' | 'codex'
-    providerSessionId: string
-    cwd: string | null
-    transcriptPath: string
-    resumeCommand: string
-  }
-): AiVaultSession {
-  return {
-    id: session.sessionRef,
-    executionHostId: request.executionHostId,
-    agent: session.provider,
-    sessionId: session.providerSessionId,
-    title: session.title,
-    cwd: session.cwd,
-    branch: null,
-    model: null,
-    // Why: these fields are consumed into the owner-only record store before projection.
-    filePath: session.transcriptPath,
-    codexHome: null,
-    createdAt: null,
-    updatedAt: null,
-    modifiedAt: scannedAt,
-    messageCount: 0,
-    totalTokens: 0,
-    previewMessages: [],
-    queuedMessageCount: 0,
-    subagentTranscriptCount: 0,
-    resumeCommand: session.resumeCommand,
-    subagent: null
-  }
-}
-
-function shortHash(value: string): string {
-  return createHash('sha256').update(value).digest('base64url').slice(0, 22)
 }

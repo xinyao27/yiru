@@ -72,6 +72,7 @@ import type { AutomationService } from '../automations/service'
 import type { AgentAwakeService } from '../agent-awake-service'
 import type { CrashReportStore } from '../crash-reporting/crash-report-store'
 import type { KeybindingService } from '../keybindings/keybinding-service'
+import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session-root-configuration'
 import {
   getSavedRuntimeAiVaultHostInfos,
   scanRuntimeAiVaultSessions
@@ -82,6 +83,9 @@ let registered = false
 type CoreHandlerLifecycleOptions = {
   onBeforeRelaunch?: () => void | Promise<void>
   getAdditionalAiVaultCodexHomePaths?: () => readonly string[]
+  resolveAiVaultClaudeProjectsDirs?: (
+    target: AiVaultSessionRuntimeTarget
+  ) => Promise<readonly string[]>
 }
 
 export function registerCoreHandlers(
@@ -183,6 +187,7 @@ export function registerCoreHandlers(
   registerEphemeralVmHandlers(store)
   registerAiVaultHandlers({
     getAdditionalCodexHomePaths: lifecycleOptions.getAdditionalAiVaultCodexHomePaths,
+    resolveClaudeProjectsDirs: lifecycleOptions.resolveAiVaultClaudeProjectsDirs,
     getActiveRuntimeAiVaultHostInfos: () =>
       getSavedRuntimeAiVaultHostInfos(app.getPath('userData')),
     scanRuntimeAiVaultSessions: async (environmentId, args, options) =>

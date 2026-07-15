@@ -20,6 +20,15 @@ export type SpoolVisibilityStore = Pick<
   'commitSpoolVisibility' | 'getAllWorktreeMeta' | 'getWorktreeMeta'
 >
 
+export type SpoolPreparedPublicationPersistence = {
+  persistProofs(): void
+  completeAttestation(): void
+}
+
+export function createEmptySpoolPublicationPersistence(): SpoolPreparedPublicationPersistence {
+  return { persistProofs: () => {}, completeAttestation: () => {} }
+}
+
 export class SpoolVisibilityPersistenceTransitions {
   constructor(
     private readonly store: SpoolVisibilityStore,
@@ -53,9 +62,13 @@ export class SpoolVisibilityPersistenceTransitions {
     })
   }
 
-  commitPublic(entries: readonly PreparedSpoolPublication[]): void {
+  commitPublic(
+    entries: readonly PreparedSpoolPublication[],
+    preparedPersistence: SpoolPreparedPublicationPersistence
+  ): void {
     const instanceIds = entries.map((entry) => entry.target.instanceId)
     try {
+      preparedPersistence.persistProofs()
       // Why: a publication is not observable until both durable metadata and
       // any older crash-deny agree that this instance is Public.
       this.store.commitSpoolVisibility(
@@ -67,6 +80,7 @@ export class SpoolVisibilityPersistenceTransitions {
         }))
       )
       this.denyJournal.remove(instanceIds)
+      preparedPersistence.completeAttestation()
     } catch (error) {
       this.publicationState.suspend(instanceIds, 'incarnation-unavailable')
       throw new SpoolVisibilityError('persistence-failed', { cause: error })

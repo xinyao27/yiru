@@ -43,6 +43,7 @@ export function rejectSharedControlPendingRequest(
   }
   pendingRequests.delete(requestId)
   clearTimeout(pending.timeout)
+  removePendingAbortListener(pending)
   pending.reject(error)
 }
 
@@ -57,6 +58,7 @@ export function resolveSharedControlPendingResponse(
   }
   pendingRequests.delete(requestId)
   clearTimeout(pending.timeout)
+  removePendingAbortListener(pending)
   pending.resolve(response)
 }
 
@@ -97,8 +99,15 @@ export function rejectAllSharedControlPendingRequests(
   const closeError = error ?? remoteRuntimeUnavailableError()
   for (const [requestId, pending] of pendingRequests) {
     clearTimeout(pending.timeout)
+    removePendingAbortListener(pending)
     pendingRequests.delete(requestId)
     pending.reject(closeError)
+  }
+}
+
+function removePendingAbortListener(pending: SharedControlPendingRequest<unknown>): void {
+  if (pending.signal && pending.abortListener) {
+    pending.signal.removeEventListener('abort', pending.abortListener)
   }
 }
 

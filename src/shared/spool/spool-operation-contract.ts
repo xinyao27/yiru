@@ -252,17 +252,23 @@ export type SpoolTerminalSubscriptionEvent =
 export type SpoolSubscriptionEvent<TOperation extends SpoolSubscriptionOperation> =
   TOperation extends SpoolTerminalSubscribeOperation ? SpoolTerminalSubscriptionEvent : never
 
+const SPOOL_MUTATION_OPERATION_KINDS: ReadonlySet<SpoolExecutionOperation['kind']> = new Set([
+  'files.write',
+  'files.mkdir',
+  'files.rename',
+  'files.delete',
+  'git.stage',
+  'git.unstage',
+  'git.commit',
+  'terminal.input',
+  'terminal.resize',
+  'session.continue'
+])
+
+export function isSpoolMutationKind(kind: SpoolExecutionOperation['kind']): boolean {
+  return SPOOL_MUTATION_OPERATION_KINDS.has(kind)
+}
+
 export function isSpoolMutationOperation(operation: SpoolExecutionOperation): boolean {
-  return (
-    operation.kind === 'files.write' ||
-    operation.kind === 'files.mkdir' ||
-    operation.kind === 'files.rename' ||
-    operation.kind === 'files.delete' ||
-    operation.kind === 'git.stage' ||
-    operation.kind === 'git.unstage' ||
-    operation.kind === 'git.commit' ||
-    operation.kind === 'terminal.input' ||
-    operation.kind === 'terminal.resize' ||
-    operation.kind === 'session.continue'
-  )
+  return isSpoolMutationKind(operation.kind)
 }

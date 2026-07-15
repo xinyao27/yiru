@@ -1,5 +1,8 @@
 import { z } from 'zod'
-import type { SpoolExecutionOperation } from '../../shared/spool/spool-operation-contract'
+import {
+  isSpoolMutationKind,
+  type SpoolExecutionOperation
+} from '../../shared/spool/spool-operation-contract'
 import type { SpoolAccessAuthority } from './spool-access-authority'
 import type { SpoolExecutionGateway } from './spool-execution-gateway'
 import type { SpoolSessionCatalog } from './spool-session-catalog'
@@ -204,14 +207,7 @@ function executionMethods(
 }
 
 function executionMethod(name: ExecutionMethodName, dependencies: SpoolRpcRegistryDependencies) {
-  const mutation =
-    name === 'files.write' ||
-    name === 'files.mkdir' ||
-    name === 'files.rename' ||
-    name === 'files.delete' ||
-    name === 'git.stage' ||
-    name === 'git.unstage' ||
-    name === 'git.commit'
+  const mutation = isSpoolMutationKind(name)
   return {
     name,
     schema: ExecutionSchemas[name],

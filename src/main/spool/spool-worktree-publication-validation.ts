@@ -1,30 +1,54 @@
-import type { ExecutionHostId } from '../../shared/execution-host'
+import { mapWithConcurrency } from '../../shared/map-with-concurrency'
+import {
+  SPOOL_PUBLICATION_MAX_REGISTERED_REPOS,
+  SPOOL_PUBLICATION_ROOT_RESOLUTION_CONCURRENCY
+} from './spool-publication-inventory-limits'
+import {
+  SpoolOwnerWorktreeCatalogError,
+  SpoolPublicationValidationError,
+  isPublicationResourceLimit
+} from './spool-publication-errors'
+import {
+  captureSpoolRegisteredInventory,
+  createEmptySpoolPublicationValidation,
+  sameSpoolOwnerWorktreeSnapshotTarget
+} from './spool-publication-snapshot-guard'
 import type {
   SpoolWorktreeIncarnation,
   SpoolOwnerWorktree,
-  SpoolWorktreeIncarnationUnavailableReason,
+  SpoolRegisteredWorktreeRoot,
   SpoolWorktreeRootComparison
 } from './spool-worktree-incarnation'
-import { haveUniqueSpoolWorktreeIdentities } from './spool-worktree-incarnation'
+import type {
+  SpoolOwnerWorktreeCatalog,
+  SpoolOwnerWorktreeCatalogInventory
+} from './spool-owner-worktree-catalog-contract'
+import {
+  sameSpoolWorktreeRoot,
+  unavailableSourceAffectsTarget,
+  unresolvedRegisteredRootReason,
+  type SpoolRegisteredRootResolution
+} from './spool-publication-root-availability'
+import {
+  addUnavailableSpoolPublication,
+  assertSpoolPublicationCandidateCapacity,
+  assertSpoolWorktreeInventoryCapacity,
+  assertUniqueSpoolPublicationTargets,
+  spoolPublicationTargetIdentityKey,
+  type UnavailableSpoolPublication
+} from './spool-publication-validation-guards'
 
-export type SpoolOwnerWorktreeCatalogInventory = {
-  worktrees: readonly SpoolOwnerWorktree[]
-  unavailableExecutionHostIds: readonly ExecutionHostId[]
-}
+export {
+  SpoolOwnerWorktreeCatalogError,
+  SpoolPublicationValidationError,
+  isPublicationResourceLimit
+} from './spool-publication-errors'
 
-export type SpoolOwnerWorktreeCatalog = {
-  getWorktree(worktreeId: string): Promise<SpoolOwnerWorktree | null>
-  getWorktreeByInstance(instanceId: string): Promise<SpoolOwnerWorktree | null>
-  listProjectWorktrees(projectId: string): Promise<readonly SpoolOwnerWorktree[]>
-  inspectRegisteredWorktrees(): Promise<SpoolOwnerWorktreeCatalogInventory>
-}
-
-export class SpoolOwnerWorktreeCatalogError extends Error {
-  constructor(readonly code: 'ambiguous' | 'unavailable') {
-    super(`spool_worktree_catalog_${code}`)
-    this.name = 'SpoolOwnerWorktreeCatalogError'
-  }
-}
+export type {
+  SpoolOwnerWorktreeCatalog,
+  SpoolOwnerWorktreeCatalogInventory,
+  SpoolUnavailableCatalogSource
+} from './spool-owner-worktree-catalog-contract'
 
 export type SpoolPublicationCandidate = {
   target: SpoolOwnerWorktree
@@ -40,23 +64,15 @@ export type PreparedSpoolPublication = {
 
 export type ReplacedSpoolPublication = PreparedSpoolPublication
 
-export type UnavailableSpoolPublication = {
-  instanceId: string
-  reason: SpoolWorktreeIncarnationUnavailableReason
-}
+export type { UnavailableSpoolPublication } from './spool-publication-validation-guards'
 
 export type SpoolPublicationValidation = {
   ready: readonly PreparedSpoolPublication[]
+  registeredInventory: SpoolOwnerWorktreeCatalogInventory
+  registeredRoots: readonly SpoolRegisteredWorktreeRoot[]
   replaced: readonly ReplacedSpoolPublication[]
   unavailable: readonly UnavailableSpoolPublication[]
   overlappingInstanceIds: readonly string[]
-}
-
-export class SpoolPublicationValidationError extends Error {
-  constructor(readonly code: 'invalid-catalog') {
-    super(`spool_publication_${code}`)
-    this.name = 'SpoolPublicationValidationError'
-  }
 }
 
 /** Resolves a publication batch once and proves it against every registered root. */
@@ -69,15 +85,22 @@ export class SpoolWorktreePublicationValidator {
   async validate(
     candidates: readonly SpoolPublicationCandidate[]
   ): Promise<SpoolPublicationValidation> {
-    assertUniqueTargets(candidates.map((candidate) => candidate.target))
-    const resolutions = await Promise.all(
-      candidates.map(async (candidate) => ({
+    assertSpoolPublicationCandidateCapacity(candidates.length)
+    const capturedCandidates = candidates.map((candidate) => ({
+      ...candidate,
+      target: { ...candidate.target }
+    }))
+    assertUniqueSpoolPublicationTargets(capturedCandidates.map((candidate) => candidate.target))
+    const resolutions = await mapWithConcurrency(
+      capturedCandidates,
+      SPOOL_PUBLICATION_ROOT_RESOLUTION_CONCURRENCY,
+      async (candidate) => ({
         candidate,
         resolution: await this.incarnation.preparePublication(
           candidate.target,
           candidate.expectedMarkerId
         )
-      }))
+      })
     )
     const prepared: PreparedSpoolPublication[] = []
     const replaced: ReplacedSpoolPublication[] = []
@@ -107,43 +130,56 @@ export class SpoolWorktreePublicationValidator {
       }
     }
     if (prepared.length === 0) {
-      return { ready: [], replaced, unavailable, overlappingInstanceIds: [] }
+      return createEmptySpoolPublicationValidation(replaced, unavailable)
     }
 
     const inventory = await this.readRegisteredOrMarkUnavailable(prepared, unavailable)
     if (!inventory) {
-      return { ready: [], replaced, unavailable, overlappingInstanceIds: [] }
+      return createEmptySpoolPublicationValidation(replaced, unavailable)
     }
-    const unavailableHosts = new Set(inventory.unavailableExecutionHostIds)
     for (const entry of prepared) {
-      if (unavailableHosts.has(entry.target.executionHostId)) {
-        addUnavailable(unavailable, entry.target.instanceId, 'host-unavailable')
+      if (
+        inventory.unavailableSources.some((source) =>
+          unavailableSourceAffectsTarget(source, entry.target, entry.root.scopeKey)
+        )
+      ) {
+        addUnavailableSpoolPublication(unavailable, entry.target.instanceId, 'host-unavailable')
       }
     }
     const roots = await this.resolveRegisteredRoots(inventory.worktrees, prepared)
-    for (const unresolved of roots.filter((entry) => entry.root === null)) {
-      for (const candidate of prepared) {
-        if (candidate.target.executionHostId === unresolved.target.executionHostId) {
-          // Why: an unknown root can overlap only roots on its actual execution host.
-          addUnavailable(
-            unavailable,
-            candidate.target.instanceId,
-            unresolved.reason ?? 'ambiguous-root'
-          )
-        }
+    const registeredRoots = roots.flatMap((entry) =>
+      entry.root ? [{ target: entry.target, root: entry.root }] : []
+    )
+    for (const candidate of prepared) {
+      const reason = unresolvedRegisteredRootReason(
+        candidate.target.executionHostId,
+        candidate.root.scopeKey,
+        roots
+      )
+      if (reason) {
+        // Why: an unknown root can overlap only roots on its actual execution host.
+        addUnavailableSpoolPublication(unavailable, candidate.target.instanceId, reason)
       }
     }
 
-    const registeredInstances = new Set(inventory.worktrees.map(targetIdentityKey))
+    const registeredByInstance = new Map(
+      inventory.worktrees.map(
+        (target) => [spoolPublicationTargetIdentityKey(target), target] as const
+      )
+    )
     const overlapping = new Set<string>()
     for (const candidate of prepared) {
-      if (!registeredInstances.has(targetIdentityKey(candidate.target))) {
-        addUnavailable(unavailable, candidate.target.instanceId, 'ambiguous-root')
+      const registered = registeredByInstance.get(
+        spoolPublicationTargetIdentityKey(candidate.target)
+      )
+      if (!registered || !sameSpoolOwnerWorktreeSnapshotTarget(candidate.target, registered)) {
+        addUnavailableSpoolPublication(unavailable, candidate.target.instanceId, 'ambiguous-root')
         continue
       }
       for (const entry of roots) {
         if (
-          targetIdentityKey(entry.target) !== targetIdentityKey(candidate.target) &&
+          spoolPublicationTargetIdentityKey(entry.target) !==
+            spoolPublicationTargetIdentityKey(candidate.target) &&
           entry.root &&
           this.incarnation.rootsOverlap(candidate.root, entry.root)
         ) {
@@ -161,6 +197,8 @@ export class SpoolWorktreePublicationValidator {
     const ready = await this.retainStableCandidates(overlapReady, replaced, unavailable)
     return {
       ready,
+      registeredInventory: inventory,
+      registeredRoots,
       replaced,
       unavailable,
       overlappingInstanceIds: [...overlapping]
@@ -179,19 +217,19 @@ export class SpoolWorktreePublicationValidator {
         candidate.markerId
       )
       if (resolution.status === 'unavailable') {
-        addUnavailable(unavailable, candidate.target.instanceId, resolution.reason)
+        addUnavailableSpoolPublication(unavailable, candidate.target.instanceId, resolution.reason)
       } else if (resolution.status === 'replaced') {
         replaced.push({
           target: candidate.target,
           markerId: resolution.markerId,
           root: resolution.root
         })
-      } else if (rootsEqual(candidate.root, resolution.root)) {
+      } else if (sameSpoolWorktreeRoot(candidate.root, resolution.root)) {
         stable.push(candidate)
       } else {
         // Why: a root that changed during overlap inspection was never proven
         // against the registered-root set used for this publication.
-        addUnavailable(unavailable, candidate.target.instanceId, 'ambiguous-root')
+        addUnavailableSpoolPublication(unavailable, candidate.target.instanceId, 'ambiguous-root')
       }
     }
     return stable
@@ -203,16 +241,23 @@ export class SpoolWorktreePublicationValidator {
   ): Promise<SpoolOwnerWorktreeCatalogInventory | null> {
     try {
       const inventory = await this.catalog.inspectRegisteredWorktrees()
-      assertUniqueTargets(inventory.worktrees)
-      return inventory
+      assertSpoolWorktreeInventoryCapacity(inventory.worktrees.length)
+      if (inventory.unavailableSources.length > SPOOL_PUBLICATION_MAX_REGISTERED_REPOS) {
+        throw new SpoolPublicationValidationError('resource-limit')
+      }
+      assertUniqueSpoolPublicationTargets(inventory.worktrees)
+      return captureSpoolRegisteredInventory(inventory)
     } catch (error) {
+      if (isPublicationResourceLimit(error)) {
+        throw error
+      }
       const reason =
         (error instanceof SpoolOwnerWorktreeCatalogError && error.code === 'ambiguous') ||
         error instanceof SpoolPublicationValidationError
           ? 'ambiguous-root'
           : 'host-unavailable'
       for (const entry of prepared) {
-        addUnavailable(unavailable, entry.target.instanceId, reason)
+        addUnavailableSpoolPublication(unavailable, entry.target.instanceId, reason)
       }
       return null
     }
@@ -221,59 +266,28 @@ export class SpoolWorktreePublicationValidator {
   private async resolveRegisteredRoots(
     registered: readonly SpoolOwnerWorktree[],
     prepared: readonly PreparedSpoolPublication[]
-  ): Promise<
-    readonly {
-      target: SpoolOwnerWorktree
-      root: SpoolWorktreeRootComparison | null
-      reason?: SpoolWorktreeIncarnationUnavailableReason
-    }[]
-  > {
+  ): Promise<readonly SpoolRegisteredRootResolution[]> {
     const preparedByTarget = new Map(
-      prepared.map((entry) => [targetIdentityKey(entry.target), entry] as const)
+      prepared.map((entry) => [spoolPublicationTargetIdentityKey(entry.target), entry] as const)
     )
-    return await Promise.all(
-      registered.map(async (target) => {
-        const candidate = preparedByTarget.get(targetIdentityKey(target))
+    return await mapWithConcurrency(
+      registered,
+      SPOOL_PUBLICATION_ROOT_RESOLUTION_CONCURRENCY,
+      async (target) => {
+        const candidate = preparedByTarget.get(spoolPublicationTargetIdentityKey(target))
         if (candidate) {
           return { target, root: candidate.root }
         }
         const resolved = await this.incarnation.resolveRoot(target)
         return resolved.status === 'resolved'
           ? { target, root: resolved.root }
-          : { target, root: null, reason: resolved.reason }
-      })
+          : {
+              target,
+              root: null,
+              reason: resolved.reason,
+              ...(resolved.actualHostScope ? { actualHostScope: resolved.actualHostScope } : {})
+            }
+      }
     )
   }
-}
-
-function assertUniqueTargets(targets: readonly SpoolOwnerWorktree[]): void {
-  if (!haveUniqueSpoolWorktreeIdentities(targets)) {
-    throw new SpoolPublicationValidationError('invalid-catalog')
-  }
-}
-
-function addUnavailable(
-  unavailable: UnavailableSpoolPublication[],
-  instanceId: string,
-  reason: SpoolWorktreeIncarnationUnavailableReason
-): void {
-  if (!unavailable.some((entry) => entry.instanceId === instanceId)) {
-    unavailable.push({ instanceId, reason })
-  }
-}
-
-function targetIdentityKey(target: SpoolOwnerWorktree): string {
-  return `${target.worktreeId}\0${target.instanceId}`
-}
-
-function rootsEqual(
-  left: SpoolWorktreeRootComparison,
-  right: SpoolWorktreeRootComparison
-): boolean {
-  return (
-    left.scopeKey === right.scopeKey &&
-    left.rootKey === right.rootKey &&
-    left.ancestorKeys.length === right.ancestorKeys.length &&
-    left.ancestorKeys.every((key, index) => key === right.ancestorKeys[index])
-  )
 }

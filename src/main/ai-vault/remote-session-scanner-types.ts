@@ -29,6 +29,12 @@ export type RemoteSessionSource = {
     content: string,
     context: RemoteScannerContext
   ) => Promise<AiVaultSession | null>
+  /** Why: SSH inventory cannot inherit the ordinary 10 MiB buffered preview limit. */
+  parseIncrementally?: (
+    file: FileWithMtime,
+    context: RemoteScannerContext,
+    signal: AbortSignal
+  ) => Promise<AiVaultSession | null>
 }
 
 export type RemoteSessionCandidate = {

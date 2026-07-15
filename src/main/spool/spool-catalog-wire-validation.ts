@@ -79,9 +79,7 @@ function isWorktree(value: unknown, counts: CatalogCounts): value is SpoolWorktr
     (record.branch === null || isLabel(record.branch)) &&
     Array.isArray(record.sessions) &&
     record.sessions.length === 0 &&
-    record.sessions.length <= SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE &&
-    isOwnerSessionCatalogState(record.sessionCatalog) &&
-    record.sessions.every(isSession)
+    isInitialSessionCatalogState(record.sessionCatalog)
   )
 }
 
@@ -103,13 +101,14 @@ export function isSpoolSessionCatalogPage(
     record.worktreeRef === expected.worktreeRef &&
     record.shareEpoch === expected.shareEpoch &&
     Array.isArray(record.sessions) &&
-    record.sessions.length > 0 &&
     record.sessions.length <= SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE &&
     record.sessions.every(isSession) &&
-    isOwnerSessionCatalogState(record.sessionCatalog) &&
-    ((record.sessionCatalog as SpoolSessionCatalogPageState).status !== 'loading' ||
-      record.sessions.length > 0)
+    isOwnerSessionCatalogState(record.sessionCatalog)
   )
+}
+
+function isInitialSessionCatalogState(value: unknown): value is SpoolSessionCatalogPageState {
+  return isSessionCatalogState(value) && value.status === 'loading'
 }
 
 function isOwnerSessionCatalogState(value: unknown): value is SpoolSessionCatalogPageState {

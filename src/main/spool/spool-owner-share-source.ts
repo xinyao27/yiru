@@ -3,13 +3,13 @@ import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import type {
   SpoolCatalogWorktreeDescription,
   SpoolShareCatalogSource
-} from './spool-share-catalog'
+} from './spool-share-catalog-source'
 import type { SpoolSessionCatalog } from './spool-session-catalog'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-visibility'
 
 type SpoolDescriptionRuntime = Pick<OrcaRuntimeService, 'showManagedWorktree' | 'onClientEvent'>
 
-/** Joins owner metadata with the sanitized SessionCatalog at request time. */
+/** Projects owner metadata and delegates session inventory to the lazy catalog. */
 export class SpoolOwnerShareSource implements SpoolShareCatalogSource {
   constructor(
     private readonly store: Store,
@@ -20,10 +20,7 @@ export class SpoolOwnerShareSource implements SpoolShareCatalogSource {
   async describeWorktree(
     instance: SpoolPublicWorktreeInstance
   ): Promise<SpoolCatalogWorktreeDescription | null> {
-    const [worktree, sessions] = await Promise.all([
-      this.runtime.showManagedWorktree(`id:${instance.worktreeId}`),
-      this.sessions.listSessions(instance)
-    ])
+    const worktree = await this.runtime.showManagedWorktree(`id:${instance.worktreeId}`)
     if (
       worktree.id !== instance.worktreeId ||
       worktree.instanceId !== instance.instanceId ||
@@ -42,9 +39,29 @@ export class SpoolOwnerShareSource implements SpoolShareCatalogSource {
       projectKey: project ? `project:${project.id}` : `repo:${repo.id}`,
       projectName: project?.displayName ?? repo.displayName,
       worktreeName: worktree.displayName,
-      branch: worktree.branch || null,
-      sessions
+      branch: worktree.branch || null
     }
+  }
+
+  async listSessionPage(
+    instance: SpoolPublicWorktreeInstance,
+    cursor: string | null,
+    inventoryScope: string,
+    signal: AbortSignal
+  ) {
+    return await this.sessions.listSessionPage(instance, cursor, inventoryScope, signal)
+  }
+
+  releaseSessionPage(
+    instance: SpoolPublicWorktreeInstance,
+    cursor: string | null,
+    inventoryScope: string
+  ): void {
+    this.sessions.releaseSessionPage(instance, cursor, inventoryScope)
+  }
+
+  invalidateSessionPages(instanceId: string): void {
+    this.sessions.invalidateInstance(instanceId)
   }
 
   subscribe(listener: () => void): () => void {

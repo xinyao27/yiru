@@ -828,6 +828,8 @@ export type TerminalTab = {
   id: string
   ptyId: string | null
   worktreeId: string
+  /** Spawn-time workspace identity; absent legacy bindings are never safe for remote sharing. */
+  worktreeInstanceId?: string
   title: string
   /** Stable fallback label for default-named terminals ("Terminal 1", etc.).
    *  Why: agent CLIs overwrite the live title via OSC updates, but Orca still

@@ -5,12 +5,14 @@ import {
   SpoolPairedRuntimeReleaseChannelParamsSchema,
   SpoolPairedRuntimeRevokeWorktreeParamsSchema,
   SpoolPairedRuntimeSubscribeParamsSchema,
+  SpoolPairedRuntimeWorktreeCatalogParamsSchema,
   parseSpoolPairedRuntimeOperation
 } from '../../../../shared/spool/spool-paired-runtime-host-contract'
 import {
   SpoolPairedRuntimeCanonicalizeResultSchema,
   SpoolPairedRuntimeInspectionSchema,
   SpoolPairedRuntimeTerminalEventSchema,
+  SpoolPairedRuntimeWorktreeCatalogSchema,
   parseSpoolPairedRuntimeResult
 } from '../../../../shared/spool/spool-paired-runtime-result-contract'
 import { isSpoolMutationOperation } from '../../../../shared/spool/spool-operation-contract'
@@ -24,12 +26,26 @@ import {
   pairedRuntimeErrorCode,
   requireActualHostAdapter,
   requirePairedRuntimePrincipal,
+  resolvePairedRuntimeRepoActualHostScope,
   resolveActualHostWorktree,
   resolveBoundActualHostWorktree,
   toOwnerWorktree
 } from './spool-host-runtime-authority'
 
 export const SPOOL_HOST_METHODS: RpcAnyMethod[] = [
+  defineMethod({
+    name: 'spool.host.listWorktrees',
+    params: SpoolPairedRuntimeWorktreeCatalogParamsSchema,
+    handler: async (params, context) => {
+      requirePairedRuntimePrincipal(context)
+      const actualHostScope = resolvePairedRuntimeRepoActualHostScope(
+        context.runtime,
+        params.repoId
+      )
+      const inventory = await context.runtime.listDetectedManagedWorktrees(`id:${params.repoId}`)
+      return SpoolPairedRuntimeWorktreeCatalogSchema.parse({ actualHostScope, inventory })
+    }
+  }),
   defineMethod({
     name: 'spool.host.inspectWorktree',
     params: SpoolPairedRuntimeInspectParamsSchema,

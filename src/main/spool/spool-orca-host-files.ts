@@ -18,6 +18,7 @@ import {
   spoolSshHostScope
 } from './spool-orca-host-paths'
 import { OrcaSpoolVerifiedFileOperations } from './spool-orca-verified-file-operations'
+import { readSpoolGitAdministrativePaths } from './spool-git-administrative-path-reader'
 import type { SpoolOwnerWorktree } from './spool-worktree-incarnation'
 import type {
   SpoolCanonicalHostPath,
@@ -99,8 +100,24 @@ export class OrcaSpoolHostFiles
   ): Promise<readonly SpoolCanonicalHostPath[]> {
     const dotGit = joinSpoolHostPath(root, ['.git'])
     const resolved = await this.tryCanonicalExisting(root, dotGit)
-    // Why: unknown Git administration means containment cannot prove metadata is hidden.
-    return resolved ? [resolved] : []
+    if (!resolved) {
+      // Why: unknown Git administration means containment cannot prove metadata is hidden.
+      return []
+    }
+    const gitPaths = await readSpoolGitAdministrativePaths(root)
+    const administrativePaths = await Promise.all(
+      gitPaths.map(async (gitPath) => await this.canonicalGitAdministrativePath(root, gitPath))
+    )
+    // Why: canonical targets block content access, while lexical Git output
+    // also hides an in-tree symlink or junction that spells the same admin root.
+    const lexicalPaths = gitPaths.map((gitPath) =>
+      canonicalSpoolHostPath(root.scopeKey, gitPath, null)
+    )
+    return deduplicateAdministrativePaths([resolved, ...lexicalPaths, ...administrativePaths])
+  }
+
+  joinPath(root: SpoolCanonicalHostPath, segments: readonly string[]): string {
+    return joinSpoolHostPath(root, segments)
   }
 
   relationship(
@@ -163,6 +180,23 @@ export class OrcaSpoolHostFiles
     }
   }
 
+  private async canonicalGitAdministrativePath(
+    root: SpoolCanonicalHostPath,
+    absolutePath: string
+  ): Promise<SpoolCanonicalHostPath> {
+    const provider = spoolFilesystemProvider(root)
+    if (provider) {
+      const canonical = await provider.realpath(absolutePath)
+      return canonicalSpoolHostPath(
+        root.scopeKey,
+        canonical,
+        await remoteSpoolPathIdentity(provider, canonical)
+      )
+    }
+    const canonical = await realpath(absolutePath)
+    return canonicalSpoolHostPath(root.scopeKey, canonical, await localSpoolPathIdentity(canonical))
+  }
+
   private async requireNoSymlinkTraversal(
     root: SpoolCanonicalHostPath,
     absolutePath: string
@@ -179,6 +213,24 @@ export class OrcaSpoolHostFiles
       }
     }
   }
+}
+
+function deduplicateAdministrativePaths(
+  paths: readonly SpoolCanonicalHostPath[]
+): SpoolCanonicalHostPath[] {
+  const unique: SpoolCanonicalHostPath[] = []
+  for (const candidate of paths) {
+    if (
+      !unique.some(
+        (existing) =>
+          existing.scopeKey === candidate.scopeKey &&
+          existing.absolutePath === candidate.absolutePath
+      )
+    ) {
+      unique.push(candidate)
+    }
+  }
+  return unique
 }
 
 async function sameIdentity(

@@ -1,4 +1,5 @@
 import { remoteRuntimeUnavailableError } from './remote-runtime-request-frames'
+import { REMOTE_RUNTIME_CANCEL_REQUEST_METHOD } from './remote-runtime-request-cancellation'
 import { requestSharedControl } from './remote-runtime-shared-control-requests'
 import {
   sendSharedControlRequest,
@@ -6,6 +7,7 @@ import {
 } from './remote-runtime-shared-control-send'
 import { rejectSharedControlPendingRequest } from './remote-runtime-shared-control-state'
 import { startSharedControlSubscription } from './remote-runtime-shared-control-subscription-start'
+import { sendSharedControlCleanupRequest } from './remote-runtime-shared-control-subscriptions'
 import type {
   RemoteRuntimeSharedSubscription,
   SharedControlLogicalSubscription,
@@ -31,7 +33,7 @@ export class RemoteRuntimeExistingRouteAccess {
     method: string,
     params: unknown,
     timeoutMs: number,
-    requestOptions: { beforeSend?: () => void | Promise<void> } = {}
+    requestOptions: { beforeSend?: () => void | Promise<void>; signal?: AbortSignal } = {}
   ): Promise<RuntimeRpcResponse<TResult>> {
     const routeGeneration = this.requireCurrentRoute()
     // Why: a borrowed request timeout must not reset or reconnect the owner's route.
@@ -42,7 +44,9 @@ export class RemoteRuntimeExistingRouteAccess {
       timeoutMs,
       ensureReady: () => this.requireSameRoute(routeGeneration),
       beforeSend: requestOptions.beforeSend,
-      send: (id, name, input) => this.sendRequest(id, name, input, routeGeneration)
+      signal: requestOptions.signal,
+      send: (id, name, input) => this.sendRequest(id, name, input, routeGeneration),
+      cancel: (id) => this.cancelRequest(id, routeGeneration)
     })
   }
 
@@ -104,6 +108,15 @@ export class RemoteRuntimeExistingRouteAccess {
       subscriptions: this.options.subscriptions,
       subscription,
       deviceToken: this.options.deviceToken,
+      send: (payload) => this.sendOnRoute(payload, routeGeneration)
+    })
+  }
+
+  private cancelRequest(requestId: string, routeGeneration: number): void {
+    sendSharedControlCleanupRequest({
+      deviceToken: this.options.deviceToken,
+      method: REMOTE_RUNTIME_CANCEL_REQUEST_METHOD,
+      params: { requestId },
       send: (payload) => this.sendOnRoute(payload, routeGeneration)
     })
   }

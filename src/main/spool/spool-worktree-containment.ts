@@ -24,6 +24,8 @@ export type SpoolContainedPath = {
   target: SpoolCanonicalHostPath
   parent: SpoolCanonicalHostPath
   exists: boolean
+  gitAdministrativePathCount: number
+  isGitAdministrativeChild(name: string): boolean
   revalidate(): Promise<boolean>
 }
 
@@ -40,6 +42,7 @@ export type SpoolWorktreeContainmentHost = {
   resolveGitAdministrativePaths(
     root: SpoolCanonicalHostPath
   ): Promise<readonly SpoolCanonicalHostPath[]>
+  joinPath(root: SpoolCanonicalHostPath, segments: readonly string[]): string
   relationship(
     root: SpoolCanonicalHostPath,
     candidate: SpoolCanonicalHostPath
@@ -62,8 +65,14 @@ export class SpoolWorktreeContainment {
     if (!resolution?.exists) {
       throw new SpoolExecutionError('resource_not_found')
     }
-    await this.requireContained(root, resolution)
-    return this.toContainedPath(parsed.normalized, parsed.segments, root, resolution)
+    const administrativePaths = await this.requireContained(root, resolution)
+    return this.toContainedPath(
+      parsed.normalized,
+      parsed.segments,
+      root,
+      resolution,
+      administrativePaths
+    )
   }
 
   async bindForCreate(
@@ -76,8 +85,14 @@ export class SpoolWorktreeContainment {
     if (!resolution) {
       throw new SpoolExecutionError('resource_not_found')
     }
-    await this.requireContained(root, resolution)
-    return this.toContainedPath(parsed.normalized, parsed.segments, root, resolution)
+    const administrativePaths = await this.requireContained(root, resolution)
+    return this.toContainedPath(
+      parsed.normalized,
+      parsed.segments,
+      root,
+      resolution,
+      administrativePaths
+    )
   }
 
   private async resolveRoot(target: SpoolOwnerWorktree): Promise<SpoolCanonicalHostPath> {
@@ -96,7 +111,7 @@ export class SpoolWorktreeContainment {
   private async requireContained(
     root: SpoolCanonicalHostPath,
     resolution: SpoolHostPathResolution
-  ): Promise<void> {
+  ): Promise<readonly SpoolCanonicalHostPath[]> {
     if (!isValidResolution(resolution)) {
       throw new SpoolExecutionError('resource_unavailable')
     }
@@ -128,13 +143,15 @@ export class SpoolWorktreeContainment {
         throw new SpoolExecutionError('resource_not_found')
       }
     }
+    return administrativePaths
   }
 
   private toContainedPath(
     relativePath: string,
     segments: readonly string[],
     root: SpoolCanonicalHostPath,
-    resolution: SpoolHostPathResolution
+    resolution: SpoolHostPathResolution,
+    administrativePaths: readonly SpoolCanonicalHostPath[]
   ): SpoolContainedPath {
     return {
       relativePath,
@@ -143,6 +160,9 @@ export class SpoolWorktreeContainment {
       target: { ...resolution.target },
       parent: { ...resolution.parent },
       exists: resolution.exists,
+      gitAdministrativePathCount: administrativePaths.length,
+      isGitAdministrativeChild: (name) =>
+        this.isGitAdministrativeChild(root, segments, name, administrativePaths),
       revalidate: async () => {
         try {
           return await this.host.revalidate(root, resolution)
@@ -151,6 +171,22 @@ export class SpoolWorktreeContainment {
         }
       }
     }
+  }
+
+  private isGitAdministrativeChild(
+    root: SpoolCanonicalHostPath,
+    parentSegments: readonly string[],
+    name: string,
+    administrativePaths: readonly SpoolCanonicalHostPath[]
+  ): boolean {
+    const candidate: SpoolCanonicalHostPath = {
+      scopeKey: root.scopeKey,
+      absolutePath: this.host.joinPath(root, [...parentSegments, name]),
+      identity: null
+    }
+    return administrativePaths.some((administrativePath) =>
+      isSameOrDescendant(this.host.relationship(administrativePath, candidate))
+    )
   }
 }
 

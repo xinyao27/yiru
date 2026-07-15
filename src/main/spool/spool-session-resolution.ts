@@ -19,6 +19,7 @@ export type SpoolResolvedLiveSession = {
   sessionKey: string
   terminalHandle: string
   executionHostId: ExecutionHostId
+  actualHostScope: string
   worktreeInstanceId: string
   spoolIncarnationId: string
   provider: SpoolSessionProvider
@@ -31,6 +32,7 @@ export type SpoolResolvedHistoricalSession = {
   sessionKey: string
   ownerRecordKey: string
   executionHostId: ExecutionHostId
+  actualHostScope: string
   worktreeInstanceId: string
   spoolIncarnationId: string
   provider: SpoolProvenanceProvider
@@ -51,6 +53,7 @@ export function resolveLiveSession(
       : liveSessionKey(worktree, candidate),
     terminalHandle: candidate.terminalHandle,
     executionHostId: candidate.executionHostId,
+    actualHostScope: candidate.actualHostScope,
     worktreeInstanceId: worktree.instanceId,
     spoolIncarnationId: worktree.spoolIncarnationId,
     provider: candidate.provider,
@@ -68,6 +71,7 @@ export function resolveHistoricalSession(
     sessionKey: providerSessionKey(worktree, candidate),
     ownerRecordKey: candidate.ownerRecordKey,
     executionHostId: candidate.executionHostId,
+    actualHostScope: candidate.actualHostScope,
     worktreeInstanceId: worktree.instanceId,
     spoolIncarnationId: worktree.spoolIncarnationId,
     provider: candidate.provider,
@@ -78,9 +82,9 @@ export function resolveHistoricalSession(
 
 export function sessionDedupeKey(session: SpoolResolvedSession): string {
   if (session.kind === 'live' && !session.providerSessionId) {
-    return JSON.stringify([session.executionHostId, session.kind, session.terminalHandle])
+    return JSON.stringify([session.actualHostScope, session.kind, session.terminalHandle])
   }
-  return JSON.stringify([session.executionHostId, session.provider, session.providerSessionId])
+  return JSON.stringify([session.actualHostScope, session.provider, session.providerSessionId])
 }
 
 export function toSessionDescription(
@@ -95,13 +99,13 @@ export function toSessionDescription(
 
 function providerSessionKey(
   worktree: SpoolSessionWorktreeIdentity,
-  session: Pick<SpoolResolvedSession, 'executionHostId' | 'provider' | 'providerSessionId'>
+  session: Pick<SpoolResolvedSession, 'actualHostScope' | 'provider' | 'providerSessionId'>
 ): string {
   return hashSessionKey([
     'provider',
     worktree.instanceId,
     worktree.spoolIncarnationId,
-    session.executionHostId,
+    session.actualHostScope,
     session.provider,
     session.providerSessionId
   ])
@@ -109,13 +113,13 @@ function providerSessionKey(
 
 function liveSessionKey(
   worktree: SpoolSessionWorktreeIdentity,
-  session: Pick<SpoolLiveSessionCandidate, 'executionHostId' | 'terminalHandle'>
+  session: Pick<SpoolLiveSessionCandidate, 'actualHostScope' | 'terminalHandle'>
 ): string {
   return hashSessionKey([
     'live',
     worktree.instanceId,
     worktree.spoolIncarnationId,
-    session.executionHostId,
+    session.actualHostScope,
     session.terminalHandle
   ])
 }

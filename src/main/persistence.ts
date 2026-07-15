@@ -1578,6 +1578,11 @@ function normalizeSshRemotePtyLease(value: unknown): SshRemotePtyLease | null {
     targetId: raw.targetId,
     ptyId: raw.ptyId,
     ...(typeof raw.worktreeId === 'string' ? { worktreeId: raw.worktreeId } : {}),
+    ...(typeof raw.worktreeInstanceId === 'string' &&
+    raw.worktreeInstanceId.trim() &&
+    raw.worktreeInstanceId.length <= 512
+      ? { worktreeInstanceId: raw.worktreeInstanceId }
+      : {}),
     ...(typeof raw.tabId === 'string' ? { tabId: raw.tabId } : {}),
     ...(typeof raw.leafId === 'string' && raw.leafId.length <= 256 ? { leafId: raw.leafId } : {}),
     state,
@@ -2393,6 +2398,7 @@ function makeProjectHostSetupId(
 
 function createMinimalPersistedTerminalTab(args: {
   worktreeId: string
+  worktreeInstanceId?: string | null
   tabId: string
   ptyId: string
   existingTabCount: number
@@ -2404,6 +2410,7 @@ function createMinimalPersistedTerminalTab(args: {
     id: args.tabId,
     ptyId: args.ptyId,
     worktreeId: args.worktreeId,
+    ...(args.worktreeInstanceId ? { worktreeInstanceId: args.worktreeInstanceId } : {}),
     title: defaultTitle,
     defaultTitle,
     customTitle: null,
@@ -5829,11 +5836,9 @@ export class Store {
           continue
         }
         for (const tab of tabs) {
-          if (tab.ptyId) {
-            continue
-          }
           const priorTab = priorList.find((t) => t.id === tab.id)
           if (
+            !tab.ptyId &&
             priorTab?.ptyId &&
             this.isRestorablePtyBinding({
               ptyId: priorTab.ptyId,
@@ -5843,6 +5848,21 @@ export class Store {
             })
           ) {
             tab.ptyId = priorTab.ptyId
+          }
+          if (
+            !tab.worktreeInstanceId &&
+            priorTab?.worktreeInstanceId &&
+            priorTab.ptyId &&
+            tab.ptyId === priorTab.ptyId &&
+            this.isRestorablePtyBinding({
+              ptyId: priorTab.ptyId,
+              worktreeId,
+              targetId: this.getConnectionIdForWorktree(worktreeId),
+              tabId: tab.id
+            })
+          ) {
+            // Why: a stale renderer snapshot must not erase the spawn-time safety binding.
+            tab.worktreeInstanceId = priorTab.worktreeInstanceId
           }
         }
       }
@@ -6075,6 +6095,7 @@ export class Store {
   // spawn-success without the binding already being durable on disk.
   persistPtyBinding(args: {
     worktreeId: string
+    worktreeInstanceId?: string | null
     tabId: string
     leafId: string
     ptyId: string
@@ -6089,6 +6110,13 @@ export class Store {
     const tab = tabs?.find((t) => t.id === args.tabId)
     if (tab) {
       tab.ptyId = args.ptyId
+      if (args.worktreeInstanceId !== undefined) {
+        if (args.worktreeInstanceId === null) {
+          delete tab.worktreeInstanceId
+        } else {
+          tab.worktreeInstanceId = args.worktreeInstanceId
+        }
+      }
     } else {
       // Why: pty:spawn can beat the debounced session writer for a newly
       // created tab. Persist a minimal tab so hydration does not prune the
@@ -6417,11 +6445,13 @@ export class Store {
   }
 
   upsertSshRemotePtyLease(
-    lease: Omit<SshRemotePtyLease, 'createdAt' | 'updatedAt'> &
-      Partial<Pick<SshRemotePtyLease, 'createdAt' | 'updatedAt'>>
+    lease: Omit<SshRemotePtyLease, 'createdAt' | 'updatedAt' | 'worktreeInstanceId'> & {
+      worktreeInstanceId?: string | null
+    } & Partial<Pick<SshRemotePtyLease, 'createdAt' | 'updatedAt'>>
   ): void {
     this.state.sshRemotePtyLeases ??= []
-    const normalizedLease = { ...lease }
+    const { worktreeInstanceId, ...normalizedLease } = lease
+    const clearWorktreeInstanceId = worktreeInstanceId === null
     if (normalizedLease.leafId !== undefined && !isTerminalLeafId(normalizedLease.leafId)) {
       delete normalizedLease.leafId
     }
@@ -6440,8 +6470,13 @@ export class Store {
     const next: SshRemotePtyLease = {
       ...existing,
       ...normalizedLease,
+      ...(worktreeInstanceId ? { worktreeInstanceId } : {}),
       createdAt: existing?.createdAt ?? normalizedLease.createdAt ?? now,
       updatedAt: normalizedLease.updatedAt ?? now
+    }
+    if (clearWorktreeInstanceId) {
+      // Why: unknown or conflicting reattach evidence must not revive a prior trusted binding.
+      delete next.worktreeInstanceId
     }
     if (existingIndex >= 0) {
       this.state.sshRemotePtyLeases[existingIndex] = next
