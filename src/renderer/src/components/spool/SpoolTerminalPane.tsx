@@ -23,8 +23,13 @@ import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-pref
 import { Button } from '@/components/ui/button'
 import { getSpoolRequesterTransportErrorCode } from './spool-requester-error'
 import { isSameSpoolSessionRoute, type SpoolSessionRoute } from './spool-session-route'
+import {
+  createSpoolTerminalMutationQueue,
+  type SpoolTerminalMutation
+} from './spool-terminal-mutation-queue'
 
 type TerminalConnectionStatus = 'connecting' | 'live' | 'closed' | 'error'
+const SPOOL_TERMINAL_INPUT_FLUSH_MS = 8
 
 export function SpoolTerminalPane({
   route,
@@ -37,7 +42,6 @@ export function SpoolTerminalPane({
   const terminalRef = useRef<Terminal | null>(null)
   const fitAddonRef = useRef<FitAddon | null>(null)
   const suppressResizeRef = useRef(false)
-  const mutationTailRef = useRef(Promise.resolve())
   const lastSequenceRef = useRef(-1)
   const lastSentSizeRef = useRef('')
   const settings = useAppStore((state) => state.settings)
@@ -72,21 +76,19 @@ export function SpoolTerminalPane({
       rows: 24
     })
     const fitAddon = new FitAddon()
+    const mutationQueue = createSpoolTerminalMutationQueue({
+      inputFlushMs: SPOOL_TERMINAL_INPUT_FLUSH_MS,
+      invoke: async (mutation) => {
+        await invokeTerminalMutation(mutationUncertainRef, route, mutation)
+      },
+      shouldDiscardAfterError: (error) =>
+        handleTerminalMutationError(error, route, markMutationUncertain)
+    })
     terminal.loadAddon(fitAddon)
     terminalRef.current = terminal
     fitAddonRef.current = fitAddon
     const inputDisposable = terminal.onData((data) => {
-      enqueueTerminalMutation(
-        mutationTailRef,
-        mutationUncertainRef,
-        markMutationUncertain,
-        route,
-        'terminal.input',
-        {
-          sessionRef: route.sessionRef,
-          data
-        }
-      )
+      mutationQueue.input(data)
     })
     const resizeDisposable = terminal.onResize(({ cols, rows }) => {
       if (suppressResizeRef.current || !canMutateTerminalRef.current) {
@@ -97,18 +99,7 @@ export function SpoolTerminalPane({
         return
       }
       lastSentSizeRef.current = sizeKey
-      enqueueTerminalMutation(
-        mutationTailRef,
-        mutationUncertainRef,
-        markMutationUncertain,
-        route,
-        'terminal.resize',
-        {
-          sessionRef: route.sessionRef,
-          cols,
-          rows
-        }
-      )
+      mutationQueue.resize(cols, rows)
     })
     const resizeObserver = new ResizeObserver(() => {
       if (canMutateTerminalRef.current) {
@@ -126,6 +117,7 @@ export function SpoolTerminalPane({
     }
     return () => {
       resizeObserver.disconnect()
+      mutationQueue.dispose()
       inputDisposable.dispose()
       resizeDisposable.dispose()
       fitAddon.dispose()
@@ -243,52 +235,54 @@ export function SpoolTerminalPane({
   )
 }
 
-function enqueueTerminalMutation(
-  tailRef: React.MutableRefObject<Promise<void>>,
+async function invokeTerminalMutation(
   uncertainRef: React.MutableRefObject<boolean>,
-  markUncertain: () => void,
   route: SpoolSessionRoute,
-  method: 'terminal.input' | 'terminal.resize',
-  params: Record<string, unknown>
-): void {
-  tailRef.current = tailRef.current
-    .then(async () => {
-      if (uncertainRef.current) {
-        return
-      }
-      const state = useAppStore.getState()
-      const activeRoute = state.activeSpoolWorkspaceRoute
-      if (
-        !isSameSpoolSessionRoute(activeRoute, route) ||
-        !selectSpoolCanControl(state, activeRoute)
-      ) {
-        return
-      }
-      ;(await window.api.spoolSharing.invoke({
-        desktopRef: route.desktopRef,
-        connectionEpoch: route.connectionEpoch,
-        method,
-        params
-      })) as SpoolMutationResult
-    })
-    .catch((error: unknown) => {
-      const activeRoute = useAppStore.getState().activeSpoolWorkspaceRoute
-      if (!isSameSpoolSessionRoute(activeRoute, route)) {
-        return
-      }
-      if (getSpoolRequesterTransportErrorCode(error) === 'outcome_unknown') {
-        // Why: later queued keystrokes must not execute until the user has
-        // inspected the terminal after an ambiguous mutation result.
-        markUncertain()
-        toast.warning(
-          translate(
-            'auto.components.spool.SpoolTerminalPane.outcomeUnknown',
-            'This terminal action may have succeeded on the owner’s desktop. Inspect the terminal output before sending more input.'
-          ),
-          { id: 'spool-terminal-outcome-unknown' }
-        )
-      }
-    })
+  mutation: SpoolTerminalMutation
+): Promise<void> {
+  if (uncertainRef.current) {
+    return
+  }
+  const state = useAppStore.getState()
+  const activeRoute = state.activeSpoolWorkspaceRoute
+  if (!isSameSpoolSessionRoute(activeRoute, route) || !selectSpoolCanControl(state, activeRoute)) {
+    return
+  }
+  const params =
+    mutation.method === 'terminal.input'
+      ? { sessionRef: route.sessionRef, data: mutation.data }
+      : { sessionRef: route.sessionRef, cols: mutation.cols, rows: mutation.rows }
+  ;(await window.api.spoolSharing.invoke({
+    desktopRef: route.desktopRef,
+    connectionEpoch: route.connectionEpoch,
+    method: mutation.method,
+    params
+  })) as SpoolMutationResult
+}
+
+function handleTerminalMutationError(
+  error: unknown,
+  route: SpoolSessionRoute,
+  markUncertain: () => void
+): boolean {
+  const activeRoute = useAppStore.getState().activeSpoolWorkspaceRoute
+  if (
+    !isSameSpoolSessionRoute(activeRoute, route) ||
+    getSpoolRequesterTransportErrorCode(error) !== 'outcome_unknown'
+  ) {
+    return false
+  }
+  // Why: later buffered keystrokes must not execute until the user has
+  // inspected the terminal after an ambiguous mutation result.
+  markUncertain()
+  toast.warning(
+    translate(
+      'auto.components.spool.SpoolTerminalPane.outcomeUnknown',
+      'This terminal action may have succeeded on the owner’s desktop. Inspect the terminal output before sending more input.'
+    ),
+    { id: 'spool-terminal-outcome-unknown' }
+  )
+  return true
 }
 
 function applyTerminalEvent(

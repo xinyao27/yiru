@@ -147,6 +147,12 @@ export class SpoolWorktreeVisibility {
     }
   }
 
+  getPublishedInstance(instanceId: string, shareEpoch: string): SpoolPublicWorktreeInstance | null {
+    return this.isPublic(instanceId, shareEpoch)
+      ? this.publicationState.get(instanceId, shareEpoch)
+      : null
+  }
+
   subscribe(listener: (change: SpoolVisibilityChange) => void): () => void {
     return this.publicationState.subscribe(listener)
   }
