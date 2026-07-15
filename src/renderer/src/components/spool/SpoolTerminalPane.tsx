@@ -1,7 +1,7 @@
 import type React from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FitAddon } from '@xterm/addon-fit'
-import { Terminal } from '@xterm/xterm'
+import { Terminal, type ITerminalOptions } from '@xterm/xterm'
 import { toast } from 'sonner'
 import type { GlobalSettings } from '../../../../shared/types'
 import type {
@@ -25,7 +25,6 @@ import { getSpoolRequesterTransportErrorCode } from './spool-requester-error'
 import { isSameSpoolSessionRoute, type SpoolSessionRoute } from './spool-session-route'
 
 type TerminalConnectionStatus = 'connecting' | 'live' | 'closed' | 'error'
-type SpoolTerminalOptions = NonNullable<ConstructorParameters<typeof Terminal>[0]>
 
 export function SpoolTerminalPane({
   route,
@@ -65,7 +64,13 @@ export function SpoolTerminalPane({
     if (!container) {
       return
     }
-    const terminal = new Terminal(terminalOptions)
+    const terminal = new Terminal({
+      ...terminalOptions,
+      // Why: xterm dimensions are constructor-only; subscription events use
+      // terminal.resize() when the owner reports a new terminal size.
+      cols: 80,
+      rows: 24
+    })
     const fitAddon = new FitAddon()
     terminal.loadAddon(fitAddon)
     terminalRef.current = terminal
@@ -351,10 +356,10 @@ function createTerminalOptions(
   settings: GlobalSettings | null,
   systemPrefersDark: boolean,
   canControl: boolean
-): SpoolTerminalOptions {
+): ITerminalOptions {
   const defaults = buildDefaultTerminalOptions()
   if (!settings) {
-    return { ...defaults, disableStdin: !canControl, cols: 80, rows: 24 }
+    return { ...defaults, disableStdin: !canControl }
   }
   const appearance = resolveEffectiveTerminalAppearance(settings, systemPrefersDark)
   const baseTheme = appearance.theme ?? getBuiltinTheme(appearance.themeName)
@@ -362,8 +367,6 @@ function createTerminalOptions(
   return {
     ...defaults,
     disableStdin: !canControl,
-    cols: 80,
-    rows: 24,
     theme: composeActiveTerminalTheme(baseTheme, settings) ?? undefined,
     fontFamily: buildFontFamily(settings.terminalFontFamily),
     fontSize: settings.terminalFontSize,
