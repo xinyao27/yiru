@@ -1,4 +1,5 @@
 import type React from 'react'
+import { SquareTerminal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
@@ -11,25 +12,29 @@ type SpoolSessionRowProps = {
 }
 
 export function SpoolSessionRow({ row, onSelect }: SpoolSessionRowProps): React.JSX.Element {
+  // Why: Sessions retain the full child step beneath the newly indented Worktree.
   return (
     <button
       type="button"
       data-current={row.active ? 'true' : undefined}
+      data-focused-agent-pane={row.active ? 'true' : undefined}
       aria-current={row.active ? 'page' : undefined}
       onClick={onSelect}
       className={cn(
-        'flex h-6 w-full min-w-0 items-center gap-1.5 rounded-md pr-2 text-left transition-colors',
+        'worktree-agent-row-hover flex h-6 w-full min-w-0 items-center gap-1 rounded-sm pr-1 text-left text-[11px] leading-none text-muted-foreground',
         'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring',
-        row.active
-          ? 'bg-worktree-sidebar-accent text-worktree-sidebar-accent-foreground'
-          : 'text-worktree-sidebar-foreground hover:bg-worktree-sidebar-accent'
+        row.active && 'text-foreground'
       )}
-      style={{ paddingLeft: getProjectGroupHeaderPaddingLeft(1) + SIDEBAR_TREE_INDENT }}
+      style={{ paddingLeft: getProjectGroupHeaderPaddingLeft(2) + SIDEBAR_TREE_INDENT }}
     >
       <span aria-hidden="true" className="flex size-3.5 shrink-0 items-center justify-center">
-        <AgentIcon agent={row.provider === 'other' ? null : row.provider} size={13} />
+        {row.provider === 'other' ? (
+          <SquareTerminal className="size-3.5" />
+        ) : (
+          <AgentIcon agent={row.provider} size={13} />
+        )}
       </span>
-      <TruncatedSidebarLabel text={row.title} className="min-w-0 flex-1 text-[11px] leading-none" />
+      <TruncatedSidebarLabel text={row.title} className="min-w-0 flex-1" />
     </button>
   )
 }

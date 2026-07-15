@@ -39,9 +39,11 @@ import {
 import { useSpoolWorktreeOperationRoute } from './spool-worktree-route'
 
 export function SpoolFilesPane({
+  layout = 'workspace',
   route,
   supportsDiff
 }: {
+  layout?: 'workspace' | 'sidebar'
   route: SpoolWorkspaceRoute
   supportsDiff: boolean
 }): React.JSX.Element {
@@ -62,6 +64,7 @@ export function SpoolFilesPane({
   const [action, setAction] = useState<SpoolFileAction | null>(null)
   const [mutating, setMutating] = useState(false)
   const [mutationOutcomeUnknown, setMutationOutcomeUnknown] = useState(false)
+  const [sidebarView, setSidebarView] = useState<'tree' | 'preview'>('tree')
   const canMutate = canControl && !mutationOutcomeUnknown
   const listRequestSequence = useRef(0)
   const fileRequestSequence = useRef(0)
@@ -163,8 +166,12 @@ export function SpoolFilesPane({
       setDiff(null)
       setFileUnavailable(false)
       setDiffUnavailable(false)
+      setSidebarView('tree')
       void loadDirectory(entry.relativePath)
       return
+    }
+    if (layout === 'sidebar') {
+      setSidebarView('preview')
     }
     void loadFile(entry)
   }
@@ -270,6 +277,7 @@ export function SpoolFilesPane({
       ) {
         setSelectedEntry(null)
         setFile(null)
+        setSidebarView('tree')
       }
       await loadDirectory(directory)
       if (nextEntry) {
@@ -304,50 +312,57 @@ export function SpoolFilesPane({
         />
       ) : null}
       <div className="flex min-h-0 flex-1">
-        <SpoolFileTree
-          canControl={canMutate}
-          directory={directory}
-          listing={listing}
-          loading={listLoading}
-          unavailable={listUnavailable}
-          selectedPath={selectedEntry?.relativePath ?? null}
-          onOpen={openEntry}
-          onRefresh={() => void loadDirectory(directory)}
-          onUp={() => void loadDirectory(parentSpoolRelativePath(directory))}
-          onNewFile={() => setAction({ kind: 'new-file' })}
-          onNewDirectory={() => setAction({ kind: 'new-directory' })}
-          onRename={(entry) => setAction({ kind: 'rename', entry })}
-          onDelete={(entry) => setAction({ kind: 'delete', entry })}
-        />
-        {/* Why: each read clears `file`, so this boundary resets preview mode before new bytes appear. */}
-        <SpoolFilePreview
-          key={file?.relativePath ?? 'empty'}
-          canControl={canMutate}
-          draft={draft}
-          file={file}
-          fileEntry={selectedEntry}
-          fileUnavailable={fileUnavailable}
-          loading={fileLoading}
-          saving={mutating}
-          supportsDiff={supportsDiff}
-          diff={diff}
-          diffLoading={diffLoading}
-          diffUnavailable={diffUnavailable}
-          onDraftChange={setDraft}
-          onLoadDiff={(staged) => void loadDiff(staged)}
-          onNextChunk={() =>
-            selectedEntry && file && void loadFile(selectedEntry, file.offset + file.bytesRead)
-          }
-          onPreviousChunk={() =>
-            selectedEntry &&
-            file &&
-            void loadFile(selectedEntry, Math.max(0, file.offset - SPOOL_FILE_READ_MAX_BYTES))
-          }
-          onRefresh={() => selectedEntry && void loadFile(selectedEntry, file?.offset ?? 0)}
-          onSave={() => void saveFile()}
-          onRename={() => selectedEntry && setAction({ kind: 'rename', entry: selectedEntry })}
-          onDelete={() => selectedEntry && setAction({ kind: 'delete', entry: selectedEntry })}
-        />
+        {layout === 'workspace' || sidebarView === 'tree' ? (
+          <SpoolFileTree
+            canControl={canMutate}
+            directory={directory}
+            listing={listing}
+            loading={listLoading}
+            surface={layout}
+            unavailable={listUnavailable}
+            selectedPath={selectedEntry?.relativePath ?? null}
+            onOpen={openEntry}
+            onRefresh={() => void loadDirectory(directory)}
+            onUp={() => void loadDirectory(parentSpoolRelativePath(directory))}
+            onNewFile={() => setAction({ kind: 'new-file' })}
+            onNewDirectory={() => setAction({ kind: 'new-directory' })}
+            onRename={(entry) => setAction({ kind: 'rename', entry })}
+            onDelete={(entry) => setAction({ kind: 'delete', entry })}
+          />
+        ) : null}
+        {layout === 'workspace' || sidebarView === 'preview' ? (
+          <SpoolFilePreview
+            // Why: each read clears `file`, so this boundary resets preview mode before new bytes appear.
+            key={file?.relativePath ?? 'empty'}
+            canControl={canMutate}
+            draft={draft}
+            file={file}
+            fileEntry={selectedEntry}
+            fileUnavailable={fileUnavailable}
+            loading={fileLoading}
+            saving={mutating}
+            surface={layout}
+            supportsDiff={supportsDiff}
+            diff={diff}
+            diffLoading={diffLoading}
+            diffUnavailable={diffUnavailable}
+            onBack={layout === 'sidebar' ? () => setSidebarView('tree') : undefined}
+            onDraftChange={setDraft}
+            onLoadDiff={(staged) => void loadDiff(staged)}
+            onNextChunk={() =>
+              selectedEntry && file && void loadFile(selectedEntry, file.offset + file.bytesRead)
+            }
+            onPreviousChunk={() =>
+              selectedEntry &&
+              file &&
+              void loadFile(selectedEntry, Math.max(0, file.offset - SPOOL_FILE_READ_MAX_BYTES))
+            }
+            onRefresh={() => selectedEntry && void loadFile(selectedEntry, file?.offset ?? 0)}
+            onSave={() => void saveFile()}
+            onRename={() => selectedEntry && setAction({ kind: 'rename', entry: selectedEntry })}
+            onDelete={() => selectedEntry && setAction({ kind: 'delete', entry: selectedEntry })}
+          />
+        ) : null}
         <SpoolFileActionDialog
           action={action}
           busy={mutating}

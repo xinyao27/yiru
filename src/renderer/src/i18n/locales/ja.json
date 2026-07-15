@@ -4809,7 +4809,8 @@
           "changesAndGit": "変更と Git",
           "changesDescription": "Worktree の状態、diff、履歴、ブランチ、upstream の状態がここに表示されます。",
           "mutableMode": "この接続では worktree の変更操作を使用できます。",
-          "readOnlyMode": "この公開 worktree は、所有者が制御を許可するまで読み取り専用です。"
+          "readOnlyMode": "この公開 worktree は、所有者が制御を許可するまで読み取り専用です。",
+          "noSessions": "This shared worktree has no Terminal or agent sessions yet."
         },
         "SpoolFileActionDialog": {
           "nameLabel": "名前",
@@ -4848,7 +4849,11 @@
           "diffUnavailable": "この差分は利用できません。",
           "previousChunk": "前のチャンク",
           "nextChunk": "次のチャンク",
-          "byteRange": "{{value0}}–{{value1}} / {{value2}} バイト"
+          "byteRange": "{{value0}}–{{value1}} / {{value2}} バイト",
+          "back": "Back to files",
+          "fileActions": "File actions",
+          "workingCompact": "Working",
+          "stagedCompact": "Staged"
         },
         "SpoolFileTree": {
           "up": "1 つ上のディレクトリへ",
@@ -4884,7 +4889,8 @@
           "staged": "ステージ済み",
           "untracked": "未追跡",
           "unstaged": "未ステージ",
-          "unavailable": "この差分は利用できません。"
+          "unavailable": "この差分は利用できません。",
+          "back": "Back"
         },
         "SpoolGitPane": {
           "refreshFailed": "Git の状態を読み込めませんでした。",

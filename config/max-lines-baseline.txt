@@ -224,7 +224,6 @@ inline src/renderer/src/components/right-sidebar/FileExplorerRow.tsx
 inline src/renderer/src/components/right-sidebar/PortsPanel.tsx
 inline src/renderer/src/components/right-sidebar/SourceControl.tsx
 inline src/renderer/src/components/right-sidebar/checks-panel-content.tsx
-inline src/renderer/src/components/right-sidebar/index.tsx
 inline src/renderer/src/components/right-sidebar/source-control-dropdown-items.ts
 inline src/renderer/src/components/right-sidebar/useCreatePullRequestDialogFields.ts
 inline src/renderer/src/components/right-sidebar/useFileExplorerDragDrop.ts

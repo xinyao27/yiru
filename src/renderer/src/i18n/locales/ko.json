@@ -4809,7 +4809,8 @@
           "changesAndGit": "변경 사항 및 Git",
           "changesDescription": "Worktree 상태, diff, 기록, 브랜치 및 upstream 상태가 여기에 표시됩니다.",
           "mutableMode": "이 연결은 worktree 변경 작업을 사용할 수 있습니다.",
-          "readOnlyMode": "이 공개 worktree는 소유자가 제어를 허용할 때까지 읽기 전용입니다."
+          "readOnlyMode": "이 공개 worktree는 소유자가 제어를 허용할 때까지 읽기 전용입니다.",
+          "noSessions": "This shared worktree has no Terminal or agent sessions yet."
         },
         "SpoolFileActionDialog": {
           "nameLabel": "이름",
@@ -4848,7 +4849,11 @@
           "diffUnavailable": "이 diff를 사용할 수 없습니다.",
           "previousChunk": "이전 청크",
           "nextChunk": "다음 청크",
-          "byteRange": "{{value0}}–{{value1}} / {{value2}}바이트"
+          "byteRange": "{{value0}}–{{value1}} / {{value2}}바이트",
+          "back": "Back to files",
+          "fileActions": "File actions",
+          "workingCompact": "Working",
+          "stagedCompact": "Staged"
         },
         "SpoolFileTree": {
           "up": "상위 디렉터리로 이동",
@@ -4884,7 +4889,8 @@
           "staged": "스테이징됨",
           "untracked": "추적되지 않음",
           "unstaged": "스테이징되지 않음",
-          "unavailable": "이 diff를 사용할 수 없습니다."
+          "unavailable": "이 diff를 사용할 수 없습니다.",
+          "back": "Back"
         },
         "SpoolGitPane": {
           "refreshFailed": "Git 상태를 불러오지 못했습니다.",

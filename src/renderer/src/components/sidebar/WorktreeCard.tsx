@@ -83,13 +83,14 @@ import { recordRendererCrashBreadcrumb } from '@/lib/crash-diagnostics'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace-scope'
 import { isRuntimeOwnedSshTargetId, parseExecutionHostId } from '../../../../shared/execution-host'
 import { DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE } from '../../../../shared/constants'
+import { WorktreeCardSurface, type WorktreeCardSurfaceActiveVariant } from './WorktreeCardSurface'
 
 type WorktreeRenameRequest = {
   worktreeId: string
   rowKey?: string
 }
 
-export type ActiveSurfaceVariant = 'primary' | 'secondary'
+export type ActiveSurfaceVariant = WorktreeCardSurfaceActiveVariant
 
 type WorktreeCardProps = {
   worktree: Worktree
@@ -244,7 +245,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const projectGroups = useAppStore((s) => s.projectGroups)
   const newCardStyle = settings?.experimentalNewWorktreeCardStyle === true
   const compactCards = !newCardStyle && settings?.compactWorktreeCards === true
-  const activeSurfaceIsSecondary = isActiveSurface && activeSurfaceVariant === 'secondary'
   const handleEditIssue = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -1854,22 +1854,13 @@ const WorktreeCard = React.memo(function WorktreeCard({
     )
 
   const cardBody = (
-    <div
+    <WorktreeCardSurface
+      density={titleOnlyCard ? 'title-only' : 'details'}
+      flush={flushSurface}
+      activeVariant={isActiveSurface ? activeSurfaceVariant : undefined}
+      multiSelected={isMultiSelected}
+      dropTarget={isLineageDropTarget}
       className={cn(
-        'relative flex cursor-pointer flex-col pr-1.5 transition-[background-color,border-color,opacity,box-shadow] duration-200 outline-none select-none',
-        titleOnlyCard ? 'py-2' : 'pt-1.25 pb-1.5',
-        flushSurface ? 'ml-1 w-[calc(100%-0.25rem)]' : 'ml-1',
-        'rounded-lg',
-        isLineageDropTarget
-          ? 'border border-accent-foreground/20 bg-accent/80'
-          : isActiveSurface
-            ? activeSurfaceIsSecondary
-              ? 'border border-sidebar-ring/25 bg-sidebar-accent/45 shadow-none ring-1 ring-sidebar-ring/15'
-              : 'bg-black/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.04)] border border-black/[0.015] dark:bg-white/[0.10] dark:border-border/40 dark:shadow-[0_1px_2px_rgba(0,0,0,0.03)]'
-            : isMultiSelected
-              ? 'border border-worktree-sidebar-ring/35 bg-worktree-sidebar-accent/70 ring-1 ring-worktree-sidebar-ring/30'
-              : 'border border-transparent worktree-sidebar-card-hover',
-        isActiveSurface && isMultiSelected && 'ring-1 ring-worktree-sidebar-ring/35',
         revealHighlight && [
           'scroll-to-current-workspace-reveal-highlight',
           revealHighlightTone === 'ai' && 'scroll-to-current-workspace-reveal-highlight--ai'
@@ -1878,8 +1869,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
         isDeleting && 'opacity-50 grayscale cursor-not-allowed',
         (isSshDisconnected || isRuntimeDisconnected) && !isDeleting && 'opacity-60'
       )}
-      data-worktree-card-surface="true"
-      data-worktree-card-active={isActiveSurface ? activeSurfaceVariant : undefined}
       onClick={handleClick}
       onDoubleClick={affiliateListMode ? undefined : handleDoubleClick}
       draggable={!affiliateListMode && nativeDragEnabled && !isDeleting && !titleRenaming}
@@ -1909,7 +1898,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
           {lineageChildren}
         </div>
       ) : null}
-    </div>
+    </WorktreeCardSurface>
   )
 
   return (

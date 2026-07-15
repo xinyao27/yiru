@@ -4809,7 +4809,8 @@
           "changesAndGit": "更改与 Git",
           "changesDescription": "Worktree 状态、diff、历史、分支和 upstream 状态会显示在这里。",
           "mutableMode": "此连接可以使用 worktree 的修改操作。",
-          "readOnlyMode": "这个公开 worktree 在所有者授予控制权限前保持只读。"
+          "readOnlyMode": "这个公开 worktree 在所有者授予控制权限前保持只读。",
+          "noSessions": "This shared worktree has no Terminal or agent sessions yet."
         },
         "SpoolFileActionDialog": {
           "nameLabel": "名称",
@@ -4848,7 +4849,11 @@
           "diffUnavailable": "此 diff 不可用。",
           "previousChunk": "上一分块",
           "nextChunk": "下一分块",
-          "byteRange": "{{value0}}–{{value1}} / {{value2}} 字节"
+          "byteRange": "{{value0}}–{{value1}} / {{value2}} 字节",
+          "back": "Back to files",
+          "fileActions": "File actions",
+          "workingCompact": "Working",
+          "stagedCompact": "Staged"
         },
         "SpoolFileTree": {
           "up": "返回上一级目录",
@@ -4884,7 +4889,8 @@
           "staged": "已暂存",
           "untracked": "未跟踪",
           "unstaged": "未暂存",
-          "unavailable": "此 diff 不可用。"
+          "unavailable": "此 diff 不可用。",
+          "back": "Back"
         },
         "SpoolGitPane": {
           "refreshFailed": "无法加载 Git 状态。",

@@ -1,5 +1,5 @@
 import type React from 'react'
-import { ChevronDown, Monitor } from 'lucide-react'
+import { Monitor } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
@@ -7,6 +7,7 @@ import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 import type { SpoolDesktopSidebarRow } from './spool-sidebar-rows'
 import { SpoolDesktopUsageHoverCard } from './SpoolDesktopUsageHoverCard'
 import { getProjectGroupHeaderPaddingLeft } from './worktree-list-indentation'
+import { SidebarDisclosure } from './SidebarDisclosure'
 
 type SpoolDesktopRowProps = {
   row: SpoolDesktopSidebarRow
@@ -40,27 +41,17 @@ export function SpoolDesktopRow({ row, onToggle }: SpoolDesktopRowProps): React.
           {connectionLabel ? <span className="shrink-0">· {connectionLabel}</span> : null}
         </span>
       </span>
-      {hasProjects ? (
-        <span className="flex size-4 shrink-0 items-center justify-center text-muted-foreground/60">
-          <ChevronDown
-            aria-hidden="true"
-            className={cn(
-              'size-3.5 transition-transform motion-reduce:transition-none',
-              !row.expanded && '-rotate-90'
-            )}
-          />
-        </span>
-      ) : null}
+      {hasProjects ? <SidebarDisclosure expanded={row.expanded} /> : null}
     </>
   )
   const className = cn(
-    'flex h-8 w-full min-w-0 items-center gap-2 rounded-md pr-2 text-left transition-colors',
-    'hover:bg-worktree-sidebar-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring',
+    'flex h-8 w-full min-w-0 items-center gap-2 rounded-md pr-1 text-left',
+    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring',
     row.connectionStatus === 'disconnected'
       ? 'text-muted-foreground'
       : 'text-worktree-sidebar-foreground'
   )
-  // Why: Desktop and Project rows share one top-level sidebar alignment.
+  // Why: Desktop anchors the shared catalog tree at the sidebar's base inset.
   const trigger = (
     <button
       type="button"

@@ -280,6 +280,8 @@ import { useHostHeaderDrag } from './host-header-drag'
 import { buildSidebarHostOptions } from './sidebar-host-options'
 import { HostSectionHeaderMenu } from './HostSectionHeaderMenu'
 import { ProjectHeaderActions } from './ProjectHeaderActions'
+import { SidebarDisclosure } from './SidebarDisclosure'
+import { SidebarProjectHeader } from './SidebarProjectHeader'
 import { translate } from '@/i18n/i18n'
 import { folderWorkspaceKey, parseWorkspaceKey } from '../../../../shared/workspace-scope'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
@@ -4315,10 +4317,11 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                       : { transform: getVirtualRowTransform(vItem.start) }
                   }
                 >
-                  <div
+                  <SidebarProjectHeader
                     id={getWorktreeOptionId(row.key)}
                     role="button"
                     tabIndex={0}
+                    paddingLeft={headerPaddingLeft}
                     aria-expanded={showHeaderCollapseAffordance ? !isHeaderCollapsed : undefined}
                     data-repo-header-id={projectIdForHeader}
                     data-repo-header-index={repoHeaderIndex}
@@ -4344,7 +4347,6 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                     data-workspace-status={headerWorkspaceStatus ?? undefined}
                     data-workspace-pin-drop-target={isPinnedHeader ? '' : undefined}
                     className={cn(
-                      'group relative flex h-7 w-full items-center gap-1.5 pr-2 text-left transition-all',
                       isDraggableRepoHeader || isDraggableProjectGroupHeader
                         ? 'cursor-grab active:cursor-grabbing'
                         : 'cursor-pointer',
@@ -4360,7 +4362,38 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                         'rounded-md bg-worktree-sidebar-accent ring-1 ring-worktree-sidebar-ring/40',
                       row.repo && 'overflow-hidden'
                     )}
-                    style={{ paddingLeft: headerPaddingLeft }}
+                    icon={
+                      row.icon ? (
+                        row.repo ? (
+                          <RepoIconGlyph
+                            repoIcon={row.repo.repoIcon}
+                            color={repoHeaderColor}
+                            className="size-4"
+                            iconClassName="size-3.5"
+                          />
+                        ) : (
+                          <row.icon className="size-3" />
+                        )
+                      ) : undefined
+                    }
+                    iconClassName={cn(
+                      repoHeaderColor ? 'text-muted-foreground' : row.tone,
+                      (isDraggableRepoHeader || isDraggableProjectGroupHeader) &&
+                        'hover:cursor-grab active:cursor-grabbing'
+                    )}
+                    iconProps={{
+                      'data-repo-header-drag-handle': isDraggableRepoHeader ? '' : undefined,
+                      'data-project-group-header-drag-handle': isDraggableProjectGroupHeader
+                        ? ''
+                        : undefined
+                    }}
+                    label={row.label}
+                    labelAfter={
+                      <>
+                        <RepoForkIndicator upstream={row.repo?.upstream} />
+                        <FolderPathStatusIndicator status={projectGroupPathStatus} />
+                      </>
+                    }
                     onDragOver={
                       isPinnedHeader
                         ? handleWorkspacePinDragOver
@@ -4404,62 +4437,19 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                       }
                     }}
                   >
-                    {row.icon ? (
-                      <div
-                        data-repo-header-drag-handle={isDraggableRepoHeader ? '' : undefined}
-                        data-project-group-header-drag-handle={
-                          isDraggableProjectGroupHeader ? '' : undefined
-                        }
-                        className={cn(
-                          'flex size-4 shrink-0 items-center justify-center rounded-[4px]',
-                          repoHeaderColor ? 'text-muted-foreground' : row.tone,
-                          (isDraggableRepoHeader || isDraggableProjectGroupHeader) &&
-                            'hover:cursor-grab active:cursor-grabbing'
-                        )}
-                      >
-                        {row.repo ? (
-                          <RepoIconGlyph
-                            repoIcon={row.repo.repoIcon}
-                            color={repoHeaderColor}
-                            className="size-4"
-                            iconClassName="size-3.5"
-                          />
-                        ) : (
-                          <row.icon className="size-3" />
-                        )}
-                      </div>
-                    ) : null}
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex min-w-0 items-center gap-1.5">
-                        <div className="min-w-0 truncate text-[13px] font-semibold leading-none">
-                          {row.label}
-                        </div>
-                        <RepoForkIndicator upstream={row.repo?.upstream} />
-                        <FolderPathStatusIndicator status={projectGroupPathStatus} />
-                      </div>
-                    </div>
-
                     <ProjectHeaderActions>
                       {showHeaderCollapseAffordance ? (
-                        <div
-                          className="flex size-5 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"
-                          data-repo-header-collapse-affordance=""
-                          aria-hidden
+                        <SidebarDisclosure
+                          expanded={!isHeaderCollapsed}
+                          dataAttribute="repo-header-collapse"
+                          itemLabel={row.label}
                           onPointerDown={handleRepoHeaderCollapseAffordancePointerDown}
                           onClick={(event) => {
                             event.preventDefault()
                             event.stopPropagation()
                             toggleGroupWithScrollAnchor(row.key)
                           }}
-                        >
-                          <ChevronDown
-                            className={cn(
-                              'size-3.5 transition-transform',
-                              isHeaderCollapsed && '-rotate-90'
-                            )}
-                          />
-                        </div>
+                        />
                       ) : null}
 
                       {isProjectGroupHeader && !row.repo && row.projectGroup?.id ? (
@@ -4839,7 +4829,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                         </Tooltip>
                       ) : null}
                     </ProjectHeaderActions>
-                  </div>
+                  </SidebarProjectHeader>
                 </div>
               )
             }

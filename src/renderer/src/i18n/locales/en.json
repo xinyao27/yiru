@@ -4809,7 +4809,8 @@
           "changesAndGit": "Changes and Git",
           "changesDescription": "Worktree status, diffs, history, branch, and upstream state appear here.",
           "mutableMode": "This connection can use worktree mutation controls.",
-          "readOnlyMode": "This public worktree is read-only until its owner grants control."
+          "readOnlyMode": "This public worktree is read-only until its owner grants control.",
+          "noSessions": "This shared worktree has no Terminal or agent sessions yet."
         },
         "SpoolFileActionDialog": {
           "nameLabel": "Name",
@@ -4848,7 +4849,11 @@
           "diffUnavailable": "This diff is unavailable.",
           "previousChunk": "Previous chunk",
           "nextChunk": "Next chunk",
-          "byteRange": "{{value0}}–{{value1}} / {{value2}} bytes"
+          "byteRange": "{{value0}}–{{value1}} / {{value2}} bytes",
+          "back": "Back to files",
+          "fileActions": "File actions",
+          "workingCompact": "Working",
+          "stagedCompact": "Staged"
         },
         "SpoolFileTree": {
           "up": "Up one directory",
@@ -4884,7 +4889,8 @@
           "staged": "Staged",
           "untracked": "Untracked",
           "unstaged": "Unstaged",
-          "unavailable": "This diff is unavailable."
+          "unavailable": "This diff is unavailable.",
+          "back": "Back"
         },
         "SpoolGitPane": {
           "refreshFailed": "Could not load Git state.",

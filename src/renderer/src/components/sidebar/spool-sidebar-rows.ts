@@ -34,6 +34,7 @@ export type SpoolProjectSidebarRow = {
 
 export type SpoolWorktreeSidebarRow = {
   type: 'spool-worktree'
+  kind: SpoolWorktreeCatalogEntry['kind']
   key: string
   desktopRef: string
   connectionEpoch: number
@@ -144,6 +145,7 @@ export function projectSpoolSidebarRows(input: SpoolSidebarProjectionInput): Spo
         )
         rows.push({
           type: 'spool-worktree',
+          kind: worktree.kind,
           key: createSpoolSidebarRowKey(
             'spool-worktree',
             desktop.desktopRef,
@@ -158,7 +160,9 @@ export function projectSpoolSidebarRows(input: SpoolSidebarProjectionInput): Spo
           name: worktree.name,
           branch: worktree.branch,
           expanded: worktreeExpanded,
-          active: worktreeActive && !input.activeRoute?.sessionRef,
+          // Why: focused child sessions still belong to the selected Worktree,
+          // matching the local card's active surface while an agent row is open.
+          active: worktreeActive,
           sessionCount: worktree.sessions.length,
           sessionCatalogStatus: worktree.sessionCatalog.status
         })

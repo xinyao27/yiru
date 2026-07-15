@@ -85,11 +85,13 @@ Spool
 ▸ Alice · Linux workstation
 ```
 
-Desktop rows use the same compact machine-card treatment as Orca's existing Host rows. Hovering a Desktop opens a card with its Claude and Codex usage, rendered with the same provider segments and global used/remaining preference as the status bar. Quota does not consume permanent rows in the narrow navigation tree.
+Desktop and Project rows reuse Orca's existing Project-header shell and disclosure affordance; Worktree rows reuse the existing Worktree-card surface. Spool does not define parallel hover backgrounds, arrow colors, or row chrome. The hierarchy uses the native anchors with one additional level for the Desktop: Desktop 10px, Project 20px, Worktree content 30px, and Session 48px. Hovering a Desktop opens a card with its Claude and Codex usage, rendered with the same provider segments and global used/remaining preference as the status bar. Quota does not consume permanent rows in the narrow navigation tree.
 
 The owner still sees Private worktrees in their normal local Orca sidebar. Another Desktop receives only Public worktrees, so a Private worktree's name, path, branch, sessions, counts, and activity do not cross the connection.
 
-Session rows are deliberately simple. Spool lists every session the owner can attribute to a Public worktree without adding `Live`, `Stopped`, or `Resumable` categories to the navigation. Selecting a live session attaches its terminal. Selecting a historical session does not open a separate transcript UI: once control is granted, the owner Desktop resumes the exact Claude or Codex session in that worktree and Spool immediately attaches the resulting terminal. Without control, the existing worktree-level request flow remains the only way to authorize that quota-consuming mutation. An unavailable session reports the observed failure only after the user tries to open it.
+Session rows are deliberately simple. Spool lists every terminal-backed session the owner can attribute to a Public worktree without adding `Live`, `Stopped`, or `Resumable` categories to the navigation. Plain shells use the Terminal glyph; Claude and Codex sessions use their provider glyph. Selecting a live session attaches its terminal. Selecting a historical session does not open a separate transcript UI: once control is granted, the owner Desktop resumes the exact Claude or Codex session in that worktree and Spool immediately attaches the resulting terminal. Without control, the existing worktree-level request flow remains the only way to authorize that quota-consuming mutation. An unavailable session reports the observed failure only after the user tries to open it.
+
+Opening a shared Worktree uses Orca's normal workbench presentation. The center uses the standard pane and overflow-aware tab strip for plain Terminals and explicitly opened agent sessions. To keep a paged history of tens of thousands of sessions from becoming tens of thousands of horizontal DOM nodes, the workbench strip keeps a bounded set of leading and recently selected sessions, always including the active one; the virtualized left tree remains the complete session navigator. The standard right-sidebar frame exposes Explorer plus Source Control for Git worktrees and Explorer only for folder worktrees. File and change selection drills into preview/diff in that right column with a Back action. These are presentation seams over Spool's checked RPC; the renderer does not create a fake local Worktree, persist remote tabs, or route remote actions through local filesystem and Git clients.
 
 The UI follows `docs/STYLEGUIDE.md`: existing sidebar tokens, quiet monochrome chrome, shadcn primitives, existing list-row states, and color reserved for meaningful application state.
 
@@ -283,7 +285,7 @@ Provider, Git, SSH, and system credentials stay on the host, but a granted shell
 
 - Persist Public/Private on worktrees, defaulting every new worktree to Private.
 - Add worktree visibility actions and project-level bulk actions.
-- Add the Desktop → Project → Worktree → Sessions sidebar hierarchy using realistic static data.
+- Add the Desktop → Project → Worktree → Sessions sidebar hierarchy by reusing the native Project header, Worktree card, and disclosure presentation seams.
 - Prototype the Public read-only header, `Request control`, approval, active-control, and revocation states.
 - Validate density and hierarchy against `docs/STYLEGUIDE.md` before networking work.
 

@@ -1,9 +1,10 @@
 import type React from 'react'
-import { ChevronRight, Folder } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { TruncatedSidebarLabel } from './truncated-sidebar-label'
+import { Folder } from 'lucide-react'
 import type { SpoolProjectSidebarRow } from './spool-sidebar-rows'
 import { getProjectGroupHeaderPaddingLeft } from './worktree-list-indentation'
+import { ProjectHeaderActions } from './ProjectHeaderActions'
+import { SidebarDisclosure } from './SidebarDisclosure'
+import { SidebarProjectHeader } from './SidebarProjectHeader'
 
 type SpoolProjectRowProps = {
   row: SpoolProjectSidebarRow
@@ -12,31 +13,44 @@ type SpoolProjectRowProps = {
 
 export function SpoolProjectRow({ row, onToggle }: SpoolProjectRowProps): React.JSX.Element {
   const hasWorktrees = row.worktreeCount > 0
+  // Why: A shared Project is one compact tree step beneath its Desktop.
   return (
-    <button
-      type="button"
-      disabled={!hasWorktrees}
+    <SidebarProjectHeader
+      role="button"
+      tabIndex={hasWorktrees ? 0 : -1}
       aria-expanded={hasWorktrees ? row.expanded : undefined}
-      onClick={onToggle}
-      className={cn(
-        'flex h-7 w-full min-w-0 items-center gap-1.5 rounded-md pr-2 text-left',
-        'text-[13px] font-semibold leading-none text-worktree-sidebar-foreground transition-colors',
-        'hover:bg-worktree-sidebar-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring',
-        'disabled:cursor-default disabled:hover:bg-transparent'
-      )}
-      style={{ paddingLeft: getProjectGroupHeaderPaddingLeft(0) }}
+      aria-disabled={!hasWorktrees}
+      onClick={hasWorktrees ? onToggle : undefined}
+      onKeyDown={(event) => {
+        if (
+          event.target !== event.currentTarget ||
+          !hasWorktrees ||
+          (event.key !== 'Enter' && event.key !== ' ')
+        ) {
+          return
+        }
+        event.preventDefault()
+        onToggle()
+      }}
+      className={hasWorktrees ? 'cursor-pointer' : 'cursor-default'}
+      paddingLeft={getProjectGroupHeaderPaddingLeft(1)}
+      icon={<Folder aria-hidden="true" className="size-3" />}
+      iconClassName="text-muted-foreground"
+      label={row.name}
     >
-      <Folder aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-      <TruncatedSidebarLabel text={row.name} className="min-w-0 flex-1" />
       {hasWorktrees ? (
-        <ChevronRight
-          aria-hidden="true"
-          className={cn(
-            'size-3 shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none',
-            row.expanded && 'rotate-90'
-          )}
-        />
+        <ProjectHeaderActions>
+          <SidebarDisclosure
+            expanded={row.expanded}
+            itemLabel={row.name}
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              onToggle()
+            }}
+          />
+        </ProjectHeaderActions>
       ) : null}
-    </button>
+    </SidebarProjectHeader>
   )
 }
