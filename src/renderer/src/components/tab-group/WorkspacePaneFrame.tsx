@@ -48,7 +48,7 @@ export function WorkspacePaneFrame({
       {/* Why: local and shared worktrees use one pane strip so titlebar drag regions,
           control clearances, and tab alignment cannot drift between the two surfaces. */}
       <div
-        className="h-[32px] shrink-0 border-b border-border bg-card"
+        className="h-[36px] shrink-0 border-b border-border bg-card"
         data-tab-group-strip-id={stripId}
         data-terminal-focus-release-surface="true"
         data-worktree-id={worktreeId}
