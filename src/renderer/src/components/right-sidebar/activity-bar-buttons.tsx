@@ -84,7 +84,7 @@ export function TopActivityOverflowMenu({
           return (
             <DropdownMenuItem
               key={item.id}
-              onSelect={() => onSelect(item.id)}
+              onClick={() => onSelect(item.id)}
               className={cn(active && 'bg-accent text-accent-foreground')}
               aria-current={active ? 'page' : undefined}
             >

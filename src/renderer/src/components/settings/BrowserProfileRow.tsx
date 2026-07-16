@@ -190,9 +190,7 @@ export function BrowserProfileRow({
                       {browser.profiles.map((bp) => (
                         <DropdownMenuItem
                           key={bp.directory}
-                          onSelect={() =>
-                            void handleImportFromBrowser(browser.family, bp.directory)
-                          }
+                          onClick={() => void handleImportFromBrowser(browser.family, bp.directory)}
                         >
                           {bp.name}
                         </DropdownMenuItem>
@@ -203,7 +201,7 @@ export function BrowserProfileRow({
               ) : (
                 <DropdownMenuItem
                   key={browser.family}
-                  onSelect={() => void handleImportFromBrowser(browser.family)}
+                  onClick={() => void handleImportFromBrowser(browser.family)}
                 >
                   {translate(
                     'auto.components.settings.BrowserProfileRow.c5a273a809',
@@ -214,7 +212,7 @@ export function BrowserProfileRow({
               )
             )}
             {detectedBrowsers.length > 0 && <DropdownMenuSeparator />}
-            <DropdownMenuItem onSelect={() => void handleImportFromFile()}>
+            <DropdownMenuItem onClick={() => void handleImportFromFile()}>
               {translate('auto.components.settings.BrowserProfileRow.ebb78dfd6f', 'From File…')}
             </DropdownMenuItem>
           </DropdownMenuContent>

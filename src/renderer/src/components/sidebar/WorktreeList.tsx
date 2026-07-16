@@ -4537,7 +4537,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                             onKeyDown={stopRepoHeaderMenuEvent}
                           >
                             <DropdownMenuItem
-                              onSelect={() => {
+                              onClick={() => {
                                 if (row.projectGroup?.id) {
                                   handleRenameProjectGroup(row.projectGroup.id, row.label)
                                 }
@@ -4550,7 +4550,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               variant="destructive"
-                              onSelect={() => {
+                              onClick={() => {
                                 if (row.projectGroup?.id) {
                                   handleDeleteProjectGroup(row.projectGroup.id, row.label)
                                 }
@@ -4672,7 +4672,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                             onKeyDown={stopRepoHeaderMenuEvent}
                           >
                             <DropdownMenuItem
-                              onSelect={() => {
+                              onClick={() => {
                                 if (row.repo) {
                                   handleOpenRepoSettings(row.repo.id)
                                 }
@@ -4685,7 +4685,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                               )}
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onSelect={() => {
+                              onClick={() => {
                                 if (row.repo) {
                                   handleOpenRepoSettings(
                                     row.repo.id,
@@ -4702,7 +4702,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                             </DropdownMenuItem>
                             {row.repo && isGitRepoKind(row.repo) ? (
                               <DropdownMenuItem
-                                onSelect={() => {
+                                onClick={() => {
                                   if (row.repo) {
                                     handleOpenWorktreeVisibility(row.repo.id)
                                   }
@@ -4715,7 +4715,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                             {row.repo && spoolProjectId && projectSpoolVisibility ? (
                               <DropdownMenuItem
                                 disabled={spoolProjectVisibilityPending.has(spoolProjectId)}
-                                onSelect={() => {
+                                onClick={() => {
                                   if (!row.repo) {
                                     return
                                   }
@@ -4746,7 +4746,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                               </DropdownMenuItem>
                             ) : null}
                             <DropdownMenuItem
-                              onSelect={() => {
+                              onClick={() => {
                                 if (row.repo) {
                                   handleCreateGroupFromRepo(row.repo)
                                 }
@@ -4772,7 +4772,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                                     <DropdownMenuItem
                                       key={group.id}
                                       disabled={row.repo?.projectGroupId === group.id}
-                                      onSelect={() => {
+                                      onClick={() => {
                                         if (row.repo) {
                                           handleMoveProjectToGroup(row.repo, group.id)
                                         }
@@ -4786,7 +4786,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                             ) : null}
                             {row.repo.projectGroupId ? (
                               <DropdownMenuItem
-                                onSelect={() => {
+                                onClick={() => {
                                   if (row.repo) {
                                     handleRemoveProjectFromGroup(row.repo)
                                   }
@@ -4802,7 +4802,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               variant="destructive"
-                              onSelect={() => {
+                              onClick={() => {
                                 if (row.repo) {
                                   handleRemoveProject(row.repo)
                                 }

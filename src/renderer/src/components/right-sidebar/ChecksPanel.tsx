@@ -284,11 +284,11 @@ export function ChecksPanelReviewHeader({
             }
           />
           <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuItem disabled={!canUnlinkPullRequest} onSelect={onUnlinkPullRequest}>
+            <DropdownMenuItem disabled={!canUnlinkPullRequest} onClick={onUnlinkPullRequest}>
               <Unlink className="size-3.5" />
               {translate('auto.components.right.sidebar.ChecksPanel.7202f4a40a', 'unlink PR')}
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onLinkAnotherPullRequest}>
+            <DropdownMenuItem onClick={onLinkAnotherPullRequest}>
               <Link className="size-3.5" />
               {translate('auto.components.right.sidebar.ChecksPanel.07871c0589', 'Link another PR')}
             </DropdownMenuItem>

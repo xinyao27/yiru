@@ -286,28 +286,28 @@ export default function BrowserTab({
             groupId={dragData.groupId}
             trailingSeparator
           />
-          <DropdownMenuItem onSelect={onDuplicate}>
+          <DropdownMenuItem onClick={onDuplicate}>
             <Copy className="size-3.5" />
             {translate('auto.components.tab.bar.BrowserTab.5d6e89891f', 'Duplicate Tab')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={onTogglePin}>
+          <DropdownMenuItem onClick={onTogglePin}>
             {isPinned ? <PinOff className="size-3.5" /> : <Pin className="size-3.5" />}
             {isPinned
               ? translate('auto.components.tab.bar.BrowserTab.c5aaee8c39', 'Unpin Tab')
               : translate('auto.components.tab.bar.BrowserTab.911542656f', 'Pin Tab')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => !isPinned && onClose()} disabled={isPinned}>
+          <DropdownMenuItem onClick={() => !isPinned && onClose()} disabled={isPinned}>
             <X className="size-3.5" />
             {translate('auto.components.tab.bar.BrowserTab.1611a1324b', 'Close')}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={onCloseToRight} disabled={!hasTabsToRight}>
+          <DropdownMenuItem onClick={onCloseToRight} disabled={!hasTabsToRight}>
             <PanelRightClose className="size-3.5" />
             {translate('auto.components.tab.bar.BrowserTab.9dd880bd56', 'Close Tabs To The Right')}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={() => void window.api.shell.openUrl(openInBrowserUrl)}
+            onClick={() => void window.api.shell.openUrl(openInBrowserUrl)}
             disabled={!isHttpUrl}
           >
             <ExternalLink className="size-3.5" />

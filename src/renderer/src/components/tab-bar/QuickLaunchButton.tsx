@@ -197,7 +197,7 @@ function QuickLaunchAgentMenuItemsInner({
         return (
           <DropdownMenuItem
             key={agent}
-            onSelect={() => runLaunch(agent)}
+            onClick={() => runLaunch(agent)}
             className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
             title={translate(
               'auto.components.tab.bar.QuickLaunchButton.ec2adf093e',
@@ -214,7 +214,7 @@ function QuickLaunchAgentMenuItemsInner({
         )
       })}
       <DropdownMenuItem
-        onSelect={openAgentSettings}
+        onClick={openAgentSettings}
         className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium text-muted-foreground"
       >
         <SettingsIcon className="size-4" />

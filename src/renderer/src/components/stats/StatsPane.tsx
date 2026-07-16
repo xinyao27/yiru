@@ -175,7 +175,7 @@ export function StatsPane(): React.JSX.Element {
             />
             <DropdownMenuContent align="end" className="w-44">
               {USAGE_ANALYTICS_OPTIONS.map((option) => (
-                <DropdownMenuItem key={option.id} onSelect={() => setActiveUsageTab(option.id)}>
+                <DropdownMenuItem key={option.id} onClick={() => setActiveUsageTab(option.id)}>
                   <span className="flex min-w-0 items-center gap-2">
                     <UsageAnalyticsOptionIcon tab={option.id} />
                     <span className="truncate">{option.label}</span>

@@ -44,7 +44,7 @@ export function MonacoGutterContextMenu({
       />
       <DropdownMenuContent sideOffset={0} align="start">
         <DropdownMenuItem
-          onSelect={() => window.api.ui.writeClipboardText(formatPathLineReference(filePath, line))}
+          onClick={() => window.api.ui.writeClipboardText(formatPathLineReference(filePath, line))}
         >
           <Copy className="w-3.5 h-3.5 mr-1.5" />
           {translate(
@@ -53,7 +53,7 @@ export function MonacoGutterContextMenu({
           )}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={() =>
+          onClick={() =>
             window.api.ui.writeClipboardText(formatPathLineReference(relativePath, line))
           }
         >
@@ -64,7 +64,7 @@ export function MonacoGutterContextMenu({
           )}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={async () => {
+          onClick={async () => {
             const state = useAppStore.getState()
             const activeFile = state.openFiles.find((f) => f.filePath === filePath)
             if (!activeFile) {

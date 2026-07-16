@@ -843,10 +843,11 @@ function ClaudeSwitcherMenu({
         {translate('auto.components.status.bar.StatusBar.d450654fa2', 'Claude Account')}
       </DropdownMenuLabel>
       <DropdownMenuItem
-        onSelect={(event) => {
+        onClick={(event) => {
           event.preventDefault()
           handleAccountsExpandedToggle()
         }}
+        closeOnClick={false}
       >
         <span className="max-w-[180px] truncate text-[12px] text-foreground">
           {activeTarget?.label ??
@@ -878,12 +879,13 @@ function ClaudeSwitcherMenu({
                 <DropdownMenuItem
                   key={`${selectedGroup.key}:${target.id ?? 'system'}`}
                   disabled={isSwitching || target.active}
-                  onSelect={(event) => {
+                  onClick={(event) => {
                     event.preventDefault()
                     if (!target.active) {
                       void handleSelectAccount(target.id, target.runtimeTarget)
                     }
                   }}
+                  closeOnClick={false}
                 >
                   <div className="flex w-full flex-col gap-0.5">
                     <div className="flex min-w-0 items-center gap-2">
@@ -917,7 +919,7 @@ function ClaudeSwitcherMenu({
       ) : null}
       <DropdownMenuSeparator />
       <DropdownMenuItem
-        onSelect={() => {
+        onClick={() => {
           openSettingsTarget({
             pane: 'accounts',
             repoId: null,
@@ -1427,10 +1429,11 @@ function CodexSwitcherMenu({
           {canRedeemReset ? (
             <DropdownMenuItem
               disabled={isRedeemingReset}
-              onSelect={(event) => {
+              onClick={(event) => {
                 event.preventDefault()
                 handleResetMenuSelect()
               }}
+              closeOnClick={false}
             >
               {isRedeemingReset ? (
                 <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
@@ -1447,10 +1450,11 @@ function CodexSwitcherMenu({
         {translate('auto.components.status.bar.StatusBar.7657e3db9c', 'Codex Account')}
       </DropdownMenuLabel>
       <DropdownMenuItem
-        onSelect={(event) => {
+        onClick={(event) => {
           event.preventDefault()
           handleAccountsExpandedToggle()
         }}
+        closeOnClick={false}
       >
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 py-0.5 text-[12px]">
           <div className="flex min-w-0 items-center gap-1.5">
@@ -1488,7 +1492,7 @@ function CodexSwitcherMenu({
                   return (
                     <DropdownMenuItem
                       key={`${selectedGroup.key}:${target.id ?? 'system'}`}
-                      onSelect={(event) => {
+                      onClick={(event) => {
                         // Why: account switching may need an immediate follow-up
                         // restart action for live Codex tabs. Prevent the menu from
                         // auto-closing so that prompt can stay within the same
@@ -1503,6 +1507,7 @@ function CodexSwitcherMenu({
                         }
                       }}
                       disabled={isBusy || target.active}
+                      closeOnClick={false}
                     >
                       <div className="flex w-full min-w-0 flex-col gap-0.5">
                         <div className="flex min-w-0 items-center gap-2">
@@ -1549,7 +1554,7 @@ function CodexSwitcherMenu({
       {open ? <CodexRestartStatusPrompt /> : null}
       <DropdownMenuSeparator />
       <DropdownMenuItem
-        onSelect={() => {
+        onClick={() => {
           openSettingsTarget({
             pane: 'accounts',
             repoId: null,

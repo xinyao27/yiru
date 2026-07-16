@@ -184,21 +184,21 @@ export function KeybindingsFileActions(): React.JSX.Element {
           }
         />
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={() => void openKeybindingsFile()}>
+          <DropdownMenuItem onClick={() => void openKeybindingsFile()}>
             <ExternalLink className="size-3.5" />
             {translate(
               'auto.components.settings.KeybindingsFileActions.98f1a23e1c',
               'Open with Default App'
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => void openKeybindingsInExternalEditor('code')}>
+          <DropdownMenuItem onClick={() => void openKeybindingsInExternalEditor('code')}>
             <Code2 className="size-3.5" />
             {translate(
               'auto.components.settings.KeybindingsFileActions.1637f64033',
               'Open in VS Code'
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => void openKeybindingsInExternalEditor('cursor')}>
+          <DropdownMenuItem onClick={() => void openKeybindingsInExternalEditor('cursor')}>
             <Code2 className="size-3.5" />
             {translate(
               'auto.components.settings.KeybindingsFileActions.9e24c0e858',
@@ -206,14 +206,14 @@ export function KeybindingsFileActions(): React.JSX.Element {
             )}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => void revealKeybindingsFile()}>
+          <DropdownMenuItem onClick={() => void revealKeybindingsFile()}>
             <FolderOpen className="size-3.5" />
             {translate(
               'auto.components.settings.KeybindingsFileActions.a8a8d6b9d3',
               'Reveal in File Manager'
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => void reloadKeybindings()}>
+          <DropdownMenuItem onClick={() => void reloadKeybindings()}>
             <RefreshCw className="size-3.5" />
             {translate(
               'auto.components.settings.KeybindingsFileActions.abc49853fb',

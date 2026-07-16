@@ -297,7 +297,8 @@ export function VaultViewMenu({
             checked={agents.includes(agent)}
             disabled={agents.length === 1 && agents.includes(agent)}
             onCheckedChange={(checked) => onAgentEnabledChange(agent, checked === true)}
-            onSelect={(event) => event.preventDefault()}
+            onClick={(event) => event.preventDefault()}
+            closeOnClick={false}
           >
             <AgentIcon agent={agent} size={14} />
             {agentLabel(agent)}
@@ -348,7 +349,8 @@ export function VaultViewMenu({
         <DropdownMenuCheckboxItem
           checked={hideEmptySessions}
           onCheckedChange={(checked) => onHideEmptySessionsChange(checked === true)}
-          onSelect={(event) => event.preventDefault()}
+          onClick={(event) => event.preventDefault()}
+          closeOnClick={false}
         >
           {translate(
             'auto.components.right.sidebar.AiVaultPanelControls.hideEmptySessions',
@@ -358,7 +360,7 @@ export function VaultViewMenu({
         {adjustmentCount > 0 ? (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={onReset}>
+            <DropdownMenuItem onClick={onReset}>
               {translate(
                 'auto.components.right.sidebar.AiVaultPanelControls.resetView',
                 'Reset view'

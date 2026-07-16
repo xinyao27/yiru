@@ -102,7 +102,7 @@ export function FloatingTerminalIconContextMenu({
         <DropdownMenuContent className="w-52" sideOffset={0} align="start">
           <DropdownMenuItem
             className="whitespace-nowrap"
-            onSelect={() => {
+            onClick={() => {
               void updateSettings({ floatingTerminalTriggerLocation: moveAction.location })
             }}
           >
@@ -112,7 +112,7 @@ export function FloatingTerminalIconContextMenu({
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="whitespace-nowrap"
-            onSelect={() => {
+            onClick={() => {
               useAppStore.getState().recordFeatureInteraction('floating-workspace-hidden')
               void updateSettings({ floatingTerminalEnabled: false })
             }}

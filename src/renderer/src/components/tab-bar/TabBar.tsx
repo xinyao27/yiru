@@ -687,7 +687,7 @@ function TabBarInner({
         return (
           <DropdownMenuItem
             key={entry.shell}
-            onSelect={() => {
+            onClick={() => {
               // Why: the top-level Windows shell menu models shell
               // categories, not concrete executables. When the user
               // picked PowerShell 7+ in advanced settings, launching the
@@ -715,7 +715,7 @@ function TabBarInner({
       })
     ) : (
       <DropdownMenuItem
-        onSelect={() => {
+        onClick={() => {
           queueNewActiveTerminalFocusAfterNewTabMenuClose()
           onNewTerminalTab()
         }}
@@ -728,7 +728,7 @@ function TabBarInner({
     )
   const newBrowserMenuItem = !terminalOnly ? (
     <DropdownMenuItem
-      onSelect={onNewBrowserTab}
+      onClick={onNewBrowserTab}
       className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
     >
       <Globe className="size-4 text-muted-foreground" />
@@ -743,7 +743,7 @@ function TabBarInner({
           <TooltipTrigger
             render={
               <DropdownMenuItem
-                onSelect={onNewSimulatorTab}
+                onClick={onNewSimulatorTab}
                 className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
               >
                 <Smartphone className="size-4 text-muted-foreground" />
@@ -761,7 +761,7 @@ function TabBarInner({
         </Tooltip>
       ) : (
         <DropdownMenuItem
-          onSelect={onNewSimulatorTab}
+          onClick={onNewSimulatorTab}
           className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
         >
           <Smartphone className="size-4 text-muted-foreground" />
@@ -773,7 +773,7 @@ function TabBarInner({
   const newMarkdownMenuItem =
     !terminalOnly && onNewFileTab ? (
       <DropdownMenuItem
-        onSelect={onNewFileTab}
+        onClick={onNewFileTab}
         className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
       >
         <FilePlus className="size-4 text-muted-foreground" />
@@ -784,7 +784,7 @@ function TabBarInner({
   const openMarkdownMenuItem =
     !terminalOnly && onOpenFileTab ? (
       <DropdownMenuItem
-        onSelect={onOpenFileTab}
+        onClick={onOpenFileTab}
         className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
       >
         <FileText className="size-4 text-muted-foreground" />

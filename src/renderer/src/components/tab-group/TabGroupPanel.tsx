@@ -235,7 +235,7 @@ export default function TabGroupPanel({
                 <DropdownMenuContent align="end" side="bottom" sideOffset={4}>
                   <DropdownMenuItem
                     variant="destructive"
-                    onSelect={() => {
+                    onClick={() => {
                       commands.closeGroup()
                     }}
                   >

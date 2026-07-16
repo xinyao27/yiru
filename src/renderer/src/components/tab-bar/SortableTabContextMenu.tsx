@@ -167,7 +167,7 @@ export function SortableTabContextMenu({
         {canToggleViewMode && onToggleViewMode ? (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={onToggleViewMode}>
+            <DropdownMenuItem onClick={onToggleViewMode}>
               {isChatView ? (
                 <SquareTerminal className="size-3.5 shrink-0" />
               ) : (
@@ -186,7 +186,7 @@ export function SortableTabContextMenu({
           </>
         ) : null}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={onTogglePin}>
+        <DropdownMenuItem onClick={onTogglePin}>
           {isPinned ? (
             <PinOff className="size-3.5 shrink-0" />
           ) : (
@@ -197,16 +197,16 @@ export function SortableTabContextMenu({
             : translate('auto.components.tab.bar.SortableTabContextMenu.60f958ec75', 'Pin Tab')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => !isPinned && onClose(tab.id)} disabled={isPinned}>
+        <DropdownMenuItem onClick={() => !isPinned && onClose(tab.id)} disabled={isPinned}>
           <X className="size-3.5" />
           {translate('auto.components.tab.bar.SortableTabContextMenu.89359a36f7', 'Close')}
           {closeShortcut ? <DropdownMenuShortcut>{closeShortcut}</DropdownMenuShortcut> : null}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onCloseOthers(tab.id)} disabled={tabCount <= 1}>
+        <DropdownMenuItem onClick={() => onCloseOthers(tab.id)} disabled={tabCount <= 1}>
           <ListX className="size-3.5" />
           {translate('auto.components.tab.bar.SortableTabContextMenu.8d16f9cd30', 'Close Others')}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onCloseToRight(tab.id)} disabled={!hasTabsToRight}>
+        <DropdownMenuItem onClick={() => onCloseToRight(tab.id)} disabled={!hasTabsToRight}>
           <PanelRightClose className="size-3.5" />
           {translate(
             'auto.components.tab.bar.SortableTabContextMenu.c1ee099c7e',
@@ -214,7 +214,7 @@ export function SortableTabContextMenu({
           )}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={onRenameOpen}>
+        <DropdownMenuItem onClick={onRenameOpen}>
           <Pencil className="size-3.5" />
           {translate('auto.components.tab.bar.SortableTabContextMenu.2f697b3c31', 'Change Title')}
           {renameShortcut ? <DropdownMenuShortcut>{renameShortcut}</DropdownMenuShortcut> : null}
@@ -235,7 +235,7 @@ export function SortableTabContextMenu({
                     color.value ? 'border-transparent' : 'border-muted-foreground/50 bg-transparent'
                   }`}
                   style={color.value ? { backgroundColor: color.value } : undefined}
-                  onSelect={() => {
+                  onClick={() => {
                     onSetTabColor(tab.id, color.value)
                   }}
                 >

@@ -660,22 +660,22 @@ export function FileExplorerRow({
         onPointerUpCapture={stopRightButtonMenuSelection}
         finalFocus={false}
       >
-        <ContextMenuItem onSelect={() => onStartNew('file', targetDir, targetDepth)}>
+        <ContextMenuItem onClick={() => onStartNew('file', targetDir, targetDepth)}>
           <FilePlus />
           {translate('auto.components.right.sidebar.FileExplorerRow.37c875d827', 'New File')}
         </ContextMenuItem>
-        <ContextMenuItem onSelect={() => onStartNew('folder', targetDir, targetDepth)}>
+        <ContextMenuItem onClick={() => onStartNew('folder', targetDir, targetDepth)}>
           <FolderPlus />
           {translate('auto.components.right.sidebar.FileExplorerRow.f61af83316', 'New Folder')}
         </ContextMenuItem>
         <ContextMenuSeparator />
         {showCopyFileAction && (
-          <ContextMenuItem onSelect={handleCopyFile}>
+          <ContextMenuItem onClick={handleCopyFile}>
             <Copy />
             {translate('auto.components.right.sidebar.FileExplorerRow.98a79948b3', 'Copy')}
           </ContextMenuItem>
         )}
-        <ContextMenuItem onSelect={() => onCopyPaths('absolute')}>
+        <ContextMenuItem onClick={() => onCopyPaths('absolute')}>
           <Copy />
           {selectionSize > 1
             ? translate('auto.components.right.sidebar.FileExplorerRow.f9d7ca753d', 'Copy Paths')
@@ -684,7 +684,7 @@ export function FileExplorerRow({
             <ContextMenuShortcut>{copyPathShortcutLabel}</ContextMenuShortcut>
           ) : null}
         </ContextMenuItem>
-        <ContextMenuItem onSelect={() => onCopyPaths('relative')}>
+        <ContextMenuItem onClick={() => onCopyPaths('relative')}>
           <Copy />
           {selectionSize > 1
             ? translate(
@@ -700,13 +700,13 @@ export function FileExplorerRow({
           ) : null}
         </ContextMenuItem>
         {!node.isDirectory && (
-          <ContextMenuItem onSelect={() => onDuplicate(node)}>
+          <ContextMenuItem onClick={() => onDuplicate(node)}>
             <Files />
             {translate('auto.components.right.sidebar.FileExplorerRow.0fec99bfd7', 'Duplicate')}
           </ContextMenuItem>
         )}
         {canAddAsProject && (
-          <ContextMenuItem onSelect={onAddFolderAsProject}>
+          <ContextMenuItem onClick={onAddFolderAsProject}>
             <FolderPlus />
             {translate(
               'auto.components.right.sidebar.FileExplorerRow.1bb9be455c',
@@ -715,7 +715,7 @@ export function FileExplorerRow({
           </ContextMenuItem>
         )}
         {shouldShowOpenInTerminalAction(node) && (
-          <ContextMenuItem onSelect={onOpenInTerminal}>
+          <ContextMenuItem onClick={onOpenInTerminal}>
             <SquareTerminal />
             {translate(
               'auto.components.right.sidebar.FileExplorerRow.e887fa4b2e',
@@ -724,13 +724,13 @@ export function FileExplorerRow({
           </ContextMenuItem>
         )}
         {shouldShowViewFileAction(node) && (
-          <ContextMenuItem onSelect={onViewFile}>
+          <ContextMenuItem onClick={onViewFile}>
             <File />
             {translate('auto.components.right.sidebar.FileExplorerRow.1d8e182c32', 'View File')}
           </ContextMenuItem>
         )}
         {!node.isDirectory && activeWorktreeId && (
-          <ContextMenuItem onSelect={handleOpenInOrcaBrowser}>
+          <ContextMenuItem onClick={handleOpenInOrcaBrowser}>
             <Globe />
             {translate(
               'auto.components.right.sidebar.FileExplorerRow.dd112c81d2',
@@ -740,7 +740,7 @@ export function FileExplorerRow({
         )}
         {!node.isDirectory && activeWorktreeId && detectLanguage(node.path) === 'markdown' && (
           <ContextMenuItem
-            onSelect={() =>
+            onClick={() =>
               openMarkdownPreview({
                 filePath: node.path,
                 relativePath: node.relativePath,
@@ -757,13 +757,13 @@ export function FileExplorerRow({
           </ContextMenuItem>
         )}
         {showRemoteDownloadAction && (
-          <ContextMenuItem onSelect={handleDownload}>
+          <ContextMenuItem onClick={handleDownload}>
             <Download />
             {translate('auto.components.right.sidebar.FileExplorerRow.c2112579f6', 'Download')}
           </ContextMenuItem>
         )}
         {canCollapseFolderSubtree && shouldShowCollapseFolderAction(node, isExpanded) && (
-          <ContextMenuItem onSelect={onCollapseFolderSubtree}>
+          <ContextMenuItem onClick={onCollapseFolderSubtree}>
             <ListCollapse />
             {translate(
               'auto.components.right.sidebar.FileExplorerRow.d6a25618aa',
@@ -772,7 +772,7 @@ export function FileExplorerRow({
           </ContextMenuItem>
         )}
         {shouldShowFindInFolderAction(node) && (
-          <ContextMenuItem onSelect={onFindInFolder}>
+          <ContextMenuItem onClick={onFindInFolder}>
             <Search />
             {translate(
               'auto.components.right.sidebar.FileExplorerRow.0df0e5abac',
@@ -784,7 +784,7 @@ export function FileExplorerRow({
           </ContextMenuItem>
         )}
         <ContextMenuItem
-          onSelect={() => {
+          onClick={() => {
             const state = useAppStore.getState()
             const activeWorktree = Object.values(state.worktreesByRepo)
               .flat()
@@ -807,7 +807,7 @@ export function FileExplorerRow({
           {revealLabel}
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onSelect={() => onStartRename(node)}>
+        <ContextMenuItem onClick={() => onStartRename(node)}>
           <Pencil />
           {translate('auto.components.right.sidebar.FileExplorerRow.fc747429bf', 'Rename')}
           <ContextMenuShortcut>
@@ -816,7 +816,7 @@ export function FileExplorerRow({
               : translate('auto.components.right.sidebar.FileExplorerRow.a06551beee', 'Enter')}
           </ContextMenuShortcut>
         </ContextMenuItem>
-        <ContextMenuItem variant="destructive" onSelect={onRequestDelete}>
+        <ContextMenuItem variant="destructive" onClick={onRequestDelete}>
           <Trash2 />
           {translate('auto.components.right.sidebar.FileExplorerRow.addc01145f', 'Delete')}
           <ContextMenuShortcut>{deleteShortcutLabel}</ContextMenuShortcut>

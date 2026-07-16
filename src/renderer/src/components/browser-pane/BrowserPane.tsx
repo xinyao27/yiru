@@ -5737,7 +5737,7 @@ function BrowserPagePane({
                   }
                 />
                 <DropdownMenuContent align="start" sideOffset={4}>
-                  <DropdownMenuItem onSelect={handleGrabCopy}>
+                  <DropdownMenuItem onClick={handleGrabCopy}>
                     <Copy className="size-3.5" />
                     {translate(
                       'auto.components.browser.pane.BrowserPane.c2ef0359b9',
@@ -5746,7 +5746,7 @@ function BrowserPagePane({
                     <DropdownMenuShortcut>C</DropdownMenuShortcut>
                   </DropdownMenuItem>
                   {grab.payload?.screenshot?.dataUrl?.startsWith('data:image/png;base64,') ? (
-                    <DropdownMenuItem onSelect={handleGrabCopyScreenshot}>
+                    <DropdownMenuItem onClick={handleGrabCopyScreenshot}>
                       <Image className="size-3.5" />
                       {translate(
                         'auto.components.browser.pane.BrowserPane.1ded0d3168',
@@ -5757,7 +5757,7 @@ function BrowserPagePane({
                   ) : null}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onSelect={() => {
+                    onClick={() => {
                       grabMenuActionTakenRef.current = true
                       grab.cancel()
                     }}
@@ -5827,7 +5827,7 @@ function BrowserPagePane({
                         />
                         <DropdownMenuContent align="start" sideOffset={4}>
                           <DropdownMenuItem
-                            onSelect={() => {
+                            onClick={() => {
                               const dataUrl = grabToast.payload?.screenshot?.dataUrl
                               if (dataUrl?.startsWith('data:image/png;base64,')) {
                                 void window.api.ui.writeClipboardImage(dataUrl)

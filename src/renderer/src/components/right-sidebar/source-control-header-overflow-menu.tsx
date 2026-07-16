@@ -69,7 +69,7 @@ export function SourceControlHeaderOverflowMenu({
         </TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end" className="min-w-[180px]">
-        <DropdownMenuItem disabled={viewModeToggleDisabled} onSelect={onToggleViewMode}>
+        <DropdownMenuItem disabled={viewModeToggleDisabled} onClick={onToggleViewMode}>
           {sourceControlViewMode === 'tree' ? (
             <List className="size-3.5" />
           ) : (
@@ -77,11 +77,11 @@ export function SourceControlHeaderOverflowMenu({
           )}
           {viewModeLabel}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={onChangeBaseRef}>
+        <DropdownMenuItem onClick={onChangeBaseRef}>
           <Settings2 className="size-3.5" />
           {translate('auto.components.right.sidebar.SourceControl.476b77745b', 'Change Base Ref')}…
         </DropdownMenuItem>
-        <DropdownMenuItem disabled={branchCompareRefreshDisabled} onSelect={onRefreshBranchCompare}>
+        <DropdownMenuItem disabled={branchCompareRefreshDisabled} onClick={onRefreshBranchCompare}>
           <RefreshCw className="size-3.5" />
           {translate(
             'auto.components.right.sidebar.SourceControl.ed34038d0d',
@@ -91,7 +91,7 @@ export function SourceControlHeaderOverflowMenu({
         {diffCommentCount > 0 ? (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={onExpandNotes}>
+            <DropdownMenuItem onClick={onExpandNotes}>
               <MessageSquare className="size-3.5" />
               {translate('auto.components.right.sidebar.SourceControl.cc474e0b8c', 'Notes')}
               <span className="ml-auto text-[11px] tabular-nums text-muted-foreground">

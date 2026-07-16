@@ -113,7 +113,7 @@ export function SetupGuideSidebarEntry(): React.JSX.Element | null {
         }
       />
       <ContextMenuContent>
-        <ContextMenuItem onSelect={handleHideSetupGuide}>
+        <ContextMenuItem onClick={handleHideSetupGuide}>
           <EyeOff className="size-3.5" />
           {translate(
             'auto.components.sidebar.SetupGuideSidebarEntry.b0a7bfc34c',

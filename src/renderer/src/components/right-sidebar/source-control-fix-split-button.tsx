@@ -131,7 +131,7 @@ export function SourceControlFixSplitButton({
         <DropdownMenuContent align="end" className="min-w-[210px] p-1">
           {worktreeId && groupId && prompt && !disabledReason ? (
             <DropdownMenuItem
-              onSelect={() => setComposerOpen(true)}
+              onClick={() => setComposerOpen(true)}
               className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
             >
               <SlidersHorizontal className="size-4 text-muted-foreground" />

@@ -194,7 +194,7 @@ export default function HostedReviewActions({
                   <>
                     <DropdownMenuItem
                       disabled={menuDisabled}
-                      onSelect={() => void handleAutoMerge()}
+                      onClick={() => void handleAutoMerge()}
                     >
                       <GitMerge className="size-3.5" />
                       {mergePresentation.autoMergeAction.label}
@@ -206,7 +206,7 @@ export default function HostedReviewActions({
                   <DropdownMenuItem
                     key={method}
                     disabled={directMergeDisabled}
-                    onSelect={() => void handleMerge(method)}
+                    onClick={() => void handleMerge(method)}
                   >
                     <GitMerge className="size-3.5" />
                     {label}
@@ -216,7 +216,7 @@ export default function HostedReviewActions({
                 <DropdownMenuItem
                   variant="destructive"
                   disabled={menuDisabled}
-                  onSelect={() => void handleCloseReview()}
+                  onClick={() => void handleCloseReview()}
                 >
                   <GitPullRequestClosed className="size-3.5" />
                   {translate(

@@ -80,7 +80,7 @@ export function SourceControlEntryContextMenu({
     <ContextMenu onOpenChange={onOpenChange}>
       <ContextMenuTrigger render={children} />
       <ContextMenuContent className="w-52">
-        <ContextMenuItem onSelect={onView} disabled={!onView}>
+        <ContextMenuItem onClick={onView} disabled={!onView}>
           <Eye className="size-3.5" />
           {translate(
             'auto.components.right.sidebar.SourceControlEntryContextMenu.a1f2c8d901',
@@ -88,7 +88,7 @@ export function SourceControlEntryContextMenu({
           )}
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onSelect={handleCopyPath} disabled={!absolutePath}>
+        <ContextMenuItem onClick={handleCopyPath} disabled={!absolutePath}>
           <Copy className="size-3.5" />
           {translate('auto.components.right.sidebar.FileExplorerRow.b5d436aa30', 'Copy Path')}
         </ContextMenuItem>
@@ -102,7 +102,7 @@ export function SourceControlEntryContextMenu({
             {openInEntries.map((entry) => (
               <ContextMenuItem
                 key={entry.id}
-                onSelect={() => handleOpenInExternal(entry.target, entry.command)}
+                onClick={() => handleOpenInExternal(entry.target, entry.command)}
                 disabled={!absolutePath}
               >
                 {entry.target === 'file-manager' ? (
@@ -116,7 +116,7 @@ export function SourceControlEntryContextMenu({
               </ContextMenuItem>
             ))}
             <ContextMenuSeparator />
-            <ContextMenuItem onSelect={openOpenInAppsSettings}>
+            <ContextMenuItem onClick={openOpenInAppsSettings}>
               {translate(
                 'auto.components.sidebar.WorktreeOpenInMenu.1417fd8380',
                 'Customize apps...'
@@ -125,7 +125,7 @@ export function SourceControlEntryContextMenu({
           </ContextMenuSubContent>
         </ContextMenuSub>
         <ContextMenuSeparator />
-        <ContextMenuItem onSelect={handleRevealInOrcaExplorer} disabled={!absolutePath}>
+        <ContextMenuItem onClick={handleRevealInOrcaExplorer} disabled={!absolutePath}>
           <FolderOpen className="size-3.5" />
           {translate(
             'auto.components.right.sidebar.SourceControl.cc05b2d088',

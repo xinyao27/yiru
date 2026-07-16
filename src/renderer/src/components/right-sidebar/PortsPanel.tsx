@@ -692,30 +692,24 @@ function LocalPortRow({
         <ContextMenuLabel
           className={LOCAL_PORT_MENU_LABEL_CLASS}
         >{`:${port.port}`}</ContextMenuLabel>
-        <ContextMenuItem
-          className={LOCAL_PORT_MENU_ITEM_CLASS}
-          onSelect={() => handleOpenBrowser()}
-        >
+        <ContextMenuItem className={LOCAL_PORT_MENU_ITEM_CLASS} onClick={() => handleOpenBrowser()}>
           <ExternalLink size={13} />
           {openBrowserLabel}
         </ContextMenuItem>
-        <ContextMenuItem className={LOCAL_PORT_MENU_ITEM_CLASS} onSelect={handleCopy}>
+        <ContextMenuItem className={LOCAL_PORT_MENU_ITEM_CLASS} onClick={handleCopy}>
           <Copy size={13} />
           {translate('auto.components.right.sidebar.PortsPanel.792baeb7ed', 'Copy Address')}
         </ContextMenuItem>
         <ContextMenuItem
           className={LOCAL_PORT_MENU_ITEM_CLASS}
-          onSelect={() => {
+          onClick={() => {
             void window.api.ui.writeClipboardText(JSON.stringify(port, null, 2))
           }}
         >
           <Copy size={13} />
           {translate('auto.components.right.sidebar.PortsPanel.bdac206faf', 'Copy Details')}
         </ContextMenuItem>
-        <ContextMenuItem
-          className={LOCAL_PORT_MENU_ITEM_CLASS}
-          onSelect={() => onShowDetails(port)}
-        >
+        <ContextMenuItem className={LOCAL_PORT_MENU_ITEM_CLASS} onClick={() => onShowDetails(port)}>
           <Info size={13} />
           {translate('auto.components.right.sidebar.PortsPanel.a223459512', 'Show Details')}
         </ContextMenuItem>
@@ -724,7 +718,7 @@ function LocalPortRow({
           className={LOCAL_PORT_MENU_ITEM_CLASS}
           variant="destructive"
           disabled={!canStopProcess}
-          onSelect={() => onStop(port)}
+          onClick={() => onStop(port)}
         >
           <Trash2 size={13} />
           {translate('auto.components.right.sidebar.PortsPanel.f9528da632', 'Stop Process')}

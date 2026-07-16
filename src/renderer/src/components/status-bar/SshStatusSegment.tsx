@@ -392,7 +392,7 @@ export function SshStatusSegment({
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             recordFeatureInteraction('ssh')
             openSettingsTarget({ pane: 'servers', repoId: null })
             setActiveView('settings')

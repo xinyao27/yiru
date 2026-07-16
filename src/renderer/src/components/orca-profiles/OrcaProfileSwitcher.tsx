@@ -269,7 +269,7 @@ export function OrcaProfileSwitcher({
                   <DropdownMenuItem
                     key={profile.id}
                     disabled={profileActionDisabled}
-                    onSelect={() => handleSwitchProfile(profile.id)}
+                    onClick={() => handleSwitchProfile(profile.id)}
                     className="min-w-0"
                   >
                     <OrcaProfileAvatar profile={profile} />
@@ -290,7 +290,7 @@ export function OrcaProfileSwitcher({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 disabled={profileActionDisabled}
-                onSelect={() => setOrgMembersOpen(true)}
+                onClick={() => setOrgMembersOpen(true)}
               >
                 <Users />
                 {translate(
@@ -322,7 +322,7 @@ export function OrcaProfileSwitcher({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 disabled={profileActionDisabled}
-                onSelect={() => {
+                onClick={() => {
                   setManagementOpen(true)
                 }}
               >
@@ -331,7 +331,7 @@ export function OrcaProfileSwitcher({
               </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={profileActionDisabled}
-                onSelect={() => {
+                onClick={() => {
                   setDialogOpen(true)
                 }}
               >

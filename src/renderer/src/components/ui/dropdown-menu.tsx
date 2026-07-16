@@ -134,15 +134,18 @@ function DropdownMenuRadioItem({
   )
 }
 
+// Why: Base UI's Menu.GroupLabel throws unless nested in a Menu.Group, but
+// shadcn labels are used as free-floating section headers (as Radix allowed).
+// Render a plain styled div to preserve that usage without the group requirement.
 function DropdownMenuLabel({
   className,
   inset,
   ...props
-}: DropdownMenuPrimitive.GroupLabel.Props & {
+}: React.ComponentProps<'div'> & {
   inset?: boolean
 }) {
   return (
-    <DropdownMenuPrimitive.GroupLabel
+    <div
       data-slot="dropdown-menu-label"
       data-inset={inset}
       className={cn(

@@ -41,7 +41,7 @@ export function SessionActionMenuItems({
   return (
     <>
       {onJumpToOriginalPane ? (
-        <Item onSelect={onJumpToOriginalPane}>
+        <Item onClick={onJumpToOriginalPane}>
           <LocateFixed className="size-3.5" />
           {translate(
             'auto.components.right.sidebar.AiVaultSessionRow.jumpToOriginalPane',
@@ -50,7 +50,7 @@ export function SessionActionMenuItems({
         </Item>
       ) : null}
       {showJumpToWorktree ? (
-        <Item disabled={!onJumpToWorktree} onSelect={onJumpToWorktree}>
+        <Item disabled={!onJumpToWorktree} onClick={onJumpToWorktree}>
           <PanelTopOpen className="size-3.5" />
           {translate(
             'auto.components.right.sidebar.AiVaultSessionRow.jumpToWorktree',
@@ -58,12 +58,12 @@ export function SessionActionMenuItems({
           )}
         </Item>
       ) : null}
-      <Item disabled={resumeDisabled} onSelect={onResume}>
+      <Item disabled={resumeDisabled} onClick={onResume}>
         <Play className="size-3.5" />
         {resumeLabel}
       </Item>
       {onCopyResume ? (
-        <Item onSelect={onCopyResume}>
+        <Item onClick={onCopyResume}>
           <Copy className="size-3.5" />
           {translate(
             'auto.components.right.sidebar.AiVaultSessionRow.copyResumeCommand',
@@ -75,19 +75,19 @@ export function SessionActionMenuItems({
         <>
           <Separator />
           {onOpenLog ? (
-            <Item onSelect={onOpenLog}>
+            <Item onClick={onOpenLog}>
               <FileJson className="size-3.5" />
               {translate('auto.components.right.sidebar.AiVaultSessionRow.openLog', 'Open Log')}
             </Item>
           ) : null}
           {onRevealLog ? (
-            <Item onSelect={onRevealLog}>
+            <Item onClick={onRevealLog}>
               <FolderOpen className="size-3.5" />
               {translate('auto.components.right.sidebar.AiVaultSessionRow.revealLog', 'Reveal Log')}
             </Item>
           ) : null}
           {onOpenCwd ? (
-            <Item onSelect={onOpenCwd}>
+            <Item onClick={onOpenCwd}>
               <FolderOpen className="size-3.5" />
               {translate(
                 'auto.components.right.sidebar.AiVaultSessionRow.openWorkingDirectory',
@@ -98,13 +98,13 @@ export function SessionActionMenuItems({
         </>
       ) : null}
       <Separator />
-      <Item onSelect={onCopyId}>
+      <Item onClick={onCopyId}>
         {translate(
           'auto.components.right.sidebar.AiVaultSessionRow.copySessionId',
           'Copy Session ID'
         )}
       </Item>
-      <Item onSelect={onCopyPath}>
+      <Item onClick={onCopyPath}>
         {translate('auto.components.right.sidebar.AiVaultSessionRow.copyLogPath', 'Copy Log Path')}
       </Item>
     </>

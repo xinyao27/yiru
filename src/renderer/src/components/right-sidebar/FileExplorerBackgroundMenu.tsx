@@ -57,14 +57,14 @@ export function FileExplorerBackgroundMenu({
         onPointerUpCapture={stopRightButtonMenuSelection}
         finalFocus={false}
       >
-        <DropdownMenuItem onSelect={() => onStartNew('file', worktreePath, 0)}>
+        <DropdownMenuItem onClick={() => onStartNew('file', worktreePath, 0)}>
           <FilePlus />
           {translate(
             'auto.components.right.sidebar.FileExplorerBackgroundMenu.21fe46ed36',
             'New File'
           )}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onStartNew('folder', worktreePath, 0)}>
+        <DropdownMenuItem onClick={() => onStartNew('folder', worktreePath, 0)}>
           <FolderPlus />
           {translate(
             'auto.components.right.sidebar.FileExplorerBackgroundMenu.3b5e2dcb8d',

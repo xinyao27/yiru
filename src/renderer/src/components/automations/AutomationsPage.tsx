@@ -2488,13 +2488,14 @@ export default function AutomationsPage(): React.JSX.Element {
                   <ContextMenuContent className="w-48">
                     <ContextMenuItem
                       disabled={!automationRunAvailability.canRunNow}
-                      onSelect={(event) => {
+                      onClick={(event) => {
                         if (!automationRunAvailability.canRunNow) {
                           event.preventDefault()
                           return
                         }
                         void runNow(automation)
                       }}
+                      closeOnClick={false}
                     >
                       <Play className="size-3.5" />
                       <span className="min-w-0 truncate">
@@ -2506,11 +2507,11 @@ export default function AutomationsPage(): React.JSX.Element {
                           : automationRunAvailability.message}
                       </span>
                     </ContextMenuItem>
-                    <ContextMenuItem onSelect={() => void openEditDialog(automation)}>
+                    <ContextMenuItem onClick={() => void openEditDialog(automation)}>
                       <Pencil className="size-3.5" />
                       {translate('auto.components.automations.AutomationsPage.f4612e3f78', 'Edit')}
                     </ContextMenuItem>
-                    <ContextMenuItem onSelect={() => void toggleAutomation(automation)}>
+                    <ContextMenuItem onClick={() => void toggleAutomation(automation)}>
                       {automation.enabled ? (
                         <Pause className="size-3.5" />
                       ) : (
@@ -2529,7 +2530,7 @@ export default function AutomationsPage(): React.JSX.Element {
                     <ContextMenuSeparator />
                     <ContextMenuItem
                       variant="destructive"
-                      onSelect={() => requestDeleteAutomation(automation)}
+                      onClick={() => requestDeleteAutomation(automation)}
                     >
                       <Trash2 className="size-3.5" />
                       {translate(
@@ -2673,7 +2674,7 @@ export default function AutomationsPage(): React.JSX.Element {
                   <ContextMenuContent className="w-48">
                     <ContextMenuItem
                       disabled={actionDisabled}
-                      onSelect={() => requestExternalAction(entry.manager, entry.job, 'run')}
+                      onClick={() => requestExternalAction(entry.manager, entry.job, 'run')}
                     >
                       <Play className="size-3.5" />
                       <span className="min-w-0 truncate">
@@ -2687,7 +2688,7 @@ export default function AutomationsPage(): React.JSX.Element {
                     {entry.manager.provider === 'hermes' ? (
                       <ContextMenuItem
                         disabled={!entry.manager.canManage || externalActionKey !== null}
-                        onSelect={() => openEditExternalDialog(entry.manager, entry.job)}
+                        onClick={() => openEditExternalDialog(entry.manager, entry.job)}
                       >
                         <Pencil className="size-3.5" />
                         {translate(
@@ -2698,7 +2699,7 @@ export default function AutomationsPage(): React.JSX.Element {
                     ) : null}
                     <ContextMenuItem
                       disabled={actionDisabled}
-                      onSelect={() =>
+                      onClick={() =>
                         requestExternalAction(
                           entry.manager,
                           entry.job,
@@ -2725,7 +2726,7 @@ export default function AutomationsPage(): React.JSX.Element {
                     <ContextMenuItem
                       variant="destructive"
                       disabled={actionDisabled}
-                      onSelect={() => requestExternalAction(entry.manager, entry.job, 'delete')}
+                      onClick={() => requestExternalAction(entry.manager, entry.job, 'delete')}
                     >
                       <Trash2 className="size-3.5" />
                       {translate(

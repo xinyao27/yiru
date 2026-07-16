@@ -155,8 +155,8 @@ export function WorktreeOpenInMenuItems({
       {entries.map((entry) => (
         <DropdownMenuItem
           key={entry.id}
-          onClick={stopMenuPropagation}
-          onSelect={() => {
+          onClick={(event) => {
+            stopMenuPropagation(event)
             void openInWorktreePath(entry.target, entry.command)
           }}
           disabled={disabled}
@@ -199,8 +199,10 @@ export function WorktreeOpenInSubMenu({
         />
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={stopMenuPropagation}
-          onSelect={openOpenInAppsSettings}
+          onClick={(event) => {
+            stopMenuPropagation(event)
+            openOpenInAppsSettings()
+          }}
           disabled={disabled}
         >
           {translate('auto.components.sidebar.WorktreeOpenInMenu.1417fd8380', 'Customize apps...')}

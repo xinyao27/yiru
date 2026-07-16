@@ -152,7 +152,7 @@ export function EditorPanelHeaderPath({
         >
           <DropdownMenuItem
             disabled={!canRename}
-            onSelect={() => {
+            onClick={() => {
               skipMenuFocusRestoreRef.current = true
               openRenameInput()
             }}
@@ -164,7 +164,7 @@ export function EditorPanelHeaderPath({
           {!isVirtualEditorTab && (
             <>
               <DropdownMenuItem
-                onSelect={() => {
+                onClick={() => {
                   void window.api.ui.writeClipboardText(activeFile.filePath)
                 }}
               >
@@ -172,7 +172,7 @@ export function EditorPanelHeaderPath({
                 {translate('auto.components.editor.EditorPanelHeader.7c08a1f990', 'Copy Path')}
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={() => {
+                onClick={() => {
                   void window.api.ui.writeClipboardText(activeFile.relativePath)
                 }}
               >
@@ -186,7 +186,7 @@ export function EditorPanelHeaderPath({
             </>
           )}
           {canShowMarkdownPreview && (
-            <DropdownMenuItem onSelect={onOpenMarkdownPreview}>
+            <DropdownMenuItem onClick={onOpenMarkdownPreview}>
               <Eye className="w-3.5 h-3.5 mr-1.5" />
               {translate(
                 'auto.components.editor.EditorPanelHeader.4157f3cbf3',
@@ -197,7 +197,7 @@ export function EditorPanelHeaderPath({
           )}
           {canShowMarkdownPreview && <DropdownMenuSeparator />}
           {!isVirtualEditorTab && (
-            <DropdownMenuItem onSelect={onOpenContainingFolder}>
+            <DropdownMenuItem onClick={onOpenContainingFolder}>
               <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
               {revealLabel}
             </DropdownMenuItem>
