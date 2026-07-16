@@ -4,6 +4,7 @@ import type {
   SpoolHistoricalSessionCandidate,
   SpoolHistoricalSessionPurpose,
   SpoolLiveSessionCandidate,
+  SpoolMobileSessionTabsResult,
   SpoolOwnerHistoricalSessionRecord,
   SpoolSessionSource,
   SpoolSessionWorktreeIdentity
@@ -33,6 +34,7 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
   private readonly publicWorktrees = new Map<string, SpoolSessionWorktreeIdentity>()
   private readonly identityAliases = new SpoolSessionIdentityAliases()
   private readonly providerSessionObserver: SpoolProviderSessionObserver
+  private readonly liveSessionFingerprintByInstanceId = new Map<string, string>()
 
   constructor(
     private readonly reader: SpoolExecutionHostSessionReader,
@@ -83,6 +85,7 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
     // Why: invalidation is the lifecycle boundary that finally retires every
     // alias for this instance, including aliases retained across route replacements.
     this.identityAliases.forget(instanceId)
+    this.liveSessionFingerprintByInstanceId.delete(instanceId)
   }
 
   async listLiveSessions(
@@ -96,6 +99,15 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
       return []
     }
     this.rememberObservedWorktree(worktree)
+    const sessions = this.projectLiveSessions(worktree, snapshot)
+    this.updateLiveSessionFingerprint(worktree.instanceId, sessions)
+    return sessions
+  }
+
+  private projectLiveSessions(
+    worktree: SpoolSessionWorktreeIdentity,
+    snapshot: SpoolMobileSessionTabsResult
+  ): SpoolLiveSessionCandidate[] {
     this.providerSessionObserver.observeSnapshot(snapshot, worktree)
     const readyTabs = snapshot.tabs.filter(
       (tab): tab is ReadyMobileSessionTerminalTab =>
@@ -208,21 +220,38 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
   subscribe(listener: () => void): () => void {
     const unsubscribeReader =
       this.reader.subscribe?.((snapshot, request, providerSessions) => {
-        const observed = request ? this.observedWorktrees.resolve(request) : undefined
-        if (!observed) {
+        const observedScope = request ? this.observedWorktrees.resolve(request) : undefined
+        const observed = observedScope
+          ? this.publicWorktrees.get(observedScope.instanceId)
+          : undefined
+        if (
+          !observedScope ||
+          !observed ||
+          observed.worktreeId !== observedScope.worktreeId ||
+          !isSameSessionIdentityScope(observed, observedScope)
+        ) {
           // Why: the runtime reports every workspace's tab/status changes; only
           // Public worktrees may invalidate an in-flight Public session catalog.
           return
         }
+        let liveSessionsChanged = false
         if (snapshot) {
           // Why: paired runtimes can contain cloned worktree UUIDs; the originating
           // execution route must match before its provider id gains provenance.
-          this.providerSessionObserver.observeSnapshot(snapshot, observed)
+          liveSessionsChanged = this.updateLiveSessionFingerprint(
+            observed.instanceId,
+            this.projectLiveSessions(observed, snapshot)
+          )
         }
-        if (providerSessions) {
+        const providerSessionsChanged = Boolean(providerSessions?.length)
+        if (providerSessionsChanged && providerSessions) {
           this.providerSessionObserver.observeExplicit(providerSessions, observed)
         }
-        listener()
+        // Why: runtime snapshots include frequent status-only updates; rebuilding
+        // the same Public session rows must not abort their historical page scan.
+        if (liveSessionsChanged || providerSessionsChanged) {
+          listener()
+        }
       }) ?? (() => {})
     const unsubscribeSessionBindings = this.sessionBindings.subscribe(listener)
     return () => {
@@ -235,6 +264,16 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
     this.observedWorktrees.remember(worktree)
   }
 
+  private updateLiveSessionFingerprint(
+    instanceId: string,
+    sessions: readonly SpoolLiveSessionCandidate[]
+  ): boolean {
+    const fingerprint = JSON.stringify(sessions)
+    const previous = this.liveSessionFingerprintByInstanceId.get(instanceId)
+    this.liveSessionFingerprintByInstanceId.set(instanceId, fingerprint)
+    return previous !== fingerprint
+  }
+
   private unregisterPublicWorktreeRoute(worktree: SpoolSessionWorktreeIdentity): void {
     this.observedWorktrees.forget(worktree)
     this.reader.unregisterPublicWorktree?.(liveSessionReadRequest(worktree))
@@ -242,8 +281,8 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
 }
 
 function isSameSessionIdentityScope(
-  left: SpoolSessionWorktreeIdentity,
-  right: SpoolSessionWorktreeIdentity
+  left: Pick<SpoolSessionWorktreeIdentity, 'instanceId' | 'spoolIncarnationId' | 'actualHostScope'>,
+  right: Pick<SpoolSessionWorktreeIdentity, 'instanceId' | 'spoolIncarnationId' | 'actualHostScope'>
 ): boolean {
   return (
     left.instanceId === right.instanceId &&
