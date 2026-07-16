@@ -2,6 +2,11 @@ import { SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE } from '../../shared/spool/spoo
 import { SPOOL_MAX_LIVE_SESSIONS_PER_WORKTREE } from '../../shared/spool/spool-resource-limits'
 import { waitForSessionInventoryAbort } from '../ai-vault/session-inventory-abort'
 import { SpoolExecutionError } from './spool-execution-error'
+import {
+  projectSpoolSessionCatalogValue,
+  spoolSessionCatalogError,
+  tagSpoolSessionCatalogStage
+} from './spool-session-catalog-error'
 import { readSpoolHistoricalSessionPages } from './spool-historical-session-pages'
 import {
   matchesHistoricalSession,
@@ -70,7 +75,7 @@ export class SpoolSessionPageProjector {
     signal: AbortSignal
   ): Promise<SpoolSessionPageState> {
     signal.throwIfAborted()
-    const live = await sessionCatalogStage(
+    const live = await tagSpoolSessionCatalogStage(
       waitForSessionInventoryAbort(this.source.listLiveSessions(worktree, signal), signal),
       'session-live-read'
     )
@@ -84,7 +89,7 @@ export class SpoolSessionPageProjector {
     try {
       this.attestProviderSessions(worktree, liveSessions)
     } catch (error) {
-      throw sessionCatalogError(error, 'session-provenance')
+      throw spoolSessionCatalogError(error, 'session-provenance')
     }
     requireCurrent()
     const dedupeKeys = new Set<string>()
@@ -97,7 +102,7 @@ export class SpoolSessionPageProjector {
         pending.push({ session, record: null })
       }
     }
-    const historicalConsistency = await sessionCatalogStage(
+    const historicalConsistency = await tagSpoolSessionCatalogStage(
       waitForSessionInventoryAbort(this.historicalConsistency.open(worktree, signal), signal),
       'session-consistency'
     )
@@ -137,7 +142,10 @@ export class SpoolSessionPageProjector {
       observedCandidates < SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE
     ) {
       signal.throwIfAborted()
-      const next = await sessionCatalogStage(state.historicalPages.next(), 'session-history-read')
+      const next = await tagSpoolSessionCatalogStage(
+        state.historicalPages.next(),
+        'session-history-read'
+      )
       signal.throwIfAborted()
       sourcePages++
       if (next.done) {
@@ -146,7 +154,7 @@ export class SpoolSessionPageProjector {
       }
       observedCandidates += next.value.length
       state.pending.push(
-        ...(await sessionCatalogStage(
+        ...(await tagSpoolSessionCatalogStage(
           this.resolveHistoricalPage(state, next.value, signal),
           'session-projection'
         ))
@@ -162,15 +170,13 @@ export class SpoolSessionPageProjector {
         records.set(entry.record.ownerRecordKey, entry.record)
       }
     }
-    try {
+    projectSpoolSessionCatalogValue(() => {
       this.inventories.mergePage(
         state.worktree,
         entries.map((entry) => entry.session),
         records
       )
-    } catch (error) {
-      throw sessionCatalogError(error, 'session-cache')
-    }
+    }, 'session-cache')
     return {
       sessions: entries.map((entry) => toSessionDescription(entry.session)),
       complete: state.historicalComplete && state.pendingOffset >= state.pending.length
@@ -273,26 +279,6 @@ export class SpoolSessionPageProjector {
       this.onProvenanceRebound()
     }
   }
-}
-
-async function sessionCatalogStage<T>(
-  operation: Promise<T>,
-  diagnostic: Parameters<typeof sessionCatalogError>[1]
-): Promise<T> {
-  try {
-    return await operation
-  } catch (error) {
-    throw sessionCatalogError(error, diagnostic)
-  }
-}
-
-function sessionCatalogError(
-  error: unknown,
-  diagnostic: NonNullable<SpoolExecutionError['diagnostic']>
-): unknown {
-  return error instanceof SpoolExecutionError
-    ? error
-    : new SpoolExecutionError('internal_error', diagnostic)
 }
 
 function drainPending(state: SpoolSessionPageState, page: ResolvedPageEntry[]): void {
