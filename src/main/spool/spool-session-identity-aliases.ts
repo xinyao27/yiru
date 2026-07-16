@@ -26,11 +26,14 @@ export class SpoolSessionIdentityAliases {
     provider: 'claude' | 'codex',
     providerSessionId: string,
     sessionKey: string
-  ): void {
+  ): boolean {
     if (!isBoundedIdentity(providerSessionId, 512) || !isBoundedIdentity(sessionKey, 512)) {
-      return
+      return false
     }
     const key = aliasKey(worktree, provider, providerSessionId)
+    if (this.aliases.get(key)?.sessionKey === sessionKey) {
+      return false
+    }
     for (const [existingKey, alias] of this.aliases) {
       if (
         existingKey !== key &&
@@ -57,6 +60,7 @@ export class SpoolSessionIdentityAliases {
       }
       this.aliases.delete(oldest)
     }
+    return true
   }
 
   resolve(

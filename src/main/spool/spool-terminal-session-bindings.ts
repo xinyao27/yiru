@@ -112,8 +112,15 @@ export class SpoolTerminalSessionBindings {
     if (!binding.terminalHandle || binding.terminalHandle.length > 2048) {
       return
     }
-    const changedInstances = new Set([binding.worktreeInstanceId])
     const replaced = this.bindings.get(binding.terminalHandle)
+    if (replaced && sameTerminalSessionBinding(replaced, binding)) {
+      // Why: repeated owner hooks refresh recency but cannot invalidate an
+      // unchanged requester-visible session catalog.
+      this.bindings.delete(binding.terminalHandle)
+      this.bindings.set(binding.terminalHandle, binding)
+      return
+    }
+    const changedInstances = new Set([binding.worktreeInstanceId])
     if (replaced) {
       changedInstances.add(replaced.worktreeInstanceId)
     }
@@ -206,4 +213,24 @@ export class SpoolTerminalSessionBindings {
       }
     }
   }
+}
+
+function sameTerminalSessionBinding(
+  left: SpoolTerminalSessionBinding,
+  right: SpoolTerminalSessionBinding
+): boolean {
+  return (
+    left.sessionKey === right.sessionKey &&
+    left.terminalHandle === right.terminalHandle &&
+    left.executionHostId === right.executionHostId &&
+    left.actualHostScope === right.actualHostScope &&
+    left.worktreeId === right.worktreeId &&
+    left.worktreeInstanceId === right.worktreeInstanceId &&
+    left.spoolIncarnationId === right.spoolIncarnationId &&
+    left.provider === right.provider &&
+    left.providerSessionId === right.providerSessionId &&
+    left.sessionKind === right.sessionKind &&
+    left.agent === right.agent &&
+    left.title === right.title
+  )
 }
