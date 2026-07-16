@@ -8,6 +8,7 @@ import type {
 import { SpoolMobileVaultSessionSource } from './spool-mobile-vault-session-source'
 import { OrcaSpoolExecutionHostSessionReader } from './spool-orca-session-reader'
 import { SpoolOwnerSessionRecords } from './spool-owner-session-records'
+import type { SpoolExecutionError } from './spool-execution-error'
 import { SpoolSessionCatalog } from './spool-session-catalog'
 import type { SpoolSessionProvenanceIndex } from './spool-session-provenance-index'
 import { toSessionWorktree } from './spool-session-worktree-binding'
@@ -342,5 +343,51 @@ describe('Spool session catalog invalidation', () => {
 
     expect(changes).toBe(1)
     unsubscribe()
+  })
+
+  it('tags an unexpected historical consistency failure without exposing its message', async () => {
+    const reader: SpoolExecutionHostSessionReader = {
+      registerPublicWorktree: () => undefined,
+      unregisterPublicWorktree: () => undefined,
+      listMobileSessionTabs: async () => emptySessionSnapshot(publicWorktree.worktreeId),
+      listAiVaultSessionPage: async () => ({
+        sessions: [],
+        nextCursor: null,
+        scannedAt: 'inventory-one'
+      }),
+      releaseAiVaultSessionPage: async () => undefined
+    }
+    const provenance = {
+      resolve: () => null,
+      attest: () => false
+    } as unknown as SpoolSessionProvenanceIndex
+    const source = new SpoolMobileVaultSessionSource(
+      reader,
+      new SpoolOwnerSessionRecords(),
+      new SpoolTerminalSessionBindings(),
+      provenance
+    )
+    const consistency: SpoolHistoricalSessionConsistency = {
+      open: async () => {
+        throw new Error('owner-only path and identity details')
+      }
+    }
+    const catalog = new SpoolSessionCatalog(provenance, source, consistency)
+    source.trackPublicWorktree(publicWorktree)
+
+    await expect(
+      catalog.listSessionPage(
+        publicWorktree,
+        null,
+        '00000000-0000-4000-8000-000000000001',
+        new AbortController().signal
+      )
+    ).rejects.toMatchObject({
+      code: 'internal_error',
+      diagnostic: 'session-consistency',
+      message: 'spool_execution_internal_error'
+    } satisfies Partial<SpoolExecutionError>)
+
+    catalog.close()
   })
 })

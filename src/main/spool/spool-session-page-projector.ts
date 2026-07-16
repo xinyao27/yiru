@@ -70,9 +70,9 @@ export class SpoolSessionPageProjector {
     signal: AbortSignal
   ): Promise<SpoolSessionPageState> {
     signal.throwIfAborted()
-    const live = await waitForSessionInventoryAbort(
-      this.source.listLiveSessions(worktree, signal),
-      signal
+    const live = await sessionCatalogStage(
+      waitForSessionInventoryAbort(this.source.listLiveSessions(worktree, signal), signal),
+      'session-live-read'
     )
     signal.throwIfAborted()
     requireCurrent()
@@ -81,7 +81,11 @@ export class SpoolSessionPageProjector {
       throw new SpoolExecutionError('result_too_large')
     }
     const liveSessions = live.filter((candidate) => hasExactLiveBinding(worktree, candidate))
-    this.attestProviderSessions(worktree, liveSessions)
+    try {
+      this.attestProviderSessions(worktree, liveSessions)
+    } catch (error) {
+      throw sessionCatalogError(error, 'session-provenance')
+    }
     requireCurrent()
     const dedupeKeys = new Set<string>()
     const pending: ResolvedPageEntry[] = []
@@ -93,9 +97,9 @@ export class SpoolSessionPageProjector {
         pending.push({ session, record: null })
       }
     }
-    const historicalConsistency = await waitForSessionInventoryAbort(
-      this.historicalConsistency.open(worktree, signal),
-      signal
+    const historicalConsistency = await sessionCatalogStage(
+      waitForSessionInventoryAbort(this.historicalConsistency.open(worktree, signal), signal),
+      'session-consistency'
     )
     signal.throwIfAborted()
     requireCurrent()
@@ -133,7 +137,7 @@ export class SpoolSessionPageProjector {
       observedCandidates < SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE
     ) {
       signal.throwIfAborted()
-      const next = await state.historicalPages.next()
+      const next = await sessionCatalogStage(state.historicalPages.next(), 'session-history-read')
       signal.throwIfAborted()
       sourcePages++
       if (next.done) {
@@ -141,7 +145,12 @@ export class SpoolSessionPageProjector {
         break
       }
       observedCandidates += next.value.length
-      state.pending.push(...(await this.resolveHistoricalPage(state, next.value, signal)))
+      state.pending.push(
+        ...(await sessionCatalogStage(
+          this.resolveHistoricalPage(state, next.value, signal),
+          'session-projection'
+        ))
+      )
       drainPending(state, entries)
     }
     // Why: an invalidated read must not repopulate a cache that source invalidation just cleared.
@@ -153,11 +162,15 @@ export class SpoolSessionPageProjector {
         records.set(entry.record.ownerRecordKey, entry.record)
       }
     }
-    this.inventories.mergePage(
-      state.worktree,
-      entries.map((entry) => entry.session),
-      records
-    )
+    try {
+      this.inventories.mergePage(
+        state.worktree,
+        entries.map((entry) => entry.session),
+        records
+      )
+    } catch (error) {
+      throw sessionCatalogError(error, 'session-cache')
+    }
     return {
       sessions: entries.map((entry) => toSessionDescription(entry.session)),
       complete: state.historicalComplete && state.pendingOffset >= state.pending.length
@@ -260,6 +273,26 @@ export class SpoolSessionPageProjector {
       this.onProvenanceRebound()
     }
   }
+}
+
+async function sessionCatalogStage<T>(
+  operation: Promise<T>,
+  diagnostic: Parameters<typeof sessionCatalogError>[1]
+): Promise<T> {
+  try {
+    return await operation
+  } catch (error) {
+    throw sessionCatalogError(error, diagnostic)
+  }
+}
+
+function sessionCatalogError(
+  error: unknown,
+  diagnostic: NonNullable<SpoolExecutionError['diagnostic']>
+): unknown {
+  return error instanceof SpoolExecutionError
+    ? error
+    : new SpoolExecutionError('internal_error', diagnostic)
 }
 
 function drainPending(state: SpoolSessionPageState, page: ResolvedPageEntry[]): void {
