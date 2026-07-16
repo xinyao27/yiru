@@ -33,7 +33,7 @@ const remoteWorktree: SpoolSidebarRow = {
 }
 
 describe('projectWorkspaceSidebarRows', () => {
-  it('places Spool worktrees directly in the Projects list without a Spool section row', () => {
+  it('places unmatched remote worktrees in a fallback group without a Spool section row', () => {
     const rows = projectWorkspaceSidebarRows({
       localRows: [],
       spoolRows: [remoteWorktree],
@@ -44,9 +44,42 @@ describe('projectWorkspaceSidebarRows', () => {
 
     expect(rows).toEqual([
       {
+        kind: 'spool-remote-worktrees-header',
+        key: 'spool:remote-worktrees-header',
+        worktreeCount: 1
+      },
+      {
         kind: 'spool',
         key: 'spool-worktree-one',
         row: remoteWorktree
+      }
+    ])
+  })
+
+  it('groups a remote worktree that has no matching Project identity', () => {
+    const unscopedRemoteWorktree = {
+      ...remoteWorktree,
+      projectRef: 'unscoped-project',
+      projectIdentityKey: null
+    }
+    const rows = projectWorkspaceSidebarRows({
+      localRows: [],
+      spoolRows: [unscopedRemoteWorktree],
+      spoolStatus: 'ready',
+      spoolDiagnostic: null,
+      getLocalRowKey: () => 'unused'
+    })
+
+    expect(rows).toEqual([
+      {
+        kind: 'spool-remote-worktrees-header',
+        key: 'spool:remote-worktrees-header',
+        worktreeCount: 1
+      },
+      {
+        kind: 'spool',
+        key: unscopedRemoteWorktree.key,
+        row: unscopedRemoteWorktree
       }
     ])
   })
@@ -142,10 +175,15 @@ describe('projectWorkspaceSidebarRows', () => {
     })
 
     expect(rows[0]).toMatchObject({ kind: 'local', row: { count: 1 } })
-    expect(rows[1]).toEqual({ kind: 'spool', key: unrelatedRemote.key, row: unrelatedRemote })
+    expect(rows[1]).toEqual({
+      kind: 'spool-remote-worktrees-header',
+      key: 'spool:remote-worktrees-header',
+      worktreeCount: 1
+    })
+    expect(rows[2]).toEqual({ kind: 'spool', key: unrelatedRemote.key, row: unrelatedRemote })
   })
 
-  it('leaves a remote worktree ungrouped when the Project has ambiguous setup sections', () => {
+  it('uses the fallback remote group when the Project has ambiguous setup sections', () => {
     const localRows: RenderRow[] = ['one', 'two'].map((setup) => ({
       type: 'header',
       key: `project:github:paperboytm/orca::setup:${setup}`,
@@ -169,7 +207,12 @@ describe('projectWorkspaceSidebarRows', () => {
       { kind: 'local', row: { count: 1 } },
       { kind: 'local', row: { count: 1 } }
     ])
-    expect(rows[2]).toEqual({ kind: 'spool', key: remoteWorktree.key, row: remoteWorktree })
+    expect(rows[2]).toEqual({
+      kind: 'spool-remote-worktrees-header',
+      key: 'spool:remote-worktrees-header',
+      worktreeCount: 1
+    })
+    expect(rows[3]).toEqual({ kind: 'spool', key: remoteWorktree.key, row: remoteWorktree })
   })
 
   it('does not duplicate a remote worktree across repeated host sections', () => {

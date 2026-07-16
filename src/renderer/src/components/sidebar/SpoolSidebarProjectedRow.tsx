@@ -4,6 +4,7 @@ import { SpoolWindowsFirewallNotice } from '@/components/spool/SpoolWindowsFirew
 import { SpoolAvailabilityNotice } from '@/components/spool/SpoolAvailabilityNotice'
 import { SpoolSessionRow } from './SpoolSessionRow'
 import { SpoolRemoteDesktopStatusRow } from './SpoolRemoteDesktopStatusRow'
+import { SpoolRemoteWorktreesHeader } from './SpoolRemoteWorktreesHeader'
 import { SpoolWorktreeRow } from './SpoolWorktreeRow'
 import type { WorkspaceSidebarProjectedRow } from './workspace-sidebar-row-projection'
 
@@ -23,6 +24,9 @@ export function SpoolSidebarProjectedRow({
   }
   if (projected.kind === 'spool-availability') {
     return <SpoolAvailabilityNotice diagnostic={projected.diagnostic} />
+  }
+  if (projected.kind === 'spool-remote-worktrees-header') {
+    return <SpoolRemoteWorktreesHeader />
   }
 
   const row = projected.row
