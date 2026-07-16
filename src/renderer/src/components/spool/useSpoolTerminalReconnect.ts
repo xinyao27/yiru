@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import type { SpoolRequesterTransportErrorCode } from '../../../../shared/spool/spool-ipc-contract'
 
-const TERMINAL_RECONNECT_DELAYS_MS = [500, 1_000, 2_000, 4_000, 8_000, 8_000, 8_000, 8_000] as const
+const TERMINAL_RECONNECT_DELAYS_MS = [500, 1_000, 2_000, 4_000, 8_000] as const
 const RECOVERABLE_TERMINAL_ERRORS: ReadonlySet<SpoolRequesterTransportErrorCode> = new Set([
   'disconnected',
   'timeout',
@@ -14,10 +14,9 @@ type SpoolTerminalReconnectOptions = {
   isCurrent: () => boolean
   onPending: () => void
   onAttempt: () => void
-  onExhausted: () => void
 }
 
-/** Runs bounded read-only reattachments without replaying terminal mutations. */
+/** Runs capped-backoff read-only reattachments without replaying terminal mutations. */
 export function useSpoolTerminalReconnect(options: SpoolTerminalReconnectOptions): {
   startReconnect: () => void
   retryReconnect: () => void
@@ -58,12 +57,16 @@ export function useSpoolTerminalReconnect(options: SpoolTerminalReconnectOptions
     if (!current.isCurrent()) {
       return
     }
-    const delay = TERMINAL_RECONNECT_DELAYS_MS[retryAttemptRef.current]
-    if (delay === undefined) {
-      current.onExhausted()
-      return
-    }
-    retryAttemptRef.current += 1
+    const delay =
+      TERMINAL_RECONNECT_DELAYS_MS[
+        Math.min(retryAttemptRef.current, TERMINAL_RECONNECT_DELAYS_MS.length - 1)
+      ]
+    // Why: reattachment is read-only and scoped to the active route, so a long
+    // network outage should wait at the cap instead of requiring manual recovery.
+    retryAttemptRef.current = Math.min(
+      retryAttemptRef.current + 1,
+      TERMINAL_RECONNECT_DELAYS_MS.length - 1
+    )
     current.onPending()
     retryTimerRef.current = setTimeout(() => {
       retryTimerRef.current = null
