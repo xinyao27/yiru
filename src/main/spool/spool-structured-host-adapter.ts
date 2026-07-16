@@ -12,10 +12,15 @@ import { SpoolExecutionError } from './spool-execution-error'
 import type { SpoolFileOperationExecutor } from './spool-file-operation-executor'
 import type { SpoolGitOperationExecutor } from './spool-git-operation-executor'
 
-export type SpoolTerminalSubscriptionHost = {
+export type SpoolTerminalHost = {
   invoke(
     target: SpoolPublicWorktreeInstance,
-    operation: Extract<SpoolExecutionOperation, { kind: 'terminal.input' | 'terminal.resize' }>,
+    operation: Extract<
+      SpoolExecutionOperation,
+      {
+        kind: 'terminal.input' | 'terminal.resize' | 'terminal.launchOptions' | 'terminal.create'
+      }
+    >,
     context: SpoolHostOperationContext
   ): Promise<unknown>
   subscribe(
@@ -31,8 +36,16 @@ export type SpoolTerminalSubscriptionHost = {
 export type SpoolHistoricalSessionHost = {
   invoke(
     target: SpoolPublicWorktreeInstance,
-    operation: Extract<SpoolExecutionOperation, { kind: 'session.read' | 'session.continue' }>,
+    operation: Extract<SpoolExecutionOperation, { kind: 'session.continue' }>,
     context: SpoolHostOperationContext
+  ): Promise<unknown>
+}
+
+export type SpoolChecksHost = {
+  invoke(
+    target: SpoolPublicWorktreeInstance,
+    operation: Extract<SpoolExecutionOperation, { kind: 'checks.read' }>,
+    signal: AbortSignal
   ): Promise<unknown>
 }
 
@@ -41,7 +54,8 @@ export class SpoolStructuredHostAdapter implements SpoolHostAdapter {
   constructor(
     private readonly files: SpoolFileOperationExecutor,
     private readonly git: SpoolGitOperationExecutor,
-    private readonly terminals: SpoolTerminalSubscriptionHost,
+    private readonly checks: SpoolChecksHost,
+    private readonly terminals: SpoolTerminalHost,
     private readonly sessions: SpoolHistoricalSessionHost
   ) {}
 
@@ -52,7 +66,9 @@ export class SpoolStructuredHostAdapter implements SpoolHostAdapter {
   ): Promise<unknown> {
     if (
       target.ownerWorktree.kind === 'folder' &&
-      (operation.kind === 'files.diff' || operation.kind.startsWith('git.'))
+      (operation.kind === 'files.diff' ||
+        operation.kind.startsWith('git.') ||
+        operation.kind === 'checks.read')
     ) {
       // Why: a folder workspace has no repository boundary on which Git operations can be proven.
       throw new SpoolExecutionError('method_not_found')
@@ -69,10 +85,18 @@ export class SpoolStructuredHostAdapter implements SpoolHostAdapter {
         context.admissionGuard
       )
     }
-    if (operation.kind === 'terminal.input' || operation.kind === 'terminal.resize') {
+    if (operation.kind === 'checks.read') {
+      return await this.checks.invoke(target, operation, context.signal)
+    }
+    if (
+      operation.kind === 'terminal.input' ||
+      operation.kind === 'terminal.resize' ||
+      operation.kind === 'terminal.launchOptions' ||
+      operation.kind === 'terminal.create'
+    ) {
       return await this.terminals.invoke(target, operation, context)
     }
-    if (operation.kind === 'session.read' || operation.kind === 'session.continue') {
+    if (operation.kind === 'session.continue') {
       return await this.sessions.invoke(target, operation, context)
     }
     throw new SpoolExecutionError('method_not_found')

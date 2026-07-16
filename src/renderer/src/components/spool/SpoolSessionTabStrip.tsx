@@ -14,12 +14,14 @@ type SpoolSessionTabStripProps = {
   sessions: readonly SpoolSessionCatalogEntry[]
   activeSessionRef: string | null
   onSelect: (sessionRef: string) => void
+  createMenu: React.ReactNode
 }
 
 export function SpoolSessionTabStrip({
   sessions,
   activeSessionRef,
-  onSelect
+  onSelect,
+  createMenu
 }: SpoolSessionTabStripProps): React.JSX.Element {
   const navigationScopeId = useId()
   const [recentSessionRefs, setRecentSessionRefs] = useState<readonly string[]>([])
@@ -47,47 +49,55 @@ export function SpoolSessionTabStrip({
   const layoutKey = useMemo(
     () =>
       visibleSessions
-        .map((session) => `${session.sessionRef}:${session.provider}:${session.title}`)
+        .map(
+          (session) =>
+            `${session.sessionRef}:${session.kind}:${session.agent ?? ''}:${session.title}`
+        )
         .join('\u001f'),
     [visibleSessions]
   )
 
   return (
-    <WorkspaceTabStripViewport
-      activeTabId={activeSessionRef}
-      layoutKey={layoutKey}
-      tabCount={visibleSessions.length}
-      navigationScopeId={navigationScopeId}
-      stripProps={{
-        role: 'tablist',
-        'aria-label': translate(
-          'auto.components.spool.SpoolWorkspaceSurface.tabs.sessions',
-          'Sessions'
-        ),
-        onKeyDown: handleSpoolSessionTabKeyDown
-      }}
-    >
-      {visibleSessions.map((session, index) => (
-        <WorkspaceSelectableTab
-          key={session.sessionRef}
-          id={session.sessionRef}
-          title={session.title}
-          active={session.sessionRef === activeSessionRef}
-          hasTabsToRight={index < visibleSessions.length - 1}
-          tabIndex={
-            session.sessionRef === activeSessionRef || (!activeTabIsVisible && index === 0) ? 0 : -1
-          }
-          icon={
-            session.provider === 'other' ? (
-              <SquareTerminal className="size-3.5" />
-            ) : (
-              <AgentIcon agent={session.provider} size={14} />
-            )
-          }
-          onSelect={onSelect}
-        />
-      ))}
-    </WorkspaceTabStripViewport>
+    <div className="flex h-full min-w-0 flex-1 items-stretch overflow-hidden">
+      <WorkspaceTabStripViewport
+        activeTabId={activeSessionRef}
+        layoutKey={layoutKey}
+        tabCount={visibleSessions.length}
+        navigationScopeId={navigationScopeId}
+        stripProps={{
+          role: 'tablist',
+          'aria-label': translate(
+            'auto.components.spool.SpoolWorkspaceSurface.tabs.sessions',
+            'Sessions'
+          ),
+          onKeyDown: handleSpoolSessionTabKeyDown
+        }}
+      >
+        {visibleSessions.map((session, index) => (
+          <WorkspaceSelectableTab
+            key={session.sessionRef}
+            id={session.sessionRef}
+            title={session.title}
+            active={session.sessionRef === activeSessionRef}
+            hasTabsToRight={index < visibleSessions.length - 1}
+            tabIndex={
+              session.sessionRef === activeSessionRef || (!activeTabIsVisible && index === 0)
+                ? 0
+                : -1
+            }
+            icon={
+              session.kind === 'terminal' ? (
+                <SquareTerminal className="size-3.5" />
+              ) : (
+                <AgentIcon agent={session.agent} size={14} />
+              )
+            }
+            onSelect={onSelect}
+          />
+        ))}
+      </WorkspaceTabStripViewport>
+      {createMenu}
+    </div>
   )
 }
 

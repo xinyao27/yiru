@@ -27,8 +27,13 @@ import {
   createSpoolTerminalMutationQueue,
   type SpoolTerminalMutation
 } from './spool-terminal-mutation-queue'
+import { notifySpoolTerminalInputBacklog } from './spool-terminal-input-backlog'
+import {
+  getSpoolTerminalStatusLabel,
+  type SpoolTerminalConnectionStatus
+} from './spool-terminal-status-label'
+import { useSpoolTerminalFocusRequest } from './useSpoolTerminalFocusRequest'
 
-type TerminalConnectionStatus = 'connecting' | 'live' | 'closed' | 'error'
 type RenderableSpoolTerminalSubscriptionEvent = Exclude<
   SpoolTerminalSubscriptionEvent,
   { kind: 'unavailable' }
@@ -37,11 +42,15 @@ const SPOOL_TERMINAL_INPUT_FLUSH_MS = 8
 
 export function SpoolTerminalPane({
   route,
+  focusRequested = false,
+  onFocusHandled,
   onSubscriptionError,
   onLive,
   onClosed
 }: {
   route: SpoolSessionRoute
+  focusRequested?: boolean
+  onFocusHandled?: () => void
   onSubscriptionError?: (code: SpoolRequesterTransportErrorCode | null) => void
   onLive?: () => void
   onClosed?: (canContinue: boolean) => void
@@ -55,7 +64,7 @@ export function SpoolTerminalPane({
   const settings = useAppStore((state) => state.settings)
   const canControl = useAppStore((state) => selectSpoolCanControl(state, route))
   const systemPrefersDark = useSystemPrefersDark()
-  const [status, setStatus] = useState<TerminalConnectionStatus>('connecting')
+  const [status, setStatus] = useState<SpoolTerminalConnectionStatus>('connecting')
   const [mutationUncertain, setMutationUncertain] = useState(false)
   const mutationUncertainRef = useRef(false)
   const canMutateTerminal = canControl && !mutationUncertain
@@ -90,7 +99,8 @@ export function SpoolTerminalPane({
         await invokeTerminalMutation(mutationUncertainRef, route, mutation)
       },
       shouldDiscardAfterError: (error) =>
-        handleTerminalMutationError(error, route, markMutationUncertain)
+        handleTerminalMutationError(error, route, markMutationUncertain),
+      onCapacityExceeded: notifySpoolTerminalInputBacklog
     })
     terminal.loadAddon(fitAddon)
     terminalRef.current = terminal
@@ -148,6 +158,8 @@ export function SpoolTerminalPane({
       window.requestAnimationFrame(() => fitAddonRef.current?.fit())
     }
   }, [canMutateTerminal, terminalOptions])
+
+  useSpoolTerminalFocusRequest(terminalRef, focusRequested && canMutateTerminal, onFocusHandled)
 
   useEffect(() => {
     const api = window.api.spoolSharing
@@ -259,7 +271,7 @@ export function SpoolTerminalPane({
         </div>
       ) : status !== 'live' ? (
         <div className="pointer-events-none absolute right-3 top-2 rounded-md border border-border bg-card/90 px-2 py-1 text-[11px] text-card-foreground shadow-xs">
-          <span className="text-muted-foreground">{getTerminalStatusLabel(status)}</span>
+          <span className="text-muted-foreground">{getSpoolTerminalStatusLabel(status)}</span>
         </div>
       ) : null}
     </div>
@@ -403,14 +415,4 @@ function createTerminalOptions(
     allowTransparency:
       settings.terminalBackgroundOpacity !== undefined && settings.terminalBackgroundOpacity < 1
   }
-}
-
-function getTerminalStatusLabel(status: TerminalConnectionStatus): string {
-  if (status === 'connecting') {
-    return translate('auto.components.spool.SpoolTerminalPane.connecting', 'Connecting terminal…')
-  }
-  if (status === 'closed') {
-    return translate('auto.components.spool.SpoolTerminalPane.closed', 'Terminal closed')
-  }
-  return translate('auto.components.spool.SpoolTerminalPane.unavailable', 'Terminal unavailable')
 }

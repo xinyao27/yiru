@@ -1,9 +1,13 @@
 import type { AiVaultSession } from '../../shared/ai-vault-types'
 import type { ExecutionHostId } from '../../shared/execution-host'
 import type { RuntimeMobileSessionTabsResult } from '../../shared/runtime-types'
+import type {
+  SpoolLiveSessionIdentity,
+  SpoolLiveSessionProvider
+} from './spool-live-session-display-identity'
 import type { SpoolOwnerWorktree, SpoolRegisteredWorktreeRoot } from './spool-worktree-incarnation'
 
-export type SpoolSessionProvider = 'claude' | 'codex' | 'other'
+export type SpoolSessionProvider = SpoolLiveSessionProvider
 
 export type SpoolSessionWorktreeIdentity = {
   worktreeId: string
@@ -14,17 +18,27 @@ export type SpoolSessionWorktreeIdentity = {
 }
 
 export type SpoolLiveSessionCandidate = {
+  /** Owner-minted live identity stays stable while provider metadata catches up. */
+  sessionKey?: string | null
   terminalHandle: string
   executionHostId: ExecutionHostId
   actualHostScope: string
   worktreeInstanceId: string
   spoolIncarnationId: string
-  provider: SpoolSessionProvider
-  providerSessionId: string | null
   title: string
+} & SpoolLiveSessionIdentity
+
+export type SpoolSessionClientTab = RuntimeMobileSessionTabsResult['tabs'][number] & {
+  spoolSessionKey?: string | null
+  spoolLiveSessionIdentity?: SpoolLiveSessionIdentity
+}
+
+export type SpoolMobileSessionTabsResult = Omit<RuntimeMobileSessionTabsResult, 'tabs'> & {
+  tabs: SpoolSessionClientTab[]
 }
 
 export type SpoolHistoricalSessionCandidate = {
+  sessionKey?: string | null
   ownerRecordKey: string
   ownerRecord: SpoolOwnerHistoricalSessionRecord
   executionHostId: ExecutionHostId
@@ -139,12 +153,20 @@ export type SpoolExecutionHostSessionReadRequest = {
   inventoryScope: string
 }
 
+export type SpoolObservedProviderSession = {
+  provider: 'claude' | 'codex'
+  providerSessionId: string
+  sessionKey: string | null
+}
+
 /** Composition routes this narrow reader to local, SSH, or paired-runtime execution. */
 export type SpoolExecutionHostSessionReader = {
+  registerPublicWorktree?(request: SpoolExecutionHostSessionReadRequest): void
+  unregisterPublicWorktree?(request: SpoolExecutionHostSessionReadRequest): void
   listMobileSessionTabs(
     request: SpoolExecutionHostSessionReadRequest,
     signal?: AbortSignal
-  ): Promise<RuntimeMobileSessionTabsResult | null>
+  ): Promise<SpoolMobileSessionTabsResult | null>
   listAiVaultSessionPage(
     request: SpoolExecutionHostSessionReadRequest,
     cursor: string | null,
@@ -154,5 +176,11 @@ export type SpoolExecutionHostSessionReader = {
     request: SpoolExecutionHostSessionReadRequest,
     cursor: string | null
   ): Promise<void>
-  subscribe?: (listener: () => void) => () => void
+  subscribe?: (
+    listener: (
+      snapshot?: SpoolMobileSessionTabsResult,
+      request?: SpoolExecutionHostSessionReadRequest,
+      providerSessions?: readonly SpoolObservedProviderSession[]
+    ) => void
+  ) => () => void
 }

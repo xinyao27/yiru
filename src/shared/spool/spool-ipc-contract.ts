@@ -17,8 +17,10 @@ export const SPOOL_REQUESTER_INVOKE_METHODS = [
   'git.stage',
   'git.unstage',
   'git.commit',
-  'session.read',
+  'checks.read',
   'session.continue',
+  'terminal.launchOptions',
+  'terminal.create',
   'terminal.input',
   'terminal.resize'
 ] as const

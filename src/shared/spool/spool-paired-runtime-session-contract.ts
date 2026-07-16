@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { SpoolAgentLaunchIdSchema } from './spool-agent-launch-contract'
 import {
   SpoolPairedRuntimeBoundWorktreeSchema,
   SpoolPairedRuntimeWorktreeSelectorSchema
@@ -13,6 +14,7 @@ const identifier = z
   .refine((value) => value.trim().length > 0 && !value.includes('\0'))
 const title = z.string().min(1).max(2_048).refine(withoutNull)
 const providerSessionId = z.string().min(1).max(512).refine(withoutNull)
+const liveSessionKey = z.string().min(1).max(512).refine(withoutNull)
 const pathText = z.string().min(1).max(32_768).refine(withoutNull)
 const resumeCommand = z
   .string()
@@ -60,8 +62,21 @@ export const SpoolPairedRuntimeUnsubscribeSessionChangesParamsSchema = z
   .object({ requestId: z.string().uuid() })
   .strict()
 
+export const SpoolPairedRuntimeObservedProviderSessionSchema = z
+  .object({
+    provider: z.enum(['claude', 'codex']),
+    providerSessionId,
+    sessionKey: liveSessionKey.nullable()
+  })
+  .strict()
+
 export const SpoolPairedRuntimeSessionChangedEventSchema = z
-  .object({ kind: z.literal('changed') })
+  .object({
+    kind: z.literal('changed'),
+    providerSessions: z
+      .array(SpoolPairedRuntimeObservedProviderSessionSchema)
+      .max(SPOOL_MAX_LIVE_SESSIONS_PER_WORKTREE)
+  })
   .strict()
 
 export const SpoolPairedRuntimeLiveSessionSchema = z
@@ -69,9 +84,21 @@ export const SpoolPairedRuntimeLiveSessionSchema = z
     terminalRef: z.string().min(1).max(2_048).refine(withoutNull),
     title,
     provider: z.enum(['claude', 'codex', 'other']),
-    providerSessionId: providerSessionId.nullable()
+    providerSessionId: providerSessionId.nullable(),
+    sessionKind: z.enum(['terminal', 'agent']),
+    agent: SpoolAgentLaunchIdSchema.nullable(),
+    sessionKey: liveSessionKey.nullable()
   })
   .strict()
+  .superRefine((value, context) => {
+    if (
+      (value.sessionKind === 'terminal' && (value.agent !== null || value.provider !== 'other')) ||
+      (value.sessionKind === 'agent' && value.agent === null && value.provider !== 'other') ||
+      (value.provider === 'other' && value.providerSessionId !== null)
+    ) {
+      context.addIssue({ code: 'custom', message: 'Invalid live session display identity' })
+    }
+  })
 
 export const SpoolPairedRuntimeHistoricalSessionSchema = z
   .object({
@@ -119,7 +146,7 @@ export const SpoolPairedRuntimeSessionInvokeParamsSchema = z
   .object({
     target: SpoolPairedRuntimeBoundWorktreeSchema,
     channelRef: z.string().uuid(),
-    operation: z.object({ kind: z.enum(['session.read', 'session.continue']) }).strict(),
+    operation: z.object({ kind: z.literal('session.continue') }).strict(),
     record: SpoolPairedRuntimeSessionRecordSchema
   })
   .strict()
@@ -128,6 +155,9 @@ export type SpoolPairedRuntimeSessionWorktree = z.infer<
   typeof SpoolPairedRuntimeSessionWorktreeSchema
 >
 export type SpoolPairedRuntimeSessionRecord = z.infer<typeof SpoolPairedRuntimeSessionRecordSchema>
+export type SpoolPairedRuntimeObservedProviderSession = z.infer<
+  typeof SpoolPairedRuntimeObservedProviderSessionSchema
+>
 
 function sessionResponse<TResult extends z.ZodTypeAny>(result: TResult) {
   return z.discriminatedUnion('status', [

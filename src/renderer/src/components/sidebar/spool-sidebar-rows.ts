@@ -1,6 +1,7 @@
 import type {
   SpoolProviderQuota,
   SpoolRemoteDesktop,
+  SpoolSessionCatalogEntry,
   SpoolWorktreeCatalogEntry
 } from '../../../../shared/spool/spool-catalog-contract'
 import type {
@@ -49,6 +50,10 @@ export type SpoolWorktreeSidebarRow = {
   sessionCatalogStatus: SpoolWorktreeCatalogEntry['sessionCatalog']['status']
 }
 
+type SpoolSessionSidebarRowIdentity =
+  | Pick<Extract<SpoolSessionCatalogEntry, { kind: 'terminal' }>, 'kind' | 'agent'>
+  | Pick<Extract<SpoolSessionCatalogEntry, { kind: 'agent' }>, 'kind' | 'agent'>
+
 export type SpoolSessionSidebarRow = {
   type: 'spool-session'
   key: string
@@ -56,10 +61,9 @@ export type SpoolSessionSidebarRow = {
   connectionEpoch: number
   worktreeRef: string
   sessionRef: string
-  provider: 'claude' | 'codex' | 'other'
   title: string
   active: boolean
-}
+} & SpoolSessionSidebarRowIdentity
 
 export type SpoolSidebarRow =
   | SpoolDesktopSidebarRow
@@ -170,6 +174,7 @@ export function projectSpoolSidebarRows(input: SpoolSidebarProjectionInput): Spo
           continue
         }
         for (const session of worktree.sessions) {
+          const sessionIdentity: SpoolSessionSidebarRowIdentity = session
           rows.push({
             type: 'spool-session',
             key: createSpoolSidebarRowKey(
@@ -182,7 +187,7 @@ export function projectSpoolSidebarRows(input: SpoolSidebarProjectionInput): Spo
             connectionEpoch: desktop.connectionEpoch,
             worktreeRef: worktree.worktreeRef,
             sessionRef: session.sessionRef,
-            provider: session.provider,
+            ...sessionIdentity,
             title: session.title,
             active: worktreeActive && input.activeRoute?.sessionRef === session.sessionRef
           })

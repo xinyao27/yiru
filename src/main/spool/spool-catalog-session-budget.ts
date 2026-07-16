@@ -41,7 +41,10 @@ export class SpoolCatalogSessionBudget {
 }
 
 export function spoolCatalogSessionBytes(session: SpoolSessionCatalogEntry): number {
-  return Buffer.byteLength(`${session.sessionRef}\0${session.provider}\0${session.title}`, 'utf8')
+  return Buffer.byteLength(
+    `${session.sessionRef}\0${session.kind}\0${session.agent ?? ''}\0${session.title}`,
+    'utf8'
+  )
 }
 
 function spoolCatalogSessionsBytes(sessions: readonly SpoolSessionCatalogEntry[]): number {

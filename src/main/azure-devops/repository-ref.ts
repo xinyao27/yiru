@@ -12,6 +12,7 @@ export type AzureDevOpsRepoRef = {
 
 type LocalGitExecOptions = {
   wslDistro?: string
+  signal?: AbortSignal
 }
 
 const REPO_REF_CACHE_MAX_ENTRIES = 512
@@ -222,15 +223,21 @@ export async function getAzureDevOpsRepoRefForRemote(
       return null
     }
     const { stdout } = sshGitProvider
-      ? await sshGitProvider.exec(['remote', 'get-url', remoteName], repoPath)
+      ? await sshGitProvider.exec(
+          ['remote', 'get-url', remoteName],
+          repoPath,
+          localGitOptions.signal ? { signal: localGitOptions.signal } : undefined
+        )
       : await gitExecFileAsync(['remote', 'get-url', remoteName], {
           cwd: repoPath,
-          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
+          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {}),
+          ...(localGitOptions.signal ? { signal: localGitOptions.signal } : {})
         })
     const result = parseAzureDevOpsRepoRef(stdout)
     rememberRepoRefCacheEntry(cacheKey, result)
     return result
   } catch {
+    localGitOptions.signal?.throwIfAborted()
     if (connectionId) {
       // Why: SSH provider failures are often transient reconnect/tunnel states;
       // caching them as "not Azure DevOps" would poison the repo for the session.

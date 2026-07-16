@@ -1,3 +1,5 @@
+import type { SpoolAgentLaunchId } from './spool-agent-launch-contract'
+
 export const SPOOL_FILE_LIST_DEFAULT_LIMIT = 1_000
 export const SPOOL_FILE_LIST_MAX_LIMIT = 5_000
 export const SPOOL_FILE_LIST_VERIFIED_HOST_PAGE_LIMIT = 256
@@ -9,8 +11,6 @@ export const SPOOL_FILE_WRITE_MAX_BYTES = 4 * 1_024 * 1_024
 export const SPOOL_GIT_DIFF_MAX_BYTES = 4 * 1_024 * 1_024
 export const SPOOL_GIT_HISTORY_DEFAULT_LIMIT = 50
 export const SPOOL_GIT_HISTORY_MAX_LIMIT = 200
-export const SPOOL_SESSION_TRANSCRIPT_MAX_MESSAGES = 2_000
-export const SPOOL_SESSION_TRANSCRIPT_MAX_BLOCK_CHARS = 4_000
 
 export type SpoolFileListOperation = {
   kind: 'files.list'
@@ -85,6 +85,8 @@ export type SpoolGitCommitOperation = {
   message: string
 }
 
+export type SpoolChecksReadOperation = { kind: 'checks.read' }
+
 export type SpoolTerminalInputOperation = {
   kind: 'terminal.input'
   terminalRef: string
@@ -98,10 +100,17 @@ export type SpoolTerminalResizeOperation = {
   rows: number
 }
 
-export type SpoolSessionReadOperation = {
-  kind: 'session.read'
-  /** Why: owner-side lookup keeps transcript paths out of the wire operation. */
-  ownerRecordKey: string
+export type SpoolTerminalLaunchOptionsOperation = {
+  kind: 'terminal.launchOptions'
+}
+
+export type SpoolTerminalLaunch = { kind: 'shell' } | { kind: 'agent'; agent: SpoolAgentLaunchId }
+
+export type SpoolTerminalCreateOperation = {
+  kind: 'terminal.create'
+  /** Why: retries after an uncertain response must converge on one owner-side PTY. */
+  clientMutationId: string
+  launch: SpoolTerminalLaunch
 }
 
 export type SpoolSessionContinueOperation = {
@@ -124,9 +133,11 @@ export type SpoolExecutionOperation =
   | SpoolGitStageOperation
   | SpoolGitUnstageOperation
   | SpoolGitCommitOperation
+  | SpoolChecksReadOperation
   | SpoolTerminalInputOperation
   | SpoolTerminalResizeOperation
-  | SpoolSessionReadOperation
+  | SpoolTerminalLaunchOptionsOperation
+  | SpoolTerminalCreateOperation
   | SpoolSessionContinueOperation
 
 export type SpoolFileTreeEntry = {
@@ -196,27 +207,58 @@ export type SpoolGitHistoryResult = {
   hasMore: boolean
 }
 
+export type SpoolChecksReview = {
+  provider: 'github' | 'gitlab' | 'bitbucket' | 'azure-devops' | 'gitea' | 'unsupported'
+  number: number
+  title: string
+  state: 'open' | 'closed' | 'merged' | 'draft'
+  url: string | null
+  status: 'pending' | 'success' | 'failure' | 'neutral'
+  updatedAt: string
+  mergeable: 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN'
+  reviewDecision: 'APPROVED' | 'CHANGES_REQUESTED' | 'REVIEW_REQUIRED' | null
+}
+
+export type SpoolCheckEntry = {
+  name: string
+  status: 'queued' | 'in_progress' | 'completed'
+  conclusion:
+    | 'success'
+    | 'failure'
+    | 'cancelled'
+    | 'timed_out'
+    | 'neutral'
+    | 'skipped'
+    | 'pending'
+    | 'action_required'
+    | null
+  url: string | null
+}
+
+export type SpoolChecksReadResult = {
+  review: SpoolChecksReview | null
+  checks: readonly SpoolCheckEntry[]
+  truncated: boolean
+  detailStatus: 'complete' | 'unavailable' | 'unsupported'
+}
+
 export type SpoolMutationResult = { ok: true }
+
+export type SpoolTerminalLaunchOptionsResult = {
+  agents: readonly SpoolAgentLaunchId[]
+  defaultAgent: SpoolAgentLaunchId | null
+}
+
+/** Internal owner/paired-runtime result; the requester receives only opaque session identity. */
+export type SpoolTerminalCreateHostResult = {
+  terminalHandle: string
+  sessionKey: string
+  provider: 'claude' | 'codex' | 'other'
+  title: string
+}
 
 /** Internal owner/paired-runtime result; requester RPC retains its connection-scoped opaque ref. */
 export type SpoolSessionContinueHostResult = { terminalHandle: string }
-
-export type SpoolSessionTranscriptBlock =
-  | { type: 'text'; text: string }
-  | { type: 'tool-call'; name: string; input: string }
-  | { type: 'tool-result'; output: string; isError: boolean }
-  | { type: 'image'; alt: string | null }
-
-export type SpoolSessionTranscriptMessage = {
-  role: 'user' | 'assistant' | 'tool' | 'reasoning' | 'system'
-  blocks: readonly SpoolSessionTranscriptBlock[]
-  timestamp: number | null
-}
-
-export type SpoolSessionReadResult = {
-  messages: readonly SpoolSessionTranscriptMessage[]
-  truncated: boolean
-}
 
 export type SpoolExecutionResultByKind = {
   'files.list': SpoolFileListResult
@@ -232,9 +274,11 @@ export type SpoolExecutionResultByKind = {
   'git.stage': SpoolMutationResult
   'git.unstage': SpoolMutationResult
   'git.commit': SpoolMutationResult
+  'checks.read': SpoolChecksReadResult
   'terminal.input': SpoolMutationResult
   'terminal.resize': SpoolMutationResult
-  'session.read': SpoolSessionReadResult
+  'terminal.launchOptions': SpoolTerminalLaunchOptionsResult
+  'terminal.create': SpoolTerminalCreateHostResult
   'session.continue': SpoolSessionContinueHostResult
 }
 
@@ -269,6 +313,7 @@ const SPOOL_MUTATION_OPERATION_KINDS: ReadonlySet<SpoolExecutionOperation['kind'
   'git.commit',
   'terminal.input',
   'terminal.resize',
+  'terminal.create',
   'session.continue'
 ])
 

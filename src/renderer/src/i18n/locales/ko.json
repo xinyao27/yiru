@@ -4738,7 +4738,7 @@
           "decisionFailed": "제어 결정을 전송할 수 없습니다.",
           "title": "{{value0}} 님이 이 worktree를 제어하도록 허용할까요?",
           "worktree": "Worktree: {{value0}} / {{value1}}",
-          "capabilities": "상대방은 terminal 입력 전송, 파일 수정, 명령 실행 및 사용자의 Claude/Codex 계정 사용이 가능해집니다.",
+          "capabilities": "상대방은 터미널 생성, 활성화된 에이전트 시작, 터미널 입력 전송, 파일 수정, 명령 실행 및 사용자의 활성 에이전트 계정 사용이 가능해집니다.",
           "shellWarning": "Terminal 명령은 이 worktree 안으로 제한되지 않습니다.",
           "queued": "제어 요청 {{value0}}개가 더 대기 중입니다.",
           "deny": "거부",
@@ -4772,7 +4772,8 @@
           "unavailable": "터미널을 사용할 수 없음",
           "outcomeUnknown": "이 터미널 작업이 소유자의 데스크톱에서 성공했을 수 있습니다. 터미널 출력을 확인하고 추가 입력을 보내세요.",
           "outcomeUnknownPersistent": "터미널 작업이 성공했을 수 있습니다. 출력을 확인한 후 입력을 다시 시작하세요.",
-          "resumeInput": "입력 다시 시작"
+          "resumeInput": "입력 다시 시작",
+          "inputBacklogFull": "원격 입력이 아직 처리 중입니다. 화면에 나타날 때까지 기다린 후 더 입력하거나 붙여 넣으세요."
         },
         "SpoolWorktreeVisibilityDialog": {
           "publishFailed": "이 worktree를 공개로 전환할 수 없습니다.",
@@ -4924,6 +4925,53 @@
           "upstream": "{{value0}} · ↑{{value1}} ↓{{value2}}",
           "stateUnavailable": "Git 상태를 사용할 수 없습니다.",
           "changesLimited": "상태의 일부만 표시됩니다."
+        },
+        "SpoolAgentsPane": {
+          "publicSessions": "Public agents",
+          "noAgentSessions": "No public agent sessions in this worktree.",
+          "unknownAgent": "Agent"
+        },
+        "SpoolChecksPane": {
+          "reviewChecks": "Review checks",
+          "refresh": "Refresh",
+          "loadFailed": "Could not load checks from the owner.",
+          "loading": "Loading checks…",
+          "noReview": "No hosted review was found for this branch.",
+          "unavailable": "Hosted review details are unavailable from the owner.",
+          "openReview": "Open review",
+          "checks": "Checks",
+          "detailsUnavailable": "Detailed checks could not be loaded.",
+          "detailsUnsupported": "Detailed checks are not available for this provider.",
+          "checksTruncated": "Showing a partial check list.",
+          "noChecks": "No checks were reported for this review.",
+          "passing": "Passing",
+          "failing": "Failing",
+          "pending": "Pending",
+          "neutral": "Neutral",
+          "queued": "Queued",
+          "inProgress": "In progress",
+          "succeeded": "Succeeded",
+          "failed": "Failed",
+          "cancelled": "Cancelled",
+          "timedOut": "Timed out",
+          "skipped": "Skipped",
+          "actionRequired": "Action required",
+          "hostedReview": "Hosted review",
+          "open": "Open",
+          "closed": "Closed",
+          "merged": "Merged",
+          "draft": "Draft"
+        },
+        "SpoolSessionCreateMenu": {
+          "outcomeUnknown": "The terminal may already be running on the owner desktop. Creation was not retried.",
+          "createFailed": "Could not create the terminal.",
+          "noAgents": "No agents available",
+          "loadingAgents": "Loading owner agents…",
+          "agentsUnavailable": "Owner agents unavailable",
+          "disconnected": "Reconnect to create terminals.",
+          "controlPending": "Waiting for the owner to approve control.",
+          "controlRequired": "Request control to create terminals.",
+          "creating": "Creating terminal…"
         }
       },
       "shared": {

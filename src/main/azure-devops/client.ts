@@ -10,6 +10,7 @@ import {
   getHostedReviewLocalGitOptions,
   type HostedReviewExecutionOptions
 } from '../source-control/hosted-review-git-options'
+import type { HostedReviewLookupOptions } from '../source-control/hosted-review-lookup-options'
 import {
   azureDevOpsTokenConfigured,
   getAzureDevOpsAuthConfig,
@@ -43,11 +44,14 @@ function encodePathSegment(value: string): string {
 }
 
 async function getRepository(
-  repo: AzureDevOpsRepoRef
+  repo: AzureDevOpsRepoRef,
+  throwOnError = false,
+  signal?: AbortSignal
 ): Promise<{ idOrName: string; webBaseUrl: string } | null> {
   const raw = await requestAzureDevOpsJson<RawAzureDevOpsRepository>(
     repo,
-    `/_apis/git/repositories/${encodePathSegment(repo.repository)}`
+    `/_apis/git/repositories/${encodePathSegment(repo.repository)}`,
+    { throwOnError, signal }
   )
   if (!raw) {
     return { idOrName: repo.repository, webBaseUrl: repo.webBaseUrl }
@@ -70,7 +74,9 @@ function readStatusList(
 async function getPullRequestStatuses(
   repo: AzureDevOpsRepoRef,
   repoIdOrName: string,
-  pr: RawAzureDevOpsPullRequest
+  pr: RawAzureDevOpsPullRequest,
+  signal?: AbortSignal,
+  throwOnError = false
 ): Promise<RawAzureDevOpsStatus[]> {
   const raw = await requestAzureDevOpsJson<
     RawAzureDevOpsStatus[] | { value?: RawAzureDevOpsStatus[] }
@@ -78,7 +84,8 @@ async function getPullRequestStatuses(
     repo,
     `/_apis/git/repositories/${encodePathSegment(repoIdOrName)}/pullRequests/${encodePathSegment(
       String(pr.pullRequestId)
-    )}/statuses`
+    )}/statuses`,
+    { signal, throwOnError }
   )
   const prStatuses = readStatusList(raw)
   if (prStatuses.length > 0) {
@@ -94,7 +101,8 @@ async function getPullRequestStatuses(
     repo,
     `/_apis/git/repositories/${encodePathSegment(repoIdOrName)}/commits/${encodePathSegment(
       commitId
-    )}/statuses`
+    )}/statuses`,
+    { signal, throwOnError }
   )
   return readStatusList(commitStatuses)
 }
@@ -103,9 +111,11 @@ async function normalizePullRequest(
   repo: AzureDevOpsRepoRef,
   repoIdOrName: string,
   webBaseUrl: string,
-  raw: RawAzureDevOpsPullRequest
+  raw: RawAzureDevOpsPullRequest,
+  signal?: AbortSignal,
+  throwOnError = false
 ): Promise<AzureDevOpsPullRequestInfo | null> {
-  const statuses = await getPullRequestStatuses(repo, repoIdOrName, raw)
+  const statuses = await getPullRequestStatuses(repo, repoIdOrName, raw, signal, throwOnError)
   return mapAzureDevOpsPullRequest(raw, deriveAzureDevOpsStatus(statuses), webBaseUrl)
 }
 
@@ -179,7 +189,7 @@ export async function getAzureDevOpsPullRequest(
     connectionId,
     getHostedReviewLocalGitOptions(options)
   )
-  const repository = repo ? await getRepository(repo) : null
+  const repository = repo ? await getRepository(repo, false, options.signal) : null
   if (!repo || !repository) {
     return null
   }
@@ -187,9 +197,12 @@ export async function getAzureDevOpsPullRequest(
     repo,
     `/_apis/git/repositories/${encodePathSegment(repository.idOrName)}/pullRequests/${encodePathSegment(
       String(prNumber)
-    )}`
+    )}`,
+    { signal: options.signal }
   )
-  return raw ? normalizePullRequest(repo, repository.idOrName, repository.webBaseUrl, raw) : null
+  return raw
+    ? normalizePullRequest(repo, repository.idOrName, repository.webBaseUrl, raw, options.signal)
+    : null
 }
 
 export async function getAzureDevOpsPullRequestForBranch(
@@ -197,7 +210,7 @@ export async function getAzureDevOpsPullRequestForBranch(
   branch: string,
   linkedPRNumber?: number | null,
   connectionId?: string | null,
-  options: HostedReviewExecutionOptions = {}
+  options: HostedReviewLookupOptions = {}
 ): Promise<AzureDevOpsPullRequestInfo | null> {
   const branchName = branch.replace(/^refs\/heads\//, '')
   if (!branchName && linkedPRNumber == null) {
@@ -209,8 +222,14 @@ export async function getAzureDevOpsPullRequestForBranch(
     connectionId,
     getHostedReviewLocalGitOptions(options)
   )
-  const repository = repo ? await getRepository(repo) : null
+  options.signal?.throwIfAborted()
+  const repository = repo
+    ? await getRepository(repo, options.throwOnProviderError, options.signal)
+    : null
   if (!repo || !repository) {
+    if (options.throwOnProviderError) {
+      throw new Error('Azure DevOps repository lookup became unavailable.')
+    }
     return null
   }
 
@@ -219,6 +238,8 @@ export async function getAzureDevOpsPullRequestForBranch(
       repo,
       `/_apis/git/repositories/${encodePathSegment(repository.idOrName)}/pullRequests`,
       {
+        throwOnError: options.throwOnProviderError,
+        signal: options.signal,
         searchParams: {
           'searchCriteria.sourceRefName': `refs/heads/${branchName}`,
           'searchCriteria.status': 'all',
@@ -228,7 +249,14 @@ export async function getAzureDevOpsPullRequestForBranch(
     )
     const raw = (list?.value ?? []).sort(sortPullRequestsForBranch)[0]
     if (raw) {
-      return normalizePullRequest(repo, repository.idOrName, repository.webBaseUrl, raw)
+      return normalizePullRequest(
+        repo,
+        repository.idOrName,
+        repository.webBaseUrl,
+        raw,
+        options.signal,
+        options.throwOnProviderError
+      )
     }
   }
 
@@ -239,9 +267,24 @@ export async function getAzureDevOpsPullRequestForBranch(
     repo,
     `/_apis/git/repositories/${encodePathSegment(repository.idOrName)}/pullRequests/${encodePathSegment(
       String(linkedPRNumber)
-    )}`
+    )}`,
+    // Why: only the durable exact-id lookup can interpret 404 as a deleted review.
+    {
+      allowNotFound: true,
+      throwOnError: options.throwOnProviderError,
+      signal: options.signal
+    }
   )
-  return raw ? normalizePullRequest(repo, repository.idOrName, repository.webBaseUrl, raw) : null
+  return raw
+    ? normalizePullRequest(
+        repo,
+        repository.idOrName,
+        repository.webBaseUrl,
+        raw,
+        options.signal,
+        options.throwOnProviderError
+      )
+    : null
 }
 
 export async function getAzureDevOpsRepoSlug(

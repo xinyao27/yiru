@@ -1,50 +1,48 @@
+import type { ExecutionHostId } from '../../shared/execution-host'
 import type {
   SpoolOwnerHistoricalSessionRecord,
+  SpoolSessionProvider,
   SpoolSessionWorktreeIdentity
 } from './spool-session-source'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
+import { spoolLiveTerminalSessionKey } from './spool-session-resolution'
+import type {
+  SpoolLiveSessionDisplayIdentity,
+  SpoolLiveSessionIdentity
+} from './spool-live-session-display-identity'
 
-const MAX_CONTINUED_BINDINGS = 2_000
+const MAX_TERMINAL_SESSION_BINDINGS = 2_000
 
-export type SpoolContinuedSessionBinding = {
+export type SpoolTerminalSessionBinding = {
+  sessionKey: string | null
   terminalHandle: string
-  executionHostId: SpoolOwnerHistoricalSessionRecord['executionHostId']
+  executionHostId: ExecutionHostId
   actualHostScope: string
   worktreeId: string
   worktreeInstanceId: string
   spoolIncarnationId: string
-  provider: SpoolOwnerHistoricalSessionRecord['provider']
-  providerSessionId: string
   title: string
-}
+} & SpoolLiveSessionIdentity
 
-type SpoolContinuedSessionExecutionHostIdentity = {
+type SpoolTerminalSessionExecutionHostIdentity = {
   instanceId: string
   spoolIncarnationId: string
   actualHostScope: string
   executionHostId: string
 }
 
-/** Bridges a resumed PTY to its provider session before the first agent hook arrives. */
-export class SpoolContinuedSessionBindings {
-  private readonly bindings = new Map<string, SpoolContinuedSessionBinding>()
+/** Stabilizes owner-created PTY identity before asynchronous agent metadata arrives. */
+export class SpoolTerminalSessionBindings {
+  private readonly bindings = new Map<string, SpoolTerminalSessionBinding>()
   private readonly listeners = new Set<(instanceId: string) => void>()
 
-  remember(
+  rememberContinued(
     worktree: SpoolPublicWorktreeInstance,
     record: SpoolOwnerHistoricalSessionRecord,
     terminalHandle: string
   ): void {
-    if (!terminalHandle || terminalHandle.length > 2048) {
-      return
-    }
-    const changedInstances = new Set([worktree.instanceId])
-    const replaced = this.bindings.get(terminalHandle)
-    if (replaced) {
-      changedInstances.add(replaced.worktreeInstanceId)
-    }
-    this.bindings.delete(terminalHandle)
-    this.bindings.set(terminalHandle, {
+    this.rememberBinding({
+      sessionKey: null,
       terminalHandle,
       executionHostId: record.executionHostId,
       actualHostScope: record.actualHostScope,
@@ -53,9 +51,75 @@ export class SpoolContinuedSessionBindings {
       spoolIncarnationId: worktree.spoolIncarnationId,
       provider: record.provider,
       providerSessionId: record.providerSessionId,
+      sessionKind: 'agent',
+      agent: record.provider,
       title: record.title
     })
-    while (this.bindings.size > MAX_CONTINUED_BINDINGS) {
+  }
+
+  rememberSpawned(
+    worktree: SpoolPublicWorktreeInstance,
+    terminalHandle: string,
+    session: { provider: SpoolSessionProvider; title: string } & SpoolLiveSessionDisplayIdentity
+  ): void {
+    // Why: the stable live key preserves tab identity while an authoritative hook
+    // later supplies the provider session id needed for historical continuation.
+    const displayIdentity: SpoolLiveSessionDisplayIdentity = session
+    this.rememberBinding({
+      sessionKey: spoolLiveTerminalSessionKey(worktree, terminalHandle),
+      terminalHandle,
+      executionHostId: worktree.ownerWorktree.executionHostId,
+      actualHostScope: worktree.actualHostScope,
+      worktreeId: worktree.worktreeId,
+      worktreeInstanceId: worktree.instanceId,
+      spoolIncarnationId: worktree.spoolIncarnationId,
+      provider: session.provider,
+      providerSessionId: null,
+      ...displayIdentity,
+      title: session.title
+    })
+  }
+
+  observeProviderSession(
+    terminalHandle: string,
+    provider: 'claude' | 'codex',
+    providerSessionId: string,
+    expected: { worktreeId: string; worktreeInstanceId: string }
+  ): SpoolTerminalSessionBinding | null {
+    const binding = this.bindings.get(terminalHandle)
+    if (
+      !binding ||
+      binding.worktreeId !== expected.worktreeId ||
+      binding.worktreeInstanceId !== expected.worktreeInstanceId
+    ) {
+      return null
+    }
+    if (binding.provider === provider && binding.providerSessionId === providerSessionId) {
+      return { ...binding }
+    }
+    // Why: one PTY can run consecutive agents; its authoritative live hook replaces stale identity.
+    binding.provider = provider
+    binding.providerSessionId = providerSessionId
+    binding.sessionKind = 'agent'
+    if (!(binding.agent === 'claude-agent-teams' && provider === 'claude')) {
+      binding.agent = provider
+    }
+    // Why: the runtime snapshot that supplied this ID already invalidates the catalog.
+    return { ...binding }
+  }
+
+  private rememberBinding(binding: SpoolTerminalSessionBinding): void {
+    if (!binding.terminalHandle || binding.terminalHandle.length > 2048) {
+      return
+    }
+    const changedInstances = new Set([binding.worktreeInstanceId])
+    const replaced = this.bindings.get(binding.terminalHandle)
+    if (replaced) {
+      changedInstances.add(replaced.worktreeInstanceId)
+    }
+    this.bindings.delete(binding.terminalHandle)
+    this.bindings.set(binding.terminalHandle, binding)
+    while (this.bindings.size > MAX_TERMINAL_SESSION_BINDINGS) {
       const oldest = this.bindings.keys().next().value
       if (!oldest) {
         break
@@ -77,7 +141,7 @@ export class SpoolContinuedSessionBindings {
       'instanceId' | 'spoolIncarnationId' | 'actualHostScope' | 'target'
     >,
     terminalHandle: string
-  ): SpoolContinuedSessionBinding | null {
+  ): SpoolTerminalSessionBinding | null {
     return this.resolveForExecutionHost(
       {
         instanceId: worktree.instanceId,
@@ -90,9 +154,9 @@ export class SpoolContinuedSessionBindings {
   }
 
   resolveForExecutionHost(
-    worktree: SpoolContinuedSessionExecutionHostIdentity,
+    worktree: SpoolTerminalSessionExecutionHostIdentity,
     terminalHandle: string
-  ): SpoolContinuedSessionBinding | null {
+  ): SpoolTerminalSessionBinding | null {
     const binding = this.bindings.get(terminalHandle)
     return binding &&
       binding.worktreeInstanceId === worktree.instanceId &&
@@ -138,7 +202,7 @@ export class SpoolContinuedSessionBindings {
         listener(instanceId)
       } catch {
         // Why: a catalog observer cannot turn a completed terminal spawn into a failed mutation.
-        console.error('[spool] Continued-session observer failed')
+        console.error('[spool] Terminal-session observer failed')
       }
     }
   }

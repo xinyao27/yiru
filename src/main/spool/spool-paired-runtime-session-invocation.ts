@@ -11,10 +11,7 @@ import type { SpoolOwnerHistoricalSessionRecord } from './spool-session-source'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
 import { boundPairedRuntimeTargetSelector } from './spool-paired-runtime-target-binding'
 
-type SessionOperation = Extract<
-  SpoolExecutionOperation,
-  { kind: 'session.read' | 'session.continue' }
->
+type SessionOperation = Extract<SpoolExecutionOperation, { kind: 'session.continue' }>
 
 export type PairedRuntimeSessionInvocationOptions = {
   userDataPath: string
@@ -57,7 +54,7 @@ export async function invokePairedRuntimeSession(
         'spool.host.invokeSession',
         params,
         options.timeoutMs,
-        { beforeSend }
+        { beforeSend, signal: options.context.signal }
       )
   })
 }

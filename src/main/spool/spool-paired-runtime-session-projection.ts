@@ -1,7 +1,11 @@
 import { createHash } from 'node:crypto'
 import type { AiVaultSession } from '../../shared/ai-vault-types'
-import type { RuntimeMobileSessionTerminalClientTab } from '../../shared/runtime-types'
-import type { SpoolExecutionHostSessionReadRequest } from './spool-session-source'
+import type { SpoolAgentLaunchId } from '../../shared/spool/spool-agent-launch-contract'
+import type {
+  SpoolExecutionHostSessionReadRequest,
+  SpoolSessionClientTab
+} from './spool-session-source'
+import type { SpoolLiveSessionIdentity } from './spool-live-session-display-identity'
 
 export function projectPairedRuntimeLiveTab(
   session: {
@@ -9,11 +13,22 @@ export function projectPairedRuntimeLiveTab(
     title: string
     provider: 'claude' | 'codex' | 'other'
     providerSessionId: string | null
+    sessionKind: 'terminal' | 'agent'
+    agent: SpoolAgentLaunchId | null
+    sessionKey: string | null
   },
   worktreeInstanceId: string
-): RuntimeMobileSessionTerminalClientTab {
+): SpoolSessionClientTab {
   const id = `spool-paired-${shortHash(session.terminalRef)}`
-  const knownProvider = session.provider === 'other' ? null : session.provider
+  const identity: SpoolLiveSessionIdentity =
+    session.sessionKind === 'terminal'
+      ? { provider: 'other', providerSessionId: null, sessionKind: 'terminal', agent: null }
+      : {
+          provider: session.provider,
+          providerSessionId: session.providerSessionId,
+          sessionKind: 'agent',
+          agent: session.agent
+        }
   return {
     type: 'terminal',
     id,
@@ -24,21 +39,8 @@ export function projectPairedRuntimeLiveTab(
     status: 'ready',
     terminal: session.terminalRef,
     worktreeInstanceId,
-    ...(knownProvider ? { launchAgent: knownProvider } : {}),
-    ...(knownProvider && session.providerSessionId
-      ? {
-          agentStatus: {
-            state: 'done',
-            prompt: '',
-            updatedAt: 0,
-            stateStartedAt: 0,
-            agentType: knownProvider,
-            paneKey: id,
-            stateHistory: [],
-            providerSession: { key: 'session_id', id: session.providerSessionId }
-          }
-        }
-      : {})
+    spoolSessionKey: session.sessionKey,
+    spoolLiveSessionIdentity: identity
   }
 }
 

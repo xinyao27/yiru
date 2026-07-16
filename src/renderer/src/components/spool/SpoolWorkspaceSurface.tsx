@@ -3,7 +3,10 @@ import { useCallback, useMemo, useState } from 'react'
 import { Loader2, LockKeyhole, ShieldCheck, SquareTerminal, TriangleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
-import type { SpoolSessionCatalogPageState } from '../../../../shared/spool/spool-catalog-contract'
+import type {
+  SpoolSessionCatalogEntry,
+  SpoolSessionCatalogPageState
+} from '../../../../shared/spool/spool-catalog-contract'
 import { useAppStore } from '@/store'
 import {
   selectActiveSpoolWorkspace,
@@ -21,10 +24,14 @@ import {
   WORKSPACE_COLUMN_FRAME_CLASS_NAME
 } from '@/components/tab-group/workspace-column-chrome'
 import { SpoolSessionPane } from './SpoolSessionPane'
+import { SpoolSessionCreateMenu } from './SpoolSessionCreateMenu'
 import { SpoolSessionTabStrip } from './SpoolSessionTabStrip'
 import { getSpoolSessionRouteKey } from './spool-session-route'
 import { getSpoolSessionCatalogStatusLabel } from './spool-session-catalog-status'
 import { getSpoolWorktreeRouteKey } from './spool-worktree-route'
+import { useSpoolCreatedSessionTabs } from './useSpoolCreatedSessionTabs'
+
+const EMPTY_SPOOL_SESSION_TABS: readonly SpoolSessionCatalogEntry[] = []
 
 export default function SpoolWorkspaceSurface(): React.JSX.Element | null {
   const route = useAppStore((state) => state.activeSpoolWorkspaceRoute)
@@ -46,6 +53,16 @@ function SpoolWorkspaceSurfaceContent({
   const markControlPending = useAppStore((state) => state.markSpoolControlPending)
   const setActiveRoute = useAppStore((state) => state.setActiveSpoolWorkspaceRoute)
   const [requesting, setRequesting] = useState(false)
+  const [pendingFocusSessionRef, setPendingFocusSessionRef] = useState<string | null>(null)
+  const catalogSessions = workspace?.worktree.sessions ?? EMPTY_SPOOL_SESSION_TABS
+  const sessionCatalogStatus = workspace?.worktree.sessionCatalog.status ?? null
+  const catalogRevision = workspace?.desktop.catalog?.catalogRevision ?? null
+  const { sessions, retainMissingSession, recordCreatedSession } = useSpoolCreatedSessionTabs({
+    catalogSessions,
+    catalogStatus: sessionCatalogStatus,
+    catalogRevision,
+    activeSessionRef: route.sessionRef ?? null
+  })
   const sessionRoute = useMemo(
     () =>
       route.sessionRef
@@ -84,10 +101,24 @@ function SpoolWorkspaceSurfaceContent({
 
   const selectSession = useCallback(
     (sessionRef: string): void => {
+      setPendingFocusSessionRef(null)
       setActiveRoute({ ...route, sessionRef })
     },
     [route, setActiveRoute]
   )
+
+  const handleSessionCreated = useCallback(
+    (session: SpoolSessionCatalogEntry): void => {
+      recordCreatedSession(session)
+      setPendingFocusSessionRef(session.sessionRef)
+      setActiveRoute({ ...route, sessionRef: session.sessionRef })
+    },
+    [recordCreatedSession, route, setActiveRoute]
+  )
+
+  const handleCreatedSessionFocused = useCallback((sessionRef: string): void => {
+    setPendingFocusSessionRef((current) => (current === sessionRef ? null : current))
+  }, [])
 
   if (!workspace) {
     return null
@@ -147,9 +178,18 @@ function SpoolWorkspaceSurfaceContent({
           stripId={`spool:${worktreeRouteKey}`}
           tabBar={
             <SpoolSessionTabStrip
-              sessions={workspace.worktree.sessions}
+              sessions={sessions}
               activeSessionRef={route.sessionRef ?? null}
               onSelect={selectSession}
+              createMenu={
+                <SpoolSessionCreateMenu
+                  route={route}
+                  connected={connected}
+                  canControl={canControl}
+                  controlState={controlState}
+                  onCreated={handleSessionCreated}
+                />
+              }
             />
           }
           trailingActions={accessControls}
@@ -158,11 +198,17 @@ function SpoolWorkspaceSurfaceContent({
           bodyClassName="flex bg-[var(--editor-surface)]"
         >
           {sessionRoute ? (
-            <SpoolSessionPane key={getSpoolSessionRouteKey(sessionRoute)} route={sessionRoute} />
+            <SpoolSessionPane
+              key={getSpoolSessionRouteKey(sessionRoute)}
+              route={sessionRoute}
+              retainMissingSession={retainMissingSession}
+              focusRequested={pendingFocusSessionRef === sessionRoute.sessionRef}
+              onFocusHandled={handleCreatedSessionFocused}
+            />
           ) : (
             <SpoolWorkspaceEmptyPane
               title={workspace.worktree.name}
-              hasSessions={workspace.worktree.sessions.length > 0}
+              hasSessions={sessions.length > 0}
               sessionCatalogStatus={workspace.worktree.sessionCatalog.status}
             />
           )}

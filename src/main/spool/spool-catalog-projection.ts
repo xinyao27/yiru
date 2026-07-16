@@ -9,6 +9,7 @@ import {
 } from './spool-catalog-reference-table'
 import {
   buildCatalogReferenceBindings,
+  buildReservedCatalogSessionBinding,
   projectCatalogEntries,
   type ResolvedSpoolCatalogWorktree
 } from './spool-catalog-projection-model'
@@ -144,6 +145,29 @@ export class SpoolCatalogProjection {
 
   retainSessionReference(sessionRef: string): boolean {
     return !this.closed && this.references.pinSession(sessionRef)
+  }
+
+  reserveSessionReference(
+    worktree: BoundSpoolWorktree,
+    sessionKey: string
+  ): Promise<string | null> {
+    return this.serialize(async () => {
+      if (this.closed) {
+        return null
+      }
+      const published = this.visibility.getPublishedInstance(
+        worktree.instanceId,
+        worktree.shareEpoch
+      )
+      if (!published || published.worktreeId !== worktree.worktreeId) {
+        return null
+      }
+      // Why: creation must return a usable alias before the asynchronous session
+      // catalog observes the newly published owner terminal.
+      return this.references.reserveSession(
+        buildReservedCatalogSessionBinding(worktree, sessionKey, this.revision, this.generation)
+      )
+    })
   }
 
   async sessionPage(

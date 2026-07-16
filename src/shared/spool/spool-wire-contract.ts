@@ -1,4 +1,6 @@
-export const SPOOL_PROTOCOL_VERSION = 1
+// Why: protocol 2 adds granted worktree terminal/agent creation and must not
+// advertise that capability to peers that only implement the read/control surface.
+export const SPOOL_PROTOCOL_VERSION = 2
 export const SPOOL_SUPPORTED_PROTOCOL_VERSIONS = [SPOOL_PROTOCOL_VERSION] as const
 export const SPOOL_INGRESS_PORT = 52_777
 export const SPOOL_PROBE_PATH = '/spool/v1/probe'

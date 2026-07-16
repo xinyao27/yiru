@@ -2,13 +2,13 @@
 
 **Date:** 2026-07-14
 
-**Status:** Implemented
+**Status:** Implemented.
 
 **Product model:** [Spool Tailnet Worktree Sharing — Product Plan](./plans/2026-07-14-spool-team-session-sharing.md)
 
 ## Outcome
 
-Spool is a Tailnet-only remote-worktree capability inside Orca Desktop. Each Desktop discovers other running Desktops, receives a server-produced projection of their Public worktrees, and opens those worktrees through a dedicated encrypted connection. Public access is read-only. An owner can grant one physical connection mutable access to one whole worktree; that grant disappears on any connection loss and is never replayed.
+Spool is a Tailnet-only remote-worktree capability inside Orca Desktop. Each Desktop discovers other running Desktops, receives a server-produced projection of their Public worktrees, and opens those worktrees through a dedicated encrypted connection. Public access is read-only. An owner can grant one physical connection mutable access to one whole worktree, including semantic owner-side terminal and agent creation. The grant disappears on any connection loss and is never replayed.
 
 The architecture has six security-critical properties:
 
@@ -27,6 +27,8 @@ A folder-project workspace gets a durable incarnation from a random `.orca-spool
 
 The first version does not expose browser profiles, cookies, OS dialogs, the owner's clipboard, settings, account selection, hosted-review mutations, issue trackers, automations, emulator/computer control, pairing administration, or SSH trust and credential prompts. These are not reliably worktree-scoped and are not covered by the approval copy.
 
+With control, the requester may select `New Terminal` or one agent from the owner's sanitized enabled/detected list. It never supplies a command, working directory, environment, path, prompt, account, or launch argument. The Owner Desktop resolves those details on the actual execution host.
+
 Once a control grant exists, a terminal is still a normal shell and can exercise the owner's broader OS-user authority. The narrower GUI RPC surface prevents accidental cross-worktree actions; it is not a sandbox.
 
 ## Ubiquitous language
@@ -43,6 +45,7 @@ Once a control grant exists, a terminal is still a normal shell and can exercise
 | **Public projection** | The sanitized Desktop → Project → Worktree → Session catalog serialized by the owner.                                                                            |
 | **Control grant**     | An in-memory capability for one connection and one Public worktree instance. Several connections may hold separate grants concurrently.                          |
 | **Opaque reference**  | A random, connection-scoped identifier that the owner resolves to a project, worktree, session, terminal, file root, or pane. It is never a raw path or host ID. |
+| **Created session**   | An owner-owned terminal or agent process started inside a Public worktree after a granted requester selects a semantic launch option.                            |
 
 ## System view
 
@@ -230,7 +233,7 @@ Publishing a worktree performs these steps on its actual execution host:
 
 Every startup and host reconnection revalidates the incarnation proof before initial publication. Missing Git support for a Git target, unavailable stable directory identity or marker storage for a folder target, an unavailable execution host, or an ambiguous/overlapping root is `not shareable`, never an optimistic Public state. After a successful publication, a transport-classified host outage may retain only the same-epoch sanitized catalog row; every operation remains unavailable until incarnation revalidation succeeds again. If a new disallowed overlapping root appears beneath a Public root, publication is suspended fail closed until the owner resolves the overlap.
 
-`resolvePublicInstance` also revalidates the incarnation proof when binding every supported structured file, Git, session, and terminal subscription operation, and mutation admission revalidates it again at its commit/spawn guard. A host-side reconciliation loop invalidates long-lived streams when the proof or root disappears; it is an acceleration, not a substitute for bind/commit checks.
+`resolvePublicInstance` also revalidates the incarnation proof when binding every supported structured file, Git, Checks, session, and terminal subscription operation, and mutation admission revalidates it again at its commit/spawn guard. A host-side reconciliation loop invalidates long-lived streams when the proof or root disappears; it is an acceleration, not a substitute for bind/commit checks.
 
 ### Visibility durability
 
@@ -287,14 +290,17 @@ type SpoolWorktreeCatalogEntry = {
   }
 }
 
-type SpoolSessionCatalogEntry = {
-  sessionRef: string
-  provider: 'claude' | 'codex' | 'other'
-  title: string
-}
+type SpoolSessionCatalogEntry =
+  | { sessionRef: string; kind: 'terminal'; agent: null; title: string }
+  | {
+      sessionRef: string
+      kind: 'agent'
+      agent: SpoolAgentLaunchId | null
+      title: string
+    }
 ```
 
-The wire model deliberately omits absolute paths, `instanceId`, repo IDs, execution-host IDs, SSH target IDs, pairing data, activity/status categories, AI Vault file paths, Codex home paths, and resume commands. A project with no Public worktrees is omitted. The Desktop and sanitized quota may remain visible even when the projects array is empty.
+The `kind` discriminator keeps plain shells out of agent-only views. Known agents retain their bounded protocol agent ID (including Gemini and OpenCode); an observed custom agent uses `kind: 'agent', agent: null` rather than widening the protocol enum or being mislabeled as a terminal. The wire model deliberately omits absolute paths, `instanceId`, repo IDs, execution-host IDs, SSH target IDs, pairing data, activity/status categories, AI Vault file paths, Codex home paths, and resume commands. A project with no Public worktrees is omitted. The Desktop and sanitized quota may remain visible even when the projects array is empty.
 
 The owner catalog stream sends bounded project/worktree base rows. `catalog.sessions.page` then returns at most 512 sessions behind a connection-scoped opaque cursor until every attributable session reaches `complete`; the requester main process merges pages before projecting them to the renderer. A failed or malformed chain is `error`, never a shorter list presented as complete, and retries read-only pages with bounded exponential backoff until a new catalog or disconnect cancels the chain. Quota-only updates retain the identity-bearing `catalogRevision` and reuse in-flight or completed worktrees instead of restarting pagination.
 
@@ -321,9 +327,21 @@ The first time an owner makes an existing worktree Public, the publication confi
 
 Selecting a live session attaches a read subscription to its terminal. Selecting a historical session does not create a requester-side transcript surface. After worktree control is granted, the owner resolves the saved record, constructs its resume command internally, starts the exact Claude or Codex agent session, and returns directly to the terminal surface. The requester never receives or supplies a resume command.
 
-The bounded `session.read` operation remains available at the protocol boundary for compatibility, but the Desktop session-selection flow does not call it or render a separate transcript UI.
+Historical-to-live handoff does not wait for pagination. `SpoolTerminalAttachmentRegistry` binds the original connection-scoped session alias to the owner PTY before `session.continue` responds. Terminal subscribe/input/resize resolve the attachment first, then the catalog.
 
-On the normal success path, historical-to-live handoff does not wait for catalog invalidation and session pagination. `SpoolTerminalAttachmentRegistry` binds the original connection-scoped opaque session reference to the new owner-only PTY handle before `session.continue` responds. Terminal subscribe/input/resize resolve that attachment first, then fall back to the current catalog. The original session alias is pinned before launch: if a paired-runtime response becomes `outcome_unknown` before its PTY handle reaches the owner process, requester retries wait for the refreshed catalog to expose that same opaque reference and never invoke `session.continue` again. A successful explicit live `terminal.subscribe` pins its alias through the same connection-scoped reference table so a catalog generation rebuild can rebind the active terminal when the stable session key reappears. After pagination reaches `complete` or `error`, the renderer clears an ordinary active alias that is still absent; it preserves aliases participating in a pending or attached historical continuation. The actual-host projection reuses the short-lived continued-session binding before an agent hook reports its provider session ID, and binding changes invalidate the paired session catalog. A genuine PTY close removes the attachment and may expose provider continuation; paired transport loss is a subscription error and cannot masquerade as a PTY close. Attachments and pinned aliases are scoped to the physical connection, revalidate the current Public worktree identity on every bind, and are cleared on disconnect; control authorization and the final PTY side-effect guard remain unchanged.
+Owner-side creation follows the same immediate-attachment rule. Before `terminal.create` returns, the owner mints a connection-scoped `sessionRef`, binds it to the new PTY, and returns it with a sanitized tab descriptor. The requester can select and subscribe immediately.
+
+Creation also invalidates the owner session source so paged catalogs for every Public viewer converge on the new owner-owned session. The creator's alias stays pinned until it maps to the stable catalog identity; merging must not duplicate the tab or lose its selection.
+
+An agent may initially lack a provider session ID. The actual-host binding keeps its identity stable when a later hook reports that ID, then invalidates the catalog. The exact-worktree change stream carries only the bounded positive provider identity proof and its nullable owner-minted live key; the outer owner attests it only while the corresponding Public execution route is still observed. Subscribing before the actual-host initial snapshot closes the healthy read/subscribe window. A lost route or hook hides the unproven history rather than assigning it by CWD.
+
+The owner keeps a bounded live-to-provider identity alias so a created Agent retains one connection-scoped `sessionRef` after its PTY closes and the same provider record becomes historical. If one PTY launches consecutive agents, only the current provider identity inherits the live alias; the previous session returns to its provider-derived key. This lineage changes the key of an already-proven row only and never creates provenance.
+
+If a continued or created process crosses the spawn boundary but its reply is lost, the requester waits for a fresh catalog and never automatically repeats the mutation. An explicit live `terminal.subscribe` also pins its alias so a catalog rebuild can rebind the active terminal.
+
+After pagination reaches `complete` or `error`, an ordinary absent alias may be cleared. Pending, attached, or outcome-unknown aliases remain bounded until they materialize or resolve. Attachments and aliases are connection-scoped, revalidate the Public worktree on every bind, and are cleared on disconnect.
+
+A genuine PTY close removes the attachment. Paired transport loss is a subscription error and cannot masquerade as a PTY close. Revocation removes future mutation authority but does not close an attached or created owner process.
 
 ### Quota projection
 
@@ -419,9 +437,9 @@ Tailscale encrypts the network path; Orca E2EE protects the application frames a
 
 ## Dedicated Spool RPC registry
 
-Spool does not expose the approximately 482-method runtime registry and then try to subtract unsafe methods. `SpoolRpcGateway` has a separate checked-in registry. Familiar wire names such as `terminal.subscribe`, `files.read`, and `git.status` may remain, but their Spool schemas accept opaque references and relative paths rather than the existing raw host parameters.
+Spool does not expose the approximately 482-method runtime registry and then try to subtract unsafe methods. `SpoolRpcGateway` has a separate checked-in registry. Familiar wire names such as `terminal.subscribe`, `files.read`, `git.status`, and `checks.read` may remain, but their Spool schemas accept opaque references and relative paths rather than the existing raw host parameters.
 
-`SpoolRpcGateway` is the deep Module. Its registry is a declarative manifest whose entries select a small set of typed schemas, resource binders, execution operations, and result/error projectors owned by the file, Git, session, terminal, and catalog domains:
+`SpoolRpcGateway` is the deep Module. Its registry is a declarative manifest whose entries select a small set of typed schemas, resource binders, execution operations, and result/error projectors owned by the file, Git, Checks, session, terminal, and catalog domains:
 
 ```ts
 type SpoolMethodSpec = {
@@ -449,7 +467,7 @@ interface SpoolRpcGateway {
 }
 ```
 
-`close()` is idempotent and is the one owner-side cleanup path for aliases, pending requests, grants, streams, queues, and downstream subscriptions. The gateway subscribes once to `SpoolWorktreeVisibility`; Private, delete, and incarnation rotation fan out internally through the same connection Modules. `SpoolIngress` does not manually call several cleanup owners.
+`close()` is idempotent and is the one owner-side cleanup path for aliases, create-idempotency ledgers, pending requests, grants, streams, queues, and downstream subscriptions. The gateway subscribes once to `SpoolWorktreeVisibility`; Private, delete, and incarnation rotation fan out internally through the same connection Modules. `SpoolIngress` does not manually call several cleanup owners.
 
 The dispatch sequence is:
 
@@ -457,10 +475,13 @@ The dispatch sequence is:
 2. Parse the Spool-specific external schema.
 3. Resolve connection-scoped references and bind them to one current worktree instance/share epoch.
 4. Require Public read or the exact control grant.
-5. Invoke the existing terminal/file/Git/session execution Module through `SpoolExecutionGateway`.
-6. Project the result and errors, then recheck the share epoch before enqueueing read data.
+5. For a create mutation, reserve its connection/worktree-scoped `clientMutationId` before the spawn guard.
+6. Invoke the existing terminal/file/Git/Checks/session execution Module through `SpoolExecutionGateway`.
+7. Project the result and errors, then recheck the share epoch before enqueueing read data.
 
 Streaming emits carry a worktree/share epoch guard. Private or delete cancels the stream and drops queued data. Mutations have a final access-generation guard at their commit/spawn point. Once a process, Git operation, or write has crossed that point, later revocation prevents new work but does not promise rollback.
+
+Direct owner RPC, paired-runtime RPC, and renderer parsing reuse one strict set of execution-result schemas for files, Git, Checks, terminal launch/create, continuation, and mutations. The owner wire projector validates before serialization, so a legal host result cannot be accepted under a wider relay bound and then rejected under a narrower renderer bound. Malformed post-admission mutation output becomes `outcome_unknown`; malformed read output is never forwarded.
 
 Private, nonexistent, stale-epoch, and cross-worktree references all return the same sanitized `resource_not_found`. Projected errors never contain owner paths, host IDs, command lines, credentials, or raw downstream error objects.
 
@@ -468,17 +489,18 @@ No policy is inferred from a method-name prefix. A test snapshots every exposed 
 
 ## Capability matrix
 
-| Area                       | Public                                                                           | With control                                                                | Always owner-only / denied remotely                                                                 |
-| -------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Catalog                    | Sanitized Desktop/project/worktree/session list and cached quota                 | Same                                                                        | Raw repos, projects, accounts, settings, AI Vault, host inventory                                   |
-| Sessions                   | List, bounded transcript read, and attach live terminal output                   | Continue a proven historical Claude/Codex session in an owner-side terminal | Structured create/rename/close; move across worktrees; account selection; global administration     |
-| Terminal                   | Subscribe, bounded snapshot/scrollback, sequenced output and resize events       | Input and resize                                                            | Owner OS clipboard, auto-download, host notification or external-open side effects                  |
-| Files                      | List tree, read/chunk/preview; view diff on Git targets                          | Create, write, rename, delete inside the worktree                           | OS file dialogs, reveal/open on owner Desktop, paths outside root, owner's clipboard                |
-| Git                        | Git targets only: current worktree/index/HEAD status, diff, HEAD history, branch | Git targets only: stage, unstage, and commit through structured methods     | All Git APIs for folder targets; checkout/merge/rebase/fetch/pull/push; worktree administration     |
-| Claude/Codex               | Observe existing session content and sanitized active quota                      | Continue a proven session; run a new agent command in a granted terminal    | Structured session creation; select/authenticate accounts; reveal credentials or account identity   |
-| Browser/integrations       | None in V1                                                                       | None in V1                                                                  | Profiles, cookies, hosted reviews, GitHub/GitLab/Linear/Jira writes, automations, emulator/computer |
-| Worktree administration    | None                                                                             | None                                                                        | Public/Private, approve/deny/revoke, delete worktree, create other worktrees                        |
-| SSH/runtime administration | Observe `resource_unavailable` only                                              | Use an already-authorized route                                             | Host-key trust, credentials, pairing, interactive reconnect prompts, target management              |
+| Area                       | Public                                                                             | With control                                                                                  | Always owner-only / denied remotely                                                                   |
+| -------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Catalog                    | Sanitized Desktop/project/worktree/session list and cached quota                   | Sanitized enabled/detected agent launch options for the selected worktree                     | Raw repos, projects, accounts, settings, AI Vault, host inventory                                     |
+| Sessions                   | List attributed sessions and attach live terminal output                           | Continue proven Claude/Codex history; create an owner-side terminal or advertised agent       | Transcript RPC/UI; close, rename, pin, drag, or move tabs/sessions; account selection; administration |
+| Terminal                   | Subscribe, bounded snapshot/scrollback, sequenced output and resize events         | Input, resize, and semantic `New Terminal`                                                    | Raw create command/CWD/env/path/prompt; owner clipboard, auto-download, notification, external open   |
+| Files                      | List tree, read/chunk/preview; view diff on Git targets                            | Create, write, rename, delete inside the worktree                                             | OS file dialogs, reveal/open on owner Desktop, paths outside root, owner's clipboard                  |
+| Git                        | Git targets only: current worktree/index/HEAD status, diff, HEAD history, branch   | Git targets only: stage, unstage, and commit through structured methods                       | All Git APIs for folder targets; checkout/merge/rebase/fetch/pull/push; worktree administration       |
+| Agents                     | Navigate agent entries from the Public paginated catalog and select their terminal | Launch an owner-enabled/detected agent by semantic ID; continue a proven Claude/Codex session | Requester AI Vault, raw launch args, settings, auth/account switching, credential or account identity |
+| Checks                     | Git targets only: sanitized current hosted-review status                           | Remains read-only                                                                             | Raw provider responses/errors, credentials, CI logs, reruns, approvals, merges, or other mutations    |
+| Browser/integrations       | None in V1                                                                         | None in V1                                                                                    | Profiles, cookies, hosted reviews, GitHub/GitLab/Linear/Jira writes, automations, emulator/computer   |
+| Worktree administration    | None                                                                               | None                                                                                          | Public/Private, approve/deny/revoke, delete worktree, create other worktrees                          |
+| SSH/runtime administration | Observe `resource_unavailable` only                                                | Use an already-authorized route                                                               | Host-key trust, credentials, pairing, interactive reconnect prompts, target management                |
 
 The matrix is the product-level rule; the checked-in registry is its executable inventory. The granted terminal remains a normal owner-side shell, so it can run commands beyond the narrower structured GUI methods without turning those commands into Spool RPC capabilities. Adding an exposed operation requires updating both and adding a security-contract test.
 
@@ -500,6 +522,10 @@ interface SpoolExecutionGateway {
 - Local and WSL worktrees reuse the owner runtime's current filesystem, Git, PTY, and agent execution Modules.
 - SSH worktrees reuse the already-established SSH relay and providers.
 - Paired runtime-backed worktrees forward through the owner's persisted runtime connection.
+
+Terminal and agent creation use the same route as the target worktree. The gateway never substitutes a local process when the target is WSL, SSH, or paired runtime-backed.
+
+For a semantic launch, the owner resolves the canonical worktree root, default shell, enabled agent definition, platform command, configured overrides, environment, and active credentials. The process starts in the background and does not activate or rearrange the owner's local workspace or tabs.
 
 The gateway chooses an actual-host `SpoolHostAdapter`. Besides normal operations, each Adapter must provide `resolveWorktreeIncarnation` and `openVerified`. The paired-runtime Adapter therefore adds narrow owner-only downstream operations for Git or folder markers, folder directory identity, and verified file access; the Owner Desktop cannot inspect a runtime host's marker, directory identity, or file handles directly. These internal operations are authenticated by the existing paired-runtime principal and are absent from the external Spool registry.
 
@@ -564,7 +590,53 @@ A granted terminal can run fetch, checkout, merge, rebase, and ref updates that 
 
 ## Terminal protocol and safety
 
-Spool V1 deliberately uses the separate checked JSON methods `terminal.subscribe`, `terminal.input`, and `terminal.resize` over the single encrypted socket. It does not register the broad paired-device `terminal.multiplex` handler. The subscription binds a connection-scoped session alias to one owner terminal, emits a bounded initial snapshot followed by sequenced output/resize events, and closes on publication invalidation.
+Spool V1 uses separate checked JSON methods over the single encrypted socket. It registers `terminal.launchOptions`, `terminal.create`, `terminal.subscribe`, `terminal.input`, and `terminal.resize`, but not the broad paired-device `terminal.multiplex` handler.
+
+`terminal.launchOptions` requires the current worktree grant. It returns `New Terminal` plus every supported agent that the owner actually has enabled and detected for the worktree's execution host:
+
+```ts
+type SpoolLaunchCapabilities = {
+  agents: readonly SpoolAgentLaunchId[]
+  defaultAgent: SpoolAgentLaunchId | null
+}
+```
+
+`SpoolAgentLaunchId` is a closed, protocol-versioned semantic enum derived from Orca's supported TUI agents, so the result is bounded without silently truncating a supported option. The projection contains no executable, command, path, arguments, environment, settings, account identity, authentication state, or raw detection error.
+
+The owner builds this projection with its bounded, cached actual-host detection path and current enabled/default-agent settings. A requester cannot install or enable an agent, refresh credentials, select an account, or open an owner-side prompt. A stale option is revalidated at the create admission guard.
+
+`terminal.create` accepts only this external schema:
+
+```ts
+type SpoolTerminalCreateParams = {
+  worktreeRef: string
+  clientMutationId: string
+  launch: { kind: 'shell' } | { kind: 'agent'; agent: SpoolAgentLaunchId }
+}
+
+type SpoolTerminalCreateResult = {
+  sessionRef: string
+  session:
+    | { kind: 'terminal'; agent: null; title: string }
+    | { kind: 'agent'; agent: SpoolAgentLaunchId | null; title: string }
+}
+```
+
+The owner maps the semantic launch to its current settings and actual-host execution Adapter. Unknown, disabled, no-longer-detected, or stale agent values fail with a sanitized error. There is no external field through which a requester can inject command, CWD, env, path, prompt, account, or arguments.
+
+Before replying, the owner binds `sessionRef` to the new PTY attachment and invalidates its session catalog. The requester can subscribe immediately, while pagination later merges the same owner-owned session without a duplicate or selection change.
+
+`clientMutationId` is bounded and scoped to the physical connection, worktree instance, and share epoch. The owner keeps an in-flight/completed ledger until disconnect. Repeating an ID with the same semantic request returns the original promise/result; reusing it with different parameters is rejected and never spawns.
+
+The ledger has a fixed per-connection/worktree capacity. Once full, a new unique ID returns `resource_busy`; an existing record is never evicted while its connection lives. This preserves idempotency without unbounded memory.
+
+`terminal.create` is a mutation. If the connection is lost after its spawn boundary but before a conclusive response, Spool returns `outcome_unknown` locally and never automatically retries. A new connection may inspect the fresh Public catalog, but it has neither the old alias nor control grant and must request approval again.
+
+The created process/session belongs to the owner Public worktree and remains running after revoke, connection loss, or requester restart. The owner can manage it through normal local controls; owner restart follows Orca's normal process lifetime. A fresh connection stays read-only until approval. Remote close, rename, pin, drag, and move remain absent from the registry.
+
+Creation is supported through local, WSL, SSH, and paired runtime Adapters. It uses only an already-authorized route and runs without changing owner-side focus, active workspace, or selected tab.
+
+`terminal.subscribe` binds a connection-scoped session alias to one owner terminal. It emits a bounded initial snapshot followed by sequenced output/resize events and closes on publication invalidation.
 
 `terminal.input` and `terminal.resize` each bind the alias again from the current connection projection and in-memory Public publication, then require the exact current worktree grant. This bind path does not rescan every Public worktree: the actual-host incarnation plus grant-generation guard still runs immediately before the PTY or viewport side effect. A binary frame sent to the Spool listener is a protocol violation and terminates the physical connection, which also revokes its grants.
 
@@ -585,7 +657,10 @@ Limits are protocol constants and return sanitized `resource_busy` or `result_to
 - Probe body size, probe concurrency, and probes per source.
 - Pre-auth sockets, total sockets, and sockets per Tailnet node.
 - Concurrent RPCs and pending owner approvals per connection.
+- Concurrent terminal/agent creates per connection and worktree.
+- Enabled-agent launch options and retained create-idempotency records per connection.
 - Logical subscriptions and terminal streams per connection/worktree.
+- Connection-scoped created-session attachments and pinned aliases per worktree.
 - Terminal snapshot and retained scrollback bytes.
 - File chunk size, directory entry count, search result count, and diff bytes.
 - Public worktrees per owner Desktop (128).
@@ -621,23 +696,37 @@ type SpoolWorkspaceRoute = {
 
 A pure `spool-sidebar-rows.ts` projection creates Desktop, Project, Worktree, and Session row kinds. A new `workspace-sidebar-row-projection.ts` is the explicit high-level Seam that combines existing local `RenderRow[]` with `SpoolSidebarRow[]` and owns virtual-row keys, measured sizes, sticky behavior, and ordering. `worktree-list-groups.ts` and `WorktreeCard` continue to model only local worktrees.
 
-The rows use the existing sidebar presentation Modules rather than Spool-specific approximations. Desktop and Project rows share the native Project-header shell and disclosure; Worktree rows share the native Worktree-card surface; every disclosure therefore has one size, position, color, and rotation source. Spool adds no alternate hover background. The anchors are Desktop 10px, Project 20px, Worktree content 30px, and Session 48px. Plain terminal sessions use the Terminal glyph, while Claude and Codex use their provider glyphs. There are no Live/Stopped/Resumable pills. A Desktop can remain present with quota and no Public projects. Owner-side active grants are projected once by `WorktreeList` and rendered inside the corresponding native `WorktreeCard` with direct Revoke actions; cards do not subscribe independently and there is no separate global grant panel.
+The rows use the existing sidebar presentation Modules rather than Spool-specific approximations. Desktop and Project rows share the native Project-header shell and disclosure; Worktree rows share the native Worktree-card surface; every disclosure therefore has one size, position, color, and rotation source. Spool adds no alternate hover background. The anchors are Desktop 10px, Project 20px, Worktree content 30px, and Session 48px. Plain terminal sessions use the Terminal glyph, while recognized agents use their provider glyph and custom agents use a neutral agent glyph. There are no Live/Stopped/Resumable pills. A Desktop can remain present with quota and no Public projects. Owner-side active grants are projected once by `WorktreeList` and rendered inside the corresponding native `WorktreeCard` with direct Revoke actions; cards do not subscribe independently and there is no separate global grant panel.
 
 Quota does not occupy permanent tree rows. `SpoolDesktopUsageHoverCard` adapts the sanitized quota snapshot to `ProviderRateLimits` and renders the same `ProviderPanel` used by the status-bar hover surface, including usage bars, reset copy, and the global used/remaining preference. It does not import the large `StatusBar` Module or raw account slices.
 
 ### Workspace surface
 
-At the content root, `SpoolWorkspaceSurface` is selected instead of the local workspace controller, but it reuses the normal Worktree presentation shell. `workspace-column-chrome.ts` is shared with `TabGroupSplitLayout` and owns the 4px top drag region, 36px total top-band alignment, and full-height left divider. `WorkspacePaneFrame` owns the same 32px tab strip, border, surface, window-drag region, and titlebar-control clearances used by local tab groups. `WorkspaceTabStripViewport` is shared with the local `TabBar`, so overflow arrows, fade masks, wheel navigation, active-tab scroll-into-view, and unused titlebar drag space have one implementation. Spool's select-only tab uses the same sizing, border, active, and focus tokens but cannot drag, close, rename, pin, create local state, or enter persistence.
+At the content root, `SpoolWorkspaceSurface` is selected instead of the local workspace controller, but it reuses the normal Worktree presentation shell. `workspace-column-chrome.ts` is shared with `TabGroupSplitLayout` and owns the 4px top drag region, 36px total top-band alignment, and full-height left divider. `WorkspacePaneFrame` owns the same 32px tab strip, border, surface, window-drag region, and titlebar-control clearances used by local tab groups. `WorkspaceTabStripViewport` is shared with the local `TabBar`, so overflow arrows, fade masks, wheel navigation, active-tab scroll-into-view, and unused titlebar drag space have one implementation.
 
-The virtualized left tree remains the complete navigator for every materialized session. The center strip is intentionally bounded to 24 entries: it prioritizes the catalog's leading entries plus recently and currently selected sessions, and always brings the active session into view. This prevents the paged history ceiling from turning into as many as 55,000 mounted horizontal buttons while preserving direct access to every session on the left. Catalog `loading` and `error` remain visible in the workbench; a partial or empty page chain is never presented as complete. No session is attached or continued until the user explicitly selects it.
+Spool reuses the local tab `+` menu presentation through a remote action adapter, not the local workspace controller. Read-only, pending, and disconnected states keep it disabled with an explanatory tooltip. A grant enables `New Terminal` and only the owner-advertised enabled/detected agents. It never shows Browser, Markdown, Simulator, agent settings, account switching, or raw shell variants.
 
-The standard `RightSidebarFrame` is also a presentation Seam. `SpoolRightSidebar` supplies Explorer and, only for Git targets, Source Control; folder targets expose Explorer alone. Because remote previews use checked relative-path and patch contracts rather than local editor models, file and change selection uses a single-column drill-in within the sidebar and an explicit Back action. `SpoolFilesPane`, `SpoolFileTree`, and `SpoolFilePreview` continue to own relative-path RPC and requester-side previews. `SpoolGitPane`, `SpoolGitSidebar`, and `SpoolGitDiffPane` continue to own the bounded Git surface. They invoke checked Spool IPC rather than local filesystem, editor, Source Control, or `PtyTransport` clients. This preserves the normal Worktree layout without synthesizing a `Repo`, `Worktree`, persisted `WorkspaceKey`, or owner absolute path.
+Remote tabs use the same sizing, border, active, and focus tokens but stay select-only. They cannot drag, close, rename, pin, create persisted local tab state, or enter local workspace reconciliation. Creation runs as a background owner-side operation and never changes the owner's active tab or focus.
 
-`SpoolSessionPane` resolves live versus historical selection and always converges on `SpoolTerminalPane`; it never renders a separate provider transcript UI. The center therefore shows both raw terminals and resumed agent terminals through the same xterm-backed remote surface, while the right sidebar owns file and Git browsing.
+The virtualized left tree remains the complete navigator for every materialized session. The center strip is bounded to 24 entries: it prioritizes leading, recent, and selected sessions, and always includes the active one. Catalog `loading` and `error` remain visible; a partial page chain is never presented as complete.
 
-`SpoolTerminalPane` starts `terminal.subscribe`, applies one bounded snapshot followed by monotonically sequenced output/resize events, and drops duplicate or stale sequences. A disconnect or new connection epoch tears down the subscription; reopening starts a fresh subscription and snapshot. There is no terminal ACK/resync or separate PTY transport protocol in V1. Terminal input and resize consult the current `canControl` selector and enter the same ordered mutation queue used to surface uncertain outcomes. The queue coalesces short adjacent input bursts up to the terminal chunk limit, including bytes that arrive while the previous acknowledged mutation is in flight; resize remains an ordering barrier.
+Existing sessions attach or continue only after explicit selection. A successful explicit create is different: the returned volatile alias is inserted, selected, and subscribed immediately. Catalog reconciliation later replaces or merges it with the stable entry without duplicate tabs or selection loss.
 
-All Spool file, Git, terminal, and session mutation controls consume the dynamic `canControl` selector. Browser and integration entry points remain unavailable in V1 regardless of the grant. On epoch change, revoke, or Private, one state transition makes every exposed surface read-only in the same render turn. The server remains authoritative if a renderer path misses a gate.
+The ordinary Worktree right sidebar is a presentation Seam: Spool reuses `RightSidebarFrame` plus the shared activity-tab definitions, ordering, icons, labels, and status-indicator semantics. `SpoolRightSidebar` filters that definition to Explorer, Agents, Source Control, and Checks for a Git worktree, and Explorer plus Agents for a folder worktree. It supplies remote panel adapters; it does not mount local panels whose selectors expect a requester-side Repo, Worktree, path, AI Vault, provider account, or Git client.
+
+Agents is a second navigator over only the `kind: 'agent'` entries in the already-loaded Public paginated session catalog. Its row viewport is virtualized, so the bounded 55,000-row materialized catalog does not become a 55,000-node DOM. It renders the sanitized agent/title fields and selecting a row updates the remote route so `SpoolSessionPane` opens that session's terminal in the center. It does not query or mirror the requester's local AI Vault, and pagination remains authoritative rather than presenting a partial chain as complete.
+
+Checks is an owner-side sanitized read projection. The checked, Git-only `checks.read` RPC resolves the Public worktree on its actual host and returns bounded review fields needed by the read-only panel and its activity status indicator: provider, number, title, state, URL, aggregate status, updated time, mergeability, and review decision. It may also return at most 256 check rows containing only name, status, conclusion, and a normalized credential-free HTTP(S) URL, plus `truncated` and `detailStatus`. The owner keeps a 15-second, 128-entry per-publication single-flight cache and performs the provider lookup without analytics side effects. A provider failure projects `unavailable`; a successful lookup with no review projects an ordinary empty result. The strict result schema rejects excess fields, malformed dates, credential-bearing URLs, and unsafe protocols at direct and paired-runtime boundaries. It returns no repository path, credential, raw provider response/error, check log, or mutation capability; a control grant does not make Checks writable.
+
+Because remote previews use checked relative-path and patch contracts rather than local editor models, file and change selection uses a single-column drill-in within the sidebar and an explicit Back action. `SpoolFilesPane`, `SpoolFileTree`, and `SpoolFilePreview` continue to own relative-path RPC and requester-side previews. `SpoolGitPane`, `SpoolGitSidebar`, and `SpoolGitDiffPane` continue to own the bounded Git surface. Every panel invokes checked Spool IPC rather than requester-side filesystem, editor, Source Control, AI Vault, provider, or `PtyTransport` clients. This preserves the normal Worktree layout without synthesizing a `Repo`, `Worktree`, persisted `WorkspaceKey`, owner absolute path, or owner credential.
+
+`SpoolSessionPane` resolves existing, continued, and newly created aliases and always converges on `SpoolTerminalPane`; it never renders a separate provider transcript UI. The center shows raw and agent terminals through the same xterm-backed remote surface, while the right sidebar provides the ordinary workspace navigation over remote projections.
+
+`SpoolTerminalPane` starts `terminal.subscribe`, applies one bounded snapshot followed by sequenced output/resize events, and drops duplicate or stale sequences. A disconnect or new connection epoch tears down the subscription; reopening starts a fresh snapshot. There is no separate PTY transport protocol in V1.
+
+Create, input, and resize consult the current `canControl` selector and use the ordered mutation path that surfaces uncertain outcomes. Input coalesces short adjacent bursts up to the chunk limit; resize remains an ordering barrier. An `outcome_unknown` create refreshes read state but never issues another create.
+
+All Spool file, Git, terminal, create, and session mutation controls consume the dynamic `canControl` selector. Browser, settings, account switching, and integration entry points remain unavailable regardless of grant. On epoch change, revoke, or Private, one state transition makes every surface read-only. The server remains authoritative.
 
 ### Owner approval surface
 
@@ -650,8 +739,8 @@ The approval copy remains:
 ```text
 Allow Xinyao · MacBook to control this worktree?
 
-They will be able to send terminal input, modify files,
-run commands, and use your Claude/Codex accounts.
+They will be able to create terminals, start enabled agents,
+send terminal input, modify files, run commands, and use your active agent accounts.
 Terminal commands are not confined to this worktree.
 
                          [Deny] [Allow this connection]
@@ -696,23 +785,24 @@ received → bound → authorized → commit/spawn guard → started → result
                revoke blocks here        └─ later revoke does not roll back
 ```
 
-Mutations are never automatically retried. If the socket dies after the commit/spawn guard and before the reply, the requester sees `outcome_unknown` and must inspect state or explicitly act again after a new approval.
+Mutations are never automatically retried. If the socket dies after the commit/spawn guard and before the reply, the requester sees `outcome_unknown`. For creation it inspects the fresh paged catalog; any later explicit action requires a new connection-scoped approval and mutation ID.
 
 ## Reconciliation and failures
 
-| Event                                            | Owner behavior                                                                      | Requester behavior                                                 |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Tailnet peer misses one scan                     | No change                                                                           | Keep current row while reconciling                                 |
-| Peer misses two scans / probe fails              | No change                                                                           | Close requester connection and remove Desktop after reconciliation |
-| Heartbeat or socket loss                         | Delete connection grants, pending requests, streams, aliases                        | Increment epoch immediately; show disconnected/read-only           |
-| Fresh socket, same owner runtime                 | Issue new aliases; Public catalog can return                                        | Replay only read subscriptions; require new control request        |
-| Owner restart                                    | New runtime ID; no grants exist                                                     | Treat as a new catalog epoch and read-only connection              |
-| Public SSH/WSL/runtime host unavailable          | Keep visibility but publish resource unavailable from validated cached catalog only | Preserve row; opening reports sanitized unavailable state          |
-| Worktree disappears                              | Invalidate share epoch; revoke and remove                                           | Remove worktree and close its views                                |
-| Same path reappears with a new incarnation proof | Rotate instance ID and persist Private                                              | Old references remain permanently invalid                          |
-| Worktree becomes Private during an awaited read  | Cancel/purge stream and discard late result                                         | Remove worktree; never render late content                         |
-| Grant revoked during a queued mutation           | Commit/spawn guard rejects if not started                                           | Demote to read; no replay                                          |
-| Already-started mutation loses connection        | Process may continue                                                                | Report `outcome_unknown`; do not retry                             |
+| Event                                            | Owner behavior                                                                               | Requester behavior                                                 |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Tailnet peer misses one scan                     | No change                                                                                    | Keep current row while reconciling                                 |
+| Peer misses two scans / probe fails              | No change                                                                                    | Close requester connection and remove Desktop after reconciliation |
+| Heartbeat or socket loss                         | Delete grants, requests, streams, aliases, and create-id ledgers; created processes continue | Increment epoch immediately; show disconnected/read-only           |
+| Fresh socket, same owner runtime                 | Issue new aliases; Public catalog can return                                                 | Replay only read subscriptions; require new control request        |
+| Owner restart                                    | New runtime ID; no grants exist                                                              | Treat as a new catalog epoch and read-only connection              |
+| Public SSH/WSL/runtime host unavailable          | Keep visibility but publish resource unavailable from validated cached catalog only          | Preserve row; opening reports sanitized unavailable state          |
+| Worktree disappears                              | Invalidate share epoch; revoke and remove                                                    | Remove worktree and close its views                                |
+| Same path reappears with a new incarnation proof | Rotate instance ID and persist Private                                                       | Old references remain permanently invalid                          |
+| Worktree becomes Private during an awaited read  | Cancel/purge stream and discard late result                                                  | Remove worktree; never render late content                         |
+| Grant revoked during a queued mutation           | Commit/spawn guard rejects if not started                                                    | Demote to read; no replay                                          |
+| Already-started create loses connection          | Owner process/session continues and enters the Public catalog                                | Report `outcome_unknown`; inspect catalog; do not retry            |
+| Revoke after a successful create                 | Keep the owner process/session running and Public                                            | Keep read access; remove input/create authority                    |
 
 The requester may retain a last successful Public row during a brief execution-host outage, but never across a visibility/share-epoch change. Cached content is scoped to the same connection/runtime/share generations.
 
@@ -724,7 +814,7 @@ Spool logs protocol versions, node IDs in a redacted/fingerprinted form, connect
 - Absolute worktree/session/file paths.
 - Terminal input/output or file contents.
 - Account identity or raw provider responses.
-- Resume commands, SSH targets, or downstream pairing offers.
+- Resolved launch/resume commands, agent overrides, SSH targets, or downstream pairing offers.
 
 Telemetry, if added, records aggregate feature events only and never forms a central discovery/control plane.
 
@@ -733,6 +823,7 @@ Telemetry, if added, records aggregate feature events only and never forms a cen
 - Existing mobile and runtime pairing wire contracts remain compatible. The E2EE refactor preserves legacy auth frames, channel-bound token mismatch checks, device/client identity, `wsClientIds` close cleanup, and revoke termination semantics while mapping the result to a paired-device principal.
 - Missing `spoolVisibility` and `spoolIncarnationId` always mean Private. There is no migration that makes an existing worktree Public.
 - Existing sessions gain worktree-instance provenance only when safely observed or created. Unprovable historical records are not shared.
+- Remotely initiated terminals and agents are ordinary owner-owned sessions. They need no ownership migration when a requester disconnects.
 - Git commands retain Git 2.25 as the baseline and use host-scoped capability caches for any newer preferred behavior.
 - Paths use Node/Electron host path functions or execution-host Adapters; keyboard labels and shortcuts continue to use platform-aware Orca conventions.
 - The requester-to-owner Spool path always terminates at the Owner Desktop even when the selected worktree executes over SSH, WSL, or a paired runtime.
@@ -747,12 +838,14 @@ Security race tests use controllable barriers between bind, authorize, execute, 
 - Ticket TTL, one-use consumption, source/node/client-key/runtime/version binding, and replay rejection.
 - E2EE principal immutability and compatibility with existing device-token clients.
 - Visibility default, atomic project bulk, deny-journal recovery, rename continuity, incarnation-proof mismatch, same-path replacement, and overlap rejection.
-- Public-only catalog projection, connection-scoped opaque references, generation handling, session provenance/deduplication, and quota sanitization.
+- Public-only catalog projection, connection-scoped opaque references, generation handling, created-session alias convergence, provenance/deduplication, and quota sanitization.
 - Session privacy fixtures cover nested roots, identical paths on different execution hosts, stale/cross-worktree provenance, and ambiguous legacy records.
 - Recursive fixtures containing email, IDs, auth sources, paths, errors, tokens, cookies, and raw metadata prove those fields/values never serialize.
 - Separate Spool RPC registry default denial and the complete bind/access/execute/result/error contract for every entry.
 - File containment for traversal, `.git`/administrative metadata denial, symlink escape/retarget, missing-target parent resolution, Windows drives/UNC/case, WSL, SSH, and runtime hosts.
 - Git read profile, current-HEAD opaque commit refs, sibling-worktree isolation, and Git 2.25 compatibility.
+- Semantic launch-option projection; `terminal.create` rejects command/CWD/env/path/prompt/account fields and stale or disabled agent IDs.
+- Create-idempotency scope, same-ID result reuse, conflicting-payload denial, full-ledger rejection, disconnect cleanup, alias pinning, and `outcome_unknown` without automatic retry.
 - Terminal method direction, per-operation grant checks, inactive viewer behavior, OSC/local-side-effect suppression, sequencing, and connection teardown on invalidation.
 
 ### Process integration
@@ -763,10 +856,13 @@ Security race tests use controllable barriers between bind, authorize, execute, 
 - Disconnect clears pending approvals/grants and reconnect replays only Public reads.
 - A grant cannot move to a second socket on the same node, another channel key, worktree/share epoch, or stale owner decision.
 - Requester and owner restart tests separately prove that grants, requests, aliases, streams, and `canControl` never survive.
-- Public → Private closes catalog/terminal/file/Git streams and discards reads that finish late.
+- Public → Private closes catalog/terminal/file/Git streams, cancels in-flight Checks reads, and discards all late results.
 - Delete, incarnation-proof mismatch, incarnation rotation, and Private invalidate active requests, grants, aliases, and streams through the same path.
 - Crash injection after each deny-journal, metadata, and epoch step never publishes uncertain visibility.
 - Revoke between authorization and commit/spawn prevents the side effect; revoke after start does not claim rollback.
+- Owner-side terminal and enabled-agent creation runs on local, WSL, SSH, and paired runtime targets without opening a route, prompting for trust/credentials, or stealing owner focus.
+- A created attachment is usable before pagination completes; catalog convergence exposes one stable session to the creator and other Public viewers.
+- Revoke, connection loss, and requester restart leave an already-created owner process running while removing requester mutation authority; owner restart follows normal Orca process lifetime.
 - Revoke/Private invalidation terminates saturated connections so stale queued replies cannot survive the publication epoch.
 - Public file and Git reads never open owner UI or trigger credential/trust/provider prompts.
 - The same authorization and symlink-retarget/visibility TOCTOU suite runs against local, WSL, SSH relay, and paired runtime execution.
@@ -780,6 +876,12 @@ Security race tests use controllable barriers between bind, authorize, execute, 
 - Sidebar projects Desktop → Project → Worktree → every attributable Session, never merges Desktops by person, and shows no session-status pills.
 - Light/dark, 220 px sidebar density, truncation, disclosure, virtual scrolling, and Desktop usage hover cards follow `docs/STYLEGUIDE.md` and canonical CSS tokens.
 - Public surfaces are consistently read-only; one grant ACK enables all allowed controls; revoke/disconnect/Private disables them in one render turn.
+- The shared tab `+` is disabled with read-only guidance, then offers only `New Terminal` and owner-advertised agents after grant; Browser/settings/account actions never appear.
+- Successful create selects and subscribes its volatile alias immediately; paged catalog merge preserves one tab and its selection.
+- Remote tabs remain select-only with no close, rename, pin, drag, move, or local persistence path.
+- Git worktrees show Explorer, Agents, Source Control, and Checks in the ordinary sidebar order; folder worktrees show Explorer and Agents only.
+- Agents follows paginated catalog loading/error/completion and selects the same center terminal without consulting local AI Vault state.
+- Checks displays the owner-projected aggregate status, up to 256 sanitized check rows, truncation, and provider-unavailable state; malformed, credential-bearing, stale, folder-target, and late responses fail closed.
 - Approval dialog warning, safe initial focus, cancellation, multi-grant list, and exact revoke action.
 - Two fake-Tailnet Desktop processes prove discover → Public read → request → approve → mutate → disconnect → reconnect read-only.
 - Real Tailnet smoke tests remain manual/nightly; CI injects an in-memory `TailnetControl` rather than depending on a developer Tailnet.
@@ -799,14 +901,16 @@ P0 merge gates are default-deny registry coverage, projection sanitization, term
 
 - Add `TailnetControl`, `TailscaleCommandAdapter`, peer reconciliation, fixed-port `SpoolIngress`, tickets, immutable principals, and `SpoolPeerConnection`.
 - Add Public-only catalog/session/quota projections and generation-bound opaque references.
-- Add the default-deny read registry for terminal, file, diff, and Git data.
+- Add the default-deny read registry for terminal, file, diff, Git, and sanitized Checks data.
 - Prove local, WSL, SSH, and runtime execution routing and fail-closed unavailable behavior.
 
 ### Slice 3: ephemeral control
 
 - Add owner request queue, access authority, multi-grant UI, explicit revoke, and guarded terminal control methods.
+- Add semantic launch capabilities and guarded owner-side terminal/agent creation across local, WSL, SSH, and paired runtime routes.
+- Add immediate connection-scoped attachment, `clientMutationId` deduplication, paged catalog convergence, and background creation without owner focus changes.
 - Add guarded file mutations, Git stage/unstage/commit, and Claude/Codex session continuation through the reviewed control registry.
-- Add commit/spawn guards, outcome-unknown handling, resource limits, priority invalidation, and reconnect-no-replay tests.
+- Add commit/spawn guards, outcome-unknown handling, resource limits, priority invalidation, and reconnect-no-replay coverage.
 
 ## Expected file ownership
 
@@ -817,6 +921,8 @@ src/shared/spool/
   spool-wire-contract.ts
   spool-catalog-contract.ts
   spool-access-contract.ts
+  spool-agent-launch-contract.ts
+  spool-checks-result-schema.ts
 
 src/main/spool/
   tailnet-control.ts
@@ -861,6 +967,8 @@ src/renderer/src/components/sidebar/
   WorktreeCardControlGrants.tsx
 
 src/renderer/src/components/tab-bar/
+  AgentLaunchMenuItems.tsx
+  WorkspaceTabCreateMenu.tsx
   WorkspaceSelectableTab.tsx
   WorkspaceTabStripViewport.tsx
 
@@ -870,6 +978,8 @@ src/renderer/src/components/tab-group/
 
 src/renderer/src/components/right-sidebar/
   RightSidebarFrame.tsx
+  right-sidebar-activity-items.ts
+  check-status-presentation.ts
 
 src/renderer/src/components/status-bar/
   ProviderUsageSegment.tsx
@@ -877,7 +987,11 @@ src/renderer/src/components/status-bar/
 src/renderer/src/components/spool/
   SpoolWorkspaceSurface.tsx
   SpoolSessionTabStrip.tsx
+  SpoolSessionCreateMenu.tsx
   SpoolRightSidebar.tsx
+  SpoolAgentsPane.tsx
+  SpoolChecksPane.tsx
+  SpoolChecksResult.tsx
   SpoolTerminalPane.tsx
   SpoolSessionPane.tsx
   SpoolSessionContinuationNotice.tsx
@@ -919,6 +1033,8 @@ Existing runtime/file/Git/PTY Modules do not import Spool catalog or renderer co
 - **Use raw paths or stable internal IDs as selectors:** they leak topology, invite cross-host confusion, and survive longer than the publication they name.
 - **Persist grants or replay them after reconnect:** contradicts the connection-scoped approval model.
 - **Treat renderer-disabled controls as authorization:** a modified renderer can still call the network protocol.
+- **Expose raw terminal or agent launch configuration:** command, CWD, env, path, prompt, arguments, and account selection exceed the approved worktree capability and create injection paths.
+- **Kill remotely initiated processes on revoke/disconnect:** those are owner-owned worktree sessions; revocation removes future authority rather than rolling back accepted work.
 - **Promise a worktree sandbox:** a granted terminal is the owner's shell authority.
 - **Continuously assign historical sessions by CWD:** path reuse and nested roots can disclose a previous worktree instance.
 - **Permit overlapping Public/Private roots:** a parent file tree or Git history can bypass the nested worktree's visibility.
@@ -935,8 +1051,10 @@ Tailnet peer snapshot
   → read-only Orca workspace
   → explicit whole-worktree request
   → owner approval for one physical connection
-  → owner-side execution using existing credentials/quota
+  → semantic terminal/agent create or other owner-side execution
+  → immediate attachment plus Public catalog convergence
   → revoke or any disconnect
+  → already-created owner processes continue
   → automatic return to Public read-only after a fresh connection
 ```
 

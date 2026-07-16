@@ -7,11 +7,15 @@ import type {
   SpoolExecutionHostSessionReader,
   SpoolHistoricalSessionPurpose
 } from '../../../spool/spool-session-source'
-import type { SpoolContinuedSessionBindings } from '../../../spool/spool-continued-session-bindings'
 import { SpoolExecutionError } from '../../../spool/spool-execution-error'
+import type { SpoolTerminalSessionBindings } from '../../../spool/spool-terminal-session-bindings'
 import type { OrcaRuntimeService } from '../../orca-runtime'
 import type { SpoolPairedRuntimeResolvedWorktree } from '../../../../shared/spool/spool-paired-runtime-host-contract'
 import type { RuntimeMobileSessionTerminalClientTab } from '../../../../shared/runtime-types'
+import {
+  resolveSpoolLiveSessionIdentity,
+  spoolObservedAgentProvider
+} from '../../../spool/spool-live-session-display-identity'
 
 type SessionRuntime = Pick<OrcaRuntimeService, 'listMobileSessionTabs'>
 type ReadyMobileSessionTerminalTab = Extract<
@@ -27,7 +31,7 @@ const MAX_HISTORICAL_SESSION_PAGE_BYTES = 4 * 1024 * 1024
 
 export async function projectPairedRuntimeLiveSessions(
   runtime: SessionRuntime,
-  continued: SpoolContinuedSessionBindings,
+  sessionBindings: SpoolTerminalSessionBindings,
   worktree: PairedRuntimeLiveSessionWorktree,
   signal?: AbortSignal
 ) {
@@ -42,21 +46,35 @@ export async function projectPairedRuntimeLiveSessions(
       tab.status === 'ready' &&
       tab.worktreeInstanceId === worktree.instanceId
   )
-  continued.reconcile(worktree, new Set(readyTabs.map((tab) => tab.terminal)))
+  sessionBindings.reconcile(worktree, new Set(readyTabs.map((tab) => tab.terminal)))
   const sessions: ReturnType<typeof SpoolPairedRuntimeLiveSessionSchema.parse>[] = []
   for (const tab of readyTabs) {
-    const binding = continued.resolveForExecutionHost(worktree, tab.terminal)
-    const agent = tab.agentStatus?.agentType ?? tab.launchAgent
-    const detectedProvider = agent === 'claude' || agent === 'codex' ? agent : 'other'
-    const provider = binding?.provider ?? detectedProvider
-    const providerSessionId =
-      binding?.providerSessionId ??
-      (provider === 'other' ? null : normalizeIdentifier(tab.agentStatus?.providerSession?.id, 512))
+    const binding = sessionBindings.resolveForExecutionHost(worktree, tab.terminal)
+    const observedProvider = spoolObservedAgentProvider(tab.agentStatus?.agentType)
+    const observedProviderSessionId = observedProvider
+      ? normalizeIdentifier(tab.agentStatus?.providerSession?.id, 512)
+      : null
+    let currentBinding = binding
+    if (currentBinding && observedProvider && observedProviderSessionId) {
+      currentBinding =
+        sessionBindings.observeProviderSession(
+          tab.terminal,
+          observedProvider,
+          observedProviderSessionId,
+          { worktreeId: worktree.worktreeId, worktreeInstanceId: worktree.instanceId }
+        ) ?? currentBinding
+    }
+    const identity = resolveSpoolLiveSessionIdentity({
+      observedAgentType: tab.agentStatus?.agentType,
+      observedProviderSessionId,
+      binding: currentBinding,
+      launchAgent: tab.launchAgent
+    })
     const parsed = SpoolPairedRuntimeLiveSessionSchema.safeParse({
       terminalRef: tab.terminal,
-      title: binding?.title ?? tab.title,
-      provider,
-      providerSessionId
+      title: currentBinding?.title ?? tab.title,
+      ...identity,
+      sessionKey: currentBinding?.sessionKey ?? null
     })
     if (parsed.success) {
       sessions.push(parsed.data)

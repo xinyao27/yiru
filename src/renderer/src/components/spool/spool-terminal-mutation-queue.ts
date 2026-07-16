@@ -19,6 +19,7 @@ type SpoolTerminalMutationQueueOptions = {
   inputFlushMs: number
   invoke(mutation: SpoolTerminalMutation): Promise<void>
   shouldDiscardAfterError(error: unknown): boolean
+  onCapacityExceeded(): void
 }
 
 type PendingInputMutation = Extract<SpoolTerminalMutation, { method: 'terminal.input' }> & {
@@ -29,6 +30,9 @@ type PendingMutation =
   | PendingInputMutation
   | Extract<SpoolTerminalMutation, { method: 'terminal.resize' }>
 
+const MAX_PENDING_INPUT_BYTES = 1024 * 1024
+const MAX_PENDING_MUTATIONS = 256
+
 export function createSpoolTerminalMutationQueue(
   options: SpoolTerminalMutationQueueOptions
 ): SpoolTerminalMutationQueue {
@@ -38,6 +42,7 @@ export function createSpoolTerminalMutationQueue(
   let inputTimer: ReturnType<typeof setTimeout> | null = null
   let pumping = false
   let disposed = false
+  let queuedInputBytes = 0
 
   const clearInputTimer = (): void => {
     if (inputTimer) {
@@ -68,8 +73,7 @@ export function createSpoolTerminalMutationQueue(
     }
   }
 
-  const bufferInput = (data: string): void => {
-    const bytes = getTerminalInputByteLength(data)
+  const bufferInput = (data: string, bytes: number): void => {
     if (bufferedInput && bufferedInputBytes + bytes > TERMINAL_INPUT_CHUNK_MAX_BYTES) {
       flushInput()
     }
@@ -93,6 +97,9 @@ export function createSpoolTerminalMutationQueue(
         if (!mutation) {
           break
         }
+        if (mutation.method === 'terminal.input') {
+          queuedInputBytes = Math.max(0, queuedInputBytes - mutation.bytes)
+        }
         try {
           await options.invoke(
             mutation.method === 'terminal.input'
@@ -104,6 +111,7 @@ export function createSpoolTerminalMutationQueue(
             pending.length = 0
             bufferedInput = ''
             bufferedInputBytes = 0
+            queuedInputBytes = 0
             clearInputTimer()
           }
         }
@@ -121,8 +129,18 @@ export function createSpoolTerminalMutationQueue(
       if (disposed || !data || isTerminalInputTooLarge(data)) {
         return false
       }
-      for (const chunk of iterateTerminalInputChunks(data)) {
-        bufferInput(chunk)
+      const bytes = getTerminalInputByteLength(data)
+      const chunks = [...iterateTerminalInputChunks(data)]
+      if (
+        queuedInputBytes + bytes > MAX_PENDING_INPUT_BYTES ||
+        pending.length + chunks.length + 2 > MAX_PENDING_MUTATIONS
+      ) {
+        options.onCapacityExceeded()
+        return false
+      }
+      queuedInputBytes += bytes
+      for (const chunk of chunks) {
+        bufferInput(chunk, getTerminalInputByteLength(chunk))
       }
       return true
     },
@@ -137,6 +155,8 @@ export function createSpoolTerminalMutationQueue(
       if (tail?.method === 'terminal.resize') {
         tail.cols = cols
         tail.rows = rows
+      } else if (pending.length >= MAX_PENDING_MUTATIONS) {
+        options.onCapacityExceeded()
       } else {
         pending.push({ method: 'terminal.resize', cols, rows })
       }
@@ -147,6 +167,7 @@ export function createSpoolTerminalMutationQueue(
       pending.length = 0
       bufferedInput = ''
       bufferedInputBytes = 0
+      queuedInputBytes = 0
       clearInputTimer()
     }
   }

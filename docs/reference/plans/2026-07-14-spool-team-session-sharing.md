@@ -8,12 +8,12 @@
 
 Spool has two access levels and one visibility setting:
 
-| State                                | What a remote Desktop can do                                                                                                             |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Private worktree                     | Discover nothing about the worktree or its sessions.                                                                                     |
-| Public Git worktree                  | Read all attributed sessions, terminals, files, diffs, and scoped Git state in the worktree.                                             |
-| Public folder-project workspace      | Read attributed sessions, terminals, and files. `.git`, file diffs, and Git operations are unavailable.                                  |
-| Public worktree with a control grant | Mutate the operations supported by that target for the lifetime of the current connection; a folder target still does not gain Git APIs. |
+| State                                | What a remote Desktop can do                                                                                                                            |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Private worktree                     | Discover nothing about the worktree or its sessions.                                                                                                    |
+| Public Git worktree                  | Read all attributed sessions, terminals, files, diffs, scoped Git state, and sanitized Checks state in the worktree.                                    |
+| Public folder-project workspace      | Read attributed sessions, terminals, and files; its sidebar exposes Explorer and Agents. `.git`, diffs, Git, and Checks are unavailable.                |
+| Public worktree with a control grant | Mutate supported operations and create owner-side terminals or enabled agents for the current connection; a folder target still does not gain Git APIs. |
 
 `Public` and `Private` belong only to worktrees. Projects and sessions do not have their own persisted visibility setting.
 
@@ -25,7 +25,7 @@ This includes the synthetic workspaces under a `Repo.kind = 'folder'` project: t
 2. **The Tailnet is the discovery boundary.** There is no Spool account, team creation flow, invitation, or central team service in the first version.
 3. **Private by default.** A newly created worktree starts Private and reveals no metadata to another Desktop.
 4. **Public is read-only.** A Public worktree exposes its complete read model, but every mutation remains blocked until its owner approves the current connection.
-5. **Control is worktree-wide.** Approval is not scoped to one session or one provider. It unlocks the remote worktree experience for the current connection.
+5. **Control is worktree-wide.** Approval is not scoped to one session or provider. It also permits owner-side terminal and enabled-agent creation for the current connection.
 6. **Approval is ephemeral.** Every disconnect or application restart invalidates control and requires a new owner confirmation.
 7. **Credentials never move.** Claude, Codex, Git, SSH, and other credentials remain on the owner's Desktop or execution host.
 8. **No false sandbox promise.** A writable terminal is a remote shell. Spool must not claim that terminal commands are confined to the selected worktree.
@@ -89,9 +89,15 @@ Desktop and Project rows reuse Orca's existing Project-header shell and disclosu
 
 The owner still sees Private worktrees in their normal local Orca sidebar. Another Desktop receives only Public worktrees, so a Private worktree's name, path, branch, sessions, counts, and activity do not cross the connection. An active control grant is rendered inside that owner's existing Worktree card as a compact requester row with a direct Revoke action; it is not collected in a separate global Spool panel.
 
-Session rows are deliberately simple. Spool lists every terminal-backed session the owner can attribute to a Public worktree without adding `Live`, `Stopped`, or `Resumable` categories to the navigation. Plain shells use the Terminal glyph; Claude and Codex sessions use their provider glyph. Selecting a live session attaches its terminal. Selecting a historical session does not open a separate transcript UI: once control is granted, the owner Desktop resumes the exact Claude or Codex session in that worktree and Spool immediately attaches the resulting terminal. Without control, the existing worktree-level request flow remains the only way to authorize that quota-consuming mutation. An unavailable session reports the observed failure only after the user tries to open it.
+Session rows are deliberately simple. Spool lists every terminal-backed session the owner can attribute to a Public worktree without adding `Live`, `Stopped`, or `Resumable` categories. The catalog discriminates plain terminals from agents; plain shells use the Terminal glyph, recognized agents retain their bounded provider label and glyph (including Gemini and OpenCode), and custom agents use a neutral agent identity. Selecting a live session attaches its terminal. Selecting a historical session does not open a separate transcript UI: once control is granted, the owner Desktop resumes the exact Claude or Codex session in that worktree and Spool immediately attaches the resulting terminal. Without control, the worktree request remains the only way to authorize that mutation. An unavailable session reports the observed failure only after the user tries to open it.
 
-Opening a shared Worktree uses Orca's normal workbench presentation. The center uses the same 4px titlebar drag region, full-height left divider, standard pane, and overflow-aware tab strip as a local Worktree for plain Terminals and explicitly opened agent sessions. To keep a paged history of tens of thousands of sessions from becoming tens of thousands of horizontal DOM nodes, the workbench strip keeps a bounded set of leading and recently selected sessions, always including the active one; the virtualized left tree remains the complete session navigator. The standard right-sidebar frame exposes Explorer plus Source Control for Git worktrees and Explorer only for folder worktrees. File and change selection drills into preview/diff in that right column with a Back action. These are presentation seams over Spool's checked RPC; the renderer does not create a fake local Worktree, persist remote tabs, or route remote actions through local filesystem and Git clients.
+Opening a shared Worktree uses Orca's normal workbench presentation. The center reuses the local Worktree pane and overflow-aware tab strip for terminals and agent sessions. Its `+` menu uses the same presentation as local tabs. Without control it is disabled with an explanatory tooltip; with control it offers `New Terminal` plus the agents that the owner actually has enabled and detected.
+
+The remote tab strip remains select-only: it cannot close, rename, pin, drag, or persist remote tabs. Creation runs in the background on the owner Desktop and never changes the owner's active worktree, tab, or focus.
+
+To keep paged history bounded, the strip keeps leading and recently selected sessions plus the active one; the virtualized left tree remains complete. The right sidebar reuses the ordinary Worktree sidebar chrome and shared tab definitions. A Git worktree exposes Explorer, Agents, Source Control, and Checks; a folder worktree exposes Explorer and Agents.
+
+Those tabs use remote adapters instead of mounting local panels against requester state. Agents projects only agent-session entries from the Public paginated session catalog through a virtualized row viewport, and selecting a row opens that session's terminal in the center. Checks uses a checked owner-side RPC to return a sanitized read-only hosted-review projection, up to 256 check rows, truncation/detail availability, and the ordinary activity status indicator. A provider failure is shown as unavailable rather than being confused with a branch that has no hosted review. None of these paths creates a fake local Repo or Worktree, discloses an owner path or credential, or routes work through requester-side filesystem, Git, AI Vault, or provider clients.
 
 The UI follows `docs/STYLEGUIDE.md`: existing sidebar tokens, quiet monochrome chrome, shadcn primitives, existing list-row states, and color reserved for meaningful application state.
 
@@ -107,7 +113,7 @@ When available, the Desktop hover card shows the same normalized fields and visu
 
 Spool does not expose account email addresses, account lists, authentication sources, credential paths, tokens, cookies, or raw provider responses. It does not invent a percentage or reset time when the provider does not report one.
 
-If the owner changes the active account, the remote quota summary updates to represent the new active account. A granted remote controller uses whichever account is active on the owner's Desktop at execution time.
+If the owner changes the active account, the remote quota summary updates to represent the new active account. A granted controller uses the owner's active account, settings, and credentials at execution time, including when starting an agent.
 
 ## Worktree visibility
 
@@ -116,7 +122,7 @@ Every worktree has one persisted visibility value:
 - **Private:** accessible only from its owner Desktop.
 - **Public:** readable by other reachable Orca Desktops on the same Tailnet.
 
-Making a worktree Public automatically covers every current and future session inside that worktree. On first publication, the same confirmation bulk-attests legacy sessions that match the current execution host and worktree root; sessions do not need individual confirmation. A legacy record that has no safe worktree attribution remains undisclosed rather than being guessed from an ambiguous path.
+Making a worktree Public automatically covers every current and future session inside that worktree, including owner-side sessions created at a remote controller's request. On first publication, the same confirmation bulk-attests legacy sessions that match the current execution host and worktree root; sessions do not need individual confirmation. A legacy record without safe worktree attribution remains undisclosed.
 
 Projects do not persist a visibility value. Their context menu provides bulk operations over the worktrees that exist at the time of the action:
 
@@ -141,13 +147,14 @@ Making a worktree Private immediately removes it from remote discovery, ends its
 Opening a Public worktree without a grant provides the complete V1 read-only worktree workspace:
 
 - List and open every session attributed to the worktree.
+- Browse agent-session entries from the same Public paginated catalog in the Agents sidebar and select one into the center terminal.
 - Watch terminal snapshots, scrollback, ANSI/TUI state, and realtime output.
 - Browse files and read file contents.
-- For Git worktrees, inspect diffs and the current worktree/index/HEAD status, HEAD history, current branch, and upstream state.
+- For Git worktrees, inspect diffs, the current worktree/index/HEAD status, HEAD history, current branch, upstream state, and sanitized hosted-review Checks state.
 
 A folder-project workspace deliberately has no Git surface. Its file browser hides every `.git` entry at every depth and rejects every path containing a `.git` segment, case-insensitively. Its incarnation proof combines a hidden random root marker with the actual-host scope and stable directory `dev`/`ino`; Files also hides and rejects that marker. Renaming the same directory preserves the proof, while replacement or a copied marker does not. Synthetic workspaces from the same folder repo may share the same exact file root and proof, while cross-repo and ancestor/descendant overlaps remain unavailable.
 
-The server is authoritative. Hiding or disabling controls in the remote renderer is not sufficient: terminal input, file writes, Git mutations, process creation, session creation, and every other mutation must be rejected unless the current connection holds an approved grant for that worktree.
+The server is authoritative. Hiding or disabling controls is not sufficient: terminal input, file writes, Git mutations, process/session creation, and every other mutation must be rejected unless the current connection holds an approved grant for that worktree.
 
 For a terminal-backed session, Spool reuses Orca's remote terminal path:
 
@@ -176,8 +183,8 @@ The confirmation must state the real security boundary:
 ```text
 Allow Xinyao · MacBook to control this worktree?
 
-They will be able to send terminal input, modify files,
-run commands, and use your Claude/Codex accounts.
+They will be able to create terminals, start enabled agents,
+send terminal input, modify files, run commands, and use your active agent accounts.
 Terminal commands are not confined to this worktree.
 
                             [Deny] [Allow this connection]
@@ -189,14 +196,23 @@ There is no auto-approve or remembered approval in the first version.
 
 After approval, the current connection receives the V1 mutable worktree capabilities defined below:
 
+- Create a new owner-side terminal or start any agent that the owner Desktop currently exposes as enabled and detected for that execution host.
 - Send input to every terminal/session in the worktree.
 - Continue a historical Claude or Codex session in a new owner-side terminal; selecting and switching sessions remains requester-side navigation.
-- Run commands, including starting another Claude or Codex process, from a granted owner-side terminal using the owner's environment and quota.
+- Run commands from a granted owner-side terminal using the owner's environment and quota.
 - Modify files.
 - Stage, unstage, and commit through Spool's structured Source Control methods. Other Git commands remain available through the granted terminal shell.
 - Use Spool's mutable terminal, file, diff, and reviewed Source Control controls for that worktree.
 
-V1 does not expose separate structured RPCs for creating, renaming, or closing sessions, or for checkout, merge, rebase, fetch, pull, and push. A granted terminal is an ordinary owner-side shell and can run those commands, but the UI and protocol must not imply that dedicated worktree-bound GUI methods exist when they do not.
+Structured creation is intentionally semantic. The requester sends only `New Terminal` or one owner-advertised agent identifier plus a `clientMutationId`. It cannot send a command, working directory, environment, path, prompt, account, or launch arguments. The owner resolves its worktree root, actual execution host, shell, settings, agent overrides, environment, and active credentials.
+
+The created process and session belong to the owner's Public worktree, not to the requester. The creator attaches immediately through a connection-scoped alias, while the paged catalog later converges on the same session. Every other read-only viewer of that Public worktree can see it once it reaches the catalog.
+
+Provider identity is learned only from an exact-worktree owner hook or initial actual-host snapshot. A bounded live-to-provider alias keeps the creator's `sessionRef` stable when the PTY later becomes a historical Claude/Codex record, including paired-runtime short-lived agents. Lost proof hides a record; Spool never repairs an ordinary catalog page by guessing from its current CWD.
+
+V1 still exposes no remote tab close, rename, pin, drag, or move operation. It also exposes no structured checkout, merge, rebase, fetch, pull, or push. A granted terminal remains an ordinary owner-side shell, but the UI must not imply that unsupported GUI methods exist.
+
+Each create carries a connection- and worktree-scoped `clientMutationId`. Repeating the same ID on that connection returns the original in-flight or completed result and never spawns twice. If the response becomes uncertain after the spawn boundary, Spool reports `outcome_unknown`; it may refresh the catalog but never automatically retries the mutation.
 
 The owner retains exclusive authority to:
 
@@ -205,7 +221,7 @@ The owner retains exclusive authority to:
 - Revoke a granted connection.
 - Delete the worktree.
 
-The remote work does not create a requester-owned worktree or migrate a session. The requester continues the owner's existing sessions in the owner's existing worktree, on the execution host already used by that worktree.
+Remote work never creates a requester-owned worktree or migrates a session. A remotely requested terminal or agent is still created and owned inside the owner's existing worktree on its existing execution host.
 
 This rule must also hold when the worktree is backed by WSL, SSH, or another Orca runtime. The owner Desktop remains the sharing gateway and routes reads and mutations to the actual execution host; Spool must not assume that the worktree path or agent process is local to the owner Desktop.
 
@@ -213,7 +229,7 @@ This rule must also hold when the worktree is backed by WSL, SSH, or another Orc
 
 Spool does not introduce a controller lease, input lock, editing lock, queue, ownership handoff, or conflict warning.
 
-The owner and any granted remote connections may operate the worktree concurrently. They may type into the same terminal, modify the same file, run conflicting Git commands, or consume provider quota at the same time. Resulting terminal races, file conflicts, and Git conflicts are accepted behavior for the first version.
+The owner and any granted remote connections may operate concurrently. They may type into the same terminal, create several terminals or agents, modify the same file, run conflicting Git commands, or consume provider quota at the same time. Resulting races and conflicts are accepted behavior for the first version.
 
 This is a deliberate non-goal, not an implied safety guarantee.
 
@@ -242,13 +258,15 @@ feature/session-sharing
 Xinyao · MacBook has access                          [Revoke]
 ```
 
-Revocation prevents future mutations. It cannot undo commands, processes, file changes, Git operations, or provider usage already initiated by the requester.
+Revocation prevents future mutations. It does not close a terminal or agent already created, and cannot undo commands, file changes, Git operations, or provider usage. Those owner-owned sessions remain visible under the Public worktree and the owner can manage them locally. Controlling them after reconnect requires a new approval.
 
 ## Security boundary
 
 Spool is designed for mutually trusted people sharing a Tailnet. Tailnet membership and reachability are not substitutes for server-side authorization, but they define the first-version discovery population.
 
 Public access is enforced as read-only. Granted access is intentionally powerful. Because Orca terminals are ordinary shells, a granted user can leave the selected directory, inspect other paths available to the owner's system user, start background processes, and execute destructive commands. Without a sandbox, `worktree control` is a product context rather than an operating-system security boundary.
+
+Owner, paired-runtime, and renderer boundaries parse the same strict execution-result schemas. A downstream result cannot cross a wider relay schema and then fail under a narrower UI schema; malformed mutation acknowledgements after admission are treated as `outcome_unknown`.
 
 Provider, Git, SSH, and system credentials stay on the host, but a granted shell may exercise the authority those credentials provide. Product copy and approval surfaces must state this without implying confinement that does not exist.
 
@@ -262,19 +280,24 @@ Provider, Git, SSH, and system credentials stay on the host, but a granted shell
 6. Xinyao opens sessions, watches terminals, reads files, inspects diffs, and inspects Git state; mutation attempts are rejected by Alice's host.
 7. Xinyao selects `Request control` on the worktree.
 8. Alice sees the requesting Desktop, the worktree, and the remote-shell warning, then approves the current connection.
-9. Xinyao continues Alice's existing Claude session, edits Alice's worktree, runs commands, and uses Alice's active Claude quota.
-10. Alice and Xinyao may operate concurrently; Spool does not arbitrate conflicts.
-11. Alice selects `Revoke`, or either Desktop disconnects. Xinyao immediately loses mutation access.
-12. After reconnecting, Xinyao can browse the Public worktree read-only but must request and receive approval again before making another change.
+9. The shared `+` menu now offers `New Terminal` and Alice's enabled/detected agents. Xinyao creates both without changing Alice's focused tab, then immediately attaches to the returned terminal.
+10. The new sessions belong to Alice's Public worktree and appear through the paged catalog for another read-only viewer. Xinyao also continues an existing Claude session and uses Alice's active quota.
+11. Repeating one `clientMutationId` produces no second process. A post-spawn response loss reports `outcome_unknown`, refreshes the catalog, and never automatically retries.
+12. The same creation behavior holds for local, WSL, SSH, and paired runtime worktrees without a local fallback or requester-triggered route prompt.
+13. Alice and Xinyao may operate concurrently; Spool does not arbitrate conflicts.
+14. Alice selects `Revoke`, or either Desktop disconnects. Xinyao immediately loses mutation access, but already-created processes continue on Alice's host.
+15. After reconnecting, Xinyao can browse those sessions read-only but must request and receive approval again before controlling or creating anything.
 
 ## Existing Orca capabilities to reuse
 
 - AI Vault and agent session discovery.
 - Workspace session tabs and terminal handle resolution.
+- The local tab `+` menu presentation and owner-side terminal/agent launch paths.
 - Runtime routing for local, WSL, SSH, and paired execution hosts.
 - Encrypted WebSocket RPC.
-- `terminal.subscribe`, serialized snapshots, scrollback, streaming output, input, and resize.
-- Remote file, diff, Git, and worktree reads.
+- `terminal.subscribe`, serialized snapshots, scrollback, streaming output, input, resize, and terminal attachment binding.
+- Remote file, diff, Git, Checks, and worktree reads.
+- The ordinary Worktree sidebar chrome, activity-tab definitions, and status-indicator presentation, backed by Spool-specific remote projections.
 - Existing terminal, editor, source-control, and worktree UI.
 - Existing Claude and Codex normalized rate-limit state.
 - Existing E2EE framing, heartbeat, terminal resync, and execution-host routing where they preserve the connection-scoped grant rules above.
@@ -294,7 +317,7 @@ Provider, Git, SSH, and system credentials stay on the host, but a granted shell
 - Enumerate Tailnet peers and probe for running Orca Desktops on macOS, Linux, and Windows.
 - Authenticate discovered peer identity and establish encrypted RPC connections.
 - Publish active-account quota summaries and Public worktree metadata only.
-- Support read-only sessions, terminal streaming, and files for every supported target; add diffs and Git state for Git worktrees.
+- Support read-only sessions, terminal streaming, files, and the remote Agents projection for every supported target; add diffs, Git state, and sanitized Checks for Git worktrees.
 - Prove that every mutation is rejected server-side without a grant.
 - Route SSH, WSL, and runtime-backed worktrees through the owner Desktop correctly.
 
@@ -302,9 +325,11 @@ Provider, Git, SSH, and system credentials stay on the host, but a granted shell
 
 - Add worktree-level control requests and owner approval.
 - Bind approved capability to the exact current connection and worktree.
-- Unlock remote terminal input, file mutations, structured Git stage/unstage/commit, and
-  continuing a proven existing Claude/Codex session in an owner-side terminal.
-- Reuse the owner's active Claude/Codex sessions, authentication, and quota.
+- Unlock owner-side `New Terminal`, semantic enabled-agent launch, terminal input, file mutations, structured Git stage/unstage/commit, and proven Claude/Codex continuation.
+- Accept only semantic launch identifiers; resolve commands, roots, environment, settings, credentials, and execution routes on the owner.
+- Return a connection-scoped attachment immediately, then converge it with the paged session catalog without duplicate tabs.
+- Deduplicate create mutations by `clientMutationId` and never automatically retry `outcome_unknown`.
+- Reuse the owner's active sessions, authentication, and quota across local, WSL, SSH, and paired runtime targets.
 - Add explicit revoke, Private transition, disconnect, restart, and deletion invalidation.
 - Verify that reconnect restores only Public read access and always requires another confirmation.
 
@@ -321,9 +346,10 @@ Provider, Git, SSH, and system credentials stay on the host, but a granted shell
 - Controller leases, conflict detection, input arbitration, or collaborative editing.
 - Sandboxing terminal commands to the selected worktree.
 - Moving credentials, PTYs, sessions, or worktrees to the requester's machine.
-- Creating requester-owned remote worktrees or sessions as part of control.
+- Creating requester-owned remote worktrees or sessions, or moving owner sessions to the requester. Remotely requested owner-side sessions inside the Public worktree are supported.
 - Sharing independent ProjectGroup-backed `FolderWorkspace` entries keyed as `folder:<uuid>`; `Repo.kind = 'folder'` synthetic workspaces are supported.
-- Browser profiles/panes, cookies, hosted-review or issue-tracker mutations, automations, emulator/computer control, settings, account selection, and SSH/runtime administration.
+- Browser profiles/panes, cookies, hosted-review or issue-tracker mutations, automations, emulator/computer control, settings, account switching, and SSH/runtime administration.
+- Remote tab close, rename, pin, drag, or move operations.
 - Invented quota estimates when provider usage data is unavailable.
 - Session lifecycle labels or status-based grouping in the sidebar.
 - Replacing Orca RPC with a Tailscale-specific terminal protocol.

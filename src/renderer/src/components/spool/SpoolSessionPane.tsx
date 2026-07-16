@@ -26,7 +26,17 @@ type ContinuationState =
   | 'reconnect-only'
 const UNKNOWN_ATTACH_RETRY_MS = [100, 250, 500, 1_000, 2_000, 4_000, 8_000] as const
 
-export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React.JSX.Element {
+export function SpoolSessionPane({
+  route,
+  retainMissingSession = false,
+  focusRequested = false,
+  onFocusHandled
+}: {
+  route: SpoolSessionRoute
+  retainMissingSession?: boolean
+  focusRequested?: boolean
+  onFocusHandled?: (sessionRef: string) => void
+}): React.JSX.Element {
   const canControl = useAppStore((state) => selectSpoolCanControl(state, route))
   const { catalogSession, sessionCatalogStatus } = useAppStore(
     useShallow((state) => {
@@ -127,6 +137,9 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
   useEffect(() => {
     if (
       catalogSession ||
+      // Why: terminal.create returns an attachable alias before paged
+      // inventory can publish it; that handoff must keep its route mounted.
+      retainMissingSession ||
       sessionCatalogStatus === null ||
       sessionCatalogStatus === 'loading' ||
       retainsMissingHistoricalContinuation(continuationRef.current)
@@ -143,7 +156,7 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
       worktreeRef: route.worktreeRef,
       connectionEpoch: route.connectionEpoch
     })
-  }, [catalogSession, phase, route, sessionCatalogStatus, setActiveRoute])
+  }, [catalogSession, phase, retainMissingSession, route, sessionCatalogStatus, setActiveRoute])
 
   useEffect(() => {
     if (
@@ -270,6 +283,10 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
     setPhase('terminal')
   }, [clearRetryTimer])
 
+  const handleFocus = useCallback((): void => {
+    onFocusHandled?.(route.sessionRef)
+  }, [onFocusHandled, route.sessionRef])
+
   const handleClosed = useCallback(
     (canContinue: boolean): void => {
       if (terminalLiveRef.current) {
@@ -346,6 +363,8 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
       <SpoolTerminalPane
         key={terminalAttempt}
         route={route}
+        focusRequested={focusRequested}
+        onFocusHandled={handleFocus}
         onSubscriptionError={handleSubscriptionError}
         onLive={handleLive}
         onClosed={handleClosed}

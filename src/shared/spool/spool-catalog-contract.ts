@@ -1,3 +1,4 @@
+import type { SpoolAgentLaunchId } from './spool-agent-launch-contract'
 import type { SpoolWorktreeKind } from './spool-worktree-kind'
 
 export const SPOOL_CATALOG_MAX_PROJECTS = 128
@@ -19,11 +20,18 @@ export type SpoolProviderQuota = {
   sevenDay: SpoolProviderQuotaWindow | null
 }
 
+export type SpoolSessionCatalogIdentity =
+  | { kind: 'terminal'; agent: null }
+  | {
+      kind: 'agent'
+      /** Null retains an observed custom agent without widening the wire agent enum. */
+      agent: SpoolAgentLaunchId | null
+    }
+
 export type SpoolSessionCatalogEntry = {
   sessionRef: string
-  provider: 'claude' | 'codex' | 'other'
   title: string
-}
+} & SpoolSessionCatalogIdentity
 
 export type SpoolSessionCatalogPageState = {
   status: 'loading' | 'complete' | 'error'

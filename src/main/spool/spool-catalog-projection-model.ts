@@ -58,7 +58,9 @@ export function sanitizeCatalogSessionDescriptions(
       // Why: silently omitting an invalid row could turn a partial owner page into completeness.
       throw new Error('Invalid Spool catalog session description')
     }
-    return { sessionKey, provider: session.provider, title }
+    return session.kind === 'terminal'
+      ? { sessionKey, kind: 'terminal', agent: null, title }
+      : { sessionKey, kind: 'agent', agent: session.agent, title }
   })
 }
 
@@ -122,6 +124,25 @@ export function buildCatalogSessionPageBindings(
   return bindings
 }
 
+export function buildReservedCatalogSessionBinding(
+  instance: Pick<SpoolPublicWorktreeInstance, 'worktreeId' | 'instanceId' | 'shareEpoch'>,
+  sessionKey: string,
+  catalogRevision: number,
+  generation: number
+): Extract<SpoolCatalogReferenceBinding, { kind: 'session' }> {
+  const worktreeAlias = worktreeAliasKey(instance.instanceId, instance.shareEpoch)
+  return {
+    kind: 'session',
+    aliasKey: sessionAliasKey(worktreeAlias, sessionKey),
+    worktreeId: instance.worktreeId,
+    instanceId: instance.instanceId,
+    shareEpoch: instance.shareEpoch,
+    sessionKey,
+    catalogRevision,
+    generation
+  }
+}
+
 export function projectCatalogEntries(
   descriptions: readonly ResolvedSpoolCatalogWorktree[],
   references: SpoolCatalogReferenceTable,
@@ -174,11 +195,12 @@ export function projectCatalogSessionPage(
     description.instance.instanceId,
     description.instance.shareEpoch
   )
-  const projected: SpoolSessionCatalogEntry[] = sessions.map((session) => ({
-    sessionRef: references.referenceFor(sessionAliasKey(worktreeAlias, session.sessionKey)),
-    provider: session.provider,
-    title: session.title
-  }))
+  const projected: SpoolSessionCatalogEntry[] = sessions.map((session) => {
+    const sessionRef = references.referenceFor(sessionAliasKey(worktreeAlias, session.sessionKey))
+    return session.kind === 'terminal'
+      ? { sessionRef, kind: 'terminal', agent: null, title: session.title }
+      : { sessionRef, kind: 'agent', agent: session.agent, title: session.title }
+  })
   return {
     catalogRevision: binding.catalogRevision,
     worktreeRef,
