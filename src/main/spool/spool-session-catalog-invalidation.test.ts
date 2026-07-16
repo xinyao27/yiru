@@ -231,4 +231,116 @@ describe('Spool session catalog invalidation', () => {
     expect(changes).toBe(1)
     unsubscribe()
   })
+
+  it('ignores a repeated explicit provider-session observation', () => {
+    let emitSessionChange: Parameters<
+      NonNullable<SpoolExecutionHostSessionReader['subscribe']>
+    >[0] = () => undefined
+    const reader: SpoolExecutionHostSessionReader = {
+      registerPublicWorktree: () => undefined,
+      unregisterPublicWorktree: () => undefined,
+      listMobileSessionTabs: async () => emptySessionSnapshot(publicWorktree.worktreeId),
+      listAiVaultSessionPage: async () => ({
+        sessions: [],
+        nextCursor: null,
+        scannedAt: 'inventory-one'
+      }),
+      releaseAiVaultSessionPage: async () => undefined,
+      subscribe: (listener) => {
+        emitSessionChange = listener
+        return () => undefined
+      }
+    }
+    const provenance = {
+      resolve: () => null,
+      attest: () => false
+    } as unknown as SpoolSessionProvenanceIndex
+    const source = new SpoolMobileVaultSessionSource(
+      reader,
+      new SpoolOwnerSessionRecords(),
+      new SpoolTerminalSessionBindings(),
+      provenance
+    )
+    source.trackPublicWorktree(publicWorktree)
+    let changes = 0
+    const unsubscribe = source.subscribe(() => changes++)
+    const observation = [
+      {
+        provider: 'codex' as const,
+        providerSessionId: 'provider-session-one',
+        sessionKey: 'session-one'
+      }
+    ]
+
+    emitSessionChange(undefined, publicReadRequest, observation)
+    emitSessionChange(undefined, publicReadRequest, observation)
+
+    expect(changes).toBe(1)
+    unsubscribe()
+  })
+
+  it('ignores terminal bindings outside Public worktrees', () => {
+    const sessionBindings = new SpoolTerminalSessionBindings()
+    const reader: SpoolExecutionHostSessionReader = {
+      registerPublicWorktree: () => undefined,
+      unregisterPublicWorktree: () => undefined,
+      listMobileSessionTabs: async () => emptySessionSnapshot(publicWorktree.worktreeId),
+      listAiVaultSessionPage: async () => ({
+        sessions: [],
+        nextCursor: null,
+        scannedAt: 'inventory-one'
+      }),
+      releaseAiVaultSessionPage: async () => undefined
+    }
+    const provenance = {
+      resolve: () => null,
+      attest: () => false
+    } as unknown as SpoolSessionProvenanceIndex
+    const source = new SpoolMobileVaultSessionSource(
+      reader,
+      new SpoolOwnerSessionRecords(),
+      sessionBindings,
+      provenance
+    )
+    source.trackPublicWorktree(publicWorktree)
+    let changes = 0
+    const unsubscribe = source.subscribe(() => changes++)
+
+    sessionBindings.rememberSpawned(
+      {
+        ...publicWorktree,
+        worktreeId: 'private-worktree',
+        instanceId: 'private-instance',
+        spoolIncarnationId: 'private-incarnation'
+      },
+      'private-terminal',
+      {
+        provider: 'codex',
+        sessionKind: 'agent',
+        agent: 'codex',
+        title: 'Private session'
+      }
+    )
+
+    expect(changes).toBe(0)
+    unsubscribe()
+  })
+
+  it('does not emit twice for the same terminal binding', () => {
+    const sessionBindings = new SpoolTerminalSessionBindings()
+    let changes = 0
+    const unsubscribe = sessionBindings.subscribe(() => changes++)
+    const session = {
+      provider: 'codex' as const,
+      sessionKind: 'agent' as const,
+      agent: 'codex' as const,
+      title: 'Public session'
+    }
+
+    sessionBindings.rememberSpawned(publicWorktree, 'public-terminal', session)
+    sessionBindings.rememberSpawned(publicWorktree, 'public-terminal', session)
+
+    expect(changes).toBe(1)
+    unsubscribe()
+  })
 })

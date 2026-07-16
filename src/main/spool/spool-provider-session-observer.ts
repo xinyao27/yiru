@@ -22,8 +22,9 @@ export class SpoolProviderSessionObserver {
   observeSnapshot(
     snapshot: SpoolMobileSessionTabsResult,
     worktree: ObservedWorktreeProvenanceScope
-  ): void {
+  ): boolean {
     const entries: Parameters<SpoolSessionProvenanceIndex['attest']>[0][number][] = []
+    let aliasChanged = false
     for (const tab of snapshot.tabs) {
       if (tab.type !== 'terminal' || tab.status !== 'ready') {
         continue
@@ -59,7 +60,9 @@ export class SpoolProviderSessionObserver {
         512
       )
       if (sessionKey) {
-        this.identityAliases.remember(worktree, provider, providerSessionId, sessionKey)
+        aliasChanged =
+          this.identityAliases.remember(worktree, provider, providerSessionId, sessionKey) ||
+          aliasChanged
       }
       entries.push({
         actualHostScope: worktree.actualHostScope,
@@ -69,43 +72,48 @@ export class SpoolProviderSessionObserver {
         spoolIncarnationId: worktree.spoolIncarnationId
       })
     }
-    this.attest(entries)
+    return this.attest(entries) || aliasChanged
   }
 
   observeExplicit(
     sessions: readonly SpoolObservedProviderSession[],
     worktree: ObservedWorktreeProvenanceScope
-  ): void {
+  ): boolean {
+    let aliasChanged = false
     for (const session of sessions) {
       if (session.sessionKey) {
-        this.identityAliases.remember(
-          worktree,
-          session.provider,
-          session.providerSessionId,
-          session.sessionKey
-        )
+        aliasChanged =
+          this.identityAliases.remember(
+            worktree,
+            session.provider,
+            session.providerSessionId,
+            session.sessionKey
+          ) || aliasChanged
       }
     }
-    this.attest(
-      sessions.map((session) => ({
-        actualHostScope: worktree.actualHostScope,
-        provider: session.provider,
-        providerSessionId: session.providerSessionId,
-        worktreeInstanceId: worktree.instanceId,
-        spoolIncarnationId: worktree.spoolIncarnationId
-      }))
+    return (
+      this.attest(
+        sessions.map((session) => ({
+          actualHostScope: worktree.actualHostScope,
+          provider: session.provider,
+          providerSessionId: session.providerSessionId,
+          worktreeInstanceId: worktree.instanceId,
+          spoolIncarnationId: worktree.spoolIncarnationId
+        }))
+      ) || aliasChanged
     )
   }
 
-  private attest(entries: Parameters<SpoolSessionProvenanceIndex['attest']>[0]): void {
+  private attest(entries: Parameters<SpoolSessionProvenanceIndex['attest']>[0]): boolean {
     if (entries.length === 0) {
-      return
+      return false
     }
     try {
-      this.provenance.attest(entries)
+      return this.provenance.attest(entries)
     } catch {
       // Why: failed positive proof hides later history but must not break runtime hook delivery.
       console.error('[spool] Failed to persist created-session provenance')
+      return false
     }
   }
 }

@@ -99,7 +99,7 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
       return []
     }
     this.rememberObservedWorktree(worktree)
-    const sessions = this.projectLiveSessions(worktree, snapshot)
+    const { sessions } = this.projectLiveSessions(worktree, snapshot)
     this.updateLiveSessionFingerprint(worktree.instanceId, sessions)
     return sessions
   }
@@ -107,8 +107,11 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
   private projectLiveSessions(
     worktree: SpoolSessionWorktreeIdentity,
     snapshot: SpoolMobileSessionTabsResult
-  ): SpoolLiveSessionCandidate[] {
-    this.providerSessionObserver.observeSnapshot(snapshot, worktree)
+  ): { sessions: SpoolLiveSessionCandidate[]; providerObservationChanged: boolean } {
+    const providerObservationChanged = this.providerSessionObserver.observeSnapshot(
+      snapshot,
+      worktree
+    )
     const readyTabs = snapshot.tabs.filter(
       (tab): tab is ReadyMobileSessionTerminalTab =>
         isReadyMobileSessionTerminalTab(tab) && tab.worktreeInstanceId === worktree.instanceId
@@ -137,7 +140,7 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
         )
       }
     }
-    return sessions
+    return { sessions, providerObservationChanged }
   }
 
   async listHistoricalSessionPage(
@@ -235,25 +238,35 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
           return
         }
         let liveSessionsChanged = false
+        let providerObservationChanged = false
         if (snapshot) {
           // Why: paired runtimes can contain cloned worktree UUIDs; the originating
           // execution route must match before its provider id gains provenance.
+          const projection = this.projectLiveSessions(observed, snapshot)
           liveSessionsChanged = this.updateLiveSessionFingerprint(
             observed.instanceId,
-            this.projectLiveSessions(observed, snapshot)
+            projection.sessions
           )
+          providerObservationChanged = projection.providerObservationChanged
         }
-        const providerSessionsChanged = Boolean(providerSessions?.length)
-        if (providerSessionsChanged && providerSessions) {
-          this.providerSessionObserver.observeExplicit(providerSessions, observed)
+        if (providerSessions?.length) {
+          providerObservationChanged =
+            this.providerSessionObserver.observeExplicit(providerSessions, observed) ||
+            providerObservationChanged
         }
         // Why: runtime snapshots include frequent status-only updates; rebuilding
         // the same Public session rows must not abort their historical page scan.
-        if (liveSessionsChanged || providerSessionsChanged) {
+        if (liveSessionsChanged || providerObservationChanged) {
           listener()
         }
       }) ?? (() => {})
-    const unsubscribeSessionBindings = this.sessionBindings.subscribe(listener)
+    const unsubscribeSessionBindings = this.sessionBindings.subscribe((instanceId) => {
+      // Why: private terminal launches share this owner-wide binding index but
+      // cannot change any requester-visible Public catalog.
+      if (this.publicWorktrees.has(instanceId)) {
+        listener()
+      }
+    })
     return () => {
       unsubscribeReader()
       unsubscribeSessionBindings()
