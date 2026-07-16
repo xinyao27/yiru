@@ -233,38 +233,40 @@ export default function TerminalPaneHeaderOverlay({
                 <div className="pane-title-actions ml-auto flex shrink-0 items-center gap-0">
                   {canToggleNativeChat && isActivePane ? (
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-xs"
-                          // Same class as split so it shares the hover/active reveal
-                          // and sits as a peer in the [chat][split][×] cluster.
-                          className="pane-title-split-trigger"
-                          aria-label={
-                            isChatViewMode
-                              ? translate(
-                                  'components.native-chat.toggle.showTerminal',
-                                  'Show terminal'
-                                )
-                              : translate(
-                                  'components.native-chat.toggle.showChat',
-                                  'Show chat view'
-                                )
-                          }
-                          aria-pressed={isChatViewMode}
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            onToggleNativeChat?.()
-                          }}
-                        >
-                          {isChatViewMode ? (
-                            <SquareTerminal className="size-3" />
-                          ) : (
-                            <MessageSquare className="size-3" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            // Same class as split so it shares the hover/active reveal
+                            // and sits as a peer in the [chat][split][×] cluster.
+                            className="pane-title-split-trigger"
+                            aria-label={
+                              isChatViewMode
+                                ? translate(
+                                    'components.native-chat.toggle.showTerminal',
+                                    'Show terminal'
+                                  )
+                                : translate(
+                                    'components.native-chat.toggle.showChat',
+                                    'Show chat view'
+                                  )
+                            }
+                            aria-pressed={isChatViewMode}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              onToggleNativeChat?.()
+                            }}
+                          >
+                            {isChatViewMode ? (
+                              <SquareTerminal className="size-3" />
+                            ) : (
+                              <MessageSquare className="size-3" />
+                            )}
+                          </Button>
+                        }
+                      />
                       <TooltipContent side="bottom" sideOffset={4}>
                         {isChatViewMode
                           ? translate('components.native-chat.toggle.showTerminal', 'Show terminal')
@@ -274,24 +276,26 @@ export default function TerminalPaneHeaderOverlay({
                   ) : null}
                   {showAlwaysOnHeaders ? (
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-xs"
-                          className="pane-title-split-trigger"
-                          data-contextual-tour-target={
-                            isActivePane ? 'terminal-pane-split-target' : undefined
-                          }
-                          aria-label={splitRightLabel}
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            onSplitPane(pane, 'vertical')
-                          }}
-                        >
-                          <SquareSplitVertical className="size-3" />
-                        </Button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            className="pane-title-split-trigger"
+                            data-contextual-tour-target={
+                              isActivePane ? 'terminal-pane-split-target' : undefined
+                            }
+                            aria-label={splitRightLabel}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              onSplitPane(pane, 'vertical')
+                            }}
+                          >
+                            <SquareSplitVertical className="size-3" />
+                          </Button>
+                        }
+                      />
                       <TooltipContent side="bottom" sideOffset={4}>
                         {splitRightLabel}
                       </TooltipContent>
@@ -299,25 +303,27 @@ export default function TerminalPaneHeaderOverlay({
                   ) : null}
                   {title ? (
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-xs"
-                          className="pane-title-close"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            onRemoveTitle(pane.id)
-                          }}
-                          aria-label={translate(
-                            'auto.components.terminal.pane.TerminalPane.f984ab2a30',
-                            'Remove pane title: {{value0}}',
-                            { value0: title }
-                          )}
-                        >
-                          <X className="size-3" />
-                        </Button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            className="pane-title-close"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              onRemoveTitle(pane.id)
+                            }}
+                            aria-label={translate(
+                              'auto.components.terminal.pane.TerminalPane.f984ab2a30',
+                              'Remove pane title: {{value0}}',
+                              { value0: title }
+                            )}
+                          >
+                            <X className="size-3" />
+                          </Button>
+                        }
+                      />
                       <TooltipContent side="bottom" sideOffset={4}>
                         {translate(
                           'auto.components.terminal.pane.TerminalPane.ac112e9036',
@@ -327,24 +333,26 @@ export default function TerminalPaneHeaderOverlay({
                     </Tooltip>
                   ) : paneCount > 1 && showAlwaysOnHeaders ? (
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-xs"
-                          className="pane-title-close"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            onClosePane(pane.id)
-                          }}
-                          aria-label={translate(
-                            'auto.components.terminal.pane.TerminalContextMenu.8c17d6786d',
-                            'Close Pane'
-                          )}
-                        >
-                          <X className="size-3" />
-                        </Button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            className="pane-title-close"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              onClosePane(pane.id)
+                            }}
+                            aria-label={translate(
+                              'auto.components.terminal.pane.TerminalContextMenu.8c17d6786d',
+                              'Close Pane'
+                            )}
+                          >
+                            <X className="size-3" />
+                          </Button>
+                        }
+                      />
                       <TooltipContent side="bottom" sideOffset={4}>
                         {translate(
                           'auto.components.terminal.pane.TerminalContextMenu.8c17d6786d',

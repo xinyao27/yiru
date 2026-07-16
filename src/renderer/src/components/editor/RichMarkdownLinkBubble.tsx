@@ -385,19 +385,21 @@ function LinkBubbleAction({
 }): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          className="rich-markdown-link-button"
-          aria-label={label}
-          disabled={disabled}
-          onClick={onClick}
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className="rich-markdown-link-button"
+            aria-label={label}
+            disabled={disabled}
+            onClick={onClick}
+          >
+            {children}
+          </Button>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {label}
       </TooltipContent>

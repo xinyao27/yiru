@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import type { Menu } from '@base-ui/react/menu'
 import {
   Clipboard,
   ClipboardCopy,
@@ -153,46 +154,50 @@ export default function TerminalContextMenu({
   return (
     <DropdownMenu
       open={open}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen && Date.now() - menuOpenedAtRef.current < 100) {
-          return
-        }
-        onOpenChange(nextOpen)
-      }}
-      modal={false}
-    >
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-hidden
-          tabIndex={-1}
-          className="pointer-events-none absolute size-px opacity-0"
-          style={{ left: menuPoint.x, top: menuPoint.y }}
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-60"
-        sideOffset={0}
-        align="start"
-        onCloseAutoFocus={(e) => {
-          // Prevent Radix from moving focus back to the hidden trigger;
-          // let xterm keep focus naturally.
-          e.preventDefault()
-        }}
-        onFocusOutside={(e) => {
-          // xterm reclaims focus after the contextmenu event; don't let
-          // Radix treat that as a dismiss signal.
-          e.preventDefault()
-        }}
-        onPointerDownOutside={(e) => {
+      onOpenChange={(nextOpen, eventDetails: Menu.Root.ChangeEventDetails) => {
+        if (!nextOpen) {
+          // Why: xterm reclaims focus after the contextmenu event; don't let
+          // Base UI treat that as a dismiss signal.
+          if (eventDetails.reason === 'focus-out') {
+            eventDetails.cancel()
+            return
+          }
+          // Why: the contextmenu pointerdown can immediately reach the menu as
+          // an outside press right after it opens.
           if (
+            eventDetails.reason === 'outside-press' &&
             shouldIgnoreTerminalMenuPointerDownOutside({
               openedAtMs: menuOpenedAtRef.current,
               nowMs: Date.now()
             })
           ) {
-            e.preventDefault()
+            eventDetails.cancel()
+            return
           }
-        }}
+          if (Date.now() - menuOpenedAtRef.current < 100) {
+            return
+          }
+        }
+        onOpenChange(nextOpen)
+      }}
+      modal={false}
+    >
+      <DropdownMenuTrigger
+        render={
+          <button
+            aria-hidden
+            tabIndex={-1}
+            className="pointer-events-none absolute size-px opacity-0"
+            style={{ left: menuPoint.x, top: menuPoint.y }}
+          />
+        }
+      />
+      <DropdownMenuContent
+        className="w-60"
+        sideOffset={0}
+        align="start"
+        // Why: keep focus on xterm instead of moving it back to the hidden trigger.
+        finalFocus={false}
       >
         <DropdownMenuItem onSelect={onCopy}>
           <Copy />

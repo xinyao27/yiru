@@ -17,7 +17,7 @@ type WorkspaceTabCreateMenuProps = {
   children: React.ReactNode
   disabled?: boolean
   disabledTooltip?: string | null
-  onCloseAutoFocus?: React.ComponentProps<typeof DropdownMenuContent>['onCloseAutoFocus']
+  finalFocus?: React.ComponentProps<typeof DropdownMenuContent>['finalFocus']
 }
 
 export function WorkspaceTabCreateMenu({
@@ -26,7 +26,7 @@ export function WorkspaceTabCreateMenu({
   children,
   disabled = false,
   disabledTooltip = null,
-  onCloseAutoFocus
+  finalFocus
 }: WorkspaceTabCreateMenuProps): React.JSX.Element {
   const label = translate('auto.components.tab.bar.TabBar.b1a132357f', 'New tab')
   const triggerButton = (
@@ -60,11 +60,7 @@ export function WorkspaceTabCreateMenu({
       <Plus className="size-3.5" />
     </button>
   )
-  const trigger = (
-    <TooltipTrigger asChild>
-      <DropdownMenuTrigger asChild>{triggerButton}</DropdownMenuTrigger>
-    </TooltipTrigger>
-  )
+  const trigger = <TooltipTrigger render={<DropdownMenuTrigger render={triggerButton} />} />
 
   return (
     <DropdownMenu
@@ -88,7 +84,7 @@ export function WorkspaceTabCreateMenu({
         align="start"
         sideOffset={6}
         className="w-72 max-w-[calc(100vw-1rem)] rounded-lg border-border/80 p-1 shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
-        onCloseAutoFocus={onCloseAutoFocus}
+        finalFocus={finalFocus}
       >
         {children}
       </DropdownMenuContent>

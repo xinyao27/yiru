@@ -43,31 +43,33 @@ export function NestedRepoScanLimitNotice({ scan }: { scan: NestedRepoScanResult
             )}
       </span>
       <Popover open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            aria-label={translate(
-              'auto.components.repo.NestedRepoScanLimitNotice.642a43c139',
-              'Nested repository scan limits'
-            )}
-            aria-expanded={detailsOpen}
-            title={detailsText}
-            className="inline-flex size-4 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-            onClick={(event) => {
-              event.stopPropagation()
-              setDetailsOpen(true)
-            }}
-          >
-            <CircleHelp className="size-3.5" />
-          </button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              aria-label={translate(
+                'auto.components.repo.NestedRepoScanLimitNotice.642a43c139',
+                'Nested repository scan limits'
+              )}
+              aria-expanded={detailsOpen}
+              title={detailsText}
+              className="inline-flex size-4 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              onClick={(event) => {
+                event.stopPropagation()
+                setDetailsOpen(true)
+              }}
+            >
+              <CircleHelp className="size-3.5" />
+            </button>
+          }
+        />
         <PopoverContent
           side="top"
           sideOffset={4}
           className="max-w-[260px] px-3 py-2 text-xs leading-5 text-pretty"
           // Why: this popover opens on hover, so default focus-on-open would
           // yank focus off the dialog every time the pointer grazes the icon.
-          onOpenAutoFocus={(event) => event.preventDefault()}
+          initialFocus={false}
         >
           {detailsText}
         </PopoverContent>

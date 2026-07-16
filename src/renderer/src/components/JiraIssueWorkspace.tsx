@@ -14,7 +14,6 @@ import {
   X
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { VisuallyHidden } from 'radix-ui'
 
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
 import { JiraIcon } from '@/components/icons/JiraIcon'
@@ -398,22 +397,18 @@ export default function JiraIssueWorkspace({
         side="right"
         showCloseButton={false}
         className="w-[min(92vw,780px)] p-0 sm:max-w-[780px]"
-        onOpenAutoFocus={(event) => event.preventDefault()}
+        initialFocus={false}
       >
-        <VisuallyHidden.Root asChild>
-          <SheetTitle>
-            {displayed?.title ??
-              translate('auto.components.JiraIssueWorkspace.ef21405c6d', 'Jira issue')}
-          </SheetTitle>
-        </VisuallyHidden.Root>
-        <VisuallyHidden.Root asChild>
-          <SheetDescription>
-            {translate(
-              'auto.components.JiraIssueWorkspace.857bd2f88f',
-              'Preview, edit, and start work from the selected issue.'
-            )}
-          </SheetDescription>
-        </VisuallyHidden.Root>
+        <SheetTitle className="sr-only">
+          {displayed?.title ??
+            translate('auto.components.JiraIssueWorkspace.ef21405c6d', 'Jira issue')}
+        </SheetTitle>
+        <SheetDescription className="sr-only">
+          {translate(
+            'auto.components.JiraIssueWorkspace.857bd2f88f',
+            'Preview, edit, and start work from the selected issue.'
+          )}
+        </SheetDescription>
 
         {displayed ? (
           <div className="flex h-full min-h-0 flex-col overflow-hidden bg-background">
@@ -440,20 +435,22 @@ export default function JiraIssueWorkspace({
                   <ArrowRight className="size-4" />
                 </Button>
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="shrink-0"
-                      onClick={onClose}
-                      aria-label={translate(
-                        'auto.components.JiraIssueWorkspace.76513c7898',
-                        'Close Jira issue preview'
-                      )}
-                    >
-                      <X className="size-4" />
-                    </Button>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="shrink-0"
+                        onClick={onClose}
+                        aria-label={translate(
+                          'auto.components.JiraIssueWorkspace.76513c7898',
+                          'Close Jira issue preview'
+                        )}
+                      >
+                        <X className="size-4" />
+                      </Button>
+                    }
+                  />
                   <TooltipContent side="bottom" sideOffset={6}>
                     {translate('auto.components.JiraIssueWorkspace.7a96985ca0', 'Close')}
                   </TooltipContent>
@@ -463,21 +460,23 @@ export default function JiraIssueWorkspace({
 
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border/60 px-4 py-2.5">
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={pendingField === 'transition' || transitions.length === 0}
-                    className={cn(
-                      'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium transition hover:opacity-80 disabled:opacity-50',
-                      jiraStatusClass(displayed.status.categoryKey)
-                    )}
-                  >
-                    {displayed.status.name}
-                    {pendingField === 'transition' ? (
-                      <LoaderCircle className="size-3 animate-spin" />
-                    ) : null}
-                  </button>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={pendingField === 'transition' || transitions.length === 0}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium transition hover:opacity-80 disabled:opacity-50',
+                        jiraStatusClass(displayed.status.categoryKey)
+                      )}
+                    >
+                      {displayed.status.name}
+                      {pendingField === 'transition' ? (
+                        <LoaderCircle className="size-3 animate-spin" />
+                      ) : null}
+                    </button>
+                  }
+                />
                 <PopoverContent
                   className="popover-scroll-content scrollbar-sleek w-52 p-1"
                   align="start"
@@ -502,19 +501,21 @@ export default function JiraIssueWorkspace({
               </Popover>
 
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={pendingField === 'priority'}
-                    className="rounded-md px-1.5 py-0.5 text-[11px] text-muted-foreground transition hover:bg-muted/40 disabled:opacity-50"
-                  >
-                    {displayed.priority?.name ??
-                      translate('auto.components.JiraIssueWorkspace.51bed73f88', 'No priority')}
-                    {pendingField === 'priority' ? (
-                      <LoaderCircle className="ml-1 inline size-3 animate-spin" />
-                    ) : null}
-                  </button>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={pendingField === 'priority'}
+                      className="rounded-md px-1.5 py-0.5 text-[11px] text-muted-foreground transition hover:bg-muted/40 disabled:opacity-50"
+                    >
+                      {displayed.priority?.name ??
+                        translate('auto.components.JiraIssueWorkspace.51bed73f88', 'No priority')}
+                      {pendingField === 'priority' ? (
+                        <LoaderCircle className="ml-1 inline size-3 animate-spin" />
+                      ) : null}
+                    </button>
+                  }
+                />
                 <PopoverContent
                   className="popover-scroll-content scrollbar-sleek w-48 p-1"
                   align="start"
@@ -544,19 +545,21 @@ export default function JiraIssueWorkspace({
               </Popover>
 
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={pendingField === 'assignee'}
-                    className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-muted-foreground transition hover:bg-muted/40 disabled:opacity-50"
-                  >
-                    {displayed.assignee?.displayName ??
-                      translate('auto.components.JiraIssueWorkspace.54649eaeab', '+ Assignee')}
-                    {pendingField === 'assignee' ? (
-                      <LoaderCircle className="size-3 animate-spin" />
-                    ) : null}
-                  </button>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={pendingField === 'assignee'}
+                      className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-muted-foreground transition hover:bg-muted/40 disabled:opacity-50"
+                    >
+                      {displayed.assignee?.displayName ??
+                        translate('auto.components.JiraIssueWorkspace.54649eaeab', '+ Assignee')}
+                      {pendingField === 'assignee' ? (
+                        <LoaderCircle className="size-3 animate-spin" />
+                      ) : null}
+                    </button>
+                  }
+                />
                 <PopoverContent
                   className="popover-scroll-content scrollbar-sleek w-56 p-1"
                   align="start"
@@ -780,16 +783,18 @@ export default function JiraIssueWorkspace({
                     const Icon = item.icon
                     return (
                       <Tooltip key={item.label}>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            onClick={item.action}
-                            className="flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-                          >
-                            <Icon className="size-3.5 shrink-0" />
-                            <span className="truncate">{item.label}</span>
-                          </button>
-                        </TooltipTrigger>
+                        <TooltipTrigger
+                          render={
+                            <button
+                              type="button"
+                              onClick={item.action}
+                              className="flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                            >
+                              <Icon className="size-3.5 shrink-0" />
+                              <span className="truncate">{item.label}</span>
+                            </button>
+                          }
+                        />
                         <TooltipContent side="left" sideOffset={6}>
                           {item.label}
                         </TooltipContent>

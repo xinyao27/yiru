@@ -189,9 +189,7 @@ export function ExternalAutomationRunTable({
           {isLoading ? <Loader2 className="size-3.5 animate-spin text-muted-foreground" /> : null}
           {fetchError ? (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <AlertCircle className="size-3.5 text-destructive" />
-              </TooltipTrigger>
+              <TooltipTrigger render={<AlertCircle className="size-3.5 text-destructive" />} />
               <TooltipContent side="top" sideOffset={4}>
                 {fetchError}
               </TooltipContent>

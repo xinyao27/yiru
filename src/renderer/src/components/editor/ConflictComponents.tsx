@@ -113,20 +113,22 @@ export function ConflictBanner({
         {conflictNavigation && conflictNavigation.total > 0 && (
           <div className="flex shrink-0 items-center gap-1">
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label={translate(
-                    'auto.components.editor.ConflictComponents.41d9af2e7a',
-                    'Previous conflict'
-                  )}
-                  onClick={() => conflictNavigation.onJump('previous')}
-                >
-                  <ChevronUp className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={translate(
+                      'auto.components.editor.ConflictComponents.41d9af2e7a',
+                      'Previous conflict'
+                    )}
+                    onClick={() => conflictNavigation.onJump('previous')}
+                  >
+                    <ChevronUp className="size-3.5" />
+                  </Button>
+                }
+              />
               <TooltipContent side="bottom" sideOffset={6}>
                 {translate(
                   'auto.components.editor.ConflictComponents.41d9af2e7a',
@@ -135,20 +137,22 @@ export function ConflictBanner({
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label={translate(
-                    'auto.components.editor.ConflictComponents.9c2901ef8a',
-                    'Next conflict'
-                  )}
-                  onClick={() => conflictNavigation.onJump('next')}
-                >
-                  <ChevronDown className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={translate(
+                      'auto.components.editor.ConflictComponents.9c2901ef8a',
+                      'Next conflict'
+                    )}
+                    onClick={() => conflictNavigation.onJump('next')}
+                  >
+                    <ChevronDown className="size-3.5" />
+                  </Button>
+                }
+              />
               <TooltipContent side="bottom" sideOffset={6}>
                 {translate('auto.components.editor.ConflictComponents.9c2901ef8a', 'Next conflict')}
               </TooltipContent>
@@ -298,20 +302,22 @@ export function ConflictReviewPanel({
           <div className="flex min-w-0 items-start gap-2">
             {fileTreeCollapsed && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    aria-label={translate(
-                      'auto.components.editor.ConflictComponents.c8ca989aea',
-                      'Show file tree'
-                    )}
-                    onClick={() => setFileTreeCollapsed(false)}
-                  >
-                    <PanelLeftOpen className="size-3.5" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label={translate(
+                        'auto.components.editor.ConflictComponents.c8ca989aea',
+                        'Show file tree'
+                      )}
+                      onClick={() => setFileTreeCollapsed(false)}
+                    >
+                      <PanelLeftOpen className="size-3.5" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6}>
                   {translate(
                     'auto.components.editor.ConflictComponents.c8ca989aea',

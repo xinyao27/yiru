@@ -97,8 +97,8 @@ export function SpoolWorktreeRow({
   )
 
   return (
-    <HoverCard openDelay={200} closeDelay={100}>
-      <HoverCardTrigger asChild>{trigger}</HoverCardTrigger>
+    <HoverCard>
+      <HoverCardTrigger delay={200} closeDelay={100} render={trigger} />
       <SpoolDesktopUsageHoverCard desktop={row.desktop} />
     </HoverCard>
   )

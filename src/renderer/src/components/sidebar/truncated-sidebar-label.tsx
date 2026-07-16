@@ -78,7 +78,7 @@ export function TruncatedSidebarLabel({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>{label}</TooltipTrigger>
+      <TooltipTrigger render={label} />
       <TooltipContent
         side={tooltipSide}
         sideOffset={tooltipSideOffset}

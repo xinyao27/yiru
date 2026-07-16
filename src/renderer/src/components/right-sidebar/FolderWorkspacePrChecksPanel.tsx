@@ -216,21 +216,23 @@ export default function FolderWorkspacePrChecksPanel({
             ) : null}
           </div>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => setManualRefreshGeneration((generation) => generation + 1)}
-                disabled={childWorktrees.length === 0 || isRefreshing}
-                aria-label={translate(
-                  'auto.components.rightSidebar.FolderWorkspacePrChecksPanel.refresh',
-                  'Refresh PR checks'
-                )}
-              >
-                <RefreshCw className={cn('size-3.5', isRefreshing && 'animate-spin')} />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setManualRefreshGeneration((generation) => generation + 1)}
+                  disabled={childWorktrees.length === 0 || isRefreshing}
+                  aria-label={translate(
+                    'auto.components.rightSidebar.FolderWorkspacePrChecksPanel.refresh',
+                    'Refresh PR checks'
+                  )}
+                >
+                  <RefreshCw className={cn('size-3.5', isRefreshing && 'animate-spin')} />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom">
               {translate(
                 'auto.components.rightSidebar.FolderWorkspacePrChecksPanel.refresh',

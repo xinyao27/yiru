@@ -169,26 +169,28 @@ export default function PRFilterDropdowns({
           }
         }}
       >
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className={cn(
-              'h-7 gap-1.5 rounded-md border-border/50 px-2 text-xs font-normal',
-              'bg-transparent hover:bg-muted/50',
-              activeCount > 0 && 'border-border'
-            )}
-          >
-            <ListFilter className="size-3.5" />
-            {translate('auto.components.github.PRFilterDropdowns.79c54552f7', 'Filters')}
-            {activeCount > 0 ? (
-              <span className="ml-0.5 rounded-full bg-muted px-1.5 text-[10px] font-medium text-foreground">
-                {activeCount}
-              </span>
-            ) : null}
-          </Button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className={cn(
+                'h-7 gap-1.5 rounded-md border-border/50 px-2 text-xs font-normal',
+                'bg-transparent hover:bg-muted/50',
+                activeCount > 0 && 'border-border'
+              )}
+            >
+              <ListFilter className="size-3.5" />
+              {translate('auto.components.github.PRFilterDropdowns.79c54552f7', 'Filters')}
+              {activeCount > 0 ? (
+                <span className="ml-0.5 rounded-full bg-muted px-1.5 text-[10px] font-medium text-foreground">
+                  {activeCount}
+                </span>
+              ) : null}
+            </Button>
+          }
+        />
         <PopoverContent align="start" className="w-72 p-0">
           {openSection === null ? (
             <SectionMenu

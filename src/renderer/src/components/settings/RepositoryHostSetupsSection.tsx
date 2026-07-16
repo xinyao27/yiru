@@ -127,7 +127,7 @@ export function RepositoryHostSetupsSection({
               <Select
                 value={selectedHostId}
                 onValueChange={(hostId) => {
-                  if (hostId === selectedHostId) {
+                  if (hostId === null || hostId === selectedHostId) {
                     return
                   }
                   selectHost(hostId as ExecutionHostId)

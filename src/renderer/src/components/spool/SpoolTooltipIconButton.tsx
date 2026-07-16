@@ -9,11 +9,13 @@ export function SpoolTooltipIconButton({
 }: React.ComponentProps<typeof Button> & { label: string }): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button type="button" size="icon-xs" variant="ghost" aria-label={label} {...props}>
-          {children}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button type="button" size="icon-xs" variant="ghost" aria-label={label} {...props}>
+            {children}
+          </Button>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {label}
       </TooltipContent>

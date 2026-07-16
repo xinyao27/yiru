@@ -130,28 +130,32 @@ export function WorktreeCardStatusSlot({
   const passiveStatus =
     canShowReviewStatus && prDisplay ? (
       <Tooltip>
-        <TooltipTrigger asChild>
-          <span className={cn('inline-flex size-5 items-center justify-center p-0.5', className)}>
-            <ReviewIcon
-              review={prDisplay}
-              className={reviewStatusIconClassName}
-              variant="generic"
-            />
-            <span className="sr-only">{passiveStatusTooltip}</span>
-          </span>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <span className={cn('inline-flex size-5 items-center justify-center p-0.5', className)}>
+              <ReviewIcon
+                review={prDisplay}
+                className={reviewStatusIconClassName}
+                variant="generic"
+              />
+              <span className="sr-only">{passiveStatusTooltip}</span>
+            </span>
+          }
+        />
         <TooltipContent side="right" sideOffset={8}>
           <span>{passiveStatusTooltip}</span>
         </TooltipContent>
       </Tooltip>
     ) : canShowBranchStatus ? (
       <Tooltip>
-        <TooltipTrigger asChild>
-          <span className={cn('inline-flex size-5 items-center justify-center p-0.5', className)}>
-            {branchStatusIcon}
-            <span className="sr-only">{passiveStatusTooltip}</span>
-          </span>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <span className={cn('inline-flex size-5 items-center justify-center p-0.5', className)}>
+              {branchStatusIcon}
+              <span className="sr-only">{passiveStatusTooltip}</span>
+            </span>
+          }
+        />
         <TooltipContent side="right" sideOffset={8}>
           <span>{passiveStatusTooltip}</span>
         </TooltipContent>
@@ -187,55 +191,57 @@ export function WorktreeCardStatusSlot({
   return (
     <>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            data-workspace-board-preserve-open=""
-            onPointerDown={onPointerDown}
-            onClick={onToggleUnread}
-            className={cn(
-              'group/unread relative flex cursor-pointer items-center justify-center rounded transition-all',
-              newCardStyle && showStatus ? 'size-5' : 'size-4',
-              'hover:bg-accent/80 active:scale-95',
-              'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-              className
-            )}
-            aria-label={actionLabel}
-          >
-            {newCardStyle ? (
-              showStatus && canShowReviewStatus && prDisplay ? (
-                <span className="inline-flex size-5 items-center justify-center p-0.5">
-                  <ReviewIcon
-                    review={prDisplay}
-                    className={reviewStatusIconClassName}
-                    variant="generic"
-                  />
-                </span>
-              ) : showStatus && canShowBranchStatus ? (
-                <span className="inline-flex size-5 items-center justify-center p-0.5">
-                  {branchStatusIcon}
-                </span>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              data-workspace-board-preserve-open=""
+              onPointerDown={onPointerDown}
+              onClick={onToggleUnread}
+              className={cn(
+                'group/unread relative flex cursor-pointer items-center justify-center rounded transition-all',
+                newCardStyle && showStatus ? 'size-5' : 'size-4',
+                'hover:bg-accent/80 active:scale-95',
+                'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                className
+              )}
+              aria-label={actionLabel}
+            >
+              {newCardStyle ? (
+                showStatus && canShowReviewStatus && prDisplay ? (
+                  <span className="inline-flex size-5 items-center justify-center p-0.5">
+                    <ReviewIcon
+                      review={prDisplay}
+                      className={reviewStatusIconClassName}
+                      variant="generic"
+                    />
+                  </span>
+                ) : showStatus && canShowBranchStatus ? (
+                  <span className="inline-flex size-5 items-center justify-center p-0.5">
+                    {branchStatusIcon}
+                  </span>
+                ) : showStatus ? (
+                  <StatusIndicator status={status} aria-hidden="true" />
+                ) : (
+                  <span className="sr-only">{actionLabel}</span>
+                )
+              ) : isUnread ? (
+                <FilledBellIcon className="size-[13px] text-amber-500 drop-shadow-sm" />
               ) : showStatus ? (
-                <StatusIndicator status={status} aria-hidden="true" />
+                <>
+                  <StatusIndicator
+                    status={status}
+                    aria-hidden="true"
+                    className="transition-opacity group-hover/unread:opacity-0 group-focus-within/unread:opacity-0"
+                  />
+                  <Bell className="absolute size-3 text-muted-foreground/40 opacity-0 transition-opacity group-hover/unread:opacity-100 group-focus-within/unread:opacity-100" />
+                </>
               ) : (
-                <span className="sr-only">{actionLabel}</span>
-              )
-            ) : isUnread ? (
-              <FilledBellIcon className="size-[13px] text-amber-500 drop-shadow-sm" />
-            ) : showStatus ? (
-              <>
-                <StatusIndicator
-                  status={status}
-                  aria-hidden="true"
-                  className="transition-opacity group-hover/unread:opacity-0 group-focus-within/unread:opacity-0"
-                />
-                <Bell className="absolute size-3 text-muted-foreground/40 opacity-0 transition-opacity group-hover/unread:opacity-100 group-focus-within/unread:opacity-100" />
-              </>
-            ) : (
-              <Bell className="size-3 text-muted-foreground/40 can-hover:opacity-0 transition-opacity group-hover:opacity-100 group-hover/unread:opacity-100 group-focus-within/unread:opacity-100" />
-            )}
-          </button>
-        </TooltipTrigger>
+                <Bell className="size-3 text-muted-foreground/40 can-hover:opacity-0 transition-opacity group-hover:opacity-100 group-hover/unread:opacity-100 group-focus-within/unread:opacity-100" />
+              )}
+            </button>
+          }
+        />
         <TooltipContent side="right" sideOffset={8}>
           <span>{tooltip}</span>
         </TooltipContent>

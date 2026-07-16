@@ -19,12 +19,14 @@ export function DeleteWorktreeDirtyChangeHint({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <div className="mt-1 flex w-fit max-w-full items-center gap-1.5 text-destructive">
-          <AlertTriangle className="size-3 shrink-0" />
-          <span className="min-w-0 truncate font-medium">{label}</span>
-        </div>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <div className="mt-1 flex w-fit max-w-full items-center gap-1.5 text-destructive">
+            <AlertTriangle className="size-3 shrink-0" />
+            <span className="min-w-0 truncate font-medium">{label}</span>
+          </div>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {translate(
           'auto.components.sidebar.DeleteWorktreeDirtyChangeHint.8e2994ce28',

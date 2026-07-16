@@ -215,11 +215,13 @@ function JiraIssueRow({
       </div>
 
       <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="block min-w-0 truncate text-[12px] text-muted-foreground max-md:!hidden">
-            {formatUpdatedAt(issue.updatedAt)}
-          </div>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <div className="block min-w-0 truncate text-[12px] text-muted-foreground max-md:!hidden">
+              {formatUpdatedAt(issue.updatedAt)}
+            </div>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {new Date(issue.updatedAt).toLocaleString()}
         </TooltipContent>
@@ -227,45 +229,49 @@ function JiraIssueRow({
 
       <div className="flex shrink-0 items-center justify-end gap-1 md:opacity-0 md:transition-opacity md:group-hover/row:opacity-100 md:group-focus-within/row:opacity-100">
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={(event) => {
-                event.stopPropagation()
-                onStartWorkspace(issue)
-              }}
-              aria-label={translate(
-                'auto.components.TaskPage.ff90d0abc7',
-                'Start workspace from {{value0}}',
-                { value0: issue.key }
-              )}
-            >
-              <ArrowRight className="size-3.5" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onStartWorkspace(issue)
+                }}
+                aria-label={translate(
+                  'auto.components.TaskPage.ff90d0abc7',
+                  'Start workspace from {{value0}}',
+                  { value0: issue.key }
+                )}
+              >
+                <ArrowRight className="size-3.5" />
+              </Button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={6}>
             {translate('auto.components.TaskPage.9497f2787c', 'Start workspace')}
           </TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={(event) => {
-                event.stopPropagation()
-                window.api.shell.openUrl(issue.url)
-              }}
-              aria-label={translate(
-                'auto.components.TaskPage.4ac8ff2275',
-                'Open {{value0}} in Jira',
-                { value0: issue.key }
-              )}
-            >
-              <ExternalLink className="size-3.5" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  window.api.shell.openUrl(issue.url)
+                }}
+                aria-label={translate(
+                  'auto.components.TaskPage.4ac8ff2275',
+                  'Open {{value0}} in Jira',
+                  { value0: issue.key }
+                )}
+              >
+                <ExternalLink className="size-3.5" />
+              </Button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={6}>
             {translate('auto.components.TaskPage.eee68073b2', 'Open in Jira')}
           </TooltipContent>
@@ -312,25 +318,27 @@ export function TaskPageJiraIssueList({
               })
             }}
           >
-            <CollapsibleTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-9 w-full justify-start rounded-none bg-muted/35 px-3 text-left font-normal transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
-              >
-                {open ? (
-                  <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="size-3 shrink-0 text-muted-foreground" />
-                )}
-                <span className="min-w-0 truncate text-[13px] font-medium text-foreground">
-                  {section.label}
-                </span>
-                <span className="shrink-0 text-[11px] text-muted-foreground">
-                  {section.issues.length}
-                </span>
-              </Button>
-            </CollapsibleTrigger>
+            <CollapsibleTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-9 w-full justify-start rounded-none bg-muted/35 px-3 text-left font-normal transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
+                >
+                  {open ? (
+                    <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="size-3 shrink-0 text-muted-foreground" />
+                  )}
+                  <span className="min-w-0 truncate text-[13px] font-medium text-foreground">
+                    {section.label}
+                  </span>
+                  <span className="shrink-0 text-[11px] text-muted-foreground">
+                    {section.issues.length}
+                  </span>
+                </Button>
+              }
+            />
             <CollapsibleContent className="divide-y divide-border/50 border-t border-border/50">
               {section.issues.map((issue) => (
                 <JiraIssueRow

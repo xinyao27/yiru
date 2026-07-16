@@ -144,14 +144,16 @@ export function SortableTabContextMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-hidden
-          tabIndex={-1}
-          className="pointer-events-none fixed size-px opacity-0"
-          style={{ left: point.x, top: point.y }}
-        />
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <button
+            aria-hidden
+            tabIndex={-1}
+            className="pointer-events-none fixed size-px opacity-0"
+            style={{ left: point.x, top: point.y }}
+          />
+        }
+      />
       <DropdownMenuContent className="w-56" sideOffset={0} align="start">
         <TerminalTabSplitMenuSection
           unifiedTabId={unifiedTabId}

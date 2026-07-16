@@ -31,17 +31,19 @@ export function MobilePageToolbar({
     <div className="mp-page-toolbar">
       <div className="mp-page-toolbar-primary">
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant={showMobileButton ? 'default' : 'secondary'}
-              size="sm"
-              className="mp-sidebar-toggle-btn"
-              onClick={onToggleMobileSidebarButton}
-              aria-label={sidebarToggleLabel}
-            >
-              {sidebarToggleLabel}
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                variant={showMobileButton ? 'default' : 'secondary'}
+                size="sm"
+                className="mp-sidebar-toggle-btn"
+                onClick={onToggleMobileSidebarButton}
+                aria-label={sidebarToggleLabel}
+              >
+                {sidebarToggleLabel}
+              </Button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={6}>
             {sidebarToggleTooltip}
           </TooltipContent>
@@ -49,20 +51,22 @@ export function MobilePageToolbar({
       </div>
 
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mp-page-toolbar-close size-7 shrink-0 rounded-full"
-            onClick={onClose}
-            aria-label={translate(
-              'auto.components.mobile.MobilePageToolbar.9883b58693',
-              'Close Orca Mobile'
-            )}
-          >
-            <X className="size-4" />
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mp-page-toolbar-close size-7 shrink-0 rounded-full"
+              onClick={onClose}
+              aria-label={translate(
+                'auto.components.mobile.MobilePageToolbar.9883b58693',
+                'Close Orca Mobile'
+              )}
+            >
+              <X className="size-4" />
+            </Button>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {translate('auto.components.mobile.MobilePageToolbar.ad2284a9e2', 'Close · Esc')}
         </TooltipContent>

@@ -101,10 +101,7 @@ export function ProjectGroupDeleteDialog({
         ref={handleDialogContentRef}
         className="max-w-sm sm:max-w-sm"
         showCloseButton={false}
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
-          confirmButtonRef.current?.focus()
-        }}
+        initialFocus={confirmButtonRef}
       >
         <DialogHeader>
           <DialogTitle className="text-sm">

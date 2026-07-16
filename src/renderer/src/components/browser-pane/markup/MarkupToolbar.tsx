@@ -95,7 +95,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
   onClear
 }: MarkupToolbarProps) {
   return (
-    <TooltipProvider delayDuration={300}>
+    <TooltipProvider delay={300}>
       <div className="flex items-center gap-1 rounded-md border border-border bg-card/95 px-1.5 py-1 shadow-md backdrop-blur">
         {toolItems().map((item) => (
           <IconButton
@@ -112,24 +112,28 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
 
         <Popover>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={translate(
-                    'auto.components.browser-pane.markup.style',
-                    'Color and thickness'
-                  )}
-                >
-                  <span
-                    className="size-4 rounded-full border border-border"
-                    style={{ backgroundColor: color }}
-                  />
-                </Button>
-              </PopoverTrigger>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <PopoverTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={translate(
+                        'auto.components.browser-pane.markup.style',
+                        'Color and thickness'
+                      )}
+                    >
+                      <span
+                        className="size-4 rounded-full border border-border"
+                        style={{ backgroundColor: color }}
+                      />
+                    </Button>
+                  }
+                />
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {translate('auto.components.browser-pane.markup.style', 'Color and thickness')}
             </TooltipContent>
@@ -178,23 +182,27 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
 
         <Popover>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 gap-1 px-2"
-                  aria-label={translate(
-                    'auto.components.browser-pane.markup.fontSize',
-                    'Font size'
-                  )}
-                >
-                  <Type className="size-3.5" />
-                  <span className="text-[11px] tabular-nums">{fontSize}</span>
-                </Button>
-              </PopoverTrigger>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <PopoverTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 gap-1 px-2"
+                      aria-label={translate(
+                        'auto.components.browser-pane.markup.fontSize',
+                        'Font size'
+                      )}
+                    >
+                      <Type className="size-3.5" />
+                      <span className="text-[11px] tabular-nums">{fontSize}</span>
+                    </Button>
+                  }
+                />
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {translate('auto.components.browser-pane.markup.fontSize', 'Font size')}
             </TooltipContent>
@@ -272,19 +280,21 @@ function IconButton({
 }: IconButtonProps): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          type="button"
-          variant={active ? 'default' : 'ghost'}
-          size="icon-sm"
-          disabled={disabled}
-          aria-label={label}
-          aria-pressed={active}
-          onClick={onClick}
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            variant={active ? 'default' : 'ghost'}
+            size="icon-sm"
+            disabled={disabled}
+            aria-label={label}
+            aria-pressed={active}
+            onClick={onClick}
+          >
+            {children}
+          </Button>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {label}
       </TooltipContent>

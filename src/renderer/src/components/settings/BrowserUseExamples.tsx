@@ -56,21 +56,23 @@ export function BrowserUseExamples(): React.JSX.Element {
               {prompt}
               {translate('auto.components.settings.BrowserUseExamples.b84807f228', '"')}
             </p>
-            <TooltipProvider delayDuration={250}>
+            <TooltipProvider delay={250}>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => void handleCopyText(prompt, 'prompt')}
-                    aria-label={translate(
-                      'auto.components.settings.BrowserUseExamples.1188e56af4',
-                      'Copy example prompt'
-                    )}
-                  >
-                    <Copy className="size-3.5" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => void handleCopyText(prompt, 'prompt')}
+                      aria-label={translate(
+                        'auto.components.settings.BrowserUseExamples.1188e56af4',
+                        'Copy example prompt'
+                      )}
+                    >
+                      <Copy className="size-3.5" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="left" sideOffset={6}>
                   {translate('auto.components.settings.BrowserUseExamples.1199258ace', 'Copy')}
                 </TooltipContent>

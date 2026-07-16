@@ -105,10 +105,9 @@ export function AutomationEditorDialogHeader({
         {isCreateMode ? (
           <div className="flex shrink-0 items-center gap-2">
             <ToggleGroup
-              type="single"
-              value={createTarget}
+              value={[createTarget]}
               onValueChange={(value) =>
-                value && onCreateTargetChange(value as AutomationCreateTarget)
+                value[0] && onCreateTargetChange(value[0] as AutomationCreateTarget)
               }
               variant="outline"
               size="sm"
@@ -128,20 +127,22 @@ export function AutomationEditorDialogHeader({
               </ToggleGroupItem>
             </ToggleGroup>
             <Popover open={templateOpen} onOpenChange={onTemplateOpenChange}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={pickerTriggerClassName}
-                >
-                  <Sparkles className="size-4" />
-                  {translate(
-                    'auto.components.automations.AutomationEditorDialogHeader.31f9253920',
-                    'Use template'
-                  )}
-                </Button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={pickerTriggerClassName}
+                  >
+                    <Sparkles className="size-4" />
+                    {translate(
+                      'auto.components.automations.AutomationEditorDialogHeader.31f9253920',
+                      'Use template'
+                    )}
+                  </Button>
+                }
+              />
               <PopoverContent align="end" className="w-96 p-3">
                 <div className="grid gap-2">
                   {templates.map((template) => (

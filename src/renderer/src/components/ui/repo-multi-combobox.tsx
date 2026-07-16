@@ -128,18 +128,20 @@ export default function RepoMultiCombobox({
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn('h-8 w-full justify-between px-3 text-xs font-normal', triggerClassName)}
-        >
-          {renderTriggerLabel(repos, selected)}
-          <ChevronsUpDown className="size-3.5 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn('h-8 w-full justify-between px-3 text-xs font-normal', triggerClassName)}
+          >
+            {renderTriggerLabel(repos, selected)}
+            <ChevronsUpDown className="size-3.5 opacity-50" />
+          </Button>
+        }
+      />
       {/* Why: trigger width can be as narrow as the "All projects" label, but the
           popover hosts a search input and repo rows with paths. Use the
           trigger as a minimum width and let the content expand to a readable

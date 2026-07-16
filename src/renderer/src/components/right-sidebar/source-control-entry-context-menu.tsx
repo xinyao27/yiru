@@ -27,7 +27,8 @@ type SourceControlEntryContextMenuProps = {
   onView?: () => void
   onRevealInExplorer: (worktreeId: string, absolutePath: string) => void
   onOpenChange?: (open: boolean) => void
-  children: React.ReactNode
+  // Base UI's ContextMenuTrigger `render` needs a single element, not arbitrary ReactNode.
+  children: React.ReactElement
 }
 
 export function SourceControlEntryContextMenu({
@@ -77,7 +78,7 @@ export function SourceControlEntryContextMenu({
 
   return (
     <ContextMenu onOpenChange={onOpenChange}>
-      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+      <ContextMenuTrigger render={children} />
       <ContextMenuContent className="w-52">
         <ContextMenuItem onSelect={onView} disabled={!onView}>
           <Eye className="size-3.5" />

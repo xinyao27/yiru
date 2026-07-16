@@ -149,7 +149,11 @@ export function ProjectWindowsRuntimeSetting({
             {isWslSelected ? (
               <Select
                 value={selectedPreference.kind === 'wsl' ? selectedPreference.distro : ''}
-                onValueChange={handleDistroChange}
+                onValueChange={(value) => {
+                  if (value) {
+                    handleDistroChange(value)
+                  }
+                }}
                 disabled={wslCapabilitiesLoading || !wslAvailable}
               >
                 <SelectTrigger size="sm" className="w-full min-w-52">

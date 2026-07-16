@@ -166,32 +166,34 @@ export function SshTargetCard({
 
   const renderEndRemoteTerminalsButton = (): React.JSX.Element => (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleTerminateSessions}
-          className="size-7 text-muted-foreground hover:text-red-400"
-          disabled={hasActionInFlight}
-          aria-label={
-            terminateInFlight
-              ? translate(
-                  'auto.components.settings.SshTargetCard.c77f1abfe3',
-                  'Ending remote terminals'
-                )
-              : translate(
-                  'auto.components.settings.SshTargetCard.da16e108e6',
-                  'End remote terminals'
-                )
-          }
-        >
-          {terminateInFlight ? (
-            <Loader2 className="size-3 animate-spin" />
-          ) : (
-            <CircleStop className="size-3" />
-          )}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleTerminateSessions}
+            className="size-7 text-muted-foreground hover:text-red-400"
+            disabled={hasActionInFlight}
+            aria-label={
+              terminateInFlight
+                ? translate(
+                    'auto.components.settings.SshTargetCard.c77f1abfe3',
+                    'Ending remote terminals'
+                  )
+                : translate(
+                    'auto.components.settings.SshTargetCard.da16e108e6',
+                    'End remote terminals'
+                  )
+            }
+          >
+            {terminateInFlight ? (
+              <Loader2 className="size-3 animate-spin" />
+            ) : (
+              <CircleStop className="size-3" />
+            )}
+          </Button>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {translate('auto.components.settings.SshTargetCard.da16e108e6', 'End remote terminals')}
       </TooltipContent>
@@ -200,29 +202,34 @@ export function SshTargetCard({
 
   const renderResetRelayButton = (): React.JSX.Element => (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleResetRelay}
-          className="size-7 text-muted-foreground hover:text-red-400"
-          disabled={hasActionInFlight}
-          aria-label={
-            resetInFlight
-              ? translate(
-                  'auto.components.settings.SshTargetCard.97dea4e8cf',
-                  'Resetting remote relay'
-                )
-              : translate('auto.components.settings.SshTargetCard.762a48c662', 'Reset remote relay')
-          }
-        >
-          {resetInFlight ? (
-            <Loader2 className="size-3 animate-spin" />
-          ) : (
-            <RotateCcw className="size-3" />
-          )}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleResetRelay}
+            className="size-7 text-muted-foreground hover:text-red-400"
+            disabled={hasActionInFlight}
+            aria-label={
+              resetInFlight
+                ? translate(
+                    'auto.components.settings.SshTargetCard.97dea4e8cf',
+                    'Resetting remote relay'
+                  )
+                : translate(
+                    'auto.components.settings.SshTargetCard.762a48c662',
+                    'Reset remote relay'
+                  )
+            }
+          >
+            {resetInFlight ? (
+              <Loader2 className="size-3 animate-spin" />
+            ) : (
+              <RotateCcw className="size-3" />
+            )}
+          </Button>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {translate('auto.components.settings.SshTargetCard.762a48c662', 'Reset remote relay')}
       </TooltipContent>
@@ -234,46 +241,53 @@ export function SshTargetCard({
       {includeEndRemoteTerminals ? renderEndRemoteTerminalsButton() : null}
       {isSshTargetConnecting(status) ? null : renderResetRelayButton()}
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onEdit(target)}
-            className="size-7"
-            disabled={hasActionInFlight}
-            aria-label={translate(
-              'auto.components.settings.SshTargetCard.3d8af2949f',
-              'Edit target'
-            )}
-          >
-            <Pencil className="size-3" />
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onEdit(target)}
+              className="size-7"
+              disabled={hasActionInFlight}
+              aria-label={translate(
+                'auto.components.settings.SshTargetCard.3d8af2949f',
+                'Edit target'
+              )}
+            >
+              <Pencil className="size-3" />
+            </Button>
+          }
+        />
         <TooltipContent side="top" sideOffset={4}>
           {translate('auto.components.settings.SshTargetCard.3d8af2949f', 'Edit target')}
         </TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onRemove(target.id)}
-            className="size-7 text-muted-foreground hover:text-red-400"
-            disabled={hasActionInFlight}
-            aria-label={
-              removeInFlight
-                ? translate('auto.components.settings.SshTargetCard.3d21a22d0e', 'Removing target')
-                : translate('auto.components.settings.SshTargetCard.7f7b3d7ab4', 'Remove target')
-            }
-          >
-            {removeInFlight ? (
-              <Loader2 className="size-3 animate-spin" />
-            ) : (
-              <Trash2 className="size-3" />
-            )}
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onRemove(target.id)}
+              className="size-7 text-muted-foreground hover:text-red-400"
+              disabled={hasActionInFlight}
+              aria-label={
+                removeInFlight
+                  ? translate(
+                      'auto.components.settings.SshTargetCard.3d21a22d0e',
+                      'Removing target'
+                    )
+                  : translate('auto.components.settings.SshTargetCard.7f7b3d7ab4', 'Remove target')
+              }
+            >
+              {removeInFlight ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                <Trash2 className="size-3" />
+              )}
+            </Button>
+          }
+        />
         <TooltipContent side="top" sideOffset={4}>
           {translate('auto.components.settings.SshTargetCard.7f7b3d7ab4', 'Remove target')}
         </TooltipContent>

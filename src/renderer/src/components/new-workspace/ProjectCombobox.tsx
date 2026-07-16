@@ -126,47 +126,51 @@ export default function ProjectCombobox({
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          aria-invalid={invalid ? true : undefined}
-          aria-describedby={describedBy}
-          onKeyDown={handleTriggerKeyDown}
-          className={cn(
-            'h-8 min-w-[184px] justify-between px-3 text-xs font-normal',
-            triggerClassName
-          )}
-          data-project-combobox-root="true"
-        >
-          {selectedProject ? (
-            selectedProject.kind === 'project-group' ? (
-              <span className="flex min-w-0 items-center gap-1.5">
-                <FolderOpen className="size-3.5 shrink-0 text-muted-foreground" />
-                <span className="truncate">{selectedProject.displayName}</span>
-              </span>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            aria-invalid={invalid ? true : undefined}
+            aria-describedby={describedBy}
+            onKeyDown={handleTriggerKeyDown}
+            className={cn(
+              'h-8 min-w-[184px] justify-between px-3 text-xs font-normal',
+              triggerClassName
+            )}
+            data-project-combobox-root="true"
+          >
+            {selectedProject ? (
+              selectedProject.kind === 'project-group' ? (
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <FolderOpen className="size-3.5 shrink-0 text-muted-foreground" />
+                  <span className="truncate">{selectedProject.displayName}</span>
+                </span>
+              ) : (
+                <RepoBadgeLabel
+                  name={selectedProject.displayName}
+                  color={selectedProject.badgeColor}
+                  badgeClassName="size-1.5"
+                />
+              )
             ) : (
-              <RepoBadgeLabel
-                name={selectedProject.displayName}
-                color={selectedProject.badgeColor}
-                badgeClassName="size-1.5"
-              />
-            )
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
-          <ChevronsUpDown className="size-3.5 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+            <ChevronsUpDown className="size-3.5 opacity-50" />
+          </Button>
+        }
+      />
       <PopoverContent
         align="start"
         className="w-[var(--radix-popover-trigger-width)] min-w-[18rem] p-0"
         data-project-combobox-root="true"
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
+        initialFocus={() => {
+          // Suppress default focus (return false); focusSearchInput schedules
+          // the rAF focus onto the search box itself.
           focusSearchInput()
+          return false
         }}
       >
         <Command shouldFilter={false} value={commandValue} onValueChange={setCommandValue}>

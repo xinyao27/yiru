@@ -46,18 +46,22 @@ function RichMarkdownMoreBlocksMenu({ editor }: { editor: Editor | null }): Reac
     <DropdownMenu>
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="rich-markdown-toolbar-button"
-                aria-label={label}
-                onMouseDown={(event) => event.preventDefault()}
-              >
-                <MoreHorizontal className="size-3.5" />
-              </button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <button
+                    type="button"
+                    className="rich-markdown-toolbar-button"
+                    aria-label={label}
+                    onMouseDown={(event) => event.preventDefault()}
+                  >
+                    <MoreHorizontal className="size-3.5" />
+                  </button>
+                }
+              />
+            }
+          />
           <TooltipContent side="bottom" sideOffset={4}>
             {label}
           </TooltipContent>

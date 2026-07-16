@@ -181,31 +181,35 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
   return (
     <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              type="button"
-              className="size-5 shrink-0 text-muted-foreground can-hover:opacity-0 transition-opacity focus-visible:opacity-100 group-hover/host-header:opacity-100 data-[state=open]:opacity-100"
-              aria-label={translate(
-                'auto.components.sidebar.HostSectionHeaderMenu.4f2c8a9b10',
-                'Host actions for {{value0}}',
-                { value0: row.label }
-              )}
-              // Why: the host header row itself toggles collapse on click;
-              // opening the menu must not also fold the section.
-              onClick={(event) => event.stopPropagation()}
-              onKeyDown={(event) => event.stopPropagation()}
-            >
-              {busy ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <Ellipsis className="size-3.5" />
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  type="button"
+                  className="size-5 shrink-0 text-muted-foreground can-hover:opacity-0 transition-opacity focus-visible:opacity-100 group-hover/host-header:opacity-100 data-[state=open]:opacity-100"
+                  aria-label={translate(
+                    'auto.components.sidebar.HostSectionHeaderMenu.4f2c8a9b10',
+                    'Host actions for {{value0}}',
+                    { value0: row.label }
+                  )}
+                  // Why: the host header row itself toggles collapse on click;
+                  // opening the menu must not also fold the section.
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
+                  {busy ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Ellipsis className="size-3.5" />
+                  )}
+                </Button>
+              }
+            />
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {translate('auto.components.sidebar.HostSectionHeaderMenu.6b7c8d9e10', 'Host actions')}
         </TooltipContent>
@@ -214,15 +218,17 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
         {model.blocked && (
           <>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onSelect={() => openManageHost(row)}
-                >
-                  <AlertTriangle className="size-3.5" />
-                  {blockedTitle(model.blocked.reason)}
-                </DropdownMenuItem>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onSelect={() => openManageHost(row)}
+                  >
+                    <AlertTriangle className="size-3.5" />
+                    {blockedTitle(model.blocked.reason)}
+                  </DropdownMenuItem>
+                }
+              />
               <TooltipContent side="right" sideOffset={6} className="max-w-72">
                 {row.compatibility ? describeRuntimeCompatBlock(row.compatibility) : null}
               </TooltipContent>

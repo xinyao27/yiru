@@ -488,18 +488,20 @@ function EnvVarChips(): React.JSX.Element {
           'Available environment variables (hover for details):'
         )}
       </p>
-      <TooltipProvider delayDuration={150}>
+      <TooltipProvider delay={150}>
         <div className="flex flex-wrap gap-1.5">
           {envVars.map(({ name, description }) => (
             <Tooltip key={name}>
-              <TooltipTrigger asChild>
-                <code
-                  tabIndex={0}
-                  className="cursor-help rounded-md border border-border/50 bg-muted/35 px-2 py-1 font-mono text-[11px] text-muted-foreground outline-none transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {name}
-                </code>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <code
+                    tabIndex={0}
+                    className="cursor-help rounded-md border border-border/50 bg-muted/35 px-2 py-1 font-mono text-[11px] text-muted-foreground outline-none transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {name}
+                  </code>
+                }
+              />
               <TooltipContent side="top" sideOffset={6} className="max-w-80 text-left text-wrap">
                 {description}
               </TooltipContent>

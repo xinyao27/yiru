@@ -96,22 +96,24 @@ export function MobilePairingSetupSection({
             className="min-w-[220px] justify-between font-normal"
           />
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={onRefreshNetworkInterfaces}
-                disabled={refreshingNetworkInterfaces}
-                aria-label={translate(
-                  'auto.components.settings.MobilePairingSetupSection.refresh',
-                  'Refresh network interfaces'
-                )}
-                className="text-muted-foreground"
-              >
-                <RefreshCw className={refreshingNetworkInterfaces ? 'animate-spin' : ''} />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={onRefreshNetworkInterfaces}
+                  disabled={refreshingNetworkInterfaces}
+                  aria-label={translate(
+                    'auto.components.settings.MobilePairingSetupSection.refresh',
+                    'Refresh network interfaces'
+                  )}
+                  className="text-muted-foreground"
+                >
+                  <RefreshCw className={refreshingNetworkInterfaces ? 'animate-spin' : ''} />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate(
                 'auto.components.settings.MobilePairingSetupSection.refresh',
@@ -122,7 +124,7 @@ export function MobilePairingSetupSection({
         </div>
       </div>
 
-      <Accordion type="single" collapsible className="mt-2">
+      <Accordion className="mt-2">
         <AccordionItem value="tailnet-guide" className="border-b-0">
           <AccordionTrigger className="py-2 text-xs">
             {translate(

@@ -390,16 +390,18 @@ export default function ProjectPicker({ activeProject, onSelect }: Props): React
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 gap-1 border-border/50 bg-transparent text-xs"
-        >
-          <span className="truncate">{buttonLabel}</span>
-          <ChevronDown className="size-3.5" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1 border-border/50 bg-transparent text-xs"
+          >
+            <span className="truncate">{buttonLabel}</span>
+            <ChevronDown className="size-3.5" />
+          </Button>
+        }
+      />
       <PopoverContent className="w-[360px] p-0" align="start">
         {viewPickFor ? (
           <ViewPickStep

@@ -101,6 +101,7 @@
     "bench:compare": "node config/scripts/compare-benchmark-artifacts.mjs"
   },
   "dependencies": {
+    "@base-ui/react": "1.6.0",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@floating-ui/dom": "1.7.6",
@@ -191,7 +192,6 @@
     "oxlint-plugin-react-doctor": "0.2.10",
     "oxlint-tsgolint": "0.23.0",
     "pdfjs-dist": "^5.7.284",
-    "radix-ui": "^1.6.2",
     "react": "^19.2.7",
     "react-colorful": "^5.7.0",
     "react-dom": "^19.2.7",

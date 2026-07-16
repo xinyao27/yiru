@@ -1,5 +1,6 @@
 /* eslint-disable max-lines -- Why: the board drawer owns shared board state, drag/drop, and settings callbacks that need one coordinated surface. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { Dialog } from '@base-ui/react/dialog'
 import { useAppStore } from '@/store'
 import { useAllWorktrees, useRepoMap } from '@/store/selectors'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
@@ -501,9 +502,17 @@ export default function WorkspaceKanbanDrawer({
     onOpenChange(false)
   }, [onOpenChange])
   const handleSheetOpenChange = useCallback(
-    (nextOpen: boolean) => {
-      // Why: Radix treats any outside pointer release as a dismiss request.
-      // The board has custom right-side/sidebar rules, so only those paths close it.
+    (nextOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+      // Why: the board has custom right-side/sidebar dismiss rules handled by
+      // useWorkspaceKanbanOutsideDismiss, so cancel Base UI's own outside/focus
+      // dismissals and only honor programmatic opens.
+      if (
+        !nextOpen &&
+        (eventDetails.reason === 'outside-press' || eventDetails.reason === 'focus-out')
+      ) {
+        eventDetails.cancel()
+        return
+      }
       if (nextOpen) {
         onOpenChange(true)
       }
@@ -633,7 +642,6 @@ export default function WorkspaceKanbanDrawer({
     return () => document.removeEventListener('pointerdown', clearSelectionOutsideBoard, true)
   }, [clearSelection, open, selectedWorktreeIds.size])
 
-  const drawerLeft = sidebarOpen ? sidebarWidth : 0
   const drawerLeftCss = sidebarOpen
     ? `var(--workspace-sidebar-live-width, ${sidebarWidth}px)`
     : '0px'
@@ -668,60 +676,9 @@ export default function WorkspaceKanbanDrawer({
         data-contextual-tour-target="workspace-board-surface"
         data-workspace-board-sheet=""
         data-workspace-board-drag-preview={dragPreview ? 'true' : undefined}
-        onOpenAutoFocus={(event) => {
-          // Why: Radix focuses the first toolbar button on open, which opens
-          // its tooltip without hover and makes the drawer feel noisy.
-          event.preventDefault()
-        }}
-        onPointerDownOutside={(event) => {
-          const originalEvent = event.detail.originalEvent
-          const target = originalEvent.target
-          if (preserveOpenForMenu) {
-            event.preventDefault()
-            return
-          }
-          if (isWorkspaceBoardKeepOpenTarget(target)) {
-            event.preventDefault()
-            return
-          }
-          const liveDrawerLeft =
-            boardRef.current
-              ?.closest<HTMLElement>('[data-slot="sheet-content"]')
-              ?.getBoundingClientRect().left ?? drawerLeft
-          const pointerX =
-            'clientX' in originalEvent && typeof originalEvent.clientX === 'number'
-              ? originalEvent.clientX
-              : null
-          if (pointerX !== null && pointerX < liveDrawerLeft) {
-            event.preventDefault()
-          }
-        }}
-        onInteractOutside={(event) => {
-          const originalEvent = event.detail.originalEvent
-          const target = originalEvent.target
-          if (preserveOpenForMenu) {
-            // Why: the first outside click should close a board dropdown, not
-            // also dismiss the board that owns the dropdown.
-            event.preventDefault()
-            return
-          }
-          if (isWorkspaceBoardKeepOpenTarget(target)) {
-            event.preventDefault()
-            return
-          }
-          const liveDrawerLeft =
-            boardRef.current
-              ?.closest<HTMLElement>('[data-slot="sheet-content"]')
-              ?.getBoundingClientRect().left ?? drawerLeft
-          const pointerX =
-            'clientX' in originalEvent && typeof originalEvent.clientX === 'number'
-              ? originalEvent.clientX
-              : null
-          if (pointerX !== null && pointerX < liveDrawerLeft) {
-            // Why: keep the workspace sidebar interactive while the companion board stays open.
-            event.preventDefault()
-          }
-        }}
+        // Why: Base UI would focus the first toolbar button on open, which opens
+        // its tooltip without hover and makes the drawer feel noisy.
+        initialFocus={false}
       >
         <WorkspaceKanbanDrawerHeader
           selectedCount={selectedWorktrees.length}

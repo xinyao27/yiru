@@ -355,59 +355,59 @@ export default function BrowserAddressBar({
         setOpen(next)
       }}
     >
-      <PopoverTrigger asChild>
-        <form
-          ref={setAddressBarFormRef}
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-background px-3 py-1 shadow-sm"
-          onSubmit={(event) => {
-            event.preventDefault()
-            setOpen(false)
-            clearSuggestionPreview()
-            setAutocompleteQuery(value)
-            onSubmit()
-          }}
-        >
-          <Globe className="size-4 shrink-0 text-muted-foreground" />
-          <Input
-            ref={inputRef}
-            value={value}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            data-orca-browser-address-bar="true"
-            className="h-auto border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0"
-            spellCheck={false}
-            autoCapitalize="none"
-            autoCorrect="off"
-            onChange={(event) => {
-              const nextValue = event.target.value
-              // Why: typing creates a new suggestion list, so keyboard selection
-              // should return to the derived top match instead of a stale row.
-              // Clearing preview state here also prevents stale hover/selection
-              // from repopulating the input after Cmd+A → Delete.
-              prePreviewValueRef.current = null
-              setSelectedValueOverride(null)
-              setAutocompleteQuery(nextValue)
-              onChange(nextValue)
+      <PopoverTrigger
+        render={
+          <form
+            ref={setAddressBarFormRef}
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-background px-3 py-1 shadow-sm"
+            onSubmit={(event) => {
+              event.preventDefault()
+              setOpen(false)
+              clearSuggestionPreview()
+              setAutocompleteQuery(value)
+              onSubmit()
             }}
-            role="combobox"
-            aria-expanded={open}
-            aria-controls="browser-history-listbox"
-            aria-autocomplete="list"
-          />
-        </form>
-      </PopoverTrigger>
+          >
+            <Globe className="size-4 shrink-0 text-muted-foreground" />
+            <Input
+              ref={inputRef}
+              value={value}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              data-orca-browser-address-bar="true"
+              className="h-auto border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0"
+              spellCheck={false}
+              autoCapitalize="none"
+              autoCorrect="off"
+              onChange={(event) => {
+                const nextValue = event.target.value
+                // Why: typing creates a new suggestion list, so keyboard selection
+                // should return to the derived top match instead of a stale row.
+                // Clearing preview state here also prevents stale hover/selection
+                // from repopulating the input after Cmd+A → Delete.
+                prePreviewValueRef.current = null
+                setSelectedValueOverride(null)
+                setAutocompleteQuery(nextValue)
+                onChange(nextValue)
+              }}
+              role="combobox"
+              aria-expanded={open}
+              aria-controls="browser-history-listbox"
+              aria-autocomplete="list"
+            />
+          </form>
+        }
+      />
       {suggestions.length > 0 && (
         <PopoverContent
           align="start"
           sideOffset={4}
           className="w-[var(--radix-popover-trigger-width)] p-0"
-          onOpenAutoFocus={(e) => {
-            // Why: prevent the popover from stealing focus away from the
-            // address bar input. The user is still typing; the popover is
-            // an overlay of suggestions, not a focus target.
-            e.preventDefault()
-          }}
+          // Why: prevent the popover from stealing focus away from the
+          // address bar input. The user is still typing; the popover is
+          // an overlay of suggestions, not a focus target.
+          initialFocus={false}
         >
           <Command
             shouldFilter={false}

@@ -84,8 +84,7 @@ export function TerminalQuickCommandContentSection({
                 />
               </SelectTrigger>
               <SelectContent
-                position="popper"
-                side="bottom"
+                alignItemWithTrigger={false}
                 align="start"
                 sideOffset={4}
                 className="max-h-[min(20rem,var(--radix-select-content-available-height))] w-[--radix-select-trigger-width]"

@@ -84,18 +84,20 @@ function ComposerModalBody({
   onClose: () => void
   onOpenChange: (open: boolean) => void
 }): React.JSX.Element {
+  const contentRef = React.useRef<HTMLDivElement | null>(null)
   return (
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent
+        ref={contentRef}
         className="flex max-h-[calc(100vh-2rem)] flex-col overflow-hidden sm:max-w-lg"
-        onOpenAutoFocus={(event) => {
-          // Why: Radix's FocusScope fires this once the dialog has mounted.
-          // preventDefault stops it from focusing whatever first-tabbable it
-          // picks (close button), and we instead focus the name/source field
-          // so users can start typing immediately.
-          event.preventDefault()
-          const content = event.currentTarget as HTMLElement
-          getWorkspaceComposerInitialFocusTarget(content)?.focus({ preventScroll: true })
+        initialFocus={() => {
+          // Why: skip Base UI's default auto-focus (the close button) and focus
+          // the name/source field instead so users can start typing immediately.
+          const content = contentRef.current
+          if (content) {
+            getWorkspaceComposerInitialFocusTarget(content)?.focus({ preventScroll: true })
+          }
+          return false
         }}
       >
         <QuickTabBody modalData={modalData} onClose={onClose} active />

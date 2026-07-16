@@ -500,160 +500,165 @@ export function FileExplorerRow({
         onContextMenuSelect()
       }}
     >
-      <ContextMenuTrigger asChild>
-        <button
-          data-file-explorer-row=""
-          data-selected={isSelected ? 'true' : undefined}
-          className={cn(
-            'flex w-full items-center gap-1 rounded-sm px-2 py-1 text-left text-xs transition-colors',
-            !isSelected && 'hover:bg-accent hover:text-foreground',
-            isSelected && 'text-accent-foreground',
-            isFlashing && 'bg-amber-400/20 ring-1 ring-inset ring-amber-400/70'
-          )}
-          style={{ paddingLeft: `${node.depth * 16 + 8}px` }}
-          ref={setRowDragNode}
-          data-native-file-drop-dir={rowDropDir}
-          // Why: marks this draggable row so the wheel-capture handler can rescue
-          // scroll Chromium swallows over draggable nodes (file-explorer-drag-scroll-marker).
-          data-explorer-draggable="true"
-          draggable
-          onDragStart={(event) => {
-            const paths =
-              selectedPaths.has(node.path) && selectedPaths.size > 1
-                ? [...selectedPaths]
-                : [node.path]
-            event.dataTransfer.setData(WORKSPACE_FILE_PATH_MIME, node.path)
-            if (paths.length > 1) {
-              event.dataTransfer.setData(WORKSPACE_FILE_PATHS_MIME, encodeWorkspaceFilePaths(paths))
-            }
-            event.dataTransfer.effectAllowed = 'copyMove'
-            onDragSourceChange(node.path)
-
-            if (paths.length > 1) {
-              const MAX_SHOWN = 5
-              const btn = event.currentTarget
-              const rowW = btn.getBoundingClientRect().width
-
-              // Why: drag images are detached DOM nodes, so inline the same
-              // file glyph the real row renders.
-              const FILE_ICON =
-                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><polyline points="14 2 14 8 20 8"/></svg>'
-
-              const makeRow = (label: string, faded = false): HTMLDivElement => {
-                const row = document.createElement('div')
-                row.style.cssText = `display:flex;align-items:center;gap:4px;height:26px;padding:4px 8px;width:${rowW}px;box-sizing:border-box;font-size:12px;border-radius:2px;background:var(--accent);color:var(--accent-foreground);${faded ? 'opacity:0.6;' : ''}`
-                const spacer = document.createElement('span')
-                spacer.style.cssText = 'width:12px;height:12px;flex-shrink:0;'
-                row.appendChild(spacer)
-                const icon = document.createElement('span')
-                icon.style.cssText =
-                  'width:12px;height:12px;flex-shrink:0;display:flex;align-items:center;color:var(--muted-foreground);'
-                icon.innerHTML = FILE_ICON
-                row.appendChild(icon)
-                const name = document.createElement('span')
-                name.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'
-                name.textContent = label
-                row.appendChild(name)
-                return row
-              }
-
-              const ghost = document.createElement('div')
-              ghost.style.cssText =
-                'position:fixed;top:-9999px;left:-9999px;pointer-events:none;display:flex;flex-direction:column;gap:1px;'
-
-              for (const p of paths.slice(0, MAX_SHOWN)) {
-                ghost.appendChild(makeRow(basename(p)))
-              }
-              if (paths.length > MAX_SHOWN) {
-                ghost.appendChild(makeRow(`+${paths.length - MAX_SHOWN} more`, true))
-              }
-
-              document.body.appendChild(ghost)
-              event.dataTransfer.setDragImage(ghost, 12, 12)
-              setTimeout(() => document.body.removeChild(ghost), 0)
-            }
-          }}
-          onDragEnd={() => onDragSourceChange(null)}
-          onDragOver={handleDragOver}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={(e) => onClick(e)}
-          onDoubleClick={onDoubleClick}
-        >
-          {node.isDirectory ? (
-            <>
-              <ChevronRight
-                className={cn(
-                  'size-3 shrink-0 text-muted-foreground transition-transform',
-                  isExpanded && 'rotate-90'
-                )}
-              />
-              {isLoading ? (
-                <Loader2 className="size-3 shrink-0 animate-spin text-muted-foreground" />
-              ) : isExpanded ? (
-                <FolderOpen className="size-3 shrink-0 text-muted-foreground" />
-              ) : (
-                <Folder className="size-3 shrink-0 text-muted-foreground" />
-              )}
-            </>
-          ) : (
-            <>
-              <span className="size-3 shrink-0" />
-              {node.isSymlink ? (
-                <Link className="size-3 shrink-0 text-muted-foreground" />
-              ) : (
-                <FileIcon className="size-3 shrink-0 text-muted-foreground" />
-              )}
-            </>
-          )}
-          <span
+      <ContextMenuTrigger
+        render={
+          <button
+            data-file-explorer-row=""
+            data-selected={isSelected ? 'true' : undefined}
             className={cn(
-              'truncate',
-              isSelected && !nodeStatus && !isIgnored && 'text-accent-foreground',
-              isIgnored && 'italic'
+              'flex w-full items-center gap-1 rounded-sm px-2 py-1 text-left text-xs transition-colors',
+              !isSelected && 'hover:bg-accent hover:text-foreground',
+              isSelected && 'text-accent-foreground',
+              isFlashing && 'bg-amber-400/20 ring-1 ring-inset ring-amber-400/70'
             )}
-            style={
-              nodeStatus
-                ? { color: statusColor ?? undefined }
-                : isIgnored
-                  ? { color: 'var(--git-decoration-ignored)' }
-                  : undefined
-            }
-            onDoubleClick={(e) => {
-              // Why: the row itself swallows double-click for "pin preview" /
-              // directory toggle. Scope rename to the filename text only so
-              // those behaviors stay intact on the icon and empty row area,
-              // matching VS Code's rename hotspot.
-              e.stopPropagation()
-              onStartRename(node)
+            style={{ paddingLeft: `${node.depth * 16 + 8}px` }}
+            ref={setRowDragNode}
+            data-native-file-drop-dir={rowDropDir}
+            // Why: marks this draggable row so the wheel-capture handler can rescue
+            // scroll Chromium swallows over draggable nodes (file-explorer-drag-scroll-marker).
+            data-explorer-draggable="true"
+            draggable
+            onDragStart={(event) => {
+              const paths =
+                selectedPaths.has(node.path) && selectedPaths.size > 1
+                  ? [...selectedPaths]
+                  : [node.path]
+              event.dataTransfer.setData(WORKSPACE_FILE_PATH_MIME, node.path)
+              if (paths.length > 1) {
+                event.dataTransfer.setData(
+                  WORKSPACE_FILE_PATHS_MIME,
+                  encodeWorkspaceFilePaths(paths)
+                )
+              }
+              event.dataTransfer.effectAllowed = 'copyMove'
+              onDragSourceChange(node.path)
+
+              if (paths.length > 1) {
+                const MAX_SHOWN = 5
+                const btn = event.currentTarget
+                const rowW = btn.getBoundingClientRect().width
+
+                // Why: drag images are detached DOM nodes, so inline the same
+                // file glyph the real row renders.
+                const FILE_ICON =
+                  '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><polyline points="14 2 14 8 20 8"/></svg>'
+
+                const makeRow = (label: string, faded = false): HTMLDivElement => {
+                  const row = document.createElement('div')
+                  row.style.cssText = `display:flex;align-items:center;gap:4px;height:26px;padding:4px 8px;width:${rowW}px;box-sizing:border-box;font-size:12px;border-radius:2px;background:var(--accent);color:var(--accent-foreground);${faded ? 'opacity:0.6;' : ''}`
+                  const spacer = document.createElement('span')
+                  spacer.style.cssText = 'width:12px;height:12px;flex-shrink:0;'
+                  row.appendChild(spacer)
+                  const icon = document.createElement('span')
+                  icon.style.cssText =
+                    'width:12px;height:12px;flex-shrink:0;display:flex;align-items:center;color:var(--muted-foreground);'
+                  icon.innerHTML = FILE_ICON
+                  row.appendChild(icon)
+                  const name = document.createElement('span')
+                  name.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'
+                  name.textContent = label
+                  row.appendChild(name)
+                  return row
+                }
+
+                const ghost = document.createElement('div')
+                ghost.style.cssText =
+                  'position:fixed;top:-9999px;left:-9999px;pointer-events:none;display:flex;flex-direction:column;gap:1px;'
+
+                for (const p of paths.slice(0, MAX_SHOWN)) {
+                  ghost.appendChild(makeRow(basename(p)))
+                }
+                if (paths.length > MAX_SHOWN) {
+                  ghost.appendChild(makeRow(`+${paths.length - MAX_SHOWN} more`, true))
+                }
+
+                document.body.appendChild(ghost)
+                event.dataTransfer.setDragImage(ghost, 12, 12)
+                setTimeout(() => document.body.removeChild(ghost), 0)
+              }
             }}
+            onDragEnd={() => onDragSourceChange(null)}
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={(e) => onClick(e)}
+            onDoubleClick={onDoubleClick}
           >
-            {node.name}
-          </span>
-          {nodeStatus ? (
+            {node.isDirectory ? (
+              <>
+                <ChevronRight
+                  className={cn(
+                    'size-3 shrink-0 text-muted-foreground transition-transform',
+                    isExpanded && 'rotate-90'
+                  )}
+                />
+                {isLoading ? (
+                  <Loader2 className="size-3 shrink-0 animate-spin text-muted-foreground" />
+                ) : isExpanded ? (
+                  <FolderOpen className="size-3 shrink-0 text-muted-foreground" />
+                ) : (
+                  <Folder className="size-3 shrink-0 text-muted-foreground" />
+                )}
+              </>
+            ) : (
+              <>
+                <span className="size-3 shrink-0" />
+                {node.isSymlink ? (
+                  <Link className="size-3 shrink-0 text-muted-foreground" />
+                ) : (
+                  <FileIcon className="size-3 shrink-0 text-muted-foreground" />
+                )}
+              </>
+            )}
             <span
-              className="ml-auto shrink-0 text-[10px] font-semibold tracking-wide mr-2"
-              style={{ color: statusColor ?? undefined }}
-            >
-              {STATUS_LABELS[nodeStatus]}
-            </span>
-          ) : isIgnored ? (
-            <CircleSlash
-              aria-label={translate(
-                'auto.components.right.sidebar.FileExplorerRow.e26010014a',
-                'Ignored by .gitignore'
+              className={cn(
+                'truncate',
+                isSelected && !nodeStatus && !isIgnored && 'text-accent-foreground',
+                isIgnored && 'italic'
               )}
-              className="ml-auto size-3 shrink-0 mr-2"
-              style={{ color: 'var(--git-decoration-ignored)' }}
-            />
-          ) : null}
-        </button>
-      </ContextMenuTrigger>
+              style={
+                nodeStatus
+                  ? { color: statusColor ?? undefined }
+                  : isIgnored
+                    ? { color: 'var(--git-decoration-ignored)' }
+                    : undefined
+              }
+              onDoubleClick={(e) => {
+                // Why: the row itself swallows double-click for "pin preview" /
+                // directory toggle. Scope rename to the filename text only so
+                // those behaviors stay intact on the icon and empty row area,
+                // matching VS Code's rename hotspot.
+                e.stopPropagation()
+                onStartRename(node)
+              }}
+            >
+              {node.name}
+            </span>
+            {nodeStatus ? (
+              <span
+                className="ml-auto shrink-0 text-[10px] font-semibold tracking-wide mr-2"
+                style={{ color: statusColor ?? undefined }}
+              >
+                {STATUS_LABELS[nodeStatus]}
+              </span>
+            ) : isIgnored ? (
+              <CircleSlash
+                aria-label={translate(
+                  'auto.components.right.sidebar.FileExplorerRow.e26010014a',
+                  'Ignored by .gitignore'
+                )}
+                className="ml-auto size-3 shrink-0 mr-2"
+                style={{ color: 'var(--git-decoration-ignored)' }}
+              />
+            ) : null}
+          </button>
+        }
+      />
       <ContextMenuContent
         className="w-64 bg-[rgba(255,255,255,0.82)] dark:bg-[rgba(0,0,0,0.72)]"
         onPointerUpCapture={stopRightButtonMenuSelection}
-        onCloseAutoFocus={(e) => e.preventDefault()}
+        finalFocus={false}
       >
         <ContextMenuItem onSelect={() => onStartNew('file', targetDir, targetDepth)}>
           <FilePlus />

@@ -252,18 +252,20 @@ export function RepositoryPane({
             forceVisible={forceFullPaneForRepoMatch}
           >
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant={confirmingRemove === repo.id ? 'destructive' : 'outline'}
-                  size="icon-sm"
-                  onClick={() => handleRemoveProject(repo.id)}
-                  onBlur={() => setConfirmingRemove(null)}
-                  aria-label={removeProjectLabel}
-                >
-                  <Trash2 className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant={confirmingRemove === repo.id ? 'destructive' : 'outline'}
+                    size="icon-sm"
+                    onClick={() => handleRemoveProject(repo.id)}
+                    onBlur={() => setConfirmingRemove(null)}
+                    aria-label={removeProjectLabel}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {removeProjectLabel}
               </TooltipContent>

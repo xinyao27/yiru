@@ -152,22 +152,26 @@ export function CodexUsagePane(): React.JSX.Element {
             <ShareUsageButton provider="codex" summary={summary} daily={daily} range={range} />
           )}
           <DropdownMenu>
-            <TooltipProvider delayDuration={250}>
+            <TooltipProvider delay={250}>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      aria-label={translate(
-                        'auto.components.stats.CodexUsagePane.70b5b8581f',
-                        'Codex usage options'
-                      )}
-                    >
-                      <SlidersHorizontal className="size-3.5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          aria-label={translate(
+                            'auto.components.stats.CodexUsagePane.70b5b8581f',
+                            'Codex usage options'
+                          )}
+                        >
+                          <SlidersHorizontal className="size-3.5" />
+                        </Button>
+                      }
+                    />
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6}>
                   {translate('auto.components.stats.CodexUsagePane.1af1a39b2f', 'Filters')}
                 </TooltipContent>
@@ -203,22 +207,26 @@ export function CodexUsagePane(): React.JSX.Element {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <TooltipProvider delayDuration={250}>
+          <TooltipProvider delay={250}>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => void refreshCodexUsage()}
-                  disabled={scanState.isScanning}
-                  aria-label={translate(
-                    'auto.components.stats.CodexUsagePane.ec4d270e2c',
-                    'Refresh Codex usage'
-                  )}
-                >
-                  <RefreshCw className={`size-3.5 ${scanState.isScanning ? 'animate-spin' : ''}`} />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={() => void refreshCodexUsage()}
+                    disabled={scanState.isScanning}
+                    aria-label={translate(
+                      'auto.components.stats.CodexUsagePane.ec4d270e2c',
+                      'Refresh Codex usage'
+                    )}
+                  >
+                    <RefreshCw
+                      className={`size-3.5 ${scanState.isScanning ? 'animate-spin' : ''}`}
+                    />
+                  </Button>
+                }
+              />
               <TooltipContent side="bottom" sideOffset={6}>
                 {translate('auto.components.stats.CodexUsagePane.3022cda443', 'Refresh')}
               </TooltipContent>

@@ -181,18 +181,20 @@ function RepoIdentityChip({
 }): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span
-          className="inline-flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-worktree-sidebar-border bg-worktree-sidebar-accent/55"
-          aria-label={translate(
-            'auto.components.sidebar.WorktreeCard.35ccfe2475',
-            'Project {{value0}}',
-            { value0: repo.displayName }
-          )}
-        >
-          {children}
-        </span>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <span
+            className="inline-flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-worktree-sidebar-border bg-worktree-sidebar-accent/55"
+            aria-label={translate(
+              'auto.components.sidebar.WorktreeCard.35ccfe2475',
+              'Project {{value0}}',
+              { value0: repo.displayName }
+            )}
+          >
+            {children}
+          </span>
+        }
+      />
       <TooltipContent side="right" sideOffset={8}>
         {repo.displayName}
       </TooltipContent>
@@ -1433,15 +1435,17 @@ const WorktreeCard = React.memo(function WorktreeCard({
 
             {repo?.connectionId && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="shrink-0 inline-flex items-center">
-                    {isSshDisconnected ? (
-                      <ServerOff className="size-3 text-red-400" />
-                    ) : (
-                      <Server className="size-3 text-muted-foreground" />
-                    )}
-                  </span>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <span className="shrink-0 inline-flex items-center">
+                      {isSshDisconnected ? (
+                        <ServerOff className="size-3 text-red-400" />
+                      ) : (
+                        <Server className="size-3 text-muted-foreground" />
+                      )}
+                    </span>
+                  }
+                />
                 <TooltipContent side="right" sideOffset={8}>
                   {isSshDisconnected
                     ? translate(
@@ -1459,15 +1463,17 @@ const WorktreeCard = React.memo(function WorktreeCard({
             {!repo?.connectionId &&
               parseExecutionHostId(repo?.executionHostId)?.kind === 'runtime' && (
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="shrink-0 inline-flex items-center">
-                      {isRuntimeDisconnected ? (
-                        <ServerOff className="size-3 text-red-400" />
-                      ) : (
-                        <Server className="size-3 text-muted-foreground" />
-                      )}
-                    </span>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={
+                      <span className="shrink-0 inline-flex items-center">
+                        {isRuntimeDisconnected ? (
+                          <ServerOff className="size-3 text-red-400" />
+                        ) : (
+                          <Server className="size-3 text-muted-foreground" />
+                        )}
+                      </span>
+                    }
+                  />
                   <TooltipContent side="right" sideOffset={8}>
                     {isRuntimeDisconnected
                       ? translate(
@@ -1520,23 +1526,28 @@ const WorktreeCard = React.memo(function WorktreeCard({
               // The full error can be raw agent CLI output, so the title-row
               // badge opens a dialog instead of squeezing details into a tooltip.
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onPointerDown={stopQuickActionPointerPropagation}
-                    onClick={handleOpenRenameErrorDialog}
-                    onDoubleClick={handleOpenRenameErrorDialog}
-                    className="h-4 shrink-0 gap-0.5 rounded !px-0.5 text-[10px] font-medium leading-none text-destructive border border-destructive/40 bg-destructive/10 hover:bg-destructive/15 hover:text-destructive has-[>svg]:!px-0.5"
-                    aria-label={translate(
-                      'auto.components.sidebar.WorktreeCard.02e19349f4',
-                      'Auto-rename failed: view error'
-                    )}
-                  >
-                    <AlertCircle className="size-2.5" />
-                    {translate('auto.components.sidebar.WorktreeCard.74522ee457', 'rename failed')}
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onPointerDown={stopQuickActionPointerPropagation}
+                      onClick={handleOpenRenameErrorDialog}
+                      onDoubleClick={handleOpenRenameErrorDialog}
+                      className="h-4 shrink-0 gap-0.5 rounded !px-0.5 text-[10px] font-medium leading-none text-destructive border border-destructive/40 bg-destructive/10 hover:bg-destructive/15 hover:text-destructive has-[>svg]:!px-0.5"
+                      aria-label={translate(
+                        'auto.components.sidebar.WorktreeCard.02e19349f4',
+                        'Auto-rename failed: view error'
+                      )}
+                    >
+                      <AlertCircle className="size-2.5" />
+                      {translate(
+                        'auto.components.sidebar.WorktreeCard.74522ee457',
+                        'rename failed'
+                      )}
+                    </Button>
+                  }
+                />
                 <TooltipContent side="right" sideOffset={8}>
                   {translate(
                     'auto.components.sidebar.WorktreeCard.4eba2ea99e',
@@ -1547,14 +1558,16 @@ const WorktreeCard = React.memo(function WorktreeCard({
             ) : null}
             {!compactCards && worktree.isMainWorktree && !isFolder && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge
-                    variant="outline"
-                    className="h-[16px] px-1.5 text-[10px] font-medium rounded shrink-0 leading-none text-foreground/70 border-foreground/20 bg-foreground/[0.06]"
-                  >
-                    {translate('auto.components.sidebar.WorktreeCard.7d517f82e2', 'primary')}
-                  </Badge>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Badge
+                      variant="outline"
+                      className="h-[16px] px-1.5 text-[10px] font-medium rounded shrink-0 leading-none text-foreground/70 border-foreground/20 bg-foreground/[0.06]"
+                    >
+                      {translate('auto.components.sidebar.WorktreeCard.7d517f82e2', 'primary')}
+                    </Badge>
+                  }
+                />
                 <TooltipContent side="right" sideOffset={8}>
                   {translate(
                     'auto.components.sidebar.WorktreeCard.0777de5970',
@@ -1566,14 +1579,16 @@ const WorktreeCard = React.memo(function WorktreeCard({
 
             {worktree.isSparse && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge
-                    variant="outline"
-                    className="h-[16px] px-1.5 text-[10px] font-medium rounded shrink-0 leading-none text-amber-700 dark:text-amber-300 border-amber-500/30 bg-amber-500/5"
-                  >
-                    {translate('auto.components.sidebar.WorktreeCard.4f964d5e8c', 'sparse')}
-                  </Badge>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Badge
+                      variant="outline"
+                      className="h-[16px] px-1.5 text-[10px] font-medium rounded shrink-0 leading-none text-amber-700 dark:text-amber-300 border-amber-500/30 bg-amber-500/5"
+                    >
+                      {translate('auto.components.sidebar.WorktreeCard.4f964d5e8c', 'sparse')}
+                    </Badge>
+                  }
+                />
                 <TooltipContent side="right" sideOffset={8} className="max-w-72">
                   <div className="space-y-1">
                     <div>
@@ -1599,17 +1614,19 @@ const WorktreeCard = React.memo(function WorktreeCard({
             <div className="ml-auto flex shrink-0 items-center justify-center gap-1 pr-1.5">
               {showTitleRowPrimary && (
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span
-                      className="shrink-0 inline-flex items-center"
-                      aria-label={translate(
-                        'auto.components.sidebar.WorktreeCard.0d224eff10',
-                        'Primary worktree'
-                      )}
-                    >
-                      <Star className="size-3 fill-amber-400 text-amber-400" />
-                    </span>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={
+                      <span
+                        className="shrink-0 inline-flex items-center"
+                        aria-label={translate(
+                          'auto.components.sidebar.WorktreeCard.0d224eff10',
+                          'Primary worktree'
+                        )}
+                      >
+                        <Star className="size-3 fill-amber-400 text-amber-400" />
+                      </span>
+                    }
+                  />
                   <TooltipContent side="right" sideOffset={8}>
                     {translate(
                       'auto.components.sidebar.WorktreeCard.0777de5970',
@@ -1621,25 +1638,27 @@ const WorktreeCard = React.memo(function WorktreeCard({
 
               {showDeleteQuickAction && (
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      data-workspace-board-preserve-open=""
-                      onPointerDown={stopQuickActionPointerPropagation}
-                      onClick={handleWorkspaceQuickAction}
-                      className={cn(
-                        'inline-flex size-4 items-center justify-center rounded bg-transparent opacity-0 transition-colors transition-opacity',
-                        'group-hover/worktree-card:opacity-100 group-focus-within/worktree-card:opacity-100 focus-visible:opacity-100',
-                        'text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive'
-                      )}
-                      aria-label={translate(
-                        'auto.components.sidebar.WorktreeCard.6f09f58541',
-                        'Delete workspace'
-                      )}
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={
+                      <button
+                        type="button"
+                        data-workspace-board-preserve-open=""
+                        onPointerDown={stopQuickActionPointerPropagation}
+                        onClick={handleWorkspaceQuickAction}
+                        className={cn(
+                          'inline-flex size-4 items-center justify-center rounded bg-transparent opacity-0 transition-colors transition-opacity',
+                          'group-hover/worktree-card:opacity-100 group-focus-within/worktree-card:opacity-100 focus-visible:opacity-100',
+                          'text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive'
+                        )}
+                        aria-label={translate(
+                          'auto.components.sidebar.WorktreeCard.6f09f58541',
+                          'Delete workspace'
+                        )}
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    }
+                  />
                   <TooltipContent side="right" sideOffset={8}>
                     {translate(
                       'auto.components.sidebar.WorktreeCard.6f09f58541',
@@ -1784,26 +1803,28 @@ const WorktreeCard = React.memo(function WorktreeCard({
             }}
           >
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="xs"
-                  className="relative z-10 h-[18px] max-w-[8rem] gap-1 rounded-md border border-worktree-sidebar-border bg-worktree-sidebar px-1.5 text-[10px] font-medium leading-none text-muted-foreground shadow-none hover:bg-worktree-sidebar-accent hover:text-foreground focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring"
-                  aria-label={lineageChildAriaLabel}
-                  aria-expanded={!lineageCollapsed}
-                  onClick={onLineageToggle}
-                >
-                  <Workflow className="size-2.5" />
-                  <span className="truncate">{childWorkspaceShortLabel}</span>
-                  <ChevronDown
-                    className={cn(
-                      'size-2.5 transition-transform',
-                      lineageCollapsed && '-rotate-90'
-                    )}
-                  />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="xs"
+                    className="relative z-10 h-[18px] max-w-[8rem] gap-1 rounded-md border border-worktree-sidebar-border bg-worktree-sidebar px-1.5 text-[10px] font-medium leading-none text-muted-foreground shadow-none hover:bg-worktree-sidebar-accent hover:text-foreground focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring"
+                    aria-label={lineageChildAriaLabel}
+                    aria-expanded={!lineageCollapsed}
+                    onClick={onLineageToggle}
+                  >
+                    <Workflow className="size-2.5" />
+                    <span className="truncate">{childWorkspaceShortLabel}</span>
+                    <ChevronDown
+                      className={cn(
+                        'size-2.5 transition-transform',
+                        lineageCollapsed && '-rotate-90'
+                      )}
+                    />
+                  </Button>
+                }
+              />
               <TooltipContent side="right" sideOffset={8}>
                 {lineageCollapsed
                   ? translate(

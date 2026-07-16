@@ -76,7 +76,7 @@ export function NativeChatExperimentalSetting({
             </div>
             <Select
               value={defaultView}
-              onValueChange={(value: NativeChatDefaultView) => {
+              onValueChange={(value) => {
                 updateSettings({
                   openAgentTabsInChatByDefault: value === 'native-chat'
                 })
@@ -92,7 +92,7 @@ export function NativeChatExperimentalSetting({
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent position="popper" side="bottom" sideOffset={4} avoidCollisions={false}>
+              <SelectContent alignItemWithTrigger={false} sideOffset={4}>
                 <SelectItem value="terminal-chat">
                   {translate(
                     'auto.components.settings.ExperimentalPane.nativeChat.defaultViewTerminal',

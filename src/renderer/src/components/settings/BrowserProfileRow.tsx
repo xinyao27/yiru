@@ -154,21 +154,26 @@ export function BrowserProfileRow({
             }
           }}
         >
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="xs"
-              className="h-6 gap-1 px-1.5 text-[11px] text-muted-foreground"
-              disabled={isImporting}
-            >
-              {isImporting ? (
-                <Loader2 className="size-3 animate-spin" />
-              ) : (
-                <Import className="size-3" />
-              )}
-              {translate('auto.components.settings.BrowserProfileRow.cdec84552f', 'Import Cookies')}
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="xs"
+                className="h-6 gap-1 px-1.5 text-[11px] text-muted-foreground"
+                disabled={isImporting}
+              >
+                {isImporting ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <Import className="size-3" />
+                )}
+                {translate(
+                  'auto.components.settings.BrowserProfileRow.cdec84552f',
+                  'Import Cookies'
+                )}
+              </Button>
+            }
+          />
           <DropdownMenuContent align="end">
             {detectedBrowsers.map((browser) =>
               browser.profiles.length > 1 ? (

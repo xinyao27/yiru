@@ -109,99 +109,103 @@ export function VaultSessionRow({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild className="block w-full min-w-0">
-        <div
-          className={cn(
-            'group/session-row flex w-full min-w-0 flex-col border-b border-sidebar-border px-3 py-2 text-left transition-colors hover:bg-sidebar-accent/55',
-            resumeDisabled ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing',
-            !detailsExpanded && 'min-h-[98px]'
-          )}
-          // Why: users naturally drag the session row itself; matching that
-          // gesture avoids hidden affordances and text-selection false starts.
-          draggable={!resumeDisabled}
-          onClick={() => {
-            onToggleDetails()
-          }}
-          onDragStart={startResumeDrag}
-          onDragEnd={() => {
-            window.dispatchEvent(new Event(AI_VAULT_SESSION_DRAG_END_EVENT))
-          }}
-        >
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-1">
-            <div
-              className={cn(
-                'min-w-0 text-[13px] font-medium leading-5 text-foreground',
-                detailsExpanded ? 'line-clamp-2 [overflow-wrap:anywhere]' : 'line-clamp-1'
-              )}
-            >
-              {session.title}
-            </div>
-            <SessionRowTrailingActions
-              session={session}
-              detailsExpanded={detailsExpanded}
-              detailsId={detailsId}
-              detailsTooltip={detailsTooltip}
-              resumeDisabled={resumeDisabled}
-              resumeLabel={resumeLabel}
-              worktreeInfo={worktreeInfo}
-              onToggleDetails={onToggleDetails}
-              onJumpToOriginalPane={onJumpToOriginalPane}
-              showJumpToWorktree={showJumpToWorktree}
-              onJumpToWorktree={onJumpToWorktree}
-              onResume={onResume}
-              onCopyResume={onCopyResume}
-              onCopyId={onCopyId}
-              onCopyPath={onCopyPath}
-              onOpenLog={onOpenLog}
-              onRevealLog={onRevealLog}
-              onOpenCwd={onOpenCwd}
-            />
-          </div>
-          {detailsExpanded && shouldShowAiVaultSessionWorktreeLine(worktreeInfo, { vaultScope }) ? (
-            <div className="mt-1">
-              <SessionWorktreeLine worktreeInfo={worktreeInfo} vaultScope={vaultScope} />
-            </div>
-          ) : null}
-          {!detailsExpanded ? (
-            <>
-              <div className="mt-0.5 min-w-0 line-clamp-2 text-[12px] leading-4 text-muted-foreground">
-                {latestTurn ? (
-                  <>
-                    <span className="font-medium text-foreground/80">
-                      {conversationRoleLabel(latestTurn.role)}
-                    </span>
-                    <span>: {latestTurn.text}</span>
-                  </>
-                ) : (
-                  translate(
-                    'auto.components.right.sidebar.AiVaultSessionRow.noPreviewAvailable',
-                    'No conversation preview available'
-                  )
+      <ContextMenuTrigger
+        className="block w-full min-w-0"
+        render={
+          <div
+            className={cn(
+              'group/session-row flex w-full min-w-0 flex-col border-b border-sidebar-border px-3 py-2 text-left transition-colors hover:bg-sidebar-accent/55',
+              resumeDisabled ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing',
+              !detailsExpanded && 'min-h-[98px]'
+            )}
+            // Why: users naturally drag the session row itself; matching that
+            // gesture avoids hidden affordances and text-selection false starts.
+            draggable={!resumeDisabled}
+            onClick={() => {
+              onToggleDetails()
+            }}
+            onDragStart={startResumeDrag}
+            onDragEnd={() => {
+              window.dispatchEvent(new Event(AI_VAULT_SESSION_DRAG_END_EVENT))
+            }}
+          >
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-1">
+              <div
+                className={cn(
+                  'min-w-0 text-[13px] font-medium leading-5 text-foreground',
+                  detailsExpanded ? 'line-clamp-2 [overflow-wrap:anywhere]' : 'line-clamp-1'
                 )}
+              >
+                {session.title}
               </div>
-              <SessionMetadata
+              <SessionRowTrailingActions
                 session={session}
-                liveState={liveState}
-                updatedAt={updatedAt}
+                detailsExpanded={detailsExpanded}
+                detailsId={detailsId}
+                detailsTooltip={detailsTooltip}
+                resumeDisabled={resumeDisabled}
+                resumeLabel={resumeLabel}
+                worktreeInfo={worktreeInfo}
+                onToggleDetails={onToggleDetails}
+                onJumpToOriginalPane={onJumpToOriginalPane}
+                showJumpToWorktree={showJumpToWorktree}
+                onJumpToWorktree={onJumpToWorktree}
+                onResume={onResume}
+                onCopyResume={onCopyResume}
+                onCopyId={onCopyId}
+                onCopyPath={onCopyPath}
+                onOpenLog={onOpenLog}
+                onRevealLog={onRevealLog}
+                onOpenCwd={onOpenCwd}
+              />
+            </div>
+            {detailsExpanded &&
+            shouldShowAiVaultSessionWorktreeLine(worktreeInfo, { vaultScope }) ? (
+              <div className="mt-1">
+                <SessionWorktreeLine worktreeInfo={worktreeInfo} vaultScope={vaultScope} />
+              </div>
+            ) : null}
+            {!detailsExpanded ? (
+              <>
+                <div className="mt-0.5 min-w-0 line-clamp-2 text-[12px] leading-4 text-muted-foreground">
+                  {latestTurn ? (
+                    <>
+                      <span className="font-medium text-foreground/80">
+                        {conversationRoleLabel(latestTurn.role)}
+                      </span>
+                      <span>: {latestTurn.text}</span>
+                    </>
+                  ) : (
+                    translate(
+                      'auto.components.right.sidebar.AiVaultSessionRow.noPreviewAvailable',
+                      'No conversation preview available'
+                    )
+                  )}
+                </div>
+                <SessionMetadata
+                  session={session}
+                  liveState={liveState}
+                  updatedAt={updatedAt}
+                  worktreeInfo={worktreeInfo}
+                  vaultScope={vaultScope}
+                />
+              </>
+            ) : null}
+            {detailsExpanded ? (
+              <SessionInlineDetails
+                id={detailsId}
+                session={session}
                 worktreeInfo={worktreeInfo}
                 vaultScope={vaultScope}
+                resumeActions={resumeActions}
+                onResumeInWorktree={onResumeInWorktree}
+                onResumeInNewTab={onResumeInNewTab}
+                onOpenLog={onOpenLog}
               />
-            </>
-          ) : null}
-          {detailsExpanded ? (
-            <SessionInlineDetails
-              id={detailsId}
-              session={session}
-              worktreeInfo={worktreeInfo}
-              vaultScope={vaultScope}
-              resumeActions={resumeActions}
-              onResumeInWorktree={onResumeInWorktree}
-              onResumeInNewTab={onResumeInNewTab}
-              onOpenLog={onOpenLog}
-            />
-          ) : null}
-        </div>
-      </ContextMenuTrigger>
+            ) : null}
+          </div>
+        }
+      />
       <ContextMenuContent>
         <SessionActionMenuItems
           menuKind="context"

@@ -182,17 +182,17 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         className="max-w-md"
-        onOpenAutoFocus={(e) => {
-          e.preventDefault()
+        initialFocus={() => {
           if (focusField === 'displayName') {
-            displayNameInputRef.current?.focus()
-          } else if (focusField === 'issue') {
-            issueInputRef.current?.focus()
-          } else if (focusField === 'pr') {
-            prInputRef.current?.focus()
-          } else {
-            textareaRef.current?.focus()
+            return displayNameInputRef.current
           }
+          if (focusField === 'issue') {
+            return issueInputRef.current
+          }
+          if (focusField === 'pr') {
+            return prInputRef.current
+          }
+          return textareaRef.current
         }}
       >
         <DialogHeader>
@@ -251,26 +251,28 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
                 className="h-8 pr-9 text-xs"
               />
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    aria-label={translate(
-                      'auto.components.sidebar.WorktreeMetaDialog.029ea5ec57',
-                      'Open GitHub issue'
-                    )}
-                    disabled={!canOpenIssue || openingIssue}
-                    onClick={handleOpenIssue}
-                    className="absolute right-1 top-1 text-muted-foreground"
-                  >
-                    {openingIssue ? (
-                      <LoaderCircle className="size-3 animate-spin" />
-                    ) : (
-                      <ExternalLink className="size-3" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label={translate(
+                        'auto.components.sidebar.WorktreeMetaDialog.029ea5ec57',
+                        'Open GitHub issue'
+                      )}
+                      disabled={!canOpenIssue || openingIssue}
+                      onClick={handleOpenIssue}
+                      className="absolute right-1 top-1 text-muted-foreground"
+                    >
+                      {openingIssue ? (
+                        <LoaderCircle className="size-3 animate-spin" />
+                      ) : (
+                        <ExternalLink className="size-3" />
+                      )}
+                    </Button>
+                  }
+                />
                 <TooltipContent side="top" sideOffset={4}>
                   {translate(
                     'auto.components.sidebar.WorktreeMetaDialog.029ea5ec57',

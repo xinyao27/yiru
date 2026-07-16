@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { Plug, ChevronDown, ChevronRight, LoaderCircle } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAppStore } from '@/store'
 import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 import {
@@ -74,59 +74,71 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <Tooltip delayDuration={150}>
-        <TooltipTrigger asChild>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 hover:bg-accent/70"
-              aria-label={translate(
-                'auto.components.status.bar.PortsStatusSegment.b8bc3e420a',
-                'Ports, {{value0}} workspace {{value1}}',
-                { value0: workspacePortCount, value1: workspacePortCount === 1 ? 'port' : 'ports' }
-              )}
-            >
-              {refreshing ? (
-                <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
-              ) : (
-                <Plug className="size-3 text-muted-foreground" />
-              )}
-              {!iconOnly && (
-                <span className="text-[11px] font-medium tabular-nums text-muted-foreground">
-                  {workspacePortCount}
-                </span>
-              )}
-              {iconOnly && totalCount > 0 && (
-                <span className="text-[11px] tabular-nums text-muted-foreground">
-                  {workspacePortCount}
-                </span>
-              )}
-            </button>
-          </PopoverTrigger>
-        </TooltipTrigger>
-        <TooltipContent side="top" sideOffset={6}>
-          {translate(
-            'auto.components.status.bar.PortsStatusSegment.ca41be2802',
-            'Ports — {{value0}} workspace {{value1}}{{value2}}',
-            {
-              value0: workspacePortCount,
-              value1:
-                workspacePortCount === 1
-                  ? translate('auto.components.status.bar.PortsStatusSegment.45834a9ace', 'port')
-                  : translate('auto.components.status.bar.PortsStatusSegment.8caaa86e9a', 'ports'),
-              value2:
-                externalPorts.length > 0
-                  ? translate(
-                      'auto.components.status.bar.PortsStatusSegment.a8e4bdb412',
-                      ' · {{value0}} external',
-                      { value0: externalPorts.length }
-                    )
-                  : ''
+      <TooltipProvider delay={150}>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <PopoverTrigger
+                render={
+                  <button
+                    type="button"
+                    {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 hover:bg-accent/70"
+                    aria-label={translate(
+                      'auto.components.status.bar.PortsStatusSegment.b8bc3e420a',
+                      'Ports, {{value0}} workspace {{value1}}',
+                      {
+                        value0: workspacePortCount,
+                        value1: workspacePortCount === 1 ? 'port' : 'ports'
+                      }
+                    )}
+                  >
+                    {refreshing ? (
+                      <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+                    ) : (
+                      <Plug className="size-3 text-muted-foreground" />
+                    )}
+                    {!iconOnly && (
+                      <span className="text-[11px] font-medium tabular-nums text-muted-foreground">
+                        {workspacePortCount}
+                      </span>
+                    )}
+                    {iconOnly && totalCount > 0 && (
+                      <span className="text-[11px] tabular-nums text-muted-foreground">
+                        {workspacePortCount}
+                      </span>
+                    )}
+                  </button>
+                }
+              />
             }
-          )}
-        </TooltipContent>
-      </Tooltip>
+          />
+          <TooltipContent side="top" sideOffset={6}>
+            {translate(
+              'auto.components.status.bar.PortsStatusSegment.ca41be2802',
+              'Ports — {{value0}} workspace {{value1}}{{value2}}',
+              {
+                value0: workspacePortCount,
+                value1:
+                  workspacePortCount === 1
+                    ? translate('auto.components.status.bar.PortsStatusSegment.45834a9ace', 'port')
+                    : translate(
+                        'auto.components.status.bar.PortsStatusSegment.8caaa86e9a',
+                        'ports'
+                      ),
+                value2:
+                  externalPorts.length > 0
+                    ? translate(
+                        'auto.components.status.bar.PortsStatusSegment.a8e4bdb412',
+                        ' · {{value0}} external',
+                        { value0: externalPorts.length }
+                      )
+                    : ''
+              }
+            )}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       <PopoverContent
         side="top"
@@ -134,7 +146,7 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
         sideOffset={8}
         {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
         className="w-[24rem] max-w-[calc(100vw-2rem)] p-0"
-        onOpenAutoFocus={(event) => event.preventDefault()}
+        initialFocus={false}
       >
         <SelectedTextCopyMenu>
           <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-1.5">

@@ -1629,14 +1629,16 @@ export default function CombinedDiffViewer({
           <div className="min-w-0">
             {commitCompare.subject && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <div
-                    className="truncate text-sm font-semibold text-foreground"
-                    title={commitCompare.subject}
-                  >
-                    {commitCompare.subject}
-                  </div>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <div
+                      className="truncate text-sm font-semibold text-foreground"
+                      title={commitCompare.subject}
+                    >
+                      {commitCompare.subject}
+                    </div>
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6} className="max-w-96">
                   {commitCompare.subject}
                 </TooltipContent>
@@ -1769,20 +1771,22 @@ export default function CombinedDiffViewer({
           <div className="flex min-w-0 items-center gap-2">
             {fileTreeCollapsed && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    aria-label={translate(
-                      'auto.components.editor.CombinedDiffViewer.b6c3b84476',
-                      'Show file tree'
-                    )}
-                    onClick={() => setFileTreeCollapsed(false)}
-                  >
-                    <PanelLeftOpen className="size-3.5" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label={translate(
+                        'auto.components.editor.CombinedDiffViewer.b6c3b84476',
+                        'Show file tree'
+                      )}
+                      onClick={() => setFileTreeCollapsed(false)}
+                    >
+                      <PanelLeftOpen className="size-3.5" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6}>
                   {translate(
                     'auto.components.editor.CombinedDiffViewer.b6c3b84476',
@@ -1812,31 +1816,33 @@ export default function CombinedDiffViewer({
             {diffCommentCount > 0 && (
               <div className="ml-1 flex shrink-0 items-center overflow-hidden rounded-full border border-border/70 bg-muted/40">
                 <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="inline-flex h-6 items-center gap-1 pl-2 pr-1.5 text-[11px] font-medium leading-none text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
-                      aria-label={translate(
-                        'auto.components.editor.CombinedDiffViewer.8f68ad9ca9',
-                        'Show {{value0}} AI {{value1}}',
-                        {
-                          value0: diffCommentCount,
-                          value1: diffCommentCount === 1 ? 'note' : 'notes'
-                        }
-                      )}
-                    >
-                      <Sparkles className="size-3 text-violet-500 dark:text-violet-400" />
-                      <span>
-                        {translate(
-                          'auto.components.editor.CombinedDiffViewer.bb84b4c374',
-                          'AI notes'
+                  <PopoverTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="inline-flex h-6 items-center gap-1 pl-2 pr-1.5 text-[11px] font-medium leading-none text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
+                        aria-label={translate(
+                          'auto.components.editor.CombinedDiffViewer.8f68ad9ca9',
+                          'Show {{value0}} AI {{value1}}',
+                          {
+                            value0: diffCommentCount,
+                            value1: diffCommentCount === 1 ? 'note' : 'notes'
+                          }
                         )}
-                      </span>
-                      <span className="rounded-full bg-background/80 px-1 text-[10px] tabular-nums text-muted-foreground">
-                        {diffCommentCount}
-                      </span>
-                    </button>
-                  </PopoverTrigger>
+                      >
+                        <Sparkles className="size-3 text-violet-500 dark:text-violet-400" />
+                        <span>
+                          {translate(
+                            'auto.components.editor.CombinedDiffViewer.bb84b4c374',
+                            'AI notes'
+                          )}
+                        </span>
+                        <span className="rounded-full bg-background/80 px-1 text-[10px] tabular-nums text-muted-foreground">
+                          {diffCommentCount}
+                        </span>
+                      </button>
+                    }
+                  />
                   <PopoverContent align="start" side="bottom" sideOffset={6} className="w-80 p-0">
                     <DiffNotesPreviewPopover
                       comments={previewDiffComments}

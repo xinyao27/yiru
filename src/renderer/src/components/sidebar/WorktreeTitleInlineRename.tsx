@@ -337,7 +337,7 @@ export function WorktreeTitleInlineRename({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>{title}</TooltipTrigger>
+      <TooltipTrigger render={title} />
       <TooltipContent side="right" sideOffset={8}>
         {displayName}
       </TooltipContent>

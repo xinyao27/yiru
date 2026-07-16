@@ -176,7 +176,7 @@ export default function IssueSourceSelector({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>{group}</TooltipTrigger>
+      <TooltipTrigger render={group} />
       <TooltipContent side="bottom" sideOffset={4} className="max-w-[260px]">
         {translate('auto.components.github.IssueSourceSelector.d6aeb2012b', 'Showing issues from')}{' '}
         <span className="font-mono">{effective === 'upstream' ? upstreamSlug : originSlug}</span>

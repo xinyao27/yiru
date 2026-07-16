@@ -174,32 +174,39 @@ export function CreateFromPicker({
   return (
     <div className="space-y-2">
       <Popover open={open} onOpenChange={handleOpenChange}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className={cn('h-9 w-full justify-between px-3 text-sm font-normal', triggerClassName)}
-          >
-            <span className="flex min-w-0 items-center gap-1.5">
-              <span className="shrink-0 text-muted-foreground">
-                {translate(
-                  'auto.components.automations.CreateFromPicker.dd3841b442',
-                  'Branch from'
-                )}
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className={cn(
+                'h-9 w-full justify-between px-3 text-sm font-normal',
+                triggerClassName
+              )}
+            >
+              <span className="flex min-w-0 items-center gap-1.5">
+                <span className="shrink-0 text-muted-foreground">
+                  {translate(
+                    'auto.components.automations.CreateFromPicker.dd3841b442',
+                    'Branch from'
+                  )}
+                </span>
+                <span className="truncate">{selectedLabel}</span>
               </span>
-              <span className="truncate">{selectedLabel}</span>
-            </span>
-            <ChevronsUpDown className="size-4 opacity-50" />
-          </Button>
-        </PopoverTrigger>
+              <ChevronsUpDown className="size-4 opacity-50" />
+            </Button>
+          }
+        />
         <PopoverContent
           align="start"
           className="w-[var(--radix-popover-trigger-width)] min-w-[18rem] p-0"
-          onOpenAutoFocus={(event) => {
-            event.preventDefault()
+          initialFocus={() => {
+            // Why: skip Base UI's default autofocus and focus the search input
+            // on the next frame (mirrors the prior onOpenAutoFocus behavior).
             focusSearchInput()
+            return false
           }}
         >
           <Command>

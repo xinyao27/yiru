@@ -217,30 +217,32 @@ export default function SparseCheckoutPresetSelect({
         }
       }}
     >
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          aria-busy={isLoadingPresets}
-          disabled={disabled || isLoadingPresets}
-          className="h-9 w-full justify-between px-3 text-sm font-normal text-foreground"
-        >
-          <span className="truncate">{triggerLabel}</span>
-          {isLoadingPresets ? (
-            <LoaderCircle className="size-3.5 animate-spin opacity-60" />
-          ) : hasPresetLoadError || !presetsLoaded ? (
-            <RefreshCcw className="size-3.5 opacity-60" />
-          ) : (
-            <ChevronsUpDown className="size-3.5 opacity-50" />
-          )}
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            aria-busy={isLoadingPresets}
+            disabled={disabled || isLoadingPresets}
+            className="h-9 w-full justify-between px-3 text-sm font-normal text-foreground"
+          >
+            <span className="truncate">{triggerLabel}</span>
+            {isLoadingPresets ? (
+              <LoaderCircle className="size-3.5 animate-spin opacity-60" />
+            ) : hasPresetLoadError || !presetsLoaded ? (
+              <RefreshCcw className="size-3.5 opacity-60" />
+            ) : (
+              <ChevronsUpDown className="size-3.5 opacity-50" />
+            )}
+          </Button>
+        }
+      />
       <PopoverContent
         align="start"
         className="popover-scroll-content max-h-[min(var(--radix-popover-content-available-height),24rem)] w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-2rem)] overflow-y-auto p-0 scrollbar-sleek"
-        onOpenAutoFocus={(event) => event.preventDefault()}
+        initialFocus={false}
       >
         {draft ? (
           <SparseCheckoutPresetDraftForm

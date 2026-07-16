@@ -75,12 +75,14 @@ export function SourceControlActionRepoOverrideNote({
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-md bg-muted/40 px-2 py-1.5 text-[11px] leading-4 text-muted-foreground">
       <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex min-w-0 items-start gap-1.5">
-            <Info className="mt-px size-3 shrink-0" />
-            <span>{noteText}</span>
-          </span>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <span className="inline-flex min-w-0 items-start gap-1.5">
+              <Info className="mt-px size-3 shrink-0" />
+              <span>{noteText}</span>
+            </span>
+          }
+        />
         <TooltipContent side="top" align="start" className="max-w-[18rem]">
           <div className="space-y-1.5">
             <p className="text-[11px] font-medium">

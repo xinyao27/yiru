@@ -215,47 +215,51 @@ export function OrcaProfileSwitcher({
     <>
       <DropdownMenu>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size={sidebarPlacement ? 'icon-xs' : 'xs'}
-                className={cn(
-                  'text-muted-foreground titlebar-profile-switcher',
-                  sidebarPlacement ? 'px-0' : 'mr-2 max-w-[180px] gap-1.5 px-1.5'
-                )}
-                disabled={profileActionDisabled}
-                aria-label={triggerLabel}
-              >
-                {sidebarPlacement && switching ? (
-                  <Loader2 className="size-3 animate-spin" />
-                ) : !multiProfileUi ? (
-                  <CircleUserRound className="size-4" />
-                ) : (
-                  <OrcaProfileAvatar
-                    profile={activeProfile}
-                    className={
-                      sidebarPlacement
-                        ? 'size-4 border-worktree-sidebar-border bg-worktree-sidebar-accent text-[10px] text-worktree-sidebar-accent-foreground'
-                        : undefined
-                    }
-                  />
-                )}
-                {!sidebarPlacement ? (
-                  <>
-                    <span className="hidden max-w-[108px] truncate text-xs font-medium sm:inline">
-                      {multiProfileUi
-                        ? activeProfile.name
-                        : showAccountIdentity
-                          ? accountIdentity.title
-                          : triggerLabel}
-                    </span>
-                    {switching ? <Loader2 className="size-3 animate-spin" /> : <ChevronDown />}
-                  </>
-                ) : null}
-              </Button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size={sidebarPlacement ? 'icon-xs' : 'xs'}
+                    className={cn(
+                      'text-muted-foreground titlebar-profile-switcher',
+                      sidebarPlacement ? 'px-0' : 'mr-2 max-w-[180px] gap-1.5 px-1.5'
+                    )}
+                    disabled={profileActionDisabled}
+                    aria-label={triggerLabel}
+                  >
+                    {sidebarPlacement && switching ? (
+                      <Loader2 className="size-3 animate-spin" />
+                    ) : !multiProfileUi ? (
+                      <CircleUserRound className="size-4" />
+                    ) : (
+                      <OrcaProfileAvatar
+                        profile={activeProfile}
+                        className={
+                          sidebarPlacement
+                            ? 'size-4 border-worktree-sidebar-border bg-worktree-sidebar-accent text-[10px] text-worktree-sidebar-accent-foreground'
+                            : undefined
+                        }
+                      />
+                    )}
+                    {!sidebarPlacement ? (
+                      <>
+                        <span className="hidden max-w-[108px] truncate text-xs font-medium sm:inline">
+                          {multiProfileUi
+                            ? activeProfile.name
+                            : showAccountIdentity
+                              ? accountIdentity.title
+                              : triggerLabel}
+                        </span>
+                        {switching ? <Loader2 className="size-3 animate-spin" /> : <ChevronDown />}
+                      </>
+                    ) : null}
+                  </Button>
+                }
+              />
+            }
+          />
           <TooltipContent side={sidebarPlacement ? 'top' : 'bottom'} sideOffset={6}>
             {triggerLabel}
           </TooltipContent>

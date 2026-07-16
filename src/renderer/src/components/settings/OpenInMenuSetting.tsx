@@ -302,18 +302,20 @@ export function OpenInMenuSetting({
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isAtLimit}
-              className="h-8 shrink-0 gap-1.5"
-            >
-              {translate('auto.components.settings.OpenInMenuSetting.e4064916aa', 'Add app')}
-              <ChevronDown className="size-3.5" />
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isAtLimit}
+                className="h-8 shrink-0 gap-1.5"
+              >
+                {translate('auto.components.settings.OpenInMenuSetting.e4064916aa', 'Add app')}
+                <ChevronDown className="size-3.5" />
+              </Button>
+            }
+          />
           <DropdownMenuContent align="end" className="w-64">
             {getOpenInAppPresets().map((preset) => {
               const isAdded = isOpenInAppPresetAdded(draft, preset)

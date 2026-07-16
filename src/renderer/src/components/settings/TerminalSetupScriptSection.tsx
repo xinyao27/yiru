@@ -60,9 +60,8 @@ export function TerminalSetupScriptSection({
             )}
             control={
               <ToggleGroup
-                type="single"
-                value={settings.setupScriptLaunchMode}
-                onValueChange={(value) => {
+                value={[settings.setupScriptLaunchMode]}
+                onValueChange={([value]) => {
                   if (!value) {
                     return
                   }

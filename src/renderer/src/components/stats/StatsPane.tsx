@@ -151,26 +151,28 @@ export function StatsPane(): React.JSX.Element {
             {translate('auto.components.stats.StatsPane.c79f073d4c', 'Usage Analytics')}
           </h3>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                data-testid="usage-provider-select"
-                aria-label={translate(
-                  'auto.components.stats.StatsPane.42d3e0bdf7',
-                  'Usage analytics provider: {{value0}}',
-                  { value0: activeUsageOption.label }
-                )}
-                className="min-w-36 justify-between"
-              >
-                <span className="flex min-w-0 items-center gap-2">
-                  <UsageAnalyticsOptionIcon tab={activeUsageOption.id} />
-                  <span className="truncate">{activeUsageOption.label}</span>
-                </span>
-                <ChevronDown className="ml-1 size-3.5 text-muted-foreground" aria-hidden />
-              </Button>
-            </DropdownMenuTrigger>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  data-testid="usage-provider-select"
+                  aria-label={translate(
+                    'auto.components.stats.StatsPane.42d3e0bdf7',
+                    'Usage analytics provider: {{value0}}',
+                    { value0: activeUsageOption.label }
+                  )}
+                  className="min-w-36 justify-between"
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    <UsageAnalyticsOptionIcon tab={activeUsageOption.id} />
+                    <span className="truncate">{activeUsageOption.label}</span>
+                  </span>
+                  <ChevronDown className="ml-1 size-3.5 text-muted-foreground" aria-hidden />
+                </Button>
+              }
+            />
             <DropdownMenuContent align="end" className="w-44">
               {USAGE_ANALYTICS_OPTIONS.map((option) => (
                 <DropdownMenuItem key={option.id} onSelect={() => setActiveUsageTab(option.id)}>

@@ -248,18 +248,20 @@ export function RightPanelCommentComposer({
       <div className="flex min-w-0 items-center gap-0.5 border-t border-border px-2 py-1">
         {toolbar.map(({ action, label, icon: Icon }) => (
           <Tooltip key={action}>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                aria-label={label}
-                disabled={disabled || submitting}
-                onClick={() => applyAction(action)}
-              >
-                <Icon className="size-3" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label={label}
+                  disabled={disabled || submitting}
+                  onClick={() => applyAction(action)}
+                >
+                  <Icon className="size-3" />
+                </Button>
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {label}
             </TooltipContent>
@@ -281,22 +283,24 @@ export function RightPanelCommentComposer({
           </Button>
         )}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              size="xs"
-              aria-label={submitLabel}
-              disabled={disabled || submitting || !canSubmitComment}
-              onClick={() => void submit()}
-            >
-              {submitting
-                ? translate(
-                    'auto.components.right.sidebar.right.panel.comment.composer.87aff03d63',
-                    'Sending...'
-                  )
-                : submitLabel}
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                size="xs"
+                aria-label={submitLabel}
+                disabled={disabled || submitting || !canSubmitComment}
+                onClick={() => void submit()}
+              >
+                {submitting
+                  ? translate(
+                      'auto.components.right.sidebar.right.panel.comment.composer.87aff03d63',
+                      'Sending...'
+                    )
+                  : submitLabel}
+              </Button>
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             {disabled && disabledReason ? (
               <span>{disabledReason}</span>

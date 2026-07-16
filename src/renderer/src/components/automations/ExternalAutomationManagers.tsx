@@ -79,18 +79,20 @@ function ExternalActionButton({
 }): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          aria-label={label}
-          className={className}
-          disabled={disabled}
-          onClick={onClick}
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            aria-label={label}
+            className={className}
+            disabled={disabled}
+            onClick={onClick}
+          >
+            {children}
+          </Button>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={6}>
         {label}
       </TooltipContent>
@@ -194,26 +196,28 @@ export function ExternalAutomationManagers({
                               )}
                         </Badge>
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            {/* Absolutely pinned to the row's top-right corner (above the action
-                                icons) so it reaches the true right edge, not just the grid column. */}
-                            <span className="absolute right-3 top-2 inline-flex shrink-0 items-center gap-1.5">
-                              {/* Match either key: job.enabled flips mid-flight, so a single-action
+                          <TooltipTrigger
+                            // Absolutely pinned to the row's top-right corner (above the action
+                            // icons) so it reaches the true right edge, not just the grid column.
+                            render={
+                              <span className="absolute right-3 top-2 inline-flex shrink-0 items-center gap-1.5">
+                                {/* Match either key: job.enabled flips mid-flight, so a single-action
                                   match would drop the spinner a render early. */}
-                              {runningActionKey === actionKey(manager, job, 'pause') ||
-                              runningActionKey === actionKey(manager, job, 'resume') ? (
-                                <RefreshCw className="size-3.5 animate-spin" />
-                              ) : null}
-                              <SettingsSwitch
-                                checked={job.enabled}
-                                onChange={() =>
-                                  onAction(manager, job, job.enabled ? 'pause' : 'resume')
-                                }
-                                disabled={disabledMessage !== null}
-                                ariaLabelledBy={`automation-name-${manager.id}-${job.id}`}
-                              />
-                            </span>
-                          </TooltipTrigger>
+                                {runningActionKey === actionKey(manager, job, 'pause') ||
+                                runningActionKey === actionKey(manager, job, 'resume') ? (
+                                  <RefreshCw className="size-3.5 animate-spin" />
+                                ) : null}
+                                <SettingsSwitch
+                                  checked={job.enabled}
+                                  onChange={() =>
+                                    onAction(manager, job, job.enabled ? 'pause' : 'resume')
+                                  }
+                                  disabled={disabledMessage !== null}
+                                  ariaLabelledBy={`automation-name-${manager.id}-${job.id}`}
+                                />
+                              </span>
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {disabledMessage ??
                               (job.enabled

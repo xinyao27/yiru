@@ -126,22 +126,24 @@ export function FloatingTerminalWindowControls({
     <div className="flex items-center gap-1 px-2" data-floating-terminal-no-drag>
       {defaultAgent ? (
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-xs"
-              className={controlButtonClassName}
-              aria-label={translate(
-                'auto.components.floating.terminal.FloatingTerminalWindowControls.648352c51f',
-                'Open {{value0}} in floating workspace',
-                { value0: defaultAgentLabel ?? defaultAgent }
-              )}
-              onClick={launchDefaultAgent}
-            >
-              <AgentIcon agent={defaultAgent} size={14} />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-xs"
+                className={controlButtonClassName}
+                aria-label={translate(
+                  'auto.components.floating.terminal.FloatingTerminalWindowControls.648352c51f',
+                  'Open {{value0}} in floating workspace',
+                  { value0: defaultAgentLabel ?? defaultAgent }
+                )}
+                onClick={launchDefaultAgent}
+              >
+                <AgentIcon agent={defaultAgent} size={14} />
+              </Button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={6}>
             {translate(
               'auto.components.floating.terminal.FloatingTerminalWindowControls.648352c51f',
@@ -152,29 +154,31 @@ export function FloatingTerminalWindowControls({
         </Tooltip>
       ) : null}
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon-xs"
-            className={controlButtonClassName}
-            aria-label={
-              maximized
-                ? translate(
-                    'auto.components.floating.terminal.FloatingTerminalWindowControls.1c79cba25d',
-                    'Restore floating workspace'
-                  )
-                : translate(
-                    'auto.components.floating.terminal.FloatingTerminalWindowControls.3f4ca29961',
-                    'Maximize floating workspace'
-                  )
-            }
-            aria-pressed={maximized}
-            onClick={onToggleMaximized}
-          >
-            {maximized ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-xs"
+              className={controlButtonClassName}
+              aria-label={
+                maximized
+                  ? translate(
+                      'auto.components.floating.terminal.FloatingTerminalWindowControls.1c79cba25d',
+                      'Restore floating workspace'
+                    )
+                  : translate(
+                      'auto.components.floating.terminal.FloatingTerminalWindowControls.3f4ca29961',
+                      'Maximize floating workspace'
+                    )
+              }
+              aria-pressed={maximized}
+              onClick={onToggleMaximized}
+            >
+              {maximized ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
+            </Button>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {maximized
             ? withShortcutHint(
@@ -194,21 +198,23 @@ export function FloatingTerminalWindowControls({
         </TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon-xs"
-            className={controlButtonClassName}
-            aria-label={translate(
-              'auto.components.floating.terminal.FloatingTerminalWindowControls.1bbaa0302f',
-              'Minimize floating workspace'
-            )}
-            onClick={onMinimize}
-          >
-            <Minus className="size-3.5" />
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-xs"
+              className={controlButtonClassName}
+              aria-label={translate(
+                'auto.components.floating.terminal.FloatingTerminalWindowControls.1bbaa0302f',
+                'Minimize floating workspace'
+              )}
+              onClick={onMinimize}
+            >
+              <Minus className="size-3.5" />
+            </Button>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {withShortcutHint(
             translate(

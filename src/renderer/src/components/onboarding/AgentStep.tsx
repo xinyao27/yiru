@@ -225,19 +225,21 @@ function YoloPermissionsControl({
         </span>
       </span>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            aria-label={translate(
-              'auto.components.onboarding.AgentStep.yoloPermissionsInfo',
-              'Agent permission info'
-            )}
-            onPointerDown={(event) => event.preventDefault()}
-            className="grid size-6 shrink-0 place-items-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
-            <Info className="size-3.5" />
-          </button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              aria-label={translate(
+                'auto.components.onboarding.AgentStep.yoloPermissionsInfo',
+                'Agent permission info'
+              )}
+              onPointerDown={(event) => event.preventDefault()}
+              className="grid size-6 shrink-0 place-items-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            >
+              <Info className="size-3.5" />
+            </button>
+          }
+        />
         <TooltipContent side="top" sideOffset={6} style={{ zIndex: 120 }}>
           {translate(
             'auto.components.onboarding.AgentStep.yoloPermissionsTooltip',

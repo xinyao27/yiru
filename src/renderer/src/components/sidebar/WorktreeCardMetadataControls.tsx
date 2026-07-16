@@ -48,16 +48,24 @@ export function MetadataActionIcon({
   children: React.ReactNode
 }): React.JSX.Element {
   const trigger = href ? (
-    <Button asChild variant="ghost" size="icon-xs" className="size-6">
-      <a
-        href={href}
-        target="_blank"
-        rel="noreferrer"
-        aria-label={label}
-        onClick={(event) => event.stopPropagation()}
-      >
-        {children}
-      </a>
+    // Base UI Button renders a native button by default; nativeButton={false}
+    // tells it the replacement element is an anchor, not a button.
+    <Button
+      render={
+        <a
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={label}
+          onClick={(event) => event.stopPropagation()}
+        />
+      }
+      nativeButton={false}
+      variant="ghost"
+      size="icon-xs"
+      className="size-6"
+    >
+      {children}
     </Button>
   ) : (
     <Button
@@ -77,7 +85,7 @@ export function MetadataActionIcon({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+      <TooltipTrigger render={trigger} />
       <TooltipContent side="top" sideOffset={4}>
         {label}
       </TooltipContent>

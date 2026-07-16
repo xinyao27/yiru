@@ -86,7 +86,11 @@ export function SourceControlActionRecipeRow({
         <div className="w-full shrink-0 space-y-1 sm:w-[220px]">
           <Select
             value={selectedAgent ?? DEFAULT_AGENT_VALUE}
-            onValueChange={(value) => onAgentChange(actionId, value)}
+            onValueChange={(value) => {
+              if (value) {
+                onAgentChange(actionId, value)
+              }
+            }}
           >
             <SelectTrigger size="sm" className="h-8 w-full text-xs">
               <SelectValue />

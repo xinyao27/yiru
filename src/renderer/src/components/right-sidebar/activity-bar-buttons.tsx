@@ -52,29 +52,31 @@ export function TopActivityOverflowMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            'relative flex h-[36px] w-8 shrink-0 items-center justify-center text-muted-foreground/60 transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-            RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
-          )}
-          aria-label={translate(
-            'auto.components.right.sidebar.activity.bar.buttons.1fd284e931',
-            'More sidebar tabs'
-          )}
-        >
-          <MoreHorizontal size={16} />
-          {hiddenChecksStatus && (
-            <div
-              className={cn(
-                'absolute top-[8px] right-[4px] size-[7px] rounded-full ring-1 ring-sidebar',
-                STATUS_DOT_COLOR[hiddenChecksStatus] ?? 'bg-muted-foreground'
-              )}
-            />
-          )}
-        </button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <button
+            type="button"
+            className={cn(
+              'relative flex h-[36px] w-8 shrink-0 items-center justify-center text-muted-foreground/60 transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+              RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
+            )}
+            aria-label={translate(
+              'auto.components.right.sidebar.activity.bar.buttons.1fd284e931',
+              'More sidebar tabs'
+            )}
+          >
+            <MoreHorizontal size={16} />
+            {hiddenChecksStatus && (
+              <div
+                className={cn(
+                  'absolute top-[8px] right-[4px] size-[7px] rounded-full ring-1 ring-sidebar',
+                  STATUS_DOT_COLOR[hiddenChecksStatus] ?? 'bg-muted-foreground'
+                )}
+              />
+            )}
+          </button>
+        }
+      />
       <DropdownMenuContent align="end" side="bottom" sideOffset={6}>
         {items.map((item) => {
           const Icon = item.icon
@@ -115,38 +117,40 @@ export function ActivityBarButton({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            'relative flex shrink-0 items-center justify-center transition-colors',
-            RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME,
-            isTop ? 'h-[36px] w-9' : 'w-10 h-10',
-            active ? 'text-foreground' : 'text-muted-foreground/60 hover:text-muted-foreground'
-          )}
-          onClick={onClick}
-          aria-label={item.shortcut ? `${item.title} (${item.shortcut})` : item.title}
-        >
-          <Icon size={isTop ? 16 : 18} />
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            className={cn(
+              'relative flex shrink-0 items-center justify-center transition-colors',
+              RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME,
+              isTop ? 'h-[36px] w-9' : 'w-10 h-10',
+              active ? 'text-foreground' : 'text-muted-foreground/60 hover:text-muted-foreground'
+            )}
+            onClick={onClick}
+            aria-label={item.shortcut ? `${item.title} (${item.shortcut})` : item.title}
+          >
+            <Icon size={isTop ? 16 : 18} />
 
-          {statusIndicator && statusIndicator !== 'neutral' && (
-            <div
-              className={cn(
-                'absolute rounded-full size-[7px] ring-1 ring-sidebar',
-                isTop ? 'top-[8px] right-[5px]' : 'top-[7px] right-[7px]',
-                STATUS_DOT_COLOR[statusIndicator] ?? 'bg-muted-foreground'
-              )}
-            />
-          )}
+            {statusIndicator && statusIndicator !== 'neutral' && (
+              <div
+                className={cn(
+                  'absolute rounded-full size-[7px] ring-1 ring-sidebar',
+                  isTop ? 'top-[8px] right-[5px]' : 'top-[7px] right-[7px]',
+                  STATUS_DOT_COLOR[statusIndicator] ?? 'bg-muted-foreground'
+                )}
+              />
+            )}
 
-          {active && isTop && (
-            <div className="absolute bottom-0 left-[25%] right-[25%] h-[2px] bg-foreground rounded-t" />
-          )}
-          {active && !isTop && (
-            <div className="absolute right-0 top-[25%] bottom-[25%] w-[2px] bg-foreground rounded-l" />
-          )}
-        </button>
-      </TooltipTrigger>
+            {active && isTop && (
+              <div className="absolute bottom-0 left-[25%] right-[25%] h-[2px] bg-foreground rounded-t" />
+            )}
+            {active && !isTop && (
+              <div className="absolute right-0 top-[25%] bottom-[25%] w-[2px] bg-foreground rounded-l" />
+            )}
+          </button>
+        }
+      />
       <TooltipContent side={isTop ? 'bottom' : 'left'} sideOffset={6}>
         {item.shortcut ? `${item.title} (${item.shortcut})` : item.title}
       </TooltipContent>

@@ -38,64 +38,68 @@ export function NativeChatComposerActions({
   return (
     <div className="flex w-full items-center justify-between gap-2">
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={translate('components.native-chat.composer.attach', 'Attach file')}
-            disabled={attachDisabled}
-            onClick={onAttach}
-            className="pointer-coarse:size-11"
-          >
-            <Plus className="size-4" />
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label={translate('components.native-chat.composer.attach', 'Attach file')}
+              disabled={attachDisabled}
+              onClick={onAttach}
+              className="pointer-coarse:size-11"
+            >
+              <Plus className="size-4" />
+            </Button>
+          }
+        />
         <TooltipContent side="top" sideOffset={4}>
           {translate('components.native-chat.composer.attach', 'Attach file')}
         </TooltipContent>
       </Tooltip>
       <div className="ml-auto flex items-center gap-1.5">
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant={isDictating ? 'secondary' : 'ghost'}
-              size="icon-sm"
-              aria-label={dictationLabel}
-              disabled={dictationDisabled}
-              onClick={isDictationHoldMode ? undefined : onDictationToggle}
-              onPointerDown={(event) => {
-                if (!isDictationHoldMode || dictationDisabled) {
-                  return
-                }
-                event.preventDefault()
-                onDictationHoldStart()
-              }}
-              onPointerUp={() => {
-                if (isDictationHoldMode && !dictationDisabled) {
-                  onDictationHoldEnd()
-                }
-              }}
-              onPointerCancel={() => {
-                if (isDictationHoldMode && !dictationDisabled) {
-                  onDictationHoldEnd()
-                }
-              }}
-              onPointerLeave={(event) => {
-                if (isDictationHoldMode && event.buttons === 1 && !dictationDisabled) {
-                  onDictationHoldEnd()
-                }
-              }}
-              className="pointer-coarse:size-11"
-            >
-              {isDictating ? (
-                <Square className="size-3.5 fill-current" />
-              ) : (
-                <Mic className="size-4" />
-              )}
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant={isDictating ? 'secondary' : 'ghost'}
+                size="icon-sm"
+                aria-label={dictationLabel}
+                disabled={dictationDisabled}
+                onClick={isDictationHoldMode ? undefined : onDictationToggle}
+                onPointerDown={(event) => {
+                  if (!isDictationHoldMode || dictationDisabled) {
+                    return
+                  }
+                  event.preventDefault()
+                  onDictationHoldStart()
+                }}
+                onPointerUp={() => {
+                  if (isDictationHoldMode && !dictationDisabled) {
+                    onDictationHoldEnd()
+                  }
+                }}
+                onPointerCancel={() => {
+                  if (isDictationHoldMode && !dictationDisabled) {
+                    onDictationHoldEnd()
+                  }
+                }}
+                onPointerLeave={(event) => {
+                  if (isDictationHoldMode && event.buttons === 1 && !dictationDisabled) {
+                    onDictationHoldEnd()
+                  }
+                }}
+                className="pointer-coarse:size-11"
+              >
+                {isDictating ? (
+                  <Square className="size-3.5 fill-current" />
+                ) : (
+                  <Mic className="size-4" />
+                )}
+              </Button>
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             {dictationLabel}
           </TooltipContent>

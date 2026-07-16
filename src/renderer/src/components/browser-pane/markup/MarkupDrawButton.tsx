@@ -97,12 +97,16 @@ export function MarkupDrawButton({
       }}
     >
       <Tooltip>
-        <TooltipTrigger asChild>
-          <PopoverTrigger asChild>
-            {/* Why: wrap in a span so the trigger still fires when disabled. */}
-            <span className="inline-flex">{button}</span>
-          </PopoverTrigger>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <PopoverTrigger
+              render={
+                /* Why: wrap in a span so the trigger still fires when disabled. */
+                <span className="inline-flex">{button}</span>
+              }
+            />
+          }
+        />
         <TooltipContent side="bottom" sideOffset={4}>
           {label}
         </TooltipContent>
@@ -112,10 +116,8 @@ export function MarkupDrawButton({
         align="center"
         sideOffset={6}
         className="w-72 p-3"
-        onOpenAutoFocus={(event) => {
-          // Why: don't steal focus from the address bar / webview on first show.
-          event.preventDefault()
-        }}
+        // Why: don't steal focus from the address bar / webview on first show.
+        initialFocus={false}
       >
         <div className="space-y-3">
           <div className="space-y-1.5">

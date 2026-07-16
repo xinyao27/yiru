@@ -61,19 +61,21 @@ export function VoiceSpeechModelSection({
         </p>
       </div>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!voiceSettings.enabled}
-            className="shrink-0 gap-1.5"
-          >
-            {selectedModel && selectedIsReady
-              ? selectedModel.label
-              : translate('auto.components.settings.VoicePane.fbe5990716', 'Select Model')}
-            <ChevronDown className="size-3 opacity-50" />
-          </Button>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!voiceSettings.enabled}
+              className="shrink-0 gap-1.5"
+            >
+              {selectedModel && selectedIsReady
+                ? selectedModel.label
+                : translate('auto.components.settings.VoicePane.fbe5990716', 'Select Model')}
+              <ChevronDown className="size-3 opacity-50" />
+            </Button>
+          }
+        />
         <DropdownMenuContent align="end" className="w-96">
           {catalog.map((manifest) => {
             const mState = getModelState(manifest.id)

@@ -152,21 +152,23 @@ export function AutomationSchedulePicker({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn('h-9 w-full justify-between px-3 text-sm font-normal', triggerClassName)}
-        >
-          <span className="flex min-w-0 flex-1 items-center gap-2">
-            <CalendarClock className="size-4 text-muted-foreground" />
-            <span className="truncate">{label}</span>
-          </span>
-          <ChevronsUpDown className="size-4 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn('h-9 w-full justify-between px-3 text-sm font-normal', triggerClassName)}
+          >
+            <span className="flex min-w-0 flex-1 items-center gap-2">
+              <CalendarClock className="size-4 text-muted-foreground" />
+              <span className="truncate">{label}</span>
+            </span>
+            <ChevronsUpDown className="size-4 opacity-50" />
+          </Button>
+        }
+      />
       <PopoverContent
         align="start"
         className="popover-scroll-content scrollbar-sleek max-h-[var(--radix-popover-content-available-height)] w-[min(var(--radix-popover-trigger-width),calc(100vw-2rem))] min-w-[min(22rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-y-auto p-3"
@@ -218,6 +220,7 @@ export function AutomationSchedulePicker({
                   <Select
                     value={draft.dayOfWeek}
                     onValueChange={(dayOfWeek) =>
+                      dayOfWeek &&
                       onDraftChange((current) => ({ ...current, dayOfWeek, scheduleWarning: null }))
                     }
                   >

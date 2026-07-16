@@ -26,7 +26,6 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { VisuallyHidden } from 'radix-ui'
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
 import { isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
 import { useMountedRef } from '@/hooks/useMountedRef'
@@ -1009,16 +1008,14 @@ export default function GitLabItemDialog({
   return (
     <Sheet open={item !== null} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl">
-        <VisuallyHidden.Root>
-          <SheetTitle>
-            {item
-              ? visibleTitle
-              : translate('auto.components.GitLabItemDialog.3a051b8ade', 'Work item')}
-          </SheetTitle>
-          <SheetDescription>
-            {translate('auto.components.GitLabItemDialog.30c97083c2', 'GitLab work item detail')}
-          </SheetDescription>
-        </VisuallyHidden.Root>
+        <SheetTitle className="sr-only">
+          {item
+            ? visibleTitle
+            : translate('auto.components.GitLabItemDialog.3a051b8ade', 'Work item')}
+        </SheetTitle>
+        <SheetDescription className="sr-only">
+          {translate('auto.components.GitLabItemDialog.30c97083c2', 'GitLab work item detail')}
+        </SheetDescription>
 
         {item ? (
           <>

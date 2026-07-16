@@ -94,29 +94,31 @@ export function MobileEmulatorAgentSetupGuideSteps({
             <p className="text-[11px] text-muted-foreground">{setup.cliInstallStatus.detail}</p>
           ) : null}
         </div>
-        <TooltipProvider delayDuration={250}>
+        <TooltipProvider delay={250}>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={setup.cliEnabled ? 'outline' : 'default'}
-                  disabled={
-                    setup.cliLoading || setup.cliBusy || !setup.cliSupported || setup.cliEnabled
-                  }
-                  onClick={() => {
-                    recordFeatureInteraction('mobile-emulator-agent-setup')
-                    void setup.handleEnableCli()
-                  }}
-                >
-                  {setup.cliLoading || setup.cliBusy ? (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  ) : null}
-                  {setup.cliActionLabel}
-                </Button>
-              </span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={setup.cliEnabled ? 'outline' : 'default'}
+                    disabled={
+                      setup.cliLoading || setup.cliBusy || !setup.cliSupported || setup.cliEnabled
+                    }
+                    onClick={() => {
+                      recordFeatureInteraction('mobile-emulator-agent-setup')
+                      void setup.handleEnableCli()
+                    }}
+                  >
+                    {setup.cliLoading || setup.cliBusy ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : null}
+                    {setup.cliActionLabel}
+                  </Button>
+                </span>
+              }
+            />
             {!setup.cliSupported && !setup.cliLoading && setup.cliInstallStatus?.detail ? (
               <TooltipContent side="left" sideOffset={6}>
                 {setup.cliInstallStatus.detail}

@@ -2047,15 +2047,17 @@ function App(): React.JSX.Element {
           <>
             <img src={logo} alt="" aria-hidden className="titlebar-logo" />
             <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  className="titlebar-icon-button"
-                  aria-label={translate('auto.App.8b0b8eb54f', 'Application menu')}
-                  onClick={() => window.api.ui.popupMenu()}
-                >
-                  <MoreHorizontal size={14} />
-                </button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <button
+                    className="titlebar-icon-button"
+                    aria-label={translate('auto.App.8b0b8eb54f', 'Application menu')}
+                    onClick={() => window.api.ui.popupMenu()}
+                  >
+                    <MoreHorizontal size={14} />
+                  </button>
+                }
+              />
               <TooltipContent side="bottom" sideOffset={6}>
                 {translate('auto.App.8b0b8eb54f', 'Application menu')}
               </TooltipContent>
@@ -2068,16 +2070,18 @@ function App(): React.JSX.Element {
           <>
             {settings?.showTitlebarAppName !== false && (
               <ContextMenu>
-                <ContextMenuTrigger asChild>
-                  <div
-                    className="titlebar-app-name"
-                    aria-label={translate('auto.App.5096cbbc86', 'Orca')}
-                  >
-                    <span className="titlebar-app-name-main">
-                      {translate('auto.App.5096cbbc86', 'Orca')}
-                    </span>
-                  </div>
-                </ContextMenuTrigger>
+                <ContextMenuTrigger
+                  render={
+                    <div
+                      className="titlebar-app-name"
+                      aria-label={translate('auto.App.5096cbbc86', 'Orca')}
+                    >
+                      <span className="titlebar-app-name-main">
+                        {translate('auto.App.5096cbbc86', 'Orca')}
+                      </span>
+                    </div>
+                  }
+                />
                 <ContextMenuContent>
                   <ContextMenuItem
                     onSelect={() => {
@@ -2093,15 +2097,17 @@ function App(): React.JSX.Element {
         )}
         {showSidebar && (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className="sidebar-toggle"
-                onClick={actions.toggleSidebar}
-                aria-label={translate('auto.App.e4b9e7dff7', 'Toggle sidebar')}
-              >
-                <PanelLeft size={16} />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  className="sidebar-toggle"
+                  onClick={actions.toggleSidebar}
+                  aria-label={translate('auto.App.e4b9e7dff7', 'Toggle sidebar')}
+                >
+                  <PanelLeft size={16} />
+                </button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate('auto.App.ce37cf5279', 'Toggle sidebar ({{value0}})', {
                 value0: leftSidebarShortcutLabel
@@ -2118,16 +2124,18 @@ function App(): React.JSX.Element {
         // and ml-auto has no spare width; keep a fixed gutter before Back.
         <div className="ml-auto mr-3 flex items-center pl-2">
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className="sidebar-toggle sidebar-toggle-compact"
-                onClick={() => useAppStore.getState().goBackWorktree()}
-                disabled={!canGoBackWorktree}
-                aria-label={translate('auto.App.064bd07810', 'Go back')}
-              >
-                <ArrowLeft size={12} />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  className="sidebar-toggle sidebar-toggle-compact"
+                  onClick={() => useAppStore.getState().goBackWorktree()}
+                  disabled={!canGoBackWorktree}
+                  aria-label={translate('auto.App.064bd07810', 'Go back')}
+                >
+                  <ArrowLeft size={12} />
+                </button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate('auto.App.fe21e8f6f5', 'Go back ({{value0}})', {
                 value0: historyBackShortcutLabel
@@ -2135,16 +2143,18 @@ function App(): React.JSX.Element {
             </TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className="sidebar-toggle sidebar-toggle-compact"
-                onClick={() => useAppStore.getState().goForwardWorktree()}
-                disabled={!canGoForwardWorktree}
-                aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
-              >
-                <ArrowRight size={12} />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  className="sidebar-toggle sidebar-toggle-compact"
+                  onClick={() => useAppStore.getState().goForwardWorktree()}
+                  disabled={!canGoForwardWorktree}
+                  aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
+                >
+                  <ArrowRight size={12} />
+                </button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate('auto.App.f7aa73e785', 'Go forward ({{value0}})', {
                 value0: historyForwardShortcutLabel
@@ -2158,15 +2168,17 @@ function App(): React.JSX.Element {
 
   const rightSidebarToggle = showRightSidebarControls ? (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          className="sidebar-toggle mr-2"
-          onClick={actions.toggleRightSidebar}
-          aria-label={translate('auto.App.9e0b441a91', 'Toggle right sidebar')}
-        >
-          <PanelRight size={16} />
-        </button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <button
+            className="sidebar-toggle mr-2"
+            onClick={actions.toggleRightSidebar}
+            aria-label={translate('auto.App.9e0b441a91', 'Toggle right sidebar')}
+          >
+            <PanelRight size={16} />
+          </button>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={6}>
         {translate('auto.App.c184e056de', 'Toggle right sidebar ({{value0}})', {
           value0: rightSidebarShortcutLabel
@@ -2187,16 +2199,18 @@ function App(): React.JSX.Element {
       )}
       {showTitlebarExpandButton && (
         <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              className="titlebar-icon-button"
-              onClick={handleToggleExpand}
-              aria-label={translate('auto.App.c1cf0b0e4a', 'Collapse pane')}
-              disabled={!activeTabCanExpand}
-            >
-              <Minimize2 size={14} />
-            </button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <button
+                className="titlebar-icon-button"
+                onClick={handleToggleExpand}
+                aria-label={translate('auto.App.c1cf0b0e4a', 'Collapse pane')}
+                disabled={!activeTabCanExpand}
+              >
+                <Minimize2 size={14} />
+              </button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={6}>
             {translate('auto.App.c1cf0b0e4a', 'Collapse pane')}
           </TooltipContent>
@@ -2251,7 +2265,7 @@ function App(): React.JSX.Element {
         } as React.CSSProperties
       }
     >
-      <TooltipProvider delayDuration={400}>
+      <TooltipProvider delay={400}>
         <ConfirmationDialogProvider>
           <LinkRoutingPreferenceDialogProvider>
             <WorkspacePortScanner enabled={workspaceSessionReady} />

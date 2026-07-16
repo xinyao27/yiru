@@ -305,7 +305,10 @@ export function SourceControlTextGenerationDialogForm({
                 'Save recipe'
               )}
             </Label>
-            <Select value={saveTargetKey} onValueChange={setSaveTargetKey}>
+            <Select
+              value={saveTargetKey}
+              onValueChange={(value) => value != null && setSaveTargetKey(value)}
+            >
               <SelectTrigger size="sm" className="h-8 w-full text-xs">
                 <SelectValue />
               </SelectTrigger>

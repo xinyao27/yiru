@@ -31,26 +31,30 @@ export function StatusBarUsageEmptyCta(): React.JSX.Element {
   }, [dismissUsageEmptyState])
 
   return (
-    <HoverCard openDelay={150} closeDelay={80}>
-      <HoverCardTrigger asChild>
-        <button
-          type="button"
-          onClick={handleOpenSettings}
-          aria-label={translate(
-            'auto.components.status.bar.StatusBarUsageEmptyCta.d663430cf9',
-            'Configure usage tracking'
-          )}
-          className="inline-flex h-5 cursor-pointer items-center gap-1.5 rounded px-1.5 text-xs font-normal text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"
-        >
-          <BarChart3 className="size-3.5" />
-          <span>
-            {translate(
+    <HoverCard>
+      <HoverCardTrigger
+        delay={150}
+        closeDelay={80}
+        render={
+          <button
+            type="button"
+            onClick={handleOpenSettings}
+            aria-label={translate(
               'auto.components.status.bar.StatusBarUsageEmptyCta.d663430cf9',
               'Configure usage tracking'
             )}
-          </span>
-        </button>
-      </HoverCardTrigger>
+            className="inline-flex h-5 cursor-pointer items-center gap-1.5 rounded px-1.5 text-xs font-normal text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"
+          >
+            <BarChart3 className="size-3.5" />
+            <span>
+              {translate(
+                'auto.components.status.bar.StatusBarUsageEmptyCta.d663430cf9',
+                'Configure usage tracking'
+              )}
+            </span>
+          </button>
+        }
+      />
       <HoverCardContent side="top" align="start" sideOffset={8} className="w-[260px] p-2.5">
         <div className="space-y-2 text-xs leading-[1.45]">
           <div className="flex items-start justify-between gap-2">
@@ -63,19 +67,21 @@ export function StatusBarUsageEmptyCta(): React.JSX.Element {
             {/* Why: permanently hide the teaching CTA — styling mirrors the
                 SetupGuideSidebarEntry hover-state icon (muted → foreground). */}
             <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={handleHide}
-                  aria-label={translate(
-                    'auto.components.status.bar.StatusBarUsageEmptyCta.9a542f46c7',
-                    'Hide from status bar'
-                  )}
-                  className="-mr-1 -mt-0.5 inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"
-                >
-                  <EyeOff className="size-3.5" />
-                </button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <button
+                    type="button"
+                    onClick={handleHide}
+                    aria-label={translate(
+                      'auto.components.status.bar.StatusBarUsageEmptyCta.9a542f46c7',
+                      'Hide from status bar'
+                    )}
+                    className="-mr-1 -mt-0.5 inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"
+                  >
+                    <EyeOff className="size-3.5" />
+                  </button>
+                }
+              />
               <TooltipContent side="top" sideOffset={6}>
                 {translate(
                   'auto.components.status.bar.StatusBarUsageEmptyCta.9a542f46c7',

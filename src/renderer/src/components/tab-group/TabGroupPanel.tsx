@@ -211,23 +211,27 @@ export default function TabGroupPanel({
           {isFocused && hasSplitGroups ? (
             <Tooltip>
               <DropdownMenu modal={false}>
-                <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      aria-label={translate(
-                        'auto.components.tab.group.TabGroupPanel.9acaf92093',
-                        'Pane Actions'
-                      )}
-                      onClick={(event) => {
-                        event.stopPropagation()
-                      }}
-                      className={menuButtonClassName}
-                    >
-                      <Ellipsis className="size-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <DropdownMenuTrigger
+                      render={
+                        <button
+                          type="button"
+                          aria-label={translate(
+                            'auto.components.tab.group.TabGroupPanel.9acaf92093',
+                            'Pane Actions'
+                          )}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                          }}
+                          className={menuButtonClassName}
+                        >
+                          <Ellipsis className="size-4" />
+                        </button>
+                      }
+                    />
+                  }
+                />
                 <DropdownMenuContent align="end" side="bottom" sideOffset={4}>
                   <DropdownMenuItem
                     variant="destructive"

@@ -1,7 +1,6 @@
-import * as React from 'react'
-import type { Popover as PopoverPrimitive } from 'radix-ui'
+import type { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 
-type PopoverContentRef = React.ComponentProps<typeof PopoverPrimitive.Content>['ref']
+type PopoverContentRef = PopoverPrimitive.Popup.Props['ref']
 
 export function updatePopoverContentRef(
   forwardedRef: PopoverContentRef | undefined,
@@ -20,7 +19,7 @@ export function updatePopoverContentRef(
 
   if (typeof forwardedRef === 'function') {
     const cleanup = forwardedRef(node)
-    // Why: React callback refs may return cleanup; wrapping the Radix ref must
+    // Why: React callback refs may return cleanup; wrapping the Base UI ref must
     // preserve that cleanup instead of replacing it with a null callback.
     return () => {
       cancelWheelFrames()

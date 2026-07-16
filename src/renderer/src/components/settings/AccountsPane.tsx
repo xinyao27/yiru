@@ -1663,16 +1663,18 @@ export function AccountsPane({
               </Badge>
             </div>
             <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  className="h-6 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
-                >
-                  <HelpCircle className="size-3" />
-                  {translate('auto.components.settings.AccountsPane.43d7a45b97', 'How to copy')}
-                </Button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    className="h-6 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    <HelpCircle className="size-3" />
+                    {translate('auto.components.settings.AccountsPane.43d7a45b97', 'How to copy')}
+                  </Button>
+                }
+              />
               <PopoverContent align="end" side="bottom" sideOffset={6} className="w-80 p-0">
                 <MiniMaxCookieHelpPopover />
               </PopoverContent>

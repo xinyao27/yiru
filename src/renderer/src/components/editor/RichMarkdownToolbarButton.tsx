@@ -18,17 +18,19 @@ export function RichMarkdownToolbarButton({
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            className={cn('rich-markdown-toolbar-button', active && 'is-active')}
-            aria-label={label}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={onClick}
-          >
-            {children}
-          </button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              className={cn('rich-markdown-toolbar-button', active && 'is-active')}
+              aria-label={label}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={onClick}
+            >
+              {children}
+            </button>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={4}>
           {label}
         </TooltipContent>

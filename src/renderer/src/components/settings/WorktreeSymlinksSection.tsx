@@ -138,12 +138,17 @@ export function WorktreeSymlinksSection({
           </p>
         </div>
         <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button type="button" variant="outline" size="sm">
-              <Plus className="size-3.5" />
-              {translate('auto.components.settings.WorktreeSymlinksSection.241325302c', 'Add Path')}
-            </Button>
-          </PopoverTrigger>
+          <PopoverTrigger
+            render={
+              <Button type="button" variant="outline" size="sm">
+                <Plus className="size-3.5" />
+                {translate(
+                  'auto.components.settings.WorktreeSymlinksSection.241325302c',
+                  'Add Path'
+                )}
+              </Button>
+            }
+          />
           <PopoverContent align="end" className="w-72 p-0">
             <Command shouldFilter={false}>
               <CommandInput

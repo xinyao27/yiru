@@ -146,19 +146,21 @@ export default function ImportedWorktreesVisibilityLine({
         <span className="min-w-0 flex-1 truncate">{lineText}</span>
         {onKeepHidden ? (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                disabled={pending}
-                aria-label={keepHiddenAriaLabel}
-                onClick={onKeepHidden}
-                className="shrink-0 rounded-md text-muted-foreground hover:bg-worktree-sidebar-accent hover:text-worktree-sidebar-accent-foreground"
-              >
-                <X className="size-3" aria-hidden="true" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  disabled={pending}
+                  aria-label={keepHiddenAriaLabel}
+                  onClick={onKeepHidden}
+                  className="shrink-0 rounded-md text-muted-foreground hover:bg-worktree-sidebar-accent hover:text-worktree-sidebar-accent-foreground"
+                >
+                  <X className="size-3" aria-hidden="true" />
+                </Button>
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {KEEP_HIDDEN_LABEL}
             </TooltipContent>
@@ -178,14 +180,16 @@ export default function ImportedWorktreesVisibilityLine({
             <div key={group.path} className="grid min-w-0 gap-0.5 rounded-md px-1.5 py-1">
               <div className="flex min-h-7 min-w-0 items-center gap-1.5">
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span
-                      tabIndex={0}
-                      className="block min-w-0 flex-1 truncate font-mono text-[10px] leading-4 text-muted-foreground outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring"
-                    >
-                      {group.path}
-                    </span>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={
+                      <span
+                        tabIndex={0}
+                        className="block min-w-0 flex-1 truncate font-mono text-[10px] leading-4 text-muted-foreground outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring"
+                      >
+                        {group.path}
+                      </span>
+                    }
+                  />
                   <TooltipContent side="top" sideOffset={4}>
                     {group.path}
                   </TooltipContent>

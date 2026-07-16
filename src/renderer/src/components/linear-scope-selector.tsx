@@ -234,21 +234,23 @@ export function LinearScopeSelector({
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn(
-            'h-8 w-[220px] max-w-[calc(100vw-5rem)] justify-between rounded-md border-border/50 bg-muted/50 px-2 text-xs font-medium shadow-sm transition hover:bg-muted/50 focus:ring-2 focus:ring-ring/20 focus:outline-none',
-            className
-          )}
-        >
-          <span className="min-w-0 truncate">{triggerLabel}</span>
-          <ChevronDown className="size-3.5 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn(
+              'h-8 w-[220px] max-w-[calc(100vw-5rem)] justify-between rounded-md border-border/50 bg-muted/50 px-2 text-xs font-medium shadow-sm transition hover:bg-muted/50 focus:ring-2 focus:ring-ring/20 focus:outline-none',
+              className
+            )}
+          >
+            <span className="min-w-0 truncate">{triggerLabel}</span>
+            <ChevronDown className="size-3.5 shrink-0 opacity-50" />
+          </Button>
+        }
+      />
       <PopoverContent align="end" className="w-[min(380px,calc(100vw-1rem))] p-0">
         <Command shouldFilter={false} value={commandValue} onValueChange={setCommandValue}>
           <CommandInput

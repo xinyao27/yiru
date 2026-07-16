@@ -21,14 +21,16 @@ export function RepoForkIndicator({
   const label = `Fork of ${upstream.owner}/${upstream.repo}`
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span
-          className={cn('inline-flex shrink-0 items-center text-muted-foreground', className)}
-          aria-label={label}
-        >
-          <GitFork className="size-3" aria-hidden="true" />
-        </span>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <span
+            className={cn('inline-flex shrink-0 items-center text-muted-foreground', className)}
+            aria-label={label}
+          >
+            <GitFork className="size-3" aria-hidden="true" />
+          </span>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {label}
       </TooltipContent>

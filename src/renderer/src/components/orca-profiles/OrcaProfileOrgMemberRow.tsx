@@ -80,9 +80,7 @@ export function OrcaProfileOrgMemberRow({
 
       {neverSignedIn && canManage ? (
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span className={cn('cursor-default')}>{roleControl}</span>
-          </TooltipTrigger>
+          <TooltipTrigger render={<span className={cn('cursor-default')}>{roleControl}</span>} />
           <TooltipContent side="top">
             {translate(
               'auto.components.orca.profiles.org.members.not.signed.in',

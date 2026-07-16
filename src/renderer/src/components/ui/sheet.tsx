@@ -2,41 +2,37 @@
 
 import * as React from 'react'
 import { XIcon } from 'lucide-react'
-import { Dialog as SheetPrimitive } from 'radix-ui'
+import { Dialog as SheetPrimitive } from '@base-ui/react/dialog'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 
-function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
+function Sheet({ ...props }: SheetPrimitive.Root.Props) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }
 
-function SheetTrigger({ ...props }: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
+function SheetTrigger({ ...props }: SheetPrimitive.Trigger.Props) {
   return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />
 }
 
-function SheetClose({ ...props }: React.ComponentProps<typeof SheetPrimitive.Close>) {
+function SheetClose({ ...props }: SheetPrimitive.Close.Props) {
   return <SheetPrimitive.Close data-slot="sheet-close" {...props} />
 }
 
-function SheetPortal({ ...props }: React.ComponentProps<typeof SheetPrimitive.Portal>) {
+function SheetPortal({ ...props }: SheetPrimitive.Portal.Props) {
   return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />
 }
 
-function SheetOverlay({
-  className,
-  style,
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Overlay>) {
+function SheetOverlay({ className, style, ...props }: SheetPrimitive.Backdrop.Props) {
   return (
-    <SheetPrimitive.Overlay
+    <SheetPrimitive.Backdrop
       data-slot="sheet-overlay"
       // Why: same fix as DialogOverlay — a flat bg-black/50 scrim disappears
       // over the dark canvas. A deeper scrim + 2px backdrop blur lifts the
       // canvas behind the sheet so its edge reads clearly.
       className={cn(
-        'fixed inset-0 z-50 bg-black/55 backdrop-blur-[2px] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0',
+        'fixed inset-0 z-50 bg-black/55 backdrop-blur-[2px] transition-opacity data-starting-style:opacity-0 data-ending-style:opacity-0',
         className
       )}
       // Why: Electron's OS-level drag hit-test ignores z-index. Without
@@ -53,16 +49,19 @@ const sheetContentVariants = cva(
   // is still ~4% white over that canvas. The translucent surface + solid 14%
   // border + dual shadow + 2xl backdrop blur match the dropdown-menu / dialog
   // recipe and give the sheet a clearly visible edge in both light and dark.
-  'fixed z-50 flex flex-col gap-0 bg-background/96 text-foreground shadow-[0_20px_60px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl outline-none transition ease-in-out dark:bg-[rgba(23,23,23,0.96)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)] data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:animate-in data-[state=open]:duration-300',
+  'fixed z-50 flex flex-col gap-0 bg-background/96 text-foreground shadow-[0_20px_60px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl outline-none transition ease-in-out duration-300 data-ending-style:duration-200 dark:bg-[rgba(23,23,23,0.96)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)]',
   {
     variants: {
+      // Why: Base UI drives enter/exit with data-starting-style/data-ending-style
+      // transitions (not keyframes), so the per-side slide is restated as an
+      // off-screen translate keyed off the starting and ending states.
       side: {
         right:
-          'inset-y-0 right-0 h-full w-3/4 border-l border-black/14 dark:border-white/14 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-[560px]',
-        left: 'inset-y-0 left-0 h-full w-3/4 border-r border-black/14 dark:border-white/14 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-[560px]',
-        top: 'inset-x-0 top-0 h-auto border-b border-black/14 dark:border-white/14 data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
+          'inset-y-0 right-0 h-full w-3/4 border-l border-black/14 dark:border-white/14 data-starting-style:translate-x-full data-ending-style:translate-x-full sm:max-w-[560px]',
+        left: 'inset-y-0 left-0 h-full w-3/4 border-r border-black/14 dark:border-white/14 data-starting-style:-translate-x-full data-ending-style:-translate-x-full sm:max-w-[560px]',
+        top: 'inset-x-0 top-0 h-auto border-b border-black/14 dark:border-white/14 data-starting-style:-translate-y-full data-ending-style:-translate-y-full',
         bottom:
-          'inset-x-0 bottom-0 h-auto border-t border-black/14 dark:border-white/14 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom'
+          'inset-x-0 bottom-0 h-auto border-t border-black/14 dark:border-white/14 data-starting-style:translate-y-full data-ending-style:translate-y-full'
       }
     },
     defaultVariants: {
@@ -80,7 +79,7 @@ function SheetContent({
   overlayStyle,
   style,
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Content> &
+}: SheetPrimitive.Popup.Props &
   VariantProps<typeof sheetContentVariants> & {
     showCloseButton?: boolean
     overlayClassName?: string
@@ -89,7 +88,7 @@ function SheetContent({
   return (
     <SheetPortal>
       <SheetOverlay className={overlayClassName} style={overlayStyle} />
-      <SheetPrimitive.Content
+      <SheetPrimitive.Popup
         data-slot="sheet-content"
         className={cn(sheetContentVariants({ side }), className)}
         // Why: same as SheetOverlay — the sheet content portals to the
@@ -109,7 +108,7 @@ function SheetContent({
             </span>
           </SheetPrimitive.Close>
         )}
-      </SheetPrimitive.Content>
+      </SheetPrimitive.Popup>
     </SheetPortal>
   )
 }
@@ -134,7 +133,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
-function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Title>) {
+function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
@@ -144,10 +143,7 @@ function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPr
   )
 }
 
-function SheetDescription({
-  className,
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Description>) {
+function SheetDescription({ className, ...props }: SheetPrimitive.Description.Props) {
   return (
     <SheetPrimitive.Description
       data-slot="sheet-description"

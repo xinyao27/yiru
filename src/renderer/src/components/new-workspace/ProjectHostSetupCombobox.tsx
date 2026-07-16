@@ -39,30 +39,32 @@ export default function ProjectHostSetupCombobox({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="h-9 w-full justify-between border-input px-3 text-sm font-normal focus:border-ring focus:ring-[3px] focus:ring-ring/50"
-        >
-          {selected ? (
-            <span className="inline-flex min-w-0 items-center gap-1.5">
-              <Server className="size-3.5 shrink-0 text-muted-foreground" />
-              <span className="truncate">{selected.label}</span>
-            </span>
-          ) : (
-            <span className="text-muted-foreground">
-              {translate(
-                'auto.components.new.workspace.ProjectHostSetupCombobox.placeholder',
-                'Choose host'
-              )}
-            </span>
-          )}
-          <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="h-9 w-full justify-between border-input px-3 text-sm font-normal focus:border-ring focus:ring-[3px] focus:ring-ring/50"
+          >
+            {selected ? (
+              <span className="inline-flex min-w-0 items-center gap-1.5">
+                <Server className="size-3.5 shrink-0 text-muted-foreground" />
+                <span className="truncate">{selected.label}</span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground">
+                {translate(
+                  'auto.components.new.workspace.ProjectHostSetupCombobox.placeholder',
+                  'Choose host'
+                )}
+              </span>
+            )}
+            <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
+          </Button>
+        }
+      />
       <PopoverContent
         align="start"
         className="w-[var(--radix-popover-trigger-width)] min-w-[18rem] p-0"

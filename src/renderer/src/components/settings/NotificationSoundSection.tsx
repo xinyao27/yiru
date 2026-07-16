@@ -172,8 +172,8 @@ export function NotificationSoundSection({
             max={100}
             step={5}
             disabled={!notificationsEnabled}
-            onValueChange={([value]) => onVolumeDraftChange(value)}
-            onValueCommit={([value]) => onVolumeCommit(value)}
+            onValueChange={(value) => onVolumeDraftChange(Array.isArray(value) ? value[0] : value)}
+            onValueCommitted={(value) => onVolumeCommit(Array.isArray(value) ? value[0] : value)}
             className="flex-1"
             aria-label={translate(
               'auto.components.settings.NotificationsPane.2a42dd8d6f',

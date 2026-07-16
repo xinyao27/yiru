@@ -863,16 +863,18 @@ function EventTime({ timestamp }: { timestamp: number }): React.JSX.Element {
   const absolute = formatAbsoluteDate(timestamp)
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          className="rounded px-1 py-0.5 text-xs text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
-          aria-label={absolute}
-          onClick={(event) => event.stopPropagation()}
-        >
-          {formatRelativeTime(timestamp)}
-        </button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            className="rounded px-1 py-0.5 text-xs text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+            aria-label={absolute}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {formatRelativeTime(timestamp)}
+          </button>
+        }
+      />
       <TooltipContent side="right" sideOffset={6}>
         {absolute}
       </TooltipContent>
@@ -894,26 +896,30 @@ export function ActivityThreadOptionsMenu({
   return (
     <DropdownMenu>
       <Tooltip>
-        <TooltipTrigger asChild>
-          {/* Why: keep Tooltip and Dropdown from composing refs onto the same
-              button; the crash report's stack loops through Radix setRef. */}
-          <span className="inline-flex shrink-0">
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="size-8 shrink-0 border-input bg-transparent p-0 text-muted-foreground shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground"
-                aria-label={translate(
-                  'auto.components.activity.ActivityPrototypePage.db8a1878b5',
-                  'Thread list options'
-                )}
-              >
-                <MoreVertical className="size-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-          </span>
-        </TooltipTrigger>
+        <TooltipTrigger
+          // Why: keep Tooltip and Dropdown from composing refs onto the same
+          // button; the crash report's stack loops through Radix setRef.
+          render={
+            <span className="inline-flex shrink-0">
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="size-8 shrink-0 border-input bg-transparent p-0 text-muted-foreground shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground"
+                    aria-label={translate(
+                      'auto.components.activity.ActivityPrototypePage.db8a1878b5',
+                      'Thread list options'
+                    )}
+                  >
+                    <MoreVertical className="size-3.5" />
+                  </Button>
+                }
+              />
+            </span>
+          }
+        />
         <TooltipContent side="bottom">
           {translate('auto.components.activity.ActivityPrototypePage.a472a14700', 'More options')}
         </TooltipContent>
@@ -1176,11 +1182,13 @@ function ThreadAgentStateIndicator({ thread }: { thread: AgentPaneThread }): Rea
   const label = threadAgentStateLabel(thread)
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="inline-flex size-4 shrink-0 items-center justify-center">
-          <AgentStateDot state={state} size="md" />
-        </span>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <span className="inline-flex size-4 shrink-0 items-center justify-center">
+            <AgentStateDot state={state} size="md" />
+          </span>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {label}
       </TooltipContent>
@@ -1344,24 +1352,26 @@ function ThreadRow({
                     )}
                   >
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon-xs"
-                          aria-label={translate(
-                            'auto.components.activity.ActivityPrototypePage.4616ea39fd',
-                            'Jump to workspace'
-                          )}
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            onJump()
-                          }}
-                          onMouseDown={(event) => event.stopPropagation()}
-                        >
-                          <ExternalLink className="size-3" />
-                        </Button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon-xs"
+                            aria-label={translate(
+                              'auto.components.activity.ActivityPrototypePage.4616ea39fd',
+                              'Jump to workspace'
+                            )}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              onJump()
+                            }}
+                            onMouseDown={(event) => event.stopPropagation()}
+                          >
+                            <ExternalLink className="size-3" />
+                          </Button>
+                        }
+                      />
                       <TooltipContent side="left">
                         {translate(
                           'auto.components.activity.ActivityPrototypePage.4616ea39fd',
@@ -1385,27 +1395,29 @@ function ThreadRow({
                   />
                 ) : (
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          onMarkUnread()
-                        }}
-                        onMouseDown={(event) => event.stopPropagation()}
-                        className={cn(
-                          'group/unread flex size-4 shrink-0 cursor-pointer items-center justify-center rounded transition-all',
-                          'hover:bg-accent/80 active:scale-95',
-                          'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-                        )}
-                        aria-label={translate(
-                          'auto.components.activity.ActivityPrototypePage.59b131fbd9',
-                          'Mark thread unread'
-                        )}
-                      >
-                        <Bell className="size-3 text-muted-foreground/40 can-hover:opacity-0 transition-opacity group-hover:opacity-100 group-hover/unread:opacity-100" />
-                      </button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            onMarkUnread()
+                          }}
+                          onMouseDown={(event) => event.stopPropagation()}
+                          className={cn(
+                            'group/unread flex size-4 shrink-0 cursor-pointer items-center justify-center rounded transition-all',
+                            'hover:bg-accent/80 active:scale-95',
+                            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+                          )}
+                          aria-label={translate(
+                            'auto.components.activity.ActivityPrototypePage.59b131fbd9',
+                            'Mark thread unread'
+                          )}
+                        >
+                          <Bell className="size-3 text-muted-foreground/40 can-hover:opacity-0 transition-opacity group-hover:opacity-100 group-hover/unread:opacity-100" />
+                        </button>
+                      }
+                    />
                     <TooltipContent side="left">
                       {translate(
                         'auto.components.activity.ActivityPrototypePage.59b131fbd9',
@@ -1878,26 +1890,28 @@ export default function ActivityPrototypePage(): React.JSX.Element {
                 </SelectContent>
               </Select>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Toggle
-                    pressed={readFilter === 'unread'}
-                    onPressedChange={(pressed) => setReadFilter(pressed ? 'unread' : 'all')}
-                    variant="outline"
-                    size="sm"
-                    className={cn(
-                      'size-8 shrink-0 p-0',
-                      readFilter === 'unread'
-                        ? '!border-primary !bg-primary !text-primary-foreground shadow-xs ring-2 ring-primary/35 hover:!bg-primary/90 hover:!text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
-                    )}
-                    aria-label={translate(
-                      'auto.components.activity.ActivityPrototypePage.d1a88df9a8',
-                      'Show unread threads only'
-                    )}
-                  >
-                    <BellDot className="size-3.5" />
-                  </Toggle>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Toggle
+                      pressed={readFilter === 'unread'}
+                      onPressedChange={(pressed) => setReadFilter(pressed ? 'unread' : 'all')}
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        'size-8 shrink-0 p-0',
+                        readFilter === 'unread'
+                          ? '!border-primary !bg-primary !text-primary-foreground shadow-xs ring-2 ring-primary/35 hover:!bg-primary/90 hover:!text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
+                      )}
+                      aria-label={translate(
+                        'auto.components.activity.ActivityPrototypePage.d1a88df9a8',
+                        'Show unread threads only'
+                      )}
+                    >
+                      <BellDot className="size-3.5" />
+                    </Toggle>
+                  }
+                />
                 <TooltipContent side="bottom">
                   {translate(
                     'auto.components.activity.ActivityPrototypePage.d1a88df9a8',
