@@ -209,12 +209,17 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
     const unsubscribeReader =
       this.reader.subscribe?.((snapshot, request, providerSessions) => {
         const observed = request ? this.observedWorktrees.resolve(request) : undefined
-        if (snapshot && observed) {
+        if (!observed) {
+          // Why: the runtime reports every workspace's tab/status changes; only
+          // Public worktrees may invalidate an in-flight Public session catalog.
+          return
+        }
+        if (snapshot) {
           // Why: paired runtimes can contain cloned worktree UUIDs; the originating
           // execution route must match before its provider id gains provenance.
           this.providerSessionObserver.observeSnapshot(snapshot, observed)
         }
-        if (providerSessions && observed) {
+        if (providerSessions) {
           this.providerSessionObserver.observeExplicit(providerSessions, observed)
         }
         listener()
