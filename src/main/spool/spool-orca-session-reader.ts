@@ -185,6 +185,20 @@ export class OrcaSpoolExecutionHostSessionReader implements SpoolExecutionHostSe
       }
       matched = request
     }
+    if (matched) {
+      return matched
+    }
+    for (const request of this.localReadRequests.values()) {
+      if (request.worktreeId !== snapshot.worktree) {
+        continue
+      }
+      if (matched && matched !== request) {
+        return undefined
+      }
+      matched = request
+    }
+    // Why: an empty/removed Public worktree snapshot has no terminal instance
+    // to join on, but a unique registered worktree route is still authoritative.
     return matched
   }
 }
