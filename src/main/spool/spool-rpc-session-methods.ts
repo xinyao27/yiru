@@ -187,7 +187,7 @@ function createTerminalSessionStream(
   connectionId: string,
   scrollbackRows?: number
 ) {
-  return createSpoolRpcStream(async (sink) => {
+  return createSpoolRpcStream(async (sink, context) => {
     const subscription = await dependencies.execution.subscribe(
       spoolSessionExecutionTarget(invocation, connectionId),
       {
@@ -213,7 +213,8 @@ function createTerminalSessionStream(
           return
         }
         sink.next(event)
-      }
+      },
+      context.signal
     )
     return () => subscription.close()
   })

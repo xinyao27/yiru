@@ -6,7 +6,12 @@ import type {
   SpoolTerminalCreateHostResult
 } from '../../shared/spool/spool-operation-contract'
 import { isSpoolMutationOperation } from '../../shared/spool/spool-operation-contract'
-import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
+import type {
+  BoundWorktreeTarget,
+  ExecutionAdmissionGuard,
+  SpoolExecutionGatewayOptions,
+  SpoolHostAdapter
+} from './spool-execution-contract'
 import { asSpoolExecutionError, SpoolExecutionError } from './spool-execution-error'
 import { linkSpoolOperationAbort } from './spool-operation-abort-link'
 import {
@@ -19,46 +24,13 @@ import {
 } from './spool-terminal-subscription-capacity'
 
 export type { SpoolHostSubscription } from './spool-terminal-subscription-capacity'
-
-export type BoundWorktreeTarget = {
-  connectionId: string
-  worktree: SpoolPublicWorktreeInstance
-  isCurrent(): boolean
-  subscribeInvalidation?: (listener: () => void) => () => void
-}
-
-export type ExecutionAdmissionGuard = {
-  beforeSideEffect(): Promise<void>
-}
-
-export type SpoolHostOperationContext = {
-  connectionId: string
-  signal: AbortSignal
-  admissionGuard?: ExecutionAdmissionGuard
-  origin: 'spool-owner'
-}
-
-export type SpoolHostAdapter = {
-  invoke(
-    target: SpoolPublicWorktreeInstance,
-    operation: SpoolExecutionOperation,
-    context: SpoolHostOperationContext
-  ): Promise<unknown>
-  subscribe(
-    target: SpoolPublicWorktreeInstance,
-    operation: SpoolSubscriptionOperation,
-    context: SpoolHostOperationContext,
-    emit: (event: unknown) => void
-  ): SpoolHostSubscription
-  closeConnection?(connectionId: string): void
-  revokeWorktree?(connectionId: string, instanceId: string): void
-}
-
-export type SpoolExecutionGatewayOptions = {
-  resolveAdapter(target: SpoolPublicWorktreeInstance): SpoolHostAdapter | null
-  captureControlGeneration(target: BoundWorktreeTarget): string
-  revalidateTarget(target: BoundWorktreeTarget): Promise<boolean>
-}
+export type {
+  BoundWorktreeTarget,
+  ExecutionAdmissionGuard,
+  SpoolExecutionGatewayOptions,
+  SpoolHostAdapter,
+  SpoolHostOperationContext
+} from './spool-execution-contract'
 
 export class SpoolExecutionGateway {
   private readonly connectionOperations = new Map<string, Map<AbortController, string>>()
@@ -132,7 +104,8 @@ export class SpoolExecutionGateway {
   async subscribe<TOperation extends SpoolSubscriptionOperation>(
     target: BoundWorktreeTarget,
     operation: TOperation,
-    emit: (event: SpoolSubscriptionEvent<TOperation>) => void
+    emit: (event: SpoolSubscriptionEvent<TOperation>) => void,
+    callerSignal?: AbortSignal
   ): Promise<SpoolHostSubscription> {
     this.requireCurrent(target)
     if (!(await this.options.revalidateTarget(target))) {
@@ -140,12 +113,15 @@ export class SpoolExecutionGateway {
     }
     this.requireCurrent(target)
     const adapter = this.requireAdapter(target)
-    const controller = new AbortController()
+    let subscription: SpoolHostSubscription
+    // Why: aborting only the host controller leaves the outer per-worktree capacity slot reserved.
+    const abortLink = linkSpoolOperationAbort(callerSignal, () => subscription.close())
+    const { controller } = abortLink
     this.trackOperation(target.connectionId, target.worktree.instanceId, controller)
     let closed = false
     let downstream: SpoolHostSubscription | null = null
     let unsubscribeInvalidation: (() => void) | null = null
-    const subscription: SpoolHostSubscription = {
+    subscription = {
       close: () => {
         if (closed) {
           return
@@ -158,6 +134,7 @@ export class SpoolExecutionGateway {
           try {
             unsubscribeInvalidation?.()
           } finally {
+            abortLink.unlink()
             this.untrackOperation(target.connectionId, controller)
             this.subscriptionCapacity.release(target.connectionId, subscription)
           }
@@ -165,6 +142,7 @@ export class SpoolExecutionGateway {
       }
     }
     try {
+      controller.signal.throwIfAborted()
       // Why: reserve before opening the host stream so concurrent requests cannot bypass the cap.
       this.subscriptionCapacity.reserve(
         target.connectionId,

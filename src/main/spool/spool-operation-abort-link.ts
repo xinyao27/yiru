@@ -4,9 +4,15 @@ export type SpoolOperationAbortLink = {
 }
 
 /** Links one caller cancellation lifetime into an owner-side operation controller. */
-export function linkSpoolOperationAbort(callerSignal?: AbortSignal): SpoolOperationAbortLink {
+export function linkSpoolOperationAbort(
+  callerSignal?: AbortSignal,
+  onCallerAbort?: () => void
+): SpoolOperationAbortLink {
   const controller = new AbortController()
-  const abort = (): void => controller.abort()
+  const abort = (): void => {
+    controller.abort()
+    onCallerAbort?.()
+  }
   if (callerSignal?.aborted) {
     controller.abort()
   } else {

@@ -56,7 +56,12 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
       return
     }
     if (request.method === SPOOL_CANCEL_REQUEST_METHOD) {
-      this.cancelRequested(request, (requestId) => this.requestAborts.get(requestId)?.abort())
+      this.cancelRequested(request, (requestId) => {
+        this.requestAborts.get(requestId)?.abort()
+        // Why: older clients cancel a timed-out stream as a request while its
+        // async setup is already tracked as a subscription; release both states.
+        this.finishSubscription(requestId, false)
+      })
       return
     }
     if (this.requestIds.has(request.id)) {

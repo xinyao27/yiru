@@ -185,7 +185,10 @@ export class SpoolPeerConnection {
       this.pending.delete(requestId)
       clearPendingRequest(pending)
       if (!pending.mutation) {
-        this.sendCancellation(SPOOL_CANCEL_REQUEST_METHOD, requestId)
+        this.sendCancellation(
+          pending.streaming ? SPOOL_CANCEL_SUBSCRIPTION_METHOD : SPOOL_CANCEL_REQUEST_METHOD,
+          requestId
+        )
       }
       pending.reject(new SpoolPeerConnectionError(pending.mutation ? 'outcome_unknown' : 'timeout'))
     }, request.timeoutMs)
