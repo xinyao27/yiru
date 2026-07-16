@@ -10,6 +10,7 @@ import { OrcaSpoolExecutionHostSessionReader } from './spool-orca-session-reader
 import { SpoolOwnerSessionRecords } from './spool-owner-session-records'
 import { SpoolSessionCatalog } from './spool-session-catalog'
 import type { SpoolSessionProvenanceIndex } from './spool-session-provenance-index'
+import { toSessionWorktree } from './spool-session-worktree-binding'
 import { SpoolTerminalSessionBindings } from './spool-terminal-session-bindings'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-visibility'
 
@@ -22,6 +23,28 @@ function emptySessionSnapshot(worktreeId: string): SpoolMobileSessionTabsResult 
     activeTabId: null,
     activeTabType: null,
     tabs: []
+  }
+}
+
+function sessionSnapshotWithTerminal(worktreeId: string): SpoolMobileSessionTabsResult {
+  return {
+    ...emptySessionSnapshot(worktreeId),
+    snapshotVersion: 2,
+    activeTabId: 'tab-one',
+    activeTabType: 'terminal',
+    tabs: [
+      {
+        type: 'terminal',
+        id: 'tab-one',
+        title: 'Terminal',
+        parentTabId: 'tab-one',
+        leafId: 'leaf-one',
+        isActive: true,
+        status: 'ready',
+        terminal: 'terminal-one',
+        worktreeInstanceId: publicWorktree.instanceId
+      }
+    ]
   }
 }
 
@@ -100,6 +123,54 @@ describe('Spool session catalog invalidation', () => {
     catalog.close()
   })
 
+  it('finishes a page while the same Public session snapshot repeats', async () => {
+    let emitSessionChange: Parameters<NonNullable<SpoolExecutionHostSessionReader['subscribe']>>[0]
+    const reader: SpoolExecutionHostSessionReader = {
+      registerPublicWorktree: () => undefined,
+      unregisterPublicWorktree: () => undefined,
+      listMobileSessionTabs: async () => emptySessionSnapshot(publicWorktree.worktreeId),
+      listAiVaultSessionPage: async () => {
+        emitSessionChange(
+          { ...emptySessionSnapshot(publicWorktree.worktreeId), snapshotVersion: 2 },
+          publicReadRequest
+        )
+        return { sessions: [], nextCursor: null, scannedAt: 'inventory-one' }
+      },
+      releaseAiVaultSessionPage: async () => undefined,
+      subscribe: (listener) => {
+        emitSessionChange = listener
+        return () => undefined
+      }
+    }
+    const provenance = {
+      resolve: () => null,
+      attest: () => false
+    } as unknown as SpoolSessionProvenanceIndex
+    const source = new SpoolMobileVaultSessionSource(
+      reader,
+      new SpoolOwnerSessionRecords(),
+      new SpoolTerminalSessionBindings(),
+      provenance
+    )
+    const consistency: SpoolHistoricalSessionConsistency = {
+      open: async () => ({ retainConsistent: async (candidates) => candidates })
+    }
+    const catalog = new SpoolSessionCatalog(provenance, source, consistency)
+    source.trackPublicWorktree(publicWorktree)
+    await source.listLiveSessions(toSessionWorktree(publicWorktree))
+
+    await expect(
+      catalog.listSessionPage(
+        publicWorktree,
+        null,
+        '00000000-0000-4000-8000-000000000001',
+        new AbortController().signal
+      )
+    ).resolves.toEqual({ sessions: [], nextCursor: null })
+
+    catalog.close()
+  })
+
   it('routes an empty snapshot through its unique registered Public worktree', () => {
     let emitSessionChange: (snapshot: SpoolMobileSessionTabsResult) => void = () => undefined
     const reader = new OrcaSpoolExecutionHostSessionReader({
@@ -118,6 +189,46 @@ describe('Spool session catalog invalidation', () => {
     emitSessionChange(emptySessionSnapshot(publicWorktree.worktreeId))
 
     expect(observedRequest).toEqual(publicReadRequest)
+    unsubscribe()
+  })
+
+  it('invalidates when a Public snapshot changes its projected sessions', async () => {
+    let emitSessionChange: Parameters<
+      NonNullable<SpoolExecutionHostSessionReader['subscribe']>
+    >[0] = () => undefined
+    const reader: SpoolExecutionHostSessionReader = {
+      registerPublicWorktree: () => undefined,
+      unregisterPublicWorktree: () => undefined,
+      listMobileSessionTabs: async () => emptySessionSnapshot(publicWorktree.worktreeId),
+      listAiVaultSessionPage: async () => ({
+        sessions: [],
+        nextCursor: null,
+        scannedAt: 'inventory-one'
+      }),
+      releaseAiVaultSessionPage: async () => undefined,
+      subscribe: (listener) => {
+        emitSessionChange = listener
+        return () => undefined
+      }
+    }
+    const provenance = {
+      resolve: () => null,
+      attest: () => false
+    } as unknown as SpoolSessionProvenanceIndex
+    const source = new SpoolMobileVaultSessionSource(
+      reader,
+      new SpoolOwnerSessionRecords(),
+      new SpoolTerminalSessionBindings(),
+      provenance
+    )
+    source.trackPublicWorktree(publicWorktree)
+    await source.listLiveSessions(toSessionWorktree(publicWorktree))
+    let changes = 0
+    const unsubscribe = source.subscribe(() => changes++)
+
+    emitSessionChange(sessionSnapshotWithTerminal(publicWorktree.worktreeId), publicReadRequest)
+
+    expect(changes).toBe(1)
     unsubscribe()
   })
 })
