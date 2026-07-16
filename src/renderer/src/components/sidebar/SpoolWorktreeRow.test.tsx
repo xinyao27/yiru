@@ -16,7 +16,7 @@ vi.mock('./SpoolDesktopUsageHoverCard', () => ({
 
 import { SpoolWorktreeRow } from './SpoolWorktreeRow'
 
-function makeRow(): SpoolWorktreeSidebarRow {
+function makeRow(overrides: Partial<SpoolWorktreeSidebarRow> = {}): SpoolWorktreeSidebarRow {
   return {
     type: 'spool-worktree',
     kind: 'git',
@@ -38,7 +38,8 @@ function makeRow(): SpoolWorktreeSidebarRow {
     expanded: false,
     active: false,
     sessionCount: 0,
-    sessionCatalogStatus: 'complete'
+    sessionCatalogStatus: 'complete',
+    ...overrides
   }
 }
 
@@ -65,9 +66,23 @@ describe('SpoolWorktreeRow', () => {
     const statusSlot = container.querySelector('[data-spool-worktree-status-slot]')
     const content = container.querySelector('[data-spool-worktree-content]')
 
-    expect(statusSlot?.querySelector('svg')).not.toBeNull()
+    expect(statusSlot?.querySelector('.lucide-cloud')).not.toBeNull()
     expect(content?.textContent).toContain('Yifeng Wang')
     expect(content?.textContent).toContain('main')
     expect(statusSlot?.textContent).not.toContain('main')
+  })
+
+  it('uses the remote icon for folder worktrees too', () => {
+    act(() => {
+      root.render(
+        <SpoolWorktreeRow
+          row={makeRow({ kind: 'folder', branch: null })}
+          onToggle={vi.fn()}
+          onSelect={vi.fn()}
+        />
+      )
+    })
+
+    expect(container.querySelector('.lucide-cloud')).not.toBeNull()
   })
 })

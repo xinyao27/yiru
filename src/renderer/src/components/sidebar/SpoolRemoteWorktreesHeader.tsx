@@ -1,5 +1,5 @@
 import type React from 'react'
-import { Cloud } from 'lucide-react'
+import { Cloudy } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { ProjectHeaderActions } from './ProjectHeaderActions'
 import { SidebarDisclosure } from './SidebarDisclosure'
@@ -21,7 +21,7 @@ export function SpoolRemoteWorktreesHeader({
         tabIndex={0}
         aria-expanded={expanded}
         paddingLeft={WORKTREE_SECTION_HEADER_PADDING_LEFT}
-        icon={<Cloud aria-hidden="true" className="size-3.5" />}
+        icon={<Cloudy aria-hidden="true" className="size-3.5" />}
         iconClassName="text-muted-foreground"
         label={label}
         className="cursor-pointer focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring"
