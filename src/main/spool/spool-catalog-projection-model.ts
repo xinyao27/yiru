@@ -63,8 +63,10 @@ export function sanitizeCatalogSessionDescriptions(
 ): SpoolCatalogSessionDescription[] {
   return sessions.map((session) => {
     const sessionKey = boundedIdentity(session.sessionKey)
-    const title = catalogLabel(session.title)
-    if (!sessionKey || !title) {
+    // Why: an owner-controlled terminal title may contain only control bytes;
+    // its stable session identity remains valid and must not hide the whole worktree.
+    const title = catalogLabel(session.title) || fallbackCatalogSessionTitle(session)
+    if (!sessionKey) {
       // Why: silently omitting an invalid row could turn a partial owner page into completeness.
       throw new Error('Invalid Spool catalog session description')
     }
@@ -72,6 +74,10 @@ export function sanitizeCatalogSessionDescriptions(
       ? { sessionKey, kind: 'terminal', agent: null, title }
       : { sessionKey, kind: 'agent', agent: session.agent, title }
   })
+}
+
+function fallbackCatalogSessionTitle(session: SpoolCatalogSessionDescription): string {
+  return session.kind === 'terminal' ? 'terminal' : (session.agent ?? 'agent')
 }
 
 export function buildCatalogReferenceBindings(

@@ -31,7 +31,7 @@ const instance: SpoolPublicWorktreeInstance = {
 }
 
 describe('Spool catalog session pages', () => {
-  it('classifies an invalid wire session description at the projection boundary', async () => {
+  it('keeps a session whose owner title contains no wire-safe text', async () => {
     const description = sanitizeCatalogWorktreeDescription(instance, {
       kind: 'git',
       projectKey: 'project:project-one',
@@ -95,9 +95,11 @@ describe('Spool catalog session pages', () => {
         },
         new AbortController().signal
       )
-    ).rejects.toMatchObject({
-      code: 'internal_error',
-      diagnostic: 'session-wire-projection'
+    ).resolves.toMatchObject({
+      page: {
+        sessions: [{ kind: 'agent', agent: 'codex', title: 'codex' }],
+        sessionCatalog: { status: 'complete', nextCursor: null }
+      }
     })
   })
 })
