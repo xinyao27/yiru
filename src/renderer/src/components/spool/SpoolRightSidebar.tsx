@@ -16,6 +16,7 @@ import { SpoolAgentsPane } from './SpoolAgentsPane'
 import { SpoolChecksPane, useSpoolChecksReadState } from './SpoolChecksPane'
 import { SpoolFilesPane } from './SpoolFilesPane'
 import { SpoolGitPane } from './SpoolGitPane'
+import { shouldReadSpoolChecks } from './spool-right-sidebar-read-policy'
 import { getSpoolWorktreeRouteKey } from './spool-worktree-route'
 
 export function SpoolRightSidebar({
@@ -75,11 +76,14 @@ function SpoolRightSidebarContent({
     activeFolderWorkspaceKey: null,
     rememberedFolderTab: null
   })
-  const checksState = useSpoolChecksReadState(route, rightSidebarOpen && connected && supportsGit)
-  const checksStatus =
-    rightSidebarOpen && connected && supportsGit
-      ? (checksState.result?.review?.status ?? null)
-      : null
+  const checksReadEnabled = shouldReadSpoolChecks({
+    activeTab,
+    rightSidebarOpen,
+    connected,
+    supportsGit
+  })
+  const checksState = useSpoolChecksReadState(route, checksReadEnabled)
+  const checksStatus = checksReadEnabled ? (checksState.result?.review?.status ?? null) : null
 
   if (rightSidebarOpen && !workspace) {
     return null
