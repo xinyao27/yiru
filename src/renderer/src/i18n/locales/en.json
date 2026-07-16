@@ -4739,7 +4739,7 @@
           "decisionFailed": "Could not send the control decision.",
           "title": "Allow {{value0}} to control this worktree?",
           "worktree": "Worktree: {{value0}} / {{value1}}",
-          "capabilities": "They will be able to send terminal input, modify files, run commands, and use your Claude/Codex accounts.",
+          "capabilities": "They will be able to create terminals, start enabled agents, send terminal input, modify files, run commands, and use your active agent accounts.",
           "shellWarning": "Terminal commands are not confined to this worktree.",
           "queued": "Queued control requests: {{value0}}.",
           "deny": "Deny",
@@ -4773,7 +4773,8 @@
           "unavailable": "Terminal unavailable",
           "outcomeUnknown": "This terminal action may have succeeded on the owner’s desktop. Inspect the terminal output before sending more input.",
           "outcomeUnknownPersistent": "A terminal action may have succeeded. Inspect the output before resuming input.",
-          "resumeInput": "Resume input"
+          "resumeInput": "Resume input",
+          "inputBacklogFull": "Remote input is still catching up. Wait for it to appear before typing or pasting more."
         },
         "SpoolWorktreeVisibilityDialog": {
           "publishFailed": "Could not make this worktree public.",
@@ -4925,6 +4926,53 @@
           "upstream": "{{value0}} · ↑{{value1}} ↓{{value2}}",
           "stateUnavailable": "Git state is unavailable.",
           "changesLimited": "Only part of this status is shown."
+        },
+        "SpoolAgentsPane": {
+          "publicSessions": "Public agents",
+          "noAgentSessions": "No public agent sessions in this worktree.",
+          "unknownAgent": "Agent"
+        },
+        "SpoolChecksPane": {
+          "reviewChecks": "Review checks",
+          "refresh": "Refresh",
+          "loadFailed": "Could not load checks from the owner.",
+          "loading": "Loading checks…",
+          "noReview": "No hosted review was found for this branch.",
+          "unavailable": "Hosted review details are unavailable from the owner.",
+          "openReview": "Open review",
+          "checks": "Checks",
+          "detailsUnavailable": "Detailed checks could not be loaded.",
+          "detailsUnsupported": "Detailed checks are not available for this provider.",
+          "checksTruncated": "Showing a partial check list.",
+          "noChecks": "No checks were reported for this review.",
+          "passing": "Passing",
+          "failing": "Failing",
+          "pending": "Pending",
+          "neutral": "Neutral",
+          "queued": "Queued",
+          "inProgress": "In progress",
+          "succeeded": "Succeeded",
+          "failed": "Failed",
+          "cancelled": "Cancelled",
+          "timedOut": "Timed out",
+          "skipped": "Skipped",
+          "actionRequired": "Action required",
+          "hostedReview": "Hosted review",
+          "open": "Open",
+          "closed": "Closed",
+          "merged": "Merged",
+          "draft": "Draft"
+        },
+        "SpoolSessionCreateMenu": {
+          "outcomeUnknown": "The terminal may already be running on the owner desktop. Creation was not retried.",
+          "createFailed": "Could not create the terminal.",
+          "noAgents": "No agents available",
+          "loadingAgents": "Loading owner agents…",
+          "agentsUnavailable": "Owner agents unavailable",
+          "disconnected": "Reconnect to create terminals.",
+          "controlPending": "Waiting for the owner to approve control.",
+          "controlRequired": "Request control to create terminals.",
+          "creating": "Creating terminal…"
         }
       },
       "shared": {

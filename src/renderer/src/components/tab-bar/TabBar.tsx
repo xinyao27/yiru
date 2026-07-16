@@ -6,7 +6,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { SortableContext } from '@dnd-kit/sortable'
-import { FilePlus, FileText, Globe, Plus, Smartphone, TerminalSquare } from 'lucide-react'
+import { FilePlus, FileText, Globe, Smartphone } from 'lucide-react'
 import { toast } from 'sonner'
 import type {
   BrowserTab as BrowserTabState,
@@ -50,12 +50,9 @@ import {
   WINDOWS_GIT_BASH_SHELL
 } from '../../../../shared/windows-terminal-shell'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger
+  DropdownMenuShortcut
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { TabCreateEntryArgs } from './tab-create-entry-action'
@@ -73,6 +70,7 @@ import {
   selectTabAgentTypesByTabId
 } from './tab-agent-types-by-tab-id'
 import { resolveCommittedTitleAgentType } from '@/lib/pane-agent-evidence'
+import { WorkspaceNewTerminalMenuItem, WorkspaceTabCreateMenu } from './WorkspaceTabCreateMenu'
 
 const isWindows = navigator.userAgent.includes('Windows')
 const isMacOs = navigator.userAgent.includes('Mac')
@@ -714,17 +712,13 @@ function TabBarInner({
         )
       })
     ) : (
-      <DropdownMenuItem
+      <WorkspaceNewTerminalMenuItem
         onSelect={() => {
           queueNewActiveTerminalFocusAfterNewTabMenuClose()
           onNewTerminalTab()
         }}
-        className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
-      >
-        <TerminalSquare className="size-4 text-muted-foreground" />
-        {translate('auto.components.tab.bar.TabBar.d364f3c8d4', 'New Terminal')}
-        <DropdownMenuShortcut>{newTerminalShortcut}</DropdownMenuShortcut>
-      </DropdownMenuItem>
+        shortcut={newTerminalShortcut}
+      />
     )
   const newBrowserMenuItem = !terminalOnly ? (
     <DropdownMenuItem
@@ -1177,74 +1171,49 @@ function TabBarInner({
           })}
         </SortableContext>
       </WorkspaceTabStripViewport>
-      <DropdownMenu
+      <WorkspaceTabCreateMenu
         open={newTabMenuOpen}
         onOpenChange={setNewTabMenuOpen}
-        // Why: this menu can stay open after the Mobile Emulator "Hide" action,
-        // which shows a toast with a re-enable link; modal would disable body
-        // pointer events and make that toast (and other outside UI) unclickable.
-        modal={false}
+        onCloseAutoFocus={(e) => {
+          // Why: terminal-producing menu actions activate a freshly-mounted
+          // xterm. Radix focus restore would steal focus back to the trigger.
+          e.preventDefault()
+          runPendingNewTabMenuFocusAfterClose()
+        }}
       >
-        <DropdownMenuTrigger asChild>
-          <button
-            className="ml-2 my-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-            title={translate('auto.components.tab.bar.TabBar.b1a132357f', 'New tab')}
-            // Why: aria-label matches the tooltip so E2E can locate the "+"
-            // affordance via getByRole('button', { name: 'New tab' }). The
-            // store-only createTab() round-trip that preceded this was a
-            // tautology — it would pass even if the + button had been deleted.
-            aria-label={translate('auto.components.tab.bar.TabBar.b1a132357f', 'New tab')}
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="start"
-          sideOffset={6}
-          className="w-72 max-w-[calc(100vw-1rem)] rounded-[11px] border-border/80 p-1 shadow-[0_16px_36px_rgba(0,0,0,0.24)]"
-          onCloseAutoFocus={(e) => {
-            // Why: terminal-producing menu actions activate a freshly-mounted
-            // xterm. Radix's default focus restore sends focus back to the "+"
-            // trigger after close, stealing it from the new terminal.
-            e.preventDefault()
-            runPendingNewTabMenuFocusAfterClose()
-          }}
-        >
-          {!terminalOnly && onOpenEntry ? (
-            <>
-              <TabBarCreateEntry
-                worktreeId={worktreeId}
-                groupId={resolvedGroupId}
-                menuOpen={newTabMenuOpen}
-                menuOptions={createMenuOptions}
-                agentOptions={agentLaunchOptions}
-                onLaunchAgent={launchAgentFromNewTabEntry}
-                onOpenDefaultTerminal={() => {
-                  queueNewActiveTerminalFocusAfterNewTabMenuClose()
-                  onNewTerminalTab()
-                }}
-                onOpenEntry={onOpenEntry}
-                onQueryChange={setCreateMenuQuery}
-                onSelectMenuOption={handleSelectCreateMenuOption}
-                onDidOpenEntry={() => setNewTabMenuOpen(false)}
-              />
-              {showStaticCreateMenuItems ? <DropdownMenuSeparator /> : null}
-            </>
-          ) : null}
-          {showStaticCreateMenuItems ? standardCreateMenuItems : null}
-          {showStaticCreateMenuItems && showAgentLaunchItems ? (
-            <>
-              <DropdownMenuSeparator />
-              <QuickLaunchAgentMenuItems
-                worktreeId={worktreeId}
-                groupId={resolvedGroupId}
-                onFocusTerminal={queueTerminalTabFocusAfterNewTabMenuClose}
-              />
-            </>
-          ) : null}
-        </DropdownMenuContent>
-      </DropdownMenu>
+        {!terminalOnly && onOpenEntry ? (
+          <>
+            <TabBarCreateEntry
+              worktreeId={worktreeId}
+              groupId={resolvedGroupId}
+              menuOpen={newTabMenuOpen}
+              menuOptions={createMenuOptions}
+              agentOptions={agentLaunchOptions}
+              onLaunchAgent={launchAgentFromNewTabEntry}
+              onOpenDefaultTerminal={() => {
+                queueNewActiveTerminalFocusAfterNewTabMenuClose()
+                onNewTerminalTab()
+              }}
+              onOpenEntry={onOpenEntry}
+              onQueryChange={setCreateMenuQuery}
+              onSelectMenuOption={handleSelectCreateMenuOption}
+              onDidOpenEntry={() => setNewTabMenuOpen(false)}
+            />
+            {showStaticCreateMenuItems ? <DropdownMenuSeparator /> : null}
+          </>
+        ) : null}
+        {showStaticCreateMenuItems ? standardCreateMenuItems : null}
+        {showStaticCreateMenuItems && showAgentLaunchItems ? (
+          <>
+            <DropdownMenuSeparator />
+            <QuickLaunchAgentMenuItems
+              worktreeId={worktreeId}
+              groupId={resolvedGroupId}
+              onFocusTerminal={queueTerminalTabFocusAfterNewTabMenuClose}
+            />
+          </>
+        ) : null}
+      </WorkspaceTabCreateMenu>
     </div>
   )
 }

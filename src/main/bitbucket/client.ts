@@ -12,6 +12,11 @@ import {
   getHostedReviewLocalGitOptions,
   type HostedReviewExecutionOptions
 } from '../source-control/hosted-review-git-options'
+import {
+  HostedReviewApiRequestError,
+  requestHostedReviewJson
+} from '../source-control/hosted-review-api-request'
+import type { HostedReviewLookupOptions } from '../source-control/hosted-review-lookup-options'
 
 const DEFAULT_API_BASE_URL = 'https://api.bitbucket.org/2.0'
 const REQUEST_TIMEOUT_MS = 5000
@@ -33,6 +38,9 @@ export type BitbucketAuthStatus = {
 type RequestOptions = {
   searchParams?: Record<string, string | readonly string[]>
   timeoutMs?: number
+  throwOnError?: boolean
+  allowNotFound?: boolean
+  signal?: AbortSignal
 }
 
 function envValue(name: string): string | null {
@@ -89,18 +97,29 @@ function apiUrl(path: string, searchParams?: RequestOptions['searchParams']): st
 async function requestJson<T>(path: string, options: RequestOptions = {}): Promise<T | null> {
   const config = getAuthConfig()
   try {
-    const response = await fetch(apiUrl(path, options.searchParams), {
-      headers: {
-        Accept: 'application/json',
-        ...authHeaders(config)
+    return await requestHostedReviewJson<T>(
+      new URL(apiUrl(path, options.searchParams)),
+      {
+        headers: {
+          Accept: 'application/json',
+          ...authHeaders(config)
+        }
       },
-      signal: AbortSignal.timeout(options.timeoutMs ?? REQUEST_TIMEOUT_MS)
-    })
-    if (!response.ok) {
+      options.timeoutMs ?? REQUEST_TIMEOUT_MS,
+      options.signal
+    )
+  } catch (error) {
+    options.signal?.throwIfAborted()
+    if (
+      options.allowNotFound &&
+      error instanceof HostedReviewApiRequestError &&
+      error.status === 404
+    ) {
       return null
     }
-    return (await response.json()) as T
-  } catch {
+    if (options.throwOnError) {
+      throw error
+    }
     return null
   }
 }
@@ -119,24 +138,28 @@ function allStateFilter(): string {
 
 async function getBuildStatus(
   repo: BitbucketRepoRef,
-  headSha: string | undefined
+  headSha: string | undefined,
+  signal?: AbortSignal,
+  throwOnError = false
 ): Promise<CheckStatus> {
   if (!headSha) {
     return 'neutral'
   }
   const data = await requestJson<{ values?: RawBitbucketBuildStatus[] }>(
     `/repositories/${encodedRepoPath(repo)}/commit/${encodeURIComponent(headSha)}/statuses/build`,
-    { searchParams: { pagelen: '100' } }
+    { searchParams: { pagelen: '100' }, signal, throwOnError }
   )
   return deriveBitbucketBuildStatus(data?.values ?? [])
 }
 
 async function normalizePullRequest(
   repo: BitbucketRepoRef,
-  raw: RawBitbucketPullRequest
+  raw: RawBitbucketPullRequest,
+  signal?: AbortSignal,
+  throwOnError = false
 ): Promise<BitbucketPullRequestInfo | null> {
   const headSha = raw.source?.commit?.hash?.trim()
-  const status = await getBuildStatus(repo, headSha)
+  const status = await getBuildStatus(repo, headSha, signal, throwOnError)
   return mapBitbucketPullRequest(raw, status)
 }
 
@@ -172,9 +195,10 @@ export async function getBitbucketPullRequest(
     return null
   }
   const raw = await requestJson<RawBitbucketPullRequest>(
-    `/repositories/${encodedRepoPath(repo)}/pullrequests/${encodeURIComponent(String(prNumber))}`
+    `/repositories/${encodedRepoPath(repo)}/pullrequests/${encodeURIComponent(String(prNumber))}`,
+    { signal: options.signal }
   )
-  return raw ? normalizePullRequest(repo, raw) : null
+  return raw ? normalizePullRequest(repo, raw, options.signal) : null
 }
 
 export async function getBitbucketPullRequestForBranch(
@@ -182,7 +206,7 @@ export async function getBitbucketPullRequestForBranch(
   branch: string,
   linkedPRNumber?: number | null,
   connectionId?: string | null,
-  options: HostedReviewExecutionOptions = {}
+  options: HostedReviewLookupOptions = {}
 ): Promise<BitbucketPullRequestInfo | null> {
   const branchName = branch.replace(/^refs\/heads\//, '')
   if (!branchName && linkedPRNumber == null) {
@@ -194,7 +218,11 @@ export async function getBitbucketPullRequestForBranch(
     connectionId,
     getHostedReviewLocalGitOptions(options)
   )
+  options.signal?.throwIfAborted()
   if (!repo) {
+    if (options.throwOnProviderError) {
+      throw new Error('Bitbucket repository lookup became unavailable.')
+    }
     return null
   }
 
@@ -206,6 +234,8 @@ export async function getBitbucketPullRequestForBranch(
     const list = await requestJson<{ values?: RawBitbucketPullRequest[] }>(
       `/repositories/${encodedRepoPath(repo)}/pullrequests`,
       {
+        throwOnError: options.throwOnProviderError,
+        signal: options.signal,
         searchParams: {
           pagelen: '1',
           sort: '-updated_on',
@@ -216,7 +246,7 @@ export async function getBitbucketPullRequestForBranch(
     )
     const raw = list?.values?.[0]
     if (raw) {
-      return normalizePullRequest(repo, raw)
+      return normalizePullRequest(repo, raw, options.signal, options.throwOnProviderError)
     }
   }
 
@@ -224,9 +254,15 @@ export async function getBitbucketPullRequestForBranch(
     return null
   }
   const raw = await requestJson<RawBitbucketPullRequest>(
-    `/repositories/${encodedRepoPath(repo)}/pullrequests/${encodeURIComponent(String(linkedPRNumber))}`
+    `/repositories/${encodedRepoPath(repo)}/pullrequests/${encodeURIComponent(String(linkedPRNumber))}`,
+    // Why: only the durable exact-id lookup can interpret 404 as a deleted review.
+    {
+      allowNotFound: true,
+      throwOnError: options.throwOnProviderError,
+      signal: options.signal
+    }
   )
-  return raw ? normalizePullRequest(repo, raw) : null
+  return raw ? normalizePullRequest(repo, raw, options.signal, options.throwOnProviderError) : null
 }
 
 export async function getBitbucketRepoSlug(

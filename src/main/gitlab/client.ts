@@ -47,6 +47,8 @@ import {
   getHostedReviewLocalGitOptions,
   type HostedReviewExecutionOptions
 } from '../source-control/hosted-review-git-options'
+import type { HostedReviewLookupOptions } from '../source-control/hosted-review-lookup-options'
+import { extractExecError } from '../git/runner'
 
 // Why: glab REST API addresses projects by URL-encoded path. Centralized
 // so call sites don't forget the slash escapes for nested groups.
@@ -56,6 +58,7 @@ function encodedProject(projectPath: string): string {
 
 const GITLAB_RATE_LIMIT_CACHE_TTL_MS = 30_000
 const GITLAB_RATE_LIMIT_CACHE_MAX_ENTRIES = 64
+const GITLAB_BRANCH_LOOKUP_TIMEOUT_MS = 10_000
 const gitLabRateLimitCache = new Map<string, GitLabRateLimitSnapshot>()
 
 type HostedReviewLocalGitOptions = ReturnType<typeof getHostedReviewLocalGitOptions>
@@ -248,7 +251,9 @@ export async function getProjectSlug(
   connectionId?: string | null,
   options: HostedReviewExecutionOptions = {}
 ): Promise<ProjectRef | null> {
-  const knownHosts = await getGlabKnownHosts(connectionId)
+  const knownHosts = options.signal
+    ? await getGlabKnownHosts(connectionId, { signal: options.signal })
+    : await getGlabKnownHosts(connectionId)
   return getProjectRef(
     repoPath,
     knownHosts,
@@ -313,20 +318,38 @@ export async function getMergeRequestForBranch(
   branch: string,
   linkedMRIid?: number | null,
   connectionId?: string | null,
-  options: HostedReviewExecutionOptions = {}
+  options: HostedReviewLookupOptions = {}
 ): Promise<MRInfo | null> {
   const branchName = branch.replace(/^refs\/heads\//, '')
   if (!branchName && linkedMRIid == null) {
     return null
   }
-  const knownHosts = await getGlabKnownHosts(connectionId)
+  options.signal?.throwIfAborted()
+  const knownHosts = options.signal
+    ? await getGlabKnownHosts(connectionId, { signal: options.signal })
+    : await getGlabKnownHosts(connectionId)
   const localGitArgs = hostedReviewLocalGitOptionArgs(options)
   const localGitOptions = localGitArgs[0] ?? {}
   const projectRef = await getProjectRef(repoPath, knownHosts, connectionId, ...localGitArgs)
+  options.signal?.throwIfAborted()
   if (!projectRef) {
+    if (options.throwOnProviderError) {
+      throw new Error('GitLab project lookup became unavailable.')
+    }
     return null
   }
-  await acquire()
+  // Why: the GitLab client has only four shared CLI lanes; one stalled branch
+  // lookup must release its lane even when glab's own network timeout does not.
+  const timeoutSignal = AbortSignal.timeout(GITLAB_BRANCH_LOOKUP_TIMEOUT_MS)
+  const lookupSignal = options.signal
+    ? AbortSignal.any([options.signal, timeoutSignal])
+    : timeoutSignal
+  await acquire(lookupSignal)
+  let exactLinkedLookup = false
+  const lookupExecOptions = {
+    ...glabRepoExecOptions(repoPath, connectionId, localGitOptions),
+    signal: lookupSignal
+  }
   try {
     if (branchName) {
       const { stdout } = await glabExecFileAsync(
@@ -335,7 +358,7 @@ export async function getMergeRequestForBranch(
           ...glabHostnameArgs(projectRef, connectionId),
           `projects/${encodedProject(projectRef.path)}/merge_requests?source_branch=${encodeURIComponent(branchName)}&order_by=updated_at&sort=desc&per_page=1`
         ],
-        glabRepoExecOptions(repoPath, connectionId, localGitOptions)
+        lookupExecOptions
       )
       const data = JSON.parse(stdout) as (Parameters<typeof mapMRInfo>[0] & {
         head_pipeline?: { status?: string } | null
@@ -355,13 +378,14 @@ export async function getMergeRequestForBranch(
     // Why: create-from-MR worktrees may use a fresh local branch name rather
     // than the MR source branch. Fall back to the durable linked iid so the
     // core review status still follows the workspace.
+    exactLinkedLookup = true
     const { stdout } = await glabExecFileAsync(
       [
         'api',
         ...glabHostnameArgs(projectRef, connectionId),
         `projects/${encodedProject(projectRef.path)}/merge_requests/${linkedMRIid}`
       ],
-      glabRepoExecOptions(repoPath, connectionId, localGitOptions)
+      lookupExecOptions
     )
     const raw = JSON.parse(stdout) as Parameters<typeof mapMRInfo>[0] & {
       head_pipeline?: { status?: string } | null
@@ -369,11 +393,20 @@ export async function getMergeRequestForBranch(
     }
     const pipelineStatus = derivePipelineStatus(raw.head_pipeline ?? raw.pipeline ?? null)
     return mapMRInfo(raw, pipelineStatus)
-  } catch {
+  } catch (error) {
+    // Why: a linked exact-id 404 is a stale link; branch-list failures remain unavailable.
+    if (options.throwOnProviderError && !(exactLinkedLookup && isGitLabNotFoundError(error))) {
+      throw error
+    }
     return null
   } finally {
     release()
   }
+}
+
+function isGitLabNotFoundError(error: unknown): boolean {
+  const output = extractExecError(error)
+  return classifyGlabError(`${output.stderr}\n${output.stdout}`).type === 'not_found'
 }
 
 function mrListStateFlags(state: MRListState): string[] {

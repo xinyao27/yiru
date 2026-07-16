@@ -28,10 +28,10 @@ export function SpoolSessionRow({ row, onSelect }: SpoolSessionRowProps): React.
       style={{ paddingLeft: getProjectGroupHeaderPaddingLeft(2) + SIDEBAR_TREE_INDENT }}
     >
       <span aria-hidden="true" className="flex size-3.5 shrink-0 items-center justify-center">
-        {row.provider === 'other' ? (
+        {row.kind === 'terminal' ? (
           <SquareTerminal className="size-3.5" />
         ) : (
-          <AgentIcon agent={row.provider} size={13} />
+          <AgentIcon agent={row.agent} size={13} />
         )}
       </span>
       <TruncatedSidebarLabel text={row.title} className="min-w-0 flex-1" />

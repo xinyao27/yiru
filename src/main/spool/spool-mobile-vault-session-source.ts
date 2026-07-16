@@ -1,41 +1,44 @@
-import { createHash } from 'node:crypto'
-import type { AiVaultSession } from '../../shared/ai-vault-types'
-import { normalizeExecutionHostId } from '../../shared/execution-host'
-import type { RuntimeMobileSessionTerminalClientTab } from '../../shared/runtime-types'
 import type {
+  SpoolExecutionHostSessionReadRequest,
   SpoolExecutionHostSessionReader,
   SpoolHistoricalSessionCandidate,
   SpoolHistoricalSessionPurpose,
   SpoolLiveSessionCandidate,
   SpoolOwnerHistoricalSessionRecord,
-  SpoolSessionProvider,
   SpoolSessionSource,
   SpoolSessionWorktreeIdentity
 } from './spool-session-source'
 import type { SpoolOwnerWorktree } from './spool-worktree-incarnation'
-import {
-  normalizeOwnerHistoricalSessionRecord,
-  type SpoolOwnerSessionRecords
-} from './spool-owner-session-records'
-import type { SpoolContinuedSessionBindings } from './spool-continued-session-bindings'
+import type { SpoolOwnerSessionRecords } from './spool-owner-session-records'
+import { SpoolObservedWorktreeProvenance } from './spool-observed-worktree-provenance'
 import { SpoolSessionReadRoutes, spoolSessionReadRouteBinding } from './spool-session-read-routes'
+import { SpoolSessionIdentityAliases } from './spool-session-identity-aliases'
+import type { SpoolSessionProvenanceIndex } from './spool-session-provenance-index'
+import type { SpoolTerminalSessionBindings } from './spool-terminal-session-bindings'
+import { SpoolProviderSessionObserver } from './spool-provider-session-observer'
+import {
+  isReadyMobileSessionTerminalTab,
+  projectMobileVaultHistoricalSession,
+  projectMobileVaultLiveTab,
+  type ReadyMobileSessionTerminalTab
+} from './spool-mobile-vault-session-projection'
+import { toSessionWorktree } from './spool-session-worktree-binding'
+import type { SpoolPublicWorktreeInstance } from './spool-worktree-visibility'
 
-const MAX_PROVIDER_SESSION_ID_LENGTH = 512
-const MAX_TERMINAL_HANDLE_LENGTH = 2048
 const LIVE_SESSION_INVENTORY_SCOPE = '00000000-0000-4000-8000-000000000000'
-
-type ReadyMobileSessionTerminalTab = Extract<
-  RuntimeMobileSessionTerminalClientTab,
-  { status: 'ready' }
->
 
 export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
   private readonly readRoutes: SpoolSessionReadRoutes
+  private readonly observedWorktrees = new SpoolObservedWorktreeProvenance()
+  private readonly publicWorktrees = new Map<string, SpoolSessionWorktreeIdentity>()
+  private readonly identityAliases = new SpoolSessionIdentityAliases()
+  private readonly providerSessionObserver: SpoolProviderSessionObserver
 
   constructor(
     private readonly reader: SpoolExecutionHostSessionReader,
     private readonly ownerRecords: SpoolOwnerSessionRecords,
-    private readonly continued: SpoolContinuedSessionBindings,
+    private readonly sessionBindings: SpoolTerminalSessionBindings,
+    private readonly provenance: SpoolSessionProvenanceIndex,
     private readonly resolveLocalWslDistro?: (
       target: SpoolOwnerWorktree
     ) => string | null | Promise<string | null>
@@ -43,6 +46,43 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
     this.readRoutes = new SpoolSessionReadRoutes(
       async (request, cursor) => await this.reader.releaseAiVaultSessionPage(request, cursor)
     )
+    this.providerSessionObserver = new SpoolProviderSessionObserver(
+      this.sessionBindings,
+      this.identityAliases,
+      this.provenance
+    )
+  }
+
+  trackPublicWorktree(instance: SpoolPublicWorktreeInstance): void {
+    const worktree = toSessionWorktree(instance)
+    const previous = this.publicWorktrees.get(instance.instanceId)
+    if (previous) {
+      this.unregisterPublicWorktreeRoute(previous)
+      if (!isSameSessionIdentityScope(previous, worktree)) {
+        // Why: only a route rename preserves identity; reusing an instance id in
+        // another incarnation or host must not revive an older session alias.
+        this.identityAliases.forget(instance.instanceId)
+      }
+    }
+    this.publicWorktrees.set(instance.instanceId, worktree)
+    const request = liveSessionReadRequest(worktree)
+    this.rememberObservedWorktree(worktree)
+    // Why: future owner sessions must gain provenance even before any requester opens the catalog.
+    this.reader.registerPublicWorktree?.(request)
+    void this.listLiveSessions(worktree).catch(() => {
+      // Publication remains readable; the normal catalog path retries unavailable host inventory.
+    })
+  }
+
+  untrackPublicWorktree(instanceId: string): void {
+    const worktree = this.publicWorktrees.get(instanceId)
+    this.publicWorktrees.delete(instanceId)
+    if (worktree) {
+      this.unregisterPublicWorktreeRoute(worktree)
+    }
+    // Why: invalidation is the lifecycle boundary that finally retires every
+    // alias for this instance, including aliases retained across route replacements.
+    this.identityAliases.forget(instanceId)
   }
 
   async listLiveSessions(
@@ -55,16 +95,37 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
     if (!snapshot || snapshot.worktree !== worktree.worktreeId) {
       return []
     }
+    this.rememberObservedWorktree(worktree)
+    this.providerSessionObserver.observeSnapshot(snapshot, worktree)
     const readyTabs = snapshot.tabs.filter(
       (tab): tab is ReadyMobileSessionTerminalTab =>
-        tab.type === 'terminal' &&
-        tab.status === 'ready' &&
-        tab.worktreeInstanceId === worktree.instanceId
+        isReadyMobileSessionTerminalTab(tab) && tab.worktreeInstanceId === worktree.instanceId
     )
-    this.continued.reconcile(worktree, new Set(readyTabs.map((tab) => tab.terminal)))
-    return readyTabs
-      .map((tab) => projectLiveTab(worktree, tab, this.continued.resolve(worktree, tab.terminal)))
+    this.sessionBindings.reconcile(worktree, new Set(readyTabs.map((tab) => tab.terminal)))
+    const sessions = readyTabs
+      .map((tab) =>
+        projectMobileVaultLiveTab(
+          worktree,
+          tab,
+          this.sessionBindings.resolve(worktree, tab.terminal)
+        )
+      )
       .filter((session): session is SpoolLiveSessionCandidate => session !== null)
+    for (const session of sessions) {
+      if (
+        (session.provider === 'claude' || session.provider === 'codex') &&
+        session.providerSessionId &&
+        session.sessionKey
+      ) {
+        this.identityAliases.remember(
+          worktree,
+          session.provider,
+          session.providerSessionId,
+          session.sessionKey
+        )
+      }
+    }
+    return sessions
   }
 
   async listHistoricalSessionPage(
@@ -93,9 +154,12 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
       signal?.throwIfAborted()
       const candidates: SpoolHistoricalSessionCandidate[] = []
       for (const session of result.sessions) {
-        const candidate = projectHistoricalSession(worktree, session)
+        const candidate = projectMobileVaultHistoricalSession(worktree, session)
         if (candidate) {
-          candidates.push(candidate)
+          candidates.push({
+            ...candidate,
+            sessionKey: this.identityAliases.resolve(worktree, candidate)
+          })
         }
       }
       this.readRoutes.commit(lease, result.nextCursor)
@@ -142,114 +206,51 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
   }
 
   subscribe(listener: () => void): () => void {
-    const unsubscribeReader = this.reader.subscribe?.(listener) ?? (() => {})
-    const unsubscribeContinued = this.continued.subscribe(listener)
+    const unsubscribeReader =
+      this.reader.subscribe?.((snapshot, request, providerSessions) => {
+        const observed = request ? this.observedWorktrees.resolve(request) : undefined
+        if (snapshot && observed) {
+          // Why: paired runtimes can contain cloned worktree UUIDs; the originating
+          // execution route must match before its provider id gains provenance.
+          this.providerSessionObserver.observeSnapshot(snapshot, observed)
+        }
+        if (providerSessions && observed) {
+          this.providerSessionObserver.observeExplicit(providerSessions, observed)
+        }
+        listener()
+      }) ?? (() => {})
+    const unsubscribeSessionBindings = this.sessionBindings.subscribe(listener)
     return () => {
       unsubscribeReader()
-      unsubscribeContinued()
+      unsubscribeSessionBindings()
     }
   }
-}
 
-function projectLiveTab(
-  worktree: SpoolSessionWorktreeIdentity,
-  tab: ReadyMobileSessionTerminalTab,
-  continued: ReturnType<SpoolContinuedSessionBindings['resolve']>
-): SpoolLiveSessionCandidate | null {
-  if (tab.worktreeInstanceId !== worktree.instanceId) {
-    // Why: path-only and legacy PTY bindings cannot attest the current worktree instance.
-    return null
+  private rememberObservedWorktree(worktree: SpoolSessionWorktreeIdentity): void {
+    this.observedWorktrees.remember(worktree)
   }
-  const terminalHandle = normalizeIdentifier(tab.terminal, MAX_TERMINAL_HANDLE_LENGTH)
-  if (!terminalHandle) {
-    return null
-  }
-  const provider = continued?.provider ?? liveProvider(tab)
-  const providerSessionId =
-    continued?.providerSessionId ??
-    (provider === 'claude' || provider === 'codex'
-      ? normalizeIdentifier(tab.agentStatus?.providerSession?.id, MAX_PROVIDER_SESSION_ID_LENGTH)
-      : null)
-  return {
-    terminalHandle,
-    executionHostId: worktree.target.executionHostId,
-    actualHostScope: worktree.actualHostScope,
-    worktreeInstanceId: worktree.instanceId,
-    spoolIncarnationId: worktree.spoolIncarnationId,
-    provider,
-    providerSessionId,
-    title: continued?.title ?? tab.title
+
+  private unregisterPublicWorktreeRoute(worktree: SpoolSessionWorktreeIdentity): void {
+    this.observedWorktrees.forget(worktree)
+    this.reader.unregisterPublicWorktree?.(liveSessionReadRequest(worktree))
   }
 }
 
-function historicalRecordKey(
-  worktree: SpoolSessionWorktreeIdentity,
-  session: AiVaultSession
-): string {
-  return createHash('sha256')
-    .update(
-      JSON.stringify([
-        worktree.actualHostScope,
-        worktree.instanceId,
-        worktree.spoolIncarnationId,
-        session.id
-      ])
-    )
-    .digest('base64url')
+function isSameSessionIdentityScope(
+  left: SpoolSessionWorktreeIdentity,
+  right: SpoolSessionWorktreeIdentity
+): boolean {
+  return (
+    left.instanceId === right.instanceId &&
+    left.spoolIncarnationId === right.spoolIncarnationId &&
+    left.actualHostScope === right.actualHostScope
+  )
 }
 
-function projectHistoricalSession(
-  worktree: SpoolSessionWorktreeIdentity,
-  session: AiVaultSession
-): SpoolHistoricalSessionCandidate | null {
-  if (
-    session.subagent !== null ||
-    (session.agent !== 'claude' && session.agent !== 'codex') ||
-    normalizeExecutionHostId(session.executionHostId) !== worktree.target.executionHostId
-  ) {
-    return null
-  }
-  const providerSessionId = normalizeIdentifier(session.sessionId, MAX_PROVIDER_SESSION_ID_LENGTH)
-  if (!providerSessionId) {
-    return null
-  }
-  const ownerRecordKey = historicalRecordKey(worktree, session)
-  const ownerRecord = normalizeOwnerHistoricalSessionRecord({
-    ownerRecordKey,
-    executionHostId: worktree.target.executionHostId,
-    actualHostScope: worktree.actualHostScope,
-    worktreeInstanceId: worktree.instanceId,
-    spoolIncarnationId: worktree.spoolIncarnationId,
-    provider: session.agent,
-    providerSessionId,
-    title: session.title,
-    transcriptPath: session.filePath,
-    resumeCommand: session.resumeCommand
-  })
-  if (!ownerRecord) {
-    return null
-  }
-  return {
-    ownerRecordKey,
-    ownerRecord,
-    executionHostId: worktree.target.executionHostId,
-    actualHostScope: worktree.actualHostScope,
-    provider: session.agent,
-    providerSessionId,
-    title: session.title,
-    attestationCwd: normalizeCwd(session.cwd)
-  }
-}
-
-function liveProvider(tab: RuntimeMobileSessionTerminalClientTab): SpoolSessionProvider {
-  const agent = tab.agentStatus?.agentType ?? tab.launchAgent
-  if (agent === 'claude') {
-    return 'claude'
-  }
-  if (agent === 'codex') {
-    return 'codex'
-  }
-  return 'other'
+function liveSessionReadRequest(
+  worktree: SpoolSessionWorktreeIdentity
+): SpoolExecutionHostSessionReadRequest {
+  return toReadRequest(worktree, 'catalog', LIVE_SESSION_INVENTORY_SCOPE, null)
 }
 
 function toReadRequest(
@@ -269,23 +270,4 @@ function toReadRequest(
     purpose,
     inventoryScope
   }
-}
-
-function normalizeIdentifier(value: string | null | undefined, maxLength: number): string | null {
-  const trimmed = value?.trim()
-  if (!trimmed || trimmed.length > maxLength) {
-    return null
-  }
-  for (const character of trimmed) {
-    const code = character.charCodeAt(0)
-    if (code <= 0x1f || code === 0x7f) {
-      return null
-    }
-  }
-  return trimmed
-}
-
-function normalizeCwd(value: string | null): string | null {
-  const trimmed = value?.trim()
-  return trimmed ? trimmed : null
 }

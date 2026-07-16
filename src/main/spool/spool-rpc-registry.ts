@@ -3,6 +3,7 @@ import {
   isSpoolMutationKind,
   type SpoolExecutionOperation
 } from '../../shared/spool/spool-operation-contract'
+import { parseSpoolExecutionResult } from '../../shared/spool/spool-execution-result-schema'
 import type { SpoolAccessAuthority } from './spool-access-authority'
 import type { SpoolExecutionGateway } from './spool-execution-gateway'
 import type { SpoolSessionCatalog } from './spool-session-catalog'
@@ -18,6 +19,7 @@ import {
 } from './spool-rpc-control-methods'
 import { asSpoolSessionInvocation } from './spool-rpc-session-binding'
 import { createSpoolSessionRpcMethods } from './spool-rpc-session-methods'
+import { createSpoolTerminalCreationRpcMethods } from './spool-rpc-terminal-creation-methods'
 import {
   createSpoolRpcRegistry,
   SpoolRpcError,
@@ -86,7 +88,8 @@ const ExecutionSchemas = {
       .string()
       .min(1)
       .max(128 * 1024)
-  }).strict()
+  }).strict(),
+  'checks.read': WorktreeParams
 } as const
 
 export type SpoolRpcRegistryDependencies = {
@@ -123,6 +126,10 @@ export function createDefaultSpoolRpcRegistry(
       project: identityProjector
     },
     ...executionMethods(dependencies),
+    ...createSpoolTerminalCreationRpcMethods(
+      dependencies,
+      async (worktreeRef, context) => await bindWorktree(dependencies, { worktreeRef }, context)
+    ),
     ...createSpoolSessionRpcMethods(dependencies)
   ])
 }
@@ -239,10 +246,20 @@ function executionMethod(name: ExecutionMethodName, dependencies: SpoolRpcRegist
           isCurrent: invocation.isCurrent,
           subscribeInvalidation: invocation.subscribeInvalidation
         },
-        invocation.operation
+        invocation.operation,
+        context.signal
       )
     },
-    project: identityProjector
+    project: (value: unknown) => projectExecutionResult(name, value)
+  }
+}
+
+function projectExecutionResult(name: ExecutionMethodName, value: unknown): unknown {
+  try {
+    return parseSpoolExecutionResult(name, value)
+  } catch {
+    // Why: malformed post-admission mutation output cannot prove the side effect did not happen.
+    throw new SpoolRpcError(isSpoolMutationKind(name) ? 'outcome_unknown' : 'internal_error')
   }
 }
 

@@ -5,16 +5,13 @@ import {
   SpoolPairedRuntimeListLiveSessionsParamsSchema,
   SpoolPairedRuntimeLiveSessionsResponseSchema,
   SpoolPairedRuntimeReleaseHistoricalSessionPageParamsSchema,
-  SpoolPairedRuntimeSessionChangedEventSchema,
   SpoolPairedRuntimeSessionInvokeParamsSchema,
   SpoolPairedRuntimeSubscribeSessionChangesParamsSchema,
   SpoolPairedRuntimeUnsubscribeSessionChangesParamsSchema
 } from '../../../../shared/spool/spool-paired-runtime-session-contract'
-import { parseSpoolPairedRuntimeResult } from '../../../../shared/spool/spool-paired-runtime-result-contract'
 import type { SpoolExecutionOperation } from '../../../../shared/spool/spool-operation-contract'
 import { SpoolExecutionError } from '../../../spool/spool-execution-error'
-import type { SpoolContinuedSessionBindings } from '../../../spool/spool-continued-session-bindings'
-import { defineMethod, defineStreamingMethod, type RpcAnyMethod, type RpcContext } from '../core'
+import { defineMethod, defineStreamingMethod, type RpcAnyMethod } from '../core'
 import {
   getHostBundle,
   operationContext,
@@ -34,8 +31,12 @@ import {
   spoolHostSessionPageBinding,
   spoolHostSessionPageReleaseBinding
 } from './spool-host-session-page-binding'
-
-const SESSION_CHANGED_EVENT = SpoolPairedRuntimeSessionChangedEventSchema.parse({ kind: 'changed' })
+import { getSpoolHostChannelLifetimes } from './spool-host-channel-lifetimes'
+import { projectSpoolHostExecutionResult } from './spool-host-result-projection'
+import {
+  runSpoolHostSessionChangesSubscription,
+  spoolHostSessionChangesCleanupId
+} from './spool-host-session-change-subscription'
 
 export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
   defineMethod({
@@ -45,10 +46,10 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
       requirePairedRuntimePrincipal(context)
       try {
         const worktree = await resolveIncarnationBoundActualWorktree(context.runtime, params.target)
-        const continued = getHostBundle(context.runtime).continuedSessions
+        const sessionBindings = getHostBundle(context.runtime).terminalSessionBindings
         const result = await projectPairedRuntimeLiveSessions(
           context.runtime,
-          continued,
+          sessionBindings,
           { ...worktree, spoolIncarnationId: params.target.spoolIncarnationId },
           context.signal
         )
@@ -163,11 +164,10 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
     handler: async (params, context, emit) => {
       requirePairedRuntimePrincipal(context)
       const worktree = await resolveIncarnationBoundActualWorktree(context.runtime, params.target)
-      await runSessionChangesSubscription(
+      await runSpoolHostSessionChangesSubscription(
         context,
-        worktree.worktreeId,
-        worktree.instanceId,
-        getHostBundle(context.runtime).continuedSessions,
+        { ...worktree, spoolIncarnationId: params.target.spoolIncarnationId },
+        getHostBundle(context.runtime).terminalSessionBindings,
         emit
       )
     }
@@ -178,7 +178,7 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
     handler: (params, context) => {
       requirePairedRuntimePrincipal(context)
       context.runtime.cleanupSubscription(
-        sessionChangesCleanupId(context.connectionId, params.requestId)
+        spoolHostSessionChangesCleanupId(context.connectionId, params.requestId)
       )
       return { ok: true }
     }
@@ -205,6 +205,11 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
         }
         try {
           const adapter = requireActualHostAdapter(context.runtime, target)
+          getSpoolHostChannelLifetimes(context.runtime).ensure(
+            context,
+            params.channelRef,
+            (channelRef) => getHostBundle(context.runtime).adapter.closeConnection(channelRef)
+          )
           const result = await adapter.invoke(
             target,
             operation,
@@ -212,7 +217,7 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
           )
           return {
             status: 'ok' as const,
-            result: parseSpoolPairedRuntimeResult(operation, result)
+            result: projectSpoolHostExecutionResult(operation, result)
           }
         } finally {
           // Why: the temporary key is only a local bridge into the existing session executor.
@@ -226,78 +231,7 @@ export const SPOOL_HOST_SESSION_METHODS: RpcAnyMethod[] = [
 ]
 
 function remoteSessionOperation(
-  kind: 'session.read' | 'session.continue'
-): Extract<SpoolExecutionOperation, { kind: 'session.read' | 'session.continue' }> {
+  kind: 'session.continue'
+): Extract<SpoolExecutionOperation, { kind: 'session.continue' }> {
   return { kind, ownerRecordKey: randomUUID() }
-}
-
-async function runSessionChangesSubscription(
-  context: RpcContext,
-  worktreeId: string,
-  instanceId: string,
-  continued: SpoolContinuedSessionBindings,
-  emit: (result: unknown) => void
-): Promise<void> {
-  const signal = context.signal ?? new AbortController().signal
-  await new Promise<void>((resolve) => {
-    let finished = false
-    let unsubscribeTabs = (): void => {}
-    let unsubscribeContinued = (): void => {}
-    const requestId = context.requestId ?? randomUUID()
-    const cleanupId = sessionChangesCleanupId(context.connectionId, requestId)
-    const finish = (): void => {
-      if (finished) {
-        return
-      }
-      finished = true
-      signal.removeEventListener('abort', finish)
-      context.runtime.cleanupSubscription(cleanupId)
-      unsubscribeTabs()
-      unsubscribeContinued()
-      resolve()
-    }
-    // Why: logical subscriptions share the owner's physical runtime route and must clean up alone.
-    context.runtime.registerSubscriptionCleanup(cleanupId, finish, context.connectionId)
-    if (signal.aborted) {
-      finish()
-      return
-    }
-    signal.addEventListener('abort', finish, { once: true })
-    try {
-      const emitChange = (): void => {
-        if (finished) {
-          return
-        }
-        try {
-          // Why: subscribers only need invalidation; session metadata stays on the owner.
-          emit(SESSION_CHANGED_EVENT)
-        } catch {
-          finish()
-        }
-      }
-      unsubscribeTabs = context.runtime.onMobileSessionTabsChanged((snapshot) => {
-        if (finished || snapshot.worktree !== worktreeId) {
-          return
-        }
-        emitChange()
-      })
-      unsubscribeContinued = continued.subscribe((changedInstanceId) => {
-        if (changedInstanceId === instanceId) {
-          // Why: createTerminal can publish its tab before the continued-session
-          // identity bridge exists, so that bridge must cause a second projection.
-          emitChange()
-        }
-      })
-    } catch {
-      finish()
-    }
-    if (finished) {
-      unsubscribeTabs()
-      unsubscribeContinued()
-    }
-  })
-}
-
-function sessionChangesCleanupId(connectionId: string | undefined, requestId: string): string {
-  return `spool.host.session-changes:${connectionId ?? 'local'}:${requestId}`
 }

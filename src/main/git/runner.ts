@@ -1429,6 +1429,7 @@ export async function ghExecFileAsync(
   let attemptedHostFallback = false
   let attemptedDefaultWslFallback = false
   for (let attempt = 0; attempt <= GH_RETRY_DELAYS_MS.length; attempt++) {
+    options.signal?.throwIfAborted()
     try {
       const { stdout, stderr } = await execFileCapture(resolved.binary, resolved.args, {
         cwd: resolved.cwd,
@@ -1437,7 +1438,8 @@ export async function ghExecFileAsync(
         // Why: GitHub detail IPC powers PR cards, Tasks, and URL worktree
         // creation; one stuck gh child must fail visibly, not wedge every lane.
         timeout: options.timeout ?? defaultGhExecTimeoutMs(options.env),
-        env: nonInteractiveGhEnv(options.env)
+        env: nonInteractiveGhEnv(options.env),
+        signal: options.signal
       })
       return { stdout: stdout as string, stderr: stderr as string }
     } catch (err) {
@@ -1562,13 +1564,15 @@ export async function glabExecFileAsync(
   let lastError: unknown
   let attemptedDefaultWslFallback = false
   for (let attempt = 0; attempt <= GH_RETRY_DELAYS_MS.length; attempt++) {
+    options.signal?.throwIfAborted()
     try {
       const { stdout, stderr } = await execFileCapture(resolved.binary, resolved.args, {
         cwd: resolved.cwd,
         encoding: (options.encoding ?? 'utf-8') as BufferEncoding,
         maxBuffer: options.maxBuffer,
         timeout: options.timeout,
-        env: options.env
+        env: options.env,
+        signal: options.signal
       })
       return { stdout: stdout as string, stderr: stderr as string }
     } catch (err) {

@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto'
 import { join } from 'node:path'
 import { SPOOL_INGRESS_PORT, type SpoolOsFamily } from '../../shared/spool/spool-wire-contract'
 import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
-import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
 import type { Store } from '../persistence'
 import type { RateLimitService } from '../rate-limits/service'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
@@ -15,6 +14,7 @@ import { SpoolExecutionGateway } from './spool-execution-gateway'
 import { SpoolIngress } from './spool-ingress'
 import { SpoolProbeService } from './spool-ingress-probe'
 import { SpoolLegacySessionAttestor } from './spool-legacy-session-attestor'
+import { resolveSpoolLocalWslDistro } from './spool-local-wsl-route'
 import { SpoolMobileVaultSessionSource } from './spool-mobile-vault-session-source'
 import { createOrcaSpoolHostAdapter } from './spool-orca-host-adapter'
 import { SpoolOwnerShareSource } from './spool-owner-share-source'
@@ -23,6 +23,7 @@ import { OrcaSpoolPairedRuntimeHostAdapter } from './spool-paired-runtime-host-a
 import { OrcaSpoolPairedRuntimeSessionReader } from './spool-paired-runtime-session-reader'
 import { listSpoolPairedRuntimeWorktrees } from './spool-paired-runtime-worktree-catalog'
 import { HttpSpoolProbeClient } from './spool-probe-client'
+import { subscribePublicSessionRoutes } from './spool-public-session-route-subscription'
 import { SpoolQuotaProjection } from './spool-quota-projection'
 import { authorizeSpoolRpcInvocation, createDefaultSpoolRpcRegistry } from './spool-rpc-registry'
 import { SpoolRpcGateway } from './spool-rpc-gateway'
@@ -44,8 +45,6 @@ import {
   inspectWindowsSpoolFirewall,
   repairWindowsSpoolFirewall
 } from './spool-windows-firewall'
-
-const VISIBILITY_DENY_FILENAME = 'spool-visibility-deny.json'
 
 export { SpoolDesktopComposition } from './spool-desktop-lifecycle'
 
@@ -80,13 +79,8 @@ export function createSpoolDesktopComposition(
   const pairedRuntimeSessionReader = new OrcaSpoolPairedRuntimeSessionReader({
     userDataPath: options.userDataPath
   })
-  const resolveLocalWslDistro = (target: SpoolOwnerWorktree): string | null => {
-    const repo = options.store.getRepo(target.repoId)
-    if (!repo || repo.connectionId) {
-      return null
-    }
-    return getLocalProjectWorktreeGitOptions(options.store, repo).wslDistro ?? null
-  }
+  const resolveLocalWslDistro = (target: SpoolOwnerWorktree): string | null =>
+    resolveSpoolLocalWslDistro(options.store, target)
   const incarnationHost = new SpoolActualHostWorktreeIncarnationHost({
     pairedRuntimeAdapter,
     resolveLocalWslDistro
@@ -103,7 +97,8 @@ export function createSpoolDesktopComposition(
   const sessionSource = new SpoolMobileVaultSessionSource(
     host.sessionReader,
     host.sessionRecords,
-    host.continuedSessions,
+    host.terminalSessionBindings,
+    provenance,
     resolveLocalWslDistro
   )
   const sessions = new SpoolSessionCatalog(
@@ -115,7 +110,7 @@ export function createSpoolDesktopComposition(
   const visibility = new SpoolWorktreeVisibility({
     store: options.store,
     denyJournal: new SpoolVisibilityDenyJournal(
-      join(options.userDataPath, VISIBILITY_DENY_FILENAME),
+      join(options.userDataPath, 'spool-visibility-deny.json'),
       options.profileId
     ),
     catalog,
@@ -133,6 +128,7 @@ export function createSpoolDesktopComposition(
       )
     }
   })
+  const unsubscribePublicSessionRoutes = subscribePublicSessionRoutes(visibility, sessionSource)
   const quota = new SpoolQuotaProjection({
     getCachedActiveRateLimitState: () => options.rateLimits.getState(),
     subscribeCachedActiveRateLimitState: (listener) => options.rateLimits.onStateChange(listener)
@@ -298,7 +294,12 @@ export function createSpoolDesktopComposition(
     catalog,
     visibility,
     sessions,
-    [unsubscribeVisibilityConnections, unsubscribeProvenance, unsubscribeGrantCleanup],
+    [
+      unsubscribePublicSessionRoutes,
+      unsubscribeVisibilityConnections,
+      unsubscribeProvenance,
+      unsubscribeGrantCleanup
+    ],
     options.runtime
   )
   return composition

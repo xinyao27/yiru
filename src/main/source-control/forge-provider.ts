@@ -37,12 +37,15 @@ import {
   getHostedReviewLocalGitOptions,
   type HostedReviewExecutionOptions
 } from './hosted-review-git-options'
+import type { HostedReviewLookupOptions } from './hosted-review-lookup-options'
+import { assertHostedReviewProviderDetectionAvailable } from './hosted-review-provider-detection'
 
 export type ForgeProviderId = Exclude<HostedReviewProvider, 'unsupported'>
 
 export type ForgeProviderRepositoryContext = HostedReviewExecutionOptions & {
   repoPath: string
   connectionId?: string | null
+  throwOnProviderError?: boolean
 }
 
 export type ForgeReviewForBranchInput = ForgeProviderRepositoryContext & {
@@ -52,6 +55,7 @@ export type ForgeReviewForBranchInput = ForgeProviderRepositoryContext & {
   // GitHub-only: lets the GitHub provider keep merged-at-head PRs visible using
   // the inspected worktree HEAD. Ignored by other providers.
   githubCurrentHeadOid?: string | null
+  throwOnProviderError?: boolean
 }
 
 export type ForgeReviewByNumberInput = ForgeProviderRepositoryContext & {
@@ -75,9 +79,26 @@ export type ForgeProvider = {
 function hostedReviewExecutionArgs(
   options: HostedReviewExecutionOptions
 ): [] | [HostedReviewExecutionOptions] {
-  return hasHostedReviewLocalGitOptions(options)
-    ? [{ localGitExecOptions: getHostedReviewLocalGitOptions(options) }]
-    : []
+  const executionOptions: HostedReviewExecutionOptions = {
+    ...(hasHostedReviewLocalGitOptions(options)
+      ? { localGitExecOptions: getHostedReviewLocalGitOptions(options) }
+      : {}),
+    ...(options.signal ? { signal: options.signal } : {})
+  }
+  return Object.keys(executionOptions).length > 0 ? [executionOptions] : []
+}
+
+function hostedReviewLookupArgs(
+  input: ForgeReviewForBranchInput
+): [] | [HostedReviewLookupOptions] {
+  const options: HostedReviewLookupOptions = {
+    ...(hasHostedReviewLocalGitOptions(input)
+      ? { localGitExecOptions: getHostedReviewLocalGitOptions(input) }
+      : {}),
+    ...(input.throwOnProviderError ? { throwOnProviderError: true } : {}),
+    ...(input.signal ? { signal: input.signal } : {})
+  }
+  return Object.keys(options).length > 0 ? [options] : []
 }
 
 const gitLabForgeProvider = {
@@ -91,7 +112,7 @@ const gitLabForgeProvider = {
       input.branch,
       input.linkedReviewNumber ?? null,
       input.connectionId,
-      ...hostedReviewExecutionArgs(input)
+      ...hostedReviewLookupArgs(input)
     )
     return mr ? mapGitLabReview(mr) : null
   },
@@ -193,7 +214,7 @@ const bitbucketForgeProvider = {
       input.branch,
       input.linkedReviewNumber ?? null,
       input.connectionId,
-      ...hostedReviewExecutionArgs(input)
+      ...hostedReviewLookupArgs(input)
     )
     return pr ? mapBitbucketReview(pr) : null
   },
@@ -223,7 +244,7 @@ const azureDevOpsForgeProvider = {
       input.branch,
       input.linkedReviewNumber ?? null,
       input.connectionId,
-      ...hostedReviewExecutionArgs(input)
+      ...hostedReviewLookupArgs(input)
     )
     return pr ? mapAzureDevOpsReview(pr) : null
   },
@@ -250,7 +271,7 @@ const giteaForgeProvider = {
       input.branch,
       input.linkedReviewNumber ?? null,
       input.connectionId,
-      ...hostedReviewExecutionArgs(input)
+      ...hostedReviewLookupArgs(input)
     )
     return pr ? mapGiteaReview(pr) : null
   },
@@ -284,9 +305,13 @@ export async function getForgeProviderForRepository(
   context: ForgeProviderRepositoryContext
 ): Promise<ForgeProvider | null> {
   for (const provider of FORGE_PROVIDERS) {
+    context.signal?.throwIfAborted()
     if (await provider.resolveRepository(context)) {
       return provider
     }
+  }
+  if (context.throwOnProviderError) {
+    await assertHostedReviewProviderDetectionAvailable(context)
   }
   return null
 }

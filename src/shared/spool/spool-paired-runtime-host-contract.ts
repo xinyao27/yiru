@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import type { ExecutionHostId } from '../execution-host'
+import { SpoolAgentLaunchIdSchema } from './spool-agent-launch-contract'
 import type { SpoolExecutionOperation } from './spool-operation-contract'
 import type { SpoolWorktreeKind } from './spool-worktree-kind'
 
@@ -107,6 +108,7 @@ const gitCommit = z
       .max(128 * 1_024)
   })
   .strict()
+const checksRead = z.object({ kind: z.literal('checks.read') }).strict()
 
 const terminalInput = z
   .object({ kind: z.literal('terminal.input'), terminalRef, data: safeString })
@@ -119,8 +121,16 @@ const terminalResize = z
     rows: z.number().int().positive().max(1_000)
   })
   .strict()
-const sessionRead = z
-  .object({ kind: z.literal('session.read'), ownerRecordKey: identifier })
+const terminalLaunchOptions = z.object({ kind: z.literal('terminal.launchOptions') }).strict()
+const terminalCreate = z
+  .object({
+    kind: z.literal('terminal.create'),
+    clientMutationId: z.string().uuid(),
+    launch: z.discriminatedUnion('kind', [
+      z.object({ kind: z.literal('shell') }).strict(),
+      z.object({ kind: z.literal('agent'), agent: SpoolAgentLaunchIdSchema }).strict()
+    ])
+  })
   .strict()
 const sessionContinue = z
   .object({ kind: z.literal('session.continue'), ownerRecordKey: identifier })
@@ -140,8 +150,11 @@ const directExecutionOperations = [
   gitStage,
   gitUnstage,
   gitCommit,
+  checksRead,
   terminalInput,
-  terminalResize
+  terminalResize,
+  terminalLaunchOptions,
+  terminalCreate
 ] as const
 
 export const SpoolPairedRuntimeDirectExecutionOperationSchema = z.discriminatedUnion(
@@ -151,7 +164,6 @@ export const SpoolPairedRuntimeDirectExecutionOperationSchema = z.discriminatedU
 
 export const SpoolPairedRuntimeExecutionOperationSchema = z.discriminatedUnion('kind', [
   ...directExecutionOperations,
-  sessionRead,
   sessionContinue
 ])
 

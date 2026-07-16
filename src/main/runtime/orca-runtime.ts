@@ -13382,8 +13382,13 @@ export class OrcaRuntimeService {
     linkedBitbucketPR?: number | null
     linkedAzureDevOpsPR?: number | null
     linkedGiteaPR?: number | null
+    recordStats?: boolean
+    throwOnProviderError?: boolean
+    signal?: AbortSignal
   }): Promise<HostedReviewInfo | null> {
+    args.signal?.throwIfAborted()
     const repo = await this.resolveRepoSelector(args.repoSelector)
+    args.signal?.throwIfAborted()
     const executionOptions = this.getHostedReviewExecutionOptions(repo)
     const review = await getHostedReviewForBranchFromRepo({
       repoPath: repo.path,
@@ -13396,9 +13401,17 @@ export class OrcaRuntimeService {
       linkedBitbucketPR: args.linkedBitbucketPR ?? null,
       linkedAzureDevOpsPR: args.linkedAzureDevOpsPR ?? null,
       linkedGiteaPR: args.linkedGiteaPR ?? null,
+      ...(args.throwOnProviderError ? { throwOnProviderError: true } : {}),
+      ...(args.signal ? { signal: args.signal } : {}),
       ...executionOptions
     })
-    if (review?.provider === 'github' && this.stats && !this.stats.hasCountedPR(review.url)) {
+    // Why: public Spool reads inspect existing reviews and must not attribute them as newly created.
+    if (
+      args.recordStats !== false &&
+      review?.provider === 'github' &&
+      this.stats &&
+      !this.stats.hasCountedPR(review.url)
+    ) {
       this.stats.record({
         type: 'pr_created',
         at: Date.now(),
@@ -13867,9 +13880,11 @@ export class OrcaRuntimeService {
     prNumber: number,
     headSha?: string,
     prRepo?: GitHubOwnerRepo | null,
-    options?: { noCache?: boolean }
+    options?: { noCache?: boolean; signal?: AbortSignal }
   ): Promise<Awaited<ReturnType<typeof getPRChecks>>> {
+    options?.signal?.throwIfAborted()
     const repo = await this.resolveRepoSelector(repoSelector)
+    options?.signal?.throwIfAborted()
     return getPRChecks(
       repo.path,
       prNumber,
@@ -18590,6 +18605,47 @@ export class OrcaRuntimeService {
       startupCommandDelivery: startup.startup.startupCommandDelivery,
       telemetry: startup.startup.telemetry,
       title: opts.title
+    })
+  }
+
+  async createAgentTerminal(
+    worktreeSelector: string,
+    opts: {
+      agent: TuiAgent
+      title?: string
+      presentation?: RuntimeTerminalPresentation
+      beforeAgentTrust?: () => void | Promise<void>
+      beforeSpawn?: () => void | Promise<void>
+    }
+  ): Promise<RuntimeTerminalCreate> {
+    const workspace = await this.resolveTerminalWorkspaceLaunchScope(worktreeSelector)
+    const repo = workspace.repo
+    if (!repo) {
+      throw new Error('Repository for the selected workspace is no longer available.')
+    }
+    const startup = this.buildStartupForAgent(repo, opts.agent, '')
+    // Why: remote control can be revoked while agent settings and host routing are resolved.
+    await opts.beforeAgentTrust?.()
+    if (workspace.connectionId) {
+      await this.markRemoteWorkspaceTrustedForAgent(
+        opts.agent,
+        workspace.connectionId,
+        workspace.path
+      )
+    } else {
+      this.markLocalWorkspaceTrustedForAgent(opts.agent, workspace.path)
+    }
+    return await this.createTerminal(`id:${workspace.id}`, {
+      command: startup.startup.command,
+      env: startup.startup.env,
+      ...(startup.startup.launchConfig ? { launchConfig: startup.startup.launchConfig } : {}),
+      launchAgent: startup.agent,
+      viewMode: 'chat',
+      startupCommandDelivery: startup.startup.startupCommandDelivery,
+      telemetry: startup.startup.telemetry,
+      title: opts.title,
+      presentation: opts.presentation ?? 'background',
+      beforeSpawn: opts.beforeSpawn
     })
   }
 

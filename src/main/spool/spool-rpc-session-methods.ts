@@ -1,5 +1,9 @@
 import { z } from 'zod'
 import { TERMINAL_INPUT_MAX_BYTES } from '../../shared/terminal-input'
+import {
+  SpoolMutationResultSchema,
+  SpoolTerminalSubscriptionEventSchema
+} from '../../shared/spool/spool-execution-result-schema'
 import type { SpoolExecutionOperation } from '../../shared/spool/spool-operation-contract'
 import type { SpoolExecutionGateway } from './spool-execution-gateway'
 import { SpoolRpcError, type SpoolRpcMethodSpec } from './spool-rpc-gateway'
@@ -15,6 +19,7 @@ import {
 import { createSpoolRpcStream } from './spool-rpc-stream'
 
 const SessionParams = z.object({ sessionRef: z.string().min(1).max(2048) }).strict()
+const SessionContinueResult = z.object({ sessionRef: z.string().min(1).max(2_048) }).strict()
 const TerminalSubscribeParams = SessionParams.extend({
   scrollbackRows: z.number().int().nonnegative().max(100_000).optional()
 }).strict()
@@ -33,29 +38,6 @@ export function createSpoolSessionRpcMethods(
   dependencies: SpoolSessionMethodDependencies
 ): readonly SpoolRpcMethodSpec[] {
   return [
-    {
-      name: 'session.read',
-      schema: SessionParams,
-      access: 'worktree-read',
-      bind: async (params, context) => {
-        const parsed = SessionParams.parse(params)
-        return bindSpoolSession(
-          dependencies,
-          context.principal.connectionId,
-          parsed.sessionRef,
-          'historical',
-          parsed
-        )
-      },
-      execute: (bound, context) => {
-        const invocation = asHistoricalSessionInvocation(bound)
-        return dependencies.execution.invoke(
-          spoolSessionExecutionTarget(invocation, context.principal.connectionId),
-          { kind: 'session.read', ownerRecordKey: invocation.ownerRecordKey }
-        )
-      },
-      project: identityProjector
-    },
     {
       name: 'session.continue',
       schema: SessionParams,
@@ -80,7 +62,8 @@ export function createSpoolSessionRpcMethods(
         // retaining this alias lets catalog fallback attach without relaunching.
         const continued = await dependencies.execution.invoke(
           spoolSessionExecutionTarget(invocation, context.principal.connectionId),
-          { kind: 'session.continue', ownerRecordKey: invocation.ownerRecordKey }
+          { kind: 'session.continue', ownerRecordKey: invocation.ownerRecordKey },
+          context.signal
         )
         const terminalHandle = requireContinuedTerminalHandle(continued.terminalHandle)
         if (context.signal.aborted || !invocation.isCurrent()) {
@@ -99,7 +82,7 @@ export function createSpoolSessionRpcMethods(
         )
         return { sessionRef: invocation.sessionRef }
       },
-      project: identityProjector
+      project: (value) => SessionContinueResult.parse(value)
     },
     {
       name: 'terminal.subscribe',
@@ -132,7 +115,7 @@ export function createSpoolSessionRpcMethods(
           parsed.scrollbackRows
         )
       },
-      project: identityProjector
+      project: (value) => SpoolTerminalSubscriptionEventSchema.parse(value)
     },
     {
       name: 'terminal.input',
@@ -158,10 +141,11 @@ export function createSpoolSessionRpcMethods(
             kind: 'terminal.input',
             terminalRef: invocation.session.terminalHandle,
             data: parsed.data
-          }
+          },
+          context.signal
         )
       },
-      project: identityProjector
+      project: projectTerminalMutationResult
     },
     {
       name: 'terminal.resize',
@@ -188,10 +172,11 @@ export function createSpoolSessionRpcMethods(
             terminalRef: invocation.session.terminalHandle,
             cols: parsed.cols,
             rows: parsed.rows
-          }
+          },
+          context.signal
         )
       },
-      project: identityProjector
+      project: projectTerminalMutationResult
     }
   ]
 }
@@ -238,17 +223,27 @@ function invokeTerminalSessionMutation(
   execution: SpoolExecutionGateway,
   invocation: SpoolLiveSessionInvocation,
   connectionId: string,
-  operation: Extract<SpoolExecutionOperation, { kind: 'terminal.input' | 'terminal.resize' }>
+  operation: Extract<SpoolExecutionOperation, { kind: 'terminal.input' | 'terminal.resize' }>,
+  signal: AbortSignal
 ): Promise<unknown> {
-  return execution.invoke(spoolSessionExecutionTarget(invocation, connectionId), {
-    ...operation,
-    // Why: the requester selects only an alias; the owner supplies its live handle.
-    terminalRef: invocation.session.terminalHandle
-  })
+  return execution.invoke(
+    spoolSessionExecutionTarget(invocation, connectionId),
+    {
+      ...operation,
+      // Why: the requester selects only an alias; the owner supplies its live handle.
+      terminalRef: invocation.session.terminalHandle
+    },
+    signal
+  )
 }
 
-function identityProjector(value: unknown): unknown {
-  return value
+function projectTerminalMutationResult(value: unknown): unknown {
+  const parsed = SpoolMutationResultSchema.safeParse(value)
+  if (!parsed.success) {
+    // Why: input or resize may already have reached the PTY before malformed acknowledgement.
+    throw new SpoolRpcError('outcome_unknown')
+  }
+  return parsed.data
 }
 
 function requireContinuedTerminalHandle(value: unknown): string {

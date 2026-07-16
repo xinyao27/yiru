@@ -1,13 +1,13 @@
 import type {
   SpoolExecutionOperation,
-  SpoolMutationResult,
   SpoolSubscriptionOperation,
   SpoolTerminalSubscriptionEvent
 } from '../../shared/spool/spool-operation-contract'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import type { SpoolHostOperationContext, SpoolHostSubscription } from './spool-execution-gateway'
 import { SpoolExecutionError } from './spool-execution-error'
-import type { SpoolTerminalSubscriptionHost } from './spool-structured-host-adapter'
+import type { OrcaSpoolHostTerminalLaunch } from './spool-orca-host-terminal-launch'
+import type { SpoolTerminalHost } from './spool-structured-host-adapter'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
 
 const MAX_SNAPSHOT_BYTES = 2 * 1024 * 1024
@@ -26,9 +26,11 @@ type SpoolTerminalRuntime = Pick<
   | 'unregisterRemoteDesktopViewers'
 >
 
-type TerminalMutation = Extract<
+type TerminalOperation = Extract<
   SpoolExecutionOperation,
-  { kind: 'terminal.input' | 'terminal.resize' }
+  {
+    kind: 'terminal.input' | 'terminal.resize' | 'terminal.launchOptions' | 'terminal.create'
+  }
 >
 
 type SequencedTerminalEvent =
@@ -38,19 +40,28 @@ type SequencedTerminalEvent =
   | { kind: 'closed' }
 
 /** Adapts session-resolved terminal handles to the owner runtime's live PTY surface. */
-export class OrcaSpoolHostTerminal implements SpoolTerminalSubscriptionHost {
+export class OrcaSpoolHostTerminal implements SpoolTerminalHost {
   private readonly viewportKeys = new Map<
     string,
     Map<string, { key: string; instanceId: string }>
   >()
 
-  constructor(private readonly runtime: SpoolTerminalRuntime) {}
+  constructor(
+    private readonly runtime: SpoolTerminalRuntime,
+    private readonly launch?: OrcaSpoolHostTerminalLaunch
+  ) {}
 
   async invoke(
     target: SpoolPublicWorktreeInstance,
-    operation: TerminalMutation,
+    operation: TerminalOperation,
     context: SpoolHostOperationContext
-  ): Promise<SpoolMutationResult> {
+  ): Promise<unknown> {
+    if (operation.kind === 'terminal.launchOptions' || operation.kind === 'terminal.create') {
+      if (!this.launch) {
+        throw new SpoolExecutionError('method_not_found')
+      }
+      return await this.launch.invoke(target, operation, context)
+    }
     const terminal = await this.resolveTerminal(target, operation.terminalRef)
     const guard = context.admissionGuard
     if (!guard) {
@@ -124,6 +135,7 @@ export class OrcaSpoolHostTerminal implements SpoolTerminalSubscriptionHost {
   }
 
   closeConnection(connectionId: string): void {
+    this.launch?.closeConnection(connectionId)
     const byPty = this.viewportKeys.get(connectionId)
     this.viewportKeys.delete(connectionId)
     for (const [ptyId, viewport] of byPty ?? []) {
@@ -196,6 +208,9 @@ export class OrcaSpoolHostTerminal implements SpoolTerminalSubscriptionHost {
     for (const chunk of outputAfterSnapshot(pending, snapshot.seq)) {
       emitEvent({ kind: 'output', data: chunk })
     }
+    // Why: replayed snapshot-gap output must not stay retained for the stream lifetime.
+    pending.length = 0
+    pendingBytes = 0
     void this.runtime
       .waitForTerminal(operation.terminalRef, { condition: 'exit', signal: context.signal })
       .then(() => {

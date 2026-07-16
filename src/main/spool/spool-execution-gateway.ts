@@ -2,11 +2,17 @@ import type {
   SpoolExecutionOperation,
   SpoolExecutionResult,
   SpoolSubscriptionEvent,
-  SpoolSubscriptionOperation
+  SpoolSubscriptionOperation,
+  SpoolTerminalCreateHostResult
 } from '../../shared/spool/spool-operation-contract'
 import { isSpoolMutationOperation } from '../../shared/spool/spool-operation-contract'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
 import { asSpoolExecutionError, SpoolExecutionError } from './spool-execution-error'
+import { linkSpoolOperationAbort } from './spool-operation-abort-link'
+import {
+  spoolTerminalCreateFingerprint,
+  SpoolTerminalCreateLedger
+} from './spool-terminal-create-ledger'
 import {
   SpoolTerminalSubscriptionCapacity,
   type SpoolHostSubscription
@@ -58,28 +64,48 @@ export class SpoolExecutionGateway {
   private readonly connectionOperations = new Map<string, Map<AbortController, string>>()
   private readonly subscriptionCapacity = new SpoolTerminalSubscriptionCapacity()
   private readonly connectionAdapters = new Map<string, Set<SpoolHostAdapter>>()
+  private readonly terminalCreates = new SpoolTerminalCreateLedger()
 
   constructor(private readonly options: SpoolExecutionGatewayOptions) {}
 
   async invoke<TOperation extends SpoolExecutionOperation>(
     target: BoundWorktreeTarget,
-    operation: TOperation
+    operation: TOperation,
+    callerSignal?: AbortSignal
   ): Promise<SpoolExecutionResult<TOperation>> {
     this.requireCurrent(target)
     const admissionGuard = isSpoolMutationOperation(operation)
       ? this.createAdmissionGuard(target)
       : undefined
     const adapter = this.requireAdapter(target)
-    const controller = new AbortController()
+    const abortLink = linkSpoolOperationAbort(callerSignal)
+    const { controller } = abortLink
     this.trackOperation(target.connectionId, target.worktree.instanceId, controller)
-    const unsubscribeInvalidation = target.subscribeInvalidation?.(() => controller.abort())
+    let unsubscribeInvalidation: (() => void) | undefined
     try {
-      const result = await adapter.invoke(target.worktree, operation, {
-        connectionId: target.connectionId,
-        signal: controller.signal,
-        ...(admissionGuard ? { admissionGuard } : {}),
-        origin: 'spool-owner'
-      })
+      unsubscribeInvalidation = target.subscribeInvalidation?.(() => controller.abort())
+      controller.signal.throwIfAborted()
+      const invokeAdapter = async (): Promise<unknown> =>
+        await adapter.invoke(target.worktree, operation, {
+          connectionId: target.connectionId,
+          signal: controller.signal,
+          ...(admissionGuard ? { admissionGuard } : {}),
+          origin: 'spool-owner'
+        })
+      const result =
+        operation.kind === 'terminal.create'
+          ? await this.terminalCreates.run(
+              {
+                connectionId: target.connectionId,
+                instanceId: target.worktree.instanceId,
+                shareEpoch: target.worktree.shareEpoch,
+                spoolIncarnationId: target.worktree.spoolIncarnationId,
+                clientMutationId: operation.clientMutationId,
+                fingerprint: spoolTerminalCreateFingerprint(operation.launch)
+              },
+              async () => (await invokeAdapter()) as SpoolTerminalCreateHostResult
+            )
+          : await invokeAdapter()
       if (!isSpoolMutationOperation(operation)) {
         // Why: a read that finished after an actual-host replacement must never be enqueued.
         if (!(await this.options.revalidateTarget(target))) {
@@ -94,7 +120,11 @@ export class SpoolExecutionGateway {
       try {
         unsubscribeInvalidation?.()
       } finally {
-        this.untrackOperation(target.connectionId, controller)
+        try {
+          abortLink.unlink()
+        } finally {
+          this.untrackOperation(target.connectionId, controller)
+        }
       }
     }
   }
@@ -189,6 +219,7 @@ export class SpoolExecutionGateway {
 
   closeConnection(connectionId: string): void {
     this.subscriptionCapacity.closeConnection(connectionId)
+    this.terminalCreates.closeConnection(connectionId)
     const operations = this.connectionOperations.get(connectionId)
     this.connectionOperations.delete(connectionId)
     for (const controller of operations?.keys() ?? []) {

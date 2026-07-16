@@ -117,14 +117,16 @@ export class OrcaSpoolPairedRuntimeHostAdapter
     const operation = parseSpoolPairedRuntimeOperation(operationInput)
     if (
       target.ownerWorktree.kind === 'folder' &&
-      (operation.kind === 'files.diff' || operation.kind.startsWith('git.'))
+      (operation.kind === 'files.diff' ||
+        operation.kind.startsWith('git.') ||
+        operation.kind === 'checks.read')
     ) {
       // Why: outer policy must hold even if paired-runtime repository metadata has drifted.
       throw new SpoolExecutionError('method_not_found')
     }
     const channel = this.registry.channel(context.connectionId, environmentId)
     channel.instanceIds.add(target.instanceId)
-    if (operation.kind === 'session.read' || operation.kind === 'session.continue') {
+    if (operation.kind === 'session.continue') {
       return await invokePairedRuntimeSession({
         userDataPath: this.options.userDataPath,
         timeoutMs: this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
@@ -144,7 +146,11 @@ export class OrcaSpoolPairedRuntimeHostAdapter
     return await invokeAdmittedPairedRuntimeOperation({
       operation,
       context,
-      send: (beforeSend) => this.call(environmentId, 'spool.host.invoke', params, { beforeSend })
+      send: (beforeSend) =>
+        this.call(environmentId, 'spool.host.invoke', params, {
+          beforeSend,
+          signal: context.signal
+        })
     })
   }
 
@@ -215,7 +221,7 @@ export class OrcaSpoolPairedRuntimeHostAdapter
     environmentId: string,
     method: string,
     params: unknown,
-    options: { beforeSend?: () => void | Promise<void> } = {}
+    options: { beforeSend?: () => void | Promise<void>; signal?: AbortSignal } = {}
   ) {
     return callRuntimeEnvironmentExistingRoute(
       this.options.userDataPath,

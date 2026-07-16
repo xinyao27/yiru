@@ -11,7 +11,7 @@ export type SpoolTerminalAttachment = Readonly<{
   session: SpoolResolvedLiveSession
 }>
 
-/** Keeps resumed PTY handles behind connection-scoped catalog references. */
+/** Keeps resumed and newly created PTY handles behind connection-scoped catalog references. */
 export class SpoolTerminalAttachmentRegistry {
   private readonly attachmentsByConnection = new Map<string, Map<string, SpoolTerminalAttachment>>()
 
@@ -22,24 +22,32 @@ export class SpoolTerminalAttachmentRegistry {
     historical: SpoolResolvedHistoricalSession,
     terminalHandle: string
   ): void {
+    this.rememberLive(connectionId, sessionRef, worktree, {
+      kind: 'live',
+      sessionKey: historical.sessionKey,
+      terminalHandle,
+      executionHostId: historical.executionHostId,
+      actualHostScope: historical.actualHostScope,
+      worktreeInstanceId: historical.worktreeInstanceId,
+      spoolIncarnationId: historical.spoolIncarnationId,
+      provider: historical.provider,
+      providerSessionId: historical.providerSessionId,
+      sessionKind: 'agent',
+      agent: historical.provider,
+      title: historical.title
+    })
+  }
+
+  rememberLive(
+    connectionId: string,
+    sessionRef: string,
+    worktree: SpoolPublicWorktreeInstance,
+    session: SpoolResolvedLiveSession
+  ): void {
     const attachments = this.attachmentsByConnection.get(connectionId) ?? new Map()
     this.attachmentsByConnection.set(connectionId, attachments)
     attachments.delete(sessionRef)
-    attachments.set(sessionRef, {
-      worktree,
-      session: {
-        kind: 'live',
-        sessionKey: historical.sessionKey,
-        terminalHandle,
-        executionHostId: historical.executionHostId,
-        actualHostScope: historical.actualHostScope,
-        worktreeInstanceId: historical.worktreeInstanceId,
-        spoolIncarnationId: historical.spoolIncarnationId,
-        provider: historical.provider,
-        providerSessionId: historical.providerSessionId,
-        title: historical.title
-      }
-    })
+    attachments.set(sessionRef, { worktree, session })
     while (attachments.size > MAX_TERMINAL_ATTACHMENTS_PER_CONNECTION) {
       // Why: catalog discovery becomes the durable lookup after the handoff; this
       // connection-local bridge must stay bounded even under repeated resumes.

@@ -36,7 +36,10 @@ export type SpoolCatalogReferenceBinding =
 export class SpoolCatalogReferenceTable {
   private readonly referenceByAliasKey = new Map<string, string>()
   private readonly bindingByReference = new Map<string, SpoolCatalogReferenceBinding>()
-  private readonly pinnedSessionReferences = new Map<string, string>()
+  private readonly pinnedSessionReferences = new Map<
+    string,
+    { reference: string; instanceId: string }
+  >()
 
   reconcile(bindings: readonly SpoolCatalogReferenceBinding[]): void {
     const nextReferences = new Map<string, string>()
@@ -45,7 +48,7 @@ export class SpoolCatalogReferenceTable {
     for (const binding of bindings) {
       const reference =
         nextReferences.get(binding.aliasKey) ??
-        this.pinnedSessionReferences.get(binding.aliasKey) ??
+        this.pinnedSessionReferences.get(binding.aliasKey)?.reference ??
         this.referenceByAliasKey.get(binding.aliasKey) ??
         this.createReference(reservedReferences)
       nextReferences.set(binding.aliasKey, reference)
@@ -74,13 +77,29 @@ export class SpoolCatalogReferenceTable {
     return this.bindingByReference.get(reference) ?? null
   }
 
+  reserveSession(binding: Extract<SpoolCatalogReferenceBinding, { kind: 'session' }>): string {
+    const reference =
+      this.pinnedSessionReferences.get(binding.aliasKey)?.reference ??
+      this.referenceByAliasKey.get(binding.aliasKey) ??
+      this.createReference(new Set())
+    this.referenceByAliasKey.set(binding.aliasKey, reference)
+    this.bindingByReference.set(reference, binding)
+    this.pinSessionReference(binding.aliasKey, reference, binding.instanceId)
+    return reference
+  }
+
   pinSession(reference: string): boolean {
     const binding = this.bindingByReference.get(reference)
     if (binding?.kind !== 'session') {
       return false
     }
-    this.pinnedSessionReferences.delete(binding.aliasKey)
-    this.pinnedSessionReferences.set(binding.aliasKey, reference)
+    this.pinSessionReference(binding.aliasKey, reference, binding.instanceId)
+    return true
+  }
+
+  private pinSessionReference(aliasKey: string, reference: string, instanceId: string): void {
+    this.pinnedSessionReferences.delete(aliasKey)
+    this.pinnedSessionReferences.set(aliasKey, { reference, instanceId })
     while (this.pinnedSessionReferences.size > MAX_PINNED_SESSION_REFERENCES) {
       const oldest = this.pinnedSessionReferences.keys().next().value
       if (!oldest) {
@@ -88,13 +107,11 @@ export class SpoolCatalogReferenceTable {
       }
       this.pinnedSessionReferences.delete(oldest)
     }
-    return true
   }
 
   invalidateInstance(instanceId: string): void {
-    for (const [aliasKey, reference] of this.pinnedSessionReferences) {
-      const binding = this.bindingByReference.get(reference)
-      if (binding && binding.kind !== 'project' && binding.instanceId === instanceId) {
+    for (const [aliasKey, pinned] of this.pinnedSessionReferences) {
+      if (pinned.instanceId === instanceId) {
         this.pinnedSessionReferences.delete(aliasKey)
       }
     }
@@ -125,7 +142,7 @@ export class SpoolCatalogReferenceTable {
 
   private isPinnedSessionReference(reference: string): boolean {
     for (const pinned of this.pinnedSessionReferences.values()) {
-      if (pinned === reference) {
+      if (pinned.reference === reference) {
         return true
       }
     }

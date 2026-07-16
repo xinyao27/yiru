@@ -1,5 +1,9 @@
 import { Buffer } from 'node:buffer'
 import type { AzureDevOpsRepoRef } from './repository-ref'
+import {
+  HostedReviewApiRequestError,
+  requestHostedReviewJson
+} from '../source-control/hosted-review-api-request'
 
 const REQUEST_TIMEOUT_MS = 5000
 
@@ -13,6 +17,9 @@ type AzureDevOpsAuthConfig = {
 export type AzureDevOpsRequestOptions = {
   searchParams?: Record<string, string | number>
   timeoutMs?: number
+  throwOnError?: boolean
+  allowNotFound?: boolean
+  signal?: AbortSignal
 }
 
 function envValue(name: string): string | null {
@@ -76,18 +83,29 @@ export async function requestAzureDevOpsJsonAtBase<T>(
 ): Promise<T | null> {
   const config = getAzureDevOpsAuthConfig()
   try {
-    const response = await fetch(apiUrl(baseUrl, path, options.searchParams), {
-      headers: {
-        Accept: 'application/json',
-        ...authHeaders(config)
+    return await requestHostedReviewJson<T>(
+      apiUrl(baseUrl, path, options.searchParams),
+      {
+        headers: {
+          Accept: 'application/json',
+          ...authHeaders(config)
+        }
       },
-      signal: AbortSignal.timeout(options.timeoutMs ?? REQUEST_TIMEOUT_MS)
-    })
-    if (!response.ok) {
+      options.timeoutMs ?? REQUEST_TIMEOUT_MS,
+      options.signal
+    )
+  } catch (error) {
+    options.signal?.throwIfAborted()
+    if (
+      options.allowNotFound &&
+      error instanceof HostedReviewApiRequestError &&
+      error.status === 404
+    ) {
       return null
     }
-    return (await response.json()) as T
-  } catch {
+    if (options.throwOnError) {
+      throw error
+    }
     return null
   }
 }

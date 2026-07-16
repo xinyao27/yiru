@@ -11,6 +11,11 @@ import {
   getHostedReviewLocalGitOptions,
   type HostedReviewExecutionOptions
 } from '../source-control/hosted-review-git-options'
+import {
+  HostedReviewApiRequestError,
+  requestHostedReviewJson
+} from '../source-control/hosted-review-api-request'
+import type { HostedReviewLookupOptions } from '../source-control/hosted-review-lookup-options'
 
 const REQUEST_TIMEOUT_MS = 5000
 // Why: self-hosted Forgejo can take ~5s to serve one /pulls page (it loads
@@ -36,6 +41,9 @@ export type GiteaAuthStatus = {
 type RequestOptions = {
   searchParams?: Record<string, string | number>
   timeoutMs?: number
+  throwOnError?: boolean
+  allowNotFound?: boolean
+  signal?: AbortSignal
 }
 
 function envValue(name: string): string | null {
@@ -81,18 +89,29 @@ async function requestJsonAtBase<T>(
 ): Promise<T | null> {
   const config = getAuthConfig()
   try {
-    const response = await fetch(apiUrl(baseUrl, path, options.searchParams), {
-      headers: {
-        Accept: 'application/json',
-        ...authHeaders(config)
+    return await requestHostedReviewJson<T>(
+      apiUrl(baseUrl, path, options.searchParams),
+      {
+        headers: {
+          Accept: 'application/json',
+          ...authHeaders(config)
+        }
       },
-      signal: AbortSignal.timeout(options.timeoutMs ?? REQUEST_TIMEOUT_MS)
-    })
-    if (!response.ok) {
+      options.timeoutMs ?? REQUEST_TIMEOUT_MS,
+      options.signal
+    )
+  } catch (error) {
+    options.signal?.throwIfAborted()
+    if (
+      options.allowNotFound &&
+      error instanceof HostedReviewApiRequestError &&
+      error.status === 404
+    ) {
       return null
     }
-    return (await response.json()) as T
-  } catch {
+    if (options.throwOnError) {
+      throw error
+    }
     return null
   }
 }
@@ -121,23 +140,28 @@ export function invalidateGiteaPullRequestScanForRepo(repo: GiteaRepoRef): void 
 
 async function getCommitStatus(
   repo: GiteaRepoRef,
-  headSha: string | undefined
+  headSha: string | undefined,
+  signal?: AbortSignal,
+  throwOnError = false
 ): Promise<ReturnType<typeof deriveGiteaCommitStatus>> {
   if (!headSha) {
     return 'neutral'
   }
   const data = await requestJson<RawGiteaCombinedStatus>(
     repo,
-    `/repos/${encodedRepoPath(repo)}/commits/${encodeURIComponent(headSha)}/status`
+    `/repos/${encodedRepoPath(repo)}/commits/${encodeURIComponent(headSha)}/status`,
+    { signal, throwOnError }
   )
   return deriveGiteaCommitStatus(data)
 }
 
 async function normalizePullRequest(
   repo: GiteaRepoRef,
-  raw: RawGiteaPullRequest
+  raw: RawGiteaPullRequest,
+  signal?: AbortSignal,
+  throwOnError = false
 ): Promise<GiteaPullRequestInfo | null> {
-  const status = await getCommitStatus(repo, raw.head?.sha?.trim())
+  const status = await getCommitStatus(repo, raw.head?.sha?.trim(), signal, throwOnError)
   return mapGiteaPullRequest(raw, status)
 }
 
@@ -215,9 +239,10 @@ export async function getGiteaPullRequest(
   }
   const raw = await requestJson<RawGiteaPullRequest>(
     repo,
-    `/repos/${encodedRepoPath(repo)}/pulls/${encodeURIComponent(String(prNumber))}`
+    `/repos/${encodedRepoPath(repo)}/pulls/${encodeURIComponent(String(prNumber))}`,
+    { signal: options.signal }
   )
-  return raw ? normalizePullRequest(repo, raw) : null
+  return raw ? normalizePullRequest(repo, raw, options.signal) : null
 }
 
 export async function getGiteaPullRequestForBranch(
@@ -225,7 +250,7 @@ export async function getGiteaPullRequestForBranch(
   branch: string,
   linkedPRNumber?: number | null,
   connectionId?: string | null,
-  options: HostedReviewExecutionOptions = {}
+  options: HostedReviewLookupOptions = {}
 ): Promise<GiteaPullRequestInfo | null> {
   const branchName = branch.replace(/^refs\/heads\//, '')
   if (!branchName && linkedPRNumber == null) {
@@ -237,29 +262,63 @@ export async function getGiteaPullRequestForBranch(
     connectionId,
     getHostedReviewLocalGitOptions(options)
   )
+  options.signal?.throwIfAborted()
   if (!repo) {
+    if (options.throwOnProviderError) {
+      throw new Error('Gitea repository lookup became unavailable.')
+    }
     return null
   }
 
   if (branchName) {
-    const pullRequests = await scanGiteaPullRequests(
-      giteaPullRequestScanKey(repo),
-      (page) =>
-        requestJson<RawGiteaPullRequest[]>(repo, `/repos/${encodedRepoPath(repo)}/pulls`, {
-          searchParams: {
-            state: 'all',
-            sort: 'recentupdate',
-            page,
-            limit: PULL_REQUEST_PAGE_LIMIT
-          },
-          timeoutMs: PULL_REQUEST_LIST_TIMEOUT_MS
-        }),
-      PULL_REQUEST_PAGE_LIMIT,
-      MAX_PULL_REQUEST_PAGES
-    )
-    const raw = pullRequests.find((item) => matchesBranch(item, branchName))
-    if (raw) {
-      return normalizePullRequest(repo, raw)
+    // Why: cancellable remote lookups cannot share an in-flight request whose
+    // AbortSignal belongs to another caller; ordinary sidebar scans still use
+    // the bounded repo cache to protect self-hosted Gitea instances.
+    if (options.signal || options.throwOnProviderError) {
+      for (let page = 1; page <= MAX_PULL_REQUEST_PAGES; page++) {
+        const list = await requestJson<RawGiteaPullRequest[]>(
+          repo,
+          `/repos/${encodedRepoPath(repo)}/pulls`,
+          {
+            throwOnError: options.throwOnProviderError,
+            signal: options.signal,
+            searchParams: {
+              state: 'all',
+              sort: 'recentupdate',
+              page,
+              limit: PULL_REQUEST_PAGE_LIMIT
+            },
+            timeoutMs: PULL_REQUEST_LIST_TIMEOUT_MS
+          }
+        )
+        const raw = list?.find((item) => matchesBranch(item, branchName))
+        if (raw) {
+          return normalizePullRequest(repo, raw, options.signal, options.throwOnProviderError)
+        }
+        if (!list || list.length < PULL_REQUEST_PAGE_LIMIT) {
+          break
+        }
+      }
+    } else {
+      const pullRequests = await scanGiteaPullRequests(
+        giteaPullRequestScanKey(repo),
+        (page) =>
+          requestJson<RawGiteaPullRequest[]>(repo, `/repos/${encodedRepoPath(repo)}/pulls`, {
+            searchParams: {
+              state: 'all',
+              sort: 'recentupdate',
+              page,
+              limit: PULL_REQUEST_PAGE_LIMIT
+            },
+            timeoutMs: PULL_REQUEST_LIST_TIMEOUT_MS
+          }),
+        PULL_REQUEST_PAGE_LIMIT,
+        MAX_PULL_REQUEST_PAGES
+      )
+      const raw = pullRequests.find((item) => matchesBranch(item, branchName))
+      if (raw) {
+        return normalizePullRequest(repo, raw)
+      }
     }
   }
 
@@ -268,9 +327,15 @@ export async function getGiteaPullRequestForBranch(
   }
   const raw = await requestJson<RawGiteaPullRequest>(
     repo,
-    `/repos/${encodedRepoPath(repo)}/pulls/${encodeURIComponent(String(linkedPRNumber))}`
+    `/repos/${encodedRepoPath(repo)}/pulls/${encodeURIComponent(String(linkedPRNumber))}`,
+    // Why: only the durable exact-id lookup can interpret 404 as a deleted review.
+    {
+      allowNotFound: true,
+      throwOnError: options.throwOnProviderError,
+      signal: options.signal
+    }
   )
-  return raw ? normalizePullRequest(repo, raw) : null
+  return raw ? normalizePullRequest(repo, raw, options.signal, options.throwOnProviderError) : null
 }
 
 export async function getGiteaRepoSlug(

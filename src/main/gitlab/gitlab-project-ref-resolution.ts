@@ -15,9 +15,11 @@ export type { ProjectRef }
 
 export type LocalGitExecOptions = {
   wslDistro?: string
+  signal?: AbortSignal
 }
 
 const PROJECT_REF_CACHE_MAX_ENTRIES = 512
+const GLAB_AUTH_STATUS_TIMEOUT_MS = 10_000
 const projectRefCache = new Map<string, ProjectRef | null>()
 
 // Why: known hosts are cached PER connection. A repo on an SSH connection
@@ -72,6 +74,18 @@ export async function getProjectRefForRemote(
     return projectRefCache.get(cacheKey)!
   }
 
+  if (localGitOptions.signal) {
+    // Why: cancellation belongs to one Spool read; it must not abort a shared
+    // provider-detection probe that an unrelated local sidebar is awaiting.
+    return resolveProjectRefForRemote(
+      repoPath,
+      remoteName,
+      knownHosts,
+      connectionId,
+      cacheKey,
+      localGitOptions
+    )
+  }
   return runProjectRefProbeOnce(cacheKey, () =>
     resolveProjectRefForRemote(
       repoPath,
@@ -98,10 +112,15 @@ async function resolveProjectRefForRemote(
       return null
     }
     const { stdout } = sshGitProvider
-      ? await sshGitProvider.exec(['remote', 'get-url', remoteName], repoPath)
+      ? await sshGitProvider.exec(
+          ['remote', 'get-url', remoteName],
+          repoPath,
+          localGitOptions.signal ? { signal: localGitOptions.signal } : undefined
+        )
       : await gitExecFileAsync(['remote', 'get-url', remoteName], {
           cwd: repoPath,
-          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
+          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {}),
+          ...(localGitOptions.signal ? { signal: localGitOptions.signal } : {})
         })
     const result = parseGitLabProjectRef(stdout, knownHosts)
     if (result) {
@@ -123,6 +142,7 @@ async function resolveProjectRefForRemote(
       return remoteCandidate
     }
   } catch {
+    localGitOptions.signal?.throwIfAborted()
     if (connectionId) {
       return null
     }
@@ -214,12 +234,15 @@ export function glabRepoExecOptions(
   repoPath: string,
   connectionId?: string | null,
   localGitOptions: LocalGitExecOptions = {}
-): { cwd?: string; wslDistro?: string } {
+): { cwd?: string; wslDistro?: string; signal?: AbortSignal } {
   return connectionId
-    ? {}
+    ? localGitOptions.signal
+      ? { signal: localGitOptions.signal }
+      : {}
     : {
         cwd: repoPath,
-        ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
+        ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {}),
+        ...(localGitOptions.signal ? { signal: localGitOptions.signal } : {})
       }
 }
 
@@ -263,7 +286,10 @@ async function isGlabConfiguredForRemoteHost(
   }
 }
 
-export async function getGlabKnownHosts(connectionId?: string | null): Promise<readonly string[]> {
+export async function getGlabKnownHosts(
+  connectionId?: string | null,
+  options: { signal?: AbortSignal } = {}
+): Promise<readonly string[]> {
   const key = connectionCacheKey(connectionId)
   const cached = knownHostsCacheByConnection.get(key)
   if (cached) {
@@ -275,12 +301,15 @@ export async function getGlabKnownHosts(connectionId?: string | null): Promise<r
     // the RESULT is cached per connection (a connected repo can have a
     // different set of authenticated self-hosted hosts than the local one),
     // mirroring how project-ref resolution caches per connection.
-    const { stdout, stderr } = await glabExecFileAsync(['auth', 'status'])
+    const timeoutSignal = AbortSignal.timeout(GLAB_AUTH_STATUS_TIMEOUT_MS)
+    const signal = options.signal ? AbortSignal.any([options.signal, timeoutSignal]) : timeoutSignal
+    const { stdout, stderr } = await glabExecFileAsync(['auth', 'status'], { signal })
     const hosts = parseGlabAuthStatusHosts(`${stdout}\n${stderr}`)
     const merged = Array.from(new Set([...DEFAULT_GITLAB_HOSTS, ...hosts]))
     knownHostsCacheByConnection.set(key, merged)
     return merged
   } catch {
+    options.signal?.throwIfAborted()
     // Auth check failed (glab not installed, no auth, tunnel not ready,
     // etc.) — fall back to the canonical default for THIS call, but do NOT
     // cache the fallback. A later probe (e.g. after the SSH tunnel comes

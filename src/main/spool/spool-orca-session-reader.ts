@@ -8,7 +8,9 @@ import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import { SpoolExecutionError } from './spool-execution-error'
 import type {
   SpoolExecutionHostSessionReader,
-  SpoolExecutionHostSessionReadRequest
+  SpoolExecutionHostSessionReadRequest,
+  SpoolMobileSessionTabsResult,
+  SpoolObservedProviderSession
 } from './spool-session-source'
 
 type SpoolSessionRuntime = Pick<
@@ -16,13 +18,37 @@ type SpoolSessionRuntime = Pick<
   'listMobileSessionTabs' | 'onMobileSessionTabsChanged'
 >
 
+const MAX_LOCAL_SESSION_READ_REQUESTS = 256
+
 /** Reads only owner-side session projections; it never opens an execution route. */
 export class OrcaSpoolExecutionHostSessionReader implements SpoolExecutionHostSessionReader {
+  private readonly localReadRequests = new Map<string, SpoolExecutionHostSessionReadRequest>()
+
   constructor(
     private readonly runtime: SpoolSessionRuntime,
     private readonly pairedRuntime?: SpoolExecutionHostSessionReader,
     private readonly ssh?: SpoolExecutionHostSessionReader
   ) {}
+
+  registerPublicWorktree(request: SpoolExecutionHostSessionReadRequest): void {
+    const host = requireExecutionHost(request)
+    if (host.kind === 'runtime') {
+      this.pairedRuntime?.registerPublicWorktree?.(request)
+      return
+    }
+    this.rememberLocalReadRequest(request)
+  }
+
+  unregisterPublicWorktree(request: SpoolExecutionHostSessionReadRequest): void {
+    const host = requireExecutionHost(request)
+    if (host.kind === 'runtime') {
+      this.pairedRuntime?.unregisterPublicWorktree?.(request)
+      return
+    }
+    this.localReadRequests.delete(
+      localReadRequestKey(request.worktreeId, request.worktreeInstanceId)
+    )
+  }
 
   async listMobileSessionTabs(request: SpoolExecutionHostSessionReadRequest, signal?: AbortSignal) {
     const host = requireExecutionHost(request)
@@ -32,6 +58,7 @@ export class OrcaSpoolExecutionHostSessionReader implements SpoolExecutionHostSe
     // Why: SSH PTYs are already represented by the owner runtime's session graph.
     const tabs = await this.runtime.listMobileSessionTabs(`id:${request.worktreeId}`)
     signal?.throwIfAborted()
+    this.rememberLocalReadRequest(request)
     return tabs
   }
 
@@ -98,8 +125,16 @@ export class OrcaSpoolExecutionHostSessionReader implements SpoolExecutionHostSe
     })
   }
 
-  subscribe(listener: () => void): () => void {
-    const unsubscribeLocal = this.runtime.onMobileSessionTabsChanged(() => listener())
+  subscribe(
+    listener: (
+      snapshot?: SpoolMobileSessionTabsResult,
+      request?: SpoolExecutionHostSessionReadRequest,
+      providerSessions?: readonly SpoolObservedProviderSession[]
+    ) => void
+  ): () => void {
+    const unsubscribeLocal = this.runtime.onMobileSessionTabsChanged((snapshot) =>
+      listener(snapshot, this.resolveLocalReadRequest(snapshot))
+    )
     const unsubscribeRuntime = this.pairedRuntime?.subscribe?.(listener) ?? (() => {})
     const unsubscribeSsh = this.ssh?.subscribe?.(listener) ?? (() => {})
     return () => {
@@ -116,6 +151,46 @@ export class OrcaSpoolExecutionHostSessionReader implements SpoolExecutionHostSe
     }
     return this.pairedRuntime
   }
+
+  private rememberLocalReadRequest(request: SpoolExecutionHostSessionReadRequest): void {
+    const key = localReadRequestKey(request.worktreeId, request.worktreeInstanceId)
+    this.localReadRequests.delete(key)
+    this.localReadRequests.set(key, request)
+    while (this.localReadRequests.size > MAX_LOCAL_SESSION_READ_REQUESTS) {
+      const oldest = this.localReadRequests.keys().next().value
+      if (!oldest) {
+        break
+      }
+      this.localReadRequests.delete(oldest)
+    }
+  }
+
+  private resolveLocalReadRequest(
+    snapshot: SpoolMobileSessionTabsResult
+  ): SpoolExecutionHostSessionReadRequest | undefined {
+    let matched: SpoolExecutionHostSessionReadRequest | undefined
+    for (const tab of snapshot.tabs) {
+      if (tab.type !== 'terminal' || tab.status !== 'ready' || !tab.worktreeInstanceId) {
+        continue
+      }
+      const request = this.localReadRequests.get(
+        localReadRequestKey(snapshot.worktree, tab.worktreeInstanceId)
+      )
+      if (!request) {
+        continue
+      }
+      if (matched && matched !== request) {
+        // Why: one hook snapshot cannot safely attest sessions from multiple execution routes.
+        return undefined
+      }
+      matched = request
+    }
+    return matched
+  }
+}
+
+function localReadRequestKey(worktreeId: string, worktreeInstanceId: string): string {
+  return JSON.stringify([worktreeId, worktreeInstanceId])
 }
 
 function inventoryBindingKey(request: SpoolExecutionHostSessionReadRequest): string {
