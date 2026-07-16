@@ -25,7 +25,7 @@ type RemoteRuntimeExistingRouteAccessOptions = {
   closeSubscription: (requestId: string) => void
 }
 
-/** Borrows one ready shared-control route without creating, reconnecting, or replaying it. */
+/** Uses only an already-ready shared-control route; owner policy may explicitly retain it. */
 export class RemoteRuntimeExistingRouteAccess {
   constructor(private readonly options: RemoteRuntimeExistingRouteAccessOptions) {}
 
@@ -55,6 +55,24 @@ export class RemoteRuntimeExistingRouteAccess {
     params: unknown,
     callbacks: SharedControlSubscriptionCallbacks<TResult>
   ): Promise<RemoteRuntimeSharedSubscription> {
+    return this.startSubscription(method, params, callbacks, false)
+  }
+
+  subscribeRetained<TResult>(
+    method: string,
+    params: unknown,
+    callbacks: SharedControlSubscriptionCallbacks<TResult>
+  ): Promise<RemoteRuntimeSharedSubscription> {
+    // Why: owner policy may retain an already-ready route, but must never create the first route.
+    return this.startSubscription(method, params, callbacks, true)
+  }
+
+  private startSubscription<TResult>(
+    method: string,
+    params: unknown,
+    callbacks: SharedControlSubscriptionCallbacks<TResult>,
+    replayOnReconnect: boolean
+  ): Promise<RemoteRuntimeSharedSubscription> {
     const routeGeneration = this.requireCurrentRoute()
     return startSharedControlSubscription({
       subscriptions: this.options.subscriptions,
@@ -64,7 +82,7 @@ export class RemoteRuntimeExistingRouteAccess {
       ensureReady: () => this.requireSameRoute(routeGeneration),
       sendSubscription: (subscription) => this.sendSubscription(subscription, routeGeneration),
       closeSubscription: this.options.closeSubscription,
-      replayOnReconnect: false
+      replayOnReconnect
     })
   }
 

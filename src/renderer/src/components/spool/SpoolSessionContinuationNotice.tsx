@@ -93,7 +93,7 @@ function getContinuationMessage(
     case 'attaching':
       return translate(
         'auto.components.spool.SpoolSessionPane.attaching',
-        'Connecting to the agent terminal…'
+        'Connecting to the remote terminal…'
       )
     case 'closed':
       return canControl

@@ -127,6 +127,24 @@ export function subscribeRemoteRuntimeExistingSharedControlRequest<TResult>(
     : Promise.reject(remoteRuntimeUnavailableError())
 }
 
+export function subscribeRemoteRuntimeRetainedExistingSharedControlRequest<TResult>(
+  environmentId: string,
+  pairing: PairingOffer,
+  method: string,
+  params: unknown,
+  callbacks: {
+    onResponse: (response: RuntimeRpcResponse<TResult>) => void
+    onBinary?: (bytes: Uint8Array<ArrayBufferLike>) => void
+    onError: (error: { code: string; message: string }) => void
+    onClose?: () => void
+  }
+): Promise<RemoteRuntimeSharedSubscription> {
+  const connection = getExistingSharedControlConnection(environmentId, pairing)
+  return connection
+    ? connection.existingRoute.subscribeRetained(method, params, callbacks)
+    : Promise.reject(remoteRuntimeUnavailableError())
+}
+
 export function closeRemoteRuntimeSharedControlConnection(environmentId: string): void {
   const cached = sharedControlConnections.get(environmentId)
   sharedControlConnections.delete(environmentId)
