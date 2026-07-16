@@ -24,7 +24,7 @@ import {
   type ResolvedSourceControlAiGenerationParams
 } from '../../shared/source-control-ai'
 import type { SourceControlAiOperation } from '../../shared/source-control-ai-types'
-import type { GitProviderStatusOptions } from '../providers/types'
+import type { GitProviderStatusOptions } from '../providers/git-provider-status-options'
 import { getRemoteCommitUrl, getRemoteFileUrl } from '../git/repo'
 import {
   abortMerge,

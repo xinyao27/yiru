@@ -54,11 +54,7 @@ describe('ProviderUsageSegment monthly window', () => {
     const { ProviderUsageSegment } = await import('./ProviderUsageSegment')
 
     const markup = renderToStaticMarkup(
-      <ProviderUsageSegment
-        limits={grokMonthlyLimits('fetching')}
-        compact={false}
-        display="used"
-      />
+      <ProviderUsageSegment limits={grokMonthlyLimits('fetching')} compact={false} display="used" />
     )
 
     expect(markup).toContain('25% used 30d')

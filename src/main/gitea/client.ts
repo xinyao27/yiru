@@ -274,51 +274,27 @@ export async function getGiteaPullRequestForBranch(
     // Why: cancellable remote lookups cannot share an in-flight request whose
     // AbortSignal belongs to another caller; ordinary sidebar scans still use
     // the bounded repo cache to protect self-hosted Gitea instances.
-    if (options.signal || options.throwOnProviderError) {
-      for (let page = 1; page <= MAX_PULL_REQUEST_PAGES; page++) {
-        const list = await requestJson<RawGiteaPullRequest[]>(
-          repo,
-          `/repos/${encodedRepoPath(repo)}/pulls`,
-          {
-            throwOnError: options.throwOnProviderError,
-            signal: options.signal,
-            searchParams: {
-              state: 'all',
-              sort: 'recentupdate',
-              page,
-              limit: PULL_REQUEST_PAGE_LIMIT
-            },
-            timeoutMs: PULL_REQUEST_LIST_TIMEOUT_MS
-          }
-        )
-        const raw = list?.find((item) => matchesBranch(item, branchName))
-        if (raw) {
-          return normalizePullRequest(repo, raw, options.signal, options.throwOnProviderError)
-        }
-        if (!list || list.length < PULL_REQUEST_PAGE_LIMIT) {
-          break
-        }
-      }
-    } else {
-      const pullRequests = await scanGiteaPullRequests(
-        giteaPullRequestScanKey(repo),
-        (page) =>
-          requestJson<RawGiteaPullRequest[]>(repo, `/repos/${encodedRepoPath(repo)}/pulls`, {
-            searchParams: {
-              state: 'all',
-              sort: 'recentupdate',
-              page,
-              limit: PULL_REQUEST_PAGE_LIMIT
-            },
-            timeoutMs: PULL_REQUEST_LIST_TIMEOUT_MS
-          }),
-        PULL_REQUEST_PAGE_LIMIT,
-        MAX_PULL_REQUEST_PAGES
-      )
-      const raw = pullRequests.find((item) => matchesBranch(item, branchName))
-      if (raw) {
-        return normalizePullRequest(repo, raw)
-      }
+    const pullRequests = await scanGiteaPullRequests(
+      giteaPullRequestScanKey(repo),
+      (page) =>
+        requestJson<RawGiteaPullRequest[]>(repo, `/repos/${encodedRepoPath(repo)}/pulls`, {
+          throwOnError: options.throwOnProviderError,
+          signal: options.signal,
+          searchParams: {
+            state: 'all',
+            sort: 'recentupdate',
+            page,
+            limit: PULL_REQUEST_PAGE_LIMIT
+          },
+          timeoutMs: PULL_REQUEST_LIST_TIMEOUT_MS
+        }),
+      PULL_REQUEST_PAGE_LIMIT,
+      MAX_PULL_REQUEST_PAGES,
+      !options.signal && !options.throwOnProviderError
+    )
+    const raw = pullRequests.find((item) => matchesBranch(item, branchName))
+    if (raw) {
+      return normalizePullRequest(repo, raw, options.signal, options.throwOnProviderError)
     }
   }
 

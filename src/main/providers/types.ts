@@ -329,8 +329,6 @@ export type TerminalArtifactAccessOptions = {
 
 // ─── Git Provider ───────────────────────────────────────────────────
 
-export type { GitProviderStatusOptions } from './git-provider-status-options'
-
 export type IGitProvider = IGitMutationProvider & {
   getStatus(worktreePath: string, options?: GitProviderStatusOptions): Promise<GitStatusResult>
   getSubmoduleStatus(

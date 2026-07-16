@@ -74,6 +74,27 @@ function reusableScanCacheEntry(repoKey: string): GiteaPullRequestScanEntry | nu
   return entry
 }
 
+async function collectGiteaPullRequestPages(
+  fetchPage: GiteaPullRequestPageFetcher,
+  pageLimit: number,
+  maxPages: number
+): Promise<{ pullRequests: RawGiteaPullRequest[]; completed: boolean }> {
+  const pullRequests: RawGiteaPullRequest[] = []
+  let completed = true
+  for (let page = 1; page <= maxPages; page++) {
+    const list = await fetchPage(page)
+    if (!list) {
+      completed = false
+      break
+    }
+    pullRequests.push(...list)
+    if (list.length < pageLimit) {
+      break
+    }
+  }
+  return { pullRequests, completed }
+}
+
 /**
  * Why: every worktree card resolves its branch by paginating the same
  * /repos/{repo}/pulls listing — Gitea/Forgejo have no head-branch filter.
@@ -87,8 +108,12 @@ export async function scanGiteaPullRequests(
   repoKey: string,
   fetchPage: GiteaPullRequestPageFetcher,
   pageLimit: number,
-  maxPages: number
+  maxPages: number,
+  useCache = true
 ): Promise<RawGiteaPullRequest[]> {
+  if (!useCache) {
+    return (await collectGiteaPullRequestPages(fetchPage, pageLimit, maxPages)).pullRequests
+  }
   const cached = reusableScanCacheEntry(repoKey)
   if (cached) {
     return cached.pullRequests
@@ -100,19 +125,11 @@ export async function scanGiteaPullRequests(
   const generation = scanGenerations.get(repoKey) ?? 0
   activeScanCounts.set(repoKey, (activeScanCounts.get(repoKey) ?? 0) + 1)
   const scan = (async () => {
-    const pullRequests: RawGiteaPullRequest[] = []
-    let completed = true
-    for (let page = 1; page <= maxPages; page++) {
-      const list = await fetchPage(page)
-      if (!list) {
-        completed = false
-        break
-      }
-      pullRequests.push(...list)
-      if (list.length < pageLimit) {
-        break
-      }
-    }
+    const { pullRequests, completed } = await collectGiteaPullRequestPages(
+      fetchPage,
+      pageLimit,
+      maxPages
+    )
     if ((scanGenerations.get(repoKey) ?? 0) === generation) {
       rememberScanCacheEntry(repoKey, pullRequests, completed ? SCAN_TTL_MS : FAILED_SCAN_RETRY_MS)
     }

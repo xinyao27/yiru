@@ -3,27 +3,30 @@
 // handler only sees plaintext JSON, identical to the Unix socket path.
 import type { WebSocket } from 'ws'
 import type { AuthenticatedRpcPrincipal } from '../../../shared/rpc-principal'
-import { deriveSharedKey, encrypt, decrypt, encryptBytes, decryptBytes } from './e2ee-crypto'
-import {
-  createWsOutboundBackpressureQueue,
-  type WsOutboundBackpressureQueue
-} from '../../../shared/ws-outbound-backpressure-queue'
+import { deriveSharedKey, decrypt, decryptBytes } from './e2ee-crypto'
 import {
   DesktopMobileE2EEV2Session,
   type DesktopMobileE2EEV2Context
 } from './mobile-e2ee-v2-desktop-session'
-import {
-  createDesktopMobileE2EEV2OutboundQueue,
-  type DesktopMobileE2EEV2OutboundItem as V2OutboundItem
-} from './mobile-e2ee-v2-desktop-outbound'
 import { handleDesktopMobileE2EEV2Inbound } from './mobile-e2ee-v2-desktop-inbound'
-import { isValidMobileE2EEAuthVersion, type MobileE2EEAuth } from './mobile-e2ee-auth-validation'
+import {
+  E2EEChannelAuthentication,
+  freezeAuthenticatedRpcPrincipal,
+  type E2EEAuthenticatedDevice,
+  type E2EEChannelAuthenticationOptions
+} from './e2ee-channel-authentication'
+import { E2EEChannelOutbound } from './e2ee-channel-outbound'
+
+export type {
+  E2EEAuthenticatedDevice,
+  E2EEAuthenticationContext,
+  E2EEAuthenticationResult
+} from './e2ee-channel-authentication'
 
 type ChannelState = 'awaiting_hello' | 'awaiting_auth' | 'ready'
 
 const HANDSHAKE_TIMEOUT_MS = 10_000
 const MAX_CONSECUTIVE_DECRYPT_FAILURES = 5
-const MAX_BINARY_BUFFERED_AMOUNT = 8 * 1024 * 1024
 
 type E2EEChannelCommonOptions = {
   serverSecretKey: Uint8Array
@@ -32,32 +35,10 @@ type E2EEChannelCommonOptions = {
   requireV2?: boolean
 }
 
-export type E2EEAuthenticatedDevice = {
-  deviceId: string
-  deviceToken: string
-  scope: 'mobile' | 'runtime'
-}
-
-export type E2EEAuthenticationResult = {
-  principal: AuthenticatedRpcPrincipal
-  legacyDeviceToken?: string
-}
-
-export type E2EEAuthenticationContext = {
-  clientPublicKeyB64: string
-}
-
-export type E2EEChannelOptions = E2EEChannelCommonOptions & {
-  maxTextReplyQueuedBytesPerGroup?: number
-  resolveAuthenticatedDevice?: (token: string) => E2EEAuthenticatedDevice | null
-  authenticate?: (
-    authFrame: unknown,
-    context: E2EEAuthenticationContext
-  ) => E2EEAuthenticationResult | null
-  onReady:
-    | ((channel: E2EEChannel, device: E2EEAuthenticatedDevice) => void)
-    | ((channel: E2EEChannel) => void)
-}
+export type E2EEChannelOptions = E2EEChannelCommonOptions &
+  E2EEChannelAuthenticationOptions & {
+    maxTextReplyQueuedBytesPerGroup?: number
+  }
 
 export class E2EEChannel {
   private state: ChannelState = 'awaiting_hello'
@@ -66,22 +47,12 @@ export class E2EEChannel {
   private handshakeTimer: ReturnType<typeof setTimeout> | null = null
   private readonly ws: WebSocket
   private readonly serverSecretKey: Uint8Array
-  private readonly maxTextReplyQueuedBytesPerGroup: number | undefined
-  private readonly resolveAuthenticatedDevice:
-    | ((token: string) => E2EEAuthenticatedDevice | null)
-    | undefined
-  private readonly authenticate:
-    | ((authFrame: unknown, context: E2EEAuthenticationContext) => E2EEAuthenticationResult | null)
-    | undefined
-  private readonly onReadyWithDevice:
-    | ((channel: E2EEChannel, device: E2EEAuthenticatedDevice) => void)
-    | undefined
-  private readonly onReadyWithPrincipal: ((channel: E2EEChannel) => void) | undefined
+  private readonly authentication: E2EEChannelAuthentication
+  private readonly outbound: E2EEChannelOutbound
   private readonly onError: (code: number, reason: string) => void
   private readonly transportContext: DesktopMobileE2EEV2Context
   private readonly requireV2: boolean
   private v2Session: DesktopMobileE2EEV2Session | null = null
-  private v2OutboundQueue: WsOutboundBackpressureQueue<V2OutboundItem> | null = null
   // Why: the RPC handler is set after the channel is ready, so the channel
   // can forward decrypted messages. Kept as a callback rather than constructor
   // param because the handler needs the encrypt function for replies.
@@ -93,11 +64,6 @@ export class E2EEChannel {
       ) => void)
     | null = null
   private binaryMessageHandler: ((plaintext: Uint8Array<ArrayBufferLike>) => void) | null = null
-  // Why: the streaming JSON reply path (e.g. legacy terminal.subscribe) has no
-  // seq/resync, so it must never drop frames under backpressure. Hold text
-  // replies in order while bufferedAmount is over the cap and drain as it
-  // clears; only a wedged link (hard cap) closes the socket for a clean resync.
-  private textReplyQueue: WsOutboundBackpressureQueue<string> | null = null
 
   deviceToken: string | null = null
   authenticatedDevice: E2EEAuthenticatedDevice | null = null
@@ -111,28 +77,22 @@ export class E2EEChannel {
   constructor(ws: WebSocket, options: E2EEChannelOptions) {
     this.ws = ws
     this.serverSecretKey = options.serverSecretKey
-    this.maxTextReplyQueuedBytesPerGroup = options.maxTextReplyQueuedBytesPerGroup
-    if (options.authenticate) {
-      this.resolveAuthenticatedDevice = undefined
-      this.authenticate = options.authenticate
-      this.onReadyWithDevice = undefined
-      this.onReadyWithPrincipal = options.onReady as (channel: E2EEChannel) => void
-    } else {
-      this.resolveAuthenticatedDevice = options.resolveAuthenticatedDevice
-      this.authenticate = undefined
-      this.onReadyWithDevice = options.onReady as (
-        channel: E2EEChannel,
-        device: E2EEAuthenticatedDevice
-      ) => void
-      this.onReadyWithPrincipal = undefined
-    }
+    this.authentication = new E2EEChannelAuthentication(options)
     this.onError = options.onError
     this.transportContext = options.transportContext ?? { transport: 'direct' }
     this.requireV2 = options.requireV2 ?? false
-
-    if (!this.resolveAuthenticatedDevice && !this.authenticate) {
-      throw new Error('E2EE channel requires an authenticator')
-    }
+    this.outbound = new E2EEChannelOutbound({
+      ws,
+      onError: options.onError,
+      getState: () => ({
+        ready: this.state === 'ready',
+        sharedKey: this.sharedKey,
+        v2Session: this.v2Session
+      }),
+      ...(options.maxTextReplyQueuedBytesPerGroup === undefined
+        ? {}
+        : { maxTextReplyQueuedBytesPerGroup: options.maxTextReplyQueuedBytesPerGroup })
+    })
 
     this.handshakeTimer = setTimeout(() => {
       this.onError(4002, 'E2EE handshake timeout')
@@ -286,10 +246,14 @@ export class E2EEChannel {
       return
     }
 
-    const authentication = this.authenticate
-      ? this.authenticatePrincipal(authFrame)
-      : this.authenticateDevice(authFrame)
+    const authentication = this.authentication.authenticate(
+      authFrame,
+      { clientPublicKeyB64: this.clientPublicKeyB64 ?? '' },
+      this.v2Session
+    )
     if (authentication === 'invalid') {
+      this.sendEncryptedControl({ type: 'e2ee_error', error: { code: 'bad_auth' } })
+      this.onError(4001, 'Invalid e2ee_auth')
       return
     }
     if (!authentication) {
@@ -299,7 +263,7 @@ export class E2EEChannel {
     }
 
     this.authenticatedDevice = authentication.device
-    this.authenticatedPrincipal = freezePrincipal(authentication.identity.principal)
+    this.authenticatedPrincipal = freezeAuthenticatedRpcPrincipal(authentication.identity.principal)
     this.deviceToken = authentication.identity.legacyDeviceToken ?? null
     this.state = 'ready'
 
@@ -312,11 +276,7 @@ export class E2EEChannel {
     // authentication success; relay sockets additionally bind this context to
     // their immutable relayDeviceId in the resolver.
     try {
-      if (authentication.device) {
-        this.onReadyWithDevice?.(this, authentication.device)
-      } else {
-        this.onReadyWithPrincipal?.(this)
-      }
+      this.authentication.notifyReady(this, authentication)
     } catch {
       // Why: a composition failure after authentication must close this exact
       // channel instead of escaping the WebSocket callback with a live socket.
@@ -346,126 +306,23 @@ export class E2EEChannel {
       onText: (plaintext) =>
         this.messageHandler?.(
           plaintext,
-          (response) => this.enqueueV2({ kind: 'text', plaintext: response }),
-          (response) => (this.enqueueV2({ kind: 'binary', plaintext: response }), true)
+          (response) => this.outbound.sendV2({ kind: 'text', plaintext: response }),
+          (response) => (this.outbound.sendV2({ kind: 'binary', plaintext: response }), true)
         ),
       onProtocolError: () => this.onError(4001, 'Invalid binary message before authentication')
     })
   }
 
-  private enqueueV2(item: V2OutboundItem): void {
-    if (!this.v2Session || this.ws.readyState !== this.ws.OPEN) {
-      return
-    }
-    if (!this.v2OutboundQueue) {
-      this.v2OutboundQueue = createDesktopMobileE2EEV2OutboundQueue({
-        ws: this.ws,
-        session: this.v2Session,
-        onOverflow: () => this.onError(1013, 'Outbound reply buffer overflow')
-      })
-    }
-    this.v2OutboundQueue.enqueue(item)
-  }
-
-  private authenticatePrincipal(authFrame: unknown): {
-    identity: E2EEAuthenticationResult
-    device: null
-  } | null {
-    const identity = this.authenticate?.(authFrame, {
-      clientPublicKeyB64: this.clientPublicKeyB64 ?? ''
-    })
-    return identity ? { identity, device: null } : null
-  }
-
-  private authenticateDevice(authFrame: unknown): {
-    identity: E2EEAuthenticationResult
-    device: E2EEAuthenticatedDevice
-  } | 'invalid' | null {
-    const auth = authFrame as MobileE2EEAuth
-    if (
-      auth.type !== 'e2ee_auth' ||
-      !auth.deviceToken ||
-      !isValidMobileE2EEAuthVersion(auth, this.v2Session)
-    ) {
-      this.sendEncryptedControl({ type: 'e2ee_error', error: { code: 'bad_auth' } })
-      this.onError(4001, 'Invalid e2ee_auth')
-      return 'invalid'
-    }
-    const device = this.resolveAuthenticatedDevice?.(auth.deviceToken)
-    if (!device || device.deviceToken !== auth.deviceToken) {
-      return null
-    }
-    return {
-      identity: {
-        principal: {
-          kind: 'paired-device',
-          deviceId: device.deviceId,
-          scope: device.scope
-        },
-        legacyDeviceToken: auth.deviceToken
-      },
-      device
-    }
-  }
-
-  private ensureTextReplyQueue(): WsOutboundBackpressureQueue<string> {
-    if (!this.textReplyQueue) {
-      this.textReplyQueue = createWsOutboundBackpressureQueue<string>({
-        send: (frame) => this.ws.send(frame),
-        // Encrypted replies are base64 ASCII strings, so length === byte count.
-        byteLengthOf: (frame) => frame.length,
-        getBufferedAmount: () => this.ws.bufferedAmount,
-        isWritable: () => Boolean(this.sharedKey) && this.ws.readyState === this.ws.OPEN,
-        // 1013 (Try Again Later): the link is wedged; drop the channel so the
-        // client reconnects and replays a full snapshot instead of unbounded RSS.
-        onOverflow: () => this.onError(1013, 'Outbound reply buffer overflow'),
-        ...(this.maxTextReplyQueuedBytesPerGroup !== undefined
-          ? { maxQueuedBytesPerGroup: this.maxTextReplyQueuedBytesPerGroup }
-          : {})
-      })
-    }
-    return this.textReplyQueue
-  }
-
   sendText(plaintext: string, groupKey?: string): boolean {
-    if (this.state !== 'ready' || this.ws.readyState !== this.ws.OPEN) {
-      return false
-    }
-    if (this.v2Session) {
-      this.enqueueV2({ kind: 'text', plaintext })
-      return true
-    }
-    if (!this.sharedKey) {
-      return false
-    }
-    this.ensureTextReplyQueue().enqueue(encrypt(plaintext, this.sharedKey), groupKey)
-    return true
+    return this.outbound.sendText(plaintext, groupKey)
   }
 
   sendBinary(plaintext: Uint8Array<ArrayBufferLike>): boolean {
-    if (this.state !== 'ready' || this.ws.readyState !== this.ws.OPEN) {
-      return false
-    }
-    if (this.v2Session) {
-      this.enqueueV2({ kind: 'binary', plaintext })
-      return true
-    }
-    if (!this.sharedKey) {
-      return false
-    }
-    if (this.ws.bufferedAmount > MAX_BINARY_BUFFERED_AMOUNT) {
-      return false
-    }
-    this.ws.send(Buffer.from(encryptBytes(plaintext, this.sharedKey)), { binary: true })
-    return true
+    return this.outbound.sendBinary(plaintext)
   }
 
   private sendEncryptedControl(message: unknown): void {
-    if (this.v2Session) {
-      this.enqueueV2({ kind: 'text', plaintext: JSON.stringify(message) })
-    } else if (this.ws.readyState === this.ws.OPEN && this.sharedKey) {
-      this.ws.send(encrypt(JSON.stringify(message), this.sharedKey))
-    }
+    this.outbound.sendControl(message)
   }
 
   destroy(): void {
@@ -481,19 +338,6 @@ export class E2EEChannel {
     this.v2Session = null
     this.messageHandler = null
     this.binaryMessageHandler = null
-    this.textReplyQueue?.dispose()
-    this.textReplyQueue = null
-    this.v2OutboundQueue?.dispose()
-    this.v2OutboundQueue = null
+    this.outbound.destroy()
   }
-}
-
-function freezePrincipal(principal: AuthenticatedRpcPrincipal): AuthenticatedRpcPrincipal {
-  if (principal.kind === 'spool') {
-    return Object.freeze({
-      ...principal,
-      tailnet: Object.freeze({ ...principal.tailnet })
-    })
-  }
-  return Object.freeze({ ...principal })
 }
