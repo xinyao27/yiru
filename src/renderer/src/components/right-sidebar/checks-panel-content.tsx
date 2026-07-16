@@ -1505,7 +1505,7 @@ function CommentMoreMenu({
       />
       <DropdownMenuContent align="end" sideOffset={4}>
         {hasQueue ? (
-          <DropdownMenuItem onSelect={() => onQueueForAgent?.()}>
+          <DropdownMenuItem onClick={() => onQueueForAgent?.()}>
             <Sparkles />
             {translate(
               'auto.components.right.sidebar.checks.panel.content.f8a2c91d04',
@@ -1515,7 +1515,7 @@ function CommentMoreMenu({
         ) : null}
         {hasQueue && (hasGoToComment || hasEdit || hasDelete) ? <DropdownMenuSeparator /> : null}
         {hasGoToComment && (
-          <DropdownMenuItem onSelect={() => window.api.shell.openUrl(comment.url)}>
+          <DropdownMenuItem onClick={() => window.api.shell.openUrl(comment.url)}>
             <ExternalLink />
             {translate(
               'auto.components.right.sidebar.checks.panel.content.d3923d18fe',
@@ -1526,17 +1526,18 @@ function CommentMoreMenu({
         {hasGoToComment && (hasEdit || hasDelete) ? <DropdownMenuSeparator /> : null}
         {hasEdit ? (
           <DropdownMenuItem
-            onSelect={(event) => {
+            onClick={(event) => {
               event.preventDefault()
               onStartEdit?.()
             }}
+            closeOnClick={false}
           >
             <Pencil />
             {translate('auto.components.right.sidebar.checks.panel.content.03ca88f623', 'Edit')}
           </DropdownMenuItem>
         ) : null}
         {hasDelete ? (
-          <DropdownMenuItem variant="destructive" onSelect={() => void onDelete?.()}>
+          <DropdownMenuItem variant="destructive" onClick={() => void onDelete?.()}>
             <Trash />
             {translate('auto.components.right.sidebar.checks.panel.content.6cc6eace26', 'Delete')}
           </DropdownMenuItem>
@@ -1545,7 +1546,7 @@ function CommentMoreMenu({
           <>
             {(hasQueue || hasGoToComment || hasEdit || hasDelete) && <DropdownMenuSeparator />}
             <DropdownMenuItem
-              onSelect={() => setPRBotAuthorOverride(comment.author, !isOverriddenBot)}
+              onClick={() => setPRBotAuthorOverride(comment.author, !isOverriddenBot)}
             >
               <Bot />
               {isOverriddenBot
@@ -2066,7 +2067,7 @@ function PRCommentGroupView({
     <ContextMenu>
       <ContextMenuTrigger render={content} />
       <ContextMenuContent>
-        <ContextMenuItem onSelect={() => onQueueForAgent()}>
+        <ContextMenuItem onClick={() => onQueueForAgent()}>
           <Sparkles />
           {translate(
             'auto.components.right.sidebar.checks.panel.content.f8a2c91d04',

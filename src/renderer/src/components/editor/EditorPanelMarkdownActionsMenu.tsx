@@ -76,10 +76,11 @@ export function EditorPanelMarkdownActionsMenu({
         {canShowMarkdownFrontmatterToggle ? (
           <>
             <DropdownMenuItem
-              onSelect={(event) => {
+              onClick={(event) => {
                 event.preventDefault()
                 onToggleMarkdownFrontmatter()
               }}
+              closeOnClick={false}
             >
               {markdownFrontmatterVisible
                 ? translate(
@@ -98,7 +99,7 @@ export function EditorPanelMarkdownActionsMenu({
           <DropdownMenuItem
             // Why: source/Monaco fallbacks have no rendered document DOM to export.
             disabled={!canExportMarkdownToPdf}
-            onSelect={onExportMarkdownToPdf}
+            onClick={onExportMarkdownToPdf}
           >
             {translate(
               'auto.components.editor.EditorPanelMarkdownActionsMenu.3e0ce48c24',

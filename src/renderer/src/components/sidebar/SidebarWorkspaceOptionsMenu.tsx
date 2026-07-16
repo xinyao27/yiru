@@ -203,7 +203,8 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
                     value={opt.id}
                     // Keep the menu open so people can compare sort modes and
                     // toggle card properties without reopening the same panel.
-                    onSelect={(e) => e.preventDefault()}
+                    onClick={(e) => e.preventDefault()}
+                    closeOnClick={false}
                   >
                     {opt.label}
                   </DropdownMenuRadioItem>
@@ -256,7 +257,8 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
                         <DropdownMenuRadioItem
                           value={opt.id}
                           // Keep the menu open so people can compare order modes.
-                          onSelect={(e) => e.preventDefault()}
+                          onClick={(e) => e.preventDefault()}
+                          closeOnClick={false}
                         >
                           {opt.label}
                         </DropdownMenuRadioItem>

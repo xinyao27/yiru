@@ -316,13 +316,14 @@ export function CreateHostedReviewComposer({
                       disabled={entry.disabled}
                       title={entry.title}
                       variant={entry.variant}
-                      onSelect={(event) => {
+                      onClick={(event) => {
                         if (entry.disabled) {
                           event.preventDefault()
                           return
                         }
                         onDropdownAction(entry.kind)
                       }}
+                      closeOnClick={false}
                     >
                       <span className="flex min-w-0 flex-col">
                         <span>{entry.label}</span>

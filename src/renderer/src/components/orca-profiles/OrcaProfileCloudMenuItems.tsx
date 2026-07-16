@@ -77,7 +77,7 @@ export function OrcaProfileCloudMenuItems({
                 <DropdownMenuItem
                   key={organization.orgId}
                   disabled={orgActionDisabled}
-                  onSelect={() => {
+                  onClick={() => {
                     if (organization.orgId !== activeOrgId) {
                       onSelectOrg(organization.orgId)
                     }
@@ -103,7 +103,7 @@ export function OrcaProfileCloudMenuItems({
                 {organizations.map((organization) => (
                   <DropdownMenuItem
                     key={organization.orgId}
-                    onSelect={() => onCreateProfileForOrg(organization)}
+                    onClick={() => onCreateProfileForOrg(organization)}
                     className="min-w-0"
                   >
                     <Cloud />
@@ -120,13 +120,13 @@ export function OrcaProfileCloudMenuItems({
         <DropdownMenuSeparator />
       ) : null}
       {showSignIn ? (
-        <DropdownMenuItem disabled={profileActionDisabled || !cloudConfigured} onSelect={onConnect}>
+        <DropdownMenuItem disabled={profileActionDisabled || !cloudConfigured} onClick={onConnect}>
           {connecting ? <Loader2 className="size-4 animate-spin" /> : <LogIn />}
           {getConnectLabel(authStatus, connecting)}
         </DropdownMenuItem>
       ) : null}
       {activeProfile.kind === 'cloud-linked' ? (
-        <DropdownMenuItem disabled={profileActionDisabled} onSelect={onRequestSignOut}>
+        <DropdownMenuItem disabled={profileActionDisabled} onClick={onRequestSignOut}>
           <LogOut />
           {translate('auto.components.orca.profiles.switcher.signout', 'Sign out')}
         </DropdownMenuItem>

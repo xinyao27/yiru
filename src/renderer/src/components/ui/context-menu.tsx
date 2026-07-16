@@ -185,15 +185,18 @@ function ContextMenuRadioItem({
   )
 }
 
+// Why: Base UI's ContextMenu.GroupLabel throws unless nested in a Group, but
+// shadcn labels are free-floating section headers (as Radix allowed). Render a
+// plain styled div to preserve that usage without the group requirement.
 function ContextMenuLabel({
   className,
   inset,
   ...props
-}: ContextMenuPrimitive.GroupLabel.Props & {
+}: React.ComponentProps<'div'> & {
   inset?: boolean
 }) {
   return (
-    <ContextMenuPrimitive.GroupLabel
+    <div
       data-slot="context-menu-label"
       data-inset={inset}
       className={cn(

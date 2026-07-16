@@ -1151,7 +1151,7 @@ function WorkspaceCleanupFilterToolbar({
           {showRestoreIgnored ? (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={onRestoreIgnored}>
+              <DropdownMenuItem onClick={onRestoreIgnored}>
                 {translate(
                   'auto.components.workspace.cleanup.WorkspaceCleanupDialog.aaee139eab',
                   'Restore ignored suggestions'
@@ -1162,7 +1162,7 @@ function WorkspaceCleanupFilterToolbar({
           {hasHiddenControls ? (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={resetPanelControls}>
+              <DropdownMenuItem onClick={resetPanelControls}>
                 {translate(
                   'auto.components.workspace.cleanup.WorkspaceCleanupDialog.e94b1f8bb4',
                   'Clear filters'
@@ -1204,7 +1204,8 @@ function WorkspaceCleanupMenuSub<T extends string>({
             <DropdownMenuRadioItem
               key={optionValue}
               value={optionValue}
-              onSelect={(event) => event.preventDefault()}
+              onClick={(event) => event.preventDefault()}
+              closeOnClick={false}
             >
               {optionLabel}
             </DropdownMenuRadioItem>

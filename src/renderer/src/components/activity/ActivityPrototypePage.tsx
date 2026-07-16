@@ -928,12 +928,13 @@ export function ActivityThreadOptionsMenu({
         <DropdownMenuCheckboxItem
           checked={compactMode}
           onCheckedChange={(checked) => onCompactModeChange(checked === true)}
-          onSelect={(event) => event.preventDefault()}
+          onClick={(event) => event.preventDefault()}
+          closeOnClick={false}
         >
           {translate('auto.components.activity.ActivityPrototypePage.f70e4bec47', 'Compact mode')}
         </DropdownMenuCheckboxItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={onMarkAllThreadsRead} disabled={!hasUnreadThreads}>
+        <DropdownMenuItem onClick={onMarkAllThreadsRead} disabled={!hasUnreadThreads}>
           {translate('auto.components.activity.ActivityPrototypePage.023ff75afe', 'Mark all read')}
         </DropdownMenuItem>
       </DropdownMenuContent>

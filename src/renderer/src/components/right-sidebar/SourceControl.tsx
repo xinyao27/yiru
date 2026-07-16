@@ -5706,7 +5706,7 @@ function SourceControlInner(): React.JSX.Element {
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive"
                       disabled={diffCommentCount === 0}
-                      onSelect={() => {
+                      onClick={() => {
                         if (!activeWorktreeId || diffCommentCount === 0) {
                           return
                         }
@@ -6724,13 +6724,14 @@ export function CommitArea({
                     title={entry.title}
                     variant={entry.variant}
                     className="w-full"
-                    onSelect={(event) => {
+                    onClick={(event) => {
                       if (entry.disabled) {
                         event.preventDefault()
                         return
                       }
                       onDropdownAction(entry.kind)
                     }}
+                    closeOnClick={false}
                   >
                     <span className="flex min-w-0 flex-col">
                       <span>{entry.label}</span>

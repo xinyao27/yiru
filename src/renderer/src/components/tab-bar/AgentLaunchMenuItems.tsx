@@ -38,7 +38,7 @@ export function AgentLaunchMenuItems({
       {options.map(({ agent, label }) => (
         <DropdownMenuItem
           key={agent}
-          onSelect={() => onLaunch(agent)}
+          onClick={() => onLaunch(agent)}
           className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
           title={translate(
             'auto.components.tab.bar.QuickLaunchButton.ec2adf093e',

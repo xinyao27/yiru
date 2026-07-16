@@ -228,7 +228,7 @@ export function BrowserImportHintButton({
                           {browser.profiles.map((profile) => (
                             <DropdownMenuItem
                               key={profile.directory}
-                              onSelect={() =>
+                              onClick={() =>
                                 void handleImportFromBrowser(browser.family, profile.directory)
                               }
                             >
@@ -241,7 +241,7 @@ export function BrowserImportHintButton({
                   ) : (
                     <DropdownMenuItem
                       key={browser.family}
-                      onSelect={() => void handleImportFromBrowser(browser.family)}
+                      onClick={() => void handleImportFromBrowser(browser.family)}
                     >
                       {translate(
                         'auto.components.browser.pane.BrowserImportHintButton.0c6d254eca',
@@ -252,7 +252,7 @@ export function BrowserImportHintButton({
                   )
                 )}
                 {detectedBrowsers.length > 0 ? <DropdownMenuSeparator /> : null}
-                <DropdownMenuItem onSelect={() => void handleImportFromFile()}>
+                <DropdownMenuItem onClick={() => void handleImportFromFile()}>
                   {translate(
                     'auto.components.browser.pane.BrowserImportHintButton.e0e125e074',
                     'From File…'

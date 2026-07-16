@@ -192,10 +192,10 @@ function FileTreeRow({
             </TooltipContent>
           </Tooltip>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={onRename}>
+            <DropdownMenuItem onClick={onRename}>
               {translate('auto.components.spool.SpoolFileTree.rename', 'Rename')}
             </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+            <DropdownMenuItem variant="destructive" onClick={onDelete}>
               <Trash2 aria-hidden="true" />
               {translate('auto.components.spool.SpoolFileTree.delete', 'Delete')}
             </DropdownMenuItem>

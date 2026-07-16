@@ -80,7 +80,7 @@ export function BrowserToolbarMenuDropdown({
           return (
             <DropdownMenuItem
               key={profile.id}
-              onSelect={() => onSwitchProfile(profile.id === 'default' ? null : profile.id)}
+              onClick={() => onSwitchProfile(profile.id === 'default' ? null : profile.id)}
             >
               <Check
                 className={`mr-2 size-3.5 shrink-0 ${isSelectedProfile ? 'opacity-100' : 'opacity-0'}`}
@@ -98,7 +98,7 @@ export function BrowserToolbarMenuDropdown({
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem onSelect={onNewProfile}>
+        <DropdownMenuItem onClick={onNewProfile}>
           <Plus className="mr-2 size-3.5" />
           {translate('auto.components.browser.pane.BrowserToolbarMenu.cf7cdc67ef', 'New Profile…')}
         </DropdownMenuItem>
@@ -144,7 +144,7 @@ export function BrowserToolbarMenuDropdown({
                         {browser.profiles.map((profile) => (
                           <DropdownMenuItem
                             key={profile.directory}
-                            onSelect={() => onImportFromBrowser(browser.family, profile.directory)}
+                            onClick={() => onImportFromBrowser(browser.family, profile.directory)}
                           >
                             {profile.name}
                           </DropdownMenuItem>
@@ -155,7 +155,7 @@ export function BrowserToolbarMenuDropdown({
                 ) : (
                   <DropdownMenuItem
                     key={browser.family}
-                    onSelect={() => onImportFromBrowser(browser.family)}
+                    onClick={() => onImportFromBrowser(browser.family)}
                   >
                     {translate(
                       'auto.components.browser.pane.BrowserToolbarMenu.eb280bfb11',
@@ -166,7 +166,7 @@ export function BrowserToolbarMenuDropdown({
                 )
               )}
               {detectedBrowsers.length > 0 && <DropdownMenuSeparator />}
-              <DropdownMenuItem onSelect={onImportFromFile}>
+              <DropdownMenuItem onClick={onImportFromFile}>
                 {translate(
                   'auto.components.browser.pane.BrowserToolbarMenu.56f94f4ffa',
                   'From File…'
@@ -219,7 +219,7 @@ export function BrowserToolbarMenuDropdown({
         <DropdownMenuSeparator />
 
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             useAppStore.getState().openSettingsTarget({ pane: 'browser', repoId: null })
             useAppStore.getState().openSettingsPage()
           }}

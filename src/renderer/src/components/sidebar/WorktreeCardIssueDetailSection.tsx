@@ -86,7 +86,7 @@ export function WorktreeCardIssueDetailSection({
                   </Tooltip>
                 )}
                 <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem onSelect={onCopyIssueLink}>
+                  <DropdownMenuItem onClick={onCopyIssueLink}>
                     <Copy className="size-3.5" />
                     {translate('auto.components.sidebar.WorktreeCardMeta.copyLink', 'Copy link')}
                   </DropdownMenuItem>

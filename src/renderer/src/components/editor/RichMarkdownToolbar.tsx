@@ -71,20 +71,16 @@ function RichMarkdownMoreBlocksMenu({ editor }: { editor: Editor | null }): Reac
         <DropdownMenuLabel>
           {translate('auto.components.editor.RichMarkdownToolbar.2cd9e0bbb3', 'Headings')}
         </DropdownMenuLabel>
-        <DropdownMenuItem
-          onSelect={() => editor?.chain().focus().toggleHeading({ level: 4 }).run()}
-        >
+        <DropdownMenuItem onClick={() => editor?.chain().focus().toggleHeading({ level: 4 }).run()}>
           <Heading4 className="size-3.5" />
           {translate('auto.components.editor.RichMarkdownToolbar.b05e14620d', 'Heading 4')}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onSelect={() => editor?.chain().focus().toggleHeading({ level: 5 }).run()}
-        >
+        <DropdownMenuItem onClick={() => editor?.chain().focus().toggleHeading({ level: 5 }).run()}>
           <Heading5 className="size-3.5" />
           {translate('auto.components.editor.RichMarkdownToolbar.6bbf827ef5', 'Heading 5')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => (editor ? insertToggle(editor) : undefined)}>
+        <DropdownMenuItem onClick={() => (editor ? insertToggle(editor) : undefined)}>
           <ChevronRight className="size-3.5" />
           {translate(
             'auto.components.editor.RichMarkdownToolbar.d1bbf9a835',

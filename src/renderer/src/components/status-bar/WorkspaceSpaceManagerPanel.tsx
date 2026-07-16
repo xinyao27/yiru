@@ -1211,7 +1211,7 @@ function WorkspaceRow({
     <ContextMenu>
       <ContextMenuTrigger render={row} />
       <ContextMenuContent>
-        <ContextMenuItem variant="destructive" onSelect={onDelete}>
+        <ContextMenuItem variant="destructive" onClick={onDelete}>
           <Trash2 className="size-3.5" />
           {translate(
             'auto.components.status.bar.WorkspaceSpaceManagerPanel.792a214457',

@@ -2925,7 +2925,7 @@ function PRMergeCell({
       </Tooltip>
       <DropdownMenuContent align="start" onClick={(event) => event.stopPropagation()}>
         {mergePresentation.autoMergeAction && (
-          <DropdownMenuItem disabled={!repo || merging} onSelect={() => void handleAutoMerge()}>
+          <DropdownMenuItem disabled={!repo || merging} onClick={() => void handleAutoMerge()}>
             <GitMerge className="size-4" />
             {mergePresentation.autoMergeAction.label}
           </DropdownMenuItem>
@@ -2935,13 +2935,13 @@ function PRMergeCell({
           <DropdownMenuItem
             key={method}
             disabled={mergeDisabled}
-            onSelect={() => void handleMerge(method)}
+            onClick={() => void handleMerge(method)}
           >
             <GitMerge className="size-4" />
             {label}
           </DropdownMenuItem>
         ))}
-        <DropdownMenuItem onSelect={() => window.api.shell.openUrl(item.url)}>
+        <DropdownMenuItem onClick={() => window.api.shell.openUrl(item.url)}>
           <ExternalLink className="size-4" />
           {translate('auto.components.TaskPage.37d60046e3', 'Open GitHub merge box')}
         </DropdownMenuItem>
@@ -9771,7 +9771,7 @@ export default function TaskPage(): React.JSX.Element {
                                   onClick={(event) => event.stopPropagation()}
                                 >
                                   {attachedWorkspace ? (
-                                    <DropdownMenuItem onSelect={() => handleUseWorkItem(item)}>
+                                    <DropdownMenuItem onClick={() => handleUseWorkItem(item)}>
                                       <Plus className="size-4" />
                                       {translate(
                                         'auto.components.TaskPage.b6329379ca',
@@ -9780,7 +9780,7 @@ export default function TaskPage(): React.JSX.Element {
                                     </DropdownMenuItem>
                                   ) : null}
                                   <DropdownMenuItem
-                                    onSelect={() => window.api.shell.openUrl(item.url)}
+                                    onClick={() => window.api.shell.openUrl(item.url)}
                                   >
                                     <ExternalLink className="size-4" />
                                     {translate(
@@ -9846,7 +9846,7 @@ export default function TaskPage(): React.JSX.Element {
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {attachedWorkspace ? (
-                                    <DropdownMenuItem onSelect={() => handleUseWorkItem(item)}>
+                                    <DropdownMenuItem onClick={() => handleUseWorkItem(item)}>
                                       <Plus className="size-4" />
                                       {translate(
                                         'auto.components.TaskPage.b6329379ca',
@@ -9855,7 +9855,7 @@ export default function TaskPage(): React.JSX.Element {
                                     </DropdownMenuItem>
                                   ) : null}
                                   <DropdownMenuItem
-                                    onSelect={() => window.api.shell.openUrl(item.url)}
+                                    onClick={() => window.api.shell.openUrl(item.url)}
                                   >
                                     <ExternalLink className="size-4" />
                                     {translate(
@@ -10614,8 +10614,9 @@ export default function TaskPage(): React.JSX.Element {
                         <DropdownMenuCheckboxItem
                           key={property.id}
                           checked={effectiveLinearDisplayProperties.has(property.id)}
-                          onSelect={(event) => event.preventDefault()}
+                          onClick={(event) => event.preventDefault()}
                           onCheckedChange={() => toggleLinearDisplayProperty(property.id)}
+                          closeOnClick={false}
                         >
                           {property.label}
                         </DropdownMenuCheckboxItem>

@@ -79,7 +79,8 @@ export function WorktreeCardDisplayMenuSection({
               onCheckedChange={(checked) =>
                 handleWorktreeCardPropertyChange(opt.properties, checked === true)
               }
-              onSelect={(e) => e.preventDefault()}
+              onClick={(e) => e.preventDefault()}
+              closeOnClick={false}
             >
               {opt.label}
             </DropdownMenuCheckboxItem>
@@ -119,7 +120,8 @@ export function WorktreeCardDisplayMenuSection({
               <DropdownMenuRadioItem
                 key={opt.id}
                 value={opt.id}
-                onSelect={(e) => e.preventDefault()}
+                onClick={(e) => e.preventDefault()}
+                closeOnClick={false}
               >
                 {opt.label}
               </DropdownMenuRadioItem>
@@ -162,7 +164,8 @@ export function WorktreeCardDisplayMenuSection({
               onCheckedChange={(checked) =>
                 handleWorktreeCardPropertyChange([opt.id], checked === true)
               }
-              onSelect={(e) => e.preventDefault()}
+              onClick={(e) => e.preventDefault()}
+              closeOnClick={false}
             >
               {opt.label}
             </DropdownMenuCheckboxItem>
@@ -184,7 +187,8 @@ export function WorktreeCardDisplayMenuSection({
               <DropdownMenuRadioItem
                 key={opt.id}
                 value={opt.id}
-                onSelect={(e) => e.preventDefault()}
+                onClick={(e) => e.preventDefault()}
+                closeOnClick={false}
               >
                 {opt.label}
               </DropdownMenuRadioItem>

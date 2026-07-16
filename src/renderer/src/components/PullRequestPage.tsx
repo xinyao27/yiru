@@ -4151,7 +4151,7 @@ function PRActionsPanel({
             {mergePresentation.autoMergeAction && (
               <DropdownMenuItem
                 disabled={!canMergeWithRepoContext || mergePending}
-                onSelect={() => void handleAutoMerge()}
+                onClick={() => void handleAutoMerge()}
               >
                 <GitMerge className="size-4" />
                 {mergePresentation.autoMergeAction.label}
@@ -4162,13 +4162,13 @@ function PRActionsPanel({
               <DropdownMenuItem
                 key={method}
                 disabled={mergeDisabled}
-                onSelect={() => void handleMerge(method)}
+                onClick={() => void handleMerge(method)}
               >
                 <GitMerge className="size-4" />
                 {label}
               </DropdownMenuItem>
             ))}
-            <DropdownMenuItem onSelect={() => window.api.shell.openUrl(item.url)}>
+            <DropdownMenuItem onClick={() => window.api.shell.openUrl(item.url)}>
               <ExternalLink className="size-4" />
               {translate('auto.components.PullRequestPage.7df8d5fc60', 'Open GitHub merge box')}
             </DropdownMenuItem>
@@ -4940,12 +4940,12 @@ function ChecksTab({
         <DropdownMenuContent align="end" className="w-44">
           <DropdownMenuItem
             disabled={failedChecks.length === 0 || rerunning}
-            onSelect={() => void handleRerun(true)}
+            onClick={() => void handleRerun(true)}
           >
             <RefreshCw className="size-4" />
             {translate('auto.components.PullRequestPage.68605516dd', 'Rerun failed checks')}
           </DropdownMenuItem>
-          <DropdownMenuItem disabled={rerunning} onSelect={() => void handleRerun(false)}>
+          <DropdownMenuItem disabled={rerunning} onClick={() => void handleRerun(false)}>
             <RefreshCw className="size-4" />
             {translate('auto.components.PullRequestPage.54cddd1858', 'Rerun all checks')}
           </DropdownMenuItem>
@@ -7172,12 +7172,12 @@ export default function PullRequestPage({
               </ButtonGroup>
               <DropdownMenuContent align="end">
                 {attachedWorkspace ? (
-                  <DropdownMenuItem onSelect={handleUseWorkItem}>
+                  <DropdownMenuItem onClick={handleUseWorkItem}>
                     <Plus className="size-4" />
                     {translate('auto.components.PullRequestPage.1a2570e18e', 'Start new workspace')}
                   </DropdownMenuItem>
                 ) : null}
-                <DropdownMenuItem onSelect={() => window.api.shell.openUrl(workItem.url)}>
+                <DropdownMenuItem onClick={() => window.api.shell.openUrl(workItem.url)}>
                   <ExternalLink className="size-4" />
                   {translate('auto.components.PullRequestPage.8ecda455a0', 'Open on GitHub')}
                 </DropdownMenuItem>

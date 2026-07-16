@@ -100,7 +100,7 @@ function renderItem({
     <ContextMenu key={key}>
       <ContextMenuTrigger render={row} />
       <ContextMenuContent className="z-[70]">
-        <ContextMenuItem onSelect={onSetDefault} disabled={isDefault}>
+        <ContextMenuItem onClick={onSetDefault} disabled={isDefault}>
           <Star className="size-3.5" />
           {isDefault
             ? translate('auto.components.agent.AgentCombobox.1b0d6965fa', 'Current default')

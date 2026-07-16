@@ -114,8 +114,9 @@ export function SidebarHostScopeMenuSection({
           <DropdownMenuCheckboxItem
             checked={allVisible}
             onCheckedChange={toggleAllHosts}
-            onSelect={(e) => e.preventDefault()}
+            onClick={(e) => e.preventDefault()}
             className="min-h-11 items-start py-1.5"
+            closeOnClick={false}
           >
             <span className="flex min-w-0 flex-col gap-0.5">
               <span className="truncate">
@@ -135,8 +136,9 @@ export function SidebarHostScopeMenuSection({
               checked={visibleHostIdSet.has(host.id)}
               disabled={!allVisible && visibleHostIdSet.has(host.id) && visibleHostIdSet.size <= 1}
               onCheckedChange={() => toggleHost(host.id)}
-              onSelect={(e) => e.preventDefault()}
+              onClick={(e) => e.preventDefault()}
               className="min-h-11 items-start py-1.5"
+              closeOnClick={false}
             >
               <span className="flex min-w-0 flex-col gap-0.5">
                 <span className="truncate">{host.label}</span>

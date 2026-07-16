@@ -91,7 +91,7 @@ export function VoiceSpeechModelSection({
               <DropdownMenuItem
                 key={manifest.id}
                 disabled={isDownloading}
-                onSelect={(event) => {
+                onClick={(event) => {
                   if (isReady) {
                     onUpdateVoiceSettings({ sttModel: manifest.id })
                   } else if (isCloud) {
@@ -115,6 +115,7 @@ export function VoiceSpeechModelSection({
                 className={`group flex items-center gap-2.5 py-2.5 ${
                   !isCloud && !isReady && !isDownloading ? 'opacity-50' : ''
                 }`}
+                closeOnClick={false}
               >
                 <span className="flex size-4 shrink-0 items-center justify-center">
                   {isActive && isReady ? (

@@ -99,7 +99,7 @@ export function WorktreeCardReviewDetailSection({
                 <DropdownMenuContent align="end" className="w-40">
                   {onCopyReviewLink && (
                     <DropdownMenuItem
-                      onSelect={() => {
+                      onClick={() => {
                         closeHover()
                         onCopyReviewLink()
                       }}
@@ -113,7 +113,7 @@ export function WorktreeCardReviewDetailSection({
                   )}
                   {onUnlinkReview && (
                     <DropdownMenuItem
-                      onSelect={() => {
+                      onClick={() => {
                         closeHover()
                         onUnlinkReview()
                       }}

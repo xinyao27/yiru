@@ -2084,7 +2084,7 @@ function App(): React.JSX.Element {
                 />
                 <ContextMenuContent>
                   <ContextMenuItem
-                    onSelect={() => {
+                    onClick={() => {
                       void actions.updateSettings({ showTitlebarAppName: false })
                     }}
                   >

@@ -74,7 +74,7 @@ function ProjectTransferMenu({
         <DropdownMenuItem
           key={`${mode}:${profile.id}`}
           disabled={Boolean(pending) || profile.id === sourceProfileId}
-          onSelect={() => onTransfer(repo, profile, mode)}
+          onClick={() => onTransfer(repo, profile, mode)}
         >
           {mode === 'move' ? <MoveRight /> : <Copy />}
           <OrcaProfileAvatar profile={profile} />

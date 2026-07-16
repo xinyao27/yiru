@@ -130,7 +130,7 @@ export default function TerminalContextMenu({
   const showSetTitleShortcut = shortcuts.setTitle !== 'Unassigned'
   const showClearPaneTitleShortcut = shortcuts.clearPaneTitle !== 'Unassigned'
   const renderQuickCommandItem = (command: TerminalQuickCommand): React.JSX.Element => (
-    <DropdownMenuItem key={command.id} onSelect={() => onQuickCommand(command)}>
+    <DropdownMenuItem key={command.id} onClick={() => onQuickCommand(command)}>
       {isTerminalAgentQuickCommand(command) ? (
         <span className="flex size-3.5 shrink-0 items-center justify-center text-muted-foreground">
           <AgentIcon agent={command.agent} size={14} />
@@ -199,12 +199,12 @@ export default function TerminalContextMenu({
         // Why: keep focus on xterm instead of moving it back to the hidden trigger.
         finalFocus={false}
       >
-        <DropdownMenuItem onSelect={onCopy}>
+        <DropdownMenuItem onClick={onCopy}>
           <Copy />
           {translate('auto.components.terminal.pane.TerminalContextMenu.f3eeb1de13', 'Copy')}
           <DropdownMenuShortcut>{shortcuts.copy}</DropdownMenuShortcut>
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={onPaste}>
+        <DropdownMenuItem onClick={onPaste}>
           <Clipboard />
           {translate('auto.components.terminal.pane.TerminalContextMenu.0a917b591a', 'Paste')}
           <DropdownMenuShortcut>{shortcuts.paste}</DropdownMenuShortcut>
@@ -253,7 +253,7 @@ export default function TerminalContextMenu({
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onSelect={() => {
+              onClick={() => {
                 // Why: the dropdown sits above dialogs; force-close before
                 // opening the add modal even during the open-gesture guard.
                 onOpenChange(false)
@@ -268,14 +268,14 @@ export default function TerminalContextMenu({
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
-        <DropdownMenuItem onSelect={onForkAgentSession}>
+        <DropdownMenuItem onClick={onForkAgentSession}>
           <GitFork />
           {translate(
             'auto.components.terminal.pane.TerminalContextMenu.8a7ddb8b8a',
             'Fork Agent Session…'
           )}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={onCopyAgentSessionContext}>
+        <DropdownMenuItem onClick={onCopyAgentSessionContext}>
           <ClipboardCopy />
           {translate(
             'auto.components.terminal.pane.TerminalContextMenu.cff67afad1',
@@ -283,7 +283,7 @@ export default function TerminalContextMenu({
           )}
         </DropdownMenuItem>
         {canToggleNativeChat ? (
-          <DropdownMenuItem onSelect={onToggleNativeChat}>
+          <DropdownMenuItem onClick={onToggleNativeChat}>
             {isNativeChatView ? <SquareTerminal /> : <MessageSquare />}
             {isNativeChatView
               ? translate(
@@ -298,7 +298,7 @@ export default function TerminalContextMenu({
           </DropdownMenuItem>
         ) : null}
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="whitespace-nowrap" onSelect={onSplitRight}>
+        <DropdownMenuItem className="whitespace-nowrap" onClick={onSplitRight}>
           <PanelRightClose />
           {translate(
             'auto.components.terminal.pane.TerminalContextMenu.20e565d865',
@@ -306,7 +306,7 @@ export default function TerminalContextMenu({
           )}
           <DropdownMenuShortcut>{shortcuts.splitRight}</DropdownMenuShortcut>
         </DropdownMenuItem>
-        <DropdownMenuItem className="whitespace-nowrap" onSelect={onSplitDown}>
+        <DropdownMenuItem className="whitespace-nowrap" onClick={onSplitDown}>
           <PanelBottomClose />
           {translate(
             'auto.components.terminal.pane.TerminalContextMenu.98bccf4fa2',
@@ -315,7 +315,7 @@ export default function TerminalContextMenu({
           <DropdownMenuShortcut>{shortcuts.splitDown}</DropdownMenuShortcut>
         </DropdownMenuItem>
         {canEqualizePaneSizes && (
-          <DropdownMenuItem onSelect={onEqualizePaneSizes}>
+          <DropdownMenuItem onClick={onEqualizePaneSizes}>
             <PanelsTopLeft />
             {translate(
               'auto.components.terminal.pane.TerminalContextMenu.06c2b0f043',
@@ -327,7 +327,7 @@ export default function TerminalContextMenu({
           </DropdownMenuItem>
         )}
         {canExpandPane && (
-          <DropdownMenuItem onSelect={onToggleExpand}>
+          <DropdownMenuItem onClick={onToggleExpand}>
             {menuPaneIsExpanded ? <Minimize2 /> : <Maximize2 />}
             {menuPaneIsExpanded
               ? translate(
@@ -343,7 +343,7 @@ export default function TerminalContextMenu({
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             // Why: Set Title moves focus into an overlay input. Force-close
             // before opening it so the menu's focus guards are not still active.
             onOpenChange(false)
@@ -357,7 +357,7 @@ export default function TerminalContextMenu({
           ) : null}
         </DropdownMenuItem>
         {canClearPaneTitle ? (
-          <DropdownMenuItem onSelect={onClearPaneTitle}>
+          <DropdownMenuItem onClick={onClearPaneTitle}>
             <X />
             {translate(
               'auto.components.terminal.pane.TerminalContextMenu.clearPaneTitle',
@@ -368,14 +368,14 @@ export default function TerminalContextMenu({
             ) : null}
           </DropdownMenuItem>
         ) : null}
-        <DropdownMenuItem onSelect={onCopyTerminalId}>
+        <DropdownMenuItem onClick={onCopyTerminalId}>
           <Copy />
           {translate(
             'auto.components.terminal.pane.TerminalContextMenu.copyTerminalId',
             'Copy Terminal ID'
           )}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={onCopyPaneId}>
+        <DropdownMenuItem onClick={onCopyPaneId}>
           <Copy />
           {translate(
             'auto.components.terminal.pane.TerminalContextMenu.2cf85a6a55',
@@ -385,7 +385,7 @@ export default function TerminalContextMenu({
         {canClosePane && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onSelect={onClosePane}>
+            <DropdownMenuItem variant="destructive" onClick={onClosePane}>
               <X />
               {translate(
                 'auto.components.terminal.pane.TerminalContextMenu.8c17d6786d',
@@ -396,7 +396,7 @@ export default function TerminalContextMenu({
           </>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={onClearScreen}>
+        <DropdownMenuItem onClick={onClearScreen}>
           <Eraser />
           {translate(
             'auto.components.terminal.pane.TerminalContextMenu.b4cdd9314e',

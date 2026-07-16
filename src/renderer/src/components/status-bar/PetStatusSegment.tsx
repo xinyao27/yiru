@@ -136,10 +136,11 @@ function PetStatusSegmentInner(): React.JSX.Element {
           {translate('auto.components.status.bar.PetStatusSegment.34c25dfe9c', 'Pet')}
         </DropdownMenuLabel>
         <DropdownMenuItem
-          onSelect={(event) => {
+          onClick={(event) => {
             event.preventDefault()
             setPetVisible(!petVisible)
           }}
+          closeOnClick={false}
         >
           {petVisible
             ? translate('auto.components.status.bar.PetStatusSegment.1fbc51cc77', 'Hide pet')
@@ -193,7 +194,7 @@ function PetStatusSegmentInner(): React.JSX.Element {
                 return (
                   <DropdownMenuItem
                     key={pet.id}
-                    onSelect={() => {
+                    onClick={() => {
                       if (!petVisible) {
                         setPetVisible(true)
                       }
@@ -214,7 +215,7 @@ function PetStatusSegmentInner(): React.JSX.Element {
                   <DropdownMenuItem
                     key={model.id}
                     className="group"
-                    onSelect={() => {
+                    onClick={() => {
                       if (!petVisible) {
                         setPetVisible(true)
                       }
@@ -246,13 +247,14 @@ function PetStatusSegmentInner(): React.JSX.Element {
               })}
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onSelect={() => {
+                onClick={() => {
                   // Why: let the menu close naturally (no preventDefault) before
                   // invoking the native file picker. Keeping the menu open when
                   // the OS dialog opens caused the dialog to appear behind the
                   // dropdown overlay on macOS.
                   void handleImport()
                 }}
+                closeOnClick={false}
               >
                 <Upload className="size-3.5" aria-hidden />
                 {translate(
@@ -261,7 +263,7 @@ function PetStatusSegmentInner(): React.JSX.Element {
                 )}
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={() => {
+                onClick={() => {
                   void handleImportPetBundle()
                 }}
               >
@@ -276,7 +278,7 @@ function PetStatusSegmentInner(): React.JSX.Element {
         </DropdownMenuSub>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             openSettingsTarget({
               pane: 'experimental',
               repoId: null,

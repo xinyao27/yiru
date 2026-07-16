@@ -176,9 +176,7 @@ export function BrowserUseCookieImportStep({
                       {browser.profiles.map((bp) => (
                         <DropdownMenuItem
                           key={bp.directory}
-                          onSelect={() =>
-                            void handleImportFromBrowser(browser.family, bp.directory)
-                          }
+                          onClick={() => void handleImportFromBrowser(browser.family, bp.directory)}
                         >
                           {bp.name}
                         </DropdownMenuItem>
@@ -189,7 +187,7 @@ export function BrowserUseCookieImportStep({
               ) : (
                 <DropdownMenuItem
                   key={browser.family}
-                  onSelect={() => void handleImportFromBrowser(browser.family)}
+                  onClick={() => void handleImportFromBrowser(browser.family)}
                 >
                   {translate(
                     'auto.components.settings.BrowserUsePane.5301857d88',
@@ -200,7 +198,7 @@ export function BrowserUseCookieImportStep({
               )
             )}
             {detectedBrowsers.length > 0 ? <DropdownMenuSeparator /> : null}
-            <DropdownMenuItem onSelect={() => void handleImportFromFile()}>
+            <DropdownMenuItem onClick={() => void handleImportFromFile()}>
               {translate('auto.components.settings.BrowserUsePane.be6df68384', 'From File…')}
             </DropdownMenuItem>
           </DropdownMenuContent>

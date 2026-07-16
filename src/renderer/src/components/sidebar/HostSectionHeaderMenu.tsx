@@ -222,7 +222,7 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
                 render={
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
-                    onSelect={() => openManageHost(row)}
+                    onClick={() => openManageHost(row)}
                   >
                     <AlertTriangle className="size-3.5" />
                     {blockedTitle(model.blocked.reason)}
@@ -240,25 +240,25 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
           {row.label}
         </DropdownMenuLabel>
         {model.actions.includes('rename') && (
-          <DropdownMenuItem onSelect={() => setRenameOpen(true)}>
+          <DropdownMenuItem onClick={() => setRenameOpen(true)}>
             <Pencil className="size-3.5" />
             {translate('auto.components.sidebar.HostSectionHeaderMenu.8d1e2f3a4b', 'Rename…')}
           </DropdownMenuItem>
         )}
         {model.actions.includes('ssh-reconnect') && (
-          <DropdownMenuItem onSelect={() => void runSshAction('connect')}>
+          <DropdownMenuItem onClick={() => void runSshAction('connect')}>
             <Plug className="size-3.5" />
             {translate('auto.components.sidebar.HostSectionHeaderMenu.63f36455cc', 'Reconnect')}
           </DropdownMenuItem>
         )}
         {model.actions.includes('ssh-disconnect') && (
-          <DropdownMenuItem onSelect={() => void runSshAction('disconnect')}>
+          <DropdownMenuItem onClick={() => void runSshAction('disconnect')}>
             <PlugZap className="size-3.5" />
             {translate('auto.components.sidebar.HostSectionHeaderMenu.59b553e2aa', 'Disconnect')}
           </DropdownMenuItem>
         )}
         {model.actions.includes('runtime-check-connection') && (
-          <DropdownMenuItem onSelect={() => void handleCheckConnection()}>
+          <DropdownMenuItem onClick={() => void handleCheckConnection()}>
             <RefreshCw className="size-3.5" />
             {translate(
               'auto.components.sidebar.HostSectionHeaderMenu.2d3e4f5a6b',
@@ -267,7 +267,7 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={handleManage}>
+        <DropdownMenuItem onClick={handleManage}>
           <Settings2 className="size-3.5" />
           {translate('auto.components.sidebar.HostSectionHeaderMenu.3c4d5e6f7a', 'Manage host…')}
         </DropdownMenuItem>
@@ -276,7 +276,7 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
-              onSelect={() => setRemoveOpen(true)}
+              onClick={() => setRemoveOpen(true)}
             >
               <Trash2 className="size-3.5" />
               {translate(

@@ -127,7 +127,7 @@ export function EditorFileTabContextMenu({
         />
         <DropdownMenuItem
           disabled={!canRename || isRenaming}
-          onSelect={() => {
+          onClick={() => {
             skipMenuFocusRestoreRef.current = true
             onActivate()
             onOpenRenameInput()
@@ -138,19 +138,19 @@ export function EditorFileTabContextMenu({
           {renameShortcut ? <DropdownMenuShortcut>{renameShortcut}</DropdownMenuShortcut> : null}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={onTogglePin}>
+        <DropdownMenuItem onClick={onTogglePin}>
           {isPinned ? <PinOff className="size-3.5" /> : <Pin className="size-3.5" />}
           {isPinned
             ? translate('auto.components.tab.bar.EditorFileTabContextMenu.8e9d603a09', 'Unpin Tab')
             : translate('auto.components.tab.bar.EditorFileTabContextMenu.fdd29eb669', 'Pin Tab')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => !isPinned && onClose()} disabled={isPinned}>
+        <DropdownMenuItem onClick={() => !isPinned && onClose()} disabled={isPinned}>
           <X className="size-3.5" />
           {translate('auto.components.tab.bar.EditorFileTabContextMenu.1ba8492c5b', 'Close')}
           {closeShortcut ? <DropdownMenuShortcut>{closeShortcut}</DropdownMenuShortcut> : null}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={onCloseAll}>
+        <DropdownMenuItem onClick={onCloseAll}>
           <ListX className="size-3.5" />
           {translate(
             'auto.components.tab.bar.EditorFileTabContextMenu.ba1369dd24',
@@ -160,7 +160,7 @@ export function EditorFileTabContextMenu({
             <DropdownMenuShortcut>{closeAllShortcut}</DropdownMenuShortcut>
           ) : null}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={onCloseToRight} disabled={!hasTabsToRight}>
+        <DropdownMenuItem onClick={onCloseToRight} disabled={!hasTabsToRight}>
           <PanelRightClose className="size-3.5" />
           {translate(
             'auto.components.tab.bar.EditorFileTabContextMenu.e5ff31ccaf',
@@ -171,7 +171,7 @@ export function EditorFileTabContextMenu({
         {canShowMarkdownPreview ? (
           <>
             <DropdownMenuItem
-              onSelect={() => {
+              onClick={() => {
                 onActivate()
                 onOpenMarkdownPreview(
                   {
@@ -195,7 +195,7 @@ export function EditorFileTabContextMenu({
           </>
         ) : null}
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             void window.api.ui.writeClipboardText(file.filePath)
           }}
         >
@@ -203,7 +203,7 @@ export function EditorFileTabContextMenu({
           {translate('auto.components.tab.bar.EditorFileTabContextMenu.5b85754786', 'Copy Path')}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             void window.api.ui.writeClipboardText(file.relativePath)
           }}
         >
@@ -215,7 +215,7 @@ export function EditorFileTabContextMenu({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             if (
               shouldBlockEditorTabLocalOpen(
                 useAppStore.getState().settings,

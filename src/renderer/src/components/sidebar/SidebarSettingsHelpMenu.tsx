@@ -72,7 +72,7 @@ function ExternalMenuItem({
   icon: React.ReactNode
 }): React.JSX.Element {
   return (
-    <DropdownMenuItem onSelect={() => openExternalUrl(url)}>
+    <DropdownMenuItem onClick={() => openExternalUrl(url)}>
       {icon}
       {label}
       <ExternalLink className="ml-auto size-3 text-muted-foreground" />
@@ -233,7 +233,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
             </TooltipContent>
           </Tooltip>
           <DropdownMenuContent side="top" align="start" sideOffset={8} className="w-52">
-            <DropdownMenuItem onSelect={openShortcutsSettings}>
+            <DropdownMenuItem onClick={openShortcutsSettings}>
               <Keyboard className="size-3.5" />
               {translate(
                 'auto.components.sidebar.SidebarSettingsHelpMenu.e565171a7c',
@@ -241,7 +241,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
               )}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => setFeedbackOpen(true)}>
+            <DropdownMenuItem onClick={() => setFeedbackOpen(true)}>
               <MessageSquareText className="size-3.5" />
               {translate(
                 'auto.components.sidebar.SidebarSettingsHelpMenu.4cf5b868d7',
@@ -249,7 +249,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
               )}
             </DropdownMenuItem>
             {showMilestones ? (
-              <DropdownMenuItem onSelect={openMilestones}>
+              <DropdownMenuItem onClick={openMilestones}>
                 <img
                   src={logo}
                   alt=""
@@ -269,11 +269,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
               </DropdownMenuItem>
             ) : null}
             {showAdminOptions ? (
-              <DropdownMenuItem
-                className="whitespace-nowrap"
-                onClick={handleShowOnboarding}
-                onSelect={handleShowOnboarding}
-              >
+              <DropdownMenuItem className="whitespace-nowrap" onClick={handleShowOnboarding}>
                 <School className="size-3.5" />
                 {translate(
                   'auto.components.sidebar.SidebarSettingsHelpMenu.b7e4d2a19c',
@@ -306,12 +302,12 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
               url={GITHUB_URL}
               icon={<Github className="size-3.5" />}
             />
-            <DropdownMenuItem onSelect={() => openExternalUrl(DISCORD_URL)}>
+            <DropdownMenuItem onClick={() => openExternalUrl(DISCORD_URL)}>
               <DiscordIcon />
               {translate('auto.components.sidebar.SidebarSettingsHelpMenu.eb9884e55b', 'Discord')}
               <ExternalLink className="ml-auto size-3 text-muted-foreground" />
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => openExternalUrl(X_URL)}>
+            <DropdownMenuItem onClick={() => openExternalUrl(X_URL)}>
               <XIcon />
               {translate('auto.components.sidebar.SidebarSettingsHelpMenu.c4f8e1b72a', 'X')}
               <ExternalLink className="ml-auto size-3 text-muted-foreground" />
@@ -320,7 +316,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
             <DropdownMenuItem
               disabled={updateStatus.state === 'checking' || updateStatus.state === 'downloading'}
               onPointerDown={handleCheckForUpdatesPointerDown}
-              onSelect={handleCheckForUpdates}
+              onClick={handleCheckForUpdates}
               title={updateCheckHint}
             >
               {updateStatus.state === 'checking' ? (
@@ -336,7 +332,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
             {showAdminOptions ? (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={handleRestartOrca} disabled={isRestartingOrca}>
+                <DropdownMenuItem onClick={handleRestartOrca} disabled={isRestartingOrca}>
                   <RotateCw className="size-3.5" />
                   {translate(
                     'auto.components.sidebar.SidebarSettingsHelpMenu.ad3d3ed7f1',

@@ -111,10 +111,10 @@ export function SpoolFilePreviewToolbar({
             </TooltipContent>
           </Tooltip>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem disabled={!canControl} onSelect={onRename}>
+            <DropdownMenuItem disabled={!canControl} onClick={onRename}>
               {translate('auto.components.spool.SpoolFilePreview.rename', 'Rename')}
             </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" disabled={!canControl} onSelect={onDelete}>
+            <DropdownMenuItem variant="destructive" disabled={!canControl} onClick={onDelete}>
               <Trash2 aria-hidden="true" />
               {translate('auto.components.spool.SpoolFilePreview.delete', 'Delete')}
             </DropdownMenuItem>
