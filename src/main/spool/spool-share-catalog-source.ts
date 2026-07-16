@@ -1,15 +1,16 @@
+import type { SpoolSessionCatalogIdentity } from '../../shared/spool/spool-catalog-contract'
 import type { SpoolWorktreeKind } from '../../shared/spool/spool-worktree-kind'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-visibility'
 
 export type SpoolCatalogSessionDescription = {
   sessionKey: string
-  provider: 'claude' | 'codex' | 'other'
   title: string
-}
+} & SpoolSessionCatalogIdentity
 
 export type SpoolCatalogWorktreeDescription = {
   kind: SpoolWorktreeKind
   projectKey: string
+  projectIdentityKey: string | null
   projectName: string
   worktreeName: string
   branch: string | null

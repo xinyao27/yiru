@@ -1,33 +1,16 @@
-import { lstat } from 'node:fs/promises'
-import { Readable } from 'node:stream'
 import type {
   SpoolExecutionOperation,
-  SpoolSessionContinueHostResult,
-  SpoolSessionReadResult
+  SpoolSessionContinueHostResult
 } from '../../shared/spool/spool-operation-contract'
 import { parseExecutionHostId } from '../../shared/execution-host'
-import type { NativeChatMessage } from '../../shared/native-chat-types'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
-import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
-import { readNativeChatTranscript } from '../native-chat/transcript-reader'
-import {
-  decodeClaudeTranscriptLine,
-  decodeCodexTranscriptLine
-} from '../native-chat/transcript-line-decoders'
-import { decodeTranscriptStream } from '../native-chat/transcript-stream-lines'
 import type { SpoolHostOperationContext } from './spool-execution-gateway'
 import { SpoolExecutionError } from './spool-execution-error'
 import type { SpoolOwnerSessionRecords } from './spool-owner-session-records'
-import type { SpoolContinuedSessionBindings } from './spool-continued-session-bindings'
-import { projectSpoolSessionTranscript } from './spool-session-transcript-projection'
+import type { SpoolTerminalSessionBindings } from './spool-terminal-session-bindings'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
 
-const MAX_TRANSCRIPT_BYTES = 64 * 1024 * 1024
-
-type SessionOperation = Extract<
-  SpoolExecutionOperation,
-  { kind: 'session.read' | 'session.continue' }
->
+type SessionOperation = Extract<SpoolExecutionOperation, { kind: 'session.continue' }>
 
 type SpoolSessionRuntime = Pick<OrcaRuntimeService, 'createTerminal'>
 
@@ -36,14 +19,14 @@ export class OrcaSpoolHostSessions {
   constructor(
     private readonly runtime: SpoolSessionRuntime,
     private readonly records: SpoolOwnerSessionRecords,
-    private readonly continued: SpoolContinuedSessionBindings
+    private readonly sessionBindings: SpoolTerminalSessionBindings
   ) {}
 
   async invoke(
     target: SpoolPublicWorktreeInstance,
     operation: SessionOperation,
     context: SpoolHostOperationContext
-  ): Promise<SpoolSessionReadResult | SpoolSessionContinueHostResult> {
+  ): Promise<SpoolSessionContinueHostResult> {
     const record = this.records.resolve(operation.ownerRecordKey)
     if (
       !record ||
@@ -59,90 +42,60 @@ export class OrcaSpoolHostSessions {
       // Why: a paired runtime needs its own admission guard at the remote spawn point.
       throw new SpoolExecutionError('resource_unavailable')
     }
-    if (operation.kind === 'session.read') {
-      const messages =
-        host.kind === 'ssh'
-          ? await this.readSshTranscript(host.targetId, record.transcriptPath, record.provider)
-          : await this.readLocalTranscript(
-              record.transcriptPath,
-              record.provider,
-              record.providerSessionId
-            )
-      context.signal.throwIfAborted()
-      return projectSpoolSessionTranscript(messages)
-    }
     const guard = context.admissionGuard
     if (!guard) {
       throw new SpoolExecutionError('unauthorized')
     }
     context.signal.throwIfAborted()
-    const created = await this.runtime.createTerminal(`id:${target.worktreeId}`, {
-      command: record.resumeCommand,
-      cwd: target.ownerWorktree.worktreePath,
-      launchAgent: record.provider,
-      viewMode: 'chat',
-      presentation: 'background',
-      beforeAgentTrust: async () => {
-        context.signal.throwIfAborted()
-        await guard.beforeSideEffect()
-      },
-      beforeSpawn: async () => {
-        context.signal.throwIfAborted()
-        await guard.beforeSideEffect()
+    let spawnAdmitted = false
+    let created: Awaited<ReturnType<SpoolSessionRuntime['createTerminal']>>
+    try {
+      created = await this.runtime.createTerminal(`id:${target.worktreeId}`, {
+        command: record.resumeCommand,
+        cwd: target.ownerWorktree.worktreePath,
+        launchAgent: record.provider,
+        viewMode: 'chat',
+        presentation: 'background',
+        beforeAgentTrust: async () => {
+          context.signal.throwIfAborted()
+          await guard.beforeSideEffect()
+        },
+        beforeSpawn: async () => {
+          context.signal.throwIfAborted()
+          await guard.beforeSideEffect()
+          spawnAdmitted = true
+        }
+      })
+    } catch (error) {
+      if (spawnAdmitted) {
+        // Why: after the final spawn guard, a host error cannot prove no agent was created.
+        throw new SpoolExecutionError('outcome_unknown')
       }
-    })
-    this.continued.remember(target, record, created.handle)
-    return { terminalHandle: created.handle }
-  }
-
-  private async readLocalTranscript(
-    transcriptPath: string,
-    provider: 'claude' | 'codex',
-    providerSessionId: string
-  ): Promise<NativeChatMessage[]> {
-    const stats = await lstat(transcriptPath).catch(() => null)
-    if (!stats || !stats.isFile()) {
-      throw new SpoolExecutionError('resource_unavailable')
+      throw error
     }
-    if (stats.size > MAX_TRANSCRIPT_BYTES) {
-      throw new SpoolExecutionError('result_too_large')
-    }
-    const result = await readNativeChatTranscript(provider, providerSessionId, {
-      filePath: transcriptPath
-    })
-    if (!('messages' in result)) {
-      throw new SpoolExecutionError('resource_unavailable')
-    }
-    return result.messages
-  }
-
-  private async readSshTranscript(
-    targetId: string,
-    transcriptPath: string,
-    provider: 'claude' | 'codex'
-  ): Promise<NativeChatMessage[]> {
-    const filesystem = getSshFilesystemProvider(targetId)
-    if (!filesystem) {
-      throw new SpoolExecutionError('resource_unavailable')
-    }
-    const stats = await filesystem.stat(transcriptPath).catch(() => null)
-    if (!stats || stats.type !== 'file') {
-      throw new SpoolExecutionError('resource_unavailable')
-    }
-    if (stats.size > MAX_TRANSCRIPT_BYTES) {
-      throw new SpoolExecutionError('result_too_large')
-    }
-    const read = await filesystem.readFile(transcriptPath)
-    if (read.isBinary || Buffer.byteLength(read.content, 'utf8') > MAX_TRANSCRIPT_BYTES) {
-      throw new SpoolExecutionError('result_too_large')
-    }
-    const decoded = await decodeTranscriptStream(
-      Readable.from([read.content]),
-      transcriptPath,
-      0,
-      provider === 'claude' ? decodeClaudeTranscriptLine : decodeCodexTranscriptLine,
-      true
+    const terminalHandle = requireContinuedTerminalHandle(
+      created.handle,
+      created.worktreeId,
+      target.worktreeId
     )
-    return decoded.messages
+    this.sessionBindings.rememberContinued(target, record, terminalHandle)
+    return { terminalHandle }
   }
+}
+
+function requireContinuedTerminalHandle(
+  handle: string,
+  worktreeId: string,
+  expectedWorktreeId: string
+): string {
+  if (
+    !handle ||
+    handle.length > 2_048 ||
+    handle.includes('\0') ||
+    worktreeId !== expectedWorktreeId
+  ) {
+    // Why: a malformed post-spawn response cannot prove whether the new agent is running.
+    throw new SpoolExecutionError('outcome_unknown')
+  }
+  return handle
 }

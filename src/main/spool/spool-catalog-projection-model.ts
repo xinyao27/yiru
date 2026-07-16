@@ -4,6 +4,7 @@ import type {
   SpoolSessionCatalogPage,
   SpoolWorktreeCatalogEntry
 } from '../../shared/spool/spool-catalog-contract'
+import { isSpoolProjectIdentityKey } from '../../shared/spool/spool-catalog-contract'
 import type {
   SpoolCatalogReferenceBinding,
   SpoolCatalogReferenceTable
@@ -26,9 +27,17 @@ export function sanitizeCatalogWorktreeDescription(
   description: SpoolCatalogWorktreeDescription
 ): ResolvedSpoolCatalogWorktree | null {
   const projectKey = boundedIdentity(description.projectKey)
+  const projectIdentityKey = isSpoolProjectIdentityKey(description.projectIdentityKey)
+    ? description.projectIdentityKey
+    : null
   const projectName = catalogLabel(description.projectName)
   const worktreeName = catalogLabel(description.worktreeName)
-  if (!projectKey || !projectName || !worktreeName) {
+  if (
+    !projectKey ||
+    (description.projectIdentityKey !== null && projectIdentityKey === null) ||
+    !projectName ||
+    !worktreeName
+  ) {
     return null
   }
   return {
@@ -41,6 +50,7 @@ export function sanitizeCatalogWorktreeDescription(
     description: {
       kind: description.kind,
       projectKey,
+      projectIdentityKey,
       projectName,
       worktreeName,
       branch: description.branch ? catalogLabel(description.branch) : null
@@ -53,13 +63,21 @@ export function sanitizeCatalogSessionDescriptions(
 ): SpoolCatalogSessionDescription[] {
   return sessions.map((session) => {
     const sessionKey = boundedIdentity(session.sessionKey)
-    const title = catalogLabel(session.title)
-    if (!sessionKey || !title) {
+    // Why: an owner-controlled terminal title may contain only control bytes;
+    // its stable session identity remains valid and must not hide the whole worktree.
+    const title = catalogLabel(session.title) || fallbackCatalogSessionTitle(session)
+    if (!sessionKey) {
       // Why: silently omitting an invalid row could turn a partial owner page into completeness.
       throw new Error('Invalid Spool catalog session description')
     }
-    return { sessionKey, provider: session.provider, title }
+    return session.kind === 'terminal'
+      ? { sessionKey, kind: 'terminal', agent: null, title }
+      : { sessionKey, kind: 'agent', agent: session.agent, title }
   })
+}
+
+function fallbackCatalogSessionTitle(session: SpoolCatalogSessionDescription): string {
+  return session.kind === 'terminal' ? 'terminal' : (session.agent ?? 'agent')
 }
 
 export function buildCatalogReferenceBindings(
@@ -122,6 +140,25 @@ export function buildCatalogSessionPageBindings(
   return bindings
 }
 
+export function buildReservedCatalogSessionBinding(
+  instance: Pick<SpoolPublicWorktreeInstance, 'worktreeId' | 'instanceId' | 'shareEpoch'>,
+  sessionKey: string,
+  catalogRevision: number,
+  generation: number
+): Extract<SpoolCatalogReferenceBinding, { kind: 'session' }> {
+  const worktreeAlias = worktreeAliasKey(instance.instanceId, instance.shareEpoch)
+  return {
+    kind: 'session',
+    aliasKey: sessionAliasKey(worktreeAlias, sessionKey),
+    worktreeId: instance.worktreeId,
+    instanceId: instance.instanceId,
+    shareEpoch: instance.shareEpoch,
+    sessionKey,
+    catalogRevision,
+    generation
+  }
+}
+
 export function projectCatalogEntries(
   descriptions: readonly ResolvedSpoolCatalogWorktree[],
   references: SpoolCatalogReferenceTable,
@@ -153,7 +190,11 @@ export function projectCatalogEntries(
       })
     } else {
       projects.set(description.projectKey, {
-        projectRef: references.referenceFor(projectAliasKey(description.projectKey)),
+        // Why: v2 readers already treat projectRef as opaque. Reusing it for a
+        // portable identity lets new peers match Projects while old peers keep working.
+        projectRef:
+          description.projectIdentityKey ??
+          references.referenceFor(projectAliasKey(description.projectKey)),
         name: description.projectName,
         worktrees: [worktree]
       })
@@ -174,11 +215,12 @@ export function projectCatalogSessionPage(
     description.instance.instanceId,
     description.instance.shareEpoch
   )
-  const projected: SpoolSessionCatalogEntry[] = sessions.map((session) => ({
-    sessionRef: references.referenceFor(sessionAliasKey(worktreeAlias, session.sessionKey)),
-    provider: session.provider,
-    title: session.title
-  }))
+  const projected: SpoolSessionCatalogEntry[] = sessions.map((session) => {
+    const sessionRef = references.referenceFor(sessionAliasKey(worktreeAlias, session.sessionKey))
+    return session.kind === 'terminal'
+      ? { sessionRef, kind: 'terminal', agent: null, title: session.title }
+      : { sessionRef, kind: 'agent', agent: session.agent, title: session.title }
+  })
   return {
     catalogRevision: binding.catalogRevision,
     worktreeRef,

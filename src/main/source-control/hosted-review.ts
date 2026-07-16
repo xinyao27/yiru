@@ -1,5 +1,9 @@
-import type { HostedReviewInfo } from '../../shared/hosted-review'
-import { getForgeProviderForRepository, type ForgeProviderId } from './forge-provider'
+import { isPositiveHostedReviewNumber, type HostedReviewInfo } from '../../shared/hosted-review'
+import {
+  getForgeProviderById,
+  getForgeProviderForRepository,
+  type ForgeProviderId
+} from './forge-provider'
 import type { HostedReviewExecutionOptions } from './hosted-review-git-options'
 
 function reviewLinkForProvider(
@@ -23,6 +27,22 @@ function reviewLinkForProvider(
   }
 }
 
+function strictLinkedReviewProvider(
+  input: Parameters<typeof getHostedReviewForBranch>[0]
+): ForgeProviderId | null {
+  const links: readonly [ForgeProviderId, number | null | undefined][] = [
+    ['github', input.linkedGitHubPR],
+    ['gitlab', input.linkedGitLabMR],
+    ['bitbucket', input.linkedBitbucketPR],
+    ['azure-devops', input.linkedAzureDevOpsPR],
+    ['gitea', input.linkedGiteaPR]
+  ]
+  const linkedProviders = links
+    .filter(([, number]) => isPositiveHostedReviewNumber(number))
+    .map(([provider]) => provider)
+  return linkedProviders.length === 1 ? (linkedProviders[0] ?? null) : null
+}
+
 export async function getHostedReviewForBranch(
   input: {
     repoPath: string
@@ -35,6 +55,7 @@ export async function getHostedReviewForBranch(
     linkedAzureDevOpsPR?: number | null
     linkedGiteaPR?: number | null
     currentHeadOid?: string | null
+    throwOnProviderError?: boolean
   } & HostedReviewExecutionOptions
 ): Promise<HostedReviewInfo | null> {
   const branchName = input.branch.replace(/^refs\/heads\//, '')
@@ -52,11 +73,18 @@ export async function getHostedReviewForBranch(
     return null
   }
 
-  const provider = await getForgeProviderForRepository({
-    repoPath: input.repoPath,
-    connectionId: input.connectionId,
-    ...(input.localGitExecOptions ? { localGitExecOptions: input.localGitExecOptions } : {})
-  })
+  // Why: a durable provider-specific link remains authoritative when strict remote detection fails.
+  const linkedProvider = input.throwOnProviderError ? strictLinkedReviewProvider(input) : null
+  const provider =
+    linkedProvider !== null
+      ? getForgeProviderById(linkedProvider)
+      : await getForgeProviderForRepository({
+          repoPath: input.repoPath,
+          connectionId: input.connectionId,
+          ...(input.localGitExecOptions ? { localGitExecOptions: input.localGitExecOptions } : {}),
+          ...(input.signal ? { signal: input.signal } : {}),
+          ...(input.throwOnProviderError ? { throwOnProviderError: true } : {})
+        })
   if (!provider) {
     return null
   }
@@ -65,6 +93,8 @@ export async function getHostedReviewForBranch(
     connectionId: input.connectionId,
     branch: branchName,
     ...(input.localGitExecOptions ? { localGitExecOptions: input.localGitExecOptions } : {}),
+    ...(input.signal ? { signal: input.signal } : {}),
+    ...(input.throwOnProviderError ? { throwOnProviderError: true } : {}),
     githubCurrentHeadOid: input.currentHeadOid ?? null,
     ...reviewLinkForProvider(input, provider.id)
   })

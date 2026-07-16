@@ -13,6 +13,7 @@ import {
   SPOOL_CATALOG_MAX_WORKTREES
 } from '../../shared/spool/spool-catalog-contract'
 import { SPOOL_PROTOCOL_VERSION } from '../../shared/spool/spool-wire-contract'
+import { isSpoolAgentLaunchId } from '../../shared/spool/spool-agent-launch-contract'
 import { hasExactSpoolWireKeys } from '../../shared/spool/spool-exact-wire-record'
 
 type CatalogCounts = { worktrees: number }
@@ -132,9 +133,10 @@ function isSession(value: unknown): value is SpoolSessionCatalogEntry {
   const record = asRecord(value)
   return Boolean(
     record &&
-    hasExactSpoolWireKeys(record, ['sessionRef', 'provider', 'title']) &&
+    hasExactSpoolWireKeys(record, ['sessionRef', 'kind', 'agent', 'title']) &&
     isReference(record.sessionRef) &&
-    (record.provider === 'claude' || record.provider === 'codex' || record.provider === 'other') &&
+    ((record.kind === 'terminal' && record.agent === null) ||
+      (record.kind === 'agent' && (record.agent === null || isSpoolAgentLaunchId(record.agent)))) &&
     isLabel(record.title)
   )
 }

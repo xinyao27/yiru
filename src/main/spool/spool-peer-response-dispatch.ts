@@ -40,7 +40,7 @@ export function dispatchSpoolPeerResponse(options: {
   if (!response.ok) {
     clearPendingRequest(pending)
     options.pending.delete(response.id)
-    callPeerCallback(() => pending.reject(new Error(response.error.code)), options)
+    callPeerCallback(() => pending.reject(new Error(response.error.message)), options)
     return
   }
   if (pending.streaming) {

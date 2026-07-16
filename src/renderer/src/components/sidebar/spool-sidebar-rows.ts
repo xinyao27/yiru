@@ -1,35 +1,28 @@
 import type {
   SpoolProviderQuota,
   SpoolRemoteDesktop,
+  SpoolSessionCatalogEntry,
   SpoolWorktreeCatalogEntry
 } from '../../../../shared/spool/spool-catalog-contract'
+import { isSpoolProjectIdentityKey } from '../../../../shared/spool/spool-catalog-contract'
 import type {
   SpoolExpandedRefsByDesktop,
   SpoolWorkspaceRoute
 } from '../../store/slices/spool-sharing-types'
 import { isSpoolRefExpanded } from '../../store/slices/spool-sharing-selectors'
 
-export type SpoolDesktopSidebarRow = {
-  type: 'spool-desktop'
-  key: string
-  desktopRef: string
-  connectionEpoch: number
+export type SpoolRemoteDesktopSidebarContext = {
   userDisplayName: string
   nodeDisplayName: string
   connectionStatus: SpoolRemoteDesktop['connectionStatus']
-  expanded: boolean
-  projectCount: number
   quota: readonly SpoolProviderQuota[]
 }
 
-export type SpoolProjectSidebarRow = {
-  type: 'spool-project'
+export type SpoolRemoteDesktopStatusSidebarRow = {
+  type: 'spool-desktop-status'
   key: string
   desktopRef: string
-  projectRef: string
-  name: string
-  expanded: boolean
-  worktreeCount: number
+  desktop: SpoolRemoteDesktopSidebarContext
 }
 
 export type SpoolWorktreeSidebarRow = {
@@ -39,8 +32,10 @@ export type SpoolWorktreeSidebarRow = {
   desktopRef: string
   connectionEpoch: number
   projectRef: string
+  projectIdentityKey: string | null
   worktreeRef: string
   shareEpoch: string
+  desktop: SpoolRemoteDesktopSidebarContext
   name: string
   branch: string | null
   expanded: boolean
@@ -49,6 +44,10 @@ export type SpoolWorktreeSidebarRow = {
   sessionCatalogStatus: SpoolWorktreeCatalogEntry['sessionCatalog']['status']
 }
 
+type SpoolSessionSidebarRowIdentity =
+  | Pick<Extract<SpoolSessionCatalogEntry, { kind: 'terminal' }>, 'kind' | 'agent'>
+  | Pick<Extract<SpoolSessionCatalogEntry, { kind: 'agent' }>, 'kind' | 'agent'>
+
 export type SpoolSessionSidebarRow = {
   type: 'spool-session'
   key: string
@@ -56,21 +55,17 @@ export type SpoolSessionSidebarRow = {
   connectionEpoch: number
   worktreeRef: string
   sessionRef: string
-  provider: 'claude' | 'codex' | 'other'
   title: string
   active: boolean
-}
+} & SpoolSessionSidebarRowIdentity
 
 export type SpoolSidebarRow =
-  | SpoolDesktopSidebarRow
-  | SpoolProjectSidebarRow
+  | SpoolRemoteDesktopStatusSidebarRow
   | SpoolWorktreeSidebarRow
   | SpoolSessionSidebarRow
 
 export type SpoolSidebarProjectionInput = {
   desktops: readonly SpoolRemoteDesktop[]
-  expandedDesktopRefs: ReadonlySet<string>
-  expandedProjectRefsByDesktop: SpoolExpandedRefsByDesktop
   expandedWorktreeRefsByDesktop: SpoolExpandedRefsByDesktop
   activeRoute: SpoolWorkspaceRoute | null
 }
@@ -97,40 +92,24 @@ export function projectSpoolSidebarRows(input: SpoolSidebarProjectionInput): Spo
   const rows: SpoolSidebarRow[] = []
   for (const desktop of input.desktops) {
     const catalog = desktop.catalog
-    const expanded = input.expandedDesktopRefs.has(desktop.desktopRef)
-    rows.push({
-      type: 'spool-desktop',
-      key: createSpoolSidebarRowKey('spool-desktop', desktop.desktopRef),
-      desktopRef: desktop.desktopRef,
-      connectionEpoch: desktop.connectionEpoch,
+    const sidebarDesktop: SpoolRemoteDesktopSidebarContext = {
       userDisplayName: desktop.userDisplayName,
       nodeDisplayName: desktop.nodeDisplayName,
       connectionStatus: desktop.connectionStatus,
-      expanded,
-      projectCount: catalog?.projects.length ?? 0,
       quota: catalog?.quota ?? []
-    })
-    if (!expanded || !catalog) {
+    }
+    if (!catalog) {
+      // Why: flattening removes the Desktop hierarchy row, but connection
+      // failures still need a visible, non-hierarchical status surface.
+      rows.push({
+        type: 'spool-desktop-status',
+        key: createSpoolSidebarRowKey('spool-desktop-status', desktop.desktopRef),
+        desktopRef: desktop.desktopRef,
+        desktop: sidebarDesktop
+      })
       continue
     }
     for (const project of catalog.projects) {
-      const projectExpanded = isSpoolRefExpanded(
-        input.expandedProjectRefsByDesktop,
-        desktop.desktopRef,
-        project.projectRef
-      )
-      rows.push({
-        type: 'spool-project',
-        key: createSpoolSidebarRowKey('spool-project', desktop.desktopRef, project.projectRef),
-        desktopRef: desktop.desktopRef,
-        projectRef: project.projectRef,
-        name: project.name,
-        expanded: projectExpanded,
-        worktreeCount: project.worktrees.length
-      })
-      if (!projectExpanded) {
-        continue
-      }
       for (const worktree of project.worktrees) {
         const worktreeActive = isActiveWorktree(
           input.activeRoute,
@@ -155,8 +134,12 @@ export function projectSpoolSidebarRows(input: SpoolSidebarProjectionInput): Spo
           desktopRef: desktop.desktopRef,
           connectionEpoch: desktop.connectionEpoch,
           projectRef: project.projectRef,
+          projectIdentityKey: isSpoolProjectIdentityKey(project.projectRef)
+            ? project.projectRef
+            : null,
           worktreeRef: worktree.worktreeRef,
           shareEpoch: worktree.shareEpoch,
+          desktop: sidebarDesktop,
           name: worktree.name,
           branch: worktree.branch,
           expanded: worktreeExpanded,
@@ -170,6 +153,7 @@ export function projectSpoolSidebarRows(input: SpoolSidebarProjectionInput): Spo
           continue
         }
         for (const session of worktree.sessions) {
+          const sessionIdentity: SpoolSessionSidebarRowIdentity = session
           rows.push({
             type: 'spool-session',
             key: createSpoolSidebarRowKey(
@@ -182,7 +166,7 @@ export function projectSpoolSidebarRows(input: SpoolSidebarProjectionInput): Spo
             connectionEpoch: desktop.connectionEpoch,
             worktreeRef: worktree.worktreeRef,
             sessionRef: session.sessionRef,
-            provider: session.provider,
+            ...sessionIdentity,
             title: session.title,
             active: worktreeActive && input.activeRoute?.sessionRef === session.sessionRef
           })

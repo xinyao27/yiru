@@ -11,6 +11,7 @@ export type GiteaRepoRef = {
 
 type LocalGitExecOptions = {
   wslDistro?: string
+  signal?: AbortSignal
 }
 
 const KNOWN_NON_GITEA_HOSTS = new Set([
@@ -158,15 +159,21 @@ export async function getGiteaRepoRefForRemote(
       return null
     }
     const { stdout } = sshGitProvider
-      ? await sshGitProvider.exec(['remote', 'get-url', remoteName], repoPath)
+      ? await sshGitProvider.exec(
+          ['remote', 'get-url', remoteName],
+          repoPath,
+          localGitOptions.signal ? { signal: localGitOptions.signal } : undefined
+        )
       : await gitExecFileAsync(['remote', 'get-url', remoteName], {
           cwd: repoPath,
-          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {})
+          ...(localGitOptions.wslDistro ? { wslDistro: localGitOptions.wslDistro } : {}),
+          ...(localGitOptions.signal ? { signal: localGitOptions.signal } : {})
         })
     const result = parseGiteaRepoRef(stdout)
     rememberRepoRefCacheEntry(cacheKey, result)
     return result
   } catch {
+    localGitOptions.signal?.throwIfAborted()
     if (connectionId) {
       // Why: SSH provider failures are often transient reconnect/tunnel states;
       // caching them as "not Gitea" would poison the repo for the session.

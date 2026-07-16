@@ -1,12 +1,11 @@
-/* eslint-disable max-lines -- Why: co-locating all checks-panel sub-components (checks list,
-conflict sections, threaded PR comments) keeps the shared icon/color maps in one place. */
+/* eslint-disable max-lines -- Why: legacy checks-panel sub-components for checks, conflicts,
+and threaded PR comments still share tightly coupled selection and composer state. */
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   CircleCheck,
   CircleX,
   LoaderCircle,
   CircleDashed,
-  CircleMinus,
   GitPullRequest,
   Files,
   Copy,
@@ -99,6 +98,9 @@ import {
 import { translate } from '@/i18n/i18n'
 import { useActiveWorktree } from '@/store/selectors'
 import { useAppStore } from '@/store'
+import { CHECK_COLOR, CHECK_ICON } from './check-status-presentation'
+
+export { CHECK_COLOR, CHECK_ICON } from './check-status-presentation'
 
 export const PullRequestIcon = GitPullRequest
 
@@ -110,28 +112,6 @@ function getPRCommentsListDisplayModeLabel(mode: PRCommentsListDisplayMode): str
   return mode === 'triage'
     ? translate('auto.components.right.sidebar.checks.panel.content.8a621a2c4f', 'Grouped')
     : translate('auto.components.right.sidebar.checks.panel.content.b13f85d75c', 'Timeline')
-}
-
-export const CHECK_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
-  success: CircleCheck,
-  failure: CircleX,
-  pending: LoaderCircle,
-  neutral: CircleDashed,
-  skipped: CircleMinus,
-  cancelled: CircleX,
-  timed_out: CircleX,
-  action_required: AlertTriangle
-}
-
-export const CHECK_COLOR: Record<string, string> = {
-  success: 'text-emerald-500',
-  failure: 'text-rose-500',
-  pending: 'text-amber-500',
-  neutral: 'text-muted-foreground',
-  skipped: 'text-muted-foreground/60',
-  cancelled: 'text-muted-foreground/60',
-  timed_out: 'text-rose-500',
-  action_required: 'text-amber-500'
 }
 
 type ConflictReview = {

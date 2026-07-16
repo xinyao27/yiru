@@ -14,6 +14,8 @@ type SpoolWorkspaceReadMethod =
   | 'git.status'
   | 'git.diff'
   | 'git.history'
+  | 'checks.read'
+  | 'terminal.launchOptions'
 
 type SpoolWorkspaceMutationMethod =
   | 'files.write'
@@ -23,6 +25,7 @@ type SpoolWorkspaceMutationMethod =
   | 'git.stage'
   | 'git.unstage'
   | 'git.commit'
+  | 'terminal.create'
 
 export class SpoolWorkspaceOperationError extends Error {
   constructor(readonly code: SpoolRequesterTransportErrorCode | 'stale_route') {
@@ -36,9 +39,12 @@ export async function invokeSpoolWorkspaceRead(
   method: SpoolWorkspaceReadMethod,
   params: Record<string, unknown>
 ): Promise<unknown> {
-  requireCurrentRoute(route, false)
+  // Why: owner agent inventory is disclosed only for the currently granted
+  // connection even though fetching it has no side effect.
+  const requireControl = method === 'terminal.launchOptions'
+  requireCurrentRoute(route, requireControl)
   const value = await invokeRequester(route, method, params)
-  requireCurrentRoute(route, false)
+  requireCurrentRoute(route, requireControl)
   return value
 }
 

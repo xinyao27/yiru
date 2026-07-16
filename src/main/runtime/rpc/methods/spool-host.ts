@@ -12,13 +12,14 @@ import {
   SpoolPairedRuntimeCanonicalizeResultSchema,
   SpoolPairedRuntimeInspectionSchema,
   SpoolPairedRuntimeTerminalEventSchema,
-  SpoolPairedRuntimeWorktreeCatalogSchema,
-  parseSpoolPairedRuntimeResult
+  SpoolPairedRuntimeWorktreeCatalogSchema
 } from '../../../../shared/spool/spool-paired-runtime-result-contract'
 import { isSpoolMutationOperation } from '../../../../shared/spool/spool-operation-contract'
 import type { SpoolHostSubscription } from '../../../spool/spool-execution-gateway'
 import { defineMethod, defineStreamingMethod, type RpcAnyMethod, type RpcContext } from '../core'
 import { SPOOL_HOST_SESSION_METHODS } from './spool-host-session-methods'
+import { getSpoolHostChannelLifetimes } from './spool-host-channel-lifetimes'
+import { projectSpoolHostExecutionResult } from './spool-host-result-projection'
 import {
   createIncarnationHost,
   getHostBundle,
@@ -96,12 +97,17 @@ export const SPOOL_HOST_METHODS: RpcAnyMethod[] = [
       try {
         const target = await resolveBoundActualHostWorktree(context.runtime, params.target)
         const adapter = requireActualHostAdapter(context.runtime, target)
+        getSpoolHostChannelLifetimes(context.runtime).ensure(
+          context,
+          params.channelRef,
+          (channelRef) => getHostBundle(context.runtime).adapter.closeConnection(channelRef)
+        )
         const result = await adapter.invoke(
           target,
           operation,
           operationContext(params.channelRef, context, isSpoolMutationOperation(operation))
         )
-        return { status: 'ok' as const, result: parseSpoolPairedRuntimeResult(operation, result) }
+        return { status: 'ok' as const, result: projectSpoolHostExecutionResult(operation, result) }
       } catch (error) {
         return { status: 'error' as const, code: pairedRuntimeErrorCode(error) }
       }
@@ -114,6 +120,11 @@ export const SPOOL_HOST_METHODS: RpcAnyMethod[] = [
       requirePairedRuntimePrincipal(context)
       const target = await resolveBoundActualHostWorktree(context.runtime, params.target)
       const adapter = requireActualHostAdapter(context.runtime, target)
+      getSpoolHostChannelLifetimes(context.runtime).ensure(
+        context,
+        params.channelRef,
+        (channelRef) => getHostBundle(context.runtime).adapter.closeConnection(channelRef)
+      )
       try {
         await runTerminalSubscription(
           context,
@@ -137,7 +148,11 @@ export const SPOOL_HOST_METHODS: RpcAnyMethod[] = [
     params: SpoolPairedRuntimeReleaseChannelParamsSchema,
     handler: (params, context) => {
       requirePairedRuntimePrincipal(context)
-      getHostBundle(context.runtime).adapter.closeConnection(params.channelRef)
+      getSpoolHostChannelLifetimes(context.runtime).release(
+        context,
+        params.channelRef,
+        (channelRef) => getHostBundle(context.runtime).adapter.closeConnection(channelRef)
+      )
       return { ok: true }
     }
   }),

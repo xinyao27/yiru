@@ -1,11 +1,14 @@
 import type React from 'react'
-import { Folder, GitBranch } from 'lucide-react'
+import { Cloud } from 'lucide-react'
 import { getSpoolSessionCatalogStatusLabel } from '@/components/spool/spool-session-catalog-status'
+import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 import type { SpoolWorktreeSidebarRow } from './spool-sidebar-rows'
+import { getSpoolWorktreeDisplayTitle } from './spool-worktree-display-title'
+import { SpoolDesktopUsageHoverCard } from './SpoolDesktopUsageHoverCard'
 import {
-  getFlushWorktreeCardPaddingLeft,
-  getProjectGroupHeaderPaddingLeft
+  DIRECT_PROJECT_WORKTREE_CONTENT_INDENT,
+  getFlushWorktreeCardPaddingLeft
 } from './worktree-list-indentation'
 import { SidebarDisclosure } from './SidebarDisclosure'
 import { WorktreeCardSurface } from './WorktreeCardSurface'
@@ -24,8 +27,9 @@ export function SpoolWorktreeRow({
   const hasSessions = row.sessionCount > 0
   const sessionCatalogLabel = getSpoolSessionCatalogStatusLabel(row.sessionCatalogStatus)
   const metadata = [row.branch, sessionCatalogLabel].filter(Boolean).join(' · ')
-  // Why: Worktrees advance one more compact step beneath their Project.
-  return (
+  // Why: flattened worktrees no longer inherit owner context from a Desktop row.
+  const displayTitle = getSpoolWorktreeDisplayTitle(row.desktop.userDisplayName, row.name)
+  const trigger = (
     <WorktreeCardSurface
       data-current={row.active ? 'true' : undefined}
       role="button"
@@ -36,13 +40,13 @@ export function SpoolWorktreeRow({
       activeVariant={row.active ? 'primary' : undefined}
       className="focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring"
       style={{
-        paddingLeft: getFlushWorktreeCardPaddingLeft(getProjectGroupHeaderPaddingLeft(2))
+        paddingLeft: getFlushWorktreeCardPaddingLeft(DIRECT_PROJECT_WORKTREE_CONTENT_INDENT)
       }}
       trailing={
         hasSessions ? (
           <SidebarDisclosure
             expanded={row.expanded}
-            itemLabel={row.name}
+            itemLabel={displayTitle}
             onPointerDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.preventDefault()
@@ -62,16 +66,21 @@ export function SpoolWorktreeRow({
       }}
     >
       <div className="flex w-full min-w-0 items-start gap-0.5 pl-0">
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5 overflow-hidden">
+        <div
+          className="flex w-4 shrink-0 items-start justify-center pt-[2px]"
+          data-spool-worktree-status-slot=""
+        >
+          {/* Why: remote location is the primary distinction after these rows flatten into Projects. */}
+          <Cloud aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
+        </div>
+        <div
+          className="flex min-w-0 flex-1 flex-col gap-1.5 overflow-hidden"
+          data-spool-worktree-content=""
+        >
           <div className="flex min-w-0 items-center justify-between gap-2">
-            <div className="flex min-w-0 flex-1 items-center gap-1.5">
-              {row.kind === 'folder' ? (
-                <Folder aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-              ) : (
-                <GitBranch aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-              )}
+            <div className="flex min-w-0 flex-1 items-center">
               <TruncatedSidebarLabel
-                text={row.name}
+                text={displayTitle}
                 className="min-w-0 flex-1 text-[13px] font-normal leading-5"
               />
             </div>
@@ -85,5 +94,12 @@ export function SpoolWorktreeRow({
         </div>
       </div>
     </WorktreeCardSurface>
+  )
+
+  return (
+    <HoverCard>
+      <HoverCardTrigger delay={200} closeDelay={100} render={trigger} />
+      <SpoolDesktopUsageHoverCard desktop={row.desktop} />
+    </HoverCard>
   )
 }

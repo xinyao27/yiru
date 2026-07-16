@@ -4697,6 +4697,7 @@
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "Cargando sesiones…",
+          "ownerTitle": "{{value1}} de {{value0}}",
           "sessionsUnavailable": "La lista de sesiones no está disponible"
         },
         "SpoolSidebarProjectedRow": {
@@ -4704,6 +4705,9 @@
         },
         "SpoolDesktopUsageHoverCard": {
           "usage": "Usage"
+        },
+        "SpoolRemoteWorktreesHeader": {
+          "title": "Remote"
         }
       },
       "spool": {
@@ -4738,7 +4742,7 @@
           "decisionFailed": "No se pudo enviar la decisión de control.",
           "title": "¿Permitir que {{value0}} controle este worktree?",
           "worktree": "Worktree: {{value0}} / {{value1}}",
-          "capabilities": "Podrá enviar entradas al terminal, modificar archivos, ejecutar comandos y usar tus cuentas de Claude/Codex.",
+          "capabilities": "Podrá crear terminales, iniciar agentes habilitados, enviar entradas al terminal, modificar archivos, ejecutar comandos y usar tus cuentas de agentes activas.",
           "shellWarning": "Los comandos del terminal no están limitados a este worktree.",
           "queued": "Solicitudes de control en cola: {{value0}}.",
           "deny": "Denegar",
@@ -4758,7 +4762,7 @@
           "startingAfterGrant": "Starting the agent on the owner’s desktop…",
           "controlRequired": "Request control to continue this agent session on the owner’s desktop.",
           "continuing": "Continuing the agent on the owner’s desktop…",
-          "attaching": "Connecting to the agent terminal…",
+          "attaching": "Connecting to the remote terminal…",
           "attachFailed": "The agent started, but its terminal could not be connected.",
           "continueAgent": "Continue agent",
           "sessionEnded": "This agent session has ended.",
@@ -4772,7 +4776,8 @@
           "unavailable": "Terminal no disponible",
           "outcomeUnknown": "Es posible que esta acción del terminal se haya completado en el equipo del propietario. Revisa la salida del terminal antes de enviar más entradas.",
           "outcomeUnknownPersistent": "Es posible que una acción del terminal se haya completado. Revisa la salida antes de reanudar la entrada.",
-          "resumeInput": "Reanudar entrada"
+          "resumeInput": "Reanudar entrada",
+          "inputBacklogFull": "La entrada remota aún se está procesando. Espera a que aparezca antes de escribir o pegar más."
         },
         "SpoolWorktreeVisibilityDialog": {
           "publishFailed": "No se pudo hacer público este worktree.",
@@ -4924,6 +4929,53 @@
           "upstream": "{{value0}} · ↑{{value1}} ↓{{value2}}",
           "stateUnavailable": "El estado de Git no está disponible.",
           "changesLimited": "Solo se muestra una parte del estado."
+        },
+        "SpoolAgentsPane": {
+          "publicSessions": "Public agents",
+          "noAgentSessions": "No public agent sessions in this worktree.",
+          "unknownAgent": "Agent"
+        },
+        "SpoolChecksPane": {
+          "reviewChecks": "Review checks",
+          "refresh": "Refresh",
+          "loadFailed": "Could not load checks from the owner.",
+          "loading": "Loading checks…",
+          "noReview": "No hosted review was found for this branch.",
+          "unavailable": "Hosted review details are unavailable from the owner.",
+          "openReview": "Open review",
+          "checks": "Checks",
+          "detailsUnavailable": "Detailed checks could not be loaded.",
+          "detailsUnsupported": "Detailed checks are not available for this provider.",
+          "checksTruncated": "Showing a partial check list.",
+          "noChecks": "No checks were reported for this review.",
+          "passing": "Passing",
+          "failing": "Failing",
+          "pending": "Pending",
+          "neutral": "Neutral",
+          "queued": "Queued",
+          "inProgress": "In progress",
+          "succeeded": "Succeeded",
+          "failed": "Failed",
+          "cancelled": "Cancelled",
+          "timedOut": "Timed out",
+          "skipped": "Skipped",
+          "actionRequired": "Action required",
+          "hostedReview": "Hosted review",
+          "open": "Open",
+          "closed": "Closed",
+          "merged": "Merged",
+          "draft": "Draft"
+        },
+        "SpoolSessionCreateMenu": {
+          "outcomeUnknown": "The terminal may already be running on the owner desktop. Creation was not retried.",
+          "createFailed": "Could not create the terminal.",
+          "noAgents": "No agents available",
+          "loadingAgents": "Loading owner agents…",
+          "agentsUnavailable": "Owner agents unavailable",
+          "disconnected": "Reconnect to create terminals.",
+          "controlPending": "Waiting for the owner to approve control.",
+          "controlRequired": "Request control to create terminals.",
+          "creating": "Creating terminal…"
         }
       },
       "shared": {

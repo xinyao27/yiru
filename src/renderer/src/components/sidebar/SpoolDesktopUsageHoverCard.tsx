@@ -9,7 +9,7 @@ import { ProviderPanel } from '@/components/status-bar/tooltip'
 import { HoverCardContent } from '@/components/ui/hover-card'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import type { SpoolDesktopSidebarRow } from './spool-sidebar-rows'
+import type { SpoolRemoteDesktopSidebarContext } from './spool-sidebar-rows'
 
 function toRateLimitWindow(
   window: SpoolProviderQuotaWindow | null,
@@ -41,9 +41,9 @@ function toProviderRateLimits(
 }
 
 export function SpoolDesktopUsageHoverCard({
-  row
+  desktop
 }: {
-  row: SpoolDesktopSidebarRow
+  desktop: SpoolRemoteDesktopSidebarContext
 }): React.JSX.Element {
   const display = normalizeUsagePercentageDisplay(
     useAppStore((state) => state.usagePercentageDisplay)
@@ -51,24 +51,24 @@ export function SpoolDesktopUsageHoverCard({
   const limitsFor = (provider: SpoolProviderQuota['provider']): ProviderRateLimits =>
     toProviderRateLimits(
       provider,
-      row.quota.find((candidate) => candidate.provider === provider) ?? null
+      desktop.quota.find((candidate) => candidate.provider === provider) ?? null
     )
 
   return (
     <HoverCardContent side="right" align="start" sideOffset={8} className="w-72 p-3">
       <div className="min-w-0">
         <div className="truncate text-[13px] font-semibold text-foreground">
-          {row.userDisplayName}
+          {desktop.userDisplayName}
         </div>
         <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
-          {row.nodeDisplayName}
+          {desktop.nodeDisplayName}
         </div>
       </div>
       <div className="mt-3 text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
         {translate('auto.components.sidebar.SpoolDesktopUsageHoverCard.usage', 'Usage')}
       </div>
-      {/* Why: the hover card reuses the status-bar detail panel so usage bars,
-          reset copy, and the global used/remaining preference cannot drift. */}
+      {/* Why: remote worktree hover reuses the status-bar detail panel so usage
+          bars, reset copy, and the global used/remaining preference cannot drift. */}
       <div className="mt-2 grid gap-3 divide-y divide-border/70 text-[11px] text-foreground">
         <ProviderPanel
           p={limitsFor('claude')}

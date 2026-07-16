@@ -18,10 +18,6 @@ export type WorkspaceSidebarProjectedRow =
       row: RenderRow
     }
   | {
-      kind: 'spool-section'
-      key: 'spool:section'
-    }
-  | {
       kind: 'spool-windows-firewall'
       key: 'spool:windows-firewall'
     }
@@ -31,10 +27,99 @@ export type WorkspaceSidebarProjectedRow =
       diagnostic: SpoolAvailabilityDiagnostic
     }
   | {
+      kind: 'spool-remote-worktrees-header'
+      key: 'spool:remote-worktrees-header'
+      worktreeCount: number
+      collapsed: boolean
+    }
+  | {
       kind: 'spool'
       key: string
       row: SpoolSidebarRow
+      localProjectHeaderKey?: string
     }
+
+type MatchedSpoolRows = {
+  rows: SpoolSidebarRow[]
+  worktreeCount: number
+}
+
+export const SPOOL_REMOTE_WORKTREES_HEADER_KEY = 'spool:remote-worktrees-header'
+
+function getLocalProjectHeaderIndexByIdentity(
+  localRows: readonly RenderRow[]
+): Map<string, number> {
+  const candidateIndexesByIdentity = new Map<string, number[]>()
+  for (const [index, row] of localRows.entries()) {
+    if (row.type !== 'header' || !row.projectIdentityKey) {
+      continue
+    }
+    const candidateIndexes = candidateIndexesByIdentity.get(row.projectIdentityKey) ?? []
+    candidateIndexes.push(index)
+    candidateIndexesByIdentity.set(row.projectIdentityKey, candidateIndexes)
+  }
+
+  const indexByIdentity = new Map<string, number>()
+  for (const [identity, candidateIndexes] of candidateIndexesByIdentity) {
+    const unsuffixedIndexes = candidateIndexes.filter((index) => {
+      const row = localRows[index]
+      return row?.type === 'header' && !row.key.includes('::setup:')
+    })
+    const unambiguousIndex =
+      candidateIndexes.length === 1
+        ? candidateIndexes[0]
+        : unsuffixedIndexes.length === 1
+          ? unsuffixedIndexes[0]
+          : undefined
+    // Why: duplicate host/setup sections represent distinct local contexts;
+    // leave remote rows ungrouped rather than attaching them arbitrarily.
+    if (unambiguousIndex !== undefined) {
+      indexByIdentity.set(identity, unambiguousIndex)
+    }
+  }
+  return indexByIdentity
+}
+
+function groupSpoolRowsByLocalProject(
+  spoolRows: readonly SpoolSidebarRow[],
+  localHeaderIndexByIdentity: ReadonlyMap<string, number>
+): {
+  matchedByHeaderIndex: Map<number, MatchedSpoolRows>
+  unmatched: SpoolSidebarRow[]
+} {
+  const matchedByHeaderIndex = new Map<number, MatchedSpoolRows>()
+  const unmatched: SpoolSidebarRow[] = []
+  let activeTarget: SpoolSidebarRow[] | null = null
+  for (const row of spoolRows) {
+    if (row.type === 'spool-worktree') {
+      const localHeaderIndex = row.projectIdentityKey
+        ? localHeaderIndexByIdentity.get(row.projectIdentityKey)
+        : undefined
+      if (localHeaderIndex === undefined) {
+        unmatched.push(row)
+        activeTarget = unmatched
+        continue
+      }
+      const matched = matchedByHeaderIndex.get(localHeaderIndex) ?? { rows: [], worktreeCount: 0 }
+      matched.rows.push(row)
+      matched.worktreeCount += 1
+      matchedByHeaderIndex.set(localHeaderIndex, matched)
+      activeTarget = matched.rows
+      continue
+    }
+    if (row.type === 'spool-session' && activeTarget) {
+      activeTarget.push(row)
+      continue
+    }
+    unmatched.push(row)
+    activeTarget = null
+  }
+  return { matchedByHeaderIndex, unmatched }
+}
+
+function isLocalSectionBoundary(row: RenderRow | undefined): boolean {
+  return !row || row.type === 'header' || row.type === 'host-header'
+}
 
 export function shouldShowSpoolWindowsFirewallDiagnostic(
   status: 'starting' | 'ready' | 'unavailable',
@@ -55,14 +140,52 @@ export function projectWorkspaceSidebarRows(args: {
   spoolRows: readonly SpoolSidebarRow[]
   spoolStatus: 'starting' | 'ready' | 'unavailable'
   spoolDiagnostic: string | null
+  remoteWorktreesCollapsed?: boolean
   getLocalRowKey: (row: RenderRow) => string
 }): WorkspaceSidebarProjectedRow[] {
-  const rows: WorkspaceSidebarProjectedRow[] = args.localRows.map((row, localIndex) => ({
-    kind: 'local',
-    key: args.getLocalRowKey(row),
-    localIndex,
-    row
-  }))
+  const localHeaderIndexByIdentity = getLocalProjectHeaderIndexByIdentity(args.localRows)
+  const { matchedByHeaderIndex, unmatched } = groupSpoolRowsByLocalProject(
+    args.spoolRows,
+    localHeaderIndexByIdentity
+  )
+  const rows: WorkspaceSidebarProjectedRow[] = []
+  let activeMatched:
+    | { headerKey: string; collapsed: boolean; spoolRows: readonly SpoolSidebarRow[] }
+    | undefined
+  for (const [localIndex, localRow] of args.localRows.entries()) {
+    const matched = localRow.type === 'header' ? matchedByHeaderIndex.get(localIndex) : undefined
+    const projectedRow =
+      matched && localRow.type === 'header'
+        ? { ...localRow, count: localRow.count + matched.worktreeCount }
+        : localRow
+    rows.push({
+      kind: 'local',
+      key: args.getLocalRowKey(localRow),
+      localIndex,
+      row: projectedRow
+    })
+    if (matched && localRow.type === 'header') {
+      activeMatched = {
+        headerKey: localRow.key,
+        collapsed: localRow.collapsed === true,
+        spoolRows: matched.rows
+      }
+    }
+    if (activeMatched && isLocalSectionBoundary(args.localRows[localIndex + 1])) {
+      const completedMatch = activeMatched
+      if (!completedMatch.collapsed) {
+        rows.push(
+          ...completedMatch.spoolRows.map((row) => ({
+            kind: 'spool' as const,
+            key: row.key,
+            row,
+            localProjectHeaderKey: completedMatch.headerKey
+          }))
+        )
+      }
+      activeMatched = undefined
+    }
+  }
   const showWindowsFirewall = shouldShowSpoolWindowsFirewallDiagnostic(
     args.spoolStatus,
     args.spoolDiagnostic
@@ -74,9 +197,6 @@ export function projectWorkspaceSidebarRows(args: {
   if (args.spoolRows.length === 0 && !showWindowsFirewall && !availabilityDiagnostic) {
     return rows
   }
-  // Why: Spool resources are a separate remote namespace; placing their
-  // section after local rows avoids interleaving opaque refs with local hosts.
-  rows.push({ kind: 'spool-section', key: 'spool:section' })
   if (showWindowsFirewall) {
     rows.push({ kind: 'spool-windows-firewall', key: 'spool:windows-firewall' })
   } else if (availabilityDiagnostic) {
@@ -86,8 +206,28 @@ export function projectWorkspaceSidebarRows(args: {
       diagnostic: availabilityDiagnostic
     })
   }
-  rows.push(...args.spoolRows.map((row) => ({ kind: 'spool' as const, key: row.key, row })))
+  const unmatchedWorktreeCount = unmatched.filter((row) => row.type === 'spool-worktree').length
+  if (unmatchedWorktreeCount > 0) {
+    // Why: a remote worktree without one unambiguous local Project must not
+    // visually inherit whichever local Project happens to precede it.
+    rows.push({
+      kind: 'spool-remote-worktrees-header',
+      key: SPOOL_REMOTE_WORKTREES_HEADER_KEY,
+      worktreeCount: unmatchedWorktreeCount,
+      collapsed: args.remoteWorktreesCollapsed === true
+    })
+  }
+  if (unmatchedWorktreeCount === 0 || !args.remoteWorktreesCollapsed) {
+    rows.push(...unmatched.map((row) => ({ kind: 'spool' as const, key: row.key, row })))
+  }
   return rows
+}
+
+export function workspaceIndexForLocalRowIndex(
+  rows: readonly WorkspaceSidebarProjectedRow[],
+  localIndex: number
+): number {
+  return rows.findIndex((row) => row.kind === 'local' && row.localIndex === localIndex)
 }
 
 export function getWorkspaceSidebarRowKey(row: WorkspaceSidebarProjectedRow): string {
@@ -119,14 +259,11 @@ export function estimateWorkspaceSidebarRowSize(args: {
   if (projected.kind === 'spool-availability') {
     return 144
   }
-  if (projected.kind === 'spool-section') {
+  if (projected.kind === 'spool-remote-worktrees-header') {
     return 32
   }
-  if (projected.row.type === 'spool-project') {
-    return 28
-  }
-  if (projected.row.type === 'spool-desktop') {
-    return 36
+  if (projected.row.type === 'spool-desktop-status') {
+    return 32
   }
   if (projected.row.type === 'spool-worktree') {
     return projected.row.branch || projected.row.sessionCatalogStatus !== 'complete' ? 44 : 32
@@ -136,25 +273,32 @@ export function estimateWorkspaceSidebarRowSize(args: {
 
 export function extractWorkspaceSidebarVirtualRowIndexes(args: {
   range: Range
-  localRowCount: number
-  localRows: readonly RenderRow[]
+  rows: readonly WorkspaceSidebarProjectedRow[]
+  stickyRows: readonly { type: string; projectGroupDepth?: number }[]
   stickyHeaderIndexes: readonly number[]
 }): number[] {
-  // Why: local sticky headers describe local projects only; once the viewport
-  // enters Spool, keeping the last local header pinned misstates ownership.
-  if (args.range.startIndex >= args.localRowCount) {
+  const rangeStart = args.rows[args.range.startIndex]
+  // Why: matched remote rows inherit their local Project's sticky context;
+  // diagnostics and unmatched remote projects must not inherit the last header.
+  if (
+    rangeStart?.kind !== 'local' &&
+    !(rangeStart?.kind === 'spool' && rangeStart.localProjectHeaderKey)
+  ) {
     return defaultRangeExtractor(args.range)
   }
   return extractWorktreeVirtualRowIndexes({
     range: args.range,
     stickyHeaderIndexes: args.stickyHeaderIndexes,
-    rows: args.localRows
+    rows: args.stickyRows
   })
 }
 
 export function workspaceSidebarStickyRangeStart(
   rangeStartIndex: number,
-  localRowCount: number
+  rows: readonly WorkspaceSidebarProjectedRow[]
 ): number | null {
-  return rangeStartIndex < localRowCount ? rangeStartIndex : null
+  const row = rows[rangeStartIndex]
+  return row?.kind === 'local' || (row?.kind === 'spool' && row.localProjectHeaderKey)
+    ? rangeStartIndex
+    : null
 }

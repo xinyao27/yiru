@@ -37,6 +37,7 @@ import { translate } from '@/i18n/i18n'
 import { getExecutionHostLabel, getRepoExecutionHostId } from '../../../../shared/execution-host'
 import { parseWslUncPath } from '../../../../shared/wsl-paths'
 import { isWindowsAbsolutePathLike } from '../../../../shared/cross-platform-path'
+import { getPortableProjectIdentityKey } from '../../../../shared/project-host-setup-projection'
 
 export { branchName }
 
@@ -52,6 +53,9 @@ export type GroupHeaderRow = {
   repo?: Repo
   projectGroup?: ProjectGroup | { id: null; name: 'Ungrouped'; tabOrder: number }
   projectGroupDepth?: number
+  projectId?: string
+  projectIdentityKey?: string
+  collapsed?: boolean
 }
 
 export type WorktreeRow = {
@@ -149,6 +153,8 @@ type WorktreeGroupEntry = {
   items: Worktree[]
   repo?: Repo
   repoIds: Set<string>
+  projectId?: string
+  projectIdentityKey?: string
 }
 
 type ProjectGroupingIndex = {
@@ -227,6 +233,7 @@ export type ProjectHeaderRevealTarget = {
   label: string
   repo?: Repo
   projectId?: string
+  projectIdentityKey?: string
 }
 
 function getProjectGroupingForRepo(
@@ -254,7 +261,8 @@ function getProjectGroupingForRepo(
       key: `project:${project.id}::setup:${repoId}`,
       label: repo?.displayName ?? setup.displayName,
       repo,
-      projectId: project.id
+      projectId: project.id,
+      projectIdentityKey: getPortableProjectIdentityKey(project) ?? undefined
     }
   }
   // Why: provisioned runtime copies and non-ambiguous checkouts follow project
@@ -263,7 +271,8 @@ function getProjectGroupingForRepo(
     key: `project:${project.id}`,
     label: project.displayName,
     repo,
-    projectId: project.id
+    projectId: project.id,
+    projectIdentityKey: getPortableProjectIdentityKey(project) ?? undefined
   }
 }
 
@@ -920,11 +929,15 @@ export function buildRows(
     let key: string
     let label: string
     let repo: Repo | undefined
+    let projectId: string | undefined
+    let projectIdentityKey: string | undefined
     if (groupBy === 'repo') {
       const grouping = getProjectGroupingForRepo(w.repoId, repoMap, projectIndex)
       key = grouping.key
       label = grouping.label
       repo = grouping.repo
+      projectId = grouping.projectId
+      projectIdentityKey = grouping.projectIdentityKey
     } else if (groupBy === 'workspace-status') {
       const workspaceStatus = getWorkspaceStatus(w, workspaceStatuses)
       key = getWorkspaceStatusGroupKey(workspaceStatus)
@@ -936,7 +949,14 @@ export function buildRows(
       label = PR_GROUP_META[prGroup].label
     }
     if (!grouped.has(key)) {
-      grouped.set(key, { label, items: [], repo, repoIds: new Set() })
+      grouped.set(key, {
+        label,
+        items: [],
+        repo,
+        repoIds: new Set(),
+        projectId,
+        projectIdentityKey
+      })
     }
     const group = grouped.get(key)!
     group.items.push(w)
@@ -956,7 +976,9 @@ export function buildRows(
           label: grouping.label,
           items: [],
           repo: grouping.repo,
-          repoIds: new Set([repoId])
+          repoIds: new Set([repoId]),
+          projectId: grouping.projectId,
+          projectIdentityKey: grouping.projectIdentityKey
         })
       } else {
         addRepoIdToGroup(grouped.get(key)!, repoId)
@@ -972,7 +994,9 @@ export function buildRows(
           label: grouping.label,
           items: [],
           repo: grouping.repo ?? candidate.repo,
-          repoIds: new Set([repoId])
+          repoIds: new Set([repoId]),
+          projectId: grouping.projectId,
+          projectIdentityKey: grouping.projectIdentityKey
         })
       } else if (grouped.has(key)) {
         addRepoIdToGroup(grouped.get(key)!, repoId)
@@ -988,7 +1012,9 @@ export function buildRows(
           label: grouping.label,
           items: [],
           repo: grouping.repo ?? candidate.repo,
-          repoIds: new Set([repoId])
+          repoIds: new Set([repoId]),
+          projectId: grouping.projectId,
+          projectIdentityKey: grouping.projectIdentityKey
         })
       } else if (grouped.has(key)) {
         addRepoIdToGroup(grouped.get(key)!, repoId)
@@ -1007,7 +1033,9 @@ export function buildRows(
           label: grouping.label,
           items: [],
           repo: grouping.repo,
-          repoIds: new Set([repoId])
+          repoIds: new Set([repoId]),
+          projectId: grouping.projectId,
+          projectIdentityKey: grouping.projectIdentityKey
         })
       } else {
         addRepoIdToGroup(grouped.get(key)!, repoId)
@@ -1069,7 +1097,10 @@ export function buildRows(
               tone: PROJECT_GROUP_META.tone,
               icon: PROJECT_GROUP_META.icon,
               repo,
-              projectGroupDepth
+              projectGroupDepth,
+              projectId: group.projectId,
+              projectIdentityKey: group.projectIdentityKey,
+              collapsed: isCollapsed
             }
           : groupBy === 'workspace-status'
             ? (() => {

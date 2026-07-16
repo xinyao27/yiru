@@ -21,10 +21,13 @@ async function readResponseText(response: Response): Promise<string> {
 export async function requestHostedReviewJson<T>(
   url: URL,
   init: Omit<RequestInit, 'signal'>,
-  timeoutMs: number
+  timeoutMs: number,
+  signal?: AbortSignal
 ): Promise<T> {
   try {
-    const response = await fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) })
+    const timeoutSignal = AbortSignal.timeout(timeoutMs)
+    const requestSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal
+    const response = await fetch(url, { ...init, signal: requestSignal })
     if (!response.ok) {
       const body = await readResponseText(response)
       throw new HostedReviewApiRequestError(body || response.statusText, {

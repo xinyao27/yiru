@@ -1,18 +1,20 @@
 import { createHash } from 'node:crypto'
 import type { ExecutionHostId } from '../../shared/execution-host'
+import type { SpoolSessionCatalogIdentity } from '../../shared/spool/spool-catalog-contract'
 import type {
   SpoolHistoricalSessionCandidate,
   SpoolLiveSessionCandidate,
-  SpoolSessionProvider,
   SpoolSessionWorktreeIdentity
 } from './spool-session-source'
 import type { SpoolProvenanceProvider } from './spool-session-provenance-index'
+import type { SpoolLiveSessionIdentity } from './spool-live-session-display-identity'
+
+const MAX_PROVIDED_SESSION_KEY_LENGTH = 512
 
 export type SpoolSessionCatalogDescription = {
   sessionKey: string
-  provider: SpoolSessionProvider
   title: string
-}
+} & SpoolSessionCatalogIdentity
 
 export type SpoolResolvedLiveSession = {
   kind: 'live'
@@ -22,10 +24,8 @@ export type SpoolResolvedLiveSession = {
   actualHostScope: string
   worktreeInstanceId: string
   spoolIncarnationId: string
-  provider: SpoolSessionProvider
-  providerSessionId: string | null
   title: string
-}
+} & SpoolLiveSessionIdentity
 
 export type SpoolResolvedHistoricalSession = {
   kind: 'historical'
@@ -37,6 +37,8 @@ export type SpoolResolvedHistoricalSession = {
   spoolIncarnationId: string
   provider: SpoolProvenanceProvider
   providerSessionId: string
+  sessionKind: 'agent'
+  agent: SpoolProvenanceProvider
   title: string
 }
 
@@ -46,18 +48,28 @@ export function resolveLiveSession(
   worktree: SpoolSessionWorktreeIdentity,
   candidate: SpoolLiveSessionCandidate
 ): SpoolResolvedLiveSession {
+  // Why: a type annotation does not strip runtime keys; explicitly projecting
+  // identity prevents an observed sessionKey from overwriting the validated key below.
+  const identity: SpoolLiveSessionIdentity = {
+    provider: candidate.provider,
+    providerSessionId: candidate.providerSessionId,
+    ...(candidate.sessionKind === 'terminal'
+      ? { sessionKind: 'terminal', agent: null }
+      : { sessionKind: 'agent', agent: candidate.agent })
+  }
   return {
     kind: 'live',
-    sessionKey: candidate.providerSessionId
-      ? providerSessionKey(worktree, candidate)
-      : liveSessionKey(worktree, candidate),
+    sessionKey:
+      normalizeProvidedSessionKey(candidate.sessionKey) ??
+      (candidate.providerSessionId
+        ? providerSessionKey(worktree, candidate)
+        : spoolLiveTerminalSessionKey(worktree, candidate.terminalHandle)),
     terminalHandle: candidate.terminalHandle,
     executionHostId: candidate.executionHostId,
     actualHostScope: candidate.actualHostScope,
     worktreeInstanceId: worktree.instanceId,
     spoolIncarnationId: worktree.spoolIncarnationId,
-    provider: candidate.provider,
-    providerSessionId: candidate.providerSessionId,
+    ...identity,
     title: candidate.title
   }
 }
@@ -68,7 +80,8 @@ export function resolveHistoricalSession(
 ): SpoolResolvedHistoricalSession {
   return {
     kind: 'historical',
-    sessionKey: providerSessionKey(worktree, candidate),
+    sessionKey:
+      normalizeProvidedSessionKey(candidate.sessionKey) ?? providerSessionKey(worktree, candidate),
     ownerRecordKey: candidate.ownerRecordKey,
     executionHostId: candidate.executionHostId,
     actualHostScope: candidate.actualHostScope,
@@ -76,8 +89,24 @@ export function resolveHistoricalSession(
     spoolIncarnationId: worktree.spoolIncarnationId,
     provider: candidate.provider,
     providerSessionId: candidate.providerSessionId,
+    sessionKind: 'agent',
+    agent: candidate.provider,
     title: candidate.title
   }
+}
+
+function normalizeProvidedSessionKey(value: string | null | undefined): string | null {
+  const trimmed = value?.trim()
+  if (!trimmed || trimmed.length > MAX_PROVIDED_SESSION_KEY_LENGTH) {
+    return null
+  }
+  for (const character of trimmed) {
+    const code = character.charCodeAt(0)
+    if (code <= 0x1f || code === 0x7f) {
+      return null
+    }
+  }
+  return trimmed
 }
 
 export function sessionDedupeKey(session: SpoolResolvedSession): string {
@@ -90,11 +119,14 @@ export function sessionDedupeKey(session: SpoolResolvedSession): string {
 export function toSessionDescription(
   session: SpoolResolvedSession
 ): SpoolSessionCatalogDescription {
-  return {
-    sessionKey: session.sessionKey,
-    provider: session.provider,
-    title: session.title
-  }
+  return session.sessionKind === 'terminal'
+    ? { sessionKey: session.sessionKey, kind: 'terminal', agent: null, title: session.title }
+    : {
+        sessionKey: session.sessionKey,
+        kind: 'agent',
+        agent: session.agent,
+        title: session.title
+      }
 }
 
 function providerSessionKey(
@@ -111,16 +143,19 @@ function providerSessionKey(
   ])
 }
 
-function liveSessionKey(
-  worktree: SpoolSessionWorktreeIdentity,
-  session: Pick<SpoolLiveSessionCandidate, 'actualHostScope' | 'terminalHandle'>
+export function spoolLiveTerminalSessionKey(
+  worktree: Pick<
+    SpoolSessionWorktreeIdentity,
+    'instanceId' | 'spoolIncarnationId' | 'actualHostScope'
+  >,
+  terminalHandle: string
 ): string {
   return hashSessionKey([
     'live',
     worktree.instanceId,
     worktree.spoolIncarnationId,
-    session.actualHostScope,
-    session.terminalHandle
+    worktree.actualHostScope,
+    terminalHandle
   ])
 }
 

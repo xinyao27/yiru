@@ -107,8 +107,11 @@ import {
   extractWorkspaceSidebarVirtualRowIndexes,
   getWorkspaceSidebarRowKey,
   projectWorkspaceSidebarRows,
+  SPOOL_REMOTE_WORKTREES_HEADER_KEY,
   shouldShowSpoolAvailabilityDiagnostic,
   shouldShowSpoolWindowsFirewallDiagnostic,
+  type WorkspaceSidebarProjectedRow,
+  workspaceIndexForLocalRowIndex,
   workspaceSidebarStickyRangeStart
 } from './workspace-sidebar-row-projection'
 import { SpoolSidebarProjectedRow } from './SpoolSidebarProjectedRow'
@@ -638,6 +641,11 @@ function getWorktreeVisibilityMenuLabel(repo: Repo): string {
 }
 
 const SIDEBAR_POINTER_DRAG_THRESHOLD_PX = 4
+const EMPTY_SPOOL_REMOTE_DESKTOPS = [] as const
+const EMPTY_SPOOL_OWNER_WORKTREES = [] as const
+const EMPTY_SPOOL_OWNER_CONTROL_GRANTS = [] as const
+const EMPTY_SPOOL_EXPANDED_WORKTREE_REFS_BY_DESKTOP = new Map()
+
 type VirtualizedWorktreeViewportProps = {
   rows: HostSectionRow[]
   spoolRows: readonly SpoolSidebarRow[]
@@ -1119,7 +1127,7 @@ function renderRowContainsNaturalWorktree(row: RenderRow, worktreeId: string): b
 function getActiveDescendantOptionId(args: {
   activeWorktreeId: string | null
   primaryActiveRowKey?: string
-  renderRows: readonly RenderRow[]
+  workspaceRows: readonly WorkspaceSidebarProjectedRow[]
   virtualItems: readonly { index: number }[]
 }): string | undefined {
   if (args.activeWorktreeId === null) {
@@ -1128,20 +1136,23 @@ function getActiveDescendantOptionId(args: {
   if (args.primaryActiveRowKey) {
     const primaryOptionId = getWorktreeOptionId(args.primaryActiveRowKey)
     for (const item of args.virtualItems) {
-      const row = args.renderRows[item.index]
+      const projected = args.workspaceRows[item.index]
+      const row = projected?.kind === 'local' ? projected.row : undefined
       if (row && getRenderRowOptionId(row, args.activeWorktreeId) === primaryOptionId) {
         return primaryOptionId
       }
     }
   }
   for (const item of args.virtualItems) {
-    const row = args.renderRows[item.index]
+    const projected = args.workspaceRows[item.index]
+    const row = projected?.kind === 'local' ? projected.row : undefined
     if (row && renderRowContainsNaturalWorktree(row, args.activeWorktreeId)) {
       return getRenderRowOptionId(row, args.activeWorktreeId)
     }
   }
   for (const item of args.virtualItems) {
-    const row = args.renderRows[item.index]
+    const projected = args.workspaceRows[item.index]
+    const row = projected?.kind === 'local' ? projected.row : undefined
     if (row && renderRowContainsWorktree(row, args.activeWorktreeId)) {
       return getRenderRowOptionId(row, args.activeWorktreeId)
     }
@@ -1357,8 +1368,9 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
   const scrollRef = useRef<HTMLDivElement>(null)
   const { spoolOwnerWorktrees, spoolOwnerControlGrants } = useAppStore(
     useShallow((state) => ({
-      spoolOwnerWorktrees: state.spoolOwnerWorktrees,
-      spoolOwnerControlGrants: state.spoolOwnerControlGrants
+      // Why: legacy snapshots can hydrate before the Spool slice exists.
+      spoolOwnerWorktrees: state.spoolOwnerWorktrees ?? EMPTY_SPOOL_OWNER_WORKTREES,
+      spoolOwnerControlGrants: state.spoolOwnerControlGrants ?? EMPTY_SPOOL_OWNER_CONTROL_GRANTS
     }))
   )
   const [spoolProjectPublicationTarget, setSpoolProjectPublicationTarget] = useState<{
@@ -1708,9 +1720,19 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         spoolRows,
         spoolStatus,
         spoolDiagnostic,
+        remoteWorktreesCollapsed: collapsedGroups.has(SPOOL_REMOTE_WORKTREES_HEADER_KEY),
         getLocalRowKey: getRenderRowKey
       }),
-    [renderRows, spoolDiagnostic, spoolRows, spoolStatus]
+    [collapsedGroups, renderRows, spoolDiagnostic, spoolRows, spoolStatus]
+  )
+  const workspaceStickyRows = useMemo(
+    () =>
+      workspaceSidebarRows.map((projected) =>
+        projected.kind === 'local'
+          ? projected.row
+          : { type: projected.kind, projectGroupDepth: undefined }
+      ),
+    [workspaceSidebarRows]
   )
   const sidebarRepoHeaderIdsByBucket = useMemo(
     () =>
@@ -1858,18 +1880,26 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
   const repoHeaderSectionEndByRepoId = useMemo(
     () =>
       getRepoHeaderSectionEndByRepoId({
-        rows: renderRows,
-        firstHeaderIndex,
+        rows: workspaceSidebarRows,
+        localRows: renderRows,
+        firstLocalHeaderIndex: firstHeaderIndex,
         sidebarRepoHeaderIdsByBucket,
         repoHeaderBucketByRepoId
       }),
-    [firstHeaderIndex, renderRows, repoHeaderBucketByRepoId, sidebarRepoHeaderIdsByBucket]
+    [
+      firstHeaderIndex,
+      renderRows,
+      repoHeaderBucketByRepoId,
+      sidebarRepoHeaderIdsByBucket,
+      workspaceSidebarRows
+    ]
   )
   const projectGroupHeaderSectionEndByGroupId = useMemo(
     () =>
       getProjectGroupHeaderSectionEndByGroupId({
-        rows: renderRows,
-        firstHeaderIndex,
+        rows: workspaceSidebarRows,
+        localRows: renderRows,
+        firstLocalHeaderIndex: firstHeaderIndex,
         sidebarProjectGroupHeaderIdsByBucket,
         projectGroupHeaderBucketByGroupId
       }),
@@ -1877,14 +1907,16 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
       firstHeaderIndex,
       projectGroupHeaderBucketByGroupId,
       renderRows,
-      sidebarProjectGroupHeaderIdsByBucket
+      sidebarProjectGroupHeaderIdsByBucket,
+      workspaceSidebarRows
     ]
   )
   const firstHeaderIndexRef = useRef(firstHeaderIndex)
   firstHeaderIndexRef.current = firstHeaderIndex
-  const stickyHeaderIndexes = useMemo(() => getStickyHeaderIndexes(renderRows), [renderRows])
-  const stickyHeaderIndexesRef = useRef(stickyHeaderIndexes)
-  stickyHeaderIndexesRef.current = stickyHeaderIndexes
+  const stickyHeaderIndexes = useMemo(
+    () => getStickyHeaderIndexes(workspaceStickyRows),
+    [workspaceStickyRows]
+  )
   const activeStickyHeaderIndexRef = useRef<number | null>(null)
   const activeStickyHostIndexRef = useRef<number | null>(null)
   const stickyRangeStartIndexRef = useRef(0)
@@ -1997,6 +2029,8 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
   renderRowsRef.current = renderRows
   const workspaceSidebarRowsRef = useRef(workspaceSidebarRows)
   workspaceSidebarRowsRef.current = workspaceSidebarRows
+  const workspaceStickyRowsRef = useRef(workspaceStickyRows)
+  workspaceStickyRowsRef.current = workspaceStickyRows
   const getVirtualItemKey = useCallback(
     (index: number) => {
       const row = workspaceSidebarRows[index]
@@ -2103,13 +2137,13 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
     rangeExtractor: useCallback(
       (range: Range) => {
         stickyRangeStartIndexRef.current =
-          workspaceSidebarStickyRangeStart(range.startIndex, renderRowsRef.current.length) ??
-          renderRowsRef.current.length
+          workspaceSidebarStickyRangeStart(range.startIndex, workspaceSidebarRowsRef.current) ??
+          workspaceSidebarRowsRef.current.length
         return extractWorkspaceSidebarVirtualRowIndexes({
           range,
-          localRowCount: renderRowsRef.current.length,
-          stickyHeaderIndexes,
-          localRows: renderRowsRef.current
+          rows: workspaceSidebarRowsRef.current,
+          stickyRows: workspaceStickyRowsRef.current,
+          stickyHeaderIndexes
         })
       },
       [stickyHeaderIndexes]
@@ -2244,6 +2278,10 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
       const outcome = resolvePendingSidebarReveal({ targetIndex, targetWorktreeStillExists })
       if (outcome === 'scroll-and-clear') {
         const targetRow = renderRows[targetIndex]
+        const workspaceTargetIndex = workspaceIndexForLocalRowIndex(
+          workspaceSidebarRows,
+          targetIndex
+        )
         const container = scrollRef.current
         const retryExactRevealOnNextFrame = () => {
           const previousRetry = pendingRevealRetryRef.current
@@ -2296,7 +2334,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         if (targetRow?.type !== 'lineage-group') {
           // Why: virtual row indexing can leave the card edge slightly clipped;
           // stage it into the mounted window, then retry the exact DOM reveal.
-          virtualizer.scrollToIndex(targetIndex, {
+          virtualizer.scrollToIndex(workspaceTargetIndex, {
             align: 'auto',
             behavior: 'auto'
           })
@@ -2308,7 +2346,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         // target. Jump it into the mounted window first, then retry the exact
         // card reveal instead of clearing while a smooth virtual scroll is
         // still in flight.
-        virtualizer.scrollToIndex(targetIndex, {
+        virtualizer.scrollToIndex(workspaceTargetIndex, {
           align: 'auto',
           behavior: 'auto'
         })
@@ -2335,6 +2373,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
     worktreeLineageById,
     worktreeMap,
     renderRows,
+    workspaceSidebarRows,
     virtualizer,
     clearPendingRevealWorktreeId,
     toggleGroup,
@@ -2444,7 +2483,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         return
       }
 
-      virtualizer.scrollToIndex(targetIndex, {
+      virtualizer.scrollToIndex(workspaceIndexForLocalRowIndex(workspaceSidebarRows, targetIndex), {
         align: 'auto',
         behavior: 'auto'
       })
@@ -2464,6 +2503,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
     groupBy,
     toggleGroup,
     renderRows,
+    workspaceSidebarRows,
     virtualizer,
     pendingRevealRetryTick,
     flashRevealedRow,
@@ -2485,10 +2525,10 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
   const totalSize = virtualizer.getTotalSize()
   const virtualItems = virtualizer.getVirtualItems()
   const activeStickyIndexes =
-    stickyRangeStartIndexRef.current >= renderRows.length
+    stickyRangeStartIndexRef.current >= workspaceSidebarRows.length
       ? { groupIndex: null, hostIndex: null }
       : getActiveStickyIndexesForScroll({
-          rows: renderRows,
+          rows: workspaceStickyRows,
           rangeStartIndex: stickyRangeStartIndexRef.current,
           scrollOffset: virtualizer.scrollOffset ?? scrollOffsetRef.current,
           stickyHeaderIndexes,
@@ -2628,11 +2668,14 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
 
       const rowIndex = renderRows.findIndex((row) => renderRowContainsWorktree(row, nextWorktreeId))
       if (rowIndex !== -1) {
-        virtualizer.scrollToIndex(rowIndex, { align: 'auto' })
+        virtualizer.scrollToIndex(workspaceIndexForLocalRowIndex(workspaceSidebarRows, rowIndex), {
+          align: 'auto'
+        })
       }
     },
     [
       renderRows,
+      workspaceSidebarRows,
       activeWorktreeId,
       virtualizer,
       groupBy,
@@ -3842,7 +3885,8 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
     const viewportBottom = viewportTop + scrollEl.clientHeight
     const visibleRows = virtualItems
       .filter((item) => item.start < viewportBottom && item.end > viewportTop)
-      .map((item) => renderRows[item.index])
+      .map((item) => workspaceSidebarRows[item.index])
+      .map((projected) => (projected?.kind === 'local' ? projected.row : undefined))
       .filter((row): row is WorktreeItemRow => row?.type === 'item')
       .filter((row) => row.repo?.kind === 'git' && !row.worktree.isBare && row.worktree.branch)
     const visibleWorktreeIds = new Set(visibleRows.map((row) => row.worktree.id))
@@ -3872,7 +3916,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
     currentWorktreeId,
     documentVisibilityRevision,
     groupBy,
-    renderRows,
+    workspaceSidebarRows,
     reportVisibleGitHubPRRefreshCandidates,
     prVisibleRefreshGeneration,
     rightSidebarShowsPR,
@@ -3888,7 +3932,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
       primaryActiveWorktreeRow?.worktreeId === activeWorktreeId
         ? primaryActiveWorktreeRow.rowKey
         : undefined,
-    renderRows,
+    workspaceRows: workspaceSidebarRows,
     virtualItems
   })
 
@@ -4170,7 +4214,12 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                   className="absolute left-0 right-0 top-0"
                   style={{ transform: getVirtualRowTransform(vItem.start) }}
                 >
-                  <SpoolSidebarProjectedRow projected={projected} />
+                  <SpoolSidebarProjectedRow
+                    projected={projected}
+                    onToggleRemoteWorktrees={() =>
+                      toggleGroupWithScrollAnchor(SPOOL_REMOTE_WORKTREES_HEADER_KEY)
+                    }
+                  />
                 </div>
               )
             }
@@ -4182,7 +4231,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
               const isActiveStickyHost = activeStickyHostIndexRef.current === vItem.index
               const hasHeaderTopSpacing = shouldUseHeaderTopSpacing({
                 rows: renderRows,
-                index: vItem.index,
+                index: projected.localIndex,
                 firstHeaderIndex
               })
               return (
@@ -4230,7 +4279,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                 activeStickyHostIndexRef.current !== null ? 'top-[35px]' : '-top-px'
               const hasHeaderTopSpacing = shouldUseHeaderTopSpacing({
                 rows: renderRows,
-                index: vItem.index,
+                index: projected.localIndex,
                 firstHeaderIndex
               })
               const isRepoHeader = groupBy === 'repo' && row.repo !== undefined
@@ -5376,13 +5425,14 @@ const WorktreeList = React.memo(function WorktreeList({
   // ── Granular selectors (each is a primitive or shallow-stable ref) ──
   const spoolSidebarProjectionInput = useAppStore(
     useShallow((state) => ({
-      desktops: state.spoolRemoteDesktops,
-      expandedDesktopRefs: state.spoolExpandedDesktopRefs,
-      expandedProjectRefsByDesktop: state.spoolExpandedProjectRefsByDesktop,
-      expandedWorktreeRefsByDesktop: state.spoolExpandedWorktreeRefsByDesktop,
-      activeRoute: state.activeSpoolWorkspaceRoute,
-      status: state.spoolSharingStatus,
-      diagnostic: state.spoolSharingDiagnostic
+      // Why: legacy persisted/test snapshots predate Spool state; treating the
+      // absent slice as empty keeps ordinary Projects renderable during hydration.
+      desktops: state.spoolRemoteDesktops ?? EMPTY_SPOOL_REMOTE_DESKTOPS,
+      expandedWorktreeRefsByDesktop:
+        state.spoolExpandedWorktreeRefsByDesktop ?? EMPTY_SPOOL_EXPANDED_WORKTREE_REFS_BY_DESKTOP,
+      activeRoute: state.activeSpoolWorkspaceRoute ?? null,
+      status: state.spoolSharingStatus ?? 'starting',
+      diagnostic: state.spoolSharingDiagnostic ?? null
     }))
   )
   const spoolRows = useMemo(

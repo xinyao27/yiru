@@ -16,6 +16,10 @@ import {
 } from './SpoolSessionContinuationNotice'
 import { getSpoolRequesterTransportErrorCode } from './spool-requester-error'
 import { isSameSpoolSessionRoute, type SpoolSessionRoute } from './spool-session-route'
+import {
+  isRecoverableSpoolTerminalError,
+  useSpoolTerminalReconnect
+} from './useSpoolTerminalReconnect'
 
 type ContinuationState =
   | 'not-started'
@@ -26,7 +30,17 @@ type ContinuationState =
   | 'reconnect-only'
 const UNKNOWN_ATTACH_RETRY_MS = [100, 250, 500, 1_000, 2_000, 4_000, 8_000] as const
 
-export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React.JSX.Element {
+export function SpoolSessionPane({
+  route,
+  retainMissingSession = false,
+  focusRequested = false,
+  onFocusHandled
+}: {
+  route: SpoolSessionRoute
+  retainMissingSession?: boolean
+  focusRequested?: boolean
+  onFocusHandled?: (sessionRef: string) => void
+}): React.JSX.Element {
   const canControl = useAppStore((state) => selectSpoolCanControl(state, route))
   const { catalogSession, sessionCatalogStatus } = useAppStore(
     useShallow((state) => {
@@ -48,6 +62,16 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
   const unknownCatalogSessionRef = useRef(catalogSession)
   const closedCatalogSessionRef = useRef(catalogSession)
   catalogSessionRef.current = catalogSession
+
+  const { startReconnect, retryReconnect, resetReconnect } = useSpoolTerminalReconnect({
+    isCurrent: () =>
+      isSameSpoolSessionRoute(useAppStore.getState().activeSpoolWorkspaceRoute, route),
+    onPending: () => setPhase('attaching'),
+    onAttempt: () => {
+      terminalLiveRef.current = false
+      setTerminalAttempt((attempt) => attempt + 1)
+    }
+  })
 
   const clearRetryTimer = useCallback((): void => {
     if (retryTimerRef.current) {
@@ -127,6 +151,9 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
   useEffect(() => {
     if (
       catalogSession ||
+      // Why: terminal.create returns an attachable alias before paged
+      // inventory can publish it; that handoff must keep its route mounted.
+      retainMissingSession ||
       sessionCatalogStatus === null ||
       sessionCatalogStatus === 'loading' ||
       retainsMissingHistoricalContinuation(continuationRef.current)
@@ -143,7 +170,7 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
       worktreeRef: route.worktreeRef,
       connectionEpoch: route.connectionEpoch
     })
-  }, [catalogSession, phase, route, sessionCatalogStatus, setActiveRoute])
+  }, [catalogSession, phase, retainMissingSession, route, sessionCatalogStatus, setActiveRoute])
 
   useEffect(() => {
     if (
@@ -201,10 +228,22 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
         clearRetryTimer()
         terminalLiveRef.current = false
         continuationRef.current = 'reconnect-only'
-        setPhase('reconnect-error')
+        if (isRecoverableSpoolTerminalError(code, true)) {
+          startReconnect()
+        } else {
+          setPhase('reconnect-error')
+        }
         return
       }
       if (code !== 'resource_not_found') {
+        const recoverable = isRecoverableSpoolTerminalError(code)
+        const recoverOrFail = (recover: () => void): void => {
+          if (recoverable) {
+            recover()
+          } else {
+            setPhase('reconnect-error')
+          }
+        }
         if (
           continuationRef.current === 'attached' ||
           continuationRef.current === 'outcome-unknown'
@@ -213,7 +252,7 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
           setPhase('attach-error')
         } else if (continuationRef.current === 'reconnect-only') {
           clearRetryTimer()
-          setPhase('reconnect-error')
+          recoverOrFail(retryReconnect)
         } else if (continuationRef.current === 'not-started') {
           clearRetryTimer()
           continuationRef.current = 'reconnect-only'
@@ -221,7 +260,7 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
         } else if (continuationRef.current === 'awaiting-historical') {
           clearRetryTimer()
           continuationRef.current = 'reconnect-only'
-          setPhase('reconnect-error')
+          recoverOrFail(startReconnect)
         }
         return
       }
@@ -250,14 +289,22 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
           }
           return
         case 'reconnect-only':
-          setPhase('reconnect-error')
+          retryReconnect()
       }
     },
-    [clearRetryTimer, continueSession, route, scheduleUnknownAttachment]
+    [
+      clearRetryTimer,
+      continueSession,
+      retryReconnect,
+      route,
+      scheduleUnknownAttachment,
+      startReconnect
+    ]
   )
 
   const handleLive = useCallback((): void => {
     clearRetryTimer()
+    resetReconnect()
     terminalLiveRef.current = true
     unknownRetryRef.current = 0
     if (continuationRef.current === 'outcome-unknown') {
@@ -268,10 +315,15 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
       continuationRef.current = 'not-started'
     }
     setPhase('terminal')
-  }, [clearRetryTimer])
+  }, [clearRetryTimer, resetReconnect])
+
+  const handleFocus = useCallback((): void => {
+    onFocusHandled?.(route.sessionRef)
+  }, [onFocusHandled, route.sessionRef])
 
   const handleClosed = useCallback(
     (canContinue: boolean): void => {
+      resetReconnect()
       if (terminalLiveRef.current) {
         clearRetryTimer()
         terminalLiveRef.current = false
@@ -313,7 +365,7 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
         setPhase('attach-error')
       }
     },
-    [clearRetryTimer]
+    [clearRetryTimer, resetReconnect]
   )
 
   const retry = (): void => {
@@ -335,6 +387,10 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
       }
       return
     }
+    if (continuationRef.current === 'reconnect-only') {
+      startReconnect()
+      return
+    }
     unknownRetryRef.current = 0
     terminalLiveRef.current = false
     setPhase('attaching')
@@ -346,6 +402,8 @@ export function SpoolSessionPane({ route }: { route: SpoolSessionRoute }): React
       <SpoolTerminalPane
         key={terminalAttempt}
         route={route}
+        focusRequested={focusRequested}
+        onFocusHandled={handleFocus}
         onSubscriptionError={handleSubscriptionError}
         onLive={handleLive}
         onClosed={handleClosed}

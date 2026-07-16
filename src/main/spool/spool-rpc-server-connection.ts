@@ -13,7 +13,7 @@ import type {
   SpoolRpcMethodSpec,
   SpoolServerConnection
 } from './spool-rpc-gateway'
-import { projectSpoolRpcErrorCode } from './spool-rpc-error'
+import { projectSpoolRpcErrorCode, projectSpoolRpcErrorMessage } from './spool-rpc-error'
 import {
   SPOOL_CANCEL_REQUEST_METHOD,
   SPOOL_CANCEL_SUBSCRIPTION_METHOD
@@ -169,7 +169,11 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
       })
     } catch (error) {
       if (!this.closed && !context.signal.aborted) {
-        this.sendFailure(context.requestId, projectSpoolRpcErrorCode(error))
+        this.sendFailure(
+          context.requestId,
+          projectSpoolRpcErrorCode(error),
+          projectSpoolRpcErrorMessage(error)
+        )
       }
     }
   }
@@ -215,7 +219,11 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
           },
           error: (error) => {
             if (isUsable()) {
-              this.sendFailure(context.requestId, projectSpoolRpcErrorCode(error))
+              this.sendFailure(
+                context.requestId,
+                projectSpoolRpcErrorCode(error),
+                projectSpoolRpcErrorMessage(error)
+              )
             }
             this.finishSubscription(context.requestId, false)
           },
@@ -270,11 +278,15 @@ export class SpoolGatewayConnection implements SpoolServerConnection {
     }
   }
 
-  private sendFailure(id: string, code: SpoolRpcFailure['error']['code']): void {
+  private sendFailure(
+    id: string,
+    code: SpoolRpcFailure['error']['code'],
+    message: string = code
+  ): void {
     this.send({
       id,
       ok: false,
-      error: { code, message: code },
+      error: { code, message },
       ownerRuntimeId: this.options.ownerRuntimeId
     })
   }

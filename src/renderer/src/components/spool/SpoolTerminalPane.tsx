@@ -23,12 +23,18 @@ import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-pref
 import { Button } from '@/components/ui/button'
 import { getSpoolRequesterTransportErrorCode } from './spool-requester-error'
 import { isSameSpoolSessionRoute, type SpoolSessionRoute } from './spool-session-route'
+import { createSpoolTerminalSubscriptionSettlement } from './spool-terminal-subscription-settlement'
 import {
   createSpoolTerminalMutationQueue,
   type SpoolTerminalMutation
 } from './spool-terminal-mutation-queue'
+import { notifySpoolTerminalInputBacklog } from './spool-terminal-input-backlog'
+import {
+  getSpoolTerminalStatusLabel,
+  type SpoolTerminalConnectionStatus
+} from './spool-terminal-status-label'
+import { useSpoolTerminalFocusRequest } from './useSpoolTerminalFocusRequest'
 
-type TerminalConnectionStatus = 'connecting' | 'live' | 'closed' | 'error'
 type RenderableSpoolTerminalSubscriptionEvent = Exclude<
   SpoolTerminalSubscriptionEvent,
   { kind: 'unavailable' }
@@ -37,11 +43,15 @@ const SPOOL_TERMINAL_INPUT_FLUSH_MS = 8
 
 export function SpoolTerminalPane({
   route,
+  focusRequested = false,
+  onFocusHandled,
   onSubscriptionError,
   onLive,
   onClosed
 }: {
   route: SpoolSessionRoute
+  focusRequested?: boolean
+  onFocusHandled?: () => void
   onSubscriptionError?: (code: SpoolRequesterTransportErrorCode | null) => void
   onLive?: () => void
   onClosed?: (canContinue: boolean) => void
@@ -55,10 +65,10 @@ export function SpoolTerminalPane({
   const settings = useAppStore((state) => state.settings)
   const canControl = useAppStore((state) => selectSpoolCanControl(state, route))
   const systemPrefersDark = useSystemPrefersDark()
-  const [status, setStatus] = useState<TerminalConnectionStatus>('connecting')
+  const [status, setStatus] = useState<SpoolTerminalConnectionStatus>('connecting')
   const [mutationUncertain, setMutationUncertain] = useState(false)
   const mutationUncertainRef = useRef(false)
-  const canMutateTerminal = canControl && !mutationUncertain
+  const canMutateTerminal = canControl && status === 'live' && !mutationUncertain
   const canMutateTerminalRef = useRef(canMutateTerminal)
   canMutateTerminalRef.current = canMutateTerminal
   const terminalOptions = useMemo(
@@ -90,13 +100,17 @@ export function SpoolTerminalPane({
         await invokeTerminalMutation(mutationUncertainRef, route, mutation)
       },
       shouldDiscardAfterError: (error) =>
-        handleTerminalMutationError(error, route, markMutationUncertain)
+        handleTerminalMutationError(error, route, markMutationUncertain),
+      onCapacityExceeded: notifySpoolTerminalInputBacklog
     })
     terminal.loadAddon(fitAddon)
     terminalRef.current = terminal
     fitAddonRef.current = fitAddon
     const inputDisposable = terminal.onData((data) => {
-      mutationQueue.input(data)
+      // Why: a dropped stream must not accept bytes whose outcome cannot be observed.
+      if (canMutateTerminalRef.current) {
+        mutationQueue.input(data)
+      }
     })
     const resizeDisposable = terminal.onResize(({ cols, rows }) => {
       if (suppressResizeRef.current || !canMutateTerminalRef.current) {
@@ -149,39 +163,38 @@ export function SpoolTerminalPane({
     }
   }, [canMutateTerminal, terminalOptions])
 
+  useSpoolTerminalFocusRequest(terminalRef, focusRequested && canMutateTerminal, onFocusHandled)
+
   useEffect(() => {
     const api = window.api.spoolSharing
     let disposed = false
     let started = false
-    let closedNotified = false
     const subscriptionId = crypto.randomUUID()
     lastSequenceRef.current = -1
     terminalRef.current?.reset()
-
-    const notifyClosed = (canContinue: boolean): void => {
-      if (closedNotified) {
+    const settlement = createSpoolTerminalSubscriptionSettlement({
+      setStatus,
+      onClosed,
+      onError: onSubscriptionError
+    })
+    const dispatch = (event: SpoolRequesterSubscriptionEvent): void => {
+      if (settlement.isSettled()) {
         return
       }
-      closedNotified = true
-      onClosed?.(canContinue)
-    }
-    const dispatch = (event: SpoolRequesterSubscriptionEvent): void => {
       if (event.type === 'next') {
         applyTerminalEvent(event.value, terminalRef.current, lastSequenceRef, suppressResizeRef)
         if (isSpoolTerminalSubscriptionEvent(event.value)) {
-          setStatus(event.value.kind === 'closed' ? 'closed' : 'live')
           if (event.value.kind === 'closed') {
-            notifyClosed(event.value.canContinue === true)
+            settlement.complete(event.value.canContinue === true)
           } else {
+            setStatus('live')
             onLive?.()
           }
         }
       } else if (event.type === 'complete') {
-        setStatus('closed')
-        notifyClosed(false)
+        settlement.complete(false)
       } else {
-        setStatus('error')
-        onSubscriptionError?.(event.code)
+        settlement.error(event.code)
       }
     }
     const unsubscribeEvents = api.onSubscriptionEvent((event) => {
@@ -208,9 +221,7 @@ export function SpoolTerminalPane({
       })
       .catch((error) => {
         if (!disposed) {
-          setStatus('error')
-          const code = getSpoolRequesterTransportErrorCode(error)
-          onSubscriptionError?.(code)
+          settlement.error(getSpoolRequesterTransportErrorCode(error))
         }
       })
 
@@ -259,7 +270,7 @@ export function SpoolTerminalPane({
         </div>
       ) : status !== 'live' ? (
         <div className="pointer-events-none absolute right-3 top-2 rounded-md border border-border bg-card/90 px-2 py-1 text-[11px] text-card-foreground shadow-xs">
-          <span className="text-muted-foreground">{getTerminalStatusLabel(status)}</span>
+          <span className="text-muted-foreground">{getSpoolTerminalStatusLabel(status)}</span>
         </div>
       ) : null}
     </div>
@@ -403,14 +414,4 @@ function createTerminalOptions(
     allowTransparency:
       settings.terminalBackgroundOpacity !== undefined && settings.terminalBackgroundOpacity < 1
   }
-}
-
-function getTerminalStatusLabel(status: TerminalConnectionStatus): string {
-  if (status === 'connecting') {
-    return translate('auto.components.spool.SpoolTerminalPane.connecting', 'Connecting terminal…')
-  }
-  if (status === 'closed') {
-    return translate('auto.components.spool.SpoolTerminalPane.closed', 'Terminal closed')
-  }
-  return translate('auto.components.spool.SpoolTerminalPane.unavailable', 'Terminal unavailable')
 }

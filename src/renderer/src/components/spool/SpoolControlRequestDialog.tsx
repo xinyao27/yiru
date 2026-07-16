@@ -104,7 +104,7 @@ export function SpoolControlRequestDialog(): React.JSX.Element | null {
             <p>
               {translate(
                 'auto.components.spool.SpoolControlRequestDialog.capabilities',
-                'They will be able to send terminal input, modify files, run commands, and use your Claude/Codex accounts.'
+                'They will be able to create terminals, start enabled agents, send terminal input, modify files, run commands, and use your active agent accounts.'
               )}
             </p>
             <p className="font-medium">

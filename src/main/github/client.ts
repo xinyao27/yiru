@@ -108,7 +108,7 @@ import {
   type RateLimitBucketKind
 } from './rate-limit'
 
-type GhExecOptions = ReturnType<typeof ghRepoExecOptions>
+type GhExecOptions = ReturnType<typeof ghRepoExecOptions> & { signal?: AbortSignal }
 type HostedReviewLocalGitOptions = ReturnType<typeof getHostedReviewLocalGitOptions>
 
 const ORCA_REPO = 'stablyai/orca'
@@ -2973,10 +2973,15 @@ export async function getPRForBranchOutcome(
   const localGitArgs = hostedReviewLocalGitOptionArgs(options)
   const localGitOptions = localGitArgs[0] ?? {}
   const context = githubRepoContext(repoPath, connectionId, localGitOptions)
-  const ghOptions = ghRepoExecOptions(context)
+  const ghOptions: GhExecOptions = {
+    ...ghRepoExecOptions(context),
+    ...(options.signal ? { signal: options.signal } : {})
+  }
 
+  options.signal?.throwIfAborted()
   await acquire()
   try {
+    options.signal?.throwIfAborted()
     const { candidates, headRepo } = await resolvePRRepositoryCandidates(
       repoPath,
       connectionId,
@@ -3548,6 +3553,7 @@ async function getPRChecksViaRestFallback(
         .map(mapRestCommitStatus)
         .filter((check): check is PRCheckDetail => check !== null && !checkRunNames.has(check.name))
     } catch (err) {
+      ghOptions.signal?.throwIfAborted()
       // Why: the REST fallback is already degraded; keep richer check-run rows
       // if the legacy-status enrichment fails.
       console.warn('getPRChecks REST status fallback failed:', err)
@@ -3576,12 +3582,14 @@ async function getPRChecksViaRestFallback(
           url: getPendingApprovalCheckSuiteUrl(ownerRepo, headSha, suite.id)
         }))
     } catch (err) {
+      ghOptions.signal?.throwIfAborted()
       console.warn('getPRChecks REST check-suite fallback failed:', err)
     }
 
     const checks = [...checkRuns, ...legacyStatuses, ...pendingApprovalChecks]
     return checks.length > 0 ? checks : null
   } catch (err) {
+    ghOptions.signal?.throwIfAborted()
     console.warn('getPRChecks via REST fallback failed, falling back to gh pr checks:', err)
     return null
   } finally {
@@ -3599,13 +3607,18 @@ export async function getPRChecks(
   prNumber: number,
   headSha?: string,
   prRepo?: OwnerRepo | null,
-  options?: { noCache?: boolean },
+  options?: { noCache?: boolean; signal?: AbortSignal },
   connectionId?: string | null,
   localGitOptions: LocalGitExecOptions = {}
 ): Promise<PRCheckDetail[]> {
   void headSha
-  const ghOptions = ghRepoExecOptions(githubRepoContext(repoPath, connectionId, localGitOptions))
+  const ghOptions: GhExecOptions = {
+    ...ghRepoExecOptions(githubRepoContext(repoPath, connectionId, localGitOptions)),
+    ...(options?.signal ? { signal: options.signal } : {})
+  }
+  options?.signal?.throwIfAborted()
   const ownerRepo = prRepo ?? (await getOwnerRepo(repoPath, connectionId, localGitOptions))
+  options?.signal?.throwIfAborted()
   const fallbackToPRChecks = async (): Promise<PRCheckDetail[]> => {
     await assertRateLimitBudget('graphql')
     await acquire()
@@ -3676,6 +3689,7 @@ export async function getPRChecks(
           return checks
         }
       } catch (err) {
+        options?.signal?.throwIfAborted()
         // Why: if GitHub's richer rollup query is unavailable, the older gh
         // command still returns the combined check/status list for display.
         console.warn('getPRChecks via GraphQL rollup failed, falling back to gh pr checks:', err)

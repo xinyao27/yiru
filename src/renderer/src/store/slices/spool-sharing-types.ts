@@ -22,8 +22,6 @@ export type SpoolSharingState = {
   spoolRemoteDesktops: readonly SpoolRemoteDesktop[]
   spoolOwnerWorktrees: readonly SpoolOwnerWorktreeSharing[]
   spoolOwnerControlGrants: readonly SpoolOwnerControlGrantView[]
-  spoolExpandedDesktopRefs: ReadonlySet<string>
-  spoolExpandedProjectRefsByDesktop: SpoolExpandedRefsByDesktop
   spoolExpandedWorktreeRefsByDesktop: SpoolExpandedRefsByDesktop
   activeSpoolWorkspaceRoute: SpoolWorkspaceRoute | null
   spoolControlRequestQueue: readonly SpoolOwnerControlRequestView[]
@@ -33,8 +31,6 @@ export type SpoolSharingState = {
 export type SpoolSharingActions = {
   applySpoolSharingSnapshot: (snapshot: SpoolSharingSnapshot) => void
   setSpoolRemoteDesktops: (desktops: readonly SpoolRemoteDesktop[]) => void
-  setSpoolDesktopExpanded: (desktopRef: string, expanded: boolean) => void
-  setSpoolProjectExpanded: (desktopRef: string, projectRef: string, expanded: boolean) => void
   setSpoolWorktreeExpanded: (desktopRef: string, worktreeRef: string, expanded: boolean) => void
   setActiveSpoolWorkspaceRoute: (route: SpoolWorkspaceRoute | null) => void
   enqueueSpoolControlRequest: (request: SpoolOwnerControlRequestView) => void
