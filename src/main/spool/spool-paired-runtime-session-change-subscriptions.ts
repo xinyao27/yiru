@@ -3,7 +3,7 @@ import {
   SpoolPairedRuntimeSessionChangedEventSchema,
   SpoolPairedRuntimeSubscribeSessionChangesParamsSchema
 } from '../../shared/spool/spool-paired-runtime-session-contract'
-import { subscribeRuntimeEnvironmentExistingRoute } from '../ipc/runtime-environment-existing-route'
+import { subscribeRuntimeEnvironmentRetainedExistingRoute } from '../ipc/runtime-environment-existing-route'
 import type {
   SpoolExecutionHostSessionReadRequest,
   SpoolMobileSessionTabsResult,
@@ -23,7 +23,7 @@ type SessionChangesBinding = {
 }
 
 type SessionChangeEvent = Parameters<
-  Parameters<typeof subscribeRuntimeEnvironmentExistingRoute>[4]['onEvent']
+  Parameters<typeof subscribeRuntimeEnvironmentRetainedExistingRoute>[4]['onEvent']
 >[0]
 
 const SESSION_CHANGE_RETRY_BASE_MS = 500
@@ -112,7 +112,8 @@ export class SpoolPairedRuntimeSessionChangeSubscriptions {
     const params = SpoolPairedRuntimeSubscribeSessionChangesParamsSchema.parse({
       target: pairedRuntimeSessionTarget(binding.request)
     })
-    void subscribeRuntimeEnvironmentExistingRoute(
+    // Why: Public-worktree observation is owner policy and may retain an already-ready host route.
+    void subscribeRuntimeEnvironmentRetainedExistingRoute(
       this.userDataPath,
       binding.environmentId,
       'spool.host.subscribeSessionChanges',

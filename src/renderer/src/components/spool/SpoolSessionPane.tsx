@@ -16,6 +16,10 @@ import {
 } from './SpoolSessionContinuationNotice'
 import { getSpoolRequesterTransportErrorCode } from './spool-requester-error'
 import { isSameSpoolSessionRoute, type SpoolSessionRoute } from './spool-session-route'
+import {
+  isRecoverableSpoolTerminalError,
+  useSpoolTerminalReconnect
+} from './useSpoolTerminalReconnect'
 
 type ContinuationState =
   | 'not-started'
@@ -58,6 +62,17 @@ export function SpoolSessionPane({
   const unknownCatalogSessionRef = useRef(catalogSession)
   const closedCatalogSessionRef = useRef(catalogSession)
   catalogSessionRef.current = catalogSession
+
+  const { startReconnect, retryReconnect, resetReconnect } = useSpoolTerminalReconnect({
+    isCurrent: () =>
+      isSameSpoolSessionRoute(useAppStore.getState().activeSpoolWorkspaceRoute, route),
+    onPending: () => setPhase('attaching'),
+    onAttempt: () => {
+      terminalLiveRef.current = false
+      setTerminalAttempt((attempt) => attempt + 1)
+    },
+    onExhausted: () => setPhase('reconnect-error')
+  })
 
   const clearRetryTimer = useCallback((): void => {
     if (retryTimerRef.current) {
@@ -214,10 +229,22 @@ export function SpoolSessionPane({
         clearRetryTimer()
         terminalLiveRef.current = false
         continuationRef.current = 'reconnect-only'
-        setPhase('reconnect-error')
+        if (isRecoverableSpoolTerminalError(code, true)) {
+          startReconnect()
+        } else {
+          setPhase('reconnect-error')
+        }
         return
       }
       if (code !== 'resource_not_found') {
+        const recoverable = isRecoverableSpoolTerminalError(code)
+        const recoverOrFail = (recover: () => void): void => {
+          if (recoverable) {
+            recover()
+          } else {
+            setPhase('reconnect-error')
+          }
+        }
         if (
           continuationRef.current === 'attached' ||
           continuationRef.current === 'outcome-unknown'
@@ -226,7 +253,7 @@ export function SpoolSessionPane({
           setPhase('attach-error')
         } else if (continuationRef.current === 'reconnect-only') {
           clearRetryTimer()
-          setPhase('reconnect-error')
+          recoverOrFail(retryReconnect)
         } else if (continuationRef.current === 'not-started') {
           clearRetryTimer()
           continuationRef.current = 'reconnect-only'
@@ -234,7 +261,7 @@ export function SpoolSessionPane({
         } else if (continuationRef.current === 'awaiting-historical') {
           clearRetryTimer()
           continuationRef.current = 'reconnect-only'
-          setPhase('reconnect-error')
+          recoverOrFail(startReconnect)
         }
         return
       }
@@ -263,14 +290,22 @@ export function SpoolSessionPane({
           }
           return
         case 'reconnect-only':
-          setPhase('reconnect-error')
+          retryReconnect()
       }
     },
-    [clearRetryTimer, continueSession, route, scheduleUnknownAttachment]
+    [
+      clearRetryTimer,
+      continueSession,
+      retryReconnect,
+      route,
+      scheduleUnknownAttachment,
+      startReconnect
+    ]
   )
 
   const handleLive = useCallback((): void => {
     clearRetryTimer()
+    resetReconnect()
     terminalLiveRef.current = true
     unknownRetryRef.current = 0
     if (continuationRef.current === 'outcome-unknown') {
@@ -281,7 +316,7 @@ export function SpoolSessionPane({
       continuationRef.current = 'not-started'
     }
     setPhase('terminal')
-  }, [clearRetryTimer])
+  }, [clearRetryTimer, resetReconnect])
 
   const handleFocus = useCallback((): void => {
     onFocusHandled?.(route.sessionRef)
@@ -289,6 +324,7 @@ export function SpoolSessionPane({
 
   const handleClosed = useCallback(
     (canContinue: boolean): void => {
+      resetReconnect()
       if (terminalLiveRef.current) {
         clearRetryTimer()
         terminalLiveRef.current = false
@@ -330,7 +366,7 @@ export function SpoolSessionPane({
         setPhase('attach-error')
       }
     },
-    [clearRetryTimer]
+    [clearRetryTimer, resetReconnect]
   )
 
   const retry = (): void => {
@@ -350,6 +386,10 @@ export function SpoolSessionPane({
         closedCatalogSessionRef.current = currentSession
         setTerminalAttempt((attempt) => attempt + 1)
       }
+      return
+    }
+    if (continuationRef.current === 'reconnect-only') {
+      startReconnect()
       return
     }
     unknownRetryRef.current = 0

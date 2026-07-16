@@ -23,6 +23,7 @@ import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-pref
 import { Button } from '@/components/ui/button'
 import { getSpoolRequesterTransportErrorCode } from './spool-requester-error'
 import { isSameSpoolSessionRoute, type SpoolSessionRoute } from './spool-session-route'
+import { createSpoolTerminalSubscriptionSettlement } from './spool-terminal-subscription-settlement'
 import {
   createSpoolTerminalMutationQueue,
   type SpoolTerminalMutation
@@ -67,7 +68,7 @@ export function SpoolTerminalPane({
   const [status, setStatus] = useState<SpoolTerminalConnectionStatus>('connecting')
   const [mutationUncertain, setMutationUncertain] = useState(false)
   const mutationUncertainRef = useRef(false)
-  const canMutateTerminal = canControl && !mutationUncertain
+  const canMutateTerminal = canControl && status === 'live' && !mutationUncertain
   const canMutateTerminalRef = useRef(canMutateTerminal)
   canMutateTerminalRef.current = canMutateTerminal
   const terminalOptions = useMemo(
@@ -106,7 +107,10 @@ export function SpoolTerminalPane({
     terminalRef.current = terminal
     fitAddonRef.current = fitAddon
     const inputDisposable = terminal.onData((data) => {
-      mutationQueue.input(data)
+      // Why: a dropped stream must not accept bytes whose outcome cannot be observed.
+      if (canMutateTerminalRef.current) {
+        mutationQueue.input(data)
+      }
     })
     const resizeDisposable = terminal.onResize(({ cols, rows }) => {
       if (suppressResizeRef.current || !canMutateTerminalRef.current) {
@@ -165,35 +169,32 @@ export function SpoolTerminalPane({
     const api = window.api.spoolSharing
     let disposed = false
     let started = false
-    let closedNotified = false
     const subscriptionId = crypto.randomUUID()
     lastSequenceRef.current = -1
     terminalRef.current?.reset()
-
-    const notifyClosed = (canContinue: boolean): void => {
-      if (closedNotified) {
+    const settlement = createSpoolTerminalSubscriptionSettlement({
+      setStatus,
+      onClosed,
+      onError: onSubscriptionError
+    })
+    const dispatch = (event: SpoolRequesterSubscriptionEvent): void => {
+      if (settlement.isSettled()) {
         return
       }
-      closedNotified = true
-      onClosed?.(canContinue)
-    }
-    const dispatch = (event: SpoolRequesterSubscriptionEvent): void => {
       if (event.type === 'next') {
         applyTerminalEvent(event.value, terminalRef.current, lastSequenceRef, suppressResizeRef)
         if (isSpoolTerminalSubscriptionEvent(event.value)) {
-          setStatus(event.value.kind === 'closed' ? 'closed' : 'live')
           if (event.value.kind === 'closed') {
-            notifyClosed(event.value.canContinue === true)
+            settlement.complete(event.value.canContinue === true)
           } else {
+            setStatus('live')
             onLive?.()
           }
         }
       } else if (event.type === 'complete') {
-        setStatus('closed')
-        notifyClosed(false)
+        settlement.complete(false)
       } else {
-        setStatus('error')
-        onSubscriptionError?.(event.code)
+        settlement.error(event.code)
       }
     }
     const unsubscribeEvents = api.onSubscriptionEvent((event) => {
@@ -220,9 +221,7 @@ export function SpoolTerminalPane({
       })
       .catch((error) => {
         if (!disposed) {
-          setStatus('error')
-          const code = getSpoolRequesterTransportErrorCode(error)
-          onSubscriptionError?.(code)
+          settlement.error(getSpoolRequesterTransportErrorCode(error))
         }
       })
 
