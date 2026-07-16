@@ -27,6 +27,7 @@ describe('SpoolRemoteWorktreesHeader', () => {
     const header = container.querySelector<HTMLElement>('[role="button"]')
     expect(header?.getAttribute('aria-expanded')).toBe('true')
     expect(header?.textContent).toBe('Remote')
+    expect(header?.querySelector('.lucide-cloudy')).not.toBeNull()
 
     act(() => header?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
     expect(onToggle).toHaveBeenCalledOnce()

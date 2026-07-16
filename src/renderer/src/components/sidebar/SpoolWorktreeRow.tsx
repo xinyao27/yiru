@@ -1,5 +1,5 @@
 import type React from 'react'
-import { Folder, GitBranch } from 'lucide-react'
+import { Cloud } from 'lucide-react'
 import { getSpoolSessionCatalogStatusLabel } from '@/components/spool/spool-session-catalog-status'
 import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
@@ -70,11 +70,8 @@ export function SpoolWorktreeRow({
           className="flex w-4 shrink-0 items-start justify-center pt-[2px]"
           data-spool-worktree-status-slot=""
         >
-          {row.kind === 'folder' ? (
-            <Folder aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-          ) : (
-            <GitBranch aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-          )}
+          {/* Why: remote location is the primary distinction after these rows flatten into Projects. */}
+          <Cloud aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
         </div>
         <div
           className="flex min-w-0 flex-1 flex-col gap-1.5 overflow-hidden"
