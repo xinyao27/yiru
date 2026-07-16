@@ -35,30 +35,11 @@ function createInitialSpoolSharingState(): SpoolSharingState {
     spoolRemoteDesktops: [],
     spoolOwnerWorktrees: [],
     spoolOwnerControlGrants: [],
-    spoolExpandedDesktopRefs: new Set(),
-    spoolExpandedProjectRefsByDesktop: new Map(),
     spoolExpandedWorktreeRefsByDesktop: new Map(),
     activeSpoolWorkspaceRoute: null,
     spoolControlRequestQueue: [],
     spoolRequesterControlByWorktree: new Map()
   }
-}
-
-function updateExpandedDesktopRefs(
-  current: ReadonlySet<string>,
-  desktopRef: string,
-  expanded: boolean
-): ReadonlySet<string> {
-  if (current.has(desktopRef) === expanded) {
-    return current
-  }
-  const next = new Set(current)
-  if (expanded) {
-    next.add(desktopRef)
-  } else {
-    next.delete(desktopRef)
-  }
-  return next
 }
 
 function updateExpandedResourceRefs(
@@ -156,25 +137,6 @@ export const createSpoolSharingSlice: StateCreator<AppState, [], [], SpoolSharin
         )
       }
     }),
-
-  setSpoolDesktopExpanded: (desktopRef, expanded) =>
-    set((state) => ({
-      spoolExpandedDesktopRefs: updateExpandedDesktopRefs(
-        state.spoolExpandedDesktopRefs,
-        desktopRef,
-        expanded
-      )
-    })),
-
-  setSpoolProjectExpanded: (desktopRef, projectRef, expanded) =>
-    set((state) => ({
-      spoolExpandedProjectRefsByDesktop: updateExpandedResourceRefs(
-        state.spoolExpandedProjectRefsByDesktop,
-        desktopRef,
-        projectRef,
-        expanded
-      )
-    })),
 
   setSpoolWorktreeExpanded: (desktopRef, worktreeRef, expanded) =>
     set((state) => ({

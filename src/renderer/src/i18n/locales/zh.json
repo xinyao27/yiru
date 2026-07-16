@@ -4698,6 +4698,7 @@
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "正在加载会话…",
+          "ownerTitle": "{{value0}} 的 {{value1}}",
           "sessionsUnavailable": "会话列表不可用"
         },
         "SpoolSidebarProjectedRow": {

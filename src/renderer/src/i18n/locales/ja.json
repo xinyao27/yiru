@@ -4698,6 +4698,7 @@
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "セッションを読み込み中…",
+          "ownerTitle": "{{value0}}の{{value1}}",
           "sessionsUnavailable": "セッション一覧を利用できません"
         },
         "SpoolSidebarProjectedRow": {

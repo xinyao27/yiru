@@ -4698,6 +4698,7 @@
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "세션 불러오는 중…",
+          "ownerTitle": "{{value0}}의 {{value1}}",
           "sessionsUnavailable": "세션 목록을 사용할 수 없음"
         },
         "SpoolSidebarProjectedRow": {

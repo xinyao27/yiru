@@ -51,6 +51,14 @@ export function getWorktreeCardContentIndent(args: {
   return (groupSteps + clampDepth(args.lineageDepth)) * SIDEBAR_TREE_INDENT + projectCardIndent
 }
 
+// Why: remote worktrees flatten into the same visual tier as a direct
+// worktree child of a Project, and their session rows share this anchor.
+export const DIRECT_PROJECT_WORKTREE_CONTENT_INDENT = getWorktreeCardContentIndent({
+  isGrouped: true,
+  groupDepth: 0,
+  lineageDepth: 0
+})
+
 export function getFolderBackedRepoWorktreeCardContentIndent(args: {
   groupDepth: number
   lineageDepth: number

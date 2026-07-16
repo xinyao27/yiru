@@ -5347,8 +5347,6 @@ const WorktreeList = React.memo(function WorktreeList({
   const spoolSidebarProjectionInput = useAppStore(
     useShallow((state) => ({
       desktops: state.spoolRemoteDesktops,
-      expandedDesktopRefs: state.spoolExpandedDesktopRefs,
-      expandedProjectRefsByDesktop: state.spoolExpandedProjectRefsByDesktop,
       expandedWorktreeRefsByDesktop: state.spoolExpandedWorktreeRefsByDesktop,
       activeRoute: state.activeSpoolWorkspaceRoute,
       status: state.spoolSharingStatus,
