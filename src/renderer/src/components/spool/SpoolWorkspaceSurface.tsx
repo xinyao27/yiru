@@ -20,7 +20,6 @@ import { Button } from '@/components/ui/button'
 import { WorkspacePaneFrame } from '@/components/tab-group/WorkspacePaneFrame'
 import {
   WORKSPACE_COLUMN_BODY_CLASS_NAME,
-  WORKSPACE_COLUMN_DRAG_REGION_CLASS_NAME,
   WORKSPACE_COLUMN_FRAME_CLASS_NAME
 } from '@/components/tab-group/workspace-column-chrome'
 import { SpoolSessionPane } from './SpoolSessionPane'
@@ -170,10 +169,6 @@ function SpoolWorkspaceSurfaceContent({
       data-can-control={canControl ? 'true' : 'false'}
       className={WORKSPACE_COLUMN_FRAME_CLASS_NAME}
     >
-      <div
-        className={WORKSPACE_COLUMN_DRAG_REGION_CLASS_NAME}
-        data-terminal-focus-release-surface="true"
-      />
       <div className={WORKSPACE_COLUMN_BODY_CLASS_NAME}>
         <WorkspacePaneFrame
           worktreeId={worktreeRouteKey}
