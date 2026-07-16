@@ -285,60 +285,64 @@ export function SshStatusSegment({
         }
       }}
     >
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 cursor-pointer rounded px-1 py-0.5 hover:bg-accent/70"
-          aria-label={translate(
-            'auto.components.status.bar.SshStatusSegment.fdc57e9970',
-            'Remote host connection status'
-          )}
-        >
-          {iconOnly ? (
-            <span className="inline-flex items-center gap-1">
-              <span
-                className={`inline-block size-2 rounded-full ${
-                  syncProblem ? 'bg-destructive' : overallDotColor(overall, connectedHostCount)
-                }`}
-              />
-              {syncProblem ? (
-                <AlertTriangle className="size-3 text-destructive" />
-              ) : anyConnecting ? (
-                <Loader2 className="size-3 animate-spin text-muted-foreground" />
-              ) : (
-                <MonitorSmartphone className="size-3 text-muted-foreground" />
-              )}
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5">
-              {syncProblem ? (
-                <AlertTriangle className="size-3 text-destructive" />
-              ) : anyConnecting ? (
-                <Loader2 className="size-3 animate-spin text-yellow-500" />
-              ) : overall === 'connected' ? (
-                <Server className="size-3 text-emerald-500" />
-              ) : overall === 'partial' ? (
-                <Server className="size-3 text-muted-foreground" />
-              ) : (
-                <ServerOff className="size-3 text-muted-foreground" />
-              )}
-              {!compact && (
-                <span className="text-[11px]">
-                  <span className={syncProblem ? 'text-destructive' : 'text-muted-foreground'}>
-                    {syncProblemLabel ??
-                      (anyConnecting ? 'Connecting…' : connectedHostCountLabel(connectedHostCount))}
+      <DropdownMenuTrigger
+        render={
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 cursor-pointer rounded px-1 py-0.5 hover:bg-accent/70"
+            aria-label={translate(
+              'auto.components.status.bar.SshStatusSegment.fdc57e9970',
+              'Remote host connection status'
+            )}
+          >
+            {iconOnly ? (
+              <span className="inline-flex items-center gap-1">
+                <span
+                  className={`inline-block size-2 rounded-full ${
+                    syncProblem ? 'bg-destructive' : overallDotColor(overall, connectedHostCount)
+                  }`}
+                />
+                {syncProblem ? (
+                  <AlertTriangle className="size-3 text-destructive" />
+                ) : anyConnecting ? (
+                  <Loader2 className="size-3 animate-spin text-muted-foreground" />
+                ) : (
+                  <MonitorSmartphone className="size-3 text-muted-foreground" />
+                )}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5">
+                {syncProblem ? (
+                  <AlertTriangle className="size-3 text-destructive" />
+                ) : anyConnecting ? (
+                  <Loader2 className="size-3 animate-spin text-yellow-500" />
+                ) : overall === 'connected' ? (
+                  <Server className="size-3 text-emerald-500" />
+                ) : overall === 'partial' ? (
+                  <Server className="size-3 text-muted-foreground" />
+                ) : (
+                  <ServerOff className="size-3 text-muted-foreground" />
+                )}
+                {!compact && (
+                  <span className="text-[11px]">
+                    <span className={syncProblem ? 'text-destructive' : 'text-muted-foreground'}>
+                      {syncProblemLabel ??
+                        (anyConnecting
+                          ? 'Connecting…'
+                          : connectedHostCountLabel(connectedHostCount))}
+                    </span>
                   </span>
-                </span>
-              )}
-              <span
-                className={`inline-block size-1.5 rounded-full ${
-                  syncProblem ? 'bg-destructive' : overallDotColor(overall, connectedHostCount)
-                }`}
-              />
-            </span>
-          )}
-        </button>
-      </DropdownMenuTrigger>
+                )}
+                <span
+                  className={`inline-block size-1.5 rounded-full ${
+                    syncProblem ? 'bg-destructive' : overallDotColor(overall, connectedHostCount)
+                  }`}
+                />
+              </span>
+            )}
+          </button>
+        }
+      />
       <DropdownMenuContent
         side="top"
         align="start"
@@ -388,7 +392,7 @@ export function SshStatusSegment({
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             recordFeatureInteraction('ssh')
             openSettingsTarget({ pane: 'servers', repoId: null })
             setActiveView('settings')

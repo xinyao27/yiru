@@ -167,31 +167,35 @@ function FileTreeRow({
       {canControl ? (
         <DropdownMenu>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  size="icon-xs"
-                  variant="ghost"
-                  className="mr-1"
-                  aria-label={translate(
-                    'auto.components.spool.SpoolFileTree.itemActions',
-                    'File actions'
-                  )}
-                >
-                  <MoreHorizontal aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      type="button"
+                      size="icon-xs"
+                      variant="ghost"
+                      className="mr-1"
+                      aria-label={translate(
+                        'auto.components.spool.SpoolFileTree.itemActions',
+                        'File actions'
+                      )}
+                    >
+                      <MoreHorizontal aria-hidden="true" />
+                    </Button>
+                  }
+                />
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {translate('auto.components.spool.SpoolFileTree.itemActions', 'File actions')}
             </TooltipContent>
           </Tooltip>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={onRename}>
+            <DropdownMenuItem onClick={onRename}>
               {translate('auto.components.spool.SpoolFileTree.rename', 'Rename')}
             </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+            <DropdownMenuItem variant="destructive" onClick={onDelete}>
               <Trash2 aria-hidden="true" />
               {translate('auto.components.spool.SpoolFileTree.delete', 'Delete')}
             </DropdownMenuItem>

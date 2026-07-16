@@ -336,22 +336,24 @@ function LocalWorkspacePortsPanel({ isVisible }: { isVisible: boolean }): React.
           {translate('auto.components.right.sidebar.PortsPanel.6bc058dbe1', 'Ports')}
         </span>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              className="text-muted-foreground hover:text-foreground"
-              onClick={() => void refresh()}
-              disabled={refreshing}
-              aria-label={translate(
-                'auto.components.right.sidebar.PortsPanel.7822e3edc6',
-                'Refresh Ports'
-              )}
-            >
-              <RefreshCw size={14} className={cn(refreshing && 'animate-spin')} />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => void refresh()}
+                disabled={refreshing}
+                aria-label={translate(
+                  'auto.components.right.sidebar.PortsPanel.7822e3edc6',
+                  'Refresh Ports'
+                )}
+              >
+                <RefreshCw size={14} className={cn(refreshing && 'animate-spin')} />
+              </Button>
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             {translate('auto.components.right.sidebar.PortsPanel.7822e3edc6', 'Refresh Ports')}
           </TooltipContent>
@@ -579,72 +581,78 @@ function LocalPortRow({
   return (
     <ContextMenu>
       <div className="group flex items-center gap-2 py-1 px-1 -mx-1 rounded hover:bg-accent/50 transition-colors">
-        <ContextMenuTrigger asChild>
-          <div
-            className="flex min-w-0 flex-1 items-center gap-2 rounded focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            tabIndex={0}
-            aria-label={translate(
-              'auto.components.right.sidebar.PortsPanel.5be4f7f727',
-              'Port {{value0}} menu',
-              { value0: port.port }
-            )}
-          >
-            <div className="flex size-5 shrink-0 items-center justify-center text-muted-foreground">
-              {port.kind === 'container' ? <Box size={13} /> : <Server size={13} />}
+        <ContextMenuTrigger
+          render={
+            <div
+              className="flex min-w-0 flex-1 items-center gap-2 rounded focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              tabIndex={0}
+              aria-label={translate(
+                'auto.components.right.sidebar.PortsPanel.5be4f7f727',
+                'Port {{value0}} menu',
+                { value0: port.port }
+              )}
+            >
+              <div className="flex size-5 shrink-0 items-center justify-center text-muted-foreground">
+                {port.kind === 'container' ? <Box size={13} /> : <Server size={13} />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <span className="text-xs font-medium text-foreground">:{port.port}</span>
+                  <span className="truncate text-xs text-muted-foreground">{processLabel}</span>
+                </div>
+                <div className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <span className="truncate">{address}</span>
+                </div>
+                <div className="flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground/70">
+                  <span className="truncate">{ownerLabel}</span>
+                  {confidenceLabel && (
+                    <span className="shrink-0 text-muted-foreground/70">{confidenceLabel}</span>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex min-w-0 items-center gap-1.5">
-                <span className="text-xs font-medium text-foreground">:{port.port}</span>
-                <span className="truncate text-xs text-muted-foreground">{processLabel}</span>
-              </div>
-              <div className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
-                <span className="truncate">{address}</span>
-              </div>
-              <div className="flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground/70">
-                <span className="truncate">{ownerLabel}</span>
-                {confidenceLabel && (
-                  <span className="shrink-0 text-muted-foreground/70">{confidenceLabel}</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </ContextMenuTrigger>
-        <TooltipProvider delayDuration={400}>
+          }
+        />
+        <TooltipProvider delay={400}>
           <div className="flex items-center gap-0.5 can-hover:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  className="text-muted-foreground hover:text-foreground"
-                  onClick={handleOpenBrowserButtonClick}
-                  aria-label={openBrowserLabel}
-                >
-                  <ExternalLink size={13} />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={handleOpenBrowserButtonClick}
+                    aria-label={openBrowserLabel}
+                  >
+                    <ExternalLink size={13} />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {getPortOpenBrowserTooltipLabel(openBrowserLabel)}
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  className="text-muted-foreground hover:text-foreground"
-                  onClick={handleCopyButtonClick}
-                  aria-label={translate(
-                    'auto.components.right.sidebar.PortsPanel.fe2730d050',
-                    'Copy {{value0}}',
-                    { value0: address }
-                  )}
-                >
-                  <Copy size={13} />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={handleCopyButtonClick}
+                    aria-label={translate(
+                      'auto.components.right.sidebar.PortsPanel.fe2730d050',
+                      'Copy {{value0}}',
+                      { value0: address }
+                    )}
+                  >
+                    <Copy size={13} />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {translate(
                   'auto.components.right.sidebar.PortsPanel.1004af16ab',
@@ -655,21 +663,23 @@ function LocalPortRow({
             </Tooltip>
             {canStopProcess && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    className="text-muted-foreground hover:text-destructive"
-                    onClick={handleStopButtonClick}
-                    aria-label={translate(
-                      'auto.components.right.sidebar.PortsPanel.f9528da632',
-                      'Stop Process'
-                    )}
-                  >
-                    <Trash2 size={13} />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={handleStopButtonClick}
+                      aria-label={translate(
+                        'auto.components.right.sidebar.PortsPanel.f9528da632',
+                        'Stop Process'
+                      )}
+                    >
+                      <Trash2 size={13} />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="top" sideOffset={4}>
                   {translate('auto.components.right.sidebar.PortsPanel.f9528da632', 'Stop Process')}
                 </TooltipContent>
@@ -682,30 +692,24 @@ function LocalPortRow({
         <ContextMenuLabel
           className={LOCAL_PORT_MENU_LABEL_CLASS}
         >{`:${port.port}`}</ContextMenuLabel>
-        <ContextMenuItem
-          className={LOCAL_PORT_MENU_ITEM_CLASS}
-          onSelect={() => handleOpenBrowser()}
-        >
+        <ContextMenuItem className={LOCAL_PORT_MENU_ITEM_CLASS} onClick={() => handleOpenBrowser()}>
           <ExternalLink size={13} />
           {openBrowserLabel}
         </ContextMenuItem>
-        <ContextMenuItem className={LOCAL_PORT_MENU_ITEM_CLASS} onSelect={handleCopy}>
+        <ContextMenuItem className={LOCAL_PORT_MENU_ITEM_CLASS} onClick={handleCopy}>
           <Copy size={13} />
           {translate('auto.components.right.sidebar.PortsPanel.792baeb7ed', 'Copy Address')}
         </ContextMenuItem>
         <ContextMenuItem
           className={LOCAL_PORT_MENU_ITEM_CLASS}
-          onSelect={() => {
+          onClick={() => {
             void window.api.ui.writeClipboardText(JSON.stringify(port, null, 2))
           }}
         >
           <Copy size={13} />
           {translate('auto.components.right.sidebar.PortsPanel.bdac206faf', 'Copy Details')}
         </ContextMenuItem>
-        <ContextMenuItem
-          className={LOCAL_PORT_MENU_ITEM_CLASS}
-          onSelect={() => onShowDetails(port)}
-        >
+        <ContextMenuItem className={LOCAL_PORT_MENU_ITEM_CLASS} onClick={() => onShowDetails(port)}>
           <Info size={13} />
           {translate('auto.components.right.sidebar.PortsPanel.a223459512', 'Show Details')}
         </ContextMenuItem>
@@ -714,7 +718,7 @@ function LocalPortRow({
           className={LOCAL_PORT_MENU_ITEM_CLASS}
           variant="destructive"
           disabled={!canStopProcess}
-          onSelect={() => onStop(port)}
+          onClick={() => onStop(port)}
         >
           <Trash2 size={13} />
           {translate('auto.components.right.sidebar.PortsPanel.f9528da632', 'Stop Process')}

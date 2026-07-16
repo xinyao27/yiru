@@ -337,7 +337,10 @@ export function SourceControlAgentActionDialogForm({
                     'Save for'
                   )}
                 </span>
-                <Select value={saveTargetValue} onValueChange={onSaveAgentDefaultChange}>
+                <Select
+                  value={saveTargetValue}
+                  onValueChange={(value) => value && onSaveAgentDefaultChange(value)}
+                >
                   <SelectTrigger size="sm" className="h-8 w-full text-xs">
                     <SelectValue />
                   </SelectTrigger>

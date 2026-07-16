@@ -27,24 +27,28 @@ export default function WorkspaceStatusAppearancePopover({
   return (
     <Popover modal={false}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <PopoverTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              className="relative size-7"
-              aria-label={translate(
-                'auto.components.sidebar.WorkspaceStatusAppearancePopover.ccbd1e2c69',
-                'Customize {{value0}} appearance',
-                { value0: status.label }
-              )}
-            >
-              <span className={cn('absolute size-4 rounded-full opacity-20', meta.swatch)} />
-              <meta.icon className={cn('relative size-3.5', meta.tone)} />
-            </Button>
-          </PopoverTrigger>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <PopoverTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  className="relative size-7"
+                  aria-label={translate(
+                    'auto.components.sidebar.WorkspaceStatusAppearancePopover.ccbd1e2c69',
+                    'Customize {{value0}} appearance',
+                    { value0: status.label }
+                  )}
+                >
+                  <span className={cn('absolute size-4 rounded-full opacity-20', meta.swatch)} />
+                  <meta.icon className={cn('relative size-3.5', meta.tone)} />
+                </Button>
+              }
+            />
+          }
+        />
         <TooltipContent side="top" sideOffset={4}>
           {translate(
             'auto.components.sidebar.WorkspaceStatusAppearancePopover.74b1413279',
@@ -59,7 +63,7 @@ export default function WorkspaceStatusAppearancePopover({
         sideOffset={8}
         className="z-[80] w-72 p-2"
         data-workspace-status-appearance-popover=""
-        onOpenAutoFocus={(event) => event.preventDefault()}
+        initialFocus={false}
       >
         <div className="px-1 py-1 text-[11px] font-semibold text-muted-foreground">
           {translate(
@@ -70,23 +74,25 @@ export default function WorkspaceStatusAppearancePopover({
         <div className="grid grid-cols-8 gap-1">
           {getWorkspaceStatusColorOptions().map((color) => (
             <Tooltip key={color.id}>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  className={cn(
-                    'flex size-8 items-center justify-center rounded-md border border-transparent outline-none transition-colors hover:bg-accent focus-visible:ring-1 focus-visible:ring-ring',
-                    status.color === color.id && 'border-ring bg-accent'
-                  )}
-                  onClick={() => onChangeColor(status.id, color.id)}
-                  aria-label={translate(
-                    'auto.components.sidebar.WorkspaceStatusAppearancePopover.514be2f569',
-                    'Set {{value0}} color to {{value1}}',
-                    { value0: status.label, value1: color.label }
-                  )}
-                >
-                  <span className={cn('size-3.5 rounded-full', color.swatch)} />
-                </button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <button
+                    type="button"
+                    className={cn(
+                      'flex size-8 items-center justify-center rounded-md border border-transparent outline-none transition-colors hover:bg-accent focus-visible:ring-1 focus-visible:ring-ring',
+                      status.color === color.id && 'border-ring bg-accent'
+                    )}
+                    onClick={() => onChangeColor(status.id, color.id)}
+                    aria-label={translate(
+                      'auto.components.sidebar.WorkspaceStatusAppearancePopover.514be2f569',
+                      'Set {{value0}} color to {{value1}}',
+                      { value0: status.label, value1: color.label }
+                    )}
+                  >
+                    <span className={cn('size-3.5 rounded-full', color.swatch)} />
+                  </button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {color.label}
               </TooltipContent>
@@ -100,22 +106,24 @@ export default function WorkspaceStatusAppearancePopover({
         <div className="grid grid-cols-6 gap-1">
           {getWorkspaceStatusIconOptions().map((icon) => (
             <Tooltip key={icon.id}>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant={status.icon === icon.id ? 'secondary' : 'ghost'}
-                  size="icon-xs"
-                  className="size-8"
-                  onClick={() => onChangeIcon(status.id, icon.id)}
-                  aria-label={translate(
-                    'auto.components.sidebar.WorkspaceStatusAppearancePopover.514be2f569',
-                    'Set {{value0}} icon to {{value1}}',
-                    { value0: status.label, value1: icon.label }
-                  )}
-                >
-                  <icon.icon className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant={status.icon === icon.id ? 'secondary' : 'ghost'}
+                    size="icon-xs"
+                    className="size-8"
+                    onClick={() => onChangeIcon(status.id, icon.id)}
+                    aria-label={translate(
+                      'auto.components.sidebar.WorkspaceStatusAppearancePopover.514be2f569',
+                      'Set {{value0}} icon to {{value1}}',
+                      { value0: status.label, value1: icon.label }
+                    )}
+                  >
+                    <icon.icon className="size-3.5" />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {icon.label}
               </TooltipContent>

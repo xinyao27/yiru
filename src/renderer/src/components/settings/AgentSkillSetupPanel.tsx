@@ -313,21 +313,23 @@ export function AgentSkillSetupPanel({
               {openTerminalCommand}
             </code>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  className="shrink-0"
-                  aria-label={translate(
-                    'auto.components.settings.AgentSkillSetupPanel.copyCommandAria',
-                    'Copy command'
-                  )}
-                  onClick={() => void copyActiveCommand()}
-                >
-                  <Copy className="size-4" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="shrink-0"
+                    aria-label={translate(
+                      'auto.components.settings.AgentSkillSetupPanel.copyCommandAria',
+                      'Copy command'
+                    )}
+                    onClick={() => void copyActiveCommand()}
+                  >
+                    <Copy className="size-4" />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {translate(
                   'auto.components.settings.AgentSkillSetupPanel.ed197f59a2',

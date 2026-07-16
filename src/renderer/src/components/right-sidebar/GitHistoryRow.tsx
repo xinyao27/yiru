@@ -13,18 +13,20 @@ function GitHistoryRefBadge({ itemRef }: { itemRef: GitHistoryItemRef }): React.
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span
-          className="max-w-[8rem] truncate rounded-full border bg-sidebar px-1.5 py-0.5 text-[10px] leading-none"
-          style={{
-            borderColor: itemRef.color ? graphColor(itemRef.color) : 'var(--border)',
-            color: itemRef.color ? graphColor(itemRef.color) : 'var(--muted-foreground)'
-          }}
-          title={itemRef.name}
-        >
-          {itemRef.name}
-        </span>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <span
+            className="max-w-[8rem] truncate rounded-full border bg-sidebar px-1.5 py-0.5 text-[10px] leading-none"
+            style={{
+              borderColor: itemRef.color ? graphColor(itemRef.color) : 'var(--border)',
+              color: itemRef.color ? graphColor(itemRef.color) : 'var(--muted-foreground)'
+            }}
+            title={itemRef.name}
+          >
+            {itemRef.name}
+          </span>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={6} className="max-w-72">
         {refLabel}
       </TooltipContent>
@@ -89,11 +91,13 @@ export const GitHistoryRow = React.forwardRef<HTMLElement, GitHistoryRowProps>(
             />
           )}
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="block min-w-0 flex-1 truncate text-foreground" title={rowTooltip}>
-                {item.subject}
-              </span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <span className="block min-w-0 flex-1 truncate text-foreground" title={rowTooltip}>
+                  {item.subject}
+                </span>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6} className="max-w-96 whitespace-pre-wrap">
               {rowTooltip}
             </TooltipContent>
@@ -106,14 +110,16 @@ export const GitHistoryRow = React.forwardRef<HTMLElement, GitHistoryRowProps>(
             ))}
             {hiddenRefs.length > 0 && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <span
-                    className="shrink-0 text-[10px] leading-none text-muted-foreground"
-                    title={hiddenRefs.map((ref) => ref.name).join(', ')}
-                  >
-                    +{hiddenRefs.length}
-                  </span>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <span
+                      className="shrink-0 text-[10px] leading-none text-muted-foreground"
+                      title={hiddenRefs.map((ref) => ref.name).join(', ')}
+                    >
+                      +{hiddenRefs.length}
+                    </span>
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6} className="max-w-72">
                   {hiddenRefs.map((ref) => ref.name).join(', ')}
                 </TooltipContent>

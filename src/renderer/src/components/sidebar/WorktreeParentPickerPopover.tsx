@@ -8,6 +8,7 @@ import {
   CommandItem,
   CommandList
 } from '@/components/ui/command'
+import type { Popover as BasePopover } from '@base-ui/react/popover'
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
 import { useAppStore } from '@/store'
 import { useAllWorktrees, useRepoMap, useWorktreeMap } from '@/store/selectors'
@@ -175,13 +176,30 @@ export function WorktreeParentPickerPopover({
     [assignWorktreeParent, childWorktreeId, onOpenChange]
   )
 
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean, eventDetails: BasePopover.Root.ChangeEventDetails) => {
+      // Why: the click that selected the dropdown item can reach the newly
+      // mounted popover as an outside interaction before the picker settles.
+      if (
+        !nextOpen &&
+        suppressInitialOutsideCloseRef.current &&
+        (eventDetails.reason === 'outside-press' || eventDetails.reason === 'focus-out')
+      ) {
+        eventDetails.cancel()
+        return
+      }
+      onOpenChange(nextOpen)
+    },
+    [onOpenChange]
+  )
+
   if (!child || !anchorRect) {
     return null
   }
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverAnchor asChild>
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverAnchor>
         <span
           aria-hidden
           className="pointer-events-none fixed"
@@ -193,17 +211,7 @@ export function WorktreeParentPickerPopover({
           }}
         />
       </PopoverAnchor>
-      <PopoverContent
-        align="start"
-        side="right"
-        sideOffset={8}
-        className="w-80 p-0"
-        onInteractOutside={(event) => {
-          if (suppressInitialOutsideCloseRef.current) {
-            event.preventDefault()
-          }
-        }}
-      >
+      <PopoverContent align="start" side="right" sideOffset={8} className="w-80 p-0">
         <Command>
           <CommandInput
             placeholder={translate(

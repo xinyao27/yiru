@@ -49,7 +49,7 @@ export function TerminalTabSplitMenuSection({
           )}
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="min-w-[12rem]">
-          <DropdownMenuItem onSelect={() => splitActiveTerminalPane('vertical')}>
+          <DropdownMenuItem onClick={() => splitActiveTerminalPane('vertical')}>
             <PanelRightClose className="size-3.5 shrink-0" />
             {translate(
               'auto.components.tab.bar.SortableTabContextMenu.splitTerminalRight',
@@ -57,7 +57,7 @@ export function TerminalTabSplitMenuSection({
             )}
             <DropdownMenuShortcut>{splitRightShortcut}</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => splitActiveTerminalPane('horizontal')}>
+          <DropdownMenuItem onClick={() => splitActiveTerminalPane('horizontal')}>
             <PanelBottomClose className="size-3.5 shrink-0" />
             {translate(
               'auto.components.tab.bar.SortableTabContextMenu.splitTerminalDown',

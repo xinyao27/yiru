@@ -89,18 +89,20 @@ export function FloatingTerminalIconContextMenu({
         {children}
       </span>
       <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
-        <DropdownMenuTrigger asChild>
-          <button
-            aria-hidden
-            tabIndex={-1}
-            className="pointer-events-none fixed size-px opacity-0"
-            style={{ left: menuPoint.x, top: menuPoint.y }}
-          />
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <button
+              aria-hidden
+              tabIndex={-1}
+              className="pointer-events-none fixed size-px opacity-0"
+              style={{ left: menuPoint.x, top: menuPoint.y }}
+            />
+          }
+        />
         <DropdownMenuContent className="w-52" sideOffset={0} align="start">
           <DropdownMenuItem
             className="whitespace-nowrap"
-            onSelect={() => {
+            onClick={() => {
               void updateSettings({ floatingTerminalTriggerLocation: moveAction.location })
             }}
           >
@@ -110,7 +112,7 @@ export function FloatingTerminalIconContextMenu({
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="whitespace-nowrap"
-            onSelect={() => {
+            onClick={() => {
               useAppStore.getState().recordFeatureInteraction('floating-workspace-hidden')
               void updateSettings({ floatingTerminalEnabled: false })
             }}

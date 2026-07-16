@@ -51,7 +51,7 @@ export function AiCommitPrSettingsFields({
         <Label className="text-xs">
           {translate('auto.components.feature.wall.AiCommitPrSettingsCard.29d119fe95', 'Agent')}
         </Label>
-        <Select value={agentSelectValue} onValueChange={onAgentChange}>
+        <Select value={agentSelectValue} onValueChange={(v) => v && onAgentChange(v)}>
           <SelectTrigger size="sm" className="h-8 w-full text-xs">
             <span
               className={cn(
@@ -92,7 +92,11 @@ export function AiCommitPrSettingsFields({
               )}
             </span>
           </SelectTrigger>
-          <SelectContent portalContainer={selectPortalRoot} position="popper" align="start">
+          <SelectContent
+            portalContainer={selectPortalRoot}
+            alignItemWithTrigger={false}
+            align="start"
+          >
             {listCommitMessageAgentCapabilities().map((capability) => (
               <SelectItem key={capability.id} value={capability.id} className="cursor-pointer">
                 <span className="flex items-center gap-2">
@@ -130,11 +134,15 @@ export function AiCommitPrSettingsFields({
           <Label className="text-xs">
             {translate('auto.components.feature.wall.AiCommitPrSettingsCard.be8917699e', 'Model')}
           </Label>
-          <Select value={activeModel.id} onValueChange={onModelChange}>
+          <Select value={activeModel.id} onValueChange={(v) => v && onModelChange(v)}>
             <SelectTrigger size="sm" className="h-8 w-full text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent portalContainer={selectPortalRoot} position="popper" align="start">
+            <SelectContent
+              portalContainer={selectPortalRoot}
+              alignItemWithTrigger={false}
+              align="start"
+            >
               {activeCapability.models.map((model) => (
                 <SelectItem key={model.id} value={model.id} className="cursor-pointer">
                   {model.label}
@@ -153,11 +161,15 @@ export function AiCommitPrSettingsFields({
               'Thinking effort'
             )}
           </Label>
-          <Select value={activeThinking} onValueChange={onThinkingChange}>
+          <Select value={activeThinking} onValueChange={(v) => v && onThinkingChange(v)}>
             <SelectTrigger size="sm" className="h-8 w-full text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent portalContainer={selectPortalRoot} position="popper" align="start">
+            <SelectContent
+              portalContainer={selectPortalRoot}
+              alignItemWithTrigger={false}
+              align="start"
+            >
               {activeModel.thinkingLevels.map((level) => (
                 <SelectItem key={level.id} value={level.id} className="cursor-pointer">
                   {level.label}

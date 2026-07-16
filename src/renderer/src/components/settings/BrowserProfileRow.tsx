@@ -154,21 +154,26 @@ export function BrowserProfileRow({
             }
           }}
         >
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="xs"
-              className="h-6 gap-1 px-1.5 text-[11px] text-muted-foreground"
-              disabled={isImporting}
-            >
-              {isImporting ? (
-                <Loader2 className="size-3 animate-spin" />
-              ) : (
-                <Import className="size-3" />
-              )}
-              {translate('auto.components.settings.BrowserProfileRow.cdec84552f', 'Import Cookies')}
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="xs"
+                className="h-6 gap-1 px-1.5 text-[11px] text-muted-foreground"
+                disabled={isImporting}
+              >
+                {isImporting ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <Import className="size-3" />
+                )}
+                {translate(
+                  'auto.components.settings.BrowserProfileRow.cdec84552f',
+                  'Import Cookies'
+                )}
+              </Button>
+            }
+          />
           <DropdownMenuContent align="end">
             {detectedBrowsers.map((browser) =>
               browser.profiles.length > 1 ? (
@@ -185,9 +190,7 @@ export function BrowserProfileRow({
                       {browser.profiles.map((bp) => (
                         <DropdownMenuItem
                           key={bp.directory}
-                          onSelect={() =>
-                            void handleImportFromBrowser(browser.family, bp.directory)
-                          }
+                          onClick={() => void handleImportFromBrowser(browser.family, bp.directory)}
                         >
                           {bp.name}
                         </DropdownMenuItem>
@@ -198,7 +201,7 @@ export function BrowserProfileRow({
               ) : (
                 <DropdownMenuItem
                   key={browser.family}
-                  onSelect={() => void handleImportFromBrowser(browser.family)}
+                  onClick={() => void handleImportFromBrowser(browser.family)}
                 >
                   {translate(
                     'auto.components.settings.BrowserProfileRow.c5a273a809',
@@ -209,7 +212,7 @@ export function BrowserProfileRow({
               )
             )}
             {detectedBrowsers.length > 0 && <DropdownMenuSeparator />}
-            <DropdownMenuItem onSelect={() => void handleImportFromFile()}>
+            <DropdownMenuItem onClick={() => void handleImportFromFile()}>
               {translate('auto.components.settings.BrowserProfileRow.ebb78dfd6f', 'From File…')}
             </DropdownMenuItem>
           </DropdownMenuContent>

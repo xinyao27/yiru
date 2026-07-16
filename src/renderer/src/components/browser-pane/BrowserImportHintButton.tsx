@@ -158,22 +158,24 @@ export function BrowserImportHintButton({
 
   return (
     <Popover modal={false} open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          className="h-7 shrink-0 rounded-full px-2.5 text-xs"
-          aria-label={translate(
-            'auto.components.browser.pane.BrowserImportHintButton.4f5ffaa6a1',
-            'Import browser data'
-          )}
-          data-contextual-tour-target="browser-import-hint"
-        >
-          <Import className="size-3.5" />
-          {translate('auto.components.browser.pane.BrowserImportHintButton.b24fef25be', 'Import')}
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="h-7 shrink-0 rounded-full px-2.5 text-xs"
+            aria-label={translate(
+              'auto.components.browser.pane.BrowserImportHintButton.4f5ffaa6a1',
+              'Import browser data'
+            )}
+            data-contextual-tour-target="browser-import-hint"
+          >
+            <Import className="size-3.5" />
+            {translate('auto.components.browser.pane.BrowserImportHintButton.b24fef25be', 'Import')}
+          </Button>
+        }
+      />
       <PopoverContent align="end" side="bottom" sideOffset={6} className="w-80 p-3">
         <div className="space-y-3">
           <div className="space-y-1.5">
@@ -194,20 +196,22 @@ export function BrowserImportHintButton({
 
           <div className="flex items-center gap-3">
             <DropdownMenu modal={false} open={importMenuOpen} onOpenChange={setImportMenuOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  className="h-7 px-2.5 text-xs"
-                  disabled={browserSessionImportState?.status === 'importing'}
-                >
-                  {translate(
-                    'auto.components.browser.pane.BrowserImportHintButton.244266c122',
-                    'Import…'
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    className="h-7 px-2.5 text-xs"
+                    disabled={browserSessionImportState?.status === 'importing'}
+                  >
+                    {translate(
+                      'auto.components.browser.pane.BrowserImportHintButton.244266c122',
+                      'Import…'
+                    )}
+                  </Button>
+                }
+              />
               <DropdownMenuContent align="start" className="w-52">
                 {detectedBrowsers.map((browser) =>
                   browser.profiles.length > 1 ? (
@@ -224,7 +228,7 @@ export function BrowserImportHintButton({
                           {browser.profiles.map((profile) => (
                             <DropdownMenuItem
                               key={profile.directory}
-                              onSelect={() =>
+                              onClick={() =>
                                 void handleImportFromBrowser(browser.family, profile.directory)
                               }
                             >
@@ -237,7 +241,7 @@ export function BrowserImportHintButton({
                   ) : (
                     <DropdownMenuItem
                       key={browser.family}
-                      onSelect={() => void handleImportFromBrowser(browser.family)}
+                      onClick={() => void handleImportFromBrowser(browser.family)}
                     >
                       {translate(
                         'auto.components.browser.pane.BrowserImportHintButton.0c6d254eca',
@@ -248,7 +252,7 @@ export function BrowserImportHintButton({
                   )
                 )}
                 {detectedBrowsers.length > 0 ? <DropdownMenuSeparator /> : null}
-                <DropdownMenuItem onSelect={() => void handleImportFromFile()}>
+                <DropdownMenuItem onClick={() => void handleImportFromFile()}>
                   {translate(
                     'auto.components.browser.pane.BrowserImportHintButton.e0e125e074',
                     'From File…'

@@ -199,41 +199,45 @@ export function OrcaProfileSwitcher({
     <>
       <DropdownMenu>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size={sidebarPlacement ? 'icon-xs' : 'xs'}
-                className={cn(
-                  'text-muted-foreground titlebar-profile-switcher',
-                  sidebarPlacement ? 'px-0' : 'mr-2 max-w-[180px] gap-1.5 px-1.5'
-                )}
-                disabled={profileActionDisabled}
-                aria-label={triggerLabel}
-              >
-                {sidebarPlacement && switching ? (
-                  <Loader2 className="size-3 animate-spin" />
-                ) : (
-                  <OrcaProfileAvatar
-                    profile={activeProfile}
-                    className={
-                      sidebarPlacement
-                        ? 'size-4 border-worktree-sidebar-border bg-worktree-sidebar-accent text-[10px] text-worktree-sidebar-accent-foreground'
-                        : undefined
-                    }
-                  />
-                )}
-                {!sidebarPlacement ? (
-                  <>
-                    <span className="hidden max-w-[108px] truncate text-xs font-medium sm:inline">
-                      {activeProfile.name}
-                    </span>
-                    {switching ? <Loader2 className="size-3 animate-spin" /> : <ChevronDown />}
-                  </>
-                ) : null}
-              </Button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size={sidebarPlacement ? 'icon-xs' : 'xs'}
+                    className={cn(
+                      'text-muted-foreground titlebar-profile-switcher',
+                      sidebarPlacement ? 'px-0' : 'mr-2 max-w-[180px] gap-1.5 px-1.5'
+                    )}
+                    disabled={profileActionDisabled}
+                    aria-label={triggerLabel}
+                  >
+                    {sidebarPlacement && switching ? (
+                      <Loader2 className="size-3 animate-spin" />
+                    ) : (
+                      <OrcaProfileAvatar
+                        profile={activeProfile}
+                        className={
+                          sidebarPlacement
+                            ? 'size-4 border-worktree-sidebar-border bg-worktree-sidebar-accent text-[10px] text-worktree-sidebar-accent-foreground'
+                            : undefined
+                        }
+                      />
+                    )}
+                    {!sidebarPlacement ? (
+                      <>
+                        <span className="hidden max-w-[108px] truncate text-xs font-medium sm:inline">
+                          {activeProfile.name}
+                        </span>
+                        {switching ? <Loader2 className="size-3 animate-spin" /> : <ChevronDown />}
+                      </>
+                    ) : null}
+                  </Button>
+                }
+              />
+            }
+          />
           <TooltipContent side={sidebarPlacement ? 'top' : 'bottom'} sideOffset={6}>
             {triggerLabel}
           </TooltipContent>
@@ -265,7 +269,7 @@ export function OrcaProfileSwitcher({
                   <DropdownMenuItem
                     key={profile.id}
                     disabled={profileActionDisabled}
-                    onSelect={() => handleSwitchProfile(profile.id)}
+                    onClick={() => handleSwitchProfile(profile.id)}
                     className="min-w-0"
                   >
                     <OrcaProfileAvatar profile={profile} />
@@ -286,7 +290,7 @@ export function OrcaProfileSwitcher({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 disabled={profileActionDisabled}
-                onSelect={() => setOrgMembersOpen(true)}
+                onClick={() => setOrgMembersOpen(true)}
               >
                 <Users />
                 {translate(
@@ -318,7 +322,7 @@ export function OrcaProfileSwitcher({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 disabled={profileActionDisabled}
-                onSelect={() => {
+                onClick={() => {
                   setManagementOpen(true)
                 }}
               >
@@ -327,7 +331,7 @@ export function OrcaProfileSwitcher({
               </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={profileActionDisabled}
-                onSelect={() => {
+                onClick={() => {
                   setDialogOpen(true)
                 }}
               >

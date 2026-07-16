@@ -22,7 +22,7 @@ export function SpoolTruncatedPathLabel({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>{content}</TooltipTrigger>
+      <TooltipTrigger render={content} />
       <TooltipContent
         side="top"
         sideOffset={4}

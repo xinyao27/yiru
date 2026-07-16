@@ -167,7 +167,7 @@ export function SpoolSessionCreateMenu({
       onOpenChange={handleOpenChange}
       disabled={disabledTooltip !== null}
       disabledTooltip={disabledTooltip}
-      onCloseAutoFocus={(event) => event.preventDefault()}
+      finalFocus={false}
     >
       <WorkspaceNewTerminalMenuItem onSelect={() => void createSession({ kind: 'shell' })} />
       <DropdownMenuSeparator />

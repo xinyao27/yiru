@@ -118,7 +118,7 @@ export function RepositoryHostSetupsSection({
               <Select
                 value={repo.id}
                 onValueChange={(repoId) => {
-                  if (repoId === repo.id) {
+                  if (repoId === null || repoId === repo.id) {
                     return
                   }
                   openSetup(repoId)

@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
+import type { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 
 export function SpoolControlRequestDialog(): React.JSX.Element | null {
   const request = useAppStore((state) => state.spoolControlRequestQueue[0] ?? null)
@@ -57,18 +58,22 @@ export function SpoolControlRequestDialog(): React.JSX.Element | null {
   const isDeciding = decidingRequestId === request.requestId
 
   return (
-    <Dialog open>
+    <Dialog
+      open
+      onOpenChange={(_open, eventDetails: DialogPrimitive.Root.ChangeEventDetails) => {
+        // Why: approval exposes a real remote shell; escape or an outside click
+        // must never dismiss the prompt — the user has to explicitly decide.
+        if (eventDetails.reason === 'escape-key' || eventDetails.reason === 'outside-press') {
+          eventDetails.cancel()
+        }
+      }}
+    >
       <DialogContent
         showCloseButton={false}
         className="sm:max-w-md"
-        onEscapeKeyDown={(event) => event.preventDefault()}
-        onPointerDownOutside={(event) => event.preventDefault()}
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
-          // Why: approval exposes a real remote shell; Enter must never accept
-          // merely because the dialog appeared while the user was typing.
-          denyButtonRef.current?.focus()
-        }}
+        // Why: approval exposes a real remote shell; focus Deny so Enter never
+        // accepts merely because the dialog appeared while the user was typing.
+        initialFocus={denyButtonRef}
       >
         <DialogHeader>
           <DialogTitle>

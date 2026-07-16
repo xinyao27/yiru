@@ -397,18 +397,20 @@ function IssueTypeCell({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={translate(
-            'auto.components.github.project.ProjectCell.c7b059cf07',
-            'Issue type'
-          )}
-          className="flex h-full w-full cursor-pointer items-center px-1 text-left"
-        >
-          {trigger}
-        </button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            aria-label={translate(
+              'auto.components.github.project.ProjectCell.c7b059cf07',
+              'Issue type'
+            )}
+            className="flex h-full w-full cursor-pointer items-center px-1 text-left"
+          >
+            {trigger}
+          </button>
+        }
+      />
       <PopoverContent className="w-64 p-1" align="start">
         {!owner || !repo ? (
           <div className="px-2 py-1 text-xs text-muted-foreground">
@@ -511,19 +513,21 @@ function SingleSelectCell({
   }
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={field.name}
-          className="flex h-full w-full cursor-pointer items-center px-1 text-left"
-        >
-          {label ?? (
-            <EmptyCellPrompt
-              label={translate('auto.components.github.project.ProjectCell.e369bf4fec', 'Select')}
-            />
-          )}
-        </button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            aria-label={field.name}
+            className="flex h-full w-full cursor-pointer items-center px-1 text-left"
+          >
+            {label ?? (
+              <EmptyCellPrompt
+                label={translate('auto.components.github.project.ProjectCell.e369bf4fec', 'Select')}
+              />
+            )}
+          </button>
+        }
+      />
       <PopoverContent className="w-56 p-1">
         {options.map((o) => (
           <button
@@ -584,19 +588,21 @@ function IterationCell({
   }
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={field.name}
-          className="flex h-full w-full cursor-pointer items-center px-1 text-left"
-        >
-          {label ?? (
-            <EmptyCellPrompt
-              label={translate('auto.components.github.project.ProjectCell.e369bf4fec', 'Select')}
-            />
-          )}
-        </button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            aria-label={field.name}
+            className="flex h-full w-full cursor-pointer items-center px-1 text-left"
+          >
+            {label ?? (
+              <EmptyCellPrompt
+                label={translate('auto.components.github.project.ProjectCell.e369bf4fec', 'Select')}
+              />
+            )}
+          </button>
+        }
+      />
       <PopoverContent className="w-64 p-1">
         {completed.length > 0 ? (
           <div className="px-2 pt-1 text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -865,24 +871,26 @@ function AssigneesCell({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={translate(
-            'auto.components.github.project.ProjectCell.f7cdb78efb',
-            'Assignees'
-          )}
-          className={cn(
-            'flex h-full w-full flex-wrap items-center gap-1 cursor-pointer px-1 text-xs text-muted-foreground hover:text-foreground'
-          )}
-        >
-          {labelContent ?? (
-            <EmptyCellPrompt
-              label={translate('auto.components.github.project.ProjectCell.36341ffc66', 'Assign')}
-            />
-          )}
-        </button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            aria-label={translate(
+              'auto.components.github.project.ProjectCell.f7cdb78efb',
+              'Assignees'
+            )}
+            className={cn(
+              'flex h-full w-full flex-wrap items-center gap-1 cursor-pointer px-1 text-xs text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {labelContent ?? (
+              <EmptyCellPrompt
+                label={translate('auto.components.github.project.ProjectCell.36341ffc66', 'Assign')}
+              />
+            )}
+          </button>
+        }
+      />
       <PopoverContent className="w-64 p-1">
         {!owner || !repo ? (
           <div className="px-2 py-1 text-xs text-muted-foreground">
@@ -956,22 +964,27 @@ function LabelsCell({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={translate('auto.components.github.project.ProjectCell.8ae56a88a6', 'Labels')}
-          className={cn('flex h-full w-full flex-wrap items-center gap-1 cursor-pointer px-1')}
-        >
-          {labelContent ?? (
-            <EmptyCellPrompt
-              label={translate(
-                'auto.components.github.project.ProjectCell.2e26a06c70',
-                'Add label'
-              )}
-            />
-          )}
-        </button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            aria-label={translate(
+              'auto.components.github.project.ProjectCell.8ae56a88a6',
+              'Labels'
+            )}
+            className={cn('flex h-full w-full flex-wrap items-center gap-1 cursor-pointer px-1')}
+          >
+            {labelContent ?? (
+              <EmptyCellPrompt
+                label={translate(
+                  'auto.components.github.project.ProjectCell.2e26a06c70',
+                  'Add label'
+                )}
+              />
+            )}
+          </button>
+        }
+      />
       <PopoverContent className="w-64 p-1">
         {!owner || !repo ? (
           <div className="px-2 py-1 text-xs text-muted-foreground">

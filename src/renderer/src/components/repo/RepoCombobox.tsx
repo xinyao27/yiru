@@ -183,49 +183,54 @@ export default function RepoCombobox({
   return (
     <div className="flex w-full items-center gap-1.5">
       <Popover open={open} onOpenChange={handleOpenChange}>
-        <PopoverTrigger asChild>
-          <Button
-            ref={triggerRef}
-            type="button"
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            aria-invalid={invalid ? true : undefined}
-            aria-describedby={describedBy}
-            onKeyDown={handleTriggerKeyDown}
-            className={cn(
-              'h-8 min-w-[184px] justify-between px-3 text-xs font-normal',
-              triggerClassName
-            )}
-            data-repo-combobox-root="true"
-          >
-            {selectedRepo ? (
-              <span className="inline-flex min-w-0 items-center gap-1.5">
-                <RepoBadgeLabel
-                  name={selectedRepo.displayName}
-                  color={selectedRepo.badgeColor}
-                  badgeClassName="size-1.5"
-                />
-                {selectedRepo.connectionId && (
-                  <span className="shrink-0 inline-flex items-center gap-0.5 rounded bg-muted px-1 py-0.5 text-[9px] font-medium leading-none text-muted-foreground">
-                    <Server className="size-2.5" />
-                    {translate('auto.components.repo.RepoCombobox.3639fd9da2', 'SSH')}
-                  </span>
-                )}
-              </span>
-            ) : (
-              <span className="text-muted-foreground">{placeholder}</span>
-            )}
-            <ChevronsUpDown className="size-3.5 opacity-50" />
-          </Button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <Button
+              ref={triggerRef}
+              type="button"
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              aria-invalid={invalid ? true : undefined}
+              aria-describedby={describedBy}
+              onKeyDown={handleTriggerKeyDown}
+              className={cn(
+                'h-8 min-w-[184px] justify-between px-3 text-xs font-normal',
+                triggerClassName
+              )}
+              data-repo-combobox-root="true"
+            >
+              {selectedRepo ? (
+                <span className="inline-flex min-w-0 items-center gap-1.5">
+                  <RepoBadgeLabel
+                    name={selectedRepo.displayName}
+                    color={selectedRepo.badgeColor}
+                    badgeClassName="size-1.5"
+                  />
+                  {selectedRepo.connectionId && (
+                    <span className="shrink-0 inline-flex items-center gap-0.5 rounded bg-muted px-1 py-0.5 text-[9px] font-medium leading-none text-muted-foreground">
+                      <Server className="size-2.5" />
+                      {translate('auto.components.repo.RepoCombobox.3639fd9da2', 'SSH')}
+                    </span>
+                  )}
+                </span>
+              ) : (
+                <span className="text-muted-foreground">{placeholder}</span>
+              )}
+              <ChevronsUpDown className="size-3.5 opacity-50" />
+            </Button>
+          }
+        />
         <PopoverContent
           align="start"
           className="w-[var(--radix-popover-trigger-width)] min-w-[18rem] p-0"
           data-repo-combobox-root="true"
-          onOpenAutoFocus={(event) => {
-            event.preventDefault()
+          // Why: return false suppresses Base UI's default popup focus so our
+          // custom focus of the search input runs instead — mirrors the old
+          // onOpenAutoFocus preventDefault + focusSearchInput.
+          initialFocus={() => {
             focusSearchInput()
+            return false
           }}
         >
           <Command shouldFilter={false} value={commandValue} onValueChange={setCommandValue}>

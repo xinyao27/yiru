@@ -64,30 +64,32 @@ export function ColorPicker({
 
   return (
     <Popover defaultOpen={defaultOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className={cn(
-            'h-8 gap-2 px-2.5',
-            selected ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background' : null,
-            className
-          )}
-          aria-label={label}
-          aria-pressed={selected}
-        >
-          <span
-            aria-hidden="true"
-            className="size-4 rounded-[4px] border border-border/70"
-            style={{ backgroundColor: currentColor }}
-          />
-          {triggerLabel ? <span className="text-xs">{triggerLabel}</span> : null}
-          {shouldShowTriggerHex ? (
-            <span className="font-mono text-xs uppercase">{currentColor}</span>
-          ) : null}
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className={cn(
+              'h-8 gap-2 px-2.5',
+              selected ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background' : null,
+              className
+            )}
+            aria-label={label}
+            aria-pressed={selected}
+          >
+            <span
+              aria-hidden="true"
+              className="size-4 rounded-[4px] border border-border/70"
+              style={{ backgroundColor: currentColor }}
+            />
+            {triggerLabel ? <span className="text-xs">{triggerLabel}</span> : null}
+            {shouldShowTriggerHex ? (
+              <span className="font-mono text-xs uppercase">{currentColor}</span>
+            ) : null}
+          </Button>
+        }
+      />
       <PopoverContent align="start" className="w-64 p-3">
         <div className="space-y-3">
           <HexColorPicker

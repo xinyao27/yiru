@@ -383,7 +383,7 @@ export default function EditorFileTab({
           tabRoot
         ) : (
           <Tooltip>
-            <TooltipTrigger asChild>{tabRoot}</TooltipTrigger>
+            <TooltipTrigger render={tabRoot} />
             <TooltipContent
               side="bottom"
               sideOffset={6}

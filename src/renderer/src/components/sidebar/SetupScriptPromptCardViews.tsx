@@ -13,21 +13,23 @@ type DismissButtonProps = {
 function DismissButton({ onDismiss }: DismissButtonProps): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          aria-label={translate(
-            'auto.components.sidebar.SetupScriptPromptCardViews.5bfd5c8779',
-            'Dismiss setup scripts'
-          )}
-          className="-mr-1 text-muted-foreground"
-          onClick={onDismiss}
-        >
-          <X className="size-3.5" />
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label={translate(
+              'auto.components.sidebar.SetupScriptPromptCardViews.5bfd5c8779',
+              'Dismiss setup scripts'
+            )}
+            className="-mr-1 text-muted-foreground"
+            onClick={onDismiss}
+          >
+            <X className="size-3.5" />
+          </Button>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {translate('auto.components.sidebar.SetupScriptPromptCardViews.822ff300ad', 'Dismiss')}
       </TooltipContent>

@@ -74,7 +74,7 @@ function ProjectTransferMenu({
         <DropdownMenuItem
           key={`${mode}:${profile.id}`}
           disabled={Boolean(pending) || profile.id === sourceProfileId}
-          onSelect={() => onTransfer(repo, profile, mode)}
+          onClick={() => onTransfer(repo, profile, mode)}
         >
           {mode === 'move' ? <MoveRight /> : <Copy />}
           <OrcaProfileAvatar profile={profile} />
@@ -86,12 +86,14 @@ function ProjectTransferMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="xs" disabled={disabled}>
-          {repoPending ? <Loader2 className="size-3.5 animate-spin" /> : <ArrowRightLeft />}
-          {translate('auto.components.orca.profiles.management.04e7bd2a23', 'Transfer')}
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="outline" size="xs" disabled={disabled}>
+            {repoPending ? <Loader2 className="size-3.5 animate-spin" /> : <ArrowRightLeft />}
+            {translate('auto.components.orca.profiles.management.04e7bd2a23', 'Transfer')}
+          </Button>
+        }
+      />
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           {translate('auto.components.orca.profiles.management.128c7dfe64', 'Copy to')}

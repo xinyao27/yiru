@@ -39,11 +39,13 @@ type IconCycleButtonProps = {
 function IconCycleButton({ label, onClick, children }: IconCycleButtonProps): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label={label} onClick={onClick}>
-          {children}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button variant="ghost" size="icon-sm" aria-label={label} onClick={onClick}>
+            {children}
+          </Button>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {label}
       </TooltipContent>

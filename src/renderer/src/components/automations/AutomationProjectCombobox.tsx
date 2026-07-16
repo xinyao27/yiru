@@ -204,37 +204,42 @@ export default function AutomationProjectCombobox({
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn(
-            'h-8 min-w-[184px] justify-between px-3 text-xs font-normal',
-            triggerClassName
-          )}
-        >
-          {selectedRepo ? (
-            <span className="inline-flex min-w-0 items-center gap-1.5">
-              <RepoBadgeLabel
-                name={selectedRepo.displayName}
-                color={selectedRepo.badgeColor}
-                badgeClassName="size-1.5"
-              />
-            </span>
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
-          <ChevronsUpDown className="size-3.5 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn(
+              'h-8 min-w-[184px] justify-between px-3 text-xs font-normal',
+              triggerClassName
+            )}
+          >
+            {selectedRepo ? (
+              <span className="inline-flex min-w-0 items-center gap-1.5">
+                <RepoBadgeLabel
+                  name={selectedRepo.displayName}
+                  color={selectedRepo.badgeColor}
+                  badgeClassName="size-1.5"
+                />
+              </span>
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+            <ChevronsUpDown className="size-3.5 opacity-50" />
+          </Button>
+        }
+      />
       <PopoverContent
         align="start"
         className="w-[var(--radix-popover-trigger-width)] min-w-[16rem] p-0"
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
+        // Why: return false suppresses Base UI's default popup focus so our
+        // custom focus of the search input runs instead — mirrors the old
+        // onOpenAutoFocus preventDefault + focusSearchInput.
+        initialFocus={() => {
           focusSearchInput()
+          return false
         }}
       >
         <Command shouldFilter={false} value={commandValue} onValueChange={setCommandValue}>
@@ -311,23 +316,25 @@ export default function AutomationProjectCombobox({
                         setHostMenuProjectKey(nextOpen ? group.projectKey : null)
                       }
                     >
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          title={translate(
-                            'auto.components.automations.AutomationProjectCombobox.chooseHost',
-                            'Choose automation host'
-                          )}
-                          onClick={(event) => {
-                            event.preventDefault()
-                            event.stopPropagation()
-                          }}
-                          onMouseDown={(event) => event.preventDefault()}
-                          className="flex w-7 shrink-0 items-center justify-center text-muted-foreground"
-                        >
-                          <ChevronRight className="size-3.5" />
-                        </button>
-                      </PopoverTrigger>
+                      <PopoverTrigger
+                        render={
+                          <button
+                            type="button"
+                            title={translate(
+                              'auto.components.automations.AutomationProjectCombobox.chooseHost',
+                              'Choose automation host'
+                            )}
+                            onClick={(event) => {
+                              event.preventDefault()
+                              event.stopPropagation()
+                            }}
+                            onMouseDown={(event) => event.preventDefault()}
+                            className="flex w-7 shrink-0 items-center justify-center text-muted-foreground"
+                          >
+                            <ChevronRight className="size-3.5" />
+                          </button>
+                        }
+                      />
                       <PopoverContent
                         side="right"
                         align="start"

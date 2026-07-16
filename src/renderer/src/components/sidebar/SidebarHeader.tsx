@@ -38,48 +38,52 @@ const SidebarHeader = React.memo(function SidebarHeader({
         />
 
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              className="text-muted-foreground"
-              aria-label={translate(
-                'auto.components.sidebar.SidebarHeader.25a95899c9',
-                'Add Project'
-              )}
-              onClick={() => openModal('add-repo')}
-            >
-              <FolderPlus className="size-3.5" strokeWidth={2.25} />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                className="text-muted-foreground"
+                aria-label={translate(
+                  'auto.components.sidebar.SidebarHeader.25a95899c9',
+                  'Add Project'
+                )}
+                onClick={() => openModal('add-repo')}
+              >
+                <FolderPlus className="size-3.5" strokeWidth={2.25} />
+              </Button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={6}>
             {translate('auto.components.sidebar.SidebarHeader.25a95899c9', 'Add Project')}
           </TooltipContent>
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => {
-                if (!canCreateWorkspace) {
-                  return
-                }
-                // Why: the parallel-work tour must click the real sidebar
-                // control so it can hand off to the workspace-creation tour.
-                openWorkspaceCreationComposerWithTourHandoff()
-              }}
-              aria-label={translate(
-                'auto.components.sidebar.SidebarHeader.92154beb7e',
-                'New workspace'
-              )}
-              disabled={!canCreateWorkspace}
-              data-contextual-tour-target="workspace-create-control"
-            >
-              <Plus className="size-3.5" strokeWidth={2.25} />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => {
+                  if (!canCreateWorkspace) {
+                    return
+                  }
+                  // Why: the parallel-work tour must click the real sidebar
+                  // control so it can hand off to the workspace-creation tour.
+                  openWorkspaceCreationComposerWithTourHandoff()
+                }}
+                aria-label={translate(
+                  'auto.components.sidebar.SidebarHeader.92154beb7e',
+                  'New workspace'
+                )}
+                disabled={!canCreateWorkspace}
+                data-contextual-tour-target="workspace-create-control"
+              >
+                <Plus className="size-3.5" strokeWidth={2.25} />
+              </Button>
+            }
+          />
           <TooltipContent side="right" sideOffset={6}>
             {canCreateWorkspace
               ? translate(

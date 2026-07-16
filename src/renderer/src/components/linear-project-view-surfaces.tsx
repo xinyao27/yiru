@@ -367,46 +367,50 @@ export function LinearProjectTable({
             <div className="flex items-center justify-end gap-1 md:opacity-0 md:transition-opacity md:group-hover/row:opacity-100 md:group-focus-within/row:opacity-100">
               {onUseProjectIssues ? (
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        onUseProjectIssues(project)
-                      }}
-                      aria-label={translate(
-                        'auto.components.linear.project.view.surfaces.7616c986c6',
-                        'Open {{value0}} issues',
-                        { value0: project.name }
-                      )}
-                    >
-                      <ArrowRight className="size-3.5" />
-                    </Button>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          onUseProjectIssues(project)
+                        }}
+                        aria-label={translate(
+                          'auto.components.linear.project.view.surfaces.7616c986c6',
+                          'Open {{value0}} issues',
+                          { value0: project.name }
+                        )}
+                      >
+                        <ArrowRight className="size-3.5" />
+                      </Button>
+                    }
+                  />
                   <TooltipContent side="bottom" sideOffset={6}>
                     {translate('auto.components.linear.project.view.surfaces.ee3d2caabd', 'Issues')}
                   </TooltipContent>
                 </Tooltip>
               ) : null}
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      onOpenProject(project)
-                    }}
-                    aria-label={translate(
-                      'auto.components.linear.project.view.surfaces.7616c986c6',
-                      'Open {{value0}} in Linear',
-                      { value0: project.name }
-                    )}
-                  >
-                    <ExternalLink className="size-3.5" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onOpenProject(project)
+                      }}
+                      aria-label={translate(
+                        'auto.components.linear.project.view.surfaces.7616c986c6',
+                        'Open {{value0}} in Linear',
+                        { value0: project.name }
+                      )}
+                    >
+                      <ExternalLink className="size-3.5" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6}>
                   {translate(
                     'auto.components.linear.project.view.surfaces.aac9a4afc6',
@@ -540,23 +544,25 @@ export function LinearCustomViewTable({
             </span>
             <div className="flex justify-end md:opacity-0 md:transition-opacity md:group-hover/row:opacity-100 md:group-focus-within/row:opacity-100">
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      onOpenView(view)
-                    }}
-                    aria-label={translate(
-                      'auto.components.linear.project.view.surfaces.7616c986c6',
-                      'Open {{value0}} in Linear',
-                      { value0: view.name }
-                    )}
-                  >
-                    <ExternalLink className="size-3.5" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onOpenView(view)
+                      }}
+                      aria-label={translate(
+                        'auto.components.linear.project.view.surfaces.7616c986c6',
+                        'Open {{value0}} in Linear',
+                        { value0: view.name }
+                      )}
+                    >
+                      <ExternalLink className="size-3.5" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6}>
                   {translate(
                     'auto.components.linear.project.view.surfaces.aac9a4afc6',

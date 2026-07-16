@@ -43,22 +43,24 @@ export function EditorPanelMarkdownActionsMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-          aria-label={translate(
-            'auto.components.editor.EditorPanelMarkdownActionsMenu.561251019a',
-            'More actions'
-          )}
-          title={translate(
-            'auto.components.editor.EditorPanelMarkdownActionsMenu.561251019a',
-            'More actions'
-          )}
-        >
-          <MoreHorizontal size={14} />
-        </button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <button
+            type="button"
+            className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            aria-label={translate(
+              'auto.components.editor.EditorPanelMarkdownActionsMenu.561251019a',
+              'More actions'
+            )}
+            title={translate(
+              'auto.components.editor.EditorPanelMarkdownActionsMenu.561251019a',
+              'More actions'
+            )}
+          >
+            <MoreHorizontal size={14} />
+          </button>
+        }
+      />
       <DropdownMenuContent align="end" sideOffset={4}>
         {isDiffSurface ? (
           <>
@@ -74,10 +76,11 @@ export function EditorPanelMarkdownActionsMenu({
         {canShowMarkdownFrontmatterToggle ? (
           <>
             <DropdownMenuItem
-              onSelect={(event) => {
+              onClick={(event) => {
                 event.preventDefault()
                 onToggleMarkdownFrontmatter()
               }}
+              closeOnClick={false}
             >
               {markdownFrontmatterVisible
                 ? translate(
@@ -96,7 +99,7 @@ export function EditorPanelMarkdownActionsMenu({
           <DropdownMenuItem
             // Why: source/Monaco fallbacks have no rendered document DOM to export.
             disabled={!canExportMarkdownToPdf}
-            onSelect={onExportMarkdownToPdf}
+            onClick={onExportMarkdownToPdf}
           >
             {translate(
               'auto.components.editor.EditorPanelMarkdownActionsMenu.3e0ce48c24',

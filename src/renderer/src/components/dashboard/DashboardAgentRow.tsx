@@ -323,14 +323,16 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
             gives the glyph enough presence for the leading slot without
             overpowering the prompt text. */}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span
-              className="inline-flex shrink-0 items-center justify-center"
-              aria-label={dotTooltipLabel}
-            >
-              <AgentStateDot state={dotState} size={stateDotSize} />
-            </span>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <span
+                className="inline-flex shrink-0 items-center justify-center"
+                aria-label={dotTooltipLabel}
+              >
+                <AgentStateDot state={dotState} size={stateDotSize} />
+              </span>
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             {dotTooltipLabel}
           </TooltipContent>

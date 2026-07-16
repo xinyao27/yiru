@@ -118,23 +118,27 @@ export function ShareUsageButton(props: ShareUsageButtonProps): React.JSX.Elemen
 
   return (
     <Dialog>
-      <TooltipProvider delayDuration={250}>
+      <TooltipProvider delay={250}>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DialogTrigger asChild>
-              <Button
-                ref={setShareButtonRef}
-                variant="ghost"
-                size="icon-xs"
-                aria-label={translate(
-                  'auto.components.stats.ShareUsageButton.bce08eccb9',
-                  'Share usage'
-                )}
-              >
-                <Share2 className="size-3.5" />
-              </Button>
-            </DialogTrigger>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <DialogTrigger
+                render={
+                  <Button
+                    ref={setShareButtonRef}
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={translate(
+                      'auto.components.stats.ShareUsageButton.bce08eccb9',
+                      'Share usage'
+                    )}
+                  >
+                    <Share2 className="size-3.5" />
+                  </Button>
+                }
+              />
+            }
+          />
           <TooltipContent side="bottom" sideOffset={6}>
             {translate('auto.components.stats.ShareUsageButton.cecefa7c32', 'Share')}
           </TooltipContent>

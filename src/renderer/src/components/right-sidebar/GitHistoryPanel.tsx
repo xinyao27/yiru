@@ -250,23 +250,25 @@ export function GitHistoryPanel({
             {result?.hasMore && <span className="text-[10px] font-medium">+</span>}
           </button>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                className="my-auto h-auto w-auto p-0.5 text-muted-foreground hover:bg-transparent hover:text-muted-foreground dark:hover:bg-transparent [&_svg]:size-3"
-                aria-label={translate(
-                  'auto.components.right.sidebar.GitHistoryPanel.9289ba0cb9',
-                  'What are refs?'
-                )}
-                onClick={(event) => {
-                  event.stopPropagation()
-                }}
-              >
-                <CircleHelp className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  className="my-auto h-auto w-auto p-0.5 text-muted-foreground hover:bg-transparent hover:text-muted-foreground dark:hover:bg-transparent [&_svg]:size-3"
+                  aria-label={translate(
+                    'auto.components.right.sidebar.GitHistoryPanel.9289ba0cb9',
+                    'What are refs?'
+                  )}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                  }}
+                >
+                  <CircleHelp className="size-3.5" />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6} className="max-w-72">
               {translate(
                 'auto.components.right.sidebar.GitHistoryPanel.9f7535d22b',
@@ -275,28 +277,30 @@ export function GitHistoryPanel({
             </TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                className="my-auto h-auto w-auto p-0.5 text-muted-foreground hover:bg-transparent hover:text-muted-foreground dark:hover:bg-transparent [&_svg]:size-3"
-                onClick={(event) => {
-                  event.stopPropagation()
-                  if (collapsed) {
-                    onToggle()
-                    return
-                  }
-                  onRefresh()
-                }}
-                aria-label={translate(
-                  'auto.components.right.sidebar.GitHistoryPanel.d0fb0f4bf2',
-                  'Refresh commits'
-                )}
-              >
-                <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  className="my-auto h-auto w-auto p-0.5 text-muted-foreground hover:bg-transparent hover:text-muted-foreground dark:hover:bg-transparent [&_svg]:size-3"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    if (collapsed) {
+                      onToggle()
+                      return
+                    }
+                    onRefresh()
+                  }}
+                  aria-label={translate(
+                    'auto.components.right.sidebar.GitHistoryPanel.d0fb0f4bf2',
+                    'Refresh commits'
+                  )}
+                >
+                  <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate(
                 'auto.components.right.sidebar.GitHistoryPanel.d0fb0f4bf2',
@@ -361,7 +365,7 @@ export function GitHistoryPanel({
               <React.Fragment key={`${viewModel.kind}:${item.id}`}>
                 {onCommitAction && !isBoundaryNode ? (
                   <ContextMenu>
-                    <ContextMenuTrigger asChild>{row}</ContextMenuTrigger>
+                    <ContextMenuTrigger render={row} />
                     <GitHistoryCommitContextMenu item={item} onAction={onCommitAction} />
                   </ContextMenu>
                 ) : (

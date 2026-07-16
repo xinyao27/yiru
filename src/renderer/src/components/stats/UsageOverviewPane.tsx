@@ -121,20 +121,22 @@ export function UsageOverviewPane(): React.JSX.Element {
             </p>
           </div>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={handleRefresh}
-                disabled={!overview.hasAnyEnabledProvider || isScanning}
-                aria-label={translate(
-                  'auto.components.stats.UsageOverviewPane.e06d1baf5c',
-                  'Refresh usage overview'
-                )}
-              >
-                <RefreshCw className={`size-3.5 ${isScanning ? 'animate-spin' : ''}`} />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={handleRefresh}
+                  disabled={!overview.hasAnyEnabledProvider || isScanning}
+                  aria-label={translate(
+                    'auto.components.stats.UsageOverviewPane.e06d1baf5c',
+                    'Refresh usage overview'
+                  )}
+                >
+                  <RefreshCw className={`size-3.5 ${isScanning ? 'animate-spin' : ''}`} />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate('auto.components.stats.UsageOverviewPane.ca6bc5fded', 'Refresh')}
             </TooltipContent>

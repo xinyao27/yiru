@@ -156,22 +156,24 @@ export function RepositoryIconTabs({
         <div className="grid grid-cols-10 gap-1.5">
           {getRepoLucideIconOptions().map((option) => (
             <Tooltip key={option.name}>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant={selectedLucideName === option.name ? 'secondary' : 'ghost'}
-                  size="icon-xs"
-                  className="size-8"
-                  onClick={() => onSetIcon({ type: 'lucide', name: option.name })}
-                  aria-label={translate(
-                    'auto.components.settings.RepositoryIconPicker.2b7d27b93c',
-                    'Use {{value0}} repo icon',
-                    { value0: option.label }
-                  )}
-                >
-                  <option.icon className="size-4" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant={selectedLucideName === option.name ? 'secondary' : 'ghost'}
+                    size="icon-xs"
+                    className="size-8"
+                    onClick={() => onSetIcon({ type: 'lucide', name: option.name })}
+                    aria-label={translate(
+                      'auto.components.settings.RepositoryIconPicker.2b7d27b93c',
+                      'Use {{value0}} repo icon',
+                      { value0: option.label }
+                    )}
+                  >
+                    <option.icon className="size-4" />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {option.label}
               </TooltipContent>

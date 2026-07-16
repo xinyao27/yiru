@@ -39,24 +39,43 @@ export default function WorkspaceKanbanSettingsMenu({
   onAddStatus
 }: WorkspaceKanbanSettingsMenuProps): React.JSX.Element {
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu
+      modal={false}
+      onOpenChange={(open, eventDetails) => {
+        // Why: keep the menu open when the outside press lands inside the status
+        // appearance popover, matching the prior onInteractOutside guard.
+        if (!open && eventDetails.reason === 'outside-press') {
+          const target = eventDetails.event.target
+          if (
+            target instanceof Element &&
+            target.closest('[data-workspace-status-appearance-popover]')
+          ) {
+            eventDetails.cancel()
+          }
+        }
+      }}
+    >
       <Tooltip>
-        <TooltipTrigger asChild>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-label={translate(
-                'auto.components.sidebar.WorkspaceKanbanSettingsMenu.26cbc92150',
-                'Workspace board settings'
-              )}
-              data-contextual-tour-target="workspace-board-settings"
-              className="text-muted-foreground"
-            >
-              <Settings className="size-3.5" />
-            </Button>
-          </DropdownMenuTrigger>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label={translate(
+                    'auto.components.sidebar.WorkspaceKanbanSettingsMenu.26cbc92150',
+                    'Workspace board settings'
+                  )}
+                  data-contextual-tour-target="workspace-board-settings"
+                  className="text-muted-foreground"
+                >
+                  <Settings className="size-3.5" />
+                </Button>
+              }
+            />
+          }
+        />
         <TooltipContent side="top" sideOffset={4}>
           {translate(
             'auto.components.sidebar.WorkspaceKanbanSettingsMenu.34f03eb0de',
@@ -67,17 +86,7 @@ export default function WorkspaceKanbanSettingsMenu({
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        collisionPadding={8}
         className="max-h-[min(80vh,720px)] w-80 overflow-y-auto p-2 scrollbar-sleek"
-        onInteractOutside={(event) => {
-          const target = event.target
-          if (
-            target instanceof Element &&
-            target.closest('[data-workspace-status-appearance-popover]')
-          ) {
-            event.preventDefault()
-          }
-        }}
       >
         <div className="px-1 pb-2">
           <div className="flex items-start justify-between gap-3 rounded-md px-1.5 py-1.5 hover:bg-worktree-sidebar-accent/70">

@@ -565,27 +565,29 @@ export function WorktreeRow({
             </span>
             {showWorktreeActions && (
               <div className="absolute inset-0 flex items-center justify-end gap-0.5 can-hover:opacity-0 can-hover:pointer-events-none transition-opacity group-hover/wtrow:opacity-100 group-hover/wtrow:pointer-events-auto group-focus-within/wtrow:opacity-100 group-focus-within/wtrow:pointer-events-auto">
-                <Tooltip delayDuration={300}>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={onDelete}
-                      disabled={isMainWorktree}
-                      aria-label={translate(
-                        'auto.components.status.bar.ResourceUsageStatusSegment.16bc3c998a',
-                        'Delete workspace {{value0}}',
-                        { value0: rowLabel }
-                      )}
-                      className={cn(
-                        'p-0.5 rounded text-muted-foreground transition-colors',
-                        isMainWorktree
-                          ? 'opacity-40 cursor-not-allowed'
-                          : 'hover:bg-destructive/10 hover:text-destructive'
-                      )}
-                    >
-                      <Trash2 className="size-3" />
-                    </button>
-                  </TooltipTrigger>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <button
+                        type="button"
+                        onClick={onDelete}
+                        disabled={isMainWorktree}
+                        aria-label={translate(
+                          'auto.components.status.bar.ResourceUsageStatusSegment.16bc3c998a',
+                          'Delete workspace {{value0}}',
+                          { value0: rowLabel }
+                        )}
+                        className={cn(
+                          'p-0.5 rounded text-muted-foreground transition-colors',
+                          isMainWorktree
+                            ? 'opacity-40 cursor-not-allowed'
+                            : 'hover:bg-destructive/10 hover:text-destructive'
+                        )}
+                      >
+                        <Trash2 className="size-3" />
+                      </button>
+                    }
+                  />
                   <TooltipContent
                     side="top"
                     sideOffset={4}
@@ -1182,69 +1184,81 @@ export function ResourceUsageStatusSegment({
   return (
     <Popover
       open={open}
-      onOpenChange={(nextOpen) => {
+      onOpenChange={(nextOpen, eventDetails) => {
+        // Why: clicking a terminal row activates a tab, which causes xterm to
+        // programmatically focus the terminal DOM node. Base UI would interpret
+        // that as a focus-outside event and close the popover. Suppress
+        // focus-driven closes; the popover still closes on outside-click and Escape.
+        if (!nextOpen && eventDetails.reason === 'focus-out') {
+          eventDetails.cancel()
+          return
+        }
         if (nextOpen) {
           recordFeatureInteraction('resource-manager')
         }
         setOpen(nextOpen)
       }}
     >
-      <Tooltip delayDuration={150}>
-        <TooltipTrigger asChild>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
-              className="relative inline-flex items-center gap-1.5 cursor-pointer rounded px-1 py-0.5 hover:bg-accent/70"
-              aria-label={
-                daemonUnreachable
-                  ? translate(
-                      'auto.components.status.bar.ResourceUsageStatusSegment.59f178fe11',
-                      '{{value0}}, daemon unreachable',
-                      { value0: resourceManagerAriaLabel }
-                    )
-                  : resourceManagerAriaLabel
-              }
-            >
-              {spaceScanReady ? (
-                <span
-                  className="absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-primary"
-                  aria-hidden="true"
-                />
-              ) : null}
-              <MemoryStick className="size-3 text-muted-foreground" />
-              {!iconOnly && (
-                <>
-                  <span className="text-[11px] font-medium tabular-nums text-muted-foreground">
-                    {memBadgeLabel}
-                  </span>
-                  <span className="text-muted-foreground/50">·</span>
-                  <Terminal className="size-3 text-muted-foreground" />
-                  <span className="text-[11px] tabular-nums text-muted-foreground">
-                    {triggerSessionCount}
-                    {orphanCount > 0 && (
-                      <span className="text-yellow-500 ml-0.5">({orphanCount})</span>
-                    )}
-                  </span>
-                </>
-              )}
-              {iconOnly && triggerSessionCount > 0 && (
-                <span className="text-[11px] tabular-nums text-muted-foreground">
-                  {triggerSessionCount}
-                </span>
-              )}
-              {daemonUnreachable && (
-                <AlertTriangle
-                  className="size-3 text-yellow-500"
-                  aria-label={translate(
-                    'auto.components.status.bar.ResourceUsageStatusSegment.ca95d077db',
-                    'Daemon unreachable'
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <PopoverTrigger
+              render={
+                <button
+                  type="button"
+                  {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
+                  className="relative inline-flex items-center gap-1.5 cursor-pointer rounded px-1 py-0.5 hover:bg-accent/70"
+                  aria-label={
+                    daemonUnreachable
+                      ? translate(
+                          'auto.components.status.bar.ResourceUsageStatusSegment.59f178fe11',
+                          '{{value0}}, daemon unreachable',
+                          { value0: resourceManagerAriaLabel }
+                        )
+                      : resourceManagerAriaLabel
+                  }
+                >
+                  {spaceScanReady ? (
+                    <span
+                      className="absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-primary"
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                  <MemoryStick className="size-3 text-muted-foreground" />
+                  {!iconOnly && (
+                    <>
+                      <span className="text-[11px] font-medium tabular-nums text-muted-foreground">
+                        {memBadgeLabel}
+                      </span>
+                      <span className="text-muted-foreground/50">·</span>
+                      <Terminal className="size-3 text-muted-foreground" />
+                      <span className="text-[11px] tabular-nums text-muted-foreground">
+                        {triggerSessionCount}
+                        {orphanCount > 0 && (
+                          <span className="text-yellow-500 ml-0.5">({orphanCount})</span>
+                        )}
+                      </span>
+                    </>
                   )}
-                />
-              )}
-            </button>
-          </PopoverTrigger>
-        </TooltipTrigger>
+                  {iconOnly && triggerSessionCount > 0 && (
+                    <span className="text-[11px] tabular-nums text-muted-foreground">
+                      {triggerSessionCount}
+                    </span>
+                  )}
+                  {daemonUnreachable && (
+                    <AlertTriangle
+                      className="size-3 text-yellow-500"
+                      aria-label={translate(
+                        'auto.components.status.bar.ResourceUsageStatusSegment.ca95d077db',
+                        'Daemon unreachable'
+                      )}
+                    />
+                  )}
+                </button>
+              }
+            />
+          }
+        />
         <TooltipContent side="top" sideOffset={6}>
           <div className="space-y-0.5">
             {resourceManagerTooltipLines.map((line, index) => (
@@ -1265,13 +1279,8 @@ export function ResourceUsageStatusSegment({
         sideOffset={8}
         {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
         className="w-[26rem] max-w-[calc(100vw-2rem)] p-0"
-        onOpenAutoFocus={(event) => event.preventDefault()}
-        // Why: clicking a terminal row activates a tab, which causes xterm
-        // to programmatically focus the terminal DOM node. Radix would
-        // interpret that as a focus-outside event and close the popover.
-        // Suppress focus-driven closes; the popover still closes on
-        // outside-click (onPointerDownOutside default) and Escape.
-        onFocusOutside={(event) => event.preventDefault()}
+        // Focus-driven closes are suppressed on the Popover root's onOpenChange.
+        initialFocus={false}
       >
         <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-1.5">
           <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-foreground">
@@ -1282,21 +1291,23 @@ export function ResourceUsageStatusSegment({
           </div>
 
           <div className="flex items-center gap-0.5">
-            <Tooltip delayDuration={200}>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => daemonActions.setPending('restart')}
-                  disabled={daemonActions.isBusy}
-                  aria-label={translate(
-                    'auto.components.status.bar.ResourceUsageStatusSegment.c9382662bb',
-                    'Restart daemon'
-                  )}
-                  className="inline-flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
-                >
-                  <RotateCw className="size-3" />
-                </button>
-              </TooltipTrigger>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <button
+                    type="button"
+                    onClick={() => daemonActions.setPending('restart')}
+                    disabled={daemonActions.isBusy}
+                    aria-label={translate(
+                      'auto.components.status.bar.ResourceUsageStatusSegment.c9382662bb',
+                      'Restart daemon'
+                    )}
+                    className="inline-flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
+                  >
+                    <RotateCw className="size-3" />
+                  </button>
+                }
+              />
               <TooltipContent side="top" sideOffset={6}>
                 {translate(
                   'auto.components.status.bar.ResourceUsageStatusSegment.c9382662bb',
@@ -1304,21 +1315,23 @@ export function ResourceUsageStatusSegment({
                 )}
               </TooltipContent>
             </Tooltip>
-            <Tooltip delayDuration={200}>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => daemonActions.setPending('killAll')}
-                  disabled={daemonActions.isBusy}
-                  aria-label={translate(
-                    'auto.components.status.bar.ResourceUsageStatusSegment.bd19fd7a59',
-                    'Kill all sessions'
-                  )}
-                  className="inline-flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
-                >
-                  <Trash2 className="size-3" />
-                </button>
-              </TooltipTrigger>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <button
+                    type="button"
+                    onClick={() => daemonActions.setPending('killAll')}
+                    disabled={daemonActions.isBusy}
+                    aria-label={translate(
+                      'auto.components.status.bar.ResourceUsageStatusSegment.bd19fd7a59',
+                      'Kill all sessions'
+                    )}
+                    className="inline-flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
+                  >
+                    <Trash2 className="size-3" />
+                  </button>
+                }
+              />
               <TooltipContent side="top" sideOffset={6}>
                 {translate(
                   'auto.components.status.bar.ResourceUsageStatusSegment.bd19fd7a59',
@@ -1380,15 +1393,17 @@ export function ResourceUsageStatusSegment({
         {resourceSnapshot && (
           <div className="px-3 py-2 border-b border-border flex items-baseline justify-between gap-3 text-xs tabular-nums">
             <div className="flex items-baseline gap-3 min-w-0">
-              <Tooltip delayDuration={200}>
-                <TooltipTrigger asChild>
-                  <span
-                    tabIndex={0}
-                    className="font-medium text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:rounded"
-                  >
-                    {formatCpu(totalCpu)}
-                  </span>
-                </TooltipTrigger>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <span
+                      tabIndex={0}
+                      className="font-medium text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:rounded"
+                    >
+                      {formatCpu(totalCpu)}
+                    </span>
+                  }
+                />
                 <TooltipContent side="top" sideOffset={6} className="z-[70] max-w-xs">
                   {translate(
                     'auto.components.status.bar.ResourceUsageStatusSegment.1fedf94eae',
@@ -1397,15 +1412,17 @@ export function ResourceUsageStatusSegment({
                 </TooltipContent>
               </Tooltip>
               <span className="text-muted-foreground/50">·</span>
-              <Tooltip delayDuration={200}>
-                <TooltipTrigger asChild>
-                  <span
-                    tabIndex={0}
-                    className="font-medium text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:rounded"
-                  >
-                    {formatMemory(totalMemory)}
-                  </span>
-                </TooltipTrigger>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <span
+                      tabIndex={0}
+                      className="font-medium text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:rounded"
+                    >
+                      {formatMemory(totalMemory)}
+                    </span>
+                  }
+                />
                 <TooltipContent side="top" sideOffset={6} className="z-[70] max-w-xs">
                   {translate(
                     'auto.components.status.bar.ResourceUsageStatusSegment.9e2525c89f',
@@ -1414,19 +1431,21 @@ export function ResourceUsageStatusSegment({
                 </TooltipContent>
               </Tooltip>
               <span className="text-muted-foreground/50">·</span>
-              <Tooltip delayDuration={200}>
-                <TooltipTrigger asChild>
-                  <span
-                    tabIndex={0}
-                    className="text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:rounded"
-                  >
-                    {formatPercent(hostShare)}{' '}
-                    {translate(
-                      'auto.components.status.bar.ResourceUsageStatusSegment.e7ccce7e87',
-                      'of system RAM'
-                    )}
-                  </span>
-                </TooltipTrigger>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <span
+                      tabIndex={0}
+                      className="text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:rounded"
+                    >
+                      {formatPercent(hostShare)}{' '}
+                      {translate(
+                        'auto.components.status.bar.ResourceUsageStatusSegment.e7ccce7e87',
+                        'of system RAM'
+                      )}
+                    </span>
+                  }
+                />
                 <TooltipContent side="top" sideOffset={6} className="z-[70] max-w-xs">
                   {translate(
                     'auto.components.status.bar.ResourceUsageStatusSegment.6449a95c78',
@@ -1618,30 +1637,20 @@ export function ResourceUsageStatusSegment({
           independent of the popover. */}
       <Dialog
         open={killConfirm !== null}
-        onOpenChange={(next) => {
+        onOpenChange={(next, eventDetails) => {
           if (next) {
             return
           }
+          // Why: while a kill is in flight, block every close path
+          // (outside-press, escape, close button) by cancelling the event.
           if (killing) {
+            eventDetails.cancel()
             return
           }
           setKillConfirm(null)
         }}
       >
-        <DialogContent
-          className="max-w-md"
-          showCloseButton={!killing}
-          onPointerDownOutside={(e) => {
-            if (killing) {
-              e.preventDefault()
-            }
-          }}
-          onEscapeKeyDown={(e) => {
-            if (killing) {
-              e.preventDefault()
-            }
-          }}
-        >
+        <DialogContent className="max-w-md" showCloseButton={!killing}>
           <DialogHeader>
             <DialogTitle className="text-sm">
               {translate(

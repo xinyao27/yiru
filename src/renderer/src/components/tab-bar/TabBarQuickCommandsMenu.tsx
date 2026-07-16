@@ -210,32 +210,34 @@ export function TabBarQuickCommandsMenu({
   return (
     <div className={splitButtonClass}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            onClick={() => mostRecent && runAndClose(mostRecent)}
-            disabled={!mostRecent}
-            className={cn(innerButtonBase, 'gap-1.5 rounded-l-md rounded-r-none px-1.5')}
-            aria-label={
-              mostRecent
-                ? translate(
-                    'auto.components.tab.bar.TabBarQuickCommandsButton.b775303755',
-                    'Run quick command: {{value0}}',
-                    { value0: mostRecent.label }
-                  )
-                : translate(
-                    'auto.components.tab.bar.TabBarQuickCommandsButton.85482c57bc',
-                    'Run quick command'
-                  )
-            }
-          >
-            <Play className="size-3 shrink-0" fill="currentColor" strokeWidth={0} />
-            <span className="max-w-[160px] truncate text-[12px] font-medium">
-              {mostRecent?.label ??
-                translate('auto.components.tab.bar.TabBarQuickCommandsButton.7b1c9d6ae1', 'Run')}
-            </span>
-          </button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              onClick={() => mostRecent && runAndClose(mostRecent)}
+              disabled={!mostRecent}
+              className={cn(innerButtonBase, 'gap-1.5 rounded-l-md rounded-r-none px-1.5')}
+              aria-label={
+                mostRecent
+                  ? translate(
+                      'auto.components.tab.bar.TabBarQuickCommandsButton.b775303755',
+                      'Run quick command: {{value0}}',
+                      { value0: mostRecent.label }
+                    )
+                  : translate(
+                      'auto.components.tab.bar.TabBarQuickCommandsButton.85482c57bc',
+                      'Run quick command'
+                    )
+              }
+            >
+              <Play className="size-3 shrink-0" fill="currentColor" strokeWidth={0} />
+              <span className="max-w-[160px] truncate text-[12px] font-medium">
+                {mostRecent?.label ??
+                  translate('auto.components.tab.bar.TabBarQuickCommandsButton.7b1c9d6ae1', 'Run')}
+              </span>
+            </button>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {mostRecent
             ? isTerminalAgentQuickCommand(mostRecent)
@@ -260,22 +262,26 @@ export function TabBarQuickCommandsMenu({
       </Tooltip>
       <DropdownMenu modal={false} open={menuOpen} onOpenChange={handleOpenChange}>
         <Tooltip open={moreCommandsTooltipOpen} onOpenChange={handleMoreCommandsTooltipOpenChange}>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className={cn(
-                  innerButtonBase,
-                  'justify-center rounded-l-none rounded-r-md border-l border-border/60 px-1'
-                )}
-                aria-label={moreCommandsLabel}
-                onPointerEnter={allowMoreCommandsTooltip}
-                onBlur={allowMoreCommandsTooltip}
-              >
-                <ChevronDown className="size-3" strokeWidth={2.5} />
-              </button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <button
+                    type="button"
+                    className={cn(
+                      innerButtonBase,
+                      'justify-center rounded-l-none rounded-r-md border-l border-border/60 px-1'
+                    )}
+                    aria-label={moreCommandsLabel}
+                    onPointerEnter={allowMoreCommandsTooltip}
+                    onBlur={allowMoreCommandsTooltip}
+                  >
+                    <ChevronDown className="size-3" strokeWidth={2.5} />
+                  </button>
+                }
+              />
+            }
+          />
           <TooltipContent side="bottom" sideOffset={6}>
             <span className="inline-flex items-center gap-1.5">
               <span>{moreCommandsLabel}</span>

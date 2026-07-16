@@ -21,20 +21,22 @@ export function ActivityTitlebarControls(): React.JSX.Element {
             sidebar's nav row isn't available as the back path. This Back button
             is the dedicated exit, mirroring Settings' onBack pattern. */}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onClick={closeActivityPage}
-              aria-label={translate(
-                'auto.components.activity.ActivityTitlebarControls.dc708f3eff',
-                'Close agents'
-              )}
-            >
-              <ArrowLeft className="size-3.5" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                onClick={closeActivityPage}
+                aria-label={translate(
+                  'auto.components.activity.ActivityTitlebarControls.dc708f3eff',
+                  'Close agents'
+                )}
+              >
+                <ArrowLeft className="size-3.5" />
+              </Button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={6}>
             {translate(
               'auto.components.activity.ActivityTitlebarControls.dc708f3eff',

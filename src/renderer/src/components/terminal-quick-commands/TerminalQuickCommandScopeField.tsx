@@ -57,13 +57,14 @@ export function TerminalQuickCommandScopeField({
       </Label>
       <div className="flex flex-wrap items-center gap-2">
         <ToggleGroup
-          type="single"
-          value={selectedScope.type}
+          value={[selectedScope.type]}
           onValueChange={(value) => {
-            if (value === 'global') {
+            // Base UI ToggleGroup values are always arrays; single mode holds one.
+            const next = value[0]
+            if (next === 'global') {
               setDraft((current) => ({ ...current, scope: { type: 'global' } }))
             }
-            if (value === 'repo' && selectedScope.type !== 'repo') {
+            if (next === 'repo' && selectedScope.type !== 'repo') {
               const repoId = getQuickCommandProjectScopeRepoId(repos, lastRepoScopeId)
               if (!repoId) {
                 return
@@ -102,6 +103,9 @@ export function TerminalQuickCommandScopeField({
             <Select
               value={selectedRepoId}
               onValueChange={(repoId) => {
+                if (!repoId) {
+                  return
+                }
                 rememberRepoScopeId(repoId)
                 setDraft((current) => ({ ...current, scope: { type: 'repo', repoId } }))
               }}

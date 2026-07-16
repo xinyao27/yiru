@@ -251,7 +251,7 @@ function AgentTargetMenuItem({
   return (
     <DropdownMenuItem
       disabled={disabled}
-      onSelect={() => onSend(target)}
+      onClick={() => onSend(target)}
       // Why: surface the ineligibility reason (permission/stale/no-terminal) as a
       // hover tooltip rather than inline text, matching DashboardAgentRow's
       // title-attribute treatment of the same disabledReason.

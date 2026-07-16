@@ -282,26 +282,28 @@ export function RepoStep({
           <span className="min-w-0 flex-1">{busyLabel}</span>
           {nestedScanInProgress ? (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive/40"
-                  aria-label={translate(
-                    'auto.components.onboarding.RepoStep.c3d9d44ca2',
-                    'Stop scan'
-                  )}
-                  title={translate(
-                    'auto.components.onboarding.RepoStep.c7af322fc3',
-                    'Stop scanning'
-                  )}
-                  onClick={onStopNestedScan}
-                >
-                  <Loader2 className="size-3.5 animate-spin text-annotation-highlight group-hover:hidden group-focus-visible:hidden" />
-                  <CircleStop className="hidden size-3.5 group-hover:block group-focus-visible:block" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive/40"
+                    aria-label={translate(
+                      'auto.components.onboarding.RepoStep.c3d9d44ca2',
+                      'Stop scan'
+                    )}
+                    title={translate(
+                      'auto.components.onboarding.RepoStep.c7af322fc3',
+                      'Stop scanning'
+                    )}
+                    onClick={onStopNestedScan}
+                  >
+                    <Loader2 className="size-3.5 animate-spin text-annotation-highlight group-hover:hidden group-focus-visible:hidden" />
+                    <CircleStop className="hidden size-3.5 group-hover:block group-focus-visible:block" />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {translate(
                   'auto.components.onboarding.RepoStep.e8fdb36338',

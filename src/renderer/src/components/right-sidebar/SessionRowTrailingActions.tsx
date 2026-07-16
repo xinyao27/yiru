@@ -83,26 +83,28 @@ export function SessionRowTrailingActions({
       <div className={HOVER_ACTION_GROUP_CLASS}>
         {onJumpToOriginalPane ? (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                aria-label={translate(
-                  'auto.components.right.sidebar.AiVaultSessionRow.jumpToOriginalPane',
-                  'Jump to Original Pane'
-                )}
-                draggable={false}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  onJumpToOriginalPane()
-                }}
-                data-testid="ai-vault-session-jump-original-pane"
-                className="can-hover:pointer-events-none group-hover/session-row:pointer-events-auto group-focus-within/session-row:pointer-events-auto focus-visible:pointer-events-auto"
-              >
-                <LocateFixed className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label={translate(
+                    'auto.components.right.sidebar.AiVaultSessionRow.jumpToOriginalPane',
+                    'Jump to Original Pane'
+                  )}
+                  draggable={false}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onJumpToOriginalPane()
+                  }}
+                  data-testid="ai-vault-session-jump-original-pane"
+                  className="can-hover:pointer-events-none group-hover/session-row:pointer-events-auto group-focus-within/session-row:pointer-events-auto focus-visible:pointer-events-auto"
+                >
+                  <LocateFixed className="size-3.5" />
+                </Button>
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {translate(
                 'auto.components.right.sidebar.AiVaultSessionRow.jumpToOriginalPane',
@@ -124,81 +126,89 @@ export function SessionRowTrailingActions({
           </Tooltip>
         ) : null}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              aria-label={resumeLabel}
-              disabled={resumeDisabled}
-              draggable={false}
-              onClick={(event) => {
-                event.stopPropagation()
-                onResume()
-              }}
-              data-testid="ai-vault-session-resume"
-              // Why: on touch (no hover) these controls stay visible and
-              // tappable; on hover-capable devices the session row gates both
-              // visibility and hit targets until it is hovered.
-              className="can-hover:pointer-events-none group-hover/session-row:pointer-events-auto group-focus-within/session-row:pointer-events-auto focus-visible:pointer-events-auto"
-            >
-              <Play className="size-3.5" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                aria-label={resumeLabel}
+                disabled={resumeDisabled}
+                draggable={false}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onResume()
+                }}
+                data-testid="ai-vault-session-resume"
+                // Why: on touch (no hover) these controls stay visible and
+                // tappable; on hover-capable devices the session row gates both
+                // visibility and hit targets until it is hovered.
+                className="can-hover:pointer-events-none group-hover/session-row:pointer-events-auto group-focus-within/session-row:pointer-events-auto focus-visible:pointer-events-auto"
+              >
+                <Play className="size-3.5" />
+              </Button>
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             {resumeLabel}
           </TooltipContent>
         </Tooltip>
       </div>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            aria-label={translate(
-              'auto.components.right.sidebar.AiVaultSessionRow.toggleSessionDetails',
-              '{{value0}} session details',
-              { value0: agentLabel(session.agent) }
-            )}
-            aria-expanded={detailsExpanded}
-            aria-controls={detailsId}
-            draggable={false}
-            onClick={(event) => {
-              event.stopPropagation()
-              onToggleDetails()
-            }}
-            data-testid="ai-vault-session-toggle-details"
-          >
-            <ChevronDown
-              className={cn('size-3.5 transition-transform', detailsExpanded && 'rotate-180')}
-            />
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              aria-label={translate(
+                'auto.components.right.sidebar.AiVaultSessionRow.toggleSessionDetails',
+                '{{value0}} session details',
+                { value0: agentLabel(session.agent) }
+              )}
+              aria-expanded={detailsExpanded}
+              aria-controls={detailsId}
+              draggable={false}
+              onClick={(event) => {
+                event.stopPropagation()
+                onToggleDetails()
+              }}
+              data-testid="ai-vault-session-toggle-details"
+            >
+              <ChevronDown
+                className={cn('size-3.5 transition-transform', detailsExpanded && 'rotate-180')}
+              />
+            </Button>
+          }
+        />
         <TooltipContent side="top" sideOffset={4}>
           {detailsTooltip}
         </TooltipContent>
       </Tooltip>
       <DropdownMenu>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                aria-label={translate(
-                  'auto.components.right.sidebar.AiVaultSessionRow.moreSessionActions',
-                  'More Session Actions'
-                )}
-                draggable={false}
-                data-testid="ai-vault-session-more-actions"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <MoreHorizontal className="size-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={translate(
+                      'auto.components.right.sidebar.AiVaultSessionRow.moreSessionActions',
+                      'More Session Actions'
+                    )}
+                    draggable={false}
+                    data-testid="ai-vault-session-more-actions"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <MoreHorizontal className="size-3.5" />
+                  </Button>
+                }
+              />
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             {translate(
               'auto.components.right.sidebar.AiVaultSessionRow.moreActions',
@@ -259,17 +269,19 @@ function WorktreeJumpTooltipTrigger({
   )
 
   if (!disabled) {
-    return <TooltipTrigger asChild>{button}</TooltipTrigger>
+    return <TooltipTrigger render={button} />
   }
 
   return (
-    <TooltipTrigger asChild>
-      <span
-        className="inline-flex can-hover:pointer-events-none group-hover/session-row:pointer-events-auto group-focus-within/session-row:pointer-events-auto"
-        onClick={(event) => event.stopPropagation()}
-      >
-        {button}
-      </span>
-    </TooltipTrigger>
+    <TooltipTrigger
+      render={
+        <span
+          className="inline-flex can-hover:pointer-events-none group-hover/session-row:pointer-events-auto group-focus-within/session-row:pointer-events-auto"
+          onClick={(event) => event.stopPropagation()}
+        >
+          {button}
+        </span>
+      }
+    />
   )
 }

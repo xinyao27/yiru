@@ -35,20 +35,22 @@ export function CliSkillSetupTerminal(): React.JSX.Element {
           {ORCA_CLI_ORCHESTRATION_SKILL_INSTALL_COMMAND}
         </code>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="shrink-0"
-              onClick={() => void handleCopySkillCommand()}
-              aria-label={translate(
-                'auto.components.feature.tips.CliSkillSetupTerminal.5eca672aac',
-                'Copy skill install command'
-              )}
-            >
-              <Copy className="size-4" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0"
+                onClick={() => void handleCopySkillCommand()}
+                aria-label={translate(
+                  'auto.components.feature.tips.CliSkillSetupTerminal.5eca672aac',
+                  'Copy skill install command'
+                )}
+              >
+                <Copy className="size-4" />
+              </Button>
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             {translate(
               'auto.components.feature.tips.CliSkillSetupTerminal.5c3aee22c0',

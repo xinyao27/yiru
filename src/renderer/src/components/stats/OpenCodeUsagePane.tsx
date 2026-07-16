@@ -163,22 +163,26 @@ export function OpenCodeUsagePane(): React.JSX.Element {
         </div>
         <div className="flex shrink-0 items-center gap-2 self-start">
           <DropdownMenu>
-            <TooltipProvider delayDuration={250}>
+            <TooltipProvider delay={250}>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      aria-label={translate(
-                        'auto.components.stats.OpenCodeUsagePane.230d6de108',
-                        'OpenCode usage options'
-                      )}
-                    >
-                      <SlidersHorizontal className="size-3.5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          aria-label={translate(
+                            'auto.components.stats.OpenCodeUsagePane.230d6de108',
+                            'OpenCode usage options'
+                          )}
+                        >
+                          <SlidersHorizontal className="size-3.5" />
+                        </Button>
+                      }
+                    />
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6}>
                   {translate('auto.components.stats.OpenCodeUsagePane.01583b30aa', 'Filters')}
                 </TooltipContent>
@@ -214,22 +218,26 @@ export function OpenCodeUsagePane(): React.JSX.Element {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <TooltipProvider delayDuration={250}>
+          <TooltipProvider delay={250}>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => void refreshOpenCodeUsage()}
-                  disabled={scanState.isScanning}
-                  aria-label={translate(
-                    'auto.components.stats.OpenCodeUsagePane.bed558df0b',
-                    'Refresh OpenCode usage'
-                  )}
-                >
-                  <RefreshCw className={`size-3.5 ${scanState.isScanning ? 'animate-spin' : ''}`} />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={() => void refreshOpenCodeUsage()}
+                    disabled={scanState.isScanning}
+                    aria-label={translate(
+                      'auto.components.stats.OpenCodeUsagePane.bed558df0b',
+                      'Refresh OpenCode usage'
+                    )}
+                  >
+                    <RefreshCw
+                      className={`size-3.5 ${scanState.isScanning ? 'animate-spin' : ''}`}
+                    />
+                  </Button>
+                }
+              />
               <TooltipContent side="bottom" sideOffset={6}>
                 {translate('auto.components.stats.OpenCodeUsagePane.603cd138dc', 'Refresh')}
               </TooltipContent>

@@ -62,7 +62,10 @@ export function AddressPicker({
   const isCustomSelection =
     value !== undefined && value !== '' && !options.some((option) => option.value === value)
 
-  const handleValueChange = (next: string): void => {
+  const handleValueChange = (next: string | null): void => {
+    if (next == null) {
+      return
+    }
     if (next === ADD_CUSTOM_VALUE) {
       setDialogOpen(true)
       return

@@ -134,34 +134,31 @@ export function useNativeChatContextMenu({
     onSelectionCapture: rememberCurrentSelection,
     menu: (
       <DropdownMenu open={state.open} onOpenChange={setOpen} modal={false}>
-        <DropdownMenuTrigger asChild>
-          <button
-            aria-hidden
-            tabIndex={-1}
-            className="pointer-events-none fixed size-px opacity-0"
-            style={{ left: state.point.x, top: state.point.y }}
-          />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="w-56"
-          sideOffset={0}
-          align="start"
-          onCloseAutoFocus={(event) => event.preventDefault()}
-        >
+        <DropdownMenuTrigger
+          render={
+            <button
+              aria-hidden
+              tabIndex={-1}
+              className="pointer-events-none fixed size-px opacity-0"
+              style={{ left: state.point.x, top: state.point.y }}
+            />
+          }
+        />
+        <DropdownMenuContent className="w-56" sideOffset={0} align="start" finalFocus={false}>
           <DropdownMenuItem
             disabled={state.selectedText.trim().length === 0}
-            onSelect={() => void window.api.ui.writeClipboardText(state.selectedText)}
+            onClick={() => void window.api.ui.writeClipboardText(state.selectedText)}
           >
             <Copy />
             {translate('auto.components.nativeChat.contextMenu.copy', 'Copy')}
             <DropdownMenuShortcut>{isMacPlatform() ? '⌘C' : 'Ctrl+C'}</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={actions.onPaste}>
+          <DropdownMenuItem onClick={actions.onPaste}>
             <Clipboard />
             {translate('auto.components.terminal.pane.TerminalContextMenu.0a917b591a', 'Paste')}
           </DropdownMenuItem>
           {onSwitchToTerminal ? (
-            <DropdownMenuItem onSelect={onSwitchToTerminal}>
+            <DropdownMenuItem onClick={onSwitchToTerminal}>
               <SquareTerminal />
               {translate(
                 'components.tab.bar.SortableTabContextMenu.switchToTerminalView',
@@ -170,7 +167,7 @@ export function useNativeChatContextMenu({
               <DropdownMenuShortcut>{shortcutLabel}</DropdownMenuShortcut>
             </DropdownMenuItem>
           ) : null}
-          <DropdownMenuItem onSelect={actions.onForkAgentSession}>
+          <DropdownMenuItem onClick={actions.onForkAgentSession}>
             <GitFork />
             {translate(
               'auto.components.terminal.pane.TerminalContextMenu.8a7ddb8b8a',
@@ -178,14 +175,14 @@ export function useNativeChatContextMenu({
             )}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={actions.onSplitRight}>
+          <DropdownMenuItem onClick={actions.onSplitRight}>
             <PanelRightClose />
             {translate(
               'auto.components.terminal.pane.TerminalContextMenu.20e565d865',
               'Split Terminal Right'
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={actions.onSplitDown}>
+          <DropdownMenuItem onClick={actions.onSplitDown}>
             <PanelBottomClose />
             {translate(
               'auto.components.terminal.pane.TerminalContextMenu.98bccf4fa2',
@@ -193,7 +190,7 @@ export function useNativeChatContextMenu({
             )}
           </DropdownMenuItem>
           {actions.canEqualizePaneSizes ? (
-            <DropdownMenuItem onSelect={actions.onEqualizePaneSizes}>
+            <DropdownMenuItem onClick={actions.onEqualizePaneSizes}>
               <PanelsTopLeft />
               {translate(
                 'auto.components.terminal.pane.TerminalContextMenu.06c2b0f043',
@@ -202,7 +199,7 @@ export function useNativeChatContextMenu({
             </DropdownMenuItem>
           ) : null}
           {actions.canExpandPane ? (
-            <DropdownMenuItem onSelect={actions.onToggleExpand}>
+            <DropdownMenuItem onClick={actions.onToggleExpand}>
               {actions.isPaneExpanded ? <Minimize2 /> : <Maximize2 />}
               {actions.isPaneExpanded
                 ? translate(
@@ -216,21 +213,21 @@ export function useNativeChatContextMenu({
             </DropdownMenuItem>
           ) : null}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={actions.onSetTitle}>
+          <DropdownMenuItem onClick={actions.onSetTitle}>
             <Pencil />
             {translate(
               'auto.components.terminal.pane.TerminalContextMenu.39809d152f',
               'Set Title…'
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={actions.onCopyTerminalId}>
+          <DropdownMenuItem onClick={actions.onCopyTerminalId}>
             <Copy />
             {translate(
               'auto.components.terminal.pane.TerminalContextMenu.copyTerminalId',
               'Copy Terminal ID'
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={actions.onCopyPaneId}>
+          <DropdownMenuItem onClick={actions.onCopyPaneId}>
             <Copy />
             {translate(
               'auto.components.terminal.pane.TerminalContextMenu.2cf85a6a55',
@@ -240,7 +237,7 @@ export function useNativeChatContextMenu({
           {actions.canClosePane ? (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onSelect={actions.onClosePane}>
+              <DropdownMenuItem variant="destructive" onClick={actions.onClosePane}>
                 <X />
                 {translate(
                   'auto.components.terminal.pane.TerminalContextMenu.8c17d6786d',

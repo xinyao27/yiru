@@ -19,7 +19,6 @@ import {
   X
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { VisuallyHidden } from 'radix-ui'
 
 import { LinearIcon } from '@/components/icons/LinearIcon'
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
@@ -272,17 +271,19 @@ function LinearIssueSubIssueButton({
       ) : null}
 
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            className="flex h-9 items-center gap-2 rounded-md px-1 text-sm font-medium text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            <Plus className="size-4" />
-            <span>
-              {translate('auto.components.LinearIssueWorkspace.8c55d6696a', 'Add sub-issues')}
-            </span>
-          </button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              className="flex h-9 items-center gap-2 rounded-md px-1 text-sm font-medium text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <Plus className="size-4" />
+              <span>
+                {translate('auto.components.LinearIssueWorkspace.8c55d6696a', 'Add sub-issues')}
+              </span>
+            </button>
+          }
+        />
         <PopoverContent className="w-80 p-3" align="start">
           <div className="space-y-3">
             <input
@@ -429,19 +430,21 @@ function LinearIssueSidebarProjectCard({
         <ChevronDown className="size-3.5" />
       </div>
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            className="m-3 flex min-h-9 w-[calc(100%-1.5rem)] items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            <FolderKanban className="size-4 shrink-0" />
-            <span className="min-w-0 flex-1 truncate">
-              {issue.project?.name ??
-                translate('auto.components.LinearIssueWorkspace.519c3587f3', 'Add to project')}
-            </span>
-            <ChevronDown className="size-3.5 shrink-0" />
-          </button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              className="m-3 flex min-h-9 w-[calc(100%-1.5rem)] items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <FolderKanban className="size-4 shrink-0" />
+              <span className="min-w-0 flex-1 truncate">
+                {issue.project?.name ??
+                  translate('auto.components.LinearIssueWorkspace.519c3587f3', 'Add to project')}
+              </span>
+              <ChevronDown className="size-3.5 shrink-0" />
+            </button>
+          }
+        />
         <PopoverContent className="w-72 p-2" align="start">
           <div className="space-y-2">
             <input
@@ -744,74 +747,82 @@ export default function LinearIssueWorkspace({
         <div className="flex shrink-0 items-center gap-1">
           <span className="hidden px-2 text-sm text-muted-foreground md:inline">2 / 17</span>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => void copyTextToClipboard(displayed.url, 'URL')}
-                aria-label={translate(
-                  'auto.components.LinearIssueWorkspace.97c19a84f1',
-                  'Copy Linear URL'
-                )}
-              >
-                <Link className="size-4" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => void copyTextToClipboard(displayed.url, 'URL')}
+                  aria-label={translate(
+                    'auto.components.LinearIssueWorkspace.97c19a84f1',
+                    'Copy Linear URL'
+                  )}
+                >
+                  <Link className="size-4" />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate('auto.components.LinearIssueWorkspace.9a9a884236', 'Copy URL')}
             </TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => void copyTextToClipboard(displayed.identifier, 'Identifier')}
-                aria-label={translate(
-                  'auto.components.LinearIssueWorkspace.9e3c49beb8',
-                  'Copy issue identifier'
-                )}
-              >
-                <Clipboard className="size-4" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => void copyTextToClipboard(displayed.identifier, 'Identifier')}
+                  aria-label={translate(
+                    'auto.components.LinearIssueWorkspace.9e3c49beb8',
+                    'Copy issue identifier'
+                  )}
+                >
+                  <Clipboard className="size-4" />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate('auto.components.LinearIssueWorkspace.30c1242f3a', 'Copy identifier')}
             </TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleUseIssue}
-                aria-label={translate(
-                  'auto.components.LinearIssueWorkspace.30a7f56c0a',
-                  'Start workspace from issue'
-                )}
-              >
-                <ArrowRight className="size-4" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={handleUseIssue}
+                  aria-label={translate(
+                    'auto.components.LinearIssueWorkspace.30a7f56c0a',
+                    'Start workspace from issue'
+                  )}
+                >
+                  <ArrowRight className="size-4" />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate('auto.components.LinearIssueWorkspace.e1e0a9bca9', 'Start workspace')}
             </TooltipContent>
           </Tooltip>
           {variant === 'sheet' ? (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={onClose}
-                  aria-label={translate(
-                    'auto.components.LinearIssueWorkspace.7a4997d8bb',
-                    'Close Linear issue preview'
-                  )}
-                >
-                  <X className="size-4" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={onClose}
+                    aria-label={translate(
+                      'auto.components.LinearIssueWorkspace.7a4997d8bb',
+                      'Close Linear issue preview'
+                    )}
+                  >
+                    <X className="size-4" />
+                  </Button>
+                }
+              />
               <TooltipContent side="bottom" sideOffset={6}>
                 {translate('auto.components.LinearIssueWorkspace.df4c86ed12', 'Close')}
               </TooltipContent>
@@ -961,16 +972,18 @@ export default function LinearIssueWorkspace({
                   const Icon = item.icon
                   return (
                     <Tooltip key={item.label}>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={item.action}
-                          className="flex min-h-9 w-full min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                          <Icon className="size-4 shrink-0" />
-                          <span className="truncate">{item.label}</span>
-                        </button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <button
+                            type="button"
+                            onClick={item.action}
+                            className="flex min-h-9 w-full min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                          >
+                            <Icon className="size-4 shrink-0" />
+                            <span className="truncate">{item.label}</span>
+                          </button>
+                        }
+                      />
                       <TooltipContent side="left" sideOffset={6}>
                         {item.label}
                       </TooltipContent>
@@ -999,24 +1012,18 @@ export default function LinearIssueWorkspace({
         side="right"
         showCloseButton={false}
         className="w-[min(92vw,1180px)] bg-background p-0 sm:max-w-[1180px]"
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
-        }}
+        initialFocus={false}
       >
-        <VisuallyHidden.Root asChild>
-          <SheetTitle>
-            {displayed?.title ??
-              translate('auto.components.LinearIssueWorkspace.61f424f8ca', 'Linear issue')}
-          </SheetTitle>
-        </VisuallyHidden.Root>
-        <VisuallyHidden.Root asChild>
-          <SheetDescription>
-            {translate(
-              'auto.components.LinearIssueWorkspace.ad5dec37b7',
-              'Preview, edit, and start work from the selected issue.'
-            )}
-          </SheetDescription>
-        </VisuallyHidden.Root>
+        <SheetTitle className="sr-only">
+          {displayed?.title ??
+            translate('auto.components.LinearIssueWorkspace.61f424f8ca', 'Linear issue')}
+        </SheetTitle>
+        <SheetDescription className="sr-only">
+          {translate(
+            'auto.components.LinearIssueWorkspace.ad5dec37b7',
+            'Preview, edit, and start work from the selected issue.'
+          )}
+        </SheetDescription>
 
         {content}
       </SheetContent>

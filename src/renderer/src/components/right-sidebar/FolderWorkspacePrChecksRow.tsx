@@ -103,20 +103,22 @@ export function FolderWorkspacePrChecksRow({
         </div>
         {row.reviewUrl ? (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="rounded p-1 text-muted-foreground opacity-80 hover:bg-accent hover:text-foreground group-hover:opacity-100"
-                aria-label={openExternalLabel}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  void openHttpLink(row.reviewUrl!)
-                }}
-                onKeyDown={(event) => event.stopPropagation()}
-              >
-                <ExternalLink className="size-3.5" />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  className="rounded p-1 text-muted-foreground opacity-80 hover:bg-accent hover:text-foreground group-hover:opacity-100"
+                  aria-label={openExternalLabel}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    void openHttpLink(row.reviewUrl!)
+                  }}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
+                  <ExternalLink className="size-3.5" />
+                </button>
+              }
+            />
             <TooltipContent side="left">{openExternalLabel}</TooltipContent>
           </Tooltip>
         ) : null}

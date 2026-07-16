@@ -111,7 +111,17 @@ export function NotesSendMenu<TNote>({
   )
 
   const handleOpenChange = useCallback(
-    (open: boolean) => {
+    (open: boolean, eventDetails: { reason?: string; event?: Event; cancel: () => void }) => {
+      // Why: keep the menu open when the outside press lands on another agent
+      // send target, matching the prior onInteractOutside/onPointerDownOutside guard.
+      if (
+        !open &&
+        eventDetails.reason === 'outside-press' &&
+        shouldKeepAgentSendMenuOpen(eventDetails.event)
+      ) {
+        eventDetails.cancel()
+        return
+      }
       setSendMenuOpen(open)
       if (open) {
         if (defaultScope) {
@@ -141,55 +151,54 @@ export function NotesSendMenu<TNote>({
   return (
     <DropdownMenu modal={false} open={effectiveSendMenuOpen} onOpenChange={handleOpenChange}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className={cn(
-                'inline-flex items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground',
-                triggerClassName
-              )}
-              disabled={!hasDeliverableNotes}
-              title={hasDeliverableNotes ? ENABLED_SEND_TOOLTIP : disabledTooltip}
-              aria-label={
-                triggerLabel
-                  ? translate(
-                      'auto.components.editor.NotesSendMenu.433928cd9f',
-                      'Send {{value0}} to an agent',
-                      { value0: triggerLabel }
-                    )
-                  : ENABLED_SEND_TOOLTIP
-              }
-              onMouseDown={(event) => event.stopPropagation()}
-              onClick={(event) => event.stopPropagation()}
-            >
-              {triggerLabel ? (
-                <>
-                  <Sparkles className="size-3 text-violet-500 dark:text-violet-400" />
-                  <span className="whitespace-nowrap">{triggerLabel}</span>
-                  {triggerCount !== undefined ? (
-                    <span className="rounded-full bg-background/80 px-1 text-[10px] tabular-nums text-muted-foreground">
-                      {triggerCount}
-                    </span>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <button
+                  type="button"
+                  className={cn(
+                    'inline-flex items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground',
+                    triggerClassName
+                  )}
+                  disabled={!hasDeliverableNotes}
+                  title={hasDeliverableNotes ? ENABLED_SEND_TOOLTIP : disabledTooltip}
+                  aria-label={
+                    triggerLabel
+                      ? translate(
+                          'auto.components.editor.NotesSendMenu.433928cd9f',
+                          'Send {{value0}} to an agent',
+                          { value0: triggerLabel }
+                        )
+                      : ENABLED_SEND_TOOLTIP
+                  }
+                  onMouseDown={(event) => event.stopPropagation()}
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  {triggerLabel ? (
+                    <>
+                      <Sparkles className="size-3 text-violet-500 dark:text-violet-400" />
+                      <span className="whitespace-nowrap">{triggerLabel}</span>
+                      {triggerCount !== undefined ? (
+                        <span className="rounded-full bg-background/80 px-1 text-[10px] tabular-nums text-muted-foreground">
+                          {triggerCount}
+                        </span>
+                      ) : null}
+                      <span className="mx-0.5 h-3 w-px bg-border/70" aria-hidden />
+                    </>
                   ) : null}
-                  <span className="mx-0.5 h-3 w-px bg-border/70" aria-hidden />
-                </>
-              ) : null}
-              <Send className={iconClassName} />
-              {actionLabel ? <span className="whitespace-nowrap">{actionLabel}</span> : null}
-            </button>
-          </DropdownMenuTrigger>
-        </TooltipTrigger>
+                  <Send className={iconClassName} />
+                  {actionLabel ? <span className="whitespace-nowrap">{actionLabel}</span> : null}
+                </button>
+              }
+            />
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {hasDeliverableNotes ? ENABLED_SEND_TOOLTIP : disabledTooltip}
         </TooltipContent>
       </Tooltip>
-      <DropdownMenuContent
-        align={align}
-        className="min-w-[220px]"
-        onInteractOutside={preventAgentSendTargetOutsideDismiss}
-        onPointerDownOutside={preventAgentSendTargetOutsideDismiss}
-      >
+      <DropdownMenuContent align={align} className="min-w-[220px]">
         {scopes.length > 1 ? (
           <>
             <DropdownMenuLabel>
@@ -237,18 +246,16 @@ export function NotesSendMenu<TNote>({
   )
 }
 
-function preventAgentSendTargetOutsideDismiss(event: CustomEvent<{ originalEvent: Event }>) {
-  const target = event.detail.originalEvent.target
+function shouldKeepAgentSendMenuOpen(event: Event | undefined): boolean {
+  const target = event?.target
   if (!(target instanceof Element)) {
-    return
+    return false
   }
-  if (
+  return Boolean(
     target.closest(
       '[data-agent-send-target="eligible"], [data-agent-send-target="disabled"], [data-agent-send-target="sending"]'
     )
-  ) {
-    event.preventDefault()
-  }
+  )
 }
 
 function NoteScopeMenuRow({ label, count }: { label: string; count: number }): React.JSX.Element {

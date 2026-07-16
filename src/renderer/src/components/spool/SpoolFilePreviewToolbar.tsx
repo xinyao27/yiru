@@ -87,30 +87,34 @@ export function SpoolFilePreviewToolbar({
         ) : null}
         <DropdownMenu>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  size="icon-xs"
-                  variant="ghost"
-                  aria-label={translate(
-                    'auto.components.spool.SpoolFilePreview.fileActions',
-                    'File actions'
-                  )}
-                >
-                  <MoreHorizontal aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      type="button"
+                      size="icon-xs"
+                      variant="ghost"
+                      aria-label={translate(
+                        'auto.components.spool.SpoolFilePreview.fileActions',
+                        'File actions'
+                      )}
+                    >
+                      <MoreHorizontal aria-hidden="true" />
+                    </Button>
+                  }
+                />
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {translate('auto.components.spool.SpoolFilePreview.fileActions', 'File actions')}
             </TooltipContent>
           </Tooltip>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem disabled={!canControl} onSelect={onRename}>
+            <DropdownMenuItem disabled={!canControl} onClick={onRename}>
               {translate('auto.components.spool.SpoolFilePreview.rename', 'Rename')}
             </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" disabled={!canControl} onSelect={onDelete}>
+            <DropdownMenuItem variant="destructive" disabled={!canControl} onClick={onDelete}>
               <Trash2 aria-hidden="true" />
               {translate('auto.components.spool.SpoolFilePreview.delete', 'Delete')}
             </DropdownMenuItem>

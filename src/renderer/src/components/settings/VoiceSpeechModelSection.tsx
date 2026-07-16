@@ -54,19 +54,21 @@ export function VoiceSpeechModelSection({
         </p>
       </div>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!voiceSettings.enabled}
-            className="shrink-0 gap-1.5"
-          >
-            {selectedModel && selectedIsReady
-              ? selectedModel.label
-              : translate('auto.components.settings.VoicePane.fbe5990716', 'Select Model')}
-            <ChevronDown className="size-3 opacity-50" />
-          </Button>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!voiceSettings.enabled}
+              className="shrink-0 gap-1.5"
+            >
+              {selectedModel && selectedIsReady
+                ? selectedModel.label
+                : translate('auto.components.settings.VoicePane.fbe5990716', 'Select Model')}
+              <ChevronDown className="size-3 opacity-50" />
+            </Button>
+          }
+        />
         <DropdownMenuContent align="end" className="w-96">
           {catalog.map((manifest) => {
             const mState = getModelState(manifest.id)
@@ -82,7 +84,7 @@ export function VoiceSpeechModelSection({
               <DropdownMenuItem
                 key={manifest.id}
                 disabled={isDownloading}
-                onSelect={(event) => {
+                onClick={(event) => {
                   if (isReady) {
                     onUpdateVoiceSettings({ sttModel: manifest.id })
                   } else if (isCloud) {
@@ -105,6 +107,7 @@ export function VoiceSpeechModelSection({
                 className={`group flex items-center gap-2.5 py-2.5 ${
                   !isCloud && !isReady && !isDownloading ? 'opacity-50' : ''
                 }`}
+                closeOnClick={false}
               >
                 <span className="flex size-4 shrink-0 items-center justify-center">
                   {isActive && isReady ? (

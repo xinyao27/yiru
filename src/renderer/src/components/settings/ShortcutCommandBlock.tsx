@@ -139,15 +139,17 @@ export function ShortcutCommandBlock({
           ) : null}
           {terminalStatus && hasBinding ? (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge
-                  variant="outline"
-                  className="shrink-0 gap-1 border-border/70 text-[11px] text-muted-foreground"
-                >
-                  <Terminal className="size-3" />
-                  {terminalStatus.label}
-                </Badge>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 gap-1 border-border/70 text-[11px] text-muted-foreground"
+                  >
+                    <Terminal className="size-3" />
+                    {terminalStatus.label}
+                  </Badge>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {terminalStatus.description}
               </TooltipContent>
@@ -162,22 +164,24 @@ export function ShortcutCommandBlock({
           <div className="can-hover:opacity-0 flex items-center gap-0.5 transition-opacity group-hover/shortcut:opacity-100 group-focus-within/shortcut:opacity-100">
             {hasBinding && !showAppendSlot ? (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    className="text-muted-foreground hover:text-foreground"
-                    aria-label={translate(
-                      'auto.components.settings.ShortcutCommandBlock.a0e2ef0e61',
-                      'Add another shortcut for {{value0}}',
-                      { value0: item.title }
-                    )}
-                    onClick={() => onAppendBinding(item.id)}
-                  >
-                    <Plus className="size-3" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label={translate(
+                        'auto.components.settings.ShortcutCommandBlock.a0e2ef0e61',
+                        'Add another shortcut for {{value0}}',
+                        { value0: item.title }
+                      )}
+                      onClick={() => onAppendBinding(item.id)}
+                    >
+                      <Plus className="size-3" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="top" sideOffset={4}>
                   {translate(
                     'auto.components.settings.ShortcutCommandBlock.245c83af24',
@@ -188,22 +192,24 @@ export function ShortcutCommandBlock({
             ) : null}
             {modified ? (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    className="text-muted-foreground hover:text-foreground"
-                    aria-label={translate(
-                      'auto.components.settings.ShortcutCommandBlock.07939d084e',
-                      'Reset {{value0}} to default',
-                      { value0: item.title }
-                    )}
-                    onClick={() => onResetAction(item.id)}
-                  >
-                    <RotateCcw className="size-3" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label={translate(
+                        'auto.components.settings.ShortcutCommandBlock.07939d084e',
+                        'Reset {{value0}} to default',
+                        { value0: item.title }
+                      )}
+                      onClick={() => onResetAction(item.id)}
+                    >
+                      <RotateCcw className="size-3" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="top" sideOffset={4}>
                   {translate(
                     'auto.components.settings.ShortcutCommandBlock.9b02917027',
@@ -214,22 +220,24 @@ export function ShortcutCommandBlock({
             ) : null}
             {hasBinding ? (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    className="text-muted-foreground hover:text-destructive"
-                    aria-label={translate(
-                      'auto.components.settings.ShortcutCommandBlock.a799f90f82',
-                      'Disable {{value0}}',
-                      { value0: item.title }
-                    )}
-                    onClick={() => onDisableAction(item.id)}
-                  >
-                    <Ban className="size-3" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      className="text-muted-foreground hover:text-destructive"
+                      aria-label={translate(
+                        'auto.components.settings.ShortcutCommandBlock.a799f90f82',
+                        'Disable {{value0}}',
+                        { value0: item.title }
+                      )}
+                      onClick={() => onDisableAction(item.id)}
+                    >
+                      <Ban className="size-3" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="top" sideOffset={4}>
                   {translate(
                     'auto.components.settings.ShortcutCommandBlock.25e6e76618',
@@ -271,22 +279,24 @@ export function ShortcutCommandBlock({
               </Button>
             ) : (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    className="text-muted-foreground hover:text-foreground"
-                    aria-label={translate(
-                      'auto.components.settings.ShortcutCommandBlock.01481b964c',
-                      'Add shortcut for {{value0}}',
-                      { value0: item.title }
-                    )}
-                    onClick={() => onAppendBinding(item.id)}
-                  >
-                    <Plus className="size-3" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label={translate(
+                        'auto.components.settings.ShortcutCommandBlock.01481b964c',
+                        'Add shortcut for {{value0}}',
+                        { value0: item.title }
+                      )}
+                      onClick={() => onAppendBinding(item.id)}
+                    >
+                      <Plus className="size-3" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="top" sideOffset={4}>
                   {translate(
                     'auto.components.settings.ShortcutCommandBlock.035a822ef0',

@@ -251,10 +251,8 @@ export function WorktreeCardDetailsHover({
     <HoverCard
       open={hoverOpen || workspaceTitleEditing}
       onOpenChange={handleEffectiveHoverOpenChange}
-      openDelay={openDelay}
-      closeDelay={closeDelay}
     >
-      <HoverCardTrigger asChild>{children}</HoverCardTrigger>
+      <HoverCardTrigger delay={openDelay} closeDelay={closeDelay} render={children} />
       <HoverCardContent
         side="right"
         align="start"

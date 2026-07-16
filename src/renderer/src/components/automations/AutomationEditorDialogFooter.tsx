@@ -106,18 +106,20 @@ export function AutomationEditorDialogFooter({
                 'Workspace'
               )}
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label={translate(
-                      'auto.components.automations.AutomationEditorDialog.2c3fd9bfa1',
-                      'Workspace mode help'
-                    )}
-                    className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                  >
-                    <Info className="size-3.5" />
-                  </button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      aria-label={translate(
+                        'auto.components.automations.AutomationEditorDialog.2c3fd9bfa1',
+                        'Workspace mode help'
+                      )}
+                      className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    >
+                      <Info className="size-3.5" />
+                    </button>
+                  }
+                />
                 <TooltipContent side="top" sideOffset={6} className="max-w-72">
                   {translate(
                     'auto.components.automations.AutomationEditorDialog.6f9610e667',
@@ -141,9 +143,8 @@ export function AutomationEditorDialogFooter({
           ) : (
             <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
               <ToggleGroup
-                type="single"
-                value={draft.workspaceMode}
-                onValueChange={(workspaceMode) =>
+                value={[draft.workspaceMode]}
+                onValueChange={([workspaceMode]) =>
                   workspaceMode &&
                   onDraftChange((current) => ({
                     ...current,

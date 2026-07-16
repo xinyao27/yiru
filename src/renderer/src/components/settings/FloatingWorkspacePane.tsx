@@ -167,14 +167,13 @@ export function FloatingWorkspacePane({
           )}
           control={
             <ToggleGroup
-              type="single"
-              value={settings.floatingTerminalTriggerLocation ?? 'floating-button'}
+              value={[settings.floatingTerminalTriggerLocation ?? 'floating-button']}
               onValueChange={(value) => {
-                if (!value) {
+                if (!value[0]) {
                   return
                 }
                 updateSettings({
-                  floatingTerminalTriggerLocation: value as FloatingTerminalTriggerLocation
+                  floatingTerminalTriggerLocation: value[0] as FloatingTerminalTriggerLocation
                 })
                 useAppStore.getState().recordFeatureInteraction('floating-workspace')
               }}

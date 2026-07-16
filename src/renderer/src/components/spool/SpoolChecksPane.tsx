@@ -83,19 +83,21 @@ export function SpoolChecksPane({ state }: { state: SpoolChecksReadState }): Rea
           {translate('auto.components.spool.SpoolChecksPane.reviewChecks', 'Review checks')}
         </span>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:border-sidebar-ring focus-visible:ring-sidebar-ring/50 dark:hover:bg-sidebar-accent/50"
-              disabled={loading}
-              onClick={() => void refresh()}
-              aria-label={translate('auto.components.spool.SpoolChecksPane.refresh', 'Refresh')}
-            >
-              <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:border-sidebar-ring focus-visible:ring-sidebar-ring/50 dark:hover:bg-sidebar-accent/50"
+                disabled={loading}
+                onClick={() => void refresh()}
+                aria-label={translate('auto.components.spool.SpoolChecksPane.refresh', 'Refresh')}
+              >
+                <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
+              </Button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={4}>
             {translate('auto.components.spool.SpoolChecksPane.refresh', 'Refresh')}
           </TooltipContent>

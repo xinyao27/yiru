@@ -685,7 +685,7 @@ function TabBarInner({
         return (
           <DropdownMenuItem
             key={entry.shell}
-            onSelect={() => {
+            onClick={() => {
               // Why: the top-level Windows shell menu models shell
               // categories, not concrete executables. When the user
               // picked PowerShell 7+ in advanced settings, launching the
@@ -722,7 +722,7 @@ function TabBarInner({
     )
   const newBrowserMenuItem = !terminalOnly ? (
     <DropdownMenuItem
-      onSelect={onNewBrowserTab}
+      onClick={onNewBrowserTab}
       className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
     >
       <Globe className="size-4 text-muted-foreground" />
@@ -734,16 +734,18 @@ function TabBarInner({
     !terminalOnly && mobileEmulatorEnabled && onNewSimulatorTab ? (
       workspaceHasSimulatorTab ? (
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuItem
-              onSelect={onNewSimulatorTab}
-              className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
-            >
-              <Smartphone className="size-4 text-muted-foreground" />
-              {translate('auto.components.tab.bar.TabBar.b426bb2615', 'Go to Mobile Emulator')}
-              <DropdownMenuShortcut>{newSimulatorShortcut}</DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <DropdownMenuItem
+                onClick={onNewSimulatorTab}
+                className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
+              >
+                <Smartphone className="size-4 text-muted-foreground" />
+                {translate('auto.components.tab.bar.TabBar.b426bb2615', 'Go to Mobile Emulator')}
+                <DropdownMenuShortcut>{newSimulatorShortcut}</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            }
+          />
           <TooltipContent side="right" sideOffset={8} className="z-[80]">
             {translate(
               'auto.components.tab.bar.TabBar.aea43b5748',
@@ -753,7 +755,7 @@ function TabBarInner({
         </Tooltip>
       ) : (
         <DropdownMenuItem
-          onSelect={onNewSimulatorTab}
+          onClick={onNewSimulatorTab}
           className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
         >
           <Smartphone className="size-4 text-muted-foreground" />
@@ -765,7 +767,7 @@ function TabBarInner({
   const newMarkdownMenuItem =
     !terminalOnly && onNewFileTab ? (
       <DropdownMenuItem
-        onSelect={onNewFileTab}
+        onClick={onNewFileTab}
         className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
       >
         <FilePlus className="size-4 text-muted-foreground" />
@@ -776,7 +778,7 @@ function TabBarInner({
   const openMarkdownMenuItem =
     !terminalOnly && onOpenFileTab ? (
       <DropdownMenuItem
-        onSelect={onOpenFileTab}
+        onClick={onOpenFileTab}
         className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
       >
         <FileText className="size-4 text-muted-foreground" />
@@ -1174,11 +1176,12 @@ function TabBarInner({
       <WorkspaceTabCreateMenu
         open={newTabMenuOpen}
         onOpenChange={setNewTabMenuOpen}
-        onCloseAutoFocus={(e) => {
+        finalFocus={() => {
           // Why: terminal-producing menu actions activate a freshly-mounted
-          // xterm. Radix focus restore would steal focus back to the trigger.
-          e.preventDefault()
+          // xterm. Returning false suppresses Base UI's focus restore (which
+          // would steal focus back to the trigger) and runs our custom focus.
           runPendingNewTabMenuFocusAfterClose()
+          return false
         }}
       >
         {!terminalOnly && onOpenEntry ? (

@@ -213,11 +213,15 @@ export function CreateHostedReviewComposer({
           {aiGenerationEnabled ? (
             <Tooltip>
               {!generating && generateDisabled ? (
-                <TooltipTrigger asChild>
-                  <span className="inline-flex shrink-0 cursor-not-allowed">{generateButton}</span>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <span className="inline-flex shrink-0 cursor-not-allowed">
+                      {generateButton}
+                    </span>
+                  }
+                />
               ) : (
-                <TooltipTrigger asChild>{generateButton}</TooltipTrigger>
+                <TooltipTrigger render={generateButton} />
               )}
               <TooltipContent side="left" sideOffset={6}>
                 {generateTooltipLabel}
@@ -279,27 +283,29 @@ export function CreateHostedReviewComposer({
           </Button>
           {showDropdown ? (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  size="xs"
-                  className={cn(
-                    'h-7 rounded-l-none border-l border-primary-foreground/20 px-1.5 shrink-0',
-                    createDisabled && 'opacity-50'
-                  )}
-                  aria-label={translate(
-                    'auto.components.right.sidebar.SourceControl.c5e4175139',
-                    'More {{value0}} and remote actions',
-                    { value0: copy.reviewLabel }
-                  )}
-                  title={translate(
-                    'auto.components.right.sidebar.SourceControl.4d6e1fd7f3',
-                    'More actions'
-                  )}
-                >
-                  <ChevronDown className="size-3.5" />
-                </Button>
-              </DropdownMenuTrigger>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    size="xs"
+                    className={cn(
+                      'h-7 rounded-l-none border-l border-primary-foreground/20 px-1.5 shrink-0',
+                      createDisabled && 'opacity-50'
+                    )}
+                    aria-label={translate(
+                      'auto.components.right.sidebar.SourceControl.c5e4175139',
+                      'More {{value0}} and remote actions',
+                      { value0: copy.reviewLabel }
+                    )}
+                    title={translate(
+                      'auto.components.right.sidebar.SourceControl.4d6e1fd7f3',
+                      'More actions'
+                    )}
+                  >
+                    <ChevronDown className="size-3.5" />
+                  </Button>
+                }
+              />
               <DropdownMenuContent align="end" className="min-w-[14rem]">
                 {effectiveDropdownItems.map((entry, index) =>
                   entry.kind === 'separator' ? (
@@ -310,13 +316,14 @@ export function CreateHostedReviewComposer({
                       disabled={entry.disabled}
                       title={entry.title}
                       variant={entry.variant}
-                      onSelect={(event) => {
+                      onClick={(event) => {
                         if (entry.disabled) {
                           event.preventDefault()
                           return
                         }
                         onDropdownAction(entry.kind)
                       }}
+                      closeOnClick={false}
                     >
                       <span className="flex min-w-0 flex-col">
                         <span>{entry.label}</span>

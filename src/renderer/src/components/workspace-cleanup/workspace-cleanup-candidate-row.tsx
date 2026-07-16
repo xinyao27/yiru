@@ -69,22 +69,24 @@ function MetadataIconChip({
 }): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span
-          className={cn(
-            'inline-flex h-5 shrink-0 items-center gap-1 rounded-full border px-1.5 text-[11px] font-medium',
-            'border-border bg-background text-muted-foreground',
-            tone === 'ready' &&
-              'border-[color:color-mix(in_srgb,var(--git-decoration-added)_45%,transparent)] bg-[color:color-mix(in_srgb,var(--git-decoration-added)_10%,transparent)] text-[var(--git-decoration-added)]',
-            tone === 'review' && 'bg-muted text-foreground',
-            tone === 'destructive' && 'border-destructive/30 text-destructive'
-          )}
-          aria-label={label}
-        >
-          <Icon className="size-3" aria-hidden="true" />
-          {value ? <span>{value}</span> : null}
-        </span>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <span
+            className={cn(
+              'inline-flex h-5 shrink-0 items-center gap-1 rounded-full border px-1.5 text-[11px] font-medium',
+              'border-border bg-background text-muted-foreground',
+              tone === 'ready' &&
+                'border-[color:color-mix(in_srgb,var(--git-decoration-added)_45%,transparent)] bg-[color:color-mix(in_srgb,var(--git-decoration-added)_10%,transparent)] text-[var(--git-decoration-added)]',
+              tone === 'review' && 'bg-muted text-foreground',
+              tone === 'destructive' && 'border-destructive/30 text-destructive'
+            )}
+            aria-label={label}
+          >
+            <Icon className="size-3" aria-hidden="true" />
+            {value ? <span>{value}</span> : null}
+          </span>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {label}
       </TooltipContent>
@@ -215,29 +217,31 @@ export const CandidateRow = React.memo(function CandidateRow({
         <div className="flex shrink-0 items-center gap-0.5">
           {hasExpandableDetails ? (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label={
-                    expanded
-                      ? translate(
-                          'auto.components.workspace.cleanup.candidateRow.collapseDetails',
-                          'Collapse details'
-                        )
-                      : translate(
-                          'auto.components.workspace.cleanup.candidateRow.expandDetails',
-                          'Expand details'
-                        )
-                  }
-                  aria-expanded={expanded}
-                  onClick={() => onToggleExpanded(candidate.worktreeId)}
-                >
-                  <ChevronDown
-                    className={cn('size-3.5 transition-transform', expanded && 'rotate-180')}
-                  />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={
+                      expanded
+                        ? translate(
+                            'auto.components.workspace.cleanup.candidateRow.collapseDetails',
+                            'Collapse details'
+                          )
+                        : translate(
+                            'auto.components.workspace.cleanup.candidateRow.expandDetails',
+                            'Expand details'
+                          )
+                    }
+                    aria-expanded={expanded}
+                    onClick={() => onToggleExpanded(candidate.worktreeId)}
+                  >
+                    <ChevronDown
+                      className={cn('size-3.5 transition-transform', expanded && 'rotate-180')}
+                    />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {expanded
                   ? translate(
@@ -252,20 +256,22 @@ export const CandidateRow = React.memo(function CandidateRow({
             </Tooltip>
           ) : null}
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                aria-label={translate(
-                  'auto.components.workspace.cleanup.WorkspaceCleanupDialog.1bffc07ba7',
-                  'View {{value0}}',
-                  { value0: candidate.displayName }
-                )}
-                onClick={() => onView(candidate)}
-              >
-                <Search className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label={translate(
+                    'auto.components.workspace.cleanup.WorkspaceCleanupDialog.1bffc07ba7',
+                    'View {{value0}}',
+                    { value0: candidate.displayName }
+                  )}
+                  onClick={() => onView(candidate)}
+                >
+                  <Search className="size-3.5" />
+                </Button>
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {translate(
                 'auto.components.workspace.cleanup.WorkspaceCleanupDialog.ee81adfcef',
@@ -275,20 +281,22 @@ export const CandidateRow = React.memo(function CandidateRow({
           </Tooltip>
           {!ignored ? (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label={translate(
-                    'auto.components.workspace.cleanup.WorkspaceCleanupDialog.a9957007eb',
-                    'Ignore {{value0}}',
-                    { value0: candidate.displayName }
-                  )}
-                  onClick={() => onIgnore(candidate)}
-                >
-                  <EyeOff className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={translate(
+                      'auto.components.workspace.cleanup.WorkspaceCleanupDialog.a9957007eb',
+                      'Ignore {{value0}}',
+                      { value0: candidate.displayName }
+                    )}
+                    onClick={() => onIgnore(candidate)}
+                  >
+                    <EyeOff className="size-3.5" />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {translate(
                   'auto.components.workspace.cleanup.WorkspaceCleanupDialog.4d0b72481c',
@@ -299,21 +307,23 @@ export const CandidateRow = React.memo(function CandidateRow({
           ) : null}
           {selectable ? (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label={translate(
-                    'auto.components.workspace.cleanup.WorkspaceCleanupDialog.3828408538',
-                    'Remove {{value0}}',
-                    { value0: candidate.displayName }
-                  )}
-                  className="text-destructive hover:text-destructive"
-                  onClick={() => onRemove(candidate)}
-                >
-                  <Trash2 className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={translate(
+                      'auto.components.workspace.cleanup.WorkspaceCleanupDialog.3828408538',
+                      'Remove {{value0}}',
+                      { value0: candidate.displayName }
+                    )}
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => onRemove(candidate)}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {translate(
                   'auto.components.workspace.cleanup.WorkspaceCleanupDialog.9cc26c019d',

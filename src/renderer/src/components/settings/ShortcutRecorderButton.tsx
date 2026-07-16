@@ -186,45 +186,47 @@ export function ShortcutRecorderButton({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          ref={recordButtonRef}
-          type="button"
-          aria-label={recorderLabel}
-          aria-pressed={recording}
-          data-shortcut-recorder=""
-          data-shortcut-recorder-active={recording ? '' : undefined}
-          onClick={() => {
-            if (!recording) {
-              onStartRecording(actionId, bindingIndex)
-            }
-          }}
-          onKeyDown={handleRecordKeyDown}
-          onKeyUp={handleRecordKeyUp}
-          className={cn(
-            'flex min-h-7 min-w-[5.5rem] max-w-[14rem] items-center justify-end gap-1.5 overflow-hidden rounded-md border px-2 py-1 text-xs outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
-            recording
-              ? 'border-ring bg-accent text-accent-foreground ring-[3px] ring-ring/30'
-              : 'border-transparent hover:border-border/70 hover:bg-background'
-          )}
-        >
-          {recording || binding === null ? (
-            <span className="px-1 text-muted-foreground">
-              {translate(
-                'auto.components.settings.ShortcutRecorderButton.f5ed5dcbf6',
-                'Press keys…'
-              )}
-            </span>
-          ) : (
-            <span className="flex flex-wrap items-center justify-end gap-1.5 overflow-hidden">
-              <ShortcutKeyCombo
-                keys={isDigitIndex ? toDigitRangeKeys(keys) : keys}
-                doubleTap={isDoubleTapBinding(binding)}
-              />
-            </span>
-          )}
-        </button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <button
+            ref={recordButtonRef}
+            type="button"
+            aria-label={recorderLabel}
+            aria-pressed={recording}
+            data-shortcut-recorder=""
+            data-shortcut-recorder-active={recording ? '' : undefined}
+            onClick={() => {
+              if (!recording) {
+                onStartRecording(actionId, bindingIndex)
+              }
+            }}
+            onKeyDown={handleRecordKeyDown}
+            onKeyUp={handleRecordKeyUp}
+            className={cn(
+              'flex min-h-7 min-w-[5.5rem] max-w-[14rem] items-center justify-end gap-1.5 overflow-hidden rounded-md border px-2 py-1 text-xs outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
+              recording
+                ? 'border-ring bg-accent text-accent-foreground ring-[3px] ring-ring/30'
+                : 'border-transparent hover:border-border/70 hover:bg-background'
+            )}
+          >
+            {recording || binding === null ? (
+              <span className="px-1 text-muted-foreground">
+                {translate(
+                  'auto.components.settings.ShortcutRecorderButton.f5ed5dcbf6',
+                  'Press keys…'
+                )}
+              </span>
+            ) : (
+              <span className="flex flex-wrap items-center justify-end gap-1.5 overflow-hidden">
+                <ShortcutKeyCombo
+                  keys={isDigitIndex ? toDigitRangeKeys(keys) : keys}
+                  doubleTap={isDoubleTapBinding(binding)}
+                />
+              </span>
+            )}
+          </button>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {tooltipLabel}
       </TooltipContent>

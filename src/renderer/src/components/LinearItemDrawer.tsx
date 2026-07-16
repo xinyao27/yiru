@@ -20,7 +20,6 @@ import { LinearIssueTextEditor } from '@/components/LinearIssueTextEditor'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { VisuallyHidden } from 'radix-ui'
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
 import { cn } from '@/lib/utils'
 import {
@@ -447,21 +446,23 @@ export function LinearIssueEditSection({
           </div>
           <div className="space-y-1 p-3">
             <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  disabled={statePending}
-                  className={propertyRowClass}
-                  aria-busy={statePending || states.loading}
-                >
-                  <span
-                    className="inline-block size-2.5 shrink-0 rounded-full"
-                    style={getLinearStateMarkerStyle(localState.color)}
-                  />
-                  <span className="min-w-0 flex-1 truncate">{localState.name}</span>
-                  <LinearEditChipAdornment loading={states.loading} pending={statePending} />
-                </button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <button
+                    type="button"
+                    disabled={statePending}
+                    className={propertyRowClass}
+                    aria-busy={statePending || states.loading}
+                  >
+                    <span
+                      className="inline-block size-2.5 shrink-0 rounded-full"
+                      style={getLinearStateMarkerStyle(localState.color)}
+                    />
+                    <span className="min-w-0 flex-1 truncate">{localState.name}</span>
+                    <LinearEditChipAdornment loading={states.loading} pending={statePending} />
+                  </button>
+                }
+              />
               <PopoverContent
                 className="popover-scroll-content scrollbar-sleek w-48 p-1"
                 align="start"
@@ -504,20 +505,22 @@ export function LinearIssueEditSection({
             </Popover>
 
             <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  disabled={priorityPending}
-                  className={propertyRowClass}
-                  aria-busy={priorityPending}
-                >
-                  <LinearPriorityIcon priority={localPriority} />
-                  <span className="min-w-0 flex-1 truncate">
-                    {PRIORITY_LABELS[localPriority] ?? `P${localPriority}`}
-                  </span>
-                  <LinearEditChipAdornment pending={priorityPending} />
-                </button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <button
+                    type="button"
+                    disabled={priorityPending}
+                    className={propertyRowClass}
+                    aria-busy={priorityPending}
+                  >
+                    <LinearPriorityIcon priority={localPriority} />
+                    <span className="min-w-0 flex-1 truncate">
+                      {PRIORITY_LABELS[localPriority] ?? `P${localPriority}`}
+                    </span>
+                    <LinearEditChipAdornment pending={priorityPending} />
+                  </button>
+                }
+              />
               <PopoverContent className="w-36 p-1" align="start">
                 {[0, 1, 2, 3, 4].map((p) => (
                   <button
@@ -537,30 +540,32 @@ export function LinearIssueEditSection({
             </Popover>
 
             <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  disabled={assigneePending}
-                  className={propertyRowClass}
-                  aria-busy={assigneePending || members.loading}
-                >
-                  {localAssignee?.avatarUrl ? (
-                    <img
-                      src={localAssignee.avatarUrl}
-                      alt=""
-                      className="size-4 shrink-0 rounded-full"
-                    />
-                  ) : (
-                    <UserRound className={propertyIconClass} />
-                  )}
-                  <span className="min-w-0 flex-1 truncate">
-                    {localAssignee
-                      ? localAssignee.displayName
-                      : translate('auto.components.LinearItemDrawer.866316f22c', 'Unassigned')}
-                  </span>
-                  <LinearEditChipAdornment loading={members.loading} pending={assigneePending} />
-                </button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <button
+                    type="button"
+                    disabled={assigneePending}
+                    className={propertyRowClass}
+                    aria-busy={assigneePending || members.loading}
+                  >
+                    {localAssignee?.avatarUrl ? (
+                      <img
+                        src={localAssignee.avatarUrl}
+                        alt=""
+                        className="size-4 shrink-0 rounded-full"
+                      />
+                    ) : (
+                      <UserRound className={propertyIconClass} />
+                    )}
+                    <span className="min-w-0 flex-1 truncate">
+                      {localAssignee
+                        ? localAssignee.displayName
+                        : translate('auto.components.LinearItemDrawer.866316f22c', 'Unassigned')}
+                    </span>
+                    <LinearEditChipAdornment loading={members.loading} pending={assigneePending} />
+                  </button>
+                }
+              />
               <PopoverContent
                 className="popover-scroll-content scrollbar-sleek w-48 p-1"
                 align="start"
@@ -602,20 +607,22 @@ export function LinearIssueEditSection({
             </Popover>
 
             <Popover open={estimatePopoverOpen} onOpenChange={handleEstimatePopoverOpenChange}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  disabled={estimatePending}
-                  className={propertyRowClass}
-                  aria-busy={estimatePending}
-                >
-                  <Gauge className={propertyIconClass} />
-                  <span className="min-w-0 flex-1 truncate">
-                    {formatLinearEstimateLabel(localEstimate)}
-                  </span>
-                  <LinearEditChipAdornment pending={estimatePending} />
-                </button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <button
+                    type="button"
+                    disabled={estimatePending}
+                    className={propertyRowClass}
+                    aria-busy={estimatePending}
+                  >
+                    <Gauge className={propertyIconClass} />
+                    <span className="min-w-0 flex-1 truncate">
+                      {formatLinearEstimateLabel(localEstimate)}
+                    </span>
+                    <LinearEditChipAdornment pending={estimatePending} />
+                  </button>
+                }
+              />
               <PopoverContent className="w-64 p-3" align="start">
                 <div className="space-y-3">
                   <div className="grid grid-cols-5 gap-1.5">
@@ -681,31 +688,33 @@ export function LinearIssueEditSection({
           </div>
           <div className="p-3">
             <Popover open={labelPopoverOpen} onOpenChange={setLabelPopoverOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  disabled={labelsPending}
-                  className={propertyRowClass}
-                  aria-label={
-                    localLabels.length
-                      ? translate(
-                          'auto.components.LinearItemDrawer.7f7b89b631',
-                          'Labels: {{value0}}',
-                          { value0: localLabels.join(', ') }
-                        )
-                      : translate('auto.components.LinearItemDrawer.23886c7eec', 'Add label')
-                  }
-                  aria-busy={labelsPending || labels.loading}
-                >
-                  <Tag className={propertyIconClass} />
-                  <span className="min-w-0 flex-1 truncate">
-                    {localLabels.length
-                      ? labelSummary
-                      : translate('auto.components.LinearItemDrawer.23886c7eec', 'Add label')}
-                  </span>
-                  <LinearEditChipAdornment loading={labels.loading} pending={labelsPending} />
-                </button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <button
+                    type="button"
+                    disabled={labelsPending}
+                    className={propertyRowClass}
+                    aria-label={
+                      localLabels.length
+                        ? translate(
+                            'auto.components.LinearItemDrawer.7f7b89b631',
+                            'Labels: {{value0}}',
+                            { value0: localLabels.join(', ') }
+                          )
+                        : translate('auto.components.LinearItemDrawer.23886c7eec', 'Add label')
+                    }
+                    aria-busy={labelsPending || labels.loading}
+                  >
+                    <Tag className={propertyIconClass} />
+                    <span className="min-w-0 flex-1 truncate">
+                      {localLabels.length
+                        ? labelSummary
+                        : translate('auto.components.LinearItemDrawer.23886c7eec', 'Add label')}
+                    </span>
+                    <LinearEditChipAdornment loading={labels.loading} pending={labelsPending} />
+                  </button>
+                }
+              />
               <PopoverContent
                 className="popover-scroll-content scrollbar-sleek w-52 p-1"
                 align="start"
@@ -763,22 +772,24 @@ export function LinearIssueEditSection({
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border/60 px-4 py-2.5">
       {/* Status */}
       <Popover>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            disabled={statePending}
-            className={LINEAR_EDIT_CHIP_CLASS}
-            style={getLinearStatePillStyle(localState.color)}
-            aria-busy={statePending || states.loading}
-          >
-            <span
-              className="inline-block size-2 shrink-0 rounded-full"
-              style={getLinearStateMarkerStyle(localState.color)}
-            />
-            <span className="truncate">{localState.name}</span>
-            <LinearEditChipAdornment loading={states.loading} pending={statePending} />
-          </button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              disabled={statePending}
+              className={LINEAR_EDIT_CHIP_CLASS}
+              style={getLinearStatePillStyle(localState.color)}
+              aria-busy={statePending || states.loading}
+            >
+              <span
+                className="inline-block size-2 shrink-0 rounded-full"
+                style={getLinearStateMarkerStyle(localState.color)}
+              />
+              <span className="truncate">{localState.name}</span>
+              <LinearEditChipAdornment loading={states.loading} pending={statePending} />
+            </button>
+          }
+        />
         <PopoverContent className="popover-scroll-content scrollbar-sleek w-48 p-1" align="start">
           {states.error ? (
             <div className="px-2 py-3 text-center text-[12px] text-destructive">{states.error}</div>
@@ -817,20 +828,22 @@ export function LinearIssueEditSection({
 
       {/* Priority */}
       <Popover>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            disabled={priorityPending}
-            className={LINEAR_EDIT_CHIP_CLASS}
-            aria-busy={priorityPending}
-          >
-            <LinearPriorityIcon priority={localPriority} />
-            <span className="truncate">
-              {PRIORITY_LABELS[localPriority] ?? `P${localPriority}`}
-            </span>
-            <LinearEditChipAdornment pending={priorityPending} />
-          </button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              disabled={priorityPending}
+              className={LINEAR_EDIT_CHIP_CLASS}
+              aria-busy={priorityPending}
+            >
+              <LinearPriorityIcon priority={localPriority} />
+              <span className="truncate">
+                {PRIORITY_LABELS[localPriority] ?? `P${localPriority}`}
+              </span>
+              <LinearEditChipAdornment pending={priorityPending} />
+            </button>
+          }
+        />
         <PopoverContent className="w-36 p-1" align="start">
           {[0, 1, 2, 3, 4].map((p) => (
             <button
@@ -851,17 +864,19 @@ export function LinearIssueEditSection({
 
       {/* Estimate */}
       <Popover open={estimatePopoverOpen} onOpenChange={handleEstimatePopoverOpenChange}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            disabled={estimatePending}
-            className={LINEAR_EDIT_CHIP_CLASS}
-            aria-busy={estimatePending}
-          >
-            <span className="truncate">{formatLinearEstimateLabel(localEstimate)}</span>
-            <LinearEditChipAdornment pending={estimatePending} />
-          </button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              disabled={estimatePending}
+              className={LINEAR_EDIT_CHIP_CLASS}
+              aria-busy={estimatePending}
+            >
+              <span className="truncate">{formatLinearEstimateLabel(localEstimate)}</span>
+              <LinearEditChipAdornment pending={estimatePending} />
+            </button>
+          }
+        />
         <PopoverContent className="w-64 p-3" align="start">
           <div className="space-y-3">
             <div className="grid grid-cols-5 gap-1.5">
@@ -920,21 +935,23 @@ export function LinearIssueEditSection({
 
       {/* Assignee */}
       <Popover>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            disabled={assigneePending}
-            className={LINEAR_EDIT_CHIP_CLASS}
-            aria-busy={assigneePending || members.loading}
-          >
-            <span className="truncate">
-              {localAssignee
-                ? localAssignee.displayName
-                : translate('auto.components.LinearItemDrawer.d71cd3003e', '+ Assignee')}
-            </span>
-            <LinearEditChipAdornment loading={members.loading} pending={assigneePending} />
-          </button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              disabled={assigneePending}
+              className={LINEAR_EDIT_CHIP_CLASS}
+              aria-busy={assigneePending || members.loading}
+            >
+              <span className="truncate">
+                {localAssignee
+                  ? localAssignee.displayName
+                  : translate('auto.components.LinearItemDrawer.d71cd3003e', '+ Assignee')}
+              </span>
+              <LinearEditChipAdornment loading={members.loading} pending={assigneePending} />
+            </button>
+          }
+        />
         <PopoverContent className="popover-scroll-content scrollbar-sleek w-48 p-1" align="start">
           <div>
             <button
@@ -974,24 +991,26 @@ export function LinearIssueEditSection({
 
       {/* Labels */}
       <Popover open={labelPopoverOpen} onOpenChange={setLabelPopoverOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            disabled={labelsPending}
-            className={LINEAR_EDIT_CHIP_CLASS}
-            aria-label={
-              localLabels.length
-                ? translate('auto.components.LinearItemDrawer.7f7b89b631', 'Labels: {{value0}}', {
-                    value0: localLabels.join(', ')
-                  })
-                : translate('auto.components.LinearItemDrawer.23886c7eec', 'Add label')
-            }
-            aria-busy={labelsPending || labels.loading}
-          >
-            <span className="truncate">{labelSummary}</span>
-            <LinearEditChipAdornment loading={labels.loading} pending={labelsPending} />
-          </button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              disabled={labelsPending}
+              className={LINEAR_EDIT_CHIP_CLASS}
+              aria-label={
+                localLabels.length
+                  ? translate('auto.components.LinearItemDrawer.7f7b89b631', 'Labels: {{value0}}', {
+                      value0: localLabels.join(', ')
+                    })
+                  : translate('auto.components.LinearItemDrawer.23886c7eec', 'Add label')
+              }
+              aria-busy={labelsPending || labels.loading}
+            >
+              <span className="truncate">{labelSummary}</span>
+              <LinearEditChipAdornment loading={labels.loading} pending={labelsPending} />
+            </button>
+          }
+        />
         <PopoverContent className="popover-scroll-content scrollbar-sleek w-52 p-1" align="start">
           {labels.error ? (
             <div className="px-2 py-3 text-center text-[12px] text-destructive">{labels.error}</div>
@@ -1378,24 +1397,18 @@ export default function LinearItemDrawer({
         side="right"
         showCloseButton={false}
         className="w-full p-0 sm:max-w-[640px]"
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
-        }}
+        initialFocus={false}
       >
-        <VisuallyHidden.Root asChild>
-          <SheetTitle>
-            {displayed?.title ??
-              translate('auto.components.LinearItemDrawer.39883467f4', 'Linear issue')}
-          </SheetTitle>
-        </VisuallyHidden.Root>
-        <VisuallyHidden.Root asChild>
-          <SheetDescription>
-            {translate(
-              'auto.components.LinearItemDrawer.04a442f796',
-              'Preview and edit the selected Linear issue.'
-            )}
-          </SheetDescription>
-        </VisuallyHidden.Root>
+        <SheetTitle className="sr-only">
+          {displayed?.title ??
+            translate('auto.components.LinearItemDrawer.39883467f4', 'Linear issue')}
+        </SheetTitle>
+        <SheetDescription className="sr-only">
+          {translate(
+            'auto.components.LinearItemDrawer.04a442f796',
+            'Preview and edit the selected Linear issue.'
+          )}
+        </SheetDescription>
 
         {displayed && (
           <div className="flex h-full min-h-0 flex-col">
@@ -1424,39 +1437,43 @@ export default function LinearItemDrawer({
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7"
-                        onClick={() => window.api.shell.openUrl(displayed.url)}
-                        aria-label={translate(
-                          'auto.components.LinearItemDrawer.0190b760c1',
-                          'Open on Linear'
-                        )}
-                      >
-                        <ExternalLink className="size-4" />
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7"
+                          onClick={() => window.api.shell.openUrl(displayed.url)}
+                          aria-label={translate(
+                            'auto.components.LinearItemDrawer.0190b760c1',
+                            'Open on Linear'
+                          )}
+                        >
+                          <ExternalLink className="size-4" />
+                        </Button>
+                      }
+                    />
                     <TooltipContent side="bottom" sideOffset={6}>
                       {translate('auto.components.LinearItemDrawer.0190b760c1', 'Open on Linear')}
                     </TooltipContent>
                   </Tooltip>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7"
-                        onClick={onClose}
-                        aria-label={translate(
-                          'auto.components.LinearItemDrawer.858d0630da',
-                          'Close preview'
-                        )}
-                      >
-                        <X className="size-4" />
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7"
+                          onClick={onClose}
+                          aria-label={translate(
+                            'auto.components.LinearItemDrawer.858d0630da',
+                            'Close preview'
+                          )}
+                        >
+                          <X className="size-4" />
+                        </Button>
+                      }
+                    />
                     <TooltipContent side="bottom" sideOffset={6}>
                       {translate('auto.components.LinearItemDrawer.9dc54172db', 'Close · Esc')}
                     </TooltipContent>

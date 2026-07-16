@@ -193,22 +193,24 @@ export function AutoRenameBranchFromWorkSetting({
       </div>
 
       <Collapsible open={advancedOpen} onOpenChange={setOptionsOpen}>
-        <CollapsibleTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="-ml-2 h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-          >
-            {translate(
-              'auto.components.settings.AutoRenameBranchFromWorkSetting.e784ea62dc',
-              'Advanced'
-            )}
-            <ChevronDown
-              className={cn('size-3.5 transition-transform', advancedOpen && 'rotate-180')}
-            />
-          </Button>
-        </CollapsibleTrigger>
+        <CollapsibleTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="-ml-2 h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+            >
+              {translate(
+                'auto.components.settings.AutoRenameBranchFromWorkSetting.e784ea62dc',
+                'Advanced'
+              )}
+              <ChevronDown
+                className={cn('size-3.5 transition-transform', advancedOpen && 'rotate-180')}
+              />
+            </Button>
+          }
+        />
         <CollapsibleContent>
           <div className="mt-2 space-y-3 rounded-md border border-border/60 bg-muted/20 px-3 py-3">
             <div className="space-y-2">
@@ -235,17 +237,19 @@ export function AutoRenameBranchFromWorkSetting({
                     "to include Orca's"
                   )}{' '}
                   <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="inline rounded-sm font-medium text-foreground underline decoration-border underline-offset-2 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      >
-                        {translate(
-                          'auto.components.settings.AutoRenameBranchFromWorkSetting.9c9b54e4ea',
-                          'built-in branch-name prompt'
-                        )}
-                      </button>
-                    </PopoverTrigger>
+                    <PopoverTrigger
+                      render={
+                        <button
+                          type="button"
+                          className="inline rounded-sm font-medium text-foreground underline decoration-border underline-offset-2 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        >
+                          {translate(
+                            'auto.components.settings.AutoRenameBranchFromWorkSetting.9c9b54e4ea',
+                            'built-in branch-name prompt'
+                          )}
+                        </button>
+                      }
+                    />
                     <PopoverContent
                       align="start"
                       side="bottom"

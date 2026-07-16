@@ -131,7 +131,7 @@ function Sidebar({
   })
 
   return (
-    <TooltipProvider delayDuration={400}>
+    <TooltipProvider delay={400}>
       <div
         ref={containerRef}
         data-native-file-drop-target={sidebarOpen ? nativeDropTarget : undefined}

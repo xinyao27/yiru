@@ -104,25 +104,28 @@ export function SourceControlActionVariableChips({
           ? variablePreviews?.[variable]
           : undefined
         return (
-          <HoverCard key={variable} openDelay={150} closeDelay={120}>
-            <HoverCardTrigger asChild>
-              <span className="inline-flex">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="xs"
-                  disabled={disabled}
-                  className="h-5 rounded px-1.5 font-mono text-[10px]"
-                  onClick={() => onInsert(variable)}
-                >
-                  {`{${variable}}`}
-                </Button>
-              </span>
-            </HoverCardTrigger>
+          <HoverCard key={variable}>
+            <HoverCardTrigger
+              delay={150}
+              closeDelay={120}
+              render={
+                <span className="inline-flex">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="xs"
+                    disabled={disabled}
+                    className="h-5 rounded px-1.5 font-mono text-[10px]"
+                    onClick={() => onInsert(variable)}
+                  >
+                    {`{${variable}}`}
+                  </Button>
+                </span>
+              }
+            />
             <HoverCardContent
               side="top"
               sideOffset={6}
-              collisionPadding={12}
               className="scrollbar-sleek max-h-[min(18rem,calc(100vh-2rem))] w-[min(32rem,calc(100vw-2rem))] overflow-y-auto p-2 text-left text-xs"
             >
               <SourceControlVariableDetails variable={variable} preview={preview} />

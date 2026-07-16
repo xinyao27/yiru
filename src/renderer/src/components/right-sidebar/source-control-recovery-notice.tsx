@@ -331,14 +331,16 @@ export function SourceControlRecoveryNotice({
                   chevronClassName="rounded-l-none border-l border-primary-foreground/20 px-2"
                 />
               ) : null}
-              <DialogClose asChild>
-                <Button type="button" variant="outline" size="sm">
-                  {translate(
-                    'auto.components.right.sidebar.SourceControl.pushRecovery.783a808870',
-                    'Close'
-                  )}
-                </Button>
-              </DialogClose>
+              <DialogClose
+                render={
+                  <Button type="button" variant="outline" size="sm">
+                    {translate(
+                      'auto.components.right.sidebar.SourceControl.pushRecovery.783a808870',
+                      'Close'
+                    )}
+                  </Button>
+                }
+              />
             </DialogFooter>
           </DialogContent>
         </Dialog>

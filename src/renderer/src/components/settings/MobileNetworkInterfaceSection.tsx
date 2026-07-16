@@ -56,22 +56,24 @@ export function MobileNetworkInterfaceSection({
             className="min-w-[220px] justify-between font-normal"
           />
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={onRefreshNetworkInterfaces}
-                disabled={refreshingNetworkInterfaces}
-                aria-label={translate(
-                  'auto.components.settings.MobileNetworkInterfaceSection.a9db5d771d',
-                  'Refresh network interfaces'
-                )}
-                className="text-muted-foreground"
-              >
-                <RefreshCw className={refreshingNetworkInterfaces ? 'animate-spin' : ''} />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={onRefreshNetworkInterfaces}
+                  disabled={refreshingNetworkInterfaces}
+                  aria-label={translate(
+                    'auto.components.settings.MobileNetworkInterfaceSection.a9db5d771d',
+                    'Refresh network interfaces'
+                  )}
+                  className="text-muted-foreground"
+                >
+                  <RefreshCw className={refreshingNetworkInterfaces ? 'animate-spin' : ''} />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate(
                 'auto.components.settings.MobileNetworkInterfaceSection.a9db5d771d',
@@ -104,7 +106,7 @@ export function MobileNetworkInterfaceSection({
               )}
         </Button>
       </div>
-      <Accordion type="single" collapsible className="mt-4 border-t border-border/60 pt-2">
+      <Accordion className="mt-4 border-t border-border/60 pt-2">
         <AccordionItem value="remote-pairing-guide">
           <AccordionTrigger className="py-2 text-xs">
             {translate(

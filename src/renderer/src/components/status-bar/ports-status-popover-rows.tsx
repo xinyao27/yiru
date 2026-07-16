@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react'
 import { Copy, ExternalLink, FolderOpen, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   addressForPort,
   canStopWorkspacePort,
@@ -56,14 +56,16 @@ function PortAction({
   )
 
   return (
-    <Tooltip delayDuration={200}>
-      <TooltipTrigger asChild>
-        {disabled ? <span className="inline-flex">{button}</span> : button}
-      </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={4} className="z-[70]">
-        {tooltipLabel}
-      </TooltipContent>
-    </Tooltip>
+    <TooltipProvider delay={200}>
+      <Tooltip>
+        <TooltipTrigger
+          render={disabled ? <span className="inline-flex">{button}</span> : button}
+        />
+        <TooltipContent side="top" sideOffset={4} className="z-[70]">
+          {tooltipLabel}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }
 
@@ -223,16 +225,20 @@ export function PortRow({
       </span>
       <div className="min-w-0 space-y-0.5">
         <div className="relative flex h-5 min-w-0 items-center">
-          <Tooltip delayDuration={200}>
-            <TooltipTrigger asChild>
-              <span className="block min-w-0 select-text truncate text-[11px] text-muted-foreground">
+          <TooltipProvider delay={200}>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <span className="block min-w-0 select-text truncate text-[11px] text-muted-foreground">
+                    {processLabel}
+                  </span>
+                }
+              />
+              <TooltipContent side="top" sideOffset={4}>
                 {processLabel}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="top" sideOffset={4}>
-              {processLabel}
-            </TooltipContent>
-          </Tooltip>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <div className="absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-md border border-border/40 bg-popover/95 px-0.5 can-hover:opacity-0 shadow-xs transition-opacity group-hover/port:opacity-100 group-focus-within/port:opacity-100">
             <PortAction
               label={openBrowserLabel}

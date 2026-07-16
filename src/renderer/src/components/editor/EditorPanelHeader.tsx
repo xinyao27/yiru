@@ -110,21 +110,23 @@ export function EditorPanelHeader({
         onOpenContainingFolder={onOpenContainingFolder}
       />
       {canOpenPreviewToSide && (
-        <TooltipProvider delayDuration={300}>
+        <TooltipProvider delay={300}>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-                onClick={onOpenPreviewToSide}
-                aria-label={translate(
-                  'auto.components.editor.EditorPanelHeader.fb8331694e',
-                  'Open Preview to the Side'
-                )}
-              >
-                <Eye size={14} />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                  onClick={onOpenPreviewToSide}
+                  aria-label={translate(
+                    'auto.components.editor.EditorPanelHeader.fb8331694e',
+                    'Open Preview to the Side'
+                  )}
+                >
+                  <Eye size={14} />
+                </button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={4}>
               {translate(
                 'auto.components.editor.EditorPanelHeader.fb8331694e',
@@ -135,22 +137,24 @@ export function EditorPanelHeader({
         </TooltipProvider>
       )}
       {isSingleDiff && (
-        <TooltipProvider delayDuration={300}>
+        <TooltipProvider delay={300}>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-                onClick={() => onOpenDiffTargetFile(isMarkdown ? 'rich' : undefined)}
-                aria-label={translate(
-                  'auto.components.editor.EditorPanelHeader.a10d9b8337',
-                  'Open file'
-                )}
-                disabled={!openFileState.canOpen}
-              >
-                <FileText size={14} />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                  onClick={() => onOpenDiffTargetFile(isMarkdown ? 'rich' : undefined)}
+                  aria-label={translate(
+                    'auto.components.editor.EditorPanelHeader.a10d9b8337',
+                    'Open file'
+                  )}
+                  disabled={!openFileState.canOpen}
+                >
+                  <FileText size={14} />
+                </button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={4}>
               {openFileState.canOpen
                 ? isMarkdown
@@ -186,17 +190,19 @@ export function EditorPanelHeader({
       {isDiffSurface && (
         // Why: the adjacent diff controls use the same tooltip timing, so they
         // share one provider instead of creating redundant Radix contexts.
-        <TooltipProvider delayDuration={300}>
+        <TooltipProvider delay={300}>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-                onClick={onToggleSideBySide}
-              >
-                {sideBySide ? <Rows2 size={14} /> : <Columns2 size={14} />}
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                  onClick={onToggleSideBySide}
+                >
+                  {sideBySide ? <Rows2 size={14} /> : <Columns2 size={14} />}
+                </button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={4}>
               {sideBySide
                 ? translate(
@@ -210,20 +216,22 @@ export function EditorPanelHeader({
             </TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-                onClick={goToPreviousDiff}
-                aria-label={translate(
-                  'auto.components.editor.EditorPanelHeader.2076ecfc9c',
-                  'Previous change'
-                )}
-                disabled={changeCount === 0}
-              >
-                <ArrowUp size={14} />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                  onClick={goToPreviousDiff}
+                  aria-label={translate(
+                    'auto.components.editor.EditorPanelHeader.2076ecfc9c',
+                    'Previous change'
+                  )}
+                  disabled={changeCount === 0}
+                >
+                  <ArrowUp size={14} />
+                </button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={4}>
               {translate('auto.components.editor.EditorPanelHeader.2076ecfc9c', 'Previous change')}
               {previousChangeShortcut.keys.length > 0 && (
@@ -236,20 +244,22 @@ export function EditorPanelHeader({
             </TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-                onClick={goToNextDiff}
-                aria-label={translate(
-                  'auto.components.editor.EditorPanelHeader.631dab0df3',
-                  'Next change'
-                )}
-                disabled={changeCount === 0}
-              >
-                <ArrowDown size={14} />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                  onClick={goToNextDiff}
+                  aria-label={translate(
+                    'auto.components.editor.EditorPanelHeader.631dab0df3',
+                    'Next change'
+                  )}
+                  disabled={changeCount === 0}
+                >
+                  <ArrowDown size={14} />
+                </button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={4}>
               {translate('auto.components.editor.EditorPanelHeader.631dab0df3', 'Next change')}
               {nextChangeShortcut.keys.length > 0 && (
@@ -274,27 +284,29 @@ export function EditorPanelHeader({
         />
       )}
       {canShowMarkdownTableOfContents && (
-        <TooltipProvider delayDuration={300}>
+        <TooltipProvider delay={300}>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className={`p-1 rounded hover:bg-accent hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground ${
-                  showMarkdownTableOfContents && !isMarkdownTableOfContentsDisabled
-                    ? 'bg-accent text-foreground'
-                    : 'text-muted-foreground'
-                }`}
-                onClick={onToggleMarkdownTableOfContents}
-                disabled={isMarkdownTableOfContentsDisabled}
-                aria-label={translate(
-                  'auto.components.editor.EditorPanelHeader.5447c4f68f',
-                  'Table of Contents'
-                )}
-                aria-pressed={showMarkdownTableOfContents}
-              >
-                <ListTree size={14} />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  className={`p-1 rounded hover:bg-accent hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground ${
+                    showMarkdownTableOfContents && !isMarkdownTableOfContentsDisabled
+                      ? 'bg-accent text-foreground'
+                      : 'text-muted-foreground'
+                  }`}
+                  onClick={onToggleMarkdownTableOfContents}
+                  disabled={isMarkdownTableOfContentsDisabled}
+                  aria-label={translate(
+                    'auto.components.editor.EditorPanelHeader.5447c4f68f',
+                    'Table of Contents'
+                  )}
+                  aria-pressed={showMarkdownTableOfContents}
+                >
+                  <ListTree size={14} />
+                </button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={4}>
               {isMarkdownTableOfContentsDisabled
                 ? translate(

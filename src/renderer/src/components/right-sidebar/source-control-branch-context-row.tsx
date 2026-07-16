@@ -50,9 +50,7 @@ function ContextStat({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span className={className}>{stat.label}</span>
-      </TooltipTrigger>
+      <TooltipTrigger render={<span className={className}>{stat.label}</span>} />
       <TooltipContent side="bottom" sideOffset={6}>
         {stat.title}
       </TooltipContent>

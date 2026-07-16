@@ -55,32 +55,34 @@ export function FileExplorerToolbar({
         {repoName}
       </span>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            className={cn(
-              'text-muted-foreground hover:text-foreground',
-              !canCollapseAll && 'cursor-not-allowed opacity-50'
-            )}
-            aria-label={translate(
-              'auto.components.right.sidebar.FileExplorerToolbar.6026b16950',
-              'Collapse All'
-            )}
-            aria-disabled={!canCollapseAll}
-            // Why: native disabled buttons suppress Radix tooltip triggers in Chromium.
-            onClick={(event) => {
-              if (!canCollapseAll) {
-                event.preventDefault()
-                return
-              }
-              onCollapseAll()
-            }}
-          >
-            <ListCollapse className="size-3" />
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              className={cn(
+                'text-muted-foreground hover:text-foreground',
+                !canCollapseAll && 'cursor-not-allowed opacity-50'
+              )}
+              aria-label={translate(
+                'auto.components.right.sidebar.FileExplorerToolbar.6026b16950',
+                'Collapse All'
+              )}
+              aria-disabled={!canCollapseAll}
+              // Why: native disabled buttons suppress Radix tooltip triggers in Chromium.
+              onClick={(event) => {
+                if (!canCollapseAll) {
+                  event.preventDefault()
+                  return
+                }
+                onCollapseAll()
+              }}
+            >
+              <ListCollapse className="size-3" />
+            </Button>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={4}>
           {translate(
             'auto.components.right.sidebar.FileExplorerToolbar.6026b16950',
@@ -89,36 +91,38 @@ export function FileExplorerToolbar({
         </TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            className={cn(
-              'text-muted-foreground hover:text-foreground',
-              !canRefresh && 'cursor-not-allowed opacity-50'
-            )}
-            aria-label={translate(
-              'auto.components.right.sidebar.FileExplorerToolbar.d95e30fe28',
-              'Refresh Explorer'
-            )}
-            aria-disabled={!canRefresh || refresh.isRefreshing}
-            disabled={refresh.isRefreshing}
-            onClick={(event) => {
-              if (!canRefresh) {
-                event.preventDefault()
-                return
-              }
-              refresh.handleRefresh()
-            }}
-          >
-            {refresh.showRefreshSpinner ? (
-              <Loader2 className="size-3 animate-spin" />
-            ) : (
-              <RefreshCw className="size-3" />
-            )}
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              className={cn(
+                'text-muted-foreground hover:text-foreground',
+                !canRefresh && 'cursor-not-allowed opacity-50'
+              )}
+              aria-label={translate(
+                'auto.components.right.sidebar.FileExplorerToolbar.d95e30fe28',
+                'Refresh Explorer'
+              )}
+              aria-disabled={!canRefresh || refresh.isRefreshing}
+              disabled={refresh.isRefreshing}
+              onClick={(event) => {
+                if (!canRefresh) {
+                  event.preventDefault()
+                  return
+                }
+                refresh.handleRefresh()
+              }}
+            >
+              {refresh.showRefreshSpinner ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                <RefreshCw className="size-3" />
+              )}
+            </Button>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={4}>
           {translate(
             'auto.components.right.sidebar.FileExplorerToolbar.d95e30fe28',
@@ -128,22 +132,26 @@ export function FileExplorerToolbar({
       </Tooltip>
       <DropdownMenu>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                className="text-muted-foreground hover:text-foreground"
-                aria-label={translate(
-                  'auto.components.right.sidebar.FileExplorerToolbar.31b4c3195d',
-                  'More Explorer Actions'
-                )}
-              >
-                <Ellipsis className="size-3" />
-              </Button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label={translate(
+                      'auto.components.right.sidebar.FileExplorerToolbar.31b4c3195d',
+                      'More Explorer Actions'
+                    )}
+                  >
+                    <Ellipsis className="size-3" />
+                  </Button>
+                }
+              />
+            }
+          />
           <TooltipContent side="bottom" sideOffset={4}>
             {translate(
               'auto.components.right.sidebar.FileExplorerToolbar.31b4c3195d',

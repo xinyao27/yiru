@@ -734,38 +734,40 @@ function LinearStateCell({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          disabled={pending}
-          onClick={(e) => e.stopPropagation()}
-          className={cn(
-            'inline-flex min-w-0 cursor-pointer! items-center gap-1 rounded-full border text-[11px] font-medium transition-[background-color,border-color,color,box-shadow] hover:[--linear-state-pill-current-background:var(--linear-state-pill-hover-background)] hover:[--linear-state-pill-current-border:var(--linear-state-pill-hover-border)] hover:[--linear-state-pill-current-foreground:var(--linear-state-pill-hover-foreground)] hover:ring-1 hover:ring-foreground/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-default! disabled:opacity-80 [&_*]:cursor-pointer! disabled:[&_*]:cursor-default!',
-            className
-          )}
-          style={{
-            ...getLinearStatePillStyle(issue.state.color),
-            cursor: pending ? 'default' : 'pointer'
-          }}
-          aria-label={translate(
-            'auto.components.TaskPage.d45a910c4a',
-            'Change Linear state from {{value0}}',
-            { value0: issue.state.name }
-          )}
-          aria-busy={pending || states.loading}
-        >
-          <span
-            className="size-1.5 shrink-0 rounded-full"
-            style={getLinearStateMarkerStyle(issue.state.color)}
-          />
-          <span className="truncate">{issue.state.name}</span>
-          {pending || states.loading ? (
-            <LoaderCircle className="size-3 shrink-0 animate-spin opacity-70" />
-          ) : (
-            <ChevronDown className="size-3 shrink-0 opacity-55" />
-          )}
-        </button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            disabled={pending}
+            onClick={(e) => e.stopPropagation()}
+            className={cn(
+              'inline-flex min-w-0 cursor-pointer! items-center gap-1 rounded-full border text-[11px] font-medium transition-[background-color,border-color,color,box-shadow] hover:[--linear-state-pill-current-background:var(--linear-state-pill-hover-background)] hover:[--linear-state-pill-current-border:var(--linear-state-pill-hover-border)] hover:[--linear-state-pill-current-foreground:var(--linear-state-pill-hover-foreground)] hover:ring-1 hover:ring-foreground/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-default! disabled:opacity-80 [&_*]:cursor-pointer! disabled:[&_*]:cursor-default!',
+              className
+            )}
+            style={{
+              ...getLinearStatePillStyle(issue.state.color),
+              cursor: pending ? 'default' : 'pointer'
+            }}
+            aria-label={translate(
+              'auto.components.TaskPage.d45a910c4a',
+              'Change Linear state from {{value0}}',
+              { value0: issue.state.name }
+            )}
+            aria-busy={pending || states.loading}
+          >
+            <span
+              className="size-1.5 shrink-0 rounded-full"
+              style={getLinearStateMarkerStyle(issue.state.color)}
+            />
+            <span className="truncate">{issue.state.name}</span>
+            {pending || states.loading ? (
+              <LoaderCircle className="size-3 shrink-0 animate-spin opacity-70" />
+            ) : (
+              <ChevronDown className="size-3 shrink-0 opacity-55" />
+            )}
+          </button>
+        }
+      />
       <PopoverContent
         className="popover-scroll-content scrollbar-sleek w-48 p-1"
         align="start"
@@ -903,17 +905,23 @@ function TaskPageJiraErrorBanner({
           <div className="font-medium leading-5">{error.title}</div>
           {error.details ? (
             <>
-              <CollapsibleTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="xs"
-                  className="-ml-1 mt-1 h-6 px-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                >
-                  {open ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
-                  {translate('auto.components.TaskPage.40eaf2c27c', 'Details')}
-                </Button>
-              </CollapsibleTrigger>
+              <CollapsibleTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="xs"
+                    className="-ml-1 mt-1 h-6 px-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    {open ? (
+                      <ChevronDown className="size-3" />
+                    ) : (
+                      <ChevronRight className="size-3" />
+                    )}
+                    {translate('auto.components.TaskPage.40eaf2c27c', 'Details')}
+                  </Button>
+                }
+              />
               <CollapsibleContent>
                 <div className="mt-1 rounded-md border border-destructive/20 bg-background/80 px-2 py-1.5 font-mono text-xs text-foreground">
                   {error.details}
@@ -1315,27 +1323,29 @@ function GHStatusCell({
 
   return (
     <Popover open={open} onOpenChange={handlePopoverOpenChange}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-          className={cn(
-            'group/status inline-flex cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium transition hover:brightness-125 hover:ring-1 hover:ring-white/10',
-            localState === 'closed'
-              ? 'border-primary/40 bg-primary/10 text-primary'
-              : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200'
-          )}
-        >
-          {localState === 'open' ? <CircleDot className="size-2.5" /> : null}
-          <span>
-            {localState === 'closed'
-              ? translate('auto.components.TaskPage.d09bf34db7', 'Closed')
-              : translate('auto.components.TaskPage.606a85c774', 'Open')}
-          </span>
-          <ChevronDown className="size-2.5 opacity-50" />
-        </button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            className={cn(
+              'group/status inline-flex cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium transition hover:brightness-125 hover:ring-1 hover:ring-white/10',
+              localState === 'closed'
+                ? 'border-primary/40 bg-primary/10 text-primary'
+                : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200'
+            )}
+          >
+            {localState === 'open' ? <CircleDot className="size-2.5" /> : null}
+            <span>
+              {localState === 'closed'
+                ? translate('auto.components.TaskPage.d09bf34db7', 'Closed')
+                : translate('auto.components.TaskPage.606a85c774', 'Open')}
+            </span>
+            <ChevronDown className="size-2.5 opacity-50" />
+          </button>
+        }
+      />
       <PopoverContent
         className={cn(duplicatePickerOpen ? 'w-[360px]' : 'w-56', 'p-1')}
         align="start"
@@ -1589,32 +1599,34 @@ function GitHubIssueLabelSelector({
         {translate('auto.components.TaskPage.d0ca4aa1d0', 'Labels')}
       </label>
       <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={disabled}
-            className="h-auto min-h-9 justify-start gap-2 px-3 py-2 text-left"
-          >
-            {selectedLabels.length === 0 ? (
-              <span className="text-muted-foreground">
-                {translate('auto.components.TaskPage.5ebff3a0aa', 'None')}
-              </span>
-            ) : (
-              <span className="flex min-w-0 flex-wrap gap-1.5">
-                {selectedLabels.map((label) => (
-                  <span
-                    key={label}
-                    className="rounded-full border border-border/50 bg-muted/40 px-2 py-0.5 text-[11px] font-medium"
-                  >
-                    {label}
-                  </span>
-                ))}
-              </span>
-            )}
-            {loading ? <LoaderCircle className="ml-auto size-3.5 animate-spin" /> : null}
-          </Button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              disabled={disabled}
+              className="h-auto min-h-9 justify-start gap-2 px-3 py-2 text-left"
+            >
+              {selectedLabels.length === 0 ? (
+                <span className="text-muted-foreground">
+                  {translate('auto.components.TaskPage.5ebff3a0aa', 'None')}
+                </span>
+              ) : (
+                <span className="flex min-w-0 flex-wrap gap-1.5">
+                  {selectedLabels.map((label) => (
+                    <span
+                      key={label}
+                      className="rounded-full border border-border/50 bg-muted/40 px-2 py-0.5 text-[11px] font-medium"
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </span>
+              )}
+              {loading ? <LoaderCircle className="ml-auto size-3.5 animate-spin" /> : null}
+            </Button>
+          }
+        />
         <PopoverContent className="popover-scroll-content scrollbar-sleek w-64 p-1" align="start">
           {error ? (
             <div className="px-2 py-2 text-xs text-destructive">{error}</div>
@@ -1687,32 +1699,34 @@ function GitHubIssueAssigneeSelector({
         {translate('auto.components.TaskPage.8aba10579d', 'Assignees')}
       </label>
       <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={disabled}
-            className="h-auto min-h-9 justify-start gap-2 px-3 py-2 text-left"
-          >
-            {selectedAssignees.length === 0 ? (
-              <span className="text-muted-foreground">
-                {translate('auto.components.TaskPage.42a9160321', 'Unassigned')}
-              </span>
-            ) : (
-              <span className="flex min-w-0 items-center gap-1.5">
-                <span className="flex -space-x-1">
-                  {selectedAssignees.slice(0, 3).map((assignee) => (
-                    <GitHubAssigneeAvatar key={assignee.login} assignee={assignee} />
-                  ))}
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              disabled={disabled}
+              className="h-auto min-h-9 justify-start gap-2 px-3 py-2 text-left"
+            >
+              {selectedAssignees.length === 0 ? (
+                <span className="text-muted-foreground">
+                  {translate('auto.components.TaskPage.42a9160321', 'Unassigned')}
                 </span>
-                <span className="min-w-0 truncate text-xs">
-                  {selectedAssignees.map((assignee) => assignee.login).join(', ')}
+              ) : (
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <span className="flex -space-x-1">
+                    {selectedAssignees.slice(0, 3).map((assignee) => (
+                      <GitHubAssigneeAvatar key={assignee.login} assignee={assignee} />
+                    ))}
+                  </span>
+                  <span className="min-w-0 truncate text-xs">
+                    {selectedAssignees.map((assignee) => assignee.login).join(', ')}
+                  </span>
                 </span>
-              </span>
-            )}
-            {loading ? <LoaderCircle className="ml-auto size-3.5 animate-spin" /> : null}
-          </Button>
-        </PopoverTrigger>
+              )}
+              {loading ? <LoaderCircle className="ml-auto size-3.5 animate-spin" /> : null}
+            </Button>
+          }
+        />
         <PopoverContent className="popover-scroll-content scrollbar-sleek w-72 p-1" align="start">
           {error ? (
             <div className="px-2 py-2 text-xs text-destructive">{error}</div>
@@ -1911,34 +1925,36 @@ function GHAssigneesCell({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={
-            assignees.length
-              ? translate('auto.components.TaskPage.bb63046423', 'Assigned to {{value0}}', {
-                  value0: assignees.map((a) => a.login).join(', ')
-                })
-              : translate('auto.components.TaskPage.7f94eb6395', 'Assign issue')
-          }
-          aria-busy={pendingLogin !== null}
-          onClick={(event) => event.stopPropagation()}
-          onKeyDown={(event) => event.stopPropagation()}
-          className={cn(
-            'inline-flex h-6 max-w-full items-center gap-1 text-left transition disabled:opacity-60',
-            assignees.length > 0
-              ? 'rounded-full border border-border/40 bg-background/70 px-1.5 hover:bg-muted/60'
-              : 'w-full rounded-sm border border-transparent bg-transparent px-1 hover:bg-muted/40'
-          )}
-        >
-          {triggerContent}
-          {pendingLogin ? (
-            <LoaderCircle className="size-3 shrink-0 animate-spin text-muted-foreground" />
-          ) : assignees.length > 0 ? (
-            <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
-          ) : null}
-        </button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            aria-label={
+              assignees.length
+                ? translate('auto.components.TaskPage.bb63046423', 'Assigned to {{value0}}', {
+                    value0: assignees.map((a) => a.login).join(', ')
+                  })
+                : translate('auto.components.TaskPage.7f94eb6395', 'Assign issue')
+            }
+            aria-busy={pendingLogin !== null}
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+            className={cn(
+              'inline-flex h-6 max-w-full items-center gap-1 text-left transition disabled:opacity-60',
+              assignees.length > 0
+                ? 'rounded-full border border-border/40 bg-background/70 px-1.5 hover:bg-muted/60'
+                : 'w-full rounded-sm border border-transparent bg-transparent px-1 hover:bg-muted/40'
+            )}
+          >
+            {triggerContent}
+            {pendingLogin ? (
+              <LoaderCircle className="size-3 shrink-0 animate-spin text-muted-foreground" />
+            ) : assignees.length > 0 ? (
+              <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
+            ) : null}
+          </button>
+        }
+      />
       <PopoverContent
         align="start"
         className="popover-scroll-content scrollbar-sleek w-64 p-1"
@@ -2499,50 +2515,49 @@ function PRReviewCell({
 
   return (
     <Popover open={open} onOpenChange={handleReviewerPickerOpenChange}>
-      <PopoverTrigger asChild>
-        <button
-          ref={reviewerTriggerRef}
-          type="button"
-          onClick={(event) => event.stopPropagation()}
-          className={cn(
-            'inline-flex h-7 max-w-full items-center justify-center text-[12px] font-medium transition hover:brightness-110',
-            primaryReviewer
-              ? 'gap-1 rounded-full border border-border/40 bg-background/70 px-1.5 text-muted-foreground hover:text-foreground'
-              : 'min-w-7 text-muted-foreground hover:text-foreground'
-          )}
-          aria-label={translate(
-            'auto.components.TaskPage.editReviewersWithCurrent',
-            'Edit reviewers: {{value0}}',
-            { value0: getGitHubPRReviewLabel(itemWithLocalReviewRequests) }
-          )}
-          title={getGitHubPRReviewLabel(itemWithLocalReviewRequests)}
-        >
-          {primaryReviewer ? (
-            <>
-              <ReviewChipAvatar reviewer={primaryReviewer} />
-              {extraReviewerCount > 0 ? (
-                <span className="text-[10px] tabular-nums text-muted-foreground">
-                  +{extraReviewerCount}
-                </span>
-              ) : null}
-              <ChevronDown className="size-3 text-muted-foreground" />
-            </>
-          ) : (
-            <span aria-hidden="true">-</span>
-          )}
-        </button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <button
+            ref={reviewerTriggerRef}
+            type="button"
+            onClick={(event) => event.stopPropagation()}
+            className={cn(
+              'inline-flex h-7 max-w-full items-center justify-center text-[12px] font-medium transition hover:brightness-110',
+              primaryReviewer
+                ? 'gap-1 rounded-full border border-border/40 bg-background/70 px-1.5 text-muted-foreground hover:text-foreground'
+                : 'min-w-7 text-muted-foreground hover:text-foreground'
+            )}
+            aria-label={translate(
+              'auto.components.TaskPage.editReviewersWithCurrent',
+              'Edit reviewers: {{value0}}',
+              { value0: getGitHubPRReviewLabel(itemWithLocalReviewRequests) }
+            )}
+            title={getGitHubPRReviewLabel(itemWithLocalReviewRequests)}
+          >
+            {primaryReviewer ? (
+              <>
+                <ReviewChipAvatar reviewer={primaryReviewer} />
+                {extraReviewerCount > 0 ? (
+                  <span className="text-[10px] tabular-nums text-muted-foreground">
+                    +{extraReviewerCount}
+                  </span>
+                ) : null}
+                <ChevronDown className="size-3 text-muted-foreground" />
+              </>
+            ) : (
+              <span aria-hidden="true">-</span>
+            )}
+          </button>
+        }
+      />
       <PopoverContent
         className="flex w-[330px] flex-col overflow-hidden rounded-md border-border/70 p-0"
         align="start"
         side={reviewerPickerSide}
         sideOffset={6}
-        avoidCollisions={false}
         style={{ maxHeight: reviewerPickerMaxHeight ? `${reviewerPickerMaxHeight}px` : undefined }}
         onClick={(event) => event.stopPropagation()}
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
-        }}
+        initialFocus={false}
       >
         <div className="border-b border-border/70 px-3 py-2">
           <div className="text-[13px] font-semibold text-foreground">
@@ -2693,26 +2708,28 @@ function PRChecksCell({
           : Minus
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          ref={triggerRef}
-          type="button"
-          onFocus={onLoadChecks}
-          onMouseEnter={onLoadChecks}
-          onClick={(event) => {
-            event.stopPropagation()
-            onLoadChecks()
-            onOpen()
-          }}
-          className={cn(
-            'inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium transition hover:brightness-110',
-            getChecksPillTone(item)
-          )}
-        >
-          <Icon className="size-3" />
-          <span className="truncate">{getChecksLabel(item)}</span>
-        </button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <button
+            ref={triggerRef}
+            type="button"
+            onFocus={onLoadChecks}
+            onMouseEnter={onLoadChecks}
+            onClick={(event) => {
+              event.stopPropagation()
+              onLoadChecks()
+              onOpen()
+            }}
+            className={cn(
+              'inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium transition hover:brightness-110',
+              getChecksPillTone(item)
+            )}
+          >
+            <Icon className="size-3" />
+            <span className="truncate">{getChecksLabel(item)}</span>
+          </button>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={6}>
         {translate('auto.components.TaskPage.995dd6af9b', 'Open PR checks')}
       </TooltipContent>
@@ -2874,33 +2891,37 @@ function PRMergeCell({
   return (
     <DropdownMenu modal={false}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              onClick={(event) => event.stopPropagation()}
-              className={cn(
-                'inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium transition hover:brightness-110',
-                mergePresentation.tone
-              )}
-            >
-              {merging ? (
-                <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
-              ) : (
-                <GitMerge className="size-3" />
-              )}
-              <span className="truncate">{mergePresentation.label}</span>
-              <ChevronDown className="size-2.5 opacity-60" />
-            </button>
-          </DropdownMenuTrigger>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={(event) => event.stopPropagation()}
+                  className={cn(
+                    'inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium transition hover:brightness-110',
+                    mergePresentation.tone
+                  )}
+                >
+                  {merging ? (
+                    <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+                  ) : (
+                    <GitMerge className="size-3" />
+                  )}
+                  <span className="truncate">{mergePresentation.label}</span>
+                  <ChevronDown className="size-2.5 opacity-60" />
+                </button>
+              }
+            />
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {mergePresentation.tooltip}
         </TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="start" onClick={(event) => event.stopPropagation()}>
         {mergePresentation.autoMergeAction && (
-          <DropdownMenuItem disabled={!repo || merging} onSelect={() => void handleAutoMerge()}>
+          <DropdownMenuItem disabled={!repo || merging} onClick={() => void handleAutoMerge()}>
             <GitMerge className="size-4" />
             {mergePresentation.autoMergeAction.label}
           </DropdownMenuItem>
@@ -2910,13 +2931,13 @@ function PRMergeCell({
           <DropdownMenuItem
             key={method}
             disabled={mergeDisabled}
-            onSelect={() => void handleMerge(method)}
+            onClick={() => void handleMerge(method)}
           >
             <GitMerge className="size-4" />
             {label}
           </DropdownMenuItem>
         ))}
-        <DropdownMenuItem onSelect={() => window.api.shell.openUrl(item.url)}>
+        <DropdownMenuItem onClick={() => window.api.shell.openUrl(item.url)}>
           <ExternalLink className="size-4" />
           {translate('auto.components.TaskPage.37d60046e3', 'Open GitHub merge box')}
         </DropdownMenuItem>
@@ -8181,20 +8202,22 @@ export default function TaskPage(): React.JSX.Element {
                         Left-aligned keeps it clear of the app sidebar on the
                         right edge. */}
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-7 rounded-full"
-                          onClick={closeTaskPage}
-                          aria-label={translate(
-                            'auto.components.TaskPage.1a06219d5c',
-                            'Close tasks'
-                          )}
-                        >
-                          <X className="size-4" />
-                        </Button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-7 rounded-full"
+                            onClick={closeTaskPage}
+                            aria-label={translate(
+                              'auto.components.TaskPage.1a06219d5c',
+                              'Close tasks'
+                            )}
+                          >
+                            <X className="size-4" />
+                          </Button>
+                        }
+                      />
                       <TooltipContent side="bottom" sideOffset={6}>
                         {translate('auto.components.TaskPage.4826fd1ad8', 'Close · Esc')}
                       </TooltipContent>
@@ -8207,42 +8230,46 @@ export default function TaskPage(): React.JSX.Element {
                       const sourceDisabled = source.disabled || sourceAvailabilityNotice?.blocking
                       return (
                         <Tooltip key={source.id}>
-                          <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              disabled={sourceDisabled}
-                              onClick={() => {
-                                if (sourceAvailabilityNotice?.blocking) {
-                                  return
-                                }
-                                taskSourceManuallyChangedRef.current = true
-                                openTaskPage(
-                                  { taskSource: source.id },
-                                  { recordTasksInteraction: false }
-                                )
-                                void updateSettings({ defaultTaskSource: source.id }).catch(() => {
-                                  toast.error(
-                                    translate(
-                                      'auto.components.TaskPage.609532fae7',
-                                      'Failed to save default task source.'
-                                    )
+                          <TooltipTrigger
+                            render={
+                              <button
+                                type="button"
+                                disabled={sourceDisabled}
+                                onClick={() => {
+                                  if (sourceAvailabilityNotice?.blocking) {
+                                    return
+                                  }
+                                  taskSourceManuallyChangedRef.current = true
+                                  openTaskPage(
+                                    { taskSource: source.id },
+                                    { recordTasksInteraction: false }
                                   )
-                                })
-                              }}
-                              data-task-source={source.id}
-                              aria-label={sourceAvailabilityNotice?.label ?? source.label}
-                              aria-pressed={active}
-                              className={cn(
-                                'group flex h-8 w-8 items-center justify-center rounded-md border transition',
-                                active
-                                  ? 'border-foreground/40 bg-muted/70 text-foreground shadow-sm'
-                                  : 'border-border/40 bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground',
-                                sourceDisabled && 'cursor-not-allowed opacity-55'
-                              )}
-                            >
-                              <source.Icon className="size-3.5" />
-                            </button>
-                          </TooltipTrigger>
+                                  void updateSettings({ defaultTaskSource: source.id }).catch(
+                                    () => {
+                                      toast.error(
+                                        translate(
+                                          'auto.components.TaskPage.609532fae7',
+                                          'Failed to save default task source.'
+                                        )
+                                      )
+                                    }
+                                  )
+                                }}
+                                data-task-source={source.id}
+                                aria-label={sourceAvailabilityNotice?.label ?? source.label}
+                                aria-pressed={active}
+                                className={cn(
+                                  'group flex h-8 w-8 items-center justify-center rounded-md border transition',
+                                  active
+                                    ? 'border-foreground/40 bg-muted/70 text-foreground shadow-sm'
+                                    : 'border-border/40 bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground',
+                                  sourceDisabled && 'cursor-not-allowed opacity-55'
+                                )}
+                              >
+                                <source.Icon className="size-3.5" />
+                              </button>
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {sourceAvailabilityNotice?.label ?? source.label}
                           </TooltipContent>
@@ -8270,35 +8297,37 @@ export default function TaskPage(): React.JSX.Element {
                         onOpen={handleLinearScopeOpen}
                       />
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon-sm"
-                            onClick={() => {
-                              if (!selectedLinearTeamForExternalLink?.url) {
-                                return
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon-sm"
+                              onClick={() => {
+                                if (!selectedLinearTeamForExternalLink?.url) {
+                                  return
+                                }
+                                void window.api.shell.openUrl(selectedLinearTeamForExternalLink.url)
+                              }}
+                              disabled={!selectedLinearTeamForExternalLink}
+                              aria-label={
+                                selectedLinearTeamForExternalLink
+                                  ? translate(
+                                      'auto.components.TaskPage.246bd64aed',
+                                      'Open {{value0}} in Linear',
+                                      { value0: selectedLinearTeamForExternalLink.name }
+                                    )
+                                  : translate(
+                                      'auto.components.TaskPage.8029e2bd4d',
+                                      'Select one Linear team to open in Linear'
+                                    )
                               }
-                              void window.api.shell.openUrl(selectedLinearTeamForExternalLink.url)
-                            }}
-                            disabled={!selectedLinearTeamForExternalLink}
-                            aria-label={
-                              selectedLinearTeamForExternalLink
-                                ? translate(
-                                    'auto.components.TaskPage.246bd64aed',
-                                    'Open {{value0}} in Linear',
-                                    { value0: selectedLinearTeamForExternalLink.name }
-                                  )
-                                : translate(
-                                    'auto.components.TaskPage.8029e2bd4d',
-                                    'Select one Linear team to open in Linear'
-                                  )
-                            }
-                            className="h-8 w-8 rounded-md border-border/50 bg-muted/50 text-foreground shadow-sm transition hover:bg-muted/50"
-                          >
-                            <ExternalLink className="size-3.5" />
-                          </Button>
-                        </TooltipTrigger>
+                              className="h-8 w-8 rounded-md border-border/50 bg-muted/50 text-foreground shadow-sm transition hover:bg-muted/50"
+                            >
+                              <ExternalLink className="size-3.5" />
+                            </Button>
+                          }
+                        />
                         <TooltipContent side="bottom" sideOffset={6}>
                           {selectedLinearTeamForExternalLink
                             ? translate(
@@ -8320,6 +8349,9 @@ export default function TaskPage(): React.JSX.Element {
                         <Select
                           value={selectedJiraSiteId ?? undefined}
                           onValueChange={(value) => {
+                            if (value === null) {
+                              return
+                            }
                             setSelectedJiraIssueKey(null)
                             setSelectedJiraIssueFallback(null)
                             setJiraIssues([])
@@ -8438,34 +8470,36 @@ export default function TaskPage(): React.JSX.Element {
                       />
                     </div>
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon-sm"
-                          onClick={() => {
-                            if (!selectedGitHubRepoExternalLink?.url) {
-                              return
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon-sm"
+                            onClick={() => {
+                              if (!selectedGitHubRepoExternalLink?.url) {
+                                return
+                              }
+                              void window.api.shell.openUrl(selectedGitHubRepoExternalLink.url)
+                            }}
+                            aria-label={
+                              selectedGitHubRepoExternalLink
+                                ? translate(
+                                    'auto.components.TaskPage.8d1e17a3ef',
+                                    'Open {{value0}} in GitHub',
+                                    { value0: selectedGitHubRepoExternalLink.label }
+                                  )
+                                : translate(
+                                    'auto.components.TaskPage.d1132848f8',
+                                    'Select one GitHub project to open in GitHub'
+                                  )
                             }
-                            void window.api.shell.openUrl(selectedGitHubRepoExternalLink.url)
-                          }}
-                          aria-label={
-                            selectedGitHubRepoExternalLink
-                              ? translate(
-                                  'auto.components.TaskPage.8d1e17a3ef',
-                                  'Open {{value0}} in GitHub',
-                                  { value0: selectedGitHubRepoExternalLink.label }
-                                )
-                              : translate(
-                                  'auto.components.TaskPage.d1132848f8',
-                                  'Select one GitHub project to open in GitHub'
-                                )
-                          }
-                          className="h-8 w-8 rounded-md border-border/50 bg-muted/50 text-foreground shadow-sm transition hover:bg-muted/50"
-                        >
-                          <ExternalLink className="size-3.5" />
-                        </Button>
-                      </TooltipTrigger>
+                            className="h-8 w-8 rounded-md border-border/50 bg-muted/50 text-foreground shadow-sm transition hover:bg-muted/50"
+                          >
+                            <ExternalLink className="size-3.5" />
+                          </Button>
+                        }
+                      />
                       <TooltipContent side="bottom" sideOffset={6}>
                         {selectedGitHubRepoExternalLink
                           ? translate(
@@ -8570,69 +8604,73 @@ export default function TaskPage(): React.JSX.Element {
                         data-contextual-tour-target="tasks-actions"
                       >
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => {
-                                // Why: restore a content-non-empty draft instead
-                                // of resetting, so an accidental dismissal is
-                                // recoverable. The empty-default branch stays live
-                                // so a stale draft never hijacks a fresh open after
-                                // the user changed their primary/selected repo.
-                                const seed = resolveNewIssueOpenSeed({
-                                  draft: useAppStore.getState().newIssueDraft,
-                                  selectedRepoIds: selectedRepos.map((r) => r.id)
-                                })
-                                setNewIssueTitle(seed.title)
-                                setNewIssueBody(seed.body)
-                                setNewIssueLabels(seed.labels)
-                                setNewIssueAssignees(seed.assignees)
-                                setNewIssueRepoId(seed.repoId)
-                                setNewIssueOpen(true)
-                              }}
-                              disabled={!newIssueTargetRepo}
-                              aria-label={translate(
-                                'auto.components.TaskPage.d3d0998b7d',
-                                'New GitHub issue'
-                              )}
-                              className="size-8 border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
-                            >
-                              <Plus className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => {
+                                  // Why: restore a content-non-empty draft instead
+                                  // of resetting, so an accidental dismissal is
+                                  // recoverable. The empty-default branch stays live
+                                  // so a stale draft never hijacks a fresh open after
+                                  // the user changed their primary/selected repo.
+                                  const seed = resolveNewIssueOpenSeed({
+                                    draft: useAppStore.getState().newIssueDraft,
+                                    selectedRepoIds: selectedRepos.map((r) => r.id)
+                                  })
+                                  setNewIssueTitle(seed.title)
+                                  setNewIssueBody(seed.body)
+                                  setNewIssueLabels(seed.labels)
+                                  setNewIssueAssignees(seed.assignees)
+                                  setNewIssueRepoId(seed.repoId)
+                                  setNewIssueOpen(true)
+                                }}
+                                disabled={!newIssueTargetRepo}
+                                aria-label={translate(
+                                  'auto.components.TaskPage.d3d0998b7d',
+                                  'New GitHub issue'
+                                )}
+                                className="size-8 border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
+                              >
+                                <Plus className="size-4" />
+                              </Button>
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {translate('auto.components.TaskPage.d3d0998b7d', 'New GitHub issue')}
                           </TooltipContent>
                         </Tooltip>
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={handleRefreshGithubTasks}
-                              disabled={githubTasksBusy}
-                              aria-busy={githubTasksBusy}
-                              aria-label={
-                                githubTasksBusy
-                                  ? translate(
-                                      'auto.components.TaskPage.6ffa6be99f',
-                                      'Refreshing GitHub work'
-                                    )
-                                  : translate(
-                                      'auto.components.TaskPage.ff53631e6f',
-                                      'Refresh GitHub work'
-                                    )
-                              }
-                              className="size-8 cursor-pointer border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md disabled:pointer-events-auto disabled:cursor-wait supports-[backdrop-filter]:bg-transparent"
-                            >
-                              {githubTasksBusy ? (
-                                <LoaderCircle className="size-4 animate-spin" />
-                              ) : (
-                                <RefreshCw className="size-4" />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={handleRefreshGithubTasks}
+                                disabled={githubTasksBusy}
+                                aria-busy={githubTasksBusy}
+                                aria-label={
+                                  githubTasksBusy
+                                    ? translate(
+                                        'auto.components.TaskPage.6ffa6be99f',
+                                        'Refreshing GitHub work'
+                                      )
+                                    : translate(
+                                        'auto.components.TaskPage.ff53631e6f',
+                                        'Refresh GitHub work'
+                                      )
+                                }
+                                className="size-8 cursor-pointer border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md disabled:pointer-events-auto disabled:cursor-wait supports-[backdrop-filter]:bg-transparent"
+                              >
+                                {githubTasksBusy ? (
+                                  <LoaderCircle className="size-4 animate-spin" />
+                                ) : (
+                                  <RefreshCw className="size-4" />
+                                )}
+                              </Button>
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {githubTasksBusy
                               ? translate(
@@ -8759,56 +8797,58 @@ export default function TaskPage(): React.JSX.Element {
                         data-contextual-tour-target="tasks-actions"
                       >
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => {
-                                if (linearMode === 'projects' && !selectedLinearProject) {
-                                  setNewLinearProjectName('')
-                                  setNewLinearProjectDescription('')
-                                  setNewLinearProjectContent('')
-                                  setNewLinearProjectTeamId(availableTeams[0]?.id ?? null)
-                                  setNewLinearProjectLeadId(null)
-                                  setNewLinearProjectMemberIds([])
-                                  setNewLinearProjectLabelIds([])
-                                  setNewLinearProjectPriority(0)
-                                  setNewLinearProjectStartDate('')
-                                  setNewLinearProjectTargetDate('')
-                                  setNewLinearProjectOpen(true)
-                                  return
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => {
+                                  if (linearMode === 'projects' && !selectedLinearProject) {
+                                    setNewLinearProjectName('')
+                                    setNewLinearProjectDescription('')
+                                    setNewLinearProjectContent('')
+                                    setNewLinearProjectTeamId(availableTeams[0]?.id ?? null)
+                                    setNewLinearProjectLeadId(null)
+                                    setNewLinearProjectMemberIds([])
+                                    setNewLinearProjectLabelIds([])
+                                    setNewLinearProjectPriority(0)
+                                    setNewLinearProjectStartDate('')
+                                    setNewLinearProjectTargetDate('')
+                                    setNewLinearProjectOpen(true)
+                                    return
+                                  }
+                                  setNewLinearIssueTitle('')
+                                  setNewLinearIssueBody('')
+                                  const projectTeamId =
+                                    selectedLinearProject?.teams?.[0]?.id ??
+                                    availableTeams.find(
+                                      (team) =>
+                                        team.workspaceId === selectedLinearProject?.workspaceId
+                                    )?.id
+                                  setNewLinearIssueTeamId(
+                                    projectTeamId ?? availableTeams[0]?.id ?? null
+                                  )
+                                  setNewLinearIssueProjectId(selectedLinearProject?.id ?? null)
+                                  setNewLinearIssueOpen(true)
+                                }}
+                                disabled={availableTeams.length === 0}
+                                aria-label={
+                                  linearMode === 'projects' && !selectedLinearProject
+                                    ? translate(
+                                        'auto.components.TaskPage.1361275ec3',
+                                        'New Linear project'
+                                      )
+                                    : translate(
+                                        'auto.components.TaskPage.3feb524d42',
+                                        'New Linear issue'
+                                      )
                                 }
-                                setNewLinearIssueTitle('')
-                                setNewLinearIssueBody('')
-                                const projectTeamId =
-                                  selectedLinearProject?.teams?.[0]?.id ??
-                                  availableTeams.find(
-                                    (team) =>
-                                      team.workspaceId === selectedLinearProject?.workspaceId
-                                  )?.id
-                                setNewLinearIssueTeamId(
-                                  projectTeamId ?? availableTeams[0]?.id ?? null
-                                )
-                                setNewLinearIssueProjectId(selectedLinearProject?.id ?? null)
-                                setNewLinearIssueOpen(true)
-                              }}
-                              disabled={availableTeams.length === 0}
-                              aria-label={
-                                linearMode === 'projects' && !selectedLinearProject
-                                  ? translate(
-                                      'auto.components.TaskPage.1361275ec3',
-                                      'New Linear project'
-                                    )
-                                  : translate(
-                                      'auto.components.TaskPage.3feb524d42',
-                                      'New Linear issue'
-                                    )
-                              }
-                              className="size-8 border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
-                            >
-                              <Plus className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
+                                className="size-8 border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
+                              >
+                                <Plus className="size-4" />
+                              </Button>
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {linearMode === 'projects' && !selectedLinearProject
                               ? translate(
@@ -8822,37 +8862,39 @@ export default function TaskPage(): React.JSX.Element {
                           </TooltipContent>
                         </Tooltip>
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => setLinearRefreshNonce((n) => n + 1)}
-                              disabled={
-                                linearMode === 'issues'
-                                  ? linearLoading
-                                  : linearMode === 'projects'
-                                    ? linearProjectsLoading || linearProjectDetailLoading
-                                    : linearCustomViewsLoading || linearCustomViewContentsLoading
-                              }
-                              aria-label={translate(
-                                'auto.components.TaskPage.8964184a8b',
-                                'Refresh Linear'
-                              )}
-                              className="size-8 border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
-                            >
-                              {linearMode === 'issues' && linearLoading ? (
-                                <LoaderCircle className="size-4 animate-spin" />
-                              ) : linearMode === 'projects' &&
-                                (linearProjectsLoading || linearProjectDetailLoading) ? (
-                                <LoaderCircle className="size-4 animate-spin" />
-                              ) : linearMode === 'views' &&
-                                (linearCustomViewsLoading || linearCustomViewContentsLoading) ? (
-                                <LoaderCircle className="size-4 animate-spin" />
-                              ) : (
-                                <RefreshCw className="size-4" />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setLinearRefreshNonce((n) => n + 1)}
+                                disabled={
+                                  linearMode === 'issues'
+                                    ? linearLoading
+                                    : linearMode === 'projects'
+                                      ? linearProjectsLoading || linearProjectDetailLoading
+                                      : linearCustomViewsLoading || linearCustomViewContentsLoading
+                                }
+                                aria-label={translate(
+                                  'auto.components.TaskPage.8964184a8b',
+                                  'Refresh Linear'
+                                )}
+                                className="size-8 border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
+                              >
+                                {linearMode === 'issues' && linearLoading ? (
+                                  <LoaderCircle className="size-4 animate-spin" />
+                                ) : linearMode === 'projects' &&
+                                  (linearProjectsLoading || linearProjectDetailLoading) ? (
+                                  <LoaderCircle className="size-4 animate-spin" />
+                                ) : linearMode === 'views' &&
+                                  (linearCustomViewsLoading || linearCustomViewContentsLoading) ? (
+                                  <LoaderCircle className="size-4 animate-spin" />
+                                ) : (
+                                  <RefreshCw className="size-4" />
+                                )}
+                              </Button>
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {translate('auto.components.TaskPage.8964184a8b', 'Refresh Linear')}
                           </TooltipContent>
@@ -8990,63 +9032,67 @@ export default function TaskPage(): React.JSX.Element {
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => {
-                                setNewJiraIssueTitle('')
-                                setNewJiraIssueBody('')
-                                setNewJiraIssueProjectId(
-                                  sortedAvailableJiraProjects[0]
-                                    ? getJiraProjectSelectionKey(sortedAvailableJiraProjects[0])
-                                    : null
-                                )
-                                setNewJiraIssueProjectQuery('')
-                                setNewJiraIssueProjectCommandValue('')
-                                setNewJiraIssueTypeId(null)
-                                setNewJiraIssueOpen(true)
-                              }}
-                              disabled={
-                                sortedAvailableJiraProjects.length === 0 || jiraProjectsLoading
-                              }
-                              aria-label={translate(
-                                'auto.components.TaskPage.0c11ca0b6d',
-                                'New Jira issue'
-                              )}
-                              className="border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
-                            >
-                              {jiraProjectsLoading ? (
-                                <LoaderCircle className="size-4 animate-spin" />
-                              ) : (
-                                <Plus className="size-4" />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => {
+                                  setNewJiraIssueTitle('')
+                                  setNewJiraIssueBody('')
+                                  setNewJiraIssueProjectId(
+                                    sortedAvailableJiraProjects[0]
+                                      ? getJiraProjectSelectionKey(sortedAvailableJiraProjects[0])
+                                      : null
+                                  )
+                                  setNewJiraIssueProjectQuery('')
+                                  setNewJiraIssueProjectCommandValue('')
+                                  setNewJiraIssueTypeId(null)
+                                  setNewJiraIssueOpen(true)
+                                }}
+                                disabled={
+                                  sortedAvailableJiraProjects.length === 0 || jiraProjectsLoading
+                                }
+                                aria-label={translate(
+                                  'auto.components.TaskPage.0c11ca0b6d',
+                                  'New Jira issue'
+                                )}
+                                className="border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
+                              >
+                                {jiraProjectsLoading ? (
+                                  <LoaderCircle className="size-4 animate-spin" />
+                                ) : (
+                                  <Plus className="size-4" />
+                                )}
+                              </Button>
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {translate('auto.components.TaskPage.0c11ca0b6d', 'New Jira issue')}
                           </TooltipContent>
                         </Tooltip>
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => setJiraRefreshNonce((n) => n + 1)}
-                              disabled={jiraLoading}
-                              aria-label={translate(
-                                'auto.components.TaskPage.2ff9fd71fd',
-                                'Refresh Jira issues'
-                              )}
-                              className="border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
-                            >
-                              {jiraLoading ? (
-                                <LoaderCircle className="size-4 animate-spin" />
-                              ) : (
-                                <RefreshCw className="size-4" />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setJiraRefreshNonce((n) => n + 1)}
+                                disabled={jiraLoading}
+                                aria-label={translate(
+                                  'auto.components.TaskPage.2ff9fd71fd',
+                                  'Refresh Jira issues'
+                                )}
+                                className="border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
+                              >
+                                {jiraLoading ? (
+                                  <LoaderCircle className="size-4 animate-spin" />
+                                ) : (
+                                  <RefreshCw className="size-4" />
+                                )}
+                              </Button>
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {translate(
                               'auto.components.TaskPage.2ff9fd71fd',
@@ -9207,32 +9253,34 @@ export default function TaskPage(): React.JSX.Element {
                           data-contextual-tour-target="tasks-actions"
                         >
                           <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setGitlabRefreshNonce((n) => n + 1)}
-                                disabled={gitlabLoading || gitlabTodosLoading}
-                                aria-label={
-                                  gitlabView === 'todos'
-                                    ? translate(
-                                        'auto.components.TaskPage.c679af7ad9',
-                                        'Refresh My Todos'
-                                      )
-                                    : translate(
-                                        'auto.components.TaskPage.d4c2830063',
-                                        'Refresh GitLab work items'
-                                      )
-                                }
-                                className="border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
-                              >
-                                {gitlabLoading || gitlabTodosLoading ? (
-                                  <LoaderCircle className="size-4 animate-spin" />
-                                ) : (
-                                  <RefreshCw className="size-4" />
-                                )}
-                              </Button>
-                            </TooltipTrigger>
+                            <TooltipTrigger
+                              render={
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => setGitlabRefreshNonce((n) => n + 1)}
+                                  disabled={gitlabLoading || gitlabTodosLoading}
+                                  aria-label={
+                                    gitlabView === 'todos'
+                                      ? translate(
+                                          'auto.components.TaskPage.c679af7ad9',
+                                          'Refresh My Todos'
+                                        )
+                                      : translate(
+                                          'auto.components.TaskPage.d4c2830063',
+                                          'Refresh GitLab work items'
+                                        )
+                                  }
+                                  className="border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
+                                >
+                                  {gitlabLoading || gitlabTodosLoading ? (
+                                    <LoaderCircle className="size-4 animate-spin" />
+                                  ) : (
+                                    <RefreshCw className="size-4" />
+                                  )}
+                                </Button>
+                              }
+                            />
                             <TooltipContent side="bottom" sideOffset={6}>
                               {gitlabView === 'todos'
                                 ? translate(
@@ -9533,7 +9581,7 @@ export default function TaskPage(): React.JSX.Element {
                           <div className={GITHUB_TASK_STICKY_ID_CELL_CLASS}>
                             {isTaskPageGitHubDraftPR(item) ? (
                               <Tooltip>
-                                <TooltipTrigger asChild>{githubTaskIdPill}</TooltipTrigger>
+                                <TooltipTrigger render={githubTaskIdPill} />
                                 <TooltipContent side="bottom" sideOffset={6}>
                                   {translate('auto.components.TaskPage.054bf695cc', 'Draft')}
                                 </TooltipContent>
@@ -9657,11 +9705,13 @@ export default function TaskPage(): React.JSX.Element {
                           )}
 
                           <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex items-center text-[11px] text-muted-foreground">
-                                {formatRelativeTime(item.updatedAt)}
-                              </div>
-                            </TooltipTrigger>
+                            <TooltipTrigger
+                              render={
+                                <div className="flex items-center text-[11px] text-muted-foreground">
+                                  {formatRelativeTime(item.updatedAt)}
+                                </div>
+                              }
+                            />
                             <TooltipContent side="bottom" sideOffset={6}>
                               {new Date(item.updatedAt).toLocaleString()}
                             </TooltipContent>
@@ -9701,30 +9751,32 @@ export default function TaskPage(): React.JSX.Element {
                                       : translate('auto.components.TaskPage.7d08e8be0f', 'Start')}
                                     <ArrowRight className="size-3" />
                                   </Button>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      type="button"
-                                      variant={attachedWorkspace ? 'default' : 'outline'}
-                                      size="icon-xs"
-                                      onClick={(event) => event.stopPropagation()}
-                                      className={cn(
-                                        attachedWorkspace ? 'shadow-xs' : 'bg-background/80'
-                                      )}
-                                      aria-label={translate(
-                                        'auto.components.TaskPage.7deb9e59a5',
-                                        'More PR actions'
-                                      )}
-                                    >
-                                      <ChevronDown className="size-3" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
+                                  <DropdownMenuTrigger
+                                    render={
+                                      <Button
+                                        type="button"
+                                        variant={attachedWorkspace ? 'default' : 'outline'}
+                                        size="icon-xs"
+                                        onClick={(event) => event.stopPropagation()}
+                                        className={cn(
+                                          attachedWorkspace ? 'shadow-xs' : 'bg-background/80'
+                                        )}
+                                        aria-label={translate(
+                                          'auto.components.TaskPage.7deb9e59a5',
+                                          'More PR actions'
+                                        )}
+                                      >
+                                        <ChevronDown className="size-3" />
+                                      </Button>
+                                    }
+                                  />
                                 </ButtonGroup>
                                 <DropdownMenuContent
                                   align="end"
                                   onClick={(event) => event.stopPropagation()}
                                 >
                                   {attachedWorkspace ? (
-                                    <DropdownMenuItem onSelect={() => handleUseWorkItem(item)}>
+                                    <DropdownMenuItem onClick={() => handleUseWorkItem(item)}>
                                       <Plus className="size-4" />
                                       {translate(
                                         'auto.components.TaskPage.b6329379ca',
@@ -9733,7 +9785,7 @@ export default function TaskPage(): React.JSX.Element {
                                     </DropdownMenuItem>
                                   ) : null}
                                   <DropdownMenuItem
-                                    onSelect={() => window.api.shell.openUrl(item.url)}
+                                    onClick={() => window.api.shell.openUrl(item.url)}
                                   >
                                     <ExternalLink className="size-4" />
                                     {translate(
@@ -9779,25 +9831,27 @@ export default function TaskPage(): React.JSX.Element {
                             )}
                             {item.type !== 'pr' ? (
                               <DropdownMenu modal={false}>
-                                <DropdownMenuTrigger asChild>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground"
-                                    aria-label={translate(
-                                      'auto.components.TaskPage.66ae7330f6',
-                                      'More actions'
-                                    )}
-                                  >
-                                    <EllipsisVertical className="size-4" />
-                                  </button>
-                                </DropdownMenuTrigger>
+                                <DropdownMenuTrigger
+                                  render={
+                                    <button
+                                      type="button"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground"
+                                      aria-label={translate(
+                                        'auto.components.TaskPage.66ae7330f6',
+                                        'More actions'
+                                      )}
+                                    >
+                                      <EllipsisVertical className="size-4" />
+                                    </button>
+                                  }
+                                />
                                 <DropdownMenuContent
                                   align="end"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {attachedWorkspace ? (
-                                    <DropdownMenuItem onSelect={() => handleUseWorkItem(item)}>
+                                    <DropdownMenuItem onClick={() => handleUseWorkItem(item)}>
                                       <Plus className="size-4" />
                                       {translate(
                                         'auto.components.TaskPage.b6329379ca',
@@ -9806,7 +9860,7 @@ export default function TaskPage(): React.JSX.Element {
                                     </DropdownMenuItem>
                                   ) : null}
                                   <DropdownMenuItem
-                                    onSelect={() => window.api.shell.openUrl(item.url)}
+                                    onClick={() => window.api.shell.openUrl(item.url)}
                                   >
                                     <ExternalLink className="size-4" />
                                     {translate(
@@ -10030,24 +10084,29 @@ export default function TaskPage(): React.JSX.Element {
                       </span>
                       <div className="flex items-center justify-end gap-1">
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              data-contextual-tour-target="tasks-start-workspace"
-                              onClick={(event) => {
-                                event.stopPropagation()
-                                handleUseGitLabItem(item)
-                              }}
-                              aria-label={translate(
-                                'auto.components.TaskPage.5e8061b088',
-                                'Start workspace from {{value0}} {{value1}}',
-                                { value0: item.type === 'mr' ? 'MR' : 'issue', value1: item.number }
-                              )}
-                            >
-                              <ArrowRight className="size-3.5" />
-                            </Button>
-                          </TooltipTrigger>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="ghost"
+                                size="icon-xs"
+                                data-contextual-tour-target="tasks-start-workspace"
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  handleUseGitLabItem(item)
+                                }}
+                                aria-label={translate(
+                                  'auto.components.TaskPage.5e8061b088',
+                                  'Start workspace from {{value0}} {{value1}}',
+                                  {
+                                    value0: item.type === 'mr' ? 'MR' : 'issue',
+                                    value1: item.number
+                                  }
+                                )}
+                              >
+                                <ArrowRight className="size-3.5" />
+                              </Button>
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {translate('auto.components.TaskPage.9497f2787c', 'Start workspace')}
                           </TooltipContent>
@@ -10463,24 +10522,26 @@ export default function TaskPage(): React.JSX.Element {
                       const active = linearViewMode === id
                       return (
                         <Tooltip key={id}>
-                          <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              onClick={() => setLinearViewMode(id)}
-                              aria-label={translate(
-                                'auto.components.TaskPage.af377b13b1',
-                                '{{value0}} view',
-                                { value0: label }
-                              )}
-                              aria-pressed={active}
-                              className={cn(
-                                'inline-flex size-6 items-center justify-center rounded text-muted-foreground transition hover:text-foreground',
-                                active && 'bg-accent text-accent-foreground shadow-xs'
-                              )}
-                            >
-                              <Icon className="size-3.5" />
-                            </button>
-                          </TooltipTrigger>
+                          <TooltipTrigger
+                            render={
+                              <button
+                                type="button"
+                                onClick={() => setLinearViewMode(id)}
+                                aria-label={translate(
+                                  'auto.components.TaskPage.af377b13b1',
+                                  '{{value0}} view',
+                                  { value0: label }
+                                )}
+                                aria-pressed={active}
+                                className={cn(
+                                  'inline-flex size-6 items-center justify-center rounded text-muted-foreground transition hover:text-foreground',
+                                  active && 'bg-accent text-accent-foreground shadow-xs'
+                                )}
+                              >
+                                <Icon className="size-3.5" />
+                              </button>
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {translate('auto.components.TaskPage.af377b13b1', '{{value0}} view', {
                               value0: label
@@ -10491,16 +10552,18 @@ export default function TaskPage(): React.JSX.Element {
                     })}
                   </div>
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        className="gap-1 border-border/50 bg-background/70 text-[11px]"
-                      >
-                        <SlidersHorizontal className="size-3.5" />
-                        {translate('auto.components.TaskPage.9c57663908', 'View')}
-                      </Button>
-                    </DropdownMenuTrigger>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          variant="outline"
+                          size="xs"
+                          className="gap-1 border-border/50 bg-background/70 text-[11px]"
+                        >
+                          <SlidersHorizontal className="size-3.5" />
+                          {translate('auto.components.TaskPage.9c57663908', 'View')}
+                        </Button>
+                      }
+                    />
                     <DropdownMenuContent align="end" className="w-56">
                       <DropdownMenuLabel className="flex items-center gap-2">
                         <List className="size-3.5" />
@@ -10556,8 +10619,9 @@ export default function TaskPage(): React.JSX.Element {
                         <DropdownMenuCheckboxItem
                           key={property.id}
                           checked={effectiveLinearDisplayProperties.has(property.id)}
-                          onSelect={(event) => event.preventDefault()}
+                          onClick={(event) => event.preventDefault()}
                           onCheckedChange={() => toggleLinearDisplayProperty(property.id)}
+                          closeOnClick={false}
                         >
                           {property.label}
                         </DropdownMenuCheckboxItem>
@@ -11018,25 +11082,30 @@ export default function TaskPage(): React.JSX.Element {
                           {effectiveLinearDisplayProperties.has('assignee') ? (
                             <div className="flex min-w-0 justify-center max-lg:!hidden">
                               <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div
-                                    className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border/50 bg-muted/40 text-[10px] text-muted-foreground"
-                                    aria-label={
-                                      issue.assignee?.displayName ??
-                                      translate('auto.components.TaskPage.42a9160321', 'Unassigned')
-                                    }
-                                  >
-                                    {issue.assignee?.avatarUrl ? (
-                                      <img
-                                        src={issue.assignee.avatarUrl}
-                                        alt={issue.assignee.displayName}
-                                        className="size-5 rounded-full"
-                                      />
-                                    ) : (
-                                      (issue.assignee?.displayName?.slice(0, 1) ?? '-')
-                                    )}
-                                  </div>
-                                </TooltipTrigger>
+                                <TooltipTrigger
+                                  render={
+                                    <div
+                                      className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border/50 bg-muted/40 text-[10px] text-muted-foreground"
+                                      aria-label={
+                                        issue.assignee?.displayName ??
+                                        translate(
+                                          'auto.components.TaskPage.42a9160321',
+                                          'Unassigned'
+                                        )
+                                      }
+                                    >
+                                      {issue.assignee?.avatarUrl ? (
+                                        <img
+                                          src={issue.assignee.avatarUrl}
+                                          alt={issue.assignee.displayName}
+                                          className="size-5 rounded-full"
+                                        />
+                                      ) : (
+                                        (issue.assignee?.displayName?.slice(0, 1) ?? '-')
+                                      )}
+                                    </div>
+                                  }
+                                />
                                 <TooltipContent side="bottom" sideOffset={6}>
                                   {issue.assignee?.displayName ??
                                     translate('auto.components.TaskPage.42a9160321', 'Unassigned')}
@@ -11047,11 +11116,13 @@ export default function TaskPage(): React.JSX.Element {
 
                           {effectiveLinearDisplayProperties.has('updated') ? (
                             <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="block min-w-0 truncate text-[12px] text-muted-foreground max-lg:!hidden">
-                                  {formatRelativeTime(issue.updatedAt)}
-                                </div>
-                              </TooltipTrigger>
+                              <TooltipTrigger
+                                render={
+                                  <div className="block min-w-0 truncate text-[12px] text-muted-foreground max-lg:!hidden">
+                                    {formatRelativeTime(issue.updatedAt)}
+                                  </div>
+                                }
+                              />
                               <TooltipContent side="bottom" sideOffset={6}>
                                 {new Date(issue.updatedAt).toLocaleString()}
                               </TooltipContent>
@@ -11060,46 +11131,50 @@ export default function TaskPage(): React.JSX.Element {
 
                           <div className="flex shrink-0 items-center justify-end gap-1 md:opacity-0 md:transition-opacity md:group-hover/row:opacity-100 md:group-focus-within/row:opacity-100">
                             <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon-xs"
-                                  data-contextual-tour-target="tasks-start-workspace"
-                                  onClick={(event) => {
-                                    event.stopPropagation()
-                                    handleUseLinearItem(issue)
-                                  }}
-                                  aria-label={translate(
-                                    'auto.components.TaskPage.ff90d0abc7',
-                                    'Start workspace from {{value0}}',
-                                    { value0: issue.identifier }
-                                  )}
-                                >
-                                  <ArrowRight className="size-3.5" />
-                                </Button>
-                              </TooltipTrigger>
+                              <TooltipTrigger
+                                render={
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-xs"
+                                    data-contextual-tour-target="tasks-start-workspace"
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      handleUseLinearItem(issue)
+                                    }}
+                                    aria-label={translate(
+                                      'auto.components.TaskPage.ff90d0abc7',
+                                      'Start workspace from {{value0}}',
+                                      { value0: issue.identifier }
+                                    )}
+                                  >
+                                    <ArrowRight className="size-3.5" />
+                                  </Button>
+                                }
+                              />
                               <TooltipContent side="bottom" sideOffset={6}>
                                 {translate('auto.components.TaskPage.7d08e8be0f', 'Start')}
                               </TooltipContent>
                             </Tooltip>
                             <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon-xs"
-                                  onClick={(event) => {
-                                    event.stopPropagation()
-                                    window.api.shell.openUrl(issue.url)
-                                  }}
-                                  aria-label={translate(
-                                    'auto.components.TaskPage.246bd64aed',
-                                    'Open {{value0}} in Linear',
-                                    { value0: issue.identifier }
-                                  )}
-                                >
-                                  <ExternalLink className="size-3.5" />
-                                </Button>
-                              </TooltipTrigger>
+                              <TooltipTrigger
+                                render={
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-xs"
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      window.api.shell.openUrl(issue.url)
+                                    }}
+                                    aria-label={translate(
+                                      'auto.components.TaskPage.246bd64aed',
+                                      'Open {{value0}} in Linear',
+                                      { value0: issue.identifier }
+                                    )}
+                                  >
+                                    <ExternalLink className="size-3.5" />
+                                  </Button>
+                                }
+                              />
                               <TooltipContent side="bottom" sideOffset={6}>
                                 {translate('auto.components.TaskPage.6244a02f46', 'Open in Linear')}
                               </TooltipContent>
@@ -11429,20 +11504,22 @@ export default function TaskPage(): React.JSX.Element {
               <span className="text-xs text-muted-foreground/40">/</span>
               {availableTeams.length > 1 ? (
                 <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      className="h-7 max-w-56 gap-1 px-2 text-xs font-medium text-foreground hover:bg-muted"
-                    >
-                      <span className="truncate">
-                        {newLinearProjectTargetTeam
-                          ? `${newLinearProjectTargetTeam.key} - ${newLinearProjectTargetTeam.name}`
-                          : translate('auto.components.TaskPage.5af6f0ae5b', 'Select team')}
-                      </span>
-                      <ChevronDown className="size-3 flex-none text-muted-foreground" />
-                    </Button>
-                  </PopoverTrigger>
+                  <PopoverTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="h-7 max-w-56 gap-1 px-2 text-xs font-medium text-foreground hover:bg-muted"
+                      >
+                        <span className="truncate">
+                          {newLinearProjectTargetTeam
+                            ? `${newLinearProjectTargetTeam.key} - ${newLinearProjectTargetTeam.name}`
+                            : translate('auto.components.TaskPage.5af6f0ae5b', 'Select team')}
+                        </span>
+                        <ChevronDown className="size-3 flex-none text-muted-foreground" />
+                      </Button>
+                    }
+                  />
                   <PopoverContent align="start" className="w-72 p-1">
                     <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                       {translate('auto.components.TaskPage.a98cbe7664', 'Team')}
@@ -11519,17 +11596,22 @@ export default function TaskPage(): React.JSX.Element {
 
             <div className="flex flex-wrap items-center gap-2">
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={newLinearProjectSubmitting}
-                    className="flex items-center gap-1.5 rounded-md border border-border/80 bg-muted/15 px-2 py-1 text-xs text-foreground/80 transition-colors hover:bg-muted/50 active:bg-muted disabled:opacity-50"
-                  >
-                    <LinearPriorityIcon priority={newLinearProjectPriority} className="size-3.5" />
-                    <span>{getLinearPriorityLabel(newLinearProjectPriority)}</span>
-                    <ChevronDown className="size-3 text-muted-foreground/70" />
-                  </button>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={newLinearProjectSubmitting}
+                      className="flex items-center gap-1.5 rounded-md border border-border/80 bg-muted/15 px-2 py-1 text-xs text-foreground/80 transition-colors hover:bg-muted/50 active:bg-muted disabled:opacity-50"
+                    >
+                      <LinearPriorityIcon
+                        priority={newLinearProjectPriority}
+                        className="size-3.5"
+                      />
+                      <span>{getLinearPriorityLabel(newLinearProjectPriority)}</span>
+                      <ChevronDown className="size-3 text-muted-foreground/70" />
+                    </button>
+                  }
+                />
                 <PopoverContent align="start" className="w-48 p-1">
                   <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     {translate('auto.components.TaskPage.c8d5bec5f7', 'Priority')}
@@ -11559,21 +11641,23 @@ export default function TaskPage(): React.JSX.Element {
               </Popover>
 
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={newLinearProjectSubmitting}
-                    className="flex items-center gap-1.5 rounded-md border border-border/80 bg-muted/15 px-2 py-1 text-xs text-foreground/80 transition-colors hover:bg-muted/50 active:bg-muted disabled:opacity-50"
-                  >
-                    <UserRound className="size-3.5 text-muted-foreground/70" />
-                    <span className="max-w-[120px] truncate">
-                      {newLinearProjectMembers.data.find(
-                        (member) => member.id === newLinearProjectLeadId
-                      )?.displayName ?? translate('auto.components.TaskPage.34da8ac06c', 'Lead')}
-                    </span>
-                    <ChevronDown className="size-3 text-muted-foreground/70" />
-                  </button>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={newLinearProjectSubmitting}
+                      className="flex items-center gap-1.5 rounded-md border border-border/80 bg-muted/15 px-2 py-1 text-xs text-foreground/80 transition-colors hover:bg-muted/50 active:bg-muted disabled:opacity-50"
+                    >
+                      <UserRound className="size-3.5 text-muted-foreground/70" />
+                      <span className="max-w-[120px] truncate">
+                        {newLinearProjectMembers.data.find(
+                          (member) => member.id === newLinearProjectLeadId
+                        )?.displayName ?? translate('auto.components.TaskPage.34da8ac06c', 'Lead')}
+                      </span>
+                      <ChevronDown className="size-3 text-muted-foreground/70" />
+                    </button>
+                  }
+                />
                 <PopoverContent align="start" className="w-64 p-1">
                   <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     {translate('auto.components.TaskPage.34da8ac06c', 'Lead')}
@@ -11635,28 +11719,30 @@ export default function TaskPage(): React.JSX.Element {
               </Popover>
 
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={newLinearProjectSubmitting}
-                    className="flex items-center gap-1.5 rounded-md border border-border/80 bg-muted/15 px-2 py-1 text-xs text-foreground/80 transition-colors hover:bg-muted/50 active:bg-muted disabled:opacity-50"
-                  >
-                    <Users className="size-3.5 text-muted-foreground/70" />
-                    <span>
-                      {newLinearProjectMemberIds.length === 0
-                        ? translate('auto.components.TaskPage.d6cda23ef1', 'Members')
-                        : translate(
-                            'auto.components.TaskPage.7719d8daa9',
-                            '{{value0}} member{{value1}}',
-                            {
-                              value0: newLinearProjectMemberIds.length,
-                              value1: newLinearProjectMemberIds.length > 1 ? 's' : ''
-                            }
-                          )}
-                    </span>
-                    <ChevronDown className="size-3 text-muted-foreground/70" />
-                  </button>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={newLinearProjectSubmitting}
+                      className="flex items-center gap-1.5 rounded-md border border-border/80 bg-muted/15 px-2 py-1 text-xs text-foreground/80 transition-colors hover:bg-muted/50 active:bg-muted disabled:opacity-50"
+                    >
+                      <Users className="size-3.5 text-muted-foreground/70" />
+                      <span>
+                        {newLinearProjectMemberIds.length === 0
+                          ? translate('auto.components.TaskPage.d6cda23ef1', 'Members')
+                          : translate(
+                              'auto.components.TaskPage.7719d8daa9',
+                              '{{value0}} member{{value1}}',
+                              {
+                                value0: newLinearProjectMemberIds.length,
+                                value1: newLinearProjectMemberIds.length > 1 ? 's' : ''
+                              }
+                            )}
+                      </span>
+                      <ChevronDown className="size-3 text-muted-foreground/70" />
+                    </button>
+                  }
+                />
                 <PopoverContent align="start" className="w-64 p-1">
                   <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     {translate('auto.components.TaskPage.d6cda23ef1', 'Members')}
@@ -11709,28 +11795,30 @@ export default function TaskPage(): React.JSX.Element {
               </Popover>
 
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={newLinearProjectSubmitting}
-                    className="flex items-center gap-1.5 rounded-md border border-border/80 bg-muted/15 px-2 py-1 text-xs text-foreground/80 transition-colors hover:bg-muted/50 active:bg-muted disabled:opacity-50"
-                  >
-                    <Tag className="size-3.5 text-muted-foreground/70" />
-                    <span>
-                      {newLinearProjectLabelIds.length === 0
-                        ? translate('auto.components.TaskPage.d0ca4aa1d0', 'Labels')
-                        : translate(
-                            'auto.components.TaskPage.eff9800d4b',
-                            '{{value0}} label{{value1}}',
-                            {
-                              value0: newLinearProjectLabelIds.length,
-                              value1: newLinearProjectLabelIds.length > 1 ? 's' : ''
-                            }
-                          )}
-                    </span>
-                    <ChevronDown className="size-3 text-muted-foreground/70" />
-                  </button>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={newLinearProjectSubmitting}
+                      className="flex items-center gap-1.5 rounded-md border border-border/80 bg-muted/15 px-2 py-1 text-xs text-foreground/80 transition-colors hover:bg-muted/50 active:bg-muted disabled:opacity-50"
+                    >
+                      <Tag className="size-3.5 text-muted-foreground/70" />
+                      <span>
+                        {newLinearProjectLabelIds.length === 0
+                          ? translate('auto.components.TaskPage.d0ca4aa1d0', 'Labels')
+                          : translate(
+                              'auto.components.TaskPage.eff9800d4b',
+                              '{{value0}} label{{value1}}',
+                              {
+                                value0: newLinearProjectLabelIds.length,
+                                value1: newLinearProjectLabelIds.length > 1 ? 's' : ''
+                              }
+                            )}
+                      </span>
+                      <ChevronDown className="size-3 text-muted-foreground/70" />
+                    </button>
+                  }
+                />
                 <PopoverContent align="start" className="w-64 p-1">
                   <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     {translate('auto.components.TaskPage.d0ca4aa1d0', 'Labels')}
@@ -11888,17 +11976,19 @@ export default function TaskPage(): React.JSX.Element {
               <span className="text-muted-foreground/40 text-xs">/</span>
               {availableTeams.length > 1 ? (
                 <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      className="h-7 gap-1 px-2 font-medium text-xs text-foreground hover:bg-muted"
-                    >
-                      {newLinearIssueTargetTeam?.key ??
-                        translate('auto.components.TaskPage.d7f16d0e32', 'Select Team')}
-                      <ChevronDown className="size-3 text-muted-foreground" />
-                    </Button>
-                  </PopoverTrigger>
+                  <PopoverTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="h-7 gap-1 px-2 font-medium text-xs text-foreground hover:bg-muted"
+                      >
+                        {newLinearIssueTargetTeam?.key ??
+                          translate('auto.components.TaskPage.d7f16d0e32', 'Select Team')}
+                        <ChevronDown className="size-3 text-muted-foreground" />
+                      </Button>
+                    }
+                  />
                   <PopoverContent align="start" className="w-64 p-1">
                     <div className="text-[10px] font-semibold text-muted-foreground px-2 py-1.5 uppercase tracking-wider">
                       {translate('auto.components.TaskPage.4f3cb99f41', 'Switch Team')}
@@ -11967,32 +12057,34 @@ export default function TaskPage(): React.JSX.Element {
             <div className="flex flex-wrap items-center gap-2 border-t border-border/40 pt-4 mt-2">
               {/* Status Selector */}
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={newLinearIssueSubmitting}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border border-border/80 bg-muted/15 hover:bg-muted/50 active:bg-muted transition-colors text-foreground/80 cursor-pointer disabled:opacity-50"
-                  >
-                    {(() => {
-                      const selectedState = newLinearStates.data.find(
-                        (s) => s.id === newLinearIssueStateId
-                      )
-                      return (
-                        <>
-                          <span
-                            className="size-2 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: selectedState?.color || '#a3a3a3' }}
-                          />
-                          <span>
-                            {selectedState?.name ||
-                              translate('auto.components.TaskPage.154b0fa623', 'Status')}
-                          </span>
-                        </>
-                      )
-                    })()}
-                    <ChevronDown className="size-3 text-muted-foreground/70" />
-                  </button>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={newLinearIssueSubmitting}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border border-border/80 bg-muted/15 hover:bg-muted/50 active:bg-muted transition-colors text-foreground/80 cursor-pointer disabled:opacity-50"
+                    >
+                      {(() => {
+                        const selectedState = newLinearStates.data.find(
+                          (s) => s.id === newLinearIssueStateId
+                        )
+                        return (
+                          <>
+                            <span
+                              className="size-2 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: selectedState?.color || '#a3a3a3' }}
+                            />
+                            <span>
+                              {selectedState?.name ||
+                                translate('auto.components.TaskPage.154b0fa623', 'Status')}
+                            </span>
+                          </>
+                        )
+                      })()}
+                      <ChevronDown className="size-3 text-muted-foreground/70" />
+                    </button>
+                  }
+                />
                 <PopoverContent align="start" className="w-56 p-1">
                   <div className="text-[10px] font-semibold text-muted-foreground px-2 py-1 uppercase tracking-wider">
                     {translate('auto.components.TaskPage.154b0fa623', 'Status')}
@@ -12033,46 +12125,48 @@ export default function TaskPage(): React.JSX.Element {
 
               {/* Assignee Selector */}
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={newLinearIssueSubmitting}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border border-border/80 bg-muted/15 hover:bg-muted/50 active:bg-muted transition-colors text-foreground/80 cursor-pointer disabled:opacity-50"
-                  >
-                    {(() => {
-                      const selectedAssignee = newLinearMembers.data.find(
-                        (m) => m.id === newLinearIssueAssigneeId
-                      )
-                      if (selectedAssignee) {
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={newLinearIssueSubmitting}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border border-border/80 bg-muted/15 hover:bg-muted/50 active:bg-muted transition-colors text-foreground/80 cursor-pointer disabled:opacity-50"
+                    >
+                      {(() => {
+                        const selectedAssignee = newLinearMembers.data.find(
+                          (m) => m.id === newLinearIssueAssigneeId
+                        )
+                        if (selectedAssignee) {
+                          return (
+                            <>
+                              {selectedAssignee.avatarUrl ? (
+                                <img
+                                  src={selectedAssignee.avatarUrl}
+                                  alt={selectedAssignee.displayName}
+                                  className="size-3.5 rounded-full flex-shrink-0"
+                                />
+                              ) : (
+                                <UserRound className="size-3.5 text-muted-foreground/70" />
+                              )}
+                              <span className="truncate max-w-[100px]">
+                                {selectedAssignee.displayName}
+                              </span>
+                            </>
+                          )
+                        }
                         return (
                           <>
-                            {selectedAssignee.avatarUrl ? (
-                              <img
-                                src={selectedAssignee.avatarUrl}
-                                alt={selectedAssignee.displayName}
-                                className="size-3.5 rounded-full flex-shrink-0"
-                              />
-                            ) : (
-                              <UserRound className="size-3.5 text-muted-foreground/70" />
-                            )}
-                            <span className="truncate max-w-[100px]">
-                              {selectedAssignee.displayName}
+                            <UserRound className="size-3.5 text-muted-foreground/70" />
+                            <span>
+                              {translate('auto.components.TaskPage.d2a876ca53', 'Assignee')}
                             </span>
                           </>
                         )
-                      }
-                      return (
-                        <>
-                          <UserRound className="size-3.5 text-muted-foreground/70" />
-                          <span>
-                            {translate('auto.components.TaskPage.d2a876ca53', 'Assignee')}
-                          </span>
-                        </>
-                      )
-                    })()}
-                    <ChevronDown className="size-3 text-muted-foreground/70" />
-                  </button>
-                </PopoverTrigger>
+                      })()}
+                      <ChevronDown className="size-3 text-muted-foreground/70" />
+                    </button>
+                  }
+                />
                 <PopoverContent align="start" className="w-64 p-1">
                   <div className="text-[10px] font-semibold text-muted-foreground px-2 py-1 uppercase tracking-wider">
                     {translate('auto.components.TaskPage.d2a876ca53', 'Assignee')}
@@ -12137,27 +12231,29 @@ export default function TaskPage(): React.JSX.Element {
 
               {/* Priority Selector */}
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={newLinearIssueSubmitting}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border border-border/80 bg-muted/15 hover:bg-muted/50 active:bg-muted transition-colors text-foreground/80 cursor-pointer disabled:opacity-50"
-                  >
-                    <LinearPriorityIcon priority={newLinearIssuePriority} className="size-3.5" />
-                    <span>
-                      {newLinearIssuePriority === 1
-                        ? translate('auto.components.TaskPage.f373ab1a4f', 'Urgent')
-                        : newLinearIssuePriority === 2
-                          ? translate('auto.components.TaskPage.345b169f1f', 'High')
-                          : newLinearIssuePriority === 3
-                            ? translate('auto.components.TaskPage.7fd59c18d8', 'Medium')
-                            : newLinearIssuePriority === 4
-                              ? translate('auto.components.TaskPage.69591944e7', 'Low')
-                              : translate('auto.components.TaskPage.c8d5bec5f7', 'Priority')}
-                    </span>
-                    <ChevronDown className="size-3 text-muted-foreground/70" />
-                  </button>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={newLinearIssueSubmitting}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border border-border/80 bg-muted/15 hover:bg-muted/50 active:bg-muted transition-colors text-foreground/80 cursor-pointer disabled:opacity-50"
+                    >
+                      <LinearPriorityIcon priority={newLinearIssuePriority} className="size-3.5" />
+                      <span>
+                        {newLinearIssuePriority === 1
+                          ? translate('auto.components.TaskPage.f373ab1a4f', 'Urgent')
+                          : newLinearIssuePriority === 2
+                            ? translate('auto.components.TaskPage.345b169f1f', 'High')
+                            : newLinearIssuePriority === 3
+                              ? translate('auto.components.TaskPage.7fd59c18d8', 'Medium')
+                              : newLinearIssuePriority === 4
+                                ? translate('auto.components.TaskPage.69591944e7', 'Low')
+                                : translate('auto.components.TaskPage.c8d5bec5f7', 'Priority')}
+                      </span>
+                      <ChevronDown className="size-3 text-muted-foreground/70" />
+                    </button>
+                  }
+                />
                 <PopoverContent align="start" className="w-48 p-1">
                   <div className="text-[10px] font-semibold text-muted-foreground px-2 py-1 uppercase tracking-wider">
                     {translate('auto.components.TaskPage.c8d5bec5f7', 'Priority')}
@@ -12196,24 +12292,26 @@ export default function TaskPage(): React.JSX.Element {
 
               {/* Project Selector */}
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={newLinearIssueSubmitting}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border border-border/80 bg-muted/15 hover:bg-muted/50 active:bg-muted transition-colors text-foreground/80 cursor-pointer disabled:opacity-50"
-                  >
-                    <FolderKanban className="size-3.5 text-muted-foreground/70" />
-                    <span className="truncate max-w-[120px]">
-                      {(() => {
-                        const selectedProj = newLinearIssueProjects.find(
-                          (p) => p.id === newLinearIssueProjectId
-                        )
-                        return selectedProj?.name || 'Project'
-                      })()}
-                    </span>
-                    <ChevronDown className="size-3 text-muted-foreground/70" />
-                  </button>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={newLinearIssueSubmitting}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border border-border/80 bg-muted/15 hover:bg-muted/50 active:bg-muted transition-colors text-foreground/80 cursor-pointer disabled:opacity-50"
+                    >
+                      <FolderKanban className="size-3.5 text-muted-foreground/70" />
+                      <span className="truncate max-w-[120px]">
+                        {(() => {
+                          const selectedProj = newLinearIssueProjects.find(
+                            (p) => p.id === newLinearIssueProjectId
+                          )
+                          return selectedProj?.name || 'Project'
+                        })()}
+                      </span>
+                      <ChevronDown className="size-3 text-muted-foreground/70" />
+                    </button>
+                  }
+                />
                 <PopoverContent align="start" className="w-64 p-1">
                   <div className="text-[10px] font-semibold text-muted-foreground px-2 py-1 uppercase tracking-wider">
                     {translate('auto.components.TaskPage.00022ec0ba', 'Project')}
@@ -12270,28 +12368,30 @@ export default function TaskPage(): React.JSX.Element {
 
               {/* Labels Selector */}
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={newLinearIssueSubmitting}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border border-border/80 bg-muted/15 hover:bg-muted/50 active:bg-muted transition-colors text-foreground/80 cursor-pointer disabled:opacity-50"
-                  >
-                    <Tag className="size-3.5 text-muted-foreground/70" />
-                    <span>
-                      {newLinearIssueLabelIds.length === 0
-                        ? translate('auto.components.TaskPage.d0ca4aa1d0', 'Labels')
-                        : translate(
-                            'auto.components.TaskPage.eff9800d4b',
-                            '{{value0}} label{{value1}}',
-                            {
-                              value0: newLinearIssueLabelIds.length,
-                              value1: newLinearIssueLabelIds.length > 1 ? 's' : ''
-                            }
-                          )}
-                    </span>
-                    <ChevronDown className="size-3 text-muted-foreground/70" />
-                  </button>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      disabled={newLinearIssueSubmitting}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border border-border/80 bg-muted/15 hover:bg-muted/50 active:bg-muted transition-colors text-foreground/80 cursor-pointer disabled:opacity-50"
+                    >
+                      <Tag className="size-3.5 text-muted-foreground/70" />
+                      <span>
+                        {newLinearIssueLabelIds.length === 0
+                          ? translate('auto.components.TaskPage.d0ca4aa1d0', 'Labels')
+                          : translate(
+                              'auto.components.TaskPage.eff9800d4b',
+                              '{{value0}} label{{value1}}',
+                              {
+                                value0: newLinearIssueLabelIds.length,
+                                value1: newLinearIssueLabelIds.length > 1 ? 's' : ''
+                              }
+                            )}
+                      </span>
+                      <ChevronDown className="size-3 text-muted-foreground/70" />
+                    </button>
+                  }
+                />
                 <PopoverContent align="start" className="w-64 p-1">
                   <div className="text-[10px] font-semibold text-muted-foreground px-2 py-1 uppercase tracking-wider">
                     {translate('auto.components.TaskPage.d0ca4aa1d0', 'Labels')}
@@ -12424,35 +12524,39 @@ export default function TaskPage(): React.JSX.Element {
                   open={newJiraIssueProjectComboboxOpen}
                   onOpenChange={handleNewJiraIssueProjectComboboxOpenChange}
                 >
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={newJiraIssueProjectComboboxOpen}
-                      onKeyDown={handleNewJiraIssueProjectTriggerKeyDown}
-                      disabled={newJiraIssueSubmitting || sortedAvailableJiraProjects.length === 0}
-                      className="h-9 w-full justify-between px-3 text-left text-xs font-normal"
-                    >
-                      {newJiraIssueTargetProject ? (
-                        <span className="min-w-0 truncate">
-                          {getJiraProjectDisplayLabel(
-                            newJiraIssueTargetProject,
-                            includeJiraSiteNameInProjectLabel
-                          )}
-                        </span>
-                      ) : (
-                        <span className="min-w-0 truncate text-muted-foreground">
-                          {translate('auto.components.TaskPage.00022ec0ba', 'Project')}
-                        </span>
-                      )}
-                      <ChevronDown className="size-3.5 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
+                  <PopoverTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={newJiraIssueProjectComboboxOpen}
+                        onKeyDown={handleNewJiraIssueProjectTriggerKeyDown}
+                        disabled={
+                          newJiraIssueSubmitting || sortedAvailableJiraProjects.length === 0
+                        }
+                        className="h-9 w-full justify-between px-3 text-left text-xs font-normal"
+                      >
+                        {newJiraIssueTargetProject ? (
+                          <span className="min-w-0 truncate">
+                            {getJiraProjectDisplayLabel(
+                              newJiraIssueTargetProject,
+                              includeJiraSiteNameInProjectLabel
+                            )}
+                          </span>
+                        ) : (
+                          <span className="min-w-0 truncate text-muted-foreground">
+                            {translate('auto.components.TaskPage.00022ec0ba', 'Project')}
+                          </span>
+                        )}
+                        <ChevronDown className="size-3.5 shrink-0 opacity-50" />
+                      </Button>
+                    }
+                  />
                   <PopoverContent
                     align="start"
                     className="w-[var(--radix-popover-trigger-width)] min-w-[18rem] p-0"
-                    onOpenAutoFocus={(event) => event.preventDefault()}
+                    initialFocus={false}
                   >
                     <Command
                       shouldFilter={false}
@@ -12589,6 +12693,7 @@ export default function TaskPage(): React.JSX.Element {
                         <Select
                           value={fieldValue}
                           onValueChange={(value) =>
+                            value !== null &&
                             setNewJiraIssueCustomFieldValues((prev) => ({
                               ...prev,
                               [field.key]: value

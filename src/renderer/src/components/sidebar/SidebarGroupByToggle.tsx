@@ -10,11 +10,11 @@ type SidebarGroupByToggleProps = {
 export function SidebarGroupByToggle({ groupBy, setGroupBy }: SidebarGroupByToggleProps) {
   return (
     <ToggleGroup
-      type="single"
-      value={groupBy}
+      value={[groupBy]}
       onValueChange={(value) => {
-        if (value) {
-          setGroupBy(value as WorktreeGroupBy)
+        const next = value[0]
+        if (next) {
+          setGroupBy(next as WorktreeGroupBy)
         }
       }}
       variant="outline"

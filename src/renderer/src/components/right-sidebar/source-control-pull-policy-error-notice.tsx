@@ -108,26 +108,28 @@ export function PullPolicyRemoteActionNotice({
                     <p className="text-[11px] leading-4 text-muted-foreground">{description}</p>
                   </div>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        className="mt-0.5 shrink-0"
-                        aria-label={translate(
-                          'auto.components.right.sidebar.pull.policy.notice.copyAria',
-                          'Copy {{value0}} pull policy command',
-                          { value0: label.toLowerCase() }
-                        )}
-                        onClick={() => handleCopyCommand(option.command)}
-                      >
-                        {copied ? (
-                          <Check className="size-3" aria-hidden="true" />
-                        ) : (
-                          <Copy className="size-3" aria-hidden="true" />
-                        )}
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          className="mt-0.5 shrink-0"
+                          aria-label={translate(
+                            'auto.components.right.sidebar.pull.policy.notice.copyAria',
+                            'Copy {{value0}} pull policy command',
+                            { value0: label.toLowerCase() }
+                          )}
+                          onClick={() => handleCopyCommand(option.command)}
+                        >
+                          {copied ? (
+                            <Check className="size-3" aria-hidden="true" />
+                          ) : (
+                            <Copy className="size-3" aria-hidden="true" />
+                          )}
+                        </Button>
+                      }
+                    />
                     <TooltipContent side="top" sideOffset={4}>
                       {copied
                         ? translate(

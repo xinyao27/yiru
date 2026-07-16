@@ -152,13 +152,7 @@ export function SidebarFeedbackDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-lg"
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
-          feedbackTextareaRef.current?.focus()
-        }}
-      >
+      <DialogContent className="sm:max-w-lg" initialFocus={feedbackTextareaRef}>
         <DialogHeader>
           <DialogTitle className="text-sm">
             {translate('auto.components.sidebar.SidebarFeedbackDialog.0eb643f07f', 'Send Feedback')}

@@ -49,18 +49,20 @@ export function WorktreeCardReviewDetailSection({
     { value0: reviewLabel }
   )
   const moreActionsTrigger = (
-    <DropdownMenuTrigger asChild>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-xs"
-        className="size-6"
-        aria-label={moreActionsLabel}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <Ellipsis className="size-3" />
-      </Button>
-    </DropdownMenuTrigger>
+    <DropdownMenuTrigger
+      render={
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className="size-6"
+          aria-label={moreActionsLabel}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <Ellipsis className="size-3" />
+        </Button>
+      }
+    />
   )
   const dismissAndOpenReview = (event: React.MouseEvent): void => {
     closeHover()
@@ -88,7 +90,7 @@ export function WorktreeCardReviewDetailSection({
                   moreActionsTrigger
                 ) : (
                   <Tooltip>
-                    <TooltipTrigger asChild>{moreActionsTrigger}</TooltipTrigger>
+                    <TooltipTrigger render={moreActionsTrigger} />
                     <TooltipContent side="top" sideOffset={4}>
                       {moreActionsLabel}
                     </TooltipContent>
@@ -97,7 +99,7 @@ export function WorktreeCardReviewDetailSection({
                 <DropdownMenuContent align="end" className="w-40">
                   {onCopyReviewLink && (
                     <DropdownMenuItem
-                      onSelect={() => {
+                      onClick={() => {
                         closeHover()
                         onCopyReviewLink()
                       }}
@@ -111,7 +113,7 @@ export function WorktreeCardReviewDetailSection({
                   )}
                   {onUnlinkReview && (
                     <DropdownMenuItem
-                      onSelect={() => {
+                      onClick={() => {
                         closeHover()
                         onUnlinkReview()
                       }}

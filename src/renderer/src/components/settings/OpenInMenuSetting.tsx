@@ -302,18 +302,20 @@ export function OpenInMenuSetting({
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isAtLimit}
-              className="h-8 shrink-0 gap-1.5"
-            >
-              {translate('auto.components.settings.OpenInMenuSetting.e4064916aa', 'Add app')}
-              <ChevronDown className="size-3.5" />
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isAtLimit}
+                className="h-8 shrink-0 gap-1.5"
+              >
+                {translate('auto.components.settings.OpenInMenuSetting.e4064916aa', 'Add app')}
+                <ChevronDown className="size-3.5" />
+              </Button>
+            }
+          />
           <DropdownMenuContent align="end" className="w-64">
             {getOpenInAppPresets().map((preset) => {
               const isAdded = isOpenInAppPresetAdded(draft, preset)
@@ -321,7 +323,7 @@ export function OpenInMenuSetting({
                 <DropdownMenuItem
                   key={preset.id}
                   disabled={isAdded || isAtLimit}
-                  onSelect={() => addPreset(preset)}
+                  onClick={() => addPreset(preset)}
                   className="gap-2"
                 >
                   <OpenInApplicationIcon application={preset} size={14} />
@@ -335,7 +337,7 @@ export function OpenInMenuSetting({
                 </DropdownMenuItem>
               )
             })}
-            <DropdownMenuItem disabled={isAtLimit} onSelect={addCustomApp} className="gap-2">
+            <DropdownMenuItem disabled={isAtLimit} onClick={addCustomApp} className="gap-2">
               <OpenInApplicationIcon application={{ command: '' }} size={14} />
               <span className="min-w-0 truncate">
                 {translate('auto.components.settings.OpenInMenuSetting.03b00b1f64', 'Custom app')}

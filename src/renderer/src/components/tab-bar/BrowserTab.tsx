@@ -253,7 +253,7 @@ export default function BrowserTab({
           tabRoot
         ) : (
           <Tooltip>
-            <TooltipTrigger asChild>{tabRoot}</TooltipTrigger>
+            <TooltipTrigger render={tabRoot} />
             <TooltipContent
               side="bottom"
               sideOffset={6}
@@ -266,14 +266,16 @@ export default function BrowserTab({
       </div>
 
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
-        <DropdownMenuTrigger asChild>
-          <button
-            aria-hidden
-            tabIndex={-1}
-            className="pointer-events-none fixed size-px opacity-0"
-            style={{ left: menuPoint.x, top: menuPoint.y }}
-          />
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <button
+              aria-hidden
+              tabIndex={-1}
+              className="pointer-events-none fixed size-px opacity-0"
+              style={{ left: menuPoint.x, top: menuPoint.y }}
+            />
+          }
+        />
         <DropdownMenuContent
           className="min-w-[11rem] rounded-[11px] border-border/80 p-1 shadow-[0_16px_36px_rgba(0,0,0,0.24)]"
           sideOffset={0}
@@ -284,28 +286,28 @@ export default function BrowserTab({
             groupId={dragData.groupId}
             trailingSeparator
           />
-          <DropdownMenuItem onSelect={onDuplicate}>
+          <DropdownMenuItem onClick={onDuplicate}>
             <Copy className="size-3.5" />
             {translate('auto.components.tab.bar.BrowserTab.5d6e89891f', 'Duplicate Tab')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={onTogglePin}>
+          <DropdownMenuItem onClick={onTogglePin}>
             {isPinned ? <PinOff className="size-3.5" /> : <Pin className="size-3.5" />}
             {isPinned
               ? translate('auto.components.tab.bar.BrowserTab.c5aaee8c39', 'Unpin Tab')
               : translate('auto.components.tab.bar.BrowserTab.911542656f', 'Pin Tab')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => !isPinned && onClose()} disabled={isPinned}>
+          <DropdownMenuItem onClick={() => !isPinned && onClose()} disabled={isPinned}>
             <X className="size-3.5" />
             {translate('auto.components.tab.bar.BrowserTab.1611a1324b', 'Close')}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={onCloseToRight} disabled={!hasTabsToRight}>
+          <DropdownMenuItem onClick={onCloseToRight} disabled={!hasTabsToRight}>
             <PanelRightClose className="size-3.5" />
             {translate('auto.components.tab.bar.BrowserTab.9dd880bd56', 'Close Tabs To The Right')}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={() => void window.api.shell.openUrl(openInBrowserUrl)}
+            onClick={() => void window.api.shell.openUrl(openInBrowserUrl)}
             disabled={!isHttpUrl}
           >
             <ExternalLink className="size-3.5" />

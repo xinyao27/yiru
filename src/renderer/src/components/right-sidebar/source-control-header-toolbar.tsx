@@ -81,25 +81,27 @@ function CreatePrHeaderButton({
 }): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="inline-flex shrink-0">
-          <Button
-            type="button"
-            size="xs"
-            disabled={action.disabled}
-            onClick={onClick}
-            className="h-6 shrink-0 px-2 text-[11px]"
-            title={action.title}
-          >
-            {isCreatePrIntentInFlight || isCreatingPr ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <GitPullRequestArrow className="size-3.5" aria-hidden="true" />
-            )}
-            {action.label}
-          </Button>
-        </span>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <span className="inline-flex shrink-0">
+            <Button
+              type="button"
+              size="xs"
+              disabled={action.disabled}
+              onClick={onClick}
+              className="h-6 shrink-0 px-2 text-[11px]"
+              title={action.title}
+            >
+              {isCreatePrIntentInFlight || isCreatingPr ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <GitPullRequestArrow className="size-3.5" aria-hidden="true" />
+              )}
+              {action.label}
+            </Button>
+          </span>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={6} className="max-w-72">
         {action.title}
       </TooltipContent>

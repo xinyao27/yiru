@@ -695,20 +695,22 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon-sm"
-                        aria-label={translate(
-                          'auto.components.workspace.cleanup.WorkspaceCleanupDialog.7ae2ad30f4',
-                          'Refresh'
-                        )}
-                        onClick={refresh}
-                        disabled={loading}
-                      >
-                        <RefreshCcw className={cn('size-3.5', loading && 'animate-spin')} />
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="outline"
+                          size="icon-sm"
+                          aria-label={translate(
+                            'auto.components.workspace.cleanup.WorkspaceCleanupDialog.7ae2ad30f4',
+                            'Refresh'
+                          )}
+                          onClick={refresh}
+                          disabled={loading}
+                        >
+                          <RefreshCcw className={cn('size-3.5', loading && 'animate-spin')} />
+                        </Button>
+                      }
+                    />
                     <TooltipContent side="bottom" sideOffset={4}>
                       {translate(
                         'auto.components.workspace.cleanup.WorkspaceCleanupDialog.7ae2ad30f4',
@@ -1015,28 +1017,32 @@ function WorkspaceCleanupFilterToolbar({
       </div>
       <DropdownMenu modal={false}>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                type="button"
-                aria-label={translate(
-                  'auto.components.workspace.cleanup.WorkspaceCleanupDialog.efb3843e75',
-                  'Filter and sort workspaces'
-                )}
-                className="relative shrink-0"
-              >
-                <SlidersHorizontal className="size-3.5" />
-                {hasHiddenControls ? (
-                  <span
-                    aria-hidden="true"
-                    className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-primary"
-                  />
-                ) : null}
-              </Button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    type="button"
+                    aria-label={translate(
+                      'auto.components.workspace.cleanup.WorkspaceCleanupDialog.efb3843e75',
+                      'Filter and sort workspaces'
+                    )}
+                    className="relative shrink-0"
+                  >
+                    <SlidersHorizontal className="size-3.5" />
+                    {hasHiddenControls ? (
+                      <span
+                        aria-hidden="true"
+                        className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-primary"
+                      />
+                    ) : null}
+                  </Button>
+                }
+              />
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             {translate(
               'auto.components.workspace.cleanup.WorkspaceCleanupDialog.efb3843e75',
@@ -1145,7 +1151,7 @@ function WorkspaceCleanupFilterToolbar({
           {showRestoreIgnored ? (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={onRestoreIgnored}>
+              <DropdownMenuItem onClick={onRestoreIgnored}>
                 {translate(
                   'auto.components.workspace.cleanup.WorkspaceCleanupDialog.aaee139eab',
                   'Restore ignored suggestions'
@@ -1156,7 +1162,7 @@ function WorkspaceCleanupFilterToolbar({
           {hasHiddenControls ? (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={resetPanelControls}>
+              <DropdownMenuItem onClick={resetPanelControls}>
                 {translate(
                   'auto.components.workspace.cleanup.WorkspaceCleanupDialog.e94b1f8bb4',
                   'Clear filters'
@@ -1198,7 +1204,8 @@ function WorkspaceCleanupMenuSub<T extends string>({
             <DropdownMenuRadioItem
               key={optionValue}
               value={optionValue}
-              onSelect={(event) => event.preventDefault()}
+              onClick={(event) => event.preventDefault()}
+              closeOnClick={false}
             >
               {optionLabel}
             </DropdownMenuRadioItem>

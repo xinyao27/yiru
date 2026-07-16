@@ -88,7 +88,7 @@ export function RepositorySourceControlAiHostedReviewDefaults({
               </span>
               <Select
                 value={triStateValue(value?.[row.key])}
-                onValueChange={(nextValue) => onChange(row.key, nextValue)}
+                onValueChange={(nextValue) => nextValue && onChange(row.key, nextValue)}
               >
                 <SelectTrigger size="sm" className="h-8 w-[120px] text-xs">
                   <SelectValue />

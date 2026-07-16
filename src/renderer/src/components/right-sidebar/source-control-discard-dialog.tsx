@@ -66,9 +66,9 @@ export function SourceControlDiscardDialog({
     >
       <DialogContent
         className="max-w-md"
-        onOpenAutoFocus={(event) =>
-          focusDiscardDialogConfirmButton(event, confirmButtonRef.current)
-        }
+        // Why: focus the destructive confirm button on open so Enter confirms
+        // rather than the default Cancel focus. See focusDiscardDialogConfirmButton.
+        initialFocus={confirmButtonRef}
       >
         <DialogHeader>
           <DialogTitle className="text-sm">

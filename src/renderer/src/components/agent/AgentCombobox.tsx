@@ -98,9 +98,9 @@ function renderItem({
     // Why: z-[70] sits above PopoverContent's z-[60] so the right-click menu
     // renders in front of the still-open combobox popover instead of behind it.
     <ContextMenu key={key}>
-      <ContextMenuTrigger asChild>{row}</ContextMenuTrigger>
+      <ContextMenuTrigger render={row} />
       <ContextMenuContent className="z-[70]">
-        <ContextMenuItem onSelect={onSetDefault} disabled={isDefault}>
+        <ContextMenuItem onClick={onSetDefault} disabled={isDefault}>
           <Star className="size-3.5" />
           {isDefault
             ? translate('auto.components.agent.AgentCombobox.1b0d6965fa', 'Current default')
@@ -263,39 +263,41 @@ export default function AgentCombobox({
   return (
     <div className="flex w-full items-center">
       <Popover open={open} onOpenChange={handleOpenChange}>
-        <PopoverTrigger asChild>
-          <Button
-            ref={triggerRef}
-            type="button"
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            onKeyDown={handleTriggerKeyDown}
-            className={cn(
-              // Why: callers sometimes pass `min-w-0` for grid layouts, but
-              // the compact trigger still needs room for "GitHub Copilot".
-              'h-8 justify-between px-3 text-xs font-normal',
-              triggerClassName,
-              !allowNarrowTrigger && TRIGGER_MIN_WIDTH_CLASS
-            )}
-            data-agent-combobox-root="true"
-          >
-            {selectedAgent ? (
-              <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
-                <AgentIcon agent={selectedAgent.id} />
-                <span className="truncate">{selectedAgent.label}</span>
-              </span>
-            ) : (
-              <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
-                <Terminal className="size-3.5" />
-                <span className="truncate">
-                  {translate('auto.components.agent.AgentCombobox.986f946354', 'Blank Terminal')}
+        <PopoverTrigger
+          render={
+            <Button
+              ref={triggerRef}
+              type="button"
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              onKeyDown={handleTriggerKeyDown}
+              className={cn(
+                // Why: callers sometimes pass `min-w-0` for grid layouts, but
+                // the compact trigger still needs room for "GitHub Copilot".
+                'h-8 justify-between px-3 text-xs font-normal',
+                triggerClassName,
+                !allowNarrowTrigger && TRIGGER_MIN_WIDTH_CLASS
+              )}
+              data-agent-combobox-root="true"
+            >
+              {selectedAgent ? (
+                <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
+                  <AgentIcon agent={selectedAgent.id} />
+                  <span className="truncate">{selectedAgent.label}</span>
                 </span>
-              </span>
-            )}
-            <ChevronsUpDown className="size-3.5 opacity-50" />
-          </Button>
-        </PopoverTrigger>
+              ) : (
+                <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
+                  <Terminal className="size-3.5" />
+                  <span className="truncate">
+                    {translate('auto.components.agent.AgentCombobox.986f946354', 'Blank Terminal')}
+                  </span>
+                </span>
+              )}
+              <ChevronsUpDown className="size-3.5 opacity-50" />
+            </Button>
+          }
+        />
         <PopoverContent
           align="start"
           className={cn(
@@ -303,9 +305,12 @@ export default function AgentCombobox({
             !allowNarrowTrigger && 'min-w-[18rem]'
           )}
           data-agent-combobox-root="true"
-          onOpenAutoFocus={(event) => {
-            event.preventDefault()
+          // Why: return false suppresses Base UI's default popup focus so our
+          // custom rAF focus (caret-at-end) runs instead — mirrors the old
+          // onOpenAutoFocus preventDefault + focusSearchInput.
+          initialFocus={() => {
             focusSearchInput()
+            return false
           }}
         >
           <Command shouldFilter={false} value={commandValue} onValueChange={setCommandValue}>

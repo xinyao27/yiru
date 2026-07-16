@@ -58,25 +58,27 @@ export function ManageSessionsTable({
         </div>
         <div className="flex items-center gap-1">
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                disabled={isBusy || sessionCount === 0}
-                onClick={onKillAll}
-                aria-label={translate(
-                  'auto.components.settings.ManageSessionsSection.3282db098c',
-                  'Kill all sessions'
-                )}
-                className="text-muted-foreground hover:text-destructive"
-              >
-                {daemonBusyKind === 'killAll' ? (
-                  <LoaderCircle className="animate-spin" />
-                ) : (
-                  <Trash2 />
-                )}
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  disabled={isBusy || sessionCount === 0}
+                  onClick={onKillAll}
+                  aria-label={translate(
+                    'auto.components.settings.ManageSessionsSection.3282db098c',
+                    'Kill all sessions'
+                  )}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  {daemonBusyKind === 'killAll' ? (
+                    <LoaderCircle className="animate-spin" />
+                  ) : (
+                    <Trash2 />
+                  )}
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate(
                 'auto.components.settings.ManageSessionsSection.3282db098c',
@@ -85,25 +87,27 @@ export function ManageSessionsTable({
             </TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                disabled={isBusy}
-                onClick={onRestartDaemon}
-                aria-label={translate(
-                  'auto.components.settings.ManageSessionsSection.5ed15e778c',
-                  'Restart daemon'
-                )}
-                className="text-muted-foreground"
-              >
-                {daemonBusyKind === 'restart' ? (
-                  <LoaderCircle className="animate-spin" />
-                ) : (
-                  <RotateCw />
-                )}
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  disabled={isBusy}
+                  onClick={onRestartDaemon}
+                  aria-label={translate(
+                    'auto.components.settings.ManageSessionsSection.5ed15e778c',
+                    'Restart daemon'
+                  )}
+                  className="text-muted-foreground"
+                >
+                  {daemonBusyKind === 'restart' ? (
+                    <LoaderCircle className="animate-spin" />
+                  ) : (
+                    <RotateCw />
+                  )}
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate(
                 'auto.components.settings.ManageSessionsSection.5ed15e778c',

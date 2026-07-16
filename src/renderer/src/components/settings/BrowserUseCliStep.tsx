@@ -57,32 +57,37 @@ export function BrowserUseCliStep({
             <p className="text-[11px] text-amber-600 dark:text-amber-400">{cliStatus.detail}</p>
           ) : null}
         </div>
-        <TooltipProvider delayDuration={250}>
+        <TooltipProvider delay={250}>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button
-                  size="sm"
-                  variant={cliEnabled ? 'outline' : 'default'}
-                  disabled={cliLoading || cliBusy || !cliSupported || cliEnabled}
-                  onClick={() => void onEnableCli()}
-                >
-                  {cliBusy
-                    ? translate(
-                        'auto.components.settings.BrowserUsePane.8b3054dac7',
-                        'Registering...'
-                      )
-                    : cliEnabled
-                      ? translate('auto.components.settings.BrowserUsePane.0289434ed6', 'Enabled')
-                      : cliPathNeedsAttention
-                        ? translate(
-                            'auto.components.settings.BrowserUsePane.ad8cb0ee22',
-                            'Fix PATH'
-                          )
-                        : translate('auto.components.settings.BrowserUsePane.de9b2f32f3', 'Enable')}
-                </Button>
-              </span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <span>
+                  <Button
+                    size="sm"
+                    variant={cliEnabled ? 'outline' : 'default'}
+                    disabled={cliLoading || cliBusy || !cliSupported || cliEnabled}
+                    onClick={() => void onEnableCli()}
+                  >
+                    {cliBusy
+                      ? translate(
+                          'auto.components.settings.BrowserUsePane.8b3054dac7',
+                          'Registering...'
+                        )
+                      : cliEnabled
+                        ? translate('auto.components.settings.BrowserUsePane.0289434ed6', 'Enabled')
+                        : cliPathNeedsAttention
+                          ? translate(
+                              'auto.components.settings.BrowserUsePane.ad8cb0ee22',
+                              'Fix PATH'
+                            )
+                          : translate(
+                              'auto.components.settings.BrowserUsePane.de9b2f32f3',
+                              'Enable'
+                            )}
+                  </Button>
+                </span>
+              }
+            />
             {!cliSupported && !cliLoading && cliStatus?.detail ? (
               <TooltipContent side="left" sideOffset={6}>
                 {cliStatus.detail}

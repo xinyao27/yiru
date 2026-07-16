@@ -3,6 +3,7 @@ co-locate shared layout and keyboard interaction logic, which keeps the settings
 panel wiring simple even though the file exceeds the default line limit. */
 import type React from 'react'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import type { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 import { ScrollArea } from '../ui/scroll-area'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
@@ -626,7 +627,20 @@ export function FontAutocomplete({
     onRequestSuggestions?.()
   }, [onRequestSuggestions])
 
-  const handleOpenChange = (nextOpen: boolean): void => {
+  const handleOpenChange = (
+    nextOpen: boolean,
+    eventDetails: PopoverPrimitive.Root.ChangeEventDetails
+  ): void => {
+    // Why: the input and its clear/toggle buttons are the anchor, not the
+    // content, so an outside-press on them must not dismiss the popup.
+    if (
+      !nextOpen &&
+      eventDetails.reason === 'outside-press' &&
+      rootRef.current?.contains(eventDetails.event.target as Node)
+    ) {
+      eventDetails.cancel()
+      return
+    }
     setOpen(nextOpen)
     if (nextOpen) {
       requestSuggestions()
@@ -706,130 +720,132 @@ export function FontAutocomplete({
   return (
     <div ref={setRootNode} className="relative max-w-sm">
       <Popover open={open} onOpenChange={handleOpenChange}>
-        <PopoverAnchor asChild>
-          <div className="relative">
-            <Input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => {
-                const next = e.target.value
-                requestSuggestions()
-                setQuery(next)
-                setIsFilteringQuery(true)
-                onChange(next)
-                setOpen(true)
-              }}
-              onFocus={() => {
-                requestSuggestions()
-                setIsFilteringQuery(false)
-                setOpen(true)
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  if (open) {
-                    e.preventDefault()
-                    setOpen(false)
-                    setIsFilteringQuery(false)
-                  }
-                  return
-                }
-
-                if (e.key === 'ArrowDown') {
-                  e.preventDefault()
+        <PopoverAnchor
+          render={
+            <div className="relative">
+              <Input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => {
+                  const next = e.target.value
+                  requestSuggestions()
+                  setQuery(next)
+                  setIsFilteringQuery(true)
+                  onChange(next)
                   setOpen(true)
-                  if (visibleSuggestions.length > 0) {
-                    setHighlightedIndex((current) =>
-                      current < 0 ? 0 : Math.min(current + 1, visibleSuggestions.length - 1)
-                    )
-                  }
-                  return
-                }
-
-                if (e.key === 'ArrowUp') {
-                  e.preventDefault()
+                }}
+                onFocus={() => {
+                  requestSuggestions()
+                  setIsFilteringQuery(false)
                   setOpen(true)
-                  if (visibleSuggestions.length > 0) {
-                    setHighlightedIndex((current) =>
-                      current < 0 ? visibleSuggestions.length - 1 : Math.max(current - 1, 0)
-                    )
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    if (open) {
+                      e.preventDefault()
+                      setOpen(false)
+                      setIsFilteringQuery(false)
+                    }
+                    return
                   }
-                  return
-                }
 
-                if (e.key === 'Enter' && open && highlightedIndex >= 0) {
-                  const highlightedFont = visibleSuggestions[highlightedIndex]
-                  if (highlightedFont) {
+                  if (e.key === 'ArrowDown') {
                     e.preventDefault()
-                    commitValue(highlightedFont)
+                    setOpen(true)
+                    if (visibleSuggestions.length > 0) {
+                      setHighlightedIndex((current) =>
+                        current < 0 ? 0 : Math.min(current + 1, visibleSuggestions.length - 1)
+                      )
+                    }
+                    return
                   }
+
+                  if (e.key === 'ArrowUp') {
+                    e.preventDefault()
+                    setOpen(true)
+                    if (visibleSuggestions.length > 0) {
+                      setHighlightedIndex((current) =>
+                        current < 0 ? visibleSuggestions.length - 1 : Math.max(current - 1, 0)
+                      )
+                    }
+                    return
+                  }
+
+                  if (e.key === 'Enter' && open && highlightedIndex >= 0) {
+                    const highlightedFont = visibleSuggestions[highlightedIndex]
+                    if (highlightedFont) {
+                      e.preventDefault()
+                      commitValue(highlightedFont)
+                    }
+                  }
+                }}
+                placeholder={placeholder}
+                className="pr-18"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={open}
+                aria-controls={listboxId}
+                aria-activedescendant={
+                  open && highlightedIndex >= 0
+                    ? `${listboxId}-option-${highlightedIndex}`
+                    : undefined
                 }
-              }}
-              placeholder={placeholder}
-              className="pr-18"
-              role="combobox"
-              aria-autocomplete="list"
-              aria-expanded={open}
-              aria-controls={listboxId}
-              aria-activedescendant={
-                open && highlightedIndex >= 0
-                  ? `${listboxId}-option-${highlightedIndex}`
-                  : undefined
-              }
-            />
-            <div className="absolute inset-y-0 right-2 flex items-center gap-1">
-              {query ? (
+              />
+              <div className="absolute inset-y-0 right-2 flex items-center gap-1">
+                {query ? (
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      setQuery('')
+                      setIsFilteringQuery(false)
+                      onChange('')
+                      setOpen(true)
+                      focusInput()
+                    }}
+                    className="rounded-sm p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    aria-label={translate(
+                      'auto.components.settings.SettingsFormControls.a4ff6143f8',
+                      'Clear font selection'
+                    )}
+                    title={translate(
+                      'auto.components.settings.SettingsFormControls.74bcecd5ec',
+                      'Clear'
+                    )}
+                  >
+                    <CircleX className="size-3.5" />
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
-                    setQuery('')
-                    setIsFilteringQuery(false)
-                    onChange('')
-                    setOpen(true)
-                    focusInput()
+                    const nextOpen = !open
+                    setOpen(nextOpen)
+                    if (!nextOpen) {
+                      setIsFilteringQuery(false)
+                    }
+                    if (nextOpen) {
+                      requestSuggestions()
+                      focusInput()
+                    }
                   }}
                   className="rounded-sm p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   aria-label={translate(
-                    'auto.components.settings.SettingsFormControls.a4ff6143f8',
-                    'Clear font selection'
+                    'auto.components.settings.SettingsFormControls.c766f8ac75',
+                    'Toggle font suggestions'
                   )}
                   title={translate(
-                    'auto.components.settings.SettingsFormControls.74bcecd5ec',
-                    'Clear'
+                    'auto.components.settings.SettingsFormControls.b55371ea18',
+                    'Fonts'
                   )}
                 >
-                  <CircleX className="size-3.5" />
+                  <ChevronsUpDown className="size-3.5" />
                 </button>
-              ) : null}
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  const nextOpen = !open
-                  setOpen(nextOpen)
-                  if (!nextOpen) {
-                    setIsFilteringQuery(false)
-                  }
-                  if (nextOpen) {
-                    requestSuggestions()
-                    focusInput()
-                  }
-                }}
-                className="rounded-sm p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                aria-label={translate(
-                  'auto.components.settings.SettingsFormControls.c766f8ac75',
-                  'Toggle font suggestions'
-                )}
-                title={translate(
-                  'auto.components.settings.SettingsFormControls.b55371ea18',
-                  'Fonts'
-                )}
-              >
-                <ChevronsUpDown className="size-3.5" />
-              </button>
+              </div>
             </div>
-          </div>
-        </PopoverAnchor>
+          }
+        />
 
         {/* Why: portal the dropdown outside the settings section — an in-flow
           absolute panel makes the highlighted option's scrollIntoView scroll
@@ -837,15 +853,8 @@ export function FontAutocomplete({
         <PopoverContent
           align="start"
           className="w-[var(--radix-popover-trigger-width)]"
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          onCloseAutoFocus={(e) => e.preventDefault()}
-          onInteractOutside={(e) => {
-            // Why: the input and its clear/toggle buttons are the anchor, not
-            // the content, so Radix would otherwise dismiss on every click there.
-            if (rootRef.current?.contains(e.target as Node)) {
-              e.preventDefault()
-            }
-          }}
+          initialFocus={false}
+          finalFocus={false}
         >
           <ScrollArea
             className={renderedSuggestions.length > 8 ? 'h-64' : undefined}

@@ -32,17 +32,19 @@ export function MonacoGutterContextMenu({
 }: MonacoGutterContextMenuProps): React.JSX.Element {
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-hidden
-          tabIndex={-1}
-          className="pointer-events-none fixed size-px opacity-0"
-          style={{ left: point.x, top: point.y }}
-        />
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <button
+            aria-hidden
+            tabIndex={-1}
+            className="pointer-events-none fixed size-px opacity-0"
+            style={{ left: point.x, top: point.y }}
+          />
+        }
+      />
       <DropdownMenuContent sideOffset={0} align="start">
         <DropdownMenuItem
-          onSelect={() => window.api.ui.writeClipboardText(formatPathLineReference(filePath, line))}
+          onClick={() => window.api.ui.writeClipboardText(formatPathLineReference(filePath, line))}
         >
           <Copy className="w-3.5 h-3.5 mr-1.5" />
           {translate(
@@ -51,7 +53,7 @@ export function MonacoGutterContextMenu({
           )}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={() =>
+          onClick={() =>
             window.api.ui.writeClipboardText(formatPathLineReference(relativePath, line))
           }
         >
@@ -62,7 +64,7 @@ export function MonacoGutterContextMenu({
           )}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={async () => {
+          onClick={async () => {
             const state = useAppStore.getState()
             const activeFile = state.openFiles.find((f) => f.filePath === filePath)
             if (!activeFile) {

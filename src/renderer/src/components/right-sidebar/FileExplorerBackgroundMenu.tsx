@@ -40,29 +40,31 @@ export function FileExplorerBackgroundMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-hidden
-          tabIndex={-1}
-          className="pointer-events-none fixed size-px opacity-0"
-          style={{ left: point.x, top: point.y }}
-        />
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <button
+            aria-hidden
+            tabIndex={-1}
+            className="pointer-events-none fixed size-px opacity-0"
+            style={{ left: point.x, top: point.y }}
+          />
+        }
+      />
       <DropdownMenuContent
         className="w-48"
         sideOffset={0}
         align="start"
         onPointerUpCapture={stopRightButtonMenuSelection}
-        onCloseAutoFocus={(e) => e.preventDefault()}
+        finalFocus={false}
       >
-        <DropdownMenuItem onSelect={() => onStartNew('file', worktreePath, 0)}>
+        <DropdownMenuItem onClick={() => onStartNew('file', worktreePath, 0)}>
           <FilePlus />
           {translate(
             'auto.components.right.sidebar.FileExplorerBackgroundMenu.21fe46ed36',
             'New File'
           )}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onStartNew('folder', worktreePath, 0)}>
+        <DropdownMenuItem onClick={() => onStartNew('folder', worktreePath, 0)}>
           <FolderPlus />
           {translate(
             'auto.components.right.sidebar.FileExplorerBackgroundMenu.3b5e2dcb8d',

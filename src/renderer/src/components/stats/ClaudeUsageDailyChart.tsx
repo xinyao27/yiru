@@ -91,14 +91,16 @@ export function ClaudeUsageDailyChart({ daily }: ClaudeUsageDailyChartProps): Re
                   <div className="flex h-full w-full flex-col justify-end">
                     {segments.map((segment) =>
                       segment.value > 0 ? (
-                        <TooltipProvider key={segment.key} delayDuration={120}>
+                        <TooltipProvider key={segment.key} delay={120}>
                           <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div
-                                className={segment.className}
-                                style={{ height: `${(segment.value / maxDailyTotal) * 100}%` }}
-                              />
-                            </TooltipTrigger>
+                            <TooltipTrigger
+                              render={
+                                <div
+                                  className={segment.className}
+                                  style={{ height: `${(segment.value / maxDailyTotal) * 100}%` }}
+                                />
+                              }
+                            />
                             <TooltipContent side="top" sideOffset={8}>
                               <div className="text-xs">
                                 <div>{entry.day}</div>

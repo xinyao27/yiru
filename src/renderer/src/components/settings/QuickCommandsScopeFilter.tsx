@@ -68,22 +68,24 @@ export function QuickCommandsScopeFilter({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Popover open={scopePopoverOpen} onOpenChange={setScopePopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            role="combobox"
-            aria-expanded={scopePopoverOpen}
-            className="h-8 min-w-52 justify-between px-3 text-xs font-normal"
-          >
-            <ScopeTriggerLabel
-              showAll={showAll}
-              effectiveSelection={effectiveSelection}
-              repos={repos}
-            />
-            <ChevronsUpDown className="size-3.5 opacity-50" />
-          </Button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              role="combobox"
+              aria-expanded={scopePopoverOpen}
+              className="h-8 min-w-52 justify-between px-3 text-xs font-normal"
+            >
+              <ScopeTriggerLabel
+                showAll={showAll}
+                effectiveSelection={effectiveSelection}
+                repos={repos}
+              />
+              <ChevronsUpDown className="size-3.5 opacity-50" />
+            </Button>
+          }
+        />
         <PopoverContent
           align="start"
           className="w-[min(320px,calc(100vw-1rem))] min-w-[var(--radix-popover-trigger-width)] p-0"

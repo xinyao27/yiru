@@ -650,7 +650,6 @@ function WorkspaceDecisionHoverCard({
       align="end"
       side="bottom"
       sideOffset={8}
-      collisionPadding={12}
       className="max-h-[min(34rem,calc(100vh-1.5rem))] w-[min(24rem,calc(100vw-1.5rem))] overflow-y-auto p-0 scrollbar-sleek"
     >
       <div className="border-b border-border/60 px-4 py-3">
@@ -1175,20 +1174,24 @@ function WorkspaceRow({
       </div>
 
       <div className="flex justify-end">
-        <HoverCard openDelay={250} closeDelay={120}>
-          <HoverCardTrigger asChild>
-            <span
-              className="inline-flex"
-              onClick={(event) => event.stopPropagation()}
-              onKeyDown={(event) => event.stopPropagation()}
-            >
-              <StatusBadge
-                worktree={worktree}
-                decisionDetails={decisionDetails}
-                deleteState={deleteState}
-              />
-            </span>
-          </HoverCardTrigger>
+        <HoverCard>
+          <HoverCardTrigger
+            delay={250}
+            closeDelay={120}
+            render={
+              <span
+                className="inline-flex"
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
+                <StatusBadge
+                  worktree={worktree}
+                  decisionDetails={decisionDetails}
+                  deleteState={deleteState}
+                />
+              </span>
+            }
+          />
           <WorkspaceDecisionHoverCard
             worktree={worktree}
             details={decisionDetails}
@@ -1206,9 +1209,9 @@ function WorkspaceRow({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>{row}</ContextMenuTrigger>
+      <ContextMenuTrigger render={row} />
       <ContextMenuContent>
-        <ContextMenuItem variant="destructive" onSelect={onDelete}>
+        <ContextMenuItem variant="destructive" onClick={onDelete}>
           <Trash2 className="size-3.5" />
           {translate(
             'auto.components.status.bar.WorkspaceSpaceManagerPanel.792a214457',

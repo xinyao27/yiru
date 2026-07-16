@@ -68,22 +68,24 @@ export function MobileEmulatorExamples({
               {prompt}
               {translate('auto.components.settings.MobileEmulatorExamples.d151e25078', '"')}
             </p>
-            <TooltipProvider delayDuration={250}>
+            <TooltipProvider delay={250}>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    aria-label={translate(
-                      'auto.components.settings.MobileEmulatorExamples.c12b253997',
-                      'Copy example prompt'
-                    )}
-                    onClick={() => void copyPrompt(prompt)}
-                  >
-                    <Copy className="size-3.5" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label={translate(
+                        'auto.components.settings.MobileEmulatorExamples.c12b253997',
+                        'Copy example prompt'
+                      )}
+                      onClick={() => void copyPrompt(prompt)}
+                    >
+                      <Copy className="size-3.5" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="left" sideOffset={6}>
                   {translate('auto.components.settings.MobileEmulatorExamples.edf13dd03b', 'Copy')}
                 </TooltipContent>

@@ -65,7 +65,7 @@ export function TabWorkspaceLayoutMenuSection({
           {PANE_COLUMN_DIRECTIONS.map((direction) => (
             <DropdownMenuItem
               key={direction}
-              onSelect={() => {
+              onClick={() => {
                 moveTabToNewPaneColumn({ unifiedTabId, groupId, direction })
               }}
             >

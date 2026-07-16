@@ -46,18 +46,22 @@ function RichMarkdownMoreBlocksMenu({ editor }: { editor: Editor | null }): Reac
     <DropdownMenu>
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="rich-markdown-toolbar-button"
-                aria-label={label}
-                onMouseDown={(event) => event.preventDefault()}
-              >
-                <MoreHorizontal className="size-3.5" />
-              </button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <button
+                    type="button"
+                    className="rich-markdown-toolbar-button"
+                    aria-label={label}
+                    onMouseDown={(event) => event.preventDefault()}
+                  >
+                    <MoreHorizontal className="size-3.5" />
+                  </button>
+                }
+              />
+            }
+          />
           <TooltipContent side="bottom" sideOffset={4}>
             {label}
           </TooltipContent>
@@ -67,20 +71,16 @@ function RichMarkdownMoreBlocksMenu({ editor }: { editor: Editor | null }): Reac
         <DropdownMenuLabel>
           {translate('auto.components.editor.RichMarkdownToolbar.2cd9e0bbb3', 'Headings')}
         </DropdownMenuLabel>
-        <DropdownMenuItem
-          onSelect={() => editor?.chain().focus().toggleHeading({ level: 4 }).run()}
-        >
+        <DropdownMenuItem onClick={() => editor?.chain().focus().toggleHeading({ level: 4 }).run()}>
           <Heading4 className="size-3.5" />
           {translate('auto.components.editor.RichMarkdownToolbar.b05e14620d', 'Heading 4')}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onSelect={() => editor?.chain().focus().toggleHeading({ level: 5 }).run()}
-        >
+        <DropdownMenuItem onClick={() => editor?.chain().focus().toggleHeading({ level: 5 }).run()}>
           <Heading5 className="size-3.5" />
           {translate('auto.components.editor.RichMarkdownToolbar.6bbf827ef5', 'Heading 5')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => (editor ? insertToggle(editor) : undefined)}>
+        <DropdownMenuItem onClick={() => (editor ? insertToggle(editor) : undefined)}>
           <ChevronRight className="size-3.5" />
           {translate(
             'auto.components.editor.RichMarkdownToolbar.d1bbf9a835',
