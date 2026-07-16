@@ -12,6 +12,12 @@ import {
   sanitizeCatalogSessionDescriptions,
   type ResolvedSpoolCatalogWorktree
 } from './spool-catalog-projection-model'
+import {
+  projectSpoolSessionCatalogValue,
+  spoolSessionCatalogError,
+  tagSpoolSessionCatalogStage
+} from './spool-session-catalog-error'
+import { isSameSpoolPublicWorktreeInstance } from './spool-public-worktree-instance-identity'
 import type { SpoolShareCatalogSource } from './spool-share-catalog-source'
 import type {
   SpoolPublicWorktreeInstance,
@@ -86,7 +92,10 @@ export class SpoolCatalogSessionPages {
     let releaseCursor: string | null = null
     try {
       pending.controller.signal.throwIfAborted()
-      instance = await this.visibility.resolvePublicInstance(binding.instanceId, binding.shareEpoch)
+      instance = await tagSpoolSessionCatalogStage(
+        this.visibility.resolvePublicInstance(binding.instanceId, binding.shareEpoch),
+        'session-publication'
+      )
       pending.controller.signal.throwIfAborted()
       if (!instance || instance.worktreeId !== binding.worktreeId || !context.isCurrent()) {
         return null
@@ -97,48 +106,62 @@ export class SpoolCatalogSessionPages {
           ? { page: cached.page, generation: context.generation }
           : null
       }
-      const result = await this.source.listSessionPage(
-        instance,
-        binding.sourceCursor,
-        inventoryScope,
-        pending.controller.signal
+      const result = await tagSpoolSessionCatalogStage(
+        this.source.listSessionPage(
+          instance,
+          binding.sourceCursor,
+          inventoryScope,
+          pending.controller.signal
+        ),
+        'session-chain'
       )
       releaseCursor = result.nextCursor
       pending.controller.signal.throwIfAborted()
-      const sessions = sanitizeCatalogSessionDescriptions(result.sessions)
+      const sessions = projectSpoolSessionCatalogValue(
+        () => sanitizeCatalogSessionDescriptions(result.sessions),
+        'session-wire-projection'
+      )
       if (sessions.length > SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE) {
         throw new Error('Spool catalog session page size exceeded')
       }
-      const current = await this.visibility.resolvePublicInstance(
-        binding.instanceId,
-        binding.shareEpoch
+      const current = await tagSpoolSessionCatalogStage(
+        this.visibility.resolvePublicInstance(binding.instanceId, binding.shareEpoch),
+        'session-publication'
       )
       if (
         !current ||
         current.worktreeId !== binding.worktreeId ||
-        !sameInstance(current, instance) ||
+        !isSameSpoolPublicWorktreeInstance(current, instance) ||
         !context.isCurrent()
       ) {
         this.releaseSourceCursor(instance, result.nextCursor, inventoryScope)
         return null
       }
 
-      for (const nextBinding of buildCatalogSessionPageBindings(
-        description,
-        binding,
-        sessions,
-        result.nextCursor
-      )) {
-        this.dynamicBindings.set(nextBinding.aliasKey, nextBinding)
+      try {
+        for (const nextBinding of buildCatalogSessionPageBindings(
+          description,
+          binding,
+          sessions,
+          result.nextCursor
+        )) {
+          this.dynamicBindings.set(nextBinding.aliasKey, nextBinding)
+        }
+        context.reconcileReferences()
+      } catch (error) {
+        throw spoolSessionCatalogError(error, 'session-references')
       }
-      context.reconcileReferences()
-      const page = projectCatalogSessionPage(
-        request.worktreeRef,
-        binding,
-        description,
-        sessions,
-        result.nextCursor,
-        this.references
+      const page = projectSpoolSessionCatalogValue(
+        () =>
+          projectCatalogSessionPage(
+            request.worktreeRef,
+            binding,
+            description,
+            sessions,
+            result.nextCursor,
+            this.references
+          ),
+        'session-wire-projection'
       )
       this.cachedPages.set(request.cursor, { binding, page })
       if (result.nextCursor === null) {
@@ -291,17 +314,4 @@ function samePageBinding(
   right: Extract<SpoolCatalogReferenceBinding, { kind: 'session-page' }>
 ): boolean {
   return left.aliasKey === right.aliasKey && left.sourceCursor === right.sourceCursor
-}
-
-function sameInstance(
-  left: SpoolPublicWorktreeInstance,
-  right: SpoolPublicWorktreeInstance
-): boolean {
-  return (
-    left.worktreeId === right.worktreeId &&
-    left.instanceId === right.instanceId &&
-    left.shareEpoch === right.shareEpoch &&
-    left.spoolIncarnationId === right.spoolIncarnationId &&
-    left.actualHostScope === right.actualHostScope
-  )
 }

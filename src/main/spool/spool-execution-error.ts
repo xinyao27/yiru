@@ -8,6 +8,10 @@ export type SpoolExecutionErrorDiagnostic =
   | 'session-history-read'
   | 'session-projection'
   | 'session-cache'
+  | 'session-publication'
+  | 'session-chain'
+  | 'session-wire-projection'
+  | 'session-references'
 
 export class SpoolExecutionError extends Error {
   constructor(
