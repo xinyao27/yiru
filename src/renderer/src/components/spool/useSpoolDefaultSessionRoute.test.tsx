@@ -20,13 +20,15 @@ const firstSession: SpoolSessionCatalogEntry = {
 }
 
 function Probe({
+  route: probeRoute = route,
   sessions,
   setActiveRoute
 }: {
+  route?: SpoolWorkspaceRoute
   sessions: readonly SpoolSessionCatalogEntry[]
   setActiveRoute: (nextRoute: SpoolWorkspaceRoute) => void
 }): null {
-  useSpoolDefaultSessionRoute({ route, sessions, setActiveRoute })
+  useSpoolDefaultSessionRoute({ route: probeRoute, sessions, setActiveRoute })
   return null
 }
 
@@ -58,5 +60,27 @@ describe('useSpoolDefaultSessionRoute', () => {
 
     act(() => root.render(<Probe sessions={[firstSession]} setActiveRoute={setActiveRoute} />))
     expect(setActiveRoute).toHaveBeenCalledOnce()
+  })
+
+  it('chooses the current default again when the same worktree row is reopened', () => {
+    const setActiveRoute = vi.fn()
+    act(() =>
+      root.render(
+        <Probe
+          route={{ ...route, sessionRef: firstSession.sessionRef }}
+          sessions={[firstSession]}
+          setActiveRoute={setActiveRoute}
+        />
+      )
+    )
+    expect(setActiveRoute).not.toHaveBeenCalled()
+
+    act(() =>
+      root.render(<Probe route={route} sessions={[firstSession]} setActiveRoute={setActiveRoute} />)
+    )
+    expect(setActiveRoute).toHaveBeenCalledWith({
+      ...route,
+      sessionRef: firstSession.sessionRef
+    })
   })
 })

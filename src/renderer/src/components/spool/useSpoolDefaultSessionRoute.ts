@@ -7,15 +7,15 @@ export function useSpoolDefaultSessionRoute(args: {
   sessions: readonly SpoolSessionCatalogEntry[]
   setActiveRoute: (route: SpoolWorkspaceRoute) => void
 }): void {
-  const handledRef = useRef(false)
+  const defaultedEmptyRouteRef = useRef(false)
   const { route, sessions, setActiveRoute } = args
 
   useEffect(() => {
-    if (handledRef.current) {
+    if (route.sessionRef) {
+      defaultedEmptyRouteRef.current = false
       return
     }
-    if (route.sessionRef) {
-      handledRef.current = true
+    if (defaultedEmptyRouteRef.current) {
       return
     }
     const firstSessionRef = sessions[0]?.sessionRef
@@ -24,7 +24,7 @@ export function useSpoolDefaultSessionRoute(args: {
     }
     // Why: catalog pagination may finish after the worktree opens; choose its
     // first tab once without later overriding deliberate session navigation.
-    handledRef.current = true
+    defaultedEmptyRouteRef.current = true
     setActiveRoute({ ...route, sessionRef: firstSessionRef })
   }, [route, sessions, setActiveRoute])
 }

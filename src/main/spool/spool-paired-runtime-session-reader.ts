@@ -70,13 +70,14 @@ export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSe
     const tabs = envelope.data.result.sessions.map((session) =>
       projectPairedRuntimeLiveTab(session, request.worktreeInstanceId)
     )
+    const activeTab = tabs.find((tab) => tab.isActive)
     return {
       worktree: request.worktreeId,
       publicationEpoch: request.spoolIncarnationId,
       snapshotVersion: 0,
       activeGroupId: null,
-      activeTabId: null,
-      activeTabType: null,
+      activeTabId: activeTab?.id ?? null,
+      activeTabType: activeTab ? ('terminal' as const) : null,
       tabs
     }
   }

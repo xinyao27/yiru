@@ -117,7 +117,13 @@ export class SpoolMobileVaultSessionSource implements SpoolSessionSource {
         isReadyMobileSessionTerminalTab(tab) && tab.worktreeInstanceId === worktree.instanceId
     )
     this.sessionBindings.reconcile(worktree, new Set(readyTabs.map((tab) => tab.terminal)))
-    const sessions = readyTabs
+    // Why: opening a worktree without a session selects the first catalog row,
+    // so preserve the owner's current terminal as the initial remote surface.
+    const ownerRankedTabs = [
+      ...readyTabs.filter((tab) => tab.isActive),
+      ...readyTabs.filter((tab) => !tab.isActive)
+    ]
+    const sessions = ownerRankedTabs
       .map((tab) =>
         projectMobileVaultLiveTab(
           worktree,

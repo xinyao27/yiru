@@ -83,6 +83,8 @@ export const SpoolPairedRuntimeLiveSessionSchema = z
   .object({
     terminalRef: z.string().min(1).max(2_048).refine(withoutNull),
     title,
+    // Why: older paired hosts omit this field; false preserves their prior ordering fallback.
+    isActive: z.boolean().default(false),
     provider: z.enum(['claude', 'codex', 'other']),
     providerSessionId: providerSessionId.nullable(),
     sessionKind: z.enum(['terminal', 'agent']),

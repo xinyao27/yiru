@@ -11,6 +11,7 @@ export function projectPairedRuntimeLiveTab(
   session: {
     terminalRef: string
     title: string
+    isActive: boolean
     provider: 'claude' | 'codex' | 'other'
     providerSessionId: string | null
     sessionKind: 'terminal' | 'agent'
@@ -35,7 +36,7 @@ export function projectPairedRuntimeLiveTab(
     title: session.title,
     parentTabId: id,
     leafId: id,
-    isActive: false,
+    isActive: session.isActive,
     status: 'ready',
     terminal: session.terminalRef,
     worktreeInstanceId,

@@ -73,6 +73,7 @@ export async function projectPairedRuntimeLiveSessions(
     const parsed = SpoolPairedRuntimeLiveSessionSchema.safeParse({
       terminalRef: tab.terminal,
       title: currentBinding?.title ?? tab.title,
+      isActive: tab.isActive,
       ...identity,
       sessionKey: currentBinding?.sessionKey ?? null
     })

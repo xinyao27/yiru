@@ -49,6 +49,41 @@ function sessionSnapshotWithTerminal(worktreeId: string): SpoolMobileSessionTabs
   }
 }
 
+function sessionSnapshotWithInactiveThenActiveTerminal(
+  worktreeId: string
+): SpoolMobileSessionTabsResult {
+  return {
+    ...emptySessionSnapshot(worktreeId),
+    snapshotVersion: 3,
+    activeTabId: 'tab-active',
+    activeTabType: 'terminal',
+    tabs: [
+      {
+        type: 'terminal',
+        id: 'tab-inactive',
+        title: 'Previous session',
+        parentTabId: 'tab-inactive',
+        leafId: 'leaf-inactive',
+        isActive: false,
+        status: 'ready',
+        terminal: 'terminal-inactive',
+        worktreeInstanceId: publicWorktree.instanceId
+      },
+      {
+        type: 'terminal',
+        id: 'tab-active',
+        title: 'Current session',
+        parentTabId: 'tab-active',
+        leafId: 'leaf-active',
+        isActive: true,
+        status: 'ready',
+        terminal: 'terminal-active',
+        worktreeInstanceId: publicWorktree.instanceId
+      }
+    ]
+  }
+}
+
 const publicWorktree: SpoolPublicWorktreeInstance = {
   worktreeId: 'worktree-main-2',
   instanceId: 'instance-main-2',
@@ -80,6 +115,88 @@ const publicReadRequest: SpoolExecutionHostSessionReadRequest = {
 }
 
 describe('Spool session catalog invalidation', () => {
+  it('ranks the owner-active terminal first for the worktree default route', async () => {
+    const reader: SpoolExecutionHostSessionReader = {
+      listMobileSessionTabs: async () =>
+        sessionSnapshotWithInactiveThenActiveTerminal(publicWorktree.worktreeId),
+      listAiVaultSessionPage: async () => ({
+        sessions: [],
+        nextCursor: null,
+        scannedAt: 'inventory-one'
+      }),
+      releaseAiVaultSessionPage: async () => undefined
+    }
+    const provenance = {
+      resolve: () => null,
+      attest: () => false
+    } as unknown as SpoolSessionProvenanceIndex
+    const source = new SpoolMobileVaultSessionSource(
+      reader,
+      new SpoolOwnerSessionRecords(),
+      new SpoolTerminalSessionBindings(),
+      provenance
+    )
+
+    const sessions = await source.listLiveSessions(toSessionWorktree(publicWorktree))
+
+    expect(sessions.map((session) => session.terminalHandle)).toEqual([
+      'terminal-active',
+      'terminal-inactive'
+    ])
+  })
+
+  it('invalidates the catalog when the owner switches the active terminal', async () => {
+    let emitSessionChange: Parameters<
+      NonNullable<SpoolExecutionHostSessionReader['subscribe']>
+    >[0] = () => undefined
+    const initial = sessionSnapshotWithInactiveThenActiveTerminal(publicWorktree.worktreeId)
+    const reader: SpoolExecutionHostSessionReader = {
+      registerPublicWorktree: () => undefined,
+      unregisterPublicWorktree: () => undefined,
+      listMobileSessionTabs: async () => initial,
+      listAiVaultSessionPage: async () => ({
+        sessions: [],
+        nextCursor: null,
+        scannedAt: 'inventory-one'
+      }),
+      releaseAiVaultSessionPage: async () => undefined,
+      subscribe: (listener) => {
+        emitSessionChange = listener
+        return () => undefined
+      }
+    }
+    const provenance = {
+      resolve: () => null,
+      attest: () => false
+    } as unknown as SpoolSessionProvenanceIndex
+    const source = new SpoolMobileVaultSessionSource(
+      reader,
+      new SpoolOwnerSessionRecords(),
+      new SpoolTerminalSessionBindings(),
+      provenance
+    )
+    source.trackPublicWorktree(publicWorktree)
+    await source.listLiveSessions(toSessionWorktree(publicWorktree))
+    let changes = 0
+    const unsubscribe = source.subscribe(() => changes++)
+
+    emitSessionChange(
+      {
+        ...initial,
+        snapshotVersion: initial.snapshotVersion + 1,
+        activeTabId: 'tab-inactive',
+        tabs: initial.tabs.map((tab) => ({
+          ...tab,
+          isActive: tab.id === 'tab-inactive'
+        }))
+      },
+      publicReadRequest
+    )
+
+    expect(changes).toBe(1)
+    unsubscribe()
+  })
+
   it('finishes a public worktree page while an unrelated session snapshot changes', async () => {
     let emitSessionChange: Parameters<NonNullable<SpoolExecutionHostSessionReader['subscribe']>>[0]
     const reader: SpoolExecutionHostSessionReader = {
