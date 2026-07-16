@@ -66,14 +66,22 @@ export function SpoolWorktreeRow({
       }}
     >
       <div className="flex w-full min-w-0 items-start gap-0.5 pl-0">
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5 overflow-hidden">
+        <div
+          className="flex w-4 shrink-0 items-start justify-center pt-[2px]"
+          data-spool-worktree-status-slot=""
+        >
+          {row.kind === 'folder' ? (
+            <Folder aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
+          ) : (
+            <GitBranch aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
+          )}
+        </div>
+        <div
+          className="flex min-w-0 flex-1 flex-col gap-1.5 overflow-hidden"
+          data-spool-worktree-content=""
+        >
           <div className="flex min-w-0 items-center justify-between gap-2">
-            <div className="flex min-w-0 flex-1 items-center gap-1.5">
-              {row.kind === 'folder' ? (
-                <Folder aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-              ) : (
-                <GitBranch aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-              )}
+            <div className="flex min-w-0 flex-1 items-center">
               <TruncatedSidebarLabel
                 text={displayTitle}
                 className="min-w-0 flex-1 text-[13px] font-normal leading-5"
