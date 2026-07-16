@@ -30,6 +30,7 @@ export type WorkspaceSidebarProjectedRow =
       kind: 'spool-remote-worktrees-header'
       key: 'spool:remote-worktrees-header'
       worktreeCount: number
+      collapsed: boolean
     }
   | {
       kind: 'spool'
@@ -42,6 +43,8 @@ type MatchedSpoolRows = {
   rows: SpoolSidebarRow[]
   worktreeCount: number
 }
+
+export const SPOOL_REMOTE_WORKTREES_HEADER_KEY = 'spool:remote-worktrees-header'
 
 function getLocalProjectHeaderIndexByIdentity(
   localRows: readonly RenderRow[]
@@ -137,6 +140,7 @@ export function projectWorkspaceSidebarRows(args: {
   spoolRows: readonly SpoolSidebarRow[]
   spoolStatus: 'starting' | 'ready' | 'unavailable'
   spoolDiagnostic: string | null
+  remoteWorktreesCollapsed?: boolean
   getLocalRowKey: (row: RenderRow) => string
 }): WorkspaceSidebarProjectedRow[] {
   const localHeaderIndexByIdentity = getLocalProjectHeaderIndexByIdentity(args.localRows)
@@ -208,11 +212,14 @@ export function projectWorkspaceSidebarRows(args: {
     // visually inherit whichever local Project happens to precede it.
     rows.push({
       kind: 'spool-remote-worktrees-header',
-      key: 'spool:remote-worktrees-header',
-      worktreeCount: unmatchedWorktreeCount
+      key: SPOOL_REMOTE_WORKTREES_HEADER_KEY,
+      worktreeCount: unmatchedWorktreeCount,
+      collapsed: args.remoteWorktreesCollapsed === true
     })
   }
-  rows.push(...unmatched.map((row) => ({ kind: 'spool' as const, key: row.key, row })))
+  if (unmatchedWorktreeCount === 0 || !args.remoteWorktreesCollapsed) {
+    rows.push(...unmatched.map((row) => ({ kind: 'spool' as const, key: row.key, row })))
+  }
   return rows
 }
 

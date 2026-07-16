@@ -11,9 +11,11 @@ import type { WorkspaceSidebarProjectedRow } from './workspace-sidebar-row-proje
 type SpoolProjectedRow = Exclude<WorkspaceSidebarProjectedRow, { kind: 'local' }>
 
 export function SpoolSidebarProjectedRow({
-  projected
+  projected,
+  onToggleRemoteWorktrees
 }: {
   projected: SpoolProjectedRow
+  onToggleRemoteWorktrees: () => void
 }): React.JSX.Element {
   const setWorktreeExpanded = useAppStore((state) => state.setSpoolWorktreeExpanded)
   const setRoute = useAppStore((state) => state.setActiveSpoolWorkspaceRoute)
@@ -26,7 +28,12 @@ export function SpoolSidebarProjectedRow({
     return <SpoolAvailabilityNotice diagnostic={projected.diagnostic} />
   }
   if (projected.kind === 'spool-remote-worktrees-header') {
-    return <SpoolRemoteWorktreesHeader />
+    return (
+      <SpoolRemoteWorktreesHeader
+        expanded={!projected.collapsed}
+        onToggle={onToggleRemoteWorktrees}
+      />
+    )
   }
 
   const row = projected.row

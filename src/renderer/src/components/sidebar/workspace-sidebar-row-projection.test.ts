@@ -46,7 +46,8 @@ describe('projectWorkspaceSidebarRows', () => {
       {
         kind: 'spool-remote-worktrees-header',
         key: 'spool:remote-worktrees-header',
-        worktreeCount: 1
+        worktreeCount: 1,
+        collapsed: false
       },
       {
         kind: 'spool',
@@ -74,7 +75,8 @@ describe('projectWorkspaceSidebarRows', () => {
       {
         kind: 'spool-remote-worktrees-header',
         key: 'spool:remote-worktrees-header',
-        worktreeCount: 1
+        worktreeCount: 1,
+        collapsed: false
       },
       {
         kind: 'spool',
@@ -82,6 +84,50 @@ describe('projectWorkspaceSidebarRows', () => {
         row: unscopedRemoteWorktree
       }
     ])
+  })
+
+  it('keeps the Remote header and hides unmatched rows when collapsed', () => {
+    const unscopedRemoteWorktree = {
+      ...remoteWorktree,
+      projectRef: 'unscoped-project',
+      projectIdentityKey: null
+    }
+    const rows = projectWorkspaceSidebarRows({
+      localRows: [],
+      spoolRows: [unscopedRemoteWorktree],
+      spoolStatus: 'ready',
+      spoolDiagnostic: null,
+      remoteWorktreesCollapsed: true,
+      getLocalRowKey: () => 'unused'
+    })
+
+    expect(rows).toEqual([
+      {
+        kind: 'spool-remote-worktrees-header',
+        key: 'spool:remote-worktrees-header',
+        worktreeCount: 1,
+        collapsed: true
+      }
+    ])
+  })
+
+  it('keeps standalone connection feedback visible while Remote is collapsed', () => {
+    const desktopStatus: SpoolSidebarRow = {
+      type: 'spool-desktop-status',
+      key: 'spool-desktop-status-one',
+      desktopRef: 'desktop-chen',
+      desktop: remoteWorktree.desktop
+    }
+    const rows = projectWorkspaceSidebarRows({
+      localRows: [],
+      spoolRows: [desktopStatus],
+      spoolStatus: 'ready',
+      spoolDiagnostic: null,
+      remoteWorktreesCollapsed: true,
+      getLocalRowKey: () => 'unused'
+    })
+
+    expect(rows).toEqual([{ kind: 'spool', key: desktopStatus.key, row: desktopStatus }])
   })
 
   it('inserts a remote worktree into the matching local Project section', () => {
@@ -178,7 +224,8 @@ describe('projectWorkspaceSidebarRows', () => {
     expect(rows[1]).toEqual({
       kind: 'spool-remote-worktrees-header',
       key: 'spool:remote-worktrees-header',
-      worktreeCount: 1
+      worktreeCount: 1,
+      collapsed: false
     })
     expect(rows[2]).toEqual({ kind: 'spool', key: unrelatedRemote.key, row: unrelatedRemote })
   })
@@ -210,7 +257,8 @@ describe('projectWorkspaceSidebarRows', () => {
     expect(rows[2]).toEqual({
       kind: 'spool-remote-worktrees-header',
       key: 'spool:remote-worktrees-header',
-      worktreeCount: 1
+      worktreeCount: 1,
+      collapsed: false
     })
     expect(rows[3]).toEqual({ kind: 'spool', key: remoteWorktree.key, row: remoteWorktree })
   })
