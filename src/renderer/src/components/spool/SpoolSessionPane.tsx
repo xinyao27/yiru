@@ -70,8 +70,7 @@ export function SpoolSessionPane({
     onAttempt: () => {
       terminalLiveRef.current = false
       setTerminalAttempt((attempt) => attempt + 1)
-    },
-    onExhausted: () => setPhase('reconnect-error')
+    }
   })
 
   const clearRetryTimer = useCallback((): void => {
