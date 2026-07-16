@@ -2,7 +2,7 @@
 
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { SpoolRemoteWorktreesHeader } from './SpoolRemoteWorktreesHeader'
 
 describe('SpoolRemoteWorktreesHeader', () => {
@@ -20,11 +20,15 @@ describe('SpoolRemoteWorktreesHeader', () => {
     container.remove()
   })
 
-  it('labels unmatched worktrees with the compact Remote heading', () => {
-    act(() => root.render(<SpoolRemoteWorktreesHeader />))
+  it('labels and toggles unmatched worktrees like a Project header', () => {
+    const onToggle = vi.fn()
+    act(() => root.render(<SpoolRemoteWorktreesHeader expanded onToggle={onToggle} />))
 
-    const heading = container.querySelector('[role="heading"]')
-    expect(heading?.getAttribute('aria-level')).toBe('2')
-    expect(heading?.textContent).toBe('Remote')
+    const header = container.querySelector<HTMLElement>('[role="button"]')
+    expect(header?.getAttribute('aria-expanded')).toBe('true')
+    expect(header?.textContent).toBe('Remote')
+
+    act(() => header?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
+    expect(onToggle).toHaveBeenCalledOnce()
   })
 })

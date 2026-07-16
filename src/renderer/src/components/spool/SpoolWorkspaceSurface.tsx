@@ -30,6 +30,7 @@ import { getSpoolSessionRouteKey } from './spool-session-route'
 import { getSpoolSessionCatalogStatusLabel } from './spool-session-catalog-status'
 import { getSpoolWorktreeRouteKey } from './spool-worktree-route'
 import { useSpoolCreatedSessionTabs } from './useSpoolCreatedSessionTabs'
+import { useSpoolDefaultSessionRoute } from './useSpoolDefaultSessionRoute'
 
 const EMPTY_SPOOL_SESSION_TABS: readonly SpoolSessionCatalogEntry[] = []
 
@@ -63,6 +64,7 @@ function SpoolWorkspaceSurfaceContent({
     catalogRevision,
     activeSessionRef: route.sessionRef ?? null
   })
+  useSpoolDefaultSessionRoute({ route, sessions, setActiveRoute })
   const sessionRoute = useMemo(
     () =>
       route.sessionRef

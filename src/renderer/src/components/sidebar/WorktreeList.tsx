@@ -107,6 +107,7 @@ import {
   extractWorkspaceSidebarVirtualRowIndexes,
   getWorkspaceSidebarRowKey,
   projectWorkspaceSidebarRows,
+  SPOOL_REMOTE_WORKTREES_HEADER_KEY,
   shouldShowSpoolAvailabilityDiagnostic,
   shouldShowSpoolWindowsFirewallDiagnostic,
   type WorkspaceSidebarProjectedRow,
@@ -1699,9 +1700,10 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         spoolRows,
         spoolStatus,
         spoolDiagnostic,
+        remoteWorktreesCollapsed: collapsedGroups.has(SPOOL_REMOTE_WORKTREES_HEADER_KEY),
         getLocalRowKey: getRenderRowKey
       }),
-    [renderRows, spoolDiagnostic, spoolRows, spoolStatus]
+    [collapsedGroups, renderRows, spoolDiagnostic, spoolRows, spoolStatus]
   )
   const workspaceStickyRows = useMemo(
     () =>
@@ -4192,7 +4194,12 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                   className="absolute left-0 right-0 top-0"
                   style={{ transform: getVirtualRowTransform(vItem.start) }}
                 >
-                  <SpoolSidebarProjectedRow projected={projected} />
+                  <SpoolSidebarProjectedRow
+                    projected={projected}
+                    onToggleRemoteWorktrees={() =>
+                      toggleGroupWithScrollAnchor(SPOOL_REMOTE_WORKTREES_HEADER_KEY)
+                    }
+                  />
                 </div>
               )
             }
