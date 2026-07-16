@@ -9,6 +9,8 @@ import type {
 import type { SpoolProvenanceProvider } from './spool-session-provenance-index'
 import type { SpoolLiveSessionIdentity } from './spool-live-session-display-identity'
 
+const MAX_PROVIDED_SESSION_KEY_LENGTH = 512
+
 export type SpoolSessionCatalogDescription = {
   sessionKey: string
   title: string
@@ -46,11 +48,19 @@ export function resolveLiveSession(
   worktree: SpoolSessionWorktreeIdentity,
   candidate: SpoolLiveSessionCandidate
 ): SpoolResolvedLiveSession {
-  const identity: SpoolLiveSessionIdentity = candidate
+  // Why: a type annotation does not strip runtime keys; explicitly projecting
+  // identity prevents an observed sessionKey from overwriting the validated key below.
+  const identity: SpoolLiveSessionIdentity = {
+    provider: candidate.provider,
+    providerSessionId: candidate.providerSessionId,
+    ...(candidate.sessionKind === 'terminal'
+      ? { sessionKind: 'terminal', agent: null }
+      : { sessionKind: 'agent', agent: candidate.agent })
+  }
   return {
     kind: 'live',
     sessionKey:
-      candidate.sessionKey ??
+      normalizeProvidedSessionKey(candidate.sessionKey) ??
       (candidate.providerSessionId
         ? providerSessionKey(worktree, candidate)
         : spoolLiveTerminalSessionKey(worktree, candidate.terminalHandle)),
@@ -70,7 +80,8 @@ export function resolveHistoricalSession(
 ): SpoolResolvedHistoricalSession {
   return {
     kind: 'historical',
-    sessionKey: candidate.sessionKey ?? providerSessionKey(worktree, candidate),
+    sessionKey:
+      normalizeProvidedSessionKey(candidate.sessionKey) ?? providerSessionKey(worktree, candidate),
     ownerRecordKey: candidate.ownerRecordKey,
     executionHostId: candidate.executionHostId,
     actualHostScope: candidate.actualHostScope,
@@ -82,6 +93,20 @@ export function resolveHistoricalSession(
     agent: candidate.provider,
     title: candidate.title
   }
+}
+
+function normalizeProvidedSessionKey(value: string | null | undefined): string | null {
+  const trimmed = value?.trim()
+  if (!trimmed || trimmed.length > MAX_PROVIDED_SESSION_KEY_LENGTH) {
+    return null
+  }
+  for (const character of trimmed) {
+    const code = character.charCodeAt(0)
+    if (code <= 0x1f || code === 0x7f) {
+      return null
+    }
+  }
+  return trimmed
 }
 
 export function sessionDedupeKey(session: SpoolResolvedSession): string {
