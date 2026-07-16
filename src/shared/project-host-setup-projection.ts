@@ -20,6 +20,23 @@ function normalizeIdentityPart(value: string): string {
   return value.trim().toLowerCase()
 }
 
+export function getPortableProjectIdentityKey(
+  project: Pick<Project, 'providerIdentity' | 'gitRemoteIdentity'> & Partial<Pick<Project, 'id'>>
+): string | null {
+  const providerIdentity = project.providerIdentity
+  if (providerIdentity?.owner.trim() && providerIdentity.repo.trim()) {
+    return `${providerIdentity.provider}:${normalizeIdentityPart(providerIdentity.owner)}/${normalizeIdentityPart(providerIdentity.repo)}`
+  }
+  const canonicalKey = project.gitRemoteIdentity?.canonicalKey.trim()
+  if (canonicalKey) {
+    return `git:${canonicalKey}`
+  }
+  const projectId = project.id?.trim()
+  // Why: projected Project IDs already encode portable identity; legacy/random
+  // IDs remain host-local and must never become cross-desktop join keys.
+  return projectId?.startsWith('github:') || projectId?.startsWith('git:') ? projectId : null
+}
+
 function getProjectProviderIdentity(
   repo: Pick<Repo, 'upstream' | 'repoIcon' | 'gitRemoteIdentity'>
 ): ProjectProviderIdentity | null {

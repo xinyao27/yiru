@@ -3,6 +3,7 @@ import {
   projectHostSetupProjectionFromRepos,
   getProjectHostSetupsForProject,
   getProjectHostSetupWorktreeMeta,
+  getPortableProjectIdentityKey,
   isGitHubBackedRepo
 } from './project-host-setup-projection'
 import type { Repo } from './types'
@@ -17,6 +18,24 @@ function repo(overrides: Partial<Repo> & Pick<Repo, 'id' | 'path' | 'displayName
 }
 
 describe('project host setup projection', () => {
+  it('exposes only cross-host-stable Project identities', () => {
+    expect(
+      getPortableProjectIdentityKey({
+        providerIdentity: { provider: 'github', owner: 'PaperBoyTM', repo: 'Orca' }
+      })
+    ).toBe('github:paperboytm/orca')
+    expect(
+      getPortableProjectIdentityKey({
+        gitRemoteIdentity: {
+          canonicalKey: 'git.company.test/Team/Orca',
+          remoteName: 'origin',
+          remoteUrl: 'git@git.company.test:Team/Orca.git'
+        }
+      })
+    ).toBe('git:git.company.test/Team/Orca')
+    expect(getPortableProjectIdentityKey({})).toBeNull()
+  })
+
   it('projects a legacy local repo into one project and one ready local setup', () => {
     const projection = projectHostSetupProjectionFromRepos(
       [repo({ id: 'repo-1', path: '/Users/alice/orca', displayName: 'orca' })],
