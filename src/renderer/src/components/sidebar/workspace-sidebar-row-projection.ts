@@ -18,10 +18,6 @@ export type WorkspaceSidebarProjectedRow =
       row: RenderRow
     }
   | {
-      kind: 'spool-section'
-      key: 'spool:section'
-    }
-  | {
       kind: 'spool-windows-firewall'
       key: 'spool:windows-firewall'
     }
@@ -74,9 +70,6 @@ export function projectWorkspaceSidebarRows(args: {
   if (args.spoolRows.length === 0 && !showWindowsFirewall && !availabilityDiagnostic) {
     return rows
   }
-  // Why: Spool resources are a separate remote namespace; placing their
-  // section after local rows avoids interleaving opaque refs with local hosts.
-  rows.push({ kind: 'spool-section', key: 'spool:section' })
   if (showWindowsFirewall) {
     rows.push({ kind: 'spool-windows-firewall', key: 'spool:windows-firewall' })
   } else if (availabilityDiagnostic) {
@@ -119,14 +112,8 @@ export function estimateWorkspaceSidebarRowSize(args: {
   if (projected.kind === 'spool-availability') {
     return 144
   }
-  if (projected.kind === 'spool-section') {
+  if (projected.row.type === 'spool-desktop-status') {
     return 32
-  }
-  if (projected.row.type === 'spool-project') {
-    return 28
-  }
-  if (projected.row.type === 'spool-desktop') {
-    return 36
   }
   if (projected.row.type === 'spool-worktree') {
     return projected.row.branch || projected.row.sessionCatalogStatus !== 'complete' ? 44 : 32
@@ -141,7 +128,7 @@ export function extractWorkspaceSidebarVirtualRowIndexes(args: {
   stickyHeaderIndexes: readonly number[]
 }): number[] {
   // Why: local sticky headers describe local projects only; once the viewport
-  // enters Spool, keeping the last local header pinned misstates ownership.
+  // enters remote worktrees, keeping the last project pinned misstates ownership.
   if (args.range.startIndex >= args.localRowCount) {
     return defaultRangeExtractor(args.range)
   }

@@ -4697,6 +4697,7 @@
           "collapse": "Collapse {{value0}}",
           "expand": "Expand {{value0}}",
           "loadingSessions": "Cargando sesiones…",
+          "ownerTitle": "{{value1}} de {{value0}}",
           "sessionsUnavailable": "La lista de sesiones no está disponible"
         },
         "SpoolSidebarProjectedRow": {
