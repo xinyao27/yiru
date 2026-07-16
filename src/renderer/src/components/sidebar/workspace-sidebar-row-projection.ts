@@ -27,6 +27,11 @@ export type WorkspaceSidebarProjectedRow =
       diagnostic: SpoolAvailabilityDiagnostic
     }
   | {
+      kind: 'spool-remote-worktrees-header'
+      key: 'spool:remote-worktrees-header'
+      worktreeCount: number
+    }
+  | {
       kind: 'spool'
       key: string
       row: SpoolSidebarRow
@@ -197,6 +202,16 @@ export function projectWorkspaceSidebarRows(args: {
       diagnostic: availabilityDiagnostic
     })
   }
+  const unmatchedWorktreeCount = unmatched.filter((row) => row.type === 'spool-worktree').length
+  if (unmatchedWorktreeCount > 0) {
+    // Why: a remote worktree without one unambiguous local Project must not
+    // visually inherit whichever local Project happens to precede it.
+    rows.push({
+      kind: 'spool-remote-worktrees-header',
+      key: 'spool:remote-worktrees-header',
+      worktreeCount: unmatchedWorktreeCount
+    })
+  }
   rows.push(...unmatched.map((row) => ({ kind: 'spool' as const, key: row.key, row })))
   return rows
 }
@@ -236,6 +251,9 @@ export function estimateWorkspaceSidebarRowSize(args: {
   }
   if (projected.kind === 'spool-availability') {
     return 144
+  }
+  if (projected.kind === 'spool-remote-worktrees-header') {
+    return 32
   }
   if (projected.row.type === 'spool-desktop-status') {
     return 32

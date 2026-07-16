@@ -4706,6 +4706,9 @@
         },
         "SpoolDesktopUsageHoverCard": {
           "usage": "Usage"
+        },
+        "SpoolRemoteWorktreesHeader": {
+          "title": "Remote"
         }
       },
       "spool": {
