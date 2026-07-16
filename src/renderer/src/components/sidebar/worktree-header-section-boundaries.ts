@@ -1,36 +1,65 @@
-import { estimateRenderRowSize, type RenderRow } from './worktree-list-virtual-rows'
+import type { RenderRow } from './worktree-list-virtual-rows'
+import {
+  estimateWorkspaceSidebarRowSize,
+  type WorkspaceSidebarProjectedRow
+} from './workspace-sidebar-row-projection'
 
-function getEstimatedRenderRowStarts(
-  rows: readonly RenderRow[],
-  firstHeaderIndex: number
+function getEstimatedWorkspaceRowStarts(
+  rows: readonly WorkspaceSidebarProjectedRow[],
+  localRows: readonly RenderRow[],
+  firstLocalHeaderIndex: number
 ): number[] {
   const starts: number[] = []
   let offset = 0
   for (let index = 0; index < rows.length; index++) {
     starts[index] = offset
-    offset += estimateRenderRowSize(rows, index, firstHeaderIndex, null)
+    offset += estimateWorkspaceSidebarRowSize({
+      rows,
+      localRows,
+      index,
+      firstLocalHeaderIndex,
+      activeStickyHeaderIndex: null
+    })
   }
   starts[rows.length] = offset
   return starts
 }
 
-function findRepoHeaderRenderRowIndex(rows: readonly RenderRow[], repoId: string): number {
-  return rows.findIndex((row) => row.type === 'header' && row.repo?.id === repoId)
+function localRowAt(row: WorkspaceSidebarProjectedRow | undefined): RenderRow | undefined {
+  return row?.kind === 'local' ? row.row : undefined
 }
 
-function findProjectGroupHeaderRenderRowIndex(rows: readonly RenderRow[], groupId: string): number {
-  return rows.findIndex(
-    (row) =>
-      row.type === 'header' &&
+function findRepoHeaderRowIndex(
+  rows: readonly WorkspaceSidebarProjectedRow[],
+  repoId: string
+): number {
+  return rows.findIndex((projected) => {
+    const row = localRowAt(projected)
+    return row?.type === 'header' && row.repo?.id === repoId
+  })
+}
+
+function findProjectGroupHeaderRowIndex(
+  rows: readonly WorkspaceSidebarProjectedRow[],
+  groupId: string
+): number {
+  return rows.findIndex((projected) => {
+    const row = localRowAt(projected)
+    return (
+      row?.type === 'header' &&
       !row.repo &&
       typeof row.projectGroup?.id === 'string' &&
       row.projectGroup.id === groupId
-  )
+    )
+  })
 }
 
-function findNextHeaderRenderRowIndex(rows: readonly RenderRow[], startIndex: number): number {
+function findNextHeaderRowIndex(
+  rows: readonly WorkspaceSidebarProjectedRow[],
+  startIndex: number
+): number {
   for (let index = startIndex; index < rows.length; index++) {
-    const row = rows[index]
+    const row = localRowAt(rows[index])
     if (row?.type === 'header' || row?.type === 'host-header') {
       return index
     }
@@ -39,12 +68,12 @@ function findNextHeaderRenderRowIndex(rows: readonly RenderRow[], startIndex: nu
 }
 
 function findProjectGroupSectionEndIndex(
-  rows: readonly RenderRow[],
+  rows: readonly WorkspaceSidebarProjectedRow[],
   startIndex: number,
   depth: number
 ): number {
   for (let index = startIndex; index < rows.length; index++) {
-    const row = rows[index]
+    const row = localRowAt(rows[index])
     if (!row) {
       continue
     }
@@ -63,15 +92,20 @@ function findProjectGroupSectionEndIndex(
 }
 
 export function getRepoHeaderSectionEndByRepoId(args: {
-  rows: readonly RenderRow[]
-  firstHeaderIndex: number
+  rows: readonly WorkspaceSidebarProjectedRow[]
+  localRows: readonly RenderRow[]
+  firstLocalHeaderIndex: number
   sidebarRepoHeaderIdsByBucket: ReadonlyMap<string, readonly string[]>
   repoHeaderBucketByRepoId: ReadonlyMap<string, string>
 }): Map<string, number> {
-  const rowStarts = getEstimatedRenderRowStarts(args.rows, args.firstHeaderIndex)
+  const rowStarts = getEstimatedWorkspaceRowStarts(
+    args.rows,
+    args.localRows,
+    args.firstLocalHeaderIndex
+  )
   const sectionEndByRepoId = new Map<string, number>()
   for (let index = 0; index < args.rows.length; index++) {
-    const row = args.rows[index]
+    const row = localRowAt(args.rows[index])
     const repoId = row?.type === 'header' ? row.repo?.id : undefined
     if (!repoId) {
       continue
@@ -81,8 +115,8 @@ export function getRepoHeaderSectionEndByRepoId(args: {
     const bucketIndex = bucketRepoIds?.indexOf(repoId) ?? -1
     const nextRepoId = bucketIndex >= 0 ? bucketRepoIds?.[bucketIndex + 1] : undefined
     const endIndex = nextRepoId
-      ? findRepoHeaderRenderRowIndex(args.rows, nextRepoId)
-      : findNextHeaderRenderRowIndex(args.rows, index + 1)
+      ? findRepoHeaderRowIndex(args.rows, nextRepoId)
+      : findNextHeaderRowIndex(args.rows, index + 1)
     sectionEndByRepoId.set(
       repoId,
       rowStarts[endIndex >= 0 ? endIndex : args.rows.length] ?? rowStarts[args.rows.length] ?? 0
@@ -92,15 +126,20 @@ export function getRepoHeaderSectionEndByRepoId(args: {
 }
 
 export function getProjectGroupHeaderSectionEndByGroupId(args: {
-  rows: readonly RenderRow[]
-  firstHeaderIndex: number
+  rows: readonly WorkspaceSidebarProjectedRow[]
+  localRows: readonly RenderRow[]
+  firstLocalHeaderIndex: number
   sidebarProjectGroupHeaderIdsByBucket: ReadonlyMap<string, readonly string[]>
   projectGroupHeaderBucketByGroupId: ReadonlyMap<string, string>
 }): Map<string, number> {
-  const rowStarts = getEstimatedRenderRowStarts(args.rows, args.firstHeaderIndex)
+  const rowStarts = getEstimatedWorkspaceRowStarts(
+    args.rows,
+    args.localRows,
+    args.firstLocalHeaderIndex
+  )
   const sectionEndByGroupId = new Map<string, number>()
   for (let index = 0; index < args.rows.length; index++) {
-    const row = args.rows[index]
+    const row = localRowAt(args.rows[index])
     const projectGroupHeader =
       row?.type === 'header' &&
       !row.repo &&
@@ -120,7 +159,7 @@ export function getProjectGroupHeaderSectionEndByGroupId(args: {
     const nextGroupId = bucketIndex >= 0 ? bucketGroupIds?.[bucketIndex + 1] : undefined
     const depth = projectGroupHeader.row.projectGroupDepth ?? 0
     const endIndex = nextGroupId
-      ? findProjectGroupHeaderRenderRowIndex(args.rows, nextGroupId)
+      ? findProjectGroupHeaderRowIndex(args.rows, nextGroupId)
       : findProjectGroupSectionEndIndex(args.rows, index + 1, depth)
     sectionEndByGroupId.set(
       groupId,

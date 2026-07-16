@@ -4,6 +4,7 @@ import type {
   SpoolSessionCatalogPage,
   SpoolWorktreeCatalogEntry
 } from '../../shared/spool/spool-catalog-contract'
+import { isSpoolProjectIdentityKey } from '../../shared/spool/spool-catalog-contract'
 import type {
   SpoolCatalogReferenceBinding,
   SpoolCatalogReferenceTable
@@ -26,9 +27,17 @@ export function sanitizeCatalogWorktreeDescription(
   description: SpoolCatalogWorktreeDescription
 ): ResolvedSpoolCatalogWorktree | null {
   const projectKey = boundedIdentity(description.projectKey)
+  const projectIdentityKey = isSpoolProjectIdentityKey(description.projectIdentityKey)
+    ? description.projectIdentityKey
+    : null
   const projectName = catalogLabel(description.projectName)
   const worktreeName = catalogLabel(description.worktreeName)
-  if (!projectKey || !projectName || !worktreeName) {
+  if (
+    !projectKey ||
+    (description.projectIdentityKey !== null && projectIdentityKey === null) ||
+    !projectName ||
+    !worktreeName
+  ) {
     return null
   }
   return {
@@ -41,6 +50,7 @@ export function sanitizeCatalogWorktreeDescription(
     description: {
       kind: description.kind,
       projectKey,
+      projectIdentityKey,
       projectName,
       worktreeName,
       branch: description.branch ? catalogLabel(description.branch) : null
@@ -174,7 +184,11 @@ export function projectCatalogEntries(
       })
     } else {
       projects.set(description.projectKey, {
-        projectRef: references.referenceFor(projectAliasKey(description.projectKey)),
+        // Why: v2 readers already treat projectRef as opaque. Reusing it for a
+        // portable identity lets new peers match Projects while old peers keep working.
+        projectRef:
+          description.projectIdentityKey ??
+          references.referenceFor(projectAliasKey(description.projectKey)),
         name: description.projectName,
         worktrees: [worktree]
       })

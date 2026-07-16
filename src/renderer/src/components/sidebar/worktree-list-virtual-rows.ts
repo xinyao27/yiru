@@ -11,6 +11,7 @@ const PENDING_CREATION_ROW_HEIGHT = 56
 const FOLDER_WORKSPACE_ROW_HEIGHT = 64
 
 type WorktreeItemRow = Extract<HostSectionRow, { type: 'item' }>
+type StickySectionRow = { type: string; projectGroupDepth?: number }
 export type RenderRow =
   | HostSectionRow
   | { type: 'lineage-group'; key: string; rows: WorktreeItemRow[] }
@@ -101,7 +102,7 @@ export function pruneStaleVirtualRowElementCache<TElement extends Element>({
   }
 }
 
-export function getStickyHeaderIndexes(rows: readonly RenderRow[]): number[] {
+export function getStickyHeaderIndexes(rows: readonly StickySectionRow[]): number[] {
   const indexes: number[] = []
   rows.forEach((row, index) => {
     // Why: project groups are the top-level repo sidebar context; nested repo
@@ -128,7 +129,10 @@ export type ActiveStickyIndexes = {
   groupIndex: number | null
 }
 
-function getHostStickyIndexes(rows: readonly RenderRow[], sticky: readonly number[]): number[] {
+function getHostStickyIndexes(
+  rows: readonly StickySectionRow[],
+  sticky: readonly number[]
+): number[] {
   return sticky.filter((index) => rows[index]?.type === 'host-header')
 }
 
@@ -136,7 +140,7 @@ function getHostStickyIndexes(rows: readonly RenderRow[], sticky: readonly numbe
  *  it stays pinned for the whole section while group headers hand off beneath
  *  it. Without host sections this degrades to the original single-tier rules. */
 export function getActiveStickyIndexesForScroll(args: {
-  rows: readonly RenderRow[]
+  rows: readonly StickySectionRow[]
   rangeStartIndex: number
   scrollOffset: number
   stickyHeaderIndexes: readonly number[]
@@ -224,7 +228,7 @@ export function getPreviousStickyHeaderIndex(
 export function extractWorktreeVirtualRowIndexes(args: {
   range: Range
   stickyHeaderIndexes: readonly number[]
-  rows?: readonly RenderRow[]
+  rows?: readonly StickySectionRow[]
 }): number[] {
   const activeStickyHeaderIndex = getActiveStickyHeaderIndex(
     args.stickyHeaderIndexes,

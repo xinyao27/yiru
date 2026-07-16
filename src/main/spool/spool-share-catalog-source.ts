@@ -10,6 +10,7 @@ export type SpoolCatalogSessionDescription = {
 export type SpoolCatalogWorktreeDescription = {
   kind: SpoolWorktreeKind
   projectKey: string
+  projectIdentityKey: string | null
   projectName: string
   worktreeName: string
   branch: string | null

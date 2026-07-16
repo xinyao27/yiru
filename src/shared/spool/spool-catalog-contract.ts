@@ -7,6 +7,19 @@ export const SPOOL_CATALOG_MAX_WORKTREES = 128
 // not a completeness cap for a Public worktree.
 export const SPOOL_CATALOG_MAX_SESSIONS_PER_WORKTREE = 512
 
+export function isSpoolProjectIdentityKey(value: unknown): value is string {
+  if (typeof value !== 'string' || value.length === 0 || value.length > 2048) {
+    return false
+  }
+  if (!value.startsWith('github:') && !value.startsWith('git:')) {
+    return false
+  }
+  return !Array.from(value).some((character) => {
+    const code = character.charCodeAt(0)
+    return code <= 0x1f || code === 0x7f
+  })
+}
+
 export type SpoolProviderQuotaWindow = {
   usedPercent: number
   resetsAt: number | null

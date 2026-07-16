@@ -1,5 +1,9 @@
 import type { Store } from '../persistence'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import {
+  getPortableProjectIdentityKey,
+  getProjectIdentityKey
+} from '../../shared/project-host-setup-projection'
 import type {
   SpoolCatalogWorktreeDescription,
   SpoolShareCatalogSource
@@ -35,9 +39,13 @@ export class SpoolOwnerShareSource implements SpoolShareCatalogSource {
     const project = instance.projectId
       ? this.store.getProjects().find((entry) => entry.id === instance.projectId)
       : null
+    const repoIdentityKey = getProjectIdentityKey(repo)
     return {
       kind: instance.ownerWorktree.kind,
       projectKey: project ? `project:${project.id}` : `repo:${repo.id}`,
+      projectIdentityKey:
+        (project ? getPortableProjectIdentityKey(project) : null) ??
+        (repoIdentityKey.startsWith('repo:') ? null : repoIdentityKey),
       projectName: project?.displayName ?? repo.displayName,
       worktreeName: worktree.displayName,
       branch: worktree.branch || null

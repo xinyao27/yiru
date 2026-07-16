@@ -4,6 +4,7 @@ import type {
   SpoolSessionCatalogEntry,
   SpoolWorktreeCatalogEntry
 } from '../../../../shared/spool/spool-catalog-contract'
+import { isSpoolProjectIdentityKey } from '../../../../shared/spool/spool-catalog-contract'
 import type {
   SpoolExpandedRefsByDesktop,
   SpoolWorkspaceRoute
@@ -31,6 +32,7 @@ export type SpoolWorktreeSidebarRow = {
   desktopRef: string
   connectionEpoch: number
   projectRef: string
+  projectIdentityKey: string | null
   worktreeRef: string
   shareEpoch: string
   desktop: SpoolRemoteDesktopSidebarContext
@@ -132,6 +134,9 @@ export function projectSpoolSidebarRows(input: SpoolSidebarProjectionInput): Spo
           desktopRef: desktop.desktopRef,
           connectionEpoch: desktop.connectionEpoch,
           projectRef: project.projectRef,
+          projectIdentityKey: isSpoolProjectIdentityKey(project.projectRef)
+            ? project.projectRef
+            : null,
           worktreeRef: worktree.worktreeRef,
           shareEpoch: worktree.shareEpoch,
           desktop: sidebarDesktop,
