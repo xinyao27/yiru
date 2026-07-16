@@ -102,19 +102,21 @@ export default function NewExternalWorktreesInboxLine({
           </span>
           {onSuppress ? (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  disabled={pending}
-                  aria-label={suppressAriaLabel}
-                  onClick={onSuppress}
-                  className="absolute inset-0 text-muted-foreground hover:bg-worktree-sidebar-accent hover:text-worktree-sidebar-accent-foreground can-hover:pointer-events-none can-hover:opacity-0 can-hover:group-hover:pointer-events-auto can-hover:group-hover:opacity-100 can-hover:group-focus-within:pointer-events-auto can-hover:group-focus-within:opacity-100"
-                >
-                  <X className="size-3" aria-hidden="true" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    disabled={pending}
+                    aria-label={suppressAriaLabel}
+                    onClick={onSuppress}
+                    className="absolute inset-0 text-muted-foreground hover:bg-worktree-sidebar-accent hover:text-worktree-sidebar-accent-foreground can-hover:pointer-events-none can-hover:opacity-0 can-hover:group-hover:pointer-events-auto can-hover:group-hover:opacity-100 can-hover:group-focus-within:pointer-events-auto can-hover:group-focus-within:opacity-100"
+                  >
+                    <X className="size-3" aria-hidden="true" />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {suppressLabel}
               </TooltipContent>

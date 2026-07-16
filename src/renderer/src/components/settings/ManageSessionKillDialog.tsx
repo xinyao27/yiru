@@ -27,32 +27,20 @@ export function ManageSessionKillDialog({
   return (
     <Dialog
       open={session !== null}
-      onOpenChange={(open) => {
+      onOpenChange={(open, eventDetails) => {
         if (open) {
           return
         }
         // Why: destructive terminal mutations should keep their progress
         // dialog open until the daemon responds, matching other confirm flows.
         if (isBusy) {
+          eventDetails.cancel()
           return
         }
         onCancel()
       }}
     >
-      <DialogContent
-        className="max-w-md"
-        showCloseButton={!isBusy}
-        onPointerDownOutside={(event) => {
-          if (isBusy) {
-            event.preventDefault()
-          }
-        }}
-        onEscapeKeyDown={(event) => {
-          if (isBusy) {
-            event.preventDefault()
-          }
-        }}
-      >
+      <DialogContent className="max-w-md" showCloseButton={!isBusy}>
         {session ? (
           <>
             <DialogHeader>

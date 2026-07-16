@@ -112,19 +112,21 @@ export function SourceControlFixSplitButton({
             )}
             {label}
           </Button>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant={variant}
-              size={size}
-              className={cn('rounded-l-none border-l', dividerClass, chevronClassName)}
-              disabled={isLaunching || !canLaunch}
-              title={chevronTitle}
-              aria-label={chevronAriaLabel}
-            >
-              <ChevronDown className={iconClassName} />
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                type="button"
+                variant={variant}
+                size={size}
+                className={cn('rounded-l-none border-l', dividerClass, chevronClassName)}
+                disabled={isLaunching || !canLaunch}
+                title={chevronTitle}
+                aria-label={chevronAriaLabel}
+              >
+                <ChevronDown className={iconClassName} />
+              </Button>
+            }
+          />
         </div>
         <DropdownMenuContent align="end" className="min-w-[210px] p-1">
           {worktreeId && groupId && prompt && !disabledReason ? (

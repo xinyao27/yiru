@@ -8,7 +8,6 @@
 // simplified surface; it also routes every write through slug-addressed
 // mutation helpers and patches the Project table cache on success.
 import React from 'react'
-import { VisuallyHidden } from 'radix-ui'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import type { GitHubItemDialogProjectOrigin } from '@/components/GitHubItemDialog'
 import { SlugDialogBody } from './slug-dialog/SlugDialogBody'
@@ -34,24 +33,20 @@ export default function ProjectItemSlugDialog({
         side="right"
         showCloseButton={false}
         className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-[720px] lg:max-w-[860px]"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        initialFocus={false}
       >
-        <VisuallyHidden.Root asChild>
-          <SheetTitle>
-            {translate(
-              'auto.components.github.project.ProjectItemSlugDialog.4450efea9c',
-              'GitHub item'
-            )}
-          </SheetTitle>
-        </VisuallyHidden.Root>
-        <VisuallyHidden.Root asChild>
-          <SheetDescription>
-            {translate(
-              'auto.components.github.project.ProjectItemSlugDialog.e55a5c4e68',
-              'Project row preview.'
-            )}
-          </SheetDescription>
-        </VisuallyHidden.Root>
+        <SheetTitle className="sr-only">
+          {translate(
+            'auto.components.github.project.ProjectItemSlugDialog.4450efea9c',
+            'GitHub item'
+          )}
+        </SheetTitle>
+        <SheetDescription className="sr-only">
+          {translate(
+            'auto.components.github.project.ProjectItemSlugDialog.e55a5c4e68',
+            'Project row preview.'
+          )}
+        </SheetDescription>
         {projectOrigin ? (
           <SlugDialogBody
             projectOrigin={projectOrigin}

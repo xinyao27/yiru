@@ -39,24 +39,28 @@ export function SourceControlHeaderOverflowMenu({
   return (
     <DropdownMenu>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex shrink-0">
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                className="size-7 text-muted-foreground hover:text-foreground"
-                aria-label={translate(
-                  'auto.components.right.sidebar.SourceControl.f71c4a8d90',
-                  'More source control actions'
-                )}
-              >
-                <MoreHorizontal className="size-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-          </span>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <span className="inline-flex shrink-0">
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="size-7 text-muted-foreground hover:text-foreground"
+                    aria-label={translate(
+                      'auto.components.right.sidebar.SourceControl.f71c4a8d90',
+                      'More source control actions'
+                    )}
+                  >
+                    <MoreHorizontal className="size-3.5" />
+                  </Button>
+                }
+              />
+            </span>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {translate(
             'auto.components.right.sidebar.SourceControl.f71c4a8d90',

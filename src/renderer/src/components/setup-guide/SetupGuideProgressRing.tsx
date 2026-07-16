@@ -31,43 +31,45 @@ export function SetupGuideProgressRing({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span
-          className={cn(
-            'relative flex shrink-0 items-center justify-center text-muted-foreground',
-            sizeClassName,
-            className
-          )}
-          aria-label={translate(
-            'auto.components.setup.guide.SetupGuideProgressRing.dac3a4724a',
-            '{{value0}} of {{value1}} setup steps complete',
-            { value0: boundedDone, value1: boundedTotal }
-          )}
-        >
-          <svg className={cn('-rotate-90', sizeClassName)} viewBox="0 0 20 20" aria-hidden>
-            <circle
-              cx={center}
-              cy={center}
-              r={radius}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={strokeWidth}
-              className="opacity-25"
-            />
-            <circle
-              cx={center}
-              cy={center}
-              r={radius}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={strokeWidth}
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
-            />
-          </svg>
-        </span>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <span
+            className={cn(
+              'relative flex shrink-0 items-center justify-center text-muted-foreground',
+              sizeClassName,
+              className
+            )}
+            aria-label={translate(
+              'auto.components.setup.guide.SetupGuideProgressRing.dac3a4724a',
+              '{{value0}} of {{value1}} setup steps complete',
+              { value0: boundedDone, value1: boundedTotal }
+            )}
+          >
+            <svg className={cn('-rotate-90', sizeClassName)} viewBox="0 0 20 20" aria-hidden>
+              <circle
+                cx={center}
+                cy={center}
+                r={radius}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={strokeWidth}
+                className="opacity-25"
+              />
+              <circle
+                cx={center}
+                cy={center}
+                r={radius}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={strokeWidth}
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+              />
+            </svg>
+          </span>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {tooltipLabel ?? progressLabel}
       </TooltipContent>

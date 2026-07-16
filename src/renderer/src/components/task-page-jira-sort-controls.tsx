@@ -112,21 +112,23 @@ export function TaskPageJiraSortControls({
           </SelectContent>
         </Select>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label={toggleDirectionLabel}
-              onClick={() => onSort(orderBy)}
-            >
-              {direction === 'asc' ? (
-                <ArrowUp aria-hidden="true" className="size-3.5" />
-              ) : (
-                <ArrowDown aria-hidden="true" className="size-3.5" />
-              )}
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label={toggleDirectionLabel}
+                onClick={() => onSort(orderBy)}
+              >
+                {direction === 'asc' ? (
+                  <ArrowUp aria-hidden="true" className="size-3.5" />
+                ) : (
+                  <ArrowDown aria-hidden="true" className="size-3.5" />
+                )}
+              </Button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={6}>
             {toggleDirectionLabel}
           </TooltipContent>

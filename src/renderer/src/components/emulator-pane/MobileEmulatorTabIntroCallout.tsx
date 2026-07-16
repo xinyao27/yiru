@@ -47,21 +47,23 @@ export function MobileEmulatorTabIntroCallout(): React.JSX.Element {
           )}
         </Button>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              aria-label={translate(
-                'auto.components.emulator.pane.MobileEmulatorTabIntroCallout.1924982130',
-                'Dismiss'
-              )}
-              className="size-6 text-muted-foreground"
-              onClick={dismissIntro}
-            >
-              <X className="size-3" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                aria-label={translate(
+                  'auto.components.emulator.pane.MobileEmulatorTabIntroCallout.1924982130',
+                  'Dismiss'
+                )}
+                className="size-6 text-muted-foreground"
+                onClick={dismissIntro}
+              >
+                <X className="size-3" />
+              </Button>
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             {translate(
               'auto.components.emulator.pane.MobileEmulatorTabIntroCallout.1924982130',

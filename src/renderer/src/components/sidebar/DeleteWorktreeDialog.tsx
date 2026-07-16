@@ -352,18 +352,12 @@ const DeleteWorktreeDialog = React.memo(function DeleteWorktreeDialog() {
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         className="max-w-md"
-        onOpenAutoFocus={(event) => {
-          if (isMainWorktree) {
-            return
-          }
-          event.preventDefault()
-          // Why: this confirmation dialog exists specifically to guard a
-          // destructive action the user already chose from the context menu.
-          // Radix otherwise picks the first tabbable control, which can be the
-          // cancel/close affordance and breaks the expected "Delete, Enter"
-          // flow for quick keyboard confirmation.
-          confirmButtonRef.current?.focus()
-        }}
+        // Why: this confirmation dialog exists specifically to guard a
+        // destructive action the user already chose from the context menu.
+        // Base UI otherwise picks the first tabbable control, which can be the
+        // cancel/close affordance and breaks the expected "Delete, Enter"
+        // flow for quick keyboard confirmation. Main worktree keeps default focus.
+        initialFocus={isMainWorktree ? undefined : confirmButtonRef}
       >
         <DialogHeader>
           <DialogTitle className="text-sm">

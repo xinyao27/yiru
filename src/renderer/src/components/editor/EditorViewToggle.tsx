@@ -104,16 +104,16 @@ export default function EditorViewToggle({
   // control to repaint when the active language changes.
   useTranslation()
   return (
-    <TooltipProvider delayDuration={300}>
+    <TooltipProvider delay={300}>
       <ToggleGroup
-        type="single"
         size="sm"
         className="h-[23px] [&_[data-slot=toggle-group-item]]:h-[23px] [&_[data-slot=toggle-group-item]]:min-w-[24px] [&_[data-slot=toggle-group-item]]:px-2"
         variant="outline"
-        value={value}
+        value={[value]}
         onValueChange={(v) => {
-          if (v) {
-            onChange(v as EditorToggleValue)
+          const next = v[0]
+          if (next) {
+            onChange(next as EditorToggleValue)
           }
         }}
       >
@@ -130,15 +130,17 @@ export default function EditorViewToggle({
           const tooltipLabel = metadata.title ?? metadata.label
           return (
             <Tooltip key={viewMode}>
-              <TooltipTrigger asChild>
-                <ToggleGroupItem
-                  value={viewMode}
-                  aria-label={metadata.label}
-                  className="h-[23px] min-w-[24px] px-2 aria-[checked=true]:border-foreground/20 aria-[checked=true]:bg-foreground/10 aria-[checked=true]:text-foreground aria-[checked=true]:shadow-xs aria-[checked=true]:hover:bg-foreground/15 aria-[checked=true]:hover:text-foreground data-[state=on]:border-foreground/20 data-[state=on]:bg-foreground/10 data-[state=on]:text-foreground data-[state=on]:shadow-xs data-[state=on]:hover:bg-foreground/15 data-[state=on]:hover:text-foreground"
-                >
-                  <Icon className="size-3.5" />
-                </ToggleGroupItem>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <ToggleGroupItem
+                    value={viewMode}
+                    aria-label={metadata.label}
+                    className="h-[23px] min-w-[24px] px-2 aria-[checked=true]:border-foreground/20 aria-[checked=true]:bg-foreground/10 aria-[checked=true]:text-foreground aria-[checked=true]:shadow-xs aria-[checked=true]:hover:bg-foreground/15 aria-[checked=true]:hover:text-foreground data-[state=on]:border-foreground/20 data-[state=on]:bg-foreground/10 data-[state=on]:text-foreground data-[state=on]:shadow-xs data-[state=on]:hover:bg-foreground/15 data-[state=on]:hover:text-foreground"
+                  >
+                    <Icon className="size-3.5" />
+                  </ToggleGroupItem>
+                }
+              />
               <TooltipContent side="top" sideOffset={4}>
                 {tooltipLabel}
               </TooltipContent>

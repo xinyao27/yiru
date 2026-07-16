@@ -190,29 +190,31 @@ export default function LinearIssueAttributeFilterDropdowns({
           }
         }}
       >
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-7 gap-1.5 px-2 text-xs"
-            aria-label={translate(
-              'auto.components.linear-issue-attribute-filter-dropdowns.filters',
-              'Filters'
-            )}
-          >
-            <ListFilter className="size-3.5" />
-            {translate(
-              'auto.components.linear-issue-attribute-filter-dropdowns.filters',
-              'Filters'
-            )}
-            {activeCount > 0 ? (
-              <span className="rounded-full bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
-                {activeCount}
-              </span>
-            ) : null}
-          </Button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 gap-1.5 px-2 text-xs"
+              aria-label={translate(
+                'auto.components.linear-issue-attribute-filter-dropdowns.filters',
+                'Filters'
+              )}
+            >
+              <ListFilter className="size-3.5" />
+              {translate(
+                'auto.components.linear-issue-attribute-filter-dropdowns.filters',
+                'Filters'
+              )}
+              {activeCount > 0 ? (
+                <span className="rounded-full bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
+                  {activeCount}
+                </span>
+              ) : null}
+            </Button>
+          }
+        />
         <PopoverContent align="start" className="w-72 p-0">
           {isAllWorkspaces ? (
             <div className="space-y-2 p-3 text-xs">

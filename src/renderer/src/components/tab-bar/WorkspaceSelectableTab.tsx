@@ -45,9 +45,9 @@ export function WorkspaceSelectableTab({
           {icon}
         </span>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1 text-left`}>{title}</span>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={<span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1 text-left`}>{title}</span>}
+          />
           <TooltipContent
             side="bottom"
             sideOffset={6}

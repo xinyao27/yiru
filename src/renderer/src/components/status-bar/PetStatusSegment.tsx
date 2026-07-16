@@ -113,22 +113,24 @@ function PetStatusSegmentInner(): React.JSX.Element {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="group inline-flex items-center cursor-pointer pl-1 pr-[6.5rem] py-0.5"
-          aria-label={translate(
-            'auto.components.status.bar.PetStatusSegment.aec479308a',
-            'Pet menu'
-          )}
-        >
-          <span
-            className={`rounded px-1 py-0.5 text-[11px] font-medium text-muted-foreground group-hover:bg-accent/70 group-hover:text-foreground ${petVisible ? '' : 'opacity-50'}`}
+      <DropdownMenuTrigger
+        render={
+          <button
+            type="button"
+            className="group inline-flex items-center cursor-pointer pl-1 pr-[6.5rem] py-0.5"
+            aria-label={translate(
+              'auto.components.status.bar.PetStatusSegment.aec479308a',
+              'Pet menu'
+            )}
           >
-            {label}
-          </span>
-        </button>
-      </DropdownMenuTrigger>
+            <span
+              className={`rounded px-1 py-0.5 text-[11px] font-medium text-muted-foreground group-hover:bg-accent/70 group-hover:text-foreground ${petVisible ? '' : 'opacity-50'}`}
+            >
+              {label}
+            </span>
+          </button>
+        }
+      />
       <DropdownMenuContent side="top" align="end" sideOffset={8} className="min-w-[220px]">
         <DropdownMenuLabel>
           {translate('auto.components.status.bar.PetStatusSegment.34c25dfe9c', 'Pet')}

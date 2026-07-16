@@ -61,7 +61,7 @@ export function EmulatorPaneToolbar({
       <div className="flex-1" />
       <Select
         value={selectedUdid ?? ''}
-        onValueChange={onSelectDevice}
+        onValueChange={(value) => value && onSelectDevice(value)}
         disabled={loading || devices.length === 0}
       >
         <SelectTrigger className="h-7 w-[180px] text-xs">
@@ -72,7 +72,7 @@ export function EmulatorPaneToolbar({
             )}
           />
         </SelectTrigger>
-        <SelectContent position="popper" side="bottom" align="start" sideOffset={4}>
+        <SelectContent alignItemWithTrigger={false} align="start" sideOffset={4}>
           {devices.map((d) => (
             <SelectItem key={d.udid} value={d.udid} className="text-xs">
               {d.name}
@@ -81,71 +81,77 @@ export function EmulatorPaneToolbar({
         </SelectContent>
       </Select>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="h-7 gap-1 px-2 text-xs"
-            onClick={onRotate}
-            disabled={!isLive || loading}
-            aria-label={translate(
-              'auto.components.emulator.pane.emulator.pane.toolbar.6bd8dff42a',
-              'Rotate'
-            )}
-          >
-            <RotateCw className="size-3.5" />
-            <span className="hidden sm:inline">
-              {translate(
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="h-7 gap-1 px-2 text-xs"
+              onClick={onRotate}
+              disabled={!isLive || loading}
+              aria-label={translate(
                 'auto.components.emulator.pane.emulator.pane.toolbar.6bd8dff42a',
                 'Rotate'
               )}
-            </span>
-          </Button>
-        </TooltipTrigger>
+            >
+              <RotateCw className="size-3.5" />
+              <span className="hidden sm:inline">
+                {translate(
+                  'auto.components.emulator.pane.emulator.pane.toolbar.6bd8dff42a',
+                  'Rotate'
+                )}
+              </span>
+            </Button>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={4}>
           {translate('auto.components.emulator.pane.emulator.pane.toolbar.6bd8dff42a', 'Rotate')}
         </TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon-xs"
-            className="size-7"
-            onClick={onHome}
-            disabled={!isLive || loading}
-            aria-label={translate(
-              'auto.components.emulator.pane.emulator.pane.toolbar.e7a0d1897e',
-              'Home'
-            )}
-          >
-            <Home className="size-3.5" />
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon-xs"
+              className="size-7"
+              onClick={onHome}
+              disabled={!isLive || loading}
+              aria-label={translate(
+                'auto.components.emulator.pane.emulator.pane.toolbar.e7a0d1897e',
+                'Home'
+              )}
+            >
+              <Home className="size-3.5" />
+            </Button>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={4}>
           {translate('auto.components.emulator.pane.emulator.pane.toolbar.e7a0d1897e', 'Home')}
         </TooltipContent>
       </Tooltip>
       {isLive ? (
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-xs"
-              className="size-7 text-muted-foreground hover:text-destructive"
-              onClick={onShutdown}
-              disabled={loading}
-              aria-label={translate(
-                'auto.components.emulator.pane.emulator.pane.toolbar.06e10d7356',
-                'Shut down emulator'
-              )}
-            >
-              <Power className="size-3.5" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-xs"
+                className="size-7 text-muted-foreground hover:text-destructive"
+                onClick={onShutdown}
+                disabled={loading}
+                aria-label={translate(
+                  'auto.components.emulator.pane.emulator.pane.toolbar.06e10d7356',
+                  'Shut down emulator'
+                )}
+              >
+                <Power className="size-3.5" />
+              </Button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={4}>
             {translate(
               'auto.components.emulator.pane.emulator.pane.toolbar.06e10d7356',

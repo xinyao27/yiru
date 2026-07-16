@@ -82,10 +82,11 @@ export function ProjectGroupNameDialog({
       <DialogContent
         ref={handleDialogContentRef}
         className="max-w-sm sm:max-w-sm"
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
+        initialFocus={() => {
           inputRef.current?.focus()
           inputRef.current?.select()
+          // Why: return false so Base UI skips auto-focus; we focus+select the input.
+          return false
         }}
       >
         <DialogHeader>

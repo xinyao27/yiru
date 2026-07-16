@@ -93,19 +93,21 @@ export function RightSidebarFrame({
   )
   const closeButton = isOpen ? (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          className="sidebar-toggle mr-1"
-          onClick={onToggle}
-          aria-label={translate(
-            'auto.components.right.sidebar.index.e8e2e4ce74',
-            'Toggle right sidebar'
-          )}
-        >
-          <PanelRight size={16} />
-        </button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            className="sidebar-toggle mr-1"
+            onClick={onToggle}
+            aria-label={translate(
+              'auto.components.right.sidebar.index.e8e2e4ce74',
+              'Toggle right sidebar'
+            )}
+          >
+            <PanelRight size={16} />
+          </button>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={6}>
         {translate(
           'auto.components.right.sidebar.index.9fffaf17c1',
@@ -134,20 +136,22 @@ export function RightSidebarFrame({
             <div className="right-sidebar-header-inset right-sidebar-header-drag flex h-[36px] min-h-[36px] items-center overflow-hidden border-b border-border">
               {!hasDesktopWindowChrome ? (
                 <>
-                  <ContextMenuTrigger asChild>
-                    <div
-                      ref={topActivityStripRef}
-                      className={RIGHT_SIDEBAR_TOP_ACTIVITY_STRIP_CLASS_NAME}
-                    >
-                      <TopActivityItems
-                        activeTab={activeTab}
-                        checksStatus={checksStatus}
-                        containerNoDrag
-                        layout={topActivityLayout}
-                        onSelectTab={onSelectTab}
-                      />
-                    </div>
-                  </ContextMenuTrigger>
+                  <ContextMenuTrigger
+                    render={
+                      <div
+                        ref={topActivityStripRef}
+                        className={RIGHT_SIDEBAR_TOP_ACTIVITY_STRIP_CLASS_NAME}
+                      >
+                        <TopActivityItems
+                          activeTab={activeTab}
+                          checksStatus={checksStatus}
+                          containerNoDrag
+                          layout={topActivityLayout}
+                          onSelectTab={onSelectTab}
+                        />
+                      </div>
+                    }
+                  />
                   <div
                     className={cn(
                       'flex shrink-0 items-center pr-1',
@@ -169,20 +173,22 @@ export function RightSidebarFrame({
               )}
             </div>
             {hasDesktopWindowChrome ? (
-              <ContextMenuTrigger asChild>
-                <div
-                  ref={topActivityStripRef}
-                  className={RIGHT_SIDEBAR_WINDOWS_TOP_ACTIVITY_STRIP_CLASS_NAME}
-                >
-                  {/* Why: desktop controls own the titlebar; navigation moves below them. */}
-                  <TopActivityItems
-                    activeTab={activeTab}
-                    checksStatus={checksStatus}
-                    layout={topActivityLayout}
-                    onSelectTab={onSelectTab}
-                  />
-                </div>
-              </ContextMenuTrigger>
+              <ContextMenuTrigger
+                render={
+                  <div
+                    ref={topActivityStripRef}
+                    className={RIGHT_SIDEBAR_WINDOWS_TOP_ACTIVITY_STRIP_CLASS_NAME}
+                  >
+                    {/* Why: desktop controls own the titlebar; navigation moves below them. */}
+                    <TopActivityItems
+                      activeTab={activeTab}
+                      checksStatus={checksStatus}
+                      layout={topActivityLayout}
+                      onSelectTab={onSelectTab}
+                    />
+                  </div>
+                }
+              />
             ) : null}
             <ActivityBarPositionMenu
               currentPosition={activityBarPosition}
@@ -212,20 +218,22 @@ export function RightSidebarFrame({
 
       {activityBarPosition === 'side' ? (
         <ContextMenu>
-          <ContextMenuTrigger asChild>
-            <div className="side-activity-bar-windows-inset flex w-10 min-w-[40px] flex-col items-center border-l border-border bg-sidebar">
-              {items.map((item) => (
-                <ActivityBarButton
-                  key={item.id}
-                  item={item}
-                  active={activeTab === item.id}
-                  onClick={() => onSelectTab(item.id)}
-                  layout="side"
-                  statusIndicator={item.id === 'checks' ? checksStatus : null}
-                />
-              ))}
-            </div>
-          </ContextMenuTrigger>
+          <ContextMenuTrigger
+            render={
+              <div className="side-activity-bar-windows-inset flex w-10 min-w-[40px] flex-col items-center border-l border-border bg-sidebar">
+                {items.map((item) => (
+                  <ActivityBarButton
+                    key={item.id}
+                    item={item}
+                    active={activeTab === item.id}
+                    onClick={() => onSelectTab(item.id)}
+                    layout="side"
+                    statusIndicator={item.id === 'checks' ? checksStatus : null}
+                  />
+                ))}
+              </div>
+            }
+          />
           <ActivityBarPositionMenu
             currentPosition={activityBarPosition}
             onChangePosition={onActivityBarPositionChange}

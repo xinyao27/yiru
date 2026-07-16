@@ -101,20 +101,20 @@ export function TerminalAdvancedSection({
             control={
               <div className="flex flex-col items-end gap-2">
                 <ToggleGroup
-                  type="single"
-                  value={scrollbackToggleValue}
+                  value={[scrollbackToggleValue]}
                   onValueChange={(value) => {
-                    if (!value) {
+                    const next = value[0]
+                    if (!next) {
                       return
                     }
-                    if (value === 'custom') {
+                    if (next === 'custom') {
                       setScrollbackMode('custom')
                       return
                     }
 
                     setScrollbackMode('preset')
                     updateSettings({
-                      terminalScrollbackRows: normalizeDesktopTerminalScrollbackRows(Number(value))
+                      terminalScrollbackRows: normalizeDesktopTerminalScrollbackRows(Number(next))
                     })
                   }}
                   variant="outline"

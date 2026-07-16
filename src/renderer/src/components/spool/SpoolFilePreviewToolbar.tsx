@@ -87,21 +87,25 @@ export function SpoolFilePreviewToolbar({
         ) : null}
         <DropdownMenu>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  size="icon-xs"
-                  variant="ghost"
-                  aria-label={translate(
-                    'auto.components.spool.SpoolFilePreview.fileActions',
-                    'File actions'
-                  )}
-                >
-                  <MoreHorizontal aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      type="button"
+                      size="icon-xs"
+                      variant="ghost"
+                      aria-label={translate(
+                        'auto.components.spool.SpoolFilePreview.fileActions',
+                        'File actions'
+                      )}
+                    >
+                      <MoreHorizontal aria-hidden="true" />
+                    </Button>
+                  }
+                />
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {translate('auto.components.spool.SpoolFilePreview.fileActions', 'File actions')}
             </TooltipContent>

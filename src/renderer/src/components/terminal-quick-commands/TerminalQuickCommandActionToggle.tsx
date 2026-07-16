@@ -14,11 +14,11 @@ export function TerminalQuickCommandActionToggle({
 }: TerminalQuickCommandActionToggleProps): React.JSX.Element {
   return (
     <ToggleGroup
-      type="single"
-      value={selectedAction}
+      value={[selectedAction]}
       onValueChange={(value) => {
-        if (value === 'terminal-command' || value === 'agent-prompt') {
-          onActionChange(value)
+        const next = value[0]
+        if (next === 'terminal-command' || next === 'agent-prompt') {
+          onActionChange(next)
         }
       }}
       className="justify-start"

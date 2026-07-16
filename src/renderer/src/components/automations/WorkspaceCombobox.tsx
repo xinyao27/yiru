@@ -66,30 +66,35 @@ export function WorkspaceCombobox({
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn('h-9 w-full justify-between px-3 text-sm font-normal', triggerClassName)}
-        >
-          <span className={cn('truncate', !selected && 'text-muted-foreground')}>
-            {selected?.displayName ??
-              translate(
-                'auto.components.automations.WorkspaceCombobox.66a0cd9628',
-                'Select workspace'
-              )}
-          </span>
-          <ChevronsUpDown className="size-4 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn('h-9 w-full justify-between px-3 text-sm font-normal', triggerClassName)}
+          >
+            <span className={cn('truncate', !selected && 'text-muted-foreground')}>
+              {selected?.displayName ??
+                translate(
+                  'auto.components.automations.WorkspaceCombobox.66a0cd9628',
+                  'Select workspace'
+                )}
+            </span>
+            <ChevronsUpDown className="size-4 opacity-50" />
+          </Button>
+        }
+      />
       <PopoverContent
         align="start"
         className="w-[var(--radix-popover-trigger-width)] min-w-[18rem] p-0"
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
+        // Why: return false suppresses Base UI's default popup focus so our
+        // custom focus of the search input runs instead — mirrors the old
+        // onOpenAutoFocus preventDefault + focusSearchInput.
+        initialFocus={() => {
           focusSearchInput()
+          return false
         }}
       >
         <Command>

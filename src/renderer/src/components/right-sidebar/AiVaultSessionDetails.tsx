@@ -272,11 +272,13 @@ function WorktreePathHint({
 }): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <div className="min-w-0 truncate font-mono text-[11px] leading-4 text-muted-foreground">
-          {compactPath}
-        </div>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <div className="min-w-0 truncate font-mono text-[11px] leading-4 text-muted-foreground">
+            {compactPath}
+          </div>
+        }
+      />
       <TooltipContent side="top" sideOffset={4} className="max-w-sm break-all font-mono text-xs">
         {fullPath}
       </TooltipContent>

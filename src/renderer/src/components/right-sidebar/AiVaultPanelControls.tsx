@@ -126,11 +126,11 @@ export function VaultScopeSwitch({
 
   return (
     <ToggleGroup
-      type="single"
-      value={scope}
+      value={[scope]}
       onValueChange={(value) => {
-        if (value === 'workspace' || value === 'project' || value === 'all') {
-          onScopeChange(value)
+        const next = value[0]
+        if (next === 'workspace' || next === 'project' || next === 'all') {
+          onScopeChange(next)
         }
       }}
       variant="outline"
@@ -192,22 +192,24 @@ export function VaultHostScopeMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="h-6 max-w-24 shrink-0 gap-1 px-1.5 text-[11px] font-medium text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground @max-[340px]/ai-vault:w-6 @max-[340px]/ai-vault:px-0"
-          aria-label={translate(
-            'auto.components.right.sidebar.AiVaultPanelControls.hostScopeAriaLabel',
-            'Session History host: {{value0}}',
-            { value0: label }
-          )}
-        >
-          <Server className="size-3 shrink-0" />
-          <span className="min-w-0 truncate @max-[340px]/ai-vault:hidden">{label}</span>
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-6 max-w-24 shrink-0 gap-1 px-1.5 text-[11px] font-medium text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground @max-[340px]/ai-vault:w-6 @max-[340px]/ai-vault:px-0"
+            aria-label={translate(
+              'auto.components.right.sidebar.AiVaultPanelControls.hostScopeAriaLabel',
+              'Session History host: {{value0}}',
+              { value0: label }
+            )}
+          >
+            <Server className="size-3 shrink-0" />
+            <span className="min-w-0 truncate @max-[340px]/ai-vault:hidden">{label}</span>
+          </Button>
+        }
+      />
       <DropdownMenuContent align="end" sideOffset={6} className="w-44">
         <DropdownMenuLabel>
           {translate('auto.components.right.sidebar.AiVaultPanelControls.host', 'Host')}
@@ -252,37 +254,39 @@ export function VaultViewMenu({
 }): React.JSX.Element {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          className={cn(
-            VAULT_HEADER_CONTROL_CLASS,
-            'relative text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-          )}
-          aria-label={translate(
-            'auto.components.right.sidebar.AiVaultPanelControls.viewOptionsAriaLabel',
-            'Session History view options'
-          )}
-        >
-          <ListFilter className="size-3" />
-          <span className="sr-only">
-            {translate(
-              'auto.components.right.sidebar.AiVaultPanelControls.viewOptions',
-              'View options'
+      <DropdownMenuTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className={cn(
+              VAULT_HEADER_CONTROL_CLASS,
+              'relative text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
             )}
-          </span>
-          {adjustmentCount > 0 ? (
-            <span
-              aria-hidden
-              className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-medium leading-none text-primary-foreground"
-            >
-              {adjustmentCount}
+            aria-label={translate(
+              'auto.components.right.sidebar.AiVaultPanelControls.viewOptionsAriaLabel',
+              'Session History view options'
+            )}
+          >
+            <ListFilter className="size-3" />
+            <span className="sr-only">
+              {translate(
+                'auto.components.right.sidebar.AiVaultPanelControls.viewOptions',
+                'View options'
+              )}
             </span>
-          ) : null}
-        </Button>
-      </DropdownMenuTrigger>
+            {adjustmentCount > 0 ? (
+              <span
+                aria-hidden
+                className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-medium leading-none text-primary-foreground"
+              >
+                {adjustmentCount}
+              </span>
+            ) : null}
+          </Button>
+        }
+      />
       <DropdownMenuContent align="end" sideOffset={6} className="w-56">
         <DropdownMenuLabel>
           {translate('auto.components.right.sidebar.AiVaultPanelControls.agents', 'Agents')}

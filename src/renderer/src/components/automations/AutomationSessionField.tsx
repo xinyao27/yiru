@@ -23,18 +23,20 @@ export function AutomationSessionField({
         <span className="inline-flex items-center gap-1">
           {translate('auto.components.automations.AutomationSessionField.5ad314118e', 'Session')}
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                aria-label={translate(
-                  'auto.components.automations.AutomationSessionField.4bdce31f37',
-                  'Session reuse help'
-                )}
-                className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              >
-                <Info className="size-3.5" />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label={translate(
+                    'auto.components.automations.AutomationSessionField.4bdce31f37',
+                    'Session reuse help'
+                  )}
+                  className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  <Info className="size-3.5" />
+                </button>
+              }
+            />
             <TooltipContent side="top" sideOffset={6} className="max-w-72">
               {translate(
                 'auto.components.automations.AutomationSessionField.b675112193',
@@ -46,9 +48,8 @@ export function AutomationSessionField({
       }
     >
       <ToggleGroup
-        type="single"
-        value={draft.workspaceMode === 'existing' && draft.reuseSession ? 'reuse' : 'fresh'}
-        onValueChange={(value) => {
+        value={[draft.workspaceMode === 'existing' && draft.reuseSession ? 'reuse' : 'fresh']}
+        onValueChange={([value]) => {
           if (!value) {
             return
           }

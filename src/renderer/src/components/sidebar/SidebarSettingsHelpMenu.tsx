@@ -174,21 +174,23 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
     <>
       <div className="flex items-center gap-1">
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              type="button"
-              aria-label={translate(
-                'auto.components.sidebar.SidebarSettingsHelpMenu.a428c25998',
-                'Settings'
-              )}
-              className="text-muted-foreground"
-              onClick={openSettingsPage}
-            >
-              <Settings className="size-3.5" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                type="button"
+                aria-label={translate(
+                  'auto.components.sidebar.SidebarSettingsHelpMenu.a428c25998',
+                  'Settings'
+                )}
+                className="text-muted-foreground"
+                onClick={openSettingsPage}
+              >
+                <Settings className="size-3.5" />
+              </Button>
+            }
+          />
           <TooltipContent side="top" sideOffset={4} className="flex items-center gap-1.5">
             {translate('auto.components.sidebar.SidebarSettingsHelpMenu.a428c25998', 'Settings')}
             {settingsShortcut.keys.length > 0 ? (
@@ -204,24 +206,28 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
         </Tooltip>
         <DropdownMenu modal={false} open={menuOpen} onOpenChange={handleMenuOpenChange}>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  type="button"
-                  aria-label={translate(
-                    'auto.components.sidebar.SidebarSettingsHelpMenu.2991a0106c',
-                    'Help'
-                  )}
-                  className="text-muted-foreground"
-                  onPointerDown={(event) => revealAdminOptions(event.altKey)}
-                  onClick={(event) => revealAdminOptions(event.altKey)}
-                >
-                  <CircleHelp className="size-3.5" />
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      type="button"
+                      aria-label={translate(
+                        'auto.components.sidebar.SidebarSettingsHelpMenu.2991a0106c',
+                        'Help'
+                      )}
+                      className="text-muted-foreground"
+                      onPointerDown={(event) => revealAdminOptions(event.altKey)}
+                      onClick={(event) => revealAdminOptions(event.altKey)}
+                    >
+                      <CircleHelp className="size-3.5" />
+                    </Button>
+                  }
+                />
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {translate('auto.components.sidebar.SidebarSettingsHelpMenu.2991a0106c', 'Help')}
             </TooltipContent>

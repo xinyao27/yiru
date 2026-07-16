@@ -137,7 +137,7 @@ export default function WorkspaceKanbanStatusLane({
           </div>
         </div>
         <Tooltip>
-          <TooltipTrigger asChild>{createButton}</TooltipTrigger>
+          <TooltipTrigger render={createButton} />
           <TooltipContent side="bottom" sideOffset={6}>
             {createTooltip}
           </TooltipContent>
@@ -176,22 +176,24 @@ export default function WorkspaceKanbanStatusLane({
           </div>
         )}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="secondary"
-              size="xs"
-              className={cn(
-                'mt-2 h-7 w-full can-hover:opacity-0 transition-opacity',
-                'group-hover/lane:opacity-100 group-focus-within/lane:opacity-100'
-              )}
-              aria-label={createTooltip}
-              disabled={!canCreateWorktree}
-              onClick={() => onCreateWorktree(status.id)}
-            >
-              <Plus className="size-3.5" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="secondary"
+                size="xs"
+                className={cn(
+                  'mt-2 h-7 w-full can-hover:opacity-0 transition-opacity',
+                  'group-hover/lane:opacity-100 group-focus-within/lane:opacity-100'
+                )}
+                aria-label={createTooltip}
+                disabled={!canCreateWorktree}
+                onClick={() => onCreateWorktree(status.id)}
+              >
+                <Plus className="size-3.5" />
+              </Button>
+            }
+          />
           <TooltipContent side="top" sideOffset={6}>
             {createTooltip}
           </TooltipContent>

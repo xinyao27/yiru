@@ -141,23 +141,25 @@ export function BrowserUseCookieImportStep({
             }
           }}
         >
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant={cookiesImported ? 'outline' : 'default'}
-              size="sm"
-              disabled={isImportingDefault}
-              className="gap-1.5"
-            >
-              {isImportingDefault ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <Import className="size-3.5" />
-              )}
-              {cookiesImported
-                ? translate('auto.components.settings.BrowserUsePane.0462565413', 'Re-import')
-                : translate('auto.components.settings.BrowserUsePane.2ccfc9cff8', 'Import')}
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant={cookiesImported ? 'outline' : 'default'}
+                size="sm"
+                disabled={isImportingDefault}
+                className="gap-1.5"
+              >
+                {isImportingDefault ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Import className="size-3.5" />
+                )}
+                {cookiesImported
+                  ? translate('auto.components.settings.BrowserUsePane.0462565413', 'Re-import')
+                  : translate('auto.components.settings.BrowserUsePane.2ccfc9cff8', 'Import')}
+              </Button>
+            }
+          />
           <DropdownMenuContent align="end">
             {detectedBrowsers.map((browser) =>
               browser.profiles.length > 1 ? (

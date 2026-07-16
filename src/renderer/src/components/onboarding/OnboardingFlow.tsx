@@ -173,7 +173,7 @@ export default function OnboardingFlow({
   }, [requestSkipConfirmation, skipConfirmOpen])
 
   return (
-    <TooltipProvider delayDuration={0} skipDelayDuration={0}>
+    <TooltipProvider delay={0} timeout={0}>
       <div
         className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-black/50 p-4 text-foreground backdrop-blur-[2px]"
         data-onboarding-overlay
@@ -222,28 +222,30 @@ export default function OnboardingFlow({
                 const isDone = realStepIndex < stepIndex
                 return (
                   <Tooltip key={step.id}>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className={cn(
-                          // Why: the visible bars stay 4px tall, but the invisible
-                          // hit area makes hover/click/tooltip targeting reliable.
-                          'relative h-1 rounded-full outline-none transition-all duration-300 before:absolute before:-inset-y-2 before:-inset-x-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card',
-                          isActive
-                            ? 'w-10 bg-foreground'
-                            : isDone
-                              ? 'w-6 bg-muted-foreground/70 hover:bg-foreground/80'
-                              : 'w-6 bg-muted-foreground/25 hover:bg-muted-foreground/45'
-                        )}
-                        aria-label={translate(
-                          'auto.components.onboarding.OnboardingFlow.adaa0aa627',
-                          'Go to onboarding step {{value0}}: {{value1}}',
-                          { value0: progressIdx + 1, value1: stepTooltipLabels[step.id] }
-                        )}
-                        aria-current={isActive ? 'step' : undefined}
-                        onClick={() => flow.jumpToStep(realStepIndex)}
-                      />
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <button
+                          type="button"
+                          className={cn(
+                            // Why: the visible bars stay 4px tall, but the invisible
+                            // hit area makes hover/click/tooltip targeting reliable.
+                            'relative h-1 rounded-full outline-none transition-all duration-300 before:absolute before:-inset-y-2 before:-inset-x-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card',
+                            isActive
+                              ? 'w-10 bg-foreground'
+                              : isDone
+                                ? 'w-6 bg-muted-foreground/70 hover:bg-foreground/80'
+                                : 'w-6 bg-muted-foreground/25 hover:bg-muted-foreground/45'
+                          )}
+                          aria-label={translate(
+                            'auto.components.onboarding.OnboardingFlow.adaa0aa627',
+                            'Go to onboarding step {{value0}}: {{value1}}',
+                            { value0: progressIdx + 1, value1: stepTooltipLabels[step.id] }
+                          )}
+                          aria-current={isActive ? 'step' : undefined}
+                          onClick={() => flow.jumpToStep(realStepIndex)}
+                        />
+                      }
+                    />
                     <TooltipContent side="top" sideOffset={8} style={{ zIndex: 110 }}>
                       {stepTooltipLabels[step.id]}
                     </TooltipContent>

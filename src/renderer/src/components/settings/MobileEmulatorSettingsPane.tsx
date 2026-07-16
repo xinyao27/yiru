@@ -274,13 +274,13 @@ export function MobileEmulatorSettingsPane({
               <SelectTrigger size="sm" className="w-56 max-w-full">
                 <SelectValue placeholder={AUTOMATIC_DEVICE_LABEL} />
               </SelectTrigger>
-              <SelectContent position="popper" align="end">
+              <SelectContent alignItemWithTrigger={false} align="end">
                 <SelectItem value={AUTOMATIC_DEVICE_VALUE}>{AUTOMATIC_DEVICE_LABEL}</SelectItem>
                 {devices.map((device) => (
                   <SelectItem
                     key={device.udid}
                     value={device.udid}
-                    textValue={deviceLabel(device)}
+                    label={deviceLabel(device)}
                     disabled={device.isAvailable === false}
                   >
                     <DeviceSelectItemLabel device={device} />

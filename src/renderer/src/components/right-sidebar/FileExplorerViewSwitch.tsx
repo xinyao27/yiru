@@ -45,11 +45,11 @@ export function FileExplorerViewSwitch({
 
   return (
     <ToggleGroup
-      type="single"
-      value={view}
+      value={[view]}
       onValueChange={(value) => {
-        if (value === 'files' || value === 'search') {
-          onSelectView(value)
+        const next = value[0]
+        if (next === 'files' || next === 'search') {
+          onSelectView(next)
         }
       }}
       aria-label={translate(

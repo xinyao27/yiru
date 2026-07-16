@@ -55,26 +55,28 @@ export function AddRepoHostSelector({
         {translate('auto.components.sidebar.AddRepoHostSelector.host', 'Host')}
       </span>
       <Popover open={open} onOpenChange={onOpenChange}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            role="combobox"
-            aria-expanded={open}
-            className="h-7 min-w-0 max-w-[18rem] gap-1.5 rounded-md border border-border bg-muted/30 px-2 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
-          >
-            <span className="min-w-0 truncate">{selectedHost.label}</span>
-            {selectedHost.health !== 'local' ? (
-              <span
-                title={getHostStatusDetail(selectedHost)}
-                className="shrink-0 text-[11px] font-normal text-muted-foreground"
-              >
-                {getSidebarHostHealthLabel(selectedHost.health)}
-              </span>
-            ) : null}
-            <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              role="combobox"
+              aria-expanded={open}
+              className="h-7 min-w-0 max-w-[18rem] gap-1.5 rounded-md border border-border bg-muted/30 px-2 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
+            >
+              <span className="min-w-0 truncate">{selectedHost.label}</span>
+              {selectedHost.health !== 'local' ? (
+                <span
+                  title={getHostStatusDetail(selectedHost)}
+                  className="shrink-0 text-[11px] font-normal text-muted-foreground"
+                >
+                  {getSidebarHostHealthLabel(selectedHost.health)}
+                </span>
+              ) : null}
+              <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
+            </Button>
+          }
+        />
         <PopoverContent
           align="start"
           className="w-[min(340px,calc(100vw-1rem))] min-w-[var(--radix-popover-trigger-width)] p-0"
@@ -83,32 +85,34 @@ export function AddRepoHostSelector({
             <CommandList>
               {showHostSetupActions ? (
                 <Popover open={addHostOpen} onOpenChange={setAddHostOpen}>
-                  <PopoverTrigger asChild>
-                    <CommandItem
-                      value="Add remote host SSH host Orca server"
-                      onSelect={() => setAddHostOpen(true)}
-                      className="items-start gap-2 px-3 py-2 text-xs text-muted-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
-                    >
-                      <Plus className="mt-0.5 size-3 shrink-0" />
-                      <span className="min-w-0 flex-1">
-                        <span className="flex min-w-0 items-center gap-2">
-                          <span className="truncate font-medium">
+                  <PopoverTrigger
+                    render={
+                      <CommandItem
+                        value="Add remote host SSH host Orca server"
+                        onSelect={() => setAddHostOpen(true)}
+                        className="items-start gap-2 px-3 py-2 text-xs text-muted-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
+                      >
+                        <Plus className="mt-0.5 size-3 shrink-0" />
+                        <span className="min-w-0 flex-1">
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span className="truncate font-medium">
+                              {translate(
+                                'auto.components.sidebar.AddRepoHostSelector.addRemoteHost',
+                                'Add remote host'
+                              )}
+                            </span>
+                          </span>
+                          <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
                             {translate(
-                              'auto.components.sidebar.AddRepoHostSelector.addRemoteHost',
-                              'Add remote host'
+                              'auto.components.sidebar.AddRepoHostSelector.addRemoteHostDetail',
+                              'SSH host or Orca server'
                             )}
                           </span>
                         </span>
-                        <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
-                          {translate(
-                            'auto.components.sidebar.AddRepoHostSelector.addRemoteHostDetail',
-                            'SSH host or Orca server'
-                          )}
-                        </span>
-                      </span>
-                      <ChevronRight className="mt-0.5 size-3.5 shrink-0" />
-                    </CommandItem>
-                  </PopoverTrigger>
+                        <ChevronRight className="mt-0.5 size-3.5 shrink-0" />
+                      </CommandItem>
+                    }
+                  />
                   <PopoverContent align="start" side="right" className="w-72 p-1" sideOffset={8}>
                     {onAddSshHost ? (
                       <button

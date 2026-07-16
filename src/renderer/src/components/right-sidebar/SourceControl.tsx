@@ -5643,25 +5643,27 @@ function SourceControlInner(): React.JSX.Element {
                   triggerClassName="size-6"
                 />
                 {diffCommentCount > 0 && (
-                  <TooltipProvider delayDuration={400}>
+                  <TooltipProvider delay={400}>
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          className="inline-flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                          onClick={() => void handleCopyDiffComments()}
-                          aria-label={translate(
-                            'auto.components.right.sidebar.SourceControl.3baf6c77b4',
-                            'Copy all notes to clipboard'
-                          )}
-                        >
-                          {diffCommentsCopied ? (
-                            <Check className="size-3.5" />
-                          ) : (
-                            <Copy className="size-3.5" />
-                          )}
-                        </button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <button
+                            type="button"
+                            className="inline-flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                            onClick={() => void handleCopyDiffComments()}
+                            aria-label={translate(
+                              'auto.components.right.sidebar.SourceControl.3baf6c77b4',
+                              'Copy all notes to clipboard'
+                            )}
+                          >
+                            {diffCommentsCopied ? (
+                              <Check className="size-3.5" />
+                            ) : (
+                              <Copy className="size-3.5" />
+                            )}
+                          </button>
+                        }
+                      />
                       <TooltipContent side="bottom" sideOffset={6}>
                         {translate(
                           'auto.components.right.sidebar.SourceControl.eae2d051af',
@@ -5672,22 +5674,26 @@ function SourceControlInner(): React.JSX.Element {
                   </TooltipProvider>
                 )}
                 <DropdownMenu>
-                  <TooltipProvider delayDuration={400}>
+                  <TooltipProvider delay={400}>
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            type="button"
-                            className="inline-flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                            aria-label={translate(
-                              'auto.components.right.sidebar.SourceControl.2fe2a67580',
-                              'More note actions'
-                            )}
-                          >
-                            <MoreHorizontal className="size-3.5" />
-                          </button>
-                        </DropdownMenuTrigger>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <DropdownMenuTrigger
+                            render={
+                              <button
+                                type="button"
+                                className="inline-flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                                aria-label={translate(
+                                  'auto.components.right.sidebar.SourceControl.2fe2a67580',
+                                  'More note actions'
+                                )}
+                              >
+                                <MoreHorizontal className="size-3.5" />
+                              </button>
+                            }
+                          />
+                        }
+                      />
                       <TooltipContent side="bottom" sideOffset={6}>
                         {translate(
                           'auto.components.right.sidebar.SourceControl.2fe2a67580',
@@ -6710,32 +6716,34 @@ export function CommitArea({
           <DropdownMenuSeparator key={`sep-${index}`} />
         ) : (
           <Tooltip key={entry.kind}>
-            <TooltipTrigger asChild>
-              <div className="block">
-                <DropdownMenuItem
-                  disabled={entry.disabled}
-                  title={entry.title}
-                  variant={entry.variant}
-                  className="w-full"
-                  onSelect={(event) => {
-                    if (entry.disabled) {
-                      event.preventDefault()
-                      return
-                    }
-                    onDropdownAction(entry.kind)
-                  }}
-                >
-                  <span className="flex min-w-0 flex-col">
-                    <span>{entry.label}</span>
-                    {entry.hint ? (
-                      <span className="truncate text-[10px] text-muted-foreground">
-                        {entry.hint}
-                      </span>
-                    ) : null}
-                  </span>
-                </DropdownMenuItem>
-              </div>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <div className="block">
+                  <DropdownMenuItem
+                    disabled={entry.disabled}
+                    title={entry.title}
+                    variant={entry.variant}
+                    className="w-full"
+                    onSelect={(event) => {
+                      if (entry.disabled) {
+                        event.preventDefault()
+                        return
+                      }
+                      onDropdownAction(entry.kind)
+                    }}
+                  >
+                    <span className="flex min-w-0 flex-col">
+                      <span>{entry.label}</span>
+                      {entry.hint ? (
+                        <span className="truncate text-[10px] text-muted-foreground">
+                          {entry.hint}
+                        </span>
+                      ) : null}
+                    </span>
+                  </DropdownMenuItem>
+                </div>
+              }
+            />
             <TooltipContent side="left" sideOffset={8} className="max-w-72">
               {entry.title}
             </TooltipContent>
@@ -6779,24 +6787,26 @@ export function CommitArea({
               // sees that clicking will abort the run. Group/group-hover toggles
               // keep this stateless on the React side.
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    onClick={() => onCancelGenerate()}
-                    title={translate(
-                      'auto.components.right.sidebar.SourceControl.527e130b6f',
-                      'Stop generating'
-                    )}
-                    aria-label={translate(
-                      'auto.components.right.sidebar.SourceControl.ddc1fbd690',
-                      'Stop generating commit message'
-                    )}
-                    className="group absolute right-1.5 top-1.5 inline-flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-destructive/40"
-                  >
-                    <RefreshCw className="size-3.5 animate-spin group-hover:hidden group-focus-visible:hidden" />
-                    <Square className="hidden size-3.5 fill-current group-hover:block group-focus-visible:block" />
-                  </button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      onClick={() => onCancelGenerate()}
+                      title={translate(
+                        'auto.components.right.sidebar.SourceControl.527e130b6f',
+                        'Stop generating'
+                      )}
+                      aria-label={translate(
+                        'auto.components.right.sidebar.SourceControl.ddc1fbd690',
+                        'Stop generating commit message'
+                      )}
+                      className="group absolute right-1.5 top-1.5 inline-flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-destructive/40"
+                    >
+                      <RefreshCw className="size-3.5 animate-spin group-hover:hidden group-focus-visible:hidden" />
+                      <Square className="hidden size-3.5 fill-current group-hover:block group-focus-visible:block" />
+                    </button>
+                  }
+                />
                 <TooltipContent side="left" sideOffset={6}>
                   {translate(
                     'auto.components.right.sidebar.SourceControl.37a81f29ad',
@@ -6806,37 +6816,39 @@ export function CommitArea({
               </Tooltip>
             ) : (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    aria-disabled={isGenerateDisabled}
-                    onClick={(event) => {
-                      if (isGenerateDisabled) {
-                        event.preventDefault()
-                        return
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      aria-disabled={isGenerateDisabled}
+                      onClick={(event) => {
+                        if (isGenerateDisabled) {
+                          event.preventDefault()
+                          return
+                        }
+                        onGenerate()
+                      }}
+                      title={
+                        generateDisabledReason ??
+                        translate(
+                          'auto.components.right.sidebar.SourceControl.b16b8f0e4b',
+                          'ai commit msg'
+                        )
                       }
-                      onGenerate()
-                    }}
-                    title={
-                      generateDisabledReason ??
-                      translate(
-                        'auto.components.right.sidebar.SourceControl.b16b8f0e4b',
-                        'ai commit msg'
-                      )
-                    }
-                    aria-label={translate(
-                      'auto.components.right.sidebar.SourceControl.461575b9bc',
-                      'Generate commit message with AI'
-                    )}
-                    className={cn(
-                      'absolute right-1.5 top-1.5 inline-flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                      isGenerateDisabled &&
-                        'cursor-not-allowed opacity-40 hover:bg-transparent hover:text-muted-foreground'
-                    )}
-                  >
-                    <Sparkles className="size-3.5" />
-                  </button>
-                </TooltipTrigger>
+                      aria-label={translate(
+                        'auto.components.right.sidebar.SourceControl.461575b9bc',
+                        'Generate commit message with AI'
+                      )}
+                      className={cn(
+                        'absolute right-1.5 top-1.5 inline-flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                        isGenerateDisabled &&
+                          'cursor-not-allowed opacity-40 hover:bg-transparent hover:text-muted-foreground'
+                      )}
+                    >
+                      <Sparkles className="size-3.5" />
+                    </button>
+                  }
+                />
                 <TooltipContent side="left" sideOffset={6}>
                   {generateDisabledReason ??
                     translate(
@@ -6860,60 +6872,66 @@ export function CommitArea({
               (size="xs", px-3 text-[11px]) so the sidebar has a consistent
               action-button shape across Source Control and Checks. */}
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="flex flex-1">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="xs"
-                  disabled={primaryAction.disabled}
-                  onClick={() => onPrimaryAction()}
-                  className="w-full rounded-r-none px-3 text-[11px]"
-                  title={primaryAction.title}
-                >
-                  {showSpinner ? (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  ) : PrimaryIcon ? (
-                    <PrimaryIcon className="size-3.5" aria-hidden="true" />
-                  ) : null}
-                  {primaryAction.label}
-                </Button>
-              </span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <span className="flex flex-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    disabled={primaryAction.disabled}
+                    onClick={() => onPrimaryAction()}
+                    className="w-full rounded-r-none px-3 text-[11px]"
+                    title={primaryAction.title}
+                  >
+                    {showSpinner ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : PrimaryIcon ? (
+                      <PrimaryIcon className="size-3.5" aria-hidden="true" />
+                    ) : null}
+                    {primaryAction.label}
+                  </Button>
+                </span>
+              }
+            />
             <TooltipContent side="top" sideOffset={6} className="max-w-72">
               {primaryAction.title}
             </TooltipContent>
           </Tooltip>
           <DropdownMenu>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="inline-flex shrink-0">
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="xs"
-                      className={cn(
-                        'rounded-l-none border-l border-border px-1.5 shrink-0',
-                        // Why: mirror the primary's disabled dimming so the split
-                        // button reads as one unit when Commit is unavailable. The
-                        // chevron itself stays clickable — its dropdown exposes
-                        // independently-gated remote actions (push / fetch / pull)
-                        // that are still valid when the primary is disabled.
-                        primaryAction.disabled && 'opacity-50'
-                      )}
-                      aria-label={moreCommitAndRemoteActionsLabel}
-                      title={moreActionsLabel}
-                    >
-                      {showChevronSpinner ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : (
-                        <ChevronDown className="size-3.5" />
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                </span>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <span className="inline-flex shrink-0">
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="xs"
+                          className={cn(
+                            'rounded-l-none border-l border-border px-1.5 shrink-0',
+                            // Why: mirror the primary's disabled dimming so the split
+                            // button reads as one unit when Commit is unavailable. The
+                            // chevron itself stays clickable — its dropdown exposes
+                            // independently-gated remote actions (push / fetch / pull)
+                            // that are still valid when the primary is disabled.
+                            primaryAction.disabled && 'opacity-50'
+                          )}
+                          aria-label={moreCommitAndRemoteActionsLabel}
+                          title={moreActionsLabel}
+                        >
+                          {showChevronSpinner ? (
+                            <Loader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <ChevronDown className="size-3.5" />
+                          )}
+                        </Button>
+                      }
+                    />
+                  </span>
+                }
+              />
               <TooltipContent side="top" sideOffset={6}>
                 {moreCommitAndRemoteActionsLabel}
               </TooltipContent>
@@ -7194,18 +7212,20 @@ export function CompareSummaryToolbarButton({
 }): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          className="text-muted-foreground hover:text-foreground"
-          aria-label={label}
-          onClick={onClick}
-        >
-          <Icon className="size-3.5" />
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className="text-muted-foreground hover:text-foreground"
+            aria-label={label}
+            onClick={onClick}
+          >
+            <Icon className="size-3.5" />
+          </Button>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={6}>
         {label}
       </TooltipContent>
@@ -8185,9 +8205,9 @@ function ConflictBadge({ entry }: { entry: GitStatusEntry }): React.JSX.Element 
   }
 
   return (
-    <TooltipProvider delayDuration={300}>
+    <TooltipProvider delay={300}>
       <Tooltip>
-        <TooltipTrigger asChild>{badge}</TooltipTrigger>
+        <TooltipTrigger render={badge} />
         <TooltipContent side="left" sideOffset={6}>
           {translate(
             'auto.components.right.sidebar.SourceControl.03194cfff4',
@@ -8323,28 +8343,30 @@ export function ActionButton({
   // `aria-disabled` + visual dimming preserves the disabled affordance.
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          className={cn(
-            'text-muted-foreground hover:bg-background/70 hover:text-foreground',
-            disabled && 'opacity-50 cursor-not-allowed'
-          )}
-          aria-label={title}
-          aria-disabled={disabled}
-          onClick={(event) => {
-            if (disabled) {
-              event.preventDefault()
-              return
-            }
-            onClick(event)
-          }}
-        >
-          <Icon className="size-3.5" />
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className={cn(
+              'text-muted-foreground hover:bg-background/70 hover:text-foreground',
+              disabled && 'opacity-50 cursor-not-allowed'
+            )}
+            aria-label={title}
+            aria-disabled={disabled}
+            onClick={(event) => {
+              if (disabled) {
+                event.preventDefault()
+                return
+              }
+              onClick(event)
+            }}
+          >
+            <Icon className="size-3.5" />
+          </Button>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={6}>
         {title}
       </TooltipContent>

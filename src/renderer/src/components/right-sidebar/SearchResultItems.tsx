@@ -70,38 +70,44 @@ export function FileResultRow({
   return (
     <div className="pt-1.5">
       {/* File header with context menu */}
-      <TooltipProvider delayDuration={400}>
+      <TooltipProvider delay={400}>
         <Tooltip>
           <ContextMenu>
-            <ContextMenuTrigger asChild>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="h-auto w-full justify-start gap-1 rounded-none px-2 py-0.5 text-left group"
-                  onClick={onToggleCollapse}
-                >
-                  <ChevronRight
-                    className={cn(
-                      'size-3 flex-shrink-0 text-muted-foreground transition-transform',
-                      !collapsed && 'rotate-90'
-                    )}
-                  />
-                  <FileIcon className="size-3.5 flex-shrink-0 text-muted-foreground" />
-                  <div className="min-w-0 flex-1 text-xs">
-                    <span className="min-w-0 block truncate">
-                      <span className="text-foreground">{fileName}</span>
-                      {dirPath && (
-                        <span className="ml-1.5 text-[11px] text-muted-foreground">{dirPath}</span>
-                      )}
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground flex-shrink-0 bg-muted/80 rounded-full px-1.5">
-                    {matchCount}
-                  </span>
-                </Button>
-              </TooltipTrigger>
-            </ContextMenuTrigger>
+            <ContextMenuTrigger
+              render={
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="h-auto w-full justify-start gap-1 rounded-none px-2 py-0.5 text-left group"
+                      onClick={onToggleCollapse}
+                    >
+                      <ChevronRight
+                        className={cn(
+                          'size-3 flex-shrink-0 text-muted-foreground transition-transform',
+                          !collapsed && 'rotate-90'
+                        )}
+                      />
+                      <FileIcon className="size-3.5 flex-shrink-0 text-muted-foreground" />
+                      <div className="min-w-0 flex-1 text-xs">
+                        <span className="min-w-0 block truncate">
+                          <span className="text-foreground">{fileName}</span>
+                          {dirPath && (
+                            <span className="ml-1.5 text-[11px] text-muted-foreground">
+                              {dirPath}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground flex-shrink-0 bg-muted/80 rounded-full px-1.5">
+                        {matchCount}
+                      </span>
+                    </Button>
+                  }
+                />
+              }
+            />
             <ContextMenuContent>
               <ContextMenuItem
                 onClick={() => window.api.ui.writeClipboardText(fileResult.relativePath)}
@@ -172,35 +178,37 @@ export function MatchResultRow({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          className="min-h-[18px] h-auto w-full justify-start gap-1 rounded-none py-px pr-2 pl-7 text-left"
-          onMouseDown={(event) => {
-            // Why: clicking a result should move focus into the opened editor.
-            // If the sidebar button takes focus first, the browser can restore
-            // it after the click and make the initial reveal feel flaky.
-            if (event.button === 0) {
-              event.preventDefault()
-            }
-          }}
-          onClick={onClick}
-        >
-          <span className="text-[10px] text-muted-foreground flex-shrink-0 tabular-nums mt-px">
-            {match.line}
-          </span>
-          <span className="text-xs flex min-w-0 items-baseline whitespace-pre">
-            <span className="text-muted-foreground flex-shrink-0">{parts.before}</span>
-            {parts.match && (
-              <span className="bg-amber-500/30 text-foreground rounded-sm flex-shrink-0">
-                {parts.match}
-              </span>
-            )}
-            <span className="text-muted-foreground min-w-0 truncate">{parts.after}</span>
-          </span>
-        </Button>
-      </ContextMenuTrigger>
+      <ContextMenuTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            className="min-h-[18px] h-auto w-full justify-start gap-1 rounded-none py-px pr-2 pl-7 text-left"
+            onMouseDown={(event) => {
+              // Why: clicking a result should move focus into the opened editor.
+              // If the sidebar button takes focus first, the browser can restore
+              // it after the click and make the initial reveal feel flaky.
+              if (event.button === 0) {
+                event.preventDefault()
+              }
+            }}
+            onClick={onClick}
+          >
+            <span className="text-[10px] text-muted-foreground flex-shrink-0 tabular-nums mt-px">
+              {match.line}
+            </span>
+            <span className="text-xs flex min-w-0 items-baseline whitespace-pre">
+              <span className="text-muted-foreground flex-shrink-0">{parts.before}</span>
+              {parts.match && (
+                <span className="bg-amber-500/30 text-foreground rounded-sm flex-shrink-0">
+                  {parts.match}
+                </span>
+              )}
+              <span className="text-muted-foreground min-w-0 truncate">{parts.after}</span>
+            </span>
+          </Button>
+        }
+      />
       <ContextMenuContent>
         <ContextMenuItem
           onClick={() => window.api.ui.writeClipboardText(`${relativePath}#L${match.line}`)}

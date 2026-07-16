@@ -199,55 +199,57 @@ export function FloatingTerminalToggleButton({
       style={{ left: position.left, top: position.top }}
     >
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            // Why: a parked launcher needs contrast against the page. On light
-            // pages a soft drop shadow lifts it; on near-black dark surfaces a
-            // drop shadow vanishes, so use a distinctly lighter fill plus a
-            // bright hairline ring to define the edge.
-            className="relative cursor-grab rounded-lg border-transparent text-foreground bg-card shadow-[0_4px_12px_rgb(0_0_0_/_0.22),0_0_0_1px_color-mix(in_srgb,var(--foreground)_12%,transparent)] hover:-translate-y-0.5 hover:bg-accent active:translate-y-0 active:cursor-grabbing dark:bg-accent dark:shadow-[0_6px_16px_rgb(0_0_0_/_0.55),0_0_0_1px_rgb(255_255_255_/_0.22)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_82%,white)]"
-            data-floating-terminal-toggle
-            aria-label={
-              open
-                ? translate(
-                    'auto.components.floating.terminal.FloatingTerminalToggleButton.5785dd9148',
-                    'Minimize floating workspace'
-                  )
-                : showAttentionDot
-                  ? // Why: announce pending activity to assistive tech; the dot
-                    // itself is aria-hidden decoration.
-                    translate(
-                      'auto.components.floating.terminal.FloatingTerminalToggleButton.4cb418b991',
-                      'Show floating workspace, new activity'
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              // Why: a parked launcher needs contrast against the page. On light
+              // pages a soft drop shadow lifts it; on near-black dark surfaces a
+              // drop shadow vanishes, so use a distinctly lighter fill plus a
+              // bright hairline ring to define the edge.
+              className="relative cursor-grab rounded-lg border-transparent text-foreground bg-card shadow-[0_4px_12px_rgb(0_0_0_/_0.22),0_0_0_1px_color-mix(in_srgb,var(--foreground)_12%,transparent)] hover:-translate-y-0.5 hover:bg-accent active:translate-y-0 active:cursor-grabbing dark:bg-accent dark:shadow-[0_6px_16px_rgb(0_0_0_/_0.55),0_0_0_1px_rgb(255_255_255_/_0.22)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_82%,white)]"
+              data-floating-terminal-toggle
+              aria-label={
+                open
+                  ? translate(
+                      'auto.components.floating.terminal.FloatingTerminalToggleButton.5785dd9148',
+                      'Minimize floating workspace'
                     )
-                  : translate(
-                      'auto.components.floating.terminal.FloatingTerminalToggleButton.3b04b065b5',
-                      'Show floating workspace'
-                    )
-            }
-            aria-pressed={open}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerEnd}
-            onPointerCancel={handlePointerEnd}
-            onClick={handleClick}
-          >
-            <PanelsTopLeft className="size-4" />
-            {showAttentionDot ? (
-              // Why: amber matches Orca's "needs attention / unread" convention
-              // (the tab-unread bell); the ring matches the button fill so the
-              // dot reads on both light (bg-card) and dark (dark:bg-accent).
-              <span
-                aria-hidden
-                data-floating-terminal-attention
-                className="pointer-events-none absolute right-1 top-1 size-2 rounded-full bg-amber-500 ring-2 ring-card dark:ring-accent"
-              />
-            ) : null}
-          </Button>
-        </TooltipTrigger>
+                  : showAttentionDot
+                    ? // Why: announce pending activity to assistive tech; the dot
+                      // itself is aria-hidden decoration.
+                      translate(
+                        'auto.components.floating.terminal.FloatingTerminalToggleButton.4cb418b991',
+                        'Show floating workspace, new activity'
+                      )
+                    : translate(
+                        'auto.components.floating.terminal.FloatingTerminalToggleButton.3b04b065b5',
+                        'Show floating workspace'
+                      )
+              }
+              aria-pressed={open}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerEnd}
+              onPointerCancel={handlePointerEnd}
+              onClick={handleClick}
+            >
+              <PanelsTopLeft className="size-4" />
+              {showAttentionDot ? (
+                // Why: amber matches Orca's "needs attention / unread" convention
+                // (the tab-unread bell); the ring matches the button fill so the
+                // dot reads on both light (bg-card) and dark (dark:bg-accent).
+                <span
+                  aria-hidden
+                  data-floating-terminal-attention
+                  className="pointer-events-none absolute right-1 top-1 size-2 rounded-full bg-amber-500 ring-2 ring-card dark:ring-accent"
+                />
+              ) : null}
+            </Button>
+          }
+        />
         <TooltipContent side="left" sideOffset={6}>
           {translate(
             'auto.components.floating.terminal.FloatingTerminalToggleButton.bfe7809a70',

@@ -80,19 +80,21 @@ function PortAction({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          disabled={disabled}
-          className="size-5 text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:text-muted-foreground/35"
-          aria-label={label}
-          onClick={handleClick}
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            disabled={disabled}
+            className="size-5 text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:text-muted-foreground/35"
+            aria-label={label}
+            onClick={handleClick}
+          >
+            {children}
+          </Button>
+        }
+      />
       <TooltipContent side="top" sideOffset={4}>
         {tooltipLabel}
       </TooltipContent>
@@ -242,15 +244,17 @@ function WorktreePortRow({ port }: { port: WorkspacePort }): React.JSX.Element {
       </span>
       <div className="relative flex h-5 min-w-0 items-center">
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="flex min-w-0 select-text items-baseline gap-1 overflow-hidden pr-[3.75rem] text-[11px] text-muted-foreground">
-              <span className="min-w-0 flex-1 truncate">{processLabel}</span>
-              <span className="shrink-0 text-muted-foreground/45">-</span>
-              <span className="min-w-0 flex-[1.1] truncate text-muted-foreground/70">
-                {address}
+          <TooltipTrigger
+            render={
+              <span className="flex min-w-0 select-text items-baseline gap-1 overflow-hidden pr-[3.75rem] text-[11px] text-muted-foreground">
+                <span className="min-w-0 flex-1 truncate">{processLabel}</span>
+                <span className="shrink-0 text-muted-foreground/45">-</span>
+                <span className="min-w-0 flex-[1.1] truncate text-muted-foreground/70">
+                  {address}
+                </span>
               </span>
-            </span>
-          </TooltipTrigger>
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             <span className="flex items-center gap-1.5">
               <span>{processLabel}</span>
@@ -328,10 +332,12 @@ export function WorktreeCardPorts({ ports }: WorktreeCardPortsProps): React.JSX.
   }
 
   return (
-    <HoverCard openDelay={250} closeDelay={120}>
-      <HoverCardTrigger asChild>
-        <WorktreeCardPortsTrigger ports={ports} />
-      </HoverCardTrigger>
+    <HoverCard>
+      <HoverCardTrigger
+        delay={250}
+        closeDelay={120}
+        render={<WorktreeCardPortsTrigger ports={ports} />}
+      />
       <HoverCardContent
         side="right"
         align="start"

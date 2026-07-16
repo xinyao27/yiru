@@ -103,22 +103,24 @@ export function CreateProjectLocationField({
             spellCheck={false}
           />
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="h-11 w-11 shrink-0"
-                onClick={onBrowseServer}
-                disabled={isCreating || (!runtimeEnvironmentId && !sshTargetId)}
-                aria-label={translate(
-                  'auto.components.sidebar.CreateProjectLocationField.f520f83a97',
-                  'Browse host filesystem'
-                )}
-              >
-                <FolderOpen className="size-4" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-11 w-11 shrink-0"
+                  onClick={onBrowseServer}
+                  disabled={isCreating || (!runtimeEnvironmentId && !sshTargetId)}
+                  aria-label={translate(
+                    'auto.components.sidebar.CreateProjectLocationField.f520f83a97',
+                    'Browse host filesystem'
+                  )}
+                >
+                  <FolderOpen className="size-4" />
+                </Button>
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {translate(
                 'auto.components.sidebar.CreateProjectLocationField.f520f83a97',

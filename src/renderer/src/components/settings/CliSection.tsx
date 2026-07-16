@@ -261,22 +261,24 @@ export function CliSection({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <TooltipProvider delayDuration={250}>
+            <TooltipProvider delay={250}>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => void refreshStatus()}
-                    disabled={loading || busyAction !== null}
-                    aria-label={translate(
-                      'auto.components.settings.CliSection.52e640f3a0',
-                      'Refresh CLI status'
-                    )}
-                  >
-                    <RefreshCw className="size-3.5" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => void refreshStatus()}
+                      disabled={loading || busyAction !== null}
+                      aria-label={translate(
+                        'auto.components.settings.CliSection.52e640f3a0',
+                        'Refresh CLI status'
+                      )}
+                    >
+                      <RefreshCw className="size-3.5" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6}>
                   {translate('auto.components.settings.CliSection.5dae812f50', 'Refresh')}
                 </TooltipContent>

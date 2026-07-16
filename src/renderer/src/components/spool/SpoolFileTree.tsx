@@ -167,22 +167,26 @@ function FileTreeRow({
       {canControl ? (
         <DropdownMenu>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  size="icon-xs"
-                  variant="ghost"
-                  className="mr-1"
-                  aria-label={translate(
-                    'auto.components.spool.SpoolFileTree.itemActions',
-                    'File actions'
-                  )}
-                >
-                  <MoreHorizontal aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      type="button"
+                      size="icon-xs"
+                      variant="ghost"
+                      className="mr-1"
+                      aria-label={translate(
+                        'auto.components.spool.SpoolFileTree.itemActions',
+                        'File actions'
+                      )}
+                    >
+                      <MoreHorizontal aria-hidden="true" />
+                    </Button>
+                  }
+                />
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {translate('auto.components.spool.SpoolFileTree.itemActions', 'File actions')}
             </TooltipContent>

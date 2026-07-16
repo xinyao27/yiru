@@ -621,23 +621,25 @@ function PRAssigneesPanel({
       <div className="mb-2 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
         <span>{translate('auto.components.GitHubItemDialog.83ac703dda', 'Assignees')}</span>
         <Popover open={assigneePopoverOpen} onOpenChange={setAssigneePopoverOpen}>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              disabled={!canEditAssignees || isPending('assignees') || repoAssignees.loading}
-              aria-label={translate(
-                'auto.components.GitHubItemDialog.76adcf5fe2',
-                'Edit assignees'
-              )}
-              className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
-            >
-              {isPending('assignees') ? (
-                <LoaderCircle className="size-3 animate-spin" />
-              ) : (
-                <Pencil className="size-3" />
-              )}
-            </button>
-          </PopoverTrigger>
+          <PopoverTrigger
+            render={
+              <button
+                type="button"
+                disabled={!canEditAssignees || isPending('assignees') || repoAssignees.loading}
+                aria-label={translate(
+                  'auto.components.GitHubItemDialog.76adcf5fe2',
+                  'Edit assignees'
+                )}
+                className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
+              >
+                {isPending('assignees') ? (
+                  <LoaderCircle className="size-3 animate-spin" />
+                ) : (
+                  <Pencil className="size-3" />
+                )}
+              </button>
+            }
+          />
           <PopoverContent className="popover-scroll-content scrollbar-sleek w-60 p-1" align="end">
             {repoAssignees.error ? (
               <div className="px-2 py-3 text-center text-[12px] text-destructive">
@@ -1199,28 +1201,28 @@ function PRReviewersPanel({
       <div className="mb-2 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
         <span>{translate('auto.components.GitHubItemDialog.dc8a092c57', 'Reviewers')}</span>
         <Popover open={open} onOpenChange={handleReviewerPickerOpenChange}>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              disabled={submitting || !canRequestReview}
-              aria-label={translate('auto.components.GitHubItemDialog.934add88b6', 'Reviewer')}
-              className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
-            >
-              {submitting ? (
-                <LoaderCircle className="size-3 animate-spin" />
-              ) : (
-                <Pencil className="size-3" />
-              )}
-            </button>
-          </PopoverTrigger>
+          <PopoverTrigger
+            render={
+              <button
+                type="button"
+                disabled={submitting || !canRequestReview}
+                aria-label={translate('auto.components.GitHubItemDialog.934add88b6', 'Reviewer')}
+                className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
+              >
+                {submitting ? (
+                  <LoaderCircle className="size-3 animate-spin" />
+                ) : (
+                  <Pencil className="size-3" />
+                )}
+              </button>
+            }
+          />
           <PopoverContent
             className="flex max-h-[420px] w-[330px] flex-col overflow-hidden rounded-md border-border/70 p-0"
             align="end"
             side="bottom"
             sideOffset={6}
-            onOpenAutoFocus={(event) => {
-              event.preventDefault()
-            }}
+            initialFocus={false}
           >
             <div className="border-b border-border/70 p-2">
               <Input
@@ -1354,25 +1356,27 @@ function PRReviewersPanel({
                 </span>
                 {canRemoveReviewer ? (
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        className="size-6 shrink-0 text-muted-foreground hover:text-foreground"
-                        disabled={submitting || !canRequestReview}
-                        aria-label={translate(
-                          'auto.components.GitHubItemDialog.8b15a5e91c',
-                          'Remove reviewer {{value0}}',
-                          { value0: reviewer.login }
-                        )}
-                        onClick={() => {
-                          void handleRemoveReviewers([reviewer.login])
-                        }}
-                      >
-                        <X className="size-3.5" />
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          className="size-6 shrink-0 text-muted-foreground hover:text-foreground"
+                          disabled={submitting || !canRequestReview}
+                          aria-label={translate(
+                            'auto.components.GitHubItemDialog.8b15a5e91c',
+                            'Remove reviewer {{value0}}',
+                            { value0: reviewer.login }
+                          )}
+                          onClick={() => {
+                            void handleRemoveReviewers([reviewer.login])
+                          }}
+                        >
+                          <X className="size-3.5" />
+                        </Button>
+                      }
+                    />
                     <TooltipContent>
                       {translate('auto.components.GitHubItemDialog.5c1c973855', 'Remove reviewer')}
                     </TooltipContent>
@@ -2024,44 +2028,46 @@ function PRViewedCheckbox({
 }): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          role="checkbox"
-          aria-checked={checked}
-          aria-label={translate(
-            'auto.components.GitHubItemDialog.2d89a38d9d',
-            '{{value0}} {{value1}} as viewed',
-            { value0: checked ? 'Unmark' : 'Mark', value1: filePath }
-          )}
-          disabled={pending}
-          onClick={(event) => {
-            event.stopPropagation()
-            onToggle()
-          }}
-          className={cn(
-            'flex h-6 shrink-0 items-center gap-1.5 rounded-md px-1.5 text-[11px] text-muted-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-            checked && 'text-foreground',
-            pending && 'cursor-default opacity-60'
-          )}
-        >
-          <span
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={checked}
+            aria-label={translate(
+              'auto.components.GitHubItemDialog.2d89a38d9d',
+              '{{value0}} {{value1}} as viewed',
+              { value0: checked ? 'Unmark' : 'Mark', value1: filePath }
+            )}
+            disabled={pending}
+            onClick={(event) => {
+              event.stopPropagation()
+              onToggle()
+            }}
             className={cn(
-              'flex size-4 items-center justify-center rounded-sm border transition-colors',
-              checked
-                ? 'border-foreground bg-foreground text-background'
-                : 'border-muted-foreground/50 bg-background text-transparent'
+              'flex h-6 shrink-0 items-center gap-1.5 rounded-md px-1.5 text-[11px] text-muted-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              checked && 'text-foreground',
+              pending && 'cursor-default opacity-60'
             )}
           >
-            {pending ? (
-              <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
-            ) : checked ? (
-              <Check className="size-3" strokeWidth={3} />
-            ) : null}
-          </span>
-          <span>{translate('auto.components.GitHubItemDialog.af924014f8', 'Viewed')}</span>
-        </button>
-      </TooltipTrigger>
+            <span
+              className={cn(
+                'flex size-4 items-center justify-center rounded-sm border transition-colors',
+                checked
+                  ? 'border-foreground bg-foreground text-background'
+                  : 'border-muted-foreground/50 bg-background text-transparent'
+              )}
+            >
+              {pending ? (
+                <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+              ) : checked ? (
+                <Check className="size-3" strokeWidth={3} />
+              ) : null}
+            </span>
+            <span>{translate('auto.components.GitHubItemDialog.af924014f8', 'Viewed')}</span>
+          </button>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={4}>
         {checked
           ? translate('auto.components.GitHubItemDialog.ba8e329d92', 'Unmark viewed')
@@ -2602,20 +2608,22 @@ function PRFilesCombinedDiffViewer({
         <div className="flex min-w-0 items-center gap-2">
           {fileTreeCollapsed && (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label={translate(
-                    'auto.components.GitHubItemDialog.1257d1435d',
-                    'Show file tree'
-                  )}
-                  onClick={() => setFileTreeCollapsed(false)}
-                >
-                  <PanelLeftOpen className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={translate(
+                      'auto.components.GitHubItemDialog.1257d1435d',
+                      'Show file tree'
+                    )}
+                    onClick={() => setFileTreeCollapsed(false)}
+                  >
+                    <PanelLeftOpen className="size-3.5" />
+                  </Button>
+                }
+              />
               <TooltipContent side="bottom" sideOffset={6}>
                 {translate('auto.components.GitHubItemDialog.1257d1435d', 'Show file tree')}
               </TooltipContent>
@@ -2879,102 +2887,110 @@ function CommentCodeContext({
         >
           {(contextBefore > 0 || contextAfter > 0) && (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-xs"
-                  className="size-7 border-border/55 bg-background/35 text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
-                  onClick={() => {
-                    setContextBefore(0)
-                    setContextAfter(0)
-                  }}
-                  aria-label={translate(
-                    'auto.components.GitHubItemDialog.b1574e8ac2',
-                    'Reset code context'
-                  )}
-                >
-                  <UndoDot className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-xs"
+                    className="size-7 border-border/55 bg-background/35 text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+                    onClick={() => {
+                      setContextBefore(0)
+                      setContextAfter(0)
+                    }}
+                    aria-label={translate(
+                      'auto.components.GitHubItemDialog.b1574e8ac2',
+                      'Reset code context'
+                    )}
+                  >
+                    <UndoDot className="size-3.5" />
+                  </Button>
+                }
+              />
               <TooltipContent>
                 {translate('auto.components.GitHubItemDialog.b1574e8ac2', 'Reset code context')}
               </TooltipContent>
             </Tooltip>
           )}
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-xs"
-                className="size-7 border-border/55 bg-background/35 text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
-                disabled={!canExpandAbove}
-                onClick={() =>
-                  setContextBefore((current) =>
-                    Math.min(current + CODE_CONTEXT_EXPAND_STEP, commentFrom - 1)
-                  )
-                }
-                aria-label={translate(
-                  'auto.components.GitHubItemDialog.307c98e8e3',
-                  'Show {{value0}} more lines above',
-                  { value0: CODE_CONTEXT_EXPAND_STEP }
-                )}
-              >
-                <ArrowUp className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-xs"
+                  className="size-7 border-border/55 bg-background/35 text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+                  disabled={!canExpandAbove}
+                  onClick={() =>
+                    setContextBefore((current) =>
+                      Math.min(current + CODE_CONTEXT_EXPAND_STEP, commentFrom - 1)
+                    )
+                  }
+                  aria-label={translate(
+                    'auto.components.GitHubItemDialog.307c98e8e3',
+                    'Show {{value0}} more lines above',
+                    { value0: CODE_CONTEXT_EXPAND_STEP }
+                  )}
+                >
+                  <ArrowUp className="size-3.5" />
+                </Button>
+              }
+            />
             <TooltipContent>
               {translate('auto.components.GitHubItemDialog.5664681624', 'Show more lines above')}
             </TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-xs"
-                className="size-7 border-border/55 bg-background/35 text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
-                disabled={!canExpandBelow}
-                onClick={() =>
-                  setContextAfter((current) =>
-                    Math.min(current + CODE_CONTEXT_EXPAND_STEP, totalLines - commentTo)
-                  )
-                }
-                aria-label={translate(
-                  'auto.components.GitHubItemDialog.307c98e8e3',
-                  'Show {{value0}} more lines below',
-                  { value0: CODE_CONTEXT_EXPAND_STEP }
-                )}
-              >
-                <ArrowDown className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-xs"
+                  className="size-7 border-border/55 bg-background/35 text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+                  disabled={!canExpandBelow}
+                  onClick={() =>
+                    setContextAfter((current) =>
+                      Math.min(current + CODE_CONTEXT_EXPAND_STEP, totalLines - commentTo)
+                    )
+                  }
+                  aria-label={translate(
+                    'auto.components.GitHubItemDialog.307c98e8e3',
+                    'Show {{value0}} more lines below',
+                    { value0: CODE_CONTEXT_EXPAND_STEP }
+                  )}
+                >
+                  <ArrowDown className="size-3.5" />
+                </Button>
+              }
+            />
             <TooltipContent>
               {translate('auto.components.GitHubItemDialog.06c06e58ba', 'Show more lines below')}
             </TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-xs"
-                className="size-7 border-border/55 bg-background/35 text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
-                disabled={!canExpandBlock}
-                onClick={() => {
-                  setContextBefore((current) =>
-                    Math.max(current, Math.max(0, commentFrom - blockRange.startLine))
-                  )
-                  setContextAfter((current) =>
-                    Math.max(current, Math.max(0, blockRange.endLine - commentTo))
-                  )
-                }}
-                aria-label={blockTooltip}
-              >
-                <Braces className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-xs"
+                  className="size-7 border-border/55 bg-background/35 text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+                  disabled={!canExpandBlock}
+                  onClick={() => {
+                    setContextBefore((current) =>
+                      Math.max(current, Math.max(0, commentFrom - blockRange.startLine))
+                    )
+                    setContextAfter((current) =>
+                      Math.max(current, Math.max(0, blockRange.endLine - commentTo))
+                    )
+                  }}
+                  aria-label={blockTooltip}
+                >
+                  <Braces className="size-3.5" />
+                </Button>
+              }
+            />
             <TooltipContent>{blockTooltip}</TooltipContent>
           </Tooltip>
         </ButtonGroup>
@@ -3357,43 +3373,47 @@ function ConversationTab({
         )}
         <div className="ml-auto flex shrink-0 items-center gap-1">
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="size-7"
-                onClick={() =>
-                  setReplyingTo((current) => (current === comment.id ? null : comment.id))
-                }
-                aria-label={translate(
-                  'auto.components.GitHubItemDialog.bca8eb39ac',
-                  'Reply to comment'
-                )}
-              >
-                <MessageSquarePlus className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  className="size-7"
+                  onClick={() =>
+                    setReplyingTo((current) => (current === comment.id ? null : comment.id))
+                  }
+                  aria-label={translate(
+                    'auto.components.GitHubItemDialog.bca8eb39ac',
+                    'Reply to comment'
+                  )}
+                >
+                  <MessageSquarePlus className="size-3.5" />
+                </Button>
+              }
+            />
             <TooltipContent>
               {translate('auto.components.GitHubItemDialog.bca8eb39ac', 'Reply to comment')}
             </TooltipContent>
           </Tooltip>
           {comment.url && (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  className="size-7"
-                  onClick={() => window.api.shell.openUrl(comment.url)}
-                  aria-label={translate(
-                    'auto.components.GitHubItemDialog.a154ec5224',
-                    'Open comment on GitHub'
-                  )}
-                >
-                  <ExternalLink className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="size-7"
+                    onClick={() => window.api.shell.openUrl(comment.url)}
+                    aria-label={translate(
+                      'auto.components.GitHubItemDialog.a154ec5224',
+                      'Open comment on GitHub'
+                    )}
+                  >
+                    <ExternalLink className="size-3.5" />
+                  </Button>
+                }
+              />
               <TooltipContent>
                 {translate('auto.components.GitHubItemDialog.a154ec5224', 'Open comment on GitHub')}
               </TooltipContent>
@@ -3460,7 +3480,7 @@ function ConversationTab({
     const root = getPRCommentGroupRoot(group)
     const count = getPRCommentGroupCount(group)
     return (
-      <Accordion key={getPRCommentGroupId(group)} type="single" collapsible>
+      <Accordion key={getPRCommentGroupId(group)}>
         <AccordionItem
           value={getPRCommentGroupId(group)}
           className="rounded-lg border border-border/40 bg-card/40"
@@ -3676,24 +3696,26 @@ function ConversationTab({
                 </div>
               ) : (
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      className="ml-auto size-7"
-                      onClick={() => {
-                        setBodyDraft(body)
-                        setBodyEditing(true)
-                      }}
-                      aria-label={translate(
-                        'auto.components.GitHubItemDialog.4d555d3796',
-                        'Edit description'
-                      )}
-                    >
-                      <Pencil className="size-3.5" />
-                    </Button>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="ml-auto size-7"
+                        onClick={() => {
+                          setBodyDraft(body)
+                          setBodyEditing(true)
+                        }}
+                        aria-label={translate(
+                          'auto.components.GitHubItemDialog.4d555d3796',
+                          'Edit description'
+                        )}
+                      >
+                        <Pencil className="size-3.5" />
+                      </Button>
+                    }
+                  />
                   <TooltipContent>
                     {translate('auto.components.GitHubItemDialog.4d555d3796', 'Edit description')}
                   </TooltipContent>
@@ -4098,29 +4120,33 @@ function PRActionsPanel({
       <div className="grid gap-2">
         <DropdownMenu modal={false}>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  className={cn(
-                    'w-full justify-center gap-2 bg-green-600 text-white hover:bg-green-700',
-                    'disabled:cursor-not-allowed disabled:opacity-50'
-                  )}
-                >
-                  {mergePending ? (
-                    <LoaderCircle className="size-3.5 animate-spin" />
-                  ) : (
-                    <GitMerge className="size-3.5" />
-                  )}
-                  {mergePresentation.autoMergeAction?.label ??
-                    (mergePresentation.directMergeAvailable
-                      ? mergeMethods.defaultLabel
-                      : mergePresentation.label)}
-                  <ChevronDown className="size-3 opacity-60" />
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      type="button"
+                      size="sm"
+                      className={cn(
+                        'w-full justify-center gap-2 bg-green-600 text-white hover:bg-green-700',
+                        'disabled:cursor-not-allowed disabled:opacity-50'
+                      )}
+                    >
+                      {mergePending ? (
+                        <LoaderCircle className="size-3.5 animate-spin" />
+                      ) : (
+                        <GitMerge className="size-3.5" />
+                      )}
+                      {mergePresentation.autoMergeAction?.label ??
+                        (mergePresentation.directMergeAvailable
+                          ? mergeMethods.defaultLabel
+                          : mergePresentation.label)}
+                      <ChevronDown className="size-3 opacity-60" />
+                    </Button>
+                  }
+                />
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {!canMergeWithRepoContext
                 ? translate(
@@ -4739,19 +4765,21 @@ function ChecksTab({
 
   const refreshAction = (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          className="size-7 shrink-0"
-          disabled={!canUseChecksRepoContext || refreshing}
-          onClick={() => void handleRefresh()}
-          aria-label={translate('auto.components.GitHubItemDialog.9a1004fc76', 'Refresh checks')}
-        >
-          <RefreshCw className={cn('size-3.5', refreshing && 'animate-spin')} />
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className="size-7 shrink-0"
+            disabled={!canUseChecksRepoContext || refreshing}
+            onClick={() => void handleRefresh()}
+            aria-label={translate('auto.components.GitHubItemDialog.9a1004fc76', 'Refresh checks')}
+          >
+            <RefreshCw className={cn('size-3.5', refreshing && 'animate-spin')} />
+          </Button>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={6}>
         {translate('auto.components.GitHubItemDialog.9a1004fc76', 'Refresh checks')}
       </TooltipContent>
@@ -4760,25 +4788,27 @@ function ChecksTab({
   const fixBrokenChecksAction =
     failedChecks.length > 0 || fixingChecks ? (
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            size="xs"
-            className="h-7 gap-1 px-2 text-[11px]"
-            disabled={!canFixBrokenChecks || fixingChecks}
-            onClick={() => void handleFixBrokenChecks()}
-          >
-            {fixingChecks ? (
-              <LoaderCircle className="size-3 animate-spin" />
-            ) : (
-              <Wrench className="size-3" />
-            )}
-            {variant === 'compact'
-              ? translate('auto.components.GitHubItemDialog.9157d48ddb', 'Fix checks')
-              : translate('auto.components.GitHubItemDialog.2511f44bb7', 'Fix broken checks')}
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              className="h-7 gap-1 px-2 text-[11px]"
+              disabled={!canFixBrokenChecks || fixingChecks}
+              onClick={() => void handleFixBrokenChecks()}
+            >
+              {fixingChecks ? (
+                <LoaderCircle className="size-3 animate-spin" />
+              ) : (
+                <Wrench className="size-3" />
+              )}
+              {variant === 'compact'
+                ? translate('auto.components.GitHubItemDialog.9157d48ddb', 'Fix checks')
+                : translate('auto.components.GitHubItemDialog.2511f44bb7', 'Fix broken checks')}
+            </Button>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {translate(
             'auto.components.GitHubItemDialog.f4b1292569',
@@ -4790,23 +4820,25 @@ function ChecksTab({
   const rerunAction =
     list.length > 0 || rerunning ? (
       <DropdownMenu modal={false}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            size="xs"
-            className="h-7 gap-1 px-2 text-[11px]"
-            disabled={!canUseChecksRepoContext || rerunning || list.length === 0}
-          >
-            {rerunning ? (
-              <LoaderCircle className="size-3 animate-spin" />
-            ) : (
-              <RefreshCw className="size-3" />
-            )}
-            {translate('auto.components.GitHubItemDialog.1b56e28faa', 'Rerun')}
-            <ChevronDown className="size-3 opacity-60" />
-          </Button>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              className="h-7 gap-1 px-2 text-[11px]"
+              disabled={!canUseChecksRepoContext || rerunning || list.length === 0}
+            >
+              {rerunning ? (
+                <LoaderCircle className="size-3 animate-spin" />
+              ) : (
+                <RefreshCw className="size-3" />
+              )}
+              {translate('auto.components.GitHubItemDialog.1b56e28faa', 'Rerun')}
+              <ChevronDown className="size-3 opacity-60" />
+            </Button>
+          }
+        />
         <DropdownMenuContent align="end" className="w-44">
           <DropdownMenuItem
             disabled={failedChecks.length === 0 || rerunning}
@@ -5953,30 +5985,34 @@ function GHEditSection({
     const isSidebar = variant === 'sidebar'
     return (
       <Popover open={statusPopoverOpen} onOpenChange={handleStatusPopoverOpenChange}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            disabled={isPending('state')}
-            className={cn(
-              isSidebar
-                ? 'inline-flex w-full items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-[12px] font-medium transition hover:brightness-125 hover:ring-1 hover:ring-white/10 disabled:opacity-50'
-                : 'group/status inline-flex items-center gap-0.5 rounded-full border px-2 py-0.5 text-[11px] font-medium transition hover:brightness-125 hover:ring-1 hover:ring-white/10 disabled:opacity-50',
-              localState === 'closed'
-                ? getStateTone({ ...item, state: localState })
-                : 'border-border/60 bg-muted/20 text-foreground hover:bg-accent/60'
-            )}
-          >
-            <span className="inline-flex items-center gap-1.5">
-              {localState === 'closed' ? (
-                <CircleDashed className={isSidebar ? 'size-3.5' : 'size-3'} />
-              ) : (
-                <CircleDot className={cn(isSidebar ? 'size-3.5' : 'size-3', 'text-emerald-500')} />
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              disabled={isPending('state')}
+              className={cn(
+                isSidebar
+                  ? 'inline-flex w-full items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-[12px] font-medium transition hover:brightness-125 hover:ring-1 hover:ring-white/10 disabled:opacity-50'
+                  : 'group/status inline-flex items-center gap-0.5 rounded-full border px-2 py-0.5 text-[11px] font-medium transition hover:brightness-125 hover:ring-1 hover:ring-white/10 disabled:opacity-50',
+                localState === 'closed'
+                  ? getStateTone({ ...item, state: localState })
+                  : 'border-border/60 bg-muted/20 text-foreground hover:bg-accent/60'
               )}
-              {getStateLabel({ ...item, state: localState })}
-            </span>
-            <ChevronDown className={isSidebar ? 'size-3 opacity-60' : 'size-2.5 opacity-50'} />
-          </button>
-        </PopoverTrigger>
+            >
+              <span className="inline-flex items-center gap-1.5">
+                {localState === 'closed' ? (
+                  <CircleDashed className={isSidebar ? 'size-3.5' : 'size-3'} />
+                ) : (
+                  <CircleDot
+                    className={cn(isSidebar ? 'size-3.5' : 'size-3', 'text-emerald-500')}
+                  />
+                )}
+                {getStateLabel({ ...item, state: localState })}
+              </span>
+              <ChevronDown className={isSidebar ? 'size-3 opacity-60' : 'size-2.5 opacity-50'} />
+            </button>
+          }
+        />
         <PopoverContent
           className={cn(duplicatePickerOpen ? 'w-[360px]' : 'w-56', 'p-1')}
           align="start"
@@ -6173,23 +6209,25 @@ function GHEditSection({
           <div className="mb-2 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
             <span>{translate('auto.components.GitHubItemDialog.83ac703dda', 'Assignees')}</span>
             <Popover open={assigneePopoverOpen} onOpenChange={setAssigneePopoverOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  disabled={isPending('assignees') || repoAssignees.loading}
-                  aria-label={translate(
-                    'auto.components.GitHubItemDialog.76adcf5fe2',
-                    'Edit assignees'
-                  )}
-                  className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
-                >
-                  {isPending('assignees') ? (
-                    <LoaderCircle className="size-3 animate-spin" />
-                  ) : (
-                    <Pencil className="size-3" />
-                  )}
-                </button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <button
+                    type="button"
+                    disabled={isPending('assignees') || repoAssignees.loading}
+                    aria-label={translate(
+                      'auto.components.GitHubItemDialog.76adcf5fe2',
+                      'Edit assignees'
+                    )}
+                    className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
+                  >
+                    {isPending('assignees') ? (
+                      <LoaderCircle className="size-3 animate-spin" />
+                    ) : (
+                      <Pencil className="size-3" />
+                    )}
+                  </button>
+                }
+              />
               <PopoverContent
                 className="popover-scroll-content scrollbar-sleek w-60 p-1"
                 align="end"
@@ -6266,23 +6304,25 @@ function GHEditSection({
           <div className="mb-2 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
             <span>{translate('auto.components.GitHubItemDialog.217e55d87c', 'Labels')}</span>
             <Popover open={labelPopoverOpen} onOpenChange={setLabelPopoverOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  disabled={isPending('labels') || repoLabels.loading}
-                  aria-label={translate(
-                    'auto.components.GitHubItemDialog.4ba0132f37',
-                    'Edit labels'
-                  )}
-                  className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
-                >
-                  {isPending('labels') ? (
-                    <LoaderCircle className="size-3 animate-spin" />
-                  ) : (
-                    <Pencil className="size-3" />
-                  )}
-                </button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <button
+                    type="button"
+                    disabled={isPending('labels') || repoLabels.loading}
+                    aria-label={translate(
+                      'auto.components.GitHubItemDialog.4ba0132f37',
+                      'Edit labels'
+                    )}
+                    className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
+                  >
+                    {isPending('labels') ? (
+                      <LoaderCircle className="size-3 animate-spin" />
+                    ) : (
+                      <Pencil className="size-3" />
+                    )}
+                  </button>
+                }
+              />
               <PopoverContent
                 className="popover-scroll-content scrollbar-sleek w-60 p-1"
                 align="end"
@@ -6370,30 +6410,32 @@ function GHEditSection({
 
       {/* Labels */}
       <Popover open={labelPopoverOpen} onOpenChange={setLabelPopoverOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            disabled={isPending('labels') || repoLabels.loading}
-            className="group/labels inline-flex items-center gap-1 rounded-full border border-border/30 bg-muted/20 px-2 py-0.5 text-[11px] transition hover:brightness-125 hover:ring-1 hover:ring-white/10 disabled:opacity-50"
-          >
-            {localLabels.length === 0 ? (
-              <span className="text-muted-foreground">
-                {translate('auto.components.GitHubItemDialog.f41ec96c13', '+ Label')}
-              </span>
-            ) : (
-              localLabels.map((name) => (
-                <span key={name} className="text-[10px] text-muted-foreground">
-                  {name}
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              disabled={isPending('labels') || repoLabels.loading}
+              className="group/labels inline-flex items-center gap-1 rounded-full border border-border/30 bg-muted/20 px-2 py-0.5 text-[11px] transition hover:brightness-125 hover:ring-1 hover:ring-white/10 disabled:opacity-50"
+            >
+              {localLabels.length === 0 ? (
+                <span className="text-muted-foreground">
+                  {translate('auto.components.GitHubItemDialog.f41ec96c13', '+ Label')}
                 </span>
-              ))
-            )}
-            {isPending('labels') ? (
-              <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
-            ) : (
-              <ChevronDown className="size-2.5 opacity-50" />
-            )}
-          </button>
-        </PopoverTrigger>
+              ) : (
+                localLabels.map((name) => (
+                  <span key={name} className="text-[10px] text-muted-foreground">
+                    {name}
+                  </span>
+                ))
+              )}
+              {isPending('labels') ? (
+                <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+              ) : (
+                <ChevronDown className="size-2.5 opacity-50" />
+              )}
+            </button>
+          }
+        />
         <PopoverContent className="popover-scroll-content scrollbar-sleek w-52 p-1" align="start">
           {repoLabels.error ? (
             <div className="px-2 py-3 text-center text-[12px] text-destructive">
@@ -6434,30 +6476,32 @@ function GHEditSection({
 
       {/* Assignees */}
       <Popover open={assigneePopoverOpen} onOpenChange={setAssigneePopoverOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            disabled={isPending('assignees') || repoAssignees.loading}
-            className="group/assignees inline-flex items-center gap-1 rounded-full border border-border/30 bg-muted/20 px-2 py-0.5 text-[11px] transition hover:brightness-125 hover:ring-1 hover:ring-white/10 disabled:opacity-50"
-          >
-            {localAssignees.length === 0 ? (
-              <span className="text-muted-foreground">
-                {translate('auto.components.GitHubItemDialog.c6f37a563d', '+ Assignee')}
-              </span>
-            ) : (
-              localAssignees.map((login) => (
-                <span key={login} className="text-[10px] text-muted-foreground">
-                  {login}
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              disabled={isPending('assignees') || repoAssignees.loading}
+              className="group/assignees inline-flex items-center gap-1 rounded-full border border-border/30 bg-muted/20 px-2 py-0.5 text-[11px] transition hover:brightness-125 hover:ring-1 hover:ring-white/10 disabled:opacity-50"
+            >
+              {localAssignees.length === 0 ? (
+                <span className="text-muted-foreground">
+                  {translate('auto.components.GitHubItemDialog.c6f37a563d', '+ Assignee')}
                 </span>
-              ))
-            )}
-            {isPending('assignees') ? (
-              <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
-            ) : (
-              <ChevronDown className="size-2.5 opacity-50" />
-            )}
-          </button>
-        </PopoverTrigger>
+              ) : (
+                localAssignees.map((login) => (
+                  <span key={login} className="text-[10px] text-muted-foreground">
+                    {login}
+                  </span>
+                ))
+              )}
+              {isPending('assignees') ? (
+                <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+              ) : (
+                <ChevronDown className="size-2.5 opacity-50" />
+              )}
+            </button>
+          }
+        />
         <PopoverContent className="popover-scroll-content scrollbar-sleek w-52 p-1" align="start">
           {repoAssignees.error ? (
             <div className="px-2 py-3 text-center text-[12px] text-destructive">
@@ -6520,18 +6564,20 @@ function GHEditSection({
                 {translate('auto.components.GitHubItemDialog.726db41722', 'Open workspace')}
                 <ArrowRight className="size-4" />
               </Button>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  size="icon-sm"
-                  aria-label={translate(
-                    'auto.components.GitHubItemDialog.fe6ff12dc2',
-                    'More issue workspace actions'
-                  )}
-                >
-                  <ChevronDown className="size-3.5" />
-                </Button>
-              </DropdownMenuTrigger>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    aria-label={translate(
+                      'auto.components.GitHubItemDialog.fe6ff12dc2',
+                      'More issue workspace actions'
+                    )}
+                  >
+                    <ChevronDown className="size-3.5" />
+                  </Button>
+                }
+              />
             </ButtonGroup>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onSelect={() => onUse(item)}>
@@ -6647,22 +6693,24 @@ function GHCommentComposer({
         onSubmitShortcut={() => void handleSubmit()}
       />
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            size="icon-sm"
-            onClick={handleSubmit}
-            disabled={!canSubmitComment || submitting}
-            className="absolute bottom-3 right-3 shadow-sm"
-            aria-label={translate('auto.components.GitHubItemDialog.0a73f59e85', 'Send comment')}
-          >
-            {submitting ? (
-              <LoaderCircle className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
-            )}
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              size="icon-sm"
+              onClick={handleSubmit}
+              disabled={!canSubmitComment || submitting}
+              className="absolute bottom-3 right-3 shadow-sm"
+              aria-label={translate('auto.components.GitHubItemDialog.0a73f59e85', 'Send comment')}
+            >
+              {submitting ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                <Send className="size-4" />
+              )}
+            </Button>
+          }
+        />
         <TooltipContent>
           {translate('auto.components.GitHubItemDialog.0a73f59e85', 'Send comment')}
         </TooltipContent>
@@ -7302,25 +7350,27 @@ export default function GitHubItemDialog({
               <span className="font-mono text-muted-foreground">#{workItem.number}</span>
               <div className="ml-auto flex items-center gap-1">
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      ref={setLinkCopyButtonRef}
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => void handleCopyWorkItemLink()}
-                      aria-label={translate(
-                        'auto.components.GitHubItemDialog.c43fe79ee0',
-                        'Copy GitHub link'
-                      )}
-                    >
-                      {linkCopied ? (
-                        <Check className="size-4 text-emerald-500" />
-                      ) : (
-                        <Copy className="size-4" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        ref={setLinkCopyButtonRef}
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => void handleCopyWorkItemLink()}
+                        aria-label={translate(
+                          'auto.components.GitHubItemDialog.c43fe79ee0',
+                          'Copy GitHub link'
+                        )}
+                      >
+                        {linkCopied ? (
+                          <Check className="size-4 text-emerald-500" />
+                        ) : (
+                          <Copy className="size-4" />
+                        )}
+                      </Button>
+                    }
+                  />
                   <TooltipContent side="bottom" sideOffset={6}>
                     {linkCopied
                       ? translate('auto.components.GitHubItemDialog.038b3d39b1', 'Copied')
@@ -7331,19 +7381,21 @@ export default function GitHubItemDialog({
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => window.api.shell.openUrl(workItem.url)}
-                      aria-label={translate(
-                        'auto.components.GitHubItemDialog.3fdf777817',
-                        'Open on GitHub'
-                      )}
-                    >
-                      <ExternalLink className="size-4" />
-                    </Button>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => window.api.shell.openUrl(workItem.url)}
+                        aria-label={translate(
+                          'auto.components.GitHubItemDialog.3fdf777817',
+                          'Open on GitHub'
+                        )}
+                      >
+                        <ExternalLink className="size-4" />
+                      </Button>
+                    }
+                  />
                   <TooltipContent side="bottom" sideOffset={6}>
                     {translate('auto.components.GitHubItemDialog.3fdf777817', 'Open on GitHub')}
                   </TooltipContent>
@@ -7378,18 +7430,20 @@ export default function GitHubItemDialog({
                         {translate('auto.components.GitHubItemDialog.726db41722', 'Open workspace')}
                         <ArrowRight className="size-3.5" />
                       </Button>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          type="button"
-                          size="icon-sm"
-                          aria-label={translate(
-                            'auto.components.GitHubItemDialog.fe6ff12dc2',
-                            'More issue workspace actions'
-                          )}
-                        >
-                          <ChevronDown className="size-3.5" />
-                        </Button>
-                      </DropdownMenuTrigger>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            type="button"
+                            size="icon-sm"
+                            aria-label={translate(
+                              'auto.components.GitHubItemDialog.fe6ff12dc2',
+                              'More issue workspace actions'
+                            )}
+                          >
+                            <ChevronDown className="size-3.5" />
+                          </Button>
+                        }
+                      />
                     </ButtonGroup>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onSelect={() => onUse(workItem)}>
@@ -7547,25 +7601,27 @@ export default function GitHubItemDialog({
                 </Button>
               )}
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    ref={setLinkCopyButtonRef}
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => void handleCopyWorkItemLink()}
-                    aria-label={translate(
-                      'auto.components.GitHubItemDialog.c43fe79ee0',
-                      'Copy GitHub link'
-                    )}
-                  >
-                    {linkCopied ? (
-                      <Check className="size-4 text-emerald-500" />
-                    ) : (
-                      <Copy className="size-4" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      ref={setLinkCopyButtonRef}
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => void handleCopyWorkItemLink()}
+                      aria-label={translate(
+                        'auto.components.GitHubItemDialog.c43fe79ee0',
+                        'Copy GitHub link'
+                      )}
+                    >
+                      {linkCopied ? (
+                        <Check className="size-4 text-emerald-500" />
+                      ) : (
+                        <Copy className="size-4" />
+                      )}
+                    </Button>
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6}>
                   {linkCopied
                     ? translate('auto.components.GitHubItemDialog.038b3d39b1', 'Copied')
@@ -7573,19 +7629,21 @@ export default function GitHubItemDialog({
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => window.api.shell.openUrl(workItem.url)}
-                    aria-label={translate(
-                      'auto.components.GitHubItemDialog.3fdf777817',
-                      'Open on GitHub'
-                    )}
-                  >
-                    <ExternalLink className="size-4" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => window.api.shell.openUrl(workItem.url)}
+                      aria-label={translate(
+                        'auto.components.GitHubItemDialog.3fdf777817',
+                        'Open on GitHub'
+                      )}
+                    >
+                      <ExternalLink className="size-4" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6}>
                   {translate('auto.components.GitHubItemDialog.3fdf777817', 'Open on GitHub')}
                 </TooltipContent>

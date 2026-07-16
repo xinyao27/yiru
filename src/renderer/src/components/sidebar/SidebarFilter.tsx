@@ -135,41 +135,45 @@ const SidebarFilter = React.memo(function SidebarFilter({
   return (
     <DropdownMenu modal={false} open={open} onOpenChange={handleOpenChange}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              type="button"
-              aria-label={
-                hasAnyFilter
-                  ? translate(
-                      'auto.components.sidebar.SidebarFilter.75405270ed',
-                      'Edit filters ({{value0}} active)',
-                      { value0: activeFilterCount }
-                    )
-                  : translate(
-                      'auto.components.sidebar.SidebarFilter.f506a1262a',
-                      'Filter workspaces'
-                    )
-              }
-              className="relative text-muted-foreground"
-              data-workspace-board-preserve-open={preserveWorkspaceBoardOpen ? '' : undefined}
-            >
-              <ListFilter className="size-3.5" strokeWidth={2.25} />
-              {hasAnyFilter && (
-                // Why: the only at-a-glance affordance that filters are
-                // applied — without it the list can silently hide workspaces.
-                <span
-                  aria-hidden
-                  className="absolute -top-0.5 -right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full bg-primary px-0.5 text-[9px] font-medium leading-none text-primary-foreground"
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  type="button"
+                  aria-label={
+                    hasAnyFilter
+                      ? translate(
+                          'auto.components.sidebar.SidebarFilter.75405270ed',
+                          'Edit filters ({{value0}} active)',
+                          { value0: activeFilterCount }
+                        )
+                      : translate(
+                          'auto.components.sidebar.SidebarFilter.f506a1262a',
+                          'Filter workspaces'
+                        )
+                  }
+                  className="relative text-muted-foreground"
+                  data-workspace-board-preserve-open={preserveWorkspaceBoardOpen ? '' : undefined}
                 >
-                  {activeFilterCount > 9 ? '9+' : activeFilterCount}
-                </span>
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-        </TooltipTrigger>
+                  <ListFilter className="size-3.5" strokeWidth={2.25} />
+                  {hasAnyFilter && (
+                    // Why: the only at-a-glance affordance that filters are
+                    // applied — without it the list can silently hide workspaces.
+                    <span
+                      aria-hidden
+                      className="absolute -top-0.5 -right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full bg-primary px-0.5 text-[9px] font-medium leading-none text-primary-foreground"
+                    >
+                      {activeFilterCount > 9 ? '9+' : activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              }
+            />
+          }
+        />
         <TooltipContent side={tooltipSide} sideOffset={6}>
           {hasAnyFilter
             ? translate('auto.components.sidebar.SidebarFilter.ee240a39eb', 'Edit filters')

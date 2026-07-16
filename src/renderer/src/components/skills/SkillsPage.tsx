@@ -98,19 +98,21 @@ function SkillCard({ skill }: { skill: DiscoveredSkill }): React.JSX.Element {
             )}
           </div>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="shrink-0"
-                onClick={() => {
-                  void revealSkill()
-                }}
-              >
-                <FolderOpen className="size-4" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="shrink-0"
+                  onClick={() => {
+                    void revealSkill()
+                  }}
+                >
+                  <FolderOpen className="size-4" />
+                </Button>
+              }
+            />
             <TooltipContent side="top" sideOffset={4}>
               {translate('auto.components.skills.SkillsPage.dc4c3328ee', 'Reveal file')}
             </TooltipContent>

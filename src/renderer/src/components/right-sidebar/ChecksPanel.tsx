@@ -263,24 +263,26 @@ export function ChecksPanelReviewHeader({
       </button>
       {showPullRequestMenu && (
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              aria-label={translate(
-                'auto.components.right.sidebar.ChecksPanel.653c105ecc',
-                'More PR actions'
-              )}
-              title={translate(
-                'auto.components.right.sidebar.ChecksPanel.653c105ecc',
-                'More PR actions'
-              )}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Ellipsis className="size-3.5" />
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                aria-label={translate(
+                  'auto.components.right.sidebar.ChecksPanel.653c105ecc',
+                  'More PR actions'
+                )}
+                title={translate(
+                  'auto.components.right.sidebar.ChecksPanel.653c105ecc',
+                  'More PR actions'
+                )}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Ellipsis className="size-3.5" />
+              </Button>
+            }
+          />
           <DropdownMenuContent align="end" className="w-44">
             <DropdownMenuItem disabled={!canUnlinkPullRequest} onSelect={onUnlinkPullRequest}>
               <Unlink className="size-3.5" />

@@ -97,41 +97,45 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
   return (
     <DropdownMenu modal={false} open={open} onOpenChange={handleOpenChange}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              type="button"
-              className="relative text-muted-foreground"
-              aria-label={
-                hasAnyFilter
-                  ? translate(
-                      'auto.components.sidebar.SidebarWorkspaceOptionsMenu.bc96dbd041',
-                      'Workspace options ({{value0}} active)',
-                      { value0: activeFilterLabel }
-                    )
-                  : translate(
-                      'auto.components.sidebar.SidebarWorkspaceOptionsMenu.9919ae1082',
-                      'Workspace options'
-                    )
-              }
-              data-workspace-board-preserve-open={preserveWorkspaceBoardOpen ? '' : undefined}
-            >
-              <SlidersHorizontal className="size-3.5" strokeWidth={2.25} />
-              {hasAnyFilter && (
-                // Why: this combined options button now owns filtering, so it
-                // needs the same at-a-glance signal that the old filter button had.
-                <span
-                  aria-hidden
-                  className="absolute -top-0.5 -right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full bg-primary px-0.5 text-[9px] font-medium leading-none text-primary-foreground"
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  type="button"
+                  className="relative text-muted-foreground"
+                  aria-label={
+                    hasAnyFilter
+                      ? translate(
+                          'auto.components.sidebar.SidebarWorkspaceOptionsMenu.bc96dbd041',
+                          'Workspace options ({{value0}} active)',
+                          { value0: activeFilterLabel }
+                        )
+                      : translate(
+                          'auto.components.sidebar.SidebarWorkspaceOptionsMenu.9919ae1082',
+                          'Workspace options'
+                        )
+                  }
+                  data-workspace-board-preserve-open={preserveWorkspaceBoardOpen ? '' : undefined}
                 >
-                  {activeFilterCount > 9 ? '9+' : activeFilterCount}
-                </span>
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-        </TooltipTrigger>
+                  <SlidersHorizontal className="size-3.5" strokeWidth={2.25} />
+                  {hasAnyFilter && (
+                    // Why: this combined options button now owns filtering, so it
+                    // needs the same at-a-glance signal that the old filter button had.
+                    <span
+                      aria-hidden
+                      className="absolute -top-0.5 -right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full bg-primary px-0.5 text-[9px] font-medium leading-none text-primary-foreground"
+                    >
+                      {activeFilterCount > 9 ? '9+' : activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              }
+            />
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {hasAnyFilter
             ? translate(
@@ -209,7 +213,7 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
                 }
                 return (
                   <Tooltip key={opt.id}>
-                    <TooltipTrigger asChild>{radioItem}</TooltipTrigger>
+                    <TooltipTrigger render={radioItem} />
                     <TooltipContent side="right" sideOffset={6}>
                       {opt.description}
                     </TooltipContent>
@@ -247,15 +251,17 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
               >
                 {PROJECT_ORDER_OPTIONS.map((opt) => (
                   <Tooltip key={opt.id}>
-                    <TooltipTrigger asChild>
-                      <DropdownMenuRadioItem
-                        value={opt.id}
-                        // Keep the menu open so people can compare order modes.
-                        onSelect={(e) => e.preventDefault()}
-                      >
-                        {opt.label}
-                      </DropdownMenuRadioItem>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <DropdownMenuRadioItem
+                          value={opt.id}
+                          // Keep the menu open so people can compare order modes.
+                          onSelect={(e) => e.preventDefault()}
+                        >
+                          {opt.label}
+                        </DropdownMenuRadioItem>
+                      }
+                    />
                     <TooltipContent side="right" sideOffset={6}>
                       {opt.description}
                     </TooltipContent>

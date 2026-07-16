@@ -202,20 +202,22 @@ export function CombinedDiffFileTree({
             />
           </div>
           <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                aria-label={translate(
-                  'auto.components.editor.CombinedDiffFileTree.cd0e0ed79e',
-                  'Filter diff files'
-                )}
-                className={cn(activeFilterCount > 0 && 'border-foreground/30 text-foreground')}
-              >
-                <Filter className="size-3.5" />
-              </Button>
-            </PopoverTrigger>
+            <PopoverTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label={translate(
+                    'auto.components.editor.CombinedDiffFileTree.cd0e0ed79e',
+                    'Filter diff files'
+                  )}
+                  className={cn(activeFilterCount > 0 && 'border-foreground/30 text-foreground')}
+                >
+                  <Filter className="size-3.5" />
+                </Button>
+              }
+            />
             <PopoverContent align="end" side="bottom" sideOffset={6} className="w-56 p-0">
               <div className="border-b border-border px-3 py-2 text-xs font-semibold text-foreground">
                 {translate(

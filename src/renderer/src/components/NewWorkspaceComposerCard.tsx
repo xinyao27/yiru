@@ -279,37 +279,39 @@ function WorkspaceRunTargetCombobox({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="h-9 w-full justify-between border-input px-3 text-sm font-normal focus:border-ring focus:ring-[3px] focus:ring-ring/50"
-        >
-          {selectedRecipe ? (
-            <span className="inline-flex min-w-0 items-center gap-1.5">
-              <Cloud className="size-3.5 shrink-0 text-muted-foreground" />
-              <span className="truncate">
-                {ephemeralVmLabel} / {selectedRecipe.name}
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="h-9 w-full justify-between border-input px-3 text-sm font-normal focus:border-ring focus:ring-[3px] focus:ring-ring/50"
+          >
+            {selectedRecipe ? (
+              <span className="inline-flex min-w-0 items-center gap-1.5">
+                <Cloud className="size-3.5 shrink-0 text-muted-foreground" />
+                <span className="truncate">
+                  {ephemeralVmLabel} / {selectedRecipe.name}
+                </span>
               </span>
-            </span>
-          ) : selectedHost ? (
-            <span className="inline-flex min-w-0 items-center gap-1.5">
-              <Server className="size-3.5 shrink-0 text-muted-foreground" />
-              <span className="truncate">{selectedHost.label}</span>
-            </span>
-          ) : (
-            <span className="text-muted-foreground">
-              {translate(
-                'auto.components.NewWorkspaceComposerCard.chooseRunTarget',
-                'Choose target'
-              )}
-            </span>
-          )}
-          <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+            ) : selectedHost ? (
+              <span className="inline-flex min-w-0 items-center gap-1.5">
+                <Server className="size-3.5 shrink-0 text-muted-foreground" />
+                <span className="truncate">{selectedHost.label}</span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground">
+                {translate(
+                  'auto.components.NewWorkspaceComposerCard.chooseRunTarget',
+                  'Choose target'
+                )}
+              </span>
+            )}
+            <ChevronsUpDown className="size-3.5 shrink-0 opacity-50" />
+          </Button>
+        }
+      />
       <PopoverContent
         align="start"
         className="w-[var(--radix-popover-trigger-width)] min-w-[18rem] p-0"
@@ -346,35 +348,37 @@ function WorkspaceRunTargetCombobox({
             ))}
             {recipes.length > 0 ? (
               <Popover open={vmRecipesOpen} onOpenChange={setVmRecipesOpen}>
-                <PopoverTrigger asChild>
-                  {/* Why: a real CommandItem (not a raw button) so cmdk registers it — fixes the row
-                      only rendering under the first host, the uneven height, and the double-highlight. */}
-                  <CommandItem
-                    value="per-workspace-env"
-                    onSelect={() => setVmRecipesOpen(true)}
-                    className="items-center gap-2 px-3 py-2"
-                  >
-                    <Check
-                      className={cn(
-                        'size-4 text-foreground',
-                        selectedRecipe ? 'opacity-100' : 'opacity-0'
-                      )}
-                    />
-                    <Cloud className="size-3.5 shrink-0 text-muted-foreground" />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm">{ephemeralVmLabel}</div>
-                      {/* Why: a second line so this row matches the two-line height of the host
-                          options above, and to hint what choosing it opens. */}
-                      <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
-                        {translate(
-                          'auto.components.NewWorkspaceComposerCard.perWorkspaceEnvHint',
-                          'Provision an on-demand environment from a recipe'
+                {/* Why: a real CommandItem (not a raw button) so cmdk registers it — fixes the row
+                    only rendering under the first host, the uneven height, and the double-highlight. */}
+                <PopoverTrigger
+                  render={
+                    <CommandItem
+                      value="per-workspace-env"
+                      onSelect={() => setVmRecipesOpen(true)}
+                      className="items-center gap-2 px-3 py-2"
+                    >
+                      <Check
+                        className={cn(
+                          'size-4 text-foreground',
+                          selectedRecipe ? 'opacity-100' : 'opacity-0'
                         )}
+                      />
+                      <Cloud className="size-3.5 shrink-0 text-muted-foreground" />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm">{ephemeralVmLabel}</div>
+                        {/* Why: a second line so this row matches the two-line height of the host
+                            options above, and to hint what choosing it opens. */}
+                        <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                          {translate(
+                            'auto.components.NewWorkspaceComposerCard.perWorkspaceEnvHint',
+                            'Provision an on-demand environment from a recipe'
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
-                  </CommandItem>
-                </PopoverTrigger>
+                      <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
+                    </CommandItem>
+                  }
+                />
                 <PopoverContent side="right" align="start" sideOffset={6} className="w-72 p-0">
                   <Command value={selectedRecipe ? `recipe:${selectedRecipe.id}` : ''}>
                     <CommandList>
@@ -810,21 +814,23 @@ export default function NewWorkspaceComposerCard({
             </label>
             {showAddProjectButton ? (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={handleAddRepo}
-                    className="size-5 shrink-0 rounded-sm text-muted-foreground hover:text-foreground"
-                    aria-label={translate(
-                      'auto.components.NewWorkspaceComposerCard.d6b0a96f32',
-                      'Add project'
-                    )}
-                  >
-                    <FolderPlus className="size-3" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={handleAddRepo}
+                      className="size-5 shrink-0 rounded-sm text-muted-foreground hover:text-foreground"
+                      aria-label={translate(
+                        'auto.components.NewWorkspaceComposerCard.d6b0a96f32',
+                        'Add project'
+                      )}
+                    >
+                      <FolderPlus className="size-3" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="top" sideOffset={6}>
                   {translate('auto.components.NewWorkspaceComposerCard.d6b0a96f32', 'Add project')}
                 </TooltipContent>
@@ -1043,25 +1049,27 @@ export default function NewWorkspaceComposerCard({
               {translate('auto.components.NewWorkspaceComposerCard.01d1e8f601', 'Agent')}
             </label>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={onOpenAgentSettings}
-                  // Why: keep Tab flow Name → Agent combobox. This settings
-                  // shortcut is a detour; making it tabbable forces a keystroke
-                  // on every workspace creation.
-                  tabIndex={-1}
-                  className="size-5 shrink-0 rounded-sm text-muted-foreground hover:text-foreground"
-                  aria-label={translate(
-                    'auto.components.NewWorkspaceComposerCard.ab63f25397',
-                    'Open agent settings'
-                  )}
-                >
-                  <Settings2 className="size-3" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={onOpenAgentSettings}
+                    // Why: keep Tab flow Name → Agent combobox. This settings
+                    // shortcut is a detour; making it tabbable forces a keystroke
+                    // on every workspace creation.
+                    tabIndex={-1}
+                    className="size-5 shrink-0 rounded-sm text-muted-foreground hover:text-foreground"
+                    aria-label={translate(
+                      'auto.components.NewWorkspaceComposerCard.ab63f25397',
+                      'Open agent settings'
+                    )}
+                  >
+                    <Settings2 className="size-3" />
+                  </Button>
+                }
+              />
               <TooltipContent side="top" sideOffset={6}>
                 {translate(
                   'auto.components.NewWorkspaceComposerCard.ba64270bdb',

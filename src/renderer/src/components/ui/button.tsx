@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { Slot } from 'radix-ui'
+import { Button as ButtonPrimitive } from '@base-ui/react/button'
 
 import { cn } from '@/lib/utils'
 
@@ -37,19 +37,15 @@ const buttonVariants = cva(
 )
 
 const Button = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<'button'> &
-    VariantProps<typeof buttonVariants> & {
-      asChild?: boolean
-    }
->(function Button(
-  { className, variant = 'default', size = 'default', asChild = false, ...props },
-  ref
-) {
-  const Comp = asChild ? Slot.Root : 'button'
-
+  HTMLElement,
+  // Base UI's Button typing allows a callback className; keep the wrapper's
+  // className a plain string so it stays compatible with the cva call below.
+  Omit<ButtonPrimitive.Props, 'className'> &
+    VariantProps<typeof buttonVariants> & { className?: string }
+>(function Button({ className, variant = 'default', size = 'default', ...props }, ref) {
+  // Base UI Button supports `render` natively, replacing the Slot/asChild idiom.
   return (
-    <Comp
+    <ButtonPrimitive
       ref={ref}
       data-slot="button"
       data-variant={variant}

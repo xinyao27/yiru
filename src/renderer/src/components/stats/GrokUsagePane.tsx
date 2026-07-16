@@ -77,22 +77,24 @@ export function GrokUsagePane(): React.JSX.Element {
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2 self-start">
-          <TooltipProvider delayDuration={250}>
+          <TooltipProvider delay={250}>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => void refreshGrokRateLimits()}
-                  disabled={isFetching}
-                  aria-label={translate(
-                    'auto.components.stats.GrokUsagePane.i0j1k2l3m4',
-                    'Refresh Grok usage'
-                  )}
-                >
-                  <RefreshCw className={`size-3.5 ${isFetching ? 'animate-spin' : ''}`} />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={() => void refreshGrokRateLimits()}
+                    disabled={isFetching}
+                    aria-label={translate(
+                      'auto.components.stats.GrokUsagePane.i0j1k2l3m4',
+                      'Refresh Grok usage'
+                    )}
+                  >
+                    <RefreshCw className={`size-3.5 ${isFetching ? 'animate-spin' : ''}`} />
+                  </Button>
+                }
+              />
               <TooltipContent side="bottom" sideOffset={6}>
                 {translate('auto.components.stats.GrokUsagePane.d4f5a6b7c8', 'Refresh')}
               </TooltipContent>

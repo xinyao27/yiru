@@ -110,18 +110,20 @@ export function AgentSessionSourceHomeInput({
           'Codex home to import from'
         )}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              aria-label={translate(
-                'auto.components.settings.AgentsPane.codexSessionSourceInfo',
-                'About importing Codex history'
-              )}
-              className="grid size-4 place-items-center rounded text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            >
-              <Info className="size-3" />
-            </button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                aria-label={translate(
+                  'auto.components.settings.AgentsPane.codexSessionSourceInfo',
+                  'About importing Codex history'
+                )}
+                className="grid size-4 place-items-center rounded text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <Info className="size-3" />
+              </button>
+            }
+          />
           <TooltipContent side="top" sideOffset={6} className="max-w-xs">
             {translate(
               'auto.components.settings.AgentsPane.codexSessionSourceTooltip',

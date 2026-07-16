@@ -91,19 +91,21 @@ export default function CacheTimer({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <div
-          className={cn(
-            'inline-flex items-center gap-1 text-[10px] font-mono tabular-nums select-none leading-none',
-            expired ? 'text-red-400' : warning ? 'text-yellow-400' : 'text-muted-foreground'
-          )}
-        >
-          <Timer className="size-2.5" />
-          {/* When expired, the red icon alone conveys state — the countdown
-              text is only meaningful while the cache is still alive. */}
-          {!expired && <span>{label}</span>}
-        </div>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <div
+            className={cn(
+              'inline-flex items-center gap-1 text-[10px] font-mono tabular-nums select-none leading-none',
+              expired ? 'text-red-400' : warning ? 'text-yellow-400' : 'text-muted-foreground'
+            )}
+          >
+            <Timer className="size-2.5" />
+            {/* When expired, the red icon alone conveys state — the countdown
+                        text is only meaningful while the cache is still alive. */}
+            {!expired && <span>{label}</span>}
+          </div>
+        }
+      />
       <TooltipContent side="right" sideOffset={8}>
         <span>{tooltipText}</span>
       </TooltipContent>

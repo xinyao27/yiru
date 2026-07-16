@@ -37,18 +37,20 @@ function LinearIssueMarkdownToolbarButton({
 }: LinearIssueMarkdownToolbarButtonProps): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          aria-label={label}
-          disabled={disabled}
-          className={cn('linear-issue-markdown-toolbar-button', active && 'is-active')}
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={onClick}
-        >
-          {children}
-        </button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            aria-label={label}
+            disabled={disabled}
+            className={cn('linear-issue-markdown-toolbar-button', active && 'is-active')}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={onClick}
+          >
+            {children}
+          </button>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={4}>
         {label}
       </TooltipContent>

@@ -167,20 +167,22 @@ export function KeybindingsFileActions(): React.JSX.Element {
         )}
       </Button>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            className="rounded-none border-l border-border"
-            aria-label={translate(
-              'auto.components.settings.KeybindingsFileActions.400397a10d',
-              'Open keybindings file menu'
-            )}
-          >
-            <ChevronDown className="size-3" />
-          </Button>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              className="rounded-none border-l border-border"
+              aria-label={translate(
+                'auto.components.settings.KeybindingsFileActions.400397a10d',
+                'Open keybindings file menu'
+              )}
+            >
+              <ChevronDown className="size-3" />
+            </Button>
+          }
+        />
         <DropdownMenuContent align="end">
           <DropdownMenuItem onSelect={() => void openKeybindingsFile()}>
             <ExternalLink className="size-3.5" />

@@ -33,18 +33,20 @@ export function AutomationMissedRunGraceField({
             'Grace'
           )}
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                aria-label={translate(
-                  'auto.components.automations.AutomationMissedRunGraceField.3df53d554a',
-                  'Missed-run grace help'
-                )}
-                className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              >
-                <Info className="size-3.5" />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label={translate(
+                    'auto.components.automations.AutomationMissedRunGraceField.3df53d554a',
+                    'Missed-run grace help'
+                  )}
+                  className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  <Info className="size-3.5" />
+                </button>
+              }
+            />
             <TooltipContent side="top" sideOffset={6} className="max-w-72">
               {translate(
                 'auto.components.automations.AutomationMissedRunGraceField.3d70c185c8',
@@ -58,14 +60,17 @@ export function AutomationMissedRunGraceField({
       <Select
         value={draft.missedRunGraceMinutes}
         disabled={disabled}
-        onValueChange={(missedRunGraceMinutes) =>
+        onValueChange={(missedRunGraceMinutes) => {
+          if (missedRunGraceMinutes == null) {
+            return
+          }
           onDraftChange((current) => ({ ...current, missedRunGraceMinutes }))
-        }
+        }}
       >
         <SelectTrigger className={`w-full ${pickerTriggerClassName}`}>
           <SelectValue />
         </SelectTrigger>
-        <SelectContent position="popper" side="bottom" align="start" sideOffset={4}>
+        <SelectContent alignItemWithTrigger={false} align="start" sideOffset={4}>
           <SelectItem value="0">
             {translate(
               'auto.components.automations.AutomationMissedRunGraceField.529dc6c0b7',

@@ -122,14 +122,16 @@ export function UntitledFileRenameDialog({
       <DialogContent
         showCloseButton={false}
         className="max-w-[340px]"
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
+        initialFocus={() => {
           cancelFocusFrame()
           focusFrameRef.current = requestAnimationFrame(() => {
             focusFrameRef.current = null
             nameInputRef.current?.focus()
             nameInputRef.current?.select()
           })
+          // Why: return false so Base UI skips its own auto-focus; the rAF
+          // above focuses and selects the name input instead.
+          return false
         }}
       >
         <DialogHeader>

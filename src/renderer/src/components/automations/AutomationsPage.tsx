@@ -2120,20 +2120,22 @@ export default function AutomationsPage(): React.JSX.Element {
       <header className="flex shrink-0 items-center justify-between px-5 pb-3 pt-1.5 md:px-8">
         <div className="flex items-center gap-2">
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 rounded-full"
-                onClick={closeAutomationsPage}
-                aria-label={translate(
-                  'auto.components.automations.AutomationsPage.67c7ff795b',
-                  'Close automations'
-                )}
-              >
-                <X className="size-4" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 rounded-full"
+                  onClick={closeAutomationsPage}
+                  aria-label={translate(
+                    'auto.components.automations.AutomationsPage.67c7ff795b',
+                    'Close automations'
+                  )}
+                >
+                  <X className="size-4" />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate('auto.components.automations.AutomationsPage.0329f9bef1', 'Close · Esc')}
             </TooltipContent>
@@ -2144,21 +2146,23 @@ export default function AutomationsPage(): React.JSX.Element {
             {translate('auto.components.automations.AutomationsPage.77c2778945', 'Automations')}
           </h1>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label={translate(
-                  'auto.components.automations.AutomationsPage.8d1afa8269',
-                  'Add automation'
-                )}
-                onClick={() => openCreateDialog()}
-                className="border border-border/50 bg-transparent hover:bg-muted/50"
-                data-contextual-tour-target="automations-create"
-              >
-                <Plus className="size-4" />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={translate(
+                    'auto.components.automations.AutomationsPage.8d1afa8269',
+                    'Add automation'
+                  )}
+                  onClick={() => openCreateDialog()}
+                  className="border border-border/50 bg-transparent hover:bg-muted/50"
+                  data-contextual-tour-target="automations-create"
+                >
+                  <Plus className="size-4" />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate(
                 'auto.components.automations.AutomationsPage.8d1afa8269',
@@ -2169,21 +2173,23 @@ export default function AutomationsPage(): React.JSX.Element {
         </div>
         <div className="flex items-center gap-2">
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label={translate(
-                  'auto.components.automations.AutomationsPage.19a6e30eae',
-                  'Refresh automations'
-                )}
-                onClick={refresh}
-                disabled={isLoading}
-                className="border border-border/50 bg-transparent hover:bg-muted/50"
-              >
-                <RefreshCw className={cn('size-4', isLoading && 'animate-spin')} />
-              </Button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={translate(
+                    'auto.components.automations.AutomationsPage.19a6e30eae',
+                    'Refresh automations'
+                  )}
+                  onClick={refresh}
+                  disabled={isLoading}
+                  className="border border-border/50 bg-transparent hover:bg-muted/50"
+                >
+                  <RefreshCw className={cn('size-4', isLoading && 'animate-spin')} />
+                </Button>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={6}>
               {translate(
                 'auto.components.automations.AutomationsPage.19a6e30eae',
@@ -2229,13 +2235,7 @@ export default function AutomationsPage(): React.JSX.Element {
           setDontAskDeleteAgain(false)
         }}
       >
-        <DialogContent
-          className="max-w-md"
-          onOpenAutoFocus={(event) => {
-            event.preventDefault()
-            deleteConfirmButtonRef.current?.focus()
-          }}
-        >
+        <DialogContent className="max-w-md" initialFocus={deleteConfirmButtonRef}>
           <DialogHeader>
             <DialogTitle className="text-sm">
               {translate(
@@ -2316,13 +2316,7 @@ export default function AutomationsPage(): React.JSX.Element {
           }
         }}
       >
-        <DialogContent
-          className="max-w-md"
-          onOpenAutoFocus={(event) => {
-            event.preventDefault()
-            deleteConfirmButtonRef.current?.focus()
-          }}
-        >
+        <DialogContent className="max-w-md" initialFocus={deleteConfirmButtonRef}>
           <DialogHeader>
             <DialogTitle className="text-sm">
               {translate(
@@ -2432,63 +2426,65 @@ export default function AutomationsPage(): React.JSX.Element {
               const scheduleLabel = formatAutomationSchedule(automation.rrule)
               return (
                 <ContextMenu key={automation.id}>
-                  <ContextMenuTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        selectExternalKey(null)
-                        selectAutomationId(automation.id)
-                      }}
-                      className={cn(
-                        'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
-                        selectedExternal === null && selected?.id === automation.id
-                          ? 'border-foreground/30 bg-muted/70 text-foreground shadow-sm'
-                          : 'border-transparent hover:bg-muted/50'
-                      )}
-                    >
-                      <span className="min-w-0">
-                        <span className="flex min-w-0 items-center gap-2">
-                          <span
-                            className={cn(
-                              'size-2 rounded-full',
-                              automation.enabled ? 'bg-foreground' : 'bg-muted-foreground/40'
-                            )}
-                          />
-                          <span className="truncate font-medium">{automation.name}</span>
-                        </span>
-                        <span className="mt-1 block truncate text-xs font-medium text-foreground/80">
-                          {scheduleLabel}
-                        </span>
-                        <span className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-                          {automationRepo ? (
-                            <RepoBadgeLabel
-                              name={automationRepo.displayName}
-                              color={automationRepo.badgeColor}
-                              badgeClassName="size-1.5"
-                            />
-                          ) : (
-                            <span>
-                              {translate(
-                                'auto.components.automations.AutomationsPage.13118faadf',
-                                'Unknown project'
+                  <ContextMenuTrigger
+                    render={
+                      <button
+                        type="button"
+                        onClick={() => {
+                          selectExternalKey(null)
+                          selectAutomationId(automation.id)
+                        }}
+                        className={cn(
+                          'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
+                          selectedExternal === null && selected?.id === automation.id
+                            ? 'border-foreground/30 bg-muted/70 text-foreground shadow-sm'
+                            : 'border-transparent hover:bg-muted/50'
+                        )}
+                      >
+                        <span className="min-w-0">
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span
+                              className={cn(
+                                'size-2 rounded-full',
+                                automation.enabled ? 'bg-foreground' : 'bg-muted-foreground/40'
                               )}
-                            </span>
-                          )}
-                          <span className="shrink-0">/</span>
-                          <span className="truncate">{workspaceLabel}</span>
-                          <span className="shrink-0">·</span>
-                          <span className="truncate">{getAgentLabel(automation.agentId)}</span>
+                            />
+                            <span className="truncate font-medium">{automation.name}</span>
+                          </span>
+                          <span className="mt-1 block truncate text-xs font-medium text-foreground/80">
+                            {scheduleLabel}
+                          </span>
+                          <span className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                            {automationRepo ? (
+                              <RepoBadgeLabel
+                                name={automationRepo.displayName}
+                                color={automationRepo.badgeColor}
+                                badgeClassName="size-1.5"
+                              />
+                            ) : (
+                              <span>
+                                {translate(
+                                  'auto.components.automations.AutomationsPage.13118faadf',
+                                  'Unknown project'
+                                )}
+                              </span>
+                            )}
+                            <span className="shrink-0">/</span>
+                            <span className="truncate">{workspaceLabel}</span>
+                            <span className="shrink-0">·</span>
+                            <span className="truncate">{getAgentLabel(automation.agentId)}</span>
+                          </span>
+                          <span className="mt-1 block truncate text-xs text-muted-foreground">
+                            {usageText}
+                          </span>
                         </span>
-                        <span className="mt-1 block truncate text-xs text-muted-foreground">
-                          {usageText}
+                        <span className="flex max-w-28 flex-col items-end gap-1 text-right text-xs text-muted-foreground">
+                          <Clock className="size-3.5" />
+                          <span className="line-clamp-2">{nextRunLabel}</span>
                         </span>
-                      </span>
-                      <span className="flex max-w-28 flex-col items-end gap-1 text-right text-xs text-muted-foreground">
-                        <Clock className="size-3.5" />
-                        <span className="line-clamp-2">{nextRunLabel}</span>
-                      </span>
-                    </button>
-                  </ContextMenuTrigger>
+                      </button>
+                    }
+                  />
                   <ContextMenuContent className="w-48">
                     <ContextMenuItem
                       disabled={!automationRunAvailability.canRunNow}
@@ -2619,59 +2615,61 @@ export default function AutomationsPage(): React.JSX.Element {
               const scheduleDisplay = getExternalAutomationScheduleDisplay(entry.manager, entry.job)
               return (
                 <ContextMenu key={entry.key}>
-                  <ContextMenuTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        selectExternalKey(entry.key)
-                        setActivePaneTab('overview')
-                      }}
-                      className={cn(
-                        'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
-                        selectedExternal?.key === entry.key
-                          ? 'border-foreground/30 bg-muted/70 text-foreground shadow-sm'
-                          : 'border-transparent hover:bg-muted/50'
-                      )}
-                    >
-                      <span className="min-w-0">
-                        <span className="flex min-w-0 items-center gap-2">
-                          <span
-                            className={cn(
-                              'size-2 rounded-full',
-                              entry.job.enabled ? 'bg-foreground' : 'bg-muted-foreground/40'
-                            )}
-                          />
-                          <span className="truncate font-medium">{entry.job.name}</span>
-                        </span>
-                        <span className="mt-1 block truncate text-xs font-medium text-foreground/80">
-                          {scheduleDisplay.label}
-                        </span>
-                        <span className="mt-1 flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
-                          <span className="truncate">
-                            {providerLabel} / {entry.manager.targetLabel}
+                  <ContextMenuTrigger
+                    render={
+                      <button
+                        type="button"
+                        onClick={() => {
+                          selectExternalKey(entry.key)
+                          setActivePaneTab('overview')
+                        }}
+                        className={cn(
+                          'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
+                          selectedExternal?.key === entry.key
+                            ? 'border-foreground/30 bg-muted/70 text-foreground shadow-sm'
+                            : 'border-transparent hover:bg-muted/50'
+                        )}
+                      >
+                        <span className="min-w-0">
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span
+                              className={cn(
+                                'size-2 rounded-full',
+                                entry.job.enabled ? 'bg-foreground' : 'bg-muted-foreground/40'
+                              )}
+                            />
+                            <span className="truncate font-medium">{entry.job.name}</span>
                           </span>
-                          <span className="shrink-0">·</span>
-                          <span className="truncate">
-                            {entry.manager.provider === 'hermes'
-                              ? `${entry.job.runCount} ${entry.job.runCount === 1 ? 'run' : 'runs'}`
-                              : entry.manager.canManage
-                                ? translate(
-                                    'auto.components.automations.AutomationsPage.aecdc3681f',
-                                    'Manageable'
-                                  )
-                                : translate(
-                                    'auto.components.automations.AutomationsPage.e059042585',
-                                    'Read-only'
-                                  )}
+                          <span className="mt-1 block truncate text-xs font-medium text-foreground/80">
+                            {scheduleDisplay.label}
+                          </span>
+                          <span className="mt-1 flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+                            <span className="truncate">
+                              {providerLabel} / {entry.manager.targetLabel}
+                            </span>
+                            <span className="shrink-0">·</span>
+                            <span className="truncate">
+                              {entry.manager.provider === 'hermes'
+                                ? `${entry.job.runCount} ${entry.job.runCount === 1 ? 'run' : 'runs'}`
+                                : entry.manager.canManage
+                                  ? translate(
+                                      'auto.components.automations.AutomationsPage.aecdc3681f',
+                                      'Manageable'
+                                    )
+                                  : translate(
+                                      'auto.components.automations.AutomationsPage.e059042585',
+                                      'Read-only'
+                                    )}
+                            </span>
                           </span>
                         </span>
-                      </span>
-                      <span className="flex max-w-28 flex-col items-end gap-1 text-right text-xs text-muted-foreground">
-                        <Clock className="size-3.5" />
-                        <span className="line-clamp-2">{nextRunLabel}</span>
-                      </span>
-                    </button>
-                  </ContextMenuTrigger>
+                        <span className="flex max-w-28 flex-col items-end gap-1 text-right text-xs text-muted-foreground">
+                          <Clock className="size-3.5" />
+                          <span className="line-clamp-2">{nextRunLabel}</span>
+                        </span>
+                      </button>
+                    }
+                  />
                   <ContextMenuContent className="w-48">
                     <ContextMenuItem
                       disabled={actionDisabled}

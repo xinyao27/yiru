@@ -42,21 +42,23 @@ export function RuntimeAccessGrantList({
           )}
         </h3>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onClick={onRefresh}
-              disabled={isLoading}
-              aria-label={translate(
-                'auto.components.settings.RuntimeAccessGrantList.27cf8507ad',
-                'Refresh shared access'
-              )}
-            >
-              <RefreshCw className={isLoading ? 'animate-spin' : undefined} />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                onClick={onRefresh}
+                disabled={isLoading}
+                aria-label={translate(
+                  'auto.components.settings.RuntimeAccessGrantList.27cf8507ad',
+                  'Refresh shared access'
+                )}
+              >
+                <RefreshCw className={isLoading ? 'animate-spin' : undefined} />
+              </Button>
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             {translate(
               'auto.components.settings.RuntimeAccessGrantList.27cf8507ad',
@@ -114,27 +116,29 @@ export function RuntimeAccessGrantList({
                   </div>
                 </div>
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:text-destructive shrink-0"
-                      onClick={() => onRevoke(grant)}
-                      disabled={isRevoking}
-                      aria-label={translate(
-                        'auto.components.settings.RuntimeAccessGrantList.6f6d5188ed',
-                        'Revoke {{value0}}',
-                        { value0: grant.name }
-                      )}
-                    >
-                      {isRevoking ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : (
-                        <Trash2 className="size-3.5" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive shrink-0"
+                        onClick={() => onRevoke(grant)}
+                        disabled={isRevoking}
+                        aria-label={translate(
+                          'auto.components.settings.RuntimeAccessGrantList.6f6d5188ed',
+                          'Revoke {{value0}}',
+                          { value0: grant.name }
+                        )}
+                      >
+                        {isRevoking ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="size-3.5" />
+                        )}
+                      </Button>
+                    }
+                  />
                   <TooltipContent side="top" sideOffset={4}>
                     {translate(
                       'auto.components.settings.RuntimeAccessGrantList.68ec21309f',

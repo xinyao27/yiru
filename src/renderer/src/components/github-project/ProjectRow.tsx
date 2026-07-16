@@ -118,19 +118,21 @@ export default function ProjectRow({
       <div className="flex items-center justify-end gap-1 can-hover:opacity-0 transition group-hover:opacity-100">
         {row.content.url ? (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                onClick={onOpenInBrowser}
-                aria-label={translate(
-                  'auto.components.github.project.ProjectRow.e12be8b4d4',
-                  'Open in GitHub'
-                )}
-                className="rounded p-1 hover:bg-muted"
-              >
-                <ExternalLink className="size-3.5" />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={onOpenInBrowser}
+                  aria-label={translate(
+                    'auto.components.github.project.ProjectRow.e12be8b4d4',
+                    'Open in GitHub'
+                  )}
+                  className="rounded p-1 hover:bg-muted"
+                >
+                  <ExternalLink className="size-3.5" />
+                </button>
+              }
+            />
             <TooltipContent>
               {translate('auto.components.github.project.ProjectRow.e12be8b4d4', 'Open in GitHub')}
             </TooltipContent>
@@ -138,19 +140,21 @@ export default function ProjectRow({
         ) : null}
         {!disabled && row.itemType !== 'DRAFT_ISSUE' && row.content.number != null ? (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                onClick={onStartWork}
-                aria-label={translate(
-                  'auto.components.github.project.ProjectRow.75b5d816e3',
-                  'Start work'
-                )}
-                className="rounded p-1 hover:bg-muted"
-              >
-                <Play className="size-3.5" />
-              </button>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={onStartWork}
+                  aria-label={translate(
+                    'auto.components.github.project.ProjectRow.75b5d816e3',
+                    'Start work'
+                  )}
+                  className="rounded p-1 hover:bg-muted"
+                >
+                  <Play className="size-3.5" />
+                </button>
+              }
+            />
             <TooltipContent>
               {translate('auto.components.github.project.ProjectRow.75b5d816e3', 'Start work')}
             </TooltipContent>
@@ -162,8 +166,8 @@ export default function ProjectRow({
 
   if (draftBody) {
     return (
-      <HoverCard openDelay={150}>
-        <HoverCardTrigger asChild>{rowInner}</HoverCardTrigger>
+      <HoverCard>
+        <HoverCardTrigger delay={150} render={rowInner} />
         <HoverCardContent
           align="start"
           sideOffset={4}

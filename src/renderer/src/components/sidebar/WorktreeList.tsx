@@ -753,11 +753,13 @@ function SectionMetricsBadge({ count }: { count: number }): React.JSX.Element {
       aria-label={totalLabel}
     >
       <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex h-full min-w-4 items-center justify-center px-1.5">
-            {count}
-          </span>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={
+            <span className="inline-flex h-full min-w-4 items-center justify-center px-1.5">
+              {count}
+            </span>
+          }
+        />
         <TooltipContent side="bottom" sideOffset={6}>
           {totalLabel}
         </TooltipContent>
@@ -913,17 +915,19 @@ function FolderPathStatusIndicator({
   const destructive = isConfirmedStaleFolderPathStatus(status)
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span
-          className={cn(
-            'inline-flex size-4 shrink-0 items-center justify-center rounded-[4px]',
-            destructive ? 'text-destructive' : 'text-muted-foreground'
-          )}
-          aria-label={title}
-        >
-          <FolderX className="size-3.5" />
-        </span>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <span
+            className={cn(
+              'inline-flex size-4 shrink-0 items-center justify-center rounded-[4px]',
+              destructive ? 'text-destructive' : 'text-muted-foreground'
+            )}
+            aria-label={title}
+          >
+            <FolderX className="size-3.5" />
+          </span>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={6} className="max-w-72">
         <div className="space-y-1">
           <div className="font-medium">{title}</div>
@@ -4497,25 +4501,27 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
 
                       {isProjectGroupHeader && !row.repo && row.projectGroup?.id ? (
                         <DropdownMenu modal={false}>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon-xs"
-                              className={REPO_HEADER_ACTION_BUTTON_CLASS}
-                              data-repo-header-action=""
-                              aria-label={translate(
-                                'auto.components.sidebar.WorktreeList.79465e9034',
-                                'Group actions for {{value0}}',
-                                { value0: row.label }
-                              )}
-                              onClick={(event) => event.stopPropagation()}
-                              onKeyDown={stopRepoHeaderKeyboardToggle}
-                              onPointerDown={handleRepoHeaderActionPointerDown}
-                            >
-                              <Ellipsis className="size-3.5" />
-                            </Button>
-                          </DropdownMenuTrigger>
+                          <DropdownMenuTrigger
+                            render={
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-xs"
+                                className={REPO_HEADER_ACTION_BUTTON_CLASS}
+                                data-repo-header-action=""
+                                aria-label={translate(
+                                  'auto.components.sidebar.WorktreeList.79465e9034',
+                                  'Group actions for {{value0}}',
+                                  { value0: row.label }
+                                )}
+                                onClick={(event) => event.stopPropagation()}
+                                onKeyDown={stopRepoHeaderKeyboardToggle}
+                                onPointerDown={handleRepoHeaderActionPointerDown}
+                              >
+                                <Ellipsis className="size-3.5" />
+                              </Button>
+                            }
+                          />
                           <DropdownMenuContent
                             align="end"
                             side="bottom"
@@ -4565,43 +4571,45 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                       'parentPath' in row.projectGroup &&
                       row.projectGroup.parentPath ? (
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon-xs"
-                              data-repo-header-action=""
-                              className={cn(
-                                REPO_HEADER_ACTION_BUTTON_CLASS,
-                                folderWorkspaceCreateDisabled &&
-                                  'cursor-not-allowed text-muted-foreground/60 hover:bg-transparent hover:text-muted-foreground/60'
-                              )}
-                              aria-label={translate(
-                                'auto.components.sidebar.WorktreeList.bd37a57ac8',
-                                'Create workspace for {{value0}}',
-                                { value0: row.label }
-                              )}
-                              aria-disabled={folderWorkspaceCreateDisabled}
-                              onKeyDown={stopRepoHeaderKeyboardToggle}
-                              onPointerDown={handleRepoHeaderActionPointerDown}
-                              onClick={(event) => {
-                                event.preventDefault()
-                                event.stopPropagation()
-                                if (folderWorkspaceCreateDisabled) {
-                                  return
-                                }
-                                if (
-                                  row.projectGroup &&
-                                  'parentPath' in row.projectGroup &&
-                                  row.projectGroup.parentPath
-                                ) {
-                                  handleCreateFolderWorkspace(row.projectGroup)
-                                }
-                              }}
-                            >
-                              <Plus className="size-3" />
-                            </Button>
-                          </TooltipTrigger>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-xs"
+                                data-repo-header-action=""
+                                className={cn(
+                                  REPO_HEADER_ACTION_BUTTON_CLASS,
+                                  folderWorkspaceCreateDisabled &&
+                                    'cursor-not-allowed text-muted-foreground/60 hover:bg-transparent hover:text-muted-foreground/60'
+                                )}
+                                aria-label={translate(
+                                  'auto.components.sidebar.WorktreeList.bd37a57ac8',
+                                  'Create workspace for {{value0}}',
+                                  { value0: row.label }
+                                )}
+                                aria-disabled={folderWorkspaceCreateDisabled}
+                                onKeyDown={stopRepoHeaderKeyboardToggle}
+                                onPointerDown={handleRepoHeaderActionPointerDown}
+                                onClick={(event) => {
+                                  event.preventDefault()
+                                  event.stopPropagation()
+                                  if (folderWorkspaceCreateDisabled) {
+                                    return
+                                  }
+                                  if (
+                                    row.projectGroup &&
+                                    'parentPath' in row.projectGroup &&
+                                    row.projectGroup.parentPath
+                                  ) {
+                                    handleCreateFolderWorkspace(row.projectGroup)
+                                  }
+                                }}
+                              >
+                                <Plus className="size-3" />
+                              </Button>
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {projectGroupPathStatus?.exists === false
                               ? getFolderWorkspacePathStatusDescription(projectGroupPathStatus)
@@ -4617,27 +4625,31 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                       {row.repo && groupBy === 'repo' ? (
                         <DropdownMenu modal={false}>
                           <Tooltip>
-                            <TooltipTrigger asChild>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon-xs"
-                                  className={REPO_HEADER_ACTION_BUTTON_CLASS}
-                                  data-repo-header-action=""
-                                  aria-label={translate(
-                                    'auto.components.sidebar.WorktreeList.609633a9e6',
-                                    'Project actions for {{value0}}',
-                                    { value0: row.label }
-                                  )}
-                                  onClick={(event) => event.stopPropagation()}
-                                  onKeyDown={stopRepoHeaderKeyboardToggle}
-                                  onPointerDown={handleRepoHeaderActionPointerDown}
-                                >
-                                  <Ellipsis className="size-3.5" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                            </TooltipTrigger>
+                            <TooltipTrigger
+                              render={
+                                <DropdownMenuTrigger
+                                  render={
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon-xs"
+                                      className={REPO_HEADER_ACTION_BUTTON_CLASS}
+                                      data-repo-header-action=""
+                                      aria-label={translate(
+                                        'auto.components.sidebar.WorktreeList.609633a9e6',
+                                        'Project actions for {{value0}}',
+                                        { value0: row.label }
+                                      )}
+                                      onClick={(event) => event.stopPropagation()}
+                                      onKeyDown={stopRepoHeaderKeyboardToggle}
+                                      onPointerDown={handleRepoHeaderActionPointerDown}
+                                    >
+                                      <Ellipsis className="size-3.5" />
+                                    </Button>
+                                  }
+                                />
+                              }
+                            />
                             <TooltipContent side="bottom" sideOffset={6}>
                               {translate(
                                 'auto.components.sidebar.WorktreeList.2ef41bf9a7',
@@ -4808,59 +4820,61 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
 
                       {row.repo && groupBy === 'repo' ? (
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            {createState?.disabled ? (
-                              <span
-                                className={cn(
-                                  'inline-flex cursor-not-allowed transition-[margin,max-width,opacity]',
-                                  REPO_HEADER_ACTION_REVEAL_CLASS
-                                )}
-                                data-repo-header-action=""
-                                tabIndex={0}
-                                aria-label={createState.ariaLabel}
-                                onKeyDown={stopRepoHeaderKeyboardToggle}
-                                onClick={(event) => event.stopPropagation()}
-                                onPointerDown={handleRepoHeaderActionPointerDown}
-                              >
+                          <TooltipTrigger
+                            render={
+                              createState?.disabled ? (
+                                <span
+                                  className={cn(
+                                    'inline-flex cursor-not-allowed transition-[margin,max-width,opacity]',
+                                    REPO_HEADER_ACTION_REVEAL_CLASS
+                                  )}
+                                  data-repo-header-action=""
+                                  tabIndex={0}
+                                  aria-label={createState.ariaLabel}
+                                  onKeyDown={stopRepoHeaderKeyboardToggle}
+                                  onClick={(event) => event.stopPropagation()}
+                                  onPointerDown={handleRepoHeaderActionPointerDown}
+                                >
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-xs"
+                                    className="pointer-events-none size-5 shrink-0 rounded-md text-muted-foreground transition-opacity opacity-60"
+                                    aria-label={createState.ariaLabel}
+                                    disabled
+                                  >
+                                    <Plus className="size-3" />
+                                  </Button>
+                                </span>
+                              ) : (
                                 <Button
                                   type="button"
                                   variant="ghost"
                                   size="icon-xs"
-                                  className="pointer-events-none size-5 shrink-0 rounded-md text-muted-foreground transition-opacity opacity-60"
-                                  aria-label={createState.ariaLabel}
-                                  disabled
+                                  className={REPO_HEADER_ACTION_BUTTON_CLASS}
+                                  data-repo-header-action=""
+                                  aria-label={
+                                    createState?.ariaLabel ??
+                                    translate(
+                                      'auto.components.sidebar.WorktreeList.bb85cd86ba',
+                                      'Create workspace for {{value0}}',
+                                      { value0: row.label }
+                                    )
+                                  }
+                                  onKeyDown={stopRepoHeaderKeyboardToggle}
+                                  onClick={(event) => {
+                                    event.preventDefault()
+                                    event.stopPropagation()
+                                    if (row.repo) {
+                                      handleCreateForRepo(row.repo.id)
+                                    }
+                                  }}
                                 >
                                   <Plus className="size-3" />
                                 </Button>
-                              </span>
-                            ) : (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon-xs"
-                                className={REPO_HEADER_ACTION_BUTTON_CLASS}
-                                data-repo-header-action=""
-                                aria-label={
-                                  createState?.ariaLabel ??
-                                  translate(
-                                    'auto.components.sidebar.WorktreeList.bb85cd86ba',
-                                    'Create workspace for {{value0}}',
-                                    { value0: row.label }
-                                  )
-                                }
-                                onKeyDown={stopRepoHeaderKeyboardToggle}
-                                onClick={(event) => {
-                                  event.preventDefault()
-                                  event.stopPropagation()
-                                  if (row.repo) {
-                                    handleCreateForRepo(row.repo.id)
-                                  }
-                                }}
-                              >
-                                <Plus className="size-3" />
-                              </Button>
-                            )}
-                          </TooltipTrigger>
+                              )
+                            }
+                          />
                           <TooltipContent side="bottom" sideOffset={6}>
                             {createState?.tooltip ??
                               translate(

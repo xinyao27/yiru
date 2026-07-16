@@ -67,20 +67,22 @@ export function AdvancedPane({ settings, updateSettings }: AdvancedPaneProps): R
                     'HTTP/1.1 Compatibility'
                   )}
                 </Label>
-                <TooltipProvider delayDuration={250}>
+                <TooltipProvider delay={250}>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        aria-label={translate(
-                          'auto.components.settings.AdvancedPane.6627e75c92',
-                          'Explain HTTP/1.1 compatibility'
-                        )}
-                        className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                      >
-                        <Info className="size-3.5" />
-                      </button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <button
+                          type="button"
+                          aria-label={translate(
+                            'auto.components.settings.AdvancedPane.6627e75c92',
+                            'Explain HTTP/1.1 compatibility'
+                          )}
+                          className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                        >
+                          <Info className="size-3.5" />
+                        </button>
+                      }
+                    />
                     <TooltipContent
                       side="top"
                       sideOffset={6}

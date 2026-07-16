@@ -127,24 +127,27 @@ export function EditorPanelHeaderPath({
         </span>
       </div>
       <DropdownMenu open={pathMenuOpen} onOpenChange={setPathMenuOpen} modal={false}>
-        <DropdownMenuTrigger asChild>
-          <button
-            aria-hidden
-            tabIndex={-1}
-            className="pointer-events-none fixed size-px opacity-0"
-            style={{ left: pathMenuPoint.x, top: pathMenuPoint.y }}
-          />
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <button
+              aria-hidden
+              tabIndex={-1}
+              className="pointer-events-none fixed size-px opacity-0"
+              style={{ left: pathMenuPoint.x, top: pathMenuPoint.y }}
+            />
+          }
+        />
         <DropdownMenuContent
           className="w-56"
           sideOffset={0}
           align="start"
-          onCloseAutoFocus={(event) => {
+          finalFocus={() => {
             if (!skipMenuFocusRestoreRef.current) {
               return
             }
             skipMenuFocusRestoreRef.current = false
-            event.preventDefault()
+            // Return false to suppress the default focus restore.
+            return false
           }}
         >
           <DropdownMenuItem

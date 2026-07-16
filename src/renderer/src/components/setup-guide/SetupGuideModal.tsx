@@ -119,21 +119,23 @@ export default function SetupGuideModal(): JSX.Element | null {
         tabIndex={-1}
       >
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              aria-label={translate(
-                'auto.components.setup.guide.SetupGuideModal.f3b5ffb2a6',
-                'Hide checklist from sidebar'
-              )}
-              onClick={handleHideFromSidebar}
-              className="absolute right-10 top-3.5 text-muted-foreground"
-            >
-              <EyeOff className="size-4" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                aria-label={translate(
+                  'auto.components.setup.guide.SetupGuideModal.f3b5ffb2a6',
+                  'Hide checklist from sidebar'
+                )}
+                onClick={handleHideFromSidebar}
+                className="absolute right-10 top-3.5 text-muted-foreground"
+              >
+                <EyeOff className="size-4" />
+              </Button>
+            }
+          />
           <TooltipContent side="top" sideOffset={4}>
             {translate(
               'auto.components.setup.guide.SetupGuideModal.28cf59fcb4',

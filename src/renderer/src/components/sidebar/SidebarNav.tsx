@@ -69,30 +69,32 @@ const SidebarNav = React.memo(function SidebarNav() {
       <SidebarTaskNavButton />
       {showAutomationsButton ? (
         <ContextMenu>
-          <ContextMenuTrigger asChild>
-            <button
-              type="button"
-              onClick={openAutomationsPage}
-              aria-current={automationsActive ? 'page' : undefined}
-              className={cn(
-                'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium tracking-tight transition-colors',
-                automationsActive
-                  ? 'bg-worktree-sidebar-accent text-worktree-sidebar-accent-foreground'
-                  : 'text-worktree-sidebar-foreground/60 hover:bg-worktree-sidebar-foreground/8'
-              )}
-            >
-              <CalendarClock
+          <ContextMenuTrigger
+            render={
+              <button
+                type="button"
+                onClick={openAutomationsPage}
+                aria-current={automationsActive ? 'page' : undefined}
                 className={cn(
-                  'size-4 shrink-0',
-                  !automationsActive && 'text-worktree-sidebar-foreground/30'
+                  'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium tracking-tight transition-colors',
+                  automationsActive
+                    ? 'bg-worktree-sidebar-accent text-worktree-sidebar-accent-foreground'
+                    : 'text-worktree-sidebar-foreground/60 hover:bg-worktree-sidebar-foreground/8'
                 )}
-                strokeWidth={automationsActive ? 2.25 : 1.75}
-              />
-              <span className="flex-1">
-                {translate('auto.components.sidebar.SidebarNav.f323383e9a', 'Automations')}
-              </span>
-            </button>
-          </ContextMenuTrigger>
+              >
+                <CalendarClock
+                  className={cn(
+                    'size-4 shrink-0',
+                    !automationsActive && 'text-worktree-sidebar-foreground/30'
+                  )}
+                  strokeWidth={automationsActive ? 2.25 : 1.75}
+                />
+                <span className="flex-1">
+                  {translate('auto.components.sidebar.SidebarNav.f323383e9a', 'Automations')}
+                </span>
+              </button>
+            }
+          />
           <HideSidebarMenu onHide={hideAutomationsButton} />
         </ContextMenu>
       ) : null}
@@ -127,38 +129,40 @@ const SidebarNav = React.memo(function SidebarNav() {
       ) : null}
       {showMobileButton ? (
         <ContextMenu>
-          <ContextMenuTrigger asChild>
-            <button
-              type="button"
-              onClick={() => {
-                mobileOnboardingBadge.dismiss()
-                openMobilePage()
-              }}
-              aria-current={mobileActive ? 'page' : undefined}
-              className={cn(
-                'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium tracking-tight transition-colors',
-                mobileActive
-                  ? 'bg-worktree-sidebar-accent text-worktree-sidebar-accent-foreground'
-                  : 'text-worktree-sidebar-foreground/60 hover:bg-worktree-sidebar-foreground/8'
-              )}
-            >
-              <Smartphone
+          <ContextMenuTrigger
+            render={
+              <button
+                type="button"
+                onClick={() => {
+                  mobileOnboardingBadge.dismiss()
+                  openMobilePage()
+                }}
+                aria-current={mobileActive ? 'page' : undefined}
                 className={cn(
-                  'size-4 shrink-0',
-                  !mobileActive && 'text-worktree-sidebar-foreground/30'
+                  'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium tracking-tight transition-colors',
+                  mobileActive
+                    ? 'bg-worktree-sidebar-accent text-worktree-sidebar-accent-foreground'
+                    : 'text-worktree-sidebar-foreground/60 hover:bg-worktree-sidebar-foreground/8'
                 )}
-                strokeWidth={mobileActive ? 2.25 : 1.75}
-              />
-              <span className="flex-1">
-                {translate('auto.components.sidebar.SidebarNav.1b5c41caee', 'Orca Mobile')}
-              </span>
-              {mobileOnboardingBadge.visible ? (
-                <span className="rounded-full bg-primary px-1.5 py-px text-[10px] font-semibold text-primary-foreground">
-                  {translate('auto.components.sidebar.SidebarNav.c86d83b5c3', 'New')}
+              >
+                <Smartphone
+                  className={cn(
+                    'size-4 shrink-0',
+                    !mobileActive && 'text-worktree-sidebar-foreground/30'
+                  )}
+                  strokeWidth={mobileActive ? 2.25 : 1.75}
+                />
+                <span className="flex-1">
+                  {translate('auto.components.sidebar.SidebarNav.1b5c41caee', 'Orca Mobile')}
                 </span>
-              ) : null}
-            </button>
-          </ContextMenuTrigger>
+                {mobileOnboardingBadge.visible ? (
+                  <span className="rounded-full bg-primary px-1.5 py-px text-[10px] font-semibold text-primary-foreground">
+                    {translate('auto.components.sidebar.SidebarNav.c86d83b5c3', 'New')}
+                  </span>
+                ) : null}
+              </button>
+            }
+          />
           <HideSidebarMenu onHide={hideMobileButton} />
         </ContextMenu>
       ) : null}

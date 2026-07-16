@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
+import type { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAppStore } from '@/store'
@@ -424,7 +425,24 @@ export default function SmartWorkspaceNameField({
   }, [disabled, mode])
 
   const handleSourcePopoverOpenChange = useCallback(
-    (next: boolean): void => {
+    (next: boolean, eventDetails: PopoverPrimitive.Root.ChangeEventDetails): void => {
+      // Why: the input is a PopoverAnchor, not a PopoverTrigger, so Base UI
+      // treats clicks/focus on it (and the mode tabs) as outside presses.
+      // Cancel those closes to keep results open — replaces the old
+      // onPointerDownOutside/onFocusOutside handlers on the content.
+      if (
+        !next &&
+        (eventDetails.reason === 'outside-press' || eventDetails.reason === 'focus-out')
+      ) {
+        const target = eventDetails.event.target as Node | null
+        if (
+          target &&
+          (localInputRef.current?.contains(target) || tabsListRef.current?.contains(target))
+        ) {
+          eventDetails.cancel()
+          return
+        }
+      }
       if (disabled || selectedSource) {
         setOpen(false)
         return
@@ -1371,7 +1389,7 @@ export default function SmartWorkspaceNameField({
           shouldFilter={false}
           className="overflow-visible bg-transparent"
         >
-          <PopoverAnchor asChild>
+          <PopoverAnchor>
             <div className="relative min-w-0">
               {selectedSource ? (
                 // Why: min-w-0 + w-full lets the pill shrink to its flex
@@ -1404,21 +1422,23 @@ export default function SmartWorkspaceNameField({
                   </span>
                   {selectedSource.url ? (
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={() => void window.api.shell.openUrl(selectedSource.url!)}
-                          className="size-6 shrink-0 rounded-sm text-muted-foreground hover:text-foreground"
-                          aria-label={translate(
-                            'auto.components.new.workspace.SmartWorkspaceNameField.2c69728c2a',
-                            'Open link in browser'
-                          )}
-                        >
-                          <ExternalLink className="size-3.5" />
-                        </Button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            onClick={() => void window.api.shell.openUrl(selectedSource.url!)}
+                            className="size-6 shrink-0 rounded-sm text-muted-foreground hover:text-foreground"
+                            aria-label={translate(
+                              'auto.components.new.workspace.SmartWorkspaceNameField.2c69728c2a',
+                              'Open link in browser'
+                            )}
+                          >
+                            <ExternalLink className="size-3.5" />
+                          </Button>
+                        }
+                      />
                       <TooltipContent side="top" sideOffset={6}>
                         {translate(
                           'auto.components.new.workspace.SmartWorkspaceNameField.370a1faf67',
@@ -1428,21 +1448,23 @@ export default function SmartWorkspaceNameField({
                     </Tooltip>
                   ) : null}
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={onClearSelectedSource}
-                        className="size-6 shrink-0 rounded-sm text-muted-foreground hover:text-foreground"
-                        aria-label={translate(
-                          'auto.components.new.workspace.SmartWorkspaceNameField.7199ff19c7',
-                          'Clear selected source'
-                        )}
-                      >
-                        <X className="size-3.5" />
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={onClearSelectedSource}
+                          className="size-6 shrink-0 rounded-sm text-muted-foreground hover:text-foreground"
+                          aria-label={translate(
+                            'auto.components.new.workspace.SmartWorkspaceNameField.7199ff19c7',
+                            'Clear selected source'
+                          )}
+                        >
+                          <X className="size-3.5" />
+                        </Button>
+                      }
+                    />
                     <TooltipContent side="top" sideOffset={6}>
                       {translate(
                         'auto.components.new.workspace.SmartWorkspaceNameField.0c9e668e3a',
@@ -1539,28 +1561,9 @@ export default function SmartWorkspaceNameField({
             // Why: this popover lives inside the create-workspace dialog; a
             // taller result list can cover the submit footer while typing.
             style={{ maxHeight: 'min(var(--radix-popover-content-available-height,7rem),7rem)' }}
-            onOpenAutoFocus={(event) => event.preventDefault()}
-            onPointerDownOutside={(event) => {
-              // Why: the input is a PopoverAnchor, not a PopoverTrigger, so
-              // Radix treats clicks on it as outside the popover. Keep focus
-              // clicks and mode-tab clicks from immediately closing results.
-              const target = event.target as Node
-              if (
-                localInputRef.current?.contains(target) ||
-                tabsListRef.current?.contains(target)
-              ) {
-                event.preventDefault()
-              }
-            }}
-            onFocusOutside={(event) => {
-              const target = event.target as Node
-              if (
-                localInputRef.current?.contains(target) ||
-                tabsListRef.current?.contains(target)
-              ) {
-                event.preventDefault()
-              }
-            }}
+            // Why: outside-press/focus-out cancellation now lives on the Popover
+            // root's onOpenChange (see handleSourcePopoverOpenChange).
+            initialFocus={false}
           >
             {mode === 'gitlab' ? (
               // Why: GitLab MR-state filter — Open / Merged / Closed / All —

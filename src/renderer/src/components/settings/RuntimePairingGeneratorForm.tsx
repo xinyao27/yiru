@@ -122,22 +122,24 @@ export function RuntimePairingGeneratorForm({
             {/* Why: server sharing uses the same interface list as Mobile,
                 and VPN/tailnet addresses can appear after Settings opens. */}
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={onRefreshNetworkInterfaces}
-                  disabled={refreshingNetworkInterfaces}
-                  aria-label={translate(
-                    'auto.components.settings.RuntimePairingUrlGenerator.360c548cf3',
-                    'Refresh connection addresses'
-                  )}
-                  className="text-muted-foreground"
-                >
-                  <RefreshCw className={refreshingNetworkInterfaces ? 'animate-spin' : ''} />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={onRefreshNetworkInterfaces}
+                    disabled={refreshingNetworkInterfaces}
+                    aria-label={translate(
+                      'auto.components.settings.RuntimePairingUrlGenerator.360c548cf3',
+                      'Refresh connection addresses'
+                    )}
+                    className="text-muted-foreground"
+                  >
+                    <RefreshCw className={refreshingNetworkInterfaces ? 'animate-spin' : ''} />
+                  </Button>
+                }
+              />
               <TooltipContent side="bottom" sideOffset={6}>
                 {translate(
                   'auto.components.settings.RuntimePairingUrlGenerator.360c548cf3',

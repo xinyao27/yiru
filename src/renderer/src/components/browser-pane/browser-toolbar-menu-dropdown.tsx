@@ -59,19 +59,21 @@ export function BrowserToolbarMenuDropdown({
 }: BrowserToolbarMenuDropdownProps): React.JSX.Element {
   return (
     <DropdownMenu modal={false} open={menuOpen} onOpenChange={onMenuOpenChange}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8"
-          title={translate(
-            'auto.components.browser.pane.BrowserToolbarMenu.7b838540c7',
-            'Browser menu'
-          )}
-        >
-          <Ellipsis className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8"
+            title={translate(
+              'auto.components.browser.pane.BrowserToolbarMenu.7b838540c7',
+              'Browser menu'
+            )}
+          >
+            <Ellipsis className="size-4" />
+          </Button>
+        }
+      />
       <DropdownMenuContent align="end" className="w-56">
         {allProfiles.map((profile) => {
           const isSelectedProfile = profile.id === effectiveProfileId

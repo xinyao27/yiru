@@ -137,7 +137,7 @@ export function RepositorySourceControlAiActionRows({
               </div>
               <Select
                 value={hasOverride ? ACTION_MODE_OVERRIDE : ACTION_MODE_INHERIT}
-                onValueChange={(value) => onActionModeChange(actionId, value)}
+                onValueChange={(value) => value && onActionModeChange(actionId, value)}
               >
                 <SelectTrigger size="sm" className="h-8 w-full shrink-0 text-xs sm:w-[150px]">
                   <SelectValue />
@@ -168,7 +168,7 @@ export function RepositorySourceControlAiActionRows({
                 </Label>
                 <Select
                   value={actionAgentSelectValue(effectiveAgent)}
-                  onValueChange={(value) => onActionAgentChange(actionId, value)}
+                  onValueChange={(value) => value && onActionAgentChange(actionId, value)}
                   disabled={!hasOverride}
                 >
                   <SelectTrigger size="sm" className="h-8 w-full text-xs">

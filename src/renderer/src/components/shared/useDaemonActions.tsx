@@ -281,30 +281,20 @@ export function DaemonActionDialog({
   return (
     <Dialog
       open={pending !== null}
-      onOpenChange={(open) => {
+      onOpenChange={(open, eventDetails) => {
         if (open) {
           return
         }
         if (isBusy) {
+          // Why: keep the confirm dialog open until the daemon responds; cancel
+          // the close (outside-press/escape) instead of dismissing mid-action.
+          eventDetails.cancel()
           return
         }
         setPending(null)
       }}
     >
-      <DialogContent
-        className="max-w-md"
-        showCloseButton={!isBusy}
-        onPointerDownOutside={(e) => {
-          if (isBusy) {
-            e.preventDefault()
-          }
-        }}
-        onEscapeKeyDown={(e) => {
-          if (isBusy) {
-            e.preventDefault()
-          }
-        }}
-      >
+      <DialogContent className="max-w-md" showCloseButton={!isBusy}>
         {copy ? (
           <>
             <DialogHeader>

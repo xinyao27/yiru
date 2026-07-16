@@ -166,22 +166,24 @@ export function WslCliRegistration({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <TooltipProvider delayDuration={250}>
+            <TooltipProvider delay={250}>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => void refreshStatus()}
-                    disabled={loading || busyAction !== null}
-                    aria-label={translate(
-                      'auto.components.settings.WslCliRegistration.ab6b022a5c',
-                      'Refresh WSL CLI status'
-                    )}
-                  >
-                    <RefreshCw className="size-3.5" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => void refreshStatus()}
+                      disabled={loading || busyAction !== null}
+                      aria-label={translate(
+                        'auto.components.settings.WslCliRegistration.ab6b022a5c',
+                        'Refresh WSL CLI status'
+                      )}
+                    >
+                      <RefreshCw className="size-3.5" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="bottom" sideOffset={6}>
                   {translate('auto.components.settings.WslCliRegistration.9b6627522c', 'Refresh')}
                 </TooltipContent>

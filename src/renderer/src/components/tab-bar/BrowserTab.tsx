@@ -253,7 +253,7 @@ export default function BrowserTab({
           tabRoot
         ) : (
           <Tooltip>
-            <TooltipTrigger asChild>{tabRoot}</TooltipTrigger>
+            <TooltipTrigger render={tabRoot} />
             <TooltipContent
               side="bottom"
               sideOffset={6}
@@ -266,14 +266,16 @@ export default function BrowserTab({
       </div>
 
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
-        <DropdownMenuTrigger asChild>
-          <button
-            aria-hidden
-            tabIndex={-1}
-            className="pointer-events-none fixed size-px opacity-0"
-            style={{ left: menuPoint.x, top: menuPoint.y }}
-          />
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <button
+              aria-hidden
+              tabIndex={-1}
+              className="pointer-events-none fixed size-px opacity-0"
+              style={{ left: menuPoint.x, top: menuPoint.y }}
+            />
+          }
+        />
         <DropdownMenuContent
           className="min-w-[11rem] rounded-[11px] border-border/80 p-1 shadow-[0_16px_36px_rgba(0,0,0,0.24)]"
           sideOffset={0}

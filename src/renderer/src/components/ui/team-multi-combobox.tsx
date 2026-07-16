@@ -126,18 +126,20 @@ export default function TeamMultiCombobox({
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn('h-8 w-full justify-between px-3 text-xs font-normal', triggerClassName)}
-        >
-          {renderTriggerLabel(teams, selected)}
-          <ChevronsUpDown className="size-3.5 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn('h-8 w-full justify-between px-3 text-xs font-normal', triggerClassName)}
+          >
+            {renderTriggerLabel(teams, selected)}
+            <ChevronsUpDown className="size-3.5 opacity-50" />
+          </Button>
+        }
+      />
       <PopoverContent
         align="start"
         // Why: team filter triggers can collapse in narrow toolbars; the menu

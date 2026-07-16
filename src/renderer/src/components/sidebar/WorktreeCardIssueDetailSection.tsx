@@ -44,18 +44,20 @@ export function WorktreeCardIssueDetailSection({
     'More issue actions'
   )
   const moreActionsTrigger = (
-    <DropdownMenuTrigger asChild>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-xs"
-        className="size-6"
-        aria-label={moreActionsLabel}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <Ellipsis className="size-3" />
-      </Button>
-    </DropdownMenuTrigger>
+    <DropdownMenuTrigger
+      render={
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className="size-6"
+          aria-label={moreActionsLabel}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <Ellipsis className="size-3" />
+        </Button>
+      }
+    />
   )
 
   return (
@@ -77,7 +79,7 @@ export function WorktreeCardIssueDetailSection({
                   moreActionsTrigger
                 ) : (
                   <Tooltip>
-                    <TooltipTrigger asChild>{moreActionsTrigger}</TooltipTrigger>
+                    <TooltipTrigger render={moreActionsTrigger} />
                     <TooltipContent side="top" sideOffset={4}>
                       {moreActionsLabel}
                     </TooltipContent>

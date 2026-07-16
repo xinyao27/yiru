@@ -105,52 +105,54 @@ export default function HostedReviewActions({
   if (review.state === 'open') {
     return (
       <div className="space-y-1.5">
-        <TooltipProvider delayDuration={300}>
+        <TooltipProvider delay={300}>
           <div className={RIGHT_SIDEBAR_SPLIT_ACTION_ROW_CLASS}>
             <Tooltip>
-              <TooltipTrigger asChild>
-                {/* Why: wrapping in a <span> so the tooltip trigger receives pointer
+              {/* Why: wrapping in a <span> so the tooltip trigger receives pointer
                   events even when the merge button inside is disabled. */}
-                <span
-                  className={cn(
-                    'inline-flex min-w-0 max-w-full shrink',
-                    primaryMergeDisabled && 'cursor-not-allowed'
-                  )}
-                >
-                  <Button
-                    type="button"
-                    size="xs"
+              <TooltipTrigger
+                render={
+                  <span
                     className={cn(
-                      'rounded-r-none px-3 text-[11px]',
-                      RIGHT_SIDEBAR_MERGE_PRIMARY_BUTTON_CLASS,
-                      'bg-green-600 text-white hover:bg-green-700',
-                      'disabled:opacity-50 disabled:cursor-not-allowed'
+                      'inline-flex min-w-0 max-w-full shrink',
+                      primaryMergeDisabled && 'cursor-not-allowed'
                     )}
-                    onClick={() =>
-                      mergePresentation.autoMergeAction && !mergePresentation.directMergeAvailable
-                        ? void handleAutoMerge()
-                        : void handleMerge(mergeMethods.defaultMethod)
-                    }
-                    disabled={primaryMergeDisabled}
                   >
-                    {merging ? (
-                      <LoaderCircle className="size-3.5 animate-spin" />
-                    ) : (
-                      <GitMerge className="size-3.5" />
-                    )}
-                    <span className={RIGHT_SIDEBAR_PRIMARY_BUTTON_LABEL_CLASS}>
-                      {merging
-                        ? translate(
-                            'auto.components.right.sidebar.HostedReviewActions.d2ca293f3d',
-                            'Working...'
-                          )
-                        : mergePresentation.directMergeAvailable
-                          ? mergeMethods.defaultLabel
-                          : (mergePresentation.autoMergeAction?.label ?? mergePresentation.label)}
-                    </span>
-                  </Button>
-                </span>
-              </TooltipTrigger>
+                    <Button
+                      type="button"
+                      size="xs"
+                      className={cn(
+                        'rounded-r-none px-3 text-[11px]',
+                        RIGHT_SIDEBAR_MERGE_PRIMARY_BUTTON_CLASS,
+                        'bg-green-600 text-white hover:bg-green-700',
+                        'disabled:opacity-50 disabled:cursor-not-allowed'
+                      )}
+                      onClick={() =>
+                        mergePresentation.autoMergeAction && !mergePresentation.directMergeAvailable
+                          ? void handleAutoMerge()
+                          : void handleMerge(mergeMethods.defaultMethod)
+                      }
+                      disabled={primaryMergeDisabled}
+                    >
+                      {merging ? (
+                        <LoaderCircle className="size-3.5 animate-spin" />
+                      ) : (
+                        <GitMerge className="size-3.5" />
+                      )}
+                      <span className={RIGHT_SIDEBAR_PRIMARY_BUTTON_LABEL_CLASS}>
+                        {merging
+                          ? translate(
+                              'auto.components.right.sidebar.HostedReviewActions.d2ca293f3d',
+                              'Working...'
+                            )
+                          : mergePresentation.directMergeAvailable
+                            ? mergeMethods.defaultLabel
+                            : (mergePresentation.autoMergeAction?.label ?? mergePresentation.label)}
+                      </span>
+                    </Button>
+                  </span>
+                }
+              />
               {primaryMergeDisabled && (
                 <TooltipContent side="bottom" sideOffset={4}>
                   {mergePresentation.tooltip}
@@ -158,33 +160,35 @@ export default function HostedReviewActions({
               )}
             </Tooltip>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  size="xs"
-                  className={cn(
-                    'rounded-l-none border-l border-green-700/50 px-1.5 shrink-0',
-                    'bg-green-600 text-white hover:bg-green-700',
-                    'disabled:opacity-50 disabled:cursor-not-allowed'
-                  )}
-                  disabled={menuDisabled}
-                  aria-label={translate(
-                    'auto.components.right.sidebar.HostedReviewActions.2bfaf4379c',
-                    'More {{value0}} actions',
-                    { value0: reviewLabel }
-                  )}
-                  title={translate(
-                    'auto.components.right.sidebar.HostedReviewActions.9845a71e17',
-                    'More actions'
-                  )}
-                >
-                  {stateUpdating === 'closed' ? (
-                    <LoaderCircle className="size-3.5 animate-spin" />
-                  ) : (
-                    <ChevronDown className="size-3.5" />
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    size="xs"
+                    className={cn(
+                      'rounded-l-none border-l border-green-700/50 px-1.5 shrink-0',
+                      'bg-green-600 text-white hover:bg-green-700',
+                      'disabled:opacity-50 disabled:cursor-not-allowed'
+                    )}
+                    disabled={menuDisabled}
+                    aria-label={translate(
+                      'auto.components.right.sidebar.HostedReviewActions.2bfaf4379c',
+                      'More {{value0}} actions',
+                      { value0: reviewLabel }
+                    )}
+                    title={translate(
+                      'auto.components.right.sidebar.HostedReviewActions.9845a71e17',
+                      'More actions'
+                    )}
+                  >
+                    {stateUpdating === 'closed' ? (
+                      <LoaderCircle className="size-3.5 animate-spin" />
+                    ) : (
+                      <ChevronDown className="size-3.5" />
+                    )}
+                  </Button>
+                }
+              />
               <DropdownMenuContent align="end" className="w-52">
                 {mergePresentation.autoMergeAction && (
                   <>

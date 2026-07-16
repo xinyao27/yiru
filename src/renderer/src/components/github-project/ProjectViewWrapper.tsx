@@ -1249,20 +1249,24 @@ function ViewTabStrip({
         }
         const unsupportedMessage = `Orca doesn't support ${layoutLabel} project views yet.`
         return (
-          <HoverCard key={v.id} openDelay={200} closeDelay={100}>
-            <HoverCardTrigger asChild>
-              <span
-                tabIndex={0}
-                aria-label={translate(
-                  'auto.components.github.project.ProjectViewWrapper.55de4fb57a',
-                  '{{value0}}. {{value1}} File a feature request at {{value2}}.',
-                  { value0: v.name, value1: unsupportedMessage, value2: ORCA_FEATURE_REQUEST_URL }
-                )}
-                className="inline-flex shrink-0 cursor-not-allowed rounded-t-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              >
-                {tab}
-              </span>
-            </HoverCardTrigger>
+          <HoverCard key={v.id}>
+            <HoverCardTrigger
+              delay={200}
+              closeDelay={100}
+              render={
+                <span
+                  tabIndex={0}
+                  aria-label={translate(
+                    'auto.components.github.project.ProjectViewWrapper.55de4fb57a',
+                    '{{value0}}. {{value1}} File a feature request at {{value2}}.',
+                    { value0: v.name, value1: unsupportedMessage, value2: ORCA_FEATURE_REQUEST_URL }
+                  )}
+                  className="inline-flex shrink-0 cursor-not-allowed rounded-t-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  {tab}
+                </span>
+              }
+            />
             <HoverCardContent side="bottom" align="start" sideOffset={8} className="w-72 p-3">
               <div className="space-y-2">
                 <p className="text-xs leading-5 text-muted-foreground">

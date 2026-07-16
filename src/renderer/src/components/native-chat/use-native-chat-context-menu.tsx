@@ -134,20 +134,17 @@ export function useNativeChatContextMenu({
     onSelectionCapture: rememberCurrentSelection,
     menu: (
       <DropdownMenu open={state.open} onOpenChange={setOpen} modal={false}>
-        <DropdownMenuTrigger asChild>
-          <button
-            aria-hidden
-            tabIndex={-1}
-            className="pointer-events-none fixed size-px opacity-0"
-            style={{ left: state.point.x, top: state.point.y }}
-          />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="w-56"
-          sideOffset={0}
-          align="start"
-          onCloseAutoFocus={(event) => event.preventDefault()}
-        >
+        <DropdownMenuTrigger
+          render={
+            <button
+              aria-hidden
+              tabIndex={-1}
+              className="pointer-events-none fixed size-px opacity-0"
+              style={{ left: state.point.x, top: state.point.y }}
+            />
+          }
+        />
+        <DropdownMenuContent className="w-56" sideOffset={0} align="start" finalFocus={false}>
           <DropdownMenuItem
             disabled={state.selectedText.trim().length === 0}
             onSelect={() => void window.api.ui.writeClipboardText(state.selectedText)}

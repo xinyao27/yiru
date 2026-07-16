@@ -740,16 +740,18 @@ function TabBarInner({
     !terminalOnly && mobileEmulatorEnabled && onNewSimulatorTab ? (
       workspaceHasSimulatorTab ? (
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuItem
-              onSelect={onNewSimulatorTab}
-              className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
-            >
-              <Smartphone className="size-4 text-muted-foreground" />
-              {translate('auto.components.tab.bar.TabBar.b426bb2615', 'Go to Mobile Emulator')}
-              <DropdownMenuShortcut>{newSimulatorShortcut}</DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <DropdownMenuItem
+                onSelect={onNewSimulatorTab}
+                className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 font-medium"
+              >
+                <Smartphone className="size-4 text-muted-foreground" />
+                {translate('auto.components.tab.bar.TabBar.b426bb2615', 'Go to Mobile Emulator')}
+                <DropdownMenuShortcut>{newSimulatorShortcut}</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            }
+          />
           <TooltipContent side="right" sideOffset={8} className="z-[80]">
             {translate(
               'auto.components.tab.bar.TabBar.aea43b5748',
@@ -1185,30 +1187,33 @@ function TabBarInner({
         // pointer events and make that toast (and other outside UI) unclickable.
         modal={false}
       >
-        <DropdownMenuTrigger asChild>
-          <button
-            className="ml-2 my-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-            title={translate('auto.components.tab.bar.TabBar.b1a132357f', 'New tab')}
-            // Why: aria-label matches the tooltip so E2E can locate the "+"
-            // affordance via getByRole('button', { name: 'New tab' }). The
-            // store-only createTab() round-trip that preceded this was a
-            // tautology — it would pass even if the + button had been deleted.
-            aria-label={translate('auto.components.tab.bar.TabBar.b1a132357f', 'New tab')}
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <button
+              className="ml-2 my-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+              style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+              title={translate('auto.components.tab.bar.TabBar.b1a132357f', 'New tab')}
+              // Why: aria-label matches the tooltip so E2E can locate the "+"
+              // affordance via getByRole('button', { name: 'New tab' }). The
+              // store-only createTab() round-trip that preceded this was a
+              // tautology — it would pass even if the + button had been deleted.
+              aria-label={translate('auto.components.tab.bar.TabBar.b1a132357f', 'New tab')}
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          }
+        />
         <DropdownMenuContent
           align="start"
           sideOffset={6}
           className="w-72 max-w-[calc(100vw-1rem)] rounded-[11px] border-border/80 p-1 shadow-[0_16px_36px_rgba(0,0,0,0.24)]"
-          onCloseAutoFocus={(e) => {
+          finalFocus={() => {
             // Why: terminal-producing menu actions activate a freshly-mounted
-            // xterm. Radix's default focus restore sends focus back to the "+"
-            // trigger after close, stealing it from the new terminal.
-            e.preventDefault()
+            // xterm. The default focus restore sends focus back to the "+"
+            // trigger after close, stealing it from the new terminal; return
+            // false to suppress it and run our custom focus instead.
             runPendingNewTabMenuFocusAfterClose()
+            return false
           }}
         >
           {!terminalOnly && onOpenEntry ? (

@@ -75,18 +75,20 @@ function ToolbarIconButton({
 }): React.JSX.Element {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          aria-label={label}
-          onClick={onClick}
-          className={className}
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label={label}
+            onClick={onClick}
+            className={className}
+          >
+            {children}
+          </Button>
+        }
+      />
       <TooltipContent side="bottom" sideOffset={6}>
         {label}
       </TooltipContent>
@@ -152,19 +154,24 @@ export function AutomationDetail({
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => onRunNow(automation)}
-                  disabled={runNowDisabled}
-                >
-                  <Play className="size-4" />
-                  {translate('auto.components.automations.AutomationDetail.2fb1605beb', 'Run Now')}
-                </Button>
-              </span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onRunNow(automation)}
+                    disabled={runNowDisabled}
+                  >
+                    <Play className="size-4" />
+                    {translate(
+                      'auto.components.automations.AutomationDetail.2fb1605beb',
+                      'Run Now'
+                    )}
+                  </Button>
+                </span>
+              }
+            />
             {runNowDisabled ? (
               <TooltipContent side="bottom" sideOffset={6}>
                 {runNowAvailability.message}

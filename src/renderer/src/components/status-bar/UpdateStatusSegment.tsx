@@ -80,18 +80,20 @@ export function UpdateStatusSegment({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          onClick={handleClick}
-          className="inline-flex items-center gap-1.5 cursor-pointer rounded px-1 py-0.5 hover:bg-accent/70"
-          aria-label={segment.ariaLabel}
-          aria-expanded={!collapsed}
-        >
-          {segment.icon}
-          {!iconOnly && <span className="text-[11px] tabular-nums">{segment.label}</span>}
-        </button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            onClick={handleClick}
+            className="inline-flex items-center gap-1.5 cursor-pointer rounded px-1 py-0.5 hover:bg-accent/70"
+            aria-label={segment.ariaLabel}
+            aria-expanded={!collapsed}
+          >
+            {segment.icon}
+            {!iconOnly && <span className="text-[11px] tabular-nums">{segment.label}</span>}
+          </button>
+        }
+      />
       <TooltipContent side="top" sideOffset={6}>
         {segment.tooltip}
       </TooltipContent>

@@ -373,9 +373,9 @@ export default function SortableTab({
         <span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1`}>{displayTitle}</span>
       ) : (
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1`}>{displayTitle}</span>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={<span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1`}>{displayTitle}</span>}
+          />
           <TooltipContent
             side="bottom"
             sideOffset={6}
@@ -411,43 +411,45 @@ export default function SortableTab({
       )}
       {!isEditing && !isPinned && (
         <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              className={`relative z-10 flex items-center justify-center w-4 h-4 rounded-sm shrink-0 ${
-                isActive
-                  ? 'text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:text-foreground focus-visible:bg-muted'
-                  : 'text-transparent group-hover:text-muted-foreground hover:!text-foreground hover:!bg-muted focus-visible:!text-foreground focus-visible:!bg-muted'
-              }`}
-              // Why: per-tab close affordance needs a stable accessible name so
-              // E2E specs can drive the same path a user takes (hover, then X)
-              // instead of bypassing the render layer by calling closeTab() on
-              // the store. A store-only assertion would miss an unmounted button.
-              aria-label={translate(
-                'auto.components.tab.bar.SortableTab.6df69d9388',
-                'Close tab {{value0}}',
-                { value0: tabTitle }
-              )}
-              type="button"
-              data-tab-close-button="true"
-              onPointerDown={(e) => {
-                if (e.button === 0) {
+          <TooltipTrigger
+            render={
+              <button
+                className={`relative z-10 flex items-center justify-center w-4 h-4 rounded-sm shrink-0 ${
+                  isActive
+                    ? 'text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:text-foreground focus-visible:bg-muted'
+                    : 'text-transparent group-hover:text-muted-foreground hover:!text-foreground hover:!bg-muted focus-visible:!text-foreground focus-visible:!bg-muted'
+                }`}
+                // Why: per-tab close affordance needs a stable accessible name so
+                // E2E specs can drive the same path a user takes (hover, then X)
+                // instead of bypassing the render layer by calling closeTab() on
+                // the store. A store-only assertion would miss an unmounted button.
+                aria-label={translate(
+                  'auto.components.tab.bar.SortableTab.6df69d9388',
+                  'Close tab {{value0}}',
+                  { value0: tabTitle }
+                )}
+                type="button"
+                data-tab-close-button="true"
+                onPointerDown={(e) => {
+                  if (e.button === 0) {
+                    e.stopPropagation()
+                  }
+                }}
+                onMouseDown={(e) => {
+                  if (e.button === 0) {
+                    e.stopPropagation()
+                  }
+                }}
+                onClick={(e) => {
+                  e.preventDefault()
                   e.stopPropagation()
-                }
-              }}
-              onMouseDown={(e) => {
-                if (e.button === 0) {
-                  e.stopPropagation()
-                }
-              }}
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                onClose(tab.id)
-              }}
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </TooltipTrigger>
+                  onClose(tab.id)
+                }}
+              >
+                <X className="w-3 h-3" />
+              </button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={6} className="flex items-center gap-2">
             <span>{translate('auto.components.tab.bar.SortableTab.95db5f2f7d', 'Close tab')}</span>
             {closeShortcut.keys.length > 0 && (

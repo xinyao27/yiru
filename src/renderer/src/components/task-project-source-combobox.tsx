@@ -219,18 +219,20 @@ export default function TaskProjectSourceCombobox({
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn('h-8 w-full justify-between px-3 text-xs font-normal', triggerClassName)}
-        >
-          {renderTriggerLabel(groups, selected)}
-          <ChevronsUpDown className="size-3.5 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn('h-8 w-full justify-between px-3 text-xs font-normal', triggerClassName)}
+          >
+            {renderTriggerLabel(groups, selected)}
+            <ChevronsUpDown className="size-3.5 opacity-50" />
+          </Button>
+        }
+      />
       <PopoverContent
         align="start"
         className="w-[min(360px,calc(100vw-1rem))] min-w-[var(--radix-popover-trigger-width)] p-0"
@@ -334,23 +336,25 @@ export default function TaskProjectSourceCombobox({
                         setSourceMenuProjectKey(nextOpen ? group.projectKey : null)
                       }
                     >
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          title={translate(
-                            'auto.components.task.project.source.combobox.chooseSource',
-                            'Choose task source'
-                          )}
-                          onClick={(event) => {
-                            event.preventDefault()
-                            event.stopPropagation()
-                          }}
-                          onMouseDown={(event) => event.preventDefault()}
-                          className="flex w-8 shrink-0 items-center justify-center text-muted-foreground"
-                        >
-                          <ChevronRight className="size-3.5" />
-                        </button>
-                      </PopoverTrigger>
+                      <PopoverTrigger
+                        render={
+                          <button
+                            type="button"
+                            title={translate(
+                              'auto.components.task.project.source.combobox.chooseSource',
+                              'Choose task source'
+                            )}
+                            onClick={(event) => {
+                              event.preventDefault()
+                              event.stopPropagation()
+                            }}
+                            onMouseDown={(event) => event.preventDefault()}
+                            className="flex w-8 shrink-0 items-center justify-center text-muted-foreground"
+                          >
+                            <ChevronRight className="size-3.5" />
+                          </button>
+                        }
+                      />
                       <PopoverContent
                         side="right"
                         align="start"

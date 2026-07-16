@@ -78,8 +78,8 @@ export function SpoolDesktopRow({ row, onToggle }: SpoolDesktopRowProps): React.
   )
   return (
     <div className="pt-1">
-      <HoverCard openDelay={200} closeDelay={100}>
-        <HoverCardTrigger asChild>{trigger}</HoverCardTrigger>
+      <HoverCard>
+        <HoverCardTrigger delay={200} closeDelay={100} render={trigger} />
         <SpoolDesktopUsageHoverCard row={row} />
       </HoverCard>
     </div>

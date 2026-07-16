@@ -55,14 +55,16 @@ export function AutomationPrecheckFields({
         <Select
           value={draft.precheckTimeoutSeconds}
           disabled={disabled}
-          onValueChange={(precheckTimeoutSeconds) =>
-            onDraftChange((current) => ({ ...current, precheckTimeoutSeconds }))
-          }
+          onValueChange={(precheckTimeoutSeconds) => {
+            if (precheckTimeoutSeconds) {
+              onDraftChange((current) => ({ ...current, precheckTimeoutSeconds }))
+            }
+          }}
         >
           <SelectTrigger className={`w-full ${pickerTriggerClassName}`}>
             <SelectValue />
           </SelectTrigger>
-          <SelectContent position="popper" side="bottom" align="start" sideOffset={4}>
+          <SelectContent alignItemWithTrigger={false} align="start" sideOffset={4}>
             <SelectItem value="30">
               {translate(
                 'auto.components.automations.AutomationPrecheckFields.51e28cdad9',

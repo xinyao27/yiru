@@ -97,24 +97,27 @@ export function EditorFileTabContextMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-hidden
-          tabIndex={-1}
-          className="pointer-events-none fixed size-px opacity-0"
-          style={{ left: menuPoint.x, top: menuPoint.y }}
-        />
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <button
+            aria-hidden
+            tabIndex={-1}
+            className="pointer-events-none fixed size-px opacity-0"
+            style={{ left: menuPoint.x, top: menuPoint.y }}
+          />
+        }
+      />
       <DropdownMenuContent
         className="w-48"
         sideOffset={0}
         align="start"
-        onCloseAutoFocus={(event) => {
+        finalFocus={() => {
           if (!skipMenuFocusRestoreRef.current) {
             return
           }
           skipMenuFocusRestoreRef.current = false
-          event.preventDefault()
+          // Return false to suppress the default focus restore.
+          return false
         }}
       >
         <TabWorkspaceLayoutMenuSection

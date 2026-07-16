@@ -10,6 +10,7 @@ import {
   type DragEvent
 } from 'react'
 import { createPortal } from 'react-dom'
+import type { Menu } from '@base-ui/react/menu'
 import { cn } from '@/lib/utils'
 import { getConnectionId } from '@/lib/connection-context'
 import { detectLanguage } from '@/lib/language-detect'
@@ -401,7 +402,7 @@ function PendingBrowserAnnotationCard({
         }
       }}
     >
-      <PopoverAnchor asChild>
+      <PopoverAnchor>
         <span
           className="pointer-events-none absolute size-px"
           style={{ left: anchor.x, top: anchor.y }}
@@ -411,18 +412,12 @@ function PendingBrowserAnnotationCard({
         side={anchor.below ? 'bottom' : 'top'}
         align="center"
         sideOffset={10}
-        collisionBoundary={portalContainer ?? undefined}
-        collisionPadding={12}
         portalContainer={portalContainer}
         className="z-40 w-[22rem] max-w-[calc(var(--radix-popover-content-available-width)-1rem)] p-3 shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
         aria-label={translate(
           'auto.components.browser.pane.BrowserPane.b472c5fe03',
           'Add browser annotation'
         )}
-        onEscapeKeyDown={(event) => {
-          event.preventDefault()
-          onCancel()
-        }}
       >
         <div className="mb-2 min-w-0">
           <div className="truncate text-xs font-medium text-foreground">
@@ -469,11 +464,10 @@ function PendingBrowserAnnotationCard({
             {translate('auto.components.browser.pane.BrowserPane.8f87e6c2e5', 'Intent')}
           </Label>
           <ToggleGroup
-            type="single"
             size="sm"
             variant="outline"
-            value={intent}
-            onValueChange={(value) => {
+            value={[intent]}
+            onValueChange={([value]) => {
               if (value) {
                 setIntent(value as BrowserAnnotationIntent)
               }
@@ -2576,23 +2570,25 @@ function RemoteBrowserPagePane({
           inputRef={addressBarInputRef}
         />
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-7 w-7 opacity-50"
-              aria-disabled="true"
-              aria-label={translate(
-                'auto.components.browser.pane.BrowserPane.deb5293610',
-                'Browser annotations unavailable in remote runtime'
-              )}
-              onClick={(event) => {
-                event.preventDefault()
-              }}
-            >
-              <MessageSquarePlus className="size-4" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 opacity-50"
+                aria-disabled="true"
+                aria-label={translate(
+                  'auto.components.browser.pane.BrowserPane.deb5293610',
+                  'Browser annotations unavailable in remote runtime'
+                )}
+                onClick={(event) => {
+                  event.preventDefault()
+                }}
+              >
+                <MessageSquarePlus className="size-4" />
+              </Button>
+            }
+          />
           <TooltipContent side="bottom" sideOffset={4}>
             {translate(
               'auto.components.browser.pane.BrowserPane.8b7e6d1f5a',
@@ -2658,18 +2654,17 @@ function RemoteBrowserPagePane({
   )
 }
 
-function preventAgentSendTargetOutsideDismiss(event: CustomEvent<{ originalEvent: Event }>) {
-  const target = event.detail.originalEvent.target
+// Why: keep the send menu open when the outside press lands on an agent-send
+// target — Base UI signals outside dismissals through onOpenChange's reason.
+function isAgentSendTargetDismiss(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) {
-    return
+    return false
   }
-  if (
+  return Boolean(
     target.closest(
       '[data-agent-send-target="eligible"], [data-agent-send-target="disabled"], [data-agent-send-target="sending"]'
     )
-  ) {
-    event.preventDefault()
-  }
+  )
 }
 
 function BrowserPagePane({
@@ -4392,7 +4387,15 @@ function BrowserPagePane({
   }, [browserAnnotationsPrompt, recordFeatureInteraction])
 
   const handleAnnotationBannerSendOpenChange = useCallback(
-    (open: boolean): void => {
+    (open: boolean, eventDetails: Menu.Root.ChangeEventDetails): void => {
+      if (
+        !open &&
+        (eventDetails.reason === 'outside-press' || eventDetails.reason === 'focus-out') &&
+        isAgentSendTargetDismiss(eventDetails.event.target)
+      ) {
+        eventDetails.cancel()
+        return
+      }
       setAnnotationBannerSendOpen(open)
       if (open) {
         openAgentSendPopoverTargetMode({
@@ -4420,7 +4423,15 @@ function BrowserPagePane({
   )
 
   const handleAnnotationTraySendOpenChange = useCallback(
-    (open: boolean): void => {
+    (open: boolean, eventDetails: Menu.Root.ChangeEventDetails): void => {
+      if (
+        !open &&
+        (eventDetails.reason === 'outside-press' || eventDetails.reason === 'focus-out') &&
+        isAgentSendTargetDismiss(eventDetails.event.target)
+      ) {
+        eventDetails.cancel()
+        return
+      }
       setAnnotationTraySendOpen(open)
       if (open) {
         openAgentSendPopoverTargetMode({
@@ -4977,29 +4988,31 @@ function BrowserPagePane({
           <BrowserImportHintButton profileId={sessionProfileId} />
 
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-flex">
-                <Button
-                  size="icon"
-                  variant={grab.state !== 'idle' && grabIntent === 'copy' ? 'default' : 'ghost'}
-                  className={cn(
-                    'h-8 w-8',
-                    grab.state !== 'idle' &&
-                      grabIntent === 'copy' &&
-                      'bg-foreground/80 text-background hover:bg-foreground/90'
-                  )}
-                  onClick={() => startGrabIntent('copy')}
-                  disabled={isBlankTab}
-                  aria-label={translate(
-                    'auto.components.browser.pane.BrowserPane.fdfc7fe0ef',
-                    'Grab page element'
-                  )}
-                  data-contextual-tour-target="browser-grab-control"
-                >
-                  <Crosshair className="size-4" />
-                </Button>
-              </span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <span className="inline-flex">
+                  <Button
+                    size="icon"
+                    variant={grab.state !== 'idle' && grabIntent === 'copy' ? 'default' : 'ghost'}
+                    className={cn(
+                      'h-8 w-8',
+                      grab.state !== 'idle' &&
+                        grabIntent === 'copy' &&
+                        'bg-foreground/80 text-background hover:bg-foreground/90'
+                    )}
+                    onClick={() => startGrabIntent('copy')}
+                    disabled={isBlankTab}
+                    aria-label={translate(
+                      'auto.components.browser.pane.BrowserPane.fdfc7fe0ef',
+                      'Grab page element'
+                    )}
+                    data-contextual-tour-target="browser-grab-control"
+                  >
+                    <Crosshair className="size-4" />
+                  </Button>
+                </span>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={4}>
               {translate(
                 'auto.components.browser.pane.BrowserPane.acbe79fd01',
@@ -5010,38 +5023,42 @@ function BrowserPagePane({
           </Tooltip>
 
           <Tooltip>
-            <TooltipTrigger asChild>
-              {/* Why: wrap the disabled button in a span so pointer events still
+            {/* Why: wrap the disabled button in a span so pointer events still
                 reach the tooltip trigger — Radix (and the DOM) drop hover
                 events on disabled <button>, which is why the previous native
                 `title` attribute fired inconsistently. */}
-              <span className="inline-flex">
-                <Button
-                  size="icon"
-                  variant={grab.state !== 'idle' && grabIntent === 'annotate' ? 'default' : 'ghost'}
-                  className={cn(
-                    'relative h-8 w-8',
-                    grab.state !== 'idle' &&
-                      grabIntent === 'annotate' &&
-                      'bg-foreground/80 text-background hover:bg-foreground/90'
-                  )}
-                  onClick={() => startGrabIntent('annotate')}
-                  disabled={isBlankTab}
-                  aria-label={translate(
-                    'auto.components.browser.pane.BrowserPane.fc9be38f6f',
-                    'Annotate page element'
-                  )}
-                  data-contextual-tour-target="browser-annotation-control"
-                >
-                  <MessageSquarePlus className="size-4" />
-                  {browserAnnotations.length > 0 ? (
-                    <span className="absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-4 text-primary-foreground">
-                      {browserAnnotations.length}
-                    </span>
-                  ) : null}
-                </Button>
-              </span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <span className="inline-flex">
+                  <Button
+                    size="icon"
+                    variant={
+                      grab.state !== 'idle' && grabIntent === 'annotate' ? 'default' : 'ghost'
+                    }
+                    className={cn(
+                      'relative h-8 w-8',
+                      grab.state !== 'idle' &&
+                        grabIntent === 'annotate' &&
+                        'bg-foreground/80 text-background hover:bg-foreground/90'
+                    )}
+                    onClick={() => startGrabIntent('annotate')}
+                    disabled={isBlankTab}
+                    aria-label={translate(
+                      'auto.components.browser.pane.BrowserPane.fc9be38f6f',
+                      'Annotate page element'
+                    )}
+                    data-contextual-tour-target="browser-annotation-control"
+                  >
+                    <MessageSquarePlus className="size-4" />
+                    {browserAnnotations.length > 0 ? (
+                      <span className="absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-4 text-primary-foreground">
+                        {browserAnnotations.length}
+                      </span>
+                    ) : null}
+                  </Button>
+                </span>
+              }
+            />
             <TooltipContent side="bottom" sideOffset={4}>
               {translate(
                 'auto.components.browser.pane.BrowserPane.fc9be38f6f',
@@ -5296,14 +5313,21 @@ function BrowserPagePane({
                   onOpenChange={handleAnnotationBannerSendOpenChange}
                 >
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <DropdownMenuTrigger asChild>
-                        <Button size="xs" variant="outline" className="h-6 gap-1.5">
-                          <Send className="size-3" />
-                          {translate('auto.components.browser.pane.BrowserPane.ac39b9366b', 'Send')}
-                        </Button>
-                      </DropdownMenuTrigger>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <DropdownMenuTrigger
+                          render={
+                            <Button size="xs" variant="outline" className="h-6 gap-1.5">
+                              <Send className="size-3" />
+                              {translate(
+                                'auto.components.browser.pane.BrowserPane.ac39b9366b',
+                                'Send'
+                              )}
+                            </Button>
+                          }
+                        />
+                      }
+                    />
                     <TooltipContent side="bottom" sideOffset={6}>
                       {translate(
                         'auto.components.browser.pane.BrowserPane.95af781091',
@@ -5311,12 +5335,7 @@ function BrowserPagePane({
                       )}
                     </TooltipContent>
                   </Tooltip>
-                  <DropdownMenuContent
-                    align="end"
-                    className="min-w-[180px]"
-                    onInteractOutside={preventAgentSendTargetOutsideDismiss}
-                    onPointerDownOutside={preventAgentSendTargetOutsideDismiss}
-                  >
+                  <DropdownMenuContent align="end" className="min-w-[180px]">
                     <BrowserAnnotationSendMenuContent
                       worktreeId={worktreeId}
                       groupId={activeGroupId ?? worktreeId}
@@ -5341,20 +5360,22 @@ function BrowserPagePane({
                     : translate('auto.components.browser.pane.BrowserPane.499b31b84e', 'Copy All')}
                 </Button>
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon-xs"
-                      variant="ghost"
-                      className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                      onClick={handleClearBrowserAnnotations}
-                      aria-label={translate(
-                        'auto.components.browser.pane.BrowserPane.734e4343ec',
-                        'Clear browser annotations'
-                      )}
-                    >
-                      <Trash2 className="size-3" />
-                    </Button>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        size="icon-xs"
+                        variant="ghost"
+                        className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                        onClick={handleClearBrowserAnnotations}
+                        aria-label={translate(
+                          'auto.components.browser.pane.BrowserPane.734e4343ec',
+                          'Clear browser annotations'
+                        )}
+                      >
+                        <Trash2 className="size-3" />
+                      </Button>
+                    }
+                  />
                   <TooltipContent side="bottom" sideOffset={6}>
                     {translate(
                       'auto.components.browser.pane.BrowserPane.11c5084aa2',
@@ -5564,17 +5585,21 @@ function BrowserPagePane({
                       onOpenChange={handleAnnotationTraySendOpenChange}
                     >
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <DropdownMenuTrigger asChild>
-                            <Button size="xs" variant="outline" className="gap-1.5">
-                              <Send className="size-3" />
-                              {translate(
-                                'auto.components.browser.pane.BrowserPane.ac39b9366b',
-                                'Send'
-                              )}
-                            </Button>
-                          </DropdownMenuTrigger>
-                        </TooltipTrigger>
+                        <TooltipTrigger
+                          render={
+                            <DropdownMenuTrigger
+                              render={
+                                <Button size="xs" variant="outline" className="gap-1.5">
+                                  <Send className="size-3" />
+                                  {translate(
+                                    'auto.components.browser.pane.BrowserPane.ac39b9366b',
+                                    'Send'
+                                  )}
+                                </Button>
+                              }
+                            />
+                          }
+                        />
                         <TooltipContent side="bottom" sideOffset={6}>
                           {translate(
                             'auto.components.browser.pane.BrowserPane.95af781091',
@@ -5582,12 +5607,7 @@ function BrowserPagePane({
                           )}
                         </TooltipContent>
                       </Tooltip>
-                      <DropdownMenuContent
-                        align="end"
-                        className="min-w-[180px]"
-                        onInteractOutside={preventAgentSendTargetOutsideDismiss}
-                        onPointerDownOutside={preventAgentSendTargetOutsideDismiss}
-                      >
+                      <DropdownMenuContent align="end" className="min-w-[180px]">
                         <BrowserAnnotationSendMenuContent
                           worktreeId={worktreeId}
                           groupId={activeGroupId ?? worktreeId}
@@ -5612,20 +5632,22 @@ function BrowserPagePane({
                         : translate('auto.components.browser.pane.BrowserPane.d51ef37351', 'Copy')}
                     </Button>
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          size="icon-xs"
-                          variant="ghost"
-                          className="text-muted-foreground hover:text-foreground"
-                          onClick={handleClearBrowserAnnotations}
-                          aria-label={translate(
-                            'auto.components.browser.pane.BrowserPane.734e4343ec',
-                            'Clear browser annotations'
-                          )}
-                        >
-                          <Trash2 className="size-3" />
-                        </Button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            size="icon-xs"
+                            variant="ghost"
+                            className="text-muted-foreground hover:text-foreground"
+                            onClick={handleClearBrowserAnnotations}
+                            aria-label={translate(
+                              'auto.components.browser.pane.BrowserPane.734e4343ec',
+                              'Clear browser annotations'
+                            )}
+                          >
+                            <Trash2 className="size-3" />
+                          </Button>
+                        }
+                      />
                       <TooltipContent side="bottom" sideOffset={6}>
                         {translate(
                           'auto.components.browser.pane.BrowserPane.11c5084aa2',
@@ -5690,28 +5712,30 @@ function BrowserPagePane({
                   }
                 }}
               >
-                <DropdownMenuTrigger asChild>
-                  <button
-                    aria-hidden
-                    tabIndex={-1}
-                    className="pointer-events-none absolute size-px opacity-0"
-                    style={(() => {
-                      if (!grab.payload) {
-                        return { left: 0, top: 0 }
-                      }
-                      const rect = grab.payload.target.rectViewport
-                      const webview = webviewRef.current
-                      const webviewRect = webview?.getBoundingClientRect()
-                      const cRect = containerRef.current?.getBoundingClientRect()
-                      const offsetX = (webviewRect?.left ?? 0) - (cRect?.left ?? 0)
-                      const offsetY = (webviewRect?.top ?? 0) - (cRect?.top ?? 0)
-                      return {
-                        left: offsetX + rect.x + rect.width / 2,
-                        top: offsetY + rect.y + rect.height / 2
-                      }
-                    })()}
-                  />
-                </DropdownMenuTrigger>
+                <DropdownMenuTrigger
+                  render={
+                    <button
+                      aria-hidden
+                      tabIndex={-1}
+                      className="pointer-events-none absolute size-px opacity-0"
+                      style={(() => {
+                        if (!grab.payload) {
+                          return { left: 0, top: 0 }
+                        }
+                        const rect = grab.payload.target.rectViewport
+                        const webview = webviewRef.current
+                        const webviewRect = webview?.getBoundingClientRect()
+                        const cRect = containerRef.current?.getBoundingClientRect()
+                        const offsetX = (webviewRect?.left ?? 0) - (cRect?.left ?? 0)
+                        const offsetY = (webviewRect?.top ?? 0) - (cRect?.top ?? 0)
+                        return {
+                          left: offsetX + rect.x + rect.width / 2,
+                          top: offsetY + rect.y + rect.height / 2
+                        }
+                      })()}
+                    />
+                  }
+                />
                 <DropdownMenuContent align="start" sideOffset={4}>
                   <DropdownMenuItem onSelect={handleGrabCopy}>
                     <Copy className="size-3.5" />
@@ -5794,11 +5818,13 @@ function BrowserPagePane({
                           }
                         }}
                       >
-                        <DropdownMenuTrigger asChild>
-                          <button className="flex size-6 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-black/10 hover:text-gray-700">
-                            <span className="text-sm font-bold leading-none">···</span>
-                          </button>
-                        </DropdownMenuTrigger>
+                        <DropdownMenuTrigger
+                          render={
+                            <button className="flex size-6 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-black/10 hover:text-gray-700">
+                              <span className="text-sm font-bold leading-none">···</span>
+                            </button>
+                          }
+                        />
                         <DropdownMenuContent align="start" sideOffset={4}>
                           <DropdownMenuItem
                             onSelect={() => {
