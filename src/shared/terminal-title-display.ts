@@ -85,7 +85,7 @@ export function normalizeTerminalTitle(title: string): string {
 
   // Why: Pi's titlebar extension animates every 80ms with different braille
   // frames. Collapsing those frames into one stable label avoids renderer
-  // churn while preserving the working/idle transition Orca keys off.
+  // churn while preserving the working/idle transition Yiru keys off.
   if (isPiAgentTitle(title)) {
     const status = detectAgentStatusFromTitle(title)
     if (status === 'working') {

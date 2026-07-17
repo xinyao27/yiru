@@ -62,15 +62,15 @@ import { readWindowsConptyProcessIds } from './windows-conpty-process-membership
 import { forceKillPosixPtyProcessGroups } from '../pty/posix-pty-process-groups'
 import { shouldUseShellReadyStartupDelivery } from '../../shared/codex-startup-delivery'
 import { assertSafeAgentStartupCwd, resolveSafePtyDefaultCwd } from './pty-default-cwd'
-import { ORCA_HERMES_STARTUP_QUERY_ENV } from '../../shared/hermes-startup-query'
+import { YIRU_HERMES_STARTUP_QUERY_ENV } from '../../shared/hermes-startup-query'
 import { PhysicalExitTracker } from '../../shared/physical-exit-tracker'
 import { mergeGitConfigEnvProtocol } from '../../shared/git-credential-prompt-env'
 
 const PANE_IDENTITY_ENV_KEYS = [
-  'ORCA_PANE_KEY',
-  'ORCA_TAB_ID',
-  'ORCA_WORKTREE_ID',
-  'ORCA_AGENT_LAUNCH_TOKEN'
+  'YIRU_PANE_KEY',
+  'YIRU_TAB_ID',
+  'YIRU_WORKTREE_ID',
+  'YIRU_AGENT_LAUNCH_TOKEN'
 ] as const
 
 let ptyCounter = 0
@@ -143,7 +143,7 @@ function promoteAgentTeamsShimPath(
   env: Record<string, string>,
   requestedPath: string | undefined
 ): void {
-  if (!env.ORCA_AGENT_TEAMS_TEAM_ID || !requestedPath) {
+  if (!env.YIRU_AGENT_TEAMS_TEAM_ID || !requestedPath) {
     return
   }
   const shimDir = requestedPath.split(delimiter)[0]
@@ -607,22 +607,22 @@ export class LocalPtyProvider implements IPtyProvider {
       ...mergeGitConfigEnvProtocol(process.env, args.env),
       TERM: 'xterm-256color',
       COLORTERM: 'truecolor',
-      TERM_PROGRAM: 'Orca',
+      TERM_PROGRAM: 'Yiru',
       // Why: TUIs feature-gate on TERM_PROGRAM_VERSION (Neovim's termcap
-      // autodetection, bat/delta paging hints). Sourced from ORCA_APP_VERSION
+      // autodetection, bat/delta paging hints). Sourced from YIRU_APP_VERSION
       // which main/index.ts seeds from app.getVersion() at startup; the
       // fallback keeps tests and non-Electron runs working.
-      TERM_PROGRAM_VERSION: process.env.ORCA_APP_VERSION ?? '0.0.0-dev',
+      TERM_PROGRAM_VERSION: process.env.YIRU_APP_VERSION ?? '0.0.0-dev',
       // Why: opt tools (Claude Code, ls --hyperlink, etc.) into emitting OSC 8
       // hyperlinks. The `supports-hyperlinks` npm package gates on a hard-coded
       // TERM_PROGRAM allowlist (iTerm.app / WezTerm / vscode) and returns false
-      // for TERM_PROGRAM=Orca, so callers drop OSC 8 output entirely and emit
-      // bare text instead. xterm.js in Orca parses OSC 8 and the pane's
+      // for TERM_PROGRAM=Yiru, so callers drop OSC 8 output entirely and emit
+      // bare text instead. xterm.js in Yiru parses OSC 8 and the pane's
       // linkHandler routes clicks, so forcing the advertisement is safe and
       // restores clickable refs like `owner/repo#123` / `PR#123`.
       FORCE_HYPERLINK: '1'
     } as Record<string, string>
-    // Why: Orca can be launched from an Orca terminal while developing. Pane
+    // Why: Yiru can be launched from a Yiru terminal while developing. Pane
     // identity belongs to the child PTY, not the parent shell that spawned app.
     removeUnspecifiedPaneIdentityEnv(spawnEnv, args.env)
     removeAppImageRuntimeEnv(spawnEnv)
@@ -677,12 +677,12 @@ export class LocalPtyProvider implements IPtyProvider {
         if (codexHomeWslInfo) {
           if (launchWslDistro && launchWslDistro !== codexHomeWslInfo.distro) {
             delete finalEnv.CODEX_HOME
-            delete finalEnv.ORCA_CODEX_HOME
+            delete finalEnv.YIRU_CODEX_HOME
           } else {
             finalEnv.CODEX_HOME = codexHomeWslInfo.linuxPath
-            finalEnv.ORCA_CODEX_HOME = codexHomeWslInfo.linuxPath
+            finalEnv.YIRU_CODEX_HOME = codexHomeWslInfo.linuxPath
             // Why: wsl.exe only imports non-default env vars named in WSLENV.
-            addWslEnvKeys(finalEnv, ['CODEX_HOME', 'ORCA_CODEX_HOME'])
+            addWslEnvKeys(finalEnv, ['CODEX_HOME', 'YIRU_CODEX_HOME'])
             if (!launchWslDistro) {
               const resolved = resolveWindowsShellLaunchArgs(shellPath, cwd, defaultCwd, {
                 distro: codexHomeWslInfo.distro
@@ -695,29 +695,29 @@ export class LocalPtyProvider implements IPtyProvider {
             }
           }
         } else if (isHostCodexHomeForWsl(finalEnv.CODEX_HOME)) {
-          // Why: Orca's selected Codex runtime home is host-local. WSL Codex
+          // Why: Yiru's selected Codex runtime home is host-local. WSL Codex
           // must use its Linux-side ~/.codex instead of a Windows path.
           delete finalEnv.CODEX_HOME
-          delete finalEnv.ORCA_CODEX_HOME
+          delete finalEnv.YIRU_CODEX_HOME
         } else if (finalEnv.CODEX_HOME) {
-          addWslEnvKeys(finalEnv, ['CODEX_HOME', 'ORCA_CODEX_HOME'])
+          addWslEnvKeys(finalEnv, ['CODEX_HOME', 'YIRU_CODEX_HOME'])
         }
         if (finalEnv.CLAUDE_CONFIG_DIR) {
           // Why: managed WSL Claude accounts pass a Linux CLAUDE_CONFIG_DIR
           // through Windows wsl.exe; non-default env vars need WSLENV import.
           addWslEnvKeys(finalEnv, ['CLAUDE_CONFIG_DIR'])
         }
-        if (finalEnv[ORCA_HERMES_STARTUP_QUERY_ENV] !== undefined) {
+        if (finalEnv[YIRU_HERMES_STARTUP_QUERY_ENV] !== undefined) {
           // Why: the startup wrapper expands this only inside WSL; wsl.exe
           // otherwise drops custom Windows environment variables.
-          addWslEnvKeys(finalEnv, [ORCA_HERMES_STARTUP_QUERY_ENV])
+          addWslEnvKeys(finalEnv, [YIRU_HERMES_STARTUP_QUERY_ENV])
         }
       } else if (codexHomeWslInfo || isWslCodexHomeForHost(finalEnv.CODEX_HOME)) {
         // Why: WSL-managed Codex homes are Linux paths. Windows Codex cannot use
-        // them. ORCA_CODEX_HOME must go too because shell-ready scripts restore
+        // them. YIRU_CODEX_HOME must go too because shell-ready scripts restore
         // CODEX_HOME from it after user profiles run.
         delete finalEnv.CODEX_HOME
-        delete finalEnv.ORCA_CODEX_HOME
+        delete finalEnv.YIRU_CODEX_HOME
       }
     }
     seedPowerlevel10kWizardEnv(finalEnv, { envToDelete: args.envToDelete })
@@ -732,12 +732,12 @@ export class LocalPtyProvider implements IPtyProvider {
       // Why: OpenCode/Codex path restoration and OMP's typed-command status
       // wrapper need shell-ready code after user startup files run.
       const needsNoMarkerWrapper =
-        finalEnv.ORCA_ATTRIBUTION_SHIM_DIR ||
-        finalEnv.ORCA_OPENCODE_CONFIG_DIR ||
-        finalEnv.ORCA_MIMOCODE_HOME ||
-        finalEnv.ORCA_OMP_STATUS_EXTENSION ||
-        finalEnv.ORCA_CODEX_HOME ||
-        finalEnv.ORCA_AGENT_TEAMS_SHIM_DIR
+        finalEnv.YIRU_ATTRIBUTION_SHIM_DIR ||
+        finalEnv.YIRU_OPENCODE_CONFIG_DIR ||
+        finalEnv.YIRU_MIMOCODE_HOME ||
+        finalEnv.YIRU_OMP_STATUS_EXTENSION ||
+        finalEnv.YIRU_CODEX_HOME ||
+        finalEnv.YIRU_AGENT_TEAMS_SHIM_DIR
       const isCodexStartupCommand = startupAgentRecognition?.agent === 'codex'
       let shellLaunch: ReturnType<typeof getShellReadyLaunchConfig> | null = null
       if (args.command && isCodexStartupCommand) {
@@ -833,8 +833,8 @@ export class LocalPtyProvider implements IPtyProvider {
       ptyAgentSessionIds.add(id)
     }
     ptyShellName.set(id, getSpawnedShellName(shellPath))
-    if (finalEnv.ORCA_TERMINAL_HANDLE) {
-      ptyTerminalHandle.set(id, finalEnv.ORCA_TERMINAL_HANDLE)
+    if (finalEnv.YIRU_TERMINAL_HANDLE) {
+      ptyTerminalHandle.set(id, finalEnv.YIRU_TERMINAL_HANDLE)
     }
     ptyAgentForegroundContextPaths.set(
       id,
@@ -961,7 +961,7 @@ export class LocalPtyProvider implements IPtyProvider {
     ptyDisposables.set(id, disposables)
 
     if (args.command && !startupCommandDeliveredInShellArgs) {
-      // Why: only Orca-wrapped POSIX bash/zsh have bracketed-paste mode armed
+      // Why: only Yiru-wrapped POSIX bash/zsh have bracketed-paste mode armed
       // (bash via `bind`, zsh on by default), so multiline startup prompts can
       // be pasted literally there; other shells keep the raw submit path.
       const spawnedShellName = getSpawnedShellName(shellPath).toLowerCase()

@@ -122,12 +122,12 @@ describe('wsl path helpers', () => {
   })
 
   it('converts Windows drive paths to /mnt paths for WSL commands', () => {
-    expect(toLinuxPath('C:\\Users\\jinwo\\git\\orca')).toBe('/mnt/c/Users/jinwo/git/orca')
+    expect(toLinuxPath('C:\\Users\\jinwo\\git\\yiru')).toBe('/mnt/c/Users/jinwo/git/yiru')
   })
 
   it('converts /mnt drive paths back to native Windows form', () => {
-    expect(toWindowsWslPath('/mnt/c/Users/jinwo/git/orca', 'Ubuntu')).toBe(
-      'C:\\Users\\jinwo\\git\\orca'
+    expect(toWindowsWslPath('/mnt/c/Users/jinwo/git/yiru', 'Ubuntu')).toBe(
+      'C:\\Users\\jinwo\\git\\yiru'
     )
   })
 })

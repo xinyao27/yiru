@@ -24,14 +24,14 @@ type LinkRoutingPreferenceDialogOptions = {
 type LinkRoutingPreferenceDialogRequest = {
   id: number
   options: LinkRoutingPreferenceDialogOptions
-  resolve: (openInOrca: boolean) => void
+  resolve: (openInYiru: boolean) => void
 }
 
 type LinkRoutingPreferenceDialogContextValue = (
   options?: LinkRoutingPreferenceDialogOptions
 ) => Promise<boolean>
 
-const PREVIEW_STORAGE_KEY = 'orca.previewLinkRoutingPreferenceDialog'
+const PREVIEW_STORAGE_KEY = 'yiru.previewLinkRoutingPreferenceDialog'
 const PREVIEW_DEFAULT_STORAGE_KEY = `${PREVIEW_STORAGE_KEY}.default`
 const LinkRoutingPreferenceDialogContext =
   createContext<LinkRoutingPreferenceDialogContextValue | null>(null)
@@ -99,18 +99,18 @@ export function LinkRoutingPreferenceDialogProvider({
     window.sessionStorage.removeItem(PREVIEW_STORAGE_KEY)
     window.sessionStorage.removeItem(PREVIEW_DEFAULT_STORAGE_KEY)
     void requestPreference({
-      openLinksInAppDefault: previewDefault === 'orca',
+      openLinksInAppDefault: previewDefault === 'yiru',
       preview: true,
-      url: 'https://github.com/stablyai/orca/pull/1234'
+      url: 'https://github.com/stablyai/yiru/pull/1234'
     })
   }, [requestPreference])
 
-  const settleActiveRequest = useCallback((openInOrca: boolean) => {
+  const settleActiveRequest = useCallback((openInYiru: boolean) => {
     const request = activeRequestRef.current
     if (!request) {
       return
     }
-    request.resolve(openInOrca)
+    request.resolve(openInYiru)
     setQueue((currentQueue) => {
       if (currentQueue[0]?.id === request.id) {
         return currentQueue.slice(1)
@@ -151,11 +151,11 @@ export function LinkRoutingPreferenceDialogProvider({
                   {openLinksInAppDefault
                     ? translate(
                         'auto.components.link.routing.preference.dialog.keep.title',
-                        "Keep terminal links in Orca's browser?"
+                        "Keep terminal links in Yiru's browser?"
                       )
                     : translate(
                         'auto.components.link.routing.preference.dialog.title',
-                        "Open terminal links in Orca's browser?"
+                        "Open terminal links in Yiru's browser?"
                       )}
                 </DialogTitle>
                 <DialogDescription className="text-sm leading-relaxed">
@@ -166,7 +166,7 @@ export function LinkRoutingPreferenceDialogProvider({
                       )
                     : translate(
                         'auto.components.link.routing.preference.dialog.description',
-                        "Use Orca's browser for terminal links, or keep your system browser."
+                        "Use Yiru's browser for terminal links, or keep your system browser."
                       )}
                 </DialogDescription>
               </div>
@@ -190,8 +190,8 @@ export function LinkRoutingPreferenceDialogProvider({
               <div className="space-y-1">
                 <p>
                   {translate(
-                    'auto.components.link.routing.preference.dialog.orca.note',
-                    'Orca can use imported cookies for logged-in sites.'
+                    'auto.components.link.routing.preference.dialog.yiru.note',
+                    'Yiru can use imported cookies for logged-in sites.'
                   )}
                 </p>
                 <p>
@@ -204,7 +204,7 @@ export function LinkRoutingPreferenceDialogProvider({
                   <span>
                     {translate(
                       'auto.components.link.routing.preference.dialog.shortcut.note.prefix',
-                      'When links open in Orca,'
+                      'When links open in Yiru,'
                     )}
                   </span>
                   <ShortcutKeyCombo
@@ -234,12 +234,12 @@ export function LinkRoutingPreferenceDialogProvider({
             <Button autoFocus onClick={() => settleActiveRequest(true)}>
               {openLinksInAppDefault
                 ? translate(
-                    'auto.components.link.routing.preference.dialog.keep.orca.button',
-                    'Keep Orca'
+                    'auto.components.link.routing.preference.dialog.keep.yiru.button',
+                    'Keep Yiru'
                   )
                 : translate(
-                    'auto.components.link.routing.preference.dialog.orca.button',
-                    'Open in Orca'
+                    'auto.components.link.routing.preference.dialog.yiru.button',
+                    'Open in Yiru'
                   )}
             </Button>
           </DialogFooter>

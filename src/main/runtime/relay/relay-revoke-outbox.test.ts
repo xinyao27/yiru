@@ -13,7 +13,7 @@ describe('RelayRevokeOutbox', () => {
   })
 
   it('durably retains an idempotent account-scoped revoke after local deletion', () => {
-    const path = mkdtempSync(join(tmpdir(), 'orca-relay-revoke-'))
+    const path = mkdtempSync(join(tmpdir(), 'yiru-relay-revoke-'))
     paths.push(path)
     const binding = {
       relayHostId: 'AbCdEf0123_-xyZ9',

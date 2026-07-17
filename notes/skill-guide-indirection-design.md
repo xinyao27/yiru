@@ -1,4 +1,4 @@
-# Skill Guide Indirection (Thin Stubs + `orca skills get`)
+# Skill Guide Indirection (Thin Stubs + `yiru skills get`)
 
 Status: FOLDED INTO `skill-freshness-design.md` (2026-07-13) — read that instead. The stub/CLI
 contract and prior-art survey carried over; the migration-via-in-app-updater section here is
@@ -9,7 +9,7 @@ superseded (migration now rides `npx skills update`, no in-app writes).
 Version-sensitive content must not live in distributed files; only discovery metadata should.
 Every hard problem in the current system — staleness, adoption consent, installer attribution,
 transactional replacement, remote-host reconciliation — descends from shipping full skill
-bodies as mutable files that must track the installed Orca binary. Move the bodies into the
+bodies as mutable files that must track the installed Yiru binary. Move the bodies into the
 binary and the problems shrink to a residue the existing machinery already handles.
 
 ## Design
@@ -19,9 +19,9 @@ binary and the problems shrink to a residue the existing machinery already handl
 New CLI surface (topic names match skill names):
 
 ```sh
-orca skills list                 # enumerate available guides, one line each
-orca skills get <topic>          # full version-matched guide for one skill, markdown to stdout
-orca skills get <topic> --full   # include bundled reference docs, if any
+yiru skills list                 # enumerate available guides, one line each
+yiru skills get <topic>          # full version-matched guide for one skill, markdown to stdout
+yiru skills get <topic> --full   # include bundled reference docs, if any
 ```
 
 - Content is authored in `skill-guides/<topic>.md`. A generator embeds those authoritative
@@ -35,39 +35,39 @@ orca skills get <topic> --full   # include bundled reference docs, if any
 ### 2. Historical stub sketch (superseded; do not copy)
 
 This sketch records the indirection idea only. The resolver and first-generation hybrid stub
-contract in `skill-freshness-design.md` are authoritative and must cover packaged `orca`,
-Linux/WSL `orca-ide`, SSH `orca`, and development `orca-dev` without blindly invoking bare
-`orca` on Linux.
+contract in `skill-freshness-design.md` are authoritative and must cover packaged `yiru`,
+Linux/WSL `yiru-ide`, SSH `yiru`, and development `yiru-dev` without blindly invoking bare
+`yiru` on Linux.
 
 ```markdown
 ---
-name: orca-cli
+name: yiru-cli
 description: <unchanged per-skill trigger copy — this is the discovery surface>
-allowed-tools: <all supported Orca CLI command names>
+allowed-tools: <all supported Yiru CLI command names>
 ---
 
-# Orca CLI
+# Yiru CLI
 
 This file is a discovery stub, not the usage guide. The full, version-matched reference
-lives in the `orca` binary itself.
+lives in the `yiru` binary itself.
 
-Before using Orca commands, resolve the CLI for this session and load the guide once:
+Before using Yiru commands, resolve the CLI for this session and load the guide once:
 
-    <resolved-orca-cli> skills get orca-cli
+    <resolved-yiru-cli> skills get yiru-cli
 
 Don't guess subcommands or flags from memory or from cached copies of this skill — they
-change between Orca releases; the command above always matches the installed binary.
+change between Yiru releases; the command above always matches the installed binary.
 ```
 
 Stub rules:
-- Body is deliberately version-independent: it says when to engage Orca and where to fetch
+- Body is deliberately version-independent: it says when to engage Yiru and where to fetch
   the how — never the how itself. A stub should survive many releases unchanged.
 - `allowed-tools` must cover every executable that the authoritative resolver can select.
 - Stub must not ship before the binary that serves its topic: gate stub rollout on the
   release that includes `skills get` (a stub pointing at a command that does not exist
   is worse than a fat skill). Enforce with a build check: every stub topic must resolve
   against the compiled guide table.
-- Stub should degrade honestly when no supported Orca command is on PATH and must retain a
+- Stub should degrade honestly when no supported Yiru command is on PATH and must retain a
   bounded legacy bootstrap for binaries that predate `skills get`.
 
 ### 3. What this retires, what it keeps
@@ -77,7 +77,7 @@ Retired / collapsed:
   transactional publish/rollback/orphan sweep, and all automatic writes into user-owned
   skill directories.
 - Phases 3–4 of skill-auto-update-design.md (WSL/SSH remote file reconcilers). Wherever the
-  skill is useful the `orca` binary is present, and the remote binary serves the guide
+  skill is useful the `yiru` binary is present, and the remote binary serves the guide
   matching its own host's version. No remote file-sync problem remains.
 
 Kept (read-only):
@@ -90,7 +90,7 @@ Kept (read-only):
 - The skills-CLI round-trip CI, extended to prove historical fat installs migrate to stubs
   through targeted global updates across supported hosts and topologies.
 - Read-only settings rows and a dismissible nudge that pre-fill a targeted
-  `npx skills update <eligible-names...> --global` command. Orca never submits it or writes
+  `npx skills update <eligible-names...> --global` command. Yiru never submits it or writes
   into a skill directory.
 
 ## Prior art (verified live 2026-07-13)
@@ -116,7 +116,7 @@ Kept (read-only):
 
 ## Migration plan
 
-0. Release `orca skills list/get` first from authoritative `skill-guides/` sources while
+0. Release `yiru skills list/get` first from authoritative `skill-guides/` sources while
    distributed skills remain fat. No stub may reach repository main before a public binary
    can serve it.
 1. Add read-only freshness detection, name-scoped update eligibility, the targeted
@@ -125,7 +125,7 @@ Kept (read-only):
 2. Spike pointer compliance against the released guide-serving binary with Claude Code and
    Codex, including Linux/WSL/SSH/dev command resolution, old-binary fallback, task success,
    and token cost.
-3. Convert only `orca-cli` to a first-generation hybrid stub. Existing exact official fat
+3. Convert only `yiru-cli` to a first-generation hybrid stub. Existing exact official fat
    copies become eligible for the targeted ecosystem update rail; users who ignore the
    nudge retain their existing skills.
 4. Cut an RC, measure the gates, and thin the hybrid only if it passes. Convert remaining
@@ -134,15 +134,15 @@ Kept (read-only):
 ## Open questions
 
 - Compliance failure mode: if agents skim the stub and skip the fetch, options are stronger
-  stub wording, frontmatter `description` nudging ("requires running orca skills get"),
+  stub wording, frontmatter `description` nudging ("requires running yiru skills get"),
   or hybrid stubs carrying a minimal command table plus the pointer. Spike decides.
 - Multi-file skills: current shipped packages are single-file; if a future skill needs
   scripts/assets, decide whether the binary serves them (`--script <name>` like WrenAI) or
   they stay in the package (then that skill keeps the fat-update path).
-- Topic/verb naming: `orca skills get` collides conceptually with the `skills` installer
+- Topic/verb naming: `yiru skills get` collides conceptually with the `skills` installer
   CLI; confirm no confusion in agent behavior during the spike.
-- Old binaries: a user can hold a stub while running an older orca without `skills get`
+- Old binaries: a user can hold a stub while running an older yiru without `skills get`
   (downgrade case). Stub wording should fail gracefully ("if the command is missing, update
-  Orca"); acceptable residual.
+  Yiru"); acceptable residual.
 - Whether settings should surface "guide served by binary" as a distinct row state so
   support can tell stub-era installs from fat-era ones at a glance.

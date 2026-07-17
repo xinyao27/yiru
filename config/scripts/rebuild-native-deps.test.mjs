@@ -31,7 +31,7 @@ describe('rebuild-native-deps Electron install fallback', () => {
 
       const result = runRebuildScript(projectDir, {
         npm_lifecycle_event: 'postinstall',
-        ORCA_STRICT_ELECTRON_INSTALL: ''
+        YIRU_STRICT_ELECTRON_INSTALL: ''
       })
 
       expect(result.status, result.stderr).toBe(0)
@@ -58,7 +58,7 @@ describe('rebuild-native-deps Electron install fallback', () => {
 
       const result = runRebuildScript(projectDir, {
         npm_lifecycle_event: 'postinstall',
-        ORCA_STRICT_ELECTRON_INSTALL: '1'
+        YIRU_STRICT_ELECTRON_INSTALL: '1'
       })
 
       expect(result.status).toBe(1)
@@ -110,7 +110,7 @@ describe('rebuild-native-deps Electron install fallback', () => {
       writeFileSync(join(projectDir, 'node_modules', 'electron', 'path.txt'), 'stale-path')
 
       const result = runRebuildScript(projectDir, {
-        ORCA_STRICT_ELECTRON_INSTALL: '1'
+        YIRU_STRICT_ELECTRON_INSTALL: '1'
       })
 
       expect(result.status).toBe(1)
@@ -132,12 +132,12 @@ describe('rebuild-native-deps patched node-pty rebuild', () => {
       try {
         const rebuildLogPath = join(projectDir, 'electron-rebuild.log')
         writeFakeUsableElectronPackage(projectDir)
-        writeFakeElectronRebuild(projectDir, { logPathEnv: 'ORCA_REBUILD_TEST_LOG' })
+        writeFakeElectronRebuild(projectDir, { logPathEnv: 'YIRU_REBUILD_TEST_LOG' })
         writeFakeLoadableNodePty(projectDir)
         writeNodePtyPatchFile(projectDir)
 
         const result = runRebuildScript(projectDir, {
-          ORCA_REBUILD_TEST_LOG: rebuildLogPath
+          YIRU_REBUILD_TEST_LOG: rebuildLogPath
         })
 
         expect(result.status, result.stderr).toBe(0)
@@ -163,13 +163,13 @@ describe('rebuild-native-deps patched node-pty rebuild', () => {
       try {
         const rebuildLogPath = join(projectDir, 'electron-rebuild.log')
         writeFakeUsableElectronPackage(projectDir)
-        writeFakeElectronRebuild(projectDir, { logPathEnv: 'ORCA_REBUILD_TEST_LOG' })
+        writeFakeElectronRebuild(projectDir, { logPathEnv: 'YIRU_REBUILD_TEST_LOG' })
         writeFakeLoadableNodePty(projectDir, { nativeDir: '../build/Release/' })
         writeNodePtyPatchFile(projectDir)
         writePatchedNodePtyBuildArtifacts(projectDir)
 
         const result = runRebuildScript(projectDir, {
-          ORCA_REBUILD_TEST_LOG: rebuildLogPath
+          YIRU_REBUILD_TEST_LOG: rebuildLogPath
         })
 
         expect(result.status, result.stderr).toBe(0)
@@ -191,18 +191,18 @@ describe('rebuild-native-deps patched node-pty rebuild', () => {
       try {
         const rebuildLogPath = join(projectDir, 'electron-rebuild.log')
         writeFakeUsableElectronPackage(projectDir)
-        writeFakeElectronRebuild(projectDir, { logPathEnv: 'ORCA_REBUILD_TEST_LOG' })
+        writeFakeElectronRebuild(projectDir, { logPathEnv: 'YIRU_REBUILD_TEST_LOG' })
         writeFakeLoadableNodePty(projectDir, { nativeDir: '../prebuilds/darwin-arm64/' })
         writeNodePtyPatchFile(projectDir)
         writePatchedNodePtyBuildArtifacts(projectDir)
 
         const result = runRebuildScript(projectDir, {
-          ORCA_REBUILD_TEST_LOG: rebuildLogPath
+          YIRU_REBUILD_TEST_LOG: rebuildLogPath
         })
 
         expect(result.status, result.stderr).toBe(0)
         expect(result.stdout).toContain('Native modules do not load in Electron; rebuilding.')
-        expect(result.stdout).toContain("expected build/Release so Orca's node-pty patch is active")
+        expect(result.stdout).toContain("expected build/Release so Yiru's node-pty patch is active")
 
         const rebuildCall = JSON.parse(readFileSync(rebuildLogPath, 'utf8').trim())
         expect(rebuildCall.onlyModules).toEqual(['node-pty'])
@@ -215,7 +215,7 @@ describe('rebuild-native-deps patched node-pty rebuild', () => {
 })
 
 function mkTempProject() {
-  const projectDir = mkdtempSync(join(tmpdir(), 'orca-rebuild-native-deps-'))
+  const projectDir = mkdtempSync(join(tmpdir(), 'yiru-rebuild-native-deps-'))
   mkdirSync(join(projectDir, 'config', 'scripts'), { recursive: true })
   copyFileSync(sourceScriptPath, join(projectDir, 'config', 'scripts', 'rebuild-native-deps.mjs'))
   copyFileSync(
@@ -233,7 +233,7 @@ function runRebuildScript(projectDir, extraEnv = {}) {
   }
   for (const key of Object.keys(env)) {
     if (
-      key.toLowerCase() === 'orca_strict_electron_install' ||
+      key.toLowerCase() === 'yiru_strict_electron_install' ||
       key.toLowerCase() === 'npm_lifecycle_event'
     ) {
       delete env[key]

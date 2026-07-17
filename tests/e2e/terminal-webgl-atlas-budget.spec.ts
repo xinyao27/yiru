@@ -1,5 +1,5 @@
 import type { Page } from '@stablyai/playwright-test'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/yiru-app'
 import { waitForActiveTerminalManager } from './helpers/terminal'
 
 type AtlasPage = {
@@ -272,11 +272,11 @@ test.describe('terminal WebGL atlas budget', () => {
   test.describe.configure({ timeout: 120_000 })
 
   test('keeps shared glyph pages bindable through overflow and recovery @terminal-rendering-golden', async ({
-    orcaPage
+    yiruPage
   }) => {
-    await waitForActiveTerminalManager(orcaPage)
-    test.skip(!(await forceActivePaneWebgl(orcaPage)), 'WebGL unavailable in this environment')
-    const result = await runAtlasBudgetScenario(orcaPage)
+    await waitForActiveTerminalManager(yiruPage)
+    test.skip(!(await forceActivePaneWebgl(yiruPage)), 'WebGL unavailable in this environment')
+    const result = await runAtlasBudgetScenario(yiruPage)
 
     expect(result.realBudget).toBeGreaterThanOrEqual(result.budget)
     expect(result.shared).toBe(true)

@@ -165,7 +165,7 @@ export class CdpWsProxy {
   private buildTargetInfo(): Record<string, unknown> {
     const destroyed = this.webContents.isDestroyed()
     return {
-      targetId: 'orca-proxy-target',
+      targetId: 'yiru-proxy-target',
       type: 'page',
       title: destroyed ? '' : this.webContents.getTitle(),
       url: destroyed ? '' : this.webContents.getURL(),
@@ -179,7 +179,7 @@ export class CdpWsProxy {
     if (url === '/json/version' || url === '/json/version/') {
       res.writeHead(200, { 'Content-Type': 'application/json' })
       // Why: agent-browser reads this endpoint to identify the browser. Returning
-      // "Orca/CdpWsProxy" leaks that this is an embedded automation surface, which
+      // "Yiru/CdpWsProxy" leaks that this is an embedded automation surface, which
       // could affect downstream detection heuristics.
       // Why: process.versions.chrome contains the exact Chromium version
       // bundled with Electron, producing a realistic version string.
@@ -199,7 +199,7 @@ export class CdpWsProxy {
         JSON.stringify([
           {
             ...this.buildTargetInfo(),
-            id: 'orca-proxy-target',
+            id: 'yiru-proxy-target',
             webSocketDebuggerUrl: `ws://127.0.0.1:${this.port}`
           }
         ])
@@ -330,7 +330,7 @@ export class CdpWsProxy {
       return
     }
     if (msg.method === 'Browser.getVersion') {
-      // Why: returning "Orca/Electron" identifies this as an embedded automation
+      // Why: returning "Yiru/Electron" identifies this as an embedded automation
       // surface to agent-browser. Use a generic Chrome product string instead.
       const chromeVersion = process.versions.chrome ?? '134.0.0.0'
       this.sendResult(
@@ -409,7 +409,7 @@ export class CdpWsProxy {
       return
     }
     // Why: CDP Page.reload can destroy Electron webview targets during process swaps.
-    // Use the same direct webContents reload path as Orca's own browser.reload.
+    // Use the same direct webContents reload path as Yiru's own browser.reload.
     if (msg.method === 'Page.reload' && !this.webContents.isDestroyed()) {
       void this.reloadWithLifecycle(client, clientId, msg.params ?? {}, msg.sessionId)
       return
@@ -427,15 +427,15 @@ export class CdpWsProxy {
   private nextSyntheticPageSessionId(): string {
     this.nextClientSessionOrdinal += 1
     return this.nextClientSessionOrdinal === 1
-      ? 'orca-proxy-session'
-      : `orca-proxy-session-${this.nextClientSessionOrdinal}`
+      ? 'yiru-proxy-session'
+      : `yiru-proxy-session-${this.nextClientSessionOrdinal}`
   }
 
   private nextSyntheticBrowserSessionId(): string {
     this.nextClientBrowserSessionOrdinal += 1
     return this.nextClientBrowserSessionOrdinal === 1
-      ? 'orca-proxy-browser-session'
-      : `orca-proxy-browser-session-${this.nextClientBrowserSessionOrdinal}`
+      ? 'yiru-proxy-browser-session'
+      : `yiru-proxy-browser-session-${this.nextClientBrowserSessionOrdinal}`
   }
 
   private isActiveClient(client: WebSocket): boolean {
@@ -502,7 +502,7 @@ export class CdpWsProxy {
     if (unsupportedParam) {
       this.sendError(
         clientId,
-        `Page.reload parameter "${unsupportedParam}" is not supported for Orca tab reloads`,
+        `Page.reload parameter "${unsupportedParam}" is not supported for Yiru tab reloads`,
         client
       )
       return

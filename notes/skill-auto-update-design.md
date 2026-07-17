@@ -11,30 +11,30 @@ text-normalized package-identity rule); Linux confirmed verbatim-LF installs and
 
 ## Problem
 
-Orca ships agent skills in `skills/` (orca-cli, orchestration, computer-use, orca-linear,
-linear-tickets, orca-per-workspace-env, orca-emulator, orca-emulator-android). Users install
+Yiru ships agent skills in `skills/` (yiru-cli, orchestration, computer-use, yiru-linear,
+linear-tickets, yiru-per-workspace-env, yiru-emulator, yiru-emulator-android). Users install
 them with the skills CLI:
 
 ```sh
-npx skills add https://github.com/stablyai/orca --skill <names> --global
+npx skills add https://github.com/stablyai/yiru --skill <names> --global
 ```
 
-Nothing then keeps those installations aligned with the Orca release they describe. Settings
+Nothing then keeps those installations aligned with the Yiru release they describe. Settings
 surface a manual `npx skills update <name> --global` command, but users receive no update
 signal. A stale skill can therefore tell an agent to use commands that are wrong or unsafe for
-the Orca binary it is driving.
+the Yiru binary it is driving.
 
 ## Goals
 
-1. Keep an Orca skill current after Orca has safely adopted or installed that physical copy.
+1. Keep a Yiru skill current after Yiru has safely adopted or installed that physical copy.
 2. Never overwrite a modified, unknown, externally managed, project-scoped, or third-party
    skill.
 3. Never install a skill the user did not request.
 4. Work on macOS, Linux, Windows, WSL, and SSH, with reconciliation performed on the host
    where the agent reads the skill.
 5. Coexist with the skills CLI, symlink and copy installs, dotfile managers, read-only or
-   generated configurations, and multiple Orca builds sharing a home directory.
-6. Keep skill content compatible with the Orca app release that is allowed to manage it.
+   generated configurations, and multiple Yiru builds sharing a home directory.
+6. Keep skill content compatible with the Yiru app release that is allowed to manage it.
 
 Non-goals: updating third-party skills; replacing the skills CLI as the normal install path;
 managing repo-scoped `.agents/skills` or `.claude/skills`; mutating plugin caches; merging user
@@ -58,18 +58,18 @@ The skills CLI lock is useful supporting evidence, but it is not an ownership le
 - `skills update` compares the stored source hash with upstream and then re-runs installation.
   It does not prove that installed files are unchanged first.
 
-Orca therefore reads supported lock versions as a provenance hint but never treats a lock
-entry by itself as permission to write. Orca never writes the foreign lock format.
+Yiru therefore reads supported lock versions as a provenance hint but never treats a lock
+entry by itself as permission to write. Yiru never writes the foreign lock format.
 
 ## Decision: detect, adopt, then manage
 
-Only a physical destination recorded in Orca's management ledger is eligible for background
+Only a physical destination recorded in Yiru's management ledger is eligible for background
 writes. A destination enters that ledger in one of two ways:
 
-1. Orca's install UI invokes the skills CLI and then verifies and records the resulting
+1. Yiru's install UI invokes the skills CLI and then verifies and records the resulting
    physical installation.
 2. A legacy installation is adopted after its complete on-disk package matches a known,
-   released Orca snapshot and its topology is eligible. Phase 1 makes this an explicit
+   released Yiru snapshot and its topology is eligible. Phase 1 makes this an explicit
    “Manage and update” action. Background auto-update never silently claims a newly
    discovered path.
 
@@ -78,8 +78,8 @@ copy from a same-named user copy or establish which manager is allowed to replac
 
 Do not rely on users discovering adoption passively in settings. When the bounded inventory
 finds exact official snapshots in eligible topologies, show one non-repeating banner/toast:
-“N installed Orca skills can be kept up to date,” with a one-click review/adoption action.
-Prioritize recording ownership immediately after every successful Orca-driven skills CLI
+“N installed Yiru skills can be kept up to date,” with a one-click review/adoption action.
+Prioritize recording ownership immediately after every successful Yiru-driven skills CLI
 install so new installations never require a later adoption step.
 
 “Non-repeating” is scoped per eligible destination snapshot, not globally or per session. Store
@@ -94,7 +94,7 @@ Package `skills/` into app resources on every supported platform and generate a 
 manifest. For each skill it contains:
 
 - canonical name and repo-relative source path;
-- release revision and Orca app version;
+- release revision and Yiru app version;
 - deterministic whole-package digest (composed from the per-file identities below);
 - every regular file's relative path, size, executable bit, a per-file text/binary
   classification, an exact-byte SHA-256, and — for text files — a text-normalized SHA-256 with
@@ -114,10 +114,10 @@ modified. Because the whole-package digest composes the per-file normalized-or-e
 official snapshot has a single identity across macOS, Linux, and Windows and across
 `core.autocrlf` settings.
 
-Maintain a compact, checked-in registry of every generated Orca skill snapshot plus a separate
+Maintain a compact, checked-in registry of every generated Yiru skill snapshot plus a separate
 release mapping that identifies which revisions actually shipped. Historical file bytes are
 unnecessary; historical paths and hashes are sufficient to prove that an existing package is
-an exact official snapshot and to map a skills CLI folder hash to an Orca release. Only a
+an exact official snapshot and to map a skills CLI folder hash to a Yiru release. Only a
 revision present in the release mapping is eligible as legacy-install provenance; an
 unreleased candidate cannot be adopted merely because it appeared on main.
 
@@ -136,10 +136,10 @@ package is intact.
 
 The exact-snapshot model depends on supported skills CLI installations preserving the shipped
 package. Add a release CI round trip on macOS, Linux, and Windows that installs representative
-single- and multi-file Orca skills through a pinned supported CLI version in both symlink and
+single- and multi-file Yiru skills through a pinned supported CLI version in both symlink and
 copy/fallback shapes, then compares paths, bytes, and applicable executable modes with the
 generated bundle manifest. Also exercise the newest CLI as an early-warning job. The bundle
-manifest remains generated from Orca's shipped source; if an installer intentionally transforms
+manifest remains generated from Yiru's shipped source; if an installer intentionally transforms
 content, model that installation shape explicitly or mark it ineligible rather than silently
 changing the authoritative digest. A mismatch blocks background-update rollout for that shape.
 macOS verbatim behavior and Windows CRLF translation are both confirmed (see Empirical
@@ -176,9 +176,9 @@ provider link/copy exists, settings must say “managed but not visible to <agen
 reporting the provider as current. Creating or repairing a provider link is a separate,
 provenance-verified, user-approved follow-up; auto-update never invents a missing placement.
 
-## Orca management ledger
+## Yiru management ledger
 
-Store state in Orca-owned application state on the execution host, never inside a user skill
+Store state in Yiru-owned application state on the execution host, never inside a user skill
 directory. Use one record per adopted physical destination:
 
 - stable execution-host identity and user/home identity;
@@ -186,7 +186,7 @@ directory. Use one record per adopted physical destination:
 - last verified physical identity, entry type, and resolved path;
 - skill name, source, source path, and source ref/hash evidence;
 - installed release revision and whole-package digest;
-- per-file paths, hashes, modes, and the digest Orca last wrote;
+- per-file paths, hashes, modes, and the digest Yiru last wrote;
 - last attempted bundle fingerprint, outcome, and error category;
 - adoption source and timestamp.
 
@@ -200,7 +200,7 @@ the same exact-snapshot adoption rules; it never grants ownership from a name al
 
 ## Detection and adoption
 
-For each Orca skill found in an approved global root:
+For each Yiru skill found in an approved global root:
 
 1. `lstat` the logical path and classify its topology without following external targets for
    mutation.
@@ -223,7 +223,7 @@ Never send skill contents, diffs, paths, or user edits to telemetry or normal lo
 
 For each adopted physical destination whose bundle revision is newer and app-compatible:
 
-1. Acquire an Orca transaction lock scoped to the execution host and destination. Dedupe
+1. Acquire a Yiru transaction lock scoped to the execution host and destination. Dedupe
    in-flight work within the process as well. Other managers do not honor this lock, so also
    revalidate immediately before publish.
 2. Re-read topology and hash the installed package. Continue only when it equals the exact
@@ -263,24 +263,24 @@ provenance and drift on LF-normalized content; stage and publish text files in t
 existing EOL convention, defaulting to what a fresh supported install would produce on that host
 when adopting a copy that has none; write binary and executable files as exact bytes. This keeps
 an updated file byte-shaped like a fresh CLI install, so an EOL difference alone never counts as
-a conflict and Orca and the skills CLI do not reclassify each other's writes.
+a conflict and Yiru and the skills CLI do not reclassify each other's writes.
 
 ### Transaction workspace and crash recovery
 
 Staging and rollback packages must be on the same filesystem/volume as the live destination,
-but must not appear as candidate skills. Use an Orca-reserved transaction root adjacent to the
+but must not appear as candidate skills. Use a Yiru-reserved transaction root adjacent to the
 skill root when possible (for example, beside `skills/`, not as another child skill), verify
 same-filesystem identity, and fall back to a reserved child only when the skill root is itself
 a mount boundary. Both general skill discovery and updater inventory must hard-exclude the
 reserved transaction root; a leading dot alone is not an exclusion rule.
 
-Each transaction directory contains an Orca marker with schema version, transaction ID,
+Each transaction directory contains a Yiru marker with schema version, transaction ID,
 destination identity, creation time, and an atomically advanced transaction phase before it
 receives skill files. On host startup and before reconciliation, sweep only marked orphan
 transactions whose owning lock is absent/stale: restore a verified rollback package when the
 marker/ledger phase says publication was incomplete, otherwise remove the verified
 staging/backup directory. Never delete an unmarked directory based on its name, age, or
-resemblance to a skill. Coordinate cleanup with the same destination lock so one Orca process
+resemblance to a skill. Coordinate cleanup with the same destination lock so one Yiru process
 cannot sweep another process's live transaction.
 
 ### Removed files and retired skills
@@ -302,7 +302,7 @@ partially reconciled destination remains retryable even when other destinations 
 At launch, after first paint:
 
 1. Perform a bounded inventory of approved global roots to detect newly installed, removed,
-   or topology-changed Orca skills.
+   or topology-changed Yiru skills.
 2. For adopted destinations, skip content hashing only when that destination already records
    successful reconciliation with the current bundle and its cheap identity/stat signature is
    unchanged.
@@ -310,11 +310,11 @@ At launch, after first paint:
 
 Also run/invalidate on:
 
-- successful Orca-driven skill installation;
+- successful Yiru-driven skill installation;
 - `notifyInstalledAgentSkillsChanged()` after an install/update terminal exits;
 - WSL distro first activation;
 - SSH connection after the host runtime is ready;
-- restart into a newly installed Orca app version.
+- restart into a newly installed Yiru app version.
 
 Do not reconcile on the updater's “download complete” event: the running process still owns
 the old app resources until restart. Coalesce triggers and cap concurrency so launch, WSL, and
@@ -338,18 +338,18 @@ SSH activation cannot fan out unbounded filesystem or network work.
 
 ## Multiple writers and app compatibility
 
-The same global roots may be touched by stable Orca, a development build, and the skills CLI.
-Orca cannot guarantee that one shared global package simultaneously matches two incompatible
+The same global roots may be touched by stable Yiru, a development build, and the skills CLI.
+Yiru cannot guarantee that one shared global package simultaneously matches two incompatible
 app binaries.
 
-- Production stable Orca is the only automatic writer by default.
+- Production stable Yiru is the only automatic writer by default.
 - Main-process runtime identity is authoritative: `app.isPackaged`, the signed release channel,
   and the resolved user-data/home roots determine whether writes are allowed. Renderer build
   flags alone are insufficient. An unpackaged build or development channel is detection-only
   unless both skill home and user-data roots are explicitly isolated from production.
 - A stable app writes only a bundle declared compatible with that app version.
 - A newer known installed release is never downgraded.
-- If `npx skills update` changes an adopted package, the next Orca check sees a ledger-digest
+- If `npx skills update` changes an adopted package, the next Yiru check sees a ledger-digest
   mismatch and stops managing it until the new content matches a known released snapshot and
   is explicitly re-adopted.
 - Provenance and drift comparison fold text line endings to LF, so a stable app and the skills
@@ -363,8 +363,8 @@ multiple incompatible writers.
 
 ## Consent and settings UX
 
-The background setting is “Keep managed Orca agent skills up to date.” It controls only
-already adopted/Orca-installed destinations and may default on. It does not authorize claiming
+The background setting is “Keep managed Yiru agent skills up to date.” It controls only
+already adopted/Yiru-installed destinations and may default on. It does not authorize claiming
 new paths.
 
 Settings show each physical installation as one of:
@@ -376,7 +376,7 @@ Settings show each physical installation as one of:
 - externally managed/read-only;
 - inaccessible or update failed.
 
-Managed and known-snapshot rows show the released skill revision, Orca app release, and a short
+Managed and known-snapshot rows show the released skill revision, Yiru app release, and a short
 digest for human/support diagnosis. Do not add a second, non-authoritative version marker to
 `SKILL.md`; it can be transformed independently of the package and mistaken for write
 authority.
@@ -391,12 +391,12 @@ Both load-bearing assumptions were tested on a real developer machine against li
 skills, not deferred to Phase 1 telemetry. Results are recorded so the evidence travels with
 the design.
 
-- **Verbatim install (decisive).** A clean-room `npx skills add https://github.com/stablyai/orca
-  --skill orca-cli orchestration --global --yes` into a throwaway home produced files
+- **Verbatim install (decisive).** A clean-room `npx skills add https://github.com/stablyai/yiru
+  --skill yiru-cli orchestration --global --yes` into a throwaway home produced files
   byte-identical to `origin/main`: equal Git blob hashes, equal byte counts, zero CRLF, exactly
   one `SKILL.md` per skill, and no injected or stripped files. The CLI does not transform content
   on macOS, so exact-content provenance is viable.
-- **Historical-snapshot match on real stale installs.** The machine's genuinely stale `orca-cli`,
+- **Historical-snapshot match on real stale installs.** The machine's genuinely stale `yiru-cli`,
   `computer-use`, and `orchestration` have on-disk bytes that exist verbatim as committed Git
   blobs in repo history. Exact-content adoption against a released-snapshot registry would
   recognize real, messy installs — not just freshly installed ones.
@@ -410,23 +410,23 @@ the design.
   collapses provider and canonical to one physical destination, confirming physical-identity
   dedup yields a single write. A live broken/dangling provider symlink was also present (target
   missing), which is why the topology table has an explicit inaccessible row.
-- **Lockfile corroboration present (macOS).** Lock entries carry `source: stablyai/orca` and a
+- **Lockfile corroboration present (macOS).** Lock entries carry `source: stablyai/yiru` and a
   folder hash, usable only as corroboration, consistent with the design.
 
 **Windows (2026-07-12, validated on a real machine via the handoff below).** A clean-room
-`npx skills add ... --skill orca-cli --global` on a default, non-Developer-Mode Windows install
+`npx skills add ... --skill yiru-cli --global` on a default, non-Developer-Mode Windows install
 produced:
 
 - **CRLF translation, not byte-identical.** Installed `SKILL.md` was 21180 bytes with 318 CR
   bytes; repo-main source was 20862 bytes with 0 CR. The size delta equals the CR count exactly,
   i.e. a pure LF→CRLF translation with identical text. This is why text-file package identity is
   LF-normalized rather than exact-byte; an exact-byte model would have adopted nothing on Windows.
-- **Copy-fallback shape.** `.agents\skills\orca-cli` was a plain directory copy (no link), and no
+- **Copy-fallback shape.** `.agents\skills\yiru-cli` was a plain directory copy (no link), and no
   `.claude` provider copy was created (Developer Mode off, process unelevated). Confirms the
   Windows copy path and the need to manage independent per-root copies, not only a canonical
   symlink target.
 - **Same file set.** Only `SKILL.md` in both source and install — no injected or stripped files.
-- **Lockfile populated.** The lock recorded `orca-cli`; the known Windows empty-lockfile bug did
+- **Lockfile populated.** The lock recorded `yiru-cli`; the known Windows empty-lockfile bug did
   not reproduce on this machine/version. Corroboration signal is therefore sometimes available on
   Windows, but the design still relies on content-match as primary since it is not guaranteed.
 
@@ -439,22 +439,22 @@ install on `Linux 6.12 aarch64` (node 22, npx 10.9, git 2.39). The container ser
 listening); the CLI check was executed on the box, since SSH transport does not change what the
 CLI writes to disk:
 
-- **Verbatim LF, like macOS.** `orca-cli` and `orchestration` installed byte-identical to
+- **Verbatim LF, like macOS.** `yiru-cli` and `orchestration` installed byte-identical to
   `origin/main`: equal SHA-256, exact byte counts (20862 / 22850), **CR=0**, only `SKILL.md` in
   each dir. Linux needs no separate manifest shape — it is covered by the LF identity.
-- **Symlink topology.** `~/.claude/skills/orca-cli` is a relative symlink
-  (`../../.agents/skills/orca-cli`) into the canonical `~/.agents/skills` copy, matching macOS;
+- **Symlink topology.** `~/.claude/skills/yiru-cli` is a relative symlink
+  (`../../.agents/skills/yiru-cli`) into the canonical `~/.agents/skills` copy, matching macOS;
   realpath dedup collapses provider and canonical to one write.
 - **XDG lockfile path confirmed, with a sharper rule.** With `XDG_STATE_HOME` unset the lock is
-  `~/.agents/.skill-lock.json` (`source: stablyai/orca`); with `XDG_STATE_HOME` set the lock is
+  `~/.agents/.skill-lock.json` (`source: stablyai/yiru`); with `XDG_STATE_HOME` set the lock is
   at `$XDG_STATE_HOME/skills/.skill-lock.json` and **not** at `~/.agents` — it moves, it is not
   duplicated. So the corroboration reader must resolve `XDG_STATE_HOME` and read the single
   correct location; checking only `~/.agents` finds no lock at all on such hosts. This is a
-  property of the Linux/host environment, not of Orca's SSH transport, so it applies equally to
+  property of the Linux/host environment, not of Yiru's SSH transport, so it applies equally to
   native Linux, WSL, and SSH Linux targets — the reconciler must resolve the remote host's
   `XDG_STATE_HOME` when reading lock corroboration remotely.
 
-Not exercised here: Orca's own remote reconciler over SSH (Phase 4, unbuilt — nothing to drive
+Not exercised here: Yiru's own remote reconciler over SSH (Phase 4, unbuilt — nothing to drive
 yet). This validated the Linux CLI install shape and the remote lock-location rule the reconciler
 will depend on.
 
@@ -483,18 +483,18 @@ Run this in PowerShell and paste the full transcript back:
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$sandbox = Join-Path $env:TEMP ("orca-skilltest-" + [Guid]::NewGuid().ToString('N'))
+$sandbox = Join-Path $env:TEMP ("yiru-skilltest-" + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $sandbox | Out-Null
 # Sandbox the CLI's global install to a throwaway profile so real skills are untouched.
 $old = @{ USERPROFILE=$env:USERPROFILE; HOME=$env:HOME; XDG_STATE_HOME=$env:XDG_STATE_HOME }
 $env:USERPROFILE = $sandbox; $env:HOME = $sandbox; Remove-Item Env:XDG_STATE_HOME -ErrorAction SilentlyContinue
 try {
-  npx --yes skills add https://github.com/stablyai/orca --skill orca-cli --global --yes 2>&1 | Tee-Object "$sandbox\install.log" | Out-Null
+  npx --yes skills add https://github.com/stablyai/yiru --skill yiru-cli --global --yes 2>&1 | Tee-Object "$sandbox\install.log" | Out-Null
 
-  $installed = Join-Path $sandbox '.agents\skills\orca-cli\SKILL.md'
+  $installed = Join-Path $sandbox '.agents\skills\yiru-cli\SKILL.md'
   $truth     = Join-Path $sandbox 'truth-SKILL.md'
   # Ground truth = exact bytes Git stores on main (LF), fetched without transformation.
-  Invoke-WebRequest 'https://raw.githubusercontent.com/stablyai/orca/main/skills/orca-cli/SKILL.md' -OutFile $truth
+  Invoke-WebRequest 'https://raw.githubusercontent.com/stablyai/yiru/main/skills/yiru-cli/SKILL.md' -OutFile $truth
 
   function Info($label,$f){
     if(!(Test-Path $f)){ Write-Host "$label`: MISSING"; return }
@@ -509,13 +509,13 @@ try {
   Write-Host ("VERDICT: {0}" -f ($(if($same){'VERBATIM (pass)'}else{'DIFFERS (inspect CR counts: CRLF-only diff = autocrlf translation)'})))
 
   Write-Host "`n=== link shape (junction/symlink/copy) for provider + canonical ==="
-  foreach($p in @("$sandbox\.claude\skills\orca-cli","$sandbox\.agents\skills\orca-cli")){
+  foreach($p in @("$sandbox\.claude\skills\yiru-cli","$sandbox\.agents\skills\yiru-cli")){
     if(Test-Path $p){ $i=Get-Item $p; Write-Host ("{0} -> LinkType={1} Target={2}" -f $p,$i.LinkType,($i.Target -join ',')) }
     else { Write-Host "$p -> (absent)" }
   }
 
   Write-Host "`n=== file set in installed skill dir (extra/stripped files?) ==="
-  Get-ChildItem (Join-Path $sandbox '.agents\skills\orca-cli') -Recurse -File | ForEach-Object { $_.FullName.Substring($sandbox.Length) }
+  Get-ChildItem (Join-Path $sandbox '.agents\skills\yiru-cli') -Recurse -File | ForEach-Object { $_.FullName.Substring($sandbox.Length) }
 
   Write-Host "`n=== lockfile location + whether skills object populated (Windows #-not-written bug) ==="
   foreach($lp in @("$sandbox\.agents\.skill-lock.json", "$env:XDG_STATE_HOME\skills\.skill-lock.json")){
@@ -583,7 +583,7 @@ Main process (skill engine):
 
 State and host identity:
 
-- `src/main/persistence.ts` (`store`, host-partitioned `orca-data.json`) — home for the
+- `src/main/persistence.ts` (`store`, host-partitioned `yiru-data.json`) — home for the
   management ledger; already host-aware and passed to the skills handler.
 - `src/shared/execution-host.ts` — `ExecutionHostId = 'local' | ssh:<id> | runtime:<id>`; add a
   `wsl:<distro>` variant (none today) so ledger records key per host. Do not key off
@@ -622,13 +622,13 @@ Ship-ready, with no background writes, when:
 
 - The bundled manifest and released-snapshot registry are generated and CI-verified (monotonic
   per-skill revisions, immutable history, release mapping).
-- Discovery classifies every `home`-root Orca skill as current / update-available / newer-known /
+- Discovery classifies every `home`-root Yiru skill as current / update-available / newer-known /
   modified / unknown / externally-managed / inaccessible, using LF-normalized text identity.
 - The ledger records adopted destinations in the host-partitioned store, keyed by
   `ExecutionHostId` (plus `wsl:<distro>` where applicable).
 - Settings shows those states; a proactive non-repeating adoption nudge exists; "Manage and
   update" and explicit destructive replace (with backup and diff) work on the local host.
-- Orca-driven installs auto-record ownership.
+- Yiru-driven installs auto-record ownership.
 - No path is written in the background and no path is adopted silently.
 
 Phase 1 exists to validate the two field assumptions before the background writer is built:
@@ -644,14 +644,14 @@ the byte/EOL identity match rate on real installs, and the adoption take-rate on
 - equal revision/different content;
 - newer known and unknown release;
 - missing, corrupt, old-version, XDG-located, and spoofed skills CLI lock;
-- lost/corrupt Orca ledger and app reinstall;
+- lost/corrupt Yiru ledger and app reinstall;
 - source ref/path changes and repo/skill rename;
 - supported pinned and newest skills CLI round trips match bundle identity on macOS, Linux, and
   Windows, including symlink and copy/fallback installation: exact bytes/modes for binary and
   executable files, LF-normalized content for text files;
 - CRLF vs LF install (`core.autocrlf` on and off) adopts and stays managed via normalized
   identity; an EOL-only difference is never a conflict; a real content change still is;
-- Orca-published text files keep the destination's existing EOL convention and do not trigger a
+- Yiru-published text files keep the destination's existing EOL convention and do not trigger a
   skills-CLI re-update loop.
 - two same-skill PRs that independently change content cannot pass the merge queue/main
   monotonicity gate with one revision;
@@ -677,7 +677,7 @@ the byte/EOL identity match rate on real installs, and the adoption take-rate on
   swept from their markers, and never offered for adoption;
 - unmarked lookalike directories under or near the reserved transaction path are never swept;
 - `EPERM`, `EBUSY`, disk full, permission loss, and process crash;
-- two Orca windows and duplicate triggers;
+- two Yiru windows and duplicate triggers;
 - stable/dev attempts and isolated dev home;
 - skills CLI or user mutation before stage, during stage, and immediately before publish;
 - failed destinations retry without reprocessing successful siblings.
@@ -702,7 +702,7 @@ host-isolation coverage below E2E as deterministic integration tests.
 - Exact platform paths and schema migration policy for the host-local management ledger.
 - Whether the skills CLI can expose a supported machine-readable placement/ownership API in
   the future; until then its private lock remains read-only supporting evidence.
-- Which custom agent homes Orca can identify from the actual launch environment rather than
+- Which custom agent homes Yiru can identify from the actual launch environment rather than
   ambient desktop environment variables.
 - Exact provider-link repair scope after a canonical install is managed but not visible to an
   agent; this remains separately consented from content updates.

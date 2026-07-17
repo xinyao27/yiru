@@ -13,7 +13,7 @@ import {
   queuePendingAgentStartupDelivery,
   resolveAgentStartupTabId
 } from '@/lib/agent-startup-delayed-delivery'
-import type { FolderWorkspaceLinkedTask, OrcaHooks, TaskViewPresetId } from '../../../shared/types'
+import type { FolderWorkspaceLinkedTask, YiruHooks, TaskViewPresetId } from '../../../shared/types'
 import { resolveHookCommandSourcePolicy } from '../../../shared/hook-command-source-policy'
 import { slugifyForWorkspaceName } from '../../../shared/workspace-name'
 import { createBrowserUuid } from '@/lib/browser-uuid'
@@ -62,7 +62,7 @@ export type LinkedWorkItemSummary = Omit<FolderWorkspaceLinkedTask, 'provider'> 
   linkedContext?: LinkedWorkItemContext
 }
 
-// Why: when a repo has no `orca.yaml` issueCommand and no per-user override,
+// Why: when a repo has no `yiru.yaml` issueCommand and no per-user override,
 // we still want the composer to send a useful default prompt whenever the user
 // attaches a linked work item without typing anything else. "Complete <url>"
 // is the minimum viable instruction that always produces a coherent agent task.
@@ -74,7 +74,7 @@ export type SetupConfig = {
   kind: 'setup' | 'default-tabs' | 'setup-and-default-tabs'
 }
 
-function getDefaultTabCommandPreview(yamlHooks: OrcaHooks | null): string {
+function getDefaultTabCommandPreview(yamlHooks: YiruHooks | null): string {
   return (yamlHooks?.defaultTabs ?? [])
     .map((tab, index) => {
       const command = tab.command?.trim()
@@ -104,7 +104,7 @@ function getSetupConfigKind(
 /**
  * Substitute the issue-command template variables. Prefers `{{artifact_url}}`
  * and keeps `{{issue}}` working silently for repos that have not migrated
- * their `orca.yaml` / `.orca/issue-command` yet.
+ * their `yiru.yaml` / `.yiru/issue-command` yet.
  */
 export function renderIssueCommandTemplate(
   template: string,
@@ -167,7 +167,7 @@ export function getSetupConfig(
         }
       }
     | undefined,
-  yamlHooks: OrcaHooks | null
+  yamlHooks: YiruHooks | null
 ): SetupConfig | null {
   const yamlSetup = yamlHooks?.scripts?.setup?.trim()
   const yamlDefaultTabCommands = getDefaultTabCommandPreview(yamlHooks)

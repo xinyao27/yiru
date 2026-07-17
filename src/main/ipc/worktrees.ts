@@ -24,7 +24,7 @@ import type {
   GitHubPrStartPoint,
   GitPushTarget,
   GitWorktreeInfo,
-  OrcaHooks,
+  YiruHooks,
   Repo,
   RemoveWorktreeResult,
   Worktree,
@@ -33,7 +33,7 @@ import type {
 import { assertWorktreeUnlockedForRemoval } from '../../shared/worktree-removal'
 import { getRepoExecutionHostId, type ExecutionHostId } from '../../shared/execution-host'
 import {
-  buildKnownOrcaWorkspaceLayouts,
+  buildKnownYiruWorkspaceLayouts,
   isLegacyRepoForExternalWorktreeVisibility,
   toDetectedWorktree
 } from '../../shared/worktree-ownership'
@@ -58,11 +58,11 @@ import {
   getEffectiveHooksFromConfig,
   getSetupRunnerEnvVars,
   loadHooks,
-  parseOrcaYaml,
+  parseYiruYaml,
   readIssueCommand,
   runHook,
   hasHooksFile,
-  hasUnrecognizedOrcaYamlKeys,
+  hasUnrecognizedYiruYamlKeys,
   writeIssueCommand
 } from '../hooks'
 import {
@@ -88,7 +88,7 @@ import {
   isENOENT,
   registerWorktreeRootsForRepo
 } from './filesystem-auth'
-import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { killAllProcessesForWorktree } from '../runtime/worktree-teardown'
 import { clearProviderPtyState, getLocalPtyProvider, getSshPtyProvider } from './pty'
 import { findExistingWorktreeSymlinkPaths, removeWorktreeLinkedPaths } from './worktree-symlinks'
@@ -114,7 +114,7 @@ type RemoveWorktreeArgs = {
 }
 
 async function stopPtysForDestructiveWorktreeRemoval(
-  runtime: OrcaRuntimeService,
+  runtime: YiruRuntimeService,
   worktreeId: string,
   connectionId?: string
 ): Promise<void> {
@@ -164,14 +164,14 @@ import { advertisedUrlWatcher } from '../ports/advertised-url-watcher'
 import { localhostWorktreeLabelProxy } from '../localhost-worktree-label-proxy'
 import {
   assertWorktreeDoesNotContainRegisteredWorktree,
-  canCleanupUnregisteredOrcaLeftoverDirectory,
-  canCleanupUnregisteredOrcaWorktreeDirectory,
+  canCleanupUnregisteredYiruLeftoverDirectory,
+  canCleanupUnregisteredYiruWorktreeDirectory,
   canSafelyRemoveOrphanedWorktreeDirectory,
   findRegisteredDeletableWorktree,
   isDangerousWorktreeRemovalPath,
   isWorktreePathMissing,
   ORPHANED_WORKTREE_DIRECTORY_MESSAGE,
-  stripOrcaProvenanceMetaUpdates,
+  stripYiruProvenanceMetaUpdates,
   UNREGISTERED_MISSING_WORKTREE_MESSAGE
 } from '../worktree-removal-safety'
 import { isWindowsAbsolutePathLike } from '../../shared/cross-platform-path'
@@ -254,7 +254,7 @@ function getProjectHostSetupMetaUpdates(
   }
 }
 
-// Why: worktrees discovered on disk (not created via Orca's UI) have no
+// Why: worktrees discovered on disk (not created via Yiru's UI) have no
 // persisted WorktreeMeta, so mergeWorktree falls back to `lastActivityAt: 0`.
 // That makes them sort to the bottom of "Recent" even though the user just
 // added the repo / folder. The same authoritative discovery pass is also the
@@ -346,7 +346,7 @@ function getWorktreeRemovalInFlightKey(worktreeId: string, hostId?: ExecutionHos
   return `${hostId ?? ''}\0${worktreeId}`
 }
 
-async function getArchiveHooksForRemoval(repo: Repo): Promise<OrcaHooks | null> {
+async function getArchiveHooksForRemoval(repo: Repo): Promise<YiruHooks | null> {
   if (!repo.connectionId) {
     return getEffectiveHooks(repo)
   }
@@ -357,8 +357,8 @@ async function getArchiveHooksForRemoval(repo: Repo): Promise<OrcaHooks | null> 
   }
 
   try {
-    const result = await fsProvider.readFile(joinWorktreeRelativePath(repo.path, 'orca.yaml'))
-    const yamlHooks = result.isBinary ? null : parseOrcaYaml(result.content)
+    const result = await fsProvider.readFile(joinWorktreeRelativePath(repo.path, 'yiru.yaml'))
+    const yamlHooks = result.isBinary ? null : parseYiruYaml(result.content)
     return getEffectiveHooksFromConfig(repo, yamlHooks)
   } catch {
     return getEffectiveHooksFromConfig(repo, null)
@@ -749,7 +749,7 @@ function buildDetectedGitWorktrees(
   gitWorktrees: GitWorktreeInfo[]
 ): DetectedWorktree[] {
   const settings = store.getSettings()
-  const knownOrcaLayouts = buildKnownOrcaWorkspaceLayouts(settings, repo)
+  const knownYiruLayouts = buildKnownYiruWorkspaceLayouts(settings, repo)
   const isLegacyRepoForVisibility = isLegacyRepoForExternalWorktreeVisibility(repo)
   // Why: a prunable registration has no working directory (issue #8389); only
   // this listing omits it — removal/cleanup flows list worktrees separately.
@@ -763,7 +763,7 @@ function buildDetectedGitWorktrees(
       worktree,
       meta,
       settings,
-      knownOrcaLayouts,
+      knownYiruLayouts,
       isLegacyRepoForVisibility
     })
     if (!detected.visible) {
@@ -776,7 +776,7 @@ function buildDetectedGitWorktrees(
       worktree: mergeWorktree(repo.id, gitWorktree, meta, repo.displayName),
       meta,
       settings,
-      knownOrcaLayouts,
+      knownYiruLayouts,
       isLegacyRepoForVisibility
     })
   })
@@ -901,7 +901,7 @@ function buildFolderDetectedWorktrees(store: Store, repo: Repo): DetectedWorktre
       worktree,
       meta: store.getWorktreeMeta(worktree.id),
       settings,
-      knownOrcaLayouts: [],
+      knownYiruLayouts: [],
       isLegacyRepoForVisibility: true
     })
   )
@@ -937,8 +937,8 @@ function createFolderWorkspace(
     displayName: args.displayName || args.name,
     lastActivityAt: now,
     createdAt: now,
-    orcaCreatedAt: now,
-    orcaCreationSource: 'desktop',
+    yiruCreatedAt: now,
+    yiruCreationSource: 'desktop',
     ...(args.automationProvenance ? { automationProvenance: args.automationProvenance } : {}),
     ...(args.createdWithAgent ? { createdWithAgent: args.createdWithAgent } : {}),
     ...(args.linkedIssue !== undefined ? { linkedIssue: args.linkedIssue } : {}),
@@ -976,13 +976,13 @@ function buildDisconnectedDetectedWorktrees(
       worktree,
       meta,
       settings,
-      knownOrcaLayouts: [],
+      knownYiruLayouts: [],
       isLegacyRepoForVisibility: true
     })
     return {
       ...detected,
       visible: true,
-      ownership: detected.ownership === 'orca-managed' ? 'orca-managed' : 'unknown-legacy'
+      ownership: detected.ownership === 'yiru-managed' ? 'yiru-managed' : 'unknown-legacy'
     }
   })
 }
@@ -990,7 +990,7 @@ function buildDisconnectedDetectedWorktrees(
 export function registerWorktreeHandlers(
   mainWindow: BrowserWindow,
   store: Store,
-  runtime: OrcaRuntimeService
+  runtime: YiruRuntimeService
 ): void {
   // Remove any previously registered handlers so we can re-register them
   // (e.g. when macOS re-activates the app and creates a new window).
@@ -1484,7 +1484,7 @@ export function registerWorktreeHandlers(
           const fsProvider = repo.connectionId ? getSshFilesystemProvider(repo.connectionId) : null
           let canCleanOrphanedDirectory = false
           if (
-            canCleanupUnregisteredOrcaWorktreeDirectory({
+            canCleanupUnregisteredYiruWorktreeDirectory({
               meta: removedMeta
             })
           ) {
@@ -1574,7 +1574,7 @@ export function registerWorktreeHandlers(
               localWorktreeGitOptions
             )
             if (
-              await canCleanupUnregisteredOrcaLeftoverDirectory({
+              await canCleanupUnregisteredYiruLeftoverDirectory({
                 meta: removedMeta,
                 worktreePath,
                 runtimeWorktreePath,
@@ -1615,12 +1615,12 @@ export function registerWorktreeHandlers(
           if (await isAlreadyRemovedWorktreePath(repo, worktreePath, localWorktreeGitOptions)) {
             if (!args.force && !removedMeta) {
               // Why: without persisted metadata, require the renderer recovery
-              // path before deleting Orca-only state for an unregistered path.
+              // path before deleting Yiru-only state for an unregistered path.
               throw new Error(UNREGISTERED_MISSING_WORKTREE_MESSAGE)
             }
             // Why: a manually deleted worktree is already gone from Git and disk.
             // The sidebar delete action has persisted metadata proving this was
-            // an Orca-known row, so no force confirmation is needed.
+            // a Yiru-known row, so no force confirmation is needed.
             if (repo.connectionId) {
               await cleanupUnusedWorktreePushTargetRemoteSsh(
                 provider!,
@@ -1953,7 +1953,7 @@ export function registerWorktreeHandlers(
     }
   )
 
-  // Why: forget-locally drops a workspace from Orca without any remote Git or
+  // Why: forget-locally drops a workspace from Yiru without any remote Git or
   // filesystem work. It exists so a workspace pinned to a removed/disconnected
   // SSH target — whose provider is gone and whose `worktrees:remove` therefore
   // throws at requireSshGitProvider before any cleanup runs — can still be
@@ -2094,7 +2094,7 @@ export function registerWorktreeHandlers(
               firstAgentMessageRenameError: null
             }
           : args.updates
-      const meta = store.setWorktreeMeta(args.worktreeId, stripOrcaProvenanceMetaUpdates(updates))
+      const meta = store.setWorktreeMeta(args.worktreeId, stripYiruProvenanceMetaUpdates(updates))
       // Do NOT call notifyWorktreesChanged here. The renderer applies meta
       // updates optimistically before calling this IPC, so a notification
       // would trigger a redundant fetchWorktrees round-trip that bumps
@@ -2193,11 +2193,11 @@ export function registerWorktreeHandlers(
           return { status: 'error', hasHooks: false, hooks: null, mayNeedUpdate: false }
         }
         try {
-          const result = await fsProvider.readFile(joinWorktreeRelativePath(repo.path, 'orca.yaml'))
+          const result = await fsProvider.readFile(joinWorktreeRelativePath(repo.path, 'yiru.yaml'))
           return {
             status: 'ok',
             hasHooks: !result.isBinary,
-            hooks: result.isBinary ? null : parseOrcaYaml(result.content),
+            hooks: result.isBinary ? null : parseYiruYaml(result.content),
             mayNeedUpdate: false
           }
         } catch (error) {
@@ -2212,11 +2212,11 @@ export function registerWorktreeHandlers(
 
       const has = hasHooksFile(repo.path)
       const hooks = has ? loadHooks(repo.path) : null
-      // Why: when a newer Orca version adds a top-level key to `orca.yaml`, older
+      // Why: when a newer Yiru version adds a top-level key to `yiru.yaml`, older
       // versions that don't recognise it return null and show "could not be parsed".
       // Detecting well-formed but unrecognised keys lets the UI suggest updating
       // instead of implying the file is broken.
-      const mayNeedUpdate = has && !hooks && hasUnrecognizedOrcaYamlKeys(repo.path)
+      const mayNeedUpdate = has && !hooks && hasUnrecognizedYiruYamlKeys(repo.path)
       return {
         status: 'ok',
         hasHooks: has,
@@ -2319,7 +2319,7 @@ export function registerWorktreeHandlers(
         }
       }
       if (repo.connectionId) {
-        const issueCommandPath = joinWorktreeRelativePath(repo.path, '.orca/issue-command')
+        const issueCommandPath = joinWorktreeRelativePath(repo.path, '.yiru/issue-command')
         const fsProvider = getSshFilesystemProvider(repo.connectionId)
         if (!fsProvider) {
           return {
@@ -2344,10 +2344,10 @@ export function registerWorktreeHandlers(
           }
         }
         try {
-          const result = await fsProvider.readFile(joinWorktreeRelativePath(repo.path, 'orca.yaml'))
+          const result = await fsProvider.readFile(joinWorktreeRelativePath(repo.path, 'yiru.yaml'))
           sharedContent = result.isBinary
             ? null
-            : parseOrcaYaml(result.content)?.issueCommand?.trim() || null
+            : parseYiruYaml(result.content)?.issueCommand?.trim() || null
         } catch (error) {
           if (!isENOENT(error)) {
             status = 'error'
@@ -2379,7 +2379,7 @@ export function registerWorktreeHandlers(
         return
       }
       if (repo.connectionId) {
-        const issueCommandPath = joinWorktreeRelativePath(repo.path, '.orca/issue-command')
+        const issueCommandPath = joinWorktreeRelativePath(repo.path, '.yiru/issue-command')
         const fsProvider = getSshFilesystemProvider(repo.connectionId)
         if (!fsProvider) {
           throw new Error(
@@ -2395,19 +2395,19 @@ export function registerWorktreeHandlers(
           })
           return
         }
-        await fsProvider.createDir(joinWorktreeRelativePath(repo.path, '.orca'))
+        await fsProvider.createDir(joinWorktreeRelativePath(repo.path, '.yiru'))
         const gitignorePath = joinWorktreeRelativePath(repo.path, '.gitignore')
         try {
           const result = await fsProvider.readFile(gitignorePath)
-          if (!result.isBinary && !/^\.orca\/?$/m.test(result.content)) {
+          if (!result.isBinary && !/^\.yiru\/?$/m.test(result.content)) {
             const separator = result.content.endsWith('\n') ? '' : '\n'
-            await fsProvider.writeFile(gitignorePath, `${result.content}${separator}.orca\n`)
+            await fsProvider.writeFile(gitignorePath, `${result.content}${separator}.yiru\n`)
           }
         } catch (error) {
           if (!isENOENT(error)) {
             throw error
           }
-          await fsProvider.writeFile(gitignorePath, '.orca\n')
+          await fsProvider.writeFile(gitignorePath, '.yiru\n')
         }
         await fsProvider.writeFile(issueCommandPath, `${trimmed}\n`)
         return

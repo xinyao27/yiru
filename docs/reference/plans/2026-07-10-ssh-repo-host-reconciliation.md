@@ -62,7 +62,7 @@ moves cached worktree ownership onto the new host.
    not considered evidence.
 7. When a repo row is pruned, its matching `ProjectHostSetup` is removed. The desktop catalog owns
    local and direct-SSH setups; `runtime:<environmentId>` setups remain authoritative on the remote
-   Orca server.
+   Yiru server.
 8. Cached visible and detected worktree rows for the migrated repo are moved from the exact old SSH
    host to the new host. If a new-host worktree row already arrived, it wins and the stale duplicate
    is discarded.

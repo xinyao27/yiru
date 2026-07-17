@@ -20,7 +20,7 @@ The visible failure is:
 1. Connect an SSH target.
 2. Add a local port forward.
 3. Close all windows on macOS while the app process remains alive.
-4. Reactivate Orca, causing SSH handlers to register again.
+4. Reactivate Yiru, causing SSH handlers to register again.
 5. `ssh:listPortForwards` returns an empty list, `ssh:removePortForward` cannot
    remove the old forward id, `ssh:addPortForward`/`ssh:updatePortForward` can
    fail because the fresh connection manager has no live connection, and

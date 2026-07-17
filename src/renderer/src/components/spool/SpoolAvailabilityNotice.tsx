@@ -89,7 +89,7 @@ function getAvailabilityDescription(diagnostic: SpoolAvailabilityDiagnostic): st
     case 'tailscale_permission-denied':
       return translate(
         'auto.components.spool.SpoolAvailabilityNotice.tailscalePermissionDenied',
-        'Orca does not have permission to read Tailscale status.'
+        'Yiru does not have permission to read Tailscale status.'
       )
     case 'tailscale_timed-out':
       return translate(
@@ -99,7 +99,7 @@ function getAvailabilityDescription(diagnostic: SpoolAvailabilityDiagnostic): st
     case 'tailscale_unsupported-output':
       return translate(
         'auto.components.spool.SpoolAvailabilityNotice.tailscaleUnsupportedOutput',
-        'Tailscale returned status data that this Orca version cannot read.'
+        'Tailscale returned status data that this Yiru version cannot read.'
       )
     case 'spool_port_unavailable':
       return translate(
@@ -110,7 +110,7 @@ function getAvailabilityDescription(diagnostic: SpoolAvailabilityDiagnostic): st
     case 'spool_permission_denied':
       return translate(
         'auto.components.spool.SpoolAvailabilityNotice.permissionDenied',
-        'System permissions prevented Orca from opening the Spool Tailnet listener.'
+        'System permissions prevented Yiru from opening the Spool Tailnet listener.'
       )
     case 'persistence_unavailable':
       return translate(

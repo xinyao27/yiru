@@ -33,7 +33,7 @@ export class ClaudeAgentTeamsService {
     const pathValue = [args.shimDir, args.baseEnv.PATH]
       .filter(Boolean)
       .join(process.platform === 'win32' ? ';' : ':')
-    const tmuxValue = `/tmp/orca-claude-agent-teams/${teamId},0,1`
+    const tmuxValue = `/tmp/yiru-claude-agent-teams/${teamId},0,1`
     const env: Record<string, string> = {
       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1',
       PATH: pathValue,
@@ -41,17 +41,17 @@ export class ClaudeAgentTeamsService {
       TMUX_PANE: leaderPane,
       TERM: 'screen-256color',
       COLORTERM: args.baseEnv.COLORTERM || 'truecolor',
-      ORCA_AGENT_TEAMS_TEAM_ID: teamId,
-      ORCA_AGENT_TEAMS_TOKEN: token,
-      ORCA_AGENT_TEAMS_LEADER_PANE: leaderPane,
-      ORCA_AGENT_TEAMS_SHIM_DIR: args.shimDir,
-      ORCA_AGENT_TEAMS_SHIM_BIN: args.shimBin
+      YIRU_AGENT_TEAMS_TEAM_ID: teamId,
+      YIRU_AGENT_TEAMS_TOKEN: token,
+      YIRU_AGENT_TEAMS_LEADER_PANE: leaderPane,
+      YIRU_AGENT_TEAMS_SHIM_DIR: args.shimDir,
+      YIRU_AGENT_TEAMS_SHIM_BIN: args.shimBin
     }
-    if (args.baseEnv.ORCA_PAIRING_CODE) {
-      env.ORCA_PAIRING_CODE = args.baseEnv.ORCA_PAIRING_CODE
+    if (args.baseEnv.YIRU_PAIRING_CODE) {
+      env.YIRU_PAIRING_CODE = args.baseEnv.YIRU_PAIRING_CODE
     }
-    if (args.baseEnv.ORCA_ENVIRONMENT) {
-      env.ORCA_ENVIRONMENT = args.baseEnv.ORCA_ENVIRONMENT
+    if (args.baseEnv.YIRU_ENVIRONMENT) {
+      env.YIRU_ENVIRONMENT = args.baseEnv.YIRU_ENVIRONMENT
     }
 
     const leader: TeamPane = { fakePaneId: leaderPane, handle: args.leaderHandle, index: 0 }
@@ -60,7 +60,7 @@ export class ClaudeAgentTeamsService {
       token,
       leaderPane,
       leaderHandle: args.leaderHandle,
-      sessionName: 'orca',
+      sessionName: 'yiru',
       windowIndex: '0',
       tmuxValue,
       baseEnv: env,

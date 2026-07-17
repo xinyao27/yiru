@@ -1162,7 +1162,7 @@ describe('generateCommitMessageFromContext', () => {
       {
         agentId: 'custom',
         model: '',
-        customAgentCommand: 'orca-test-agent-nope'
+        customAgentCommand: 'yiru-test-agent-nope'
       },
       {
         kind: 'local',
@@ -1179,7 +1179,7 @@ describe('generateCommitMessageFromContext', () => {
       message: 'Add README note'
     })
     expect(spawnMock).toHaveBeenCalledWith(
-      'orca-test-agent-nope',
+      'yiru-test-agent-nope',
       [],
       expect.objectContaining({
         env: expect.objectContaining({ CODEX_HOME: '/managed/codex-home' })
@@ -1189,7 +1189,7 @@ describe('generateCommitMessageFromContext', () => {
 
   it('routes WSL local commit generation through the selected distro login shell', async () => {
     await withPlatform('win32', async () => {
-      process.env.ORCA_HOST_ONLY_SECRET = 'do-not-leak'
+      process.env.YIRU_HOST_ONLY_SECRET = 'do-not-leak'
       const listeners = new Map<string, (value: unknown) => void>()
       const child = {
         pid: 123,
@@ -1237,10 +1237,10 @@ describe('generateCommitMessageFromContext', () => {
         })
       )
       const spawnEnv = spawnMock.mock.calls[0]?.[2]?.env as NodeJS.ProcessEnv
-      expect(spawnEnv.ORCA_HOST_ONLY_SECRET).toBeUndefined()
+      expect(spawnEnv.YIRU_HOST_ONLY_SECRET).toBeUndefined()
       const shellCommand = spawnMock.mock.calls[0]?.[1]?.[5] as string
       expect(shellCommand).toContain('getent passwd')
-      expect(shellCommand).toContain('exec "\\$_orca_wsl_shell" -ilc')
+      expect(shellCommand).toContain('exec "\\$_yiru_wsl_shell" -ilc')
       expect(shellCommand).toContain('/mnt/c/repo')
       expect(shellCommand).toContain("'agent'")
       expect(shellCommand).toContain('--mode')
@@ -1698,7 +1698,7 @@ describe('generateCommitMessageFromContext', () => {
       expect(result).toEqual({
         success: false,
         error:
-          'C:/tools/agent.cmd cannot be run as a Windows batch command with the prompt in argv. Remove {prompt} so Orca sends the prompt on stdin.'
+          'C:/tools/agent.cmd cannot be run as a Windows batch command with the prompt in argv. Remove {prompt} so Yiru sends the prompt on stdin.'
       })
       expect(spawnMock).not.toHaveBeenCalled()
     })

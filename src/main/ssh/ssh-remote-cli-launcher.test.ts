@@ -22,13 +22,13 @@ function decodePowerShellCommand(command: string): string {
   return Buffer.from(encoded, 'base64').toString('utf16le')
 }
 
-describe('SSH remote Orca CLI launcher', () => {
+describe('SSH remote Yiru CLI launcher', () => {
   function windowsInstallPlan(): ReturnType<typeof createRemoteCliInstallPlan> {
     return createRemoteCliInstallPlan({
-      binDir: 'C:/Users/me user/.orca-relay/bin',
-      relayDir: 'C:/Users/me user/.orca-remote/relay-v1',
+      binDir: 'C:/Users/me user/.yiru-relay/bin',
+      relayDir: 'C:/Users/me user/.yiru-remote/relay-v1',
       nodePath: 'C:/Program Files/nodejs/node.exe',
-      sockPath: '\\\\.\\pipe\\orca-relay-123',
+      sockPath: '\\\\.\\pipe\\yiru-relay-123',
       hostPlatform: getRemoteHostPlatform('win32-x64')
     })
   }
@@ -36,11 +36,11 @@ describe('SSH remote Orca CLI launcher', () => {
   it('compiles a native Windows launcher without a cmd.exe argument bridge', () => {
     const plan = windowsInstallPlan()
 
-    expect(plan.launcherPath).toBe('C:/Users/me user/.orca-relay/bin/orca.exe')
+    expect(plan.launcherPath).toBe('C:/Users/me user/.yiru-relay/bin/yiru.exe')
     expect(plan.files).toHaveLength(1)
-    expect(plan.files[0]?.path).toBe('C:/Users/me user/.orca-relay/bin/orca-launcher.cs')
+    expect(plan.files[0]?.path).toBe('C:/Users/me user/.yiru-relay/bin/yiru-launcher.cs')
     expect(plan.files[0]?.contents).toContain('ProcessStartInfo')
-    expect(plan.files[0]?.contents).toContain('"--orca-cli"')
+    expect(plan.files[0]?.contents).toContain('"--yiru-cli"')
     expect(plan.files[0]?.contents).toContain("value[index] == '\"'")
     expect(plan.files[0]?.contents).toContain("character == '\\\\'")
     expect(plan.files[0]?.contents).not.toContain('cmd.exe')
@@ -52,23 +52,23 @@ describe('SSH remote Orca CLI launcher', () => {
     // Why: legacy csc.exe is invoked from the bin directory with bare, space-free
     // file names so PowerShell 5.1 never mangles a space-bearing absolute path.
     expect(compileScript).toContain(
-      "Set-Location -ErrorAction Stop -LiteralPath 'C:/Users/me user/.orca-relay/bin'"
+      "Set-Location -ErrorAction Stop -LiteralPath 'C:/Users/me user/.yiru-relay/bin'"
     )
-    expect(compileScript).toContain('/out:orca.exe')
-    expect(compileScript).toContain('C:/Users/me user/.orca-relay/bin/orca-launcher.cs')
-    expect(compileScript).toContain('C:/Users/me user/.orca-relay/bin/orca.cmd')
+    expect(compileScript).toContain('/out:yiru.exe')
+    expect(compileScript).toContain('C:/Users/me user/.yiru-relay/bin/yiru-launcher.cs')
+    expect(compileScript).toContain('C:/Users/me user/.yiru-relay/bin/yiru.cmd')
   })
 
-  it('removes the legacy orca.cmd only after every compile guard has passed', () => {
+  it('removes the legacy yiru.cmd only after every compile guard has passed', () => {
     const script = decodePowerShellCommand(windowsInstallPlan().postWriteCommands[0] ?? '')
     const legacyShimRemoval =
-      "Remove-Item -LiteralPath 'C:/Users/me user/.orca-relay/bin/orca.cmd' -Force -ErrorAction SilentlyContinue"
+      "Remove-Item -LiteralPath 'C:/Users/me user/.yiru-relay/bin/yiru.cmd' -Force -ErrorAction SilentlyContinue"
     // Why: a host missing csc.exe or failing the compile must keep its existing
     // CLI, so every fail-closed guard precedes the legacy %* shim removal.
     const guards = [
-      "if (-not $compiler) { Write-Error 'Unable to find the .NET Framework C# compiler required for the Orca SSH CLI launcher.'; exit 1 }",
+      "if (-not $compiler) { Write-Error 'Unable to find the .NET Framework C# compiler required for the Yiru SSH CLI launcher.'; exit 1 }",
       'if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }',
-      "if (-not (Test-Path -LiteralPath 'C:/Users/me user/.orca-relay/bin/orca.exe' -PathType Leaf))"
+      "if (-not (Test-Path -LiteralPath 'C:/Users/me user/.yiru-relay/bin/yiru.exe' -PathType Leaf))"
     ]
     expect(script).toContain(legacyShimRemoval)
     for (const guard of guards) {
@@ -78,11 +78,11 @@ describe('SSH remote Orca CLI launcher', () => {
   })
 
   itWindows('preserves a multiline argument through the compiled remote launcher', () => {
-    const root = mkdtempSync(join(tmpdir(), 'orca remote cli '))
+    const root = mkdtempSync(join(tmpdir(), 'yiru remote cli '))
     try {
       const binDir = join(root, 'bin').replaceAll('\\', '/')
       const relayDir = join(root, 'relay').replaceAll('\\', '/')
-      const sockPath = '\\\\.\\pipe\\orca-relay-test'
+      const sockPath = '\\\\.\\pipe\\yiru-relay-test'
       const plan = createRemoteCliInstallPlan({
         binDir,
         relayDir,
@@ -125,9 +125,9 @@ describe('SSH remote Orca CLI launcher', () => {
           encoding: 'utf8',
           env: {
             ...process.env,
-            ORCA_RELAY_NODE_PATH: process.execPath,
-            ORCA_RELAY_DIR: relayDir,
-            ORCA_RELAY_SOCKET_PATH: sockPath
+            YIRU_RELAY_NODE_PATH: process.execPath,
+            YIRU_RELAY_DIR: relayDir,
+            YIRU_RELAY_SOCKET_PATH: sockPath
           }
         }
       )
@@ -136,7 +136,7 @@ describe('SSH remote Orca CLI launcher', () => {
       expect(JSON.parse(launched.stdout)).toEqual([
         '--sock-path',
         sockPath,
-        '--orca-cli',
+        '--yiru-cli',
         'orchestration',
         'send',
         '--body',
@@ -148,19 +148,19 @@ describe('SSH remote Orca CLI launcher', () => {
     }
   })
 
-  itWindows('preserves the existing orca.cmd when the compiler is missing', () => {
-    const root = mkdtempSync(join(tmpdir(), 'orca remote cli '))
+  itWindows('preserves the existing yiru.cmd when the compiler is missing', () => {
+    const root = mkdtempSync(join(tmpdir(), 'yiru remote cli '))
     try {
       const binDir = join(root, 'bin').replaceAll('\\', '/')
       mkdirSync(binDir, { recursive: true })
-      const legacyShimPath = join(binDir, 'orca.cmd')
-      writeFileSync(legacyShimPath, '@echo legacy orca cli\r\n', 'utf8')
+      const legacyShimPath = join(binDir, 'yiru.cmd')
+      writeFileSync(legacyShimPath, '@echo legacy yiru cli\r\n', 'utf8')
 
       const plan = createRemoteCliInstallPlan({
         binDir,
         relayDir: join(root, 'relay').replaceAll('\\', '/'),
         nodePath: process.execPath,
-        sockPath: '\\\\.\\pipe\\orca-relay-test',
+        sockPath: '\\\\.\\pipe\\yiru-relay-test',
         hostPlatform: getRemoteHostPlatform('win32-x64')
       })
       for (const file of plan.files) {
@@ -185,7 +185,7 @@ describe('SSH remote Orca CLI launcher', () => {
       )
 
       expect(compile.status).not.toBe(0)
-      expect(existsSync(legacyShimPath), 'existing orca.cmd must survive a failed install').toBe(
+      expect(existsSync(legacyShimPath), 'existing yiru.cmd must survive a failed install').toBe(
         true
       )
     } finally {
@@ -195,18 +195,18 @@ describe('SSH remote Orca CLI launcher', () => {
 
   it('keeps the POSIX launcher as an argv-preserving shell exec', () => {
     const plan = createRemoteCliInstallPlan({
-      binDir: '/home/me/.orca-relay/bin',
-      relayDir: '/home/me/.orca-remote/relay-v1',
+      binDir: '/home/me/.yiru-relay/bin',
+      relayDir: '/home/me/.yiru-remote/relay-v1',
       nodePath: '/usr/bin/node',
-      sockPath: '/home/me/.orca-remote/relay-v1/relay.sock',
+      sockPath: '/home/me/.yiru-remote/relay-v1/relay.sock',
       hostPlatform: getRemoteHostPlatform('linux-x64')
     })
 
-    expect(plan.launcherPath).toBe('/home/me/.orca-relay/bin/orca')
+    expect(plan.launcherPath).toBe('/home/me/.yiru-relay/bin/yiru')
     expect(plan.files).toEqual([
       expect.objectContaining({
-        path: '/home/me/.orca-relay/bin/orca',
-        contents: expect.stringContaining('--orca-cli "$@"')
+        path: '/home/me/.yiru-relay/bin/yiru',
+        contents: expect.stringContaining('--yiru-cli "$@"')
       })
     ])
   })

@@ -2,7 +2,7 @@
 
 ## Problem
 
-- Paired browser image paste reads a clipboard image in `src/renderer/src/web/web-preload-api.ts:120`, converts it to PNG base64, and sends the whole string through `clipboard.saveImageAsTempFile` at `src/renderer/src/web/web-preload-api.ts:1613`. `src/main/runtime/rpc/ws-transport.ts` sets `maxPayload` to 1 MiB, and the browser RPC client encrypts JSON requests into base64 text frames. A screenshot well below the existing 24 MiB clipboard schema limit can still exceed the encrypted WebSocket frame cap and close the socket as `Remote Orca runtime connection interrupted`.
+- Paired browser image paste reads a clipboard image in `src/renderer/src/web/web-preload-api.ts:120`, converts it to PNG base64, and sends the whole string through `clipboard.saveImageAsTempFile` at `src/renderer/src/web/web-preload-api.ts:1613`. `src/main/runtime/rpc/ws-transport.ts` sets `maxPayload` to 1 MiB, and the browser RPC client encrypts JSON requests into base64 text frames. A screenshot well below the existing 24 MiB clipboard schema limit can still exceed the encrypted WebSocket frame cap and close the socket as `Remote Yiru runtime connection interrupted`.
 - Paired browser workspace activity is inflated. `src/renderer/src/lib/worktree-status.ts` and `src/renderer/src/lib/worktree-activity-state.ts` currently treat any mirrored web terminal surface ID as active, even when `src/renderer/src/runtime/web-session-tabs-sync.ts` only has a pending host terminal with no ready PTY handle.
 
 ## Root Cause

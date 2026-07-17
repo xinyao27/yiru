@@ -98,7 +98,7 @@ export async function killWorkspacePort(
     return { ok: false, reason: 'The owning process is unknown.' }
   }
   if (pid === process.pid) {
-    return { ok: false, reason: 'Orca cannot stop its own process.' }
+    return { ok: false, reason: 'Yiru cannot stop its own process.' }
   }
 
   try {

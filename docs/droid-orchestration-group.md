@@ -2,11 +2,11 @@
 
 ## Problem
 
-Issue #4560 reports that Orca CLI / orchestration cannot be used with a Droid agent. Droid is already a first-class launchable agent in `src/shared/tui-agent-config.ts:240`, title detection token-matches Droid in `src/shared/agent-detection.ts:38` and `src/shared/agent-detection.ts:397`, and `--inject` accepts a detected running agent through `runtime.isTerminalRunningAgent` in `src/main/runtime/rpc/methods/orchestration.ts:429`. The gap found locally is that orchestration agent groups are hardcoded to `claude`, `openclaude`, `codex`, `opencode`, and `gemini` in `src/main/runtime/orchestration/groups.ts:7`, so `@droid` resolves to no recipients.
+Issue #4560 reports that Yiru CLI / orchestration cannot be used with a Droid agent. Droid is already a first-class launchable agent in `src/shared/tui-agent-config.ts:240`, title detection token-matches Droid in `src/shared/agent-detection.ts:38` and `src/shared/agent-detection.ts:397`, and `--inject` accepts a detected running agent through `runtime.isTerminalRunningAgent` in `src/main/runtime/rpc/methods/orchestration.ts:429`. The gap found locally is that orchestration agent groups are hardcoded to `claude`, `openclaude`, `codex`, `opencode`, and `gemini` in `src/main/runtime/orchestration/groups.ts:7`, so `@droid` resolves to no recipients.
 
 ## Root Cause
 
-The orchestration group resolver has its own closed list of addressable agent-name groups instead of deriving from the agent set that Orca can launch and recognize. Droid was added to the catalog and status paths, but not to this separate group list.
+The orchestration group resolver has its own closed list of addressable agent-name groups instead of deriving from the agent set that Yiru can launch and recognize. Droid was added to the catalog and status paths, but not to this separate group list.
 
 ## Non-Goals
 
@@ -24,7 +24,7 @@ The orchestration group resolver has its own closed list of addressable agent-na
 
 ## Data Flow
 
-- User sends `orca orchestration send --to @droid ...`.
+- User sends `yiru orchestration send --to @droid ...`.
 - CLI calls `orchestration.send`.
 - Runtime lists terminal summaries.
 - `resolveGroupAddress` sees `@droid`, matches terminal titles with the existing token regex, and returns Droid terminal handles.
@@ -43,7 +43,7 @@ The orchestration group resolver has its own closed list of addressable agent-na
 - Unit: `src/main/runtime/orchestration/groups.test.ts` covers `@droid` positive fan-out and Android/path/hyphen false positives.
 - Unit: existing `src/shared/agent-detection` coverage remains the title-status source of truth; no changes expected.
 - Unit: existing orchestration RPC group fan-out tests should continue passing.
-- Manual/CLI: with a Droid terminal title, `orca orchestration send --to @droid --subject ...` should resolve recipients; without one it should report no recipients.
+- Manual/CLI: with a Droid terminal title, `yiru orchestration send --to @droid --subject ...` should resolve recipients; without one it should report no recipients.
 
 ## UI Quality Bar
 

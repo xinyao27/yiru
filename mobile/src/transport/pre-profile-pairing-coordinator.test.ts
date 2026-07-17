@@ -23,8 +23,8 @@ const relayOffer: PairingOffer = {
   ...directOffer,
   relay: {
     v: 1,
-    directorUrl: 'https://relay.onorca.dev',
-    cellUrl: 'https://relay-c1.onorca.dev',
+    directorUrl: 'https://relay.onyiru.dev',
+    cellUrl: 'https://relay-c1.onyiru.dev',
     assignmentEpoch: 7,
     relayHostId: 'AbCdEf0123_-xyZ9',
     inviteToken: 'abcdefghijklmnopqrstuvwxyzABCDEFGH012345678',
@@ -245,7 +245,7 @@ describe('pre-profile pairing coordinator', () => {
           {
             id: 'relay-primary',
             kind: 'relay',
-            url: `wss://relay-c1.onorca.dev/v1/connect/${relayOffer.relay!.relayHostId}`
+            url: `wss://relay-c1.onyiru.dev/v1/connect/${relayOffer.relay!.relayHostId}`
           }
         ]
       })

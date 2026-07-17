@@ -158,7 +158,7 @@ export function AutoRenameBranchFromWorkSetting({
           <p className="text-xs text-muted-foreground">
             {translate(
               'auto.components.settings.AutoRenameBranchFromWorkSetting.12ea4a408d',
-              'When an agent starts working in a new workspace, Orca renames its auto-generated branch (e.g.'
+              'When an agent starts working in a new workspace, Yiru renames its auto-generated branch (e.g.'
             )}
             <code>
               {translate(
@@ -168,7 +168,7 @@ export function AutoRenameBranchFromWorkSetting({
             </code>
             {translate(
               'auto.components.settings.AutoRenameBranchFromWorkSetting.d9b65054ef',
-              ') to a short name summarizing the task. Only branches Orca named itself are renamed, and never after they have been pushed.'
+              ') to a short name summarizing the task. Only branches Yiru named itself are renamed, and never after they have been pushed.'
             )}
           </p>
         </div>
@@ -234,7 +234,7 @@ export function AutoRenameBranchFromWorkSetting({
                   </code>{' '}
                   {translate(
                     'auto.components.settings.AutoRenameBranchFromWorkSetting.69bf4830c2',
-                    "to include Orca's"
+                    "to include Yiru's"
                   )}{' '}
                   <Popover>
                     <PopoverTrigger
@@ -284,7 +284,7 @@ export function AutoRenameBranchFromWorkSetting({
                   </code>
                   {translate(
                     'auto.components.settings.AutoRenameBranchFromWorkSetting.5d569f5199',
-                    '. Orca generates only the final segment, like'
+                    '. Yiru generates only the final segment, like'
                   )}
                   <code className="font-mono">
                     {translate(

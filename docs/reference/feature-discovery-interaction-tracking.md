@@ -1,6 +1,6 @@
 # Feature Discovery Interaction Tracking
 
-This document defines local feature-interaction state used to decide whether Orca should still teach a feature with an education surface such as a tour or feature tip.
+This document defines local feature-interaction state used to decide whether Yiru should still teach a feature with an education surface such as a tour or feature tip.
 
 ## Decision
 
@@ -48,14 +48,14 @@ Do not upload this state as broad analytics. Product analytics should continue t
 | Split panes                    | `terminal-panes`            | A split group is created from the pane shortcut/menu, a split is resized, or panes are merged.                                                                                                                         | Suppress future tips about pane-level split workflows.                                                                               |
 | Tab splits                     | `tab-splits`                | A workspace tab is moved into another pane or split into a new pane from a tab split/drop action.                                                                                                                      | Suppress future tips about tab-level split workflows separately from pane creation/resizing.                                         |
 | Agent Browser Use setup        | `agent-browser-setup`       | Browser Use was selected in legacy onboarding, enabled in settings, or its setup terminal opens.                                                                                                                       | Suppress future setup tips once the user has started Browser Use setup.                                                              |
-| Agent Browser Use              | `agent-browser-use`         | A successful non-profile `browser.*` runtime method is handled.                                                                                                                                                        | Suppress future usage tips once an agent/runtime has actually driven Orca's browser.                                                 |
+| Agent Browser Use              | `agent-browser-use`         | A successful non-profile `browser.*` runtime method is handled.                                                                                                                                                        | Suppress future usage tips once an agent/runtime has actually driven Yiru's browser.                                                 |
 | Agent Orchestration setup      | `agent-orchestration-setup` | Orchestration was selected in legacy onboarding, enabled in settings, or its setup terminal opens.                                                                                                                     | Suppress future setup tips once the user has started Orchestration setup.                                                            |
 | Agent Orchestration            | `agent-orchestration`       | A successful `orchestration.*` runtime method is handled.                                                                                                                                                              | Suppress future usage tips once an agent/runtime has actually used orchestration.                                                    |
 | Notifications                  | `notifications`             | Notifications are enabled in onboarding/settings or a test notification is sent.                                                                                                                                       | Suppress future notification setup tips.                                                                                             |
 
 ## Surface-Level Features
 
-Orca also records surface-level interactions for feature areas where opening the surface is itself a meaningful discovery signal:
+Yiru also records surface-level interactions for feature areas where opening the surface is itself a meaningful discovery signal:
 
 - `workspace-board`: workspace board opened
 - `workspace-agent-sessions`: workspace terminal surface opened with agent split controls visible

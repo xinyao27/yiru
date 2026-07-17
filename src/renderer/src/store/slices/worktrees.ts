@@ -187,7 +187,7 @@ function showLocalBaseRefRefreshToast(result: LocalBaseRefRefreshResult | undefi
     {
       description: translate(
         'auto.store.slices.worktrees.903b51c2ed',
-        'Workspace created from {{value0}}, but Orca could not fast-forward local {{value1}} because {{value2}}',
+        'Workspace created from {{value0}}, but Yiru could not fast-forward local {{value1}} because {{value2}}',
         { value0: result.baseRef, value1: result.localBranch, value2: reason }
       )
     }
@@ -569,7 +569,7 @@ function toLegacyDetectedWorktreeResult(
     source: 'session-fallback',
     worktrees: result.worktrees.map((worktree) => ({
       ...worktree,
-      ownership: 'orca-managed',
+      ownership: 'yiru-managed',
       selectedCheckout: false,
       visible: true
     }))
@@ -599,7 +599,7 @@ function notifyRuntimeScopeForbiddenIfNeeded(error: unknown): boolean {
       id: RUNTIME_SCOPE_FORBIDDEN_TOAST_ID,
       description: translate(
         'auto.store.slices.worktrees.runtimeScopeForbiddenDescription',
-        'Workspaces are unavailable on a mobile-scope pairing. Reconnect using the browser access link from Settings → Runtime Environments → Share this Orca server.'
+        'Workspaces are unavailable on a mobile-scope pairing. Reconnect using the browser access link from Settings → Runtime Environments → Share this Yiru server.'
       )
     }
   )
@@ -3327,7 +3327,7 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
       ) {
         throw new Error(WORKTREE_REMOVAL_AMBIGUOUS_ERROR)
       }
-      // Why: forget-local always clears Orca's own records via the local IPC
+      // Why: forget-local always clears Yiru's own records via the local IPC
       // handler regardless of the workspace's execution host — the whole point
       // is that the remote (SSH relay / runtime) is gone or unreachable.
       const target = getActiveRuntimeTarget(

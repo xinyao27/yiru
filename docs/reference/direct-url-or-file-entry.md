@@ -16,7 +16,7 @@ The runtime file client has the required local/SSH/runtime primitives, with cave
 
 Add an entry field at the top of the tab bar `+` menu so users can type:
 
-1. A URL to open an Orca browser tab.
+1. A URL to open a Yiru browser tab.
 2. An existing file name/path to open an editor tab.
 3. A new relative file path to create in the active worktree and open.
 
@@ -27,7 +27,7 @@ The behavior must work from both the titlebar tab strip and split-group tab stri
 - Do not replace global Quick Open.
 - Do not add persisted launcher state.
 - Do not support standalone directory creation.
-- Do not open external URLs outside Orca.
+- Do not open external URLs outside Yiru.
 - Do not make URL/file detection configurable.
 
 ## Design
@@ -85,7 +85,7 @@ The behavior must work from both the titlebar tab strip and split-group tab stri
 
 ## Edge Cases
 
-- No active worktree: disable the entry, including URL entry, because Orca browser tabs are worktree-scoped.
+- No active worktree: disable the entry, including URL entry, because Yiru browser tabs are worktree-scoped.
 - SSH/runtime connection not ready: mirror Quick Open by keying the list request on active target status. Non-URL submissions are disabled while loading/connecting to avoid creating a duplicate before the real list arrives.
 - File listing failure: explicit `http://` / `https://` URL submissions still work; file and bare host-like submissions are blocked with the cleaned list error.
 - Ambiguous host-like/file names: an existing listed file wins over bare host-like URL normalization. Explicit `http://` or `https://` input is the escape hatch when the user wants a browser tab despite a file-name collision.

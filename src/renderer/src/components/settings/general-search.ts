@@ -137,10 +137,10 @@ export const getGeneralNavigationSearchEntries = createLocalizedCatalog(() => [
 
 export const getGeneralCliSearchEntries = createLocalizedCatalog(() => [
   {
-    title: translate('auto.components.settings.general.search.327e3fa70d', 'Orca CLI'),
+    title: translate('auto.components.settings.general.search.327e3fa70d', 'Yiru CLI'),
     description: translate(
       'auto.components.settings.general.search.ca529079bf',
-      'Register or remove the Orca CLI command.'
+      'Register or remove the Yiru CLI command.'
     ),
     keywords: [
       ...translateSearchKeyword('auto.components.settings.general.search.924a660a78', 'cli'),
@@ -164,7 +164,7 @@ export const getGeneralCliSearchEntries = createLocalizedCatalog(() => [
     title: translate('auto.components.settings.general.search.2d9f7b42df', 'Agent skill'),
     description: translate(
       'auto.components.settings.general.search.244e3fb4c8',
-      'Install the Orca skill so agents know to use the Orca CLI.'
+      'Install the Yiru skill so agents know to use the Yiru CLI.'
     ),
     keywords: [
       ...translateSearchKeyword('auto.components.settings.general.search.bda108e66c', 'skill'),
@@ -179,7 +179,7 @@ export const getGeneralUpdateSearchEntries = createLocalizedCatalog(() => [
     title: translate('auto.components.settings.general.search.e15af4eb64', 'Check for Updates'),
     description: translate(
       'auto.components.settings.general.search.79ff46776e',
-      'Check for app updates and install a newer Orca version.'
+      'Check for app updates and install a newer Yiru version.'
     ),
     keywords: [
       ...translateSearchKeyword('auto.components.settings.general.search.f89a94773c', 'update'),

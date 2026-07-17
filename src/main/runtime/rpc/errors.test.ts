@@ -4,7 +4,7 @@ import { mapRuntimeError } from './errors'
 class LineageError extends Error {
   code = 'LINEAGE_PARENT_NOT_FOUND'
   data = {
-    nextSteps: ['Run `orca worktree list`.', 'Retry with --no-parent.']
+    nextSteps: ['Run `yiru worktree list`.', 'Retry with --no-parent.']
   }
 }
 
@@ -118,7 +118,7 @@ describe('mapRuntimeError', () => {
         code: 'LINEAGE_PARENT_NOT_FOUND',
         message: 'Parent selector was not found.',
         data: {
-          nextSteps: ['Run `orca worktree list`.', 'Retry with --no-parent.']
+          nextSteps: ['Run `yiru worktree list`.', 'Retry with --no-parent.']
         }
       },
       _meta: { runtimeId: 'runtime-1' }

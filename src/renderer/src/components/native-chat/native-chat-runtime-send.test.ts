@@ -70,7 +70,7 @@ describe('sendNativeChatMessage', () => {
     expect(sendRuntimePtyInput).toHaveBeenCalledTimes(1)
   })
 
-  it('matches orca-runtime writeTerminalAction Enter gap (500ms)', () => {
+  it('matches yiru-runtime writeTerminalAction Enter gap (500ms)', () => {
     expect(NATIVE_CHAT_SUBMIT_DELAY_MS).toBe(500)
   })
 })
@@ -86,7 +86,7 @@ describe('sendNativeChatMessageWithImageAttachments', () => {
 
   it('bracket-pastes image paths before prompt text so the TUI creates image chips', () => {
     const handle = sendNativeChatMessageWithImageAttachments(SETTINGS, PTY, 'what do you see?', [
-      '/tmp/orca-paste-image.png'
+      '/tmp/yiru-paste-image.png'
     ])
 
     expect(handle.settleAfterMs).toBe(
@@ -97,7 +97,7 @@ describe('sendNativeChatMessageWithImageAttachments', () => {
     expect(sendRuntimePtyInput).toHaveBeenLastCalledWith(
       SETTINGS,
       PTY,
-      buildNativeChatImagePasteBytes('/tmp/orca-paste-image.png')
+      buildNativeChatImagePasteBytes('/tmp/yiru-paste-image.png')
     )
 
     vi.advanceTimersByTime(NATIVE_CHAT_IMAGE_ATTACHMENT_SETTLE_MS)
@@ -115,7 +115,7 @@ describe('sendNativeChatMessageWithImageAttachments', () => {
 
   it('waits the normal submit gap for an attachment-only send', () => {
     const handle = sendNativeChatMessageWithImageAttachments(SETTINGS, PTY, '', [
-      '/tmp/orca-paste-image.png'
+      '/tmp/yiru-paste-image.png'
     ])
 
     expect(handle.settleAfterMs).toBe(NATIVE_CHAT_SUBMIT_DELAY_MS)
@@ -130,7 +130,7 @@ describe('sendNativeChatMessageWithImageAttachments', () => {
 
   it('cancels deferred prompt and Enter writes after the attachment path', () => {
     const handle = sendNativeChatMessageWithImageAttachments(SETTINGS, PTY, 'describe', [
-      '/tmp/orca-paste-image.png'
+      '/tmp/yiru-paste-image.png'
     ])
     handle.cancel()
     vi.runAllTimers()

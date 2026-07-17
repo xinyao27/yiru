@@ -52,7 +52,7 @@ function isRemoteTerminalGoneMessage(message: string): boolean {
 }
 
 /**
- * PTY transport backing a renderer terminal pane with a terminal on a remote Orca
+ * PTY transport backing a renderer terminal pane with a terminal on a remote Yiru
  * runtime, over runtime RPC plus the multiplexed stream (create, subscribe, input,
  * resize, close, reattach).
  */

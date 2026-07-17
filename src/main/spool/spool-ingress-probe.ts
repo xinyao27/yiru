@@ -19,7 +19,7 @@ export type SpoolProbeServiceOptions = {
   tickets: SpoolTicketAuthority
   keypair: SpoolE2EEKeypair
   ownerRuntimeId: string
-  orcaVersion: string
+  yiruVersion: string
   osFamily: SpoolOsFamily
   now?: () => number
 }
@@ -79,7 +79,7 @@ export class SpoolProbeService {
         ownerRuntimeId: this.options.ownerRuntimeId,
         ownerPublicKeyB64: this.options.keypair.publicKeyB64,
         ownerKeyFingerprint: this.options.keypair.fingerprint,
-        orcaVersion: this.options.orcaVersion,
+        yiruVersion: this.options.yiruVersion,
         osFamily: this.options.osFamily,
         ticket: ticket.value,
         ticketExpiresAt: ticket.expiresAt

@@ -210,7 +210,7 @@ push-only subsystem:
   immediately and prevent an older in-flight failure from writing after it.
 - Switching worktrees or branches must not show another worktree or branch's
   push failure.
-- External edits or another Orca window may make the failure stale. Do not add
+- External edits or another Yiru window may make the failure stale. Do not add
   cross-window persistence for this feature; rely on local retry/remount/branch
   mismatch clearing and list this as residual risk.
 - Source Control AI hidden for a repo still shows the blocked notice and Details;
@@ -362,7 +362,7 @@ light/dark mode and under SSH latency.
 - Residual risks: Classifier false positives remain possible for unusual local
   hook-runner output that mentions push context; keep tests biased toward
   preserving auth, protected-branch, and non-fast-forward behavior. Failure
-  panels are renderer-local, so another Orca window or an external terminal can
+  panels are renderer-local, so another Yiru window or an external terminal can
   fix the problem while the old panel remains visible until local retry, remount,
   or branch/worktree change. Electron validation may need a mocked or temporary
   repo scenario to trigger a real pre-push hook without mutating user data.

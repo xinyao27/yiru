@@ -88,7 +88,7 @@ export function AddRepoHostSelector({
                   <PopoverTrigger
                     render={
                       <CommandItem
-                        value="Add remote host SSH host Orca server"
+                        value="Add remote host SSH host Yiru server"
                         onSelect={() => setAddHostOpen(true)}
                         className="items-start gap-2 px-3 py-2 text-xs text-muted-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
                       >
@@ -105,7 +105,7 @@ export function AddRepoHostSelector({
                           <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
                             {translate(
                               'auto.components.sidebar.AddRepoHostSelector.addRemoteHostDetail',
-                              'SSH host or Orca server'
+                              'SSH host or Yiru server'
                             )}
                           </span>
                         </span>
@@ -157,7 +157,7 @@ export function AddRepoHostSelector({
                         <span className="mt-0.5 text-[11px] text-muted-foreground">
                           {translate(
                             'auto.components.sidebar.AddRepoHostSelector.addRemoteServerDetail',
-                            'Pair with Orca running on another computer.'
+                            'Pair with Yiru running on another computer.'
                           )}
                         </span>
                       </button>

@@ -37,7 +37,7 @@ export {
 } from './active-agent-note-send-result'
 
 const ACTIVE_AGENT_SEND_TIMEOUT_MS = 8000
-const ORCA_DESKTOP_TERMINAL_CLIENT = { id: 'orca-desktop', type: 'desktop' as const }
+const YIRU_DESKTOP_TERMINAL_CLIENT = { id: 'yiru-desktop', type: 'desktop' as const }
 
 export async function sendNotesToActiveAgentSession({
   worktreeId,
@@ -149,7 +149,7 @@ async function sendPromptWithLegacyCombinedSend(
         terminal: terminalHandle,
         text: prompt,
         enter: true,
-        client: ORCA_DESKTOP_TERMINAL_CLIENT
+        client: YIRU_DESKTOP_TERMINAL_CLIENT
       },
       { timeoutMs: ACTIVE_AGENT_SEND_RPC_TIMEOUT_MS }
     )
@@ -187,7 +187,7 @@ async function sendPromptWithGuardedPasteAndEnter(
         terminal: terminalHandle,
         text: pastePayload,
         requireAgentStatus: 'sendable',
-        client: ORCA_DESKTOP_TERMINAL_CLIENT
+        client: YIRU_DESKTOP_TERMINAL_CLIENT
       },
       { timeoutMs: ACTIVE_AGENT_SEND_RPC_TIMEOUT_MS }
     )
@@ -234,7 +234,7 @@ async function sendPromptWithGuardedPasteAndEnter(
         terminal: terminalHandle,
         enter: true,
         requireAgentStatus: 'sendable',
-        client: ORCA_DESKTOP_TERMINAL_CLIENT
+        client: YIRU_DESKTOP_TERMINAL_CLIENT
       },
       { timeoutMs: ACTIVE_AGENT_SEND_RPC_TIMEOUT_MS }
     )

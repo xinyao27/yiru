@@ -10,7 +10,7 @@
 
 ## Goal
 
-Make Orca behave like a mature SSH client for common config-host flows: aliases imported from `~/.ssh/config`, aliases with inherited `HostName`/`Port`, and pasted SSH targets should connect without users re-entering information that OpenSSH can resolve.
+Make Yiru behave like a mature SSH client for common config-host flows: aliases imported from `~/.ssh/config`, aliases with inherited `HostName`/`Port`, and pasted SSH targets should connect without users re-entering information that OpenSSH can resolve.
 
 ## Non-goals
 
@@ -47,7 +47,7 @@ Make Orca behave like a mature SSH client for common config-host flows: aliases 
 
 ## Edge Cases
 
-- Explicit non-default port in Orca still wins over `ssh -G`.
+- Explicit non-default port in Yiru still wins over `ssh -G`.
 - Empty or unparsable host input remains invalid.
 - IPv6 bracket syntax is accepted for `ssh://` URLs and preserved conservatively for scp-like inputs.
 - Plain config aliases remain valid even without a username.

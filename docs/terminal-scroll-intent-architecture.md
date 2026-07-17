@@ -41,12 +41,12 @@ explicit pinned-to-bottom model owned by the terminal frontend:
 The reference implementation also patches private xterm internals to disable
 xterm's implicit scroll-to-bottom behavior and call the original bottom-scroll
 only from explicit owner paths. That gives a clean ownership boundary, but it is
-an escalation point for Orca because private internals increase xterm upgrade
+an escalation point for Yiru because private internals increase xterm upgrade
 risk.
 
-## Current Orca Risk Points
+## Current Yiru Risk Points
 
-The current Orca branch already has several independent scroll actors:
+The current Yiru branch already has several independent scroll actors:
 
 - `src/renderer/src/lib/pane-manager/pane-scroll.ts` captures `viewportY`,
   `baseY`, bottom state, and sometimes a marker, then restores using immediate,
@@ -235,7 +235,7 @@ reparenting only, not a general model copied into workspace switching.
 
 ## Performance Constraints
 
-The design must preserve Orca's terminal performance priorities:
+The design must preserve Yiru's terminal performance priorities:
 
 - Do not keep all hidden terminals hot-rendering.
 - Keep PTY/session/xterm state warm when feasible, but suspend hidden rendering
@@ -316,8 +316,8 @@ batch, not per byte and not per animation frame.
 
 ## Open Decisions
 
-- Whether Orca should patch private xterm bottom-scroll internals. The reference
-  pattern does this for strict ownership, but Orca should first try public API
+- Whether Yiru should patch private xterm bottom-scroll internals. The reference
+  pattern does this for strict ownership, but Yiru should first try public API
   enforcement at write/fit boundaries and only escalate if xterm continues to
   auto-follow independently.
 - Whether scroll intent should be stored only by live `Terminal` instance or also

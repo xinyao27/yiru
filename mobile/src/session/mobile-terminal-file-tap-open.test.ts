@@ -158,7 +158,7 @@ describe('openMobileTerminalFileTap', () => {
       client,
       hostId: 'host-1',
       worktreeId: 'wt-1',
-      worktreeName: 'Orca',
+      worktreeName: 'Yiru',
       pathText: 'src/index.ts:120:7',
       line: 120,
       column: 7,
@@ -183,7 +183,7 @@ describe('openMobileTerminalFileTap', () => {
         relativePath: 'src/index.ts',
         line: '120',
         column: '7',
-        worktreeName: 'Orca'
+        worktreeName: 'Yiru'
       })
     })
     expect(triggerOpenFeedback).toHaveBeenCalledTimes(1)

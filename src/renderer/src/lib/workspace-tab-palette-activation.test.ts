@@ -102,7 +102,7 @@ function makeResult(
     contentType: 'terminal',
     title: 'Terminal',
     secondaryText: 'Terminal tab',
-    repoName: 'repo/orca',
+    repoName: 'repo/yiru',
     worktreeName: 'Palette Worktree',
     titleRange: null,
     secondaryRange: null,

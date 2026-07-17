@@ -1,10 +1,10 @@
 // Existing-user first-launch notice. Shown to users whose cohort marker is
 // `existedBeforeTelemetryRelease === true` and whose `optedIn` is still
-// `null`, i.e. users who installed Orca before the telemetry release and
+// `null`, i.e. users who installed Yiru before the telemetry release and
 // have not yet resolved the notice.
 //
 // Why existing users see a notice at all (and new users do not): pre-
-// telemetry users installed Orca under a "no telemetry" social contract,
+// telemetry users installed Yiru under a "no telemetry" social contract,
 // so default-on for them would be a silent policy flip. New users are
 // covered by the install-time disclosure and receive no first-launch UI —
 // see telemetry-plan.md §First-launch experience.

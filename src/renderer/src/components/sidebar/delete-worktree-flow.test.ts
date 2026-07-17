@@ -296,7 +296,7 @@ describe('runWorktreeBatchDelete', () => {
         isMainWorktree: true
       }
     ])
-    mocks.state.repos = [{ id: 'repo-1', displayName: 'orca' }]
+    mocks.state.repos = [{ id: 'repo-1', displayName: 'yiru' }]
 
     runWorktreeDelete('main')
 
@@ -304,7 +304,7 @@ describe('runWorktreeBatchDelete', () => {
     expect(mocks.state.removeWorktree).not.toHaveBeenCalled()
     expect(mocks.state.openModal).toHaveBeenCalledWith('confirm-remove-folder', {
       repoId: 'repo-1',
-      displayName: 'orca'
+      displayName: 'yiru'
     })
   })
 

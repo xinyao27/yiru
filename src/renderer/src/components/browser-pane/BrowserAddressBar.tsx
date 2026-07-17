@@ -375,7 +375,7 @@ export default function BrowserAddressBar({
               onFocus={handleFocus}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
-              data-orca-browser-address-bar="true"
+              data-yiru-browser-address-bar="true"
               className="h-auto border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0"
               spellCheck={false}
               autoCapitalize="none"

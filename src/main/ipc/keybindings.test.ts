@@ -41,7 +41,7 @@ vi.mock('../menu/register-app-menu', () => ({
 import { registerKeybindingHandlers } from './keybindings'
 
 const snapshot: KeybindingFileSnapshot = {
-  path: '/Users/example/.orca/keybindings.json',
+  path: '/Users/example/.yiru/keybindings.json',
   platform: 'darwin',
   exists: true,
   overrides: {},
@@ -75,7 +75,7 @@ describe('registerKeybindingHandlers', () => {
     expect(authorizeExternalPathMock).toHaveBeenCalledWith(snapshot.path)
   })
 
-  it('authorizes the keybindings file before opening it outside Orca', async () => {
+  it('authorizes the keybindings file before opening it outside Yiru', async () => {
     openPathMock.mockResolvedValue('')
     registerKeybindingHandlers({ ensureFile: vi.fn(() => snapshot) } as never)
 

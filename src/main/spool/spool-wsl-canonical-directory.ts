@@ -2,9 +2,9 @@ import { execFile } from 'node:child_process'
 import { parseWslUncPath } from '../../shared/wsl-paths'
 import { toLinuxPath, toWindowsWslPath } from '../wsl'
 
-const WSL_CANONICAL_PATH_PREFIX = '__ORCA_SPOOL_CANONICAL_PATH__'
-const WSL_DIRECTORY_IDENTITY_PREFIX = '__ORCA_SPOOL_DIRECTORY_IDENTITY__'
-const WSL_MISSING_PATH = '__ORCA_SPOOL_MISSING_PATH__'
+const WSL_CANONICAL_PATH_PREFIX = '__YIRU_SPOOL_CANONICAL_PATH__'
+const WSL_DIRECTORY_IDENTITY_PREFIX = '__YIRU_SPOOL_DIRECTORY_IDENTITY__'
+const WSL_MISSING_PATH = '__YIRU_SPOOL_MISSING_PATH__'
 
 export type SpoolWslCanonicalDirectoryResult =
   | { status: 'resolved'; path: string }
@@ -90,7 +90,7 @@ function runSpoolWslProbe(
   return new Promise((resolve) => {
     execFile(
       'wsl.exe',
-      ['-d', parsed.distro, '--', 'sh', '-c', script, 'orca-spool-path', parsed.linuxPath],
+      ['-d', parsed.distro, '--', 'sh', '-c', script, 'yiru-spool-path', parsed.linuxPath],
       { encoding: 'utf8', timeout: 5_000, windowsHide: true },
       (error, stdout) =>
         resolve({

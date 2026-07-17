@@ -40,7 +40,7 @@ export function getHiddenExternalWorktrees(
   }
   return detected.worktrees.filter(
     (worktree) =>
-      !worktree.visible && !worktree.selectedCheckout && worktree.ownership !== 'orca-managed'
+      !worktree.visible && !worktree.selectedCheckout && worktree.ownership !== 'yiru-managed'
   )
 }
 

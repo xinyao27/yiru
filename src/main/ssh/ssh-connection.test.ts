@@ -118,19 +118,19 @@ vi.mock('ssh2', () => {
 })
 
 const {
-  getOrcaControlSocketPathMock,
+  getYiruControlSocketPathMock,
   removeControlSocketPathMock,
   spawnSystemSshCommandMock,
   spawnSystemSshMock
 } = vi.hoisted(() => ({
-  getOrcaControlSocketPathMock: vi.fn(),
+  getYiruControlSocketPathMock: vi.fn(),
   removeControlSocketPathMock: vi.fn(),
   spawnSystemSshMock: vi.fn(),
   spawnSystemSshCommandMock: vi.fn()
 }))
 
 vi.mock('./ssh-system-fallback', () => ({
-  getOrcaControlSocketPath: getOrcaControlSocketPathMock,
+  getYiruControlSocketPath: getYiruControlSocketPathMock,
   spawnSystemSsh: spawnSystemSshMock,
   spawnSystemSshCommand: spawnSystemSshCommandMock,
   downloadFileViaSystemSsh: vi.fn(),
@@ -211,7 +211,7 @@ function createSystemCommandChannel(): EventEmitter & {
   channel.stderr = new EventEmitter()
   channel.close = vi.fn()
   queueMicrotask(() => {
-    channel.emit('data', Buffer.from('ORCA-SYSTEM-SSH-OK'))
+    channel.emit('data', Buffer.from('YIRU-SYSTEM-SSH-OK'))
     channel.emit('close', 0)
   })
   return channel
@@ -249,7 +249,7 @@ function createPendingSystemSshProcess() {
 function createSystemSshProcess() {
   const proc = createPendingSystemSshProcess()
   queueMicrotask(() => {
-    proc.stdout.emit('data', Buffer.from('ORCA-SYSTEM-SSH-READY'))
+    proc.stdout.emit('data', Buffer.from('YIRU-SYSTEM-SSH-READY'))
   })
   return proc
 }
@@ -275,8 +275,8 @@ describe('SshConnection', () => {
     sftpBehavior = 'callback'
     pendingSftpCallback = null
     clientInstances = []
-    getOrcaControlSocketPathMock.mockReset()
-    getOrcaControlSocketPathMock.mockReturnValue(null)
+    getYiruControlSocketPathMock.mockReset()
+    getYiruControlSocketPathMock.mockReturnValue(null)
     removeControlSocketPathMock.mockReset()
     spawnSystemSshMock.mockReset()
     spawnSystemSshMock.mockImplementation(() => createSystemSshProcess())
@@ -489,7 +489,7 @@ describe('SshConnection', () => {
 
   it('falls back to direct private key auth when agent auth fails', async () => {
     vi.stubEnv('SSH_AUTH_SOCK', '/tmp/agent.sock')
-    const tempDir = mkdtempSync(join(tmpdir(), 'orca-ssh-key-'))
+    const tempDir = mkdtempSync(join(tmpdir(), 'yiru-ssh-key-'))
     const keyPath = join(tempDir, 'id_ed25519')
     writeFileSync(keyPath, 'test-key')
     connectSequence = [new Error('All configured authentication methods failed'), 'ready']
@@ -519,7 +519,7 @@ describe('SshConnection', () => {
 
   it('falls back to direct private key auth when the agent socket is unavailable', async () => {
     vi.stubEnv('SSH_AUTH_SOCK', '/tmp/stale-agent.sock')
-    const tempDir = mkdtempSync(join(tmpdir(), 'orca-ssh-key-'))
+    const tempDir = mkdtempSync(join(tmpdir(), 'yiru-ssh-key-'))
     const keyPath = join(tempDir, 'id_ed25519')
     writeFileSync(keyPath, 'test-key')
     const agentError = new Error('Failed to connect to agent') as Error & { level: string }
@@ -545,7 +545,7 @@ describe('SshConnection', () => {
 
   it('falls back to direct private key auth after too many agent authentication failures', async () => {
     vi.stubEnv('SSH_AUTH_SOCK', '/tmp/agent.sock')
-    const tempDir = mkdtempSync(join(tmpdir(), 'orca-ssh-key-'))
+    const tempDir = mkdtempSync(join(tmpdir(), 'yiru-ssh-key-'))
     const keyPath = join(tempDir, 'id_ed25519')
     writeFileSync(keyPath, 'test-key')
     connectSequence = [new Error('Received disconnect: Too many authentication failures'), 'ready']
@@ -594,7 +594,7 @@ describe('SshConnection', () => {
 
   it('retries password auth with the no-agent key config after direct key fallback fails', async () => {
     vi.stubEnv('SSH_AUTH_SOCK', '/tmp/agent.sock')
-    const tempDir = mkdtempSync(join(tmpdir(), 'orca-ssh-key-'))
+    const tempDir = mkdtempSync(join(tmpdir(), 'yiru-ssh-key-'))
     const keyPath = join(tempDir, 'id_ed25519')
     writeFileSync(keyPath, 'test-key')
     connectSequence = [
@@ -634,7 +634,7 @@ describe('SshConnection', () => {
 
   it('does not prompt twice when post-agent private key passphrase is cancelled', async () => {
     vi.stubEnv('SSH_AUTH_SOCK', '/tmp/agent.sock')
-    const tempDir = mkdtempSync(join(tmpdir(), 'orca-ssh-key-'))
+    const tempDir = mkdtempSync(join(tmpdir(), 'yiru-ssh-key-'))
     const keyPath = join(tempDir, 'id_ed25519')
     writeFileSync(keyPath, 'test-key')
     connectSequence = [
@@ -668,7 +668,7 @@ describe('SshConnection', () => {
     // Why: sshd lets the login shell parse this first, so raw newlines let
     // csh/tcsh split the command before /bin/sh receives it (issue #8701).
     expect(wrapped).not.toContain('\n')
-    expect(wrapped).toMatch(/^exec \/bin\/sh -c '.*printf %b .*' orca-command /)
+    expect(wrapped).toMatch(/^exec \/bin\/sh -c '.*printf %b .*' yiru-command /)
     expect(wrapped).not.toContain('base64')
   })
 
@@ -915,7 +915,7 @@ describe('SshConnection', () => {
     expect(clientInstances).toHaveLength(0)
     expect(spawnSystemSshCommandMock).toHaveBeenCalledWith(
       expect.objectContaining({ configHost: 'fdpass-host' }),
-      'echo ORCA-SYSTEM-SSH-OK',
+      'echo YIRU-SYSTEM-SSH-OK',
       {
         wrapCommand: false,
         resolvedConfig: expect.objectContaining({ proxyUseFdpass: true })
@@ -923,8 +923,8 @@ describe('SshConnection', () => {
     )
   })
 
-  it('allows concurrent exec commands for system SSH with an Orca ControlMaster socket', async () => {
-    getOrcaControlSocketPathMock.mockReturnValue('/tmp/orca-ssh-501/live-socket')
+  it('allows concurrent exec commands for system SSH with a Yiru ControlMaster socket', async () => {
+    getYiruControlSocketPathMock.mockReturnValue('/tmp/yiru-ssh-501/live-socket')
     vi.mocked(resolveWithSshG).mockResolvedValueOnce(createResolvedConfig())
     const conn = new SshConnection(createTarget({ configHost: 'fdpass-host' }), createCallbacks())
 
@@ -935,7 +935,7 @@ describe('SshConnection', () => {
   })
 
   it('keeps concurrent exec commands disabled for system SSH without a reusable socket', async () => {
-    getOrcaControlSocketPathMock.mockReturnValue(null)
+    getYiruControlSocketPathMock.mockReturnValue(null)
     vi.mocked(resolveWithSshG).mockResolvedValueOnce(createResolvedConfig())
     const conn = new SshConnection(
       createTarget({ configHost: 'fdpass-host', systemSshConnectionReuse: false }),
@@ -949,9 +949,9 @@ describe('SshConnection', () => {
   })
 
   it('retries a failed system SSH probe without ControlMaster and disables mux for the session', async () => {
-    getOrcaControlSocketPathMock.mockImplementation(
+    getYiruControlSocketPathMock.mockImplementation(
       (_target: SshTarget, options?: { disableControlMaster?: boolean }) =>
-        options?.disableControlMaster ? null : '/tmp/orca-ssh-501/stale-socket'
+        options?.disableControlMaster ? null : '/tmp/yiru-ssh-501/stale-socket'
     )
     spawnSystemSshCommandMock
       .mockImplementationOnce(() => createFailingSystemCommandChannel(255, 'mux client failed'))
@@ -963,11 +963,11 @@ describe('SshConnection', () => {
     await conn.exec('echo after-connect')
     await conn.writeFile('/tmp/after-connect', 'contents')
 
-    expect(removeControlSocketPathMock).toHaveBeenCalledWith('/tmp/orca-ssh-501/stale-socket')
+    expect(removeControlSocketPathMock).toHaveBeenCalledWith('/tmp/yiru-ssh-501/stale-socket')
     expect(spawnSystemSshCommandMock).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ configHost: 'fdpass-host' }),
-      'echo ORCA-SYSTEM-SSH-OK',
+      'echo YIRU-SYSTEM-SSH-OK',
       expect.objectContaining({
         wrapCommand: false,
         resolvedConfig: expect.objectContaining({ proxyUseFdpass: true })
@@ -976,7 +976,7 @@ describe('SshConnection', () => {
     expect(spawnSystemSshCommandMock).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ configHost: 'fdpass-host' }),
-      'echo ORCA-SYSTEM-SSH-OK',
+      'echo YIRU-SYSTEM-SSH-OK',
       expect.objectContaining({
         disableControlMaster: true,
         wrapCommand: false,
@@ -1017,7 +1017,7 @@ describe('SshConnection', () => {
     expect(clientInstances).toHaveLength(0)
     expect(spawnSystemSshCommandMock).toHaveBeenCalledWith(
       expect.objectContaining({ proxyCommand: 'ssh -W %h:%p bastion.example.com' }),
-      'echo ORCA-SYSTEM-SSH-OK',
+      'echo YIRU-SYSTEM-SSH-OK',
       { wrapCommand: false }
     )
   })
@@ -1038,7 +1038,7 @@ describe('SshConnection', () => {
     expect(clientInstances).toHaveLength(1)
     expect(spawnSystemSshCommandMock).toHaveBeenCalledWith(
       expect.objectContaining({ host: '192.168.0.210' }),
-      'echo ORCA-SYSTEM-SSH-OK',
+      'echo YIRU-SYSTEM-SSH-OK',
       { wrapCommand: false }
     )
   })
@@ -1076,7 +1076,7 @@ describe('SshConnection', () => {
     expect(spawnSystemSshCommandMock).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ gssapiAuthentication: true }),
-      'echo ORCA-SYSTEM-SSH-OK',
+      'echo YIRU-SYSTEM-SSH-OK',
       {
         gssapiOnly: true,
         wrapCommand: false
@@ -1105,7 +1105,7 @@ describe('SshConnection', () => {
     // so the test fails if the proactive block is removed.
     expect(spawnSystemSshCommandMock).toHaveBeenCalledWith(
       expect.objectContaining({ gssapiAuthentication: true }),
-      'echo ORCA-SYSTEM-SSH-OK',
+      'echo YIRU-SYSTEM-SSH-OK',
       {
         gssapiOnly: true,
         wrapCommand: false
@@ -1178,7 +1178,7 @@ describe('SshConnection', () => {
     // the test fails if the reactive fallback block is removed.
     expect(spawnSystemSshCommandMock).toHaveBeenCalledWith(
       expect.objectContaining({ configHost: 'krb-host' }),
-      'echo ORCA-SYSTEM-SSH-OK',
+      'echo YIRU-SYSTEM-SSH-OK',
       expect.objectContaining({ wrapCommand: false })
     )
     expect(onCredentialRequest).toHaveBeenCalledWith('target-1', 'password', expect.any(String))
@@ -1190,7 +1190,7 @@ describe('SshConnection', () => {
     // retry fails with a passphrase error, and resolved GSSAPI is on — so the
     // reactive probe must run before onCredentialRequest.
     vi.stubEnv('SSH_AUTH_SOCK', '/tmp/agent.sock')
-    const tempDir = mkdtempSync(join(tmpdir(), 'orca-ssh-key-'))
+    const tempDir = mkdtempSync(join(tmpdir(), 'yiru-ssh-key-'))
     const keyPath = join(tempDir, 'id_ed25519')
     writeFileSync(keyPath, 'test-key')
     connectSequence = [
@@ -1300,17 +1300,17 @@ describe('SshConnection', () => {
     const hostPlatform = getRemoteHostPlatform('win32-x64')
 
     await conn.connect()
-    await conn.uploadDirectory('/tmp/local-relay', 'C:/Users/me/.orca-remote/relay', {
+    await conn.uploadDirectory('/tmp/local-relay', 'C:/Users/me/.yiru-remote/relay', {
       hostPlatform
     })
-    await conn.writeFile('C:/Users/me/.orca-remote/relay/.version', '0.1.0', {
+    await conn.writeFile('C:/Users/me/.yiru-remote/relay/.version', '0.1.0', {
       hostPlatform
     })
-    await conn.writeBuffer('C:/Users/me/.orca-remote/relay/logo.png', Buffer.from('png'), {
+    await conn.writeBuffer('C:/Users/me/.yiru-remote/relay/logo.png', Buffer.from('png'), {
       hostPlatform,
       exclusive: true
     })
-    await conn.downloadFile('C:/Users/me/.orca-remote/relay/logo.png', '/tmp/logo.png', {
+    await conn.downloadFile('C:/Users/me/.yiru-remote/relay/logo.png', '/tmp/logo.png', {
       hostPlatform
     })
     const uploadSession = await conn.openFileUploadSession({ hostPlatform })
@@ -1322,7 +1322,7 @@ describe('SshConnection', () => {
     expect(uploadDirectoryViaSystemSsh).toHaveBeenCalledWith(
       expect.objectContaining({ configHost: 'fdpass-host' }),
       '/tmp/local-relay',
-      'C:/Users/me/.orca-remote/relay',
+      'C:/Users/me/.yiru-remote/relay',
       expect.objectContaining({
         hostPlatform,
         resolvedConfig: expect.objectContaining({ proxyUseFdpass: true })
@@ -1330,7 +1330,7 @@ describe('SshConnection', () => {
     )
     expect(writeFileViaSystemSsh).toHaveBeenCalledWith(
       expect.objectContaining({ configHost: 'fdpass-host' }),
-      'C:/Users/me/.orca-remote/relay/.version',
+      'C:/Users/me/.yiru-remote/relay/.version',
       '0.1.0',
       expect.objectContaining({
         hostPlatform,
@@ -1339,7 +1339,7 @@ describe('SshConnection', () => {
     )
     expect(writeBufferViaSystemSsh).toHaveBeenCalledWith(
       expect.objectContaining({ configHost: 'fdpass-host' }),
-      'C:/Users/me/.orca-remote/relay/logo.png',
+      'C:/Users/me/.yiru-remote/relay/logo.png',
       Buffer.from('png'),
       expect.objectContaining({
         hostPlatform,
@@ -1349,7 +1349,7 @@ describe('SshConnection', () => {
     )
     expect(downloadFileViaSystemSsh).toHaveBeenCalledWith(
       expect.objectContaining({ configHost: 'fdpass-host' }),
-      'C:/Users/me/.orca-remote/relay/logo.png',
+      'C:/Users/me/.yiru-remote/relay/logo.png',
       '/tmp/logo.png',
       expect.objectContaining({
         hostPlatform,
@@ -1443,9 +1443,9 @@ describe('SshConnection', () => {
   })
 
   it('retries direct system SSH connections without ControlMaster after mux startup failure', async () => {
-    getOrcaControlSocketPathMock.mockImplementation(
+    getYiruControlSocketPathMock.mockImplementation(
       (_target: SshTarget, options?: { disableControlMaster?: boolean }) =>
-        options?.disableControlMaster ? null : '/tmp/orca-ssh-501/stale-socket'
+        options?.disableControlMaster ? null : '/tmp/yiru-ssh-501/stale-socket'
     )
     spawnSystemSshMock
       .mockReturnValueOnce(createFailingSystemSshProcess(255))
@@ -1455,7 +1455,7 @@ describe('SshConnection', () => {
 
     await conn.connectViaSystemSsh()
 
-    expect(removeControlSocketPathMock).toHaveBeenCalledWith('/tmp/orca-ssh-501/stale-socket')
+    expect(removeControlSocketPathMock).toHaveBeenCalledWith('/tmp/yiru-ssh-501/stale-socket')
     expect(spawnSystemSshMock).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ configHost: 'fdpass-host' }),
@@ -1490,7 +1490,7 @@ describe('SshConnection', () => {
     await conn.disconnect()
 
     expect(proc.kill).toHaveBeenCalled()
-    proc.stdout.emit('data', Buffer.from('ORCA-SYSTEM-SSH-READY'))
+    proc.stdout.emit('data', Buffer.from('YIRU-SYSTEM-SSH-READY'))
 
     await expect(connectResult).resolves.toMatchObject({
       message: 'SSH connection attempt was cancelled'
@@ -1565,7 +1565,7 @@ describe('SshConnection', () => {
   })
 
   it('does not spawn direct system SSH retry after cancellation between mux failure and retry', async () => {
-    getOrcaControlSocketPathMock.mockReturnValue('/tmp/orca-ssh-501/stale-socket')
+    getYiruControlSocketPathMock.mockReturnValue('/tmp/yiru-ssh-501/stale-socket')
     const firstProc = createPendingSystemSshProcess()
     let conn!: SshConnection
     firstProc.onExit = vi.fn((handler: (exitCode: number | null) => void) => {
@@ -1611,7 +1611,7 @@ describe('shouldUseSystemSshTransport', () => {
   })
 
   it('allows an environment override for e2e coverage', () => {
-    vi.stubEnv('ORCA_SSH_FORCE_SYSTEM_TRANSPORT', '1')
+    vi.stubEnv('YIRU_SSH_FORCE_SYSTEM_TRANSPORT', '1')
     expect(shouldUseSystemSshTransport(createTarget(), null)).toBe(true)
   })
 })

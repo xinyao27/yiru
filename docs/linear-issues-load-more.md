@@ -5,12 +5,12 @@
 - `src/renderer/src/components/TaskPage.tsx:288` defines `LINEAR_ITEM_LIMIT = 36`.
 - The plain Linear Issues tabs fetch with that fixed limit in `TaskPage.tsx:4678` and store only `LinearIssue[]`, so All/Assigned/Created/Completed have no `hasMore` state and no in-app way to request more rows.
 - `src/main/linear/issues.ts:291` returns `Promise<LinearIssue[]>` from `listIssues`. The current list GraphQL queries also do not request `pageInfo`, so the main process cannot infer whether Linear has more results.
-- `src/main/ipc/linear.ts:115` and `src/main/runtime/orca-runtime.ts:12415` clamp plain issue list reads to 50. A 36-row "Load more" step would request 72 but receive at most 50 unless these clamps change.
+- `src/main/ipc/linear.ts:115` and `src/main/runtime/yiru-runtime.ts:12415` clamp plain issue list reads to 50. A 36-row "Load more" step would request 72 but receive at most 50 unless these clamps change.
 - Project and custom-view issue reads already return `LinearCollectionResult<LinearIssue>` and render `LinearCollectionNotice`, but their backend helpers cap at 50 and only expose a passive "Search or open Linear" message.
 
 ## Goal
 
-Let users browse more issues from the Linear Issues All tab inside Orca with an explicit "Load more" action. Apply the same plain-list behavior to Assigned, Created, and Completed because they share the same store/runtime/main read path.
+Let users browse more issues from the Linear Issues All tab inside Yiru with an explicit "Load more" action. Apply the same plain-list behavior to Assigned, Created, and Completed because they share the same store/runtime/main read path.
 
 ## Non-Goals
 
@@ -101,7 +101,7 @@ Let users browse more issues from the Linear Issues All tab inside Orca with an 
 - The notice stays a compact footer matching existing bordered, muted Linear collection notices.
 - The load-more action is visually secondary, keyboard reachable, and does not resize or overlap the issue list on narrow widths.
 - While loading more, existing rows remain visible and the button clearly shows progress/disabled state.
-- Copy is direct: users should understand Orca can fetch more without opening Linear.
+- Copy is direct: users should understand Yiru can fetch more without opening Linear.
 
 ## Review Screenshots
 

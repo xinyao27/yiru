@@ -35,11 +35,11 @@ import { SidebarFeedbackDialog } from './SidebarFeedbackDialog'
 import { translate } from '@/i18n/i18n'
 import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-check-click-options'
 
-const DOCS_URL = 'https://www.onorca.dev/docs'
-const CHANGELOG_URL = 'https://onorca.dev/changelog'
-const GITHUB_URL = 'https://github.com/stablyai/orca'
+const DOCS_URL = 'https://www.onyiru.dev/docs'
+const CHANGELOG_URL = 'https://onyiru.dev/changelog'
+const GITHUB_URL = 'https://github.com/stablyai/yiru'
 const DISCORD_URL = 'https://discord.gg/fzjDKHxv8Q'
-const X_URL = 'https://x.com/orca_build'
+const X_URL = 'https://x.com/yiru_build'
 const NO_UPDATE_CHECK_MODIFIERS = { ctrlKey: false, metaKey: false, shiftKey: false }
 
 function openExternalUrl(url: string): void {
@@ -91,7 +91,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
   const [menuOpen, setMenuOpen] = useState(false)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [showAdminOptions, setShowAdminOptions] = useState(false)
-  const [isRestartingOrca, setIsRestartingOrca] = useState(false)
+  const [isRestartingYiru, setIsRestartingYiru] = useState(false)
   const lastShowOnboardingAtRef = React.useRef(0)
   const updateCheckModifiersRef = React.useRef(NO_UPDATE_CHECK_MODIFIERS)
   const mountedRef = useMountedRef()
@@ -123,21 +123,21 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
     void showOnboardingFromRenderer()
   }
 
-  const handleRestartOrca = (): void => {
-    if (isRestartingOrca) {
+  const handleRestartYiru = (): void => {
+    if (isRestartingYiru) {
       return
     }
-    setIsRestartingOrca(true)
+    setIsRestartingYiru(true)
     toast.info(
-      translate('auto.components.sidebar.SidebarSettingsHelpMenu.5161eef55d', 'Restarting Orca…')
+      translate('auto.components.sidebar.SidebarSettingsHelpMenu.5161eef55d', 'Restarting Yiru…')
     )
     void window.api.app.restart().catch((error) => {
       if (mountedRef.current) {
-        setIsRestartingOrca(false)
+        setIsRestartingYiru(false)
         toast.error(
           translate(
             'auto.components.sidebar.SidebarSettingsHelpMenu.4e8f5710d3',
-            "Couldn't restart Orca."
+            "Couldn't restart Yiru."
           ),
           {
             description: error instanceof Error ? error.message : undefined
@@ -332,11 +332,11 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
             {showAdminOptions ? (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleRestartOrca} disabled={isRestartingOrca}>
+                <DropdownMenuItem onClick={handleRestartYiru} disabled={isRestartingYiru}>
                   <RotateCw className="size-3.5" />
                   {translate(
                     'auto.components.sidebar.SidebarSettingsHelpMenu.ad3d3ed7f1',
-                    'Restart Orca'
+                    'Restart Yiru'
                   )}
                 </DropdownMenuItem>
               </>

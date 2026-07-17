@@ -163,7 +163,7 @@ export function RemoteServerFields({
           onChange={(event) => onPairingCodeChange(event.target.value)}
           placeholder={translate(
             'auto.components.sidebar.AddRemoteHostDialog.pairingCodePlaceholder',
-            'orca://pair?code=...'
+            'yiru://pair?code=...'
           )}
           className="font-mono"
         />
@@ -172,7 +172,7 @@ export function RemoteServerFields({
           <span className="font-mono">
             {translate(
               'auto.components.sidebar.AddRemoteHostDialog.pairingCommand',
-              'orca serve --pairing-address <host>'
+              'yiru serve --pairing-address <host>'
             )}
           </span>{' '}
           {translate(

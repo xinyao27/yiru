@@ -4,16 +4,16 @@ import { InMemoryClipboardMetadataManager } from 'monaco-editor/esm/vs/editor/br
 import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
 import {
-  ORCA_CONTEXT_MENU_PASTE_NAME,
-  ORCA_CONTEXT_MENU_PASTE_PRIORITY,
-  runOrcaContextMenuPaste
+  YIRU_CONTEXT_MENU_PASTE_NAME,
+  YIRU_CONTEXT_MENU_PASTE_PRIORITY,
+  runYiruContextMenuPaste
 } from './monaco-context-menu-paste'
 
 let installed = false
 
 /**
  * Make Monaco's context-menu / command-palette Paste read the clipboard through
- * Orca's trusted IPC bridge instead of the sandbox-blocked navigator.clipboard.
+ * Yiru's trusted IPC bridge instead of the sandbox-blocked navigator.clipboard.
  * Idempotent and safe to call once during Monaco setup.
  */
 export function installMonacoContextMenuPaste(monaco: typeof Monaco): void {
@@ -29,10 +29,10 @@ export function installMonacoContextMenuPaste(monaco: typeof Monaco): void {
   // MultiCommand iteration so the blocked default never runs. Returning `false`
   // falls through to the default for read-only/unfocused/non-editor cases.
   PasteAction.addImplementation(
-    ORCA_CONTEXT_MENU_PASTE_PRIORITY,
-    ORCA_CONTEXT_MENU_PASTE_NAME,
+    YIRU_CONTEXT_MENU_PASTE_PRIORITY,
+    YIRU_CONTEXT_MENU_PASTE_NAME,
     () =>
-      runOrcaContextMenuPaste({
+      runYiruContextMenuPaste({
         getFocusedEditor: () =>
           monaco.editor.getEditors().find((candidate) => candidate.hasTextFocus()) ?? null,
         readClipboardText: (options) => window.api.ui.readClipboardText(options),

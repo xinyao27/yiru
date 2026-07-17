@@ -11,7 +11,7 @@ The floating workspace panel appears in a different default location after app r
 
 ## Root Cause
 
-Panel geometry is transient renderer state. Restarting Orca remounts `FloatingTerminalPanel`, so the panel recomputes from the current viewport instead of restoring the last user placement. The component also has no source tracking, so its legacy right-gap normalization cannot distinguish a default position from an intentional user drag.
+Panel geometry is transient renderer state. Restarting Yiru remounts `FloatingTerminalPanel`, so the panel recomputes from the current viewport instead of restoring the last user placement. The component also has no source tracking, so its legacy right-gap normalization cannot distinguish a default position from an intentional user drag.
 
 ## Non-Goals
 
@@ -23,7 +23,7 @@ Panel geometry is transient renderer state. Restarting Orca remounts `FloatingTe
 ## Design
 
 1. Add floating panel bounds persistence helpers beside the existing panel bounds math:
-   - use a panel-specific versioned key, e.g. `orca-floating-terminal-panel-bounds-v1`;
+   - use a panel-specific versioned key, e.g. `yiru-floating-terminal-panel-bounds-v1`;
    - parse only finite `left`, `top`, `width`, and `height` numbers;
    - distinguish `default` versus `user` bounds sources;
    - expose a panel viewport-usability guard so saved user bounds are not clamped against Electron's transient zero-sized startup viewport;

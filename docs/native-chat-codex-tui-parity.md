@@ -1,7 +1,7 @@
 # Native Chat Codex TUI Parity
 
-This note maps Codex TUI behavior to Orca native chat on branch
-`inspect/pr-5824-native-chat`. It is intentionally concrete: the current Orca
+This note maps Codex TUI behavior to Yiru native chat on branch
+`inspect/pr-5824-native-chat`. It is intentionally concrete: the current Yiru
 surface is a PTY harness around the running TUI, while real native parity should
 move selected paths to Codex app-server protocol v2.
 
@@ -24,9 +24,9 @@ move selected paths to Codex app-server protocol v2.
   `/Users/jinwoohong/stably/codex/codex-rs/app-server-protocol/src/protocol/v2/turn.rs`,
   `/Users/jinwoohong/stably/codex/codex-rs/app-server-protocol/src/protocol/common.rs`
 
-## Current Orca Architecture
+## Current Yiru Architecture
 
-Orca native chat currently sends through the hosted terminal PTY. The composer
+Yiru native chat currently sends through the hosted terminal PTY. The composer
 builds paste bytes, writes them through `sendRuntimePtyInput`, then sends a
 delayed Enter. This preserves local and SSH behavior because it uses the same
 runtime path as terminal typing.
@@ -51,7 +51,7 @@ Codex behavior:
   `/clear` sends `AppEvent::ClearUi`; `/compact` starts compaction; `/model`
   opens the model picker; `/skills` opens skill management.
 
-Current Orca behavior:
+Current Yiru behavior:
 
 - Slash commands are still typed into the TUI over PTY.
 - Native optimistic chat bubbles are suppressed for slash drafts so `/clear`
@@ -83,9 +83,9 @@ Codex behavior:
 - Skill injection reads the selected `SKILL.md` by path, records telemetry, and
   avoids double-injecting already provided host skill prompts.
 
-Current Orca behavior:
+Current Yiru behavior:
 
-- Native chat discovers skills through Orca's skills IPC with the active
+- Native chat discovers skills through Yiru's skills IPC with the active
   terminal tab's cwd. This is important for worktree symlinks like
   `.agents/skills`.
 - `$` autocomplete inserts plain `$skillName` text. That can work through the
@@ -112,7 +112,7 @@ Codex behavior:
 - Remote image rows are first-class composer attachments and can be removed with
   keyboard navigation.
 
-Current Orca behavior:
+Current Yiru behavior:
 
 - File attach inserts a path/reference into the draft and relies on the TUI to
   interpret it.
@@ -135,7 +135,7 @@ Codex behavior:
 - App-server v2 already exposes model listing, config requirements, approval
   policies, permission profiles, and reasoning effort fields.
 
-Current Orca behavior:
+Current Yiru behavior:
 
 - Native chat does not know or set Codex model/reasoning directly. Typing
   `/model` opens Codex's TUI picker.
@@ -157,15 +157,15 @@ Codex behavior:
 - App-server notifications include thread status, waiting-on-approval/user-input
   flags, item start/completion, diff/plan updates, and skill changes.
 
-Current Orca behavior:
+Current Yiru behavior:
 
-- Native chat has interactive cards sourced from Orca's existing agent status
+- Native chat has interactive cards sourced from Yiru's existing agent status
   hooks. This is good for common question/approval flows, but it is not the full
   Codex approval overlay model.
 
 Recommended route:
 
-- Keep PTY fallback for anything not represented in Orca hooks.
+- Keep PTY fallback for anything not represented in Yiru hooks.
 - For Codex-native mode, subscribe to app-server notifications and render
   approvals/tool calls from protocol events rather than scraping terminal text.
 
@@ -179,7 +179,7 @@ Codex behavior:
   search, Esc edit/interrupt behavior, Ctrl+J newline, Ctrl+T transcript, and
   Ctrl+C quit/interrupt behavior.
 
-Current Orca behavior:
+Current Yiru behavior:
 
 - Native chat has small in-memory draft history and Enter/Shift+Enter.
 - Session commands are typed into the hosted TUI.
@@ -189,7 +189,7 @@ Recommended route:
 - Short term: keep TUI command dispatch and avoid fake optimistic bubbles for
   lifecycle commands.
 - Native mode: use app-server thread APIs for lifecycle and expose real thread
-  transitions in the Orca UI.
+  transitions in the Yiru UI.
 
 ## Priority
 

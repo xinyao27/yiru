@@ -6,7 +6,7 @@ vi.mock('../runtime-client', () => {
   class RuntimeClient {
     call = callMock
     getCliStatus = vi.fn()
-    openOrca = vi.fn()
+    openYiru = vi.fn()
   }
 
   class RuntimeClientError extends Error {
@@ -37,7 +37,7 @@ vi.mock('../runtime-client', () => {
 import { main } from '../index'
 import { buildWorktree, okFixture, queueFixtures, worktreeListFixture } from '../test-fixtures'
 
-describe('orca computer observation CLI handlers', () => {
+describe('yiru computer observation CLI handlers', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     callMock.mockReset()
@@ -68,7 +68,7 @@ describe('orca computer observation CLI handlers', () => {
 
     const output = vi.mocked(console.log).mock.calls[0][0]
     expect(output).toContain(
-      'orca computer permissions [--id <accessibility|screenshots>] [--json]'
+      'yiru computer permissions [--id <accessibility|screenshots>] [--json]'
     )
     expect(output).toContain('--id <id>')
     expect(output).toContain('Identifier for a target item or permission')
@@ -114,7 +114,7 @@ describe('orca computer observation CLI handlers', () => {
       callMock,
       okFixture('req_capabilities', {
         platform: 'darwin',
-        provider: 'orca-computer-use-macos',
+        provider: 'yiru-computer-use-macos',
         providerVersion: '1.0.0',
         protocolVersion: 1,
         supports: {
@@ -131,7 +131,7 @@ describe('orca computer observation CLI handlers', () => {
 
     expect(callMock).toHaveBeenCalledTimes(1)
     expect(callMock).toHaveBeenCalledWith('computer.capabilities', {})
-    expect(vi.mocked(console.log).mock.calls[0][0]).toContain('orca-computer-use-macos')
+    expect(vi.mocked(console.log).mock.calls[0][0]).toContain('yiru-computer-use-macos')
   })
 
   it('opens computer permission setup without resolving a worktree', async () => {
@@ -139,7 +139,7 @@ describe('orca computer observation CLI handlers', () => {
       callMock,
       okFixture('req_permissions', {
         platform: 'darwin',
-        helperAppPath: '/Applications/Orca Computer Use.app',
+        helperAppPath: '/Applications/Yiru Computer Use.app',
         openedSettings: false,
         launchedHelper: true
       })
@@ -150,8 +150,8 @@ describe('orca computer observation CLI handlers', () => {
     expect(callMock).toHaveBeenCalledTimes(1)
     expect(callMock).toHaveBeenCalledWith('computer.permissions', {})
     const output = vi.mocked(console.log).mock.calls[0][0]
-    expect(output).toContain('Opened Orca Computer Use permission setup')
-    expect(output).toContain('/Applications/Orca Computer Use.app')
+    expect(output).toContain('Opened Yiru Computer Use permission setup')
+    expect(output).toContain('/Applications/Yiru Computer Use.app')
   })
 
   it('passes targeted computer permission setup id', async () => {
@@ -159,7 +159,7 @@ describe('orca computer observation CLI handlers', () => {
       callMock,
       okFixture('req_permissions', {
         platform: 'darwin',
-        helperAppPath: '/Applications/Orca Computer Use.app',
+        helperAppPath: '/Applications/Yiru Computer Use.app',
         openedSettings: true,
         launchedHelper: true
       })

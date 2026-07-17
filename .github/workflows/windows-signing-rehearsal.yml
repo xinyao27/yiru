@@ -1,7 +1,7 @@
 ﻿# Windows inner-binary signing rehearsal.
 #
 # Why: SignPath cannot deep-sign inside NSIS installers, so shipping signed
-# inner binaries (Orca.exe, node-pty *.node, DLLs — see issue #7785) requires
+# inner binaries (Yiru.exe, node-pty *.node, DLLs — see issue #7785) requires
 # a two-request flow: sign the unpacked PE files first, then build the NSIS
 # installer from the signed tree, then sign the installer. This workflow
 # rehearses that entire flow from a branch, end to end, without publishing
@@ -88,8 +88,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           pnpm exec electron-builder --config config/electron-builder.config.cjs --win --dir --publish never
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          if (-not (Test-Path 'dist/win-unpacked/Orca.exe')) {
-            throw 'electron-builder --dir did not produce dist/win-unpacked/Orca.exe'
+          if (-not (Test-Path 'dist/win-unpacked/Yiru.exe')) {
+            throw 'electron-builder --dir did not produce dist/win-unpacked/Yiru.exe'
           }
 
       # Why: only unsigned PE files go to SignPath. Files that already carry a
@@ -119,8 +119,8 @@ jobs:
               $list.Add($relative)
             }
 
-          if (-not ($list -contains 'Orca.exe')) {
-            throw 'Orca.exe was not staged for signing; unpacked layout changed?'
+          if (-not ($list -contains 'Yiru.exe')) {
+            throw 'Yiru.exe was not staged for signing; unpacked layout changed?'
           }
           if (-not ($list | Where-Object { $_ -like '*conpty_console_list.node' })) {
             throw 'node-pty conpty_console_list.node was not staged; this is the file from issue #7785.'
@@ -136,7 +136,7 @@ jobs:
         id: upload-unsigned-inner
         uses: actions/upload-artifact@v7
         with:
-          name: orca-windows-inner-unsigned-${{ github.run_id }}
+          name: yiru-windows-inner-unsigned-${{ github.run_id }}
           path: signing-stage/**
           if-no-files-found: error
 
@@ -165,7 +165,7 @@ jobs:
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: c37aa192-a27a-4377-9c90-5d6c95912dc0
-          project-slug: orca
+          project-slug: yiru
           signing-policy-slug: ${{ inputs.signing-policy-slug || 'test-signing' }}
           artifact-configuration-slug: ${{ inputs.inner-artifact-configuration-slug || 'windows-inner-binaries-zip' }}
           github-artifact-id: ${{ steps.upload-unsigned-inner.outputs.artifact-id }}
@@ -221,16 +221,16 @@ jobs:
         run: |
           pnpm exec electron-builder --config config/electron-builder.config.cjs --win --publish never --prepackaged "$env:GITHUB_WORKSPACE\dist\win-unpacked"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          if (-not (Test-Path 'dist/orca-windows-setup.exe')) {
-            throw 'electron-builder --prepackaged did not produce dist/orca-windows-setup.exe'
+          if (-not (Test-Path 'dist/yiru-windows-setup.exe')) {
+            throw 'electron-builder --prepackaged did not produce dist/yiru-windows-setup.exe'
           }
 
       - name: Upload unsigned Windows installer for SignPath
         id: upload-unsigned-installer
         uses: actions/upload-artifact@v7
         with:
-          name: orca-windows-installer-unsigned-${{ github.run_id }}
-          path: dist/orca-windows-setup.exe
+          name: yiru-windows-installer-unsigned-${{ github.run_id }}
+          path: dist/yiru-windows-setup.exe
           if-no-files-found: error
 
       - name: Submit Windows installer signing request
@@ -239,7 +239,7 @@ jobs:
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: c37aa192-a27a-4377-9c90-5d6c95912dc0
-          project-slug: orca
+          project-slug: yiru
           signing-policy-slug: ${{ inputs.signing-policy-slug || 'test-signing' }}
           artifact-configuration-slug: github-actions-windows-installer
           github-artifact-id: ${{ steps.upload-unsigned-installer.outputs.artifact-id }}
@@ -266,16 +266,16 @@ jobs:
       - name: Stage signed Windows installer and regenerate updater metadata
         shell: pwsh
         run: |
-          $signedInstaller = Get-ChildItem -Path signed-windows -Recurse -File -Filter 'orca-windows-setup.exe' | Select-Object -First 1
+          $signedInstaller = Get-ChildItem -Path signed-windows -Recurse -File -Filter 'yiru-windows-setup.exe' | Select-Object -First 1
           if ($null -eq $signedInstaller) {
             throw 'Signed Windows installer was not returned by SignPath.'
           }
-          Copy-Item -Path $signedInstaller.FullName -Destination 'dist/orca-windows-setup.exe' -Force
-          & 'node_modules/app-builder-bin/win/x64/app-builder.exe' blockmap --input 'dist/orca-windows-setup.exe' --output 'dist/orca-windows-setup.exe.blockmap'
+          Copy-Item -Path $signedInstaller.FullName -Destination 'dist/yiru-windows-setup.exe' -Force
+          & 'node_modules/app-builder-bin/win/x64/app-builder.exe' blockmap --input 'dist/yiru-windows-setup.exe' --output 'dist/yiru-windows-setup.exe.blockmap'
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-          $installer = Get-Item 'dist/orca-windows-setup.exe'
-          $blockmap = Get-Item 'dist/orca-windows-setup.exe.blockmap'
+          $installer = Get-Item 'dist/yiru-windows-setup.exe'
+          $blockmap = Get-Item 'dist/yiru-windows-setup.exe.blockmap'
           $stream = [System.IO.File]::OpenRead($installer.FullName)
           try {
             $sha512 = [System.Security.Cryptography.SHA512]::Create()
@@ -321,13 +321,13 @@ jobs:
             }
           }
 
-          Test-Signature 'installer: orca-windows-setup.exe' 'dist/orca-windows-setup.exe'
+          Test-Signature 'installer: yiru-windows-setup.exe' 'dist/yiru-windows-setup.exe'
 
           # Extract the signed installer and verify the files a user actually
           # gets on disk — including the exact file from issue #7785.
           $7za = 'node_modules/7zip-bin/win/x64/7za.exe'
           New-Item -ItemType Directory -Path extracted-app -Force | Out-Null
-          & $7za x 'dist/orca-windows-setup.exe' '-oextracted-app' -y | Out-Null
+          & $7za x 'dist/yiru-windows-setup.exe' '-oextracted-app' -y | Out-Null
 
           $root = Resolve-Path 'extracted-app'
           foreach ($relative in Get-Content 'inner-signing-list.txt') {
@@ -354,7 +354,7 @@ jobs:
           path: |
             signing-evidence.txt
             inner-signing-list.txt
-            dist/orca-windows-setup.exe
-            dist/orca-windows-setup.exe.blockmap
+            dist/yiru-windows-setup.exe
+            dist/yiru-windows-setup.exe.blockmap
             dist/latest.yml
           retention-days: 7

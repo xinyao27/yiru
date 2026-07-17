@@ -16,8 +16,8 @@ afterEach(async () => {
 })
 
 describe('claude agent teams shim env', () => {
-  it('writes a private tmux shim that calls the Orca shim command', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'orca-agent-teams-shim-'))
+  it('writes a private tmux shim that calls the Yiru shim command', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'yiru-agent-teams-shim-'))
     roots.push(root)
 
     await ensureClaudeAgentTeamsShimDir(root)
@@ -26,9 +26,9 @@ describe('claude agent teams shim env', () => {
   })
 
   it('builds native shim env only for direct Claude commands', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'orca-agent-teams-cli-'))
+    const root = await mkdtemp(join(tmpdir(), 'yiru-agent-teams-cli-'))
     roots.push(root)
-    const cliName = process.platform === 'win32' ? 'orca-dev.cmd' : 'orca-dev'
+    const cliName = process.platform === 'win32' ? 'yiru-dev.cmd' : 'yiru-dev'
     const cliPath = join(root, cliName)
     await writeFile(cliPath, '#!/usr/bin/env sh\n', 'utf8')
     if (process.platform !== 'win32') {
@@ -44,7 +44,7 @@ describe('claude agent teams shim env', () => {
         capturedShimBin = shimBin
         return {
           PATH: `${shimDir}:/usr/bin`,
-          TMUX: '/tmp/orca/fake,0,0',
+          TMUX: '/tmp/yiru/fake,0,0',
           TMUX_PANE: '%1'
         }
       }
@@ -61,7 +61,7 @@ describe('claude agent teams shim env', () => {
       expect(plan).toMatchObject({
         command: "claude --teammate-mode auto 'hello'",
         env: expect.objectContaining({ TMUX_PANE: '%1' }),
-        envToDelete: ['TERM_PROGRAM', 'ORCA_ATTRIBUTION_SHIM_DIR']
+        envToDelete: ['TERM_PROGRAM', 'YIRU_ATTRIBUTION_SHIM_DIR']
       })
       expect(capturedShimBin).toBe(cliPath)
     }
@@ -77,9 +77,9 @@ describe('claude agent teams shim env', () => {
   })
 
   it('resolves the dev CLI wrapper for the tmux callback binary', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'orca-agent-teams-cli-'))
+    const root = await mkdtemp(join(tmpdir(), 'yiru-agent-teams-cli-'))
     roots.push(root)
-    const cliName = process.platform === 'win32' ? 'orca-dev.cmd' : 'orca-dev'
+    const cliName = process.platform === 'win32' ? 'yiru-dev.cmd' : 'yiru-dev'
     const cliPath = join(root, cliName)
     await writeFile(cliPath, '#!/usr/bin/env sh\n', 'utf8')
     if (process.platform !== 'win32') {

@@ -1028,7 +1028,7 @@ describe('getStatus', () => {
   })
 
   it('benchmarks concurrent status burst subprocess pressure', async () => {
-    const benchPath = process.env.ORCA_GIT_STATUS_COALESCING_BENCH_JSON
+    const benchPath = process.env.YIRU_GIT_STATUS_COALESCING_BENCH_JSON
     if (!benchPath) {
       return
     }

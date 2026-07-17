@@ -53,10 +53,10 @@ function isCodexManagedCommand(command: string | undefined): boolean {
 let previousUserDataPath: string | undefined
 
 beforeEach(() => {
-  tmpHome = mkdtempSync(join(tmpdir(), 'orca-codex-home-'))
-  userDataDir = mkdtempSync(join(tmpdir(), 'orca-codex-user-data-'))
-  previousUserDataPath = process.env.ORCA_USER_DATA_PATH
-  process.env.ORCA_USER_DATA_PATH = userDataDir
+  tmpHome = mkdtempSync(join(tmpdir(), 'yiru-codex-home-'))
+  userDataDir = mkdtempSync(join(tmpdir(), 'yiru-codex-user-data-'))
+  previousUserDataPath = process.env.YIRU_USER_DATA_PATH
+  process.env.YIRU_USER_DATA_PATH = userDataDir
   homedirMock.mockReturnValue(tmpHome)
   getPathMock.mockImplementation((name: string) => {
     if (name === 'userData') {
@@ -70,9 +70,9 @@ afterEach(() => {
   rmSync(tmpHome, { recursive: true, force: true })
   rmSync(userDataDir, { recursive: true, force: true })
   if (previousUserDataPath === undefined) {
-    delete process.env.ORCA_USER_DATA_PATH
+    delete process.env.YIRU_USER_DATA_PATH
   } else {
-    process.env.ORCA_USER_DATA_PATH = previousUserDataPath
+    process.env.YIRU_USER_DATA_PATH = previousUserDataPath
   }
   vi.clearAllMocks()
 })
@@ -129,7 +129,7 @@ function localManagedCodexEvents(): string[] {
 }
 
 describe('CodexHookService', () => {
-  it('installs PermissionRequest with trust so Codex approval prompts reach Orca', () => {
+  it('installs PermissionRequest with trust so Codex approval prompts reach Yiru', () => {
     const systemCodexHome = join(tmpHome, '.codex')
     mkdirSync(systemCodexHome, { recursive: true })
     writeFileSync(
@@ -191,7 +191,7 @@ describe('CodexHookService', () => {
   it.skipIf(process.platform !== 'win32')(
     'wraps the managed hook command when the profile path contains a space (#6078)',
     () => {
-      const spaceHome = join(tmpdir(), 'orca home with spaces')
+      const spaceHome = join(tmpdir(), 'yiru home with spaces')
       mkdirSync(spaceHome, { recursive: true })
       homedirMock.mockReturnValue(spaceHome)
       try {
@@ -221,7 +221,7 @@ describe('CodexHookService', () => {
   it.skipIf(process.platform !== 'win32')(
     'keeps the encoded launcher when the profile path contains cmd metacharacters',
     () => {
-      const metacharHome = join(tmpdir(), 'orca %ORCA_TEST% ^ home')
+      const metacharHome = join(tmpdir(), 'yiru %YIRU_TEST% ^ home')
       mkdirSync(metacharHome, { recursive: true })
       homedirMock.mockReturnValue(metacharHome)
       try {
@@ -263,7 +263,7 @@ describe('CodexHookService', () => {
       // Why: the temp home is normally cmd-safe; guard so a runner whose tmpdir
       // holds an exotic character still asserts the correct (fallback) branch.
       const command = hooksConfig.hooks.Stop?.[0]?.hooks?.[0]?.command ?? ''
-      const cmdSafe = /^[A-Za-z0-9_.:\\~-]+$/.test(join(tmpHome, '.orca', 'agent-hooks'))
+      const cmdSafe = /^[A-Za-z0-9_.:\\~-]+$/.test(join(tmpHome, '.yiru', 'agent-hooks'))
       if (cmdSafe) {
         expect(command).not.toMatch(/powershell/i)
         expect(command).toMatch(/\\agent-hooks\\codex-hook\.cmd$/)
@@ -280,7 +280,7 @@ describe('CodexHookService', () => {
     'posts hook payloads via the curl-based managed script preserving UTF-8 and spaced metadata',
     async () => {
       new CodexHookService().install()
-      const scriptPath = join(homedir(), '.orca', 'agent-hooks', 'codex-hook.cmd')
+      const scriptPath = join(homedir(), '.yiru', 'agent-hooks', 'codex-hook.cmd')
       expect(existsSync(scriptPath)).toBe(true)
 
       // Why: resolve when the listener has fully read the hook POST. spawnSync
@@ -305,25 +305,25 @@ describe('CodexHookService', () => {
 
       try {
         const payload = JSON.stringify({ prompt: '你好世界', hook_event_name: 'UserPromptSubmit' })
-        // Why: this suite may run inside an Orca-launched terminal whose env
-        // already carries ORCA_AGENT_HOOK_ENDPOINT/PORT/TOKEN. The managed
+        // Why: this suite may run inside a Yiru-launched terminal whose env
+        // already carries YIRU_AGENT_HOOK_ENDPOINT/PORT/TOKEN. The managed
         // script sources that endpoint file, so leave it out or the hook posts
-        // to the live Orca instead of this test's listener.
+        // to the live Yiru instead of this test's listener.
         const cleanEnv = { ...process.env }
         for (const key of Object.keys(cleanEnv)) {
-          if (key.startsWith('ORCA_')) {
+          if (key.startsWith('YIRU_')) {
             delete cleanEnv[key]
           }
         }
         const child = spawn('cmd.exe', ['/d', '/c', scriptPath], {
           env: {
             ...cleanEnv,
-            ORCA_AGENT_HOOK_PORT: String(port),
-            ORCA_AGENT_HOOK_TOKEN: 'tok123',
-            ORCA_PANE_KEY: '42:leaf-abc',
-            ORCA_TAB_ID: '42',
-            ORCA_WORKTREE_ID: 'C:\\work trees\\my repo & co',
-            ORCA_AGENT_HOOK_VERSION: '1'
+            YIRU_AGENT_HOOK_PORT: String(port),
+            YIRU_AGENT_HOOK_TOKEN: 'tok123',
+            YIRU_PANE_KEY: '42:leaf-abc',
+            YIRU_TAB_ID: '42',
+            YIRU_WORKTREE_ID: 'C:\\work trees\\my repo & co',
+            YIRU_AGENT_HOOK_VERSION: '1'
           }
         })
         child.stdin.end(payload)
@@ -332,7 +332,7 @@ describe('CodexHookService', () => {
 
         const received = await receivedPromise
         const params = new URLSearchParams(received.body)
-        expect(received.headers['x-orca-agent-hook-token']).toBe('tok123')
+        expect(received.headers['x-yiru-agent-hook-token']).toBe('tok123')
         expect(params.get('paneKey')).toBe('42:leaf-abc')
         expect(params.get('worktreeId')).toBe('C:\\work trees\\my repo & co')
         expect(JSON.parse(params.get('payload') ?? '{}').prompt).toBe('你好世界')
@@ -342,15 +342,15 @@ describe('CodexHookService', () => {
     }
   )
 
-  it('keeps hooks isolated by Orca userData instead of mutating system ~/.codex', () => {
+  it('keeps hooks isolated by Yiru userData instead of mutating system ~/.codex', () => {
     const systemCodexHome = join(tmpHome, '.codex')
     const systemHooksPath = join(systemCodexHome, 'hooks.json')
     const existingSystemHooks = '{"hooks":{"Stop":[{"hooks":[{"command":"user-hook"}]}]}}\n'
     mkdirSync(systemCodexHome, { recursive: true })
     writeFileSync(systemHooksPath, existingSystemHooks, 'utf-8')
 
-    const devUserDataDir = mkdtempSync(join(tmpdir(), 'orca-dev-codex-user-data-'))
-    const prodUserDataDir = mkdtempSync(join(tmpdir(), 'orca-prod-codex-user-data-'))
+    const devUserDataDir = mkdtempSync(join(tmpdir(), 'yiru-dev-codex-user-data-'))
+    const prodUserDataDir = mkdtempSync(join(tmpdir(), 'yiru-prod-codex-user-data-'))
     try {
       getPathMock.mockImplementation((name: string) => {
         if (name === 'userData') {
@@ -358,7 +358,7 @@ describe('CodexHookService', () => {
         }
         throw new Error(`unexpected app.getPath(${name})`)
       })
-      process.env.ORCA_USER_DATA_PATH = devUserDataDir
+      process.env.YIRU_USER_DATA_PATH = devUserDataDir
       expect(new CodexHookService().install().state).toBe('installed')
 
       getPathMock.mockImplementation((name: string) => {
@@ -367,7 +367,7 @@ describe('CodexHookService', () => {
         }
         throw new Error(`unexpected app.getPath(${name})`)
       })
-      process.env.ORCA_USER_DATA_PATH = prodUserDataDir
+      process.env.YIRU_USER_DATA_PATH = prodUserDataDir
       expect(new CodexHookService().install().state).toBe('installed')
 
       const devHooksPath = join(devUserDataDir, 'codex-runtime-home', 'home', 'hooks.json')
@@ -402,7 +402,7 @@ describe('CodexHookService', () => {
       ).toBe(true)
       expect(readFileSync(systemHooksPath, 'utf-8')).toBe(existingSystemHooks)
     } finally {
-      process.env.ORCA_USER_DATA_PATH = userDataDir
+      process.env.YIRU_USER_DATA_PATH = userDataDir
       rmSync(devUserDataDir, { recursive: true, force: true })
       rmSync(prodUserDataDir, { recursive: true, force: true })
     }
@@ -802,7 +802,7 @@ describe('CodexHookService', () => {
     expect(stopCommands).not.toContain('user-hook-old')
   })
 
-  it('refreshes runtime user hooks without installing Orca-managed hooks', () => {
+  it('refreshes runtime user hooks without installing Yiru-managed hooks', () => {
     const systemCodexHome = join(tmpHome, '.codex')
     const systemHooksPath = join(systemCodexHome, 'hooks.json')
     mkdirSync(systemCodexHome, { recursive: true })
@@ -872,12 +872,12 @@ describe('CodexHookService', () => {
     expect(runtimeToml).not.toContain(':permission_request:0:0')
   })
 
-  it('removes legacy Orca-managed hooks from system ~/.codex during install', () => {
+  it('removes legacy Yiru-managed hooks from system ~/.codex during install', () => {
     const systemCodexHome = join(tmpHome, '.codex')
     const systemHooksPath = join(systemCodexHome, 'hooks.json')
     const legacyScriptPath = join(
       tmpHome,
-      '.orca',
+      '.yiru',
       'agent-hooks',
       process.platform === 'win32' ? 'codex-hook.cmd' : 'codex-hook.sh'
     )
@@ -942,12 +942,12 @@ describe('CodexHookService', () => {
     expect(systemToml).not.toContain(':session_start:0:0')
   })
 
-  it('removes very large legacy Orca-managed hook lists from system ~/.codex', () => {
+  it('removes very large legacy Yiru-managed hook lists from system ~/.codex', () => {
     const systemCodexHome = join(tmpHome, '.codex')
     const systemHooksPath = join(systemCodexHome, 'hooks.json')
     const legacyScriptPath = join(
       tmpHome,
-      '.orca',
+      '.yiru',
       'agent-hooks',
       process.platform === 'win32' ? 'codex-hook.cmd' : 'codex-hook.sh'
     )
@@ -983,19 +983,19 @@ describe('CodexHookService', () => {
     expect(systemHooks.hooks.Stop).toBeUndefined()
   }, 30_000)
 
-  it('removes the legacy Orca Codex profile file when it only contains managed hooks', () => {
+  it('removes the legacy Yiru Codex profile file when it only contains managed hooks', () => {
     const systemCodexHome = join(tmpHome, '.codex')
-    const profilePath = join(systemCodexHome, 'orca-agent-status.config.toml')
+    const profilePath = join(systemCodexHome, 'yiru-agent-status.config.toml')
     mkdirSync(systemCodexHome, { recursive: true })
     writeFileSync(
       profilePath,
       [
-        '# BEGIN ORCA AGENT STATUS HOOKS',
+        '# BEGIN YIRU AGENT STATUS HOOKS',
         '[[hooks.PermissionRequest]]',
         '[[hooks.PermissionRequest.hooks]]',
         'type = "command"',
         'command = "codex-hook"',
-        '# END ORCA AGENT STATUS HOOKS',
+        '# END YIRU AGENT STATUS HOOKS',
         ''
       ].join('\n'),
       'utf-8'
@@ -1006,21 +1006,21 @@ describe('CodexHookService', () => {
     expect(existsSync(profilePath)).toBe(false)
   })
 
-  it('removes only the legacy Orca block from a user-edited Codex profile file', () => {
+  it('removes only the legacy Yiru block from a user-edited Codex profile file', () => {
     const systemCodexHome = join(tmpHome, '.codex')
-    const profilePath = join(systemCodexHome, 'orca-agent-status.config.toml')
+    const profilePath = join(systemCodexHome, 'yiru-agent-status.config.toml')
     mkdirSync(systemCodexHome, { recursive: true })
     writeFileSync(
       profilePath,
       [
         'model = "gpt-5.5"',
         '',
-        '# BEGIN ORCA AGENT STATUS HOOKS',
+        '# BEGIN YIRU AGENT STATUS HOOKS',
         '[[hooks.PermissionRequest]]',
         '[[hooks.PermissionRequest.hooks]]',
         'type = "command"',
         'command = "codex-hook"',
-        '# END ORCA AGENT STATUS HOOKS',
+        '# END YIRU AGENT STATUS HOOKS',
         ''
       ].join('\n'),
       'utf-8'
@@ -1030,7 +1030,7 @@ describe('CodexHookService', () => {
 
     const profileConfig = readFileSync(profilePath, 'utf-8')
     expect(profileConfig).toContain('model = "gpt-5.5"')
-    expect(profileConfig).not.toContain('ORCA AGENT STATUS HOOKS')
+    expect(profileConfig).not.toContain('YIRU AGENT STATUS HOOKS')
     expect(profileConfig).not.toContain('codex-hook')
   })
 
@@ -1041,10 +1041,10 @@ describe('CodexHookService', () => {
 
     const systemCodexHome = join(tmpHome, '.codex')
     const systemHooksPath = join(systemCodexHome, 'hooks.json')
-    const profilePath = join(systemCodexHome, 'orca-agent-status.config.toml')
+    const profilePath = join(systemCodexHome, 'yiru-agent-status.config.toml')
     const legacyScriptPath = join(
       tmpHome,
-      '.orca',
+      '.yiru',
       'agent-hooks',
       process.platform === 'win32' ? 'codex-hook.cmd' : 'codex-hook.sh'
     )
@@ -1071,12 +1071,12 @@ describe('CodexHookService', () => {
     writeFileSync(
       profilePath,
       [
-        '# BEGIN ORCA AGENT STATUS HOOKS',
+        '# BEGIN YIRU AGENT STATUS HOOKS',
         '[[hooks.PermissionRequest]]',
         '[[hooks.PermissionRequest.hooks]]',
         'type = "command"',
         'command = "codex-hook"',
-        '# END ORCA AGENT STATUS HOOKS',
+        '# END YIRU AGENT STATUS HOOKS',
         ''
       ].join('\n'),
       'utf-8'
@@ -1133,10 +1133,10 @@ describe('CodexHookService', () => {
     const systemCodexHome = join(tmpHome, '.codex')
     const systemHooksPath = join(systemCodexHome, 'hooks.json')
     const systemTomlPath = join(systemCodexHome, 'config.toml')
-    const legacyProfilePath = join(systemCodexHome, 'orca-agent-status.config.toml')
+    const legacyProfilePath = join(systemCodexHome, 'yiru-agent-status.config.toml')
     const legacyScriptPath = join(
       tmpHome,
-      '.orca',
+      '.yiru',
       'agent-hooks',
       process.platform === 'win32' ? 'codex-hook.cmd' : 'codex-hook.sh'
     )
@@ -1187,12 +1187,12 @@ describe('CodexHookService', () => {
     writeFileSync(
       legacyProfilePath,
       [
-        '# BEGIN ORCA AGENT STATUS HOOKS',
+        '# BEGIN YIRU AGENT STATUS HOOKS',
         '[[hooks.PermissionRequest]]',
         '[[hooks.PermissionRequest.hooks]]',
         'type = "command"',
         'command = "codex-hook"',
-        '# END ORCA AGENT STATUS HOOKS',
+        '# END YIRU AGENT STATUS HOOKS',
         ''
       ].join('\n'),
       'utf-8'
@@ -1237,7 +1237,7 @@ describe('CodexHookService', () => {
   it('removes managed trust entries when userData resolves through a symlink', () => {
     const linkedUserDataDir = join(tmpHome, 'linked-user-data')
     symlinkSync(userDataDir, linkedUserDataDir, process.platform === 'win32' ? 'junction' : 'dir')
-    process.env.ORCA_USER_DATA_PATH = linkedUserDataDir
+    process.env.YIRU_USER_DATA_PATH = linkedUserDataDir
 
     const service = new CodexHookService()
     expect(service.install().state).toBe('installed')

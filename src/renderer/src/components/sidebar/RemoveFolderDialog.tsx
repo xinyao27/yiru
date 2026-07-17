@@ -68,13 +68,13 @@ const RemoveFolderDialog = React.memo(function RemoveFolderDialog() {
             <span className="break-all font-medium text-foreground">{displayName}</span>{' '}
             {sshHostLabel
               ? translate(
-                  'auto.components.sidebar.RemoveFolderDialog.fromOrcaSsh',
-                  'from Orca. Its files stay on {{value0}} — re-add that SSH host to recover it.',
+                  'auto.components.sidebar.RemoveFolderDialog.fromYiruSsh',
+                  'from Yiru. Its files stay on {{value0}} — re-add that SSH host to recover it.',
                   { value0: sshHostLabel }
                 )
               : translate(
                   'auto.components.sidebar.RemoveFolderDialog.8c097ef04e',
-                  'from Orca. It is still on your disk.'
+                  'from Yiru. It is still on your disk.'
                 )}
           </DialogDescription>
         </DialogHeader>

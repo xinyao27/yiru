@@ -110,7 +110,7 @@ export function GrokAccountsSection(): React.JSX.Element {
                 {tokenFresh
                   ? translate(
                       'auto.components.settings.GrokAccountsSection.c3d4e5f6a7',
-                      'Signed in. Orca only reads that file on disk — run grok login again if usage fails.'
+                      'Signed in. Yiru only reads that file on disk — run grok login again if usage fails.'
                     )
                   : translate(
                       'auto.components.settings.GrokAccountsSection.d4e5f6a7b8',

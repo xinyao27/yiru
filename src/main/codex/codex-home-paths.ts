@@ -32,30 +32,30 @@ export function getSystemCodexHomePath(): string {
   return join(homedir(), '.codex')
 }
 
-export function getOrcaManagedCodexHomePath(): string {
-  const managedHomePath = join(getOrcaUserDataPath(), 'codex-runtime-home', 'home')
+export function getYiruManagedCodexHomePath(): string {
+  const managedHomePath = join(getYiruUserDataPath(), 'codex-runtime-home', 'home')
   mkdirSync(managedHomePath, { recursive: true })
   return managedHomePath
 }
 
-function getOrcaUserDataPath(): string {
-  if (process.env.ORCA_USER_DATA_PATH) {
-    return process.env.ORCA_USER_DATA_PATH
+function getYiruUserDataPath(): string {
+  if (process.env.YIRU_USER_DATA_PATH) {
+    return process.env.YIRU_USER_DATA_PATH
   }
   // Why: CLI hook commands import this module outside Electron. Mirror the CLI
   // runtime metadata path so offline hook status/on/off uses the same userData.
   if (process.platform === 'darwin') {
-    return join(homedir(), 'Library', 'Application Support', 'orca')
+    return join(homedir(), 'Library', 'Application Support', 'yiru')
   }
   if (process.platform === 'win32') {
-    return join(process.env.APPDATA ?? join(homedir(), 'AppData', 'Roaming'), 'orca')
+    return join(process.env.APPDATA ?? join(homedir(), 'AppData', 'Roaming'), 'yiru')
   }
-  return join(process.env.XDG_CONFIG_HOME || join(homedir(), '.config'), 'orca')
+  return join(process.env.XDG_CONFIG_HOME || join(homedir(), '.config'), 'yiru')
 }
 
 export function syncSystemCodexResourcesIntoManagedHome(): void {
   const systemHomePath = getSystemCodexHomePath()
-  const managedHomePath = getOrcaManagedCodexHomePath()
+  const managedHomePath = getYiruManagedCodexHomePath()
   for (const entryName of CODEX_SYSTEM_RESOURCE_ENTRIES) {
     linkSystemCodexResource(systemHomePath, managedHomePath, entryName)
   }
@@ -241,7 +241,7 @@ function normalizeWindowsLinkTarget(linkTarget: string): string {
 }
 
 function getResourceCopyMarkerPath(managedHomePath: string, entryName: string): string {
-  return join(managedHomePath, '.orca-resource-copies', `${entryName}.json`)
+  return join(managedHomePath, '.yiru-resource-copies', `${entryName}.json`)
 }
 
 function markCopiedResource(managedHomePath: string, entryName: string, sourcePath: string): void {

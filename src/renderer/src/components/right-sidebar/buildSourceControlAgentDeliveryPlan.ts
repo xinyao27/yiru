@@ -12,8 +12,7 @@ type BuildSourceControlAgentDeliveryPlanArgs = {
   detectedAgents: TuiAgent[]
   connectionUnavailable: boolean
   launchPlatform?: NodeJS.Platform
-  /** Why: keep the previewed command label in sync with the real remote launch,
-   * which omits the Linux-only `orca-ide` rename for SSH hosts. */
+  /** Why: keep the previewed command label in sync with the relay command. */
   isRemote?: boolean
 }
 

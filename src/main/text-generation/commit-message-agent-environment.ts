@@ -43,17 +43,17 @@ function prepareShellConfigDirEnv(agentId: string): { ok: true; env?: NodeJS.Pro
   if (!configVar) {
     return null
   }
-  // Why: each kind owns a distinct ORCA_*_SOURCE_* shadow so a headless commit
+  // Why: each kind owns a distinct YIRU_*_SOURCE_* shadow so a headless commit
   // run from inside a legacy OMP overlay restores the OMP source dir, never
   // the Pi one (and vice versa). PI_CODING_AGENT_DIR is the binary-facing var
   // both kinds consume — see src/main/pi/titlebar-extension-service.ts.
   const sourceVar =
     agentId === 'opencode'
-      ? 'ORCA_OPENCODE_SOURCE_CONFIG_DIR'
+      ? 'YIRU_OPENCODE_SOURCE_CONFIG_DIR'
       : agentId === 'pi'
-        ? 'ORCA_PI_SOURCE_AGENT_DIR'
+        ? 'YIRU_PI_SOURCE_AGENT_DIR'
         : agentId === 'omp'
-          ? 'ORCA_OMP_SOURCE_AGENT_DIR'
+          ? 'YIRU_OMP_SOURCE_AGENT_DIR'
           : undefined
 
   const value = readInheritedOrShellEnvVar(configVar, sourceVar)
@@ -61,9 +61,9 @@ function prepareShellConfigDirEnv(agentId: string): { ok: true; env?: NodeJS.Pro
     return { ok: true }
   }
 
-  // Why: GUI-launched Orca may not inherit shell startup exports, but these
-  // vars point the headless CLI at the user's auth/config root. Nested Orca
-  // launches inherit PTY overlays, so prefer ORCA_*_SOURCE_* when present.
+  // Why: GUI-launched Yiru may not inherit shell startup exports, but these
+  // vars point the headless CLI at the user's auth/config root. Nested Yiru
+  // launches inherit PTY overlays, so prefer YIRU_*_SOURCE_* when present.
   return { ok: true, env: { ...cloneProcessEnv(), [configVar]: value } }
 }
 

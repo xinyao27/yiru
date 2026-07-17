@@ -13,7 +13,7 @@ export type TextControlPastePayloadOwnership =
       exceededLimit: false
     }
   | {
-      action: 'claim-orca'
+      action: 'claim-yiru'
       byteLength: number
       exceededLimit: true
     }
@@ -97,7 +97,7 @@ export function classifyTextControlPastePayloadOwnership(
   }
 
   return {
-    action: 'claim-orca',
+    action: 'claim-yiru',
     byteLength: ownershipMeasurement.byteLength,
     exceededLimit: true
   }

@@ -8,11 +8,11 @@
 
 ## Outcome
 
-Spool is a Tailnet-only remote-worktree capability inside Orca Desktop. Each Desktop discovers other running Desktops, receives a server-produced projection of their Public worktrees, and opens those worktrees through a dedicated encrypted connection. Public access is read-only. An owner can grant one physical connection mutable access to one whole worktree, including semantic owner-side terminal and agent creation. The grant disappears on any connection loss and is never replayed.
+Spool is a Tailnet-only remote-worktree capability inside Yiru Desktop. Each Desktop discovers other running Desktops, receives a server-produced projection of their Public worktrees, and opens those worktrees through a dedicated encrypted connection. Public access is read-only. An owner can grant one physical connection mutable access to one whole worktree, including semantic owner-side terminal and agent creation. The grant disappears on any connection loss and is never replayed.
 
 The architecture has six security-critical properties:
 
-1. Spool has one dedicated fixed-port ingress for both discovery and encrypted WebSocket traffic. It reuses Orca's crypto, framing, terminal, file, Git, and execution Modules without inheriting the existing mobile/runtime admission surface.
+1. Spool has one dedicated fixed-port ingress for both discovery and encrypted WebSocket traffic. It reuses Yiru's crypto, framing, terminal, file, Git, and execution Modules without inheriting the existing mobile/runtime admission surface.
 2. Tailnet source identity comes from Tailscale, while one-time tickets bind that identity to one E2EE client key and one connection attempt.
 3. The host serializes a Public-only catalog. A requester never receives the owner's full repos, account state, AI Vault, paths, host targets, or credentials and then filters them locally.
 4. Spool has a separate, default-deny RPC registry. Every exposed operation owns its external schema, resource binding, access rule, execution Adapter, result projection, and error projection.
@@ -21,9 +21,9 @@ The architecture has six security-critical properties:
 
 ## Scope decisions
 
-This design covers Orca Git worktrees and the synthetic workspaces of a `Repo.kind = 'folder'` project on local, WSL, SSH, and paired runtime execution hosts. A folder project's root workspace uses `repoId::path`; additional workspace instances use `repoId::path::workspace:<uuid>`. Independent ProjectGroup-backed `FolderWorkspace` entries keyed as `folder:<uuid>` remain deferred; they do not yet participate in Spool visibility or publication.
+This design covers Yiru Git worktrees and the synthetic workspaces of a `Repo.kind = 'folder'` project on local, WSL, SSH, and paired runtime execution hosts. A folder project's root workspace uses `repoId::path`; additional workspace instances use `repoId::path::workspace:<uuid>`. Independent ProjectGroup-backed `FolderWorkspace` entries keyed as `folder:<uuid>` remain deferred; they do not yet participate in Spool visibility or publication.
 
-A folder-project workspace gets a durable incarnation from a random `.orca-spool-incarnation-v1` marker created at its canonical root. The marker is owner-only Spool metadata: Files hides it and rejects direct or symlinked access. The actual host sandwiches marker access between stable directory `dev`/`ino` checks, then derives the published UUID from the marker, actual-host scope, and directory identity. Renaming or moving the same directory preserves the proof, while replacing the directory or copying its marker does not. A host that cannot provide stable directory identity or durable marker storage cannot publish that folder workspace.
+A folder-project workspace gets a durable incarnation from a random `.yiru-spool-incarnation-v1` marker created at its canonical root. The marker is owner-only Spool metadata: Files hides it and rejects direct or symlinked access. The actual host sandwiches marker access between stable directory `dev`/`ino` checks, then derives the published UUID from the marker, actual-host scope, and directory identity. Renaming or moving the same directory preserves the proof, while replacing the directory or copying its marker does not. A host that cannot provide stable directory identity or durable marker storage cannot publish that folder workspace.
 
 The first version does not expose browser profiles, cookies, OS dialogs, the owner's clipboard, settings, account selection, hosted-review mutations, issue trackers, automations, emulator/computer control, pairing administration, or SSH trust and credential prompts. These are not reliably worktree-scoped and are not covered by the approval copy.
 
@@ -35,8 +35,8 @@ Once a control grant exists, a terminal is still a normal shell and can exercise
 
 | Term                  | Meaning                                                                                                                                                          |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Owner Desktop**     | The running Orca Desktop process that publishes worktrees and executes remote operations.                                                                        |
-| **Requester Desktop** | The running Orca Desktop process browsing or requesting control of another Desktop.                                                                              |
+| **Owner Desktop**     | The running Yiru Desktop process that publishes worktrees and executes remote operations.                                                                        |
+| **Requester Desktop** | The running Yiru Desktop process browsing or requesting control of another Desktop.                                                                              |
 | **Tailnet principal** | Tailscale-authenticated source node identity obtained from the inbound network flow. It identifies a machine/node, not a human account inside Spool.             |
 | **Connection**        | One physical E2EE WebSocket. It is the smallest grant lifetime and has one server-generated `connectionId`.                                                      |
 | **Connection epoch**  | Requester-side generation that changes immediately whenever the physical socket changes. UI control state is keyed by it.                                        |
@@ -67,14 +67,14 @@ SpoolDesktopCatalog                              SpoolRpcGateway
           │                                                   │
           │                                      local / WSL / SSH / runtime
           ▼                                                   ▼
-renderer slice/UI                                      existing Orca execution
+renderer slice/UI                                      existing Yiru execution
 ```
 
-The Tailnet is the discovery population and network path. It is not a Spool account system. Orca still performs application authentication, projection, authorization, and revocation.
+The Tailnet is the discovery population and network path. It is not a Spool account system. Yiru still performs application authentication, projection, authorization, and revocation.
 
 ## Module map
 
-The design favors a small number of deep Modules. Their Interfaces hide platform differences, identity mapping, lifecycle cleanup, and existing Orca execution details.
+The design favors a small number of deep Modules. Their Interfaces hide platform differences, identity mapping, lifecycle cleanup, and existing Yiru execution details.
 
 ### TailnetControl
 
@@ -111,30 +111,30 @@ interface TailnetPeerDirectory {
 }
 ```
 
-It reads only peers enumerated by `TailnetControl`; it never scans `100.64.0.0/10`. It probes all advertised Tailnet IPs with bounded parallelism and deduplicates them by verified node ID. A successful probe is authoritative that Orca Desktop is running. A peer is removed after two missed reconciliation passes to avoid one transient timeout flickering the sidebar.
+It reads only peers enumerated by `TailnetControl`; it never scans `100.64.0.0/10`. It probes all advertised Tailnet IPs with bounded parallelism and deduplicates them by verified node ID. A successful probe is authoritative that Yiru Desktop is running. A peer is removed after two missed reconciliation passes to avoid one transient timeout flickering the sidebar.
 
 `Online` from `tailscale status` is advisory. The Spool probe and encrypted connection decide usability.
 
 ### SpoolIngress
 
-`SpoolIngress` is a dedicated HTTP/WebSocket listener. V1 fixes `SPOOL_INGRESS_PORT = 52777`, inside IANA's dynamic/private range, and binds only the current local Tailscale addresses. It runs only in Orca Desktop mode, not `orca serve`.
+`SpoolIngress` is a dedicated HTTP/WebSocket listener. V1 fixes `SPOOL_INGRESS_PORT = 52777`, inside IANA's dynamic/private range, and binds only the current local Tailscale addresses. It runs only in Yiru Desktop mode, not `yiru serve`.
 
 The same listener serves:
 
 - `POST /spool/v1/probe` for source verification and one-time ticket issuance.
 - `GET /spool/v1/connect` with WebSocket upgrade for the one physical encrypted connection.
 
-There is no dynamic second RPC port. One fixed port means one Tailnet ACL/firewall decision, and the listener never shares admission logic with paired mobile or runtime clients. If the port cannot bind, Spool reports a local diagnostic and remains disabled; normal Orca runtime/mobile RPC continues unaffected. No random fallback is advertised because peers would have no trustworthy way to find it.
+There is no dynamic second RPC port. One fixed port means one Tailnet ACL/firewall decision, and the listener never shares admission logic with paired mobile or runtime clients. If the port cannot bind, Spool reports a local diagnostic and remains disabled; normal Yiru runtime/mobile RPC continues unaffected. No random fallback is advertised because peers would have no trustworthy way to find it.
 
-The [IANA registry](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml) defines `49152–65535` as dynamic/private rather than assigned service ports. `52777` avoids Orca's existing `6768`/`6769` runtime ports and is a wire-protocol constant, not a user preference. Because an ephemeral local connection can still occupy it, port-collision handling remains mandatory.
+The [IANA registry](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml) defines `49152–65535` as dynamic/private rather than assigned service ports. `52777` avoids Yiru's existing `6768`/`6769` runtime ports and is a wire-protocol constant, not a user preference. Because an ephemeral local connection can still occupy it, port-collision handling remains mandatory.
 
 `SpoolIngress` owns one listener per current Tailnet IPv4/IPv6 address on the same port. It reconciles additions and removals when the Tailnet snapshot changes, using IPv6-only socket options where needed so dual-stack binds do not collide. Existing sockets on a removed address close and therefore revoke normally. It never falls back to a wildcard bind.
 
-On Windows, a Spool-specific firewall rule is created, updated, and removed through the same platform-aware pattern as Orca's current mobile rule, but scoped to the Spool executable and fixed port. Failure surfaces an actionable diagnostic rather than silently claiming the Desktop is discoverable.
+On Windows, a Spool-specific firewall rule is created, updated, and removed through the same platform-aware pattern as Yiru's current mobile rule, but scoped to the Spool executable and fixed port. Failure surfaces an actionable diagnostic rather than silently claiming the Desktop is discoverable.
 
 The listener enforces bounded request bodies, a pre-auth timeout, per-node connection limits, total connection limits, probe rate limits, and a protocol-version negotiation header. It rejects browser Origin/CORS requests and forwarded-address headers; only the socket's normalized remote address participates in identity.
 
-The probe descriptor is limited to protocol versions, owner runtime ID, Spool public key/fingerprint, Orca version, and OS family. User and device display names come from the requester's verified Tailnet snapshot, not a peer-supplied label. Catalog, quota, paths, account state, and host inventory are available only after encrypted authentication and projection.
+The probe descriptor is limited to protocol versions, owner runtime ID, Spool public key/fingerprint, Yiru version, and OS family. User and device display names come from the requester's verified Tailnet snapshot, not a peer-supplied label. Catalog, quota, paths, account state, and host inventory are available only after encrypted authentication and projection.
 
 ### SpoolTicketAuthority
 
@@ -170,7 +170,7 @@ interface SpoolPeerConnection {
 }
 ```
 
-It reuses extracted Orca E2EE framing, bounded backpressure, and heartbeat, but it does not inherit `RemoteRuntimeSharedControlConnection`: that class has different reconnect/replay semantics and currently permits separate stream sockets. Spool V1 keeps terminal output and control on the checked JSON RPC registry; inbound binary frames fail the physical connection closed instead of opening a second authorization path.
+It reuses extracted Yiru E2EE framing, bounded backpressure, and heartbeat, but it does not inherit `RemoteRuntimeSharedControlConnection`: that class has different reconnect/replay semantics and currently permits separate stream sockets. Spool V1 keeps terminal output and control on the checked JSON RPC registry; inbound binary frames fail the physical connection closed instead of opening a second authorization path.
 
 On socket loss, `SpoolPeerConnection` synchronously:
 
@@ -392,7 +392,7 @@ shareEpoch
 approvedAt
 ```
 
-The exact socket and verified Tailnet node are authority. Requester-supplied Desktop labels or runtime descriptors are never authority. Approval copy uses the verified Tailnet user/node display; Orca version/platform labels are descriptive.
+The exact socket and verified Tailnet node are authority. Requester-supplied Desktop labels or runtime descriptors are never authority. Approval copy uses the verified Tailnet user/node display; Yiru version/platform labels are descriptive.
 
 Requests are deduplicated per connection and worktree. Approval rechecks that the same connection is alive and the same share epoch is Public. A disconnect, Private transition, incarnation rotation, or delete removes pending requests so a late `Allow` cannot create a grant.
 
@@ -415,9 +415,9 @@ type AuthenticatedRpcPrincipal =
 
 Legacy `{ type: 'e2ee_auth', deviceToken }` remains compatible on the existing runtime listener. Spool's dedicated listener accepts only `{ type: 'e2ee_auth', spoolTicket }`. A channel cannot switch principal after authentication, and every JSON dispatch receives the same immutable principal object. Binary data remains available to existing paired-device protocols but is rejected on the dedicated Spool gateway in V1.
 
-Spool uses a dedicated persisted E2EE keypair in canonical user data. The probe returns its public key and fingerprint. This fingerprint distinguishes Orca installations on a Tailnet node but is not a replacement for Tailscale source identity; the first probe is trust-on-the-Tailnet, not a public-key infrastructure.
+Spool uses a dedicated persisted E2EE keypair in canonical user data. The probe returns its public key and fingerprint. This fingerprint distinguishes Yiru installations on a Tailnet node but is not a replacement for Tailscale source identity; the first probe is trust-on-the-Tailnet, not a public-key infrastructure.
 
-Requester-side list identity is `(verified Tailnet node ID, owner Spool key fingerprint, owner runtime ID)`. The node identifies the Tailnet machine, the persistent Spool key distinguishes the Orca installation, and the runtime ID detects application restart. The owner still authorizes the requester by verified node plus exact socket; the requester's ephemeral channel key only prevents ticket transfer and is not presented as a human/device identity.
+Requester-side list identity is `(verified Tailnet node ID, owner Spool key fingerprint, owner runtime ID)`. The node identifies the Tailnet machine, the persistent Spool key distinguishes the Yiru installation, and the runtime ID detects application restart. The owner still authorizes the requester by verified node plus exact socket; the requester's ephemeral channel key only prevents ticket transfer and is not presented as a human/device identity.
 
 ## Connection handshake
 
@@ -433,7 +433,7 @@ One requester-to-owner connection is established as follows:
 8. The owner consumes the ticket against the actual socket source and hello public key, creates a physical `connectionId`, and binds one immutable Spool principal.
 9. Only then may the requester subscribe to the Public catalog.
 
-Tailscale encrypts the network path; Orca E2EE protects the application frames and keeps Spool aligned with existing Orca remote protocols. A process that can fully compromise either endpoint machine remains outside the threat boundary.
+Tailscale encrypts the network path; Yiru E2EE protects the application frames and keeps Spool aligned with existing Yiru remote protocols. A process that can fully compromise either endpoint machine remains outside the threat boundary.
 
 ## Dedicated Spool RPC registry
 
@@ -543,7 +543,7 @@ interface ExecutionAdmissionGuard {
 }
 ```
 
-The existing file, Git, session, and PTY execution Modules gain a narrow optional guard and call it after target/path resolution but immediately before their first real write, rename, delete, Git/process spawn, PTY input, resize, or session lifecycle mutation. Concretely, this introduces Seams in `orca-runtime-files.ts`, `orca-runtime-git.ts`, agent/session spawn paths, and terminal input/viewport handling; a check only in `SpoolRpcGateway` is insufficient.
+The existing file, Git, session, and PTY execution Modules gain a narrow optional guard and call it after target/path resolution but immediately before their first real write, rename, delete, Git/process spawn, PTY input, resize, or session lifecycle mutation. Concretely, this introduces Seams in `yiru-runtime-files.ts`, `yiru-runtime-git.ts`, agent/session spawn paths, and terminal input/viewport handling; a check only in `SpoolRpcGateway` is insufficient.
 
 For local, WSL, and direct SSH-provider operations, that call is the commitment boundary. For a paired runtime, successful transmission of the authenticated downstream mutation is the V1 commitment boundary: after the owner sends it, Spool treats the mutation as started even if the downstream process has not spawned yet. A stronger downstream two-phase admission protocol is not assumed. Revocation before transmission blocks; revocation after transmission does not promise cancellation or rollback.
 
@@ -584,7 +584,7 @@ This containment applies to structured GUI operations only. A granted shell may 
 
 Sibling worktrees often share one Git common directory, refs, and object database even when their filesystem roots do not overlap. Public Git input therefore cannot select an arbitrary ref, branch, revision range, or object ID. History starts only at the Public worktree's current `HEAD`; the projection issues opaque commit references for commits it has already returned from that ancestry, and detail/diff calls accept only those references. Working-copy diffs use fixed worktree/index/HEAD bases. Current-upstream projection is limited to its name and ahead/behind counts, not upstream-only content. Local branch enumeration, ref search, and sibling worktree state are denied.
 
-The Public read profile is a new mode in the existing Git execution Module, not the behavior of today's `git.status`/`git.diff`/`git.history` handlers. Implementation extends `orca-runtime-git.ts` and the lower Git command Modules so the profile applies on the actual host. Every option must satisfy `docs/reference/git-compatibility.md`; preferred newer behavior needs the existing host-scoped capability/fallback pattern.
+The Public read profile is a new mode in the existing Git execution Module, not the behavior of today's `git.status`/`git.diff`/`git.history` handlers. Implementation extends `yiru-runtime-git.ts` and the lower Git command Modules so the profile applies on the actual host. Every option must satisfy `docs/reference/git-compatibility.md`; preferred newer behavior needs the existing host-scoped capability/fallback pattern.
 
 A granted terminal can run fetch, checkout, merge, rebase, and ref updates that affect repository state shared by Private sibling worktrees. That is accepted under the powerful control grant; V1 does not expose those actions as structured Git RPCs, and the GUI remains scoped to the selected worktree without claiming repository isolation.
 
@@ -601,7 +601,7 @@ type SpoolLaunchCapabilities = {
 }
 ```
 
-`SpoolAgentLaunchId` is a closed, protocol-versioned semantic enum derived from Orca's supported TUI agents, so the result is bounded without silently truncating a supported option. The projection contains no executable, command, path, arguments, environment, settings, account identity, authentication state, or raw detection error.
+`SpoolAgentLaunchId` is a closed, protocol-versioned semantic enum derived from Yiru's supported TUI agents, so the result is bounded without silently truncating a supported option. The projection contains no executable, command, path, arguments, environment, settings, account identity, authentication state, or raw detection error.
 
 The owner builds this projection with its bounded, cached actual-host detection path and current enabled/default-agent settings. A requester cannot install or enable an agent, refresh credentials, select an account, or open an owner-side prompt. A stale option is revalidated at the create admission guard.
 
@@ -632,7 +632,7 @@ The ledger has a fixed per-connection/worktree capacity. Once full, a new unique
 
 `terminal.create` is a mutation. If the connection is lost after its spawn boundary but before a conclusive response, Spool returns `outcome_unknown` locally and never automatically retries. A new connection may inspect the fresh Public catalog, but it has neither the old alias nor control grant and must request approval again.
 
-The created process/session belongs to the owner Public worktree and remains running after revoke, connection loss, or requester restart. The owner can manage it through normal local controls; owner restart follows Orca's normal process lifetime. A fresh connection stays read-only until approval. Remote close, rename, pin, drag, and move remain absent from the registry.
+The created process/session belongs to the owner Public worktree and remains running after revoke, connection loss, or requester restart. The owner can manage it through normal local controls; owner restart follows Yiru's normal process lifetime. A fresh connection stays read-only until approval. Remote close, rename, pin, drag, and move remain absent from the registry.
 
 Creation is supported through local, WSL, SSH, and paired runtime Adapters. It uses only an already-authorized route and runs without changing owner-side focus, active workspace, or selected tab.
 
@@ -825,7 +825,7 @@ Telemetry, if added, records aggregate feature events only and never forms a cen
 - Existing sessions gain worktree-instance provenance only when safely observed or created. Unprovable historical records are not shared.
 - Remotely initiated terminals and agents are ordinary owner-owned sessions. They need no ownership migration when a requester disconnects.
 - Git commands retain Git 2.25 as the baseline and use host-scoped capability caches for any newer preferred behavior.
-- Paths use Node/Electron host path functions or execution-host Adapters; keyboard labels and shortcuts continue to use platform-aware Orca conventions.
+- Paths use Node/Electron host path functions or execution-host Adapters; keyboard labels and shortcuts continue to use platform-aware Yiru conventions.
 - The requester-to-owner Spool path always terminates at the Owner Desktop even when the selected worktree executes over SSH, WSL, or a paired runtime.
 
 ## Verification strategy
@@ -862,7 +862,7 @@ Security race tests use controllable barriers between bind, authorize, execute, 
 - Revoke between authorization and commit/spawn prevents the side effect; revoke after start does not claim rollback.
 - Owner-side terminal and enabled-agent creation runs on local, WSL, SSH, and paired runtime targets without opening a route, prompting for trust/credentials, or stealing owner focus.
 - A created attachment is usable before pagination completes; catalog convergence exposes one stable session to the creator and other Public viewers.
-- Revoke, connection loss, and requester restart leave an already-created owner process running while removing requester mutation authority; owner restart follows normal Orca process lifetime.
+- Revoke, connection loss, and requester restart leave an already-created owner process running while removing requester mutation authority; owner restart follows normal Yiru process lifetime.
 - Revoke/Private invalidation terminates saturated connections so stale queued replies cannot survive the publication epoch.
 - Public file and Git reads never open owner UI or trigger credential/trust/provider prompts.
 - The same authorization and symlink-retarget/visibility TOCTOU suite runs against local, WSL, SSH relay, and paired runtime execution.
@@ -1014,8 +1014,8 @@ The implementation also changes these existing Seams deliberately:
 - `src/main/index.ts` for composition, cached quota injection, lifecycle, and Windows firewall setup.
 - `src/preload/index.ts`, `src/preload/api-types.ts`, and a concrete Spool subscription contract for renderer IPC.
 - `src/main/runtime/rpc/core.ts`, `e2ee-channel.ts`, and `runtime-rpc.ts` for immutable principals while preserving paired-device wire behavior.
-- `src/main/runtime/orca-runtime.ts` terminal input/viewport seams for final side-effect admission.
-- `src/main/runtime/orca-runtime-files.ts`, `orca-runtime-git.ts`, and lower host providers for verified file access, the audited Git read profile, and final side-effect guards.
+- `src/main/runtime/yiru-runtime.ts` terminal input/viewport seams for final side-effect admission.
+- `src/main/runtime/yiru-runtime-files.ts`, `yiru-runtime-git.ts`, and lower host providers for verified file access, the audited Git read profile, and final side-effect guards.
 - Paired-runtime internal RPC for incarnation and verified-file host operations.
 
 Existing runtime/file/Git/PTY Modules do not import Spool catalog or renderer code; the dependency points from the Spool execution gateway toward those Modules.
@@ -1048,7 +1048,7 @@ Tailnet peer snapshot
   → verified running Desktop
   → one-use E2EE connection
   → owner-produced Public projection
-  → read-only Orca workspace
+  → read-only Yiru workspace
   → explicit whole-worktree request
   → owner approval for one physical connection
   → semantic terminal/agent create or other owner-side execution

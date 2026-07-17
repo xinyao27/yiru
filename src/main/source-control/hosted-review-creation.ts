@@ -266,7 +266,7 @@ function reviewCopy(provider: HostedReviewProvider): {
       shortLabel: 'PR',
       reviewLabel: 'pull request',
       providerName: 'Azure DevOps',
-      authInstruction: 'Set ORCA_AZURE_DEVOPS_TOKEN'
+      authInstruction: 'Set YIRU_AZURE_DEVOPS_TOKEN'
     }
   }
   if (provider === 'gitea') {
@@ -274,7 +274,7 @@ function reviewCopy(provider: HostedReviewProvider): {
       shortLabel: 'PR',
       reviewLabel: 'pull request',
       providerName: 'Gitea',
-      authInstruction: 'Set ORCA_GITEA_TOKEN'
+      authInstruction: 'Set YIRU_GITEA_TOKEN'
     }
   }
   return {

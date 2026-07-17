@@ -289,7 +289,7 @@ function throwWindowsNodeNotFound(options?: RemoteNodeResolutionOptions): never 
   throwIfAborted(options)
   throw new Error(
     [
-      'Node.js not found on remote host. Orca relay requires Node.js 18+ and npm.',
+      'Node.js not found on remote host. Yiru relay requires Node.js 18+ and npm.',
       '',
       'Install Node.js 18+ on the remote host, then reconnect:',
       '  winget install OpenJS.NodeJS.LTS',

@@ -196,7 +196,7 @@ async function insertMonacoTextInChunks(
       { lineNumber: selection.startLineNumber, column: selection.startColumn },
       chunk
     )
-    const accepted = monacoEditor.executeEdits('orca-large-paste', [
+    const accepted = monacoEditor.executeEdits('yiru-large-paste', [
       { range: selection, text: chunk, forceMoveMarkers: true }
     ])
     if (!accepted) {

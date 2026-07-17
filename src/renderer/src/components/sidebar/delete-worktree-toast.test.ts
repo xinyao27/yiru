@@ -34,7 +34,7 @@ describe('getDeleteWorktreeToastCopy', () => {
       )
     ).toEqual({
       title: 'Failed to delete workspace feature/foo',
-      description: 'Git already removed this workspace. Use Force Delete to clear it from Orca.',
+      description: 'Git already removed this workspace. Use Force Delete to clear it from Yiru.',
       isDestructive: false
     })
   })

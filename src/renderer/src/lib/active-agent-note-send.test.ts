@@ -193,7 +193,7 @@ describe('active agent note send', () => {
     })
   })
 
-  it('offers the active terminal send target for an Orca-launched agent before hooks report', () => {
+  it('offers the active terminal send target for a Yiru-launched agent before hooks report', () => {
     testState.appState.tabsByWorktree = {
       'wt-1': [{ id: 'tab-1', launchAgent: 'codex' }]
     }
@@ -357,7 +357,7 @@ describe('active agent note send', () => {
         terminal: 'term-1',
         text: `${PASTE_BEGIN}File: src/app.ts${PASTE_END}`,
         requireAgentStatus: 'sendable',
-        client: { id: 'orca-desktop', type: 'desktop' }
+        client: { id: 'yiru-desktop', type: 'desktop' }
       },
       { timeoutMs: 15000 }
     )
@@ -368,7 +368,7 @@ describe('active agent note send', () => {
         terminal: 'term-1',
         enter: true,
         requireAgentStatus: 'sendable',
-        client: { id: 'orca-desktop', type: 'desktop' }
+        client: { id: 'yiru-desktop', type: 'desktop' }
       },
       { timeoutMs: 15000 }
     )
@@ -824,7 +824,7 @@ describe('active agent note send', () => {
         terminal: 'term-2',
         text: `${PASTE_BEGIN}notes${PASTE_END}`,
         requireAgentStatus: 'sendable',
-        client: { id: 'orca-desktop', type: 'desktop' }
+        client: { id: 'yiru-desktop', type: 'desktop' }
       },
       { timeoutMs: 15000 }
     )
@@ -835,7 +835,7 @@ describe('active agent note send', () => {
         terminal: 'term-2',
         enter: true,
         requireAgentStatus: 'sendable',
-        client: { id: 'orca-desktop', type: 'desktop' }
+        client: { id: 'yiru-desktop', type: 'desktop' }
       },
       { timeoutMs: 15000 }
     )
@@ -1317,10 +1317,10 @@ describe('active agent note send', () => {
     expect(
       activeAgentNotesSendFailureMessage('partial-submit-failed', { explicitTarget: true })
     ).toBe(
-      'The notes may already be pasted in the selected terminal, but Orca could not submit them.'
+      'The notes may already be pasted in the selected terminal, but Yiru could not submit them.'
     )
     expect(activeAgentNotesSendFailureMessage('partial-submit-failed')).toBe(
-      'The notes may already be pasted in the active terminal, but Orca could not submit them.'
+      'The notes may already be pasted in the active terminal, but Yiru could not submit them.'
     )
   })
 

@@ -1,22 +1,22 @@
 # Feature Education State
 
-Orca uses local persisted UI state to decide which education surfaces should appear for a user. Keep these concepts separate; they answer different questions and should not be collapsed into one flag.
+Yiru uses local persisted UI state to decide which education surfaces should appear for a user. Keep these concepts separate; they answer different questions and should not be collapsed into one flag.
 
 For the feature-interaction catalog, see [`feature-discovery-interaction-tracking.md`](./feature-discovery-interaction-tracking.md). For retention analysis and dashboard construction, see [`feature-education-retention-analytics.md`](./feature-education-retention-analytics.md).
 
 ## State Types
 
-`featureTipsSeenIds` answers: "Has Orca already surfaced this tip?"
+`featureTipsSeenIds` answers: "Has Yiru already surfaced this tip?"
 
 Set this when a restart tip is opened, dismissed, or acted on. It prevents the same tip from reappearing after restart, crash, or dismissal. It does not mean the user used the feature.
 
-`contextualToursSeenIds` answers: "Has Orca already surfaced this contextual tour?"
+`contextualToursSeenIds` answers: "Has Yiru already surfaced this contextual tour?"
 
 Set this after a tour has rendered a measured target, or when the user skips/completes the tour. It prevents the same tour from showing again. It does not mean the user used the feature.
 
 `contextualToursAutoEligible` answers: "May this profile receive automatic contextual tours from this rollout?"
 
-Missing means Orca has not classified the profile yet. On first hydrated launch after this change, the renderer sets it once:
+Missing means Yiru has not classified the profile yet. On first hydrated launch after this change, the renderer sets it once:
 
 - `true` when first-run onboarding is still open, which covers new users from this rollout forward
 - `false` when onboarding is already closed, which covers existing users

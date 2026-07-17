@@ -32,8 +32,8 @@ describe('Spool catalog Project identity', () => {
     const resolved = sanitizeCatalogWorktreeDescription(instance, {
       kind: 'git',
       projectKey: 'project:local-project-id',
-      projectIdentityKey: 'github:paperboytm/orca',
-      projectName: 'orca',
+      projectIdentityKey: 'github:paperboytm/yiru',
+      projectName: 'yiru',
       worktreeName: 'worktree-one',
       branch: 'feature/one'
     })
@@ -42,7 +42,7 @@ describe('Spool catalog Project identity', () => {
     const references = new SpoolCatalogReferenceTable()
     references.reconcile(buildCatalogReferenceBindings([resolved!], 1, 0))
     const projects = projectCatalogEntries([resolved!], references, 1, 0)
-    expect(projects[0]?.projectRef).toBe('github:paperboytm/orca')
+    expect(projects[0]?.projectRef).toBe('github:paperboytm/yiru')
 
     expect(
       isSpoolDesktopCatalog(
@@ -66,7 +66,7 @@ describe('Spool catalog Project identity', () => {
           ownerRuntimeId: 'owner-runtime',
           catalogRevision: 1,
           quota: [],
-          projects: [{ projectRef: 'project-ref', name: 'orca', worktrees: [] }]
+          projects: [{ projectRef: 'project-ref', name: 'yiru', worktrees: [] }]
         },
         'owner-runtime'
       )
@@ -79,7 +79,7 @@ describe('Spool catalog Project identity', () => {
         kind: 'git',
         projectKey: 'project:local-project-id',
         projectIdentityKey: 'project:local-project-id',
-        projectName: 'orca',
+        projectName: 'yiru',
         worktreeName: 'worktree-one',
         branch: null
       })

@@ -1,9 +1,9 @@
-import type { OrcaRuntimeService } from '../../orca-runtime'
+import type { YiruRuntimeService } from '../../yiru-runtime'
 import type { RpcContext } from '../core'
 
 type CloseChannel = (channelRef: string) => void
 
-const lifetimesByRuntime = new WeakMap<OrcaRuntimeService, SpoolHostChannelLifetimes>()
+const lifetimesByRuntime = new WeakMap<YiruRuntimeService, SpoolHostChannelLifetimes>()
 
 /** Binds owner-side logical channels to the physical paired-runtime socket that introduced them. */
 export class SpoolHostChannelLifetimes {
@@ -59,7 +59,7 @@ export class SpoolHostChannelLifetimes {
 }
 
 export function getSpoolHostChannelLifetimes(
-  runtime: OrcaRuntimeService
+  runtime: YiruRuntimeService
 ): SpoolHostChannelLifetimes {
   const existing = lifetimesByRuntime.get(runtime)
   if (existing) {

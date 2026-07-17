@@ -57,7 +57,7 @@ function enabledOpenCodeScanState(): OpenCodeUsageScanState {
 describe('usage overview model', () => {
   it('combines provider totals without double-counting cached input', () => {
     const claudeSummary: ClaudeUsageSummary = {
-      scope: 'orca',
+      scope: 'yiru',
       range: '30d',
       sessions: 2,
       turns: 4,
@@ -69,11 +69,11 @@ describe('usage overview model', () => {
       cacheReuseRate: 0.8,
       estimatedCostUsd: 0.04,
       topModel: 'claude-sonnet-4-5',
-      topProject: 'orca-main',
+      topProject: 'yiru-main',
       hasAnyClaudeData: true
     }
     const codexSummary: CodexUsageSummary = {
-      scope: 'orca',
+      scope: 'yiru',
       range: '30d',
       sessions: 1,
       events: 3,
@@ -84,11 +84,11 @@ describe('usage overview model', () => {
       totalTokens: 3_200,
       estimatedCostUsd: 0.02,
       topModel: 'gpt-5.4',
-      topProject: 'orca-secondary',
+      topProject: 'yiru-secondary',
       hasAnyCodexData: true
     }
     const openCodeSummary: OpenCodeUsageSummary = {
-      scope: 'orca',
+      scope: 'yiru',
       range: '30d',
       sessions: 1,
       events: 2,
@@ -99,7 +99,7 @@ describe('usage overview model', () => {
       totalTokens: 1_600,
       estimatedCostUsd: 0.03,
       topModel: 'anthropic/claude-sonnet-4-5',
-      topProject: 'orca-third',
+      topProject: 'yiru-third',
       hasAnyOpenCodeData: true
     }
     const claudeDaily: ClaudeUsageDailyPoint[] = [

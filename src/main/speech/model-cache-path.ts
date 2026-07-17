@@ -55,7 +55,9 @@ export function getSpeechModelCacheDirCandidates(
     .digest('hex')
     .slice(0, WINDOWS_SAFE_CACHE_HASH_LENGTH)
   const candidates = getWindowsAsciiSharedDataRoots()
-    .map((root) => join(root, 'Orca', 'speech-models', requestedModelsDirHash))
+    // Why: speech models are large; retain the legacy cache root so upgrading
+    // to Yiru does not download the same model files again.
+    .map((root) => join(root, 'Yiru', 'speech-models', requestedModelsDirHash))
     .filter((modelsDir) => !hasNonAsciiCharacters(modelsDir))
     .map((modelsDir) => ({ modelsDir, migrationSourceDir: requestedModelsDir }))
 

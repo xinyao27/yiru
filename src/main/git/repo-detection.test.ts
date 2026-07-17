@@ -21,7 +21,7 @@ describe('isGitRepo', () => {
   let tmpDir: string
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(path.join(tmpdir(), 'orca-repo-detect-'))
+    tmpDir = mkdtempSync(path.join(tmpdir(), 'yiru-repo-detect-'))
   })
 
   afterEach(() => {
@@ -141,9 +141,9 @@ describe('isGitRepo', () => {
     git(realRepo, ['init', '--quiet'])
     git(realRepo, [
       '-c',
-      'user.name=Orca Test',
+      'user.name=Yiru Test',
       '-c',
-      'user.email=orca@example.com',
+      'user.email=yiru@example.com',
       'commit',
       '--allow-empty',
       '--message',
@@ -190,7 +190,7 @@ describe('isGitRepo', () => {
   it('rejects a .git file that points at a missing gitdir when git cannot be run', () => {
     const fakeRepo = path.join(tmpDir, 'missing-gitdir')
     mkdirSync(fakeRepo)
-    writeFileSync(path.join(fakeRepo, '.git'), 'gitdir: /missing/orca/gitdir')
+    writeFileSync(path.join(fakeRepo, '.git'), 'gitdir: /missing/yiru/gitdir')
 
     withGitUnavailable(() => {
       expect(isGitRepo(fakeRepo)).toBe(false)

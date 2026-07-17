@@ -60,12 +60,12 @@ vi.mock('../../main/agent-hooks/managed-agent-hook-controls', () => ({
 import { main } from '../index'
 
 function readDataFile(userDataPath: string): PersistedState {
-  return JSON.parse(readFileSync(join(userDataPath, 'orca-data.json'), 'utf-8')) as PersistedState
+  return JSON.parse(readFileSync(join(userDataPath, 'yiru-data.json'), 'utf-8')) as PersistedState
 }
 
 function writeDataFile(userDataPath: string, state: PersistedState): void {
   mkdirSync(userDataPath, { recursive: true })
-  writeFileSync(join(userDataPath, 'orca-data.json'), JSON.stringify(state, null, 2), 'utf-8')
+  writeFileSync(join(userDataPath, 'yiru-data.json'), JSON.stringify(state, null, 2), 'utf-8')
 }
 
 async function runAgentHooksOff(userDataPath: string): Promise<void> {
@@ -77,7 +77,7 @@ describe('agent hooks CLI handler', () => {
   let userDataPath: string
 
   beforeEach(() => {
-    userDataPath = mkdtempSync(join(tmpdir(), 'orca-agent-hooks-cli-'))
+    userDataPath = mkdtempSync(join(tmpdir(), 'yiru-agent-hooks-cli-'))
     applyAgentStatusHooksEnabledMock.mockReturnValue([])
     callMock.mockReset()
     getCliStatusMock.mockClear()

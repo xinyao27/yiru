@@ -61,7 +61,7 @@ function createTarget(overrides?: Partial<SshTarget>): SshTarget {
   }
 }
 
-function expectNoOrcaControlMasterArgs(args: string[]): void {
+function expectNoYiruControlMasterArgs(args: string[]): void {
   expect(args).not.toContain('ControlMaster=auto')
   expect(args.some((arg) => arg.startsWith('ControlPath='))).toBe(false)
   expect(args).not.toContain('ControlPersist=300')
@@ -135,7 +135,7 @@ describe('system SSH forward process', () => {
     expect(args[exitOnForwardFailureIdx - 1]).toBe('-o')
     expect(exitOnForwardFailureIdx).toBeLessThan(terminatorIdx)
     expect(standaloneControlIdx).toBe(-1)
-    expectNoOrcaControlMasterArgs(args)
+    expectNoYiruControlMasterArgs(args)
     expect(args).toContain('127.0.0.1:5173:127.0.0.1:3000')
     expect(args[terminatorIdx + 1]).toBe('deploy@fdpass-host')
     expect(spawnMock).toHaveBeenCalledWith(
@@ -145,7 +145,7 @@ describe('system SSH forward process', () => {
     )
   })
 
-  it('suppresses Orca mux flags for port forwards without disabling ssh_config muxing', () => {
+  it('suppresses Yiru mux flags for port forwards without disabling ssh_config muxing', () => {
     spawnMock.mockReturnValue(createFakeProcess())
 
     spawnSystemSshPortForward(createTarget(), 5173, '127.0.0.1', 3000, {
@@ -163,7 +163,7 @@ describe('system SSH forward process', () => {
 
     const args = spawnMock.mock.calls[0][1] as string[]
     expect(args.indexOf('-S')).toBe(-1)
-    expectNoOrcaControlMasterArgs(args)
+    expectNoYiruControlMasterArgs(args)
   })
 
   it('preserves user-configured muxing for port forwards', () => {
@@ -191,7 +191,7 @@ describe('system SSH forward process', () => {
 
     const args = spawnMock.mock.calls[0][1] as string[]
     expect(args.indexOf('-S')).toBe(-1)
-    expectNoOrcaControlMasterArgs(args)
+    expectNoYiruControlMasterArgs(args)
     expect(args).toContain('deploy@workbox')
   })
 

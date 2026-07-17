@@ -15,13 +15,13 @@ import {
   writeFileSync
 } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { ORCA_BROWSER_PARTITION } from '../../shared/constants'
+import { YIRU_BROWSER_PARTITION } from '../../shared/constants'
 import {
-  DEFAULT_LOCAL_ORCA_PROFILE_ID,
-  getOrcaProfileBrowserDefaultPartition,
-  getOrcaProfileBrowserPartitionSegment,
-  getOrcaProfileBrowserSessionPartition
-} from '../../shared/orca-profiles'
+  DEFAULT_LOCAL_YIRU_PROFILE_ID,
+  getYiruProfileBrowserDefaultPartition,
+  getYiruProfileBrowserPartitionSegment,
+  getYiruProfileBrowserSessionPartition
+} from '../../shared/yiru-profiles'
 import type { BrowserSessionProfile, BrowserSessionProfileScope } from '../../shared/types'
 import { browserManager } from './browser-manager'
 import { hasSystemMediaAccess, requestSystemMediaAccess } from './browser-media-access'
@@ -44,13 +44,13 @@ type BrowserSessionMeta = {
 }
 
 export type BrowserSessionRegistryProfileOptions = {
-  orcaProfileId: string
+  yiruProfileId: string
   profileDirectory: string
 }
 
 const BROWSER_SESSION_META_FILE_NAME = 'browser-session-meta.json'
 const LEGACY_BROWSER_SESSION_PARTITION_RE =
-  /^persist:orca-browser-session-[\da-f-]{8}-[\da-f-]{4}-[\da-f-]{4}-[\da-f-]{4}-[\da-f-]{12}$/
+  /^persist:yiru-browser-session-[\da-f-]{8}-[\da-f-]{4}-[\da-f-]{4}-[\da-f-]{4}-[\da-f-]{12}$/
 
 // Why: the registry is the single source of truth for which Electron partitions
 // are valid. will-attach-webview consults it to decide whether a guest's
@@ -59,18 +59,18 @@ const LEGACY_BROWSER_SESSION_PARTITION_RE =
 
 class BrowserSessionRegistry {
   private readonly profiles = new Map<string, BrowserSessionProfile>()
-  private activeOrcaProfileId = DEFAULT_LOCAL_ORCA_PROFILE_ID
+  private activeYiruProfileId = DEFAULT_LOCAL_YIRU_PROFILE_ID
   private metadataPathOverride: string | null = null
-  private defaultPartition = ORCA_BROWSER_PARTITION
+  private defaultPartition = YIRU_BROWSER_PARTITION
 
   constructor() {
     this.resetDefaultProfile()
   }
 
-  configureForOrcaProfile(options: BrowserSessionRegistryProfileOptions): void {
-    this.activeOrcaProfileId = options.orcaProfileId
+  configureForYiruProfile(options: BrowserSessionRegistryProfileOptions): void {
+    this.activeYiruProfileId = options.yiruProfileId
     this.metadataPathOverride = join(options.profileDirectory, BROWSER_SESSION_META_FILE_NAME)
-    this.defaultPartition = getOrcaProfileBrowserDefaultPartition(options.orcaProfileId)
+    this.defaultPartition = getYiruProfileBrowserDefaultPartition(options.yiruProfileId)
     this.profiles.clear()
     this.resetDefaultProfile()
   }
@@ -365,7 +365,7 @@ class BrowserSessionRegistry {
 
   resolveKnownPartition(profileId: string | null | undefined): string | null {
     if (!profileId) {
-      // Why: must track the active Orca profile's default partition, not the
+      // Why: must track the active Yiru profile's default partition, not the
       // legacy constant, or non-default profiles would resolve local-default's
       // cookie jar.
       return this.defaultPartition
@@ -385,7 +385,7 @@ class BrowserSessionRegistry {
     // Why: partition names are deterministic from the profile id so main can
     // reconstruct the allowlist on restart from persisted profile metadata
     // without needing a separate partition→profile mapping.
-    const partition = getOrcaProfileBrowserSessionPartition(this.activeOrcaProfileId, id)
+    const partition = getYiruProfileBrowserSessionPartition(this.activeYiruProfileId, id)
     const profile: BrowserSessionProfile = {
       id,
       scope,
@@ -506,14 +506,14 @@ class BrowserSessionRegistry {
 
   private isProfileOwnedSessionPartition(partition: string): boolean {
     if (
-      this.activeOrcaProfileId === DEFAULT_LOCAL_ORCA_PROFILE_ID &&
+      this.activeYiruProfileId === DEFAULT_LOCAL_YIRU_PROFILE_ID &&
       LEGACY_BROWSER_SESSION_PARTITION_RE.test(partition)
     ) {
       return true
     }
 
-    const segment = getOrcaProfileBrowserPartitionSegment(this.activeOrcaProfileId)
-    const prefix = `persist:orca-profile-${segment}-browser-session-`
+    const segment = getYiruProfileBrowserPartitionSegment(this.activeYiruProfileId)
+    const prefix = `persist:yiru-profile-${segment}-browser-session-`
     if (!partition.startsWith(prefix)) {
       return false
     }
@@ -560,7 +560,7 @@ class BrowserSessionRegistry {
       // Why: `media` (camera/mic) must defer to macOS TCC instead of being
       // denied outright. Denying at the session layer would make pages inside
       // isolated browser profiles throw NotAllowedError even after the user
-      // granted Camera/Microphone to Orca — the same bug we fixed for the
+      // granted Camera/Microphone to Yiru — the same bug we fixed for the
       // default partition. macOS TCC still gates the actual stream, so
       // granting here only forwards what the OS has already authorized.
       if (permission === 'media') {

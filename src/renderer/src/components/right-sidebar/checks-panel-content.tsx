@@ -400,7 +400,7 @@ export function PRTriageStrip({
             <div className="truncate text-[10px] text-muted-foreground">
               {translate(
                 'auto.components.right.sidebar.checks.panel.content.5856874b59',
-                'Orca will refresh checks while this panel stays open.'
+                'Yiru will refresh checks while this panel stays open.'
               )}
             </div>
           </div>

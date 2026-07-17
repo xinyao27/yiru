@@ -32,7 +32,7 @@ import {
   WINDOWS_HOOK_STDIN_DRAIN_COMMAND
 } from '../agent-hooks/hook-stdin-contract'
 
-const ANTIGRAVITY_HOOK_BUNDLE_NAME = 'orca-status'
+const ANTIGRAVITY_HOOK_BUNDLE_NAME = 'yiru-status'
 
 const ANTIGRAVITY_EVENTS = [
   {
@@ -47,7 +47,7 @@ const ANTIGRAVITY_EVENTS = [
   },
   { eventName: 'Stop', schema: 'direct', windowsWrapperFileName: 'antigravity-stop.cmd' },
   // Why: Antigravity requires PreToolUse hooks to make permission decisions.
-  // Orca's hook is observational, so installing there can block user tools.
+  // Yiru's hook is observational, so installing there can block user tools.
   {
     eventName: 'PostToolUse',
     schema: 'tool',
@@ -85,7 +85,7 @@ function getManagedCommand(scriptPath: string, event: AntigravityEvent): string 
   if (process.platform === 'win32') {
     return wrapWindowsCmdHookCommand(getWindowsWrapperScriptPath(event))
   }
-  return wrapPosixHookCommand(scriptPath, { ORCA_ANTIGRAVITY_EVENT: event.eventName })
+  return wrapPosixHookCommand(scriptPath, { YIRU_ANTIGRAVITY_EVENT: event.eventName })
 }
 
 function getManagedScript(target: 'local' | 'posix' = 'local'): string {
@@ -93,12 +93,12 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
     return [
       '@echo off',
       'setlocal',
-      'if /I "%ORCA_ANTIGRAVITY_EVENT%"=="Stop" (',
+      'if /I "%YIRU_ANTIGRAVITY_EVENT%"=="Stop" (',
       '  echo {"decision":""}',
       ') else (',
       '  echo {}',
       ')',
-      'if defined ORCA_AGENT_HOOK_ENDPOINT if exist "%ORCA_AGENT_HOOK_ENDPOINT%" call "%ORCA_AGENT_HOOK_ENDPOINT%" 2>nul',
+      'if defined YIRU_AGENT_HOOK_ENDPOINT if exist "%YIRU_AGENT_HOOK_ENDPOINT%" call "%YIRU_AGENT_HOOK_ENDPOINT%" 2>nul',
       ...buildWindowsHookEnvironmentGuardLines(),
       buildWindowsAntigravityHookPostCommand(),
       'exit /b 0',
@@ -109,7 +109,7 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
 
   return [
     '#!/bin/sh',
-    'case "$ORCA_ANTIGRAVITY_EVENT" in',
+    'case "$YIRU_ANTIGRAVITY_EVENT" in',
     '  Stop)',
     '    printf \'{"decision":""}\\n\'',
     '    ;;',
@@ -123,27 +123,27 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
     // Why: some Antigravity events arrive without stdin but still need a
     // status post, so the shared capture maps empty input to an object.
     ...buildPosixHookPayloadCapture('empty-object'),
-    'if [ -n "$ORCA_AGENT_HOOK_ENDPOINT" ] && [ -r "$ORCA_AGENT_HOOK_ENDPOINT" ]; then',
-    '  . "$ORCA_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
+    'if [ -n "$YIRU_AGENT_HOOK_ENDPOINT" ] && [ -r "$YIRU_AGENT_HOOK_ENDPOINT" ]; then',
+    '  . "$YIRU_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
     'fi',
-    'if [ -z "$ORCA_AGENT_HOOK_PORT" ] || [ -z "$ORCA_AGENT_HOOK_TOKEN" ] || [ -z "$ORCA_PANE_KEY" ]; then',
+    'if [ -z "$YIRU_AGENT_HOOK_PORT" ] || [ -z "$YIRU_AGENT_HOOK_TOKEN" ] || [ -z "$YIRU_PANE_KEY" ]; then',
     '  exit 0',
     'fi',
     // Timeout caps best-effort hook posts if the local listener stalls.
     // Why: pipe payload to curl's stdin (`payload@-`) instead of an inline
     // `payload=$VALUE` arg, so tens-of-KB tool output stays off the curl
     // command line (EDR command-line false positives). Wire body is identical.
-    'printf \'%s\' "$payload" | curl -sS -X POST "http://127.0.0.1:${ORCA_AGENT_HOOK_PORT}/hook/antigravity" \\',
+    'printf \'%s\' "$payload" | curl -sS -X POST "http://127.0.0.1:${YIRU_AGENT_HOOK_PORT}/hook/antigravity" \\',
     '  --connect-timeout 0.5 --max-time 1.5 \\',
     '  -H "Content-Type: application/x-www-form-urlencoded" \\',
-    '  -H "X-Orca-Agent-Hook-Token: ${ORCA_AGENT_HOOK_TOKEN}" \\',
-    '  --data-urlencode "paneKey=${ORCA_PANE_KEY}" \\',
-    '  --data-urlencode "tabId=${ORCA_TAB_ID}" \\',
-    '  --data-urlencode "launchToken=${ORCA_AGENT_LAUNCH_TOKEN}" \\',
-    '  --data-urlencode "worktreeId=${ORCA_WORKTREE_ID}" \\',
-    '  --data-urlencode "env=${ORCA_AGENT_HOOK_ENV}" \\',
-    '  --data-urlencode "version=${ORCA_AGENT_HOOK_VERSION}" \\',
-    '  --data-urlencode "hook_event_name=${ORCA_ANTIGRAVITY_EVENT}" \\',
+    '  -H "X-Yiru-Agent-Hook-Token: ${YIRU_AGENT_HOOK_TOKEN}" \\',
+    '  --data-urlencode "paneKey=${YIRU_PANE_KEY}" \\',
+    '  --data-urlencode "tabId=${YIRU_TAB_ID}" \\',
+    '  --data-urlencode "launchToken=${YIRU_AGENT_LAUNCH_TOKEN}" \\',
+    '  --data-urlencode "worktreeId=${YIRU_WORKTREE_ID}" \\',
+    '  --data-urlencode "env=${YIRU_AGENT_HOOK_ENV}" \\',
+    '  --data-urlencode "version=${YIRU_AGENT_HOOK_VERSION}" \\',
+    '  --data-urlencode "hook_event_name=${YIRU_ANTIGRAVITY_EVENT}" \\',
     '  --data-urlencode "payload@-" >/dev/null 2>&1 || true',
     'exit 0',
     ''
@@ -154,13 +154,13 @@ function getWindowsWrapperScript(eventName: string): string {
   return [
     '@echo off',
     'setlocal',
-    `set "ORCA_ANTIGRAVITY_EVENT=${eventName}"`,
-    'set "ORCA_ANTIGRAVITY_CORE=%~dp0antigravity-hook.cmd"',
-    'if exist "%ORCA_ANTIGRAVITY_CORE%" (',
-    '  call "%ORCA_ANTIGRAVITY_CORE%"',
+    `set "YIRU_ANTIGRAVITY_EVENT=${eventName}"`,
+    'set "YIRU_ANTIGRAVITY_CORE=%~dp0antigravity-hook.cmd"',
+    'if exist "%YIRU_ANTIGRAVITY_CORE%" (',
+    '  call "%YIRU_ANTIGRAVITY_CORE%"',
     '  exit /b 0',
     ')',
-    'if /I "%ORCA_ANTIGRAVITY_EVENT%"=="Stop" (',
+    'if /I "%YIRU_ANTIGRAVITY_EVENT%"=="Stop" (',
     '  echo {"decision":""}',
     ') else (',
     '  echo {}',
@@ -177,7 +177,7 @@ function buildWindowsAntigravityHookPostCommand(): string {
   // Why: Antigravity hooks are best-effort status updates; do not let a stalled
   // local listener hold the agent process open. Qualify PowerShell so a
   // worktree-local powershell.exe cannot hijack hook payloads.
-  return `"%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -NoProfile -ExecutionPolicy Bypass -Command "$utf8=[System.Text.UTF8Encoding]::new($false); [Console]::InputEncoding=$utf8; [Console]::OutputEncoding=$utf8; $inputData=[Console]::In.ReadToEnd(); try { $payload=if ([string]::IsNullOrWhiteSpace($inputData)) { @{} } else { $inputData | ConvertFrom-Json }; $body=@{ paneKey=$env:ORCA_PANE_KEY; launchToken=$env:ORCA_AGENT_LAUNCH_TOKEN; tabId=$env:ORCA_TAB_ID; worktreeId=$env:ORCA_WORKTREE_ID; env=$env:ORCA_AGENT_HOOK_ENV; version=$env:ORCA_AGENT_HOOK_VERSION; hook_event_name=$env:ORCA_ANTIGRAVITY_EVENT; payload=$payload } | ConvertTo-Json -Depth 100 -Compress; $bodyBytes=$utf8.GetBytes($body); Invoke-WebRequest -UseBasicParsing -Method Post -Uri ('http://127.0.0.1:' + $env:ORCA_AGENT_HOOK_PORT + '/hook/antigravity') -ContentType 'application/json; charset=utf-8' -Headers @{ 'X-Orca-Agent-Hook-Token'=$env:ORCA_AGENT_HOOK_TOKEN } -Body $bodyBytes -TimeoutSec 2 | Out-Null } catch {}"`
+  return `"%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -NoProfile -ExecutionPolicy Bypass -Command "$utf8=[System.Text.UTF8Encoding]::new($false); [Console]::InputEncoding=$utf8; [Console]::OutputEncoding=$utf8; $inputData=[Console]::In.ReadToEnd(); try { $payload=if ([string]::IsNullOrWhiteSpace($inputData)) { @{} } else { $inputData | ConvertFrom-Json }; $body=@{ paneKey=$env:YIRU_PANE_KEY; launchToken=$env:YIRU_AGENT_LAUNCH_TOKEN; tabId=$env:YIRU_TAB_ID; worktreeId=$env:YIRU_WORKTREE_ID; env=$env:YIRU_AGENT_HOOK_ENV; version=$env:YIRU_AGENT_HOOK_VERSION; hook_event_name=$env:YIRU_ANTIGRAVITY_EVENT; payload=$payload } | ConvertTo-Json -Depth 100 -Compress; $bodyBytes=$utf8.GetBytes($body); Invoke-WebRequest -UseBasicParsing -Method Post -Uri ('http://127.0.0.1:' + $env:YIRU_AGENT_HOOK_PORT + '/hook/antigravity') -ContentType 'application/json; charset=utf-8' -Headers @{ 'X-Yiru-Agent-Hook-Token'=$env:YIRU_AGENT_HOOK_TOKEN } -Body $bodyBytes -TimeoutSec 2 | Out-Null } catch {}"`
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -389,7 +389,7 @@ export class AntigravityHookService {
   async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
     const home = remoteHome.replace(/\/$/, '')
     const remoteConfigPath = `${home}/.gemini/config/hooks.json`
-    const remoteScriptPath = `${home}/.orca/agent-hooks/antigravity-hook.sh`
+    const remoteScriptPath = `${home}/.yiru/agent-hooks/antigravity-hook.sh`
     try {
       const config = await readHooksJsonRemote(sftp, remoteConfigPath)
       if (!config) {
@@ -405,7 +405,7 @@ export class AntigravityHookService {
       buildInstalledConfig(
         config,
         (event) =>
-          wrapPosixHookCommand(remoteScriptPath, { ORCA_ANTIGRAVITY_EVENT: event.eventName }),
+          wrapPosixHookCommand(remoteScriptPath, { YIRU_ANTIGRAVITY_EVENT: event.eventName }),
         createAntigravityManagedCommandMatcher()
       )
       await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript('posix'))

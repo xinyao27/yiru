@@ -20,31 +20,31 @@ import type { AppIdentity } from '../shared/app-identity'
 import type { MobileRelayStatus } from '../shared/mobile-relay-status'
 import type { MobilePairingConnectionMode } from '../shared/mobile-pairing-connection-mode'
 import type {
-  CreateLocalOrcaProfileArgs,
-  CreateLocalOrcaProfileResult,
-  CreateCloudLinkedOrcaProfileArgs,
-  CreateCloudLinkedOrcaProfileResult,
-  ConnectCurrentOrcaProfileResult,
-  FindOrcaProfileProjectsByPathArgs,
-  FindOrcaProfileProjectsByPathResult,
-  OrcaProfileListResult,
-  OrcaProfileAuthStatus,
-  RefreshCurrentOrcaProfileAuthResult,
-  SelectOrcaProfileOrgArgs,
-  SelectOrcaProfileOrgResult,
-  SignOutCurrentOrcaProfileResult,
-  SwitchOrcaProfileArgs,
-  SwitchOrcaProfileResult,
-  TransferOrcaProfileProjectArgs,
-  TransferOrcaProfileProjectResult,
-  OrcaProfileOrgInviteRevokeArgs,
-  OrcaProfileOrgMemberChangeRoleArgs,
-  OrcaProfileOrgMemberInviteArgs,
-  OrcaProfileOrgMemberMutationResult,
-  OrcaProfileOrgMemberRemoveArgs,
-  OrcaProfileOrgMembersListArgs,
-  OrcaProfileOrgMembersListResult
-} from '../shared/orca-profiles'
+  CreateLocalYiruProfileArgs,
+  CreateLocalYiruProfileResult,
+  CreateCloudLinkedYiruProfileArgs,
+  CreateCloudLinkedYiruProfileResult,
+  ConnectCurrentYiruProfileResult,
+  FindYiruProfileProjectsByPathArgs,
+  FindYiruProfileProjectsByPathResult,
+  YiruProfileListResult,
+  YiruProfileAuthStatus,
+  RefreshCurrentYiruProfileAuthResult,
+  SelectYiruProfileOrgArgs,
+  SelectYiruProfileOrgResult,
+  SignOutCurrentYiruProfileResult,
+  SwitchYiruProfileArgs,
+  SwitchYiruProfileResult,
+  TransferYiruProfileProjectArgs,
+  TransferYiruProfileProjectResult,
+  YiruProfileOrgInviteRevokeArgs,
+  YiruProfileOrgMemberChangeRoleArgs,
+  YiruProfileOrgMemberInviteArgs,
+  YiruProfileOrgMemberMutationResult,
+  YiruProfileOrgMemberRemoveArgs,
+  YiruProfileOrgMembersListArgs,
+  YiruProfileOrgMembersListResult
+} from '../shared/yiru-profiles'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
 import type { TaskSourceContext } from '../shared/task-source-context'
 import type { LinearIssueAttributeFilter } from '../shared/linear-issue-attribute-filter'
@@ -186,7 +186,7 @@ import type {
   NotificationPermissionStatusResult,
   NotificationSoundResult,
   OnboardingState,
-  OrcaHooks,
+  YiruHooks,
   PathSource,
   PersistedUIState,
   PRCheckDetail,
@@ -523,7 +523,7 @@ export type BrowserApi = {
   onPaneFocus: (
     callback: (data: { worktreeId: string | null; browserPageId: string }) => void
   ) => () => void
-  onOpenLinkInOrcaTab: (
+  onOpenLinkInYiruTab: (
     callback: (event: { browserPageId: string; url: string }) => void
   ) => () => void
   cancelDownload: (args: { downloadId: string }) => Promise<boolean>
@@ -721,8 +721,8 @@ export type DiagnosticsStatusPayload = {
   readonly traceFamilySize: number
   readonly disabledReason?:
     | 'do_not_track'
-    | 'orca_telemetry_disabled'
-    | 'orca_diagnostics_disabled'
+    | 'yiru_telemetry_disabled'
+    | 'yiru_diagnostics_disabled'
     | 'ci'
 }
 export type DiagnosticsBundlePayload = {
@@ -891,7 +891,7 @@ export type AppApi = {
    *  by settings panes that need a full restart to apply changes (e.g. the
    *  terminal-window blur setting in TerminalWindowSection). */
   relaunch: () => Promise<void>
-  /** Restarts Orca through the normal quit pipeline so daemon-backed terminal
+  /** Restarts Yiru through the normal quit pipeline so daemon-backed terminal
    *  sessions survive and can reattach after the new process starts. */
   restart: () => Promise<void>
   /** Reloads the current app renderer through main so expected renderer
@@ -900,7 +900,7 @@ export type AppApi = {
   /** Resolves when the daemon PTY provider and hook receiver have either
    *  started or failed open for the first BrowserWindow. */
   awaitFirstWindowStartupServices: () => Promise<void>
-  /** Emits a startup benchmark marker when ORCA_STARTUP_DIAGNOSTICS is enabled. */
+  /** Emits a startup benchmark marker when YIRU_STARTUP_DIAGNOSTICS is enabled. */
   startupDiagnostic: (event: string, details?: Record<string, unknown>) => Promise<void>
   /** Returns the macOS active input mode, or layout ID when no IME mode is
    *  selected (e.g. `com.apple.keylayout.PolishPro`). Used by the
@@ -913,7 +913,7 @@ export type AppApi = {
   setUnreadDockBadgeCount: (count: number) => Promise<void>
   /** Resolves the launch directory for global Floating Terminal tabs. */
   getFloatingTerminalCwd: (args?: FloatingTerminalCwdRequest) => Promise<string>
-  /** Resolves Orca's app-owned directory for auto-created Floating Workspace
+  /** Resolves Yiru's app-owned directory for auto-created Floating Workspace
    *  markdown notes. */
   getFloatingMarkdownDirectory: () => Promise<string>
   /** Opens a native picker for markdown documents, rooted in the floating
@@ -926,39 +926,39 @@ export type AppApi = {
 
 export type PreloadApi = {
   app: AppApi
-  orcaProfiles: {
-    list: () => Promise<OrcaProfileListResult>
-    authStatus: () => Promise<OrcaProfileAuthStatus>
-    createLocal: (args?: CreateLocalOrcaProfileArgs) => Promise<CreateLocalOrcaProfileResult>
+  yiruProfiles: {
+    list: () => Promise<YiruProfileListResult>
+    authStatus: () => Promise<YiruProfileAuthStatus>
+    createLocal: (args?: CreateLocalYiruProfileArgs) => Promise<CreateLocalYiruProfileResult>
     createCloudLinked: (
-      args?: CreateCloudLinkedOrcaProfileArgs
-    ) => Promise<CreateCloudLinkedOrcaProfileResult>
-    switchProfile: (args: SwitchOrcaProfileArgs) => Promise<SwitchOrcaProfileResult>
+      args?: CreateCloudLinkedYiruProfileArgs
+    ) => Promise<CreateCloudLinkedYiruProfileResult>
+    switchProfile: (args: SwitchYiruProfileArgs) => Promise<SwitchYiruProfileResult>
     transferProject: (
-      args: TransferOrcaProfileProjectArgs
-    ) => Promise<TransferOrcaProfileProjectResult>
+      args: TransferYiruProfileProjectArgs
+    ) => Promise<TransferYiruProfileProjectResult>
     findProjectProfiles: (
-      args: FindOrcaProfileProjectsByPathArgs
-    ) => Promise<FindOrcaProfileProjectsByPathResult>
-    connectCurrent: () => Promise<ConnectCurrentOrcaProfileResult>
-    refreshAuth: () => Promise<RefreshCurrentOrcaProfileAuthResult>
-    signOutCurrent: () => Promise<SignOutCurrentOrcaProfileResult>
-    selectOrg: (args: SelectOrcaProfileOrgArgs) => Promise<SelectOrcaProfileOrgResult>
+      args: FindYiruProfileProjectsByPathArgs
+    ) => Promise<FindYiruProfileProjectsByPathResult>
+    connectCurrent: () => Promise<ConnectCurrentYiruProfileResult>
+    refreshAuth: () => Promise<RefreshCurrentYiruProfileAuthResult>
+    signOutCurrent: () => Promise<SignOutCurrentYiruProfileResult>
+    selectOrg: (args: SelectYiruProfileOrgArgs) => Promise<SelectYiruProfileOrgResult>
     orgMembersList: (
-      args: OrcaProfileOrgMembersListArgs
-    ) => Promise<OrcaProfileOrgMembersListResult>
+      args: YiruProfileOrgMembersListArgs
+    ) => Promise<YiruProfileOrgMembersListResult>
     orgMemberInvite: (
-      args: OrcaProfileOrgMemberInviteArgs
-    ) => Promise<OrcaProfileOrgMemberMutationResult>
+      args: YiruProfileOrgMemberInviteArgs
+    ) => Promise<YiruProfileOrgMemberMutationResult>
     orgInviteRevoke: (
-      args: OrcaProfileOrgInviteRevokeArgs
-    ) => Promise<OrcaProfileOrgMemberMutationResult>
+      args: YiruProfileOrgInviteRevokeArgs
+    ) => Promise<YiruProfileOrgMemberMutationResult>
     orgMemberChangeRole: (
-      args: OrcaProfileOrgMemberChangeRoleArgs
-    ) => Promise<OrcaProfileOrgMemberMutationResult>
+      args: YiruProfileOrgMemberChangeRoleArgs
+    ) => Promise<YiruProfileOrgMemberMutationResult>
     orgMemberRemove: (
-      args: OrcaProfileOrgMemberRemoveArgs
-    ) => Promise<OrcaProfileOrgMemberMutationResult>
+      args: YiruProfileOrgMemberRemoveArgs
+    ) => Promise<YiruProfileOrgMemberMutationResult>
   }
   platform: {
     get: () => {
@@ -1195,7 +1195,7 @@ export type PreloadApi = {
       force?: boolean
       skipArchive?: boolean
     }) => Promise<RemoveWorktreeResult>
-    // Forget a workspace from Orca only — no remote Git/filesystem work. Used
+    // Forget a workspace from Yiru only — no remote Git/filesystem work. Used
     // for workspaces pinned to a removed/disconnected SSH host.
     forgetLocal: (args: {
       worktreeId: string
@@ -1702,8 +1702,8 @@ export type PreloadApi = {
         number: number
       }) => void
     ) => () => void
-    checkOrcaStarred: () => Promise<boolean | null>
-    starOrca: (source: AppStarSource) => Promise<boolean>
+    checkYiruStarred: () => Promise<boolean | null>
+    starYiru: (source: AppStarSource) => Promise<boolean>
     /**
      * GitHub API rate-limit snapshot. Does NOT consume quota (the
      * `rate_limit` endpoint is exempt). Cached 30s server-side — pass
@@ -2076,7 +2076,7 @@ export type PreloadApi = {
     complete: () => Promise<void>
     disable: () => Promise<void>
     openWeb: () => Promise<void>
-    starOrca: () => Promise<boolean>
+    starYiru: () => Promise<boolean>
     forceShow: () => Promise<void>
     agentValueMoment: () => Promise<{ status: 'ready'; mode: 'gh' | 'web' } | { status: 'skipped' }>
     showAgentValueMoment: () => Promise<void>
@@ -2268,7 +2268,7 @@ export type PreloadApi = {
     check: (args: { repoId: string; hostId?: ExecutionHostId }) => Promise<{
       status?: 'ok' | 'error'
       hasHooks: boolean
-      hooks: OrcaHooks | null
+      hooks: YiruHooks | null
       mayNeedUpdate: boolean
     }>
     inspectSetupScriptImports: (args: { repoId: string }) => Promise<SetupScriptImportCandidate[]>
@@ -2295,8 +2295,8 @@ export type PreloadApi = {
     listRecipes: (args: { repoId: string }) => Promise<{
       status: 'ok' | 'error'
       repoPath: string | null
-      recipes: OrcaHooks['environmentRecipes']
-      diagnostics: NonNullable<OrcaHooks['environmentRecipeDiagnostics']>
+      recipes: YiruHooks['environmentRecipes']
+      diagnostics: NonNullable<YiruHooks['environmentRecipeDiagnostics']>
       message?: string
     }>
     listRecipeCatalog: () => Promise<
@@ -2304,8 +2304,8 @@ export type PreloadApi = {
         repoId: string
         repoName: string
         repoPath: string
-        recipes: NonNullable<OrcaHooks['environmentRecipes']>
-        diagnostics: NonNullable<OrcaHooks['environmentRecipeDiagnostics']>
+        recipes: NonNullable<YiruHooks['environmentRecipes']>
+        diagnostics: NonNullable<YiruHooks['environmentRecipeDiagnostics']>
       }[]
     >
     doctor: (args: { repoId: string; recipeId: string }) => Promise<EphemeralVmRecipeDoctorResult>
@@ -2319,7 +2319,7 @@ export type PreloadApi = {
     }) => Promise<
       | {
           ok: true
-          connectionType: 'orca-server'
+          connectionType: 'yiru-server'
           runtime: EphemeralVmRuntimeRecord
           environment: PublicKnownRuntimeEnvironment
           stderr: string

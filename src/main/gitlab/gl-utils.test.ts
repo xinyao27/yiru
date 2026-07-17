@@ -41,12 +41,12 @@ describe('gitlab project ref resolution', () => {
 
   it('keeps getProjectRef origin-based', async () => {
     gitExecFileAsyncMock.mockResolvedValueOnce({
-      stdout: 'git@gitlab.com:fork/orca.git\n'
+      stdout: 'git@gitlab.com:fork/yiru.git\n'
     })
 
     await expect(getProjectRef('/repo')).resolves.toEqual({
       host: 'gitlab.com',
-      path: 'fork/orca'
+      path: 'fork/yiru'
     })
     expect(gitExecFileAsyncMock).toHaveBeenCalledWith(['remote', 'get-url', 'origin'], {
       cwd: '/repo'
@@ -55,12 +55,12 @@ describe('gitlab project ref resolution', () => {
 
   it('prefers upstream for issue project ref resolution', async () => {
     gitExecFileAsyncMock.mockResolvedValueOnce({
-      stdout: 'git@gitlab.com:stablyai/orca.git\n'
+      stdout: 'git@gitlab.com:stablyai/yiru.git\n'
     })
 
     await expect(getIssueProjectRef('/repo')).resolves.toEqual({
       host: 'gitlab.com',
-      path: 'stablyai/orca'
+      path: 'stablyai/yiru'
     })
     expect(gitExecFileAsyncMock).toHaveBeenCalledWith(['remote', 'get-url', 'upstream'], {
       cwd: '/repo'
@@ -69,49 +69,49 @@ describe('gitlab project ref resolution', () => {
 
   it('falls back to origin when upstream is missing or non-GitLab', async () => {
     gitExecFileAsyncMock
-      .mockResolvedValueOnce({ stdout: 'git@example.com:stablyai/orca.git\n' })
-      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:fork/orca.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@example.com:stablyai/yiru.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:fork/yiru.git\n' })
 
     await expect(getIssueProjectRef('/repo')).resolves.toEqual({
       host: 'gitlab.com',
-      path: 'fork/orca'
+      path: 'fork/yiru'
     })
   })
 
   it('does not mix origin and upstream cache entries for the same repo path', async () => {
     gitExecFileAsyncMock
-      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:fork/orca.git\n' })
-      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:stablyai/orca.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:fork/yiru.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:stablyai/yiru.git\n' })
 
     await expect(getProjectRef('/repo')).resolves.toEqual({
       host: 'gitlab.com',
-      path: 'fork/orca'
+      path: 'fork/yiru'
     })
     await expect(getIssueProjectRef('/repo')).resolves.toEqual({
       host: 'gitlab.com',
-      path: 'stablyai/orca'
+      path: 'stablyai/yiru'
     })
   })
 
   it('keeps local host and local WSL project-ref cache entries separate for the same path', async () => {
     gitExecFileAsyncMock
-      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:host/orca.git\n' })
-      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:wsl/orca.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:host/yiru.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:wsl/yiru.git\n' })
 
     await expect(getProjectRef('/repo')).resolves.toEqual({
       host: 'gitlab.com',
-      path: 'host/orca'
+      path: 'host/yiru'
     })
     await expect(getProjectRef('/repo', undefined, null, { wslDistro: 'Ubuntu' })).resolves.toEqual(
       {
         host: 'gitlab.com',
-        path: 'wsl/orca'
+        path: 'wsl/yiru'
       }
     )
     await expect(getProjectRef('/repo', undefined, null, { wslDistro: 'Ubuntu' })).resolves.toEqual(
       {
         host: 'gitlab.com',
-        path: 'wsl/orca'
+        path: 'wsl/yiru'
       }
     )
 
@@ -150,12 +150,12 @@ describe('gitlab project ref resolution', () => {
   })
 
   it('resolves project refs through the SSH git provider for connected repos', async () => {
-    sshExecMock.mockResolvedValueOnce({ stdout: 'git@gitlab.com:remote/orca.git\n', stderr: '' })
+    sshExecMock.mockResolvedValueOnce({ stdout: 'git@gitlab.com:remote/yiru.git\n', stderr: '' })
     registerSshGitProvider('conn-1', { exec: sshExecMock } as never)
 
     await expect(getProjectRefForRemote('/repo', 'origin', undefined, 'conn-1')).resolves.toEqual({
       host: 'gitlab.com',
-      path: 'remote/orca'
+      path: 'remote/yiru'
     })
 
     expect(sshExecMock).toHaveBeenCalledWith(['remote', 'get-url', 'origin'], '/repo')
@@ -164,7 +164,7 @@ describe('gitlab project ref resolution', () => {
 
   it('bounds cached project refs for distinct repo paths', async () => {
     gitExecFileAsyncMock.mockResolvedValue({
-      stdout: 'git@gitlab.com:stablyai/orca.git\n',
+      stdout: 'git@gitlab.com:stablyai/yiru.git\n',
       stderr: ''
     })
 
@@ -179,27 +179,27 @@ describe('gitlab project ref resolution', () => {
     await expect(getProjectRefForRemote('/repo', 'origin', undefined, 'conn-1')).resolves.toBeNull()
 
     sshExecMock.mockResolvedValueOnce({
-      stdout: 'git@gitlab.com:remote/orca.git\n',
+      stdout: 'git@gitlab.com:remote/yiru.git\n',
       stderr: ''
     })
     registerSshGitProvider('conn-1', { exec: sshExecMock } as never)
 
     await expect(getProjectRefForRemote('/repo', 'origin', undefined, 'conn-1')).resolves.toEqual({
       host: 'gitlab.com',
-      path: 'remote/orca'
+      path: 'remote/yiru'
     })
   })
 
   it('does not cache transient SSH exec failures as permanent null project refs', async () => {
     sshExecMock
       .mockRejectedValueOnce(new Error('ssh tunnel not ready'))
-      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:remote/orca.git\n', stderr: '' })
+      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:remote/yiru.git\n', stderr: '' })
     registerSshGitProvider('conn-1', { exec: sshExecMock } as never)
 
     await expect(getProjectRefForRemote('/repo', 'origin', undefined, 'conn-1')).resolves.toBeNull()
     await expect(getProjectRefForRemote('/repo', 'origin', undefined, 'conn-1')).resolves.toEqual({
       host: 'gitlab.com',
-      path: 'remote/orca'
+      path: 'remote/yiru'
     })
   })
 })
@@ -212,22 +212,22 @@ describe('resolveIssueSource', () => {
 
   it("'auto' + upstream exists → upstream, fellBack=false", async () => {
     gitExecFileAsyncMock.mockResolvedValueOnce({
-      stdout: 'git@gitlab.com:stablyai/orca.git\n'
+      stdout: 'git@gitlab.com:stablyai/yiru.git\n'
     })
 
     await expect(resolveIssueSource('/repo', 'auto')).resolves.toEqual({
-      source: { host: 'gitlab.com', path: 'stablyai/orca' },
+      source: { host: 'gitlab.com', path: 'stablyai/yiru' },
       fellBack: false
     })
   })
 
   it("'auto' + no upstream → origin, fellBack=false", async () => {
     gitExecFileAsyncMock
-      .mockResolvedValueOnce({ stdout: 'git@example.com:stablyai/orca.git\n' })
-      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:solo/orca.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@example.com:stablyai/yiru.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:solo/yiru.git\n' })
 
     await expect(resolveIssueSource('/repo', 'auto')).resolves.toEqual({
-      source: { host: 'gitlab.com', path: 'solo/orca' },
+      source: { host: 'gitlab.com', path: 'solo/yiru' },
       fellBack: false
     })
   })
@@ -235,21 +235,21 @@ describe('resolveIssueSource', () => {
   it("'upstream' + no upstream remote → origin, fellBack=true", async () => {
     gitExecFileAsyncMock
       .mockRejectedValueOnce(new Error('fatal: No such remote'))
-      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:solo/orca.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@gitlab.com:solo/yiru.git\n' })
 
     await expect(resolveIssueSource('/repo', 'upstream')).resolves.toEqual({
-      source: { host: 'gitlab.com', path: 'solo/orca' },
+      source: { host: 'gitlab.com', path: 'solo/yiru' },
       fellBack: true
     })
   })
 
   it("'origin' + upstream exists → origin (ignores upstream), fellBack=false", async () => {
     gitExecFileAsyncMock.mockResolvedValueOnce({
-      stdout: 'git@gitlab.com:fork/orca.git\n'
+      stdout: 'git@gitlab.com:fork/yiru.git\n'
     })
 
     await expect(resolveIssueSource('/repo', 'origin')).resolves.toEqual({
-      source: { host: 'gitlab.com', path: 'fork/orca' },
+      source: { host: 'gitlab.com', path: 'fork/yiru' },
       fellBack: false
     })
     expect(gitExecFileAsyncMock).toHaveBeenCalledTimes(1)
@@ -260,11 +260,11 @@ describe('resolveIssueSource', () => {
 
   it('undefined preference is treated identically to auto', async () => {
     gitExecFileAsyncMock.mockResolvedValueOnce({
-      stdout: 'git@gitlab.com:stablyai/orca.git\n'
+      stdout: 'git@gitlab.com:stablyai/yiru.git\n'
     })
 
     await expect(resolveIssueSource('/repo', undefined)).resolves.toEqual({
-      source: { host: 'gitlab.com', path: 'stablyai/orca' },
+      source: { host: 'gitlab.com', path: 'stablyai/yiru' },
       fellBack: false
     })
   })

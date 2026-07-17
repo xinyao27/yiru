@@ -15,11 +15,11 @@ function itWindows(name, test) {
 
 describe('Windows CLI launcher', () => {
   itCrossHost('fails closed when the Windows launcher cannot be compiled on this host', () => {
-    const outputRoot = mkdtempSync(join(tmpdir(), 'orca cross-host launcher '))
+    const outputRoot = mkdtempSync(join(tmpdir(), 'yiru cross-host launcher '))
     try {
       const result = spawnSync(
         process.execPath,
-        ['config/scripts/build-windows-cli-launcher.mjs', '--output', join(outputRoot, 'orca.exe')],
+        ['config/scripts/build-windows-cli-launcher.mjs', '--output', join(outputRoot, 'yiru.exe')],
         { cwd: projectRoot, encoding: 'utf8' }
       )
 
@@ -32,21 +32,21 @@ describe('Windows CLI launcher', () => {
   })
 
   itWindows('preserves a multiline argument from PowerShell through the native launcher', () => {
-    const appRoot = mkdtempSync(join(tmpdir(), 'orca cli launcher '))
+    const appRoot = mkdtempSync(join(tmpdir(), 'yiru cli launcher '))
     try {
       const resourcesPath = join(appRoot, 'resources')
-      const launcherPath = join(resourcesPath, 'bin', 'orca.exe')
+      const launcherPath = join(resourcesPath, 'bin', 'yiru.exe')
       const cliPath = join(resourcesPath, 'app.asar.unpacked', 'out', 'cli', 'index.js')
       mkdirSync(join(resourcesPath, 'bin'), { recursive: true })
       mkdirSync(dirname(cliPath), { recursive: true })
-      copyFileSync(process.execPath, join(appRoot, 'Orca.exe'))
+      copyFileSync(process.execPath, join(appRoot, 'Yiru.exe'))
       writeFileSync(
         cliPath,
         `process.stdout.write(JSON.stringify({
   argv: process.argv.slice(2),
   electronRunAsNode: process.env.ELECTRON_RUN_AS_NODE,
   nodeOptions: process.env.NODE_OPTIONS ?? null,
-  orcaNodeOptions: process.env.ORCA_NODE_OPTIONS ?? null
+  yiruNodeOptions: process.env.YIRU_NODE_OPTIONS ?? null
 }))\n`,
         'utf8'
       )
@@ -65,15 +65,15 @@ describe('Windows CLI launcher', () => {
           '-NoProfile',
           '-NonInteractive',
           '-Command',
-          '& $env:ORCA_TEST_LAUNCHER orchestration send --body $env:ORCA_TEST_BODY --json'
+          '& $env:YIRU_TEST_LAUNCHER orchestration send --body $env:YIRU_TEST_BODY --json'
         ],
         {
           encoding: 'utf8',
           env: {
             ...process.env,
             NODE_OPTIONS: '--no-warnings',
-            ORCA_TEST_BODY: body,
-            ORCA_TEST_LAUNCHER: launcherPath
+            YIRU_TEST_BODY: body,
+            YIRU_TEST_LAUNCHER: launcherPath
           }
         }
       )
@@ -83,7 +83,7 @@ describe('Windows CLI launcher', () => {
         argv: ['orchestration', 'send', '--body', body, '--json'],
         electronRunAsNode: '1',
         nodeOptions: null,
-        orcaNodeOptions: '--no-warnings'
+        yiruNodeOptions: '--no-warnings'
       })
     } finally {
       rmSync(appRoot, { recursive: true, force: true })

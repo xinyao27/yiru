@@ -2,15 +2,15 @@
 
 ## Problem
 
-Issue [#7953](https://github.com/stablyai/orca/issues/7953) reports that `Cmd+F` can type `f` into a TypeScript file instead of opening find on macOS.
+Issue [#7953](https://github.com/stablyai/yiru/issues/7953) reports that `Cmd+F` can type `f` into a TypeScript file instead of opening find on macOS.
 
-Orca's editable Monaco surfaces currently install its layout-aware save shortcut through `editor-shortcuts.ts` (`src/renderer/src/components/editor/editor-shortcuts.ts:18`), but leave find entirely to Monaco's internal keycode dispatch. Orca already declares `editor.find` as `Mod+F` (`src/shared/keybindings.ts:784`) and its matcher resolves logical keys before physical-code fallback (`src/shared/keybindings.ts:2041`).
+Yiru's editable Monaco surfaces currently install its layout-aware save shortcut through `editor-shortcuts.ts` (`src/renderer/src/components/editor/editor-shortcuts.ts:18`), but leave find entirely to Monaco's internal keycode dispatch. Yiru already declares `editor.find` as `Mod+F` (`src/shared/keybindings.ts:784`) and its matcher resolves logical keys before physical-code fallback (`src/shared/keybindings.ts:2041`).
 
 A real Electron repro sends a macOS event with logical key `f`, physical code `KeyU`, and virtual key code `U`, as produced by a non-QWERTY layout. Monaco leaves its find widget closed. The equivalent QWERTY `KeyF` event opens it.
 
 ## Root cause
 
-Monaco's built-in find keybinding follows the physical/virtual keycode delivered by Chromium. Orca's shortcut system is layout-aware, but its editable Monaco integrations do not use it for find. On layouts where the key that produces `f` is not physical `KeyF`, Monaco misses the chord and Native Edit Context remains in editing mode.
+Monaco's built-in find keybinding follows the physical/virtual keycode delivered by Chromium. Yiru's shortcut system is layout-aware, but its editable Monaco integrations do not use it for find. On layouts where the key that produces `f` is not physical `KeyF`, Monaco misses the chord and Native Edit Context remains in editing mode.
 
 ## Non-goals
 
@@ -31,7 +31,7 @@ Monaco's built-in find keybinding follows the physical/virtual keycode delivered
 
 - macOS/Linux/Windows keydown reaches the focused editable Monaco container.
 - `editorShortcutMatches('editor.find', event)` resolves the active platform, user bindings, modifiers, and logical key.
-- On match, Orca consumes the DOM event and calls Monaco's existing `actions.find` action.
+- On match, Yiru consumes the DOM event and calls Monaco's existing `actions.find` action.
 - Monaco owns the visible find widget and focus exactly as before.
 
 ## Edge cases
@@ -40,8 +40,8 @@ Monaco's built-in find keybinding follows the physical/virtual keycode delivered
 - Ordinary unmodified `f` typing and unrelated shortcuts must continue to Monaco unchanged.
 - A removed/disposed source editor, diff pane, or notebook cell must not retain the listener.
 - QWERTY `Cmd/Ctrl+F` must still open the same Monaco widget once, not twice.
-- User-configured bindings accepted by Orca's `editor.find` matcher should open find; Monaco's own default bindings remain outside the scope of this patch.
-- The behavior is renderer-local and does not read files or execute commands, so local, SSH, and Remote Orca files share the same path.
+- User-configured bindings accepted by Yiru's `editor.find` matcher should open find; Monaco's own default bindings remain outside the scope of this patch.
+- The behavior is renderer-local and does not read files or execute commands, so local, SSH, and Remote Yiru files share the same path.
 
 ## Test plan
 
@@ -71,14 +71,14 @@ No new UI. The existing Monaco find widget must appear in its current position a
 ## Lightweight Eng Review
 
 - Scope: Kept to one shared shortcut installer and the existing mount/teardown seams for source editors, editable diff panes, and notebook code cells; no new find implementation or global shortcut interception.
-- Architecture/data flow: The renderer-local Monaco container owns the keydown. Orca's canonical matcher resolves the logical key, while Monaco continues to own widget state and rendering. No main/preload/IPC, persistence, network, SSH, or provider boundary changes.
+- Architecture/data flow: The renderer-local Monaco container owns the keydown. Yiru's canonical matcher resolves the logical key, while Monaco continues to own widget state and rendering. No main/preload/IPC, persistence, network, SSH, or provider boundary changes.
 - Failure modes covered:
   - Non-QWERTY logical key differs from physical/virtual keycode.
   - QWERTY double handling.
   - Auto-repeat escaping to Monaco's native QWERTY handler.
   - Listener surviving editor disposal.
   - Ordinary typing being consumed.
-  - Custom `editor.find` chord accepted by Orca but not Monaco.
+  - Custom `editor.find` chord accepted by Yiru but not Monaco.
 - Test coverage required:
   - DOM-listener unit tests in `src/renderer/src/components/editor/editor-shortcuts.test.ts`, parameterized for Darwin/Meta, Linux/Ctrl, and Windows/Ctrl.
   - Electron-visible QWERTY and layout-aware `.ts` scenarios.

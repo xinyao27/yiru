@@ -36,9 +36,9 @@ function matchesRemoteCommand(commandPath: string[], ...command: string[]): bool
   )
 }
 
-const LINEAR_HELP = `orca linear
+const LINEAR_HELP = `yiru linear
 
-Usage: orca linear <command> [options]
+Usage: yiru linear <command> [options]
 
 Commands:
   issue              Read Linear issue context for agents
@@ -65,11 +65,11 @@ Commands:
   attach             Attach a link to a Linear issue
   create             Create a Linear issue
 
-Run \`orca linear <command> --help\` for command-specific usage.`
+Run \`yiru linear <command> --help\` for command-specific usage.`
 
-const LINEAR_ISSUE_HELP = `orca linear issue
+const LINEAR_ISSUE_HELP = `yiru linear issue
 
-Usage: orca linear issue [<id>] [--current] [--comments] [--children] [--depth <n>] [--attachments] [--relations] [--full] [--workspace <id>] [--json]
+Usage: yiru linear issue [<id>] [--current] [--comments] [--children] [--depth <n>] [--attachments] [--relations] [--full] [--workspace <id>] [--json]
 
 Read Linear issue context for agents
 
@@ -78,7 +78,7 @@ Options:
   --json                 Emit machine-readable JSON
   --pairing-code
   --environment
-  --current              Use the current Orca worktree linked Linear issue
+  --current              Use the current Yiru worktree linked Linear issue
   --comments             Include threaded Linear comments
   --children             Include recursive child issues
   --depth <n>            Child issue depth for --children/--full
@@ -89,13 +89,13 @@ Options:
   --id <id>             Linear issue key, id, or URL
 
 Examples:
-  $ orca linear issue ENG-123
-  $ orca linear issue --current --comments
-  $ orca linear issue https://linear.app/acme/issue/ENG-123 --full --json`
+  $ yiru linear issue ENG-123
+  $ yiru linear issue --current --comments
+  $ yiru linear issue https://linear.app/acme/issue/ENG-123 --full --json`
 
-const LINEAR_SEARCH_HELP = `orca linear search
+const LINEAR_SEARCH_HELP = `yiru linear search
 
-Usage: orca linear search <query> [--limit <n>] [--workspace <id>|all] [--json]
+Usage: yiru linear search <query> [--limit <n>] [--workspace <id>|all] [--json]
 
 Search connected Linear workspaces
 
@@ -109,41 +109,41 @@ Options:
   --query <text>        Text to search across Linear issues
 
 Examples:
-  $ orca linear search "auth bug"
-  $ orca linear search ENG --workspace all --json`
+  $ yiru linear search "auth bug"
+  $ yiru linear search ENG --workspace all --json`
 
-const LINEAR_TEAM_LIST_HELP = `orca linear team list
+const LINEAR_TEAM_LIST_HELP = `yiru linear team list
 
-Usage: orca linear team list [--workspace <id>|all] [--json]
+Usage: yiru linear team list [--workspace <id>|all] [--json]
 
 List connected Linear teams`
 
-const LINEAR_TEAM_MEMBERS_HELP = `orca linear team members
+const LINEAR_TEAM_MEMBERS_HELP = `yiru linear team members
 
-Usage: orca linear team members --team <key|id> [--workspace <id>] [--json]
+Usage: yiru linear team members --team <key|id> [--workspace <id>] [--json]
 
 List Linear team members`
 
-const LINEAR_TEAM_STATES_HELP = `orca linear team states
+const LINEAR_TEAM_STATES_HELP = `yiru linear team states
 
-Usage: orca linear team states --team <key|id> [--workspace <id>] [--json]
+Usage: yiru linear team states --team <key|id> [--workspace <id>] [--json]
 
 List Linear team workflow states`
 
-const LINEAR_TEAM_LABELS_HELP = `orca linear team labels
+const LINEAR_TEAM_LABELS_HELP = `yiru linear team labels
 
-Usage: orca linear team labels --team <key|id> [--workspace <id>] [--json]
+Usage: yiru linear team labels --team <key|id> [--workspace <id>] [--json]
 
 List Linear team labels`
 
-const LINEAR_PROJECT_LIST_HELP = `orca linear project list
+const LINEAR_PROJECT_LIST_HELP = `yiru linear project list
 
-Usage: orca linear project list [--query <text>] [--limit <n>] [--workspace <id>|all] [--json]
+Usage: yiru linear project list [--query <text>] [--limit <n>] [--workspace <id>|all] [--json]
 
 List connected Linear projects`
 
-const LINEAR_LIST_HELP = `orca linear list
+const LINEAR_LIST_HELP = `yiru linear list
 
-Usage: orca linear list [--filter assigned|created|all|completed|open] [--team <key|id>] [--limit <n>] [--workspace <id>|all] [--json]
+Usage: yiru linear list [--filter assigned|created|all|completed|open] [--team <key|id>] [--limit <n>] [--workspace <id>|all] [--json]
 
 List Linear issues`

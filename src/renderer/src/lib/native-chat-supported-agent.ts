@@ -7,7 +7,7 @@ export const NATIVE_CHAT_SUPPORTED_AGENTS: ReadonlySet<string> = new Set<string>
   'openclaude',
   'codex',
   // Why: Grok writes `~/.grok/sessions/<cwd-enc>/<id>/chat_history.jsonl` and
-  // Orca already reads that for hooks/AI Vault — native chat reuses the same
+  // Yiru already reads that for hooks/AI Vault — native chat reuses the same
   // path + a Grok JSONL decoder rather than leaving Grok TUI-only.
   'grok'
 ])

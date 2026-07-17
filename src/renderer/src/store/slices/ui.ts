@@ -13,7 +13,7 @@ import type {
   JiraIssue,
   LinearIssue,
   ManualRepoOrderEntry,
-  PersistedTrustedOrcaHooks,
+  PersistedTrustedYiruHooks,
   PersistedUIState,
   StatusBarItem,
   TaskProvider,
@@ -96,7 +96,7 @@ import {
 } from '../../../../shared/workspace-statuses'
 import { clampMarkdownTocPanelWidth } from '../../../../shared/markdown-toc-panel-width'
 import { normalizeKagiSessionLink } from '../../../../shared/browser-url'
-import type { OrcaHookScriptKind } from '../../lib/orca-hook-trust'
+import type { YiruHookScriptKind } from '../../lib/yiru-hook-trust'
 import type { SettingsNavTarget } from '@/lib/settings-navigation-types'
 import {
   filterSetupScriptPromptDismissalsToValidRepos,
@@ -374,26 +374,26 @@ function sanitizePersistedRepoIds(value: unknown): string[] {
   return value.filter((repoId): repoId is string => typeof repoId === 'string')
 }
 
-function sanitizeTrustedOrcaHooks(trust: unknown): PersistedTrustedOrcaHooks {
+function sanitizeTrustedYiruHooks(trust: unknown): PersistedTrustedYiruHooks {
   if (!isPlainPersistedRecord(trust)) {
     return {}
   }
-  const next: PersistedTrustedOrcaHooks = {}
+  const next: PersistedTrustedYiruHooks = {}
   for (const [repoId, entry] of Object.entries(trust)) {
     if (!isSafePersistedRecordKey(repoId) || !isPlainPersistedRecord(entry)) {
       continue
     }
-    next[repoId] = entry as PersistedTrustedOrcaHooks[string]
+    next[repoId] = entry as PersistedTrustedYiruHooks[string]
   }
   return next
 }
 
-function filterTrustedOrcaHooksToValidRepos(
+function filterTrustedYiruHooksToValidRepos(
   trust: unknown,
   validRepoIds: Set<string>
-): PersistedTrustedOrcaHooks {
-  const sanitized = sanitizeTrustedOrcaHooks(trust)
-  const next: PersistedTrustedOrcaHooks = {}
+): PersistedTrustedYiruHooks {
+  const sanitized = sanitizeTrustedYiruHooks(trust)
+  const next: PersistedTrustedYiruHooks = {}
   for (const [repoId, entry] of Object.entries(sanitized)) {
     if (validRepoIds.has(repoId)) {
       next[repoId] = entry
@@ -402,15 +402,15 @@ function filterTrustedOrcaHooksToValidRepos(
   return next
 }
 
-function hydrateTrustedOrcaHooks(
+function hydrateTrustedYiruHooks(
   trust: unknown,
   validRepoIds: Set<string>
-): PersistedTrustedOrcaHooks {
-  const sanitized = sanitizeTrustedOrcaHooks(trust)
+): PersistedTrustedYiruHooks {
+  const sanitized = sanitizeTrustedYiruHooks(trust)
   if (validRepoIds.size === 0) {
     return sanitized
   }
-  return filterTrustedOrcaHooksToValidRepos(sanitized, validRepoIds)
+  return filterTrustedYiruHooksToValidRepos(sanitized, validRepoIds)
 }
 
 function isSafePersistedRecordKey(key: string): boolean {
@@ -813,7 +813,7 @@ export type UISlice = {
     | 'feature-wall'
     | 'feature-tips'
     | 'new-workspace-composer'
-    | 'confirm-orca-yaml-hooks'
+    | 'confirm-yiru-yaml-hooks'
   modalData: Record<string, unknown>
   openModal: (modal: UISlice['activeModal'], data?: Record<string, unknown>) => void
   closeModal: () => void
@@ -851,14 +851,14 @@ export type UISlice = {
   completeContextualTour: (id?: ContextualTourId) => void
   cancelContextualTour: (id?: ContextualTourId) => void
   markContextualToursSeen: (ids: ContextualTourId[]) => void
-  trustedOrcaHooks: PersistedTrustedOrcaHooks
-  markOrcaHookScriptConfirmed: (
+  trustedYiruHooks: PersistedTrustedYiruHooks
+  markYiruHookScriptConfirmed: (
     repoId: string,
-    kind: OrcaHookScriptKind,
+    kind: YiruHookScriptKind,
     contentHash: string
   ) => void
-  markOrcaHookRepoAlwaysTrusted: (repoId: string) => void
-  clearOrcaHookTrustForRepo: (repoId: string) => void
+  markYiruHookRepoAlwaysTrusted: (repoId: string) => void
+  clearYiruHookTrustForRepo: (repoId: string) => void
   setupScriptPromptDismissedRepoIds: string[]
   dismissSetupScriptPrompt: (repoId: string) => void
   setupGuideSidebarDismissed: boolean
@@ -1874,10 +1874,10 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       }
       return { contextualToursSeenIds: next }
     }),
-  trustedOrcaHooks: {},
-  markOrcaHookScriptConfirmed: (repoId, kind, contentHash) =>
+  trustedYiruHooks: {},
+  markYiruHookScriptConfirmed: (repoId, kind, contentHash) =>
     set((s) => {
-      const existing = s.trustedOrcaHooks[repoId]
+      const existing = s.trustedYiruHooks[repoId]
       const currentEntry = existing?.[kind]
       if (currentEntry?.contentHash === contentHash) {
         return s
@@ -1886,35 +1886,35 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
         ...existing,
         [kind]: { contentHash, approvedAt: Date.now() }
       }
-      const next = { ...s.trustedOrcaHooks, [repoId]: nextRepo }
-      window.api.ui.set({ trustedOrcaHooks: next }).catch(console.error)
-      return { trustedOrcaHooks: next }
+      const next = { ...s.trustedYiruHooks, [repoId]: nextRepo }
+      window.api.ui.set({ trustedYiruHooks: next }).catch(console.error)
+      return { trustedYiruHooks: next }
     }),
-  markOrcaHookRepoAlwaysTrusted: (repoId) =>
+  markYiruHookRepoAlwaysTrusted: (repoId) =>
     set((s) => {
-      const existing = s.trustedOrcaHooks[repoId]
+      const existing = s.trustedYiruHooks[repoId]
       if (existing?.all) {
         return s
       }
       const next = {
-        ...s.trustedOrcaHooks,
+        ...s.trustedYiruHooks,
         [repoId]: {
           ...existing,
           all: { approvedAt: Date.now() }
         }
       }
-      window.api.ui.set({ trustedOrcaHooks: next }).catch(console.error)
-      return { trustedOrcaHooks: next }
+      window.api.ui.set({ trustedYiruHooks: next }).catch(console.error)
+      return { trustedYiruHooks: next }
     }),
-  clearOrcaHookTrustForRepo: (repoId) =>
+  clearYiruHookTrustForRepo: (repoId) =>
     set((s) => {
-      if (!(repoId in s.trustedOrcaHooks)) {
+      if (!(repoId in s.trustedYiruHooks)) {
         return s
       }
-      const next = { ...s.trustedOrcaHooks }
+      const next = { ...s.trustedYiruHooks }
       delete next[repoId]
-      window.api.ui.set({ trustedOrcaHooks: next }).catch(console.error)
-      return { trustedOrcaHooks: next }
+      window.api.ui.set({ trustedYiruHooks: next }).catch(console.error)
+      return { trustedYiruHooks: next }
     }),
   setupScriptPromptDismissedRepoIds: [],
   dismissSetupScriptPrompt: (repoId) =>
@@ -2545,7 +2545,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
           typeof ui.contextualToursAutoEligible === 'boolean'
             ? ui.contextualToursAutoEligible
             : null,
-        trustedOrcaHooks: hydrateTrustedOrcaHooks(ui.trustedOrcaHooks, validRepoIds),
+        trustedYiruHooks: hydrateTrustedYiruHooks(ui.trustedYiruHooks, validRepoIds),
         setupScriptPromptDismissedRepoIds:
           validRepoIds.size === 0
             ? sanitizeSetupScriptPromptDismissals(ui.setupScriptPromptDismissedRepoIds)

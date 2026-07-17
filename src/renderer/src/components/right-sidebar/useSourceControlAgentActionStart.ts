@@ -27,8 +27,7 @@ type UseSourceControlAgentActionStartArgs = {
   groupId?: string | null
   promptDelivery: 'auto-submit' | 'draft' | 'submit-after-ready'
   launchPlatform?: NodeJS.Platform
-  /** Why: SSH hosts launch the plain `orca` shim, so the previewed command must
-   * drop the Linux-only `orca-ide` rename to match the real launch. */
+  /** Why: SSH hosts must preview the relay's public CLI command. */
   isRemote?: boolean
   launchSource: LaunchSource
   connectionUnavailable: boolean

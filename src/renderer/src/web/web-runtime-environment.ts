@@ -14,7 +14,7 @@ export type StoredWebRuntimeEnvironment = Omit<PublicKnownRuntimeEnvironment, 'e
   }[]
 }
 
-const ENVIRONMENT_STORAGE_KEY = 'orca.web.runtimeEnvironment.v1'
+const ENVIRONMENT_STORAGE_KEY = 'yiru.web.runtimeEnvironment.v1'
 
 export function readStoredWebRuntimeEnvironment(): StoredWebRuntimeEnvironment | null {
   const raw = window.localStorage.getItem(ENVIRONMENT_STORAGE_KEY)
@@ -48,7 +48,7 @@ export function createStoredWebRuntimeEnvironment(args: {
   const now = Date.now()
   return {
     id,
-    name: args.name.trim() || 'Orca Server',
+    name: args.name.trim() || 'Yiru Server',
     createdAt: now,
     updatedAt: now,
     lastUsedAt: null,

@@ -41,7 +41,7 @@ import type {
   GitPushTarget,
   GitLabWorkItem,
   LinearIssue,
-  OrcaHooks,
+  YiruHooks,
   RepoHookSettings,
   SetupAgentStartupPolicy,
   SetupDecision,
@@ -253,7 +253,7 @@ export type ComposerCardProps = {
   projectHostSetupOptions: ProjectHostSetupOption[]
   selectedProjectHostSetupId: string | null
   onProjectHostSetupChange: (setupId: string) => void
-  ephemeralVmRecipes: NonNullable<OrcaHooks['environmentRecipes']>
+  ephemeralVmRecipes: NonNullable<YiruHooks['environmentRecipes']>
   selectedEphemeralVmRecipeId: string | null
   onEphemeralVmRecipeChange: (recipeId: string | null) => void
   ephemeralVmRecipeError: string | null
@@ -525,7 +525,7 @@ export function getInitialAutoManagedWorkspaceName({
   initialLinkedWorkItem?: LinkedWorkItemSummary | null
 }): string {
   // Why: command-palette prefilled names are user input unless they exactly
-  // match the linked item seed Orca generated for a source selection.
+  // match the linked item seed Yiru generated for a source selection.
   const candidateName = draftName ?? initialName
   const seedName = getLinkedWorkItemSeedName(draftLinkedWorkItem ?? initialLinkedWorkItem)
   return candidateName && seedName && candidateName === seedName ? candidateName : ''
@@ -754,7 +754,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
   const selectedRepo = eligibleRepos.find((repo) => repo.id === repoId)
   const selectedRepoIsGit = selectedRepo ? isGitRepoKind(selectedRepo) : false
   const [ephemeralVmRecipes, setEphemeralVmRecipes] = useState<
-    NonNullable<OrcaHooks['environmentRecipes']>
+    NonNullable<YiruHooks['environmentRecipes']>
   >([])
   const [selectedEphemeralVmRecipeId, setSelectedEphemeralVmRecipeId] = useState<string | null>(
     null
@@ -780,8 +780,8 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
         )
     return getAgentLaunchPlatformForRepo(selectedRepo, projectRuntime)
   }, [activeRepoId, projects, repos, selectedRepo, settings, worktreesByRepo])
-  // Why: SSH remotes deploy the CLI shim as plain `orca`, so the Linux-only
-  // `orca-ide` rename must not be applied to remote launch commands.
+  // Why: SSH remotes deploy the CLI shim as plain `yiru`, so the Linux-only
+  // SSH remotes must use the relay's public CLI command.
   const selectedRepoIsRemote = selectedRepo ? repoIsRemote(selectedRepo) : false
   const selectedRepoStartupShell = resolveLocalWindowsAgentStartupShell({
     platform: selectedRepoAgentLaunchPlatform,
@@ -1154,7 +1154,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     [detectedAgentList]
   )
 
-  const [yamlHooks, setYamlHooks] = useState<OrcaHooks | null>(null)
+  const [yamlHooks, setYamlHooks] = useState<YiruHooks | null>(null)
   const [checkedHooksRepoId, setCheckedHooksRepoId] = useState<string | null>(null)
   const [issueCommandTemplate, setIssueCommandTemplate] = useState('')
   const [hasLoadedIssueCommand, setHasLoadedIssueCommand] = useState(false)
@@ -1385,7 +1385,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     return promise
   }, [])
   const commitHookCheckIfCurrent = useCallback(
-    (targetRepoId: string, hooks: OrcaHooks | null): boolean => {
+    (targetRepoId: string, hooks: YiruHooks | null): boolean => {
       if (repoIdRef.current !== targetRepoId) {
         return false
       }
@@ -2489,7 +2489,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
         }
         return { filePaths: [], folderPaths: [] }
       }
-      const destinationDir = joinPath(targetRepoPath, '.orca/drops')
+      const destinationDir = joinPath(targetRepoPath, '.yiru/drops')
       const { results } = await importExternalPathsToRuntime(
         {
           settings: targetSettings,
@@ -2854,7 +2854,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       // linkedPR state stay in a single code path.
       applyLinkedWorkItem(item, { preserveBranchNameOverride: Boolean(nextBranchNameOverride) })
       // Why: starting a worktree from a PR is a strong hint for what the
-      // worktree's comment should surface (`orca worktree current`, sidebar).
+      // worktree's comment should surface (`yiru worktree current`, sidebar).
       // Prefill the note if it's empty or still equal to a prior auto-fill, so
       // we don't overwrite anything the user has typed.
       const identity = resolveGitHubWorkItemIdentity(item)

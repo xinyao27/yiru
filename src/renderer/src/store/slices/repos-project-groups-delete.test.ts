@@ -250,7 +250,7 @@ describe('project group deletion store routing', () => {
       failedProjectRemovals: [
         {
           projectId: 'nested',
-          reason: 'Project remained in Orca after removeProject completed.'
+          reason: 'Project remained in Yiru after removeProject completed.'
         }
       ]
     })

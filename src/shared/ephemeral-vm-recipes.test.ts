@@ -58,7 +58,7 @@ describe('parseEphemeralVmRecipeResult', () => {
     }
   })
 
-  it('parses an orca-server connection result', () => {
+  it('parses a yiru-server connection result', () => {
     const pairingCode = makePairingCode()
 
     expect(
@@ -66,7 +66,7 @@ describe('parseEphemeralVmRecipeResult', () => {
         JSON.stringify({
           schemaVersion: 1,
           connection: {
-            type: 'orca-server',
+            type: 'yiru-server',
             pairingCode,
             projectRoot: '/workspace/repo'
           }
@@ -77,7 +77,7 @@ describe('parseEphemeralVmRecipeResult', () => {
       result: {
         schemaVersion: 1,
         connection: {
-          type: 'orca-server',
+          type: 'yiru-server',
           pairingCode,
           projectRoot: '/workspace/repo'
         }
@@ -165,7 +165,7 @@ describe('parseEphemeralVmRecipeResult', () => {
       )
     ).toEqual({
       ok: false,
-      error: 'Recipe result pairingCode is not a valid Orca pairing code.'
+      error: 'Recipe result pairingCode is not a valid Yiru pairing code.'
     })
   })
 
@@ -242,7 +242,7 @@ describe('parseEphemeralVmRecipeResult', () => {
       })
     ).toEqual({
       schemaVersion: 1,
-      pairingCode: 'orca://pair?code=[redacted]',
+      pairingCode: 'yiru://pair?code=[redacted]',
       projectRoot: '/workspace/repo',
       userData: {
         providerResourceId: 'sandbox-123',

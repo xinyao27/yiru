@@ -6,13 +6,13 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MobileRelayStatus } from '../../../../shared/mobile-relay-status'
-import type { OrcaProfileAuthStatus } from '../../../../shared/orca-profiles'
+import type { YiruProfileAuthStatus } from '../../../../shared/yiru-profiles'
 import { MobilePairingConnectionOptions } from './MobilePairingConnectionOptions'
 
 type MobileRelayStoreState = {
-  orcaProfileAuthStatus: OrcaProfileAuthStatus | null
-  orcaProfileConnecting: boolean
-  connectCurrentOrcaProfile: () => Promise<null>
+  yiruProfileAuthStatus: YiruProfileAuthStatus | null
+  yiruProfileConnecting: boolean
+  connectCurrentYiruProfile: () => Promise<null>
 }
 
 const mocks = vi.hoisted(() => ({
@@ -48,14 +48,14 @@ describe('MobilePairingConnectionOptions', () => {
       }
     })
     mocks.state = {
-      orcaProfileAuthStatus: {
+      yiruProfileAuthStatus: {
         activeProfileId: 'profile-1',
         configured: true,
         state: 'local',
         persistence: 'none'
       },
-      orcaProfileConnecting: false,
-      connectCurrentOrcaProfile: connect
+      yiruProfileConnecting: false,
+      connectCurrentYiruProfile: connect
     }
   })
 
@@ -65,30 +65,30 @@ describe('MobilePairingConnectionOptions', () => {
     const user = userEvent.setup()
     render(<MobilePairingConnectionOptions value="local-only" onChange={vi.fn()} />)
 
-    expect(screen.getByRole('switch', { name: /connect with Orca Relay/i })).toBeDisabled()
-    expect(screen.getByRole('switch', { name: /connect with Orca Relay/i })).not.toBeChecked()
+    expect(screen.getByRole('switch', { name: /connect with Yiru Relay/i })).toBeDisabled()
+    expect(screen.getByRole('switch', { name: /connect with Yiru Relay/i })).not.toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(connect).toHaveBeenCalledOnce()
   })
 
   it('selects either automatic fallback or local-only pairing when signed in', async () => {
     mocks.state = {
-      orcaProfileAuthStatus: {
+      yiruProfileAuthStatus: {
         activeProfileId: 'profile-1',
         configured: true,
         state: 'connected',
         persistence: 'encrypted'
       },
-      orcaProfileConnecting: false,
-      connectCurrentOrcaProfile: connect
+      yiruProfileConnecting: false,
+      connectCurrentYiruProfile: connect
     }
     const onChange = vi.fn()
     const user = userEvent.setup()
     render(<MobilePairingConnectionOptions value="automatic" onChange={onChange} />)
 
     await waitFor(() => expect(screen.getByText('Ready')).toBeVisible())
-    expect(screen.getByRole('switch', { name: /connect with Orca Relay/i })).toBeChecked()
-    await user.click(screen.getByRole('switch', { name: /connect with Orca Relay/i }))
+    expect(screen.getByRole('switch', { name: /connect with Yiru Relay/i })).toBeChecked()
+    await user.click(screen.getByRole('switch', { name: /connect with Yiru Relay/i }))
     expect(onChange).toHaveBeenCalledWith('local-only')
     statusListener?.('standby')
     await waitFor(() => expect(screen.getByText('Available')).toBeVisible())
@@ -108,31 +108,31 @@ describe('MobilePairingConnectionOptions', () => {
 
     await user.click(screen.getByRole('button', { name: 'Android APK' }))
     expect(window.api.shell.openUrl).toHaveBeenCalledWith(
-      'https://github.com/stablyai/orca/releases/download/mobile-android-v0.0.31/app-release.apk'
+      'https://github.com/stablyai/yiru/releases/download/mobile-android-v0.0.31/app-release.apk'
     )
   })
 
   it('keeps the compact onboarding choices structurally stable across modes', async () => {
     mocks.state = {
-      orcaProfileAuthStatus: {
+      yiruProfileAuthStatus: {
         activeProfileId: 'profile-1',
         configured: true,
         state: 'connected',
         persistence: 'encrypted'
       },
-      orcaProfileConnecting: false,
-      connectCurrentOrcaProfile: connect
+      yiruProfileConnecting: false,
+      connectCurrentYiruProfile: connect
     }
     const props = { compact: true, onChange: vi.fn() }
     const { rerender } = render(<MobilePairingConnectionOptions {...props} value="automatic" />)
 
-    expect(screen.getByRole('switch', { name: /connect with Orca Relay/i })).toBeChecked()
+    expect(screen.getByRole('switch', { name: /connect with Yiru Relay/i })).toBeChecked()
     expect(screen.getByText(/direct connection when available/i)).toBeVisible()
     expect(screen.queryByText('Ready')).toBeNull()
 
     rerender(<MobilePairingConnectionOptions {...props} value="local-only" />)
-    expect(screen.getByRole('switch', { name: /connect with Orca Relay/i })).not.toBeChecked()
+    expect(screen.getByRole('switch', { name: /connect with Yiru Relay/i })).not.toBeChecked()
     expect(screen.getByText(/direct connection when available/i)).toBeVisible()
-    expect(screen.queryByText(/without connecting this phone through Orca Relay/i)).toBeNull()
+    expect(screen.queryByText(/without connecting this phone through Yiru Relay/i)).toBeNull()
   })
 })

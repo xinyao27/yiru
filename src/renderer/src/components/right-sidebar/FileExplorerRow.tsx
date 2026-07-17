@@ -324,7 +324,7 @@ export function shouldShowRemoteDownloadAction(
   return (
     !node.isDirectory &&
     Boolean(connectionId || runtimeDownloadContext) &&
-    (globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__ !== true
+    (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ !== true
   )
 }
 
@@ -338,7 +338,7 @@ export function shouldShowCopyFileAction(
   return (
     (!connectionId || !node.isDirectory) &&
     selectionSize === 1 &&
-    (globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__ !== true
+    (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ !== true
   )
 }
 
@@ -470,7 +470,7 @@ export function FileExplorerRow({
       onNativeDragExpandDir,
       onMoveDrop
     })
-  const handleOpenInOrcaBrowser = useCallback(() => {
+  const handleOpenInYiruBrowser = useCallback(() => {
     if (!activeWorktreeId) {
       return
     }
@@ -730,11 +730,11 @@ export function FileExplorerRow({
           </ContextMenuItem>
         )}
         {!node.isDirectory && activeWorktreeId && (
-          <ContextMenuItem onClick={handleOpenInOrcaBrowser}>
+          <ContextMenuItem onClick={handleOpenInYiruBrowser}>
             <Globe />
             {translate(
               'auto.components.right.sidebar.FileExplorerRow.dd112c81d2',
-              'Open in Orca Browser'
+              'Open in Yiru Browser'
             )}
           </ContextMenuItem>
         )}

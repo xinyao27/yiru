@@ -1,6 +1,6 @@
 # Feature Education Retention Analytics
 
-This document records how Orca should use contextual-tour telemetry to evaluate retention and feature adoption.
+This document records how Yiru should use contextual-tour telemetry to evaluate retention and feature adoption.
 
 ## Decision
 

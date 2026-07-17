@@ -53,7 +53,7 @@ export function MobileHostCard(props: {
         ) : null}
         {props.verdict.kind === 'unreachable' && !props.host.relay ? (
           <Text style={styles.discoveryHint} numberOfLines={2}>
-            Update desktop Orca and sign in to connect from anywhere
+            Update desktop Yiru and sign in to connect from anywhere
           </Text>
         ) : null}
       </View>

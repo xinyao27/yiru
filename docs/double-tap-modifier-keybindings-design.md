@@ -197,7 +197,7 @@ loses focus.
 `DoubleTap+Shift` is a canonical binding string, so `findKeybindingConflicts`
 compares it like any other binding — two actions sharing a double-tap surface a
 conflict in the UI. Terminal-policy gating (`keybindingIsActiveInContext`,
-orca-first / terminal-first) applies unchanged. Note that a bare modifier press
+yiru-first / terminal-first) applies unchanged. Note that a bare modifier press
 emits no terminal bytes, so detecting a double-tap never steals readline input;
 policy is still honored for consistency.
 
@@ -205,7 +205,7 @@ policy is still honored for consistency.
 
 - **Record:** row keydown/keyup → row detector → `{ doubleTapModifier: M }` →
   `keybindingFromInputForAction` → `DoubleTap+<Mod>` → stored as
-  `["DoubleTap+Shift"]` in `~/.orca/keybindings.json`.
+  `["DoubleTap+Shift"]` in `~/.yiru/keybindings.json`.
 - **Runtime:** physical modifier taps → main + renderer detectors → synthetic
   `{ doubleTapModifier: M }` → existing matchers → action dispatched (main IPC
   for allowlisted actions, renderer inline for the rest).

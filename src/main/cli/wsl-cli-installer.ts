@@ -5,7 +5,6 @@ import type { CliInstallStatus } from '../../shared/cli-install-types'
 import { getDefaultWslDistro } from '../wsl'
 import { CliInstaller } from './cli-installer'
 import {
-  buildManagedLegacyRemoveCommand,
   buildRegistrationLockPrelude,
   buildSafeRemoveCommand,
   buildSafeReplaceGuard,
@@ -21,8 +20,7 @@ import {
 
 const MANAGED_MARKER = getWslLauncherMarker()
 const BRIDGE_MANAGED_MARKER = getWslBridgeMarker()
-const WSL_COMMAND_NAME = 'orca-ide'
-const LEGACY_WSL_COMMAND_NAME = 'orca'
+const WSL_COMMAND_NAME = 'yiru'
 const WSL_COMMAND_TIMEOUT_MS = 10_000
 
 function normalizeManagedScriptContent(content: string): string {
@@ -74,7 +72,7 @@ export class WslCliInstaller {
         state: 'not_installed',
         currentTarget: null,
         pathConfigured: ready.pathConfigured,
-        detail: `Register ${ready.commandPath} to use Orca from WSL.`
+        detail: `Register ${ready.commandPath} to use Yiru from WSL.`
       })
     }
 
@@ -86,7 +84,7 @@ export class WslCliInstaller {
         state: 'conflict',
         currentTarget: null,
         pathConfigured: ready.pathConfigured,
-        detail: `${ready.commandPath} exists but is not an Orca launcher script.`
+        detail: `${ready.commandPath} exists but is not a Yiru launcher script.`
       })
     }
 
@@ -123,7 +121,7 @@ export class WslCliInstaller {
         detail:
           bridgeContent === null || bridgeManaged
             ? `${ready.commandPath} is missing its PowerShell bridge.`
-            : `${ready.bridgePath} exists but is not managed by Orca.`
+            : `${ready.bridgePath} exists but is not managed by Yiru.`
       })
     }
 
@@ -139,10 +137,10 @@ export class WslCliInstaller {
       currentTarget,
       pathConfigured: ready.pathConfigured,
       detail: !managed
-        ? `${ready.commandPath} exists but is not managed by Orca.`
+        ? `${ready.commandPath} exists but is not managed by Yiru.`
         : bridgeConflict
-          ? `${ready.bridgePath} exists but is not managed by Orca.`
-          : `${ready.commandPath} points to a different Orca launcher.`
+          ? `${ready.bridgePath} exists but is not managed by Yiru.`
+          : `${ready.commandPath} points to a different Yiru launcher.`
     })
   }
 
@@ -161,7 +159,7 @@ export class WslCliInstaller {
     }
     if (status.state === 'conflict') {
       // Why: a user-owned bridge conflicts with repair, but the launcher is
-      // still Orca-managed and must remain registered for future reconciliation.
+      // still Yiru-managed and must remain registered for future reconciliation.
       return { changed: false, managed: status.currentTarget !== null, status }
     }
 
@@ -169,32 +167,7 @@ export class WslCliInstaller {
       return { changed: true, managed: true, status: await this.install(status) }
     }
 
-    const legacyCommandPath = status.commandPath
-      ? `${getPosixDirname(status.commandPath)}/${LEGACY_WSL_COMMAND_NAME}`
-      : null
-    if (!legacyCommandPath || !this.distro) {
-      return { changed: false, managed: status.state === 'installed', status }
-    }
-
-    const legacyContent = await this.readCommandFile(this.distro, legacyCommandPath)
-    const legacyManaged =
-      typeof legacyContent === 'string' && legacyContent.includes(MANAGED_MARKER)
-    if (!legacyManaged) {
-      return { changed: false, managed: status.state === 'installed', status }
-    }
-
-    if (
-      status.commandPath &&
-      (await this.isBridgeConflict(this.distro, getBridgePathFromCommandPath(status.commandPath)))
-    ) {
-      // Why: adopting the legacy command would fail install()'s bridge guard
-      // forever; stay registered so reconciliation retries after an update.
-      return { changed: false, managed: true, status }
-    }
-
-    // Why: a legacy-only managed command proves the user opted into WSL CLI
-    // registration; install the current name before removing that owned script.
-    return { changed: true, managed: true, status: await this.install(status) }
+    return { changed: false, managed: status.state === 'installed', status }
   }
 
   async install(precomputedStatus?: CliInstallStatus): Promise<CliInstallStatus> {
@@ -205,7 +178,7 @@ export class WslCliInstaller {
       throw new Error(status.detail ?? 'WSL CLI registration is unavailable.')
     }
     if (status.state === 'conflict') {
-      throw new Error(`Refusing to replace non-Orca command at ${status.commandPath}.`)
+      throw new Error(`Refusing to replace non-Yiru command at ${status.commandPath}.`)
     }
 
     // Why: the launcher and PowerShell bridge are one registration; the
@@ -220,9 +193,6 @@ export class WslCliInstaller {
         buildRegistrationLockPrelude(status.commandPath),
         `command_tmp=${quoteShell(`${status.commandPath}.tmp`)}.$$`,
         `bridge_path=${quoteShell(getBridgePathFromCommandPath(status.commandPath))}`,
-        `legacy_command_path=${quoteShell(
-          `${getPosixDirname(status.commandPath)}/${LEGACY_WSL_COMMAND_NAME}`
-        )}`,
         'bridge_tmp="${bridge_path}.tmp.$$"',
         'bridge_backup="${bridge_tmp}.backup"',
         'bridge_had_original=0',
@@ -243,12 +213,12 @@ export class WslCliInstaller {
           getBridgePathFromCommandPath(status.commandPath),
           BRIDGE_MANAGED_MARKER
         ),
-        `cat > "$command_tmp" <<'ORCA_WSL_CLI'`,
+        `cat > "$command_tmp" <<'YIRU_WSL_CLI'`,
         buildWslLauncher(status.launcherPath, getBridgePathFromCommandPath(status.commandPath)),
-        'ORCA_WSL_CLI',
-        `cat > "$bridge_tmp" <<'ORCA_WSL_BRIDGE'`,
+        'YIRU_WSL_CLI',
+        `cat > "$bridge_tmp" <<'YIRU_WSL_BRIDGE'`,
         buildWslBridgeScript(),
-        'ORCA_WSL_BRIDGE',
+        'YIRU_WSL_BRIDGE',
         'chmod 755 "$command_tmp"',
         'chmod 644 "$bridge_tmp"',
         buildSafeReplaceGuard(status.commandPath, MANAGED_MARKER),
@@ -262,9 +232,6 @@ export class WslCliInstaller {
         `mv -f "$command_tmp" ${quoteShell(status.commandPath)}`,
         'committed=1',
         'rm -f "$bridge_backup"',
-        // Why: the command was renamed to avoid GNOME Orca; remove only the
-        // old Orca-managed WSL wrapper after the replacement has committed.
-        buildManagedLegacyRemoveCommand('"$legacy_command_path"'),
         'trap - EXIT'
       ].join('\n')
     )
@@ -276,26 +243,14 @@ export class WslCliInstaller {
     if (!status.supported || !status.commandPath) {
       return status
     }
-    const legacyCommandPath = `${getPosixDirname(status.commandPath)}/${LEGACY_WSL_COMMAND_NAME}`
     if (status.state === 'not_installed') {
-      // Why: a managed legacy `orca` left behind would later be re-adopted by
-      // startup reconciliation as opt-in proof, silently undoing this removal.
-      await this.run(
-        this.distro as string,
-        ['set -euo pipefail', buildManagedLegacyRemoveCommand(quoteShell(legacyCommandPath))].join(
-          '\n'
-        )
-      )
       return status
     }
     if (status.state === 'conflict') {
-      throw new Error(`Refusing to remove non-Orca command at ${status.commandPath}.`)
+      throw new Error(`Refusing to remove non-Yiru command at ${status.commandPath}.`)
     }
 
-    await this.run(
-      this.distro as string,
-      buildSafeRemoveCommand(status.commandPath, legacyCommandPath)
-    )
+    await this.run(this.distro as string, buildSafeRemoveCommand(status.commandPath))
     return this.getStatus()
   }
 
@@ -328,7 +283,7 @@ export class WslCliInstaller {
       return {
         status: this.unsupported(
           hostStatus.unsupportedReason ?? 'launcher_missing',
-          hostStatus.detail ?? 'The Windows Orca CLI launcher is missing.'
+          hostStatus.detail ?? 'The Windows Yiru CLI launcher is missing.'
         )
       }
     }
@@ -351,13 +306,12 @@ export class WslCliInstaller {
       return {
         status: this.unsupported(
           'launcher_missing',
-          'WSL Windows interop is unavailable; Orca cannot launch the Windows CLI from WSL.'
+          'WSL Windows interop is unavailable; Yiru cannot launch the Windows CLI from WSL.'
         )
       }
     }
 
     const pathDirectory = `${home}/.local/bin`
-    // Why: matches the Linux CLI rename to `orca-ide` (avoids GNOME Orca conflict).
     const commandPath = `${pathDirectory}/${WSL_COMMAND_NAME}`
     const pathConfigured =
       (
@@ -384,20 +338,20 @@ export class WslCliInstaller {
       distro,
       [
         `if [ -L ${quoteShell(commandPath)} ]; then`,
-        '  printf __ORCA_NOT_FILE__',
+        '  printf __YIRU_NOT_FILE__',
         `elif [ ! -e ${quoteShell(commandPath)} ]; then`,
-        '  printf __ORCA_MISSING__',
+        '  printf __YIRU_MISSING__',
         `elif [ ! -f ${quoteShell(commandPath)} ]; then`,
-        '  printf __ORCA_NOT_FILE__',
+        '  printf __YIRU_NOT_FILE__',
         'else',
         `  cat ${quoteShell(commandPath)}`,
         'fi'
       ].join('\n')
     )
-    if (output === '__ORCA_MISSING__') {
+    if (output === '__YIRU_MISSING__') {
       return null
     }
-    if (output === '__ORCA_NOT_FILE__') {
+    if (output === '__YIRU_NOT_FILE__') {
       return 'not_file'
     }
     return output

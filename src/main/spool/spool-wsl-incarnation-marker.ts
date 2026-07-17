@@ -3,10 +3,10 @@ import { isSpoolIncarnationMarkerId } from '../../shared/spool/spool-incarnation
 import { parseWslUncPath } from '../../shared/wsl-paths'
 import { SpoolWorktreeIncarnationHostError } from './spool-worktree-incarnation'
 
-const MARKER_RESULT_PREFIX = '__ORCA_SPOOL_MARKER_ID__'
-const MARKER_INVALID = '__ORCA_SPOOL_MARKER_INVALID__'
-const MARKER_HOST_UNAVAILABLE = '__ORCA_SPOOL_MARKER_HOST_UNAVAILABLE__'
-const MARKER_FILENAMES = new Set(['orca-spool-incarnation-v1', '.orca-spool-incarnation-v1'])
+const MARKER_RESULT_PREFIX = '__YIRU_SPOOL_MARKER_ID__'
+const MARKER_INVALID = '__YIRU_SPOOL_MARKER_INVALID__'
+const MARKER_HOST_UNAVAILABLE = '__YIRU_SPOOL_MARKER_HOST_UNAVAILABLE__'
+const MARKER_FILENAMES = new Set(['yiru-spool-incarnation-v1', '.yiru-spool-incarnation-v1'])
 const WSL_MARKER_TIMEOUT_MS = 15_000
 
 const WSL_MARKER_SCRIPT = [
@@ -114,7 +114,7 @@ export function readOrCreateSpoolWslIncarnationMarker(
         'sh',
         '-c',
         WSL_MARKER_SCRIPT,
-        'orca-spool-marker',
+        'yiru-spool-marker',
         parsed.linuxPath,
         filename,
         proposedMarkerId

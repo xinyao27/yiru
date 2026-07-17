@@ -15,7 +15,7 @@ import {
 const initialAppStoreState = useAppStore.getState()
 
 afterEach(() => {
-  delete (globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__
+  delete (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__
   vi.unstubAllGlobals()
   resetWebSessionTabsSnapshotFreshnessForTests()
   resetWebRuntimeWakeTerminalRespawnForTests()
@@ -311,7 +311,7 @@ describe('activateAndRevealWorktree created agent reopen', () => {
       ok: true,
       result: { repoId: worktree.repoId, worktreeId: worktree.id, activated: true }
     })
-    ;(globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__ = true
+    ;(globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ = true
     vi.stubGlobal('window', {
       api: {
         runtimeEnvironments: {
@@ -375,7 +375,7 @@ describe('activateAndRevealWorktree created agent reopen', () => {
       ok: true,
       result: { repoId: worktree.repoId, worktreeId: worktree.id, activated: true }
     })
-    ;(globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__ = true
+    ;(globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ = true
     vi.stubGlobal('window', {
       api: {
         runtimeEnvironments: {
@@ -445,7 +445,7 @@ describe('activateAndRevealWorktree created agent reopen', () => {
       ok: true,
       result: { repoId: worktree.repoId, worktreeId: worktree.id, activated: true }
     })
-    ;(globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__ = true
+    ;(globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ = true
     vi.stubGlobal('window', {
       api: {
         runtimeEnvironments: {
@@ -480,7 +480,7 @@ describe('activateAndRevealWorktree created agent reopen', () => {
       activeTabIdByWorktree: {},
       tabBarOrderByWorktree: {},
       settings: {
-        ...getDefaultSettings('/workspace/.orca-workspaces'),
+        ...getDefaultSettings('/workspace/.yiru-workspaces'),
         agentCmdOverrides: {},
         activeRuntimeEnvironmentId: 'web-runtime-1',
         setupScriptLaunchMode: 'new-tab'
@@ -502,7 +502,7 @@ describe('activateAndRevealWorktree created agent reopen', () => {
   it('does not respawn when the host snapshot still has terminal tabs', async () => {
     const worktree = makeWorktree()
     const callRuntimeEnvironment = vi.fn()
-    ;(globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__ = true
+    ;(globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ = true
 
     useAppStore.setState({
       repos: [
@@ -531,7 +531,7 @@ describe('activateAndRevealWorktree created agent reopen', () => {
       },
       ptyIdsByTabId: { 'tab-1': [] },
       settings: {
-        ...getDefaultSettings('/workspace/.orca-workspaces'),
+        ...getDefaultSettings('/workspace/.yiru-workspaces'),
         activeRuntimeEnvironmentId: 'web-runtime-1'
       },
       reconcileWorktreeTabModel: vi.fn(() => ({
@@ -583,7 +583,7 @@ describe('activateAndRevealWorktree created agent reopen', () => {
         ok: true,
         result: { tabId: 'host-tab-1', terminal: 'term_host' }
       })
-    ;(globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__ = true
+    ;(globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ = true
     vi.stubGlobal('window', {
       api: {
         runtimeEnvironments: {
@@ -633,7 +633,7 @@ describe('activateAndRevealWorktree created agent reopen', () => {
       activeTabIdByWorktree: {},
       tabBarOrderByWorktree: {},
       settings: {
-        ...getDefaultSettings('/workspace/.orca-workspaces'),
+        ...getDefaultSettings('/workspace/.yiru-workspaces'),
         agentCmdOverrides: {},
         activeRuntimeEnvironmentId: 'web-runtime-1',
         setupScriptLaunchMode: 'new-tab'
@@ -665,7 +665,7 @@ describe('activateAndRevealWorktree created agent reopen', () => {
       ok: true,
       result: { tabId: 'host-tab-1', terminal: 'term_host' }
     })
-    ;(globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__ = true
+    ;(globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ = true
     vi.stubGlobal('window', {
       api: {
         runtimeEnvironments: {
@@ -703,7 +703,7 @@ describe('activateAndRevealWorktree created agent reopen', () => {
       },
       ptyIdsByTabId: { 'tab-1': [] },
       settings: {
-        ...getDefaultSettings('/workspace/.orca-workspaces'),
+        ...getDefaultSettings('/workspace/.yiru-workspaces'),
         activeRuntimeEnvironmentId: 'focused-runtime'
       },
       reconcileWorktreeTabModel: vi.fn(() => ({

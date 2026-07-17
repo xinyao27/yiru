@@ -11,8 +11,8 @@ import {
   _linearAgentSkillSetupPromptInternalsForTests
 } from './LinearAgentSkillSetupPrompt'
 
-const HOST_DISMISS_STORAGE_KEY = 'orca.linearTicketsSkill.setupDismissed.host'
-const FEDORA_DISMISS_STORAGE_KEY = 'orca.linearTicketsSkill.setupDismissed.wsl.Fedora'
+const HOST_DISMISS_STORAGE_KEY = 'yiru.linearTicketsSkill.setupDismissed.host'
+const FEDORA_DISMISS_STORAGE_KEY = 'yiru.linearTicketsSkill.setupDismissed.wsl.Fedora'
 
 const projectHostRuntime: ProjectExecutionRuntimeResolution = {
   status: 'resolved',
@@ -60,8 +60,8 @@ vi.mock('@/hooks/useInstalledAgentSkills', async (importOriginal) => ({
 
 vi.mock('@/lib/agent-skill-cli-prerequisite', () => ({
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE: 'CLI registration notice',
-  ensureOrcaCliAvailableForAgentSkillTerminal: mocks.ensureCli,
-  isOrcaCliAvailableOnPath: (status: CliInstallStatus | null | undefined) =>
+  ensureYiruCliAvailableForAgentSkillTerminal: mocks.ensureCli,
+  isYiruCliAvailableOnPath: (status: CliInstallStatus | null | undefined) =>
     status?.state === 'installed' && status.pathConfigured
 }))
 
@@ -123,15 +123,15 @@ function installLocalStorageShim(): void {
 function cliStatus(overrides: Partial<CliInstallStatus>): CliInstallStatus {
   return {
     platform: 'darwin',
-    commandName: 'orca',
-    commandPath: '/usr/local/bin/orca',
+    commandName: 'yiru',
+    commandPath: '/usr/local/bin/yiru',
     pathDirectory: '/usr/local/bin',
     pathConfigured: true,
-    launcherPath: '/Applications/Orca.app/Contents/MacOS/Orca',
+    launcherPath: '/Applications/Yiru.app/Contents/MacOS/Yiru',
     installMethod: 'symlink',
     supported: true,
     state: 'installed',
-    currentTarget: '/Applications/Orca.app/Contents/MacOS/Orca',
+    currentTarget: '/Applications/Yiru.app/Contents/MacOS/Yiru',
     unsupportedReason: null,
     detail: null,
     ...overrides
@@ -238,7 +238,7 @@ describe('LinearAgentSkillSetupPrompt', () => {
     const rendered = await renderPrompt({ linked: true, remote: false })
 
     expect(rendered.textContent).toContain('Set up Linear agent skill')
-    expect(rendered.textContent).toContain('Orca CLI and Linear agent skill are missing')
+    expect(rendered.textContent).toContain('Yiru CLI and Linear agent skill are missing')
     expect(rendered.textContent).toContain('Install it for host agent handoffs')
     expect(mocks.useInstalledAgentSkillNames).toHaveBeenCalledWith(
       LINEAR_AGENT_SKILL_NAMES,
@@ -348,7 +348,7 @@ describe('LinearAgentSkillSetupPrompt', () => {
     expect(mocks.panelProps.at(-1)).toEqual(
       expect.objectContaining({
         installedCommand:
-          "wsl.exe -d 'Fedora' -- bash -lc 'npx skills update orca-linear --global'",
+          "wsl.exe -d 'Fedora' -- bash -lc 'npx skills update yiru-linear --global'",
         terminalShellOverride: 'powershell.exe',
         getPrerequisiteStatus: expect.any(Function)
       })
@@ -438,7 +438,7 @@ describe('LinearAgentSkillSetupPrompt', () => {
     })
 
     expect(document.body.querySelector('[data-testid="linear-skill-inline-panel"]')).not.toBeNull()
-    expect(document.body.textContent).toContain('orca-linear')
+    expect(document.body.textContent).toContain('yiru-linear')
 
     const installButton = Array.from(document.body.querySelectorAll('button')).find(
       (button) => button.textContent === 'Mock install'
@@ -459,7 +459,7 @@ describe('LinearAgentSkillSetupPrompt', () => {
     expect(document.body.textContent).toContain(
       'Enable agents to read and edit the attached Linear ticket.'
     )
-    expect(document.body.textContent).toContain('Orca CLI and Linear agent skill are missing.')
+    expect(document.body.textContent).toContain('Yiru CLI and Linear agent skill are missing.')
     expect(document.body.textContent).toContain('Mock install')
     expect(mocks.panelProps.at(-1)).toEqual(
       expect.objectContaining({
@@ -691,7 +691,7 @@ describe('LinearAgentSkillSetupPrompt', () => {
     expect(document.body.textContent).toContain(
       'Enable agents to read and edit the attached Linear ticket.'
     )
-    expect(document.body.textContent).toContain('Orca CLI is missing.')
+    expect(document.body.textContent).toContain('Yiru CLI is missing.')
     expect(document.body.textContent).not.toContain('Linear ticket access is ready')
   })
 
@@ -734,7 +734,7 @@ describe('LinearAgentSkillSetupPrompt', () => {
     expect(document.body.textContent).toContain(
       'Enable agents to read and edit the attached Linear ticket.'
     )
-    expect(document.body.textContent).toContain('Orca CLI is missing.')
+    expect(document.body.textContent).toContain('Yiru CLI is missing.')
     expect(document.body.textContent).not.toContain('Linear ticket access is ready')
   })
 
@@ -774,7 +774,7 @@ describe('LinearAgentSkillSetupPrompt', () => {
       'Enable agents to read and edit the attached Linear ticket.'
     )
     expect(document.body.textContent).toContain('Linear agent skill is missing.')
-    expect(document.body.textContent).not.toContain('Orca CLI is missing.')
+    expect(document.body.textContent).not.toContain('Yiru CLI is missing.')
   })
 
   it('ignores older same-context CLI refreshes that finish after a newer Re-check', async () => {

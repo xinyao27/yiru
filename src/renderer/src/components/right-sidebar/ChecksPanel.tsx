@@ -2275,7 +2275,7 @@ export default function ChecksPanel(): React.JSX.Element {
   )
 
   // Why: force a freshness check on each "entry" into the Checks tab so PRs
-  // opened outside Orca, externally force-pushed heads, and stale checks/comments
+  // opened outside Yiru, externally force-pushed heads, and stale checks/comments
   // appear without waiting for the cache TTL. The grace window suppresses
   // duplicate fetches from rapid show/hide toggles. See
   // docs/refresh-on-checks-tab.md.
@@ -3694,7 +3694,7 @@ export default function ChecksPanel(): React.JSX.Element {
   const shouldShowReviewTriageStrip =
     activeConflictReview !== null || getBrokenChecks(checks).length > 0
   // Why: mirror openHttpLink's global routing inputs so the hint only appears
-  // when the actual plain-click path would open inside Orca.
+  // when the actual plain-click path would open inside Yiru.
   const showHostedReviewSystemBrowserHint =
     Boolean(activeWorktreeId) &&
     settings?.openLinksInApp === true &&

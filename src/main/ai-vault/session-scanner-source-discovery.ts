@@ -115,10 +115,10 @@ export function codexSessionRootDirs(
   return uniqueCodexSessionsDirs([
     options.codexSessionsDir ?? CODEX_SESSIONS_DIR,
     ...wslHomeDirs.map((homeDir) => join(homeDir, '.codex', 'sessions')),
-    // Why: Orca-launched WSL Codex sessions use an Orca-owned CODEX_HOME,
+    // Why: Yiru-launched WSL Codex sessions use a Yiru-owned CODEX_HOME,
     // not the user's default ~/.codex history root.
     ...wslHomeDirs.map((homeDir) =>
-      join(homeDir, '.local', 'share', 'orca', 'codex-runtime-home', 'home', 'sessions')
+      join(homeDir, '.local', 'share', 'yiru', 'codex-runtime-home', 'home', 'sessions')
     ),
     ...(options.additionalCodexSessionsDirs ?? [])
   ])

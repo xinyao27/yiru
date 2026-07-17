@@ -2,21 +2,21 @@
 
 ## Problem
 
-GitHub issue [#5864](https://github.com/stablyai/orca/issues/5864) reports that Orca on Windows v0.14.80 fails to delete a workspace created from a project `+` button:
+GitHub issue [#5864](https://github.com/stablyai/yiru/issues/5864) reports that Yiru on Windows v0.14.80 fails to delete a workspace created from a project `+` button:
 
-`Error invoking remote method 'worktrees:remove': Error: Refusing to delete unregistered worktree path: C:/Users/andy/orca/workspaces/ops-tools/packaging-improvements-2`
+`Error invoking remote method 'worktrees:remove': Error: Refusing to delete unregistered worktree path: C:/Users/andy/yiru/workspaces/ops-tools/packaging-improvements-2`
 
 Relevant flow:
 
 - Renderer delete calls local IPC for local targets in `src/renderer/src/store/slices/worktrees.ts`.
 - Preload exposes that as `worktrees:remove` in `src/preload/index.ts`.
 - IPC delete lists Git worktrees, matches the requested path, and throws the unregistered error if no registered entry matches in `src/main/ipc/worktrees.ts`.
-- Runtime RPC delete has the same registered-worktree gate in `src/main/runtime/orca-runtime.ts`.
+- Runtime RPC delete has the same registered-worktree gate in `src/main/runtime/yiru-runtime.ts`.
 - Windows create/list coverage exists in `src/main/ipc/worktrees-windows.test.ts`, but Windows delete coverage is missing.
 
 ## Root Cause
 
-Delete is right to refuse arbitrary paths. This bug is a false negative in the proof step: Orca asks Git for the authoritative registered worktree list, but the list does not contain an entry equivalent to the project-created target.
+Delete is right to refuse arbitrary paths. This bug is a false negative in the proof step: Yiru asks Git for the authoritative registered worktree list, but the list does not contain an entry equivalent to the project-created target.
 
 Do not fix this by adding another path-normalization layer after the list. `findRegisteredDeletableWorktree` delegates to `areWorktreePathsEqual`, which already treats `C:/...`, `C:\...`, and drive-case variants as equal while keeping POSIX/WSL paths distinct. `git/worktree.removeWorktree` has a similar comparator for its fallback branch lookup.
 
@@ -84,8 +84,8 @@ Runtime RPC follows the same rule after selector resolution, and exact-ID fallba
 - Main worktree deletion is still rejected.
 - Parent worktree deletion is still rejected if another registered worktree is nested inside it.
 - Existing unregistered directories are still rejected, even with `force`.
-- Already-missing Orca-known worktrees still clean metadata only.
-- Orphaned Orca-created worktree directories still require proof through the `.git` file before recursive deletion.
+- Already-missing Yiru-known worktrees still clean metadata only.
+- Orphaned Yiru-created worktree directories still require proof through the `.git` file before recursive deletion.
 - Multi-window IPC deletes coalesce only for the same exact worktree ID and options. Equivalent Windows paths with different IDs, or IPC/runtime deletes racing each other, must degrade to safe missing/orphan handling or a protected error.
 - External Git mutation between list and `git worktree remove` is handled by the existing missing/orphan branches; keep those branches under the same captured runtime options.
 - Project runtime setting changes during an in-flight delete affect only later deletes.
@@ -96,7 +96,7 @@ Runtime RPC follows the same rule after selector resolution, and exact-ID fallba
 - Unit:
   - `pnpm vitest run src/main/ipc/worktrees-windows.test.ts`
   - `pnpm vitest run src/main/ipc/worktrees.test.ts --testNamePattern "local worktree removal|selected WSL project runtime|unregistered delete|contains another registered|already-missing"`
-  - `pnpm vitest run src/main/runtime/orca-runtime.test.ts --testNamePattern "worktree removal|selected WSL project runtime|unregistered delete|contains another registered|already-missing"`
+  - `pnpm vitest run src/main/runtime/yiru-runtime.test.ts --testNamePattern "worktree removal|selected WSL project runtime|unregistered delete|contains another registered|already-missing"`
 - Required new coverage:
   - IPC Windows delete regression: request path uses `C:/...`, Git registered row uses backslashes and/or different drive-case, delete succeeds, hooks/preflight/removal use the canonical registered path, `knownRemovedWorktree` is passed, metadata is removed, and `worktrees:changed` emits.
   - Runtime Windows delete regression with the same path mismatch. Assert selector/list resolution and final removal both use selected project runtime options, and `knownRemovedWorktree` is passed.

@@ -912,7 +912,7 @@ export class DaemonPtyAdapter implements IPtyProvider {
   // restore. disconnectOnly() leaves history files in unclean state so
   // the next launch detects them as crash-recoverable.
   // We write a final checkpoint before disconnecting so that if the daemon
-  // later crashes while Orca is closed, checkpoint.json has recovery data.
+  // later crashes while Yiru is closed, checkpoint.json has recovery data.
   async disconnectOnly(): Promise<void> {
     this.stopCheckpointTimer()
     // Why: wait for any in-flight timer pass to finish before starting

@@ -21,23 +21,23 @@ function getSection(markdown, heading) {
 }
 
 describe('orchestration skill guidance', () => {
-  it('requires Orca runtime state before claiming a worker was orchestrated', () => {
+  it('requires Yiru runtime state before claiming a worker was orchestrated', () => {
     const skill = readSkill()
     const toolBoundary = getSection(skill, 'Tool Boundary')
 
     expect(toolBoundary).toContain(
-      'must create Orca runtime state with `orca orchestration task-create` and `orca orchestration dispatch --inject`'
+      'must create Yiru runtime state with `yiru orchestration task-create` and `yiru orchestration dispatch --inject`'
     )
-    expect(toolBoundary).toContain('or `orca orchestration run`')
+    expect(toolBoundary).toContain('or `yiru orchestration run`')
     expect(toolBoundary).toContain(
-      'Do not substitute non-Orca subagent tools, generic agent-spawn APIs, or chat-only parallel worker features'
+      'Do not substitute non-Yiru subagent tools, generic agent-spawn APIs, or chat-only parallel worker features'
     )
-    expect(toolBoundary).toContain('do not create Orca task/dispatch provenance')
+    expect(toolBoundary).toContain('do not create Yiru task/dispatch provenance')
     expect(toolBoundary).toContain('injected lifecycle preambles')
     expect(toolBoundary).toContain('`worker_done` authority')
     expect(toolBoundary).toContain('decision gates')
-    expect(toolBoundary).toContain('orca orchestration task-list --json')
-    expect(toolBoundary).toContain('orca orchestration dispatch-show --task <task_id> --json')
+    expect(toolBoundary).toContain('yiru orchestration task-list --json')
+    expect(toolBoundary).toContain('yiru orchestration dispatch-show --task <task_id> --json')
     expect(toolBoundary).toContain(
       'do not retroactively describe the external worker as orchestrated'
     )
@@ -60,7 +60,7 @@ describe('orchestration skill guidance', () => {
 
     expect(skill).toContain('Full handoff means ownership transfer, not supervised dispatch.')
     expect(fullHandoffs).toContain(
-      'Do not run `orca orchestration task-create`, `orca orchestration dispatch --inject`, or `orca orchestration check --wait` for full handoffs.'
+      'Do not run `yiru orchestration task-create`, `yiru orchestration dispatch --inject`, or `yiru orchestration check --wait` for full handoffs.'
     )
     expect(fullHandoffs).toContain(
       '`task-create` is also forbidden because it records coordinator-owned tracking state'
@@ -70,16 +70,16 @@ describe('orchestration skill guidance', () => {
       'read the worker terminal after prompt delivery except to avoid losing the initial prompt'
     )
     expect(skill).toContain(
-      '`--no-parent` only controls Orca lineage; it does not choose the Git base.'
+      '`--no-parent` only controls Yiru lineage; it does not choose the Git base.'
     )
     expect(skill).toContain(
       'never base it on the current feature branch unless the user explicitly asks'
     )
     expect(skill).toContain(
-      'orca worktree create --name <task-name> --no-parent --agent codex --prompt'
+      'yiru worktree create --name <task-name> --no-parent --agent codex --prompt'
     )
     expect(fullHandoffs).toContain(
-      'Before creating a new worktree from an active feature branch, decide and state whether the desired Orca lineage is child or top-level'
+      'Before creating a new worktree from an active feature branch, decide and state whether the desired Yiru lineage is child or top-level'
     )
     expect(fullHandoffs).toContain(
       'Use child worktree lineage only when the new work is conceptually stacked under or dependent on the active worktree'
@@ -144,10 +144,10 @@ describe('orchestration skill guidance', () => {
       'Sidebar lineage and orchestration lifecycle are related but not identical.'
     )
     expect(workerTerminals).toContain(
-      'A same-worktree worker created with `orca terminal create --worktree active` may appear as a peer terminal/agent'
+      'A same-worktree worker created with `yiru terminal create --worktree active` may appear as a peer terminal/agent'
     )
     expect(workerTerminals).toContain(
-      'even though it is a child dispatch in Orca orchestration state'
+      'even though it is a child dispatch in Yiru orchestration state'
     )
     expect(workerTerminals).toContain(
       'A visible parent/child worktree relationship requires creating a child worktree'
@@ -156,7 +156,7 @@ describe('orchestration skill guidance', () => {
       'only when the task can safely run from an isolated checkout and does not need uncommitted artifacts from the current working tree'
     )
     expect(workerTerminals).toContain(
-      'For supervised new-worktree workers, decide the desired Orca lineage before creation'
+      'For supervised new-worktree workers, decide the desired Yiru lineage before creation'
     )
     expect(workerTerminals).toContain(
       'use `--no-parent` for independent repo-wide fixes, standalone feature work, or unrelated follow-up tasks'
@@ -185,7 +185,7 @@ describe('orchestration skill guidance', () => {
 
     expect(agentGuidance).toContain('After sending `worker_done`, end your turn')
     expect(agentGuidance).toContain('idle at the agent prompt')
-    expect(agentGuidance).toContain('Do not poll or keep calling `orca orchestration check`')
+    expect(agentGuidance).toContain('Do not poll or keep calling `yiru orchestration check`')
     expect(agentGuidance).toContain('fresh preamble + TASK block delivered as new terminal input')
     expect(skill).not.toContain('post-completion polling messages')
     expect(skill).not.toContain('every 2 minutes')
@@ -210,7 +210,7 @@ describe('orchestration skill guidance', () => {
     const messaging = getSection(skill, 'Messaging')
     const workerTerminals = getSection(skill, 'Worker Terminals')
     const agentFirstExample = workerTerminals.match(
-      /```bash\norca worktree create --name <task-name> --agent codex --json\n[\s\S]*?```/
+      /```bash\nyiru worktree create --name <task-name> --agent codex --json\n[\s\S]*?```/
     )?.[0]
 
     expect(workerTerminals).toContain('Agent-first (required for ordinary agent workers)')
@@ -225,7 +225,7 @@ describe('orchestration skill guidance', () => {
     expect(workerTerminals).not.toContain('bare create opens a default shell')
     expect(workerTerminals).not.toContain('ends with **one** agent tab')
     expect(agentFirstExample).toBeDefined()
-    expect(agentFirstExample).not.toContain('orca terminal list')
+    expect(agentFirstExample).not.toContain('yiru terminal list')
     expect(agentFirstExample).toContain('startupTerminal.handle')
     expect(messaging).toContain(
       'Use `startupTerminal.handle` from the create response when present'

@@ -17,7 +17,7 @@ import {
 // paste before the submit. The gap must clear the agent's paste-handling latency
 // even while it's BUSY (Codex): a short gap (60ms) fires Enter before a busy
 // Codex has landed the paste into its input, so the submit hits an empty box and
-// the message sits "Queued" forever. 500ms is orca-runtime's proven value in
+// the message sits "Queued" forever. 500ms is yiru-runtime's proven value in
 // writeTerminalAction({enter:true}), so match it here.
 export const NATIVE_CHAT_SUBMIT_DELAY_MS = 500
 export const NATIVE_CHAT_IMAGE_ATTACHMENT_SETTLE_MS = 300

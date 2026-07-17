@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer'
 import { PNG } from 'pngjs'
 import type { Page } from '@stablyai/playwright-test'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/yiru-app'
 import {
   ensureTerminalVisible,
   getActiveWorktreeId,
@@ -224,14 +224,14 @@ async function countVisibleBackgroundPixels(
 
 test.describe('Codex hidden startup composer background', () => {
   test('restores the input background when a Codex worktree first becomes visible', async ({
-    orcaPage
+    yiruPage
   }) => {
-    await waitForSessionReady(orcaPage)
-    const firstWorktreeId = await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await waitForSessionReady(yiruPage)
+    const firstWorktreeId = await waitForActiveWorktree(yiruPage)
+    await ensureTerminalVisible(yiruPage)
+    await waitForActiveTerminalManager(yiruPage, 30_000)
 
-    const secondWorktreeId = (await getAllWorktreeIds(orcaPage)).find(
+    const secondWorktreeId = (await getAllWorktreeIds(yiruPage)).find(
       (id) => id !== firstWorktreeId
     )
     test.skip(!secondWorktreeId, 'Codex hidden startup background repro needs a second worktree')
@@ -241,7 +241,7 @@ test.describe('Codex hidden startup composer background', () => {
 
     const marker = `CODEX_STARTUP_BG_${Date.now()}`
     const command = codexLikeStartupCommand(marker)
-    const hiddenTabId = await orcaPage.evaluate(
+    const hiddenTabId = await yiruPage.evaluate(
       ({ worktreeId, command, eventName }) => {
         const store = window.__store
         if (!store) {
@@ -279,9 +279,9 @@ test.describe('Codex hidden startup composer background', () => {
       }
     )
 
-    const hiddenPtyId = await waitForHiddenTabPtyId(orcaPage, hiddenTabId)
+    const hiddenPtyId = await waitForHiddenTabPtyId(yiruPage, hiddenTabId)
     await expect
-      .poll(() => mainSnapshotContains(orcaPage, hiddenPtyId, marker), {
+      .poll(() => mainSnapshotContains(yiruPage, hiddenPtyId, marker), {
         timeout: 20_000,
         message: 'Hidden Codex startup background never reached the main buffer snapshot'
       })
@@ -291,14 +291,14 @@ test.describe('Codex hidden startup composer background', () => {
     // The main-buffer snapshot above proves the hidden output was handled; the
     // reveal restore below proves it repaints when the worktree first shows.
 
-    await switchToWorktree(orcaPage, secondWorktreeId)
+    await switchToWorktree(yiruPage, secondWorktreeId)
     await expect
-      .poll(() => getActiveWorktreeId(orcaPage), {
+      .poll(() => getActiveWorktreeId(yiruPage), {
         timeout: 10_000,
         message: 'Hidden Codex worktree did not become active'
       })
       .toBe(secondWorktreeId)
-    await orcaPage.evaluate((tabId) => {
+    await yiruPage.evaluate((tabId) => {
       const store = window.__store
       if (!store) {
         throw new Error('Store unavailable')
@@ -307,10 +307,10 @@ test.describe('Codex hidden startup composer background', () => {
       state.setActiveTab(tabId)
       state.setActiveTabType('terminal')
     }, hiddenTabId)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await ensureTerminalVisible(yiruPage)
+    await waitForActiveTerminalManager(yiruPage, 30_000)
     await expect
-      .poll(() => getTerminalContent(orcaPage, 8_000), {
+      .poll(() => getTerminalContent(yiruPage, 8_000), {
         timeout: 10_000,
         message: 'First visible mount did not restore hidden Codex startup content'
       })
@@ -321,7 +321,7 @@ test.describe('Codex hidden startup composer background', () => {
       .poll(
         async () => {
           try {
-            const nextTarget = await readCodexStartupBackgroundTarget(orcaPage, marker)
+            const nextTarget = await readCodexStartupBackgroundTarget(yiruPage, marker)
             target = nextTarget
             return nextTarget.modelBackgroundCells >= Math.min(40, nextTarget.cols)
           } catch {
@@ -338,7 +338,7 @@ test.describe('Codex hidden startup composer background', () => {
     if (!target) {
       throw new Error('Codex startup background target was not captured')
     }
-    const visibleBackgroundPixels = await countVisibleBackgroundPixels(orcaPage, target)
+    const visibleBackgroundPixels = await countVisibleBackgroundPixels(yiruPage, target)
     const minimumVisiblePixels = Math.round(
       target.modelBackgroundCells * target.cellWidth * target.cellHeight * 0.2
     )

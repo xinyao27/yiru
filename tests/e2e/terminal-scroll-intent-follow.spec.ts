@@ -1,6 +1,6 @@
 import type { Page } from '@stablyai/playwright-test'
 import path from 'node:path'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/yiru-app'
 import { ensureTerminalVisible, waitForActiveWorktree, waitForSessionReady } from './helpers/store'
 import {
   execInTerminal,
@@ -155,26 +155,26 @@ async function startStreamingFixturePhase1(page: Page): Promise<string> {
 
 test.describe('terminal scroll intent keeps following output', () => {
   test('a sub-row wheel-up that never moves the viewport must not stop follow-output', async ({
-    orcaPage
+    yiruPage
   }) => {
-    const ptyId = await startStreamingFixturePhase1(orcaPage)
+    const ptyId = await startStreamingFixturePhase1(yiruPage)
 
-    await dispatchSubRowWheelUp(orcaPage)
-    await orcaPage.waitForTimeout(INTENT_SETTLE_WAIT_MS)
+    await dispatchSubRowWheelUp(yiruPage)
+    await yiruPage.waitForTimeout(INTENT_SETTLE_WAIT_MS)
 
     // Any byte releases the fixture's phase-2 stream.
-    await sendToTerminal(orcaPage, ptyId, 'g')
-    await waitForMarkerAtBottom(orcaPage, 'STREAM_PHASE2_DONE')
+    await sendToTerminal(yiruPage, ptyId, 'g')
+    await waitForMarkerAtBottom(yiruPage, 'STREAM_PHASE2_DONE')
   })
 
   test('a plain Home keypress delivered to the app must not stop follow-output', async ({
-    orcaPage
+    yiruPage
   }) => {
-    await startStreamingFixturePhase1(orcaPage)
+    await startStreamingFixturePhase1(yiruPage)
 
     // The Home escape sequence reaching the fixture's stdin doubles as the
     // phase-2 release, exactly like a user pressing Home mid-generation.
-    await dispatchPlainHomeKeydown(orcaPage)
-    await waitForMarkerAtBottom(orcaPage, 'STREAM_PHASE2_DONE')
+    await dispatchPlainHomeKeydown(yiruPage)
+    await waitForMarkerAtBottom(yiruPage, 'STREAM_PHASE2_DONE')
   })
 })

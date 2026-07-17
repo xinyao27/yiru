@@ -119,7 +119,7 @@ export function formatMissingToolchainError(
 
   const lines = [
     `The remote host is missing the C/C++ build tools (${missing.join(', ')}) needed to ` +
-      `compile Orca's relay native modules (node-pty, @parcel/watcher). node-pty has no ` +
+      `compile Yiru's relay native modules (node-pty, @parcel/watcher). node-pty has no ` +
       `prebuilt binary for Linux, so they must be compiled on the remote host.`,
     '',
     'Install the build tools on the remote host, then reconnect:'

@@ -395,7 +395,7 @@ describe('prRefreshStates stays bounded (leak regression)', () => {
             number: 12,
             title: 'Late PR',
             state: 'open',
-            url: 'https://github.com/acme/orca/pull/12',
+            url: 'https://github.com/acme/yiru/pull/12',
             checksStatus: 'pending',
             updatedAt: '2026-03-28T00:00:00Z',
             mergeable: 'UNKNOWN'

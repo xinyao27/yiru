@@ -1,5 +1,5 @@
 import type { TuiAgent } from './types'
-import { getOrcaCliCommandNameForPlatform } from './orca-cli-command-name'
+import { getYiruCliCommandNameForPlatform } from './yiru-cli-command-name'
 
 export type AgentPromptInjectionMode =
   | 'argv'
@@ -42,8 +42,8 @@ export type TuiAgentConfig = {
   draftPromptFlag?: string
   /** Why: agents that don't expose a `--prefill <text>`-style CLI flag but
    * CAN read an env var on startup to seed their input box without
-   * submitting. Today only pi uses this (via Orca's overlay-installed
-   * `orca-prefill` extension reading `ORCA_PI_PREFILL`). Equivalent in
+   * submitting. Today only pi uses this (via Yiru's overlay-installed
+   * `yiru-prefill` extension reading `YIRU_PI_PREFILL`). Equivalent in
    * effect to `draftPromptFlag`: avoids the bracketed-paste-after-ready
    * race when the agent's startup output is long (pi prints banner,
    * skills, and extensions for several seconds, which keeps the
@@ -61,7 +61,7 @@ export type TuiAgentConfig = {
   /** Why: most TUIs need both bracketed-paste enablement and a quiet render
    * window before pasted bytes reliably land in the composer. Codex can use
    * a stronger signal from its own renderer: chat_composer.rs writes the
-   * `›` prompt only when the composer row exists, so Orca can paste as soon
+   * `›` prompt only when the composer row exists, so Yiru can paste as soon
    * as that prompt appears after bracketed paste is enabled. */
   draftPasteReadySignal?: DraftPasteReadySignal
   /** Windows Shift+Enter override. Omitted agents keep the legacy Esc+CR path
@@ -78,24 +78,24 @@ export const TUI_AGENT_CONFIG: Record<TuiAgent, TuiAgentConfig> = {
     // Why: `claude --prefill <text>` lands the TUI with `<text>` in the
     // input box, nothing submitted. Strictly better than the paste-after-
     // ready fallback because it eliminates the readiness race entirely.
-    // See PR https://github.com/stablyai/orca/pull/926 for context.
+    // See PR https://github.com/stablyai/yiru/pull/926 for context.
     draftPromptFlag: '--prefill'
   },
   'claude-agent-teams': {
-    // Why: this is an Orca-provided launch mode, not a separate upstream
-    // binary. Detection follows the Orca CLI and requires Claude below.
-    detectCmd: 'orca',
-    detectCmdAliases: ['orca-dev', 'orca-ide'],
-    // Why: the Orca shim alone exists on fresh installs. Require Claude too so
+    // Why: this is a Yiru-provided launch mode, not a separate upstream
+    // binary. Detection follows the Yiru CLI and requires Claude below.
+    detectCmd: 'yiru',
+    detectCmdAliases: ['yiru-dev'],
+    // Why: the Yiru shim alone exists on fresh installs. Require Claude too so
     // onboarding does not report Agent Teams when no agent CLI is installed.
     detectRequiredCommands: ['claude'],
     // Why: native Windows and WSL use Claude's in-process Agent Teams fallback,
-    // not the Orca native-pane/tmux-shim wrapper exposed by this agent entry.
+    // not the Yiru native-pane/tmux-shim wrapper exposed by this agent entry.
     detectUnsupportedRuntimes: ['win32', 'wsl'],
-    launchCmd: 'orca claude-teams',
+    launchCmd: 'yiru claude-teams',
     launchCmdByPlatform: {
-      linux: `${getOrcaCliCommandNameForPlatform('linux')} claude-teams`,
-      win32: `${getOrcaCliCommandNameForPlatform('win32')} claude-teams`
+      linux: `${getYiruCliCommandNameForPlatform('linux')} claude-teams`,
+      win32: `${getYiruCliCommandNameForPlatform('win32')} claude-teams`
     },
     expectedProcess: 'claude',
     promptInjectionMode: 'stdin-after-start'
@@ -126,7 +126,7 @@ export const TUI_AGENT_CONFIG: Record<TuiAgent, TuiAgentConfig> = {
     launchCmd: 'ante',
     expectedProcess: 'ante',
     // Why: `ante --prompt` is Ante's documented headless mode (runs the task
-    // once and exits), so Orca launches the bare interactive TUI and injects
+    // once and exits), so Yiru launches the bare interactive TUI and injects
     // the composed prompt after startup to keep the hosted session alive.
     promptInjectionMode: 'stdin-after-start'
   },
@@ -156,19 +156,19 @@ export const TUI_AGENT_CONFIG: Record<TuiAgent, TuiAgentConfig> = {
     promptInjectionMode: 'argv',
     // Why: pi has no `--prefill` flag, and bracketed-paste-after-ready
     // races against its multi-second startup output (banner + skills +
-    // extensions list) so the paste frequently never lands. Orca's
-    // overlay installs an `orca-prefill` pi extension (see
+    // extensions list) so the paste frequently never lands. Yiru's
+    // overlay installs an `yiru-prefill` pi extension (see
     // src/main/pi/titlebar-extension-service.ts) that reads this env var
     // on session_start and calls `pi.ui.setEditorText(text)`. Same
     // user-visible behavior as `claude --prefill <text>`.
-    draftPromptEnvVar: 'ORCA_PI_PREFILL'
+    draftPromptEnvVar: 'YIRU_PI_PREFILL'
   },
   omp: {
     detectCmd: 'omp',
     launchCmd: 'omp',
     expectedProcess: 'omp',
     promptInjectionMode: 'argv',
-    draftPromptEnvVar: 'ORCA_OMP_PREFILL'
+    draftPromptEnvVar: 'YIRU_OMP_PREFILL'
   },
   gemini: {
     detectCmd: 'gemini',
@@ -254,7 +254,7 @@ export const TUI_AGENT_CONFIG: Record<TuiAgent, TuiAgentConfig> = {
     detectCmd: 'command-code',
     // Why: Command Code's documented positional prompt starts the turn, while
     // paste-after-start can leave the prompt sitting in the composer. `--trust`
-    // mirrors the preflight trust behavior Orca applies to other first-run
+    // mirrors the preflight trust behavior Yiru applies to other first-run
     // TUIs so launch prompts do not consume the task text.
     launchCmd: 'command-code --trust',
     expectedProcess: 'command-code',
@@ -286,7 +286,7 @@ export const TUI_AGENT_CONFIG: Record<TuiAgent, TuiAgentConfig> = {
     launchCmd: 'droid',
     expectedProcess: 'droid',
     promptInjectionMode: 'argv',
-    // Why: Droid decodes CSI-u on Windows and treats Orca's legacy Esc+CR
+    // Why: Droid decodes CSI-u on Windows and treats Yiru's legacy Esc+CR
     // fallback as plain Enter, which submits instead of inserting a newline.
     windowsShiftEnterEncoding: 'csi-u'
   },
@@ -323,7 +323,7 @@ export const TUI_AGENT_CONFIG: Record<TuiAgent, TuiAgentConfig> = {
   hermes: {
     detectCmd: 'hermes',
     // Why: bare `hermes` opens the classic REPL in recent Hermes releases;
-    // `--tui` starts the full-screen agent UI Orca is designed to host.
+    // `--tui` starts the full-screen agent UI Yiru is designed to host.
     launchCmd: 'hermes --tui',
     expectedProcess: 'hermes',
     // Why: Hermes owns prompt delivery through its startup-query contract,
@@ -341,9 +341,9 @@ export const TUI_AGENT_CONFIG: Record<TuiAgent, TuiAgentConfig> = {
     launchCmd: 'copilot',
     expectedProcess: 'copilot',
     // Why: `copilot --prompt <text>` runs non-interactively and exits on
-    // completion, which would kill the TUI session Orca is hosting.
+    // completion, which would kill the TUI session Yiru is hosting.
     // `-i/--interactive <prompt>` starts an interactive session with the
-    // initial prompt pre-executed — the behavior Orca needs.
+    // initial prompt pre-executed — the behavior Yiru needs.
     promptInjectionMode: 'flag-interactive',
     // Why: Copilot's first-launch trust menu used to swallow our bracketed
     // paste. Pre-appending the workspace path to `trustedFolders` in
@@ -370,7 +370,7 @@ export const TUI_AGENT_CONFIG: Record<TuiAgent, TuiAgentConfig> = {
     launchCmd: 'devin',
     expectedProcess: 'devin',
     // Why: `devin -- <prompt>` auto-submits immediately (docs.devin.ai/cli).
-    // `stdin-after-start` starts the REPL with no argv prompt; Orca then sends
+    // `stdin-after-start` starts the REPL with no argv prompt; Yiru then sends
     // `followupPrompt` to the PTY as plain input + Enter after startup (not
     // bracketed paste). Use `draftPrompt` / agent-paste-draft for review-before-send.
     promptInjectionMode: 'stdin-after-start'
@@ -390,9 +390,8 @@ export function getTuiAgentLaunchCommand(
   platform: NodeJS.Platform,
   opts?: { isRemote?: boolean }
 ): string {
-  // Why: the SSH relay shim is always named `orca` on Unix, so the local-only
-  // `orca-ide` rename (avoids shadowing the GNOME Orca screen reader) must not
-  // leak to Linux remotes — the remote has no such desktop binary on PATH.
+  // Why: remote Linux launches use the relay's public command instead of a
+  // platform-specific local override.
   if (opts?.isRemote && platform === 'linux') {
     return config.launchCmd
   }

@@ -8,7 +8,7 @@ const {
 } = require('./electron-builder-native-rebuild.cjs')
 
 describe('electron-builder native rebuild hook', () => {
-  it('passes the target platform and arch to Orca native rebuild script', () => {
+  it('passes the target platform and arch to Yiru native rebuild script', () => {
     expect(
       buildNativeRebuildArgs({
         platform: { nodeName: 'darwin' },

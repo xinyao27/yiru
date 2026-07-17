@@ -1,8 +1,8 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import nacl from 'tweetnacl'
 
-const HOST_PROOF_TRANSCRIPT_DOMAIN = 'orca-relay-host-proof/v1'
-const HOST_CHALLENGE_PLAINTEXT_DOMAIN = 'orca-relay-host-challenge/v1'
+const HOST_PROOF_TRANSCRIPT_DOMAIN = 'yiru-relay-host-proof/v1'
+const HOST_CHALLENGE_PLAINTEXT_DOMAIN = 'yiru-relay-host-challenge/v1'
 const textEncoder = new TextEncoder()
 const textDecoder = new TextDecoder()
 

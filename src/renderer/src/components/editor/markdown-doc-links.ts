@@ -1,7 +1,7 @@
 import type { MarkdownDocument } from '../../../../shared/types'
 import { slugMarkdownHeading } from './markdown-heading-slug'
 
-export const MARKDOWN_DOC_LINK_PREFIX = '#orca-doc-link='
+export const MARKDOWN_DOC_LINK_PREFIX = '#yiru-doc-link='
 
 type MarkdownTextNode = {
   type: 'text'

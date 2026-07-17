@@ -20,9 +20,9 @@ vi.mock('fs', () => ({
 
 vi.mock('./relay-protocol', () => ({
   RELAY_VERSION: '0.1.0',
-  RELAY_REMOTE_DIR: '.orca-remote',
+  RELAY_REMOTE_DIR: '.yiru-remote',
   parseUnameToRelayPlatform: vi.fn().mockReturnValue('linux-x64'),
-  RELAY_SENTINEL: 'ORCA-RELAY v0.1.0 READY\n',
+  RELAY_SENTINEL: 'YIRU-RELAY v0.1.0 READY\n',
   RELAY_SENTINEL_TIMEOUT_MS: 10_000
 }))
 
@@ -90,15 +90,15 @@ describe('cross-version isolation', () => {
     const mockExec = vi.mocked(execCommand)
 
     // Simulated remote where:
-    //   v1 dir = ~/.orca-remote/relay-0.1.0+v1hash/  (live daemon, listening)
-    //   v2 dir = ~/.orca-remote/relay-0.1.0+v2hash/  (does not yet exist)
+    //   v1 dir = ~/.yiru-remote/relay-0.1.0+v1hash/  (live daemon, listening)
+    //   v2 dir = ~/.yiru-remote/relay-0.1.0+v2hash/  (does not yet exist)
     // The v2 client has fullVersion='0.1.0+v2hash' (from the fs mock above).
     //
     // We feed enough exec results to walk through the deploy: platform,
     // $HOME, isRelayAlreadyInstalled probe, lock acquire, upload (no exec),
     // npm install, finalize, socket probe, socket poll, then GC scan.
     const responses: string[] = [
-      '__ORCA_REMOTE_PLATFORM__ Linux x86_64', // tagged POSIX platform probe
+      '__YIRU_REMOTE_PLATFORM__ Linux x86_64', // tagged POSIX platform probe
       '/home/u', // echo $HOME
       'MISSING', // isRelayAlreadyInstalled (v2 dir doesn't exist)
       '', // mkdir -p remoteRelayDir (v2)
@@ -108,7 +108,7 @@ describe('cross-version isolation', () => {
       '', // chmod +x node
       '', // npm install
       '', // chmod prebuilds
-      'ORCA-NPTY-PROBE-OK\n', // node -e require() load-test (post-install verify)
+      'YIRU-NPTY-PROBE-OK\n', // node -e require() load-test (post-install verify)
       '', // rm -f probe-stderr (best-effort cleanup after probe resolved)
       '', // touch .install-complete (finalizeInstall)
       '', // rm -rf .install-lock

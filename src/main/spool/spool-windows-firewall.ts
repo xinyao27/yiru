@@ -5,7 +5,7 @@ import type {
   SpoolWindowsFirewallStatus
 } from '../../shared/spool/spool-windows-firewall-contract'
 
-export const SPOOL_WINDOWS_FIREWALL_RULE_NAME = 'Orca.Spool'
+export const SPOOL_WINDOWS_FIREWALL_RULE_NAME = 'Yiru.Spool'
 
 const POWERSHELL_TIMEOUT_MS = 10_000
 const ELEVATION_TIMEOUT_MS = 5 * 60_000
@@ -114,7 +114,7 @@ if ($rules.Count -eq 1) {
 function buildRepairScript(port: number, executablePath: string): string {
   return `$ErrorActionPreference = 'Stop'
 Get-NetFirewallRule -ErrorAction Stop | Where-Object { [string]$_.Name -eq ${quotePowerShell(SPOOL_WINDOWS_FIREWALL_RULE_NAME)} -or [string]$_.DisplayName -eq ${quotePowerShell(SPOOL_WINDOWS_FIREWALL_RULE_NAME)} } | Remove-NetFirewallRule
-New-NetFirewallRule -Name ${quotePowerShell(SPOOL_WINDOWS_FIREWALL_RULE_NAME)} -DisplayName ${quotePowerShell(SPOOL_WINDOWS_FIREWALL_RULE_NAME)} -Description 'Allows Orca Spool sharing over Tailscale on private networks.' -Direction Inbound -Action Allow -Enabled True -Profile Private -Protocol TCP -LocalPort ${port} -Program ${quotePowerShell(executablePath)} -EdgeTraversalPolicy Block | Out-Null`
+New-NetFirewallRule -Name ${quotePowerShell(SPOOL_WINDOWS_FIREWALL_RULE_NAME)} -DisplayName ${quotePowerShell(SPOOL_WINDOWS_FIREWALL_RULE_NAME)} -Description 'Allows Yiru Spool sharing over Tailscale on private networks.' -Direction Inbound -Action Allow -Enabled True -Profile Private -Protocol TCP -LocalPort ${port} -Program ${quotePowerShell(executablePath)} -EdgeTraversalPolicy Block | Out-Null`
 }
 
 function buildElevationScript(powershellPath: string, encodedRepairScript: string): string {

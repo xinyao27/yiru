@@ -25,7 +25,7 @@ import {
 import { buildPosixHookPayloadCapture } from '../agent-hooks/hook-stdin-contract'
 
 // Why: Copilot's user-level hook files can use VS Code-compatible PascalCase
-// names, which match the event vocabulary already normalized by Orca's hook
+// names, which match the event vocabulary already normalized by Yiru's hook
 // server and avoid wrapper-side event remapping.
 const COPILOT_EVENTS = [
   'SessionStart',
@@ -36,7 +36,7 @@ const COPILOT_EVENTS = [
   'PostToolUseFailure',
   // Why: GitHub's current reference documents subagentStart with only the
   // camelCase payload shape. The wrapper passes the event name separately, so
-  // Orca can normalize it without depending on a PascalCase payload.
+  // Yiru can normalize it without depending on a PascalCase payload.
   'subagentStart',
   'SubagentStop',
   'PreCompact',
@@ -52,7 +52,7 @@ function getCopilotHome(): string {
 }
 
 function getConfigPath(): string {
-  return join(getCopilotHome(), 'hooks', 'orca.json')
+  return join(getCopilotHome(), 'hooks', 'yiru.json')
 }
 
 function getManagedScriptFileName(): string {
@@ -65,9 +65,9 @@ function getManagedScriptPath(): string {
 
 function getManagedCommand(scriptPath: string, eventName: string): string {
   if (process.platform !== 'win32') {
-    return wrapPosixHookCommand(scriptPath, { ORCA_COPILOT_HOOK_EVENT: eventName })
+    return wrapPosixHookCommand(scriptPath, { YIRU_COPILOT_HOOK_EVENT: eventName })
   }
-  return wrapWindowsHookCommand(scriptPath, { ORCA_COPILOT_HOOK_EVENT: eventName })
+  return wrapWindowsHookCommand(scriptPath, { YIRU_COPILOT_HOOK_EVENT: eventName })
 }
 
 function getManagedHookDefinition(command: string): HookDefinition {
@@ -119,31 +119,31 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
       "Write-Output '{}'",
       '$inputData = [Console]::In.ReadToEnd()',
       // Why: endpoint.cmd is cmd syntax, not PowerShell. Parse its `set KEY=...`
-      // lines so surviving PTYs can refresh to the current Orca server.
-      'if ($env:ORCA_AGENT_HOOK_ENDPOINT -and (Test-Path -LiteralPath $env:ORCA_AGENT_HOOK_ENDPOINT)) {',
+      // lines so surviving PTYs can refresh to the current Yiru server.
+      'if ($env:YIRU_AGENT_HOOK_ENDPOINT -and (Test-Path -LiteralPath $env:YIRU_AGENT_HOOK_ENDPOINT)) {',
       '  try {',
-      '    Get-Content -LiteralPath $env:ORCA_AGENT_HOOK_ENDPOINT | ForEach-Object {',
+      '    Get-Content -LiteralPath $env:YIRU_AGENT_HOOK_ENDPOINT | ForEach-Object {',
       "      if ($_ -match '^set ([A-Za-z0-9_]+)=(.*)$') {",
       "        [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')",
       '      }',
       '    }',
       '  } catch {}',
       '}',
-      'if (-not $env:ORCA_AGENT_HOOK_PORT -or -not $env:ORCA_AGENT_HOOK_TOKEN -or -not $env:ORCA_PANE_KEY) { exit 0 }',
+      'if (-not $env:YIRU_AGENT_HOOK_PORT -or -not $env:YIRU_AGENT_HOOK_TOKEN -or -not $env:YIRU_PANE_KEY) { exit 0 }',
       'if ([string]::IsNullOrWhiteSpace($inputData)) { exit 0 }',
       'try {',
       '  $payload = $inputData | ConvertFrom-Json',
       '  $body = @{',
-      '    paneKey = $env:ORCA_PANE_KEY',
-      '    launchToken = $env:ORCA_AGENT_LAUNCH_TOKEN',
-      '    tabId = $env:ORCA_TAB_ID',
-      '    worktreeId = $env:ORCA_WORKTREE_ID',
-      '    hookEventName = $env:ORCA_COPILOT_HOOK_EVENT',
-      '    env = $env:ORCA_AGENT_HOOK_ENV',
-      '    version = $env:ORCA_AGENT_HOOK_VERSION',
+      '    paneKey = $env:YIRU_PANE_KEY',
+      '    launchToken = $env:YIRU_AGENT_LAUNCH_TOKEN',
+      '    tabId = $env:YIRU_TAB_ID',
+      '    worktreeId = $env:YIRU_WORKTREE_ID',
+      '    hookEventName = $env:YIRU_COPILOT_HOOK_EVENT',
+      '    env = $env:YIRU_AGENT_HOOK_ENV',
+      '    version = $env:YIRU_AGENT_HOOK_VERSION',
       '    payload = $payload',
       '  } | ConvertTo-Json -Depth 100',
-      "  Invoke-WebRequest -UseBasicParsing -Method Post -Uri ('http://127.0.0.1:' + $env:ORCA_AGENT_HOOK_PORT + '/hook/copilot') -Headers @{ 'Content-Type'='application/json'; 'X-Orca-Agent-Hook-Token'=$env:ORCA_AGENT_HOOK_TOKEN } -Body $body -TimeoutSec 2 | Out-Null",
+      "  Invoke-WebRequest -UseBasicParsing -Method Post -Uri ('http://127.0.0.1:' + $env:YIRU_AGENT_HOOK_PORT + '/hook/copilot') -Headers @{ 'Content-Type'='application/json'; 'X-Yiru-Agent-Hook-Token'=$env:YIRU_AGENT_HOOK_TOKEN } -Body $body -TimeoutSec 2 | Out-Null",
       '} catch {}',
       'exit 0',
       ''
@@ -156,26 +156,26 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
     ...buildPosixHookPayloadCapture(),
     // Why: Copilot consumes stdout for some hooks, so stdout is emitted before
     // endpoint refresh, stdin parsing, or the network POST can fail.
-    'if [ -n "$ORCA_AGENT_HOOK_ENDPOINT" ] && [ -r "$ORCA_AGENT_HOOK_ENDPOINT" ]; then',
-    '  . "$ORCA_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
+    'if [ -n "$YIRU_AGENT_HOOK_ENDPOINT" ] && [ -r "$YIRU_AGENT_HOOK_ENDPOINT" ]; then',
+    '  . "$YIRU_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
     'fi',
-    'if [ -z "$ORCA_AGENT_HOOK_PORT" ] || [ -z "$ORCA_AGENT_HOOK_TOKEN" ] || [ -z "$ORCA_PANE_KEY" ]; then',
+    'if [ -z "$YIRU_AGENT_HOOK_PORT" ] || [ -z "$YIRU_AGENT_HOOK_TOKEN" ] || [ -z "$YIRU_PANE_KEY" ]; then',
     '  exit 0',
     'fi',
     // Why: pipe payload to curl's stdin (`payload@-`) instead of an inline
     // `payload=$VALUE` arg, so tens-of-KB tool output stays off the curl
     // command line (EDR command-line false positives). Wire body is identical.
-    'printf \'%s\' "$payload" | curl -sS -X POST "http://127.0.0.1:${ORCA_AGENT_HOOK_PORT}/hook/copilot" \\',
+    'printf \'%s\' "$payload" | curl -sS -X POST "http://127.0.0.1:${YIRU_AGENT_HOOK_PORT}/hook/copilot" \\',
     '  --connect-timeout 0.5 --max-time 1.5 \\',
     '  -H "Content-Type: application/x-www-form-urlencoded" \\',
-    '  -H "X-Orca-Agent-Hook-Token: ${ORCA_AGENT_HOOK_TOKEN}" \\',
-    '  --data-urlencode "paneKey=${ORCA_PANE_KEY}" \\',
-    '  --data-urlencode "tabId=${ORCA_TAB_ID}" \\',
-    '  --data-urlencode "launchToken=${ORCA_AGENT_LAUNCH_TOKEN}" \\',
-    '  --data-urlencode "worktreeId=${ORCA_WORKTREE_ID}" \\',
-    '  --data-urlencode "hookEventName=${ORCA_COPILOT_HOOK_EVENT}" \\',
-    '  --data-urlencode "env=${ORCA_AGENT_HOOK_ENV}" \\',
-    '  --data-urlencode "version=${ORCA_AGENT_HOOK_VERSION}" \\',
+    '  -H "X-Yiru-Agent-Hook-Token: ${YIRU_AGENT_HOOK_TOKEN}" \\',
+    '  --data-urlencode "paneKey=${YIRU_PANE_KEY}" \\',
+    '  --data-urlencode "tabId=${YIRU_TAB_ID}" \\',
+    '  --data-urlencode "launchToken=${YIRU_AGENT_LAUNCH_TOKEN}" \\',
+    '  --data-urlencode "worktreeId=${YIRU_WORKTREE_ID}" \\',
+    '  --data-urlencode "hookEventName=${YIRU_COPILOT_HOOK_EVENT}" \\',
+    '  --data-urlencode "env=${YIRU_AGENT_HOOK_ENV}" \\',
+    '  --data-urlencode "version=${YIRU_AGENT_HOOK_VERSION}" \\',
     '  --data-urlencode "payload@-" >/dev/null 2>&1 || true',
     'exit 0',
     ''
@@ -193,7 +193,7 @@ export class CopilotHookService {
         state: 'error',
         configPath,
         managedHooksPresent: false,
-        detail: 'Could not parse Copilot hooks/orca.json'
+        detail: 'Could not parse Copilot hooks/yiru.json'
       }
     }
 
@@ -260,7 +260,7 @@ export class CopilotHookService {
         state: 'error',
         configPath,
         managedHooksPresent: false,
-        detail: 'Could not parse Copilot hooks/orca.json'
+        detail: 'Could not parse Copilot hooks/yiru.json'
       }
     }
 
@@ -299,8 +299,8 @@ export class CopilotHookService {
 
   async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
     const home = remoteHome.replace(/\/$/, '')
-    const remoteConfigPath = `${home}/.copilot/hooks/orca.json`
-    const remoteScriptPath = `${home}/.orca/agent-hooks/copilot-hook.sh`
+    const remoteConfigPath = `${home}/.copilot/hooks/yiru.json`
+    const remoteScriptPath = `${home}/.yiru/agent-hooks/copilot-hook.sh`
 
     try {
       const config = await readHooksJsonRemote(sftp, remoteConfigPath)
@@ -310,7 +310,7 @@ export class CopilotHookService {
           state: 'error',
           configPath: remoteConfigPath,
           managedHooksPresent: false,
-          detail: 'Could not parse remote Copilot hooks/orca.json'
+          detail: 'Could not parse remote Copilot hooks/yiru.json'
         }
       }
 
@@ -336,7 +336,7 @@ export class CopilotHookService {
         nextHooks[eventName] = [
           ...cleaned,
           getRemoteManagedHookDefinition(
-            wrapPosixHookCommand(remoteScriptPath, { ORCA_COPILOT_HOOK_EVENT: eventName })
+            wrapPosixHookCommand(remoteScriptPath, { YIRU_COPILOT_HOOK_EVENT: eventName })
           )
         ]
       }
@@ -344,8 +344,8 @@ export class CopilotHookService {
       config.version = 1
       delete config.disableAllHooks
       config.hooks = nextHooks
-      // Why: SSH remotes use POSIX scripts regardless of Orca's local OS. Write
-      // the script before hooks/orca.json so a partial install cannot point
+      // Why: SSH remotes use POSIX scripts regardless of Yiru's local OS. Write
+      // the script before hooks/yiru.json so a partial install cannot point
       // Copilot at a missing managed command.
       await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript('posix'))
       await writeHooksJsonRemote(sftp, remoteConfigPath, config)
@@ -380,7 +380,7 @@ export class CopilotHookService {
         state: 'error',
         configPath,
         managedHooksPresent: false,
-        detail: 'Could not parse Copilot hooks/orca.json'
+        detail: 'Could not parse Copilot hooks/yiru.json'
       }
     }
 

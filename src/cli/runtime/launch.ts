@@ -9,14 +9,14 @@ import { RuntimeClientError } from './types'
 
 const IGNORED_NON_RECIPE_STDOUT = '[serve] ignored non-recipe stdout'
 
-export function launchOrcaApp(): void {
-  const overrideCommand = process.env.ORCA_OPEN_COMMAND
+export function launchYiruApp(): void {
+  const overrideCommand = process.env.YIRU_OPEN_COMMAND
   if (typeof overrideCommand === 'string' && overrideCommand.trim().length > 0) {
     spawnDetached(overrideCommand, [], { shell: true })
     return
   }
 
-  const overrideExecutable = process.env.ORCA_APP_EXECUTABLE
+  const overrideExecutable = process.env.YIRU_APP_EXECUTABLE
   if (typeof overrideExecutable === 'string' && overrideExecutable.trim().length > 0) {
     spawnDetached(overrideExecutable, getExecutableAppArgs(), {
       ...getExecutableSpawnOptions(overrideExecutable),
@@ -47,7 +47,7 @@ export function launchOrcaApp(): void {
 
   throw new RuntimeClientError(
     'runtime_open_failed',
-    'Could not determine how to launch Orca. Start Orca manually and try again.'
+    'Could not determine how to launch Yiru. Start Yiru manually and try again.'
   )
 }
 
@@ -58,12 +58,12 @@ function spawnDetached(command: string, args: string[], options: SpawnOptions): 
     ...options
   })
   // Why: detached launch errors are reported asynchronously after this function
-  // returns; openOrca already reports the user-facing timeout if startup fails.
+  // returns; openYiru already reports the user-facing timeout if startup fails.
   child.once('error', () => {})
   child.unref()
 }
 
-export function serveOrcaApp(
+export function serveYiruApp(
   args: {
     json?: boolean
     port?: string | null
@@ -74,7 +74,7 @@ export function serveOrcaApp(
     projectRoot?: string | null
   } = {}
 ): Promise<number> {
-  const executable = resolveForegroundOrcaExecutable()
+  const executable = resolveForegroundYiruExecutable()
   const childArgs = [...getExecutableAppArgs(), '--serve']
   if (args.json) {
     childArgs.push('--serve-json')
@@ -141,7 +141,7 @@ export function serveOrcaApp(
         resolve(code)
         return
       }
-      reject(new RuntimeClientError('runtime_serve_failed', `Orca serve exited via ${signal}`))
+      reject(new RuntimeClientError('runtime_serve_failed', `Yiru serve exited via ${signal}`))
     })
   })
 }
@@ -186,7 +186,7 @@ function waitForRecipeJson(child: ReturnType<typeof spawnProcess>): Promise<numb
         writeIgnoredRecipeStdout()
         return
       }
-      if (getEphemeralVmRecipeResultConnection(parsed.result).type !== 'orca-server') {
+      if (getEphemeralVmRecipeResultConnection(parsed.result).type !== 'yiru-server') {
         writeIgnoredRecipeStdout()
         return
       }
@@ -224,8 +224,8 @@ function waitForRecipeJson(child: ReturnType<typeof spawnProcess>): Promise<numb
         new RuntimeClientError(
           'runtime_serve_failed',
           typeof code === 'number'
-            ? `Orca serve exited before printing valid recipe JSON with code ${code}.`
-            : `Orca serve exited before printing valid recipe JSON via ${signal}.`
+            ? `Yiru serve exited before printing valid recipe JSON with code ${code}.`
+            : `Yiru serve exited before printing valid recipe JSON via ${signal}.`
         )
       )
     }
@@ -238,7 +238,7 @@ function waitForRecipeJson(child: ReturnType<typeof spawnProcess>): Promise<numb
 }
 
 function getExecutableAppArgs(): string[] {
-  return process.env.ORCA_APP_EXECUTABLE_NEEDS_APP_ROOT === '1' ? [resolveAppRoot()] : []
+  return process.env.YIRU_APP_EXECUTABLE_NEEDS_APP_ROOT === '1' ? [resolveAppRoot()] : []
 }
 
 function getExecutableSpawnOptions(executable: string): Pick<SpawnOptions, 'shell'> {
@@ -247,13 +247,13 @@ function getExecutableSpawnOptions(executable: string): Pick<SpawnOptions, 'shel
 
 function resolveAppRoot(): string {
   // Why: dev-mode resource resolution in the Electron child may consult
-  // process.cwd(). Pin it to the app root so `orca serve` behaves the same
+  // process.cwd(). Pin it to the app root so `yiru serve` behaves the same
   // regardless of the shell directory it was launched from.
   return resolve(__dirname, '../../..')
 }
 
-function resolveForegroundOrcaExecutable(): string {
-  const overrideExecutable = process.env.ORCA_APP_EXECUTABLE
+function resolveForegroundYiruExecutable(): string {
+  const overrideExecutable = process.env.YIRU_APP_EXECUTABLE
   if (typeof overrideExecutable === 'string' && overrideExecutable.trim().length > 0) {
     return overrideExecutable
   }
@@ -262,7 +262,7 @@ function resolveForegroundOrcaExecutable(): string {
   }
   throw new RuntimeClientError(
     'runtime_serve_failed',
-    'Could not determine how to start Orca server. Set ORCA_APP_EXECUTABLE to the Orca executable.'
+    'Could not determine how to start Yiru server. Set YIRU_APP_EXECUTABLE to the Yiru executable.'
   )
 }
 

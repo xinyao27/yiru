@@ -143,7 +143,7 @@ describe('resolveRemoteNodePath', () => {
     await resolveRemoteNodePath(conn)
 
     const callScript = execCommandMock.mock.calls[0]![1] as string
-    const home = mkdtempSync(path.join(os.tmpdir(), 'orca-nvm-probe-'))
+    const home = mkdtempSync(path.join(os.tmpdir(), 'yiru-nvm-probe-'))
     try {
       const nodePath = path.join(home, 'tilde-nvm/versions/node/v20.11.0/bin/node')
       mkdirSync(path.dirname(nodePath), { recursive: true })

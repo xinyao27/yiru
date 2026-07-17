@@ -18,7 +18,7 @@ const OPEN_NOFOLLOW = typeof constants.O_NOFOLLOW === 'number' ? constants.O_NOF
 const OPEN_NONBLOCK = typeof constants.O_NONBLOCK === 'number' ? constants.O_NONBLOCK : 0
 const OPEN_DIRECTORY = typeof constants.O_DIRECTORY === 'number' ? constants.O_DIRECTORY : 0
 const MAX_MARKER_BYTES = 128n
-const MARKER_FILENAMES = new Set(['orca-spool-incarnation-v1', '.orca-spool-incarnation-v1'])
+const MARKER_FILENAMES = new Set(['yiru-spool-incarnation-v1', '.yiru-spool-incarnation-v1'])
 
 export function registerSpoolIncarnationMarkerHandler(dispatcher: RelayDispatcher): void {
   dispatcher.onRequest('fs.spoolInspectDirectoryIdentity', inspectSpoolDirectoryIdentity)

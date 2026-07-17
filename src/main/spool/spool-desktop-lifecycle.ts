@@ -1,6 +1,6 @@
 import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import type { Store } from '../persistence'
-import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import type { SpoolDesktopService } from './spool-desktop-service'
 import type { DefaultSpoolOwnerWorktreeCatalog } from './spool-owner-worktree-catalog'
 import type { SpoolSessionCatalog } from './spool-session-catalog'
@@ -26,7 +26,7 @@ export class SpoolDesktopComposition {
     private readonly visibility: SpoolWorktreeVisibility,
     private readonly sessions: SpoolSessionCatalog,
     private readonly lifecycleUnsubscribes: readonly (() => void)[],
-    private readonly runtime: OrcaRuntimeService
+    private readonly runtime: YiruRuntimeService
   ) {
     this.service = service
     const repos = new Map(store.getRepos().map((repo) => [repo.id, repo] as const))

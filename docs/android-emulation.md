@@ -2,7 +2,7 @@
 
 ## Problem
 
-Orca ships a built-in mobile emulator surface (live pane + `orca emulator` CLI +
+Yiru ships a built-in mobile emulator surface (live pane + `yiru emulator` CLI +
 agent skill), but it is **iOS Simulator only and macOS only**:
 
 - `src/main/emulator/emulator-availability.ts:32` hard-returns "unavailable" for
@@ -16,7 +16,7 @@ Android Studio installs. We want Android emulation as a first-class peer of the
 iOS feature: full AVD lifecycle management, a live ~60fps pane, the full
 tap/gesture/type/button/rotate control surface, accessibility tree, app
 install/launch, runtime permissions, logcat, plus a dedicated
-`orca-emulator-android` agent skill.
+`yiru-emulator-android` agent skill.
 
 ## Current architecture (what we reuse vs. replace)
 
@@ -34,7 +34,7 @@ renderer pane, session registry, RPC/CLI shape, and tab system are effectively
   `src/main/emulator/emulator-session-registry.ts` (like the active browser
   tab). Backend-agnostic.
 - **RPC** is declared in `src/main/runtime/rpc/methods/emulator.ts` and
-  implemented in `src/main/runtime/orca-runtime-emulator.ts`.
+  implemented in `src/main/runtime/yiru-runtime-emulator.ts`.
 - **CLI** is `src/cli/specs/emulator.ts` + `src/cli/handlers/emulator.ts`.
 - **Pane** is `src/renderer/src/components/emulator-pane/**` (~50 files).
 
@@ -51,7 +51,7 @@ What is iOS-bound and needs an Android sibling:
 - Android emulation on **Windows, Linux, and macOS** (macOS users choose iOS or
   Android in the same pane).
 - **Full AVD lifecycle**: discover installed AVDs via the SDK, boot/shutdown
-  them from Orca, and attach to already-running emulators + physical `adb`
+  them from Yiru, and attach to already-running emulators + physical `adb`
   devices.
 - **Live ~60fps pane** via scrcpy H.264 decoded in the renderer with WebCodecs.
 - Control parity: tap, swipe/gesture, type, hardware buttons (Back, Home,
@@ -59,7 +59,7 @@ What is iOS-bound and needs an Android sibling:
 - Extra capabilities: accessibility tree (`uiautomator dump`), app
   install/launch (`adb install` / `am start`), runtime permissions
   (`pm grant/revoke/reset`), logcat capture.
-- A dedicated `skills/orca-emulator-android/SKILL.md`.
+- A dedicated `skills/yiru-emulator-android/SKILL.md`.
 
 ## Non-goals (v1)
 
@@ -217,10 +217,10 @@ path, but video streaming does not require that path.
 ## RPC + CLI surface
 
 Extend `src/main/runtime/rpc/methods/emulator.ts`,
-`src/main/runtime/orca-runtime-emulator.ts`, `src/cli/specs/emulator.ts`, and
+`src/main/runtime/yiru-runtime-emulator.ts`, `src/cli/specs/emulator.ts`, and
 `src/cli/handlers/emulator.ts`:
 
-- `orca emulator list` gains a **platform column** and shows iOS + Android
+- `yiru emulator list` gains a **platform column** and shows iOS + Android
   devices/AVDs together; device selection resolves the backend automatically
   (by recorded session tag, else by which backend's `listDevices()` owns the id).
 - Existing verbs (`attach`, `tap`, `gesture`, `type`, `button`, `rotate`,
@@ -261,18 +261,18 @@ Extend `src/main/runtime/rpc/methods/emulator.ts`,
 
 ## Skill
 
-New `skills/orca-emulator-android/SKILL.md`, mirroring
-`skills/orca-emulator/SKILL.md`:
+New `skills/yiru-emulator-android/SKILL.md`, mirroring
+`skills/yiru-emulator/SKILL.md`:
 
 - Prerequisites: Android Studio / SDK installed, `ANDROID_HOME` (or
   `ANDROID_SDK_ROOT`) set, at least one AVD or a connected device.
-- The `orca emulator ...` command table (shared CLI; Android examples).
-- Gotchas: Orca handles pixel ↔ normalized conversion (agents always pass 0–1);
+- The `yiru emulator ...` command table (shared CLI; Android examples).
+- Gotchas: Yiru handles pixel ↔ normalized conversion (agents always pass 0–1);
   adb device/serial targeting; no camera injection in v1; scrcpy version
   coupling.
 - Cross-reference from the iOS skill's "When NOT to use" (which already
   anticipates an Android backend under the same namespace).
-- Register it the same way `orca-emulator` is registered.
+- Register it the same way `yiru-emulator` is registered.
 
 ## Availability & platform gating
 
@@ -329,7 +329,7 @@ the iOS tests mock serve-sim (`serve-sim-*.test.ts`, `emulator-bridge.test.ts`).
 
 Electron validation (manual, on a machine with the Android SDK):
 
-- Boot an AVD from Orca; confirm the live pane streams and is responsive.
+- Boot an AVD from Yiru; confirm the live pane streams and is responsive.
 - tap / swipe / type / Back / Home / Recents / rotate.
 - `ax`, `install` + `launch`, `permissions grant`, `logcat`.
 - Cross-platform smoke on Windows (primary driver) and macOS (iOS + Android
@@ -356,21 +356,21 @@ Electron validation (manual, on a machine with the Android SDK):
    refactor); keep all iOS tests green.
 3. Android device management (`android-sdk-discovery`, `adb-devices`,
    `avd-manager`, `android-availability`) + availability aggregation; surface
-   Android devices in `orca emulator list`.
+   Android devices in `yiru emulator list`.
 4. scrcpy streaming (`scrcpy-server-deploy`, `scrcpy-video-stream`) + the video
    IPC channel + the renderer WebCodecs canvas path; live pane renders.
 5. scrcpy control (`scrcpy-control-channel`, `android-input-mapping`) +
    tap/gesture/type/button/rotate end-to-end.
 6. Extra capabilities: `ax`, `install`/`launch`, `permissions`, `logcat`.
 7. Renderer polish: Android hardware buttons, bezel, setup guide.
-8. Packaging (`scrcpy-server.jar` resource) + the `orca-emulator-android` skill.
+8. Packaging (`scrcpy-server.jar` resource) + the `yiru-emulator-android` skill.
 9. Tests at each step; typecheck + lint; Electron validation on Windows + macOS.
 
 ## Open decisions
 
-- Whether `orca emulator install`/`launch`/`logcat` should also be exposed for
+- Whether `yiru emulator install`/`launch`/`logcat` should also be exposed for
   iOS later (iOS install is `xcrun simctl install`); v1 leaves them
   Android-only via capability flags.
-- Whether to expose an explicit `orca emulator boot <avd>` verb vs. folding boot
+- Whether to expose an explicit `yiru emulator boot <avd>` verb vs. folding boot
   into `attach`; initial version folds boot into `attach` (parity with iOS,
   which boots on attach) and adds a `--no-boot` opt-out.

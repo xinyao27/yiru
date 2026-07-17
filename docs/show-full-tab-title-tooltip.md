@@ -86,7 +86,7 @@ The tab components render plain text spans for their ellipsized labels. The full
 ## UI Quality Bar
 
 - Tooltip appears near the hovered/focused truncated label without covering the close button unnecessarily.
-- Tooltip uses existing Orca token-based styling through `TooltipContent`; no new colors, shadows, or typography.
+- Tooltip uses existing Yiru token-based styling through `TooltipContent`; no new colors, shadows, or typography.
 - Long text wraps at a readable max width, including long path/URL segments, and does not clip off-screen in a normal desktop viewport.
 - Tab dimensions, hover colors, active indicator, unread bell, dirty dot, git status, and close-button reveal behavior do not shift.
 - Light and dark theme surfaces remain legible.

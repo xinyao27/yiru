@@ -21,7 +21,7 @@ export function resolveChecksPanelPRRefreshRequest(
     input.cachedFetchedAt < input.panelVisibleSince
 
   if (cachedMissPredatesVisiblePanel) {
-    // Why: external agents can create/merge a PR after Orca cached "none";
+    // Why: external agents can create/merge a PR after Yiru cached "none";
     // visible empty-state checks need one foreground lookup to recover.
     return { reason: 'active', priority: 80 }
   }

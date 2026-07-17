@@ -1,4 +1,4 @@
-import type { PersistedTrustedOrcaHooks } from '../../../src/shared/types'
+import type { PersistedTrustedYiruHooks } from '../../../src/shared/types'
 import type { RpcClient } from '../transport/rpc-client'
 
 export type SetupHookTrust = {
@@ -7,7 +7,7 @@ export type SetupHookTrust = {
 }
 
 export function isSetupHookTrusted(
-  trust: PersistedTrustedOrcaHooks,
+  trust: PersistedTrustedYiruHooks,
   repoId: string,
   contentHash: string
 ): boolean {
@@ -16,19 +16,19 @@ export function isSetupHookTrusted(
 }
 
 export function wasSetupHookPreviouslyApproved(
-  trust: PersistedTrustedOrcaHooks,
+  trust: PersistedTrustedYiruHooks,
   repoId: string
 ): boolean {
   return Boolean(trust[repoId]?.setup?.contentHash)
 }
 
-export function trustedOrcaHooksWithSetupApproval(args: {
-  trust: PersistedTrustedOrcaHooks
+export function trustedYiruHooksWithSetupApproval(args: {
+  trust: PersistedTrustedYiruHooks
   repoId: string
   contentHash: string
   alwaysTrust: boolean
   approvedAt?: number
-}): PersistedTrustedOrcaHooks {
+}): PersistedTrustedYiruHooks {
   const approvedAt = args.approvedAt ?? Date.now()
   const existing = args.trust[args.repoId]
   const nextRepo = args.alwaysTrust
@@ -39,13 +39,13 @@ export function trustedOrcaHooksWithSetupApproval(args: {
 
 export async function persistSetupHookTrustApproval(args: {
   client: RpcClient
-  trust: PersistedTrustedOrcaHooks
+  trust: PersistedTrustedYiruHooks
   repoId: string
   contentHash: string
   alwaysTrust: boolean
-}): Promise<PersistedTrustedOrcaHooks> {
-  const next = trustedOrcaHooksWithSetupApproval(args)
-  const response = await args.client.sendRequest('ui.set', { trustedOrcaHooks: next })
+}): Promise<PersistedTrustedYiruHooks> {
+  const next = trustedYiruHooksWithSetupApproval(args)
+  const response = await args.client.sendRequest('ui.set', { trustedYiruHooks: next })
   if (!response.ok) {
     throw new Error(response.error.message)
   }

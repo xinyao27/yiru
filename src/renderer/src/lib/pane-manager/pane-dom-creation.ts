@@ -53,7 +53,7 @@ export function createPaneDOM(
   // Why: a synchronous throw inside any link provider's provideLinks (notably
   // xterm web-links' LinkComputer raising RangeError on a pathological wrapped
   // line) escapes to window.onerror and gets the renderer killed. Guard every
-  // provider registered after this point — addon-internal and Orca's own.
+  // provider registered after this point — addon-internal and Yiru's own.
   installGuardedLinkProviderRegistration(terminal)
   const fitAddon = new FitAddon()
   const searchAddon = new SearchAddon()

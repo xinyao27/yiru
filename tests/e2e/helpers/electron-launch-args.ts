@@ -1,4 +1,4 @@
-export function getOrcaElectronLaunchArgs(mainPath: string, headful: boolean): string[] {
+export function getYiruElectronLaunchArgs(mainPath: string, headful: boolean): string[] {
   if (headful || process.platform !== 'linux') {
     return [mainPath]
   }

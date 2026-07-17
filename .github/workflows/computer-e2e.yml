@@ -130,12 +130,12 @@ jobs:
         run: node config/scripts/windows-daemon-workspace-close-repro.mjs
       - if: runner.os == 'Linux'
         env:
-          ORCA_COMPUTER_E2E: '1'
+          YIRU_COMPUTER_E2E: '1'
           ACCESSIBILITY_ENABLED: '1'
         run: xvfb-run --auto-servernum dbus-run-session -- pnpm test:e2e:computer --reporter=verbose tests/e2e/computer-linux.e2e.ts
       - if: runner.os == 'Windows'
         env:
-          ORCA_COMPUTER_E2E: '1'
+          YIRU_COMPUTER_E2E: '1'
         run: pnpm test:e2e:computer --reporter=verbose tests/e2e/computer-windows.e2e.ts
 
   mac:
@@ -144,7 +144,7 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: macos-15
     env:
-      ORCA_COMPUTER_E2E: '1'
+      YIRU_COMPUTER_E2E: '1'
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -164,7 +164,7 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-22.04
     env:
-      ORCA_COMPUTER_E2E: '1'
+      YIRU_COMPUTER_E2E: '1'
       ACCESSIBILITY_ENABLED: '1'
     steps:
       - uses: actions/checkout@v6
@@ -191,7 +191,7 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: windows-latest
     env:
-      ORCA_COMPUTER_E2E: '1'
+      YIRU_COMPUTER_E2E: '1'
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6

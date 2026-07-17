@@ -34,7 +34,7 @@ import type { PullRequestGenerationSlice } from './slices/pull-request-generatio
 import type { CommitMessageGenerationSlice } from './slices/commit-message-generation'
 import type { PinnedTabCloseConfirmSlice } from './slices/pinned-tab-close-confirm'
 import type { RecentlyClosedTabsSlice } from './slices/recently-closed-tabs'
-import type { OrcaProfilesSlice } from './slices/orca-profiles'
+import type { YiruProfilesSlice } from './slices/yiru-profiles'
 import type { NewIssueDraftSlice } from './slices/new-issue-draft'
 import type { SpoolSharingSlice } from './slices/spool-sharing'
 
@@ -74,6 +74,6 @@ export type AppState = RepoSlice &
   CommitMessageGenerationSlice &
   PinnedTabCloseConfirmSlice &
   RecentlyClosedTabsSlice &
-  OrcaProfilesSlice &
+  YiruProfilesSlice &
   NewIssueDraftSlice &
   SpoolSharingSlice

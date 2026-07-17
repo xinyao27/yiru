@@ -61,7 +61,7 @@ describe('readNativeChatTranscript (claude)', () => {
       }
     })
 
-    const filePath = await writeFixture('orca-native-chat-claude-', records)
+    const filePath = await writeFixture('yiru-native-chat-claude-', records)
     const result = await readNativeChatTranscript('claude', 'sess', { filePath })
     expect('messages' in result).toBe(true)
     if (!('messages' in result)) {
@@ -88,7 +88,7 @@ describe('readNativeChatTranscript (claude)', () => {
   })
 
   it('drops structurally marked injected user turns but keeps their tool results', async () => {
-    const filePath = await writeFixture('orca-native-chat-claude-meta-', [
+    const filePath = await writeFixture('yiru-native-chat-claude-meta-', [
       {
         type: 'user',
         uuid: 'u-real',
@@ -156,7 +156,7 @@ describe('readNativeChatTranscript (claude)', () => {
   })
 
   it('marks thinking-only assistant content as a reasoning surface', async () => {
-    const filePath = await writeFixture('orca-native-chat-claude-think-', [
+    const filePath = await writeFixture('yiru-native-chat-claude-think-', [
       {
         type: 'assistant',
         uuid: 'a-think',
@@ -174,7 +174,7 @@ describe('readNativeChatTranscript (claude)', () => {
 
 describe('readNativeChatTranscript (codex)', () => {
   it('maps tool calls and results to tool-call/tool-result blocks', async () => {
-    const filePath = await writeFixture('orca-native-chat-codex-', [
+    const filePath = await writeFixture('yiru-native-chat-codex-', [
       {
         type: 'session_meta',
         timestamp: '2026-06-01T10:00:00.000Z',
@@ -246,7 +246,7 @@ describe('readNativeChatTranscript (errors)', () => {
   // race as an unresolved path (#8401) — it must stay retry-worthy.
   it('marks an ENOENT on a directly-passed path as notFound (vanished after resolve)', async () => {
     const result = await readNativeChatTranscript('claude', 'sess', {
-      filePath: join(tmpdir(), 'orca-native-chat-does-not-exist.jsonl')
+      filePath: join(tmpdir(), 'yiru-native-chat-does-not-exist.jsonl')
     })
     expect('error' in result).toBe(true)
     if ('error' in result) {
@@ -255,7 +255,7 @@ describe('readNativeChatTranscript (errors)', () => {
   })
 
   it('returns a real read error (no notFound) when the path exists but is unreadable', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'orca-native-chat-unreadable-'))
+    const root = await mkdtemp(join(tmpdir(), 'yiru-native-chat-unreadable-'))
     tempRoots.push(root)
     // A directory instead of a file fails the read with a non-ENOENT error.
     const result = await readNativeChatTranscript('claude', 'sess', { filePath: root })
@@ -269,7 +269,7 @@ describe('readNativeChatTranscript (errors)', () => {
   // to exist on disk (#8401) — the miss must be marked retry-worthy so callers
   // above (cache, watch, renderer) don't settle into a permanent error.
   it('marks an unresolved session as notFound so callers know to retry', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'orca-native-chat-noresolve-'))
+    const root = await mkdtemp(join(tmpdir(), 'yiru-native-chat-noresolve-'))
     tempRoots.push(root)
     const result = await readNativeChatTranscript('claude', 'missing', {
       claudeProjectsDir: join(root, 'empty')

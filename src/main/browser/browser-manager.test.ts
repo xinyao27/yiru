@@ -205,7 +205,7 @@ describe('browserManager', () => {
       }
     })
     // Why: the custom createWindow is what swaps the chrome-less native child
-    // for Orca's origin-bar window without losing the popup contents.
+    // for Yiru's origin-bar window without losing the popup contents.
     expect(typeof response.createWindow).toBe('function')
 
     expect(shellOpenExternalMock).not.toHaveBeenCalled()
@@ -324,7 +324,7 @@ describe('browserManager', () => {
     expect(rendererSendMock).toHaveBeenCalledWith('browser:popup', {
       browserPageId: 'browser-1',
       origin: 'https://sso.example.com',
-      action: 'opened-in-orca'
+      action: 'opened-in-yiru'
     })
 
     // Opener-lifecycle parity: destroying the owning guest closes the popup.
@@ -387,7 +387,7 @@ describe('browserManager', () => {
 
     expect(shellOpenExternalMock).not.toHaveBeenCalled()
     expect(rendererSendMock).not.toHaveBeenCalledWith(
-      'browser:open-link-in-orca-tab',
+      'browser:open-link-in-yiru-tab',
       expect.anything()
     )
     expect(rendererSendMock).toHaveBeenCalledWith('browser:popup', {
@@ -550,7 +550,7 @@ describe('browserManager', () => {
 
     const restore = await browserManager.acquireAutomationVisibility(guest.id)
     const acquireScript = rendererExecuteJavaScriptMock.mock.calls[0]?.[0]
-    expect(acquireScript).toContain('__orcaBrowserAutomationVisibility')
+    expect(acquireScript).toContain('__yiruBrowserAutomationVisibility')
     expect(acquireScript).toContain('bridge.acquire("page-automation")')
     expect(acquireScript).not.toContain('setActiveBrowserTab')
     expect(acquireScript).not.toContain('setActiveTabType')
@@ -845,7 +845,7 @@ describe('browserManager', () => {
     expect(restoreScript).toContain('state.setActiveTabType("terminal");')
   })
 
-  it('does not focus the Orca window while preparing a screenshot', async () => {
+  it('does not focus the Yiru window while preparing a screenshot', async () => {
     const rendererExecuteJavaScriptMock = vi.fn().mockResolvedValueOnce({
       prevTabType: 'terminal',
       prevActiveWorktreeId: 'wt-1',
@@ -895,7 +895,7 @@ describe('browserManager', () => {
     expect(browserWindowFromWebContentsMock).not.toHaveBeenCalled()
   })
 
-  it('offers opening a link in another Orca browser tab from the guest context menu', () => {
+  it('offers opening a link in another Yiru browser tab from the guest context menu', () => {
     const rendererSendMock = vi.fn()
     const guest = {
       id: 104,
@@ -2414,7 +2414,7 @@ describe('browserManager', () => {
         getType: vi.fn(() => 'webview'),
         getUserAgent: vi.fn(
           () =>
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) orca/1.0.0 Chrome/134.0.0.0 Electron/30.0.0 Safari/537.36'
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) yiru/1.0.0 Chrome/134.0.0.0 Electron/30.0.0 Safari/537.36'
         ),
         setBackgroundThrottling: guestSetBackgroundThrottlingMock,
         setWindowOpenHandler: guestSetWindowOpenHandlerMock,
@@ -2583,7 +2583,7 @@ describe('browserManager', () => {
         expect.any(Number),
         [
           expect.objectContaining({
-            code: expect.stringContaining('__orcaBrowserAnnotationViewportBridge')
+            code: expect.stringContaining('__yiruBrowserAnnotationViewportBridge')
           })
         ],
         false

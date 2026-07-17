@@ -2,13 +2,13 @@
 
 ## Problem
 
-- Failed Orca automation run details show only the disabled/open-target action when no workspace launched, so a user who sees a `dispatch_failed` error has no local recovery action in the failed-run view: `src/renderer/src/components/automations/AutomationsPage.tsx:1858`.
+- Failed Yiru automation run details show only the disabled/open-target action when no workspace launched, so a user who sees a `dispatch_failed` error has no local recovery action in the failed-run view: `src/renderer/src/components/automations/AutomationsPage.tsx:1858`.
 - The reusable detail header already accepts actions, but the run detail action set is limited to `getAutomationRunViewState`/`openRunWorkspace`: `src/renderer/src/components/automations/AutomationRunPageFrame.tsx:9`, `src/renderer/src/components/automations/automation-run-view-state.ts:13`.
 - Manual rerun behavior already exists as `runNow`, which creates a fresh manual run for the automation; the renderer wrapper currently refreshes the page after calling it: `src/renderer/src/components/automations/AutomationsPage.tsx:1033`, `src/main/automations/service.ts:66`.
 
 ## Goal
 
-Add an easy rerun button to Orca automation run detail pages for failed launch/recovery statuses. The button creates a fresh manual run for the same automation through the existing `runNow` path.
+Add an easy rerun button to Yiru automation run detail pages for failed launch/recovery statuses. The button creates a fresh manual run for the same automation through the existing `runNow` path.
 
 ## Non-goals
 
@@ -20,7 +20,7 @@ Add an easy rerun button to Orca automation run detail pages for failed launch/r
 ## Design
 
 1. Add a small pure predicate near the run view state code, for example `canRerunAutomationRun({ automation, run })`.
-   - Return `true` only when an Orca automation still exists, `run.automationId === automation.id`, and the run status is one of `dispatch_failed`, `skipped_unavailable`, or `skipped_needs_interactive_auth`.
+   - Return `true` only when a Yiru automation still exists, `run.automationId === automation.id`, and the run status is one of `dispatch_failed`, `skipped_unavailable`, or `skipped_needs_interactive_auth`.
    - Do not show rerun for `pending`, `dispatching`, `dispatched`, `completed`, or `skipped_missed`. `skipped_missed` is scheduler catch-up history, not a launch failure the detail page should recover.
 2. In `AutomationsPage`, render a `Rerun` action in `AutomationRunPageFrame.actions` when that predicate is true for `selected` and `selectedAutomationRunPage`.
 3. The action calls `window.api.automations.runNow({ id: selected.id })` through a small handler, then `refresh()`, then shows the existing queued toast. Wrap the call in `try/catch/finally`: if the automation was deleted or the IPC rejects, toast the error and refresh so the stale run detail can disappear.
@@ -40,11 +40,11 @@ Add an easy rerun button to Orca automation run detail pages for failed launch/r
 - The user clicks rerun repeatedly in the same window: disable the rerun button while the request is pending.
 - The user clicks rerun in two windows: the renderer guard will not prevent duplicate manual runs across windows. Do not claim backend idempotency unless a service-level dedupe key is added.
 - Refresh after rerun may leave the failed run detail selected because `selectedAutomationRunPageId` still points at the old run. That is acceptable for this change, but the run list count and rows must refresh so the new manual run is visible after navigating back.
-- `runNow` itself does not broadcast `orca:automations-changed`; the initiating page must call `refresh()` after the IPC resolves. Other windows update only when dispatch result handling fires the existing event or when focus/visibility refresh runs.
+- `runNow` itself does not broadcast `yiru:automations-changed`; the initiating page must call `refresh()` after the IPC resolves. Other windows update only when dispatch result handling fires the existing event or when focus/visibility refresh runs.
 
 ## Rollout
 
 1. Add a small predicate/helper for rerun action visibility and unit tests if it can live near automation run view state without mixing responsibilities.
 2. Add rerun pending state, error handling, and handler in `AutomationsPage`.
-3. Render the new action in the selected Orca run detail header.
+3. Render the new action in the selected Yiru run detail header.
 4. Run focused tests, then `pnpm typecheck` and `pnpm lint`.

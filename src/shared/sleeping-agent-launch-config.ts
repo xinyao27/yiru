@@ -9,7 +9,7 @@ export function buildSleepingAgentLaunchConfig(args: {
     ...(args.agentCommand?.trim() ? { agentCommand: args.agentCommand } : {}),
     agentArgs: args.agentArgs ?? '',
     // Why: startup env may include prompt transport or pane identity values;
-    // durable resume state is limited to Orca-managed agent inputs.
+    // durable resume state is limited to Yiru-managed agent inputs.
     agentEnv: args.agentEnv ? { ...args.agentEnv } : {}
   }
 }

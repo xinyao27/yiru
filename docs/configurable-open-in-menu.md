@@ -103,7 +103,7 @@ Search indexing: add entries in `general-search.ts` so settings search can disco
 - Multi-window: renderer has a `settings:changed` listener, but main currently emits that event only for View > Appearance toggles. `settings:set` does not broadcast generic updates. So edits to `openInApplications` in one window are not guaranteed to appear live in another until reload/fetch.
 - Renderer optimistic merge is temporary UI state only. Main write result is authoritative and may normalize away invalid rows. Use the `settings:set` return value to rebase local state immediately after each write.
 - Concurrent edits are last-write-wins at the field level (`openInApplications` array replaced wholesale). There is no compare-and-swap/version guard.
-- External file mutation of `orca-data.json` is only observed on app restart; no live file watch exists.
+- External file mutation of `yiru-data.json` is only observed on app restart; no live file watch exists.
 
 ## Edge cases
 

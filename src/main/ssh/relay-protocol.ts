@@ -5,9 +5,9 @@
 import { DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS } from '../../shared/ssh-types'
 
 export const RELAY_VERSION = '0.1.0'
-export const RELAY_SENTINEL = `ORCA-RELAY v${RELAY_VERSION} READY\n`
+export const RELAY_SENTINEL = `YIRU-RELAY v${RELAY_VERSION} READY\n`
 export const RELAY_SENTINEL_TIMEOUT_MS = 10_000
-export const RELAY_REMOTE_DIR = '.orca-remote'
+export const RELAY_REMOTE_DIR = '.yiru-remote'
 
 // ── Framing constants (VS Code ProtocolConstants) ───────────────────
 
@@ -72,14 +72,14 @@ export const GIT_RESPONSE_CHUNK_SIZE = 128 * 1024
  * as git.responseChunk frames. Absent from old relays, so a new client falls
  * back to the plain result they return. */
 export type GitResponseStreamMarker = {
-  __orcaGitResponseStream: { streamId: number; totalBytes: number; chunkCount: number }
+  __yiruGitResponseStream: { streamId: number; totalBytes: number; chunkCount: number }
 }
 
 export function isGitResponseStreamMarker(value: unknown): value is GitResponseStreamMarker {
-  if (typeof value !== 'object' || value === null || !('__orcaGitResponseStream' in value)) {
+  if (typeof value !== 'object' || value === null || !('__yiruGitResponseStream' in value)) {
     return false
   }
-  const marker = (value as { __orcaGitResponseStream?: unknown }).__orcaGitResponseStream
+  const marker = (value as { __yiruGitResponseStream?: unknown }).__yiruGitResponseStream
   if (typeof marker !== 'object' || marker === null) {
     return false
   }

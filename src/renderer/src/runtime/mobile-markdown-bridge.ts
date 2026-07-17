@@ -1,6 +1,6 @@
 import { getActiveTabNavOrder } from '@/components/tab-bar/group-tab-order'
 import {
-  ORCA_EDITOR_FILE_SAVED_EVENT,
+  YIRU_EDITOR_FILE_SAVED_EVENT,
   requestEditorFileSave,
   requestEditorSaveQuiesce,
   type EditorFileSavedDetail
@@ -272,7 +272,7 @@ async function waitForPositiveSave(file: OpenFile, content: string): Promise<voi
       timeout = null
     }
     if (onSaved) {
-      window.removeEventListener(ORCA_EDITOR_FILE_SAVED_EVENT, onSaved as EventListener)
+      window.removeEventListener(YIRU_EDITOR_FILE_SAVED_EVENT, onSaved as EventListener)
       onSaved = null
     }
   }
@@ -289,7 +289,7 @@ async function waitForPositiveSave(file: OpenFile, content: string): Promise<voi
       cleanup()
       resolve()
     }
-    window.addEventListener(ORCA_EDITOR_FILE_SAVED_EVENT, onSaved as EventListener)
+    window.addEventListener(YIRU_EDITOR_FILE_SAVED_EVENT, onSaved as EventListener)
   })
 
   try {

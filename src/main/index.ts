@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- Why: this is Orca's main-process entry point;
+/* eslint-disable max-lines -- Why: this is Yiru's main-process entry point;
    it owns app lifecycle, service wiring, window creation, and hook/daemon
    startup. Splitting by line count would fragment tightly coupled startup
    logic across files without a cleaner ownership seam. */
@@ -14,9 +14,9 @@ import {
   getCanonicalUserDataPath,
   migrateMobilePairingDataToCanonicalUserDataPath
 } from './persistence'
-import { ensureActiveOrcaProfile, initOrcaProfilePaths } from './orca-profiles/profile-index-store'
-import { getOrcaCloudAuthConfig } from './orca-profiles/profile-cloud-auth-config'
-import { getProfileUserDataPath } from './orca-profiles/profile-storage-paths'
+import { ensureActiveYiruProfile, initYiruProfilePaths } from './yiru-profiles/profile-index-store'
+import { getYiruCloudAuthConfig } from './yiru-profiles/profile-cloud-auth-config'
+import { getProfileUserDataPath } from './yiru-profiles/profile-storage-paths'
 import { applyAppIcon } from './app-icon'
 import { StatsCollector, initStatsPath } from './stats/collector'
 import { ClaudeUsageStore, initClaudeUsagePath } from './claude-usage/store'
@@ -42,11 +42,11 @@ import { initCohortClassifier } from './telemetry/cohort-classifier'
 import { initOnboardingCohortClassifier } from './telemetry/onboarding-cohort-classifier'
 import { resolveConsent } from './telemetry/consent'
 import { triggerStartupNotificationRegistration } from './ipc/notifications'
-import { OrcaRuntimeService } from './runtime/orca-runtime'
-import { OrcaRuntimeRpcServer } from './runtime/runtime-rpc'
+import { YiruRuntimeService } from './runtime/yiru-runtime'
+import { YiruRuntimeRpcServer } from './runtime/runtime-rpc'
 import { DesktopRelayService } from './runtime/relay/desktop-relay-service'
 import type { RelayBrokerStatus } from './runtime/relay/relay-session-broker'
-import { awaitRuntimeFileWatcherUnsubscribes } from './runtime/orca-runtime-files'
+import { awaitRuntimeFileWatcherUnsubscribes } from './runtime/yiru-runtime-files'
 import { clearRuntimeMetadataIfOwned } from './runtime/runtime-metadata'
 import { ensureMainI18n, setMainUiLanguage } from './i18n/main-i18n'
 import {
@@ -59,7 +59,7 @@ import { recordUpdaterLifecycle } from './updater-lifecycle-diagnostics'
 import {
   configureElectronNetworkCompatibility,
   configureDevUserDataPath,
-  configureOrcaUserDataPathEnv,
+  configureYiruUserDataPathEnv,
   enableMainProcessGpuFeatures,
   installDevParentDisconnectQuit,
   installDevParentSignalQuit,
@@ -200,7 +200,6 @@ import { KeybindingService } from './keybindings/keybinding-service'
 import { applyElectronProxySettings } from './network/proxy-settings'
 import { preserveAgentAuthBeforeRestart } from './agent-auth-restart-preservation'
 import { CliInstaller } from './cli/cli-installer'
-import { installLinuxBareOrcaDispatcher } from './cli/linux-bare-orca-dispatcher'
 import { reconcileManagedWslCliRegistrations } from './cli/wsl-cli-registration-reconciliation'
 import { selfHealRuntimeEnvironmentFocus } from './runtime-environment-focus-self-heal'
 import {
@@ -223,9 +222,9 @@ let codexAccounts: CodexAccountService | null = null
 let codexRuntimeHome: CodexRuntimeHomeService | null = null
 let claudeAccounts: ClaudeAccountService | null = null
 let claudeRuntimeAuth: ClaudeRuntimeAuthService | null = null
-let runtime: OrcaRuntimeService | null = null
+let runtime: YiruRuntimeService | null = null
 let rateLimits: RateLimitService | null = null
-let runtimeRpc: OrcaRuntimeRpcServer | null = null
+let runtimeRpc: YiruRuntimeRpcServer | null = null
 let desktopRelayService: DesktopRelayService | null = null
 let desktopRelayStatus: RelayBrokerStatus = 'offline'
 let spoolDesktop: SpoolDesktopComposition | null = null
@@ -256,7 +255,7 @@ let managedWslCliStartupBarrierReady: Promise<void> = Promise.resolve()
 // un-migrated registration. 'settled' covers the off-Windows no-op fast path.
 let managedWslCliReconciliationStatus: 'pending' | 'settled' | 'failed' = 'settled'
 // Why: GPU child crashes clustered right after launch indicate a broken driver;
-// track them so Orca can move this build onto software rendering.
+// track them so Yiru can move this build onto software rendering.
 const gpuLaunchTimeMs = Date.now()
 const gpuCrashFallbackTracker = new GpuCrashFallbackTracker({
   windowMs: DEFAULT_GPU_CRASH_FALLBACK_WINDOW_MS,
@@ -276,7 +275,7 @@ const desktopActivationGate = createServeDesktopActivationGate({
   },
   onBlocked: (reason) => console.error(`[serve] Desktop activation blocked: ${reason}`)
 })
-// Why: on Windows a CLI-shaped launch (Orca.exe <unpacked CLI entry>) that lost
+// Why: on Windows a CLI-shaped launch (Yiru.exe <unpacked CLI entry>) that lost
 // ELECTRON_RUN_AS_NODE would otherwise boot the GUI, lose the single-instance
 // lock to a running window, and exit silently. Redirect it to node mode here,
 // before the lock gate below can bounce it.
@@ -354,11 +353,11 @@ function maybeAutoRenameBranchOnFirstWorkFromHook(event: {
         }
         return currentStore.getWorktreeMeta(worktreeId)?.pendingFirstAgentMessageRename === true
       },
-      canRenameOrcaCreatedBranch: (worktreeId) => {
+      canRenameYiruCreatedBranch: (worktreeId) => {
         const meta = currentStore.getWorktreeMeta(worktreeId)
         // Why: a user/imported branch can coincidentally be named after a creature.
-        // Only worktrees Orca stamped at creation are safe to auto-rename.
-        return !!meta?.orcaCreationSource && meta.preserveBranchOnDelete !== true
+        // Only worktrees Yiru stamped at creation are safe to auto-rename.
+        return !!meta?.yiruCreationSource && meta.preserveBranchOnDelete !== true
       },
       setDisplayName: (worktreeId, displayName) => {
         rememberBranchRenameFailureOutput(worktreeId, null)
@@ -440,11 +439,11 @@ const devAgentHookEndpointNamespace = devInstanceIdentity.isDev
   : undefined
 
 installUncaughtPipeErrorGuard()
-// Why: propagate the Orca app version into `process.env` so PTY-env
+// Why: propagate the Yiru app version into `process.env` so PTY-env
 // construction in both main (local-pty-provider) and the forked daemon
 // (pty-subprocess) can set `TERM_PROGRAM_VERSION` without re-importing
 // electron. The daemon inherits `process.env` via fork (daemon-init.ts:93).
-process.env.ORCA_APP_VERSION = app.getVersion()
+process.env.YIRU_APP_VERSION = app.getVersion()
 patchPackagedProcessPath()
 // Why: patchPackagedProcessPath seeds a minimal list of well-known system
 // dirs synchronously so early IPC (e.g. preflight before the shell spawn
@@ -462,7 +461,7 @@ if (app.isPackaged && process.platform !== 'win32') {
   })
 }
 configureDevUserDataPath(is.dev)
-configureOrcaUserDataPathEnv()
+configureYiruUserDataPathEnv()
 
 // Why: just past createMainWindow's 10s ready-to-show reveal fallback,
 // so a window revealed on that path still gets its tray icon.
@@ -476,11 +475,11 @@ if (startupDiagnosticsEnabled) {
     platform: process.platform,
     osRelease: os.release(),
     userData: app.getPath('userData'),
-    e2eUserData: Boolean(process.env.ORCA_E2E_USER_DATA_DIR)
+    e2eUserData: Boolean(process.env.YIRU_E2E_USER_DATA_DIR)
   })
   startEventLoopStallProbe()
 }
-// Self-gated on ORCA_MAIN_THREAD_DIAGNOSTICS; unlike the startup probe it
+// Self-gated on YIRU_MAIN_THREAD_DIAGNOSTICS; unlike the startup probe it
 // runs for the whole session to catch steady-state churn (issue #7576).
 startMainThreadChurnProbe()
 
@@ -586,15 +585,15 @@ function recordAgentStateCrashBreadcrumb(agentType: string, state: string): void
 
 // Why: the lock must be acquired AFTER configureDevUserDataPath — Electron
 // derives the lock identity from the `userData` path, so this placement lets
-// dev (`orca-dev`) and packaged (`orca`) runs lock in separate namespaces
+// dev (`yiru-dev`) and packaged (`yiru`) runs lock in separate namespaces
 // instead of serialising against each other.
 //
 // Why skip in dev: engineers routinely run `pnpm dev` in parallel from
 // multiple worktrees while shipping features, and the lock makes the second
-// `pnpm dev` exit silently. In dev we accept that `orca-runtime.json` may race
-// (the bundled `orca-dev` CLI routes to whichever instance wrote last). Agent
+// `pnpm dev` exit silently. In dev we accept that `yiru-runtime.json` may race
+// (the bundled `yiru-dev` CLI routes to whichever instance wrote last). Agent
 // hook endpoint files are namespaced per dev instance when the hook server
-// starts below. Packaged Orca keeps the lock to protect against the corruption
+// starts below. Packaged Yiru keeps the lock to protect against the corruption
 // documented in PR #1326 / issue #1312.
 const bypassSingleInstanceLock = shouldBypassSingleInstanceLock({
   isDev: is.dev,
@@ -635,17 +634,17 @@ if (!hasSingleInstanceLock) {
 // prevents from ever dispatching.
 if (hasSingleInstanceLock) {
   // Why: dev parent shutdown coupling is only for electron-vite desktop runs.
-  // `orca serve` may be launched through a CLI shim or background shell whose
+  // `yiru serve` may be launched through a CLI shim or background shell whose
   // parent lifetime is not the intended server lifetime.
   const shouldCoupleToDevParent = is.dev && !isServeMode
   installDevParentDisconnectQuit(shouldCoupleToDevParent)
   installDevParentWatchdog(shouldCoupleToDevParent)
   installDevParentSignalQuit(shouldCoupleToDevParent)
   // Why: must run after configureDevUserDataPath (which redirects userData to
-  // orca-dev in dev mode) but before app.setName('Orca') inside whenReady
+  // yiru-dev in dev mode) but before app.setName('Yiru') inside whenReady
   // (which would change the resolved path on case-sensitive filesystems).
   initDataPath()
-  initOrcaProfilePaths()
+  initYiruProfilePaths()
   // Why: same timing constraint as initDataPath — capture the userData path
   // before app.setName changes it. See persistence.ts:20-28.
   initStatsPath()
@@ -695,7 +694,7 @@ function startTerminalRuntimeStartupServices(): Promise<void> {
       await initDaemonPtyProvider(signal)
       logStartupMilestone('startup-service-done', { service: 'daemon-pty-provider' })
     },
-    // Why: PTY spawn env reads ORCA_AGENT_HOOK_* from the live server state, so
+    // Why: PTY spawn env reads YIRU_AGENT_HOOK_* from the live server state, so
     // the renderer awaits this barrier before restored terminals reconnect.
     startAgentHookServer: async () => {
       if (!isAgentStatusHooksEnabled(store?.getSettings())) {
@@ -705,8 +704,8 @@ function startTerminalRuntimeStartupServices(): Promise<void> {
       await agentHookServer.start({
         env: app.isPackaged ? 'production' : 'development',
         // Why: hooks source this endpoint file at invocation time, so old PTY
-        // env still reaches the current Orca process after an app restart.
-        // Dev uses a namespace because all worktrees share `orca-dev`.
+        // env still reaches the current Yiru process after an app restart.
+        // Dev uses a namespace because all worktrees share `yiru-dev`.
         userDataPath: app.getPath('userData'),
         endpointNamespace: devAgentHookEndpointNamespace
       })
@@ -726,7 +725,7 @@ function startTerminalRuntimeStartupServices(): Promise<void> {
     },
     onAgentHookServerError: (error) => {
       // Why: Claude/Codex/Gemini/OpenCode/Cursor hook callbacks are sidebar
-      // enrichment only. Orca must still boot if the loopback receiver fails.
+      // enrichment only. Yiru must still boot if the loopback receiver fails.
       console.error('[agent-hooks] Failed to start local hook server:', error)
     }
   })
@@ -780,7 +779,7 @@ function prepareCodexRuntimeHomeForLaunch(target?: CodexAccountSelectionTarget):
   return runtimeHomePath
 }
 
-// Why: tray "Open Orca" / left-click restores the window the close handler may
+// Why: tray "Open Yiru" / left-click restores the window the close handler may
 // have hidden to the tray; if the window was fully torn down, reopen it the
 // same way macOS dock re-activation does (guarded against update relaunch).
 function showMainWindowFromTray(): void {
@@ -997,8 +996,8 @@ function openMainWindow(): BrowserWindow {
         desktopRelayService?.fenceAndCloseNow()
         await preserveAgentAuthBeforeRestart({ codexRuntimeHome, claudeRuntimeAuth, store })
       },
-      onOrcaProfileAuthMutation: () => desktopRelayService?.authMutated(),
-      onBeforeOrcaProfileSignOut: () => desktopRelayService?.fenceAndCloseNow()
+      onYiruProfileAuthMutation: () => desktopRelayService?.authMutated(),
+      onBeforeYiruProfileSignOut: () => desktopRelayService?.fenceAndCloseNow()
     }
   )
   automations.setWebContents(window.webContents)
@@ -1173,9 +1172,9 @@ async function presentRendererRecoveryPrompt(recentRecoveryCount: number): Promi
     buttons: ['Reload', 'Quit'],
     defaultId: 0,
     cancelId: 1,
-    title: 'Orca keeps failing to load',
+    title: 'Yiru keeps failing to load',
     message: 'The app window crashed repeatedly and stopped reloading automatically.',
-    detail: `Orca tried to recover ${recentRecoveryCount} times in a row without success. This is often a graphics-driver or installation problem. Reload to try again, or quit and relaunch Orca.`
+    detail: `Yiru tried to recover ${recentRecoveryCount} times in a row without success. This is often a graphics-driver or installation problem. Reload to try again, or quit and relaunch Yiru.`
   }
   const { response } = window
     ? await dialog.showMessageBox(window, options)
@@ -1427,7 +1426,7 @@ async function printServeReady(options: ServeOptions): Promise<void> {
   if (options.json) {
     console.log(
       JSON.stringify({
-        type: 'orca_server_ready',
+        type: 'yiru_server_ready',
         runtimeId: runtime.getRuntimeId(),
         endpoint,
         // Why: the WSL reconciliation barrier fails open, so 'pending' warns clients
@@ -1447,7 +1446,7 @@ async function printServeReady(options: ServeOptions): Promise<void> {
     )
     return
   }
-  console.log(`Orca server ready: ${endpoint ?? 'websocket unavailable'}`)
+  console.log(`Yiru server ready: ${endpoint ?? 'websocket unavailable'}`)
   if (pairing.available) {
     if (pairing.webClientUrl) {
       console.log(`Web client URL: ${pairing.webClientUrl}`)
@@ -1461,7 +1460,7 @@ async function printServeReady(options: ServeOptions): Promise<void> {
 
 function installServeSignalHandlers(): void {
   const quit = (): void => {
-    // Why: foreground `orca serve` is controlled by the parent CLI/terminal,
+    // Why: foreground `yiru serve` is controlled by the parent CLI/terminal,
     // so POSIX termination signals should follow Electron's normal quit path
     // and flush runtime metadata, daemon checkpoints, and telemetry.
     app.quit()
@@ -1688,8 +1687,8 @@ app.whenReady().then(async () => {
     managedWslCliReconciliationReady
   )
 
-  const activeOrcaProfile = ensureActiveOrcaProfile()
-  store = new Store({ dataFile: activeOrcaProfile.dataFile })
+  const activeYiruProfile = ensureActiveYiruProfile()
+  store = new Store({ dataFile: activeYiruProfile.dataFile })
   logStartupMilestone('store-loaded')
   // Why: must run before ClaudeRuntimeAuthService's constructor sync — a Claude
   // CLI that survived the restart inside the daemon still holds the current
@@ -1718,8 +1717,8 @@ app.whenReady().then(async () => {
   // Why: browser sessions are used by desktop webviews and runtime profile
   // commands, so initialize them at app startup instead of a renderer IPC path.
   initializeBrowserSessionsForApp({
-    orcaProfileId: activeOrcaProfile.profile.id,
-    profileDirectory: activeOrcaProfile.profileDirectory
+    yiruProfileId: activeYiruProfile.profile.id,
+    profileDirectory: activeYiruProfile.profileDirectory
   })
   unsubscribeSystemResumeBroadcast = registerSystemResumeBroadcast()
   agentAwakeService = new AgentAwakeService()
@@ -1742,7 +1741,7 @@ app.whenReady().then(async () => {
   // composition root — independent of product telemetry — and must
   // initialize before any IPC handler / runtime span is created so the
   // tracer's active sink is populated at the moment the first span fires.
-  // Honors DO_NOT_TRACK / ORCA_TELEMETRY_DISABLED / ORCA_DIAGNOSTICS_DISABLED
+  // Honors DO_NOT_TRACK / YIRU_TELEMETRY_DISABLED / YIRU_DIAGNOSTICS_DISABLED
   // / CI internally; those gates do not need to be re-checked here.
   initObservability()
   // Why: cohort-classifier reads the repo count synchronously at every emit
@@ -1822,7 +1821,7 @@ app.whenReady().then(async () => {
       .filter((account) => !activeIds.has(account.id))
       .map((account) => ({ id: account.id, managedHomePath: account.managedHomePath }))
   })
-  const runtimeService = new OrcaRuntimeService(store, stats, {
+  const runtimeService = new YiruRuntimeService(store, stats, {
     // Why: resolve the PTY provider lazily. initDaemonPtyProvider() runs later
     // inside attachMainWindowServices and calls setLocalPtyProvider(routedAdapter)
     // to swap the in-process provider for the daemon-routed one. Capturing the
@@ -1952,8 +1951,8 @@ app.whenReady().then(async () => {
   runtimeService.setAutomationService(automations)
   runtimeService.setAccountServices({ claudeAccounts, codexAccounts, rateLimits })
   runtimeService.setCommitMessageAgentEnvironmentResolvers({
-    // Why: local Codex hooks and auth now live in Orca's managed runtime home
-    // even for the system-default path, so every Orca-launched Codex process
+    // Why: local Codex hooks and auth now live in Yiru's managed runtime home
+    // even for the system-default path, so every Yiru-launched Codex process
     // must resolve CODEX_HOME through the runtime-home service.
     prepareForCodexLaunch: prepareCodexRuntimeHomeForLaunch,
     prepareForClaudeLaunch: (target) => claudeRuntimeAuth!.prepareForClaudeLaunch(target)
@@ -1975,13 +1974,13 @@ app.whenReady().then(async () => {
     runtimeService.getEmulatorBridge()?.registerActiveEmulator(worktreeId, info, {
       managed: false
     })
-    serveSimStateWatcher.markOrcaManaged(info)
+    serveSimStateWatcher.markYiruManaged(info)
     runtimeService.notifyEmulatorAutoAttachFromWatcher(worktreeId, info)
   })
   nativeTheme.themeSource = store.getSettings().theme ?? 'system'
   if (shouldInstallManagedHooks(is.dev)) {
     // Why: the persisted off switch must run before any auto-install path so
-    // users who removed Orca-managed hooks do not see them silently reappear on launch.
+    // users who removed Yiru-managed hooks do not see them silently reappear on launch.
     if (isAgentStatusHooksEnabled(store.getSettings())) {
       runManagedHookInstallers(MANAGED_AGENT_HOOK_INSTALLERS)
     } else {
@@ -2097,8 +2096,8 @@ app.whenReady().then(async () => {
   // bind the default fixed port, crashing on EADDRINUSE. Port 0 lets the OS
   // assign a random available port per instance while still exercising the
   // full WebSocket startup path.
-  const isE2E = Boolean(process.env.ORCA_E2E_USER_DATA_DIR)
-  // Why: a developer running `pnpm dev` while the packaged Orca is also open
+  const isE2E = Boolean(process.env.YIRU_E2E_USER_DATA_DIR)
+  // Why: a developer running `pnpm dev` while the packaged Yiru is also open
   // would otherwise race the packaged app for 6768 and silently fall back to
   // a random OS-assigned port — breaking deterministic mobile pairing/repro
   // scripts against the dev instance. Pin the first dev instance to 6769 so
@@ -2119,7 +2118,7 @@ app.whenReady().then(async () => {
   // under the late app.getPath('userData') directory. Copy any missing files
   // forward before the runtime switches exclusively to the canonical path.
   migrateMobilePairingDataToCanonicalUserDataPath(app.getPath('userData'))
-  runtimeRpc = new OrcaRuntimeRpcServer({
+  runtimeRpc = new YiruRuntimeRpcServer({
     runtime,
     // Why: mobile pairing (DeviceRegistry + E2EE keypair + runtime metadata)
     // must share the stable path captured before app.setName(), not a late
@@ -2172,13 +2171,12 @@ app.whenReady().then(async () => {
     })
     settleServeDesktopActivation()
     installServeSignalHandlers()
-    // Why: the orca CLI command is normally installed by the renderer onboarding /
+    // Why: the yiru CLI command is normally installed by the renderer onboarding /
     // Settings "Install CLI" flow via the cli:install IPC. Headless serve has no
-    // renderer, so the command is never created and an in-terminal `orca …` fails
+    // renderer, so the command is never created and an in-terminal `yiru …` fails
     // with command-not-found. Run the idempotent installer here for the platforms
-    // where it puts a resolvable command on the managed-terminal PATH: macOS (bare
-    // `orca` in /usr/local/bin or ~/.local/bin) and Linux (`orca-ide`; bare `orca`
-    // is added by the dispatcher below). Windows is excluded — there install() would
+    // where it puts a resolvable command on the managed-terminal PATH: macOS
+    // (/usr/local/bin or ~/.local/bin) and Linux (~/.local/bin). Windows is excluded — there install() would
     // only mutate the persistent user-registry PATH without helping the current
     // serve's child terminals. Best-effort: a failure must not block serve start.
     if (process.platform === 'darwin' || process.platform === 'linux') {
@@ -2192,32 +2190,11 @@ app.whenReady().then(async () => {
           }
         }).install()
         console.log(
-          `[serve] orca CLI install: ${cliStatus.state}${cliStatus.commandPath ? ` (${cliStatus.commandPath})` : ''}`
+          `[serve] yiru CLI install: ${cliStatus.state}${cliStatus.commandPath ? ` (${cliStatus.commandPath})` : ''}`
         )
       } catch (error) {
         console.warn(
-          '[serve] orca CLI install skipped:',
-          error instanceof Error ? error.message : String(error)
-        )
-      }
-    }
-    // Why: on Linux the CLI installs as `orca-ide`, NOT bare `orca` (above), but the
-    // Claude Team launcher typed into the initial managed terminal invokes bare `orca`.
-    // Drop a bare-`orca` dispatcher on ~/.local/bin (ahead of /usr/bin on the managed
-    // terminal PATH) so `orca claude-teams` resolves. Best-effort: a failure must not
-    // block serve startup. See installLinuxBareOrcaDispatcher for the full rationale.
-    if (process.platform === 'linux' && app.isPackaged && process.resourcesPath) {
-      try {
-        const dispatcher = await installLinuxBareOrcaDispatcher({
-          resourcesPath: process.resourcesPath
-        })
-        console.log(
-          `[serve] bare orca dispatcher ${dispatcher.state}: ${dispatcher.dispatcherPath}` +
-            `${dispatcher.target ? ` -> ${dispatcher.target}` : ''}`
-        )
-      } catch (error) {
-        console.warn(
-          '[serve] bare orca dispatcher install skipped:',
+          '[serve] yiru CLI install skipped:',
           error instanceof Error ? error.message : String(error)
         )
       }
@@ -2234,9 +2211,9 @@ app.whenReady().then(async () => {
       runtime: runtimeService,
       rateLimits,
       userDataPath: getCanonicalUserDataPath(),
-      profileId: activeOrcaProfile.profile.id,
+      profileId: activeYiruProfile.profile.id,
       ownerRuntimeId: runtimeService.getRuntimeId(),
-      orcaVersion: app.getVersion(),
+      yiruVersion: app.getVersion(),
       isPackaged: app.isPackaged,
       executablePath: process.execPath,
       osFamily:
@@ -2262,7 +2239,7 @@ app.whenReady().then(async () => {
     spoolDesktop?.start()
   ])
 
-  const cloudAuth = getOrcaCloudAuthConfig()
+  const cloudAuth = getYiruCloudAuthConfig()
   if (cloudAuth.configured) {
     try {
       const relayService = new DesktopRelayService({
@@ -2362,7 +2339,7 @@ app.on('will-quit', (e) => {
   // deterministically instead of relying on stdio-pipe teardown.
   wslHookRelayManager.disposeAll()
   stats?.flush()
-  // Why: agent-browser daemon processes would otherwise linger after Orca quits,
+  // Why: agent-browser daemon processes would otherwise linger after Yiru quits,
   // holding ports and leaving stale session state on disk.
   runtime?.getAgentBrowserBridge()?.destroyAllSessions()
   // Why: headless offscreen browser windows are main-process owned; tear them
@@ -2447,7 +2424,7 @@ app.on('will-quit', (e) => {
 })
 
 app.on('window-all-closed', () => {
-  // Why: headless `orca serve` has no desktop window, and offscreen browser
+  // Why: headless `yiru serve` has no desktop window, and offscreen browser
   // windows are disposable implementation details. Closing/crashing the last
   // one must not take down terminal/runtime RPC for the VM workspace — the
   // policy fn returns false for serve mode so the app stays alive.

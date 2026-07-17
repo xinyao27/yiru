@@ -518,7 +518,7 @@ function getClaudeStatusAccountsFromSettings(
   }
 }
 
-// Why: with a Remote Orca Server active, accounts persisted in local
+// Why: with a Remote Yiru Server active, accounts persisted in local
 // GlobalSettings describe this desktop, not the account owner; the snapshot
 // fetched from the server must win (#7973).
 export function resolveCodexStatusAccountState(
@@ -1694,7 +1694,7 @@ export function ProviderDetailsMenu({
 // StatusBar
 // ---------------------------------------------------------------------------
 
-const CLOSE_ALL_CONTEXT_MENUS_EVENT = 'orca-close-all-context-menus'
+const CLOSE_ALL_CONTEXT_MENUS_EVENT = 'yiru-close-all-context-menus'
 
 function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Element | null {
   const floatingTerminalShortcut = useShortcutLabel('floatingTerminal.toggle')
@@ -1781,7 +1781,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     setIsRefreshing(true)
     try {
       // Why: also re-run PATH detection so a freshly-installed CLI's bar
-      // appears (and a removed CLI's bar hides) without restarting Orca.
+      // appears (and a removed CLI's bar hides) without restarting Yiru.
       await Promise.all([refreshRateLimits(), refreshDetectedAgents()])
     } finally {
       if (mountedRef.current) {
@@ -2065,7 +2065,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                   >
                     <PanelsTopLeft className="size-3.5" />
                     {showFloatingWorkspaceAttentionDot ? (
-                      // Why: amber = Orca's "needs attention" convention; ring
+                      // Why: amber = Yiru's "needs attention" convention; ring
                       // matches the button fill so the dot reads on the icon.
                       <span
                         aria-hidden

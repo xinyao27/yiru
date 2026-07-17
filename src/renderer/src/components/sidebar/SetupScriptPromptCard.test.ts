@@ -20,8 +20,8 @@ describe('getRenderedSetupScriptPromptState', () => {
       getRenderedSetupScriptPromptState({
         promptState: current,
         activeRepoId: 'repo-local',
-        activeProjectId: 'github:stablyai/orca',
-        lastVisiblePrompt: { state: prompt('repo-ssh'), projectId: 'github:stablyai/orca' }
+        activeProjectId: 'github:stablyai/yiru',
+        lastVisiblePrompt: { state: prompt('repo-ssh'), projectId: 'github:stablyai/yiru' }
       })
     ).toBe(current)
   })
@@ -33,8 +33,8 @@ describe('getRenderedSetupScriptPromptState', () => {
       getRenderedSetupScriptPromptState({
         promptState: null,
         activeRepoId: 'repo-ssh',
-        activeProjectId: 'github:stablyai/orca',
-        lastVisiblePrompt: { state: previous, projectId: 'github:stablyai/orca' }
+        activeProjectId: 'github:stablyai/yiru',
+        lastVisiblePrompt: { state: previous, projectId: 'github:stablyai/yiru' }
       })
     ).toBe(previous)
   })
@@ -45,7 +45,7 @@ describe('getRenderedSetupScriptPromptState', () => {
         promptState: null,
         activeRepoId: 'repo-other',
         activeProjectId: 'github:stablyai/other',
-        lastVisiblePrompt: { state: prompt('repo-local'), projectId: 'github:stablyai/orca' }
+        lastVisiblePrompt: { state: prompt('repo-local'), projectId: 'github:stablyai/yiru' }
       })
     ).toBeNull()
   })

@@ -1,6 +1,6 @@
 # Kill all sessions also closes terminal tabs
 
-GitHub: https://github.com/stablyai/orca/issues/8001
+GitHub: https://github.com/stablyai/yiru/issues/8001
 Branch: `bug-kill-all-sessions-doesnt-kill-terminals`
 
 ## Problem
@@ -121,7 +121,7 @@ confirm
 | Runtime-host snapshot races close         | Existing close intent suppresses stale snapshots temporarily; host completion remains an accepted gap.            |
 | External/mobile session creation          | Sessions created after the main/renderer snapshots are not chased. Existing PTY-exit publication updates mirrors. |
 
-Orca's production UI currently tracks a single desktop `mainWindow`/renderer. The main daemon action is process-global while renderer cleanup is renderer-local. If multiple desktop windows become supported, this action must be broadcast from main with an action ID and per-window acknowledgement; “shared store probably mirrors it” is not sufficient.
+Yiru's production UI currently tracks a single desktop `mainWindow`/renderer. The main daemon action is process-global while renderer cleanup is renderer-local. If multiple desktop windows become supported, this action must be broadcast from main with an action ID and per-window acknowledgement; “shared store probably mirrors it” is not sufficient.
 
 ## Tests and reliability gate
 

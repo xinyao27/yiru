@@ -116,7 +116,7 @@ export function SpoolWorktreeVisibilityDialog({
         ),
         description: translate(
           'auto.components.spool.SpoolWorktreeVisibilityDialog.description',
-          'People using Orca Desktop on your Tailnet will be able to open this worktree.'
+          'People using Yiru Desktop on your Tailnet will be able to open this worktree.'
         ),
         historyWarning: translate(
           'auto.components.spool.SpoolWorktreeVisibilityDialog.historyWarning',

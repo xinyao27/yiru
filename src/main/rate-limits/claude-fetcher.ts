@@ -159,7 +159,7 @@ async function readFromKeychain(configDir?: string): Promise<OAuthCredentialRead
       return scopedCredentials
     }
     const legacyCredentials = await readCredentialsFromStrictKeychain(undefined, 'legacy-keychain')
-    // Why: Orca cannot refresh tokens itself, so an actual access token from
+    // Why: Yiru cannot refresh tokens itself, so an actual access token from
     // either item beats refresh-only credentials. A scoped item the CLI stopped
     // maintaining must not shadow a still-working legacy token.
     if (legacyCredentials.token) {
@@ -448,7 +448,7 @@ async function fetchViaOAuth(token: string, signal?: AbortSignal): Promise<Provi
         Authorization: `Bearer ${token}`,
         'anthropic-beta': OAUTH_BETA_HEADER,
         // Why: Claude's OAuth usage endpoint is the Claude Code usage API;
-        // matching the CLI user-agent keeps Orca aligned with that contract.
+        // matching the CLI user-agent keeps Yiru aligned with that contract.
         'User-Agent': CLAUDE_CODE_USER_AGENT
       },
       signal: requestSignal
@@ -1128,13 +1128,13 @@ function resolveOwnedWslClaudeManagedAuthPath(account: InactiveClaudeAccountInfo
   }
   const linuxPath = account.wslLinuxAuthPath ?? wslInfo.linuxPath
   if (
-    !linuxPath.includes('/.local/share/orca/claude-accounts/') ||
+    !linuxPath.includes('/.local/share/yiru/claude-accounts/') ||
     !linuxPath.endsWith(`/${account.id}/auth`)
   ) {
     return null
   }
   try {
-    const markerPath = path.join(account.managedAuthPath, '.orca-managed-claude-auth')
+    const markerPath = path.join(account.managedAuthPath, '.yiru-managed-claude-auth')
     if (
       !existsSync(markerPath) ||
       lstatSync(markerPath).isSymbolicLink() ||

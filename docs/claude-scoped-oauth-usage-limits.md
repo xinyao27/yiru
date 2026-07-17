@@ -2,7 +2,7 @@
 
 ## Problem
 
-Anthropic's current OAuth usage response reports Fable in `limits` as a model-scoped weekly limit instead of one of the legacy top-level Fable fields. Orca ignores `limits`, maps `fableWeekly` to `null`, and then depends on a hidden Claude `/usage` PTY read that is disabled on Windows and can fail silently elsewhere.
+Anthropic's current OAuth usage response reports Fable in `limits` as a model-scoped weekly limit instead of one of the legacy top-level Fable fields. Yiru ignores `limits`, maps `fableWeekly` to `null`, and then depends on a hidden Claude `/usage` PTY read that is disabled on Windows and can fail silently elsewhere.
 
 - `src/main/rate-limits/claude-fetcher.ts:300` models only top-level OAuth windows.
 - `src/main/rate-limits/claude-fetcher.ts:393` maps only legacy Fable field names.
@@ -11,7 +11,7 @@ Anthropic's current OAuth usage response reports Fable in `limits` as a model-sc
 
 ## Root Cause
 
-The OAuth response contract evolved from dedicated model fields to generic entries shaped like `kind: "weekly_scoped"`, `percent`, `resets_at`, and `scope.model.display_name`. Orca's response type and mapper were not updated for that shape.
+The OAuth response contract evolved from dedicated model fields to generic entries shaped like `kind: "weekly_scoped"`, `percent`, `resets_at`, and `scope.model.display_name`. Yiru's response type and mapper were not updated for that shape.
 
 ## Non-goals
 

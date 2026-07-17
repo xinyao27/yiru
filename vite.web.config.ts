@@ -6,11 +6,11 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   root: resolve('src/renderer'),
   // Why: pairing URLs may live under a reverse-proxy path prefix like
-  // /orca/web-index.html, so built assets must resolve relative to the page.
+  // /yiru/web-index.html, so built assets must resolve relative to the page.
   base: './',
   plugins: [react(), tailwindcss()],
   define: {
-    ORCA_FEATURE_WALL_ENABLED: 'true'
+    YIRU_FEATURE_WALL_ENABLED: 'true'
   },
   resolve: {
     alias: {

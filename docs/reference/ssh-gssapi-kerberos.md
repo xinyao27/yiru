@@ -1,6 +1,6 @@
 # Kerberos / GSSAPI SSH Authentication
 
-Orca's ssh2-based SSH stack cannot speak `gssapi-with-mic` — the ssh2 library
+Yiru's ssh2-based SSH stack cannot speak `gssapi-with-mic` — the ssh2 library
 has no GSSAPI userauth support, and adding it would mean forking ssh2's
 protocol layer plus shipping the `kerberos` native module (MIT krb5 / Heimdal /
 Windows SSPI) as a prebuilt Electron dependency on three platforms. Instead,
@@ -34,6 +34,6 @@ Manual (non-ssh-config) targets flagged for GSSAPI get an explicit
 inherit the option from their own `Host` block since the system binary re-reads
 ssh_config.
 
-Both tiers work headless (`orca serve`): the system-ssh probe needs no
+Both tiers work headless (`yiru serve`): the system-ssh probe needs no
 credential callbacks, and GSSAPI itself is non-interactive once a ticket
 exists.

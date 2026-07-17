@@ -2,18 +2,18 @@
 
 ## Scope
 
-This profile investigated high Orca renderer memory while working in
-`/Users/nwparker/orca/workspaces/orca/goal`. The user suspected the browser
+This profile investigated high Yiru renderer memory while working in
+`/Users/nwparker/yiru/workspaces/yiru/goal`. The user suspected the browser
 might not actually have an open tab, so the investigation checked browser,
 renderer, terminal, and Resource Usage attribution paths separately.
 
 ## Live Evidence
 
-- Orca runtime was reachable through the packaged CLI fallback. The public
-  `/usr/local/bin/orca` shim pointed at a removed development app path, so it
+- Yiru runtime was reachable through the packaged CLI fallback. The public
+  `/usr/local/bin/yiru` shim pointed at a removed development app path, so it
   failed before contacting the runtime.
-- `orca tab list --worktree all --json` returned `tabs: []`. There were no live
-  Orca browser tabs in the measured session.
+- `yiru tab list --worktree all --json` returned `tabs: []`. There were no live
+  Yiru browser tabs in the measured session.
 - The live packaged app had one renderer process and no separate browser guest
   renderer process. A later `ps` sample showed:
   - main process: 390 MB RSS
@@ -27,7 +27,7 @@ renderer, terminal, and Resource Usage attribution paths separately.
   373 MB peak, while total resident accounting was about 1.7 GB. Most of that
   larger number was shared Electron/Chromium mappings, especially read-only
   library mappings.
-- `orca terminal list --worktree active --json` showed the active Codex terminal
+- `yiru terminal list --worktree active --json` showed the active Codex terminal
   preview retaining repeated status redraw fragments such as repeated
   `Working` text. The retained terminal tail buffers were bounded, but the
   text normalization path was treating redraw controls as append-only text.
@@ -38,10 +38,10 @@ renderer, terminal, and Resource Usage attribution paths separately.
    browser tabs and no browser guest renderer process.
 2. The browser-pane retention fix is still useful: inactive worktree browser
    webviews are now unmounted so Chromium can release guest renderers. Browser
-   state remains in Orca, and automation-visible webviews stay mounted so
+   state remains in Yiru, and automation-visible webviews stay mounted so
    agent-browser can keep driving them.
 3. Resource Usage was using `app.getAppMetrics().memory.workingSetSize` for
-   Orca app buckets. On macOS this can count large shared Electron/Chromium
+   Yiru app buckets. On macOS this can count large shared Electron/Chromium
    mappings and make the renderer look much larger than its private footprint.
 4. The active terminal path was producing noisy previews from TUI redraws. This
    explains the high active renderer churn observed during the profile, even
@@ -51,7 +51,7 @@ renderer, terminal, and Resource Usage attribution paths separately.
 
 - Browser panes now mount their backing webview only when the pane is active or
   automation-visible. This sleeps inactive worktree browser guest renderers
-  without sleeping the main Orca renderer.
+  without sleeping the main Yiru renderer.
 - Browser crash breadcrumbs now include webview counts, parked webview counts,
   hidden webviews, and registered browser guest counts.
 - The memory collector now prefers the existing host process RSS sweep for
@@ -71,7 +71,7 @@ renderer, terminal, and Resource Usage attribution paths separately.
 
 ## Remaining Risk
 
-The current packaged Orca app was not running this worktree's patched code
+The current packaged Yiru app was not running this worktree's patched code
 during the live profile. The fixes are covered by unit and e2e tests, but the
 next packaged build should be re-profiled under the same active Codex TUI load
 to confirm the Resource Usage display and terminal previews match the expected
@@ -80,13 +80,13 @@ lower-churn behavior.
 ## Follow-up: CLI Profiling Blocker
 
 Continuing the profile after this change confirmed the public
-`/usr/local/bin/orca` command was still broken because it was a regular
+`/usr/local/bin/yiru` command was still broken because it was a regular
 generated launcher file pointing at a removed development build. The CLI
 installer previously self-healed stale symlinks, but treated regular files as
-conflicts. That meant Settings could not replace an Orca-owned stale launcher,
+conflicts. That meant Settings could not replace a Yiru-owned stale launcher,
 forcing profiling to use the packaged CLI fallback.
 
-The follow-up fix teaches the installer to recognize only generated Orca Unix
+The follow-up fix teaches the installer to recognize only generated Yiru Unix
 launcher files as stale and replaceable. Arbitrary regular files at the command
 path remain conflicts.
 
@@ -94,11 +94,11 @@ path remain conflicts.
 
 The next profiling blocker was repeatability: collecting a useful memory sample
 still required combining Resource Usage IPC, terminal lists, browser tab state,
-and host process output by hand. This branch adds `orca diagnostics memory`,
+and host process output by hand. This branch adds `yiru diagnostics memory`,
 which exposes the existing main-process memory collector through runtime RPC.
 
 The command returns the same `MemorySnapshot` shape used by Resource Usage when
-run with `--json`, including host memory, Orca app process buckets, worktree
+run with `--json`, including host memory, Yiru app process buckets, worktree
 terminal memory, per-session process roots, and history samples. Text output
 prints a compact point-in-time summary and the top worktrees by retained
 terminal memory.

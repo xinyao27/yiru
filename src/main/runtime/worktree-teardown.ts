@@ -1,5 +1,5 @@
 import type { IPtyProvider } from '../providers/types'
-import type { OrcaRuntimeService } from './orca-runtime'
+import type { YiruRuntimeService } from './yiru-runtime'
 import { listRegisteredPtys } from '../memory/pty-registry'
 import { isPathInsideOrEqual } from '../../shared/cross-platform-path'
 import { splitWorktreeIdForFilesystem } from '../../shared/worktree-id'
@@ -10,7 +10,7 @@ import { mapWithConcurrency } from '../../shared/map-with-concurrency'
 const WORKTREE_TEARDOWN_CONCURRENCY = 32
 
 export type WorktreeTeardownDeps = {
-  runtime?: OrcaRuntimeService
+  runtime?: YiruRuntimeService
   localProvider: IPtyProvider
   onPtyStopped?: (ptyId: string) => void
   timeoutMs?: number

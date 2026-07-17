@@ -5,7 +5,7 @@ import {
   readHooksJson,
   type HookDefinition
 } from '../agent-hooks/installer-utils'
-import { getOrcaManagedCodexHomePath, getSystemCodexHomePath } from './codex-home-paths'
+import { getYiruManagedCodexHomePath, getSystemCodexHomePath } from './codex-home-paths'
 import {
   getCodexCanonicalTrustPath,
   normalizeHookTrustKeyForLookup,
@@ -38,7 +38,7 @@ type HookTrustProvenanceFile = {
 }
 
 function getProvenancePath(runtimeHomePath: string): string {
-  return join(runtimeHomePath, '.orca-hook-trust-provenance.json')
+  return join(runtimeHomePath, '.yiru-hook-trust-provenance.json')
 }
 
 function readHookTrustProvenance(
@@ -73,13 +73,13 @@ function readHookTrustProvenance(
 }
 
 /**
- * Records the runtime config.toml trust state Orca leaves behind after an
- * install/refresh, so the next launch can tell "entry Orca wrote" apart from
+ * Records the runtime config.toml trust state Yiru leaves behind after an
+ * install/refresh, so the next launch can tell "entry Yiru wrote" apart from
  * "entry Codex wrote after a user approval". Call after all trust writes.
  */
 export function snapshotCodexRuntimeHookTrustProvenance(): void {
   try {
-    const runtimeHomePath = getOrcaManagedCodexHomePath()
+    const runtimeHomePath = getYiruManagedCodexHomePath()
     const runtimeHooksPath = join(runtimeHomePath, 'hooks.json')
     const canonicalRuntimeHooksPath = getCodexCanonicalTrustPath(runtimeHooksPath)
     const entries: Record<string, HookTrustProvenanceEntry> = {}
@@ -106,7 +106,7 @@ export function snapshotCodexRuntimeHookTrustProvenance(): void {
 }
 
 /**
- * Promotes hook approvals the user made inside Orca-launched Codex (written
+ * Promotes hook approvals the user made inside Yiru-launched Codex (written
  * by Codex into the runtime config.toml) into ~/.codex/config.toml, keyed to
  * the user's own hooks.json. Runs before the config mirror so the promoted
  * trust is mirrored back on the same launch.
@@ -122,7 +122,7 @@ export function promoteCodexRuntimeHookApprovalsToSystem(): void {
 }
 
 function promoteCodexRuntimeHookApprovalsToSystemUnsafe(): void {
-  const runtimeHomePath = getOrcaManagedCodexHomePath()
+  const runtimeHomePath = getYiruManagedCodexHomePath()
   const systemHomePath = getSystemCodexHomePath()
   const runtimeHooksPath = join(runtimeHomePath, 'hooks.json')
   const systemHooksPath = join(systemHomePath, 'hooks.json')
@@ -134,10 +134,10 @@ function promoteCodexRuntimeHookApprovalsToSystemUnsafe(): void {
   if (!existsSync(runtimeTomlPath)) {
     return
   }
-  // Why: without a snapshot of what Orca last wrote (first launch after
+  // Why: without a snapshot of what Yiru last wrote (first launch after
   // upgrading to a build with promotion, or a corrupted snapshot), a mirrored
   // copy of since-revoked system trust is indistinguishable from a genuine
-  // in-Orca approval. Promoting would resurrect trust the user revoked in
+  // in-Yiru approval. Promoting would resurrect trust the user revoked in
   // ~/.codex, so skip this launch — install() writes the first snapshot and
   // promotion starts on the next one.
   const provenance = readHookTrustProvenance(runtimeHomePath)
@@ -173,7 +173,7 @@ function promoteCodexRuntimeHookApprovalsToSystemUnsafe(): void {
       previous.trustedHash === state.trustedHash &&
       (previous.enabled ?? true) === (state.enabled ?? true)
     ) {
-      // Orca wrote this entry and nothing touched it since — not an approval.
+      // Yiru wrote this entry and nothing touched it since — not an approval.
       continue
     }
     const eventName = CODEX_EVENT_NAME_BY_LABEL[parsed.eventLabel]
@@ -184,8 +184,8 @@ function promoteCodexRuntimeHookApprovalsToSystemUnsafe(): void {
     const hook = Array.isArray(definition?.hooks)
       ? definition.hooks[parsed.handlerIndex]
       : undefined
-    // Why: never write trust for Orca's managed status hook into the user's
-    // real config — mutating ~/.codex for Orca's own hooks is exactly what the
+    // Why: never write trust for Yiru's managed status hook into the user's
+    // real config — mutating ~/.codex for Yiru's own hooks is exactly what the
     // runtime CODEX_HOME isolation exists to prevent.
     if (!definition || !hook?.command || isManagedCommand(hook.command)) {
       continue

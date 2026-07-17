@@ -64,7 +64,7 @@ function ConnectionModeSwitch({
           <span>
             {translate(
               'auto.components.settings.MobilePairingConnectionOptions.anywhere',
-              'Connect with Orca Relay'
+              'Connect with Yiru Relay'
             )}
           </span>
         </span>
@@ -75,11 +75,11 @@ function ConnectionModeSwitch({
             {signedIn
               ? translate(
                   'auto.components.settings.MobilePairingConnectionOptions.automaticDescription',
-                  'Orca uses a direct connection when available and Relay otherwise.'
+                  'Yiru uses a direct connection when available and Relay otherwise.'
                 )
               : translate(
                   'auto.components.settings.MobilePairingConnectionOptions.signInDescription',
-                  'Sign in on this desktop to use Orca Relay.'
+                  'Sign in on this desktop to use Yiru Relay.'
                 )}
           </span>
           <MobileRelayBetaAvailability />
@@ -98,7 +98,7 @@ function ConnectionModeSwitch({
             disabled={!signedIn}
             ariaLabel={translate(
               'auto.components.settings.MobilePairingConnectionOptions.anywhere',
-              'Connect with Orca Relay'
+              'Connect with Yiru Relay'
             )}
             onChange={() => onChange(value === 'automatic' ? 'local-only' : 'automatic')}
           />
@@ -165,9 +165,9 @@ export function MobilePairingConnectionOptions({
   onChange: (value: MobilePairingConnectionMode) => void
   compact?: boolean
 }): React.JSX.Element {
-  const authStatus = useAppStore((state) => state.orcaProfileAuthStatus)
-  const connecting = useAppStore((state) => state.orcaProfileConnecting)
-  const connect = useAppStore((state) => state.connectCurrentOrcaProfile)
+  const authStatus = useAppStore((state) => state.yiruProfileAuthStatus)
+  const connecting = useAppStore((state) => state.yiruProfileConnecting)
+  const connect = useAppStore((state) => state.connectCurrentYiruProfile)
   const [relayStatus, setRelayStatus] = useState<MobileRelayStatus>('offline')
   const signedIn = authStatus?.state === 'connected'
   const configured = authStatus?.configured !== false

@@ -2,7 +2,7 @@
 
 ## Problem
 
-Credential files Orca writes on Windows (runtime env auth store, device registry,
+Credential files Yiru writes on Windows (runtime env auth store, device registry,
 e2ee keypair) must end up readable only by the current user, SYSTEM, and
 Administrators. On POSIX this is a one-line `chmodSync`, but `writeFileSync`'s
 `mode` option is a no-op on Windows, so the NTFS ACL has to be rewritten by
@@ -28,7 +28,7 @@ chosen by whether the target is a directory and whether it is on the write path:
   process. Directory hardening uses fire-and-forget `execFile` so it never blocks
   the main thread. This is the change that kills the #4901 storm.
   - _Known limitation:_ a directory that is deleted and recreated mid-process is
-    not re-hardened until the next restart. The `.orca` secure dirs are not
+    not re-hardened until the next restart. The `.yiru` secure dirs are not
     deleted at runtime, so this is acceptable.
 
 - **Credential files on the write path — synchronous, cache only on success.**
@@ -69,9 +69,9 @@ on `ubuntu-latest`, where `applySecurePathRestriction` short-circuits to
 `chmodSync` and never reaches the PowerShell path. The ACL storm therefore cannot
 be reproduced in the cross-platform e2e harness; verify it manually on Windows.
 
-Pre-req: a Windows client paired to a remote `orca serve` runtime.
+Pre-req: a Windows client paired to a remote `yiru serve` runtime.
 
-Watcher (PowerShell, run before launching Orca):
+Watcher (PowerShell, run before launching Yiru):
 
 ```powershell
 while ($true) {
@@ -96,7 +96,7 @@ Steps:
    written), then immediately inspect the file ACL:
 
    ```powershell
-   icacls "$env:APPDATA\orca\orca-environments.json"
+   icacls "$env:APPDATA\yiru\yiru-environments.json"
    ```
 
    - **Expected:** only the current user, `SYSTEM`, and `Administrators` have

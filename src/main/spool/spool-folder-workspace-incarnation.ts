@@ -204,7 +204,7 @@ function deriveFolderIncarnationId(
   const digest = createHash('sha256')
     .update(
       JSON.stringify([
-        'orca-spool-folder-incarnation-v2',
+        'yiru-spool-folder-incarnation-v2',
         actualHostScope,
         markerId,
         identity.deviceId,

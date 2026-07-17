@@ -40,7 +40,7 @@ D1+/D3+/D7+ retention means the user fired `app_opened` at least once after 24/7
 - `workspace_created` means create-worktree IPC succeeded. It is not a general "usable workspace exists" or "workspace revealed" marker.
 - `add_repo_setup_step_action` is a historical post-add choice-screen event. Current Add Project flows auto-open the default checkout or reveal the project row, so absence of this event after the default-checkout handoff rollout is expected and should not be read as setup abandonment.
 - `add_repo_existing_workspaces_detected` is a detection signal for migration opportunity, not proof that a user chose an existing workspace. Current Add Project flows may emit it before automatically opening the default checkout.
-- `add_repo_default_checkout_handoff.result = 'revealed_project'` means Orca could not confidently open the default checkout and instead revealed the newly added project row. It is the direct fallback metric for the 2026-06-03 Add Project handoff rollout.
+- `add_repo_default_checkout_handoff.result = 'revealed_project'` means Yiru could not confidently open the default checkout and instead revealed the newly added project row. It is the direct fallback metric for the 2026-06-03 Add Project handoff rollout.
 - `agent_started` means PTY spawn succeeded with agent telemetry attached. It is not first-repo activation and does not prove the user sent a prompt.
 - `agent_prompt_sent` means a live agent hook observed an explicit non-empty user prompt. It excludes hydrated/replayed status, agent auto-start, bare shells, draft prefill, and hookless sessions; missing rows mean no hook-confirmed interaction was observed, not proof the user never typed.
 - Workspace-outcome joins are native Electron coverage unless the query explicitly proves remote/web instrumentation. Remote runtime and web paths can bypass native repo/worktree telemetry, so do not interpret missing workspace outcome rows as product drop-off for SSH, remote, or web users.
@@ -154,7 +154,7 @@ Dashboard caveats:
 
 ### 2026-05-23 - Inline Tour Surface
 
-Scope: optional "Explore Orca" tour during onboarding and the Help menu entry point. This shipped the product surface, not the full retention cohort instrumentation. It also added `source = 'onboarding'` to the feature-wall open source enum and added feature-wall group/feature/docs click events with source.
+Scope: optional "Explore Yiru" tour during onboarding and the Help menu entry point. This shipped the product surface, not the full retention cohort instrumentation. It also added `source = 'onboarding'` to the feature-wall open source enum and added feature-wall group/feature/docs click events with source.
 
 | Field                      | Value                                                                        |
 | -------------------------- | ---------------------------------------------------------------------------- |
@@ -177,7 +177,7 @@ Dashboard caveats:
 
 Scope: low-cardinality telemetry that makes inline-tour cohort retention dashboards possible.
 
-Current status: the inline first-run onboarding tour was later removed from active onboarding after PR #2734 moved these education/setup moments to contextual feature tours and the Getting started with Orca guide. The historical schemas still accept seven-step `tour`/`agent_setup` onboarding rows for compatibility, but current active onboarding should not emit new `onboarding_step_* { value_kind: 'tour' }` rows.
+Current status: the inline first-run onboarding tour was later removed from active onboarding after PR #2734 moved these education/setup moments to contextual feature tours and the Getting started with Yiru guide. The historical schemas still accept seven-step `tour`/`agent_setup` onboarding rows for compatibility, but current active onboarding should not emit new `onboarding_step_* { value_kind: 'tour' }` rows.
 
 Added/changed signals:
 
@@ -258,7 +258,7 @@ Feature-wall close interpretation:
 
 ### 2026-06-02 - Active Onboarding Step Removal
 
-Scope: active first-run onboarding no longer emits the `agent_setup` or `tour` semantic steps. The removed "Set up Orca for agents" and "Explore Orca" education/setup moments are covered by PR #2734 through contextual feature tours and the Getting started with Orca guide.
+Scope: active first-run onboarding no longer emits the `agent_setup` or `tour` semantic steps. The removed "Set up Yiru for agents" and "Explore Yiru" education/setup moments are covered by PR #2734 through contextual feature tours and the Getting started with Yiru guide.
 
 This is a product-flow and telemetry-interpretation boundary, not a new event rollout. Historical onboarding schemas still accept seven-step `agent_setup` and `tour` rows so old data remains queryable, but dashboard authors should not expect new active-onboarding rows for those semantic steps after this rollout.
 
@@ -378,7 +378,7 @@ Dashboard caveats:
 - Segment numeric onboarding step analysis across this boundary. Step `4` is Windows terminal preferences in the current flow, but was notifications in the previous active flow.
 - Use `value_kind` rather than numeric `step` when comparing notifications or Windows terminal setup across releases.
 - Non-Windows users can have persisted `lastCompletedStep` values that include the skipped Windows step; do not treat that as evidence they viewed the Windows terminal page.
-- `onboarding_windows_terminal_snapshot.default_shell = 'other'` means Orca could not bucket the persisted setting. It is not a raw shell path and should be monitored as telemetry quality, not a product choice.
+- `onboarding_windows_terminal_snapshot.default_shell = 'other'` means Yiru could not bucket the persisted setting. It is not a raw shell path and should be monitored as telemetry quality, not a product choice.
 
 ## Updating This File
 

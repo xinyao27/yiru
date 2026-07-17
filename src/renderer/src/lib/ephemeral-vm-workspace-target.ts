@@ -56,12 +56,12 @@ export async function prepareEphemeralVmWorkspaceTarget(
       ? toSshExecutionHostId(provisioned.sshTargetId)
       : toRuntimeExecutionHostId(provisioned.environment.id)
 
-  if (provisioned.connectionType === 'orca-server') {
+  if (provisioned.connectionType === 'yiru-server') {
     try {
       await assertRuntimeEnvironmentCapability(
         provisioned.environment.id,
         PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
-        'The recipe-created Orca server does not support project setup.'
+        'The recipe-created Yiru server does not support project setup.'
       )
     } catch (error) {
       await cleanupProvisionedRuntime(provisioned.runtime.id)
@@ -118,7 +118,7 @@ export async function prepareEphemeralVmWorkspaceTarget(
     warnings: provisioned.warnings
   } satisfies PrepareEphemeralVmWorkspaceTargetResult
 
-  return provisioned.connectionType === 'orca-server'
+  return provisioned.connectionType === 'yiru-server'
     ? { ...success, environmentId: provisioned.environment.id }
     : success
 }

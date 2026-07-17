@@ -27,9 +27,9 @@ import { Button } from '@/components/ui/button'
 import TabBar from './tab-bar/TabBar'
 import TerminalPane from './terminal-pane/TerminalPane'
 import {
-  ORCA_EDITOR_REQUEST_FILE_CLOSE_EVENT,
-  ORCA_EDITOR_SAVE_AND_CLOSE_EVENT,
-  ORCA_EDITOR_REQUEST_CMD_SAVE_EVENT,
+  YIRU_EDITOR_REQUEST_FILE_CLOSE_EVENT,
+  YIRU_EDITOR_SAVE_AND_CLOSE_EVENT,
+  YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT,
   type EditorRequestFileCloseDetail,
   requestEditorSaveQuiesce
 } from './editor/editor-autosave'
@@ -294,7 +294,7 @@ function Terminal(): React.JSX.Element | null {
   const activeTabType = useAppStore((s) => s.activeTabType)
   const keybindings = useAppStore((s) => s.keybindings)
   const terminalShortcutPolicy = useAppStore(
-    (s) => s.settings?.terminalShortcutPolicy ?? 'orca-first'
+    (s) => s.settings?.terminalShortcutPolicy ?? 'yiru-first'
   )
   const mobileEmulatorEnabled = useAppStore((s) => s.settings?.mobileEmulatorEnabled !== false)
   const setActiveTabType = useAppStore((s) => s.setActiveTabType)
@@ -359,7 +359,7 @@ function Terminal(): React.JSX.Element | null {
   useTerminalProviderSnapshotCapability(workspaceSessionReady && hydrationSucceeded)
 
   // Why: the TabBar is rendered into the titlebar via a portal so tabs share
-  // the same row as the "Orca" title. The target element is created by App.tsx.
+  // the same row as the "Yiru" title. The target element is created by App.tsx.
   const titlebarTabsTarget = document.getElementById('titlebar-tabs')
 
   useEffect(() => {
@@ -416,7 +416,7 @@ function Terminal(): React.JSX.Element | null {
   // Why: while a save-and-close is awaiting the file to disappear from
   // openFiles, concurrent queueEditorCloseRequests calls (e.g. user clicks X
   // on another dirty tab, or a split-group dispatch fires
-  // ORCA_EDITOR_REQUEST_FILE_CLOSE_EVENT) must not re-open the dialog over
+  // YIRU_EDITOR_REQUEST_FILE_CLOSE_EVENT) must not re-open the dialog over
   // the in-flight save. Track the in-flight file here so
   // getNextQueuedEditorClose can skip it as an un-advanceable head.
   const inFlightSaveFileIdRef = useRef<string | null>(null)
@@ -622,7 +622,7 @@ function Terminal(): React.JSX.Element | null {
     // owns that write path now, so the dialog signals it through a custom
     // event instead of poking at editor component refs.
     setSaveDialogFileId(null)
-    window.dispatchEvent(new CustomEvent(ORCA_EDITOR_SAVE_AND_CLOSE_EVENT, { detail: { fileId } }))
+    window.dispatchEvent(new CustomEvent(YIRU_EDITOR_SAVE_AND_CLOSE_EVENT, { detail: { fileId } }))
     inFlightSaveFileIdRef.current = fileId
     let closed = false
     try {
@@ -736,12 +736,12 @@ function Terminal(): React.JSX.Element | null {
       queueEditorCloseRequests([fileId])
     }
     window.addEventListener(
-      ORCA_EDITOR_REQUEST_FILE_CLOSE_EVENT,
+      YIRU_EDITOR_REQUEST_FILE_CLOSE_EVENT,
       onRequestEditorClose as EventListener
     )
     return () =>
       window.removeEventListener(
-        ORCA_EDITOR_REQUEST_FILE_CLOSE_EVENT,
+        YIRU_EDITOR_REQUEST_FILE_CLOSE_EVENT,
         onRequestEditorClose as EventListener
       )
   }, [queueEditorCloseRequests])
@@ -1750,7 +1750,7 @@ function Terminal(): React.JSX.Element | null {
           terminalShortcutPolicy
         })
       const notifyTerminalCapture = (actionId: KeybindingActionId): void => {
-        if (context !== 'terminal' || terminalShortcutPolicy !== 'orca-first') {
+        if (context !== 'terminal' || terminalShortcutPolicy !== 'yiru-first') {
           return
         }
         showTerminalShortcutCaptureNotification({
@@ -1872,7 +1872,7 @@ function Terminal(): React.JSX.Element | null {
           if (state.activeTabType === 'editor' && state.activeFileId) {
             e.preventDefault()
             notifyTerminalCapture('editor.save')
-            window.dispatchEvent(new Event(ORCA_EDITOR_REQUEST_CMD_SAVE_EVENT))
+            window.dispatchEvent(new Event(YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT))
             return
           }
         }

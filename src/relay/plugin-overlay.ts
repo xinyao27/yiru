@@ -1,19 +1,19 @@
-// Why: relay-side equivalent of Orca's local agent integration installers.
-// OpenCode still needs a config overlay, while Pi/OMP now get Orca-managed
+// Why: relay-side equivalent of Yiru's local agent integration installers.
+// OpenCode still needs a config overlay, while Pi/OMP now get Yiru-managed
 // extension files installed into the remote agent homes. Host paths from the
 // renderer are meaningless on SSH targets, so the relay performs the remote
 // filesystem work itself.
 //
 // Plugin source strings ship over the JSON-RPC channel at session-ready
 // (commit #7) — they are NOT bundled with the relay binary because the
-// relay is versioned independently from Orca and the plugin source changes
+// relay is versioned independently from Yiru and the plugin source changes
 // frequently as new agent events get added (see docs/design/agent-status-
 // over-ssh.md §4 "Why ship the plugin source over the wire").
 //
 // We deliberately do not reuse OpenCodeHookService / PiTitlebarExtensionService
-// directly: those modules import `electron` and ride on Orca's userData
+// directly: those modules import `electron` and ride on Yiru's userData
 // path. The relay's electron-free constraint forces a thin parallel
-// implementation rooted at $HOME/.orca-relay/ for OpenCode and at the remote
+// implementation rooted at $HOME/.yiru-relay/ for OpenCode and at the remote
 // Pi/OMP homes for those agents.
 
 import { createHash } from 'node:crypto'
@@ -32,21 +32,21 @@ import { join } from 'node:path'
 import { mirrorEntry, safeRemoveOverlay } from '../main/pty/overlay-mirror'
 import type { PiAgentKind } from '../shared/pi-agent-kind'
 
-const RELAY_HOOKS_DIR = '.orca-relay'
+const RELAY_HOOKS_DIR = '.yiru-relay'
 const OPENCODE_OVERLAY_SUBDIR = 'opencode-overlays'
 const PI_OVERLAY_SUBDIR_BY_KIND: Record<PiAgentKind, string> = {
   pi: 'pi-overlays',
   omp: 'omp-overlays'
 }
-const OPENCODE_PLUGIN_FILE = 'orca-opencode-status.js'
-const PI_EXTENSION_FILE = 'orca-agent-status.ts'
+const OPENCODE_PLUGIN_FILE = 'yiru-opencode-status.js'
+const PI_EXTENSION_FILE = 'yiru-agent-status.ts'
 const PI_AGENT_SUBDIR = 'agent'
-const ORCA_MANAGED_EXTENSION_MARKER = '@orca-managed-pi-extension'
+const YIRU_MANAGED_EXTENSION_MARKER = '@yiru-managed-pi-extension'
 
-function withOrcaManagedPiExtensionMarker(source: string): string {
-  return source.includes(ORCA_MANAGED_EXTENSION_MARKER)
+function withYiruManagedPiExtensionMarker(source: string): string {
+  return source.includes(YIRU_MANAGED_EXTENSION_MARKER)
     ? source
-    : `// ${ORCA_MANAGED_EXTENSION_MARKER}\n${source}`
+    : `// ${YIRU_MANAGED_EXTENSION_MARKER}\n${source}`
 }
 // Why: source-dir resolution is keyed off the launching agent (Pi or OMP).
 // Both consume `PI_CODING_AGENT_DIR` but default to different `~/.<kind>/agent`
@@ -61,7 +61,7 @@ const PI_AGENT_HOME_DIR_NAME: Record<PiAgentKind, string> = {
 
 function safeDirName(input: string): string {
   // Why: paneKey embeds tabId:paneId where tabId may itself contain
-  // filesystem-unsafe characters in some Orca builds. Hash to a fixed-width
+  // filesystem-unsafe characters in some Yiru builds. Hash to a fixed-width
   // hex name so any input produces a portable directory name.
   return createHash('sha256').update(input).digest('hex').slice(0, 32)
 }
@@ -71,11 +71,11 @@ function isUsableId(id: string): boolean {
 }
 
 export type PluginSources = {
-  /** Source body of `orca-opencode-status.js` to drop into <overlay>/plugins/. */
+  /** Source body of `yiru-opencode-status.js` to drop into <overlay>/plugins/. */
   opencodePluginSource?: string
-  /** Source body of Pi's `orca-agent-status.ts` to drop into <overlay>/extensions/. */
+  /** Source body of Pi's `yiru-agent-status.ts` to drop into <overlay>/extensions/. */
   piExtensionSource?: string
-  /** Source body of OMP's `orca-agent-status.ts` to drop into <overlay>/extensions/. */
+  /** Source body of OMP's `yiru-agent-status.ts` to drop into <overlay>/extensions/. */
   ompExtensionSource?: string
 }
 
@@ -103,9 +103,9 @@ export class PluginOverlayManager {
     }
   }
 
-  /** Replace the cached source bodies. Called from relay.ts when Orca sends
+  /** Replace the cached source bodies. Called from relay.ts when Yiru sends
    *  `agent_hook.installPlugins`. The first install enables the augmenter
-   *  output; subsequent installs (e.g. Orca version upgrade in flight) refresh
+   *  output; subsequent installs (e.g. Yiru version upgrade in flight) refresh
    *  the cached source so future spawns see the new strings.
    *  Note: existing running agents keep whatever source they loaded at
    *  process start. Future PTYs pick up the refreshed source when the relay
@@ -115,10 +115,10 @@ export class PluginOverlayManager {
       this.opencodePluginSource = sources.opencodePluginSource
     }
     if (typeof sources.piExtensionSource === 'string') {
-      this.piExtensionSources.pi = withOrcaManagedPiExtensionMarker(sources.piExtensionSource)
+      this.piExtensionSources.pi = withYiruManagedPiExtensionMarker(sources.piExtensionSource)
     }
     if (typeof sources.ompExtensionSource === 'string') {
-      this.piExtensionSources.omp = withOrcaManagedPiExtensionMarker(sources.ompExtensionSource)
+      this.piExtensionSources.omp = withYiruManagedPiExtensionMarker(sources.ompExtensionSource)
     }
   }
 
@@ -204,7 +204,7 @@ export class PluginOverlayManager {
           return null
         }
         // Why: OPENCODE_CONFIG_DIR is a single config root. Mirror the user's
-        // remote root into the overlay before adding Orca's plugin so status
+        // remote root into the overlay before adding Yiru's plugin so status
         // reporting does not hide their auth, models, keybinds, or plugins.
         this.mirrorOpenCodeConfig(existingConfigDir, dir)
       }
@@ -224,7 +224,7 @@ export class PluginOverlayManager {
 
   private canOverwritePiExtension(path: string): boolean {
     try {
-      return readFileSync(path, 'utf8').includes(ORCA_MANAGED_EXTENSION_MARKER)
+      return readFileSync(path, 'utf8').includes(YIRU_MANAGED_EXTENSION_MARKER)
     } catch {
       return true
     }

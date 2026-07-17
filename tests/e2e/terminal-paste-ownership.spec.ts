@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import type { ElectronApplication, Page } from '@stablyai/playwright-test'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/yiru-app'
 import {
   focusActiveTerminalInput,
   sendToTerminal,
@@ -116,7 +116,7 @@ async function installClipboardReadTerminalBlurRepro(app: ElectronApplication): 
   await app.evaluate(({ BrowserWindow, ipcMain }) => {
     type ClipboardReadHandler = (event: unknown, ...args: unknown[]) => Promise<unknown> | unknown
     const global = globalThis as unknown as {
-      __orcaOriginalClipboardReadTextHandler?: ClipboardReadHandler
+      __yiruOriginalClipboardReadTextHandler?: ClipboardReadHandler
     }
     const invokeHandlers = (
       ipcMain as unknown as {
@@ -124,10 +124,10 @@ async function installClipboardReadTerminalBlurRepro(app: ElectronApplication): 
       }
     )._invokeHandlers
     const handler = invokeHandlers?.get('clipboard:readText')
-    if (!invokeHandlers || !handler || global.__orcaOriginalClipboardReadTextHandler) {
+    if (!invokeHandlers || !handler || global.__yiruOriginalClipboardReadTextHandler) {
       return
     }
-    global.__orcaOriginalClipboardReadTextHandler = handler
+    global.__yiruOriginalClipboardReadTextHandler = handler
     invokeHandlers.set('clipboard:readText', async (event, ...args) => {
       const windows = BrowserWindow.getAllWindows().filter((window) => !window.isDestroyed())
       await Promise.all(
@@ -145,7 +145,7 @@ async function installClipboardReadTerminalBlurRepro(app: ElectronApplication): 
       )
       // Why: reproduce the focus churn window before the async clipboard read resolves.
       await new Promise((resolve) => setTimeout(resolve, 0))
-      return global.__orcaOriginalClipboardReadTextHandler!(event, ...args)
+      return global.__yiruOriginalClipboardReadTextHandler!(event, ...args)
     })
   })
 }
@@ -154,16 +154,16 @@ async function restoreClipboardReadTerminalBlurRepro(app: ElectronApplication): 
   await app.evaluate(({ ipcMain }) => {
     type ClipboardReadHandler = (event: unknown, ...args: unknown[]) => Promise<unknown> | unknown
     const global = globalThis as unknown as {
-      __orcaOriginalClipboardReadTextHandler?: ClipboardReadHandler
+      __yiruOriginalClipboardReadTextHandler?: ClipboardReadHandler
     }
     const invokeHandlers = (
       ipcMain as unknown as {
         _invokeHandlers?: Map<string, ClipboardReadHandler>
       }
     )._invokeHandlers
-    if (invokeHandlers && global.__orcaOriginalClipboardReadTextHandler) {
-      invokeHandlers.set('clipboard:readText', global.__orcaOriginalClipboardReadTextHandler)
-      delete global.__orcaOriginalClipboardReadTextHandler
+    if (invokeHandlers && global.__yiruOriginalClipboardReadTextHandler) {
+      invokeHandlers.set('clipboard:readText', global.__yiruOriginalClipboardReadTextHandler)
+      delete global.__yiruOriginalClipboardReadTextHandler
     }
   })
 }
@@ -186,42 +186,42 @@ async function openTerminalContextMenu(page: Page): Promise<void> {
 test.describe('terminal paste ownership', () => {
   test('keyboard paste shortcuts send clipboard text to the focused terminal exactly once', async ({
     electronApp,
-    orcaPage,
+    yiruPage,
     testRepoPath
   }) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await waitForSessionReady(yiruPage)
+    await waitForActiveWorktree(yiruPage)
+    await ensureTerminalVisible(yiruPage)
+    await waitForActiveTerminalManager(yiruPage, 30_000)
     await installTerminalPtyWriteSpy(electronApp)
 
-    const ptyId = await waitForActivePanePtyId(orcaPage)
+    const ptyId = await waitForActivePanePtyId(yiruPage)
     const runId = randomUUID()
-    const scriptPath = path.join(testRepoPath, `.orca-paste-ownership-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.yiru-paste-ownership-${runId}.mjs`)
     writeFileSync(scriptPath, pasteEchoScript(runId))
     let scriptStarted = false
 
     try {
-      await sendToTerminal(orcaPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
+      await sendToTerminal(yiruPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
       scriptStarted = true
-      await waitForTerminalOutput(orcaPage, `PASTE_READY_${runId}`, 10_000)
+      await waitForTerminalOutput(yiruPage, `PASTE_READY_${runId}`, 10_000)
 
       for (const [index, chord] of keyboardPasteChords().entries()) {
-        const payload = `ORCA_E2E_PASTE_${runId}_${index}`
+        const payload = `YIRU_E2E_PASTE_${runId}_${index}`
         const encodedPayload = Buffer.from(payload, 'utf8').toString('base64')
         await clearTerminalPtyWriteLog(electronApp)
-        await orcaPage.evaluate((text) => window.api.ui.writeClipboardText(text), payload)
-        await focusActiveTerminalInput(orcaPage)
+        await yiruPage.evaluate((text) => window.api.ui.writeClipboardText(text), payload)
+        await focusActiveTerminalInput(yiruPage)
 
-        await orcaPage.keyboard.press(chord)
-        await waitForTerminalOutput(orcaPage, encodedPayload, 10_000, 12_000)
+        await yiruPage.keyboard.press(chord)
+        await waitForTerminalOutput(yiruPage, encodedPayload, 10_000, 12_000)
 
         const writes = (await readTerminalPtyWrites(electronApp)).join('')
         expect(countOccurrences(writes, payload), `${chord} PTY write count`).toBe(1)
       }
     } finally {
       if (scriptStarted) {
-        await sendToTerminal(orcaPage, ptyId, '\x03').catch(() => undefined)
+        await sendToTerminal(yiruPage, ptyId, '\x03').catch(() => undefined)
       }
       rmSync(scriptPath, { force: true })
     }
@@ -229,42 +229,42 @@ test.describe('terminal paste ownership', () => {
 
   test('keyboard paste survives transient terminal blur during clipboard read', async ({
     electronApp,
-    orcaPage,
+    yiruPage,
     testRepoPath
   }) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await waitForSessionReady(yiruPage)
+    await waitForActiveWorktree(yiruPage)
+    await ensureTerminalVisible(yiruPage)
+    await waitForActiveTerminalManager(yiruPage, 30_000)
     await installTerminalPtyWriteSpy(electronApp)
 
-    const ptyId = await waitForActivePanePtyId(orcaPage)
+    const ptyId = await waitForActivePanePtyId(yiruPage)
     const runId = randomUUID()
-    const scriptPath = path.join(testRepoPath, `.orca-paste-blur-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.yiru-paste-blur-${runId}.mjs`)
     writeFileSync(scriptPath, pasteEchoScript(runId))
     let scriptStarted = false
 
     try {
-      await sendToTerminal(orcaPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
+      await sendToTerminal(yiruPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
       scriptStarted = true
-      await waitForTerminalOutput(orcaPage, `PASTE_READY_${runId}`, 10_000)
+      await waitForTerminalOutput(yiruPage, `PASTE_READY_${runId}`, 10_000)
 
-      const payload = `ORCA_E2E_TRANSIENT_BLUR_PASTE_${runId}`
+      const payload = `YIRU_E2E_TRANSIENT_BLUR_PASTE_${runId}`
       const encodedPayload = Buffer.from(payload, 'utf8').toString('base64')
       await clearTerminalPtyWriteLog(electronApp)
-      await orcaPage.evaluate((text) => window.api.ui.writeClipboardText(text), payload)
-      await focusActiveTerminalInput(orcaPage)
+      await yiruPage.evaluate((text) => window.api.ui.writeClipboardText(text), payload)
+      await focusActiveTerminalInput(yiruPage)
       await installClipboardReadTerminalBlurRepro(electronApp)
 
-      await orcaPage.keyboard.press(keyboardPasteChords()[0])
-      await waitForTerminalOutput(orcaPage, encodedPayload, 10_000, 12_000)
+      await yiruPage.keyboard.press(keyboardPasteChords()[0])
+      await waitForTerminalOutput(yiruPage, encodedPayload, 10_000, 12_000)
 
       const writes = (await readTerminalPtyWrites(electronApp)).join('')
       expect(countOccurrences(writes, payload), 'transient blur PTY write count').toBe(1)
     } finally {
       await restoreClipboardReadTerminalBlurRepro(electronApp).catch(() => undefined)
       if (scriptStarted) {
-        await sendToTerminal(orcaPage, ptyId, '\x03').catch(() => undefined)
+        await sendToTerminal(yiruPage, ptyId, '\x03').catch(() => undefined)
       }
       rmSync(scriptPath, { force: true })
     }
@@ -272,41 +272,41 @@ test.describe('terminal paste ownership', () => {
 
   test('terminal context-menu Paste sends clipboard text exactly once', async ({
     electronApp,
-    orcaPage,
+    yiruPage,
     testRepoPath
   }) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await waitForSessionReady(yiruPage)
+    await waitForActiveWorktree(yiruPage)
+    await ensureTerminalVisible(yiruPage)
+    await waitForActiveTerminalManager(yiruPage, 30_000)
     await installTerminalPtyWriteSpy(electronApp)
 
-    const ptyId = await waitForActivePanePtyId(orcaPage)
+    const ptyId = await waitForActivePanePtyId(yiruPage)
     const runId = randomUUID()
-    const scriptPath = path.join(testRepoPath, `.orca-paste-context-menu-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.yiru-paste-context-menu-${runId}.mjs`)
     writeFileSync(scriptPath, pasteEchoScript(runId))
     let scriptStarted = false
 
     try {
-      await sendToTerminal(orcaPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
+      await sendToTerminal(yiruPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
       scriptStarted = true
-      await waitForTerminalOutput(orcaPage, `PASTE_READY_${runId}`, 10_000)
+      await waitForTerminalOutput(yiruPage, `PASTE_READY_${runId}`, 10_000)
 
-      const payload = `ORCA_E2E_CONTEXT_MENU_PASTE_${runId}`
+      const payload = `YIRU_E2E_CONTEXT_MENU_PASTE_${runId}`
       const encodedPayload = Buffer.from(payload, 'utf8').toString('base64')
       await clearTerminalPtyWriteLog(electronApp)
-      await orcaPage.evaluate((text) => window.api.ui.writeClipboardText(text), payload)
-      await focusActiveTerminalInput(orcaPage)
+      await yiruPage.evaluate((text) => window.api.ui.writeClipboardText(text), payload)
+      await focusActiveTerminalInput(yiruPage)
 
-      await openTerminalContextMenu(orcaPage)
-      await orcaPage.getByRole('menuitem', { name: /Paste/ }).click()
-      await waitForTerminalOutput(orcaPage, encodedPayload, 10_000, 12_000)
+      await openTerminalContextMenu(yiruPage)
+      await yiruPage.getByRole('menuitem', { name: /Paste/ }).click()
+      await waitForTerminalOutput(yiruPage, encodedPayload, 10_000, 12_000)
 
       const writes = (await readTerminalPtyWrites(electronApp)).join('')
       expect(countOccurrences(writes, payload), 'terminal context-menu PTY write count').toBe(1)
     } finally {
       if (scriptStarted) {
-        await sendToTerminal(orcaPage, ptyId, '\x03').catch(() => undefined)
+        await sendToTerminal(yiruPage, ptyId, '\x03').catch(() => undefined)
       }
       rmSync(scriptPath, { force: true })
     }
@@ -314,22 +314,22 @@ test.describe('terminal paste ownership', () => {
 
   test('Windows multiline keyboard paste normalizes terminal newlines with one PTY owner', async ({
     electronApp,
-    orcaPage,
+    yiruPage,
     testRepoPath
   }) => {
     test.skip(process.platform !== 'win32', 'Windows multiline paste behavior is Windows-only')
 
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await waitForSessionReady(yiruPage)
+    await waitForActiveWorktree(yiruPage)
+    await ensureTerminalVisible(yiruPage)
+    await waitForActiveTerminalManager(yiruPage, 30_000)
     await installTerminalPtyWriteSpy(electronApp)
 
-    const ptyId = await waitForActivePanePtyId(orcaPage)
+    const ptyId = await waitForActivePanePtyId(yiruPage)
     const runId = randomUUID()
-    const sentinel = `ORCA_E2E_MULTILINE_DONE_${runId}`
+    const sentinel = `YIRU_E2E_MULTILINE_DONE_${runId}`
     const payload = [
-      `ORCA_E2E_MULTILINE_${runId}`,
+      `YIRU_E2E_MULTILINE_${runId}`,
       'line with spaces and tabs\tend',
       'PowerShell metacharacters: ` $ " \' ; | & < > @ { } ( )',
       'cmd metacharacters: % ! ^ & | < >',
@@ -337,29 +337,29 @@ test.describe('terminal paste ownership', () => {
       `mixed-newline-before\r\nlf-line\ncrlf-line\r\n${sentinel}`
     ].join('\n')
     // Why: xterm translates clipboard line endings to terminal Enter bytes;
-    // Orca's direct Windows bracketed-paste path must produce the same bytes.
+    // Yiru's direct Windows bracketed-paste path must produce the same bytes.
     const terminalText = payload.replace(/\r?\n/g, '\r')
-    const scriptPath = path.join(testRepoPath, `.orca-paste-multiline-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.yiru-paste-multiline-${runId}.mjs`)
     writeFileSync(scriptPath, pasteCollectScript(runId, sentinel, terminalText))
     let scriptStarted = false
 
     try {
-      await sendToTerminal(orcaPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
+      await sendToTerminal(yiruPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
       scriptStarted = true
-      await waitForTerminalOutput(orcaPage, `PASTE_READY_${runId}`, 10_000)
+      await waitForTerminalOutput(yiruPage, `PASTE_READY_${runId}`, 10_000)
 
       await clearTerminalPtyWriteLog(electronApp)
-      await orcaPage.evaluate((text) => window.api.ui.writeClipboardText(text), payload)
-      await focusActiveTerminalInput(orcaPage)
+      await yiruPage.evaluate((text) => window.api.ui.writeClipboardText(text), payload)
+      await focusActiveTerminalInput(yiruPage)
 
-      await orcaPage.keyboard.press('Control+V')
-      await waitForTerminalOutput(orcaPage, `PASTE_COMPLETE_${runId}:MATCH`, 10_000, 12_000)
+      await yiruPage.keyboard.press('Control+V')
+      await waitForTerminalOutput(yiruPage, `PASTE_COMPLETE_${runId}:MATCH`, 10_000, 12_000)
 
       const writes = (await readTerminalPtyWrites(electronApp)).join('')
       expect(countOccurrences(writes, terminalText), 'multiline payload PTY write count').toBe(1)
     } finally {
       if (scriptStarted) {
-        await sendToTerminal(orcaPage, ptyId, '\x03').catch(() => undefined)
+        await sendToTerminal(yiruPage, ptyId, '\x03').catch(() => undefined)
       }
       rmSync(scriptPath, { force: true })
     }
@@ -367,43 +367,43 @@ test.describe('terminal paste ownership', () => {
 
   test('right-click paste sends clipboard text to the focused terminal exactly once', async ({
     electronApp,
-    orcaPage,
+    yiruPage,
     testRepoPath
   }) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await orcaPage.evaluate(async () => {
+    await waitForSessionReady(yiruPage)
+    await waitForActiveWorktree(yiruPage)
+    await ensureTerminalVisible(yiruPage)
+    await yiruPage.evaluate(async () => {
       await window.__store?.getState().updateSettings({ terminalRightClickToPaste: true })
     })
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await waitForActiveTerminalManager(yiruPage, 30_000)
     await installTerminalPtyWriteSpy(electronApp)
 
-    const ptyId = await waitForActivePanePtyId(orcaPage)
+    const ptyId = await waitForActivePanePtyId(yiruPage)
     const runId = randomUUID()
-    const scriptPath = path.join(testRepoPath, `.orca-paste-right-click-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.yiru-paste-right-click-${runId}.mjs`)
     writeFileSync(scriptPath, pasteEchoScript(runId))
     let scriptStarted = false
 
     try {
-      await sendToTerminal(orcaPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
+      await sendToTerminal(yiruPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
       scriptStarted = true
-      await waitForTerminalOutput(orcaPage, `PASTE_READY_${runId}`, 10_000)
+      await waitForTerminalOutput(yiruPage, `PASTE_READY_${runId}`, 10_000)
 
-      const payload = `ORCA_E2E_RIGHT_CLICK_PASTE_${runId}`
+      const payload = `YIRU_E2E_RIGHT_CLICK_PASTE_${runId}`
       const encodedPayload = Buffer.from(payload, 'utf8').toString('base64')
       await clearTerminalPtyWriteLog(electronApp)
-      await orcaPage.evaluate((text) => window.api.ui.writeClipboardText(text), payload)
-      await focusActiveTerminalInput(orcaPage)
+      await yiruPage.evaluate((text) => window.api.ui.writeClipboardText(text), payload)
+      await focusActiveTerminalInput(yiruPage)
 
-      await rightClickActiveTerminalSurface(orcaPage)
-      await waitForTerminalOutput(orcaPage, encodedPayload, 10_000, 12_000)
+      await rightClickActiveTerminalSurface(yiruPage)
+      await waitForTerminalOutput(yiruPage, encodedPayload, 10_000, 12_000)
 
       const writes = (await readTerminalPtyWrites(electronApp)).join('')
       expect(countOccurrences(writes, payload), 'right-click PTY write count').toBe(1)
     } finally {
       if (scriptStarted) {
-        await sendToTerminal(orcaPage, ptyId, '\x03').catch(() => undefined)
+        await sendToTerminal(yiruPage, ptyId, '\x03').catch(() => undefined)
       }
       rmSync(scriptPath, { force: true })
     }

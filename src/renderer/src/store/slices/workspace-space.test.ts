@@ -24,7 +24,7 @@ function makeAnalysis(): WorkspaceSpaceAnalysis {
     repos: [
       {
         repoId: 'repo-1',
-        displayName: 'orca',
+        displayName: 'yiru',
         path: '/repo/main',
         isRemote: false,
         worktreeCount: 2,
@@ -39,7 +39,7 @@ function makeAnalysis(): WorkspaceSpaceAnalysis {
       {
         worktreeId: 'repo-1::/repo/main',
         repoId: 'repo-1',
-        repoDisplayName: 'orca',
+        repoDisplayName: 'yiru',
         repoPath: '/repo/main',
         displayName: 'main',
         path: '/repo/main',
@@ -62,7 +62,7 @@ function makeAnalysis(): WorkspaceSpaceAnalysis {
       {
         worktreeId: 'repo-1::/repo/feature',
         repoId: 'repo-1',
-        repoDisplayName: 'orca',
+        repoDisplayName: 'yiru',
         repoPath: '/repo/main',
         displayName: 'feature',
         path: '/repo/feature',

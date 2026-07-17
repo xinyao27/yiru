@@ -2,13 +2,13 @@
 
 ## Problem
 
-On Windows, choosing **Open in VS Code** for a workspace stored under a WSL UNC path opens the folder in a Windows VS Code environment instead of a Remote - WSL window ([issue #7649](https://github.com/stablyai/orca/issues/7649)). The renderer passes the workspace path and configured editor command unchanged (`src/renderer/src/components/sidebar/WorktreeOpenInMenu.tsx:103-121`), and the main process delegates launch argument construction to `resolveExternalEditorLaunchSpec` (`src/main/ipc/shell.ts:101-110`). The builder currently gives every non-Cursor executable only the original path (`src/main/external-editor-launch.ts:109-116`).
+On Windows, choosing **Open in VS Code** for a workspace stored under a WSL UNC path opens the folder in a Windows VS Code environment instead of a Remote - WSL window ([issue #7649](https://github.com/stablyai/yiru/issues/7649)). The renderer passes the workspace path and configured editor command unchanged (`src/renderer/src/components/sidebar/WorktreeOpenInMenu.tsx:103-121`), and the main process delegates launch argument construction to `resolveExternalEditorLaunchSpec` (`src/main/ipc/shell.ts:101-110`). The builder currently gives every non-Cursor executable only the original path (`src/main/external-editor-launch.ts:109-116`).
 
 The deterministic reproduction for `\\wsl.localhost\Ubuntu\home\aliuq\project` produces `code <UNC path>` with no remote authority. VS Code's supported Windows CLI form is `code --remote wsl+<distro> <Linux path>`.
 
 ## Root cause
 
-`resolveExternalEditorLaunchSpec` does not distinguish a VS Code launch targeting a WSL UNC workspace. Orca already has a shared parser for both modern `\\wsl.localhost\...` and legacy `\\wsl$\...` paths (`src/shared/wsl-paths.ts:1-20`), but the editor launcher never uses it. VS Code therefore receives the Windows-visible UNC folder and correctly opens it as a local Windows workspace.
+`resolveExternalEditorLaunchSpec` does not distinguish a VS Code launch targeting a WSL UNC workspace. Yiru already has a shared parser for both modern `\\wsl.localhost\...` and legacy `\\wsl$\...` paths (`src/shared/wsl-paths.ts:1-20`), but the editor launcher never uses it. VS Code therefore receives the Windows-visible UNC folder and correctly opens it as a local Windows workspace.
 
 ## Non-goals
 
@@ -20,7 +20,7 @@ The deterministic reproduction for `\\wsl.localhost\Ubuntu\home\aliuq\project` p
 ## Design
 
 1. In the external-editor launch-spec builder, parse the target path with the shared WSL UNC parser when the host platform is Windows.
-2. For direct/executable VS Code Stable or Insiders launchers only, reuse the existing normalized launcher-basename check and translate a recognized WSL target into `['--remote', 'wsl+<distro>', '<linuxPath>']`. The exact allowlist recognizes Stable's `code`, Insiders' `code-insiders`, and the direct `Code - Insiders.exe` basename without matching unrelated `code-*` editors. Matching is case-insensitive and strips every Windows launcher suffix already supported by Orca (`.cmd`, `.exe`, and `.bat`).
+2. For direct/executable VS Code Stable or Insiders launchers only, reuse the existing normalized launcher-basename check and translate a recognized WSL target into `['--remote', 'wsl+<distro>', '<linuxPath>']`. The exact allowlist recognizes Stable's `code`, Insiders' `code-insiders`, and the direct `Code - Insiders.exe` basename without matching unrelated `code-*` editors. Matching is case-insensitive and strips every Windows launcher suffix already supported by Yiru (`.cmd`, `.exe`, and `.bat`).
 3. Keep local paths, non-Windows hosts, non-VS-Code applications, and compound commands on their existing argument paths. The existing main-process spawn and Windows shim handling remain unchanged.
 4. Replace the temporary reproduction harness with focused regression cases in `src/main/external-editor-launch.test.ts` covering modern and legacy WSL UNC forms plus unaffected local/custom-editor behavior.
 
@@ -42,7 +42,7 @@ The deterministic reproduction for `\\wsl.localhost\Ubuntu\home\aliuq\project` p
 - Cursor retains `--new-window`; other custom editors retain their existing single path argument.
 - Compound commands remain user-owned and are not rewritten because inserting flags safely would require parsing arbitrary shell syntax.
 - SSH and remote-runtime workspaces remain blocked from local path opening by the existing renderer guard; this change does not alter that boundary.
-- If the VS Code WSL extension is unavailable, launch behavior is left to VS Code and Orca retains its existing spawn-success contract.
+- If the VS Code WSL extension is unavailable, launch behavior is left to VS Code and Yiru retains its existing spawn-success contract.
 
 ## Test plan
 
@@ -53,13 +53,13 @@ The deterministic reproduction for `\\wsl.localhost\Ubuntu\home\aliuq\project` p
 - Unit: assert distro names and Linux folder paths containing spaces remain intact arguments through launch-spec construction and Windows shim forwarding.
 - Unit: assert a Windows local path remains unchanged and explicit `darwin` and `linux` hosts do not acquire WSL remote arguments.
 - Unit: assert Cursor and another custom editor are not given VS Code remote arguments.
-- Integration/Electron: create a throwaway repo in the installed Ubuntu WSL distro, add/open it in Orca, choose Open in VS Code, and verify the VS Code remote indicator and an integrated-terminal Linux probe.
+- Integration/Electron: create a throwaway repo in the installed Ubuntu WSL distro, add/open it in Yiru, choose Open in VS Code, and verify the VS Code remote indicator and an integrated-terminal Linux probe.
 - Adjacent smoke: open a local Windows workspace in VS Code and verify it remains a local Windows window.
 - Repository gates: focused Vitest files, `pnpm typecheck`, `pnpm lint`, and `pnpm check:max-lines-ratchet`.
 
 ## UI quality bar
 
-Not UI-visible in Orca. The existing menu, labels, loading behavior, and errors do not change. The user-visible acceptance criterion is external: the launched VS Code window must identify the selected WSL distro and its terminal must run Linux.
+Not UI-visible in Yiru. The existing menu, labels, loading behavior, and errors do not change. The user-visible acceptance criterion is external: the launched VS Code window must identify the selected WSL distro and its terminal must run Linux.
 
 ## Review screenshots
 
@@ -88,8 +88,8 @@ Not UI-visible in Orca. The existing menu, labels, loading behavior, and errors 
   - `src/main/ipc/shell.test.ts` plus the existing Windows shim contract to prove remote arguments, including spaces, are forwarded as distinct values.
   - Live Windows + Ubuntu WSL + VS Code smoke for the actual environment boundary.
 - Performance/blast radius: One regex parse per external-editor click only; no startup, polling, watcher, terminal, or renderer cost. Blast radius is limited to direct VS Code launches of WSL UNC paths on Windows.
-- UI quality bar: Not UI-visible in Orca; VS Code must visibly attach to the requested WSL distro and run a Linux terminal.
+- UI quality bar: Not UI-visible in Yiru; VS Code must visibly attach to the requested WSL distro and run a Linux terminal.
 - Required review screenshots:
   1. WSL VS Code window with distro indicator and Linux terminal probe.
   2. Local Windows VS Code window demonstrating unchanged local launch behavior.
-- Residual risks: VS Code without the WSL extension may reject or prompt on the valid remote launch; this is external dependency behavior and should not cause Orca to fall back silently to the wrong Windows environment.
+- Residual risks: VS Code without the WSL extension may reject or prompt on the valid remote launch; this is external dependency behavior and should not cause Yiru to fall back silently to the wrong Windows environment.

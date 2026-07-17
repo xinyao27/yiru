@@ -373,7 +373,7 @@ describe('Subprocess: Relay entry point', () => {
       tmpDir = mkdtempSync(path.join(tmpdir(), 'relay-empty-'))
       relay = spawn(
         ['--detached', '--grace-time', '10', '--sock-path', path.join(tmpDir, 'relay.sock')],
-        { ...process.env, ORCA_RELAY_EMPTY_STARTUP_GRACE_MS: '100' }
+        { ...process.env, YIRU_RELAY_EMPTY_STARTUP_GRACE_MS: '100' }
       )
       await relay.sentinelReceived
 
@@ -389,7 +389,7 @@ describe('Subprocess: Relay entry point', () => {
       tmpDir = mkdtempSync(path.join(tmpdir(), 'relay-empty-unlimited-'))
       relay = spawn(
         ['--detached', '--grace-time', '0', '--sock-path', path.join(tmpDir, 'relay.sock')],
-        { ...process.env, ORCA_RELAY_EMPTY_STARTUP_GRACE_MS: '100' }
+        { ...process.env, YIRU_RELAY_EMPTY_STARTUP_GRACE_MS: '100' }
       )
       await relay.sentinelReceived
 
@@ -406,7 +406,7 @@ describe('Subprocess: Relay entry point', () => {
       const sockPath = path.join(tmpDir, 'relay.sock')
       relay = spawn(['--detached', '--grace-time', '1', '--sock-path', sockPath], {
         ...process.env,
-        ORCA_RELAY_EMPTY_STARTUP_GRACE_MS: '500'
+        YIRU_RELAY_EMPTY_STARTUP_GRACE_MS: '500'
       })
       await relay.sentinelReceived
 

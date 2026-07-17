@@ -54,7 +54,7 @@ describe('MobilePairingSetupSection', () => {
     renderSection({ connectionMode: 'automatic' })
     expect(screen.getByRole('combobox')).toBeVisible()
     expect(
-      screen.getByText(/includes direct access and encrypted Orca Relay fallback/i)
+      screen.getByText(/includes direct access and encrypted Yiru Relay fallback/i)
     ).toBeVisible()
   })
 

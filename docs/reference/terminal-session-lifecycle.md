@@ -11,7 +11,7 @@
 Terminal process lifetime must be owned by explicit product intent, never by
 whether a React view happens to be mounted.
 
-Orca currently preserves a PTY when a terminal view detaches, which is correct
+Yiru currently preserves a PTY when a terminal view detaches, which is correct
 for view parking, tab moves, renderer reload, and warm reattach. It also relies
 on `TerminalPane` unmount to destroy a PTY after a tab is closed. Hidden-view
 parking invalidated that implicit invariant: a parked tab has no mounted pane,
@@ -101,7 +101,7 @@ could invalidate intentional long-lived `worktree-sleep` checkpoints.
 - **View:** a renderer xterm or pane-less parked watcher observing a surface.
 - **Session:** the provider-owned PTY identified by a PTY ID.
 - **Resume authority:** a `sleepingAgentSessionsByPaneKey` record that permits
-  Orca to launch an agent-provider resume command.
+  Yiru to launch an agent-provider resume command.
 - **Retire:** permanently close a surface and revoke its process and resume
   ownership.
 - **Detach:** disconnect a view while preserving the session for reattachment.
@@ -123,7 +123,7 @@ The lifecycle distinction is established in mature terminal implementations:
   the session and its windows. See
   [`tmux.1`](https://github.com/tmux/tmux/blob/42b3ea0d7411acb4cd0357a3c2829d986b455918/tmux.1#L1177-L1218).
 
-Orca needs the same semantic split, extended across local, WSL, SSH, persistent
+Yiru needs the same semantic split, extended across local, WSL, SSH, persistent
 daemon, and remote-runtime ownership. The important precedent is the explicit
 intent boundary, not a particular framework or process API.
 
@@ -171,7 +171,7 @@ The current close path deletes `ptyIdsByTabId[tabId]` and the tab layout, then
 relies on a mounted `TerminalPane` cleanup to call `transport.destroy()`. A
 parked tab has already run the detach branch and has no mounted cleanup left.
 `disposeParkedTabWatchers` only unregisters observers. The provider session is
-therefore alive after Orca discards its last renderer-side owner.
+therefore alive after Yiru discards its last renderer-side owner.
 
 The same state close drops live agent status but not
 `sleepingAgentSessionsByPaneKey`. Worktree activation intentionally fresh-resumes
@@ -297,7 +297,7 @@ record is deleted immediately; it is not retained for 30 minutes.
 - `close` must clear the exact pane's resume authority, add a pane-scoped late
   event tombstone, and destroy the pane transport;
 - `detach` must atomically transfer or alias resume ownership because the agent
-  process retains its immutable source `ORCA_PANE_KEY`.
+  process retains its immutable source `YIRU_PANE_KEY`.
 
 The last-pane path routes to terminal-tab retirement so it receives the same
 parked, split, SSH, and resume cleanup behavior as a tab-bar close.
@@ -467,7 +467,7 @@ required to avoid introducing adjacent close regressions.
 2. Switch worktrees and wait until the source worktree is cold-parked.
 3. Close the parked tab.
 4. Assert its exact PTY disappears from `pty:listSessions` and the child exits.
-5. Restart/reload Orca and activate the worktree.
+5. Restart/reload Yiru and activate the worktree.
 6. Assert no terminal or agent resume command is recreated for the closed pane.
 7. Repeat with two split panes and with an SSH fixture where CI supports it.
 
@@ -545,7 +545,7 @@ observable.
 ## Phase 1 acceptance criteria
 
 - A confirmed terminal-tab close submits retirement for every exclusively owned
-  session Orca can currently reach and reports rejected requests without an
+  session Yiru can currently reach and reports rejected requests without an
   unhandled promise.
 - A closed agent session is never resumed by restart, activation, or mobile wake.
 - Parking, move/detach, sleep/wake, and warm app reattach retain their documented

@@ -1,4 +1,4 @@
-export const ORCA_TERMINAL_COMMAND_FINISHED_EVENT = 'orca:terminal-command-finished'
+export const YIRU_TERMINAL_COMMAND_FINISHED_EVENT = 'yiru:terminal-command-finished'
 
 export type TerminalCommandFinishedEventDetail = {
   worktreeId: string
@@ -14,7 +14,7 @@ export function dispatchTerminalCommandFinishedEvent(worktreeId: string): void {
   }
 
   window.dispatchEvent(
-    new CustomEvent<TerminalCommandFinishedEventDetail>(ORCA_TERMINAL_COMMAND_FINISHED_EVENT, {
+    new CustomEvent<TerminalCommandFinishedEventDetail>(YIRU_TERMINAL_COMMAND_FINISHED_EVENT, {
       detail: { worktreeId }
     })
   )

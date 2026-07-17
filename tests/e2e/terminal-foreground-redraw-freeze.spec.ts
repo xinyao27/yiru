@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import type { Page, TestInfo } from '@stablyai/playwright-test'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/yiru-app'
 import { ensureTerminalVisible, waitForActiveWorktree, waitForSessionReady } from './helpers/store'
 import { waitForActivePaneHookDescriptor, waitForActiveTerminalManager } from './helpers/terminal'
 import { waitForTerminalPtyDataInjector } from './helpers/terminal-pty-injection'
@@ -340,28 +340,28 @@ function annotateMeasurement(
 
 test.describe('Terminal foreground redraw freeze repro', () => {
   test('Codex-style line rewrites request a visible row refresh', async ({
-    orcaPage
+    yiruPage
   }, testInfo) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await waitForSessionReady(yiruPage)
+    await waitForActiveWorktree(yiruPage)
+    await ensureTerminalVisible(yiruPage)
+    await waitForActiveTerminalManager(yiruPage, 30_000)
 
-    const { paneKey } = await waitForActivePaneHookDescriptor(orcaPage)
-    await waitForTerminalPtyDataInjector(orcaPage, paneKey)
-    const webglAttached = await forceActivePaneWebglRenderer(orcaPage)
+    const { paneKey } = await waitForActivePaneHookDescriptor(yiruPage)
+    await waitForTerminalPtyDataInjector(yiruPage, paneKey)
+    const webglAttached = await forceActivePaneWebglRenderer(yiruPage)
     // Why: Linux headless CI intentionally disables GPU. Declare that
     // environment unsupported instead of weakening the WebGL-only oracle.
     test.skip(!webglAttached, 'WebGL is unavailable for the refresh-policy probe')
     if (!webglAttached) {
       return
     }
-    await installActivePaneRefreshProbe(orcaPage)
+    await installActivePaneRefreshProbe(yiruPage)
     try {
-      const refreshBaseline = await readRefreshProbe(orcaPage)
-      await resetSchedulerDebug(orcaPage)
-      const measurement = await measureRendererDuringRewriteBurst(orcaPage, paneKey)
-      const scheduler = await readSchedulerDebug(orcaPage)
+      const refreshBaseline = await readRefreshProbe(yiruPage)
+      await resetSchedulerDebug(yiruPage)
+      const measurement = await measureRendererDuringRewriteBurst(yiruPage, paneKey)
+      const scheduler = await readSchedulerDebug(yiruPage)
 
       expect(measurement.injectedFrames).toBe(REWRITE_REDRAW_FRAME_COUNT)
       expect(measurement.maxTimerDriftMs).toBeLessThan(MAX_RENDERER_TIMER_DRIFT_MS)
@@ -369,7 +369,7 @@ test.describe('Terminal foreground redraw freeze repro', () => {
       await expect
         .poll(
           async () => {
-            const refresh = await readRefreshProbe(orcaPage)
+            const refresh = await readRefreshProbe(yiruPage)
             const delta = subtractRefreshProbe(refresh, refreshBaseline)
             return Object.values(delta).reduce((total, count) => total + count, 0)
           },
@@ -379,7 +379,7 @@ test.describe('Terminal foreground redraw freeze repro', () => {
           }
         )
         .toBeGreaterThan(0)
-      const refresh = await readRefreshProbe(orcaPage)
+      const refresh = await readRefreshProbe(yiruPage)
       const refreshDelta = subtractRefreshProbe(refresh, refreshBaseline)
       testInfo.annotations.push({
         type: 'terminal-refresh-probe',
@@ -394,23 +394,23 @@ test.describe('Terminal foreground redraw freeze repro', () => {
       // fallback from turning the zero-sync assertion into a vacuous pass.
       expect(refreshDelta.debouncedWebgl).toBeGreaterThan(0)
     } finally {
-      await disposeActivePaneRefreshProbe(orcaPage)
+      await disposeActivePaneRefreshProbe(yiruPage)
     }
   })
 
   test('active OpenTUI-style redraw bursts do not monopolize the renderer', async ({
-    orcaPage
+    yiruPage
   }, testInfo) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await waitForSessionReady(yiruPage)
+    await waitForActiveWorktree(yiruPage)
+    await ensureTerminalVisible(yiruPage)
+    await waitForActiveTerminalManager(yiruPage, 30_000)
 
-    const { paneKey } = await waitForActivePaneHookDescriptor(orcaPage)
-    await waitForTerminalPtyDataInjector(orcaPage, paneKey)
-    await resetSchedulerDebug(orcaPage)
-    const measurement = await measureRendererDuringBurst(orcaPage, paneKey)
-    const scheduler = await readSchedulerDebug(orcaPage)
+    const { paneKey } = await waitForActivePaneHookDescriptor(yiruPage)
+    await waitForTerminalPtyDataInjector(yiruPage, paneKey)
+    await resetSchedulerDebug(yiruPage)
+    const measurement = await measureRendererDuringBurst(yiruPage, paneKey)
+    const scheduler = await readSchedulerDebug(yiruPage)
     annotateMeasurement(testInfo, measurement, scheduler)
 
     expect(measurement.injectedFrames).toBe(REDRAW_FRAME_COUNT)
@@ -421,7 +421,7 @@ test.describe('Terminal foreground redraw freeze repro', () => {
   })
 
   test('captured OpenCode/OpenTUI redraw bytes do not monopolize foreground writes', async ({
-    orcaPage
+    yiruPage
   }, testInfo) => {
     const frames = loadCapturedOpenCodeSmallRedrawFrames()
     test.skip(
@@ -429,16 +429,16 @@ test.describe('Terminal foreground redraw freeze repro', () => {
       `OpenCode PTY capture missing; run "git clone https://github.com/anomalyco/opencode.git .tmp/opencode" then "node tests/e2e/capture-opencode-tui-repro.mjs" to generate ${OPENCODE_CAPTURE_PATH}`
     )
 
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await waitForSessionReady(yiruPage)
+    await waitForActiveWorktree(yiruPage)
+    await ensureTerminalVisible(yiruPage)
+    await waitForActiveTerminalManager(yiruPage, 30_000)
 
-    const { paneKey } = await waitForActivePaneHookDescriptor(orcaPage)
-    await waitForTerminalPtyDataInjector(orcaPage, paneKey)
-    await resetSchedulerDebug(orcaPage)
-    const measurement = await measureRendererDuringFrames(orcaPage, paneKey, frames)
-    const scheduler = await readSchedulerDebug(orcaPage)
+    const { paneKey } = await waitForActivePaneHookDescriptor(yiruPage)
+    await waitForTerminalPtyDataInjector(yiruPage, paneKey)
+    await resetSchedulerDebug(yiruPage)
+    const measurement = await measureRendererDuringFrames(yiruPage, paneKey, frames)
+    const scheduler = await readSchedulerDebug(yiruPage)
     annotateMeasurement(testInfo, measurement, scheduler)
 
     expect(measurement.injectedFrames).toBe(frames.length)

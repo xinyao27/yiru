@@ -26,17 +26,17 @@ export function parseAgentHookEndpointFile(contents: string): AgentHookEndpoint 
       })
   )
   if (
-    !values.ORCA_AGENT_HOOK_PORT ||
-    !values.ORCA_AGENT_HOOK_TOKEN ||
-    !values.ORCA_AGENT_HOOK_ENV ||
-    !values.ORCA_AGENT_HOOK_VERSION
+    !values.YIRU_AGENT_HOOK_PORT ||
+    !values.YIRU_AGENT_HOOK_TOKEN ||
+    !values.YIRU_AGENT_HOOK_ENV ||
+    !values.YIRU_AGENT_HOOK_VERSION
   ) {
     throw new Error('Agent hook endpoint file is missing required fields')
   }
   return {
-    port: values.ORCA_AGENT_HOOK_PORT,
-    token: values.ORCA_AGENT_HOOK_TOKEN,
-    env: values.ORCA_AGENT_HOOK_ENV,
-    version: values.ORCA_AGENT_HOOK_VERSION
+    port: values.YIRU_AGENT_HOOK_PORT,
+    token: values.YIRU_AGENT_HOOK_TOKEN,
+    env: values.YIRU_AGENT_HOOK_ENV,
+    version: values.YIRU_AGENT_HOOK_VERSION
   }
 }

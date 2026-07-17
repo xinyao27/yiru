@@ -105,7 +105,7 @@ vi.mock('./rate-limit', () => ({
 }))
 
 import {
-  checkOrcaStarred,
+  checkYiruStarred,
   getPRComments,
   getPRForBranch,
   getPRForBranchOutcome,
@@ -126,7 +126,7 @@ import {
 import { __resetPRConflictSummaryCachesForTests } from './conflict-summary'
 import { resetMergedPRCommitMembershipCacheForTest } from './merged-pr-commit-membership'
 
-describe('checkOrcaStarred', () => {
+describe('checkYiruStarred', () => {
   beforeEach(() => {
     execFileAsyncMock.mockReset()
     acquireMock.mockReset()
@@ -137,11 +137,11 @@ describe('checkOrcaStarred', () => {
   it('returns true only for an included successful GitHub response', async () => {
     execFileAsyncMock.mockResolvedValueOnce({ stdout: 'HTTP/2.0 204 No Content\r\n', stderr: '' })
 
-    await expect(checkOrcaStarred()).resolves.toBe(true)
+    await expect(checkYiruStarred()).resolves.toBe(true)
 
     expect(execFileAsyncMock).toHaveBeenCalledWith(
       'gh',
-      ['api', '--include', 'user/starred/stablyai/orca'],
+      ['api', '--include', 'user/starred/stablyai/yiru'],
       { encoding: 'utf-8' }
     )
   })
@@ -149,19 +149,19 @@ describe('checkOrcaStarred', () => {
   it('returns true for an HTTP 200 starred response', async () => {
     execFileAsyncMock.mockResolvedValueOnce({ stdout: 'HTTP/2.0 200 OK\r\n', stderr: '' })
 
-    await expect(checkOrcaStarred()).resolves.toBe(true)
+    await expect(checkYiruStarred()).resolves.toBe(true)
   })
 
   it('returns false for GitHub 404 not starred responses', async () => {
     execFileAsyncMock.mockRejectedValueOnce(new Error('HTTP 404: Not Found'))
 
-    await expect(checkOrcaStarred()).resolves.toBe(false)
+    await expect(checkYiruStarred()).resolves.toBe(false)
   })
 
   it('returns null when gh exits successfully without response headers', async () => {
     execFileAsyncMock.mockResolvedValueOnce({ stdout: '', stderr: '' })
 
-    await expect(checkOrcaStarred()).resolves.toBe(null)
+    await expect(checkYiruStarred()).resolves.toBe(null)
   })
 })
 
@@ -234,10 +234,10 @@ describe('getPRForBranch', () => {
   it('resolves fork PRs from the upstream PR repo with the origin head owner', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
       candidates: [
-        { owner: 'stablyai', repo: 'orca' },
-        { owner: 'fork', repo: 'orca' }
+        { owner: 'stablyai', repo: 'yiru' },
+        { owner: 'fork', repo: 'yiru' }
       ],
-      headRepo: { owner: 'fork', repo: 'orca' }
+      headRepo: { owner: 'fork', repo: 'yiru' }
     })
     ghExecFileAsyncMock.mockResolvedValueOnce({
       stdout: JSON.stringify([
@@ -245,7 +245,7 @@ describe('getPRForBranch', () => {
           number: 1738,
           title: 'Fork PR',
           state: 'open',
-          html_url: 'https://github.com/stablyai/orca/pull/1738',
+          html_url: 'https://github.com/stablyai/yiru/pull/1738',
           updated_at: '2026-03-28T00:00:00Z',
           draft: false,
           mergeable_state: 'clean',
@@ -258,23 +258,23 @@ describe('getPRForBranch', () => {
     const pr = await getPRForBranch('/repo-root', 'feature/test')
 
     expect(ghExecFileAsyncMock).toHaveBeenCalledWith(
-      ['api', 'repos/stablyai/orca/pulls?head=fork%3Afeature%2Ftest&state=all&per_page=1'],
+      ['api', 'repos/stablyai/yiru/pulls?head=fork%3Afeature%2Ftest&state=all&per_page=1'],
       { cwd: '/repo-root' }
     )
     expect(pr).toMatchObject({
       number: 1738,
-      prRepo: { owner: 'stablyai', repo: 'orca' },
-      headRepo: { owner: 'fork', repo: 'orca' }
+      prRepo: { owner: 'stablyai', repo: 'yiru' },
+      headRepo: { owner: 'fork', repo: 'yiru' }
     })
   })
 
   it('looks up a linked PR number across PR repo candidates', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
       candidates: [
-        { owner: 'stablyai', repo: 'orca' },
-        { owner: 'fork', repo: 'orca' }
+        { owner: 'stablyai', repo: 'yiru' },
+        { owner: 'fork', repo: 'yiru' }
       ],
-      headRepo: { owner: 'fork', repo: 'orca' }
+      headRepo: { owner: 'fork', repo: 'yiru' }
     })
     gitExecFileAsyncMock.mockResolvedValueOnce({ stdout: 'linked-head-oid\n', stderr: '' })
     ghExecFileAsyncMock
@@ -284,7 +284,7 @@ describe('getPRForBranch', () => {
           number: 99,
           title: 'Linked fork PR',
           state: 'OPEN',
-          url: 'https://github.com/fork/orca/pull/99',
+          url: 'https://github.com/fork/yiru/pull/99',
           statusCheckRollup: [],
           updatedAt: '2026-03-28T00:00:00Z',
           isDraft: false,
@@ -305,7 +305,7 @@ describe('getPRForBranch', () => {
         'view',
         '99',
         '--repo',
-        'stablyai/orca',
+        'stablyai/yiru',
         '--json',
         'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid'
       ],
@@ -318,13 +318,13 @@ describe('getPRForBranch', () => {
         'view',
         '99',
         '--repo',
-        'fork/orca',
+        'fork/yiru',
         '--json',
         'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid'
       ],
       { cwd: '/repo-root' }
     )
-    expect(pr?.prRepo).toEqual({ owner: 'fork', repo: 'orca' })
+    expect(pr?.prRepo).toEqual({ owner: 'fork', repo: 'yiru' })
   })
 
   it('prefers exact linked PR lookup when the repo identity is known', async () => {
@@ -663,7 +663,7 @@ describe('getPRForBranch', () => {
             title: 'Merged branch PR',
             state: 'closed',
             merged_at: '2026-06-16T17:15:33Z',
-            html_url: 'https://github.com/stablyai/orca/pull/5511',
+            html_url: 'https://github.com/stablyai/yiru/pull/5511',
             updated_at: '2026-06-16T17:15:33Z',
             draft: false,
             mergeable_state: 'clean',
@@ -677,7 +677,7 @@ describe('getPRForBranch', () => {
           number: 5511,
           title: 'Merged branch PR',
           state: 'MERGED',
-          url: 'https://github.com/stablyai/orca/pull/5511',
+          url: 'https://github.com/stablyai/yiru/pull/5511',
           statusCheckRollup: [],
           updatedAt: '2026-06-16T17:15:33Z',
           isDraft: false,
@@ -1229,7 +1229,7 @@ describe('getPRForBranch', () => {
 
   it('reports upstream error when fallback branch discovery fails transiently then retry misses', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
-      candidates: [{ owner: 'stablyai', repo: 'orca' }],
+      candidates: [{ owner: 'stablyai', repo: 'yiru' }],
       headRepo: null
     })
     ghExecFileAsyncMock
@@ -1248,7 +1248,7 @@ describe('getPRForBranch', () => {
         'pr',
         'list',
         '--repo',
-        'stablyai/orca',
+        'stablyai/yiru',
         '--head',
         'feature/test',
         '--state',
@@ -1262,14 +1262,14 @@ describe('getPRForBranch', () => {
     )
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       2,
-      ['api', 'repos/stablyai/orca/pulls?head=stablyai%3Afeature%2Ftest&state=all&per_page=1'],
+      ['api', 'repos/stablyai/yiru/pulls?head=stablyai%3Afeature%2Ftest&state=all&per_page=1'],
       { cwd: '/repo-root' }
     )
   })
 
   it('reports no PR when fallback branch discovery cleanly misses', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
-      candidates: [{ owner: 'stablyai', repo: 'orca' }],
+      candidates: [{ owner: 'stablyai', repo: 'yiru' }],
       headRepo: null
     })
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: JSON.stringify([]) })
@@ -1282,7 +1282,7 @@ describe('getPRForBranch', () => {
 
   it('returns found when fallback branch discovery retry finds the PR', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
-      candidates: [{ owner: 'stablyai', repo: 'orca' }],
+      candidates: [{ owner: 'stablyai', repo: 'yiru' }],
       headRepo: null
     })
     ghExecFileAsyncMock
@@ -1293,7 +1293,7 @@ describe('getPRForBranch', () => {
             number: 42,
             title: 'Retry branch PR',
             state: 'open',
-            html_url: 'https://github.com/stablyai/orca/pull/42',
+            html_url: 'https://github.com/stablyai/yiru/pull/42',
             updated_at: '2026-03-28T00:00:00Z',
             draft: false,
             mergeable: true,
@@ -1307,7 +1307,7 @@ describe('getPRForBranch', () => {
           number: 42,
           title: 'Hydrated retry branch PR',
           state: 'OPEN',
-          url: 'https://github.com/stablyai/orca/pull/42',
+          url: 'https://github.com/stablyai/yiru/pull/42',
           statusCheckRollup: [],
           updatedAt: '2026-03-28T00:00:00Z',
           isDraft: false,
@@ -1326,14 +1326,14 @@ describe('getPRForBranch', () => {
       pr: {
         number: 42,
         title: 'Hydrated retry branch PR',
-        prRepo: { owner: 'stablyai', repo: 'orca' }
+        prRepo: { owner: 'stablyai', repo: 'yiru' }
       }
     })
   })
 
   it('lets fallback PR number recovery win after fallback branch queries throw', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
-      candidates: [{ owner: 'stablyai', repo: 'orca' }],
+      candidates: [{ owner: 'stablyai', repo: 'yiru' }],
       headRepo: null
     })
     ghExecFileAsyncMock
@@ -1344,7 +1344,7 @@ describe('getPRForBranch', () => {
           number: 42,
           title: 'Fallback number recovered PR',
           state: 'OPEN',
-          url: 'https://github.com/stablyai/orca/pull/42',
+          url: 'https://github.com/stablyai/yiru/pull/42',
           statusCheckRollup: [],
           updatedAt: '2026-03-28T00:00:00Z',
           isDraft: false,
@@ -1372,7 +1372,7 @@ describe('getPRForBranch', () => {
         'view',
         '42',
         '--repo',
-        'stablyai/orca',
+        'stablyai/yiru',
         '--json',
         'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid'
       ],
@@ -1382,7 +1382,7 @@ describe('getPRForBranch', () => {
 
   it('reports upstream error when fallback branch discovery has a network failure', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
-      candidates: [{ owner: 'stablyai', repo: 'orca' }],
+      candidates: [{ owner: 'stablyai', repo: 'yiru' }],
       headRepo: null
     })
     ghExecFileAsyncMock
@@ -1400,8 +1400,8 @@ describe('getPRForBranch', () => {
   it('keeps a pending fallback branch error when a later candidate cleanly misses', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
       candidates: [
-        { owner: 'stablyai', repo: 'orca' },
-        { owner: 'fork', repo: 'orca' }
+        { owner: 'stablyai', repo: 'yiru' },
+        { owner: 'fork', repo: 'yiru' }
       ],
       headRepo: null
     })
@@ -1422,7 +1422,7 @@ describe('getPRForBranch', () => {
         'pr',
         'list',
         '--repo',
-        'fork/orca',
+        'fork/yiru',
         '--head',
         'feature/test',
         '--state',
@@ -1446,7 +1446,7 @@ describe('getPRForBranch', () => {
             title: 'Merged branch PR',
             state: 'closed',
             merged_at: '2026-06-16T17:15:33Z',
-            html_url: 'https://github.com/stablyai/orca/pull/5511',
+            html_url: 'https://github.com/stablyai/yiru/pull/5511',
             updated_at: '2026-06-16T17:15:33Z',
             draft: false,
             mergeable_state: 'clean',
@@ -1460,7 +1460,7 @@ describe('getPRForBranch', () => {
           number: 5511,
           title: 'Merged branch PR',
           state: 'MERGED',
-          url: 'https://github.com/stablyai/orca/pull/5511',
+          url: 'https://github.com/stablyai/yiru/pull/5511',
           statusCheckRollup: [],
           updatedAt: '2026-06-16T17:15:33Z',
           isDraft: false,
@@ -1565,10 +1565,10 @@ describe('getPRForBranch', () => {
 
   it('does not carry a merged upstream branch head repo into a fallback PR number', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
-      candidates: [{ owner: 'stablyai', repo: 'orca' }],
-      headRepo: { owner: 'origin-owner', repo: 'orca' }
+      candidates: [{ owner: 'stablyai', repo: 'yiru' }],
+      headRepo: { owner: 'origin-owner', repo: 'yiru' }
     })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'fork-owner', repo: 'orca' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'fork-owner', repo: 'yiru' })
     gitExecFileAsyncMock.mockResolvedValueOnce({
       stdout: 'local-created-from-pr\0fork/contributor/original\n',
       stderr: ''
@@ -1582,7 +1582,7 @@ describe('getPRForBranch', () => {
             title: 'Merged upstream branch PR',
             state: 'closed',
             merged_at: '2026-06-16T17:15:33Z',
-            html_url: 'https://github.com/stablyai/orca/pull/5511',
+            html_url: 'https://github.com/stablyai/yiru/pull/5511',
             updated_at: '2026-06-16T17:15:33Z',
             draft: false,
             mergeable_state: 'clean',
@@ -1596,7 +1596,7 @@ describe('getPRForBranch', () => {
           number: 5511,
           title: 'Merged upstream branch PR',
           state: 'MERGED',
-          url: 'https://github.com/stablyai/orca/pull/5511',
+          url: 'https://github.com/stablyai/yiru/pull/5511',
           statusCheckRollup: [],
           updatedAt: '2026-06-16T17:15:33Z',
           isDraft: false,
@@ -1612,7 +1612,7 @@ describe('getPRForBranch', () => {
           number: 42,
           title: 'Open fallback PR',
           state: 'OPEN',
-          url: 'https://github.com/stablyai/orca/pull/42',
+          url: 'https://github.com/stablyai/yiru/pull/42',
           statusCheckRollup: [],
           updatedAt: '2026-06-17T00:00:00Z',
           isDraft: false,
@@ -1629,7 +1629,7 @@ describe('getPRForBranch', () => {
     expect(pr).toMatchObject({
       number: 42,
       title: 'Open fallback PR',
-      headRepo: { owner: 'origin-owner', repo: 'orca' }
+      headRepo: { owner: 'origin-owner', repo: 'yiru' }
     })
   })
 
@@ -1642,7 +1642,7 @@ describe('getPRForBranch', () => {
           number: 5511,
           title: 'Merged fallback PR',
           state: 'MERGED',
-          url: 'https://github.com/stablyai/orca/pull/5511',
+          url: 'https://github.com/stablyai/yiru/pull/5511',
           statusCheckRollup: [],
           updatedAt: '2026-06-16T17:15:33Z',
           isDraft: false,
@@ -2386,12 +2386,12 @@ describe('getPRForBranch', () => {
   it('uses the tracked upstream remote owner for fork branch lookup', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
       candidates: [
-        { owner: 'stablyai', repo: 'orca' },
-        { owner: 'origin-owner', repo: 'orca' }
+        { owner: 'stablyai', repo: 'yiru' },
+        { owner: 'origin-owner', repo: 'yiru' }
       ],
-      headRepo: { owner: 'origin-owner', repo: 'orca' }
+      headRepo: { owner: 'origin-owner', repo: 'yiru' }
     })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'fork-owner', repo: 'orca' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'fork-owner', repo: 'yiru' })
     ghExecFileAsyncMock
       .mockResolvedValueOnce({ stdout: JSON.stringify([]) })
       .mockResolvedValueOnce({ stdout: JSON.stringify([]) })
@@ -2401,7 +2401,7 @@ describe('getPRForBranch', () => {
             number: 78,
             title: 'Fork upstream branch PR',
             state: 'open',
-            html_url: 'https://github.com/stablyai/orca/pull/78',
+            html_url: 'https://github.com/stablyai/yiru/pull/78',
             updated_at: '2026-03-28T00:00:00Z',
             draft: false,
             mergeable: true,
@@ -2415,7 +2415,7 @@ describe('getPRForBranch', () => {
           number: 78,
           title: 'Hydrated fork upstream branch PR',
           state: 'OPEN',
-          url: 'https://github.com/stablyai/orca/pull/78',
+          url: 'https://github.com/stablyai/yiru/pull/78',
           statusCheckRollup: [],
           updatedAt: '2026-03-28T00:00:00Z',
           isDraft: false,
@@ -2438,27 +2438,27 @@ describe('getPRForBranch', () => {
       3,
       [
         'api',
-        'repos/stablyai/orca/pulls?head=fork-owner%3Acontributor%2Foriginal&state=all&per_page=1'
+        'repos/stablyai/yiru/pulls?head=fork-owner%3Acontributor%2Foriginal&state=all&per_page=1'
       ],
       { cwd: '/repo-root' }
     )
     expect(pr).toMatchObject({
       number: 78,
       title: 'Hydrated fork upstream branch PR',
-      prRepo: { owner: 'stablyai', repo: 'orca' },
-      headRepo: { owner: 'fork-owner', repo: 'orca' }
+      prRepo: { owner: 'stablyai', repo: 'yiru' },
+      headRepo: { owner: 'fork-owner', repo: 'yiru' }
     })
   })
 
   it('uses the tracked upstream remote owner when the fork branch name matches locally', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
       candidates: [
-        { owner: 'stablyai', repo: 'orca' },
-        { owner: 'origin-owner', repo: 'orca' }
+        { owner: 'stablyai', repo: 'yiru' },
+        { owner: 'origin-owner', repo: 'yiru' }
       ],
-      headRepo: { owner: 'origin-owner', repo: 'orca' }
+      headRepo: { owner: 'origin-owner', repo: 'yiru' }
     })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'brennanb2025', repo: 'orca' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'brennanb2025', repo: 'yiru' })
     ghExecFileAsyncMock
       .mockResolvedValueOnce({ stdout: JSON.stringify([]) })
       .mockResolvedValueOnce({ stdout: JSON.stringify([]) })
@@ -2468,7 +2468,7 @@ describe('getPRForBranch', () => {
             number: 6433,
             title: 'Recover Windows worktree deletes from long paths',
             state: 'open',
-            html_url: 'https://github.com/stablyai/orca/pull/6433',
+            html_url: 'https://github.com/stablyai/yiru/pull/6433',
             updated_at: '2026-06-26T00:00:00Z',
             draft: false,
             mergeable: true,
@@ -2485,7 +2485,7 @@ describe('getPRForBranch', () => {
           number: 6433,
           title: 'Recover Windows worktree deletes from long paths',
           state: 'OPEN',
-          url: 'https://github.com/stablyai/orca/pull/6433',
+          url: 'https://github.com/stablyai/yiru/pull/6433',
           statusCheckRollup: [],
           updatedAt: '2026-06-26T00:00:00Z',
           isDraft: false,
@@ -2508,14 +2508,14 @@ describe('getPRForBranch', () => {
       3,
       [
         'api',
-        'repos/stablyai/orca/pulls?head=brennanb2025%3Abrennanb2025%2Fworktree-remove-fix&state=all&per_page=1'
+        'repos/stablyai/yiru/pulls?head=brennanb2025%3Abrennanb2025%2Fworktree-remove-fix&state=all&per_page=1'
       ],
       { cwd: '/repo-root' }
     )
     expect(pr).toMatchObject({
       number: 6433,
-      prRepo: { owner: 'stablyai', repo: 'orca' },
-      headRepo: { owner: 'brennanb2025', repo: 'orca' }
+      prRepo: { owner: 'stablyai', repo: 'yiru' },
+      headRepo: { owner: 'brennanb2025', repo: 'yiru' }
     })
   })
 
@@ -2599,12 +2599,12 @@ describe('getPRForBranch', () => {
     getSshGitProviderMock.mockReturnValue(sshGitProvider)
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
       candidates: [
-        { owner: 'stablyai', repo: 'orca' },
-        { owner: 'origin-owner', repo: 'orca' }
+        { owner: 'stablyai', repo: 'yiru' },
+        { owner: 'origin-owner', repo: 'yiru' }
       ],
-      headRepo: { owner: 'origin-owner', repo: 'orca' }
+      headRepo: { owner: 'origin-owner', repo: 'yiru' }
     })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'fork-owner', repo: 'orca' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'fork-owner', repo: 'yiru' })
     ghExecFileAsyncMock
       .mockResolvedValueOnce({ stdout: JSON.stringify([]) })
       .mockResolvedValueOnce({ stdout: JSON.stringify([]) })
@@ -2614,7 +2614,7 @@ describe('getPRForBranch', () => {
             number: 79,
             title: 'SSH same-name fork PR',
             state: 'open',
-            html_url: 'https://github.com/stablyai/orca/pull/79',
+            html_url: 'https://github.com/stablyai/yiru/pull/79',
             updated_at: '2026-03-28T00:00:00Z',
             draft: false,
             mergeable: true,
@@ -2629,14 +2629,14 @@ describe('getPRForBranch', () => {
     expect(getOwnerRepoForRemoteMock).toHaveBeenCalledWith('/remote/repo-root', 'fork', 'ssh-1')
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       3,
-      ['api', 'repos/stablyai/orca/pulls?head=fork-owner%3Acontributor%2Ffix&state=all&per_page=1'],
+      ['api', 'repos/stablyai/yiru/pulls?head=fork-owner%3Acontributor%2Ffix&state=all&per_page=1'],
       {}
     )
     expect(pr).toMatchObject({
       number: 79,
       title: 'SSH same-name fork PR',
-      prRepo: { owner: 'stablyai', repo: 'orca' },
-      headRepo: { owner: 'fork-owner', repo: 'orca' }
+      prRepo: { owner: 'stablyai', repo: 'yiru' },
+      headRepo: { owner: 'fork-owner', repo: 'yiru' }
     })
   })
 
@@ -3366,80 +3366,80 @@ describe('getPRForBranch', () => {
   })
 
   it('resolves fork PR push target using the origin URL protocol', async () => {
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
     ghExecFileAsyncMock.mockResolvedValueOnce({
       stdout: JSON.stringify({
         head: {
           ref: 'prateek/fix-sidebar-agents-toggle',
           repo: {
-            full_name: 'prateek/orca',
-            name: 'orca',
-            clone_url: 'https://github.com/prateek/orca.git',
-            ssh_url: 'git@github.com:prateek/orca.git',
+            full_name: 'prateek/yiru',
+            name: 'yiru',
+            clone_url: 'https://github.com/prateek/yiru.git',
+            ssh_url: 'git@github.com:prateek/yiru.git',
             owner: { login: 'prateek' }
           }
         }
       })
     })
-    getRemoteUrlForRepoMock.mockResolvedValueOnce('git@github.com:stablyai/orca.git')
+    getRemoteUrlForRepoMock.mockResolvedValueOnce('git@github.com:stablyai/yiru.git')
 
     const target = await getPullRequestPushTarget('/repo-root', 1738)
 
-    expect(ghExecFileAsyncMock).toHaveBeenCalledWith(['api', 'repos/stablyai/orca/pulls/1738'], {
+    expect(ghExecFileAsyncMock).toHaveBeenCalledWith(['api', 'repos/stablyai/yiru/pulls/1738'], {
       cwd: '/repo-root'
     })
     expect(target).toEqual({
       pushTarget: {
-        remoteName: 'pr-prateek-orca',
+        remoteName: 'pr-prateek-yiru',
         branchName: 'prateek/fix-sidebar-agents-toggle',
-        remoteUrl: 'git@github.com:prateek/orca.git'
+        remoteUrl: 'git@github.com:prateek/yiru.git'
       }
     })
   })
 
   it('surfaces maintainer_can_modify=false alongside a fork PR push target', async () => {
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
     ghExecFileAsyncMock.mockResolvedValueOnce({
       stdout: JSON.stringify({
         maintainer_can_modify: false,
         head: {
           ref: 'prateek/fix-sidebar-agents-toggle',
           repo: {
-            full_name: 'prateek/orca',
-            name: 'orca',
-            clone_url: 'https://github.com/prateek/orca.git',
-            ssh_url: 'git@github.com:prateek/orca.git',
+            full_name: 'prateek/yiru',
+            name: 'yiru',
+            clone_url: 'https://github.com/prateek/yiru.git',
+            ssh_url: 'git@github.com:prateek/yiru.git',
             owner: { login: 'prateek' }
           }
         }
       })
     })
-    getRemoteUrlForRepoMock.mockResolvedValueOnce('git@github.com:stablyai/orca.git')
+    getRemoteUrlForRepoMock.mockResolvedValueOnce('git@github.com:stablyai/yiru.git')
 
     await expect(getPullRequestPushTarget('/repo-root', 1738)).resolves.toEqual({
       pushTarget: {
-        remoteName: 'pr-prateek-orca',
+        remoteName: 'pr-prateek-yiru',
         branchName: 'prateek/fix-sidebar-agents-toggle',
-        remoteUrl: 'git@github.com:prateek/orca.git'
+        remoteUrl: 'git@github.com:prateek/yiru.git'
       },
       maintainerCanModify: false
     })
   })
 
   it('omits maintainerCanModify when the API does not report the flag', async () => {
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
     ghExecFileAsyncMock.mockResolvedValueOnce({
       stdout: JSON.stringify({
         head: {
           ref: 'fix-sidebar',
           repo: {
-            full_name: 'stablyai/orca',
-            name: 'orca',
-            clone_url: 'https://github.com/stablyai/orca.git',
-            ssh_url: 'git@github.com:stablyai/orca.git',
+            full_name: 'stablyai/yiru',
+            name: 'yiru',
+            clone_url: 'https://github.com/stablyai/yiru.git',
+            ssh_url: 'git@github.com:stablyai/yiru.git',
             owner: { login: 'stablyai' }
           }
         }
@@ -3455,17 +3455,17 @@ describe('getPRForBranch', () => {
   })
 
   it('uses origin for same-repository PR push targets', async () => {
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
     ghExecFileAsyncMock.mockResolvedValueOnce({
       stdout: JSON.stringify({
         head: {
           ref: 'fix-sidebar',
           repo: {
-            full_name: 'stablyai/orca',
-            name: 'orca',
-            clone_url: 'https://github.com/stablyai/orca.git',
-            ssh_url: 'git@github.com:stablyai/orca.git',
+            full_name: 'stablyai/yiru',
+            name: 'yiru',
+            clone_url: 'https://github.com/stablyai/yiru.git',
+            ssh_url: 'git@github.com:stablyai/yiru.git',
             owner: { login: 'stablyai' }
           }
         }
@@ -3482,20 +3482,20 @@ describe('getPRForBranch', () => {
   })
 
   it('resolves a distinct upstream remote as the repo upstream', async () => {
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'tmchow', repo: 'orca' })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'tmchow', repo: 'yiru' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
 
     await expect(getRepoUpstream('/repo-root')).resolves.toEqual({
       owner: 'stablyai',
-      repo: 'orca'
+      repo: 'yiru'
     })
 
     expect(ghExecFileAsyncMock).not.toHaveBeenCalled()
   })
 
   it('does not treat a same-repository upstream remote as a fork', async () => {
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'StablyAI', repo: 'Orca' })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'StablyAI', repo: 'Yiru' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
     ghExecFileAsyncMock.mockResolvedValueOnce({
       stdout: JSON.stringify({ isFork: false, parent: null })
     })
@@ -3503,7 +3503,7 @@ describe('getPRForBranch', () => {
     await expect(getRepoUpstream('/repo-root')).resolves.toBeNull()
 
     expect(ghExecFileAsyncMock).toHaveBeenCalledWith(
-      ['repo', 'view', 'StablyAI/Orca', '--json', 'isFork,parent'],
+      ['repo', 'view', 'StablyAI/Yiru', '--json', 'isFork,parent'],
       { cwd: '/repo-root', timeout: 10_000 }
     )
   })
@@ -3518,30 +3518,30 @@ describe('getPRForBranch', () => {
   })
 
   it('falls back to the GitHub parent when no upstream remote is configured', async () => {
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'tmchow', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'tmchow', repo: 'yiru' })
     getOwnerRepoForRemoteMock.mockResolvedValueOnce(null)
     ghExecFileAsyncMock.mockResolvedValueOnce({
       stdout: JSON.stringify({
         isFork: true,
-        parent: { name: 'orca', owner: { login: 'stablyai' } }
+        parent: { name: 'yiru', owner: { login: 'stablyai' } }
       })
     })
 
     await expect(getRepoUpstream('/repo-root')).resolves.toEqual({
       owner: 'stablyai',
-      repo: 'orca'
+      repo: 'yiru'
     })
   })
 
   it('probes additional PR repo candidates when the first lookup is not found', async () => {
     resolvePRRepositoryCandidatesMock.mockResolvedValueOnce({
       candidates: [
-        { owner: 'fork', repo: 'orca' },
-        { owner: 'stablyai', repo: 'orca' }
+        { owner: 'fork', repo: 'yiru' },
+        { owner: 'stablyai', repo: 'yiru' }
       ],
-      headRepo: { owner: 'fork', repo: 'orca' }
+      headRepo: { owner: 'fork', repo: 'yiru' }
     })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'fork', repo: 'yiru' })
     ghExecFileAsyncMock
       .mockRejectedValueOnce(new Error('HTTP 404: Not Found'))
       .mockResolvedValueOnce({
@@ -3549,10 +3549,10 @@ describe('getPRForBranch', () => {
           head: {
             ref: 'feature/test',
             repo: {
-              full_name: 'fork/orca',
-              name: 'orca',
-              clone_url: 'https://github.com/fork/orca.git',
-              ssh_url: 'git@github.com:fork/orca.git',
+              full_name: 'fork/yiru',
+              name: 'yiru',
+              clone_url: 'https://github.com/fork/yiru.git',
+              ssh_url: 'git@github.com:fork/yiru.git',
               owner: { login: 'fork' }
             }
           }
@@ -3565,12 +3565,12 @@ describe('getPRForBranch', () => {
         branchName: 'feature/test'
       }
     })
-    expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(1, ['api', 'repos/fork/orca/pulls/1849'], {
+    expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(1, ['api', 'repos/fork/yiru/pulls/1849'], {
       cwd: '/repo-root'
     })
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       2,
-      ['api', 'repos/stablyai/orca/pulls/1849'],
+      ['api', 'repos/stablyai/yiru/pulls/1849'],
       { cwd: '/repo-root' }
     )
   })
@@ -3620,7 +3620,7 @@ describe('updatePRState', () => {
   })
 
   it('reopens pull requests through the gh PR command', async () => {
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '', stderr: '' })
 
     await expect(updatePRState('/repo-root', 3977, { state: 'open' })).resolves.toEqual({
@@ -3628,7 +3628,7 @@ describe('updatePRState', () => {
     })
 
     expect(ghExecFileAsyncMock).toHaveBeenCalledWith(
-      ['pr', 'reopen', '3977', '--repo', 'stablyai/orca'],
+      ['pr', 'reopen', '3977', '--repo', 'stablyai/yiru'],
       { cwd: '/repo-root' }
     )
     expect(acquireMock).toHaveBeenCalledTimes(1)
@@ -3636,7 +3636,7 @@ describe('updatePRState', () => {
   })
 
   it('closes pull requests through the gh PR command', async () => {
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '', stderr: '' })
 
     await expect(updatePRState('/repo-root', 3977, { state: 'closed' })).resolves.toEqual({
@@ -3644,13 +3644,13 @@ describe('updatePRState', () => {
     })
 
     expect(ghExecFileAsyncMock).toHaveBeenCalledWith(
-      ['pr', 'close', '3977', '--repo', 'stablyai/orca'],
+      ['pr', 'close', '3977', '--repo', 'stablyai/yiru'],
       { cwd: '/repo-root' }
     )
   })
 
   it('reopens SSH-backed pull requests without local cwd options', async () => {
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '', stderr: '' })
 
     await expect(
@@ -3660,7 +3660,7 @@ describe('updatePRState', () => {
     })
 
     expect(ghExecFileAsyncMock).toHaveBeenCalledWith(
-      ['pr', 'reopen', '3977', '--repo', 'stablyai/orca'],
+      ['pr', 'reopen', '3977', '--repo', 'stablyai/yiru'],
       {}
     )
   })
@@ -3733,23 +3733,23 @@ describe('GitHub GraphQL rate-limit guard', () => {
             user: { login: 'octo', avatar_url: 'https://avatar', type: 'User' },
             body: 'top-level',
             created_at: '2026-04-01T00:00:00Z',
-            html_url: 'https://github.com/stablyai/orca/pull/7#issuecomment-10'
+            html_url: 'https://github.com/stablyai/yiru/pull/7#issuecomment-10'
           }
         ])
       })
       .mockResolvedValueOnce({ stdout: '[]' })
 
-    await getPRComments('/repo-root', 7, { prRepo: { owner: 'stablyai', repo: 'orca' } }, undefined)
+    await getPRComments('/repo-root', 7, { prRepo: { owner: 'stablyai', repo: 'yiru' } }, undefined)
 
     expect(getOwnerRepoMock).not.toHaveBeenCalled()
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       1,
-      ['api', '--cache', '60s', 'repos/stablyai/orca/issues/7/comments?per_page=100'],
+      ['api', '--cache', '60s', 'repos/stablyai/yiru/issues/7/comments?per_page=100'],
       { cwd: '/repo-root' }
     )
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       2,
-      ['api', '--cache', '60s', 'repos/stablyai/orca/pulls/7/reviews?per_page=100'],
+      ['api', '--cache', '60s', 'repos/stablyai/yiru/pulls/7/reviews?per_page=100'],
       { cwd: '/repo-root' }
     )
   })
@@ -3761,7 +3761,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
           number: 7,
           title: 'PR',
           state: 'OPEN',
-          url: 'https://github.com/stablyai/orca/pull/7',
+          url: 'https://github.com/stablyai/yiru/pull/7',
           statusCheckRollup: [],
           updatedAt: '2026-04-01T00:00:00Z',
           isDraft: false,
@@ -3774,10 +3774,10 @@ describe('GitHub GraphQL rate-limit guard', () => {
       .mockResolvedValue({ stdout: '', stderr: '' })
 
     await expect(
-      mergePR('/repo-root', 7, 'squash', undefined, { owner: 'stablyai', repo: 'orca' })
+      mergePR('/repo-root', 7, 'squash', undefined, { owner: 'stablyai', repo: 'yiru' })
     ).resolves.toEqual({ ok: true })
     await expect(
-      updatePRTitle('/repo-root', 7, 'New title', undefined, { owner: 'stablyai', repo: 'orca' })
+      updatePRTitle('/repo-root', 7, 'New title', undefined, { owner: 'stablyai', repo: 'yiru' })
     ).resolves.toBe(true)
 
     expect(getOwnerRepoMock).not.toHaveBeenCalled()
@@ -3788,7 +3788,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
         'view',
         '7',
         '--repo',
-        'stablyai/orca',
+        'stablyai/yiru',
         '--json',
         'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid'
       ],
@@ -3796,7 +3796,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
     )
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       2,
-      ['pr', 'merge', '7', '--squash', '--repo', 'stablyai/orca'],
+      ['pr', 'merge', '7', '--squash', '--repo', 'stablyai/yiru'],
       expect.objectContaining({
         cwd: '/repo-root',
         env: expect.objectContaining({ GH_PROMPT_DISABLED: '1' })
@@ -3804,7 +3804,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
     )
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       3,
-      ['pr', 'edit', '7', '--title', 'New title', '--repo', 'stablyai/orca'],
+      ['pr', 'edit', '7', '--title', 'New title', '--repo', 'stablyai/yiru'],
       { cwd: '/repo-root' }
     )
   })
@@ -3819,19 +3819,19 @@ describe('GitHub GraphQL rate-limit guard', () => {
     await expect(
       setPRAutoMerge('/remote/repo-root', 7, true, 'squash', 'ssh-1', {
         owner: 'stablyai',
-        repo: 'orca'
+        repo: 'yiru'
       })
     ).resolves.toEqual({ ok: true })
     await expect(
       setPRAutoMerge('/remote/repo-root', 7, false, 'squash', 'ssh-1', {
         owner: 'stablyai',
-        repo: 'orca'
+        repo: 'yiru'
       })
     ).resolves.toEqual({ ok: true })
 
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       1,
-      ['pr', 'view', '7', '--json', 'id,headRefOid,baseRefName', '--repo', 'stablyai/orca'],
+      ['pr', 'view', '7', '--json', 'id,headRefOid,baseRefName', '--repo', 'stablyai/yiru'],
       {}
     )
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
@@ -3852,7 +3852,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
     )
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       3,
-      ['pr', 'merge', '7', '--disable-auto', '--repo', 'stablyai/orca'],
+      ['pr', 'merge', '7', '--disable-auto', '--repo', 'stablyai/yiru'],
       expect.objectContaining({
         env: expect.objectContaining({ GH_PROMPT_DISABLED: '1' })
       })
@@ -3870,7 +3870,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
     await expect(
       setPRAutoMerge('/repo-root', 7, true, 'squash', undefined, {
         owner: 'stablyai',
-        repo: 'orca'
+        repo: 'yiru'
       })
     ).resolves.toEqual({ ok: true })
 
@@ -3897,7 +3897,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
     await expect(
       setPRAutoMerge('/repo-root', 7, true, 'squash', undefined, {
         owner: 'stablyai',
-        repo: 'orca'
+        repo: 'yiru'
       })
     ).resolves.toEqual({
       ok: false,
@@ -3918,7 +3918,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
     await expect(
       setPRAutoMerge('/repo-root', 7, true, 'squash', undefined, {
         owner: 'stablyai',
-        repo: 'orca'
+        repo: 'yiru'
       })
     ).resolves.toEqual({ ok: true })
 
@@ -3929,7 +3929,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
     )
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       3,
-      ['pr', 'merge', '7', '--auto', '--squash', '--repo', 'stablyai/orca'],
+      ['pr', 'merge', '7', '--auto', '--squash', '--repo', 'stablyai/yiru'],
       expect.objectContaining({
         cwd: '/repo-root',
         env: expect.objectContaining({ GH_PROMPT_DISABLED: '1' })
@@ -3948,7 +3948,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
         number: 7,
         title: 'PR',
         state: 'OPEN',
-        url: 'https://github.com/stablyai/orca/pull/7',
+        url: 'https://github.com/stablyai/yiru/pull/7',
         statusCheckRollup: [],
         updatedAt: '2026-04-01T00:00:00Z',
         isDraft: false,
@@ -3963,7 +3963,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
     })
 
     await expect(
-      mergePR('/repo-root', 7, 'squash', undefined, { owner: 'stablyai', repo: 'orca' })
+      mergePR('/repo-root', 7, 'squash', undefined, { owner: 'stablyai', repo: 'yiru' })
     ).resolves.toEqual({
       ok: false,
       error: 'This pull request requires review approval before it can be merged.'
@@ -3978,7 +3978,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
       number: 7,
       title: 'PR',
       state: 'OPEN',
-      url: 'https://github.com/stablyai/orca/pull/7',
+      url: 'https://github.com/stablyai/yiru/pull/7',
       statusCheckRollup: [],
       updatedAt: '2026-04-01T00:00:00Z',
       isDraft: false,
@@ -3998,32 +3998,32 @@ describe('GitHub GraphQL rate-limit guard', () => {
       .mockResolvedValueOnce({ stdout: JSON.stringify(prView) })
 
     await expect(
-      mergePR('/repo-root', 7, 'squash', undefined, { owner: 'stablyai', repo: 'orca' })
+      mergePR('/repo-root', 7, 'squash', undefined, { owner: 'stablyai', repo: 'yiru' })
     ).resolves.toEqual({
       ok: false,
       error:
         'This pull request must be merged through GitHub merge queue. Use Merge when ready instead.'
     })
     await expect(
-      mergePR('/repo-root', 7, 'squash', undefined, { owner: 'stablyai', repo: 'orca' })
+      mergePR('/repo-root', 7, 'squash', undefined, { owner: 'stablyai', repo: 'yiru' })
     ).resolves.toMatchObject({ ok: false })
 
     expect(
       ghExecFileAsyncMock.mock.calls.filter((call) => call[0].includes('graphql'))
     ).toHaveLength(1)
     expect(ghExecFileAsyncMock.mock.calls[1]?.[0]).toEqual(
-      expect.arrayContaining(['-f', 'owner=stablyai', '-f', 'repo=orca', '-f', 'branch=true'])
+      expect.arrayContaining(['-f', 'owner=stablyai', '-f', 'repo=yiru', '-f', 'branch=true'])
     )
     expect(ghExecFileAsyncMock.mock.calls[1]?.[0]).not.toContain('-F')
   })
 
   it('caches unknown merge queue probes after GraphQL failures', async () => {
-    getOwnerRepoMock.mockResolvedValue({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValue({ owner: 'stablyai', repo: 'yiru' })
     const prView = {
       number: 7,
       title: 'PR',
       state: 'OPEN',
-      url: 'https://github.com/stablyai/orca/pull/7',
+      url: 'https://github.com/stablyai/yiru/pull/7',
       statusCheckRollup: [],
       updatedAt: '2026-04-01T00:00:00Z',
       isDraft: false,
@@ -4053,7 +4053,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
   })
 
   it('bounds merge metadata cache entries across many base branches', async () => {
-    getOwnerRepoMock.mockResolvedValue({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValue({ owner: 'stablyai', repo: 'yiru' })
     let prViewCount = 0
     ghExecFileAsyncMock.mockImplementation(async (args) => {
       if (args.includes('graphql')) {
@@ -4065,7 +4065,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
           number: prViewCount,
           title: 'PR',
           state: 'OPEN',
-          url: `https://github.com/stablyai/orca/pull/${prViewCount}`,
+          url: `https://github.com/stablyai/yiru/pull/${prViewCount}`,
           statusCheckRollup: [],
           updatedAt: '2026-04-01T00:00:00Z',
           isDraft: false,
@@ -4093,7 +4093,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
         number: 7,
         title: 'PR',
         state: 'OPEN',
-        url: 'https://github.com/stablyai/orca/pull/7',
+        url: 'https://github.com/stablyai/yiru/pull/7',
         statusCheckRollup: [],
         updatedAt: '2026-04-01T00:00:00Z',
         isDraft: false,
@@ -4111,7 +4111,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
       .mockResolvedValueOnce({ stdout: 'result-tree-oid\u0000src/conflict.ts\u0000' })
 
     await expect(
-      mergePR('/repo-root', 7, 'squash', undefined, { owner: 'stablyai', repo: 'orca' })
+      mergePR('/repo-root', 7, 'squash', undefined, { owner: 'stablyai', repo: 'yiru' })
     ).resolves.toEqual({
       ok: false,
       error:
@@ -4131,7 +4131,7 @@ describe('GitHub GraphQL rate-limit guard', () => {
           number: 7,
           title: 'PR',
           state: 'OPEN',
-          url: 'https://github.com/stablyai/orca/pull/7',
+          url: 'https://github.com/stablyai/yiru/pull/7',
           statusCheckRollup: [],
           updatedAt: '2026-04-01T00:00:00Z',
           isDraft: false,
@@ -4144,13 +4144,13 @@ describe('GitHub GraphQL rate-limit guard', () => {
       .mockResolvedValueOnce({ stdout: '', stderr: '' })
 
     await expect(
-      mergePR('/remote/repo-root', 7, 'squash', 'ssh-1', { owner: 'stablyai', repo: 'orca' })
+      mergePR('/remote/repo-root', 7, 'squash', 'ssh-1', { owner: 'stablyai', repo: 'yiru' })
     ).resolves.toEqual({ ok: true })
 
     expect(ghExecFileAsyncMock).toHaveBeenCalledTimes(2)
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       2,
-      ['pr', 'merge', '7', '--squash', '--repo', 'stablyai/orca'],
+      ['pr', 'merge', '7', '--squash', '--repo', 'stablyai/yiru'],
       expect.objectContaining({
         env: expect.objectContaining({ GH_PROMPT_DISABLED: '1' })
       })

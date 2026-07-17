@@ -21,7 +21,7 @@ Status](#architecture-status) for the shipped phases.
   subscriber, or CLI read page consuming model state and live output.
 - **Snapshot:** A bounded model serialization that can restore a view without
   replaying an unbounded byte log.
-- **Transcript:** The retained output contract for `orca terminal read`; it is
+- **Transcript:** The retained output contract for `yiru terminal read`; it is
   line/cursor oriented and distinct from a screen snapshot.
 
 ## Non-Negotiable Invariants
@@ -53,7 +53,7 @@ Status](#architecture-status) for the shipped phases.
    attributes. Replayed, seeded, or snapshot bytes are answered by no one.
    The daemon emulator never answers. (Amended by Phase 5 — see
    [`terminal-query-authority.md`](./terminal-query-authority.md).)
-7. The transcript contract stays separate from screen restore. `orca terminal
+7. The transcript contract stays separate from screen restore. `yiru terminal
    read` must preserve bounded previews, cursor pagination, partial-line rules,
    truncation flags, and total counts even if view snapshots change shape.
 8. Local, daemon, SSH, remote runtime, mobile, and CLI paths must either satisfy
@@ -66,11 +66,11 @@ Status](#architecture-status) for the shipped phases.
 | --- | --- |
 | PTY byte source and local/SSH delivery | `src/main/ipc/pty.ts` |
 | Hidden-delivery gate (hidden marks, delivery interest, drop accounting, restore markers) | `src/main/ipc/pty-hidden-delivery-gate.ts`, drop sites in `src/main/ipc/pty.ts` and `src/main/ssh/ssh-relay-session.ts` |
-| Side-effect parsing and the `pty:sideEffect` facts channel | `src/shared/terminal-output-side-effects.ts` driven from `OrcaRuntimeService.onPtyData`; renderer policy in `src/renderer/src/components/terminal-pane/terminal-side-effect-facts-handler.ts` |
+| Side-effect parsing and the `pty:sideEffect` facts channel | `src/shared/terminal-output-side-effects.ts` driven from `YiruRuntimeService.onPtyData`; renderer policy in `src/renderer/src/components/terminal-pane/terminal-side-effect-facts-handler.ts` |
 | Model query responder and view-attribute bridge | `src/main/runtime/terminal-model-query-authority.ts`, `src/main/daemon/terminal-view-attribute-responder.ts`, `src/main/runtime/terminal-view-attribute-store.ts` |
 | Hidden view parking policy and parked watcher | `src/renderer/src/components/terminal-pane/terminal-hidden-view-parking.ts`, `parked-terminal-byte-watcher.ts` |
 | Daemon PTY state and headless snapshots | `src/main/daemon/headless-emulator.ts` |
-| Runtime headless state, retained reads, mobile/session tabs | `src/main/runtime/orca-runtime.ts` |
+| Runtime headless state, retained reads, mobile/session tabs | `src/main/runtime/yiru-runtime.ts` |
 | Remote terminal subscribe/multiplex/ACK semantics | `src/main/runtime/rpc/methods/terminal.ts` |
 | Renderer xterm view and hidden restore behavior | `src/renderer/src/components/terminal-pane/pty-connection.ts` |
 | Remote desktop runtime xterm transport | `src/renderer/src/runtime/remote-runtime-terminal-multiplexer.ts` |
@@ -159,7 +159,7 @@ Current coverage is spread across:
 - `src/main/runtime/mobile-subscribe-integration.test.ts`
 - `src/main/runtime/rpc/terminal-subscribe-buffer.test.ts`
 - `src/main/runtime/rpc/terminal-multiplex.test.ts`
-- `src/main/runtime/orca-runtime.test.ts`
+- `src/main/runtime/yiru-runtime.test.ts`
 - `src/main/runtime/terminal-query-responder.test.ts`
 - `src/shared/terminal-output-side-effects.test.ts`
 - `src/renderer/src/components/terminal-pane/terminal-title-tracker-parity.test.ts`

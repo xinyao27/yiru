@@ -5,9 +5,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { translate } from '@/i18n/i18n'
 
 const EXAMPLE_PROMPTS: string[] = [
-  'Using Orca CLI, open https://github.com/notifications and click the first unread pull request.',
-  "Take a screenshot of my open Linear board with the Orca CLI and tell me what's blocked.",
-  'With Orca CLI, go to our staging app, log in (my cookies are imported), and verify the checkout flow works.'
+  'Using Yiru CLI, open https://github.com/notifications and click the first unread pull request.',
+  "Take a screenshot of my open Linear board with the Yiru CLI and tell me what's blocked.",
+  'With Yiru CLI, go to our staging app, log in (my cookies are imported), and verify the checkout flow works.'
 ]
 
 async function handleCopyText(text: string, label: string): Promise<void> {

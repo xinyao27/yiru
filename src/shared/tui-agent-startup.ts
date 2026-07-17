@@ -50,7 +50,7 @@ function resolveBaseCommand(args: {
   if (!suffix.ok) {
     return suffix
   }
-  // Why: Codex status hooks live in Orca's runtime CODEX_HOME; adding
+  // Why: Codex status hooks live in Yiru's runtime CODEX_HOME; adding
   // --profile-v2 makes Codex load a second hook representation and warn.
   return { ok: true, command: suffix.suffix ? `${command} ${suffix.suffix}` : command }
 }
@@ -64,8 +64,7 @@ export function buildAgentStartupPlan(args: {
   allowEmptyPromptLaunch?: boolean
   agentArgs?: string | null
   agentEnv?: Record<string, string> | null
-  /** Why: SSH remotes deploy the CLI shim as plain `orca`, so the Linux-only
-   * `orca-ide` rename must be skipped for remote launches. */
+  /** Why: SSH remotes must use the relay's public CLI command. */
   isRemote?: boolean
 }): AgentStartupPlan | null {
   const { agent, prompt, cmdOverrides, platform, allowEmptyPromptLaunch = false } = args
@@ -144,7 +143,7 @@ export function buildAgentStartupPlan(args: {
     }
     return {
       agent,
-      // Why: Hermes owns readiness and submission for `chat --query`; Orca
+      // Why: Hermes owns readiness and submission for `chat --query`; Yiru
       // only bounds and quotes the native invocation before starting the TUI.
       launchCommand: queryPlan.command,
       expectedProcess: config.expectedProcess,
@@ -195,7 +194,7 @@ export function buildAgentResumeStartupPlan(args: {
   agentArgs?: string | null
   agentEnv?: Record<string, string> | null
   agentCommand?: string | null
-  /** Why: see buildAgentStartupPlan — remote launches use the plain `orca` shim. */
+  /** Why: see buildAgentStartupPlan — remote launches use the plain `yiru` shim. */
   isRemote?: boolean
 }): AgentStartupPlan | null {
   const argv = getAgentResumeArgv(args.agent, args.providerSession)
@@ -254,7 +253,7 @@ export function buildAgentDraftLaunchPlan(args: {
   shell?: AgentStartupShell
   agentArgs?: string | null
   agentEnv?: Record<string, string> | null
-  /** Why: see buildAgentStartupPlan — remote launches use the plain `orca` shim. */
+  /** Why: see buildAgentStartupPlan — remote launches use the plain `yiru` shim. */
   isRemote?: boolean
 }): AgentDraftLaunchPlan | null {
   const { agent, draft, cmdOverrides, platform } = args

@@ -14,8 +14,8 @@ const remoteWorktree: SpoolSidebarRow = {
   key: 'spool-worktree-one',
   desktopRef: 'desktop-chen',
   connectionEpoch: 1,
-  projectRef: 'project-orca',
-  projectIdentityKey: 'github:paperboytm/orca',
+  projectRef: 'project-yiru',
+  projectIdentityKey: 'github:paperboytm/yiru',
   worktreeRef: 'worktree-one',
   shareEpoch: 'share-one',
   desktop: {
@@ -133,12 +133,12 @@ describe('projectWorkspaceSidebarRows', () => {
   it('inserts a remote worktree into the matching local Project section', () => {
     const localProjectHeader: RenderRow = {
       type: 'header',
-      key: 'project:github:paperboytm/orca',
-      label: 'orca',
+      key: 'project:github:paperboytm/yiru',
+      label: 'yiru',
       count: 1,
       tone: 'neutral',
       projectId: 'local-project-id',
-      projectIdentityKey: 'github:paperboytm/orca',
+      projectIdentityKey: 'github:paperboytm/yiru',
       collapsed: false
     }
 
@@ -153,7 +153,7 @@ describe('projectWorkspaceSidebarRows', () => {
     expect(rows).toEqual([
       {
         kind: 'local',
-        key: 'project:github:paperboytm/orca',
+        key: 'project:github:paperboytm/yiru',
         localIndex: 0,
         row: { ...localProjectHeader, count: 2 }
       },
@@ -161,7 +161,7 @@ describe('projectWorkspaceSidebarRows', () => {
         kind: 'spool',
         key: 'spool-worktree-one',
         row: remoteWorktree,
-        localProjectHeaderKey: 'project:github:paperboytm/orca'
+        localProjectHeaderKey: 'project:github:paperboytm/yiru'
       }
     ])
   })
@@ -169,12 +169,12 @@ describe('projectWorkspaceSidebarRows', () => {
   it('counts but hides a matched remote worktree when its local Project is collapsed', () => {
     const localProjectHeader: RenderRow = {
       type: 'header',
-      key: 'project:github:paperboytm/orca',
-      label: 'orca',
+      key: 'project:github:paperboytm/yiru',
+      label: 'yiru',
       count: 1,
       tone: 'neutral',
       projectId: 'local-project-id',
-      projectIdentityKey: 'github:paperboytm/orca',
+      projectIdentityKey: 'github:paperboytm/yiru',
       collapsed: true
     }
 
@@ -189,7 +189,7 @@ describe('projectWorkspaceSidebarRows', () => {
     expect(rows).toEqual([
       {
         kind: 'local',
-        key: 'project:github:paperboytm/orca',
+        key: 'project:github:paperboytm/yiru',
         localIndex: 0,
         row: { ...localProjectHeader, count: 2 }
       }
@@ -199,17 +199,17 @@ describe('projectWorkspaceSidebarRows', () => {
   it('does not match projects by display name', () => {
     const localProjectHeader: RenderRow = {
       type: 'header',
-      key: 'project:local-orca',
-      label: 'orca',
+      key: 'project:local-yiru',
+      label: 'yiru',
       count: 1,
       tone: 'neutral',
-      projectId: 'local-orca',
-      projectIdentityKey: 'git:git.example.com/local/orca',
+      projectId: 'local-yiru',
+      projectIdentityKey: 'git:git.example.com/local/yiru',
       collapsed: false
     }
     const unrelatedRemote = {
       ...remoteWorktree,
-      projectIdentityKey: 'git:git.example.com/other/orca'
+      projectIdentityKey: 'git:git.example.com/other/yiru'
     }
 
     const rows = projectWorkspaceSidebarRows({
@@ -233,12 +233,12 @@ describe('projectWorkspaceSidebarRows', () => {
   it('uses the fallback remote group when the Project has ambiguous setup sections', () => {
     const localRows: RenderRow[] = ['one', 'two'].map((setup) => ({
       type: 'header',
-      key: `project:github:paperboytm/orca::setup:${setup}`,
-      label: `orca (${setup})`,
+      key: `project:github:paperboytm/yiru::setup:${setup}`,
+      label: `yiru (${setup})`,
       count: 1,
       tone: 'neutral',
       projectId: 'local-project-id',
-      projectIdentityKey: 'github:paperboytm/orca',
+      projectIdentityKey: 'github:paperboytm/yiru',
       collapsed: false
     }))
 
@@ -266,12 +266,12 @@ describe('projectWorkspaceSidebarRows', () => {
   it('does not duplicate a remote worktree across repeated host sections', () => {
     const repeatedHeader: RenderRow = {
       type: 'header',
-      key: 'project:github:paperboytm/orca',
-      label: 'orca',
+      key: 'project:github:paperboytm/yiru',
+      label: 'yiru',
       count: 1,
       tone: 'neutral',
       projectId: 'local-project-id',
-      projectIdentityKey: 'github:paperboytm/orca',
+      projectIdentityKey: 'github:paperboytm/yiru',
       collapsed: false
     }
 
@@ -293,11 +293,11 @@ describe('projectWorkspaceSidebarRows', () => {
   it('maps a local row index through inserted remote rows', () => {
     const firstHeader: RenderRow = {
       type: 'header',
-      key: 'project:github:paperboytm/orca',
-      label: 'orca',
+      key: 'project:github:paperboytm/yiru',
+      label: 'yiru',
       count: 0,
       tone: 'neutral',
-      projectIdentityKey: 'github:paperboytm/orca',
+      projectIdentityKey: 'github:paperboytm/yiru',
       collapsed: false
     }
     const secondHeader: RenderRow = {
@@ -323,12 +323,12 @@ describe('projectWorkspaceSidebarRows', () => {
   it('keeps a matched Project header sticky across its inserted remote rows', () => {
     const localProjectHeader: RenderRow = {
       type: 'header',
-      key: 'project:github:paperboytm/orca',
-      label: 'orca',
+      key: 'project:github:paperboytm/yiru',
+      label: 'yiru',
       count: 0,
       tone: 'neutral',
       projectId: 'local-project-id',
-      projectIdentityKey: 'github:paperboytm/orca',
+      projectIdentityKey: 'github:paperboytm/yiru',
       collapsed: false
     }
     const rows = projectWorkspaceSidebarRows({

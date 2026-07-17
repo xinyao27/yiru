@@ -8,9 +8,9 @@ import { createInterface } from 'node:readline'
 
 const scriptDir = import.meta.dirname
 const repoRoot = path.resolve(scriptDir, '..', '..')
-const orcaDevScript = path.join(scriptDir, 'orca-dev.mjs')
+const yiruDevScript = path.join(scriptDir, 'yiru-dev.mjs')
 const ensureNativeRuntimeScript = path.join(scriptDir, 'ensure-native-runtime.mjs')
-const fixedProfileDir = process.env.ORCA_HEADLESS_PAIRING_PROFILE_DIR
+const fixedProfileDir = process.env.YIRU_HEADLESS_PAIRING_PROFILE_DIR
 const parsed = parseArgs(process.argv.slice(2))
 
 if (parsed.help) {
@@ -34,7 +34,7 @@ const serveArgs = withDefaultPairingAddress(parsed.serveArgs)
 ensureElectronRuntime()
 
 const profileDir =
-  fixedProfileDir ?? mkdtempSync(path.join(tmpdir(), 'orca-headless-pairing-profile-'))
+  fixedProfileDir ?? mkdtempSync(path.join(tmpdir(), 'yiru-headless-pairing-profile-'))
 const ownsProfileDir = !fixedProfileDir
 mkdirSync(profileDir, { recursive: true })
 
@@ -46,16 +46,16 @@ let stopAttempts = 0
 // is only for local headless testing, not packaged production.
 const childEnv = {
   ...process.env,
-  ORCA_DEV_USER_DATA_PATH: profileDir,
+  YIRU_DEV_USER_DATA_PATH: profileDir,
   ...(process.platform === 'linux'
     ? { ELECTRON_DISABLE_SANDBOX: process.env.ELECTRON_DISABLE_SANDBOX ?? '1' }
     : {})
 }
 
 console.error(`[headless-pairing] userData=${profileDir}`)
-console.error(`[headless-pairing] starting: orca-dev serve --json${formatForwardedArgs(serveArgs)}`)
+console.error(`[headless-pairing] starting: yiru-dev serve --json${formatForwardedArgs(serveArgs)}`)
 
-child = spawn(process.execPath, [orcaDevScript, 'serve', '--json', ...serveArgs], {
+child = spawn(process.execPath, [yiruDevScript, 'serve', '--json', ...serveArgs], {
   cwd: repoRoot,
   detached: process.platform !== 'win32',
   env: childEnv,
@@ -92,7 +92,7 @@ process.on('SIGINT', () => stopChild('SIGINT'))
 process.on('SIGTERM', () => stopChild('SIGTERM'))
 
 /**
- * Parses wrapper flags and forwards everything else to `orca serve`.
+ * Parses wrapper flags and forwards everything else to `yiru serve`.
  */
 function parseArgs(args) {
   const serveArgs = []
@@ -116,9 +116,9 @@ function parseArgs(args) {
  * Prints script usage without touching the dev profile or starting the server.
  */
 function printHelp() {
-  console.log(`Usage: node config/scripts/serve-headless-fresh-profile-pairing.mjs [--keep] [orca serve flags]
+  console.log(`Usage: node config/scripts/serve-headless-fresh-profile-pairing.mjs [--keep] [yiru serve flags]
 
-Starts orca-dev serve --json with a fresh isolated userData profile, ensures Electron's dev runtime is usable, and prints the pairing URL.
+Starts yiru-dev serve --json with a fresh isolated userData profile, ensures Electron's dev runtime is usable, and prints the pairing URL.
 
 Wrapper flags:
   --keep        Keep the fresh profile after the server exits.
@@ -130,8 +130,8 @@ Forwarded examples:
   node config/scripts/serve-headless-fresh-profile-pairing.mjs --mobile-pairing
 
 Environment:
-  ORCA_HEADLESS_PAIRING_ADDRESS=<host|host:port|ws://...>  Override the auto pairing address.
-  ORCA_HEADLESS_PAIRING_PROFILE_DIR=/path/to/profile       Use a fixed profile directory.
+  YIRU_HEADLESS_PAIRING_ADDRESS=<host|host:port|ws://...>  Override the auto pairing address.
+  YIRU_HEADLESS_PAIRING_PROFILE_DIR=/path/to/profile       Use a fixed profile directory.
 `)
 }
 
@@ -169,7 +169,7 @@ function hasForwardedServeFlag(args, name) {
  * Prefers an override, then Tailscale, then the OS hostname over loopback.
  */
 function resolveDefaultPairingAddress() {
-  const configured = process.env.ORCA_HEADLESS_PAIRING_ADDRESS?.trim()
+  const configured = process.env.YIRU_HEADLESS_PAIRING_ADDRESS?.trim()
   if (configured) {
     return configured
   }
@@ -248,10 +248,10 @@ function printReadyLine(line) {
   } catch {
     return false
   }
-  if (!payload || payload.type !== 'orca_server_ready') {
+  if (!payload || payload.type !== 'yiru_server_ready') {
     return false
   }
-  console.log(`Orca server ready: ${payload.endpoint ?? 'websocket unavailable'}`)
+  console.log(`Yiru server ready: ${payload.endpoint ?? 'websocket unavailable'}`)
   if (payload.pairing?.endpoint) {
     console.log(`Pairing endpoint: ${payload.pairing.endpoint}`)
   }
@@ -278,7 +278,7 @@ function stopChild(signal) {
   stopAttempts += 1
   const targetSignal = stopAttempts > 1 ? 'SIGKILL' : signal
   if (process.platform === 'win32' && child.pid) {
-    // Why: child.kill() only targets orca-dev on Windows; taskkill walks the
+    // Why: child.kill() only targets yiru-dev on Windows; taskkill walks the
     // CLI/Electron descendants so the fresh profile is not left locked.
     const killer = spawn('taskkill', ['/pid', String(child.pid), '/t', '/f'], {
       stdio: 'ignore',
@@ -288,7 +288,7 @@ function stopChild(signal) {
     return
   }
   if (process.platform !== 'win32' && child.pid) {
-    // Why: orca-dev synchronously owns the CLI child, which owns Electron; kill
+    // Why: yiru-dev synchronously owns the CLI child, which owns Electron; kill
     // the spawned process group so programmatic shutdown does not orphan serve.
     try {
       process.kill(-child.pid, targetSignal)
@@ -312,7 +312,7 @@ function cleanupProfile() {
     console.error(`[headless-pairing] kept ${profileDir}`)
     return
   }
-  if (!existsSync(profileDir) || !profileDir.includes('orca-headless-pairing-profile-')) {
+  if (!existsSync(profileDir) || !profileDir.includes('yiru-headless-pairing-profile-')) {
     console.error(`[headless-pairing] skipped cleanup for unexpected profile path: ${profileDir}`)
     return
   }

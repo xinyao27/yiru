@@ -59,12 +59,12 @@ export function normalizeAgentActivityDisplayMode(value: unknown): AgentActivity
 export const ONBOARDING_FINAL_STEP = 5
 export const ONBOARDING_FLOW_VERSION = 4
 
-export const ORCA_BROWSER_PARTITION = 'persist:orca-browser'
+export const YIRU_BROWSER_PARTITION = 'persist:yiru-browser'
 // Why: blank browser tabs must start from an inert guest URL that does not
 // navigate the privileged main window to about:blank. Renderer and main both
 // need the exact same value so the attach policy can allow only this one safe
 // data URL while still rejecting arbitrary renderer-provided data URLs.
-export const ORCA_BROWSER_BLANK_URL = 'data:text/html,'
+export const YIRU_BROWSER_BLANK_URL = 'data:text/html,'
 
 // Why: Electron's invoke error path preserves message text, not arbitrary
 // custom Error fields. Keep this stable token shared across main/renderer.
@@ -183,7 +183,7 @@ export function getDefaultOnboardingState(): OnboardingState {
 function getDefaultWorkspaceDir(homeDir: string): string {
   const separator = homeDir.includes('\\') ? '\\' : '/'
   const trimmedHomeDir = homeDir.replace(/[\\/]+$/, '')
-  return [trimmedHomeDir, 'orca', 'workspaces'].join(separator)
+  return [trimmedHomeDir, 'yiru', 'workspaces'].join(separator)
 }
 
 export function getDefaultSettings(homedir: string): GlobalSettings {
@@ -295,8 +295,8 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     showMobileButton: true,
     ctrlTabOrderMode: 'mru',
     // Why: switching worktrees and opening command surfaces from a focused
-    // terminal is a core Orca workflow; users who prefer TUI ownership opt in.
-    terminalShortcutPolicy: 'orca-first',
+    // terminal is a core Yiru workflow; users who prefer TUI ownership opt in.
+    terminalShortcutPolicy: 'yiru-first',
     floatingTerminalEnabled: true,
     floatingTerminalDefaultedForAllUsers: true,
     floatingTerminalCwd: '~',
@@ -506,7 +506,7 @@ export function getDefaultUIState(): PersistedUIState {
     usagePercentageDisplay: DEFAULT_USAGE_PERCENTAGE_DISPLAY,
     dismissedUpdateVersion: null,
     lastUpdateCheckAt: null,
-    trustedOrcaHooks: {},
+    trustedYiruHooks: {},
     setupScriptPromptDismissedRepoIds: [],
     acknowledgedAgentsByPaneKey: {},
     setupGuideSidebarDismissed: false,

@@ -9,7 +9,7 @@ import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pair
 
 type StoreState = {
   closeMobilePage: () => void
-  orcaProfileAuthStatus: { state: 'connected' | 'local' }
+  yiruProfileAuthStatus: { state: 'connected' | 'local' }
   settings: { showMobileButton: boolean }
   updateSettings: () => Promise<void>
 }
@@ -78,11 +78,11 @@ describe('MobilePage pairing connection mode', () => {
     getPairingQR.mockReset().mockResolvedValue({
       available: true,
       qrDataUrl: 'data:image/png;base64,qr',
-      pairingUrl: 'orca://pair#automatic'
+      pairingUrl: 'yiru://pair#automatic'
     })
     mocks.storeState = {
       closeMobilePage: vi.fn(),
-      orcaProfileAuthStatus: { state: 'connected' },
+      yiruProfileAuthStatus: { state: 'connected' },
       settings: { showMobileButton: true },
       updateSettings: vi.fn().mockResolvedValue(undefined)
     }
@@ -139,13 +139,13 @@ describe('MobilePage pairing connection mode', () => {
     resolveRelayQr?.({
       available: true,
       qrDataUrl: 'data:image/png;base64,relay-qr',
-      pairingUrl: 'orca://pair#relay'
+      pairingUrl: 'yiru://pair#relay'
     })
     await waitFor(() => expect(screen.getByTestId('pairing-qr')).toHaveTextContent('relay-qr'))
   })
 
   it('defaults signed-out pairing to local-only', async () => {
-    mocks.storeState.orcaProfileAuthStatus = { state: 'local' }
+    mocks.storeState.yiruProfileAuthStatus = { state: 'local' }
     await openPairingStep()
 
     await waitFor(() => expect(getPairingQR).toHaveBeenCalledWith({ connectionMode: 'local-only' }))

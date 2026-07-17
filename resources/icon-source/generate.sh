@@ -13,11 +13,6 @@ TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 MAGICK_BIN=$(command -v magick || true)
-if [ -z "$MAGICK_BIN" ]; then
-  echo "Error: ImageMagick is required to trim the small macOS icon slots." >&2
-  echo "Install with: brew install imagemagick" >&2
-  exit 1
-fi
 
 echo "Compiling icon from $ICON_SOURCE..."
 
@@ -41,24 +36,30 @@ cp "$TMP_DIR/icon.icns" "$BUILD_DIR/icon.icns"
 # safe-area inset there, so trim only those slots while preserving larger icons.
 ICONSET_DIR="$TMP_DIR/icon.iconset"
 iconutil -c iconset "$BUILD_DIR/icon.icns" -o "$ICONSET_DIR"
-for icon_file in \
-  icon_16x16.png \
-  icon_16x16@2x.png \
-  icon_32x32.png \
-  icon_32x32@2x.png; do
-  case "$icon_file" in
-    icon_16x16.png) icon_size=16 ;;
-    icon_16x16@2x.png | icon_32x32.png) icon_size=32 ;;
-    icon_32x32@2x.png) icon_size=64 ;;
-  esac
-  "$MAGICK_BIN" "$ICONSET_DIR/$icon_file" \
-    -trim +repage \
-    -resize "${icon_size}x${icon_size}" \
-    -background none \
-    -gravity center \
-    -extent "${icon_size}x${icon_size}" \
-    "$ICONSET_DIR/$icon_file"
-done
+if [ -n "$MAGICK_BIN" ]; then
+  for icon_file in \
+    icon_16x16.png \
+    icon_16x16@2x.png \
+    icon_32x32.png \
+    icon_32x32@2x.png; do
+    case "$icon_file" in
+      icon_16x16.png) icon_size=16 ;;
+      icon_16x16@2x.png | icon_32x32.png) icon_size=32 ;;
+      icon_32x32@2x.png) icon_size=64 ;;
+    esac
+    "$MAGICK_BIN" "$ICONSET_DIR/$icon_file" \
+      -trim +repage \
+      -resize "${icon_size}x${icon_size}" \
+      -background none \
+      -gravity center \
+      -extent "${icon_size}x${icon_size}" \
+      "$ICONSET_DIR/$icon_file"
+  done
+else
+  # Why: Icon Composer already emits valid small slots; trimming is a visual
+  # optimization and must not block deterministic icon builds without Homebrew.
+  echo "Warning: ImageMagick unavailable; preserving Icon Composer small slots." >&2
+fi
 iconutil -c icns "$ICONSET_DIR" -o "$BUILD_DIR/icon.icns"
 echo "  -> resources/build/icon.icns"
 
@@ -79,5 +80,7 @@ echo "  -> resources/icon.png (256x256)"
 # already repo dependencies, so this also works where ImageMagick is unavailable.
 node "$PROJECT_DIR/config/scripts/trim-windows-icon-source.mjs"
 echo "  -> resources/build/icon.ico (trimmed, filled multi-size ICO)"
+
+bash "$PROJECT_DIR/resources/brand/generate-yiru-raster-assets.sh"
 
 echo "Done! Icons generated in resources/build/ and resources/"

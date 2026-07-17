@@ -9,7 +9,7 @@ import { SearchableSetting } from './SearchableSetting'
 import { SettingsSubsectionHeader } from './SettingsFormControls'
 import { translate } from '@/i18n/i18n'
 
-const ORCA_STARGAZERS_URL = 'https://github.com/stablyai/orca/stargazers'
+const YIRU_STARGAZERS_URL = 'https://github.com/stablyai/yiru/stargazers'
 
 type SupportState =
   | 'loading'
@@ -40,7 +40,7 @@ export function GeneralSupportSection({
 
   useEffect(() => {
     let cancelled = false
-    void window.api.gh.checkOrcaStarred().then((result) => {
+    void window.api.gh.checkYiruStarred().then((result) => {
       if (cancelled) {
         return
       }
@@ -58,7 +58,7 @@ export function GeneralSupportSection({
   const handleStarClick = async (): Promise<void> => {
     if (starState === 'web-fallback') {
       setStarState('opening-github')
-      await window.api.shell.openUrl(ORCA_STARGAZERS_URL)
+      await window.api.shell.openUrl(YIRU_STARGAZERS_URL)
       if (mountedRef.current) {
         setStarState('web-fallback')
       }
@@ -68,7 +68,7 @@ export function GeneralSupportSection({
       return
     }
     setStarState('starring')
-    const ok = await window.api.gh.starOrca('settings')
+    const ok = await window.api.gh.starYiru('settings')
     if (!ok) {
       if (mountedRef.current) {
         setStarState('web-fallback')
@@ -122,7 +122,7 @@ function SupportSection({
             <SettingsSubsectionHeader
               title={translate(
                 'auto.components.settings.GeneralSupportSection.55a87e5fd1',
-                'Support Orca'
+                'Support Yiru'
               )}
             />
             {state === 'loading' ? <SupportRowSkeleton /> : null}
@@ -159,7 +159,7 @@ function SupportRow({
     <SearchableSetting
       title={translate(
         'auto.components.settings.GeneralSupportSection.6922c1fa2b',
-        'Star Orca on GitHub'
+        'Star Yiru on GitHub'
       )}
       description={translate(
         'auto.components.settings.GeneralSupportSection.511782265b',
@@ -171,7 +171,7 @@ function SupportRow({
       <Label>
         {translate(
           'auto.components.settings.GeneralSupportSection.6922c1fa2b',
-          'Star Orca on GitHub'
+          'Star Yiru on GitHub'
         )}
       </Label>
       {state === 'starred' ? (

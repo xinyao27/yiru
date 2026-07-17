@@ -73,7 +73,7 @@ visible behavior today. The headless build has **no theme service**: OSC
 set, so the view-attribute class is answered by responder-registered parser
 handlers instead (below) — never by core defaults.
 
-Forwarding predicate, captured per chunk in `OrcaRuntimeService.onPtyData` and
+Forwarding predicate, captured per chunk in `YiruRuntimeService.onPtyData` and
 attached to the emulator `writeChain` link (the mark can flip between
 ingestion and an async write; the decision must not be re-read at reply time):
 
@@ -280,7 +280,7 @@ otherwise untouched in this phase.
 
 ## Test strategy
 
-- Responder unit tests beside `orca-runtime.test.ts`: marked vs unmarked vs
+- Responder unit tests beside `yiru-runtime.test.ts`: marked vs unmarked vs
   interest-suppressed; each reply class; seed/hydrate silence; remote-
   subscriber suppression; ConPTY DA1 variant; kill-switch off; mark flip
   between ingestion and async emulator write (captured decision wins).

@@ -1,7 +1,8 @@
 export const APP_ICON_OPTIONS = [
-  { id: 'classic', label: 'Classic Orca' },
-  { id: 'watercolor', label: 'Watercolor Orca' },
-  { id: 'blue', label: 'Blue Orca' }
+  { id: 'classic', label: 'Classic Yiru' },
+  // Why: persisted ids stay stable while the visible variants follow the Yiru mark.
+  { id: 'watercolor', label: 'Warm Yiru' },
+  { id: 'blue', label: 'Graphite Yiru' }
 ] as const
 
 export type AppIconId = (typeof APP_ICON_OPTIONS)[number]['id']

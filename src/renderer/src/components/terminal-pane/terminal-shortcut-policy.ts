@@ -65,7 +65,7 @@ function resolveUnshiftedCharacterForCode(code: string | undefined): string | un
 
 /**
  * Resolves terminal keyboard events before xterm receives them.
- * Keeps configurable Orca shortcuts and terminal byte fallbacks in one
+ * Keeps configurable Yiru shortcuts and terminal byte fallbacks in one
  * platform-aware policy so renderer handlers do not duplicate key checks.
  */
 export function resolveTerminalShortcutAction(

@@ -18,7 +18,7 @@ import { registerSshHandlers } from '../ipc/ssh'
 import { registerRemoteWorkspaceHandlers } from '../ipc/remote-workspace'
 import { browserManager } from '../browser/browser-manager'
 import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/browser-media-access'
-import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import {
   checkForUpdatesFromMenu,
   downloadUpdate,
@@ -67,7 +67,7 @@ let activeRuntimeNotifierToken: number | null = null
 export function attachMainWindowServices(
   mainWindow: BrowserWindow,
   store: Store,
-  runtime: OrcaRuntimeService,
+  runtime: YiruRuntimeService,
   getSelectedCodexHomePath?: (target?: CodexAccountSelectionTarget) => string | null,
   prepareClaudeAuth?: (
     target?: ClaudeAccountSelectionTarget
@@ -113,7 +113,7 @@ export function attachMainWindowServices(
   })
   // Why: warm-reattach gap.
   // Daemon-hosted PTYs survive renderer restarts on purpose, so on a fresh
-  // Orca launch the daemon's `listSessions()` returns sessions that
+  // Yiru launch the daemon's `listSessions()` returns sessions that
   // `pty:spawn` hasn't re-registered yet. Without this hydration, the
   // memory snapshot omits those PTYs and the renderer mislabels their
   // workspaces as `· REMOTE` while showing `—` for CPU/Memory.
@@ -250,7 +250,7 @@ function registerAppReloadHandler(
 
 function registerRuntimeWindowLifecycle(
   mainWindow: BrowserWindow,
-  runtime: OrcaRuntimeService
+  runtime: YiruRuntimeService
 ): void {
   const notifierToken = ++runtimeNotifierTokenCounter
   activeRuntimeNotifierToken = notifierToken

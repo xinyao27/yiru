@@ -20,8 +20,8 @@ describe('wrapShellSpawnForMacosTccAttribution', () => {
 
   beforeEach(() => {
     origPlatform = Object.getOwnPropertyDescriptor(process, 'platform')
-    origDisable = process.env.ORCA_DISABLE_MACOS_LOGIN_SHELL
-    delete process.env.ORCA_DISABLE_MACOS_LOGIN_SHELL
+    origDisable = process.env.YIRU_DISABLE_MACOS_LOGIN_SHELL
+    delete process.env.YIRU_DISABLE_MACOS_LOGIN_SHELL
     existsSyncMock.mockReturnValue(true)
     userInfoMock.mockReturnValue({ username: 'ada' })
   })
@@ -31,9 +31,9 @@ describe('wrapShellSpawnForMacosTccAttribution', () => {
       Object.defineProperty(process, 'platform', origPlatform)
     }
     if (origDisable === undefined) {
-      delete process.env.ORCA_DISABLE_MACOS_LOGIN_SHELL
+      delete process.env.YIRU_DISABLE_MACOS_LOGIN_SHELL
     } else {
-      process.env.ORCA_DISABLE_MACOS_LOGIN_SHELL = origDisable
+      process.env.YIRU_DISABLE_MACOS_LOGIN_SHELL = origDisable
     }
     vi.clearAllMocks()
   })
@@ -49,7 +49,7 @@ describe('wrapShellSpawnForMacosTccAttribution', () => {
   it('keeps bash rcfile args intact after the shell path', () => {
     setPlatform('darwin')
     expect(
-      wrapShellSpawnForMacosTccAttribution('/bin/bash', ['--rcfile', '/orca/bash/rcfile'])
+      wrapShellSpawnForMacosTccAttribution('/bin/bash', ['--rcfile', '/yiru/bash/rcfile'])
     ).toEqual({
       file: '/usr/bin/login',
       args: [
@@ -59,7 +59,7 @@ describe('wrapShellSpawnForMacosTccAttribution', () => {
         'SHELL=/bin/bash',
         '/bin/bash',
         '--rcfile',
-        '/orca/bash/rcfile'
+        '/yiru/bash/rcfile'
       ]
     })
   })
@@ -147,7 +147,7 @@ describe('wrapShellSpawnForMacosTccAttribution', () => {
 
   it('falls back to the plain spawn when disabled via env', () => {
     setPlatform('darwin')
-    process.env.ORCA_DISABLE_MACOS_LOGIN_SHELL = '1'
+    process.env.YIRU_DISABLE_MACOS_LOGIN_SHELL = '1'
     expect(wrapShellSpawnForMacosTccAttribution('/bin/zsh', ['-l'])).toEqual({
       file: '/bin/zsh',
       args: ['-l']

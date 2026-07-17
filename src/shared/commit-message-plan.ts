@@ -228,7 +228,7 @@ export function planCommitMessageGeneration(
     return agentArgs
   }
   // Why: Codex rejects repeated singleton model flags. Recipe CLI arguments
-  // are the more specific setting, so they replace Orca's generated model.
+  // are the more specific setting, so they replace Yiru's generated model.
   const overriddenArgs =
     input.agentId === 'codex'
       ? applyRecipeOptionOverride({

@@ -27,14 +27,14 @@ function mkdtempLike(prefix: string): string {
 }
 
 function tokenPathForSite(siteId: string): string {
-  return join(tempHome, '.orca', 'jira-tokens', `${Buffer.from(siteId).toString('base64url')}.enc`)
+  return join(tempHome, '.yiru', 'jira-tokens', `${Buffer.from(siteId).toString('base64url')}.enc`)
 }
 
 function writeJiraFiles(siteId: string, token: string | Buffer): void {
-  const orcaDir = join(tempHome, '.orca')
-  mkdirSync(join(orcaDir, 'jira-tokens'), { recursive: true })
+  const yiruDir = join(tempHome, '.yiru')
+  mkdirSync(join(yiruDir, 'jira-tokens'), { recursive: true })
   writeFileSync(
-    join(orcaDir, 'jira-sites.json'),
+    join(yiruDir, 'jira-sites.json'),
     JSON.stringify(
       {
         version: 1,
@@ -62,10 +62,10 @@ function writeMultiSiteFiles(
   sites: { id: string; token: string | Buffer }[],
   selectedSiteId: string
 ): void {
-  const orcaDir = join(tempHome, '.orca')
-  mkdirSync(join(orcaDir, 'jira-tokens'), { recursive: true })
+  const yiruDir = join(tempHome, '.yiru')
+  mkdirSync(join(yiruDir, 'jira-tokens'), { recursive: true })
   writeFileSync(
-    join(orcaDir, 'jira-sites.json'),
+    join(yiruDir, 'jira-sites.json'),
     JSON.stringify(
       {
         version: 1,
@@ -115,7 +115,7 @@ async function loadClientModule(options: SafeStorageMockOptions = {}) {
 }
 
 beforeEach(() => {
-  tempHome = mkdtempLike('orca-jira-client-')
+  tempHome = mkdtempLike('yiru-jira-client-')
   fetchMock = vi.fn(async () => {
     throw new Error('fetch should not be called')
   })
@@ -197,7 +197,7 @@ describe('Jira client credential storage', () => {
     const headers = netFetchMock.mock.calls[0]?.[1]?.headers as Headers
     const userAgent = headers.get('User-Agent') ?? ''
     expect(netFetchMock.mock.calls[0]?.[1]?.method).toBe('POST')
-    expect(userAgent).toBe('Orca')
+    expect(userAgent).toBe('Yiru')
     expect(userAgent).not.toMatch(/Mozilla|Chrome|Safari|AppleWebKit/i)
   })
 
@@ -426,7 +426,7 @@ describe('Jira client credential storage', () => {
     expect(resolveProxyMock).toHaveBeenCalledWith('https://example.atlassian.net/rest/api/3/myself')
     expect(netFetchMock).toHaveBeenCalledTimes(1)
     const headers = netFetchMock.mock.calls[0]?.[1]?.headers as Headers
-    expect(headers.get('User-Agent')).toBe('Orca')
+    expect(headers.get('User-Agent')).toBe('Yiru')
     expect(fetchMock).not.toHaveBeenCalled()
   })
 })

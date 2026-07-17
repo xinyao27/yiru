@@ -19,8 +19,8 @@ function releaseUrlForVersion(version: string | null): string {
   // when GitHub's release API is degraded, and the listing is the most
   // reliable manual fallback.
   return version
-    ? `https://github.com/stablyai/orca/releases/tag/v${version}`
-    : 'https://github.com/stablyai/orca/releases'
+    ? `https://github.com/stablyai/yiru/releases/tag/v${version}`
+    : 'https://github.com/stablyai/yiru/releases'
 }
 
 function isAnimatedGif(url: string | undefined): boolean {
@@ -344,7 +344,7 @@ export function UpdateCard() {
         ? {
             variant: 'http1Compatibility',
             title: translate('auto.components.UpdateCard.1339b82cee', 'HTTP/2 Download Blocked'),
-            summary: 'Orca can retry through HTTP/1.1 compatibility mode.',
+            summary: 'Yiru can retry through HTTP/1.1 compatibility mode.',
             message: compatibilitySetupError ?? status.message,
             releaseUrl: releaseUrlForVersion(cachedVersion),
             primaryAction: {
@@ -356,7 +356,7 @@ export function UpdateCard() {
           }
         : {
             // Why: title is scoped to the operation that failed so check-time
-            // failures (commonly GitHub-side) don't read as a bug in Orca.
+            // failures (commonly GitHub-side) don't read as a bug in Yiru.
             title: cachedVersion ? 'Update Error' : 'Update Check Failed',
             summary: cachedVersion
               ? 'Could not complete the update.'
@@ -757,7 +757,7 @@ function SimpleCardContent({
       </div>
 
       <p className="text-sm text-muted-foreground">
-        {translate('auto.components.UpdateCard.05ad78a6d1', 'Orca v{{value0}} is ready.', {
+        {translate('auto.components.UpdateCard.05ad78a6d1', 'Yiru v{{value0}} is ready.', {
           value0: version
         })}
       </p>
@@ -858,7 +858,7 @@ function DownloadingContent({
       <p className="text-sm text-muted-foreground">
         {release
           ? release.description
-          : translate('auto.components.UpdateCard.93794ea932', 'Orca v{{value0}} is downloading.', {
+          : translate('auto.components.UpdateCard.93794ea932', 'Yiru v{{value0}} is downloading.', {
               value0: version
             })}
       </p>
@@ -1016,7 +1016,7 @@ function ReadyToInstallContent({
       <p className="text-sm text-muted-foreground">
         {translate(
           'auto.components.UpdateCard.6714206e5a',
-          "Orca v{{value0}} is downloaded. Restart when you're ready.",
+          "Yiru v{{value0}} is downloaded. Restart when you're ready.",
           { value0: version }
         )}
       </p>

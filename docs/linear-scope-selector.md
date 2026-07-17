@@ -15,13 +15,13 @@ Make Linear task scoping feel like one selector:
 2. Preserve the existing state model: `selectedWorkspaceId` is one workspace id or `all`; `defaultLinearTeamSelection` remains a nullable global list where `null` means sticky-all and an array means an explicit subset of team IDs.
 3. Add an "Add team access" path from the selector. It opens a reusable API-key dialog. Pasting a key for an already connected workspace replaces that workspace token because the workspace id is stable.
 4. Make the copy accurate: one full-access personal API key for a Linear workspace can cover every team the key owner can access in that workspace; restricted/team-limited keys only expose permitted teams; private teams require the key owner to be a member or otherwise have access.
-5. Link to the most specific Linear settings URL Orca can build from `organizationUrlKey`, with global fallbacks when the workspace is unknown or `all`.
+5. Link to the most specific Linear settings URL Yiru can build from `organizationUrlKey`, with global fallbacks when the workspace is unknown or `all`.
 
 ## Non-goals
 
 - Do not change Linear authentication storage, encryption, IPC/RPC method names, or the `LinearWorkspaceSelection` type.
 - Do not switch Linear auth to OAuth.
-- Do not create, join, unarchive, or grant access to Linear teams from Orca. "Add team access" means paste a key whose owner/scope can already see the team.
+- Do not create, join, unarchive, or grant access to Linear teams from Yiru. "Add team access" means paste a key whose owner/scope can already see the team.
 - Do not make team selection per-workspace in this change.
 - Do not touch provider-generic review code.
 
@@ -61,7 +61,7 @@ Make Linear task scoping feel like one selector:
    - Use org-specific URLs only when a single workspace context is known. For `all`, use the global fallback and copy that tells the user to choose the intended Linear workspace.
    - Guidance:
      - Create a Personal API key from Account > Security & Access.
-     - Prefer full access when Orca should show every team the account can access in that workspace.
+     - Prefer full access when Yiru should show every team the account can access in that workspace.
      - If member API keys are blocked, ask a workspace admin to allow them from workspace API settings. Do not imply the workspace API page creates the personal key.
      - A key never grants teams the owner cannot access.
    - Make storage copy runtime-aware. Local runtime keys use the local OS keychain when Electron encryption is available; SSH/remote-runtime keys are stored by that runtime, not necessarily on this machine.

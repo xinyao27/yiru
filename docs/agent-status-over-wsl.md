@@ -27,12 +27,12 @@ sidebar after v1.4.124. Diagnosis split it into a regression and a pre-existing 
   fallback was not restored.
 - The **class gap** is that agent hooks have never worked from inside WSL for any agent.
   Two scoped PRs fixed it for OMP alone (merged, live-validated on a Windows+WSL2-NAT rig):
-  - PR `7642` — Orca-managed WSL shells wrap interactive `omp` invocations with
-    `--extension "$ORCA_OMP_STATUS_EXTENSION"` (the env var is WSLENV `/p`-translated so
+  - PR `7642` — Yiru-managed WSL shells wrap interactive `omp` invocations with
+    `--extension "$YIRU_OMP_STATUS_EXTENSION"` (the env var is WSLENV `/p`-translated so
     the WSL process reads the extension out of the Windows filesystem via `/mnt/c`).
   - PR `7641` — when the extension's loopback POST cannot connect, it delivers via
     Windows-side `/mnt/c/Windows/System32/curl.exe` (a Windows process, so *its*
-    `127.0.0.1` is the loopback Orca actually binds). Fire-and-forget spawn,
+    `127.0.0.1` is the loopback Yiru actually binds). Fire-and-forget spawn,
     `--noproxy 127.0.0.1`, memoized WSL/curl probes, load-tolerant timeouts
     (`--connect-timeout 3 --max-time 10`; 0.5s dropped events under load).
 
@@ -45,8 +45,8 @@ Windows+WSL story.
 ### Gap A — transport
 
 The hook listener binds `127.0.0.1` only, deliberately (`src/main/agent-hooks/server.ts`,
-`listen(0, '127.0.0.1')`; auth via `X-Orca-Agent-Hook-Token`, 403 otherwise). Every hook
-client POSTs to a hardcoded `http://127.0.0.1:$ORCA_AGENT_HOOK_PORT/hook/<source>`.
+`listen(0, '127.0.0.1')`; auth via `X-Yiru-Agent-Hook-Token`, 403 otherwise). Every hook
+client POSTs to a hardcoded `http://127.0.0.1:$YIRU_AGENT_HOOK_PORT/hook/<source>`.
 
 WSL2 under default **NAT** networking is a VM with its own network namespace. Microsoft's
 localhost forwarding is **one-way (Windows→WSL only)**: `127.0.0.1` inside WSL is WSL's
@@ -55,9 +55,9 @@ deliberately fail-open. Reaching Windows from WSL would require the host vNIC IP
 per boot) + a non-loopback listener bind + a firewall rule — all three conflict with the
 loopback-only security posture.
 
-The env coordinates DO cross correctly (`src/main/pty/wsl-orca-env.ts`
-`addOrcaWslInteropEnv`: WSLENV `PORT/u TOKEN/u ENV/u VERSION/u` plus
-`ORCA_AGENT_HOOK_ENDPOINT/p` path-translated; called from `src/main/ipc/pty.ts` and
+The env coordinates DO cross correctly (`src/main/pty/wsl-yiru-env.ts`
+`addYiruWslInteropEnv`: WSLENV `PORT/u TOKEN/u ENV/u VERSION/u` plus
+`YIRU_AGENT_HOOK_ENDPOINT/p` path-translated; called from `src/main/ipc/pty.ts` and
 `src/main/daemon/pty-subprocess.ts`). The address is simply unreachable.
 
 Opt-in **mirrored** networking (Win11, `.wslconfig`) shares loopback and makes plain fetch
@@ -84,9 +84,9 @@ shell hooks still execute inside WSL and then hit Gap A regardless.
 ## Transport map — every client, how it posts
 
 Endpoint file contract: `writeEndpointFile` (`src/shared/agent-hook-listener.ts`) emits
-exactly four keys (`ORCA_AGENT_HOOK_PORT/TOKEN/ENV/VERSION`) to `endpoint.env` (POSIX) /
+exactly four keys (`YIRU_AGENT_HOOK_PORT/TOKEN/ENV/VERSION`) to `endpoint.env` (POSIX) /
 `endpoint.cmd` (Windows) — **no host field**. Shell clients source it to refresh stale
-coords after an Orca restart; node clients parse it. It is never executed as a delivery
+coords after a Yiru restart; node clients parse it. It is never executed as a delivery
 script. Clients prefer endpoint-FILE coords over env (restart re-coordination) — any
 transport change must preserve that property.
 
@@ -117,26 +117,26 @@ integration.
 ### Transport (Gap A): guest-resident relay, host-owned stdio
 
 Run a small receiver **inside WSL on WSL's own loopback, listening on the very port the
-clients were already given** (`$ORCA_AGENT_HOOK_PORT` — free inside WSL, since that port
+clients were already given** (`$YIRU_AGENT_HOOK_PORT` — free inside WSL, since that port
 only exists on the Windows side). Unmodified clients then deliver successfully with
 **zero client changes**; the reporter's diagnostic relay in GH `7565` proved this shape
 live. Forward each parsed envelope to the Windows host over the relay's **own stdio**
-(Orca spawns it via `wsl.exe`, so it owns that pipe). Ingest through the existing trust
+(Yiru spawns it via `wsl.exe`, so it owns that pipe). Ingest through the existing trust
 boundary: `agentHookServer.ingestRemote` (`src/main/agent-hooks/server.ts`), envelope
 shape `src/shared/agent-hook-relay.ts` — identical to the SSH relay, which runs a
 loopback-only receiver on the remote box and forwards over the SSH control channel.
 
-**Port binding.** Bind the inherited `$ORCA_AGENT_HOOK_PORT` first — it keeps every
+**Port binding.** Bind the inherited `$YIRU_AGENT_HOOK_PORT` first — it keeps every
 already-crossed coordinate (env and the `/p`-translated endpoint file) truthful with zero
 divergence. On `EADDRINUSE` inside the guest, fall back to the SSH relay's own pattern:
 bind `127.0.0.1:0`, write a **WSL-side endpoint file**, and point WSL PTYs'
-`ORCA_AGENT_HOOK_ENDPOINT` at it (clients already prefer endpoint-file coords over env).
+`YIRU_AGENT_HOOK_ENDPOINT` at it (clients already prefer endpoint-file coords over env).
 The relay writes that WSL-side endpoint file in **both** modes so restart re-coordination
 never depends on `/mnt/c` translation being readable.
 
-Lifecycle: one relay per distro **per Orca instance** (concurrent instances have distinct
+Lifecycle: one relay per distro **per Yiru instance** (concurrent instances have distinct
 ports, so guest listeners never collide); **ensure** — not just start — whenever a WSL PTY
-exists: first spawn *and* daemon-PTY reattach after an Orca restart (WSL PTYs survive in
+exists: first spawn *and* daemon-PTY reattach after a Yiru restart (WSL PTYs survive in
 the daemon; the new instance has a new port + token and must respawn the relay before
 surviving agents re-coordinate). The relay **exits when its stdin closes**: a lingering
 guest listener would let WSL's own Windows→WSL forwarder grab the freed Windows-side port
@@ -185,7 +185,7 @@ the hook clients themselves are absent from the WSL filesystem.
 3. **Listener-side bind changes / rely on mirrored networking** — posture conflict /
    opt-in only.
 4. **OSC 9999 in-band status** (`src/shared/agent-status-osc.ts`, parsed per-pane in
-   `pty-transport.ts` and `orca-runtime.ts`) — zero-network and pane-attributed, but only
+   `pty-transport.ts` and `yiru-runtime.ts`) — zero-network and pane-attributed, but only
    viable for in-process clients and carries status payloads, not the full hook event
    vocabulary (prompts, tools, completion) — cannot replace the pipeline.
 
@@ -196,7 +196,7 @@ the hook clients themselves are absent from the WSL filesystem.
   under load; fine at 3s. A resident relay avoids per-event spawns entirely.
 - `wslinfo --networking-mode` distinguishes NAT vs mirrored.
 - Clients prefer endpoint-FILE coords over env. Testing gotcha: unset
-  `ORCA_AGENT_HOOK_ENDPOINT` in synthetic tests or events go to the real running app.
+  `YIRU_AGENT_HOOK_ENDPOINT` in synthetic tests or events go to the real running app.
 - Server ingest silently drops paneKeys that are not `uuid:uuid`-shaped — use real-shaped
   keys in synthetic validation.
 - OMP is a Bun single-file binary; Bun's `node:child_process`/`fetch` compat held. Other
@@ -205,7 +205,7 @@ the hook clients themselves are absent from the WSL filesystem.
   (E_UNEXPECTED)" from `wsl.exe -d <distro> -- bash -lc` under concurrent spawn load
   (cleared by `wsl --terminate`). The relay spawn path should tolerate/retry this.
 - Fork-PR CI runs sit in `action_required` until approved:
-  `gh api repos/stablyai/orca/actions/runs/<id>/approve -X POST`.
+  `gh api repos/stablyai/yiru/actions/runs/<id>/approve -X POST`.
 
 ## Acceptance
 
@@ -213,7 +213,7 @@ On a default-config Windows 11 + WSL2 **NAT** machine: launch **Codex or Claude*
 (explicitly not OMP) in a WSL worktree → live hook-driven worktree-card row with status
 transitions and a completion notification; hook listener still bound to Windows loopback
 only; zero per-client transport changes; hooks installed WSL-side automatically (no manual
-config); harmless under mirrored networking and inert on non-WSL platforms. After an Orca
+config); harmless under mirrored networking and inert on non-WSL platforms. After a Yiru
 restart with the WSL agent still running (daemon-surviving PTY), status events resume
 without relaunching the agent.
 
@@ -228,7 +228,7 @@ two fixes:
    `wsl-hook-relay-link.ts` now guarantees exactly-once death handling from either signal;
    the manager breadcrumbs it, kills the child, and self-restarts after a short cooldown
    (a live agent session produces no new PTY spawns to re-trigger ensure).
-   `ORCA_WSL_HOOK_RELAY_DEBUG=1` traces every received envelope pre-ingest so a live rig
+   `YIRU_WSL_HOOK_RELAY_DEBUG=1` traces every received envelope pre-ingest so a live rig
    can pinpoint any residual drop. The full host chain is pinned by a live integration
    test (real bundle over real child stdio through the real manager into a real
    `ingestRemote`).
@@ -241,8 +241,8 @@ two fixes:
    `isWslHookRelayConnectionId`, while still rejecting WSL-stamped events against
    SSH-owned repos. Provenance stays stamped (it made the drop diagnosable in the first
    place).
-3. **Codex reads a redirected home.** Orca launches WSL Codex with `CODEX_HOME` pointed at
-   the managed runtime home (`~/.local/share/orca/codex-runtime-home/home`), so installing
+3. **Codex reads a redirected home.** Yiru launches WSL Codex with `CODEX_HOME` pointed at
+   the managed runtime home (`~/.local/share/yiru/codex-runtime-home/home`), so installing
    hooks to `~/.codex` left Codex dark. The installers now accept an explicit codex home;
    the trust write into `config.toml` is deferred while that file doesn't exist (the
    launch path seeds it only-if-absent — creating it first would cancel the seed), and the
@@ -256,10 +256,10 @@ Four independent review lenses over the full diff; confirmed findings fixed:
 
 - **Endpoint identity (all 4 reviewers)**: the guest endpoint dir was keyed by the
   ephemeral Windows hook port, so a daemon-surviving agent kept sourcing the DEAD
-  `port-P1` file after an Orca restart — breaking the restart-resume acceptance criterion
+  `port-P1` file after a Yiru restart — breaking the restart-resume acceptance criterion
   and regressing shipped OMP recovery. Now keyed by a restart-stable instance key
   (hash of the Windows endpoint file path = userData + namespace, crossed via
-  `ORCA_WSL_HOOK_INSTANCE`): the restarted instance's relay REWRITES the same file, which
+  `YIRU_WSL_HOOK_INSTANCE`): the restarted instance's relay REWRITES the same file, which
   is exactly what re-coordinates survivors.
 - **Restart policy**: every failure now arms the restart timer (one failed relaunch no
   longer ends self-recovery), and the timer probes `wsl --list --running` first — `wsl -d`
@@ -268,7 +268,7 @@ Four independent review lenses over the full diff; confirmed findings fixed:
   counters only reset after 2 min of stable uptime, so connect-then-die loops escalate to
   the 10-min cap instead of cycling every 10s.
 - **Install-dir versioning**: the guest install dir is namespaced by bundle version, so
-  concurrent Orca instances with different bundles (dev + prod) never reinstall over each
+  concurrent Yiru instances with different bundles (dev + prod) never reinstall over each
   other; tmp files carry the guest PID. The install spawn also gained the 30s timeout it
   was missing (a wedged wsl.exe could previously pin the state machine at 'starting'
   forever).
@@ -353,8 +353,8 @@ no-node distros show up in telemetry). The relay remains the primary path: resid
   handling), `wsl-hook-relay-deps.ts` (DI seam), `wsl-hook-fs-adapter.ts` (SFTP-shaped
   adapter + `installWslGuestHooks`, which targets Codex's managed runtime home).
 - Wiring: `buildPtyHostEnv` (`src/main/ipc/pty.ts`) ensures the relay on every WSL spawn
-  and repoints `ORCA_AGENT_HOOK_ENDPOINT` at the guest endpoint file once known;
-  `src/main/pty/wsl-orca-env.ts` picks `/u` vs `/p` by value shape.
+  and repoints `YIRU_AGENT_HOOK_ENDPOINT` at the guest endpoint file once known;
+  `src/main/pty/wsl-yiru-env.ts` picks `/u` vs `/p` by value shape.
 - Contract shared by both sides: `src/shared/wsl-hook-relay-contract.ts`.
 - Oracles: `src/relay/wsl-agent-hook-relay.test.ts`,
   `src/main/agent-hooks/wsl-hook-relay-manager.test.ts` (fault injection: stale-42
@@ -369,6 +369,6 @@ no-node distros show up in telemetry). The relay remains the primary path: resid
 - Linear: STA-1515 (this work; ticket comments carry the same context).
 - Key files: `src/main/agent-hooks/server.ts`, `src/shared/agent-hook-listener.ts`,
   `src/shared/agent-hook-relay.ts`, `src/relay/agent-hook-server.ts`, `src/relay/relay.ts`,
-  `src/main/pty/wsl-orca-env.ts`, `src/main/agent-hooks/installer-utils.ts`,
+  `src/main/pty/wsl-yiru-env.ts`, `src/main/agent-hooks/installer-utils.ts`,
   `src/main/pi/agent-status-extension-source.ts`, `src/main/ssh/ssh-relay-session.ts`,
   `src/main/providers/windows-shell-args.ts`, `src/shared/wsl-login-shell-command.ts`.

@@ -35,8 +35,8 @@ const repoMap = new Map<string, Repo>([
     'repo-1',
     {
       id: 'repo-1',
-      path: '/repo/orca',
-      displayName: 'stablyai/orca',
+      path: '/repo/yiru',
+      displayName: 'stablyai/yiru',
       badgeColor: '#22c55e',
       addedAt: 0
     }
@@ -155,7 +155,7 @@ describe('worktree-palette-search', () => {
       'quick jump',
       repoMap,
       {
-        '/repo/orca::feature/palette-refresh': {
+        '/repo/yiru::feature/palette-refresh': {
           data: {
             number: 426,
             title: 'Refresh the worktree quick jump palette'
@@ -179,7 +179,7 @@ describe('worktree-palette-search', () => {
       number: 17,
       title: 'Reuse checks tab review metadata',
       state: 'open',
-      url: 'https://gitlab.com/acme/orca/-/merge_requests/17',
+      url: 'https://gitlab.com/acme/yiru/-/merge_requests/17',
       status: 'success',
       updatedAt: '2026-07-12T00:00:00Z',
       mergeable: 'MERGEABLE'
@@ -224,7 +224,7 @@ describe('worktree-palette-search', () => {
       number: 17,
       title: 'Current merge request',
       state: 'open',
-      url: 'https://gitlab.com/acme/orca/-/merge_requests/17',
+      url: 'https://gitlab.com/acme/yiru/-/merge_requests/17',
       status: 'success',
       updatedAt: '2026-07-12T00:00:00Z',
       mergeable: 'MERGEABLE'
@@ -241,7 +241,7 @@ describe('worktree-palette-search', () => {
         'stale github title',
         repoMap,
         {
-          '/repo/orca::feature/palette-refresh': {
+          '/repo/yiru::feature/palette-refresh': {
             data: { number: 99, title: 'Stale GitHub title' }
           }
         },
@@ -258,7 +258,7 @@ describe('worktree-palette-search', () => {
 
   it('does not search stale GitHub metadata while a linked non-GitHub review is loading', () => {
     const stalePRCache = {
-      '/repo/orca::feature/palette-refresh': {
+      '/repo/yiru::feature/palette-refresh': {
         data: { number: 99, title: 'Stale GitHub title' }
       }
     }
@@ -303,7 +303,7 @@ describe('worktree-palette-search', () => {
       number: 17,
       title: 'Remote-only merge request',
       state: 'open',
-      url: 'https://gitlab.com/acme/orca/-/merge_requests/17',
+      url: 'https://gitlab.com/acme/yiru/-/merge_requests/17',
       status: 'success',
       updatedAt: '2026-07-12T00:00:00Z',
       mergeable: 'MERGEABLE'
@@ -329,7 +329,7 @@ describe('worktree-palette-search', () => {
       number: 42,
       title: 'GitHub pull request',
       state: 'open',
-      url: 'https://github.com/acme/orca/pull/42',
+      url: 'https://github.com/acme/yiru/pull/42',
       status: 'success',
       updatedAt: '2026-07-12T00:00:00Z',
       mergeable: 'MERGEABLE'
@@ -339,7 +339,7 @@ describe('worktree-palette-search', () => {
       number: 17,
       title: 'GitLab merge request',
       state: 'open',
-      url: 'https://gitlab.com/acme/orca/-/merge_requests/17',
+      url: 'https://gitlab.com/acme/yiru/-/merge_requests/17',
       status: 'success',
       updatedAt: '2026-07-12T00:00:00Z',
       mergeable: 'MERGEABLE'
@@ -403,7 +403,7 @@ describe('worktree-palette-search', () => {
       })
     ]
 
-    const results = searchWorktrees(worktrees, 'orca', repoMap, null, null)
+    const results = searchWorktrees(worktrees, 'yiru', repoMap, null, null)
 
     // All three match on the repo name, order preserved from input
     expect(results).toHaveLength(3)
@@ -426,7 +426,7 @@ describe('worktree-palette-search', () => {
       })
     ]
 
-    const results = searchWorktrees(worktrees, 'orca/main', repoMap, null, null)
+    const results = searchWorktrees(worktrees, 'yiru/main', repoMap, null, null)
 
     expect(results).toHaveLength(1)
     expect(results[0].worktreeId).toBe('wt-main')

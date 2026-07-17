@@ -28,14 +28,14 @@ type Harness = {
 }
 
 const BASE_ENV = {
-  ORCA_PANE_KEY: 'pane-1',
-  ORCA_AGENT_LAUNCH_TOKEN: 'launch-1',
-  ORCA_TAB_ID: 'tab-1',
-  ORCA_WORKTREE_ID: 'tree-1',
-  ORCA_AGENT_HOOK_PORT: '4321',
-  ORCA_AGENT_HOOK_TOKEN: 'token-1',
-  ORCA_AGENT_HOOK_ENV: 'env-1',
-  ORCA_AGENT_HOOK_VERSION: '1.2.3'
+  YIRU_PANE_KEY: 'pane-1',
+  YIRU_AGENT_LAUNCH_TOKEN: 'launch-1',
+  YIRU_TAB_ID: 'tab-1',
+  YIRU_WORKTREE_ID: 'tree-1',
+  YIRU_AGENT_HOOK_PORT: '4321',
+  YIRU_AGENT_HOOK_TOKEN: 'token-1',
+  YIRU_AGENT_HOOK_ENV: 'env-1',
+  YIRU_AGENT_HOOK_VERSION: '1.2.3'
 } satisfies Record<string, string>
 
 function createHarness(args: {
@@ -96,7 +96,7 @@ function createHarness(args: {
       ...args.env
     },
     title: args.title ?? 'node',
-    argv: args.argv ?? ['node', '/usr/bin/orca']
+    argv: args.argv ?? ['node', '/usr/bin/yiru']
   }
 
   const context = {
@@ -212,7 +212,7 @@ describe('getPiAgentStatusExtensionSource', () => {
       '-H',
       'Content-Type: application/json',
       '-H',
-      'X-Orca-Agent-Hook-Token: token-1',
+      'X-Yiru-Agent-Hook-Token: token-1',
       '--data-binary',
       '@-',
       'http://127.0.0.1:4321/hook/omp'
@@ -298,7 +298,7 @@ describe('getPiAgentStatusExtensionSource', () => {
     await Promise.resolve()
 
     // Why: Pi awaits extension handlers, so loopback status delivery cannot
-    // remain on the agent's critical path when Orca is stalled or restarting.
+    // remain on the agent's critical path when Yiru is stalled or restarting.
     expect(harness.fetchMock).toHaveBeenCalledTimes(1)
     await vi.waitFor(() => expect(handlerReturned).toBe(true))
 

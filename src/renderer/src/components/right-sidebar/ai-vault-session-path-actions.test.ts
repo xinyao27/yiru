@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  canOpenAiVaultSessionLogInOrca,
+  canOpenAiVaultSessionLogInYiru,
   canUseLocalAiVaultSessionPathActions,
   isSyntheticAiVaultSessionPath
 } from './ai-vault-session-path-actions'
@@ -28,10 +28,10 @@ describe('isSyntheticAiVaultSessionPath', () => {
   })
 })
 
-describe('canOpenAiVaultSessionLogInOrca', () => {
+describe('canOpenAiVaultSessionLogInYiru', () => {
   it('allows a local, single-file, non-synthetic path', () => {
     expect(
-      canOpenAiVaultSessionLogInOrca({
+      canOpenAiVaultSessionLogInYiru({
         filePath: '/home/user/.claude/sessions/log.jsonl',
         executionHostId: 'local'
       })
@@ -39,17 +39,17 @@ describe('canOpenAiVaultSessionLogInOrca', () => {
   })
 
   it('withholds blank, remote, and synthetic identities', () => {
-    expect(canOpenAiVaultSessionLogInOrca({ filePath: '   ', executionHostId: 'local' })).toBe(
+    expect(canOpenAiVaultSessionLogInYiru({ filePath: '   ', executionHostId: 'local' })).toBe(
       false
     )
     expect(
-      canOpenAiVaultSessionLogInOrca({
+      canOpenAiVaultSessionLogInYiru({
         filePath: '/remote/.claude/log.jsonl',
         executionHostId: 'ssh:dev-box'
       })
     ).toBe(false)
     expect(
-      canOpenAiVaultSessionLogInOrca({
+      canOpenAiVaultSessionLogInYiru({
         filePath: '/home/user/.opencode/db.sqlite#sess_1',
         executionHostId: 'local'
       })

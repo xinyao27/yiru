@@ -8,7 +8,7 @@ Status: Shipped — Phase 3 of the terminal model/view architecture, kill switch
 ## Problem
 
 Main parses every local/daemon/SSH PTY byte before renderer delivery
-(`OrcaRuntimeService.onPtyData` in `src/main/runtime/orca-runtime.ts`:
+(`YiruRuntimeService.onPtyData` in `src/main/runtime/yiru-runtime.ts`:
 side-effect tracker, OSC 9999 agent status, headless emulator, tails, URL
 watchers; SSH feeds the same path from `wireUpPtyEvents` in
 `src/main/ssh/ssh-relay-session.ts`). Before this phase, the side effects
@@ -50,7 +50,7 @@ Remote-runtime PTYs (`remote:`) never transit local main; the renderer
   transitions, the stale-working-title 3s timer
   (`STALE_WORKING_TITLE_TIMEOUT_MS`), and the stateful BEL detector
   (`src/shared/terminal-bell-detector.ts`).
-- One tracker per PTY on `OrcaRuntimeService`, lazily created like
+- One tracker per PTY on `YiruRuntimeService`, lazily created like
   `agentStatusOscProcessorsByPtyId`; disposed in `onPtyExit` (cancels the
   stale-title timer).
 - It replaced the chunk-level last-title extraction in `onPtyData`: titles
@@ -206,7 +206,7 @@ ever become parkable.
   fake timers, OSC 133;D, split PR URLs) run through the renderer
   `createPtyOutputProcessor` and the main tracker; assert identical ordered
   fact sequences.
-- Unit: main tracker tests beside `orca-runtime.test.ts` (lastOscTitle
+- Unit: main tracker tests beside `yiru-runtime.test.ts` (lastOscTitle
   parity, tui-idle waiter transitions, synthetic ingestion); store-handler
   tests reusing `parked-terminal-byte-watcher.test.ts` scenarios.
 - Pinned tests that flip or retire: `pty-connection.test.ts` callback wiring,

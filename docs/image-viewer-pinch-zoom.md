@@ -66,7 +66,7 @@
 - Unit tests: cover the extracted zoom helpers under the existing node Vitest config; this repo does not currently include jsdom, happy-dom, or Testing Library, so do not promise DOM component tests unless that tooling is deliberately added.
 - Unit tests: assert negative/positive/zero `deltaY`, pixel/line/page `deltaMode` normalization, min/max clamping, and bounded per-event zoom factors.
 - Unit tests: assert the wheel decision helper ignores non-ctrl wheel events and treats ctrl-wheel as handled even when the resulting zoom is already clamped or `deltaY` is `0`.
-- Electron validation: open a PNG in Orca, dispatch a cancelable `WheelEvent` with `ctrlKey` on the inline image surface, verify the displayed percent and visual scale change, and verify an ordinary wheel still scrolls where applicable.
+- Electron validation: open a PNG in Yiru, dispatch a cancelable `WheelEvent` with `ctrlKey` on the inline image surface, verify the displayed percent and visual scale change, and verify an ordinary wheel still scrolls where applicable.
 - Electron validation: open popup and repeat after the dialog mounts; close/reopen the popup and repeat once to catch duplicate or stale native listeners.
 - Electron validation: open an image diff and verify ctrl-wheel on one pane changes only that pane's percent.
 - Electron validation: switch from one image file to another or reload changed image content and verify zoom returns to `100%`.

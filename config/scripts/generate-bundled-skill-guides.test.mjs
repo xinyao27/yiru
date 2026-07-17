@@ -18,7 +18,7 @@ const projectDir = path.resolve(import.meta.dirname, '..', '..')
 const temporaryDirectories = []
 
 async function createFixture() {
-  const root = await mkdtemp(path.join(tmpdir(), 'orca-bundled-skill-guides-'))
+  const root = await mkdtemp(path.join(tmpdir(), 'yiru-bundled-skill-guides-'))
   temporaryDirectories.push(root)
   await Promise.all([
     cp(path.join(projectDir, 'skill-guides'), path.join(root, 'skill-guides'), {
@@ -64,19 +64,19 @@ describe('bundled skill guide generator', () => {
   })
 
   it('keeps CLI guide examples safe across shells and Linux command names', async () => {
-    for (const name of ['orca-cli', 'computer-use', 'orca-emulator', 'orca-emulator-android']) {
+    for (const name of ['yiru-cli', 'computer-use', 'yiru-emulator', 'yiru-emulator-android']) {
       const source = await readFile(path.join(projectDir, 'skill-guides', `${name}.md`), 'utf8')
 
-      expect(source).toContain('ORCA_CLI_COMMAND')
-      expect(source).toContain('orca-dev')
-      expect(source).toContain('orca-ide')
+      expect(source).toContain('YIRU_CLI_COMMAND')
+      expect(source).toContain('yiru-dev')
+      expect(source).toContain('yiru')
       expect(source).toContain('PowerShell')
       expect(source).toContain('cmd.exe')
-      expect(source).toMatch(/^ORCA .+--json$/mu)
-      // Why: bare command lines can launch GNOME Orca, while shell variables make
-      // the same guide unusable from PowerShell and cmd.exe.
-      expect(source).not.toMatch(/^orca /mu)
-      expect(source).not.toMatch(/\$ORCA(?:_|\b)/u)
+      expect(source).toMatch(/^YIRU .+--json$/mu)
+      // Why: the placeholder keeps the same guide usable from POSIX shells,
+      // PowerShell, and cmd.exe.
+      expect(source).not.toMatch(/^yiru /mu)
+      expect(source).not.toMatch(/\$YIRU(?:_|\b)/u)
     }
   })
 

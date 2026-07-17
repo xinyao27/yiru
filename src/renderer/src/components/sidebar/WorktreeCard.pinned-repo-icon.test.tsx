@@ -65,16 +65,16 @@ vi.mock('./SshDisconnectedDialog', () => ({
 
 vi.mock('./WorktreeContextMenu', () => ({
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
-  CLOSE_ALL_CONTEXT_MENUS_EVENT: 'orca:test-close-context-menus',
+  CLOSE_ALL_CONTEXT_MENUS_EVENT: 'yiru:test-close-context-menus',
   WORKTREE_NATIVE_CONTEXT_MENU_ATTR: 'data-worktree-native-context-menu',
-  WORKTREE_CONTEXT_MENU_SCOPE_ATTR: 'data-orca-context-menu-scope'
+  WORKTREE_CONTEXT_MENU_SCOPE_ATTR: 'data-yiru-context-menu-scope'
 }))
 
 function makeRepo(overrides: Partial<Repo> = {}): Repo {
   return {
     id: 'repo-1',
     path: '/repo',
-    displayName: 'orca',
+    displayName: 'yiru',
     badgeColor: '#999999',
     repoIcon: { type: 'emoji', emoji: '🦊' },
     addedAt: 1,
@@ -129,7 +129,7 @@ describe('WorktreeCard pinned repo icon', () => {
       )
 
       expect(markup).toContain('🦊')
-      expect(markup).toContain('Project orca')
+      expect(markup).toContain('Project yiru')
     },
     WORKTREE_CARD_IMPORT_TIMEOUT_MS
   )
@@ -148,7 +148,7 @@ describe('WorktreeCard pinned repo icon', () => {
       )
 
       expect(markup).not.toContain('🦊')
-      expect(markup).not.toContain('Project orca')
+      expect(markup).not.toContain('Project yiru')
     },
     WORKTREE_CARD_IMPORT_TIMEOUT_MS
   )
@@ -169,7 +169,7 @@ describe('WorktreeCard pinned repo icon', () => {
       )
 
       expect(markup).toContain('🦊')
-      expect(markup).toContain('Project orca')
+      expect(markup).toContain('Project yiru')
       expect(markup).not.toContain('data-worktree-card-meta-row=""')
     },
     WORKTREE_CARD_IMPORT_TIMEOUT_MS

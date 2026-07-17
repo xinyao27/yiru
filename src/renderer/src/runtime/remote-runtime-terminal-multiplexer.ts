@@ -341,7 +341,7 @@ class RemoteRuntimeTerminalMultiplexer {
             onResponse: (response) => this.handleResponse(response),
             onBinary: (bytes) => this.handleBinary(bytes),
             onError: (error) => this.failConnection(new Error(error.message)),
-            onClose: () => this.handleClose('Remote Orca runtime closed the connection.')
+            onClose: () => this.handleClose('Remote Yiru runtime closed the connection.')
           }
         )
         .then((subscription) => {

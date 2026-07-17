@@ -3,7 +3,7 @@ import { mapWithConcurrency } from '../../shared/map-with-concurrency'
 import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import type { DetectedWorktreeListResult, ProjectHostSetup, Repo } from '../../shared/types'
 import type { Store } from '../persistence'
-import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import type { SpoolPairedRuntimeWorktreeCatalog } from './spool-paired-runtime-worktree-catalog'
 import {
   projectRegisteredSpoolWorktree,
@@ -22,7 +22,7 @@ import type {
 import { SpoolOwnerWorktreeCatalogError } from './spool-worktree-publication-validation'
 import { resolveDirectSpoolRepoActualHostScope } from './spool-repo-actual-host-scope'
 
-type SpoolWorktreeRuntime = Pick<OrcaRuntimeService, 'listDetectedManagedWorktrees'>
+type SpoolWorktreeRuntime = Pick<YiruRuntimeService, 'listDetectedManagedWorktrees'>
 
 export type DefaultSpoolOwnerWorktreeCatalogOptions = {
   store: Store

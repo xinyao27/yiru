@@ -41,8 +41,8 @@ describe('electron-builder config', () => {
     expect(electronBuilderConfig.mac.extraResources).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          from: 'native/computer-use-macos/.build/release/Orca Computer Use.app',
-          to: 'Orca Computer Use.app'
+          from: 'native/computer-use-macos/.build/release/Yiru Computer Use.app',
+          to: 'Yiru Computer Use.app'
         })
       ])
     )
@@ -61,8 +61,8 @@ describe('electron-builder config', () => {
           to: 'computer-use-windows/runtime.ps1'
         }),
         expect.objectContaining({
-          from: 'native/windows-cli-launcher/.build/orca.exe',
-          to: 'bin/orca.exe'
+          from: 'native/windows-cli-launcher/.build/yiru.exe',
+          to: 'bin/yiru.exe'
         })
       ])
     )
@@ -74,13 +74,13 @@ describe('electron-builder config', () => {
     expect(electronBuilderConfig.mac.extraFiles).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          from: 'native/notification-status-macos/.build/release/orca-notification-status',
-          to: 'MacOS/orca-notification-status'
+          from: 'native/notification-status-macos/.build/release/yiru-notification-status',
+          to: 'MacOS/yiru-notification-status'
         })
       ])
     )
     expect(electronBuilderConfig.mac.extraResources).not.toEqual(
-      expect.arrayContaining([expect.objectContaining({ to: 'orca-notification-status' })])
+      expect.arrayContaining([expect.objectContaining({ to: 'yiru-notification-status' })])
     )
   })
 
@@ -103,46 +103,46 @@ describe('electron-builder config', () => {
   })
 
   it('matches the Linux desktop entry to Electron window class', () => {
-    expect(electronBuilderConfig.linux.desktop.entry.StartupWMClass).toBe('orca')
+    expect(electronBuilderConfig.linux.desktop.entry.StartupWMClass).toBe('yiru')
   })
 
   it('uses AppImage and deb as local Linux targets without changing existing artifact names', () => {
     expect(electronBuilderConfig.linux.target).toEqual(['AppImage', 'deb'])
-    expect(electronBuilderConfig.appImage.artifactName).toBe('orca-linux.${ext}')
-    expect(electronBuilderConfig.deb.artifactName).toBe('orca-ide_${version}_${arch}.${ext}')
+    expect(electronBuilderConfig.appImage.artifactName).toBe('yiru-linux.${ext}')
+    expect(electronBuilderConfig.deb.artifactName).toBe('yiru_${version}_${arch}.${ext}')
     expect(electronBuilderConfig.rpm).toMatchObject({
-      packageName: 'orca-ide',
-      artifactName: 'orca-ide-${version}.${arch}.${ext}'
+      packageName: 'yiru',
+      artifactName: 'yiru-${version}.${arch}.${ext}'
     })
   })
 
   it('uses a distinct AppImage name for Linux arm64 release uploads', () => {
     const configPath = require.resolve('../electron-builder.config.cjs')
-    const original = process.env.ORCA_LINUX_ARM64_RELEASE
+    const original = process.env.YIRU_LINUX_ARM64_RELEASE
     try {
       delete require.cache[configPath]
-      process.env.ORCA_LINUX_ARM64_RELEASE = '1'
+      process.env.YIRU_LINUX_ARM64_RELEASE = '1'
       expect(require('../electron-builder.config.cjs').appImage.artifactName).toBe(
-        'orca-linux-arm64.${ext}'
+        'yiru-linux-arm64.${ext}'
       )
     } finally {
       if (original === undefined) {
-        delete process.env.ORCA_LINUX_ARM64_RELEASE
+        delete process.env.YIRU_LINUX_ARM64_RELEASE
       } else {
-        process.env.ORCA_LINUX_ARM64_RELEASE = original
+        process.env.YIRU_LINUX_ARM64_RELEASE = original
       }
       delete require.cache[configPath]
       require('../electron-builder.config.cjs')
     }
   })
 
-  it('uses Orca native rebuild hook instead of electron-builder default rebuild', () => {
+  it('uses Yiru native rebuild hook instead of electron-builder default rebuild', () => {
     expect(electronBuilderConfig.beforeBuild).toBe(electronBuilderNativeRebuild)
     expect(electronBuilderConfig.npmRebuild).toBe(true)
   })
 
   it('verifies packaged main runtime deps from Windows-style asar entries', async () => {
-    const resourcesDir = await mkdtemp(join(tmpdir(), 'orca-runtime-deps-'))
+    const resourcesDir = await mkdtemp(join(tmpdir(), 'yiru-runtime-deps-'))
     try {
       await writeFile(join(resourcesDir, 'app.asar'), '', 'utf8')
       await mkdir(join(resourcesDir, 'node_modules', 'yaml'), { recursive: true })
@@ -171,7 +171,7 @@ describe('electron-builder config', () => {
   })
 
   it('prunes non-target node-pty prebuilds from packaged runtime resources', async () => {
-    const resourcesDir = await mkdtemp(join(tmpdir(), 'orca-node-pty-prune-'))
+    const resourcesDir = await mkdtemp(join(tmpdir(), 'yiru-node-pty-prune-'))
     try {
       const prebuildsDir = join(resourcesDir, 'node_modules', 'node-pty', 'prebuilds')
       await mkdir(join(prebuildsDir, 'darwin-arm64'), { recursive: true })
@@ -204,7 +204,7 @@ describe('electron-builder config', () => {
 
   it('copies the Windows node-pty ConPTY runtime beside the rebuilt addon', async () => {
     for (const arch of ['x64', 'arm64']) {
-      const resourcesDir = await mkdtemp(join(tmpdir(), `orca-node-pty-conpty-${arch}-`))
+      const resourcesDir = await mkdtemp(join(tmpdir(), `yiru-node-pty-conpty-${arch}-`))
       try {
         const nodePtyDir = join(resourcesDir, 'node_modules', 'node-pty')
         const releaseDir = join(nodePtyDir, 'build', 'Release')
@@ -251,7 +251,7 @@ describe('electron-builder config', () => {
   })
 
   it('prunes non-target @parcel/watcher platform subpackages from packaged runtime resources', async () => {
-    const resourcesDir = await mkdtemp(join(tmpdir(), 'orca-parcel-watcher-prune-'))
+    const resourcesDir = await mkdtemp(join(tmpdir(), 'yiru-parcel-watcher-prune-'))
     try {
       const parcelDir = join(resourcesDir, 'node_modules', '@parcel')
       await mkdir(join(parcelDir, 'watcher'), { recursive: true })
@@ -274,7 +274,7 @@ describe('electron-builder config', () => {
   })
 
   it('leaves unrelated @parcel/* runtime deps untouched when pruning the watcher', async () => {
-    const resourcesDir = await mkdtemp(join(tmpdir(), 'orca-parcel-watcher-prune-unrelated-'))
+    const resourcesDir = await mkdtemp(join(tmpdir(), 'yiru-parcel-watcher-prune-unrelated-'))
     try {
       const parcelDir = join(resourcesDir, 'node_modules', '@parcel')
       await mkdir(join(parcelDir, 'watcher'), { recursive: true })
@@ -296,7 +296,7 @@ describe('electron-builder config', () => {
   })
 
   it('prunes type declaration artifacts from packaged runtime node_modules', async () => {
-    const resourcesDir = await mkdtemp(join(tmpdir(), 'orca-runtime-type-prune-'))
+    const resourcesDir = await mkdtemp(join(tmpdir(), 'yiru-runtime-type-prune-'))
     try {
       const packageDir = join(resourcesDir, 'node_modules', 'example-package')
       await mkdir(join(packageDir, 'dist'), { recursive: true })
@@ -314,7 +314,7 @@ describe('electron-builder config', () => {
   })
 
   it('prunes duplicate darwin sherpa-onnx runtime dylib aliases', async () => {
-    const resourcesDir = await mkdtemp(join(tmpdir(), 'orca-sherpa-prune-'))
+    const resourcesDir = await mkdtemp(join(tmpdir(), 'yiru-sherpa-prune-'))
     try {
       const packageDir = join(resourcesDir, 'node_modules', 'sherpa-onnx-darwin-arm64')
       await mkdir(packageDir, { recursive: true })
@@ -334,7 +334,7 @@ describe('electron-builder config', () => {
   })
 
   it('prunes zod TypeScript sources from packaged runtime resources', async () => {
-    const resourcesDir = await mkdtemp(join(tmpdir(), 'orca-zod-prune-'))
+    const resourcesDir = await mkdtemp(join(tmpdir(), 'yiru-zod-prune-'))
     try {
       const packageDir = join(resourcesDir, 'node_modules', 'zod')
       await mkdir(join(packageDir, 'src'), { recursive: true })
@@ -352,10 +352,10 @@ describe('electron-builder config', () => {
   it.skipIf(process.platform === 'win32')(
     'marks packaged Unix CLI launchers executable',
     async () => {
-      const root = await mkdtemp(join(tmpdir(), 'orca-electron-builder-config-'))
+      const root = await mkdtemp(join(tmpdir(), 'yiru-electron-builder-config-'))
       try {
         const resourcesDir = join(root, 'linux-unpacked', 'resources')
-        const launcherPath = join(resourcesDir, 'bin', 'orca-ide')
+        const launcherPath = join(resourcesDir, 'bin', 'yiru')
         await mkdir(join(resourcesDir, 'bin'), { recursive: true })
         await mkdir(join(resourcesDir, 'node_modules', 'zod', 'src'), { recursive: true })
         // Why: afterPack now fails hard when the unpacked daemon entry is

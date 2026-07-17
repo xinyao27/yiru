@@ -957,7 +957,7 @@ describe('createEditorSlice floating editor activation', () => {
 
     store.getState().openFile(
       {
-        filePath: '/tmp/orca/notes.md',
+        filePath: '/tmp/yiru/notes.md',
         relativePath: 'notes.md',
         worktreeId: FLOATING_TERMINAL_WORKTREE_ID,
         runtimeEnvironmentId: null,
@@ -970,7 +970,7 @@ describe('createEditorSlice floating editor activation', () => {
     const tab = store.getState().unifiedTabsByWorktree[FLOATING_TERMINAL_WORKTREE_ID]?.[0]
     expect(tab).toMatchObject({
       contentType: 'editor',
-      entityId: '/tmp/orca/notes.md',
+      entityId: '/tmp/yiru/notes.md',
       label: 'notes.md',
       worktreeId: FLOATING_TERMINAL_WORKTREE_ID
     })
@@ -979,7 +979,7 @@ describe('createEditorSlice floating editor activation', () => {
       tabOrder: [tab?.id]
     })
     expect(store.getState().activeFileIdByWorktree[FLOATING_TERMINAL_WORKTREE_ID]).toBe(
-      '/tmp/orca/notes.md'
+      '/tmp/yiru/notes.md'
     )
   })
 
@@ -993,7 +993,7 @@ describe('createEditorSlice floating editor activation', () => {
     } as Partial<AppState>)
 
     store.getState().openFile({
-      filePath: '/tmp/orca/untitled.md',
+      filePath: '/tmp/yiru/untitled.md',
       relativePath: 'untitled.md',
       worktreeId: FLOATING_TERMINAL_WORKTREE_ID,
       language: 'markdown',
@@ -1004,7 +1004,7 @@ describe('createEditorSlice floating editor activation', () => {
     expect(store.getState().activeFileId).toBe('/repo/main.md')
     expect(store.getState().activeTabType).toBe('editor')
     expect(store.getState().activeFileIdByWorktree[FLOATING_TERMINAL_WORKTREE_ID]).toBe(
-      '/tmp/orca/untitled.md'
+      '/tmp/yiru/untitled.md'
     )
     expect(store.getState().activeTabTypeByWorktree[FLOATING_TERMINAL_WORKTREE_ID]).toBe('editor')
   })
@@ -4192,8 +4192,8 @@ describe('createEditorSlice activateMarkdownLink', () => {
 
     store.getState().openFile(
       {
-        filePath: '/remote/.orca/drops/log.txt',
-        relativePath: '.orca/drops/log.txt',
+        filePath: '/remote/.yiru/drops/log.txt',
+        relativePath: '.yiru/drops/log.txt',
         worktreeId: 'wt-1',
         language: 'text',
         mode: 'edit'
@@ -4202,7 +4202,7 @@ describe('createEditorSlice activateMarkdownLink', () => {
     )
 
     expect(store.getState().openFiles[0]).toMatchObject({
-      filePath: '/remote/.orca/drops/log.txt'
+      filePath: '/remote/.yiru/drops/log.txt'
     })
     expect(store.getState().openFiles[0]?.runtimeEnvironmentId).toBeNull()
   })
@@ -4409,7 +4409,7 @@ describe('createEditorSlice activateMarkdownLink', () => {
     })
   })
 
-  it('opens in-worktree file links in Orca', async () => {
+  it('opens in-worktree file links in Yiru', async () => {
     const store = createEditorStore()
     await store.getState().activateMarkdownLink('./image.png', {
       sourceFilePath: '/repo/docs/note.md',
@@ -4452,7 +4452,7 @@ describe('createEditorSlice activateMarkdownLink', () => {
     })
   })
 
-  it('opens explicit file URLs inside the worktree in Orca', async () => {
+  it('opens explicit file URLs inside the worktree in Yiru', async () => {
     const store = createEditorStore()
     await store.getState().activateMarkdownLink('file:///repo/docs/image.png', {
       sourceFilePath: '/repo/docs/note.md',
@@ -4470,7 +4470,7 @@ describe('createEditorSlice activateMarkdownLink', () => {
     expect(openFileUriMock).not.toHaveBeenCalled()
   })
 
-  it('opens explicit file URLs outside the worktree in Orca after authorizing them', async () => {
+  it('opens explicit file URLs outside the worktree in Yiru after authorizing them', async () => {
     const store = createEditorStore()
     await store.getState().activateMarkdownLink('file:///tmp/image.png', {
       sourceFilePath: '/repo/docs/note.md',

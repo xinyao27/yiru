@@ -26,9 +26,9 @@ export function formatMessageBanner(msg: MessageRow): string {
   }
 
   // Why: injected reply commands must retain the receiving pane's identity
-  // even when an older shell lacks Orca's terminal environment variables.
+  // even when an older shell lacks Yiru's terminal environment variables.
   lines.push(
-    `[Reply: orca orchestration reply --id ${msg.id} --from ${msg.to_handle} --body "..."]`
+    `[Reply: yiru orchestration reply --id ${msg.id} --from ${msg.to_handle} --body "..."]`
   )
   lines.push(SEPARATOR)
 

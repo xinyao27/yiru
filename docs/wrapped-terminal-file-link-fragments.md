@@ -8,7 +8,7 @@ The provider builds hard-wrap candidates in `wrapped-terminal-link-ranges.ts:172
 
 ## Root cause
 
-`buildHardWrappedPathLogicalLineCandidates` trims and joins whole physical rows. A continuation row is accepted only when the entire trimmed row is a path fragment (`wrapped-terminal-link-ranges.ts:195-203`). A row such as `transparent-...png · validation-screenshots/03-after-light-theme.png` therefore stops reconstruction. Orca probes the two incomplete middle fragments separately, rejects both as nonexistent, and retains only the complete first and third paths.
+`buildHardWrappedPathLogicalLineCandidates` trims and joins whole physical rows. A continuation row is accepted only when the entire trimmed row is a path fragment (`wrapped-terminal-link-ranges.ts:195-203`). A row such as `transparent-...png · validation-screenshots/03-after-light-theme.png` therefore stops reconstruction. Yiru probes the two incomplete middle fragments separately, rejects both as nonexistent, and retains only the complete first and third paths.
 
 ## Non-goals
 

@@ -184,8 +184,7 @@ export function buildGitHubWorkItemStartupPlan(args: {
   // Why: runtime-owned repos launch on their owner host, not on the client
   // desktop, so startup shell quoting must use the runtime platform.
   const platform = resolveGitHubWorkItemLaunchPlatform(store, repo)
-  // Why: SSH remotes deploy the CLI shim as plain `orca`, so the Linux-only
-  // `orca-ide` rename must not be applied for remote launches.
+  // Why: SSH remotes must use the relay's public CLI command.
   const isRemote = repoIsRemote(repo)
   const shell = resolveLocalWindowsAgentStartupShell({
     platform,

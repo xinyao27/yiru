@@ -16,7 +16,7 @@ Validation mode: the current branch logs the would-be event name and payload to 
 
 ## Product Decisions
 
-Question: Should Orca keep, revise, or disable the automatic `workspace-agent-sessions` tour for new users?
+Question: Should Yiru keep, revise, or disable the automatic `workspace-agent-sessions` tour for new users?
 
 Decision owner/use: Product and growth review the retention and activation read after rollout. If exposed users retain and activate better than eligible-but-unexposed users, keep or expand the tour. If exposed users underperform or skip/cancel heavily, revise copy, timing, or gating.
 

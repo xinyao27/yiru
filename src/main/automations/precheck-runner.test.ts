@@ -26,7 +26,7 @@ describe('runAutomationPrecheck', () => {
   let cwd = ''
 
   beforeEach(() => {
-    cwd = mkdtempSync(join(tmpdir(), 'orca-precheck-test-'))
+    cwd = mkdtempSync(join(tmpdir(), 'yiru-precheck-test-'))
     sshManagerState.manager = null
   })
 

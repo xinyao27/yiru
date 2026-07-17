@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { RpcDispatcher } from './dispatcher'
 import type { RpcRequest } from './core'
-import type { OrcaRuntimeService } from '../orca-runtime'
+import type { YiruRuntimeService } from '../yiru-runtime'
 import { TERMINAL_METHODS } from './methods/terminal'
 import type { RuntimeTerminalWait } from '../../../shared/runtime-types'
 import {
@@ -15,7 +15,7 @@ import {
   encodeTerminalStreamText
 } from '../../../shared/terminal-stream-protocol'
 
-function stubRuntime(overrides: Partial<OrcaRuntimeService> = {}): OrcaRuntimeService {
+function stubRuntime(overrides: Partial<YiruRuntimeService> = {}): YiruRuntimeService {
   return {
     getRuntimeId: () => 'test-runtime',
     // Why: every multiplex stream registers as a remote view subscriber for
@@ -33,7 +33,7 @@ function stubRuntime(overrides: Partial<OrcaRuntimeService> = {}): OrcaRuntimeSe
     getRemoteDesktopFitHold: vi.fn().mockReturnValue({ mode: 'desktop-fit', cols: 120, rows: 40 }),
     isRemoteDesktopViewerOwner: vi.fn().mockReturnValue(false),
     ...overrides
-  } as OrcaRuntimeService
+  } as YiruRuntimeService
 }
 
 function makeRequest(method: string, params?: unknown): RpcRequest {

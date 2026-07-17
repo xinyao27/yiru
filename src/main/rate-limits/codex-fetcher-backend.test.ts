@@ -71,7 +71,7 @@ describe('Codex backend rate-limit requests', () => {
 
     await expect(
       fetchCodexRateLimits({
-        codexHomePath: '\\\\wsl.localhost\\Ubuntu\\home\\alice\\.local\\share\\orca\\account\\home'
+        codexHomePath: '\\\\wsl.localhost\\Ubuntu\\home\\alice\\.local\\share\\yiru\\account\\home'
       })
     ).resolves.toMatchObject({
       session: { usedPercent: 12, windowMinutes: 60, resetsAt: 1_800_000_000_000 },

@@ -234,7 +234,7 @@ export function AddRemoteHostDialog({
             {mode === 'server'
               ? translate(
                   'auto.components.sidebar.AddRemoteHostDialog.serverDescription',
-                  'Pair with Orca running on another computer.'
+                  'Pair with Yiru running on another computer.'
                 )
               : translate(
                   'auto.components.sidebar.AddRemoteHostDialog.sshDescription',

@@ -62,16 +62,16 @@ type ContextualTourOverlaySurfaceProps = {
 
 if (typeof window !== 'undefined') {
   const guardedWindow = window as Window & {
-    __orcaContextualTourGlobalKeyGuardInstalled?: boolean
+    __yiruContextualTourGlobalKeyGuardInstalled?: boolean
   }
-  if (!guardedWindow.__orcaContextualTourGlobalKeyGuardInstalled) {
-    guardedWindow.__orcaContextualTourGlobalKeyGuardInstalled = true
+  if (!guardedWindow.__yiruContextualTourGlobalKeyGuardInstalled) {
+    guardedWindow.__yiruContextualTourGlobalKeyGuardInstalled = true
     window.addEventListener('keydown', handleContextualTourGlobalKeyDown, true)
   }
 }
 
 const PANEL_BASE_CLASSES =
-  'orca-contextual-tour-panel rounded-lg border border-border text-popover-foreground backdrop-blur-[2px]'
+  'yiru-contextual-tour-panel rounded-lg border border-border text-popover-foreground backdrop-blur-[2px]'
 
 const PANEL_ANIMATION_CLASSES = 'animate-in fade-in-0 zoom-in-95 duration-200 ease-out'
 
@@ -259,7 +259,7 @@ export function ContextualTourOverlaySurface({
       {showTargetRings ? (
         <div
           aria-hidden="true"
-          className="orca-contextual-tour-target-rings fixed z-[75]"
+          className="yiru-contextual-tour-target-rings fixed z-[75]"
           data-contextual-tour-target-rings=""
           style={targetRingStyle}
         />

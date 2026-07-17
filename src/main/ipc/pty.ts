@@ -16,7 +16,7 @@ import {
   powerMonitor
 } from 'electron'
 export { getBashShellReadyRcfileContent } from '../providers/local-pty-shell-ready'
-import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import type { Store } from '../persistence'
 import type { GlobalSettings, TuiAgent } from '../../shared/types'
 import { normalizeRuntimePathForComparison } from '../../shared/cross-platform-path'
@@ -80,7 +80,6 @@ import {
   applyTerminalAttributionEnv,
   resolveAttributionShellFamily
 } from '../attribution/terminal-attribution'
-import { ensureLinuxTerminalOrcaCliShimDir } from '../cli/linux-terminal-orca-cli-shim'
 import { registerPty, unregisterPty } from '../memory/pty-registry'
 import { advertisedUrlWatcher } from '../ports/advertised-url-watcher'
 import { track } from '../telemetry/client'
@@ -118,7 +117,7 @@ import {
 } from '../agent-hooks/migration-unsupported-pty-state'
 import { parseWslPath } from '../wsl'
 import { mergePersistedWindowsPath } from '../pty/windows-environment-path'
-import { addOrcaWslInteropEnv } from '../pty/wsl-orca-env'
+import { addYiruWslInteropEnv } from '../pty/wsl-yiru-env'
 import { PtyProducerFlowController } from './pty-producer-flow-control'
 import { beginTerminalInstall } from './watcher-removal-gate'
 import {
@@ -209,14 +208,14 @@ const ptyPaneKey = new Map<string, string>()
 const paneKeyPtyId = new Map<string, string>()
 
 const AGENT_HOOK_RUNTIME_ENV_KEYS = [
-  'ORCA_AGENT_HOOK_PORT',
-  'ORCA_AGENT_HOOK_TOKEN',
-  'ORCA_AGENT_HOOK_ENV',
-  'ORCA_AGENT_HOOK_VERSION',
-  'ORCA_AGENT_HOOK_ENDPOINT',
+  'YIRU_AGENT_HOOK_PORT',
+  'YIRU_AGENT_HOOK_TOKEN',
+  'YIRU_AGENT_HOOK_ENV',
+  'YIRU_AGENT_HOOK_VERSION',
+  'YIRU_AGENT_HOOK_ENDPOINT',
   // Why: PR 2778 briefly exported this scoped Claude settings path. Keep
   // deleting stale inherited values so older PTYs cannot leak the reverted path.
-  'ORCA_CLAUDE_AGENT_STATUS_SETTINGS'
+  'YIRU_CLAUDE_AGENT_STATUS_SETTINGS'
 ] as const
 
 export function getPtyIdForPaneKey(paneKey: string): string | undefined {
@@ -509,18 +508,18 @@ function stripRemotePaneEnvWhenHooksDisabled(
   }
   if (
     !env ||
-    (!('ORCA_PANE_KEY' in env) &&
-      !('ORCA_TAB_ID' in env) &&
-      !('ORCA_WORKTREE_ID' in env) &&
-      !('ORCA_AGENT_LAUNCH_TOKEN' in env))
+    (!('YIRU_PANE_KEY' in env) &&
+      !('YIRU_TAB_ID' in env) &&
+      !('YIRU_WORKTREE_ID' in env) &&
+      !('YIRU_AGENT_LAUNCH_TOKEN' in env))
   ) {
     return env
   }
   const stripped = { ...env }
-  delete stripped.ORCA_PANE_KEY
-  delete stripped.ORCA_TAB_ID
-  delete stripped.ORCA_WORKTREE_ID
-  delete stripped.ORCA_AGENT_LAUNCH_TOKEN
+  delete stripped.YIRU_PANE_KEY
+  delete stripped.YIRU_TAB_ID
+  delete stripped.YIRU_WORKTREE_ID
+  delete stripped.YIRU_AGENT_LAUNCH_TOKEN
   return stripped
 }
 
@@ -668,7 +667,7 @@ function promoteAgentTeamsShimPath(
   env: Record<string, string> | undefined,
   requestedPath: string | undefined
 ): void {
-  if (!env?.ORCA_AGENT_TEAMS_TEAM_ID) {
+  if (!env?.YIRU_AGENT_TEAMS_TEAM_ID) {
     return
   }
   const shimPath = firstPathEntry(requestedPath)
@@ -680,7 +679,7 @@ function promoteAgentTeamsShimPath(
   const remaining = currentPath
     .split(delimiter)
     .filter((entry) => entry.length > 0 && entry !== shimPath)
-  // Why: host env injection can prepend Orca's attribution/dev shims. Claude
+  // Why: host env injection can prepend Yiru's attribution/dev shims. Claude
   // Agent Teams must still resolve our fake tmux before any real tmux.
   env[currentPathKey] = [shimPath, ...remaining].join(delimiter)
 }
@@ -704,7 +703,7 @@ function shouldSkipCodexHomeEnvForWindowsShell(
   return isWslShellName(shellPath) || (typeof cwd === 'string' && parseWslPath(cwd) !== null)
 }
 
-const CODEX_HOME_ENV_KEYS = ['CODEX_HOME', 'ORCA_CODEX_HOME'] as const
+const CODEX_HOME_ENV_KEYS = ['CODEX_HOME', 'YIRU_CODEX_HOME'] as const
 type GetSelectedCodexHomePath = (target?: CodexAccountSelectionTarget) => string | null
 type PrepareClaudeAuth = (
   target?: ClaudeAccountSelectionTarget
@@ -749,9 +748,9 @@ function resolvePiAgentSourceDir(
   baseEnv: Record<string, string>,
   kind: PiAgentKind
 ): string | undefined {
-  const sourceKey = kind === 'omp' ? 'ORCA_OMP_SOURCE_AGENT_DIR' : 'ORCA_PI_SOURCE_AGENT_DIR'
-  const overlayKey = kind === 'omp' ? 'ORCA_OMP_CODING_AGENT_DIR' : 'ORCA_PI_CODING_AGENT_DIR'
-  const otherOverlayKey = kind === 'omp' ? 'ORCA_PI_CODING_AGENT_DIR' : 'ORCA_OMP_CODING_AGENT_DIR'
+  const sourceKey = kind === 'omp' ? 'YIRU_OMP_SOURCE_AGENT_DIR' : 'YIRU_PI_SOURCE_AGENT_DIR'
+  const overlayKey = kind === 'omp' ? 'YIRU_OMP_CODING_AGENT_DIR' : 'YIRU_PI_CODING_AGENT_DIR'
+  const otherOverlayKey = kind === 'omp' ? 'YIRU_PI_CODING_AGENT_DIR' : 'YIRU_OMP_CODING_AGENT_DIR'
 
   const sourceDir = readEnvWithProcessFallback(baseEnv, sourceKey)
   if (sourceDir) {
@@ -761,7 +760,7 @@ function resolvePiAgentSourceDir(
   const publicDir = readEnvWithProcessFallback(baseEnv, 'PI_CODING_AGENT_DIR')
   const ownOverlayDir = readEnvWithProcessFallback(baseEnv, overlayKey)
   const otherOverlayDir = readEnvWithProcessFallback(baseEnv, otherOverlayKey)
-  // Why: if PI_CODING_AGENT_DIR is just a restored Orca overlay from either
+  // Why: if PI_CODING_AGENT_DIR is just a restored Yiru overlay from either
   // kind and the matching source shadow is absent, remirroring it would leak
   // another agent's overlay tree into this launch. Fall through to defaults.
   if (publicDir && publicDir !== ownOverlayDir && publicDir !== otherOverlayDir) {
@@ -779,19 +778,19 @@ function resolveScopedPiAgentSourceDir(
   baseEnv: Record<string, string>,
   kind: PiAgentKind
 ): string | undefined {
-  const sourceKey = kind === 'omp' ? 'ORCA_OMP_SOURCE_AGENT_DIR' : 'ORCA_PI_SOURCE_AGENT_DIR'
+  const sourceKey = kind === 'omp' ? 'YIRU_OMP_SOURCE_AGENT_DIR' : 'YIRU_PI_SOURCE_AGENT_DIR'
   return readEnvWithProcessFallback(baseEnv, sourceKey)
 }
 
 function clearPiAgentShadowEnv(baseEnv: Record<string, string>, kind: PiAgentKind): void {
   if (kind === 'omp') {
-    delete baseEnv.ORCA_OMP_CODING_AGENT_DIR
-    delete baseEnv.ORCA_OMP_SOURCE_AGENT_DIR
-    delete baseEnv.ORCA_OMP_STATUS_EXTENSION
+    delete baseEnv.YIRU_OMP_CODING_AGENT_DIR
+    delete baseEnv.YIRU_OMP_SOURCE_AGENT_DIR
+    delete baseEnv.YIRU_OMP_STATUS_EXTENSION
     return
   }
-  delete baseEnv.ORCA_PI_CODING_AGENT_DIR
-  delete baseEnv.ORCA_PI_SOURCE_AGENT_DIR
+  delete baseEnv.YIRU_PI_CODING_AGENT_DIR
+  delete baseEnv.YIRU_PI_SOURCE_AGENT_DIR
 }
 
 function exposePiManagedExtensionEnv(
@@ -800,24 +799,24 @@ function exposePiManagedExtensionEnv(
   managedEnv: Record<string, string>
 ): void {
   if (kind === 'omp') {
-    delete baseEnv.ORCA_OMP_CODING_AGENT_DIR
-    if (managedEnv.ORCA_OMP_SOURCE_AGENT_DIR) {
-      baseEnv.ORCA_OMP_SOURCE_AGENT_DIR = managedEnv.ORCA_OMP_SOURCE_AGENT_DIR
+    delete baseEnv.YIRU_OMP_CODING_AGENT_DIR
+    if (managedEnv.YIRU_OMP_SOURCE_AGENT_DIR) {
+      baseEnv.YIRU_OMP_SOURCE_AGENT_DIR = managedEnv.YIRU_OMP_SOURCE_AGENT_DIR
     } else {
-      delete baseEnv.ORCA_OMP_SOURCE_AGENT_DIR
+      delete baseEnv.YIRU_OMP_SOURCE_AGENT_DIR
     }
-    if (managedEnv.ORCA_OMP_STATUS_EXTENSION) {
-      baseEnv.ORCA_OMP_STATUS_EXTENSION = managedEnv.ORCA_OMP_STATUS_EXTENSION
+    if (managedEnv.YIRU_OMP_STATUS_EXTENSION) {
+      baseEnv.YIRU_OMP_STATUS_EXTENSION = managedEnv.YIRU_OMP_STATUS_EXTENSION
     } else {
-      delete baseEnv.ORCA_OMP_STATUS_EXTENSION
+      delete baseEnv.YIRU_OMP_STATUS_EXTENSION
     }
     return
   }
-  delete baseEnv.ORCA_PI_CODING_AGENT_DIR
-  if (managedEnv.ORCA_PI_SOURCE_AGENT_DIR) {
-    baseEnv.ORCA_PI_SOURCE_AGENT_DIR = managedEnv.ORCA_PI_SOURCE_AGENT_DIR
+  delete baseEnv.YIRU_PI_CODING_AGENT_DIR
+  if (managedEnv.YIRU_PI_SOURCE_AGENT_DIR) {
+    baseEnv.YIRU_PI_SOURCE_AGENT_DIR = managedEnv.YIRU_PI_SOURCE_AGENT_DIR
   } else {
-    delete baseEnv.ORCA_PI_SOURCE_AGENT_DIR
+    delete baseEnv.YIRU_PI_SOURCE_AGENT_DIR
   }
 }
 
@@ -841,9 +840,9 @@ function getInheritedAgentHookEnvKeysToDelete(
   return AGENT_HOOK_RUNTIME_ENV_KEYS.filter((key) => env[key] === undefined)
 }
 
-// Why: when agent status is disabled, a nested Orca terminal can still pass
+// Why: when agent status is disabled, a nested Yiru terminal can still pass
 // through prior OpenCode or legacy Pi/OMP overlay env. Restore the user's
-// original source dir when Orca recorded one, otherwise strip only values
+// original source dir when Yiru recorded one, otherwise strip only values
 // known to be ours.
 function restoreOrStripOverlayEnv(
   baseEnv: Record<string, string>,
@@ -872,13 +871,13 @@ function isMimoLaunchCommand(launchCommand: string | undefined): boolean {
 }
 
 function resolveMimocodeSourceHome(baseEnv: Record<string, string>): string | undefined {
-  const sourceHome = baseEnv.ORCA_MIMOCODE_SOURCE_HOME ?? process.env.ORCA_MIMOCODE_SOURCE_HOME
+  const sourceHome = baseEnv.YIRU_MIMOCODE_SOURCE_HOME ?? process.env.YIRU_MIMOCODE_SOURCE_HOME
   if (sourceHome) {
     return sourceHome
   }
   const configHome = baseEnv.MIMOCODE_HOME ?? process.env.MIMOCODE_HOME
-  const orcaHome = baseEnv.ORCA_MIMOCODE_HOME ?? process.env.ORCA_MIMOCODE_HOME
-  if (configHome && orcaHome && configHome === orcaHome) {
+  const yiruHome = baseEnv.YIRU_MIMOCODE_HOME ?? process.env.YIRU_MIMOCODE_HOME
+  if (configHome && yiruHome && configHome === yiruHome) {
     return undefined
   }
   return configHome
@@ -886,18 +885,18 @@ function resolveMimocodeSourceHome(baseEnv: Record<string, string>): string | un
 
 function resolveOpenCodeSourceConfigDir(baseEnv: Record<string, string>): string | undefined {
   const sourceDir =
-    baseEnv.ORCA_OPENCODE_SOURCE_CONFIG_DIR ?? process.env.ORCA_OPENCODE_SOURCE_CONFIG_DIR
+    baseEnv.YIRU_OPENCODE_SOURCE_CONFIG_DIR ?? process.env.YIRU_OPENCODE_SOURCE_CONFIG_DIR
   if (sourceDir) {
     return sourceDir
   }
 
   const configDir = baseEnv.OPENCODE_CONFIG_DIR ?? process.env.OPENCODE_CONFIG_DIR
-  const orcaConfigDir = baseEnv.ORCA_OPENCODE_CONFIG_DIR ?? process.env.ORCA_OPENCODE_CONFIG_DIR
-  // Why: nested Orca terminals inherit OPENCODE_CONFIG_DIR from the parent
-  // PTY. If there is no recorded source dir, that value is Orca-owned, not a
-  // user config. Treating it as user config makes child Orcas mirror Orca's
+  const yiruConfigDir = baseEnv.YIRU_OPENCODE_CONFIG_DIR ?? process.env.YIRU_OPENCODE_CONFIG_DIR
+  // Why: nested Yiru terminals inherit OPENCODE_CONFIG_DIR from the parent
+  // PTY. If there is no recorded source dir, that value is Yiru-owned, not a
+  // user config. Treating it as user config makes child Yirus mirror Yiru's
   // hook dir and can create large OpenCode runtime trees per terminal.
-  if (configDir && orcaConfigDir && configDir === orcaConfigDir) {
+  if (configDir && yiruConfigDir && configDir === yiruConfigDir) {
     return undefined
   }
 
@@ -914,7 +913,7 @@ function resolveOpenCodeSourceConfigDir(baseEnv: Record<string, string>): string
 /**
  * Mutates `baseEnv` in place with all host-local PTY env vars and returns it.
  *
- * This is the single source of truth for the env shape an Orca PTY needs
+ * This is the single source of truth for the env shape a Yiru PTY needs
  * BEFORE the provider-specific wrapper (LocalPtyProvider's TERM/LANG defaults,
  * DaemonPtyAdapter's subprocess env). Callers are responsible for the SSH
  * guard — if `args.connectionId` is set, do NOT call this function, because
@@ -962,54 +961,54 @@ export function buildPtyHostEnv(
 
   if (opts.agentStatusHooksEnabled) {
     // Why: OPENCODE_CONFIG_DIR is a singular path, not a colon-list, so a user
-    // value cannot coexist with an Orca-only injection. Hand the user's value
+    // value cannot coexist with a Yiru-only injection. Hand the user's value
     // (when present) to the hook service and let it materialize a source-scoped
-    // mirror overlay that lets the user's plugins and Orca's status plugin
+    // mirror overlay that lets the user's plugins and Yiru's status plugin
     // load together. See docs/opencode-config-dir-collision.md.
     Object.assign(baseEnv, openCodeHookService.buildPtyEnv(id, preexistingOpenCodeConfigDir))
     if (baseEnv.OPENCODE_CONFIG_DIR) {
       // Why: ~/.zshrc can re-export the user's default after spawn; shell-ready
       // wrappers restore this PTY-scoped value after user startup files run.
-      baseEnv.ORCA_OPENCODE_CONFIG_DIR = baseEnv.OPENCODE_CONFIG_DIR
+      baseEnv.YIRU_OPENCODE_CONFIG_DIR = baseEnv.OPENCODE_CONFIG_DIR
       if (preexistingOpenCodeConfigDir) {
-        // Why: terminals launched from another Orca terminal inherit the overlay
+        // Why: terminals launched from another Yiru terminal inherit the overlay
         // as OPENCODE_CONFIG_DIR; keep the original source so overlays do not
         // mirror overlays and drop the user's real config.
-        baseEnv.ORCA_OPENCODE_SOURCE_CONFIG_DIR = preexistingOpenCodeConfigDir
+        baseEnv.YIRU_OPENCODE_SOURCE_CONFIG_DIR = preexistingOpenCodeConfigDir
       } else {
-        delete baseEnv.ORCA_OPENCODE_SOURCE_CONFIG_DIR
+        delete baseEnv.YIRU_OPENCODE_SOURCE_CONFIG_DIR
       }
     }
     if (isMimoLaunchCommand(launchCommandHint)) {
       const preexistingMimocodeHome = resolveMimocodeSourceHome(baseEnv)
       Object.assign(baseEnv, mimoCodeHookService.buildPtyEnv(id, preexistingMimocodeHome))
       if (baseEnv.MIMOCODE_HOME) {
-        baseEnv.ORCA_MIMOCODE_HOME = baseEnv.MIMOCODE_HOME
+        baseEnv.YIRU_MIMOCODE_HOME = baseEnv.MIMOCODE_HOME
         if (preexistingMimocodeHome) {
-          baseEnv.ORCA_MIMOCODE_SOURCE_HOME = preexistingMimocodeHome
+          baseEnv.YIRU_MIMOCODE_SOURCE_HOME = preexistingMimocodeHome
         } else {
-          delete baseEnv.ORCA_MIMOCODE_SOURCE_HOME
+          delete baseEnv.YIRU_MIMOCODE_SOURCE_HOME
         }
       }
     }
   } else {
     restoreOrStripOverlayEnv(baseEnv, {
       primary: 'OPENCODE_CONFIG_DIR',
-      overlay: 'ORCA_OPENCODE_CONFIG_DIR',
-      source: 'ORCA_OPENCODE_SOURCE_CONFIG_DIR'
+      overlay: 'YIRU_OPENCODE_CONFIG_DIR',
+      source: 'YIRU_OPENCODE_SOURCE_CONFIG_DIR'
     })
     restoreOrStripOverlayEnv(baseEnv, {
       primary: 'MIMOCODE_HOME',
-      overlay: 'ORCA_MIMOCODE_HOME',
-      source: 'ORCA_MIMOCODE_SOURCE_HOME'
+      overlay: 'YIRU_MIMOCODE_HOME',
+      source: 'YIRU_MIMOCODE_SOURCE_HOME'
     })
   }
 
-  // Why: Claude/Codex native hooks run inside the shell process, so Orca
+  // Why: Claude/Codex native hooks run inside the shell process, so Yiru
   // must inject the loopback receiver coordinates before the agent starts.
   // Without these env vars the global hook config cannot map callbacks back
-  // to the correct Orca pane.
-  // Why: nested Orca terminals can inherit another process's hook endpoint or
+  // to the correct Yiru pane.
+  // Why: nested Yiru terminals can inherit another process's hook endpoint or
   // token. Strip all hook runtime coordinates before injecting this PTY's fresh
   // server values so callbacks route to the owning app/runtime.
   for (const key of AGENT_HOOK_RUNTIME_ENV_KEYS) {
@@ -1027,13 +1026,13 @@ export function buildPtyHostEnv(
       wslHookRelayManager.ensureForDistro(distro)
       const guestEndpoint = wslHookRelayManager.getGuestEndpointFilePath(distro)
       if (guestEndpoint) {
-        baseEnv.ORCA_AGENT_HOOK_ENDPOINT = guestEndpoint
+        baseEnv.YIRU_AGENT_HOOK_ENDPOINT = guestEndpoint
       }
     }
   }
 
   // Why: PI_CODING_AGENT_DIR owns Pi's / OMP's full config/session root. Keep
-  // that home as the user's normal source of truth and install only Orca-owned,
+  // that home as the user's normal source of truth and install only Yiru-owned,
   // env-guarded extension files into the selected agent's extension dir.
   if (opts.agentStatusHooksEnabled) {
     clearPiAgentShadowEnv(baseEnv, 'pi')
@@ -1054,44 +1053,44 @@ export function buildPtyHostEnv(
     // so a nested PTY does not inherit a stale overlay from either agent.
     restoreOrStripOverlayEnv(baseEnv, {
       primary: 'PI_CODING_AGENT_DIR',
-      overlay: 'ORCA_PI_CODING_AGENT_DIR',
-      source: 'ORCA_PI_SOURCE_AGENT_DIR'
+      overlay: 'YIRU_PI_CODING_AGENT_DIR',
+      source: 'YIRU_PI_SOURCE_AGENT_DIR'
     })
     restoreOrStripOverlayEnv(baseEnv, {
       primary: 'PI_CODING_AGENT_DIR',
-      overlay: 'ORCA_OMP_CODING_AGENT_DIR',
-      source: 'ORCA_OMP_SOURCE_AGENT_DIR'
+      overlay: 'YIRU_OMP_CODING_AGENT_DIR',
+      source: 'YIRU_OMP_SOURCE_AGENT_DIR'
     })
-    delete baseEnv.ORCA_OMP_STATUS_EXTENSION
+    delete baseEnv.YIRU_OMP_STATUS_EXTENSION
   }
 
-  // Why: Codex account switching now materializes auth into an Orca-scoped
-  // runtime home, and Codex launched inside Orca terminals must use that same
+  // Why: Codex account switching now materializes auth into a Yiru-scoped
+  // runtime home, and Codex launched inside Yiru terminals must use that same
   // prepared home as quota fetches and other entry points. Keep the override
-  // PTY-scoped so dev/prod Orcas do not share hooks through ~/.codex.
+  // PTY-scoped so dev/prod Yirus do not share hooks through ~/.codex.
   if (opts.skipCodexHomeEnv) {
     delete baseEnv.CODEX_HOME
-    delete baseEnv.ORCA_CODEX_HOME
+    delete baseEnv.YIRU_CODEX_HOME
   } else if (opts.selectedCodexHomePath) {
     baseEnv.CODEX_HOME = opts.selectedCodexHomePath
     // Why: user startup files may re-export CODEX_HOME; shell-ready wrappers
     // restore this runtime home before Codex can be launched from the prompt.
-    baseEnv.ORCA_CODEX_HOME = opts.selectedCodexHomePath
+    baseEnv.YIRU_CODEX_HOME = opts.selectedCodexHomePath
   }
 
-  // Why: WSL shells need the managed userData root for shell-ready wrappers; dev-mode terminals need the same export so `orca` targets the live dev instance.
+  // Why: WSL shells need the managed userData root for shell-ready wrappers; dev-mode terminals need the same export so `yiru` targets the live dev instance.
   if (opts.isWsl) {
-    baseEnv.ORCA_USER_DATA_PATH = opts.userDataPath
-    // Why: managed WSL registration deliberately uses `orca-ide`; exposing
-    // that literal keeps agent guidance scoped to WSL without a bare-orca shim.
-    baseEnv.ORCA_CLI_COMMAND = opts.isPackaged ? 'orca-ide' : 'orca-dev'
+    baseEnv.YIRU_USER_DATA_PATH = opts.userDataPath
+    // Why: exposing the registered WSL command keeps agent guidance scoped to
+    // the execution host instead of whichever command exists on Windows PATH.
+    baseEnv.YIRU_CLI_COMMAND = opts.isPackaged ? 'yiru' : 'yiru-dev'
   } else {
     if (!opts.isPackaged) {
-      baseEnv.ORCA_USER_DATA_PATH ??= opts.userDataPath
+      baseEnv.YIRU_USER_DATA_PATH ??= opts.userDataPath
     }
-    delete baseEnv.ORCA_CLI_COMMAND
+    delete baseEnv.YIRU_CLI_COMMAND
   }
-  // Why: dev mode needs the launcher PATH override so `orca` resolves to the dev build instead of the production binary at /usr/local/bin/orca.
+  // Why: dev mode needs the launcher PATH override so `yiru` resolves to the dev build instead of the production binary at /usr/local/bin/yiru.
   if (!opts.isPackaged) {
     const devCliBin = join(opts.userDataPath, 'cli', 'bin')
     const inheritedPath = readInheritedPath(baseEnv)
@@ -1100,30 +1099,18 @@ export function buildPtyHostEnv(
     // the current working directory (a foot-gun we don't want to create
     // for dev terminals).
     baseEnv.PATH = inheritedPath ? `${devCliBin}${delimiter}${inheritedPath}` : devCliBin
-  } else if (process.platform === 'linux') {
-    // Why: the Linux CLI installs as `orca-ide` (never shadowing GNOME's
-    // /usr/bin/orca screen reader), but agent-facing guidance invokes bare
-    // `orca`. Scope a bare-`orca` shim to Orca-managed PTYs so agents reach
-    // the Orca CLI instead of the screen reader (stablyai/orca#7904).
-    const shimDir = ensureLinuxTerminalOrcaCliShimDir({ userDataPath: opts.userDataPath })
-    if (shimDir) {
-      const inheritedEntries = readInheritedPath(baseEnv)
-        .split(delimiter)
-        .filter((entry) => entry.length > 0 && entry !== shimDir)
-      baseEnv.PATH = [shimDir, ...inheritedEntries].join(delimiter)
-    }
   }
 
   // Why: GitHub attribution should only affect commands launched from
-  // Orca's own PTYs. Injecting lightweight PATH shims at spawn-time keeps
-  // the behavior local to Orca instead of rewriting user git config or
+  // Yiru's own PTYs. Injecting lightweight PATH shims at spawn-time keeps
+  // the behavior local to Yiru instead of rewriting user git config or
   // touching external shells.
   if (!opts.githubAttributionEnabled) {
-    delete baseEnv.ORCA_ENABLE_GIT_ATTRIBUTION
-    delete baseEnv.ORCA_GIT_COMMIT_TRAILER
-    delete baseEnv.ORCA_GH_PR_FOOTER
-    delete baseEnv.ORCA_GH_ISSUE_FOOTER
-    delete baseEnv.ORCA_ATTRIBUTION_SHIM_DIR
+    delete baseEnv.YIRU_ENABLE_GIT_ATTRIBUTION
+    delete baseEnv.YIRU_GIT_COMMIT_TRAILER
+    delete baseEnv.YIRU_GH_PR_FOOTER
+    delete baseEnv.YIRU_GH_ISSUE_FOOTER
+    delete baseEnv.YIRU_ATTRIBUTION_SHIM_DIR
   }
   applyTerminalAttributionEnv(baseEnv, {
     enabled: opts.githubAttributionEnabled,
@@ -1580,7 +1567,7 @@ export function unbindLocalProviderListeners(): void {
 
 export function registerPtyHandlers(
   mainWindow: BrowserWindow,
-  runtime?: OrcaRuntimeService,
+  runtime?: YiruRuntimeService,
   getSelectedCodexHomePath?: GetSelectedCodexHomePath,
   getSettings?: () => GlobalSettings,
   prepareClaudeAuth?: PrepareClaudeAuth,
@@ -1677,19 +1664,19 @@ export function registerPtyHandlers(
         })
         // Why: agents need their own terminal handle at process start so they
         // can self-identify in orchestration messages without an extra RPC.
-        const requestedHandle = baseEnv.ORCA_TERMINAL_HANDLE
+        const requestedHandle = baseEnv.YIRU_TERMINAL_HANDLE
         const preAllocatedHandle =
           requestedHandle && trustedTerminalHandleEnv.has(requestedHandle)
             ? requestedHandle
             : runtime?.preAllocateHandleForPty(id)
         if (requestedHandle && requestedHandle !== preAllocatedHandle) {
-          delete env.ORCA_TERMINAL_HANDLE
+          delete env.YIRU_TERMINAL_HANDLE
         }
         if (preAllocatedHandle) {
-          env.ORCA_TERMINAL_HANDLE = preAllocatedHandle
+          env.YIRU_TERMINAL_HANDLE = preAllocatedHandle
         }
         if (ctx?.isWsl === true) {
-          addOrcaWslInteropEnv(env)
+          addYiruWslInteropEnv(env)
         }
         return env
       },
@@ -3139,9 +3126,9 @@ export function registerPtyHandlers(
       let env: Record<string, string> | undefined = claudeAuth
         ? { ...sshScopedEnv, ...claudeAuth.envPatch }
         : sshScopedEnv
-      const requestedAgentTeamsPath = env?.ORCA_AGENT_TEAMS_TEAM_ID ? env.PATH : undefined
+      const requestedAgentTeamsPath = env?.YIRU_AGENT_TEAMS_TEAM_ID ? env.PATH : undefined
       if (args.preAllocatedHandle) {
-        env = { ...env, ORCA_TERMINAL_HANDLE: args.preAllocatedHandle }
+        env = { ...env, YIRU_TERMINAL_HANDLE: args.preAllocatedHandle }
       }
       const selectedCodexHomePath = isDaemonHostSpawn
         ? getCompatibleSelectedCodexHomePath(
@@ -3434,7 +3421,7 @@ export function registerPtyHandlers(
         // Why: runtime-owned CLI PTYs bypass the renderer `pty:spawn` handler,
         // so record their spawn-time paneKey here too. Synthetic hook titles and
         // paneKey-scoped cache cleanup both depend on this reverse lookup.
-        const paneKey = rememberPaneKeyForPty(result.id, env?.ORCA_PANE_KEY)
+        const paneKey = rememberPaneKeyForPty(result.id, env?.YIRU_PANE_KEY)
         const pendingSerializer = paneKey ? pendingByPaneKey.get(paneKey) : undefined
         const inheritRendererReadiness =
           result.isReattach === true &&
@@ -3813,7 +3800,7 @@ export function registerPtyHandlers(
         tabId?: string
         leafId?: string
         // Why: telemetry-plan.md§Agent launch semantics. The renderer
-        // threads what Orca was *asked* to launch through this field; main
+        // threads what Yiru was *asked* to launch through this field; main
         // fires `agent_started` only after `provider.spawn` resolves. Loose
         // typing on the IPC boundary because the main-side schema
         // validator is the single enforcement point — `track()` will drop
@@ -3933,12 +3920,12 @@ export function registerPtyHandlers(
           : null
       // Why: the renderer sets pane env for SSH too. Only forward it to the
       // remote when the relay hook path is enabled; otherwise a newer relay
-      // could emit statuses this Orca build is not prepared to route.
+      // could emit statuses this Yiru build is not prepared to route.
       const sshSourceEnv = stripRemotePaneEnvWhenHooksDisabled(args.connectionId, args.env)
       const baseEnvWithAuth = claudeAuth
         ? { ...sshSourceEnv, ...claudeAuth.envPatch }
         : sshSourceEnv
-      const spawnPaneKey = baseEnvWithAuth?.ORCA_PANE_KEY
+      const spawnPaneKey = baseEnvWithAuth?.YIRU_PANE_KEY
       const parsedSpawnPaneKey = parseValidPaneKey(spawnPaneKey)
       const verifiedPaneKey =
         parsedSpawnPaneKey &&
@@ -4007,32 +3994,32 @@ export function registerPtyHandlers(
           }
         }
       }
-      const requestedAgentTeamsPath = baseEnv?.ORCA_AGENT_TEAMS_TEAM_ID ? baseEnv.PATH : undefined
+      const requestedAgentTeamsPath = baseEnv?.YIRU_AGENT_TEAMS_TEAM_ID ? baseEnv.PATH : undefined
       const agentTeamsEnvToDelete = shouldRefreshAgentTeamsEnv
-        ? ['TERM_PROGRAM', 'ORCA_ATTRIBUTION_SHIM_DIR']
+        ? ['TERM_PROGRAM', 'YIRU_ATTRIBUTION_SHIM_DIR']
         : undefined
       if (baseEnv && stablePaneKey) {
-        baseEnv.ORCA_PANE_KEY = stablePaneKey
+        baseEnv.YIRU_PANE_KEY = stablePaneKey
         if (typeof args.tabId === 'string') {
-          baseEnv.ORCA_TAB_ID = args.tabId
+          baseEnv.YIRU_TAB_ID = args.tabId
         } else if (!args.connectionId) {
-          delete baseEnv.ORCA_TAB_ID
+          delete baseEnv.YIRU_TAB_ID
         }
         if (typeof args.worktreeId === 'string') {
-          baseEnv.ORCA_WORKTREE_ID = args.worktreeId
+          baseEnv.YIRU_WORKTREE_ID = args.worktreeId
         } else if (!args.connectionId) {
-          delete baseEnv.ORCA_WORKTREE_ID
+          delete baseEnv.YIRU_WORKTREE_ID
         }
       } else if (baseEnv) {
-        // Why: ORCA_PANE_KEY crosses into shells and hook registries. Only the
+        // Why: YIRU_PANE_KEY crosses into shells and hook registries. Only the
         // key proven to match this spawn's tab+leaf may leave the IPC boundary.
-        delete baseEnv.ORCA_PANE_KEY
-        delete baseEnv.ORCA_TAB_ID
-        delete baseEnv.ORCA_WORKTREE_ID
-        delete baseEnv.ORCA_AGENT_LAUNCH_TOKEN
+        delete baseEnv.YIRU_PANE_KEY
+        delete baseEnv.YIRU_TAB_ID
+        delete baseEnv.YIRU_WORKTREE_ID
+        delete baseEnv.YIRU_AGENT_LAUNCH_TOKEN
       }
       const validatedPaneKey = stablePaneKey
-      // Why: SSH can strip ORCA_PANE_KEY when remote hooks are disabled; the
+      // Why: SSH can strip YIRU_PANE_KEY when remote hooks are disabled; the
       // IPC tab/leaf metadata still names the pane and matches runtime fallback.
       const reservationPaneKey = metadataPaneKey ?? validatedPaneKey
       const validatedLeafId = verifiedLeafId ?? metadataLeafId
@@ -4107,7 +4094,7 @@ export function registerPtyHandlers(
       }
       spawnTiming.mark('host_env')
       const spawnEnv = preAllocatedHandle
-        ? { ...env, ORCA_TERMINAL_HANDLE: preAllocatedHandle }
+        ? { ...env, YIRU_TERMINAL_HANDLE: preAllocatedHandle }
         : env
       const envToDelete = claudeAuth?.stripAuthEnv
         ? [...CLAUDE_AUTH_ENV_VARS, 'ANTHROPIC_CUSTOM_HEADERS']
@@ -4376,7 +4363,7 @@ export function registerPtyHandlers(
         }
         const relayResultId = getRelayPtyId(args.connectionId, result.id)
         if (store && args.connectionId) {
-          // Why: remote PTYs live in the SSH relay grace window after Orca
+          // Why: remote PTYs live in the SSH relay grace window after Yiru
           // detaches. Persist their IDs immediately so reconnect can reattach
           // instead of treating the tab as a fresh shell.
           store.upsertSshRemotePtyLease({
@@ -4533,7 +4520,7 @@ export function registerPtyHandlers(
         if (isClaudeLaunch) {
           markClaudePtySpawned(result.id)
         }
-        // Why: renderer sets ORCA_PANE_KEY in `args.env` for every pane-owned
+        // Why: renderer sets YIRU_PANE_KEY in `args.env` for every pane-owned
         // spawn (see pty-connection.ts). Recording the mapping here lets
         // clearProviderPtyState clear the agent-hooks server's per-paneKey
         // caches when the PTY exits.
@@ -5442,13 +5429,13 @@ export function registerPtyHandlers(
 }
 
 export function registerHeadlessPtyRuntime(
-  runtime: OrcaRuntimeService,
+  runtime: YiruRuntimeService,
   getSelectedCodexHomePath?: GetSelectedCodexHomePath,
   getSettings?: () => GlobalSettings,
   prepareClaudeAuth?: PrepareClaudeAuth,
   store?: Store
 ): void {
-  // Why: headless `orca serve` has no renderer window, but the runtime still
+  // Why: headless `yiru serve` has no renderer window, but the runtime still
   // needs the same PTY controller and provider listeners as desktop so remote
   // clients can create, stream, inspect, and stop terminals.
   const headlessWindow = {

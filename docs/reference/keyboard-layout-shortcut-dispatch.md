@@ -9,7 +9,7 @@ other non-US layouts, and it also makes user keybinding overrides impossible to 
 
 ## Decision
 
-Orca app shortcuts dispatch by logical key by default.
+Yiru app shortcuts dispatch by logical key by default.
 
 The shared keybinding registry in `src/shared/keybindings.ts` is the source of truth for
 app commands, configurable commands, shortcut recording, labels, conflict detection, browser
@@ -28,7 +28,7 @@ Allowed physical-code uses:
 - Dead, unidentified, or missing logical keys where `KeyboardEvent.key` cannot describe the
   produced key.
 - Terminal byte encoding where the intent is a physical terminal escape sequence rather than
-  an Orca command.
+  a Yiru command.
 
 Disallowed physical-code uses:
 
@@ -42,12 +42,12 @@ Disallowed physical-code uses:
 
 Terminal handling has two different jobs:
 
-1. Orca commands that act on terminal UI, such as copy selection, paste, search, clear,
+1. Yiru commands that act on terminal UI, such as copy selection, paste, search, clear,
    pane focus, split, and close. These are app shortcuts and must be layout-aware.
 2. Bytes sent to the shell, such as readline escapes and Option-as-Alt sequences. These may
    use physical key positions when terminal compatibility requires it.
 
-This boundary is intentional. It lets non-US layouts use Orca commands naturally while
+This boundary is intentional. It lets non-US layouts use Yiru commands naturally while
 preserving shell behavior where users expect physical terminal-control sequences.
 
 ## Regression Requirements

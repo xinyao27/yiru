@@ -20,7 +20,7 @@ const baseSession: AiVaultSession = {
   agent: 'codex',
   sessionId: 'session-1',
   title: 'Find the pane',
-  cwd: '/repo/orca/src',
+  cwd: '/repo/yiru/src',
   branch: null,
   model: null,
   filePath: '/home/ada/.codex/session-1.jsonl',
@@ -39,10 +39,10 @@ const baseSession: AiVaultSession = {
 
 function makeWorktree(overrides: Partial<Worktree> = {}): Worktree {
   const worktree: Worktree = {
-    id: 'repo-1::/repo/orca',
+    id: 'repo-1::/repo/yiru',
     repoId: 'repo-1',
-    displayName: 'orca',
-    path: '/repo/orca',
+    displayName: 'yiru',
+    path: '/repo/yiru',
     head: 'abc123',
     branch: 'main',
     isBare: false,
@@ -63,8 +63,8 @@ function makeWorktree(overrides: Partial<Worktree> = {}): Worktree {
 function makeRepo(overrides: Partial<Repo> = {}): Repo {
   return {
     id: 'repo-1',
-    path: '/repo/orca',
-    displayName: 'orca',
+    path: '/repo/yiru',
+    displayName: 'yiru',
     badgeColor: '#737373',
     addedAt: 1,
     connectionId: null,
@@ -85,8 +85,8 @@ describe('resolveAiVaultSessionWorktreeInfo', () => {
       })
     ).toMatchObject({
       status: 'current',
-      label: 'orca',
-      path: '/repo/orca'
+      label: 'yiru',
+      path: '/repo/yiru'
     })
   })
 
@@ -104,9 +104,9 @@ describe('resolveAiVaultSessionWorktreeInfo', () => {
 
   it('uses prior worktree paths to identify renamed active worktrees', () => {
     const worktree = makeWorktree({
-      id: 'repo-1::/repo/orca-renamed',
-      path: '/repo/orca-renamed',
-      priorWorktreeIds: ['repo-1::/repo/orca']
+      id: 'repo-1::/repo/yiru-renamed',
+      path: '/repo/yiru-renamed',
+      priorWorktreeIds: ['repo-1::/repo/yiru']
     })
 
     expect(
@@ -117,8 +117,8 @@ describe('resolveAiVaultSessionWorktreeInfo', () => {
       })
     ).toMatchObject({
       status: 'active',
-      label: 'orca',
-      path: '/repo/orca'
+      label: 'yiru',
+      path: '/repo/yiru'
     })
   })
 
@@ -131,48 +131,48 @@ describe('resolveAiVaultSessionWorktreeInfo', () => {
       })
     ).toMatchObject({
       status: 'unavailable',
-      label: 'orca/src',
-      path: '/repo/orca/src'
+      label: 'yiru/src',
+      path: '/repo/yiru/src'
     })
   })
 
   it('matches WSL UNC worktree paths to Linux transcript cwd values', () => {
     const worktree = makeWorktree({
-      path: '\\\\wsl.localhost\\Ubuntu\\home\\ada\\orca'
+      path: '\\\\wsl.localhost\\Ubuntu\\home\\ada\\yiru'
     })
 
     expect(
       resolveAiVaultSessionWorktreeInfo({
-        session: { ...baseSession, cwd: '/home/ada/orca/src' },
+        session: { ...baseSession, cwd: '/home/ada/yiru/src' },
         worktrees: [worktree],
         activeWorktreeId: null
       })
     ).toMatchObject({
       status: 'active',
-      label: 'orca',
-      path: '\\\\wsl.localhost\\Ubuntu\\home\\ada\\orca'
+      label: 'yiru',
+      path: '\\\\wsl.localhost\\Ubuntu\\home\\ada\\yiru'
     })
   })
 
   it('uses the session host when multiple worktrees share the same path', () => {
     const localWorktree = makeWorktree({
-      id: 'repo-local::/srv/orca',
+      id: 'repo-local::/srv/yiru',
       repoId: 'repo-local',
       displayName: 'local',
-      path: '/srv/orca',
+      path: '/srv/yiru',
       hostId: 'local'
     })
     const sshWorktree = makeWorktree({
-      id: 'repo-ssh::/srv/orca',
+      id: 'repo-ssh::/srv/yiru',
       repoId: 'repo-ssh',
       displayName: 'ssh',
-      path: '/srv/orca',
+      path: '/srv/yiru',
       hostId: 'ssh:target-1'
     })
 
     expect(
       resolveAiVaultSessionWorktreeInfo({
-        session: { ...baseSession, cwd: '/srv/orca/src', executionHostId: 'ssh:target-1' },
+        session: { ...baseSession, cwd: '/srv/yiru/src', executionHostId: 'ssh:target-1' },
         worktrees: [localWorktree, sshWorktree],
         activeWorktreeId: null
       })
@@ -184,15 +184,15 @@ describe('resolveAiVaultSessionWorktreeInfo', () => {
 
   it('uses repo host ownership when a legacy worktree lacks host metadata', () => {
     const worktree = makeWorktree({
-      id: 'repo-ssh::/srv/orca',
+      id: 'repo-ssh::/srv/yiru',
       repoId: 'repo-ssh',
       displayName: 'ssh',
-      path: '/srv/orca'
+      path: '/srv/yiru'
     })
 
     expect(
       resolveAiVaultSessionWorktreeInfo({
-        session: { ...baseSession, cwd: '/srv/orca/src', executionHostId: 'ssh:target-1' },
+        session: { ...baseSession, cwd: '/srv/yiru/src', executionHostId: 'ssh:target-1' },
         repos: [makeRepo({ id: 'repo-ssh', connectionId: 'target-1', executionHostId: null })],
         worktrees: [worktree],
         activeWorktreeId: null
@@ -231,11 +231,11 @@ describe('extractWorktreePathFromSessionTitle', () => {
   it('reads worktree paths embedded in session titles', () => {
     expect(
       extractWorktreePathFromSessionTitle(
-        'Inspect PR #6229 - Worktree: /Users/ada/projects/orca/fix-tabs'
+        'Inspect PR #6229 - Worktree: /Users/ada/projects/yiru/fix-tabs'
       )
-    ).toBe('/Users/ada/projects/orca/fix-tabs')
-    expect(extractWorktreePathFromSessionTitle('Worktree: /tmp/orca-worker')).toBe(
-      '/tmp/orca-worker'
+    ).toBe('/Users/ada/projects/yiru/fix-tabs')
+    expect(extractWorktreePathFromSessionTitle('Worktree: /tmp/yiru-worker')).toBe(
+      '/tmp/yiru-worker'
     )
   })
 })
@@ -248,12 +248,12 @@ describe('resolveAiVaultSessionWorktreeDisplay', () => {
           ...baseSession,
           cwd: null,
           branch: null,
-          title: 'Fix tabs - Worktree: /Users/ada/projects/orca/fix-tabs'
+          title: 'Fix tabs - Worktree: /Users/ada/projects/yiru/fix-tabs'
         },
         worktrees: [makeWorktree()],
         activeWorktreeId: null
       })?.path
-    ).toBe('/Users/ada/projects/orca/fix-tabs')
+    ).toBe('/Users/ada/projects/yiru/fix-tabs')
 
     expect(
       resolveAiVaultSessionWorktreeDisplay({
@@ -267,8 +267,8 @@ describe('resolveAiVaultSessionWorktreeDisplay', () => {
 
 describe('aiVaultWorktreeCompactPath', () => {
   it('keeps the last two path segments for dense detail rows', () => {
-    expect(aiVaultWorktreeCompactPath('/Users/ada/projects/orca/improve-agent-session')).toBe(
-      'orca/improve-agent-session'
+    expect(aiVaultWorktreeCompactPath('/Users/ada/projects/yiru/improve-agent-session')).toBe(
+      'yiru/improve-agent-session'
     )
   })
 })
@@ -321,8 +321,8 @@ function makeWorktreeInfo(
 ): AiVaultSessionWorktreeInfo {
   return {
     status,
-    label: 'orca',
-    path: '/repo/orca',
-    ...(status === 'unavailable' ? {} : { worktreeId: 'repo-1::/repo/orca' })
+    label: 'yiru',
+    path: '/repo/yiru',
+    ...(status === 'unavailable' ? {} : { worktreeId: 'repo-1::/repo/yiru' })
   }
 }

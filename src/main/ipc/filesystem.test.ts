@@ -730,8 +730,8 @@ describe('registerFilesystemHandlers', () => {
   })
 
   it('allows readDir when a registered worktree resolves to a macOS canonical alias', async () => {
-    const aliasWorktreePath = path.resolve('/var/folders/orca/worktrees/feature')
-    const canonicalWorktreePath = path.resolve('/private/var/folders/orca/worktrees/feature')
+    const aliasWorktreePath = path.resolve('/var/folders/yiru/worktrees/feature')
+    const canonicalWorktreePath = path.resolve('/private/var/folders/yiru/worktrees/feature')
     registerWorktreeRootsForRepo(store as never, 'repo-1', [REPO_PATH, aliasWorktreePath])
     realpathMock.mockImplementation(async (targetPath: string) => {
       if (targetPath === aliasWorktreePath) {
@@ -804,8 +804,8 @@ describe('registerFilesystemHandlers', () => {
   })
 
   it('allows deletePath when a registered worktree parent resolves to a macOS canonical alias', async () => {
-    const aliasWorktreePath = path.resolve('/var/folders/orca/worktrees/feature')
-    const canonicalWorktreePath = path.resolve('/private/var/folders/orca/worktrees/feature')
+    const aliasWorktreePath = path.resolve('/var/folders/yiru/worktrees/feature')
+    const canonicalWorktreePath = path.resolve('/private/var/folders/yiru/worktrees/feature')
     const aliasFilePath = path.join(aliasWorktreePath, 'README.md')
     const canonicalFilePath = path.join(canonicalWorktreePath, 'README.md')
     registerWorktreeRootsForRepo(store as never, 'repo-1', [REPO_PATH, aliasWorktreePath])
@@ -825,8 +825,8 @@ describe('registerFilesystemHandlers', () => {
   })
 
   it('rejects readFile when a symlink in a canonical alias worktree escapes the registered root', async () => {
-    const aliasWorktreePath = path.resolve('/var/folders/orca/worktrees/feature')
-    const canonicalWorktreePath = path.resolve('/private/var/folders/orca/worktrees/feature')
+    const aliasWorktreePath = path.resolve('/var/folders/yiru/worktrees/feature')
+    const canonicalWorktreePath = path.resolve('/private/var/folders/yiru/worktrees/feature')
     const aliasLinkPath = path.join(aliasWorktreePath, 'link.txt')
     registerWorktreeRootsForRepo(store as never, 'repo-1', [REPO_PATH, aliasWorktreePath])
     realpathMock.mockImplementation(async (targetPath: string) => {
@@ -1656,7 +1656,7 @@ describe('registerFilesystemHandlers', () => {
     )
   })
 
-  it('prepares the Orca-managed Codex home for the default system selection', async () => {
+  it('prepares the Yiru-managed Codex home for the default system selection', async () => {
     const context = {
       branch: 'feature/ai',
       stagedSummary: 'M\tREADME.md',
@@ -1671,7 +1671,7 @@ describe('registerFilesystemHandlers', () => {
     })
 
     registerFilesystemHandlers(store as never, {
-      prepareForCodexLaunch: () => '/orca-managed/codex-home'
+      prepareForCodexLaunch: () => '/yiru-managed/codex-home'
     })
 
     await handlers.get('git:generateCommitMessage')!(null, {
@@ -1684,7 +1684,7 @@ describe('registerFilesystemHandlers', () => {
       expect.objectContaining({
         kind: 'local',
         cwd: WORKTREE_FEATURE_PATH,
-        env: expect.objectContaining({ CODEX_HOME: '/orca-managed/codex-home' })
+        env: expect.objectContaining({ CODEX_HOME: '/yiru-managed/codex-home' })
       })
     )
   })

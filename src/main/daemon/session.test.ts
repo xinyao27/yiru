@@ -236,7 +236,7 @@ describe('Session', () => {
       expect(session.shellState).toBe('pending')
 
       session.write('first\n')
-      subprocess.simulateData('\x1b]777;orca-shell-ready\x07')
+      subprocess.simulateData('\x1b]777;yiru-shell-ready\x07')
       expect(session.shellState).toBe('ready' satisfies ShellReadyState)
       session.write('second\n')
       expect(subprocess.written).toEqual([])
@@ -250,7 +250,7 @@ describe('Session', () => {
       createSession({ shellReadySupported: true })
       session.write('codex\n')
 
-      subprocess.simulateData('\x1b]777;orca-shell-ready\x07\r\nuser@host $ ')
+      subprocess.simulateData('\x1b]777;yiru-shell-ready\x07\r\nuser@host $ ')
       expect(session.shellState).toBe('ready' satisfies ShellReadyState)
       vi.advanceTimersByTime(29)
       expect(subprocess.written).toEqual([])
@@ -263,7 +263,7 @@ describe('Session', () => {
       createSession({ shellReadySupported: true })
       session.write('codex\n')
 
-      subprocess.simulateData('last login\r\n\x1b]777;orca-shell-ready\x07')
+      subprocess.simulateData('last login\r\n\x1b]777;yiru-shell-ready\x07')
       expect(session.shellState).toBe('ready' satisfies ShellReadyState)
       vi.advanceTimersByTime(30)
       expect(subprocess.written).toEqual([])
@@ -281,14 +281,14 @@ describe('Session', () => {
         onExit: () => {}
       })
 
-      subprocess.simulateData('hello \x1b]777;orca-shell-ready\x07% ')
+      subprocess.simulateData('hello \x1b]777;yiru-shell-ready\x07% ')
 
       expect(received).toEqual(['hello % '])
       expect(session.takePendingOutput(false)?.records).toEqual([
         { kind: 'output', data: 'hello % ' }
       ])
       expect(session.getSnapshot()?.snapshotAnsi).toContain('hello % ')
-      expect(session.getSnapshot()?.snapshotAnsi).not.toContain('orca-shell-ready')
+      expect(session.getSnapshot()?.snapshotAnsi).not.toContain('yiru-shell-ready')
     })
 
     it('publishes an absolute output sequence with live snapshots', () => {
@@ -308,14 +308,14 @@ describe('Session', () => {
         onExit: () => {}
       })
 
-      subprocess.simulateData('\x1b]777;orca-shell-ready')
+      subprocess.simulateData('\x1b]777;yiru-shell-ready')
       session.write('codex\n')
       vi.advanceTimersByTime(100)
 
       expect(session.shellState).toBe('timed_out' satisfies ShellReadyState)
-      expect(received).toEqual(['\x1b]777;orca-shell-ready'])
+      expect(received).toEqual(['\x1b]777;yiru-shell-ready'])
       expect(session.takePendingOutput(false)?.records).toEqual([
-        { kind: 'output', data: '\x1b]777;orca-shell-ready' }
+        { kind: 'output', data: '\x1b]777;yiru-shell-ready' }
       ])
       expect(subprocess.written).toEqual(['codex\n'])
     })
@@ -328,12 +328,12 @@ describe('Session', () => {
         onExit: () => {}
       })
 
-      subprocess.simulateData('\x1b]777;orca-shell-ready')
+      subprocess.simulateData('\x1b]777;yiru-shell-ready')
       subprocess.simulateExit(0)
 
-      expect(received).toEqual(['\x1b]777;orca-shell-ready'])
+      expect(received).toEqual(['\x1b]777;yiru-shell-ready'])
       expect(session.takePendingOutput(false)?.records).toEqual([
-        { kind: 'output', data: '\x1b]777;orca-shell-ready' }
+        { kind: 'output', data: '\x1b]777;yiru-shell-ready' }
       ])
     })
 
@@ -341,7 +341,7 @@ describe('Session', () => {
       createSession({ shellReadySupported: true, shellReadyTimeoutMs: 100 })
       session.write('codex\n')
 
-      subprocess.simulateData('\x1b]777;orca-shell-ready')
+      subprocess.simulateData('\x1b]777;yiru-shell-ready')
       const taken = session.takePendingOutput(true)
       subprocess.simulateData('\x07\r\nuser@host $ ')
       vi.advanceTimersByTime(30)
@@ -355,10 +355,10 @@ describe('Session', () => {
     it('releases held marker-prefix bytes before final take-with-snapshot', () => {
       createSession({ shellReadySupported: true, shellReadyTimeoutMs: 100 })
 
-      subprocess.simulateData('\x1b]777;orca-shell-ready')
+      subprocess.simulateData('\x1b]777;yiru-shell-ready')
       const taken = session.takePendingOutput(true, { teardownSnapshot: true })
 
-      expect(taken?.records).toEqual([{ kind: 'output', data: '\x1b]777;orca-shell-ready' }])
+      expect(taken?.records).toEqual([{ kind: 'output', data: '\x1b]777;yiru-shell-ready' }])
       expect(taken?.snapshot).toBeTruthy()
     })
 
@@ -366,7 +366,7 @@ describe('Session', () => {
       createSession({ shellReadySupported: true })
       session.write('codex\n')
 
-      subprocess.simulateData('\x1b]777;orca-shell-ready\x07')
+      subprocess.simulateData('\x1b]777;yiru-shell-ready\x07')
       expect(session.shellState).toBe('ready' satisfies ShellReadyState)
       const dispose = session.forceKillAndDisposeSubprocess()
       subprocess.simulateExit(137)
@@ -401,7 +401,7 @@ describe('Session', () => {
     it('detects marker split across data chunks', () => {
       createSession({ shellReadySupported: true })
 
-      subprocess.simulateData('\x1b]777;orca-sh')
+      subprocess.simulateData('\x1b]777;yiru-sh')
       expect(session.shellState).toBe('pending')
 
       subprocess.simulateData('ell-ready\x07')
@@ -624,7 +624,7 @@ describe('Session', () => {
       // arbitrary later moment, when the prompt gates no longer hold.
       withPlatform('win32', () => session.clearScrollback())
       expect(subprocess.written).toEqual([])
-      subprocess.simulateData('\x1b]777;orca-shell-ready\x07\r\nPS C:\\Users\\me> ')
+      subprocess.simulateData('\x1b]777;yiru-shell-ready\x07\r\nPS C:\\Users\\me> ')
       await vi.advanceTimersByTimeAsync(10)
       expect(subprocess.written).toEqual([])
     })

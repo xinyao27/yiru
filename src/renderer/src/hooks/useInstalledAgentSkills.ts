@@ -9,7 +9,7 @@ import { ORCHESTRATION_SKILL_NAME } from '@/lib/agent-feature-install-commands'
 import { markOrchestrationSetupComplete } from '@/lib/orchestration-setup-state'
 import { useMountedRef } from './useMountedRef'
 
-const INSTALLED_AGENT_SKILLS_CHANGED_EVENT = 'orca:installed-agent-skills-changed'
+const INSTALLED_AGENT_SKILLS_CHANGED_EVENT = 'yiru:installed-agent-skills-changed'
 export const GLOBAL_AGENT_SKILL_SOURCE_KINDS = [
   'home'
 ] as const satisfies readonly SkillSourceKind[]

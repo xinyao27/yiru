@@ -129,12 +129,12 @@ describe('createGitHubPullRequest', () => {
     getOwnerRepoMock.mockResolvedValueOnce(null)
     getEnterpriseGitHubRepoSlugMock.mockResolvedValueOnce({
       owner: 'team',
-      repo: 'orca',
+      repo: 'yiru',
       host: 'github.acme-corp.com'
     })
     // gh prints the PR URL (not JSON); the GHES host must still parse directly.
     ghExecFileAsyncMock.mockResolvedValueOnce({
-      stdout: 'https://github.acme-corp.com/team/orca/pull/7\n'
+      stdout: 'https://github.acme-corp.com/team/yiru/pull/7\n'
     })
 
     await expect(
@@ -147,20 +147,20 @@ describe('createGitHubPullRequest', () => {
     ).resolves.toEqual({
       ok: true,
       number: 7,
-      url: 'https://github.acme-corp.com/team/orca/pull/7'
+      url: 'https://github.acme-corp.com/team/yiru/pull/7'
     })
 
     const [args] = ghExecFileAsyncMock.mock.calls[0]
-    // Bare "team/orca" would resolve against gh's default host (github.com);
+    // Bare "team/yiru" would resolve against gh's default host (github.com);
     // the host prefix pins the command to the Enterprise server.
-    expect(args[args.indexOf('--repo') + 1]).toBe('github.acme-corp.com/team/orca')
+    expect(args[args.indexOf('--repo') + 1]).toBe('github.acme-corp.com/team/yiru')
   })
 
   it('host-qualifies --repo for the GHES existing-PR fallback lookup (#8312)', async () => {
     getOwnerRepoMock.mockResolvedValue(null)
     getEnterpriseGitHubRepoSlugMock.mockResolvedValue({
       owner: 'team',
-      repo: 'orca',
+      repo: 'yiru',
       host: 'github.acme-corp.com'
     })
     // Create reports "already exists", forcing the pr-list fallback.
@@ -173,7 +173,7 @@ describe('createGitHubPullRequest', () => {
       )
       .mockResolvedValueOnce({
         stdout: JSON.stringify([
-          { number: 9, url: 'https://github.acme-corp.com/team/orca/pull/9' }
+          { number: 9, url: 'https://github.acme-corp.com/team/yiru/pull/9' }
         ])
       })
 
@@ -187,12 +187,12 @@ describe('createGitHubPullRequest', () => {
     ).resolves.toMatchObject({
       ok: false,
       code: 'already_exists',
-      existingReview: { number: 9, url: 'https://github.acme-corp.com/team/orca/pull/9' }
+      existingReview: { number: 9, url: 'https://github.acme-corp.com/team/yiru/pull/9' }
     })
 
     const [listArgs] = ghExecFileAsyncMock.mock.calls[1]
     expect(listArgs).toEqual(expect.arrayContaining(['pr', 'list']))
-    expect(listArgs[listArgs.indexOf('--repo') + 1]).toBe('github.acme-corp.com/team/orca')
+    expect(listArgs[listArgs.indexOf('--repo') + 1]).toBe('github.acme-corp.com/team/yiru')
   })
 
   it('runs local WSL project pull request creation through the selected distro', async () => {

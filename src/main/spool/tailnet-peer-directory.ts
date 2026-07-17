@@ -17,7 +17,7 @@ export type DiscoveredSpoolDesktop = {
   ownerRuntimeId: string
   ownerKeyFingerprint: string
   ownerPublicKeyB64: string
-  orcaVersion: string
+  yiruVersion: string
   osFamily: SpoolOsFamily
 }
 
@@ -154,7 +154,7 @@ export class DefaultTailnetPeerDirectory implements TailnetPeerDirectory {
           ownerRuntimeId: response.ownerRuntimeId,
           ownerKeyFingerprint: response.ownerKeyFingerprint,
           ownerPublicKeyB64: response.ownerPublicKeyB64,
-          orcaVersion: response.orcaVersion,
+          yiruVersion: response.yiruVersion,
           osFamily: response.osFamily
         }
       } catch {

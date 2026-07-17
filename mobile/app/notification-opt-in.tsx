@@ -11,7 +11,7 @@ import {
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { BellRing } from 'lucide-react-native'
-import { OrcaLogo } from '../src/components/OrcaLogo'
+import { YiruLogo } from '../src/components/YiruLogo'
 import { ensureNotificationPermissions } from '../src/notifications/mobile-notifications'
 import { savePushNotificationsEnabled } from '../src/storage/preferences'
 import { colors, radii, spacing, typography } from '../src/theme/mobile-theme'
@@ -59,8 +59,8 @@ export default function NotificationOptInScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.brandRow}>
-          <OrcaLogo size={22} />
-          <Text style={styles.brandName}>Orca</Text>
+          <YiruLogo size={22} />
+          <Text style={styles.brandName}>Yiru</Text>
         </View>
 
         <View style={styles.content}>

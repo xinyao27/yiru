@@ -3,7 +3,7 @@ import { ArrowRightLeft, GitBranch, ListChecks, Workflow } from 'lucide-react'
 import { ORCHESTRATION_SKILL_NAME } from '@/lib/agent-feature-install-commands'
 import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
-  ensureOrcaCliAvailableForAgentSkillTerminal
+  ensureYiruCliAvailableForAgentSkillTerminal
 } from '@/lib/agent-skill-cli-prerequisite'
 import {
   ORCHESTRATION_SKILL_INSTALL_COMMAND,
@@ -92,7 +92,7 @@ export function OrchestrationPane(): React.JSX.Element {
         )}
         description={translate(
           'auto.components.settings.OrchestrationPane.9bedd2a6e5',
-          'Enables agents to hand off context and coordinate work through Orca.'
+          'Enables agents to hand off context and coordinate work through Yiru.'
         )}
         command={orchestrationInstallCommand}
         installedCommand={orchestrationUpdateCommand}
@@ -117,7 +117,7 @@ export function OrchestrationPane(): React.JSX.Element {
           useAppStore.getState().recordFeatureInteraction('agent-orchestration-setup')
           await (activeSkillRuntime.agentRuntime?.runtime === 'wsl'
             ? ensureWslCliAvailableForAgentSkillTerminal(activeSkillRuntime.agentRuntime)
-            : ensureOrcaCliAvailableForAgentSkillTerminal())
+            : ensureYiruCliAvailableForAgentSkillTerminal())
         }}
         actionHint={
           // Installed updates stay on the primary panel so there is only one update path.

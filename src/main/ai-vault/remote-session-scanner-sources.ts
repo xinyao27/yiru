@@ -160,7 +160,7 @@ function remoteCodexSources(
       remoteHome,
       '.local',
       'share',
-      'orca',
+      'yiru',
       'codex-runtime-home',
       'home'
     )

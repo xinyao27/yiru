@@ -111,7 +111,7 @@ import {
 type GhExecOptions = ReturnType<typeof ghRepoExecOptions> & { signal?: AbortSignal }
 type HostedReviewLocalGitOptions = ReturnType<typeof getHostedReviewLocalGitOptions>
 
-const ORCA_REPO = 'stablyai/orca'
+const YIRU_REPO = 'stablyai/yiru'
 const PR_CHECK_LOG_TAIL_JOB_LIMIT = 5
 // Why: each entry holds up to 16KB of log text; bound the cache so a long
 // session reviewing many failing checks can't grow it without limit.
@@ -244,15 +244,15 @@ function isNoPullRequestError(err: unknown): boolean {
 }
 
 /**
- * Check if the authenticated user has starred the Orca repo.
+ * Check if the authenticated user has starred the Yiru repo.
  * Returns true if starred, false if not, null if unable to determine (gh unavailable).
  */
-export async function checkOrcaStarred(): Promise<boolean | null> {
+export async function checkYiruStarred(): Promise<boolean | null> {
   await acquire()
   try {
     const { stdout, stderr } = await execFileAsync(
       'gh',
-      ['api', '--include', `user/starred/${ORCA_REPO}`],
+      ['api', '--include', `user/starred/${YIRU_REPO}`],
       { encoding: 'utf-8' }
     )
     const response = `${stdout ?? ''}\n${stderr ?? ''}`
@@ -405,12 +405,12 @@ export async function getPullRequestPushTarget(
 }
 
 /**
- * Star the Orca repo for the authenticated user.
+ * Star the Yiru repo for the authenticated user.
  */
-export async function starOrca(): Promise<boolean> {
+export async function starYiru(): Promise<boolean> {
   await acquire()
   try {
-    await execFileAsync('gh', ['api', '-X', 'PUT', `user/starred/${ORCA_REPO}`], {
+    await execFileAsync('gh', ['api', '-X', 'PUT', `user/starred/${YIRU_REPO}`], {
       encoding: 'utf-8'
     })
     return true
@@ -1483,7 +1483,7 @@ async function countWorkItemsForQuery(
 
 function sameOwnerRepo(left: OwnerRepo | null, right: OwnerRepo | null): boolean {
   // Why: GitHub treats owner and repo names as case-insensitive, so remotes
-  // with different casing (StablyAI/Orca vs stablyai/orca) point at the same
+  // with different casing (StablyAI/Yiru vs stablyai/yiru) point at the same
   // repo and should not split into two search queries.
   return (
     left?.owner.toLowerCase() === right?.owner.toLowerCase() &&
@@ -1876,7 +1876,7 @@ export async function createGitHubPullRequest(
     }
   }
 
-  const tempDir = await mkdtemp(join(tmpdir(), 'orca-pr-body-'))
+  const tempDir = await mkdtemp(join(tmpdir(), 'yiru-pr-body-'))
   await acquire()
   const bodyPath = join(tempDir, 'body.md')
   try {
@@ -3143,7 +3143,7 @@ export async function getPRForBranchOutcome(
     const shouldPreserveMergedFallback =
       !explicitHeadHidesMergedImplicitPR &&
       (fallbackConfirmedMergedBranch || options.acceptMergedFallbackPR === true)
-    // Why: a currently visible PR can be merged outside Orca; when the caller
+    // Why: a currently visible PR can be merged outside Yiru; when the caller
     // marks the fallback as visible review state, keep its lifecycle fresh even
     // if GitHub no longer reports it by branch (for example deleted heads).
     if ((await hideMergedImplicitPR(data, dataRepo)) && !shouldPreserveMergedFallback) {

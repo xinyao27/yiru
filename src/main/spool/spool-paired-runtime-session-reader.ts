@@ -26,16 +26,16 @@ import {
 
 const DEFAULT_TIMEOUT_MS = 15_000
 
-export type OrcaSpoolPairedRuntimeSessionReaderOptions = {
+export type YiruSpoolPairedRuntimeSessionReaderOptions = {
   userDataPath: string
   timeoutMs?: number
 }
 
 /** Reads a strict projection while locator material remains on the paired owner channel. */
-export class OrcaSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSessionReader {
+export class YiruSpoolPairedRuntimeSessionReader implements SpoolExecutionHostSessionReader {
   private readonly sessionChanges: SpoolPairedRuntimeSessionChangeSubscriptions
 
-  constructor(private readonly options: OrcaSpoolPairedRuntimeSessionReaderOptions) {
+  constructor(private readonly options: YiruSpoolPairedRuntimeSessionReaderOptions) {
     this.sessionChanges = new SpoolPairedRuntimeSessionChangeSubscriptions(
       options.userDataPath,
       async (request) => await this.listMobileSessionTabs(request)

@@ -5,7 +5,7 @@ in one file avoids scattering the browser security boundary across modules. */
 import { randomUUID } from 'node:crypto'
 
 import { shell, webContents } from 'electron'
-import { ORCA_BROWSER_BLANK_URL } from '../../shared/constants'
+import { YIRU_BROWSER_BLANK_URL } from '../../shared/constants'
 import {
   normalizeBrowserNavigationUrl,
   normalizeExternalBrowserUrl,
@@ -76,7 +76,7 @@ function releaseAutomationVisibilityToken(renderer: Electron.WebContents, token:
   renderer
     .executeJavaScript(
       `(function() {
-        var bridge = window.__orcaBrowserAutomationVisibility;
+        var bridge = window.__yiruBrowserAutomationVisibility;
         if (!bridge || typeof bridge.release !== 'function') return false;
         return bridge.release(${JSON.stringify(token)});
       })()`
@@ -359,7 +359,7 @@ export class BrowserManager {
     return renderer
   }
 
-  // Why: screenshot sessions target guest page ids, but Orca's visible browser
+  // Why: screenshot sessions target guest page ids, but Yiru's visible browser
   // chrome is keyed by workspace ids. If we activate the page id directly, the
   // webview stays hidden under the terminal pane and Page.captureScreenshot
   // times out even though the guest still exists.
@@ -548,7 +548,7 @@ export class BrowserManager {
                 ${JSON.stringify(prev?.targetBrowserPageId)} &&
               typeof state.setActiveBrowserPage === 'function'
             ) {
-              // Why: Orca remembers the last browser workspace/page even when
+              // Why: Yiru remembers the last browser workspace/page even when
               // the user is currently in terminal/editor view. Screenshot prep
               // temporarily switches that hidden browser selection state, so
               // restore it independently of the visible tab type.
@@ -584,11 +584,11 @@ export class BrowserManager {
     }
 
     // Why: agent browser commands need a paintable webview for lazy-loading
-    // sites, but must not steal the user's visible Orca tab/worktree.
+    // sites, but must not steal the user's visible Yiru tab/worktree.
     const acquirePromise = renderer
       .executeJavaScript(
         `(async function() {
-            var bridge = window.__orcaBrowserAutomationVisibility;
+            var bridge = window.__yiruBrowserAutomationVisibility;
             if (!bridge || typeof bridge.acquire !== 'function') return null;
             return await bridge.acquire(${JSON.stringify(browserPageId)});
           })()`
@@ -629,7 +629,7 @@ export class BrowserManager {
 
     // Why: background throttling must be disabled so agent-driven screenshots
     // (Page.captureScreenshot via CDP proxy) can capture frames even when the
-    // Orca window is not the focused foreground app. With throttling enabled,
+    // Yiru window is not the focused foreground app. With throttling enabled,
     // the compositor stops producing frames and capturePage() returns empty.
     guest.setBackgroundThrottling(false)
     const handleDidCreateWindow = (window: Electron.BrowserWindow): void => {
@@ -645,7 +645,7 @@ export class BrowserManager {
 
       // Why: file URLs are valid for user-opened in-pane previews, but remote
       // content must not create native child windows targeting local paths.
-      const canOpenAsChild = Boolean(externalUrl || browserUrl === ORCA_BROWSER_BLANK_URL)
+      const canOpenAsChild = Boolean(externalUrl || browserUrl === YIRU_BROWSER_BLANK_URL)
       if (browserTabId && canOpenAsChild) {
         // Why: OAuth may request ordinary size/position features, but browser
         // content must not create deceptive or inescapable native chrome.
@@ -653,7 +653,7 @@ export class BrowserManager {
           action: 'allow',
           overrideBrowserWindowOptions: SAFE_POPUP_WINDOW_OPTIONS,
           // Why: a default child window has no address bar, so users cannot
-          // verify a popup's destination. Host it in an Orca window with an
+          // verify a popup's destination. Host it in a Yiru window with an
           // origin bar while keeping the shared session + window.opener.
           createWindow: (options: PopupChildWindowOptions) =>
             this.createPopupChildWindowWithOriginBar(guest, url, options)
@@ -764,7 +764,7 @@ export class BrowserManager {
     )
     this.forwardOrQueuePopupEvent(openerGuest.id, {
       origin: safeOrigin(targetUrl),
-      action: 'opened-in-orca'
+      action: 'opened-in-yiru'
     })
     // Why: parity with Electron's default child-window lifecycle — closing the
     // owning browser tab must not leave orphaned session-bearing popups.
@@ -938,7 +938,7 @@ export class BrowserManager {
     this.annotationViewportBridgeOpsByTabId.delete(browserTabId)
   }
 
-  // Why: headless orca serve has no renderer window to mount a <webview>, so its
+  // Why: headless yiru serve has no renderer window to mount a <webview>, so its
   // browser pages are backed by main-process offscreen WebContents instead. This
   // registers such a page into the same resolution maps the bridge/screencast/
   // input handlers read, but skips the webview-only guards and the renderer setup
@@ -974,7 +974,7 @@ export class BrowserManager {
     // Cancel all active grab ops before tearing down registrations
     this.grabSessionController.cancelAll('evicted')
     for (const downloadId of this.downloadsById.keys()) {
-      this.cancelDownloadInternal(downloadId, 'Orca is shutting down.')
+      this.cancelDownloadInternal(downloadId, 'Yiru is shutting down.')
     }
     browserDownloadDestinationReservations.clear()
     for (const browserTabId of this.webContentsIdByTabId.keys()) {
@@ -1122,7 +1122,7 @@ export class BrowserManager {
         item.cancel()
       } catch {
         // Why: failing setSavePath can leave Electron in a partially finalized
-        // state; cancellation is best-effort after Orca has made the UI terminal.
+        // state; cancellation is best-effort after Yiru has made the UI terminal.
       }
       return
     }
@@ -1177,7 +1177,7 @@ export class BrowserManager {
     return true
   }
 
-  // Why: guest browser surfaces are intentionally isolated from Orca's preload
+  // Why: guest browser surfaces are intentionally isolated from Yiru's preload
   // bridge, so renderer code cannot directly call Electron WebContents APIs on
   // them. Main owns the devtools escape hatch and only after tab→guest lookup.
   async openDevTools(browserTabId: string): Promise<boolean> {
@@ -1779,7 +1779,7 @@ export class BrowserManager {
     } catch {
       // Why: DownloadItem.cancel can throw after the item has already
       // finalized. Cleanup here is best-effort because the UI state is the
-      // source of truth for whether Orca still considers the request active.
+      // source of truth for whether Yiru still considers the request active.
     }
 
     if (shouldSendCancel) {

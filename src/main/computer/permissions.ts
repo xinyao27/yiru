@@ -5,7 +5,7 @@ const ACCESSIBILITY_SETTINGS_URL =
 
 const activePermissionNotifications = new Set<Notification>()
 
-/** Surface a notification through Orca's existing notification system (do not duplicate UI). */
+/** Surface a notification through Yiru's existing notification system (do not duplicate UI). */
 export function notifyPermissionRequired(instructions: string): void {
   if (!Notification.isSupported()) {
     return

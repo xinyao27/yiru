@@ -51,7 +51,7 @@ of depending on an unbounded renderer backlog.
 ## Chosen Design
 
 The existing runtime headless terminal is the main-owned model. Every PTY byte
-already reaches `OrcaRuntimeService.onPtyData` before renderer delivery for
+already reaches `YiruRuntimeService.onPtyData` before renderer delivery for
 local, daemon, and SSH PTYs. That path keeps a headless xterm emulator updated
 and can serialize it.
 

@@ -26,7 +26,7 @@ export type IssueSourceIndicatorProps = {
 // Why: host-agnostic copy per parent design doc §2 — never mention "GitHub"
 // and never leak the local remote name ("upstream" / "origin"). The slug
 // alone is what the user needs to verify before filing an issue or using a
-// task as a work-item source. Leaking the remote name would imply Orca
+// task as a work-item source. Leaking the remote name would imply Yiru
 // maintains a stable mapping between UI labels and git config, which is not
 // something we want to promise.
 const LABEL_PREFIX_LIST = 'Issues from '
@@ -40,7 +40,7 @@ export function sameGitHubOwnerRepo(
     return false
   }
   // Why: GitHub treats owner/repo names case-insensitively, so remotes with
-  // different casing (e.g. StablyAI/Orca vs stablyai/orca) resolve to the
+  // different casing (e.g. StablyAI/Yiru vs stablyai/yiru) resolve to the
   // same repo and must suppress the indicator.
   return (
     left.owner.toLowerCase() === right.owner.toLowerCase() &&

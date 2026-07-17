@@ -104,7 +104,7 @@ export const SOURCE_CONTROL_ACTION_VARIABLE_INFO: Record<string, SourceControlAc
   {
     basePrompt: {
       description:
-        'Orca’s built-in prompt for this action, including the context Orca knows how to gather safely.',
+        'Yiru’s built-in prompt for this action, including the context Yiru knows how to gather safely.',
       example:
         'Commit messages include staged diff guidance; PR details include branch comparison guidance; fix actions include the failure summary.'
     },
@@ -146,11 +146,11 @@ export const SOURCE_CONTROL_ACTION_VARIABLE_INFO: Record<string, SourceControlAc
       example: 'diff --git a/src/app.ts b/src/app.ts\n+renderSourceControlActionCommandTemplate()'
     },
     firstPrompt: {
-      description: 'The first user request that created the Orca workspace.',
+      description: 'The first user request that created the Yiru workspace.',
       example: 'Fix CI and commit the result'
     },
     assistantMessage: {
-      description: 'The initial agent response, when Orca has one available.',
+      description: 'The initial agent response, when Yiru has one available.',
       example: 'I will inspect the failing check, patch the issue, and run tests.'
     }
   }

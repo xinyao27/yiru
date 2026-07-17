@@ -2,12 +2,12 @@
 
 ## Problem
 
-Orca installs agent hooks in global agent configuration, so a managed hook can
-run in an Orca pane, an SSH/WSL runtime, a detached session, or an ordinary
-terminal with no Orca environment. Hook runners write an event payload to the
+Yiru installs agent hooks in global agent configuration, so a managed hook can
+run in a Yiru pane, an SSH/WSL runtime, a detached session, or an ordinary
+terminal with no Yiru environment. Hook runners write an event payload to the
 child process's stdin after spawn.
 
-The generated scripts currently inspect Orca environment variables before they
+The generated scripts currently inspect Yiru environment variables before they
 read stdin. When a guard exits first, the hook runner can still be writing to a
 pipe whose reader has closed. POSIX reports `EPIPE`; Windows reports
 `ERROR_BROKEN_PIPE`. The same failure exists when a managed launcher finds that
@@ -85,10 +85,10 @@ limits. Their posting path therefore remains streaming.
 All environment guard failures jump to one epilogue:
 
 ```bat
-if "%ORCA_AGENT_HOOK_PORT%"=="" goto :orca_agent_hook_drain_stdin
+if "%YIRU_AGENT_HOOK_PORT%"=="" goto :yiru_agent_hook_drain_stdin
 ...
 exit /b 0
-:orca_agent_hook_drain_stdin
+:yiru_agent_hook_drain_stdin
 "%SystemRoot%\System32\more.com" >nul 2>nul
 exit /b 0
 ```
@@ -145,7 +145,7 @@ path syntax or shell.
 
 ## Failure Semantics
 
-- Missing Orca environment: consume input, exit zero, emit only protocol-required
+- Missing Yiru environment: consume input, exit zero, emit only protocol-required
   output.
 - Empty payload: consume EOF, then follow the agent's existing empty-event rule.
 - Missing/unreadable/non-executable script: launcher consumes input and exits
@@ -163,7 +163,7 @@ path syntax or shell.
 Add one cross-agent lifecycle suite rather than per-service string-position
 assertions.
 
-- Generate every SSH-compatible POSIX managed script, spawn it with Orca
+- Generate every SSH-compatible POSIX managed script, spawn it with Yiru
   environment removed, write a payload larger than pipe buffers, and assert:
   exit zero, no stdin error, and required protocol output remains valid.
 - Exercise the Claude Devin skip independently because it is a second no-op
@@ -171,14 +171,14 @@ assertions.
 - Exercise POSIX, encoded PowerShell, cmd.exe, and Git Bash missing-script
   launchers with a large payload and verify zero write errors.
 - On Windows CI, install and execute every local batch/PowerShell managed script
-  with missing Orca environment and a large payload.
+  with missing Yiru environment and a large payload.
 - Keep structural assertions for shared batch guard/epilogue generation, but do
   not use substring placement as the primary regression gate.
 - Preserve existing successful-post, timeout, quoting, SSH install, WSL, and
   nonzero-exit propagation tests.
 
 For a macOS smoke test, launch the real Electron app with an isolated `HOME`
-and `ORCA_DEV_USER_DATA_PATH`, record the launch time, then run:
+and `YIRU_DEV_USER_DATA_PATH`, record the launch time, then run:
 
 ```sh
 node config/scripts/verify-agent-hook-stdin-lifecycle.mjs \

@@ -656,7 +656,7 @@ async function performQuitAndInstall(): Promise<void> {
       }
     )
     sendErrorStatus(
-      'Could not restart to install the update. Quit and reopen Orca, then try again.'
+      'Could not restart to install the update. Quit and reopen Yiru, then try again.'
     )
   }
 }
@@ -685,7 +685,7 @@ function handleQuitAndInstallFailure(): boolean {
     level: 'warn',
     message: 'Update install could not start; recovered app state'
   })
-  sendErrorStatus('Could not restart to install the update. Quit and reopen Orca, then try again.')
+  sendErrorStatus('Could not restart to install the update. Quit and reopen Yiru, then try again.')
   return true
 }
 
@@ -845,7 +845,7 @@ function scheduleAutomaticUpdateCheck(delayMs: number): void {
     clearTimeout(autoUpdateCheckTimer)
   }
   autoUpdateCheckTimer = setTimeout(() => {
-    // Why: Orca is often left running for days. A one-shot startup check means
+    // Why: Yiru is often left running for days. A one-shot startup check means
     // users can miss fresh releases entirely, so we always keep the next
     // background attempt scheduled in the main process instead of tying checks
     // to relaunches or renderer lifetime.
@@ -1026,7 +1026,7 @@ async function pinDefaultReleaseFeed(
   } else {
     clearPrereleaseFallbackContext()
     clearPublishingWindowLastGoodCheck()
-    const url = 'https://github.com/stablyai/orca/releases/latest/download'
+    const url = 'https://github.com/stablyai/yiru/releases/latest/download'
     console.info(
       `[updater] release feed fallback: current=${currentVersion} includePrerelease=${includePrerelease} → ${url}`
     )
@@ -1413,7 +1413,7 @@ export function setupAutoUpdater(
   // moving /latest redirect changing between check and download.
   autoUpdater.setFeedURL({
     provider: 'generic',
-    url: 'https://github.com/stablyai/orca/releases/latest/download'
+    url: 'https://github.com/stablyai/yiru/releases/latest/download'
   })
 
   if (autoUpdaterInitialized) {

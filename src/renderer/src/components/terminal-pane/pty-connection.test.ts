@@ -773,7 +773,7 @@ describe('connectPanePty', () => {
       worktreesByRepo: {
         repo1: [{ id: 'wt-1', repoId: 'repo1', path: '/tmp/wt-1', displayName: 'feat/notis' }]
       },
-      repos: [{ id: 'repo1', connectionId: null, displayName: 'orca' }],
+      repos: [{ id: 'repo1', connectionId: null, displayName: 'yiru' }],
       projects: [],
       sshConnectionStates: new Map(),
       cacheTimerByKey: {},
@@ -1046,13 +1046,13 @@ describe('connectPanePty', () => {
     connectPanePty(createPane(1) as never, createManager(1) as never, createDeps() as never)
     await flushAsyncTicks()
 
-    capturedDataCallback.current?.('Created https://github.com/acme/orca/pull/42\r\n')
+    capturedDataCallback.current?.('Created https://github.com/acme/yiru/pull/42\r\n')
 
     expect(mockStoreState.observeTerminalGitHubPullRequestLink).toHaveBeenCalledWith(
       'wt-1',
       expect.objectContaining({
-        url: 'https://github.com/acme/orca/pull/42',
-        slug: { owner: 'acme', repo: 'orca' },
+        url: 'https://github.com/acme/yiru/pull/42',
+        slug: { owner: 'acme', repo: 'yiru' },
         number: 42
       })
     )
@@ -4587,7 +4587,7 @@ describe('connectPanePty', () => {
       }
       expect(transport.sendInput).not.toHaveBeenCalled()
 
-      capturedDataCallback.current?.('\x1b]777;orca-shell-ready\x07user@remote $ ')
+      capturedDataCallback.current?.('\x1b]777;yiru-shell-ready\x07user@remote $ ')
       for (const fn of pendingTimeouts.splice(0)) {
         fn()
       }
@@ -4623,7 +4623,7 @@ describe('connectPanePty', () => {
         launchAgent: 'codex',
         launchConfig: { agentArgs: '', agentEnv: {} },
         launchToken: 'launch-token-1',
-        draftPrompt: 'https://github.com/stablyai/orca/issues/42'
+        draftPrompt: 'https://github.com/stablyai/yiru/issues/42'
       }
     })
 
@@ -4643,11 +4643,11 @@ describe('connectPanePty', () => {
     await flushAsyncTicks()
 
     expect(transport.sendInputAccepted).toHaveBeenCalledWith(
-      '\x1b[200~https://github.com/stablyai/orca/issues/42\x1b[201~'
+      '\x1b[200~https://github.com/stablyai/yiru/issues/42\x1b[201~'
     )
     expect(transport.sendInput.mock.calls.map(([data]) => data)).toEqual([
       '\x1b[I',
-      '\x1b[200~https://github.com/stablyai/orca/issues/42\x1b[201~'
+      '\x1b[200~https://github.com/stablyai/yiru/issues/42\x1b[201~'
     ])
     expect(window.api.pty.writeAccepted).not.toHaveBeenCalled()
     expect(mockStoreState.recordTerminalInput).toHaveBeenCalledOnce()
@@ -4675,7 +4675,7 @@ describe('connectPanePty', () => {
           launchAgent: 'codex',
           launchConfig: { agentArgs: '', agentEnv: {} },
           launchToken: 'launch-token-1',
-          draftPrompt: 'https://github.com/stablyai/orca/issues/42'
+          draftPrompt: 'https://github.com/stablyai/yiru/issues/42'
         }
       }) as never
     )
@@ -4856,7 +4856,7 @@ describe('connectPanePty', () => {
       }
       expect(transport.sendInput).not.toHaveBeenCalled()
 
-      capturedDataCallback.current?.('\x1b]777;orca-shell-ready\x07user@remote $ ')
+      capturedDataCallback.current?.('\x1b]777;yiru-shell-ready\x07user@remote $ ')
       for (const fn of pendingTimeouts.splice(0)) {
         fn()
       }
@@ -4918,7 +4918,7 @@ describe('connectPanePty', () => {
       }
       expect(transport.sendInput).not.toHaveBeenCalled()
 
-      capturedDataCallback.current?.('\x1b]777;orca-shell-ready\x07user@remote $ ')
+      capturedDataCallback.current?.('\x1b]777;yiru-shell-ready\x07user@remote $ ')
       for (const fn of pendingTimeouts.splice(0)) {
         fn()
       }
@@ -4968,7 +4968,7 @@ describe('connectPanePty', () => {
     expect(mockStoreState.removeAgentStatus).not.toHaveBeenCalled()
   })
 
-  it('clears pre-hook launch config when an Orca-started command exits', async () => {
+  it('clears pre-hook launch config when a Yiru-started command exits', async () => {
     const { connectPanePty } = await import('./pty-connection')
 
     const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
@@ -5965,11 +5965,11 @@ describe('connectPanePty', () => {
         expect.objectContaining({
           command: "codex '--dangerously-bypass-approvals-and-sandbox' 'resume' 'codex-session-1'",
           env: expect.objectContaining({
-            ORCA_PANE_KEY: paneKey,
-            ORCA_TAB_ID: 'tab-1',
-            ORCA_WORKTREE_ID: 'wt-1',
-            ORCA_WORKSPACE_ID: 'wt-1',
-            ORCA_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
+            YIRU_PANE_KEY: paneKey,
+            YIRU_TAB_ID: 'tab-1',
+            YIRU_WORKTREE_ID: 'wt-1',
+            YIRU_WORKSPACE_ID: 'wt-1',
+            YIRU_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
           })
         })
       )
@@ -6835,11 +6835,11 @@ describe('connectPanePty', () => {
         sessionId: 'lost-pty',
         command: "codex '--dangerously-bypass-approvals-and-sandbox' 'resume' 'codex-session-1'",
         env: expect.objectContaining({
-          ORCA_PANE_KEY: paneKey,
-          ORCA_TAB_ID: 'tab-1',
-          ORCA_WORKTREE_ID: 'wt-1',
-          ORCA_WORKSPACE_ID: 'wt-1',
-          ORCA_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
+          YIRU_PANE_KEY: paneKey,
+          YIRU_TAB_ID: 'tab-1',
+          YIRU_WORKTREE_ID: 'wt-1',
+          YIRU_WORKSPACE_ID: 'wt-1',
+          YIRU_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
         })
       })
     )
@@ -6918,11 +6918,11 @@ describe('connectPanePty', () => {
         command:
           "codex '--dangerously-bypass-approvals-and-sandbox' 'resume' 'codex-session-1'\\''s'",
         env: expect.objectContaining({
-          ORCA_PANE_KEY: paneKey,
-          ORCA_TAB_ID: 'tab-1',
-          ORCA_WORKTREE_ID: 'wt-1',
-          ORCA_WORKSPACE_ID: 'wt-1',
-          ORCA_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
+          YIRU_PANE_KEY: paneKey,
+          YIRU_TAB_ID: 'tab-1',
+          YIRU_WORKTREE_ID: 'wt-1',
+          YIRU_WORKSPACE_ID: 'wt-1',
+          YIRU_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
         })
       })
     )
@@ -6995,11 +6995,11 @@ describe('connectPanePty', () => {
         sessionId: 'lost-pty',
         command: "codex '--dangerously-bypass-approvals-and-sandbox' 'resume' 'codex-session-1'",
         env: expect.objectContaining({
-          ORCA_PANE_KEY: paneKey,
-          ORCA_TAB_ID: 'tab-1',
-          ORCA_WORKTREE_ID: 'wt-1',
-          ORCA_WORKSPACE_ID: 'wt-1',
-          ORCA_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
+          YIRU_PANE_KEY: paneKey,
+          YIRU_TAB_ID: 'tab-1',
+          YIRU_WORKTREE_ID: 'wt-1',
+          YIRU_WORKSPACE_ID: 'wt-1',
+          YIRU_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
         })
       })
     )
@@ -7174,10 +7174,10 @@ describe('connectPanePty', () => {
       agentArgs: '--model gpt-5 --reasoning-effort high',
       agentEnv: {
         CODEX_PROFILE: 'captured',
-        ORCA_PANE_KEY: 'wrong-pane',
-        ORCA_TAB_ID: 'wrong-tab',
-        ORCA_WORKTREE_ID: 'wrong-worktree',
-        ORCA_WORKSPACE_ID: 'wrong-workspace'
+        YIRU_PANE_KEY: 'wrong-pane',
+        YIRU_TAB_ID: 'wrong-tab',
+        YIRU_WORKTREE_ID: 'wrong-worktree',
+        YIRU_WORKSPACE_ID: 'wrong-workspace'
       }
     }
     mockStoreState = {
@@ -7226,11 +7226,11 @@ describe('connectPanePty', () => {
         command: "codex '--model' 'gpt-5' '--reasoning-effort' 'high' 'resume' 'codex-session-1'",
         env: expect.objectContaining({
           CODEX_PROFILE: 'captured',
-          ORCA_PANE_KEY: paneKey,
-          ORCA_TAB_ID: 'tab-1',
-          ORCA_WORKTREE_ID: 'wt-1',
-          ORCA_WORKSPACE_ID: 'wt-1',
-          ORCA_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
+          YIRU_PANE_KEY: paneKey,
+          YIRU_TAB_ID: 'tab-1',
+          YIRU_WORKTREE_ID: 'wt-1',
+          YIRU_WORKSPACE_ID: 'wt-1',
+          YIRU_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
         })
       })
     )
@@ -7395,7 +7395,7 @@ describe('connectPanePty', () => {
         sessionId: 'lost-pty',
         command: "codex '--model' 'gpt-5-mini' 'resume' 'codex-session-1'",
         env: expect.objectContaining({
-          ORCA_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
+          YIRU_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
         })
       })
     )
@@ -7644,11 +7644,11 @@ describe('connectPanePty', () => {
         command: "codex '--dangerously-bypass-approvals-and-sandbox' 'resume' 'codex-session-1'",
         launchAgent: 'codex',
         env: expect.objectContaining({
-          ORCA_PANE_KEY: paneKey,
-          ORCA_TAB_ID: 'tab-1',
-          ORCA_WORKTREE_ID: 'wt-1',
-          ORCA_WORKSPACE_ID: 'wt-1',
-          ORCA_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
+          YIRU_PANE_KEY: paneKey,
+          YIRU_TAB_ID: 'tab-1',
+          YIRU_WORKTREE_ID: 'wt-1',
+          YIRU_WORKSPACE_ID: 'wt-1',
+          YIRU_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
         })
       })
     )
@@ -10785,7 +10785,7 @@ describe('connectPanePty', () => {
 
     expect(transport.serializeBuffer).toHaveBeenCalledTimes(1)
     expect(pane.terminal.write).not.toHaveBeenCalledWith(
-      expect.stringContaining('Orca skipped hidden terminal output'),
+      expect.stringContaining('Yiru skipped hidden terminal output'),
       expect.any(Function)
     )
     expect(pane.terminal.write).not.toHaveBeenCalledWith(
@@ -11306,7 +11306,7 @@ describe('connectPanePty', () => {
       expect(getMainBufferSnapshot).toHaveBeenCalledTimes(4)
       expect(pane.terminal.write).toHaveBeenCalledWith(
         expect.stringContaining(
-          'Orca skipped hidden terminal output because main recovery was unavailable.'
+          'Yiru skipped hidden terminal output because main recovery was unavailable.'
         ),
         expect.any(Function)
       )
@@ -12830,7 +12830,7 @@ describe('connectPanePty', () => {
       connectPanePty(pane as never, createManager(1) as never, createDeps() as never)
       await flushAsyncTicks(6)
 
-      capturedDataCallback.current?.('\r\x1b[Korca % npm test')
+      capturedDataCallback.current?.('\r\x1b[Kyiru % npm test')
 
       parseCallback?.()
       expect(refresh).toHaveBeenCalledWith(0, 39, true)
@@ -13108,7 +13108,7 @@ describe('connectPanePty', () => {
       // SSH changes where bytes originate, but Windows still paints them locally.
       mockStoreState = {
         ...mockStoreState,
-        repos: [{ id: 'repo1', connectionId: 'conn-1', displayName: 'orca' }]
+        repos: [{ id: 'repo1', connectionId: 'conn-1', displayName: 'yiru' }]
       }
 
       const pane = createPane(1)
@@ -13734,11 +13734,11 @@ describe('connectPanePty', () => {
         },
         launchToken: expect.stringMatching(new RegExp(`^${UUID_RE}$`)),
         env: expect.objectContaining({
-          ORCA_PANE_KEY: paneKey,
-          ORCA_TAB_ID: 'tab-1',
-          ORCA_WORKTREE_ID: 'wt-1',
-          ORCA_WORKSPACE_ID: 'wt-1',
-          ORCA_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
+          YIRU_PANE_KEY: paneKey,
+          YIRU_TAB_ID: 'tab-1',
+          YIRU_WORKTREE_ID: 'wt-1',
+          YIRU_WORKSPACE_ID: 'wt-1',
+          YIRU_AGENT_LAUNCH_TOKEN: expect.stringMatching(new RegExp(`^${UUID_RE}$`))
         })
       })
     )
@@ -13799,7 +13799,7 @@ describe('connectPanePty', () => {
         {
           id: 'repo1',
           connectionId: null,
-          displayName: 'orca',
+          displayName: 'yiru',
           executionHostId: 'runtime:owner-runtime'
         }
       ],
@@ -13839,7 +13839,7 @@ describe('connectPanePty', () => {
         {
           id: 'repo1',
           connectionId: null,
-          displayName: 'orca',
+          displayName: 'yiru',
           executionHostId: 'local'
         }
       ],
@@ -14292,8 +14292,8 @@ describe('connectPanePty', () => {
       onPtySpawn('pty-fact-pr')
 
       const link = {
-        url: 'https://github.com/acme/orca/pull/42',
-        slug: { owner: 'acme', repo: 'orca' },
+        url: 'https://github.com/acme/yiru/pull/42',
+        slug: { owner: 'acme', repo: 'yiru' },
         number: 42
       }
       handler._dispatchTerminalSideEffectBatchForTest({
@@ -14334,7 +14334,7 @@ describe('connectPanePty', () => {
       await flushAsyncTicks()
       expect(capturedDataCallback.current).not.toBeNull()
 
-      capturedDataCallback.current?.('Created https://github.com/acme/orca/pull/42\r\n')
+      capturedDataCallback.current?.('Created https://github.com/acme/yiru/pull/42\r\n')
       capturedDataCallback.current?.('\x1b]133;D;130\x07prompt $ ')
 
       expect(mockStoreState.observeTerminalGitHubPullRequestLink).not.toHaveBeenCalled()
@@ -16156,7 +16156,7 @@ describe('connectPanePty', () => {
       expect.objectContaining({
         source: 'agent-task-complete',
         worktreeId: 'wt-1',
-        repoLabel: 'orca',
+        repoLabel: 'yiru',
         worktreeLabel: 'feat/notis',
         hasMultipleActiveRepos: true,
         terminalTitle: '* Claude done',
@@ -16932,7 +16932,7 @@ describe('connectPanePty', () => {
           {
             id: 'repo1',
             connectionId: null,
-            displayName: 'orca',
+            displayName: 'yiru',
             executionHostId: 'runtime:owner-runtime'
           }
         ]

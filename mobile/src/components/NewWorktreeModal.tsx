@@ -32,7 +32,7 @@ import {
   isMobileTuiAgentEnabled,
   MOBILE_TUI_AGENT_LAUNCH_COMMANDS
 } from '../tasks/mobile-tui-agents'
-import type { PersistedTrustedOrcaHooks, TuiAgent } from '../../../src/shared/types'
+import type { PersistedTrustedYiruHooks, TuiAgent } from '../../../src/shared/types'
 import type { SshConnectionState } from '../../../src/shared/ssh-types'
 import {
   NEW_WORKTREE_AGENT_OPTIONS as AGENT_OPTIONS,
@@ -213,7 +213,7 @@ function NewWorktreeModalContent({
   const [tasksSupported, setTasksSupported] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [setupHookDetails, setSetupHookDetails] = useState<SetupHookDetails | null>(null)
-  const [trustedOrcaHooks, setTrustedOrcaHooks] = useState<PersistedTrustedOrcaHooks>({})
+  const [trustedYiruHooks, setTrustedYiruHooks] = useState<PersistedTrustedYiruHooks>({})
   const [setupTrustPrompt, setSetupTrustPrompt] = useState<SetupTrustPrompt | null>(null)
   const [setupDecisionChoice, setSetupDecisionChoice] = useState<Exclude<
     SetupDecision,
@@ -403,8 +403,8 @@ function NewWorktreeModalContent({
       }
       const uiResult = okResult(uiRes)
       if (uiResult) {
-        const ui = (uiResult.result as { ui?: { trustedOrcaHooks?: PersistedTrustedOrcaHooks } }).ui
-        setTrustedOrcaHooks(ui?.trustedOrcaHooks ?? {})
+        const ui = (uiResult.result as { ui?: { trustedYiruHooks?: PersistedTrustedYiruHooks } }).ui
+        setTrustedYiruHooks(ui?.trustedYiruHooks ?? {})
       }
 
       const [statusRes, preflightRes, linearRes] = await probes
@@ -668,16 +668,16 @@ function NewWorktreeModalContent({
         setupDecision === 'run' &&
         setupTrust &&
         setupTrust.contentHash !== options.approvedSetupContentHash &&
-        !isSetupHookTrusted(trustedOrcaHooks, selectedRepo.id, setupTrust.contentHash)
+        !isSetupHookTrusted(trustedYiruHooks, selectedRepo.id, setupTrust.contentHash)
       ) {
-        // Why: desktop prompts before running repo-owned orca.yaml setup hooks.
+        // Why: desktop prompts before running repo-owned yiru.yaml setup hooks.
         // Mobile stores the same trust hash so approvals carry across surfaces.
         setSetupTrustPrompt({
           repoId: selectedRepo.id,
           repoName: selectedRepo.displayName,
           scriptContent: setupTrust.scriptContent,
           contentHash: setupTrust.contentHash,
-          previouslyApproved: wasSetupHookPreviouslyApproved(trustedOrcaHooks, selectedRepo.id)
+          previouslyApproved: wasSetupHookPreviouslyApproved(trustedYiruHooks, selectedRepo.id)
         })
         transitionDrawer('trust')
         return
@@ -778,12 +778,12 @@ function NewWorktreeModalContent({
     try {
       const nextTrust = await persistSetupHookTrustApproval({
         client,
-        trust: trustedOrcaHooks,
+        trust: trustedYiruHooks,
         repoId: setupTrustPrompt.repoId,
         contentHash: setupTrustPrompt.contentHash,
         alwaysTrust
       })
-      setTrustedOrcaHooks(nextTrust)
+      setTrustedYiruHooks(nextTrust)
       const approvedHash = setupTrustPrompt.contentHash
       setSetupTrustPrompt(null)
       transitionDrawer('form')
@@ -983,7 +983,7 @@ function NewWorktreeModalContent({
                       {setupSource && (
                         <View style={styles.sourceBadge}>
                           <Text style={styles.sourceBadgeText}>
-                            {setupSource === 'orca.yaml' ? 'ORCA.YAML' : 'HOOKS'}
+                            {setupSource === 'yiru.yaml' ? 'YIRU.YAML' : 'HOOKS'}
                           </Text>
                         </View>
                       )}

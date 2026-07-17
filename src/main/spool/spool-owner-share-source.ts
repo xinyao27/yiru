@@ -1,5 +1,5 @@
 import type { Store } from '../persistence'
-import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import {
   getPortableProjectIdentityKey,
   getProjectIdentityKey
@@ -11,7 +11,7 @@ import type {
 import type { SpoolSessionCatalog } from './spool-session-catalog'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-visibility'
 
-type SpoolDescriptionRuntime = Pick<OrcaRuntimeService, 'showManagedWorktree' | 'onClientEvent'>
+type SpoolDescriptionRuntime = Pick<YiruRuntimeService, 'showManagedWorktree' | 'onClientEvent'>
 
 /** Projects owner metadata and delegates session inventory to the lazy catalog. */
 export class SpoolOwnerShareSource implements SpoolShareCatalogSource {

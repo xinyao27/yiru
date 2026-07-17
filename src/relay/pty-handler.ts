@@ -69,9 +69,9 @@ type ManagedPty = {
   disposed?: boolean
   /** True once external cleanup observers have been notified. */
   exitListenerNotified?: boolean
-  /** Renderer-supplied paneKey from spawn env (ORCA_PANE_KEY). Captured so
+  /** Renderer-supplied paneKey from spawn env (YIRU_PANE_KEY). Captured so
    *  external observers (the relay-hook-server cache) can evict per-pane
-   *  state when this PTY exits. Symmetric with Orca's local pty.ts. */
+   *  state when this PTY exits. Symmetric with Yiru's local pty.ts. */
   paneKey?: string
   tabId?: string
   /** Attach-only identity metadata supplied over RPC. Kept separate from
@@ -305,7 +305,7 @@ export class PtyHandler {
   // disposeManagedPty / map cleanup.
   private exitListener: PtyExitListener | null = null
   // Why: env augmenters injected at relay boot (currently the relay-hook
-  // server's ORCA_AGENT_HOOK_* coords). Run on every spawn so every PTY
+  // server's YIRU_AGENT_HOOK_* coords). Run on every spawn so every PTY
   // sees the live hook coordinates without the dispatcher needing to know
   // about agent hooks.
   private envAugmenters: PtyEnvAugmenter[] = []
@@ -351,7 +351,7 @@ export class PtyHandler {
 
   /** Register an env augmenter whose return value is merged into every spawn
    *  env *after* `process.env` and the renderer-supplied env. Used by the
-   *  relay-hook server to inject ORCA_AGENT_HOOK_PORT/TOKEN/ENV/VERSION/
+   *  relay-hook server to inject YIRU_AGENT_HOOK_PORT/TOKEN/ENV/VERSION/
    *  ENDPOINT — values the agent CLI inside the PTY needs to find the local
    *  hook receiver. See docs/design/agent-status-over-ssh.md §3. */
   addEnvAugmenter(augmenter: PtyEnvAugmenter): () => void {
@@ -369,7 +369,7 @@ export class PtyHandler {
    *  addEnvAugmenter doc-comment). Used by both spawn() and revive() so the
    *  relationship between process.env, renderer env, and augmenters cannot
    *  drift between the two paths — revived shells after a relay restart must
-   *  see the fresh ORCA_AGENT_HOOK_* coords just like freshly-spawned ones,
+   *  see the fresh YIRU_AGENT_HOOK_* coords just like freshly-spawned ones,
    *  otherwise agent-status over SSH silently breaks on every revive. */
   private buildSpawnEnv(
     rendererEnv: Record<string, string> | undefined,
@@ -381,9 +381,9 @@ export class PtyHandler {
         ...process.env,
         TERM: 'xterm-256color',
         COLORTERM: 'truecolor',
-        TERM_PROGRAM: 'Orca',
+        TERM_PROGRAM: 'Yiru',
         TERM_PROGRAM_VERSION:
-          rendererEnv?.ORCA_APP_VERSION || process.env.ORCA_APP_VERSION || '0.0.0-dev',
+          rendererEnv?.YIRU_APP_VERSION || process.env.YIRU_APP_VERSION || '0.0.0-dev',
         FORCE_HYPERLINK: '1'
       },
       rendererEnv
@@ -466,7 +466,7 @@ export class PtyHandler {
     }
     const submit = process.platform === 'win32' ? '\r' : '\n'
     // Why: a multiline startup prompt is pasted literally via bracketed paste
-    // only when the Orca shell-ready wrapper is active (waitForShellReady) —
+    // only when the Yiru shell-ready wrapper is active (waitForShellReady) —
     // that is the bash/zsh overlay that arms bracketed-paste mode. Other remote
     // shells keep the raw submit path so the ESC[200~ markers are not echoed.
     const payload = buildStartupCommandSubmission(startup.command, {
@@ -726,7 +726,7 @@ export class PtyHandler {
     context?: RequestContext
   ): Promise<{ id: string }> {
     const env = params.env as Record<string, string> | undefined
-    const worktreeId = env?.ORCA_WORKTREE_ID
+    const worktreeId = env?.YIRU_WORKTREE_ID
     const worktreePath = worktreeId ? splitWorktreeId(worktreeId)?.worktreePath : undefined
     const cwd = typeof params.cwd === 'string' ? params.cwd : resolveDefaultCwd()
     const finishCreation = this.beginPtyCreation([worktreePath, cwd])
@@ -768,18 +768,18 @@ export class PtyHandler {
       id = `pty-${this.nextId++}`
     } while (this.ptys.has(id) || this.pendingReviveIds.has(id))
 
-    // Why: server-side augmenter values (ORCA_AGENT_HOOK_* and plugin overlay
+    // Why: server-side augmenter values (YIRU_AGENT_HOOK_* and plugin overlay
     // dirs) override renderer-supplied env so live remote paths and hook coords
     // win over local userData paths. The context lets overlay augmenters derive
     // per-PTY OpenCode/Pi directories from the stable paneKey when present.
     // `command` is usually forwarded by ssh-pty-provider.ts only as a hint
     // for overlay resolution; runtime-owned PTYs opt into relay delivery
     // because no renderer TerminalPane exists to type the command.
-    const paneKey = typeof env?.ORCA_PANE_KEY === 'string' ? env.ORCA_PANE_KEY : undefined
+    const paneKey = typeof env?.YIRU_PANE_KEY === 'string' ? env.YIRU_PANE_KEY : undefined
     // Why: kept so a restarted runtime can re-adopt this live PTY under its
     // originally-exported handle (reported via listProcesses, survives revive).
     const terminalHandle =
-      typeof env?.ORCA_TERMINAL_HANDLE === 'string' ? env.ORCA_TERMINAL_HANDLE : undefined
+      typeof env?.YIRU_TERMINAL_HANDLE === 'string' ? env.YIRU_TERMINAL_HANDLE : undefined
     const command = typeof params.command === 'string' ? params.command : undefined
     const terminalWindowsWslDistro =
       typeof params.terminalWindowsWslDistro === 'string' ? params.terminalWindowsWslDistro : null
@@ -821,21 +821,21 @@ export class PtyHandler {
       cols,
       rows,
       cwd,
-      // Why: relay shells inherit process.env; never let an ambient Orca marker
+      // Why: relay shells inherit process.env; never let an ambient Yiru marker
       // enable shell-ready behavior unless this spawn explicitly requested it.
-      env: { ...spawnEnv, ORCA_SHELL_READY_MARKER: '0', ...shellLaunch.env }
+      env: { ...spawnEnv, YIRU_SHELL_READY_MARKER: '0', ...shellLaunch.env }
     })
 
     // Why: capture the renderer-supplied paneKey on the managed entry so the
     // exit listener can evict per-pane caches without the relay needing a
-    // separate ptyId→paneKey map. ORCA_PANE_KEY is shaped `${tabId}:${paneId}`
+    // separate ptyId→paneKey map. YIRU_PANE_KEY is shaped `${tabId}:${paneId}`
     // and is bounded by the renderer; the relay treats it as opaque.
-    const tabId = typeof env?.ORCA_TAB_ID === 'string' ? env.ORCA_TAB_ID : undefined
+    const tabId = typeof env?.YIRU_TAB_ID === 'string' ? env.YIRU_TAB_ID : undefined
     const attachIdentity = {
       paneKey: typeof params.paneKey === 'string' ? params.paneKey : paneKey,
       tabId: typeof params.tabId === 'string' ? params.tabId : tabId
     }
-    const worktreeId = typeof env?.ORCA_WORKTREE_ID === 'string' ? env.ORCA_WORKTREE_ID : undefined
+    const worktreeId = typeof env?.YIRU_WORKTREE_ID === 'string' ? env.YIRU_WORKTREE_ID : undefined
     const managed: ManagedPty = {
       id,
       pty: term,
@@ -854,9 +854,9 @@ export class PtyHandler {
             startupCommand: {
               command,
               delivered: false,
-              waitForShellReady: shellLaunch.env.ORCA_SHELL_READY_MARKER === '1',
+              waitForShellReady: shellLaunch.env.YIRU_SHELL_READY_MARKER === '1',
               scanState:
-                shellLaunch.env.ORCA_SHELL_READY_MARKER === '1'
+                shellLaunch.env.YIRU_SHELL_READY_MARKER === '1'
                   ? createShellReadyScanState()
                   : null,
               timer: null
@@ -1222,19 +1222,19 @@ export class PtyHandler {
     // Why: revive must apply the same hook env as spawn(). The hook-server
     // coords come from augmenters, while pane identity comes from the
     // serialized PTY entry because managed hook scripts exit without
-    // ORCA_PANE_KEY.
+    // YIRU_PANE_KEY.
     const revivedEnv: Record<string, string> = {}
     if (entry.paneKey) {
-      revivedEnv.ORCA_PANE_KEY = entry.paneKey
+      revivedEnv.YIRU_PANE_KEY = entry.paneKey
     }
     if (entry.tabId) {
-      revivedEnv.ORCA_TAB_ID = entry.tabId
+      revivedEnv.YIRU_TAB_ID = entry.tabId
     }
     if (entry.worktreeId) {
-      revivedEnv.ORCA_WORKTREE_ID = entry.worktreeId
+      revivedEnv.YIRU_WORKTREE_ID = entry.worktreeId
     }
     if (entry.terminalHandle) {
-      revivedEnv.ORCA_TERMINAL_HANDLE = entry.terminalHandle
+      revivedEnv.YIRU_TERMINAL_HANDLE = entry.terminalHandle
     }
     const explicitTerm =
       typeof entry.explicitTerm === 'string' && entry.explicitTerm.length > 0
@@ -1265,7 +1265,7 @@ export class PtyHandler {
       rows: entry.rows,
       cwd: entry.cwd,
       // Why: no provider-delivered command is waiting for a ready marker.
-      env: { ...spawnEnv, ORCA_SHELL_READY_MARKER: '0', ...shellLaunch.env }
+      env: { ...spawnEnv, YIRU_SHELL_READY_MARKER: '0', ...shellLaunch.env }
     })
     this.wireAndStore({
       id: entry.id,

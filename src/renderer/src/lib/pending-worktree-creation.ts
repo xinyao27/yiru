@@ -37,7 +37,7 @@ export type WorktreeCreationRequest = {
    *  host intent for retry, diagnostics, and future metadata writes. */
   workspaceRunContext?: WorkspaceRunContext | null
   /** Ephemeral VM runtime provisioned for this create. Used for best-effort
-   *  cleanup if Orca fails before the workspace owns the runtime. */
+   *  cleanup if Yiru fails before the workspace owns the runtime. */
   ephemeralVmRuntimeId?: string
   /** Runtime environment created from the VM's pairing code. Used to refresh
    *  live status immediately after the workspace takes ownership. */

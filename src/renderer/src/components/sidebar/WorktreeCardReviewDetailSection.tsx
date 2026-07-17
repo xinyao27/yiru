@@ -22,7 +22,7 @@ type WorktreeCardReviewDetailSectionProps = {
   review: WorktreeCardPrDisplay | null
   reviewMenuOpen: boolean
   onReviewMenuOpenChange: (open: boolean) => void
-  onOpenReviewInOrca?: (event: React.MouseEvent) => void
+  onOpenReviewInYiru?: (event: React.MouseEvent) => void
   onCopyReviewLink?: () => void
   onUnlinkReview?: () => void
   closeHover: () => void
@@ -32,7 +32,7 @@ export function WorktreeCardReviewDetailSection({
   review,
   reviewMenuOpen,
   onReviewMenuOpenChange,
-  onOpenReviewInOrca,
+  onOpenReviewInYiru,
   onCopyReviewLink,
   onUnlinkReview,
   closeHover
@@ -66,7 +66,7 @@ export function WorktreeCardReviewDetailSection({
   )
   const dismissAndOpenReview = (event: React.MouseEvent): void => {
     closeHover()
-    onOpenReviewInOrca?.(event)
+    onOpenReviewInYiru?.(event)
   }
 
   return (
@@ -129,11 +129,11 @@ export function WorktreeCardReviewDetailSection({
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            {review.url && onOpenReviewInOrca && (
+            {review.url && onOpenReviewInYiru && (
               <MetadataActionIcon
                 label={translate(
                   'auto.components.sidebar.WorktreeCardMeta.2c67730e07',
-                  'Open in Orca'
+                  'Open in Yiru'
                 )}
                 onClick={dismissAndOpenReview}
               >

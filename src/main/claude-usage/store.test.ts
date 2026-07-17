@@ -3,7 +3,7 @@ import type { ClaudeUsagePersistedState } from './types'
 
 vi.mock('electron', () => ({
   app: {
-    getPath: vi.fn(() => '/tmp/orca-test-userdata')
+    getPath: vi.fn(() => '/tmp/yiru-test-userdata')
   }
 }))
 
@@ -39,7 +39,7 @@ describe('ClaudeUsageStore', () => {
     vi.setSystemTime(new Date('2026-04-09T12:00:00.000-04:00'))
   })
 
-  it('reports no data for Orca scope when only non-Orca usage exists', async () => {
+  it('reports no data for Yiru scope when only non-Yiru usage exists', async () => {
     const store = createStoreWithState({
       sessions: [
         {
@@ -89,7 +89,7 @@ describe('ClaudeUsageStore', () => {
       ]
     })
 
-    const summary = await store.getSummary('orca', '30d')
+    const summary = await store.getSummary('yiru', '30d')
 
     expect(summary.hasAnyClaudeData).toBe(false)
     expect(summary.sessions).toBe(0)
@@ -147,7 +147,7 @@ describe('ClaudeUsageStore', () => {
       ]
     })
 
-    const recentSessions = await store.getRecentSessions('orca', '7d', 10)
+    const recentSessions = await store.getRecentSessions('yiru', '7d', 10)
 
     expect(recentSessions).toHaveLength(1)
     expect(recentSessions[0]?.sessionId).toBe('session-1')
@@ -173,7 +173,7 @@ describe('ClaudeUsageStore', () => {
       ]
     })
 
-    const summary = await store.getSummary('orca', '30d')
+    const summary = await store.getSummary('yiru', '30d')
 
     expect(summary.turns).toBe(5)
     expect(summary.zeroCacheReadTurns).toBe(2)
@@ -199,8 +199,8 @@ describe('ClaudeUsageStore', () => {
       ]
     })
 
-    const summary = await store.getSummary('orca', '30d')
-    const breakdown = await store.getBreakdown('orca', '30d', 'model')
+    const summary = await store.getSummary('yiru', '30d')
+    const breakdown = await store.getBreakdown('yiru', '30d', 'model')
 
     expect(summary.estimatedCostUsd).toBeCloseTo(36.75)
     expect(
@@ -242,8 +242,8 @@ describe('ClaudeUsageStore', () => {
       ]
     })
 
-    const summary = await store.getSummary('orca', '30d')
-    const breakdown = await store.getBreakdown('orca', '30d', 'model')
+    const summary = await store.getSummary('yiru', '30d')
+    const breakdown = await store.getBreakdown('yiru', '30d', 'model')
 
     expect(summary.estimatedCostUsd).toBeCloseTo(73.5)
     expect(
@@ -288,7 +288,7 @@ describe('ClaudeUsageStore', () => {
       ]
     })
 
-    const summary = await store.getSummary('orca', '30d')
+    const summary = await store.getSummary('yiru', '30d')
 
     expect(summary.estimatedCostUsd).toBeCloseTo(73.5)
   })
@@ -327,7 +327,7 @@ describe('ClaudeUsageStore', () => {
       ]
     })
 
-    const summary = await store.getSummary('orca', '30d')
+    const summary = await store.getSummary('yiru', '30d')
 
     expect(summary.estimatedCostUsd).toBeCloseTo(220.5)
   })
@@ -352,7 +352,7 @@ describe('ClaudeUsageStore', () => {
       ]
     })
 
-    const summary = await store.getSummary('orca', '30d')
+    const summary = await store.getSummary('yiru', '30d')
 
     expect(summary.estimatedCostUsd).toBeCloseTo(8.07)
   })

@@ -78,7 +78,7 @@ const AddProjectFromFolderDialog = React.memo(function AddProjectFromFolderDialo
         const state = useAppStore.getState()
         const existingIdx = state.repos.findIndex((r) => r.id === repo?.id)
         if (existingIdx !== -1) {
-          state.clearOrcaHookTrustForRepo(repo.id)
+          state.clearYiruHookTrustForRepo(repo.id)
           const updated = [...state.repos]
           updated[existingIdx] = repo
           useAppStore.setState({ repos: updated })
@@ -173,7 +173,7 @@ const AddProjectFromFolderDialog = React.memo(function AddProjectFromFolderDialo
           <DialogDescription>
             {translate(
               'auto.components.sidebar.AddProjectFromFolderDialog.046751dbfb',
-              'Add this folder as a separate Orca project.'
+              'Add this folder as a separate Yiru project.'
             )}
           </DialogDescription>
         </DialogHeader>

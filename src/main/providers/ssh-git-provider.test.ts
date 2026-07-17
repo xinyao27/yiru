@@ -148,7 +148,7 @@ describe('SshGitProvider', () => {
     mux.request.mockRejectedValueOnce(methodNotFound)
 
     await expect(provider.getSubmoduleStatus('/home/user/repo', 'vendor/lib')).rejects.toThrow(
-      'SSH submodule diff support is unavailable on this relay. Reconnect the SSH target to update Orca on the host, then try again.'
+      'SSH submodule diff support is unavailable on this relay. Reconnect the SSH target to update Yiru on the host, then try again.'
     )
   })
 
@@ -222,7 +222,7 @@ describe('SshGitProvider', () => {
     await expect(
       provider.clone(['clone', '--progress', '--', 'url', 'repo'], '/home/user')
     ).rejects.toThrow(
-      'SSH clone support is unavailable on this relay. Reconnect the SSH target to update Orca on the host, then try again.'
+      'SSH clone support is unavailable on this relay. Reconnect the SSH target to update Yiru on the host, then try again.'
     )
   })
 
@@ -294,25 +294,25 @@ describe('SshGitProvider', () => {
 
     await provider.execNonInteractive(
       '/bin/bash',
-      ['-lc', 'echo "$ORCA_WORKTREE_PATH"'],
+      ['-lc', 'echo "$YIRU_WORKTREE_PATH"'],
       '/home/user/repo',
       120_000,
       undefined,
       {
-        ORCA_ROOT_PATH: '/home/user/repo',
-        ORCA_WORKTREE_PATH: '/home/user/repo-feature'
+        YIRU_ROOT_PATH: '/home/user/repo',
+        YIRU_WORKTREE_PATH: '/home/user/repo-feature'
       }
     )
 
     expect(mux.request).toHaveBeenCalledWith('agent.execNonInteractive', {
       binary: '/bin/bash',
-      args: ['-lc', 'echo "$ORCA_WORKTREE_PATH"'],
+      args: ['-lc', 'echo "$YIRU_WORKTREE_PATH"'],
       cwd: '/home/user/repo',
       stdin: null,
       timeoutMs: 120_000,
       env: {
-        ORCA_ROOT_PATH: '/home/user/repo',
-        ORCA_WORKTREE_PATH: '/home/user/repo-feature'
+        YIRU_ROOT_PATH: '/home/user/repo',
+        YIRU_WORKTREE_PATH: '/home/user/repo-feature'
       }
     })
   })
@@ -764,14 +764,14 @@ describe('SshGitProvider', () => {
 
   it('pushBranch sends git.push request and forwards publish mode and target', async () => {
     await provider.pushBranch('/home/user/repo', true, {
-      remoteName: 'pr-fork-orca',
+      remoteName: 'pr-fork-yiru',
       branchName: 'contributor/fix'
     })
     expect(mux.request).toHaveBeenCalledWith('git.push', {
       worktreePath: '/home/user/repo',
       publish: true,
       pushTarget: {
-        remoteName: 'pr-fork-orca',
+        remoteName: 'pr-fork-yiru',
         branchName: 'contributor/fix'
       }
     })
@@ -862,7 +862,7 @@ describe('SshGitProvider', () => {
     }
     mux.request.mockResolvedValue(syncResult)
 
-    const expectedUpstream = { owner: 'stablyai', repo: 'orca' }
+    const expectedUpstream = { owner: 'stablyai', repo: 'yiru' }
     const result = await provider.syncForkDefaultBranch('/home/user/repo', expectedUpstream)
 
     expect(mux.request).toHaveBeenCalledWith('git.forkSync', {
@@ -1415,7 +1415,7 @@ describe('SshGitProvider', () => {
     await expect(
       provider.forceDeletePreservedBranch('/home/user/repo', 'you/fix-auth', 'abc123')
     ).rejects.toThrow(
-      'This SSH host is running an older Orca relay that cannot delete preserved branches. Reconnect to deploy the latest relay, then try again.'
+      'This SSH host is running an older Yiru relay that cannot delete preserved branches. Reconnect to deploy the latest relay, then try again.'
     )
   })
 

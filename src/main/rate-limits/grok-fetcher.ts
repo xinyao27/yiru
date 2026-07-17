@@ -209,7 +209,7 @@ async function fetchMonthlyUsageFallback(
   return { kind: 'window', window: mapMonthlyUsage(config) }
 }
 
-// Why: Orca never runs grok login; it only reads the session file the CLI updates.
+// Why: Yiru never runs grok login; it only reads the session file the CLI updates.
 export async function fetchGrokRateLimits(
   options: { signal?: AbortSignal; authReadResult?: GrokAuthReadResult } = {}
 ): Promise<ProviderRateLimits> {

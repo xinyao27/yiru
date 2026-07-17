@@ -17,9 +17,9 @@ vi.mock('fs', () => ({
 
 vi.mock('./relay-protocol', () => ({
   RELAY_VERSION: '0.1.0',
-  RELAY_REMOTE_DIR: '.orca-remote',
+  RELAY_REMOTE_DIR: '.yiru-remote',
   parseUnameToRelayPlatform: vi.fn().mockReturnValue('linux-x64'),
-  RELAY_SENTINEL: 'ORCA-RELAY v0.1.0 READY\n',
+  RELAY_SENTINEL: 'YIRU-RELAY v0.1.0 READY\n',
   RELAY_SENTINEL_TIMEOUT_MS: 10_000
 }))
 
@@ -39,7 +39,7 @@ vi.mock('./ssh-remote-node-resolution', () => ({
 
 vi.mock('./ssh-relay-versioned-install', () => ({
   readLocalFullVersion: vi.fn().mockReturnValue('0.1.0+testhash'),
-  computeRemoteRelayDir: (home: string, v: string) => `${home}/.orca-remote/relay-${v}`,
+  computeRemoteRelayDir: (home: string, v: string) => `${home}/.yiru-remote/relay-${v}`,
   isRelayAlreadyInstalled: vi.fn().mockResolvedValue(false),
   acquireInstallLock: vi.fn().mockResolvedValue(undefined),
   finalizeInstall: vi.fn().mockResolvedValue(undefined),
@@ -152,7 +152,7 @@ function makeExecResponses(opts: {
   // build toolchain — no chmod/probe/launch slots are reached.
   if (opts.npmInstall !== 'ok') {
     return [
-      '__ORCA_REMOTE_PLATFORM__ Linux x86_64',
+      '__YIRU_REMOTE_PLATFORM__ Linux x86_64',
       '/home/u',
       '', // mkdir remoteDir (uploadRelay)
       '', // chmod +x node
@@ -164,14 +164,14 @@ function makeExecResponses(opts: {
     opts.probeStdoutOverride !== undefined
       ? opts.probeStdoutOverride
       : opts.probe === 'ok'
-        ? 'ORCA-NPTY-PROBE-OK\n'
+        ? 'YIRU-NPTY-PROBE-OK\n'
         : opts.probe === 'missing'
           ? 'MISSING\n' // shell-level `|| echo MISSING` after require throw
           : opts.probe === 'dir-gone'
             ? { reject: 'cd: no such file or directory' }
             : opts.probe
   const slots: ExecResponse[] = [
-    '__ORCA_REMOTE_PLATFORM__ Linux x86_64',
+    '__YIRU_REMOTE_PLATFORM__ Linux x86_64',
     '/home/u',
     '', // mkdir remoteDir (uploadRelay)
     '', // chmod +x node
@@ -182,7 +182,7 @@ function makeExecResponses(opts: {
   // Cleanup execs only run when the probe resolved (not when it rejected).
   const probeResolved = typeof probeSlot === 'string'
   if (probeResolved) {
-    const probeOk = probeSlot.includes('ORCA-NPTY-PROBE-OK')
+    const probeOk = probeSlot.includes('YIRU-NPTY-PROBE-OK')
     if (!probeOk) {
       slots.push('') // cat stderr (graceful failure path captures detail)
     }
@@ -249,7 +249,7 @@ describe('installNativeDeps (via deployAndLaunchRelay)', () => {
     const written = sftpCapture.contents[pkgPath as string]
     expect(written).toBeTruthy()
     const parsed = JSON.parse(written) as Record<string, unknown>
-    expect(parsed.name).toBe('orca-relay')
+    expect(parsed.name).toBe('yiru-relay')
     expect(parsed.version).toBe('1.0.0')
     expect(parsed.private).toBe(true)
     // Why: pin commonjs so a future Node default flip doesn't silently
@@ -346,7 +346,7 @@ describe('installNativeDeps (via deployAndLaunchRelay)', () => {
       makeExecResponses({
         npmInstall: {
           reject:
-            'Command "export PATH=/usr/bin:$PATH && cd /home/u/.orca-remote/relay && npm install node-pty@1.1.0 2>&1" failed (exit 1): npm ERR! network ETIMEDOUT'
+            'Command "export PATH=/usr/bin:$PATH && cd /home/u/.yiru-remote/relay && npm install node-pty@1.1.0 2>&1" failed (exit 1): npm ERR! network ETIMEDOUT'
         },
         probe: 'ok',
         toolchainProbe: 'PKG apt-get'
@@ -494,7 +494,7 @@ describe('installNativeDeps (via deployAndLaunchRelay)', () => {
       makeExecResponses({
         npmInstall: 'ok',
         probe: 'ok',
-        probeStdoutOverride: 'Welcome to Acme Corp\nLast login: ...\nORCA-NPTY-PROBE-OK\n'
+        probeStdoutOverride: 'Welcome to Acme Corp\nLast login: ...\nYIRU-NPTY-PROBE-OK\n'
       })
     )
 
@@ -530,7 +530,7 @@ describe('installNativeDeps (via deployAndLaunchRelay)', () => {
     vi.mocked(resolveRemoteNodePath).mockResolvedValueOnce('C:/Program Files/nodejs/node.exe')
     const conn = makeMockConnection(sftpCapture)
     feed([
-      '__ORCA_REMOTE_PLATFORM__ Windows AMD64',
+      '__YIRU_REMOTE_PLATFORM__ Windows AMD64',
       'C:\\Users\\u',
       '', // mkdir remoteDir
       '', // npm install native deps
@@ -605,13 +605,13 @@ describe('installNativeDeps (via deployAndLaunchRelay)', () => {
     vi.mocked(isRelayAlreadyInstalled).mockResolvedValue(true)
     const conn = makeMockConnection(sftpCapture)
     feed([
-      '__ORCA_REMOTE_PLATFORM__ Linux x86_64',
+      '__YIRU_REMOTE_PLATFORM__ Linux x86_64',
       '/home/u',
       'MISSING', // first native-deps probe before lock
       'MISSING', // re-probe after lock
       '', // npm install native deps
       '', // chmod prebuilds
-      'ORCA-NPTY-PROBE-OK\n',
+      'YIRU-NPTY-PROBE-OK\n',
       '', // rm probe stderr
       'DEAD',
       'READY'
@@ -633,9 +633,9 @@ describe('installNativeDeps (via deployAndLaunchRelay)', () => {
     vi.mocked(isRelayAlreadyInstalled).mockResolvedValue(true)
     const conn = makeMockConnection(sftpCapture)
     feed([
-      '__ORCA_REMOTE_PLATFORM__ Linux x86_64',
+      '__YIRU_REMOTE_PLATFORM__ Linux x86_64',
       '/home/u',
-      'ORCA-NATIVE-DEPS-OK',
+      'YIRU-NATIVE-DEPS-OK',
       'DEAD',
       'READY'
     ])

@@ -6,7 +6,7 @@ import type {
   SpoolHistoricalSessionConsistency
 } from './spool-session-source'
 import { SpoolMobileVaultSessionSource } from './spool-mobile-vault-session-source'
-import { OrcaSpoolExecutionHostSessionReader } from './spool-orca-session-reader'
+import { YiruSpoolExecutionHostSessionReader } from './spool-yiru-session-reader'
 import { SpoolOwnerSessionRecords } from './spool-owner-session-records'
 import type { SpoolExecutionError } from './spool-execution-error'
 import { SpoolSessionCatalog } from './spool-session-catalog'
@@ -291,7 +291,7 @@ describe('Spool session catalog invalidation', () => {
 
   it('routes an empty snapshot through its unique registered Public worktree', () => {
     let emitSessionChange: (snapshot: SpoolMobileSessionTabsResult) => void = () => undefined
-    const reader = new OrcaSpoolExecutionHostSessionReader({
+    const reader = new YiruSpoolExecutionHostSessionReader({
       listMobileSessionTabs: async () => emptySessionSnapshot(publicWorktree.worktreeId),
       onMobileSessionTabsChanged: (listener) => {
         emitSessionChange = listener

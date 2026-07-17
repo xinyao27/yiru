@@ -1,6 +1,6 @@
 import { getRepoIdFromMobileWorktreeId } from '../session/mobile-session-route-helpers'
 
-export const LAST_VISITED_WORKTREE_STORAGE_KEY = 'orca:last-visited-worktree'
+export const LAST_VISITED_WORKTREE_STORAGE_KEY = 'yiru:last-visited-worktree'
 
 type LastVisitedWorktreeRecord = {
   hostId: string

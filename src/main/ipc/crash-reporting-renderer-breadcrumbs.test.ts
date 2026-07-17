@@ -55,7 +55,7 @@ vi.mock('../observability', () => ({
 }))
 
 vi.mock('../observability/diagnostic-upload-endpoint', () => ({
-  resolveDiagnosticOrcaChannel: vi.fn()
+  resolveDiagnosticYiruChannel: vi.fn()
 }))
 
 vi.mock('../observability/tracer', () => ({

@@ -4,7 +4,7 @@ import { SPOOL_INGRESS_PORT, type SpoolOsFamily } from '../../shared/spool/spool
 import { getRepoIdFromWorktreeId } from '../../shared/worktree-id'
 import type { Store } from '../persistence'
 import type { RateLimitService } from '../rate-limits/service'
-import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { SpoolAccessAuthority } from './spool-access-authority'
 import { SpoolDesktopCatalog } from './spool-desktop-catalog'
 import { SpoolDesktopComposition } from './spool-desktop-lifecycle'
@@ -16,11 +16,11 @@ import { SpoolProbeService } from './spool-ingress-probe'
 import { SpoolLegacySessionAttestor } from './spool-legacy-session-attestor'
 import { resolveSpoolLocalWslDistro } from './spool-local-wsl-route'
 import { SpoolMobileVaultSessionSource } from './spool-mobile-vault-session-source'
-import { createOrcaSpoolHostAdapter } from './spool-orca-host-adapter'
+import { createYiruSpoolHostAdapter } from './spool-yiru-host-adapter'
 import { SpoolOwnerShareSource } from './spool-owner-share-source'
 import { DefaultSpoolOwnerWorktreeCatalog } from './spool-owner-worktree-catalog'
-import { OrcaSpoolPairedRuntimeHostAdapter } from './spool-paired-runtime-host-adapter'
-import { OrcaSpoolPairedRuntimeSessionReader } from './spool-paired-runtime-session-reader'
+import { YiruSpoolPairedRuntimeHostAdapter } from './spool-paired-runtime-host-adapter'
+import { YiruSpoolPairedRuntimeSessionReader } from './spool-paired-runtime-session-reader'
 import { listSpoolPairedRuntimeWorktrees } from './spool-paired-runtime-worktree-catalog'
 import { HttpSpoolProbeClient } from './spool-probe-client'
 import { subscribePublicSessionRoutes } from './spool-public-session-route-subscription'
@@ -50,12 +50,12 @@ export { SpoolDesktopComposition } from './spool-desktop-lifecycle'
 
 export type SpoolDesktopCompositionOptions = {
   store: Store
-  runtime: OrcaRuntimeService
+  runtime: YiruRuntimeService
   rateLimits: Pick<RateLimitService, 'getState' | 'onStateChange'>
   userDataPath: string
   profileId: string
   ownerRuntimeId: string
-  orcaVersion: string
+  yiruVersion: string
   osFamily: SpoolOsFamily
   isPackaged: boolean
   executablePath: string
@@ -70,13 +70,13 @@ export function createSpoolDesktopComposition(
     listRuntimeWorktrees: (environmentId, repo) =>
       listSpoolPairedRuntimeWorktrees(options.userDataPath, environmentId, repo)
   })
-  let host: ReturnType<typeof createOrcaSpoolHostAdapter> | undefined
-  const pairedRuntimeAdapter = new OrcaSpoolPairedRuntimeHostAdapter({
+  let host: ReturnType<typeof createYiruSpoolHostAdapter> | undefined
+  const pairedRuntimeAdapter = new YiruSpoolPairedRuntimeHostAdapter({
     userDataPath: options.userDataPath,
     resolveOwnerHistoricalRecord: (ownerRecordKey) =>
       host?.sessionRecords.resolve(ownerRecordKey) ?? null
   })
-  const pairedRuntimeSessionReader = new OrcaSpoolPairedRuntimeSessionReader({
+  const pairedRuntimeSessionReader = new YiruSpoolPairedRuntimeSessionReader({
     userDataPath: options.userDataPath
   })
   const resolveLocalWslDistro = (target: SpoolOwnerWorktree): string | null =>
@@ -87,7 +87,7 @@ export function createSpoolDesktopComposition(
   })
   const incarnation = new SpoolWorktreeIncarnation(incarnationHost)
   const roots = new SpoolActualHostSessionRootMatcher(incarnationHost)
-  host = createOrcaSpoolHostAdapter({
+  host = createYiruSpoolHostAdapter({
     store: options.store,
     runtime: options.runtime,
     pairedRuntimeAdapter,
@@ -210,7 +210,7 @@ export function createSpoolDesktopComposition(
     tickets,
     keypair,
     ownerRuntimeId: options.ownerRuntimeId,
-    orcaVersion: options.orcaVersion,
+    yiruVersion: options.yiruVersion,
     osFamily: options.osFamily
   })
   const probeClient = new HttpSpoolProbeClient()

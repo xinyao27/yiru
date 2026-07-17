@@ -81,8 +81,8 @@ device pixels with `android-input-mapping`, then `encodeInjectTouchEvent`).
 ```sh
 pnpm build:cli
 # boot an AVD (Android Studio or `emulator @<avd>`), then:
-orca-dev emulator devices --json          # see the device
-orca-dev emulator tap 0.5 0.8 --device <serial>   # control works today
+yiru-dev emulator devices --json          # see the device
+yiru-dev emulator tap 0.5 0.8 --device <serial>   # control works today
 # after wiring §2/§4: open the emulator pane and confirm the live frame + taps.
 ```
 

@@ -19,7 +19,7 @@ real dev app over CDP. Each cycle times a **cold** reveal (tab confirmed parked
 via `window.__terminalParkingDebug.parkedTabIds()` before revealing) and a
 **warm** reveal (revealed inside the hot-retain window, confirmed not parked),
 so the cold−warm delta is the isolated cost of parking. It shrinks the 30s
-hysteresis with `ORCA_E2E_TERMINAL_PARKING_DELAY_MS` and roots userData under a
+hysteresis with `YIRU_E2E_TERMINAL_PARKING_DELAY_MS` and roots userData under a
 short `~/.ocpb` path — the default `/var/folders` tmp path overruns the macOS
 104-char Unix-socket limit, the daemon fails to bind, and terminals fall back to
 non-snapshot PTYs that never park.

@@ -58,7 +58,7 @@ afterEach(() => {
 })
 
 describe('openHttpLink', () => {
-  it('routes into Orca when openLinksInApp is on and a worktree is known', () => {
+  it('routes into Yiru when openLinksInApp is on and a worktree is known', () => {
     storeState.settings = { openLinksInApp: true }
 
     openHttpLink('https://example.com/', { worktreeId: 'wt-1' })
@@ -79,7 +79,7 @@ describe('openHttpLink', () => {
     expect(createBrowserTabMock).not.toHaveBeenCalled()
   })
 
-  it('routes floating workspace links into Orca without changing the active repo worktree', () => {
+  it('routes floating workspace links into Yiru without changing the active repo worktree', () => {
     storeState.settings = { openLinksInApp: true }
 
     openHttpLink('https://example.com/', { worktreeId: FLOATING_TERMINAL_WORKTREE_ID })
@@ -187,7 +187,7 @@ describe('openHttpLink', () => {
         ports: [port('repo-local', 'wt-local', '/local')]
       }
     }
-    registerLocalhostLabelMock.mockResolvedValue({ url: 'http://wt-local.orca.localhost:60016/' })
+    registerLocalhostLabelMock.mockResolvedValue({ url: 'http://wt-local.yiru.localhost:60016/' })
 
     openHttpLink('http://localhost:5180/', {
       worktreeId: 'wt-local',
@@ -275,7 +275,7 @@ describe('openHttpLink', () => {
       }
     }
     registerLocalhostLabelMock.mockResolvedValue({
-      url: 'http://analytics.orca.localhost:60016/episodes'
+      url: 'http://analytics.yiru.localhost:60016/episodes'
     })
 
     openHttpLink('http://localhost:5180/episodes', { worktreeId: 'wt-analytics' })
@@ -290,7 +290,7 @@ describe('openHttpLink', () => {
         worktreeId: 'wt-analytics'
       })
     )
-    expect(openUrlMock).toHaveBeenCalledWith('http://analytics.orca.localhost:60016/episodes')
+    expect(openUrlMock).toHaveBeenCalledWith('http://analytics.yiru.localhost:60016/episodes')
   })
 
   it('resolves display URLs for labeled localhost links without opening them', async () => {
@@ -337,11 +337,11 @@ describe('openHttpLink', () => {
       }
     }
     registerLocalhostLabelMock.mockResolvedValue({
-      url: 'http://snapstudio-main.orca.localhost:60016/'
+      url: 'http://snapstudio-main.yiru.localhost:60016/'
     })
 
     await expect(resolveLocalhostHttpLinkDisplayUrl('http://localhost:5180/')).resolves.toBe(
-      'http://snapstudio-main.orca.localhost:60016/'
+      'http://snapstudio-main.yiru.localhost:60016/'
     )
     expect(openUrlMock).not.toHaveBeenCalled()
     expect(createBrowserTabMock).not.toHaveBeenCalled()

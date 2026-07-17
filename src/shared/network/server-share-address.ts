@@ -1,4 +1,4 @@
-// Why: shared validator for the "Share this Orca server" custom address. The
+// Why: shared validator for the "Share this Yiru server" custom address. The
 // field accepts a bare host, host:port, or a full ws(s):// URL — looser than
 // the mobile pairing grammar because the target is a transport endpoint, not
 // just an IP. Kept pure so the renderer and any future caller agree.

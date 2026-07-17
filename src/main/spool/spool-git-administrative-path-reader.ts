@@ -3,7 +3,7 @@ import { parseWslUncPath } from '../../shared/wsl-paths'
 import { gitExecFileAsync } from '../git/runner'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { requireSingleSpoolGitPath, toSpoolLocalAccessPath } from './spool-canonical-host-path'
-import { spoolHostPath, spoolSshConnectionIdFromScope } from './spool-orca-host-paths'
+import { spoolHostPath, spoolSshConnectionIdFromScope } from './spool-yiru-host-paths'
 import type { SpoolCanonicalHostPath } from './spool-worktree-containment'
 
 const GIT_ADMIN_PATH_TIMEOUT_MS = 10_000

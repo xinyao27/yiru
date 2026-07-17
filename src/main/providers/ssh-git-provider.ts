@@ -139,7 +139,7 @@ export class SshGitProvider implements IGitProvider {
       // raw JSON-RPC method-not-found error in Source Control.
       if (isJsonRpcMethodNotFoundError(error)) {
         throw new Error(
-          'SSH submodule diff support is unavailable on this relay. Reconnect the SSH target to update Orca on the host, then try again.'
+          'SSH submodule diff support is unavailable on this relay. Reconnect the SSH target to update Yiru on the host, then try again.'
         )
       }
       throw error
@@ -771,7 +771,7 @@ export class SshGitProvider implements IGitProvider {
         // Why: older SSH relays predate git.forceDeletePreservedBranch; surface
         // a reconnect prompt instead of a raw JSON-RPC method-not-found error.
         throw new Error(
-          'This SSH host is running an older Orca relay that cannot delete preserved branches. Reconnect to deploy the latest relay, then try again.'
+          'This SSH host is running an older Yiru relay that cannot delete preserved branches. Reconnect to deploy the latest relay, then try again.'
         )
       }
       throw error
@@ -845,7 +845,7 @@ export class SshGitProvider implements IGitProvider {
     } catch (error) {
       if (isJsonRpcMethodNotFoundError(error)) {
         throw new Error(
-          'SSH clone support is unavailable on this relay. Reconnect the SSH target to update Orca on the host, then try again.'
+          'SSH clone support is unavailable on this relay. Reconnect the SSH target to update Yiru on the host, then try again.'
         )
       }
       throw error

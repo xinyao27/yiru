@@ -17,7 +17,7 @@ let isolatedStateDirSeq = 0
 function createIsolatedWatcher(): ServeSimStateWatcher {
   isolatedStateDirSeq += 1
   return new ServeSimStateWatcher({
-    stateDir: join(tmpdir(), `orca-serve-sim-test-none-${process.pid}-${isolatedStateDirSeq}`)
+    stateDir: join(tmpdir(), `yiru-serve-sim-test-none-${process.pid}-${isolatedStateDirSeq}`)
   })
 }
 
@@ -46,7 +46,7 @@ describe('ServeSimStateWatcher', () => {
   })
 
   it('attaches to the serve-sim state directory when it appears after startup', async () => {
-    const parentDir = await mkdtemp(join(tmpdir(), 'orca-serve-sim-watch-'))
+    const parentDir = await mkdtemp(join(tmpdir(), 'yiru-serve-sim-watch-'))
     cleanupPaths.push(parentDir)
     const stateDir = join(parentDir, 'serve-sim')
     // Force darwin (the poll is macOS-only) and a fast interval so this
@@ -89,7 +89,7 @@ describe('ServeSimStateWatcher', () => {
     // recurring timer waking the daemon for a directory that can never exist.
     for (const platform of ['win32', 'linux'] as const) {
       const watcher = new ServeSimStateWatcher({
-        stateDir: join(tmpdir(), `orca-serve-sim-nonmac-${process.pid}-${platform}`),
+        stateDir: join(tmpdir(), `yiru-serve-sim-nonmac-${process.pid}-${platform}`),
         platform
       })
       watcher.start()
@@ -155,7 +155,7 @@ describe('ServeSimStateWatcher', () => {
     watcher.stop()
   })
 
-  it('suppresses Orca-managed sessions only while they are marked managed', async () => {
+  it('suppresses Yiru-managed sessions only while they are marked managed', async () => {
     const watcher = createIsolatedWatcher()
     const events: ServeSimStateDetectedEvent[] = []
     const payload = JSON.stringify({
@@ -166,7 +166,7 @@ describe('ServeSimStateWatcher', () => {
 
     watcher.bindPty('pty-1', 'worktree-1')
     watcher.onDetected((event) => events.push(event))
-    watcher.markOrcaManaged({
+    watcher.markYiruManaged({
       deviceUdid: TEST_UDID,
       streamUrl: 'http://127.0.0.1:3100/stream.mjpeg',
       wsUrl: 'ws://127.0.0.1:3100/ws'
@@ -174,7 +174,7 @@ describe('ServeSimStateWatcher', () => {
     watcher.ingestPtyOutput('pty-1', payload)
     expect(events).toHaveLength(0)
 
-    watcher.unmarkOrcaManaged(TEST_UDID)
+    watcher.unmarkYiruManaged(TEST_UDID)
     watcher.ingestPtyOutput('pty-1', payload)
     expect(events).toHaveLength(1)
     expect(events[0]?.info.deviceUdid).toBe(TEST_UDID)

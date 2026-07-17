@@ -121,7 +121,7 @@ jobs:
           mkdir -p "$source"
           tar -xzf "$archive" -C "$source" --strip-components=1
           make -C "$source" -j2 NO_GETTEXT=YesPlease NO_TCLTK=YesPlease NO_PYTHON=YesPlease git
-          ORCA_GIT_COMPAT_BINARY="$source/git" ORCA_GIT_COMPAT_VERSION="2.25.5" \
+          YIRU_GIT_COMPAT_BINARY="$source/git" YIRU_GIT_COMPAT_VERSION="2.25.5" \
             pnpm exec vitest run --config config/vitest.config.ts \
             src/shared/git-binary-compatibility.test.ts
 
@@ -130,7 +130,7 @@ jobs:
             "alpine/git:v2.49.1|2.49.1"; do
             image="${spec%%|*}"
             version="${spec#*|}"
-            ORCA_GIT_COMPAT_IMAGE="$image" ORCA_GIT_COMPAT_VERSION="$version" \
+            YIRU_GIT_COMPAT_IMAGE="$image" YIRU_GIT_COMPAT_VERSION="$version" \
               pnpm exec vitest run --config config/vitest.config.ts \
               src/shared/git-binary-compatibility.test.ts
           done

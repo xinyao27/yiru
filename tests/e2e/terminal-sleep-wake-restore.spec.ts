@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import type { Page } from '@stablyai/playwright-test'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/yiru-app'
 import {
   ensureTerminalVisible,
   getAllWorktreeIds,
@@ -144,12 +144,12 @@ function writeSleepWakePayloadScript(scriptPath: string, payload: string): void 
 
 test.describe('Terminal sleep wake restore', () => {
   test('restores slept terminal output and accepts fresh input after wake', async ({
-    orcaPage,
+    yiruPage,
     testRepoPath
   }) => {
-    await waitForSessionReady(orcaPage)
-    const firstWorktreeId = await waitForActiveWorktree(orcaPage)
-    const secondWorktreeId = (await getAllWorktreeIds(orcaPage)).find(
+    await waitForSessionReady(yiruPage)
+    const firstWorktreeId = await waitForActiveWorktree(yiruPage)
+    const secondWorktreeId = (await getAllWorktreeIds(yiruPage)).find(
       (id) => id !== firstWorktreeId
     )
     test.skip(!secondWorktreeId, 'sleep wake restore needs the seeded secondary worktree')
@@ -157,40 +157,40 @@ test.describe('Terminal sleep wake restore', () => {
       return
     }
 
-    await switchToWorktree(orcaPage, secondWorktreeId)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
-    const ptyId = await waitForActivePanePtyId(orcaPage)
+    await switchToWorktree(yiruPage, secondWorktreeId)
+    await ensureTerminalVisible(yiruPage)
+    await waitForActiveTerminalManager(yiruPage, 30_000)
+    const ptyId = await waitForActivePanePtyId(yiruPage)
     const runId = randomUUID()
     const restoreMarker = `SLEEP_WAKE_RESTORE_${runId}`
     const freshMarker = `SLEEP_WAKE_FRESH_${runId}`
     const expectedMarkers = sleepWakeExpectedMarkers(runId)
-    const scriptPath = path.join(testRepoPath, `.orca-sleep-wake-restore-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.yiru-sleep-wake-restore-${runId}.mjs`)
     writeSleepWakePayloadScript(scriptPath, richSleepWakePayload(runId))
     try {
-      await sendToTerminal(orcaPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
-      await waitForTerminalOutput(orcaPage, restoreMarker, 10_000, 20_000)
-      const beforeSleepDebug = await readSleepWakeTerminalDebug(orcaPage, secondWorktreeId)
+      await sendToTerminal(yiruPage, ptyId, `node ${JSON.stringify(scriptPath)}\r`)
+      await waitForTerminalOutput(yiruPage, restoreMarker, 10_000, 20_000)
+      const beforeSleepDebug = await readSleepWakeTerminalDebug(yiruPage, secondWorktreeId)
       for (const marker of expectedMarkers) {
-        expect(await mainSnapshotContains(orcaPage, ptyId, marker)).toBe(true)
+        expect(await mainSnapshotContains(yiruPage, ptyId, marker)).toBe(true)
       }
 
-      await switchToWorktree(orcaPage, firstWorktreeId)
-      await sleepWorktreeTerminals(orcaPage, secondWorktreeId)
-      const afterSleepDebug = await readSleepWakeTerminalDebug(orcaPage, secondWorktreeId)
+      await switchToWorktree(yiruPage, firstWorktreeId)
+      await sleepWorktreeTerminals(yiruPage, secondWorktreeId)
+      const afterSleepDebug = await readSleepWakeTerminalDebug(yiruPage, secondWorktreeId)
       await expect
-        .poll(() => readLivePtyCountForWorktree(orcaPage, secondWorktreeId), {
+        .poll(() => readLivePtyCountForWorktree(yiruPage, secondWorktreeId), {
           timeout: 10_000,
           message: 'sleep did not release live PTYs for the background worktree'
         })
         .toBe(0)
 
-      await switchToWorktree(orcaPage, secondWorktreeId)
-      await ensureTerminalVisible(orcaPage)
-      await waitForActiveTerminalManager(orcaPage, 30_000)
-      const awakePtyId = await waitForActivePanePtyId(orcaPage)
-      const afterWakeDebug = await readSleepWakeTerminalDebug(orcaPage, secondWorktreeId)
-      const awakeTerminalContent = await getTerminalContent(orcaPage, 20_000)
+      await switchToWorktree(yiruPage, secondWorktreeId)
+      await ensureTerminalVisible(yiruPage)
+      await waitForActiveTerminalManager(yiruPage, 30_000)
+      const awakePtyId = await waitForActivePanePtyId(yiruPage)
+      const afterWakeDebug = await readSleepWakeTerminalDebug(yiruPage, secondWorktreeId)
+      const awakeTerminalContent = await getTerminalContent(yiruPage, 20_000)
       for (const marker of expectedMarkers) {
         expect
           .soft(awakeTerminalContent.includes(marker), {
@@ -210,9 +210,9 @@ test.describe('Terminal sleep wake restore', () => {
           })
           .toBe(true)
       }
-      await waitForTerminalOutput(orcaPage, restoreMarker, 15_000, 20_000)
-      await sendToTerminal(orcaPage, awakePtyId, `printf '\\n${freshMarker}\\n'\r`)
-      await waitForTerminalOutput(orcaPage, freshMarker, 10_000, 20_000)
+      await waitForTerminalOutput(yiruPage, restoreMarker, 15_000, 20_000)
+      await sendToTerminal(yiruPage, awakePtyId, `printf '\\n${freshMarker}\\n'\r`)
+      await waitForTerminalOutput(yiruPage, freshMarker, 10_000, 20_000)
     } finally {
       rmSync(scriptPath, { force: true })
     }

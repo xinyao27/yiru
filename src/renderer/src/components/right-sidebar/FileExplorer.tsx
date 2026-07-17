@@ -629,7 +629,7 @@ function FileExplorerFiles(): React.JSX.Element {
     <>
       <div
         ref={setExplorerShellRef}
-        data-orca-explorer-shell
+        data-yiru-explorer-shell
         data-selected-folder-relative-path={
           selectedNode?.isDirectory ? selectedNode.relativePath : undefined
         }

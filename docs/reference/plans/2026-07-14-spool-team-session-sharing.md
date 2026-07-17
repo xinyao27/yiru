@@ -2,7 +2,7 @@
 
 **Status:** Implemented. Architecture recorded in [Spool Tailnet Worktree Sharing — Architecture](../2026-07-14-spool-tailnet-worktree-sharing-architecture.md).
 
-**Goal:** Extend Orca into Spool so people running Orca Desktop on the same reachable Tailnet can discover one another, browse explicitly public worktrees, inspect every safely attributed session and the surrounding development state, and request temporary control of an entire remote worktree through the owner's existing Orca runtime.
+**Goal:** Extend Yiru into Spool so people running Yiru Desktop on the same reachable Tailnet can discover one another, browse explicitly public worktrees, inspect every safely attributed session and the surrounding development state, and request temporary control of an entire remote worktree through the owner's existing Yiru runtime.
 
 ## Confirmed product model
 
@@ -21,7 +21,7 @@ This includes the synthetic workspaces under a `Repo.kind = 'folder'` project: t
 
 ## Product principles
 
-1. **Orca remains the product shell.** Spool extends Orca's sidebar, worktree, terminal, editor, source-control, agent, and runtime experiences instead of introducing a parallel UI.
+1. **Yiru remains the product shell.** Spool extends Yiru's sidebar, worktree, terminal, editor, source-control, agent, and runtime experiences instead of introducing a parallel UI.
 2. **The Tailnet is the discovery boundary.** There is no Spool account, team creation flow, invitation, or central team service in the first version.
 3. **Private by default.** A newly created worktree starts Private and reveals no metadata to another Desktop.
 4. **Public is read-only.** A Public worktree exposes its complete read model, but every mutation remains blocked until its owner approves the current connection.
@@ -32,23 +32,23 @@ This includes the synthetic workspaces under a `Repo.kind = 'folder'` project: t
 
 ## Tailnet discovery
 
-When Orca Desktop opens, Spool enumerates the peers visible to the local Tailscale client, then probes those peers for a running Orca Desktop endpoint. The intended discovery input is the machine-readable peer list from `tailscale status --json`, not a brute-force scan of the `100.64.0.0/10` address range.
+When Yiru Desktop opens, Spool enumerates the peers visible to the local Tailscale client, then probes those peers for a running Yiru Desktop endpoint. The intended discovery input is the machine-readable peer list from `tailscale status --json`, not a brute-force scan of the `100.64.0.0/10` address range.
 
 Only peers that satisfy all of the following appear:
 
 - They are visible to the local Tailscale client.
 - Tailnet policy and device settings allow a connection.
-- Orca Desktop is currently running and responds to the Spool probe.
+- Yiru Desktop is currently running and responds to the Spool probe.
 
-There is no persistent offline roster. Closing Orca Desktop or becoming unreachable removes that Desktop from the discovered list after reconciliation.
+There is no persistent offline roster. Closing Yiru Desktop or becoming unreachable removes that Desktop from the discovered list after reconciliation.
 
-Tailscale provides peer discovery, reachability, and the private network path. Orca's authenticated encrypted WebSocket RPC remains the application protocol. The implementation must not treat possession of a `100.x` address alone as identity.
+Tailscale provides peer discovery, reachability, and the private network path. Yiru's authenticated encrypted WebSocket RPC remains the application protocol. The implementation must not treat possession of a `100.x` address alone as identity.
 
 The Tailscale CLI documents `status --json` as an automation-oriented detailed peer list while warning that its JSON shape is subject to change. Discovery must therefore parse defensively and fail closed when peer identity cannot be established.
 
 ## Desktop identity
 
-The top-level sidebar item represents one running Desktop, not one merged person. If the same person runs Orca on two machines, both appear independently:
+The top-level sidebar item represents one running Desktop, not one merged person. If the same person runs Yiru on two machines, both appear independently:
 
 ```text
 Alice · MacBook Pro
@@ -57,7 +57,7 @@ Alice · Linux workstation
 
 This matches the real ownership of worktrees, active provider accounts, credentials, sessions, and runtime connections. Spool does not merge projects or quota across devices.
 
-The display identity should come from verified Tailnet peer information plus the remote Orca Desktop descriptor. A client-supplied display name alone is not an authorization identity.
+The display identity should come from verified Tailnet peer information plus the remote Yiru Desktop descriptor. A client-supplied display name alone is not an authorization identity.
 
 ## Sidebar hierarchy
 
@@ -76,7 +76,7 @@ Example:
 Spool
 
 ▾ Alice · MacBook Pro
-  ▾ orca
+  ▾ yiru
     ▾ feature/session-sharing
         [Claude] Sharing UI
         [Codex]  RPC review
@@ -85,13 +85,13 @@ Spool
 ▸ Alice · Linux workstation
 ```
 
-Desktop and Project rows reuse Orca's existing Project-header shell and disclosure affordance; Worktree rows reuse the existing Worktree-card surface. Spool does not define parallel hover backgrounds, arrow colors, or row chrome. The hierarchy uses the native anchors with one additional level for the Desktop: Desktop 10px, Project 20px, Worktree content 30px, and Session 48px. Hovering a Desktop opens a card with its Claude and Codex usage, rendered with the same provider segments and global used/remaining preference as the status bar. Quota does not consume permanent rows in the narrow navigation tree.
+Desktop and Project rows reuse Yiru's existing Project-header shell and disclosure affordance; Worktree rows reuse the existing Worktree-card surface. Spool does not define parallel hover backgrounds, arrow colors, or row chrome. The hierarchy uses the native anchors with one additional level for the Desktop: Desktop 10px, Project 20px, Worktree content 30px, and Session 48px. Hovering a Desktop opens a card with its Claude and Codex usage, rendered with the same provider segments and global used/remaining preference as the status bar. Quota does not consume permanent rows in the narrow navigation tree.
 
-The owner still sees Private worktrees in their normal local Orca sidebar. Another Desktop receives only Public worktrees, so a Private worktree's name, path, branch, sessions, counts, and activity do not cross the connection. An active control grant is rendered inside that owner's existing Worktree card as a compact requester row with a direct Revoke action; it is not collected in a separate global Spool panel.
+The owner still sees Private worktrees in their normal local Yiru sidebar. Another Desktop receives only Public worktrees, so a Private worktree's name, path, branch, sessions, counts, and activity do not cross the connection. An active control grant is rendered inside that owner's existing Worktree card as a compact requester row with a direct Revoke action; it is not collected in a separate global Spool panel.
 
 Session rows are deliberately simple. Spool lists every terminal-backed session the owner can attribute to a Public worktree without adding `Live`, `Stopped`, or `Resumable` categories. The catalog discriminates plain terminals from agents; plain shells use the Terminal glyph, recognized agents retain their bounded provider label and glyph (including Gemini and OpenCode), and custom agents use a neutral agent identity. Selecting a live session attaches its terminal. Selecting a historical session does not open a separate transcript UI: once control is granted, the owner Desktop resumes the exact Claude or Codex session in that worktree and Spool immediately attaches the resulting terminal. Without control, the worktree request remains the only way to authorize that mutation. An unavailable session reports the observed failure only after the user tries to open it.
 
-Opening a shared Worktree uses Orca's normal workbench presentation. The center reuses the local Worktree pane and overflow-aware tab strip for terminals and agent sessions. Its `+` menu uses the same presentation as local tabs. Without control it is disabled with an explanatory tooltip; with control it offers `New Terminal` plus the agents that the owner actually has enabled and detected.
+Opening a shared Worktree uses Yiru's normal workbench presentation. The center reuses the local Worktree pane and overflow-aware tab strip for terminals and agent sessions. Its `+` menu uses the same presentation as local tabs. Without control it is disabled with an explanatory tooltip; with control it offers `New Terminal` plus the agents that the owner actually has enabled and detected.
 
 The remote tab strip remains select-only: it cannot close, rename, pin, drag, or persist remote tabs. Creation runs in the background on the owner Desktop and never changes the owner's active worktree, tab, or focus.
 
@@ -105,7 +105,7 @@ The UI follows `docs/STYLEGUIDE.md`: existing sidebar tokens, quiet monochrome c
 
 Each discovered Desktop publishes the observable rate-limit state for its current active Claude and Codex accounts.
 
-When available, the Desktop hover card shows the same normalized fields and visual treatment Orca's status bar already uses:
+When available, the Desktop hover card shows the same normalized fields and visual treatment Yiru's status bar already uses:
 
 - Five-hour utilization and reset time.
 - Seven-day utilization and reset time.
@@ -120,7 +120,7 @@ If the owner changes the active account, the remote quota summary updates to rep
 Every worktree has one persisted visibility value:
 
 - **Private:** accessible only from its owner Desktop.
-- **Public:** readable by other reachable Orca Desktops on the same Tailnet.
+- **Public:** readable by other reachable Yiru Desktops on the same Tailnet.
 
 Making a worktree Public automatically covers every current and future session inside that worktree, including owner-side sessions created at a remote controller's request. On first publication, the same confirmation bulk-attests legacy sessions that match the current execution host and worktree root; sessions do not need individual confirmation. A legacy record without safe worktree attribution remains undisclosed.
 
@@ -156,7 +156,7 @@ A folder-project workspace deliberately has no Git surface. Its file browser hid
 
 The server is authoritative. Hiding or disabling controls is not sufficient: terminal input, file writes, Git mutations, process/session creation, and every other mutation must be rejected unless the current connection holds an approved grant for that worktree.
 
-For a terminal-backed session, Spool reuses Orca's remote terminal path:
+For a terminal-backed session, Spool reuses Yiru's remote terminal path:
 
 1. Resolve the selected session to its terminal on the owner Desktop.
 2. Subscribe through `terminal.subscribe` over the encrypted WebSocket RPC channel.
@@ -164,14 +164,14 @@ For a terminal-backed session, Spool reuses Orca's remote terminal path:
 4. Continue rendering realtime terminal output.
 5. Keep terminal input disabled until control is granted.
 
-The PTY, agent process, worktree, and credentials remain on the owner side. Tailscale carries the connection; it does not replace Orca's terminal protocol.
+The PTY, agent process, worktree, and credentials remain on the owner side. Tailscale carries the connection; it does not replace Yiru's terminal protocol.
 
 ## Requesting control
 
 A Public worktree exposes one primary control request in its workspace header:
 
 ```text
-Alice / orca / feature-session-sharing                 [Request control]
+Alice / yiru / feature-session-sharing                 [Request control]
 ```
 
 The user requests the whole worktree once. Spool does not trigger separate approval prompts for terminal input, file edits, Git mutations, or individual sessions.
@@ -223,7 +223,7 @@ The owner retains exclusive authority to:
 
 Remote work never creates a requester-owned worktree or migrates a session. A remotely requested terminal or agent is still created and owned inside the owner's existing worktree on its existing execution host.
 
-This rule must also hold when the worktree is backed by WSL, SSH, or another Orca runtime. The owner Desktop remains the sharing gateway and routes reads and mutations to the actual execution host; Spool must not assume that the worktree path or agent process is local to the owner Desktop.
+This rule must also hold when the worktree is backed by WSL, SSH, or another Yiru runtime. The owner Desktop remains the sharing gateway and routes reads and mutations to the actual execution host; Spool must not assume that the worktree path or agent process is local to the owner Desktop.
 
 ## No concurrency coordination
 
@@ -246,7 +246,7 @@ It is never persisted. The following events immediately remove write capability:
 - The owner selects `Revoke`.
 - The owner makes the worktree Private.
 - Either side's WebSocket connection closes, including a transient network loss.
-- Either Orca Desktop exits or restarts.
+- Either Yiru Desktop exits or restarts.
 - The worktree is deleted.
 
 After a network reconnect, a Public worktree may restore its read-only state automatically, but control does not return. The requester must select `Request control` again and the owner must explicitly approve again.
@@ -264,7 +264,7 @@ Revocation prevents future mutations. It does not close a terminal or agent alre
 
 Spool is designed for mutually trusted people sharing a Tailnet. Tailnet membership and reachability are not substitutes for server-side authorization, but they define the first-version discovery population.
 
-Public access is enforced as read-only. Granted access is intentionally powerful. Because Orca terminals are ordinary shells, a granted user can leave the selected directory, inspect other paths available to the owner's system user, start background processes, and execute destructive commands. Without a sandbox, `worktree control` is a product context rather than an operating-system security boundary.
+Public access is enforced as read-only. Granted access is intentionally powerful. Because Yiru terminals are ordinary shells, a granted user can leave the selected directory, inspect other paths available to the owner's system user, start background processes, and execute destructive commands. Without a sandbox, `worktree control` is a product context rather than an operating-system security boundary.
 
 Owner, paired-runtime, and renderer boundaries parse the same strict execution-result schemas. A downstream result cannot cross a wider relay schema and then fail under a narrower UI schema; malformed mutation acknowledgements after admission are treated as `outcome_unknown`.
 
@@ -272,11 +272,11 @@ Provider, Git, SSH, and system credentials stay on the host, but a granted shell
 
 ## End-to-end acceptance scenario
 
-1. Alice and Xinyao run Orca Desktop on separate machines reachable in the same Tailnet.
+1. Alice and Xinyao run Yiru Desktop on separate machines reachable in the same Tailnet.
 2. Each Desktop discovers the other without a Spool account or invitation.
 3. Xinyao sees one sidebar item per Alice Desktop and the observable active Claude/Codex quota for each.
-4. Alice makes one Orca worktree Public. Her other worktrees remain undisclosed.
-5. Xinyao expands `Alice Desktop → orca → public worktree` and sees every session attributed to that worktree.
+4. Alice makes one Yiru worktree Public. Her other worktrees remain undisclosed.
+5. Xinyao expands `Alice Desktop → yiru → public worktree` and sees every session attributed to that worktree.
 6. Xinyao opens sessions, watches terminals, reads files, inspects diffs, and inspects Git state; mutation attempts are rejected by Alice's host.
 7. Xinyao selects `Request control` on the worktree.
 8. Alice sees the requesting Desktop, the worktree, and the remote-shell warning, then approves the current connection.
@@ -288,7 +288,7 @@ Provider, Git, SSH, and system credentials stay on the host, but a granted shell
 14. Alice selects `Revoke`, or either Desktop disconnects. Xinyao immediately loses mutation access, but already-created processes continue on Alice's host.
 15. After reconnecting, Xinyao can browse those sessions read-only but must request and receive approval again before controlling or creating anything.
 
-## Existing Orca capabilities to reuse
+## Existing Yiru capabilities to reuse
 
 - AI Vault and agent session discovery.
 - Workspace session tabs and terminal handle resolution.
@@ -314,7 +314,7 @@ Provider, Git, SSH, and system credentials stay on the host, but a granted shell
 
 ### Slice 2: Tailnet discovery and read-only sharing
 
-- Enumerate Tailnet peers and probe for running Orca Desktops on macOS, Linux, and Windows.
+- Enumerate Tailnet peers and probe for running Yiru Desktops on macOS, Linux, and Windows.
 - Authenticate discovered peer identity and establish encrypted RPC connections.
 - Publish active-account quota summaries and Public worktree metadata only.
 - Support read-only sessions, terminal streaming, files, and the remote Agents projection for every supported target; add diffs, Git state, and sanitized Checks for Git worktrees.
@@ -352,7 +352,7 @@ Provider, Git, SSH, and system credentials stay on the host, but a granted shell
 - Remote tab close, rename, pin, drag, or move operations.
 - Invented quota estimates when provider usage data is unavailable.
 - Session lifecycle labels or status-based grouping in the sidebar.
-- Replacing Orca RPC with a Tailscale-specific terminal protocol.
+- Replacing Yiru RPC with a Tailscale-specific terminal protocol.
 
 ## Architecture resolution
 

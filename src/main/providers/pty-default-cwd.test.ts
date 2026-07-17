@@ -27,7 +27,7 @@ describe('pty default cwd safety', () => {
   beforeEach(() => {
     setPlatform(originalPlatform)
     homedirMock.mockReset()
-    homedirMock.mockReturnValue('/home/orca')
+    homedirMock.mockReturnValue('/home/yiru')
   })
 
   it('rejects root-like implicit cwd values', () => {
@@ -42,7 +42,7 @@ describe('pty default cwd safety', () => {
     setPlatform('linux')
 
     expect(resolveSafePtyDefaultCwd({ HOME: '/home/alice' })).toBe('/home/alice')
-    expect(resolveSafePtyDefaultCwd({ HOME: '/' })).toBe('/home/orca')
+    expect(resolveSafePtyDefaultCwd({ HOME: '/' })).toBe('/home/yiru')
   })
 
   it('throws instead of falling back to POSIX root', () => {

@@ -879,7 +879,7 @@ export default function SessionScreen() {
   // command bar; reloaded on focus so a Settings → Terminal toggle takes effect on return.
   const [autocompleteEnabled, setAutocompleteEnabled] = useState(false)
   const [terminalLinkOpenMode, setTerminalLinkOpenMode] =
-    useState<MobileTerminalLinkOpenMode>('orca-browser')
+    useState<MobileTerminalLinkOpenMode>('yiru-browser')
   const [liveInputCapture, setLiveInputCapture] = useState('')
   const {
     clearTerminalLiveInputDefault,
@@ -1020,7 +1020,7 @@ export default function SessionScreen() {
   const pendingActiveSessionTabIdRef = useRef<string | null>(null)
   const pendingActiveTerminalHandleRef = useRef<string | null>(null)
   // Why: a browser tab opened from a terminal-tapped HTML must be focused as an
-  // Orca session tab (bridge auto-activate only flags the live webContents, not
+  // Yiru session tab (bridge auto-activate only flags the live webContents, not
   // the app-level active tab). We remember the page id and, once its session tab
   // syncs, activate it through the normal switchSessionTab path (which also makes
   // switching back to the terminal work). A ref breaks the callback dep cycle.
@@ -2668,7 +2668,7 @@ export default function SessionScreen() {
   useEffect(() => {
     if (hostId && worktreeId) {
       void AsyncStorage.setItem(
-        'orca:last-visited-worktree',
+        'yiru:last-visited-worktree',
         JSON.stringify({ hostId, worktreeId })
       )
     }
@@ -2764,7 +2764,7 @@ export default function SessionScreen() {
     void (async () => {
       const reportActivationOutcome = (response: RpcSuccess | null): void => {
         if (!disposed && response && headlessActivationNeedsHostRenderer(response.result)) {
-          showToast('Open Orca on the host to wake sleeping agents.', 3000)
+          showToast('Open Yiru on the host to wake sleeping agents.', 3000)
         }
       }
       if (client && created !== '1') {

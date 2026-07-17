@@ -1,4 +1,4 @@
-// Why: Project mode rows carry a GitHub `owner/repo` slug, but Orca's
+// Why: Project mode rows carry a GitHub `owner/repo` slug, but Yiru's
 // `state.repos` stores only absolute paths. Before any repo-context action
 // (opening the item dialog in repo-backed mode, launching a worktree) can
 // dispatch correctly, we need a renderer-side index mapping slug → Repo[].

@@ -1,7 +1,7 @@
-// Why: the WebSocket transport enables mobile clients to connect to the Orca
+// Why: the WebSocket transport enables mobile clients to connect to the Yiru
 // runtime over the local network. When TLS cert/key are provided it uses wss://
 // to prevent passive sniffing; otherwise it falls back to plain ws://. Per-device
-// tokens (validated by the message handler in OrcaRuntimeRpcServer) provide auth
+// tokens (validated by the message handler in YiruRuntimeRpcServer) provide auth
 // regardless of transport encryption.
 import { createServer as createHttpsServer, type Server as HttpsServer } from 'node:https'
 import { createServer as createHttpServer, type Server as HttpServer } from 'node:http'
@@ -302,7 +302,7 @@ export class WebSocketTransport implements RpcTransport {
   // Why: WebSocket connections are long-lived (unlike Unix socket which is
   // one-per-request). Multiple requests can be multiplexed on the same
   // connection via the RPC `id` field. The transport delegates all auth
-  // and dispatch logic to the message handler set by OrcaRuntimeRpcServer.
+  // and dispatch logic to the message handler set by YiruRuntimeRpcServer.
   private handleConnection(ws: WebSocket): void {
     let finalized = false
     const onPong = (): void => {

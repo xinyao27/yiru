@@ -47,9 +47,9 @@ import {
   ONBOARDING_FLOW_VERSION
 } from '../../../shared/constants'
 import {
-  createDefaultLocalOrcaProfile,
-  DEFAULT_LOCAL_ORCA_PROFILE_ID
-} from '../../../shared/orca-profiles'
+  createDefaultLocalYiruProfile,
+  DEFAULT_LOCAL_YIRU_PROFILE_ID
+} from '../../../shared/yiru-profiles'
 import { legacyBaseRefSearchResult } from '../../../shared/base-ref-search-result'
 import { EMPTY_PTY_MAIN_DELIVERY_DIAGNOSTICS } from '../../../shared/pty-delivery-diagnostics'
 import { createE2EConfig } from '../../../shared/e2e-config'
@@ -127,12 +127,12 @@ import { normalizeContextualTourIds, type ContextualTourId } from '../../../shar
 import { translate } from '@/i18n/i18n'
 import { getDefaultCreateProjectParent } from '@/components/sidebar/create-project-defaults'
 
-const SETTINGS_STORAGE_KEY = 'orca.web.settings.v1'
-const UI_STORAGE_KEY = 'orca.web.ui.v1'
-const SESSION_STORAGE_KEY = 'orca.web.workspaceSession.v1'
-const ONBOARDING_STORAGE_KEY = 'orca.web.onboarding.v1'
-const GITHUB_CACHE_STORAGE_KEY = 'orca.web.githubCache.v1'
-const KEYBINDINGS_STORAGE_KEY = 'orca.web.keybindings.v1'
+const SETTINGS_STORAGE_KEY = 'yiru.web.settings.v1'
+const UI_STORAGE_KEY = 'yiru.web.ui.v1'
+const SESSION_STORAGE_KEY = 'yiru.web.workspaceSession.v1'
+const ONBOARDING_STORAGE_KEY = 'yiru.web.onboarding.v1'
+const GITHUB_CACHE_STORAGE_KEY = 'yiru.web.githubCache.v1'
+const KEYBINDINGS_STORAGE_KEY = 'yiru.web.keybindings.v1'
 // Why: browser-paired clients need desktop parity for large dev sessions; the
 // runtime's no-limit default remains capped for lower-level RPC callers.
 const WEB_RUNTIME_WORKTREE_LIST_LIMIT = 10_000
@@ -459,27 +459,27 @@ const webKeybindingListeners = new Set<(snapshot: KeybindingFileSnapshot) => voi
 
 export function installWebPreloadApi(): void {
   activeEnvironment = readStoredWebRuntimeEnvironment()
-  const webWindow = window as unknown as { __ORCA_WEB_CLIENT__?: boolean }
-  webWindow.__ORCA_WEB_CLIENT__ = true
+  const webWindow = window as unknown as { __YIRU_WEB_CLIENT__?: boolean }
+  webWindow.__YIRU_WEB_CLIENT__ = true
   window.electron = createFallbackProxy(['electron']) as Window['electron']
   window.api = withFallback(createWebPreloadApi(), []) as PreloadApi
 }
 
 function createWebPreloadApi(): Partial<PreloadApi> {
-  const webOrcaProfileAuthStatus = () =>
+  const webYiruProfileAuthStatus = () =>
     Promise.resolve({
-      activeProfileId: DEFAULT_LOCAL_ORCA_PROFILE_ID,
+      activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
       configured: false,
       state: 'unconfigured' as const,
       persistence: 'none' as const,
-      setupMessage: 'Orca Cloud sign-in is not available in the browser fallback.'
+      setupMessage: 'Yiru Cloud sign-in is not available in the browser fallback.'
     })
 
   return {
     app: {
       getIdentity: () =>
         Promise.resolve({
-          name: 'Orca',
+          name: 'Yiru',
           isDev: false,
           devLabel: null,
           devBranch: null,
@@ -508,7 +508,7 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       complete: () => Promise.resolve(),
       disable: () => Promise.resolve(),
       openWeb: () => Promise.resolve(),
-      starOrca: () => Promise.resolve(false),
+      starYiru: () => Promise.resolve(false),
       forceShow: () => Promise.resolve(),
       agentValueMoment: () => Promise.resolve({ status: 'skipped' }),
       showAgentValueMoment: () => Promise.resolve(),
@@ -521,23 +521,23 @@ function createWebPreloadApi(): Partial<PreloadApi> {
         displayServer: null
       })
     },
-    orcaProfiles: {
+    yiruProfiles: {
       list: () =>
         Promise.resolve({
-          activeProfileId: DEFAULT_LOCAL_ORCA_PROFILE_ID,
-          profiles: [createDefaultLocalOrcaProfile(0)],
+          activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
+          profiles: [createDefaultLocalYiruProfile(0)],
           multiProfileUi: false
         }),
-      authStatus: webOrcaProfileAuthStatus,
+      authStatus: webYiruProfileAuthStatus,
       createLocal: () =>
         Promise.resolve({
-          activeProfileId: DEFAULT_LOCAL_ORCA_PROFILE_ID,
-          profiles: [createDefaultLocalOrcaProfile(0)],
-          profile: createDefaultLocalOrcaProfile(0)
+          activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
+          profiles: [createDefaultLocalYiruProfile(0)],
+          profile: createDefaultLocalYiruProfile(0)
         }),
       createCloudLinked: async () => ({
         status: 'unconfigured',
-        auth: await webOrcaProfileAuthStatus()
+        auth: await webYiruProfileAuthStatus()
       }),
       switchProfile: () => Promise.resolve({ status: 'already-active' }),
       transferProject: (args) =>
@@ -551,21 +551,21 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       findProjectProfiles: async () => ({ projects: [] }),
       connectCurrent: async () => ({
         status: 'unconfigured',
-        auth: await webOrcaProfileAuthStatus()
+        auth: await webYiruProfileAuthStatus()
       }),
       refreshAuth: async () => ({
         status: 'unconfigured',
-        auth: await webOrcaProfileAuthStatus()
+        auth: await webYiruProfileAuthStatus()
       }),
       signOutCurrent: async () => ({
         status: 'signed-out',
-        auth: await webOrcaProfileAuthStatus(),
-        activeProfileId: DEFAULT_LOCAL_ORCA_PROFILE_ID,
-        profiles: [createDefaultLocalOrcaProfile(0)]
+        auth: await webYiruProfileAuthStatus(),
+        activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
+        profiles: [createDefaultLocalYiruProfile(0)]
       }),
       selectOrg: async () => ({
         status: 'unconfigured',
-        auth: await webOrcaProfileAuthStatus()
+        auth: await webYiruProfileAuthStatus()
       }),
       orgMembersList: async () => ({ status: 'unconfigured' }),
       orgMemberInvite: async () => ({ status: 'unconfigured' }),
@@ -1166,7 +1166,7 @@ function createRuntimeEnvironmentsApi(): NonNullable<Partial<PreloadApi>['runtim
     addFromPairingCode: async ({ name, pairingCode }) => {
       const offer = parseWebPairingInput(pairingCode)
       if (!offer) {
-        throw new Error('Invalid Orca pairing code.')
+        throw new Error('Invalid Yiru pairing code.')
       }
       closeActiveRuntimeClients()
       activeEnvironment = createStoredWebRuntimeEnvironment({ name, offer })
@@ -1259,7 +1259,7 @@ function createReposApi(): NonNullable<Partial<PreloadApi>['repos']> {
       invalidateRuntimeWorktreeCaches()
     },
     // Why: host-scoped forget targets a disconnected/removed SSH host owned by
-    // the desktop app. A paired web client talks to a single Orca runtime and
+    // the desktop app. A paired web client talks to a single Yiru runtime and
     // has no ghost-host state to reconcile.
     removeForHost: () => {
       throw new Error('Forgetting a host is unavailable in paired web clients.')
@@ -1923,7 +1923,7 @@ function createBrowserApi(): NonNullable<Partial<PreloadApi>['browser']> {
     onNavigationUpdate: () => noopUnsubscribe,
     onActivateView: () => noopUnsubscribe,
     onPaneFocus: () => noopUnsubscribe,
-    onOpenLinkInOrcaTab: () => noopUnsubscribe,
+    onOpenLinkInYiruTab: () => noopUnsubscribe,
     cancelDownload: () => Promise.resolve(false),
     setGrabMode: () =>
       Promise.resolve({
@@ -2094,8 +2094,8 @@ function createGitHubApi(): WebGitHubApi {
         args
       ),
     onWorkItemMutated: () => noopUnsubscribe,
-    checkOrcaStarred: () => Promise.resolve(null),
-    starOrca: () => Promise.resolve(false),
+    checkYiruStarred: () => Promise.resolve(null),
+    starYiru: () => Promise.resolve(false),
     rateLimit: (args) =>
       route<WebGitHubResult<'rateLimit'>>(GITHUB_WEB_RPC_METHODS.rateLimit, args),
     diagnoseAuth: () =>
@@ -2541,7 +2541,7 @@ function createPreflightApi(): NonNullable<Partial<PreloadApi>['preflight']> {
 function createCliApi(): NonNullable<Partial<PreloadApi>['cli']> {
   const status = {
     platform: getBrowserPlatform(),
-    commandName: getBrowserPlatform() === 'linux' ? 'orca-ide' : 'orca',
+    commandName: 'yiru',
     commandPath: null,
     pathDirectory: null,
     pathConfigured: false,
@@ -2551,7 +2551,7 @@ function createCliApi(): NonNullable<Partial<PreloadApi>['cli']> {
     state: 'unsupported',
     currentTarget: null,
     unsupportedReason: 'launch_mode_unavailable',
-    detail: 'CLI registration is managed on the Orca server, not in the web browser.'
+    detail: 'CLI registration is managed on the Yiru server, not in the web browser.'
   } as const
   return {
     getInstallStatus: () => Promise.resolve(status),
@@ -2585,7 +2585,7 @@ function createAgentHooksApi(): NonNullable<Partial<PreloadApi>['agentHooks']> {
       state: 'not_installed',
       configPath: '',
       managedHooksPresent: false,
-      detail: 'Agent hook status is only available on the Orca server.'
+      detail: 'Agent hook status is only available on the Yiru server.'
     } as const)
   return {
     claudeStatus: () => status('claude'),
@@ -2633,7 +2633,7 @@ function createComputerUsePermissionsApi(): NonNullable<
         helperAppPath: null,
         openedSettings: false,
         launchedHelper: false,
-        nextStep: 'Computer-use permissions are managed on the Orca server.'
+        nextStep: 'Computer-use permissions are managed on the Yiru server.'
       })),
     reset: () =>
       Promise.resolve({
@@ -3085,13 +3085,13 @@ function resolveEnvironment(selector: string): StoredWebRuntimeEnvironment {
     // a fresh web-* environment id even when it points at the same active server.
     return environment
   }
-  throw new Error(`Unknown Orca runtime environment: ${selector}`)
+  throw new Error(`Unknown Yiru runtime environment: ${selector}`)
 }
 
 function requireActiveEnvironment(): StoredWebRuntimeEnvironment {
   activeEnvironment = activeEnvironment ?? readStoredWebRuntimeEnvironment()
   if (!activeEnvironment) {
-    throw new Error('Pair this web client with an Orca server first.')
+    throw new Error('Pair this web client with a Yiru server first.')
   }
   return activeEnvironment
 }
@@ -3276,7 +3276,7 @@ function getStoredOnboarding(): OnboardingState {
     return closed
   }
   const closed = closeWebOnboarding(getDefaultOnboardingState())
-  // Why: pairing already means the user has an Orca server. Desktop first-run
+  // Why: pairing already means the user has a Yiru server. Desktop first-run
   // onboarding would incorrectly probe browser-local tools and block the client.
   writeJson(ONBOARDING_STORAGE_KEY, closed)
   return closed
@@ -3512,7 +3512,7 @@ function toLegacyDetectedWorktreeResult(
     source: 'session-fallback',
     worktrees: worktrees.map((worktree) => ({
       ...worktree,
-      ownership: 'orca-managed',
+      ownership: 'yiru-managed',
       selectedCheckout: false,
       visible: true
     }))
@@ -3588,7 +3588,7 @@ function mapRepoPathArg(args: unknown): unknown {
     ...record,
     // Why: runtime repo selectors accept loose path/name forms, but duplicate
     // checked-out repos can make those ambiguous. The renderer already passes
-    // Orca's repo id on task calls, so prefer the explicit selector.
+    // Yiru's repo id on task calls, so prefer the explicit selector.
     repo: repoId ? `id:${repoId}` : record.repoPath
   }
 }

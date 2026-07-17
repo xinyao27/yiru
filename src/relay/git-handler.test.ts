@@ -1742,7 +1742,7 @@ describe('GitHandler', () => {
       await expect(
         dispatcher.callRequest('git.forkSync', {
           worktreePath: tmpDir,
-          expectedUpstream: { owner: '   ', repo: 'orca' }
+          expectedUpstream: { owner: '   ', repo: 'yiru' }
         })
       ).rejects.toThrow('Invalid expected upstream.')
     })
@@ -1763,7 +1763,7 @@ describe('GitHandler', () => {
       await expect(
         dispatcher.callRequest(
           'git.forkSync',
-          { worktreePath: tmpDir, expectedUpstream: { owner: 'stablyai', repo: 'orca' } },
+          { worktreePath: tmpDir, expectedUpstream: { owner: 'stablyai', repo: 'yiru' } },
           { isStale: () => false, signal: controller.signal }
         )
       ).rejects.toThrow(/abort/i)

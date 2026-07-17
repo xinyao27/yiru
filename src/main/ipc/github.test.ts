@@ -42,8 +42,8 @@ const {
   rerunPRChecksMock,
   requestPRReviewersMock,
   removePRReviewersMock,
-  checkOrcaStarredMock,
-  starOrcaMock,
+  checkYiruStarredMock,
+  starYiruMock,
   trackMock,
   getCohortAtEmitMock,
   getAllWebContentsMock,
@@ -84,8 +84,8 @@ const {
   rerunPRChecksMock: vi.fn(),
   requestPRReviewersMock: vi.fn(),
   removePRReviewersMock: vi.fn(),
-  checkOrcaStarredMock: vi.fn(),
-  starOrcaMock: vi.fn(),
+  checkYiruStarredMock: vi.fn(),
+  starYiruMock: vi.fn(),
   trackMock: vi.fn(),
   getCohortAtEmitMock: vi.fn(),
   getAllWebContentsMock: vi.fn(),
@@ -134,8 +134,8 @@ vi.mock('../github/client', () => ({
   rerunPRChecks: rerunPRChecksMock,
   requestPRReviewers: requestPRReviewersMock,
   removePRReviewers: removePRReviewersMock,
-  checkOrcaStarred: checkOrcaStarredMock,
-  starOrca: starOrcaMock
+  checkYiruStarred: checkYiruStarredMock,
+  starYiru: starYiruMock
 }))
 
 vi.mock('../github/work-item-details', () => ({
@@ -232,8 +232,8 @@ describe('registerGitHubHandlers', () => {
     rerunPRChecksMock.mockReset()
     requestPRReviewersMock.mockReset()
     removePRReviewersMock.mockReset()
-    checkOrcaStarredMock.mockReset()
-    starOrcaMock.mockReset()
+    checkYiruStarredMock.mockReset()
+    starYiruMock.mockReset()
     trackMock.mockReset()
     getCohortAtEmitMock.mockReset()
     getCohortAtEmitMock.mockReturnValue({ nth_repo_added: undefined })
@@ -856,7 +856,7 @@ describe('registerGitHubHandlers', () => {
         updatedAt: 0
       }
     ]
-    const prRepo = { owner: 'acme', repo: 'orca' }
+    const prRepo = { owner: 'acme', repo: 'yiru' }
     const localGitOptions = { wslDistro: 'Ubuntu' }
     getWorkItemMock.mockResolvedValue(null)
     getWorkItemByOwnerRepoMock.mockResolvedValue(null)
@@ -882,7 +882,7 @@ describe('registerGitHubHandlers', () => {
     await handlers['gh:workItemByOwnerRepo'](null, {
       repoPath: '/workspace/repo',
       owner: 'acme',
-      repo: 'orca',
+      repo: 'yiru',
       number: 42,
       type: 'pr'
     })
@@ -1185,13 +1185,13 @@ describe('registerGitHubHandlers', () => {
         repoPath: '/workspace/repo',
         prNumber: 42,
         method: 'squash',
-        prRepo: { owner: 'acme', repo: 'orca' }
+        prRepo: { owner: 'acme', repo: 'yiru' }
       }
     )
 
     expect(mergePRMock).toHaveBeenCalledWith('/workspace/repo', 42, 'squash', 'openclaw-2', {
       owner: 'acme',
-      repo: 'orca'
+      repo: 'yiru'
     })
   })
 
@@ -1208,7 +1208,7 @@ describe('registerGitHubHandlers', () => {
         prNumber: 42,
         enabled: true,
         method: 'squash',
-        prRepo: { owner: 'acme', repo: 'orca' }
+        prRepo: { owner: 'acme', repo: 'yiru' }
       }
     )
 
@@ -1220,7 +1220,7 @@ describe('registerGitHubHandlers', () => {
       'openclaw-2',
       {
         owner: 'acme',
-        repo: 'orca'
+        repo: 'yiru'
       }
     )
   })
@@ -1237,25 +1237,25 @@ describe('registerGitHubHandlers', () => {
     expect(getAuthenticatedViewerMock).toHaveBeenCalled()
   })
 
-  it('emits app_starred_orca once after a successful star with cohort context', async () => {
-    starOrcaMock.mockResolvedValue(true)
+  it('emits app_starred_yiru once after a successful star with cohort context', async () => {
+    starYiruMock.mockResolvedValue(true)
     getCohortAtEmitMock.mockReturnValue({ nth_repo_added: 3 })
 
     registerGitHubHandlers(store as never, stats as never)
 
-    await expect(handlers['gh:starOrca'](null, 'settings')).resolves.toBe(true)
+    await expect(handlers['gh:starYiru'](null, 'settings')).resolves.toBe(true)
 
-    expect(starOrcaMock).toHaveBeenCalledTimes(1)
+    expect(starYiruMock).toHaveBeenCalledTimes(1)
     expect(getCohortAtEmitMock).toHaveBeenCalledTimes(1)
     expect(trackMock).toHaveBeenCalledTimes(1)
-    expect(trackMock).toHaveBeenCalledWith('app_starred_orca', {
+    expect(trackMock).toHaveBeenCalledWith('app_starred_yiru', {
       source: 'settings',
       nth_repo_added: 3
     })
   })
 
   it('accepts every app star source for success telemetry', async () => {
-    starOrcaMock.mockResolvedValue(true)
+    starYiruMock.mockResolvedValue(true)
 
     registerGitHubHandlers(store as never, stats as never)
 
@@ -1266,7 +1266,7 @@ describe('registerGitHubHandlers', () => {
       'settings',
       'landing'
     ] as const) {
-      await expect(handlers['gh:starOrca'](null, source)).resolves.toBe(true)
+      await expect(handlers['gh:starYiru'](null, source)).resolves.toBe(true)
     }
 
     expect(trackMock).toHaveBeenCalledTimes(5)
@@ -1279,37 +1279,37 @@ describe('registerGitHubHandlers', () => {
     ])
   })
 
-  it('does not emit app_starred_orca when the star action returns false', async () => {
-    starOrcaMock.mockResolvedValue(false)
+  it('does not emit app_starred_yiru when the star action returns false', async () => {
+    starYiruMock.mockResolvedValue(false)
 
     registerGitHubHandlers(store as never, stats as never)
 
-    await expect(handlers['gh:starOrca'](null, 'landing')).resolves.toBe(false)
+    await expect(handlers['gh:starYiru'](null, 'landing')).resolves.toBe(false)
 
-    expect(starOrcaMock).toHaveBeenCalledTimes(1)
+    expect(starYiruMock).toHaveBeenCalledTimes(1)
     expect(trackMock).not.toHaveBeenCalled()
     expect(getCohortAtEmitMock).not.toHaveBeenCalled()
   })
 
-  it('does not emit app_starred_orca when the star action throws', async () => {
-    starOrcaMock.mockRejectedValue(new Error('gh failed'))
+  it('does not emit app_starred_yiru when the star action throws', async () => {
+    starYiruMock.mockRejectedValue(new Error('gh failed'))
 
     registerGitHubHandlers(store as never, stats as never)
 
-    await expect(handlers['gh:starOrca'](null, 'star_nag')).rejects.toThrow('gh failed')
+    await expect(handlers['gh:starYiru'](null, 'star_nag')).rejects.toThrow('gh failed')
 
     expect(trackMock).not.toHaveBeenCalled()
     expect(getCohortAtEmitMock).not.toHaveBeenCalled()
   })
 
   it('preserves star result but skips telemetry for an invalid IPC source', async () => {
-    starOrcaMock.mockResolvedValue(true)
+    starYiruMock.mockResolvedValue(true)
 
     registerGitHubHandlers(store as never, stats as never)
 
-    await expect(handlers['gh:starOrca'](null, 'github_website')).resolves.toBe(true)
+    await expect(handlers['gh:starYiru'](null, 'github_website')).resolves.toBe(true)
 
-    expect(starOrcaMock).toHaveBeenCalledTimes(1)
+    expect(starYiruMock).toHaveBeenCalledTimes(1)
     expect(trackMock).not.toHaveBeenCalled()
     expect(getCohortAtEmitMock).not.toHaveBeenCalled()
   })

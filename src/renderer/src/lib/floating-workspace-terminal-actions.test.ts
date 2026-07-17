@@ -425,7 +425,7 @@ describe('createFloatingWorkspaceMarkdownTab', () => {
 
   it('creates floating markdown tabs without activating the main workspace', async () => {
     const fileInfo = {
-      filePath: '/tmp/orca/floating-workspace/untitled.md',
+      filePath: '/tmp/yiru/floating-workspace/untitled.md',
       relativePath: 'untitled.md',
       worktreeId: FLOATING_TERMINAL_WORKTREE_ID,
       language: 'markdown',
@@ -438,10 +438,10 @@ describe('createFloatingWorkspaceMarkdownTab', () => {
     }
     createUntitledMarkdownFileWithTemplateSelectionMock.mockResolvedValue(fileInfo)
 
-    await createFloatingWorkspaceMarkdownTab(store as never, '/tmp/orca/floating-workspace')
+    await createFloatingWorkspaceMarkdownTab(store as never, '/tmp/yiru/floating-workspace')
 
     expect(createUntitledMarkdownFileWithTemplateSelectionMock).toHaveBeenCalledWith(
-      '/tmp/orca/floating-workspace',
+      '/tmp/yiru/floating-workspace',
       FLOATING_TERMINAL_WORKTREE_ID,
       undefined,
       { activeRuntimeEnvironmentId: null }
@@ -460,10 +460,10 @@ describe('createFloatingWorkspaceMarkdownTab', () => {
     }
     createUntitledMarkdownFileWithTemplateSelectionMock.mockResolvedValue(null)
 
-    await createFloatingWorkspaceMarkdownTab(store as never, '/tmp/orca/floating-workspace')
+    await createFloatingWorkspaceMarkdownTab(store as never, '/tmp/yiru/floating-workspace')
 
     expect(createUntitledMarkdownFileWithTemplateSelectionMock).toHaveBeenCalledWith(
-      '/tmp/orca/floating-workspace',
+      '/tmp/yiru/floating-workspace',
       FLOATING_TERMINAL_WORKTREE_ID,
       undefined,
       { activeRuntimeEnvironmentId: null }
@@ -637,7 +637,7 @@ describe('handleEmptyFloatingWorkspacePanelCloseShortcut', () => {
     expect(event.stopImmediatePropagation).toHaveBeenCalledWith()
     expect(dispatchEvent).toHaveBeenCalledWith(expect.any(Event))
     const dispatchedEvent = dispatchEvent.mock.calls[0][0] as Event
-    expect(dispatchedEvent.type).toBe('orca-toggle-floating-terminal')
+    expect(dispatchedEvent.type).toBe('yiru-toggle-floating-terminal')
   })
 
   it('ignores non-close shortcuts and non-empty floating workspaces', () => {

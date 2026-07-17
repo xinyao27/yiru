@@ -65,9 +65,9 @@ export function getGrokToolEventMatcherForTests(): string {
 function getConfigPath(): string {
   // Why: Grok loads trusted global hook files from $GROK_HOME/hooks/*.json
   // (or ~/.grok when unset). Honor GROK_HOME so install/status match the same
-  // home Grok and transcript lookup use; keep Orca entries in a dedicated file
+  // home Grok and transcript lookup use; keep Yiru entries in a dedicated file
   // so user-authored hook files stay untouched.
-  return join(resolveGrokHomeDir(), 'hooks', 'orca-status.json')
+  return join(resolveGrokHomeDir(), 'hooks', 'yiru-status.json')
 }
 
 /** Validated guest Grok home with a login-home fallback. */
@@ -97,7 +97,7 @@ function hasControlCharacter(value: string): boolean {
 
 const WINDOWS_GROK_HOOK_POST_COMMAND = buildWindowsAgentHookPostCommand('grok').replace(
   WINDOWS_HOOK_PAYLOAD_FORM_LINE,
-  `  --data-urlencode "grokHome=%ORCA_GROK_HOME%" ^\r\n${WINDOWS_HOOK_PAYLOAD_FORM_LINE}`
+  `  --data-urlencode "grokHome=%YIRU_GROK_HOME%" ^\r\n${WINDOWS_HOOK_PAYLOAD_FORM_LINE}`
 )
 
 function getManagedScriptFileName(): string {
@@ -119,13 +119,13 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
     return [
       '@echo off',
       'setlocal',
-      'if defined ORCA_AGENT_HOOK_ENDPOINT if exist "%ORCA_AGENT_HOOK_ENDPOINT%" call "%ORCA_AGENT_HOOK_ENDPOINT%" 2>nul',
+      'if defined YIRU_AGENT_HOOK_ENDPOINT if exist "%YIRU_AGENT_HOOK_ENDPOINT%" call "%YIRU_AGENT_HOOK_ENDPOINT%" 2>nul',
       ...buildWindowsHookEnvironmentGuardLines(),
-      'set "ORCA_GROK_HOME=%GROK_HOME%"',
-      `if not "%GROK_HOME:~${GROK_HOME_ENVELOPE_MAX_LENGTH},1%"=="" set "ORCA_GROK_HOME="`,
+      'set "YIRU_GROK_HOME=%GROK_HOME%"',
+      `if not "%GROK_HOME:~${GROK_HOME_ENVELOPE_MAX_LENGTH},1%"=="" set "YIRU_GROK_HOME="`,
       // Why: a trailing backslash escapes curl's closing argv quote on Windows,
       // merging the payload option into grokHome and dropping the hook body.
-      'if "%ORCA_GROK_HOME:~-1%"=="\\" set "ORCA_GROK_HOME=%ORCA_GROK_HOME%."',
+      'if "%YIRU_GROK_HOME:~-1%"=="\\" set "YIRU_GROK_HOME=%YIRU_GROK_HOME%."',
       WINDOWS_GROK_HOOK_POST_COMMAND,
       'exit /b 0',
       ...buildWindowsHookStdinDrainEpilogue(),
@@ -136,10 +136,10 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
   return [
     '#!/bin/sh',
     ...buildPosixHookPayloadCapture(),
-    'if [ -n "$ORCA_AGENT_HOOK_ENDPOINT" ] && [ -r "$ORCA_AGENT_HOOK_ENDPOINT" ]; then',
-    '  . "$ORCA_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
+    'if [ -n "$YIRU_AGENT_HOOK_ENDPOINT" ] && [ -r "$YIRU_AGENT_HOOK_ENDPOINT" ]; then',
+    '  . "$YIRU_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
     'fi',
-    'if [ -z "$ORCA_AGENT_HOOK_PORT" ] || [ -z "$ORCA_AGENT_HOOK_TOKEN" ] || [ -z "$ORCA_PANE_KEY" ]; then',
+    'if [ -z "$YIRU_AGENT_HOOK_PORT" ] || [ -z "$YIRU_AGENT_HOOK_TOKEN" ] || [ -z "$YIRU_PANE_KEY" ]; then',
     '  exit 0',
     'fi',
     'grok_home=',
@@ -150,16 +150,16 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
     // Why: pipe payload to curl's stdin (`payload@-`) instead of an inline
     // `payload=$VALUE` arg, so tens-of-KB tool output stays off the curl
     // command line (EDR command-line false positives). Wire body is identical.
-    'printf \'%s\' "$payload" | curl -sS -X POST "http://127.0.0.1:${ORCA_AGENT_HOOK_PORT}/hook/grok" \\',
+    'printf \'%s\' "$payload" | curl -sS -X POST "http://127.0.0.1:${YIRU_AGENT_HOOK_PORT}/hook/grok" \\',
     '  --connect-timeout 0.5 --max-time 1.5 \\',
     '  -H "Content-Type: application/x-www-form-urlencoded" \\',
-    '  -H "X-Orca-Agent-Hook-Token: ${ORCA_AGENT_HOOK_TOKEN}" \\',
-    '  --data-urlencode "paneKey=${ORCA_PANE_KEY}" \\',
-    '  --data-urlencode "tabId=${ORCA_TAB_ID}" \\',
-    '  --data-urlencode "launchToken=${ORCA_AGENT_LAUNCH_TOKEN}" \\',
-    '  --data-urlencode "worktreeId=${ORCA_WORKTREE_ID}" \\',
-    '  --data-urlencode "env=${ORCA_AGENT_HOOK_ENV}" \\',
-    '  --data-urlencode "version=${ORCA_AGENT_HOOK_VERSION}" \\',
+    '  -H "X-Yiru-Agent-Hook-Token: ${YIRU_AGENT_HOOK_TOKEN}" \\',
+    '  --data-urlencode "paneKey=${YIRU_PANE_KEY}" \\',
+    '  --data-urlencode "tabId=${YIRU_TAB_ID}" \\',
+    '  --data-urlencode "launchToken=${YIRU_AGENT_LAUNCH_TOKEN}" \\',
+    '  --data-urlencode "worktreeId=${YIRU_WORKTREE_ID}" \\',
+    '  --data-urlencode "env=${YIRU_AGENT_HOOK_ENV}" \\',
+    '  --data-urlencode "version=${YIRU_AGENT_HOOK_VERSION}" \\',
     '  --data-urlencode "grokHome=${grok_home}" \\',
     '  --data-urlencode "payload@-" >/dev/null 2>&1 || true',
     'exit 0',
@@ -176,7 +176,7 @@ function buildInstalledConfig(
   const isManagedCommand = createManagedCommandMatcher(scriptFileName)
   const managedEvents = new Set<string>(GROK_EVENTS.map((event) => event.eventName))
 
-  // Why: Orca owns only grok-hook.* entries. Sweep stale managed commands out
+  // Why: Yiru owns only grok-hook.* entries. Sweep stale managed commands out
   // of retired events while preserving any user-authored hooks in this file.
   for (const [eventName, definitions] of Object.entries(nextHooks)) {
     if (managedEvents.has(eventName) || !Array.isArray(definitions)) {
@@ -279,8 +279,8 @@ export class GrokHookService {
     const home = remoteHome.replace(/\/$/, '')
     // Why: only a guest-resolved path can describe remote Grok; never apply the
     // host process's GROK_HOME to SFTP paths.
-    const remoteConfigPath = `${getRemoteGrokHome(home, remoteGrokHome)}/hooks/orca-status.json`
-    const remoteScriptPath = `${home}/.orca/agent-hooks/grok-hook.sh`
+    const remoteConfigPath = `${getRemoteGrokHome(home, remoteGrokHome)}/hooks/yiru-status.json`
+    const remoteScriptPath = `${home}/.yiru/agent-hooks/grok-hook.sh`
     try {
       const config = await readHooksJsonRemote(sftp, remoteConfigPath)
       if (!config) {

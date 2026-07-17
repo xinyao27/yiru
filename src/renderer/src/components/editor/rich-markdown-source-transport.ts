@@ -8,12 +8,12 @@ export type RichMarkdownSourceKind =
   | 'document-link'
   | 'html-superscript-link'
 
-const TRANSPORT_PREFIX = '[[ORCA_RICH_MD:'
+const TRANSPORT_PREFIX = '[[YIRU_RICH_MD:'
 const TRANSPORT_SUFFIX = ']]'
 const KEY_PATTERN = /^[a-f0-9]{32}$/
 const TRANSPORT_BODY_PATTERN =
-  /^ORCA_RICH_MD:[a-f0-9]{32}:(?:literal|inline-html|block-html|document-link|html-superscript-link):/
-const LEGACY_PREFIXES = ['ORCA_RAW_HTML_INLINE:', 'ORCA_RAW_HTML_BLOCK:', 'ORCA_DOC_LINK:'] as const
+  /^YIRU_RICH_MD:[a-f0-9]{32}:(?:literal|inline-html|block-html|document-link|html-superscript-link):/
+const LEGACY_PREFIXES = ['YIRU_RAW_HTML_INLINE:', 'YIRU_RAW_HTML_BLOCK:', 'YIRU_DOC_LINK:'] as const
 
 export type RichMarkdownSourceTransport = {
   readonly key: string

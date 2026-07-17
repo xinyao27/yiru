@@ -87,7 +87,7 @@ export function MobilePairingQrSection({
         <p className="text-muted-foreground max-w-xs text-center text-xs">
           {translate(
             'auto.components.settings.MobilePane.310924ad2c',
-            'Scan this code with the Orca mobile app. Each code creates a unique device token.'
+            'Scan this code with the Yiru mobile app. Each code creates a unique device token.'
           )}
         </p>
         {pairingUrl && (
@@ -120,7 +120,7 @@ export function MobilePairingQrSection({
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {translate('auto.components.settings.MobilePane.dd3cd78d04', 'Scan with Orca Mobile')}
+              {translate('auto.components.settings.MobilePane.dd3cd78d04', 'Scan with Yiru Mobile')}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center gap-3">

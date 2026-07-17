@@ -195,7 +195,7 @@ export function AppearanceInterfaceSection({
                 'Titlebar App Name'
               )}
               description={titlebarEntry?.description}
-              keywords={titlebarEntry?.keywords ?? ['titlebar', 'orca', 'app', 'name']}
+              keywords={titlebarEntry?.keywords ?? ['titlebar', 'yiru', 'app', 'name']}
             >
               <SettingsSwitchRow
                 label={translate(
@@ -223,11 +223,11 @@ export function AppearanceInterfaceSection({
                     'auto.components.settings.AppearancePane.2edf606c46',
                     'Minimize to Tray on Close'
                   )}
-                  // Why: platform constraint + "close keeps Orca running" consequence are
+                  // Why: platform constraint + "close keeps Yiru running" consequence are
                   // both non-obvious from the label alone.
                   description={translate(
                     'auto.components.settings.AppearancePane.b707773a0d',
-                    'When enabled, closing the window keeps Orca running in the system tray instead of quitting.'
+                    'When enabled, closing the window keeps Yiru running in the system tray instead of quitting.'
                   )}
                   checked={settings.minimizeToTrayOnClose === true}
                   onChange={() =>

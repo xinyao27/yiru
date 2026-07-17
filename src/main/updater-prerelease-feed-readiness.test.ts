@@ -12,7 +12,7 @@ function buildAtomFeed(tags: string[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?><feed>${tags
     .map(
       (tag) =>
-        `<entry><link rel="alternate" type="text/html" href="https://github.com/stablyai/orca/releases/tag/${tag}"/><title>${tag}</title></entry>`
+        `<entry><link rel="alternate" type="text/html" href="https://github.com/stablyai/yiru/releases/tag/${tag}"/><title>${tag}</title></entry>`
     )
     .join('')}</feed>`
 }
@@ -22,9 +22,9 @@ function buildManifest(tag: string): string {
   return [
     `version: ${version}`,
     'files:',
-    `  - url: Orca-${version}-arm64-mac.zip`,
+    `  - url: Yiru-${version}-arm64-mac.zip`,
     '    sha512: test',
-    `path: Orca-${version}-arm64-mac.zip`
+    `path: Yiru-${version}-arm64-mac.zip`
   ].join('\n')
 }
 
@@ -40,7 +40,7 @@ function respondWithAtom(
   const missingManifests = new Set(missingManifestTags)
   const missingAssets = new Set(missingAssetTags)
   netFetchMock.mockImplementation((url: string, init?: { method?: string }) => {
-    if (url === 'https://github.com/stablyai/orca/releases.atom') {
+    if (url === 'https://github.com/stablyai/yiru/releases.atom') {
       return Promise.resolve({ ok: true, text: () => Promise.resolve(buildAtomFeed(tags)) })
     }
 
@@ -117,7 +117,7 @@ describe('fetchNewerReleaseTagsWithReadiness', () => {
 
   it('requires every asset referenced by the manifest files list to be reachable', async () => {
     netFetchMock.mockImplementation((url: string, init?: { method?: string }) => {
-      if (url === 'https://github.com/stablyai/orca/releases.atom') {
+      if (url === 'https://github.com/stablyai/yiru/releases.atom') {
         return Promise.resolve({
           ok: true,
           text: () => Promise.resolve(buildAtomFeed(['v1.4.28', 'v1.4.27']))
@@ -134,11 +134,11 @@ describe('fetchNewerReleaseTagsWithReadiness', () => {
               [
                 `version: ${version}`,
                 'files:',
-                `  - url: Orca-${version}-mac.zip`,
+                `  - url: Yiru-${version}-mac.zip`,
                 '    sha512: test',
-                `  - url: Orca-${version}-arm64-mac.zip`,
+                `  - url: Yiru-${version}-arm64-mac.zip`,
                 '    sha512: test',
-                `path: Orca-${version}-mac.zip`
+                `path: Yiru-${version}-mac.zip`
               ].join('\n')
             )
         })
@@ -146,7 +146,7 @@ describe('fetchNewerReleaseTagsWithReadiness', () => {
 
       if (init?.method === 'HEAD') {
         return Promise.resolve({
-          ok: !url.endsWith('/Orca-1.4.28-arm64-mac.zip'),
+          ok: !url.endsWith('/Yiru-1.4.28-arm64-mac.zip'),
           text: () => Promise.resolve('')
         })
       }
@@ -168,7 +168,7 @@ describe('fetchNewerReleaseTagsWithReadiness', () => {
   it('accepts absolute manifest asset URLs without rewriting them to release asset paths', async () => {
     const assetUrls: string[] = []
     netFetchMock.mockImplementation((url: string, init?: { method?: string }) => {
-      if (url === 'https://github.com/stablyai/orca/releases.atom') {
+      if (url === 'https://github.com/stablyai/yiru/releases.atom') {
         return Promise.resolve({
           ok: true,
           text: () => Promise.resolve(buildAtomFeed(['v1.4.27']))
@@ -183,7 +183,7 @@ describe('fetchNewerReleaseTagsWithReadiness', () => {
               [
                 'version: 1.4.27',
                 'files:',
-                '  - url: https://downloads.example.com/Orca-1.4.27-arm64-mac.zip',
+                '  - url: https://downloads.example.com/Yiru-1.4.27-arm64-mac.zip',
                 '    sha512: test'
               ].join('\n')
             )
@@ -201,12 +201,12 @@ describe('fetchNewerReleaseTagsWithReadiness', () => {
     const { fetchNewerReleaseTag } = await import('./updater-prerelease-feed')
 
     expect(await fetchNewerReleaseTag('1.4.26')).toBe('v1.4.27')
-    expect(assetUrls).toEqual(['https://downloads.example.com/Orca-1.4.27-arm64-mac.zip'])
+    expect(assetUrls).toEqual(['https://downloads.example.com/Yiru-1.4.27-arm64-mac.zip'])
   })
 
   it('treats malformed updater manifests as not ready', async () => {
     netFetchMock.mockImplementation((url: string, init?: { method?: string }) => {
-      if (url === 'https://github.com/stablyai/orca/releases.atom') {
+      if (url === 'https://github.com/stablyai/yiru/releases.atom') {
         return Promise.resolve({
           ok: true,
           text: () => Promise.resolve(buildAtomFeed(['v1.4.28', 'v1.4.27']))

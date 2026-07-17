@@ -59,7 +59,7 @@ function writeFakeRelay(dir: string): void {
     `
 const fs = require('fs');
 const net = require('net');
-const sentinel = 'ORCA-RELAY v0.1.0 READY\\n';
+const sentinel = 'YIRU-RELAY v0.1.0 READY\\n';
 const sockPath = process.argv[process.argv.indexOf('--sock-path') + 1];
 
 function encode(msg) {
@@ -136,7 +136,7 @@ function createRelayTree(root: string, remoteHome: string): void {
     writeFakeRelay(localDir)
   }
 
-  const remoteDir = join(remoteHome, '.orca-remote', `relay-${RELAY_VERSION}`)
+  const remoteDir = join(remoteHome, '.yiru-remote', `relay-${RELAY_VERSION}`)
   mkdirSync(join(remoteDir, 'node_modules', 'node-pty'), { recursive: true })
   mkdirSync(join(remoteDir, 'node_modules', '@parcel', 'watcher'), { recursive: true })
   writeFileSync(join(remoteDir, 'node_modules', 'node-pty', 'index.js'), '')
@@ -156,19 +156,19 @@ describe('system SSH transport integration', () => {
     if (process.platform === 'win32') {
       return
     }
-    tempDir = mkdtempSync(join('/tmp', 'orca-ssh-'))
+    tempDir = mkdtempSync(join('/tmp', 'yiru-ssh-'))
     oldHome = process.env.HOME
-    oldRelayPath = process.env.ORCA_RELAY_PATH
-    oldSystemSshPath = process.env.ORCA_SYSTEM_SSH_PATH
-    oldForceSystemTransport = process.env.ORCA_SSH_FORCE_SYSTEM_TRANSPORT
+    oldRelayPath = process.env.YIRU_RELAY_PATH
+    oldSystemSshPath = process.env.YIRU_SYSTEM_SSH_PATH
+    oldForceSystemTransport = process.env.YIRU_SSH_FORCE_SYSTEM_TRANSPORT
     const remoteHome = join(tempDir, 'remote-home')
     const relayRoot = join(tempDir, 'relay')
     mkdirSync(remoteHome, { recursive: true })
     createRelayTree(relayRoot, remoteHome)
     process.env.HOME = remoteHome
-    process.env.ORCA_RELAY_PATH = relayRoot
-    process.env.ORCA_SYSTEM_SSH_PATH = writeFakeSsh(tempDir)
-    process.env.ORCA_SSH_FORCE_SYSTEM_TRANSPORT = '1'
+    process.env.YIRU_RELAY_PATH = relayRoot
+    process.env.YIRU_SYSTEM_SSH_PATH = writeFakeSsh(tempDir)
+    process.env.YIRU_SSH_FORCE_SYSTEM_TRANSPORT = '1'
   })
 
   afterEach(() => {
@@ -181,19 +181,19 @@ describe('system SSH transport integration', () => {
       process.env.HOME = oldHome
     }
     if (oldRelayPath === undefined) {
-      delete process.env.ORCA_RELAY_PATH
+      delete process.env.YIRU_RELAY_PATH
     } else {
-      process.env.ORCA_RELAY_PATH = oldRelayPath
+      process.env.YIRU_RELAY_PATH = oldRelayPath
     }
     if (oldSystemSshPath === undefined) {
-      delete process.env.ORCA_SYSTEM_SSH_PATH
+      delete process.env.YIRU_SYSTEM_SSH_PATH
     } else {
-      process.env.ORCA_SYSTEM_SSH_PATH = oldSystemSshPath
+      process.env.YIRU_SYSTEM_SSH_PATH = oldSystemSshPath
     }
     if (oldForceSystemTransport === undefined) {
-      delete process.env.ORCA_SSH_FORCE_SYSTEM_TRANSPORT
+      delete process.env.YIRU_SSH_FORCE_SYSTEM_TRANSPORT
     } else {
-      process.env.ORCA_SSH_FORCE_SYSTEM_TRANSPORT = oldForceSystemTransport
+      process.env.YIRU_SSH_FORCE_SYSTEM_TRANSPORT = oldForceSystemTransport
     }
     rmSync(tempDir, { recursive: true, force: true })
   })
@@ -224,7 +224,7 @@ describe('system SSH transport integration', () => {
   it.skipIf(process.platform === 'win32')(
     'connects GSSAPI-flagged targets through system ssh without the force override',
     async () => {
-      delete process.env.ORCA_SSH_FORCE_SYSTEM_TRANSPORT
+      delete process.env.YIRU_SSH_FORCE_SYSTEM_TRANSPORT
       const conn = new SshConnection(
         { ...makeTarget(), gssapiAuthentication: true },
         { onStateChange: vi.fn() }

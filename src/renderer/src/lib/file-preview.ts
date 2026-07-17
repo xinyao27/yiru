@@ -6,7 +6,7 @@ import { findSiblingGroupId } from '@/store/slices/tabs'
 
 export type PreviewableLanguage = 'html'
 export const REMOTE_FILE_BROWSER_UNSUPPORTED_MESSAGE =
-  'Open in Orca Browser is only available for local files.'
+  'Open in Yiru Browser is only available for local files.'
 
 export type WorkspaceFileBrowserOpenTarget =
   | {
@@ -26,7 +26,7 @@ export function getWorkspaceFileBrowserOpenTarget(params: {
 }): WorkspaceFileBrowserOpenTarget {
   if (getConnectionId(params.worktreeId)) {
     // Why: Chromium resolves file:// URLs on the local machine. Remote files
-    // need an Orca-served URL before the browser can render them correctly.
+    // need a Yiru-served URL before the browser can render them correctly.
     return {
       status: 'unsupported',
       reason: 'remote-worktree',

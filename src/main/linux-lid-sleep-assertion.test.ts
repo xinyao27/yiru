@@ -36,7 +36,7 @@ describe('LinuxLidSleepAssertion', () => {
       'systemd-inhibit',
       [
         '--what=sleep:handle-lid-switch',
-        '--who=Orca',
+        '--who=Yiru',
         '--why=Agents are working',
         '--mode=block',
         'sleep',

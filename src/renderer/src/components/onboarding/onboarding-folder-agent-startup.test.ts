@@ -9,7 +9,7 @@ import {
 describe('buildOnboardingFolderAgentStartup', () => {
   it('queues the persisted default agent with onboarding telemetry', () => {
     const startup = buildOnboardingFolderAgentStartup({
-      ...getDefaultSettings('/tmp/orca-workspaces'),
+      ...getDefaultSettings('/tmp/yiru-workspaces'),
       defaultTuiAgent: 'codex'
     })
 
@@ -32,7 +32,7 @@ describe('buildOnboardingFolderAgentStartup', () => {
 
   it('respects the blank terminal preference', () => {
     const startup = buildOnboardingFolderAgentStartup({
-      ...getDefaultSettings('/tmp/orca-workspaces'),
+      ...getDefaultSettings('/tmp/yiru-workspaces'),
       defaultTuiAgent: 'blank'
     })
 
@@ -41,7 +41,7 @@ describe('buildOnboardingFolderAgentStartup', () => {
 
   it('does not infer an agent from auto mode', () => {
     const startup = buildOnboardingFolderAgentStartup({
-      ...getDefaultSettings('/tmp/orca-workspaces'),
+      ...getDefaultSettings('/tmp/yiru-workspaces'),
       defaultTuiAgent: null
     })
 
@@ -89,7 +89,7 @@ describe('buildOnboardingFolderAgentStartup', () => {
     expect(
       buildDismissedOnboardingFolderAgentStartup(
         {
-          ...getDefaultSettings('/tmp/orca-workspaces'),
+          ...getDefaultSettings('/tmp/yiru-workspaces'),
           defaultTuiAgent: 'codex',
           agentCmdOverrides: { codex: 'echo onboarding-folder-agent' }
         },

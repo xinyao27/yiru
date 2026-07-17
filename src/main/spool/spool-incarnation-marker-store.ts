@@ -6,8 +6,8 @@ import { readOrCreateSpoolLocalIncarnationMarker } from './spool-local-incarnati
 import { readOrCreateSpoolWslIncarnationMarker } from './spool-wsl-incarnation-marker'
 import { SpoolWorktreeIncarnationHostError } from './spool-worktree-incarnation'
 
-const INCARNATION_MARKER_FILENAME = 'orca-spool-incarnation-v1'
-export const SPOOL_FOLDER_INCARNATION_MARKER_FILENAME = '.orca-spool-incarnation-v1'
+const INCARNATION_MARKER_FILENAME = 'yiru-spool-incarnation-v1'
+export const SPOOL_FOLDER_INCARNATION_MARKER_FILENAME = '.yiru-spool-incarnation-v1'
 export const SPOOL_FOLDER_INCARNATION_TEMP_PREFIX = `${SPOOL_FOLDER_INCARNATION_MARKER_FILENAME}.tmp-`
 
 export type SpoolIncarnationMarkerLocation =

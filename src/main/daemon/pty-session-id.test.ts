@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { isSafePtySessionId, mintPtySessionId, parsePtySessionId } from './pty-session-id'
 
-const USER_DATA = '/tmp/orca-userdata'
+const USER_DATA = '/tmp/yiru-userdata'
 
 describe('mintPtySessionId', () => {
   it('returns a UUID when no worktreeId is provided', () => {

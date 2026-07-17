@@ -4,15 +4,15 @@ Date: 2026-07-01
 
 ## Scope
 
-This note tracks the investigation into terminal input lag that appears after switching workspaces or terminals in a heavy packaged Orca profile.
+This note tracks the investigation into terminal input lag that appears after switching workspaces or terminals in a heavy packaged Yiru profile.
 
-The user-visible symptom is that typing after switching back to a workspace can feel delayed for about one second. Text may appear all at once after the delay. The issue reproduced in the user's main packaged Orca app, but not reliably in lighter dev profiles.
+The user-visible symptom is that typing after switching back to a workspace can feel delayed for about one second. Text may appear all at once after the delay. The issue reproduced in the user's main packaged Yiru app, but not reliably in lighter dev profiles.
 
 ## Current Reproduction Setup
 
-- Main packaged Orca app is used for the meaningful repro.
+- Main packaged Yiru app is used for the meaningful repro.
 - The main profile had roughly 150 terminals when the lag reproduced.
-- The current worktree under test is `/Users/jinwoohong/orca/workspaces/orca/osprey`.
+- The current worktree under test is `/Users/jinwoohong/yiru/workspaces/yiru/osprey`.
 - The main app did not expose CDP, so browser-level renderer profiling was limited.
 - The harness creates a throwaway bash terminal, switches away and back, sends a marker command, waits for a receipt file, and closes the throwaway terminal.
 - Harness path: `.tmp/terminal-main-app-typing-lag/probe.mjs`
@@ -23,10 +23,10 @@ The user-visible symptom is that typing after switching back to a workspace can 
 Useful harness modes:
 
 ```sh
-ORCA_PROBE_RUNS=8 ORCA_PROBE_FOCUS_EACH_RUN=0 ORCA_PROBE_TYPE_MODE=terminal-send ORCA_PROBE_RECEIPT_MODE=file node .tmp/terminal-main-app-typing-lag/probe.mjs
-ORCA_PROBE_RUNS=8 ORCA_PROBE_FOCUS_EACH_RUN=0 ORCA_PROBE_TYPE_MODE=daemon-direct-request ORCA_PROBE_RECEIPT_MODE=file node .tmp/terminal-main-app-typing-lag/probe.mjs
-ORCA_PROBE_RUNS=8 ORCA_PROBE_SKIP_SWITCH=1 ORCA_PROBE_FOCUS_EACH_RUN=0 ORCA_PROBE_TYPE_MODE=daemon-direct-request ORCA_PROBE_RECEIPT_MODE=file node .tmp/terminal-main-app-typing-lag/probe.mjs
-ORCA_PROBE_RUNS=4 ORCA_PROBE_FOCUS_EACH_RUN=0 ORCA_PROBE_SKIP_FOCUS=1 ORCA_PROBE_SAMPLE_RENDERER=0 ORCA_PROBE_ALT_TERMINAL=term_4d7a0b50-e9ae-420e-ac5d-7ec12cbfa408 ORCA_PROBE_TYPE_MODE=daemon-direct-request ORCA_PROBE_RECEIPT_MODE=file node .tmp/terminal-main-app-typing-lag/probe.mjs
+YIRU_PROBE_RUNS=8 YIRU_PROBE_FOCUS_EACH_RUN=0 YIRU_PROBE_TYPE_MODE=terminal-send YIRU_PROBE_RECEIPT_MODE=file node .tmp/terminal-main-app-typing-lag/probe.mjs
+YIRU_PROBE_RUNS=8 YIRU_PROBE_FOCUS_EACH_RUN=0 YIRU_PROBE_TYPE_MODE=daemon-direct-request YIRU_PROBE_RECEIPT_MODE=file node .tmp/terminal-main-app-typing-lag/probe.mjs
+YIRU_PROBE_RUNS=8 YIRU_PROBE_SKIP_SWITCH=1 YIRU_PROBE_FOCUS_EACH_RUN=0 YIRU_PROBE_TYPE_MODE=daemon-direct-request YIRU_PROBE_RECEIPT_MODE=file node .tmp/terminal-main-app-typing-lag/probe.mjs
+YIRU_PROBE_RUNS=4 YIRU_PROBE_FOCUS_EACH_RUN=0 YIRU_PROBE_SKIP_FOCUS=1 YIRU_PROBE_SAMPLE_RENDERER=0 YIRU_PROBE_ALT_TERMINAL=term_4d7a0b50-e9ae-420e-ac5d-7ec12cbfa408 YIRU_PROBE_TYPE_MODE=daemon-direct-request YIRU_PROBE_RECEIPT_MODE=file node .tmp/terminal-main-app-typing-lag/probe.mjs
 ```
 
 ## Key Measurements
@@ -160,7 +160,7 @@ Latest reproduced run:
 
 ### Direct daemon ping loop during switch
 
-A direct daemon client sent `ping` requests every roughly 50 ms while the harness issued `orca terminal switch` away and back.
+A direct daemon client sent `ping` requests every roughly 50 ms while the harness issued `yiru terminal switch` away and back.
 
 - Pings before and after the switch were effectively immediate.
 - One ping sent around 469 ms after switch start waited 1212 ms.
@@ -179,8 +179,8 @@ Latest no-switch result:
 
 ### Pause after switching away
 
-- Adding `ORCA_PROBE_AFTER_SWITCH_AWAY_MS=1500` before switching back made direct daemon writes fast again.
-- This indicates expensive work starts when Orca switches into or resumes the output-rich workspace, then spills into the immediate switch-back/write window.
+- Adding `YIRU_PROBE_AFTER_SWITCH_AWAY_MS=1500` before switching back made direct daemon writes fast again.
+- This indicates expensive work starts when Yiru switches into or resumes the output-rich workspace, then spills into the immediate switch-back/write window.
 
 Latest pause-control result:
 `.tmp/terminal-main-app-typing-lag/result-2026-07-01T07-29-58-568Z.json`
@@ -256,7 +256,7 @@ Source cause:
 - It is probably not keyboard focus. Direct daemon writes reproduce the delay.
 - It is probably not only renderer paint. Direct daemon writes wait before the shell receives bytes.
 - It is probably not bash or node-pty readiness. No-switch direct writes are fast, and receipt latency after a delayed daemon response is low.
-- It is probably not queueing only on Orca's normal daemon client socket. The direct-daemon harness uses a separate socket and still sees the delay.
+- It is probably not queueing only on Yiru's normal daemon client socket. The direct-daemon harness uses a separate socket and still sees the delay.
 - It is not caused by typing itself. A ping loop with no write showed the daemon stall during switching.
 - It is unlikely to be a single normal `getSnapshot` or `resize` call, because direct controls for those operations are much cheaper than the observed stall.
 - The resume-time dead-pane recovery is still necessary; the hot path should
@@ -295,8 +295,8 @@ the expensive primitive was the problem.
 ## Relevant Code Areas
 
 - CLI terminal send: `src/cli/handlers/terminal.ts`
-- Runtime terminal send/focus/write: `src/main/runtime/orca-runtime.ts`
-- Runtime PTY data handling: `onPtyData`, `trackHeadlessTerminalData`, hidden-output serialization in `src/main/runtime/orca-runtime.ts`
+- Runtime terminal send/focus/write: `src/main/runtime/yiru-runtime.ts`
+- Runtime PTY data handling: `onPtyData`, `trackHeadlessTerminalData`, hidden-output serialization in `src/main/runtime/yiru-runtime.ts`
 - Daemon request routing: `src/main/daemon/daemon-server.ts`
 - Daemon session write/resize/output handling: `src/main/daemon/session.ts`
 - Daemon-side headless terminal state: `src/main/daemon/headless-emulator.ts`
@@ -345,7 +345,7 @@ The correct fix is two-layered:
 
 ## Investigation Constraints
 
-- Do not kill or restart the user's main packaged Orca app or daemon without explicit approval.
+- Do not kill or restart the user's main packaged Yiru app or daemon without explicit approval.
 - Use throwaway terminals for probes and close them afterward.
 - Keep temp harnesses and screenshots out of commits unless explicitly requested.
 - Reproduce in the real main-app flow when possible; lighter dev profiles may not show the problem.

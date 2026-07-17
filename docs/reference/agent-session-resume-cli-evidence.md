@@ -2,25 +2,25 @@
 
 Date: June 5, 2026
 
-Scope: issue [stablyai/orca#1796](https://github.com/stablyai/orca/issues/1796), current worktree code, installed agent CLIs on this machine, cloned open-source CLI repos under `/tmp/orca-agent-resume-research`, and official provider docs where available.
+Scope: issue [stablyai/yiru#1796](https://github.com/stablyai/yiru/issues/1796), current worktree code, installed agent CLIs on this machine, cloned open-source CLI repos under `/tmp/yiru-agent-resume-research`, and official provider docs where available.
 
 ## Executive conclusion
 
-Orca can implement one-click agent resume on wake, but it cannot use terminal PTY IDs, pane keys, tab IDs, or worktree IDs as the agent session ID. Those are Orca terminal identifiers. The required value is the provider's conversation/session/thread ID.
+Yiru can implement one-click agent resume on wake, but it cannot use terminal PTY IDs, pane keys, tab IDs, or worktree IDs as the agent session ID. Those are Yiru terminal identifiers. The required value is the provider's conversation/session/thread ID.
 
-For several first-tier providers, the exact provider ID is available in hook payloads today, but Orca drops it during normalization:
+For several first-tier providers, the exact provider ID is available in hook payloads today, but Yiru drops it during normalization:
 
 - Claude: hook payloads include `session_id`; resume command is `claude --resume <session_id>`.
 - Codex: hook runtime sends `session_id`; resume command is `codex resume <session_id>`.
 - Gemini: hook payloads include `session_id`; resume command is `gemini --resume <session_id>`.
 - Antigravity: hook payloads include `conversationId`; resume command is `agy --conversation <conversationId>`.
-- OpenCode: Orca's managed plugin already reads OpenCode `sessionID`; resume command is `opencode --session <sessionID>`.
+- OpenCode: Yiru's managed plugin already reads OpenCode `sessionID`; resume command is `opencode --session <sessionID>`.
 - Droid: hook payloads include `session_id`; resume command is `droid --resume <session_id>`.
 - Grok: hook payloads include `sessionId`/`session_id`; resume command is `grok --resume <sessionId>`.
 
-The current blocker is not primarily "how do we resume?" The exact resume action is to spawn a new agent process on wake in the same workspace/pane context using the provider-specific resume command. The blocker is that Orca's current hook event and status types have no durable provider-session field, so the ID is discarded before sleep.
+The current blocker is not primarily "how do we resume?" The exact resume action is to spawn a new agent process on wake in the same workspace/pane context using the provider-specific resume command. The blocker is that Yiru's current hook event and status types have no durable provider-session field, so the ID is discarded before sleep.
 
-## Current Orca behavior
+## Current Yiru behavior
 
 Issue #1796 is accurate about current behavior. The issue says sleep loses agent type, session ID, last prompt, and resume command because `dropAgentStatusByWorktree` wipes rows before wake can offer resume.
 
@@ -66,26 +66,26 @@ These exact binaries were available on this machine:
 Legend:
 
 - `Exact supported`: exact resume command and exact ID source are both verified.
-- `Resume verified, ID capture missing`: CLI can resume, but current Orca hook path does not expose a durable exact ID.
-- `ID seen, resume not verified`: Orca/source exposes an ID, but no exact resume CLI command was verified.
-- `Out of current hook scope`: Orca has no current hook source for this TUI agent.
+- `Resume verified, ID capture missing`: CLI can resume, but current Yiru hook path does not expose a durable exact ID.
+- `ID seen, resume not verified`: Yiru/source exposes an ID, but no exact resume CLI command was verified.
+- `Out of current hook scope`: Yiru has no current hook source for this TUI agent.
 
-| Agent | Resume command evidence | Exact ID source evidence | Current Orca support status |
+| Agent | Resume command evidence | Exact ID source evidence | Current Yiru support status |
 | --- | --- | --- | --- |
-| Claude | `claude --resume <session_id>` verified by local `claude --help` and Anthropic CLI docs. | Claude hook docs show hook input includes `session_id` and `transcript_path`; current Orca normalizer drops `session_id`. | Exact supported after adding provider-session metadata extraction. |
+| Claude | `claude --resume <session_id>` verified by local `claude --help` and Anthropic CLI docs. | Claude hook docs show hook input includes `session_id` and `transcript_path`; current Yiru normalizer drops `session_id`. | Exact supported after adding provider-session metadata extraction. |
 | Codex | `codex resume <session_id>` verified by local help and cloned Codex source `codex-rs/utils/cli/src/resume_command.rs`. | Cloned Codex source `codex-rs/core/src/hook_runtime.rs` sends `session_id` on `SessionStart`, `PreToolUse`, `PermissionRequest`, and `PostToolUse` hook requests. | Exact supported after extraction. |
 | Gemini | `gemini --resume <session_id>` verified by local help and Gemini docs. | Gemini hooks reference says all hooks receive `session_id` and `transcript_path`. | Exact supported after extraction. |
 | Antigravity | `agy --conversation <uuid>` verified by local help and Antigravity docs. | Antigravity hook docs list `conversationId` as the active conversation UUID. | Exact supported after extraction. |
-| OpenCode | `opencode --session <sessionID>` verified by local help, official docs, and cloned OpenCode TUI source. | Orca's OpenCode plugin already reads `event.properties?.sessionID` before posting. | Exact supported after preserving `sessionID`. |
-| Droid | `droid --resume <sessionId>` verified by local help and Factory CLI docs. | Factory hooks reference includes `session_id`; Orca installs Droid hooks and already subscribes to `SessionStart`. | Exact supported after extraction. |
-| Grok | `grok --resume <SESSION_ID>` verified by local help. | Orca already reads `sessionId`/`session_id` in `getGrokChatHistoryPath`, but only to locate chat history. | Exact supported after preserving that same ID. |
-| Cursor | `cursor-agent --resume <chatId>` and `cursor-agent resume` verified by local help and Cursor docs. | Current Orca Cursor hook install deliberately omits `sessionStart`/`sessionEnd`; the subscribed event set does not currently prove a chat ID source. `cursor-agent create-chat` was locally verified to return a UUID, but preallocation for Orca launches still needs an end-to-end test before relying on it. | Resume verified, ID capture missing. |
-| Pi | `pi --session <path|id>`, `pi --resume`, and `pi --continue` verified by local help and Pi docs. | Orca's bundled Pi/OMP extension posts status events but does not include session file path, session UUID, or session name in the status payload. | Resume verified, ID capture missing. |
-| OMP | Same launch family as Pi in Orca. | Orca reuses Pi extension API shape and does not include exact session pointer. | Resume verified by inheritance only from Pi-like CLI contract; exact OMP ID capture missing. |
-| Amp | Orca's managed plugin posts `threadId: event.thread.id`. | Amp is not installed locally, and no exact Amp CLI resume command was verified in this investigation. | ID seen, resume not verified. |
-| Hermes | Orca's managed Hermes plugin selects `session_id` for session/LLM/tool events. | Hermes is not installed locally, and no exact Hermes CLI resume command was verified in this investigation. | ID seen, resume not verified. |
-| Copilot | Orca installs broad Copilot hooks. | Local Copilot CLI not installed; no exact resume command or session ID contract was verified. | Not supported for exact resume yet. |
-| Command Code | Orca installs hooks for `PreToolUse`, `PostToolUse`, and `Stop`. | Local Command Code CLI not installed; no exact resume command or session ID contract was verified. | Not supported for exact resume yet. |
+| OpenCode | `opencode --session <sessionID>` verified by local help, official docs, and cloned OpenCode TUI source. | Yiru's OpenCode plugin already reads `event.properties?.sessionID` before posting. | Exact supported after preserving `sessionID`. |
+| Droid | `droid --resume <sessionId>` verified by local help and Factory CLI docs. | Factory hooks reference includes `session_id`; Yiru installs Droid hooks and already subscribes to `SessionStart`. | Exact supported after extraction. |
+| Grok | `grok --resume <SESSION_ID>` verified by local help. | Yiru already reads `sessionId`/`session_id` in `getGrokChatHistoryPath`, but only to locate chat history. | Exact supported after preserving that same ID. |
+| Cursor | `cursor-agent --resume <chatId>` and `cursor-agent resume` verified by local help and Cursor docs. | Current Yiru Cursor hook install deliberately omits `sessionStart`/`sessionEnd`; the subscribed event set does not currently prove a chat ID source. `cursor-agent create-chat` was locally verified to return a UUID, but preallocation for Yiru launches still needs an end-to-end test before relying on it. | Resume verified, ID capture missing. |
+| Pi | `pi --session <path|id>`, `pi --resume`, and `pi --continue` verified by local help and Pi docs. | Yiru's bundled Pi/OMP extension posts status events but does not include session file path, session UUID, or session name in the status payload. | Resume verified, ID capture missing. |
+| OMP | Same launch family as Pi in Yiru. | Yiru reuses Pi extension API shape and does not include exact session pointer. | Resume verified by inheritance only from Pi-like CLI contract; exact OMP ID capture missing. |
+| Amp | Yiru's managed plugin posts `threadId: event.thread.id`. | Amp is not installed locally, and no exact Amp CLI resume command was verified in this investigation. | ID seen, resume not verified. |
+| Hermes | Yiru's managed Hermes plugin selects `session_id` for session/LLM/tool events. | Hermes is not installed locally, and no exact Hermes CLI resume command was verified in this investigation. | ID seen, resume not verified. |
+| Copilot | Yiru installs broad Copilot hooks. | Local Copilot CLI not installed; no exact resume command or session ID contract was verified. | Not supported for exact resume yet. |
+| Command Code | Yiru installs hooks for `PreToolUse`, `PostToolUse`, and `Stop`. | Local Command Code CLI not installed; no exact resume command or session ID contract was verified. | Not supported for exact resume yet. |
 | openclaude, autohand, aider, goose, kilo, kiro, crush, aug, cline, codebuff, continue, kimi, mistral-vibe, qwen-code, rovo, openclaw | Not investigated to exact-resume standard. | Not in `HOOK_SOURCE_BY_PATHNAME` today. | Out of current hook scope. |
 
 ## Exact resume behavior by provider
@@ -104,7 +104,7 @@ Resume command:
 claude --resume <session_id>
 ```
 
-If Orca stores `lastPromptSummary` separately, it should not pass that summary as a new user prompt by default. The one-click resume action should reopen the prior conversation. Auto-submitting a summary would create a new turn.
+If Yiru stores `lastPromptSummary` separately, it should not pass that summary as a new user prompt by default. The one-click resume action should reopen the prior conversation. Auto-submitting a summary would create a new turn.
 
 ### Codex
 
@@ -159,7 +159,7 @@ Verified:
 - Official OpenCode docs list `--session` as the session ID to continue.
 - Cloned OpenCode source `packages/opencode/src/cli/cmd/tui/thread.ts` defines `--session` and passes it into TUI args as `sessionID`.
 - Cloned OpenCode source `validate-session.ts` validates the supplied session ID through the OpenCode client.
-- Orca's managed OpenCode plugin reads `event.properties?.sessionID`.
+- Yiru's managed OpenCode plugin reads `event.properties?.sessionID`.
 
 Resume command:
 
@@ -186,7 +186,7 @@ droid --resume <session_id>
 Verified:
 
 - Local `grok --help` shows `--resume [<SESSION_ID>]`, `--continue`, `--cwd`, and `--restore-code`.
-- Orca already reads `sessionId`/`session_id` in `getGrokChatHistoryPath`.
+- Yiru already reads `sessionId`/`session_id` in `getGrokChatHistoryPath`.
 
 Resume command:
 
@@ -205,11 +205,11 @@ Verified:
 
 Not verified:
 
-- Current Orca Cursor hook install subscribes to `beforeSubmitPrompt`, `stop`, tool events, approval events, and `afterAgentResponse`, but intentionally does not subscribe to `sessionStart`/`sessionEnd`.
+- Current Yiru Cursor hook install subscribes to `beforeSubmitPrompt`, `stop`, tool events, approval events, and `afterAgentResponse`, but intentionally does not subscribe to `sessionStart`/`sessionEnd`.
 - I did not verify a current subscribed Cursor hook payload containing `chatId`.
 - I did not run `cursor-agent --resume <chatId> <prompt>` because that would start a real agent turn and may make workspace changes.
 
-Conclusion: exact Cursor resume is CLI-supported, but Orca currently needs either a verified hook payload chat ID or a launch preallocation strategy that is tested end to end.
+Conclusion: exact Cursor resume is CLI-supported, but Yiru currently needs either a verified hook payload chat ID or a launch preallocation strategy that is tested end to end.
 
 ### Pi and OMP
 
@@ -217,7 +217,7 @@ Verified:
 
 - Local `pi --help` shows `--continue`, `--resume`, `--session <path|id>`, `--fork <path|id>`, `--session-dir`, and `--no-session`.
 - Pi docs state `/resume` opens a picker and `pi -r` opens the same picker at startup.
-- Orca's Pi/OMP extension posts status events from Pi's extension API, but the status events do not include session path, UUID, or session name.
+- Yiru's Pi/OMP extension posts status events from Pi's extension API, but the status events do not include session path, UUID, or session name.
 
 Resume command:
 
@@ -225,9 +225,9 @@ Resume command:
 pi --session <path-or-id>
 ```
 
-Conclusion: exact Pi resume is CLI-supported, but current Orca capture is missing the exact pointer.
+Conclusion: exact Pi resume is CLI-supported, but current Yiru capture is missing the exact pointer.
 
-## What Orca should store
+## What Yiru should store
 
 Store a durable record per sleeping agent pane, not per worktree only:
 
@@ -294,15 +294,15 @@ This is the extraction map that is supported by the evidence above:
 ## Open questions that remain genuinely unverified
 
 - Cursor: whether any currently subscribed Cursor hook payload carries `chatId`. If not, the only plausible exact strategy is preallocating a chat with `cursor-agent create-chat` at launch and starting/resuming that known chat. That needs an end-to-end test before productizing.
-- Pi/OMP: whether the extension API can expose the current session file/path/UUID. Current Orca extension does not forward it.
+- Pi/OMP: whether the extension API can expose the current session file/path/UUID. Current Yiru extension does not forward it.
 - Amp: whether the Amp CLI has an exact thread resume command matching `threadId`.
 - Hermes: whether Hermes has an exact session resume CLI command matching `session_id`.
 - Copilot and Command Code: exact resume command and exact hook session field were not verified because the CLIs were not installed locally and no sufficient primary docs/source were found during this pass.
-- Non-hook TUI agents: no exact support should be promised until Orca adds a hook/metadata capture path for each.
+- Non-hook TUI agents: no exact support should be promised until Yiru adds a hook/metadata capture path for each.
 
 ## Sources
 
-Local Orca source:
+Local Yiru source:
 
 - `src/shared/agent-hook-listener.ts`
 - `src/shared/agent-hook-relay.ts`
@@ -321,13 +321,13 @@ Local Orca source:
 
 Cloned source:
 
-- `/tmp/orca-agent-resume-research/codex`
-- `/tmp/orca-agent-resume-research/gemini-cli`
-- `/tmp/orca-agent-resume-research/opencode`
+- `/tmp/yiru-agent-resume-research/codex`
+- `/tmp/yiru-agent-resume-research/gemini-cli`
+- `/tmp/yiru-agent-resume-research/opencode`
 
 Official docs:
 
-- GitHub issue: https://github.com/stablyai/orca/issues/1796
+- GitHub issue: https://github.com/stablyai/yiru/issues/1796
 - Claude CLI reference: https://docs.anthropic.com/en/docs/claude-code/cli-usage
 - Claude hooks reference: https://code.claude.com/docs/en/hooks
 - Gemini hooks reference: https://geminicli.com/docs/hooks/reference/

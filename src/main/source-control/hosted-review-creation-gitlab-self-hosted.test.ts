@@ -95,7 +95,7 @@ describe('GitLab self-hosted hosted review creation eligibility', () => {
     mockNonGitLabProviders()
     getHostedReviewForBranchMock.mockResolvedValue(null)
     gitExecFileAsyncMock.mockResolvedValue({
-      stdout: 'git@gitlab.internal:team/orca.git\n',
+      stdout: 'git@gitlab.internal:team/yiru.git\n',
       stderr: ''
     })
   })

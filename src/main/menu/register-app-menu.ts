@@ -110,12 +110,12 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
   }
 
   const featureTourItem: Electron.MenuItemConstructorOptions = {
-    label: translateMain('menu.exploreOrca', 'Explore Orca'),
+    label: translateMain('menu.exploreYiru', 'Explore Yiru'),
     click: (_menuItem, window) => onOpenFeatureTour(window)
   }
 
   const setupGuideItem: Electron.MenuItemConstructorOptions = {
-    label: translateMain('menu.gettingStarted', 'Getting Started with Orca'),
+    label: translateMain('menu.gettingStarted', 'Getting Started with Yiru'),
     click: (_menuItem, window) => onOpenSetupGuide(window)
   }
 
@@ -127,7 +127,7 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
   // Why: the macOS app-menu (named after the app) is mandatory on darwin and
   // owns hide/hideOthers/unhide/services/quit roles that only make sense in
   // the system menu bar. On Windows/Linux that menu would render as a
-  // redundant "Orca" entry with roles that don't apply, so we omit it there
+  // redundant "Yiru" entry with roles that don't apply, so we omit it there
   // and distribute its items across File / Help instead.
   const macAppMenu: Electron.MenuItemConstructorOptions = {
     label: app.name,
@@ -171,7 +171,7 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
         accelerator: 'CmdOrCtrl+V',
         click: () => {
           // Why: a focused terminal/native-chat pane is not a native editable
-          // control, so raw Electron paste cannot know which Orca surface owns it.
+          // control, so raw Electron paste cannot know which Yiru surface owns it.
           BrowserWindow.getFocusedWindow()?.webContents.send('ui:appMenuPaste')
         }
       },
@@ -224,7 +224,7 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
         click: () => onToggleAppearance('showAutomationsButton')
       },
       {
-        label: translateMain('menu.showMobileButton', 'Show Orca Mobile Button'),
+        label: translateMain('menu.showMobileButton', 'Show Yiru Mobile Button'),
         type: 'checkbox',
         checked: appearance.showMobileButton,
         click: () => onToggleAppearance('showMobileButton')

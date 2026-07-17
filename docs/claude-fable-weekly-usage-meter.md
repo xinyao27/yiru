@@ -2,12 +2,12 @@
 
 ## Problem
 
-Claude Code now exposes weekly subscription usage alongside the 5-hour window, and its live `/usage` panel can show an explicit Fable-specific weekly bucket. Anthropic documents `rate_limits.five_hour` and `rate_limits.seven_day` in Claude Code statusline JSON, with weekly data present for Claude.ai subscribers after the first API response. The existing Orca Claude meter already has a weekly slot in shared state, but it needs a distinct Fable weekly slot so the status bar can show all three visible meters when Claude reports them.
+Claude Code now exposes weekly subscription usage alongside the 5-hour window, and its live `/usage` panel can show an explicit Fable-specific weekly bucket. Anthropic documents `rate_limits.five_hour` and `rate_limits.seven_day` in Claude Code statusline JSON, with weekly data present for Claude.ai subscribers after the first API response. The existing Yiru Claude meter already has a weekly slot in shared state, but it needs a distinct Fable weekly slot so the status bar can show all three visible meters when Claude reports them.
 
 Relevant code:
 
 - `src/shared/rate-limit-types.ts:46` models provider usage with `session` and `weekly` windows.
-- `src/main/rate-limits/claude-fetcher.ts:373` maps OAuth `five_hour` and `seven_day` into Orca's Claude provider state.
+- `src/main/rate-limits/claude-fetcher.ts:373` maps OAuth `five_hour` and `seven_day` into Yiru's Claude provider state.
 - `src/main/rate-limits/claude-pty.ts:18` parses hidden `claude` `/usage` output, but `WEEKLY_RE` only accepts `Current week`.
 - `src/renderer/src/components/status-bar/StatusBar.tsx:1112` renders both session and weekly windows when both are present.
 - `src/renderer/src/components/status-bar/tooltip.tsx:138` includes weekly usage in the details popover.
@@ -15,9 +15,9 @@ Relevant code:
 Research:
 
 - Official Claude Code statusline docs: [`rate_limits.five_hour.used_percentage` and `rate_limits.seven_day.used_percentage`](https://code.claude.com/docs/en/statusline#available-data), plus matching `resets_at`, are the 5-hour and 7-day rate-limit fields.
-- `harveyxiacn/cc-usage-monitor` uses Claude Code's statusline `rate_limits` data and shows both [`5h` and `7d` windows](https://github.com/harveyxiacn/cc-usage-monitor), matching Orca's existing `session` and `weekly` model.
+- `harveyxiacn/cc-usage-monitor` uses Claude Code's statusline `rate_limits` data and shows both [`5h` and `7d` windows](https://github.com/harveyxiacn/cc-usage-monitor), matching Yiru's existing `session` and `weekly` model.
 - `leeguooooo/claude-code-usage-bar` independently exposes the same [`5h` and `7d` rate-limit usage](https://github.com/leeguooooo/claude-code-usage-bar) in a Claude Code statusLine integration.
-- Fable is not part of the documented statusline schema above. Orca only treats it as Fable weekly usage when the live `/usage` panel renders a standalone `Fable` label or an OAuth response uses an explicit weekly/seven-day Fable field name.
+- Fable is not part of the documented statusline schema above. Yiru only treats it as Fable weekly usage when the live `/usage` panel renders a standalone `Fable` label or an OAuth response uses an explicit weekly/seven-day Fable field name.
 
 Redacted live `/usage` shape this parser targets:
 
@@ -39,7 +39,7 @@ Resets in 3d 2h
 
 ## Goal
 
-Make Orca's existing Claude status-bar meter show the weekly Claude and Fable usage windows whenever Claude Code reports them, including newer `/usage` panel wording such as `Weekly limits`, `Fable`, or `7-day`.
+Make Yiru's existing Claude status-bar meter show the weekly Claude and Fable usage windows whenever Claude Code reports them, including newer `/usage` panel wording such as `Weekly limits`, `Fable`, or `7-day`.
 
 ## Non-goals
 

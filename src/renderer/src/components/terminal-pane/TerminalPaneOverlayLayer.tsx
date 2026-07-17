@@ -28,16 +28,16 @@ const EMPTY_GROUPS: readonly TabGroup[] = []
 const EMPTY_ACTIVITY_PORTALS: ActivityTerminalPortalTarget[] = []
 const HAS_CSS_ANCHOR_POSITIONING =
   typeof CSS !== 'undefined' &&
-  CSS.supports('position-anchor', '--orca-terminal-overlay-probe') &&
-  CSS.supports('top', 'anchor(--orca-terminal-overlay-probe top)') &&
-  CSS.supports('width', 'anchor-size(--orca-terminal-overlay-probe width)')
+  CSS.supports('position-anchor', '--yiru-terminal-overlay-probe') &&
+  CSS.supports('top', 'anchor(--yiru-terminal-overlay-probe top)') &&
+  CSS.supports('width', 'anchor-size(--yiru-terminal-overlay-probe width)')
 const MIN_OVERLAY_FIT_WIDTH_PX = 48
 const MIN_OVERLAY_FIT_HEIGHT_PX = 24
 
 function shouldUseCssAnchorPositioning(): boolean {
   return (
     HAS_CSS_ANCHOR_POSITIONING &&
-    (globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__ !== true
+    (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ !== true
   )
 }
 

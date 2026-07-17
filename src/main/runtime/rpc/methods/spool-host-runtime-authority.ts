@@ -1,4 +1,4 @@
-import type { OrcaRuntimeService } from '../../orca-runtime'
+import type { YiruRuntimeService } from '../../yiru-runtime'
 import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
 import type {
   SpoolPairedRuntimeBoundWorktree,
@@ -11,7 +11,7 @@ import {
   type SpoolExecutionErrorCode
 } from '../../../spool/spool-execution-error'
 import type { SpoolHostOperationContext } from '../../../spool/spool-execution-gateway'
-import { createOrcaSpoolHostAdapter } from '../../../spool/spool-orca-host-adapter'
+import { createYiruSpoolHostAdapter } from '../../../spool/spool-yiru-host-adapter'
 import type { SpoolOwnerWorktree } from '../../../spool/spool-worktree-incarnation'
 import { SpoolActualHostWorktreeIncarnationHost } from '../../../spool/spool-worktree-incarnation-host'
 import {
@@ -23,7 +23,7 @@ import { resolveSpoolRepoLocalWslDistro } from '../../../spool/spool-repo-actual
 import type { SpoolPublicWorktreeInstance } from '../../../spool/spool-worktree-publication-state'
 import type { RpcContext } from '../core'
 
-const bundles = new WeakMap<OrcaRuntimeService, ReturnType<typeof createOrcaSpoolHostAdapter>>()
+const bundles = new WeakMap<YiruRuntimeService, ReturnType<typeof createYiruSpoolHostAdapter>>()
 
 export function requirePairedRuntimePrincipal(context: RpcContext): void {
   if (context.principal?.kind !== 'paired-device' || context.principal.scope !== 'runtime') {
@@ -33,14 +33,14 @@ export function requirePairedRuntimePrincipal(context: RpcContext): void {
 }
 
 export async function resolveActualHostWorktree(
-  runtime: OrcaRuntimeService,
+  runtime: YiruRuntimeService,
   selector: SpoolPairedRuntimeWorktreeSelector
 ): Promise<SpoolPairedRuntimeResolvedWorktree> {
   return await runtime.resolvePairedRuntimeSpoolWorktree(selector)
 }
 
 export function resolvePairedRuntimeRepoActualHostScope(
-  runtime: OrcaRuntimeService,
+  runtime: YiruRuntimeService,
   repoId: string
 ): string {
   const store = runtime.getPairedRuntimeSpoolStore()
@@ -65,7 +65,7 @@ export function resolvePairedRuntimeRepoActualHostScope(
 }
 
 export async function resolveIncarnationBoundActualWorktree(
-  runtime: OrcaRuntimeService,
+  runtime: YiruRuntimeService,
   selector: SpoolPairedRuntimeSessionWorktree
 ): Promise<SpoolPairedRuntimeResolvedWorktree & { actualHostScope: string }> {
   const resolved = await resolveActualHostWorktree(runtime, selector)
@@ -83,7 +83,7 @@ export async function resolveIncarnationBoundActualWorktree(
 }
 
 export async function resolveBoundActualHostWorktree(
-  runtime: OrcaRuntimeService,
+  runtime: YiruRuntimeService,
   selector: SpoolPairedRuntimeBoundWorktree
 ): Promise<SpoolPublicWorktreeInstance> {
   const resolved = await resolveIncarnationBoundActualWorktree(runtime, selector)
@@ -120,12 +120,12 @@ export function createIncarnationHost(
   })
 }
 
-export function getHostBundle(runtime: OrcaRuntimeService) {
+export function getHostBundle(runtime: YiruRuntimeService) {
   const existing = bundles.get(runtime)
   if (existing) {
     return existing
   }
-  const created = createOrcaSpoolHostAdapter({
+  const created = createYiruSpoolHostAdapter({
     store: runtime.getPairedRuntimeSpoolStore(),
     runtime
   })
@@ -134,7 +134,7 @@ export function getHostBundle(runtime: OrcaRuntimeService) {
 }
 
 export function requireActualHostAdapter(
-  runtime: OrcaRuntimeService,
+  runtime: YiruRuntimeService,
   target: SpoolPublicWorktreeInstance
 ) {
   const adapter = getHostBundle(runtime).resolveAdapter(target)

@@ -48,7 +48,7 @@ import type { SpoolOwnerHistoricalSessionRecord } from './spool-session-source'
 
 const DEFAULT_TIMEOUT_MS = 15_000
 
-export type OrcaSpoolPairedRuntimeHostAdapterOptions = {
+export type YiruSpoolPairedRuntimeHostAdapterOptions = {
   userDataPath: string
   timeoutMs?: number
   resolveOwnerHistoricalRecord?: (
@@ -57,12 +57,12 @@ export type OrcaSpoolPairedRuntimeHostAdapterOptions = {
 }
 
 /** Forwards only the narrow internal Spool host contract over an existing runtime pairing. */
-export class OrcaSpoolPairedRuntimeHostAdapter
+export class YiruSpoolPairedRuntimeHostAdapter
   implements SpoolHostAdapter, SpoolPairedRuntimeWorktreeHostAdapter
 {
   private readonly registry = new SpoolPairedRuntimeChannelRegistry()
 
-  constructor(private readonly options: OrcaSpoolPairedRuntimeHostAdapterOptions) {}
+  constructor(private readonly options: YiruSpoolPairedRuntimeHostAdapterOptions) {}
 
   async inspectWorktree(
     target: SpoolOwnerWorktree,

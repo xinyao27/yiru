@@ -6,7 +6,7 @@ import type {
 } from './types'
 
 const { getPathMock } = vi.hoisted(() => ({
-  getPathMock: vi.fn(() => '/tmp/orca-test-userdata')
+  getPathMock: vi.fn(() => '/tmp/yiru-test-userdata')
 }))
 
 vi.mock('electron', () => ({
@@ -149,7 +149,7 @@ describe('OpenCodeUsageStore', () => {
     vi.useRealTimers()
   })
 
-  it('reports no data for Orca scope when only non-Orca OpenCode usage exists', async () => {
+  it('reports no data for Yiru scope when only non-Yiru OpenCode usage exists', async () => {
     const store = createStoreWithState({
       sessions: [
         makeSession({
@@ -168,7 +168,7 @@ describe('OpenCodeUsageStore', () => {
       ]
     })
 
-    const summary = await store.getSummary('orca', '30d')
+    const summary = await store.getSummary('yiru', '30d')
 
     expect(summary.hasAnyOpenCodeData).toBe(false)
     expect(summary.sessions).toBe(0)
@@ -214,9 +214,9 @@ describe('OpenCodeUsageStore', () => {
       ]
     })
 
-    const summary = await store.getSummary('orca', '30d')
-    const daily = await store.getDaily('orca', '30d')
-    const breakdown = await store.getBreakdown('orca', '30d', 'model')
+    const summary = await store.getSummary('yiru', '30d')
+    const daily = await store.getDaily('yiru', '30d')
+    const breakdown = await store.getBreakdown('yiru', '30d', 'model')
 
     expect(summary).toMatchObject({
       sessions: 2,
@@ -253,7 +253,7 @@ describe('OpenCodeUsageStore', () => {
       dailyAggregates: [makeDaily()]
     })
 
-    const sessions = await store.getRecentSessions('orca', '30d', 5)
+    const sessions = await store.getRecentSessions('yiru', '30d', 5)
 
     expect(sessions).toEqual([
       {

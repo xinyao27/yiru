@@ -1,5 +1,5 @@
 import type { Page } from '@stablyai/playwright-test'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/yiru-app'
 import { waitForActiveWorktree, waitForSessionReady } from './helpers/store'
 
 async function prepareSidebarForScrollTest(page: Page): Promise<void> {
@@ -22,14 +22,14 @@ async function prepareSidebarForScrollTest(page: Page): Promise<void> {
 }
 
 test.describe('Reveal active workspace button', () => {
-  test.beforeEach(async ({ orcaPage }) => {
+  test.beforeEach(async ({ yiruPage }) => {
     // Why: headless Electron under xvfb never ticks a smooth-scroll animation,
     // so the reveal's `scrollTo({ behavior: 'smooth' })` would never reach its
     // target. Reduced-motion makes the reveal jump instantly (see
     // worktree-sidebar-reveal.ts) so the geometry assertions are deterministic.
-    await orcaPage.emulateMedia({ reducedMotion: 'reduce' })
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
+    await yiruPage.emulateMedia({ reducedMotion: 'reduce' })
+    await waitForSessionReady(yiruPage)
+    await waitForActiveWorktree(yiruPage)
   })
 
   // Note: the "clipped in the production sidebar" pixel-containment test was
@@ -39,11 +39,11 @@ test.describe('Reveal active workspace button', () => {
   // the "outside the virtualized window" test below.
 
   test('clears sidebar filters before revealing a hidden current workspace', async ({
-    orcaPage
+    yiruPage
   }) => {
-    await prepareSidebarForScrollTest(orcaPage)
+    await prepareSidebarForScrollTest(yiruPage)
 
-    const renderedOptions = orcaPage.locator('[data-worktree-sidebar] [role="option"]')
+    const renderedOptions = yiruPage.locator('[data-worktree-sidebar] [role="option"]')
     await expect(renderedOptions).toHaveCount(2)
 
     const targetId = await renderedOptions.last().getAttribute('data-worktree-id')
@@ -51,13 +51,13 @@ test.describe('Reveal active workspace button', () => {
       throw new Error('Bottom workspace row did not expose a data-worktree-id')
     }
 
-    const targetRows = orcaPage.locator(
+    const targetRows = yiruPage.locator(
       `[data-worktree-sidebar] [data-worktree-id=${JSON.stringify(targetId)}]`
     )
     const targetRow = targetRows.first()
-    const revealButton = orcaPage.getByRole('button', { name: 'Reveal active workspace' })
+    const revealButton = yiruPage.getByRole('button', { name: 'Reveal active workspace' })
 
-    await orcaPage.evaluate((targetId) => {
+    await yiruPage.evaluate((targetId) => {
       const store = window.__store
       if (!store) {
         throw new Error('window.__store is not available')
@@ -78,7 +78,7 @@ test.describe('Reveal active workspace button', () => {
     }, targetId)
     await expect(targetRow).toHaveAttribute('aria-current', 'page')
 
-    await orcaPage.evaluate(() => {
+    await yiruPage.evaluate(() => {
       const store = window.__store
       if (!store) {
         throw new Error('window.__store is not available')
@@ -98,7 +98,7 @@ test.describe('Reveal active workspace button', () => {
     await expect
       .poll(
         () =>
-          orcaPage.evaluate(() => {
+          yiruPage.evaluate(() => {
             const store = window.__store
             if (!store) {
               throw new Error('window.__store is not available')
@@ -114,11 +114,11 @@ test.describe('Reveal active workspace button', () => {
   })
 
   test('reveals the current workspace when it starts outside the virtualized window', async ({
-    orcaPage
+    yiruPage
   }) => {
-    await prepareSidebarForScrollTest(orcaPage)
+    await prepareSidebarForScrollTest(yiruPage)
 
-    const targetId = await orcaPage.evaluate(() => {
+    const targetId = await yiruPage.evaluate(() => {
       const store = window.__store
       if (!store) {
         throw new Error('window.__store is not available')
@@ -174,11 +174,11 @@ test.describe('Reveal active workspace button', () => {
       return target.id
     })
 
-    const scroller = orcaPage.locator('[data-worktree-sidebar]')
+    const scroller = yiruPage.locator('[data-worktree-sidebar]')
     await expect
       .poll(
         () =>
-          orcaPage.evaluate(() => {
+          yiruPage.evaluate(() => {
             const scroller = document.querySelector<HTMLElement>('[data-worktree-sidebar]')
             return scroller?.scrollTop ?? null
           }),
@@ -193,7 +193,7 @@ test.describe('Reveal active workspace button', () => {
     await expect
       .poll(
         () =>
-          orcaPage.evaluate((targetId) => {
+          yiruPage.evaluate((targetId) => {
             const scroller = document.querySelector<HTMLElement>('[data-worktree-sidebar]')
             const target = [...document.querySelectorAll<HTMLElement>('[data-worktree-id]')].find(
               (candidate) => candidate.dataset.worktreeId === targetId
@@ -212,12 +212,12 @@ test.describe('Reveal active workspace button', () => {
       )
       .toBe(false)
 
-    const revealButton = orcaPage.getByRole('button', { name: 'Reveal active workspace' })
+    const revealButton = yiruPage.getByRole('button', { name: 'Reveal active workspace' })
     await expect(revealButton).toBeVisible()
     await expect(revealButton).toBeEnabled()
 
     await revealButton.click()
-    const targetRow = orcaPage
+    const targetRow = yiruPage
       .locator(`[data-worktree-sidebar] [data-worktree-id=${JSON.stringify(targetId)}]`)
       .first()
     await expect(targetRow).toBeVisible()
@@ -225,11 +225,11 @@ test.describe('Reveal active workspace button', () => {
   })
 
   test('uses the active workspace key when the legacy active worktree id is not set', async ({
-    orcaPage
+    yiruPage
   }) => {
-    await prepareSidebarForScrollTest(orcaPage)
+    await prepareSidebarForScrollTest(yiruPage)
 
-    const folderWorktreeId = await orcaPage.evaluate(() => {
+    const folderWorktreeId = await yiruPage.evaluate(() => {
       const store = window.__store
       if (!store) {
         throw new Error('window.__store is not available')
@@ -283,7 +283,7 @@ test.describe('Reveal active workspace button', () => {
       return folderWorktreeId
     })
 
-    const scroller = orcaPage.locator('[data-worktree-sidebar]')
+    const scroller = yiruPage.locator('[data-worktree-sidebar]')
     await scroller.evaluate((element) => {
       element.scrollTop = 0
       element.dispatchEvent(new Event('scroll', { bubbles: true }))
@@ -291,7 +291,7 @@ test.describe('Reveal active workspace button', () => {
     await expect
       .poll(
         () =>
-          orcaPage.evaluate((targetId) => {
+          yiruPage.evaluate((targetId) => {
             const scroller = document.querySelector<HTMLElement>('[data-worktree-sidebar]')
             const target = [...document.querySelectorAll<HTMLElement>('[data-worktree-id]')].find(
               (candidate) => candidate.dataset.worktreeId === targetId
@@ -310,7 +310,7 @@ test.describe('Reveal active workspace button', () => {
       )
       .toBe(false)
 
-    const revealButton = orcaPage.getByRole('button', { name: 'Reveal active workspace' })
+    const revealButton = yiruPage.getByRole('button', { name: 'Reveal active workspace' })
     await expect(revealButton).toBeVisible()
     await expect(revealButton).toBeEnabled()
     await revealButton.click()
@@ -318,7 +318,7 @@ test.describe('Reveal active workspace button', () => {
     await expect
       .poll(
         () =>
-          orcaPage.evaluate((targetId) => {
+          yiruPage.evaluate((targetId) => {
             const scroller = document.querySelector<HTMLElement>('[data-worktree-sidebar]')
             const target = [...document.querySelectorAll<HTMLElement>('[data-worktree-id]')].find(
               (candidate) => candidate.dataset.worktreeId === targetId

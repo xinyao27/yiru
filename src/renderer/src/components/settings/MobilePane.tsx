@@ -31,7 +31,7 @@ export function MobilePane(): React.JSX.Element {
   const [refreshingNetworkInterfaces, setRefreshingNetworkInterfaces] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
   const [deviceCountAtQr, setDeviceCountAtQr] = useState<number | null>(null)
-  const signedIn = useAppStore((state) => state.orcaProfileAuthStatus?.state === 'connected')
+  const signedIn = useAppStore((state) => state.yiruProfileAuthStatus?.state === 'connected')
   // Why: Relay is opt-in while compatible mobile builds are limited to the
   // TestFlight preview and Android APK.
   const [connectionMode, setConnectionMode] = useState<MobilePairingConnectionMode>('local-only')

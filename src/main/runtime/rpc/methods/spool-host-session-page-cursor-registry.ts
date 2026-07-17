@@ -1,10 +1,10 @@
-import type { OrcaRuntimeService } from '../../orca-runtime'
+import type { YiruRuntimeService } from '../../yiru-runtime'
 import { SpoolHostSessionPageCursors } from './spool-host-session-page-cursors'
 
-const stores = new WeakMap<OrcaRuntimeService, SpoolHostSessionPageCursors>()
+const stores = new WeakMap<YiruRuntimeService, SpoolHostSessionPageCursors>()
 
 export function getSpoolHostSessionPageCursors(
-  runtime: OrcaRuntimeService
+  runtime: YiruRuntimeService
 ): SpoolHostSessionPageCursors {
   const existing = stores.get(runtime)
   if (existing) {

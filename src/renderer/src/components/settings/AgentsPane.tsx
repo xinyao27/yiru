@@ -232,7 +232,7 @@ export function AgentPermissionsSetting({
         }
         description={translate(
           'auto.components.settings.AgentsPane.agentPermissionsDescription',
-          'Choose whether Orca launches agents with fewer permission prompts or with manual checks.'
+          'Choose whether Yiru launches agents with fewer permission prompts or with manual checks.'
         )}
         action={
           <SettingsSegmentedControl<AgentPermissionMode>
@@ -684,7 +684,7 @@ export function AgentsPane({
   const { detectedIds: detectedList, isRefreshing, refresh } = useDetectedAgents()
   // Why: refresh re-spawns the user's login shell to re-capture PATH
   // (preflight:refreshAgents on the main side). This handles the
-  // "installed a new CLI, Orca doesn't see it yet" case without a restart.
+  // "installed a new CLI, Yiru doesn't see it yet" case without a restart.
   const handleRefresh = (): void => {
     void refresh()
   }

@@ -9,8 +9,8 @@ notes still applies and is referenced below.
 
 ## Problem (unchanged)
 
-Orca ships agent skills that teach coding agents to drive the `orca` CLI. Users install them
-with `npx skills add stablyai/orca --global`. Installed copies are frozen files; the Orca
+Yiru ships agent skills that teach coding agents to drive the `yiru` CLI. Users install them
+with `npx skills add stablyai/yiru --global`. Installed copies are frozen files; the Yiru
 binary keeps moving. A stale skill tells an agent to use commands that are wrong or unsafe
 for the binary it is driving.
 
@@ -19,14 +19,14 @@ for the binary it is driving.
 Three moves, replacing the in-app write machinery entirely:
 
 1. **Structural fix — content lives in the binary.** All version-sensitive skill content is
-   served by the CLI (`orca skills get <topic>`), compiled at build time from authoritative
+   served by the CLI (`yiru skills get <topic>`), compiled at build time from authoritative
    `skill-guides/` sources. Generated `skills/<name>/SKILL.md` files are the installable
    discovery surface and become permanent thin stubs. Staleness becomes impossible for the
    content that matters, rather than mitigated.
-2. **Residual freshness — read-only detection, ecosystem-rail updates.** Orca detects
+2. **Residual freshness — read-only detection, ecosystem-rail updates.** Yiru detects
    outdated official copies (content-addressed, LF-normalized identity) and pre-fills a
    targeted `npx skills update <names...> --global` command in a terminal. The user reviews
-   and runs the skills CLI's own update command; Orca never submits it automatically and
+   and runs the skills CLI's own update command; Yiru never submits it automatically and
    never writes a byte into a skill directory.
 3. **No persistent ownership or update state.** No ownership ledger, no adoption consent,
    no background writer, no transactional publish/rollback stack, no settings toggle. The
@@ -41,12 +41,12 @@ Three moves, replacing the in-app write machinery entirely:
   write into user-owned directories forever. Under the stub model it would run meaningfully
   once. Every module is permanent Windows/WSL/SSH edge-case surface for a one-shot job.
 - **Trust posture.** Ecosystem discourse (2026) consistently favors pinning and reviewable,
-  user-invoked updates over silent writes into `$HOME`; Orca has first-hand precedent of
+  user-invoked updates over silent writes into `$HOME`; Yiru has first-hand precedent of
   user backlash from writing into user-owned config directories. Read-only detection has no
   trust cost at all.
 - **The rail already exists.** `npx skills update <names...> --global` is the ecosystem's
   documented remedy, and once `skills/` contains stubs it delivers the migration without an
-  Orca-owned writer. The rail is treated as an external dependency with a tested contract,
+  Yiru-owned writer. The rail is treated as an external dependency with a tested contract,
   not assumed trustworthy from its lock file alone.
 - The full write implementation exists, reviewed and green, on branch
   `brennanb2025/skill-auto-update-research` (PR #8496, closed as superseded). If in-app
@@ -57,12 +57,12 @@ Three moves, replacing the in-app write machinery entirely:
 ### A. Binary-served guides
 
 ```sh
-orca skills list                 # one line per topic: name + when to use
-orca skills get <topic>          # full version-matched guide, markdown to stdout
-orca skills get <topic> --full   # include bundled reference docs, if any
+yiru skills list                 # one line per topic: name + when to use
+yiru skills get <topic>          # full version-matched guide, markdown to stdout
+yiru skills get <topic> --full   # include bundled reference docs, if any
 ```
 
-- Topics are the skill names (orca-cli, orchestration, computer-use, …).
+- Topics are the skill names (yiru-cli, orchestration, computer-use, …).
 - Full version-sensitive content lives in `skill-guides/<topic>.md`. A generator embeds it
   in a concrete CLI module and emits the installable `skills/<name>/SKILL.md` projection.
   During the pre-stub release this projection may remain fat; after migration it is a stub.
@@ -86,41 +86,41 @@ per-skill registry entries.
 
 ```markdown
 ---
-name: orca-cli
+name: yiru-cli
 description: <unchanged per-skill trigger copy — the discovery surface>
-allowed-tools: <the supported Orca CLI command names>
+allowed-tools: <the supported Yiru CLI command names>
 ---
 
-# Orca CLI
+# Yiru CLI
 
 This file is a discovery stub, not the usage guide. The full, version-matched reference
-lives in the `orca` binary itself.
+lives in the `yiru` binary itself.
 
-Before using Orca commands, resolve the Orca CLI for this session and load the guide once:
+Before using Yiru commands, resolve the Yiru CLI for this session and load the guide once:
 
-    <resolved-orca-cli> skills get orca-cli
+    <resolved-yiru-cli> skills get yiru-cli
 
 Don't guess subcommands or flags from memory or from cached copies of this skill — they
-change between Orca releases; the command above always matches the installed binary that
-will handle subsequent Orca commands.
+change between Yiru releases; the command above always matches the installed binary that
+will handle subsequent Yiru commands.
 ```
 
 Rules:
 
-- The permanent body says when to engage Orca, how to resolve its CLI, and where to fetch
+- The permanent body says when to engage Yiru, how to resolve its CLI, and where to fetch
   the version-matched guide. It does not carry the changing command reference.
-- A stub must never blindly invoke bare `orca` outside an Orca-managed terminal on Linux;
-  that name commonly resolves to the GNOME Orca screen reader. The contract must cover
-  packaged `orca`, Linux/WSL `orca-ide`, SSH relay `orca`, and development `orca-dev`, and
+- A stub must never blindly invoke bare `yiru` outside a Yiru-managed terminal on Linux;
+  that name commonly resolves to the GNOME Yiru screen reader. The contract must cover
+  packaged `yiru`, Linux/WSL `yiru-ide`, SSH relay `yiru`, and development `yiru-dev`, and
   `allowed-tools` must cover every command the resolution contract can select.
-- **Linux command decision (2026-07-13):** do not install a uniform global bare `orca` alias;
-  it would shadow or risk launching the GNOME Orca screen reader. Keep `orca-ide` outside
-  managed Linux terminals, the existing managed-terminal/SSH `orca` shims, and `orca-dev` for
+- **Linux command decision (2026-07-13):** do not install a uniform global bare `yiru` alias;
+  it would shadow or risk launching the GNOME Yiru screen reader. Keep `yiru-ide` outside
+  managed Linux terminals, the existing managed-terminal/SSH `yiru` shims, and `yiru-dev` for
   development. The permanent stub therefore needs the short resolver exercised by the spike.
 - First-generation stubs are hybrid: a minimal safe bootstrap plus the guide pointer. Thin
   them further only after pointer compliance and old-binary behavior are measured. If
   `skills get` is unavailable, the hybrid must provide a bounded legacy workflow and tell the
-  user that updating Orca restores the full version-matched guide; it must not dead-end or
+  user that updating Yiru restores the full version-matched guide; it must not dead-end or
   invite the agent to guess the missing command surface.
 
 ### C. Read-only detection (kept from Phase 1, slimmed)
@@ -139,7 +139,7 @@ Kept as-is:
 
 Slimmed:
 - Statuses collapse to: `current`, `outdated` (exact match of an older released snapshot),
-  `newer-known`, `unrecognized`, and `inaccessible`. Without a ledger, Orca cannot honestly
+  `newer-known`, `unrecognized`, and `inaccessible`. Without a ledger, Yiru cannot honestly
   distinguish a locally modified official copy from unrelated same-named content;
   `unrecognized` says it may be edited or from another source. All `managed-*` states, the
   ledger, adoption eligibility, and attribution are removed.
@@ -159,7 +159,7 @@ Slimmed:
   an exact `current` or `outdated` official snapshot in a supported global topology. One
   `newer-known`, unrecognized, external, read-only, inaccessible, or otherwise unsupported
   provider copy poisons the update offer for that name entirely.
-- The action combines only eligible outdated Orca names into
+- The action combines only eligible outdated Yiru names into
   `npx skills update <names...> --global`, opens the existing run-command terminal with that
   command pre-filled, and leaves execution to the user. Never use an unscoped bulk update and
   never auto-submit the command. Re-inventory after terminal exit or focus; only observed
@@ -174,15 +174,15 @@ Slimmed:
 ### E. Migration (fat → stub)
 
 1. **Implemented, pending release:** from a fresh main-based PR, add authoritative guide
-   sources, generated embedded data, `orca skills list/get`, aliases, generated-output checks,
+   sources, generated embedded data, `yiru skills list/get`, aliases, generated-output checks,
    and local/SSH/WSL/dev tests. Keep distributed skills fat and ship this release first.
 2. From a separate PR, land slim read-only detection and settings/nudge UI, including the
    name-scoped targeted update action and the real migration-rail CI. Keep distributed
    skills fat.
 3. Run the pointer-compliance spike against the released guide-serving binary, not a checkout
    artifact. The binary must be publicly released before a stub PR merges because the skills
-   CLI installs from repository main, independently of Orca's desktop release train.
-4. In one PR, convert only `orca-cli` to a first-generation hybrid stub and keep any final
+   CLI installs from repository main, independently of Yiru's desktop release train.
+4. In one PR, convert only `yiru-cli` to a first-generation hybrid stub and keep any final
    thinning of that stub in the same change. This bumps its registry revision like any content
    change. Existing users see an `outdated` exact snapshot and may run the targeted global
    update; users of pre-guide binaries retain the hybrid bootstrap.
@@ -193,11 +193,11 @@ Slimmed:
 
 ## Spike gate (before any stub ships)
 
-Using the released guide-serving binary, install the proposed hybrid `orca-cli` stub in a
-test home and run real agents (Claude Code, Codex) on representative Orca tasks. Measure:
+Using the released guide-serving binary, install the proposed hybrid `yiru-cli` stub in a
+test home and run real agents (Claude Code, Codex) on representative Yiru tasks. Measure:
 
 - how often the agent resolves the correct packaged/Linux/WSL/SSH/dev command and fetches the
-  guide before its first Orca command;
+  guide before its first Yiru command;
 - task success versus the fat skill;
 - old-binary failure behavior; and
 - net token cost (stub preload + one fetch versus fat preload).

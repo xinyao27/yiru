@@ -59,7 +59,7 @@ export function getWorkingAgentsPerWorktree({
   for (const [worktreeId, tabs] of Object.entries(tabsByWorktree)) {
     // Why: tabsByWorktree can retain orphaned entries for worktrees that no
     // longer exist in git (e.g. deleted worktrees whose tab cleanup didn't
-    // complete, or worktrees removed outside Orca). worktreesByRepo is the
+    // complete, or worktrees removed outside Yiru). worktreesByRepo is the
     // source of truth — only include worktrees that still exist.
     if (!validIds.has(worktreeId)) {
       continue

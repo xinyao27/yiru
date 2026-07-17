@@ -10,7 +10,7 @@
  *   - Shortcuts no-op in non-terminal views (buttons also hidden there).
  */
 
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/yiru-app'
 import type { Page } from '@stablyai/playwright-test'
 import {
   waitForSessionReady,
@@ -85,59 +85,59 @@ const isMac = process.platform === 'darwin'
 const mod = isMac ? 'Meta' : 'Control'
 
 test.describe('Workspace Back/Forward Navigation', () => {
-  test.beforeEach(async ({ orcaPage }) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
+  test.beforeEach(async ({ yiruPage }) => {
+    await waitForSessionReady(yiruPage)
+    await waitForActiveWorktree(yiruPage)
+    await ensureTerminalVisible(yiruPage)
   })
 
-  test('buttons are hidden outside the terminal view', async ({ orcaPage }) => {
-    await expect(await getBackButton(orcaPage)).toBeVisible()
-    await expect(await getForwardButton(orcaPage)).toBeVisible()
+  test('buttons are hidden outside the terminal view', async ({ yiruPage }) => {
+    await expect(await getBackButton(yiruPage)).toBeVisible()
+    await expect(await getForwardButton(yiruPage)).toBeVisible()
 
     // Why: the Back/Forward pair is conditional on `activeView === 'terminal'`.
     // Settings, Tasks, and Landing must not render the buttons at all (not just
     // disable them) so the titlebar stays compact and the semantics unambiguous.
-    await orcaPage.evaluate(() => {
+    await yiruPage.evaluate(() => {
       window.__store!.getState().openSettingsPage()
     })
 
-    await expect(await getBackButton(orcaPage)).toHaveCount(0)
-    await expect(await getForwardButton(orcaPage)).toHaveCount(0)
+    await expect(await getBackButton(yiruPage)).toHaveCount(0)
+    await expect(await getForwardButton(yiruPage)).toHaveCount(0)
 
-    await orcaPage.evaluate(() => {
+    await yiruPage.evaluate(() => {
       window.__store!.getState().setActiveView('terminal')
     })
-    await expect(await getBackButton(orcaPage)).toBeVisible()
+    await expect(await getBackButton(yiruPage)).toBeVisible()
   })
 
-  test('both buttons disabled at cold start with a single history entry', async ({ orcaPage }) => {
+  test('both buttons disabled at cold start with a single history entry', async ({ yiruPage }) => {
     // The test fixture already activated a worktree during setup, so one entry
     // may or may not exist. Reset the slice to a known empty baseline, then
     // record the current worktree as the single entry.
-    const activeId = await getActiveWorktreeId(orcaPage)
+    const activeId = await getActiveWorktreeId(yiruPage)
     expect(activeId).not.toBeNull()
 
-    await resetNavHistory(orcaPage)
-    await seedVisit(orcaPage, activeId!)
+    await resetNavHistory(yiruPage)
+    await seedVisit(yiruPage, activeId!)
 
-    const back = await getBackButton(orcaPage)
-    const forward = await getForwardButton(orcaPage)
+    const back = await getBackButton(yiruPage)
+    const forward = await getForwardButton(yiruPage)
     await expect(back).toBeDisabled()
     await expect(forward).toBeDisabled()
   })
 
-  test('clicking Back and Forward walks the history stack', async ({ orcaPage }) => {
-    const worktreeIds = await getAllWorktreeIds(orcaPage)
+  test('clicking Back and Forward walks the history stack', async ({ yiruPage }) => {
+    const worktreeIds = await getAllWorktreeIds(yiruPage)
     test.skip(worktreeIds.length < 2, 'Need at least two worktrees to exercise back/forward')
     const [primaryId, secondaryId] = worktreeIds
 
-    await resetNavHistory(orcaPage)
-    await seedVisit(orcaPage, primaryId)
-    await seedVisit(orcaPage, secondaryId)
+    await resetNavHistory(yiruPage)
+    await seedVisit(yiruPage, primaryId)
+    await seedVisit(yiruPage, secondaryId)
 
-    const back = await getBackButton(orcaPage)
-    const forward = await getForwardButton(orcaPage)
+    const back = await getBackButton(yiruPage)
+    const forward = await getForwardButton(yiruPage)
     await expect(back).toBeEnabled()
     await expect(forward).toBeDisabled()
 
@@ -145,12 +145,12 @@ test.describe('Workspace Back/Forward Navigation', () => {
     // worktree is currently active". `aria-selected` is reserved for batch
     // multi-select state, so a store-only `activeWorktreeId` check would miss
     // render-layer regressions in the active row.
-    const primaryRow = worktreeRow(orcaPage, primaryId)
-    const secondaryRow = worktreeRow(orcaPage, secondaryId)
+    const primaryRow = worktreeRow(yiruPage, primaryId)
+    const secondaryRow = worktreeRow(yiruPage, secondaryId)
 
     await back.click()
     await expect
-      .poll(async () => getActiveWorktreeId(orcaPage), {
+      .poll(async () => getActiveWorktreeId(yiruPage), {
         message: 'Back click did not activate the previous worktree'
       })
       .toBe(primaryId)
@@ -161,7 +161,7 @@ test.describe('Workspace Back/Forward Navigation', () => {
 
     await forward.click()
     await expect
-      .poll(async () => getActiveWorktreeId(orcaPage), {
+      .poll(async () => getActiveWorktreeId(yiruPage), {
         message: 'Forward click did not re-activate the next worktree'
       })
       .toBe(secondaryId)
@@ -170,23 +170,23 @@ test.describe('Workspace Back/Forward Navigation', () => {
     await expect(forward).toBeDisabled()
   })
 
-  test('re-activating the current worktree is a no-op (dedupe)', async ({ orcaPage }) => {
-    const activeId = await getActiveWorktreeId(orcaPage)
+  test('re-activating the current worktree is a no-op (dedupe)', async ({ yiruPage }) => {
+    const activeId = await getActiveWorktreeId(yiruPage)
     expect(activeId).not.toBeNull()
 
-    await resetNavHistory(orcaPage)
-    await seedVisit(orcaPage, activeId!)
-    await seedVisit(orcaPage, activeId!)
-    await seedVisit(orcaPage, activeId!)
+    await resetNavHistory(yiruPage)
+    await seedVisit(yiruPage, activeId!)
+    await seedVisit(yiruPage, activeId!)
+    await seedVisit(yiruPage, activeId!)
 
-    const snapshot = await getNavHistorySnapshot(orcaPage)
+    const snapshot = await getNavHistorySnapshot(yiruPage)
     expect(snapshot.history).toEqual([activeId])
     expect(snapshot.index).toBe(0)
-    await expect(await getBackButton(orcaPage)).toBeDisabled()
+    await expect(await getBackButton(yiruPage)).toBeDisabled()
   })
 
-  test('new navigation after going back truncates the forward stack', async ({ orcaPage }) => {
-    const worktreeIds = await getAllWorktreeIds(orcaPage)
+  test('new navigation after going back truncates the forward stack', async ({ yiruPage }) => {
+    const worktreeIds = await getAllWorktreeIds(yiruPage)
     test.skip(worktreeIds.length < 2, 'Need at least two worktrees to exercise forward truncation')
     const [primaryId, secondaryId] = worktreeIds
 
@@ -195,83 +195,83 @@ test.describe('Workspace Back/Forward Navigation', () => {
     // from mid-history). The current-entry dedupe should kick in, but if we
     // instead activate secondary while sitting on primary mid-history, the
     // forward entry pointing at secondary must be truncated.
-    await resetNavHistory(orcaPage)
-    await seedVisit(orcaPage, primaryId)
-    await seedVisit(orcaPage, secondaryId)
-    await (await getBackButton(orcaPage)).click()
-    await expect.poll(() => getActiveWorktreeId(orcaPage)).toBe(primaryId)
+    await resetNavHistory(yiruPage)
+    await seedVisit(yiruPage, primaryId)
+    await seedVisit(yiruPage, secondaryId)
+    await (await getBackButton(yiruPage)).click()
+    await expect.poll(() => getActiveWorktreeId(yiruPage)).toBe(primaryId)
 
     // Forward button is live — a forward entry exists.
-    await expect(await getForwardButton(orcaPage)).toBeEnabled()
+    await expect(await getForwardButton(yiruPage)).toBeEnabled()
 
     // Fresh activation from mid-history. Using secondary again is the simplest
     // way to prove truncation happened: after this call, the stack must be
     // [primary, secondary] with index=1, so Forward is disabled even though
     // there *was* a forward entry moments ago.
-    await seedVisit(orcaPage, secondaryId)
-    const snapshot = await getNavHistorySnapshot(orcaPage)
+    await seedVisit(yiruPage, secondaryId)
+    const snapshot = await getNavHistorySnapshot(yiruPage)
     expect(snapshot.history).toEqual([primaryId, secondaryId])
     expect(snapshot.index).toBe(1)
-    await expect(await getForwardButton(orcaPage)).toBeDisabled()
+    await expect(await getForwardButton(yiruPage)).toBeDisabled()
   })
 
-  test(`${isMac ? 'Cmd' : 'Ctrl'}+Alt+Left/Right shortcuts walk history`, async ({ orcaPage }) => {
-    const worktreeIds = await getAllWorktreeIds(orcaPage)
+  test(`${isMac ? 'Cmd' : 'Ctrl'}+Alt+Left/Right shortcuts walk history`, async ({ yiruPage }) => {
+    const worktreeIds = await getAllWorktreeIds(yiruPage)
     test.skip(worktreeIds.length < 2, 'Need at least two worktrees to exercise shortcuts')
     const [primaryId, secondaryId] = worktreeIds
 
-    await resetNavHistory(orcaPage)
-    await seedVisit(orcaPage, primaryId)
-    await seedVisit(orcaPage, secondaryId)
+    await resetNavHistory(yiruPage)
+    await seedVisit(yiruPage, primaryId)
+    await seedVisit(yiruPage, secondaryId)
 
     // Why: focus body so the window-level keydown capture handler runs without
     // an `isEditableTarget` bail-out. The xterm helper textarea is explicitly
     // treated as non-editable, but body is the simplest stable target in a
     // hidden-window Electron run.
-    await orcaPage.evaluate(() => document.body.focus())
+    await yiruPage.evaluate(() => document.body.focus())
 
-    await orcaPage.keyboard.press(`${mod}+Alt+ArrowLeft`)
+    await yiruPage.keyboard.press(`${mod}+Alt+ArrowLeft`)
     await expect
-      .poll(async () => getActiveWorktreeId(orcaPage), {
+      .poll(async () => getActiveWorktreeId(yiruPage), {
         message: `${mod}+Alt+Left did not navigate back`
       })
       .toBe(primaryId)
 
-    await orcaPage.keyboard.press(`${mod}+Alt+ArrowRight`)
+    await yiruPage.keyboard.press(`${mod}+Alt+ArrowRight`)
     await expect
-      .poll(async () => getActiveWorktreeId(orcaPage), {
+      .poll(async () => getActiveWorktreeId(yiruPage), {
         message: `${mod}+Alt+Right did not navigate forward`
       })
       .toBe(secondaryId)
   })
 
-  test('shortcut is a no-op in settings view', async ({ orcaPage }) => {
-    const worktreeIds = await getAllWorktreeIds(orcaPage)
+  test('shortcut is a no-op in settings view', async ({ yiruPage }) => {
+    const worktreeIds = await getAllWorktreeIds(yiruPage)
     test.skip(worktreeIds.length < 2, 'Need at least two worktrees to exercise settings gating')
     const [primaryId, secondaryId] = worktreeIds
 
-    await resetNavHistory(orcaPage)
-    await seedVisit(orcaPage, primaryId)
-    await seedVisit(orcaPage, secondaryId)
+    await resetNavHistory(yiruPage)
+    await seedVisit(yiruPage, primaryId)
+    await seedVisit(yiruPage, secondaryId)
 
     // Enter settings. The back shortcut must not change the active worktree,
     // matching the view-guard in App.tsx and useIpcEvents.ts.
-    await orcaPage.evaluate(() => {
+    await yiruPage.evaluate(() => {
       window.__store!.getState().openSettingsPage()
     })
     await expect
-      .poll(async () => orcaPage.evaluate(() => window.__store!.getState().activeView))
+      .poll(async () => yiruPage.evaluate(() => window.__store!.getState().activeView))
       .toBe('settings')
 
-    const idBefore = await getActiveWorktreeId(orcaPage)
-    await orcaPage.evaluate(() => document.body.focus())
-    await orcaPage.keyboard.press(`${mod}+Alt+ArrowLeft`)
+    const idBefore = await getActiveWorktreeId(yiruPage)
+    await yiruPage.evaluate(() => document.body.focus())
+    await yiruPage.keyboard.press(`${mod}+Alt+ArrowLeft`)
 
     // Give any erroneous nav a beat to land, then assert the active worktree
     // and the slice index both stayed put.
-    await orcaPage.waitForTimeout(150)
-    expect(await getActiveWorktreeId(orcaPage)).toBe(idBefore)
-    const snapshot = await getNavHistorySnapshot(orcaPage)
+    await yiruPage.waitForTimeout(150)
+    expect(await getActiveWorktreeId(yiruPage)).toBe(idBefore)
+    const snapshot = await getNavHistorySnapshot(yiruPage)
     expect(snapshot.index).toBe(1)
   })
 })

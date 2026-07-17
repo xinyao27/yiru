@@ -1,6 +1,6 @@
 import type { OnboardingState } from '../../../../shared/types'
 
-const ONBOARDING_REOPENED_EVENT = 'orca:onboarding-reopened'
+const ONBOARDING_REOPENED_EVENT = 'yiru:onboarding-reopened'
 
 export async function showOnboardingFromRenderer(): Promise<void> {
   const nextOnboarding = await window.api.onboarding.update({

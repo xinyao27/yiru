@@ -15,7 +15,7 @@ export function scheduleSharedControlReconnectOrFinish(args: {
 }): { timer: ReturnType<typeof setTimeout> | null; reconnectAttempt: number } {
   if (args.reconnectAttempt >= args.delaysMs.length) {
     const error = remoteRuntimeUnavailableError(
-      'Remote Orca runtime connection could not be restored.'
+      'Remote Yiru runtime connection could not be restored.'
     )
     for (const subscription of Array.from(args.subscriptions.values())) {
       finishSharedControlSubscription(args.subscriptions, subscription, true, error)

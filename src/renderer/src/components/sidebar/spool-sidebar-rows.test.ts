@@ -18,8 +18,8 @@ function createDesktop(): SpoolRemoteDesktop {
       quota: [],
       projects: [
         {
-          projectRef: 'github:paperboytm/orca',
-          name: 'orca',
+          projectRef: 'github:paperboytm/yiru',
+          name: 'yiru',
           worktrees: [
             {
               kind: 'git',
@@ -59,8 +59,8 @@ describe('projectSpoolSidebarRows', () => {
       expect.objectContaining({
         type: 'spool-worktree',
         desktopRef: 'desktop-chen',
-        projectRef: 'github:paperboytm/orca',
-        projectIdentityKey: 'github:paperboytm/orca',
+        projectRef: 'github:paperboytm/yiru',
+        projectIdentityKey: 'github:paperboytm/yiru',
         worktreeRef: 'worktree-one',
         desktop: expect.objectContaining({ userDisplayName: 'chen' }),
         name: 'worktree-one'

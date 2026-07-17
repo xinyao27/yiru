@@ -164,7 +164,7 @@ describe('DaemonPtyAdapter (IPtyProvider)', () => {
       await new Promise((resolve) => setTimeout(resolve, 350))
       expect(lastSubprocess.write).not.toHaveBeenCalled()
 
-      lastSubprocess._simulateData('\x1b]777;orca-shell-ready\x07')
+      lastSubprocess._simulateData('\x1b]777;yiru-shell-ready\x07')
       lastSubprocess._simulateData('\r\nuser@host $ ')
 
       await waitFor(() => vi.mocked(lastSubprocess.write).mock.calls.length > 0)
@@ -1263,11 +1263,11 @@ describe('DaemonPtyAdapter (IPtyProvider)', () => {
       })
       const appendSpy = vi.spyOn(historyAdapter.getHistoryManager()!, 'appendIncrements')
 
-      lastSubprocess._simulateData('\x1b]777;orca-shell-ready')
+      lastSubprocess._simulateData('\x1b]777;yiru-shell-ready')
       await historyAdapter.shutdown(id, { immediate: true, keepHistory: true })
 
       expect(appendSpy).toHaveBeenCalledWith(id, expect.any(Number), [
-        { kind: 'output', data: '\x1b]777;orca-shell-ready' }
+        { kind: 'output', data: '\x1b]777;yiru-shell-ready' }
       ])
     })
 

@@ -510,7 +510,7 @@ describe('PtyHandler', () => {
       const spawnOptions = mockPtySpawn.mock.calls[0]?.[2] as
         | { env?: Record<string, string> }
         | undefined
-      expect(spawnOptions?.env?.ORCA_SHELL_READY_MARKER).toBe('1')
+      expect(spawnOptions?.env?.YIRU_SHELL_READY_MARKER).toBe('1')
       expect(handler.retainedStartupCommandCount).toBe(0)
     }
   )
@@ -546,7 +546,7 @@ describe('PtyHandler', () => {
       const spawnOptions = mockPtySpawn.mock.calls[0]?.[2] as
         | { env?: Record<string, string> }
         | undefined
-      expect(spawnOptions?.env?.ORCA_SHELL_READY_MARKER).toBe('1')
+      expect(spawnOptions?.env?.YIRU_SHELL_READY_MARKER).toBe('1')
       expect(handler.retainedStartupCommandCount).toBe(0)
     }
   )
@@ -584,7 +584,7 @@ describe('PtyHandler', () => {
       const spawnOptions = mockPtySpawn.mock.calls[0]?.[2] as
         | { env?: Record<string, string> }
         | undefined
-      expect(spawnOptions?.env?.ORCA_SHELL_READY_MARKER).toBe('1')
+      expect(spawnOptions?.env?.YIRU_SHELL_READY_MARKER).toBe('1')
     }
   )
 
@@ -623,7 +623,7 @@ describe('PtyHandler', () => {
       const spawnOptions = mockPtySpawn.mock.calls[0]?.[2] as
         | { env?: Record<string, string> }
         | undefined
-      expect(spawnOptions?.env?.ORCA_SHELL_READY_MARKER).toBe('1')
+      expect(spawnOptions?.env?.YIRU_SHELL_READY_MARKER).toBe('1')
     }
   )
 
@@ -669,7 +669,7 @@ describe('PtyHandler', () => {
       vi.advanceTimersByTime(1499)
       expect(term.write).not.toHaveBeenCalled()
 
-      dataCallback?.('\x1b]777;orca-shell-ready\x07user@remote $ ')
+      dataCallback?.('\x1b]777;yiru-shell-ready\x07user@remote $ ')
       vi.advanceTimersByTime(49)
       expect(term.write).not.toHaveBeenCalled()
       vi.advanceTimersByTime(1)
@@ -723,21 +723,21 @@ describe('PtyHandler', () => {
         rmSync(homeDir, { recursive: true, force: true })
       }
 
-      dataCallback?.('\x1b]777;orca-shell-ready')
+      dataCallback?.('\x1b]777;yiru-shell-ready')
       vi.advanceTimersByTime(1500)
 
       expect(term.write).toHaveBeenCalledWith('echo fallback\n')
       vi.advanceTimersByTime(8)
       expect(dispatcher.notify).toHaveBeenCalledWith('pty.data', {
         id: 'pty-1',
-        data: '\x1b]777;orca-shell-ready'
+        data: '\x1b]777;yiru-shell-ready'
       })
 
       const result = await dispatcher.callRequest('pty.attach', {
         id: 'pty-1',
         suppressReplayNotification: true
       })
-      expect(result).toEqual({ replay: '\x1b]777;orca-shell-ready' })
+      expect(result).toEqual({ replay: '\x1b]777;yiru-shell-ready' })
     }
   )
 
@@ -757,7 +757,7 @@ describe('PtyHandler', () => {
     const exits: { id: string; paneKey?: string }[] = []
     handler.setExitListener((evt) => exits.push(evt))
 
-    await dispatcher.callRequest('pty.spawn', { env: { ORCA_PANE_KEY: 'tab-dead:0' } })
+    await dispatcher.callRequest('pty.spawn', { env: { YIRU_PANE_KEY: 'tab-dead:0' } })
     expect(handler.activePtyCount).toBe(1)
     expect(onExitCb).toBeDefined()
 
@@ -1070,10 +1070,10 @@ describe('PtyHandler', () => {
   })
 
   it('uses attach identity metadata without exporting it to the shell env', async () => {
-    const oldPaneKey = process.env.ORCA_PANE_KEY
-    const oldTabId = process.env.ORCA_TAB_ID
-    delete process.env.ORCA_PANE_KEY
-    delete process.env.ORCA_TAB_ID
+    const oldPaneKey = process.env.YIRU_PANE_KEY
+    const oldTabId = process.env.YIRU_TAB_ID
+    delete process.env.YIRU_PANE_KEY
+    delete process.env.YIRU_TAB_ID
     try {
       await dispatcher.callRequest('pty.spawn', {
         env: { FOO: 'bar' },
@@ -1082,20 +1082,20 @@ describe('PtyHandler', () => {
       })
     } finally {
       if (oldPaneKey === undefined) {
-        delete process.env.ORCA_PANE_KEY
+        delete process.env.YIRU_PANE_KEY
       } else {
-        process.env.ORCA_PANE_KEY = oldPaneKey
+        process.env.YIRU_PANE_KEY = oldPaneKey
       }
       if (oldTabId === undefined) {
-        delete process.env.ORCA_TAB_ID
+        delete process.env.YIRU_TAB_ID
       } else {
-        process.env.ORCA_TAB_ID = oldTabId
+        process.env.YIRU_TAB_ID = oldTabId
       }
     }
 
     const spawnOptions = mockPtySpawn.mock.calls[0][2] as { env: Record<string, string> }
-    expect(spawnOptions.env.ORCA_PANE_KEY).toBeUndefined()
-    expect(spawnOptions.env.ORCA_TAB_ID).toBeUndefined()
+    expect(spawnOptions.env.YIRU_PANE_KEY).toBeUndefined()
+    expect(spawnOptions.env.YIRU_TAB_ID).toBeUndefined()
 
     await expect(
       dispatcher.callRequest('pty.attach', {
@@ -1371,7 +1371,7 @@ describe('PtyHandler', () => {
     const exits: { id: string; paneKey?: string }[] = []
     handler.setExitListener((evt) => exits.push(evt))
 
-    await dispatcher.callRequest('pty.spawn', { env: { ORCA_PANE_KEY: 'tab-fallback:0' } })
+    await dispatcher.callRequest('pty.spawn', { env: { YIRU_PANE_KEY: 'tab-fallback:0' } })
     await dispatcher.callRequest('pty.shutdown', { id: 'pty-1', immediate: false })
     vi.advanceTimersByTime(5000)
 
@@ -1576,28 +1576,28 @@ describe('PtyHandler', () => {
 
   it('applies env augmenters after process.env and renderer-supplied env (augmenter wins on key conflict)', async () => {
     handler.addEnvAugmenter(() => ({
-      ORCA_AGENT_HOOK_PORT: '12345',
-      ORCA_AGENT_HOOK_TOKEN: 'abc-uuid',
+      YIRU_AGENT_HOOK_PORT: '12345',
+      YIRU_AGENT_HOOK_TOKEN: 'abc-uuid',
       // Why: also override a key the renderer supplied below so the test pins
       // the documented "augmenter wins on key conflict" invariant — see the
       // doc-comment on addEnvAugmenter in pty-handler.ts.
-      ORCA_PANE_KEY: 'augmenter-wins'
+      YIRU_PANE_KEY: 'augmenter-wins'
     }))
 
     await dispatcher.callRequest('pty.spawn', {
       cols: 80,
       rows: 24,
-      env: { ORCA_PANE_KEY: 'tab-1:0', ORCA_TAB_ID: 'tab-1' }
+      env: { YIRU_PANE_KEY: 'tab-1:0', YIRU_TAB_ID: 'tab-1' }
     })
 
     expect(mockPtySpawn).toHaveBeenCalled()
     const callArgs = mockPtySpawn.mock.calls[0][2] as { env: Record<string, string> }
-    expect(callArgs.env.ORCA_AGENT_HOOK_PORT).toBe('12345')
-    expect(callArgs.env.ORCA_AGENT_HOOK_TOKEN).toBe('abc-uuid')
+    expect(callArgs.env.YIRU_AGENT_HOOK_PORT).toBe('12345')
+    expect(callArgs.env.YIRU_AGENT_HOOK_TOKEN).toBe('abc-uuid')
     // Augmenter override beats the renderer-supplied value:
-    expect(callArgs.env.ORCA_PANE_KEY).toBe('augmenter-wins')
+    expect(callArgs.env.YIRU_PANE_KEY).toBe('augmenter-wins')
     // Renderer-supplied keys not in augmenter map flow through:
-    expect(callArgs.env.ORCA_TAB_ID).toBe('tab-1')
+    expect(callArgs.env.YIRU_TAB_ID).toBe('tab-1')
   })
 
   it('passes the PTY id and renderer paneKey to env augmenters', async () => {
@@ -1610,7 +1610,7 @@ describe('PtyHandler', () => {
     })
 
     await dispatcher.callRequest('pty.spawn', {
-      env: { ORCA_PANE_KEY: 'tab-context:0' }
+      env: { YIRU_PANE_KEY: 'tab-context:0' }
     })
     await dispatcher.callRequest('pty.spawn', {})
 
@@ -1619,7 +1619,7 @@ describe('PtyHandler', () => {
     expect(seenContexts[0]).toMatchObject({
       id: 'pty-1',
       paneKey: 'tab-context:0',
-      env: { ORCA_PANE_KEY: 'tab-context:0' }
+      env: { YIRU_PANE_KEY: 'tab-context:0' }
     })
     expect(seenContexts[1]).toMatchObject({ id: 'pty-2', paneKey: undefined })
     expect(firstEnv.env.OVERLAY_ID).toBe('tab-context:0')
@@ -1662,16 +1662,16 @@ describe('PtyHandler', () => {
     handler.addEnvAugmenter(() => ({
       TERM: 'augmenter-term',
       TERM_PROGRAM: 'augmenter-terminal',
-      ORCA_ATTRIBUTION_SHIM_DIR: '/tmp/augmenter-attribution'
+      YIRU_ATTRIBUTION_SHIM_DIR: '/tmp/augmenter-attribution'
     }))
 
     await dispatcher.callRequest('pty.spawn', {
       env: {
         TERM: 'screen-256color',
         TERM_PROGRAM: 'renderer-terminal',
-        ORCA_ATTRIBUTION_SHIM_DIR: '/tmp/renderer-attribution'
+        YIRU_ATTRIBUTION_SHIM_DIR: '/tmp/renderer-attribution'
       },
-      envToDelete: ['TERM_PROGRAM', 'ORCA_ATTRIBUTION_SHIM_DIR']
+      envToDelete: ['TERM_PROGRAM', 'YIRU_ATTRIBUTION_SHIM_DIR']
     })
 
     const spawnEnv = mockPtySpawn.mock.calls[0][2] as {
@@ -1683,7 +1683,7 @@ describe('PtyHandler', () => {
     expect(spawnEnv.env.COLORTERM).toBe('truecolor')
     expect(spawnEnv.env.FORCE_HYPERLINK).toBe('1')
     expect(spawnEnv.env.TERM_PROGRAM).toBeUndefined()
-    expect(spawnEnv.env.ORCA_ATTRIBUTION_SHIM_DIR).toBeUndefined()
+    expect(spawnEnv.env.YIRU_ATTRIBUTION_SHIM_DIR).toBeUndefined()
   })
 
   it('replaces an ambient TERM=dumb when no explicit TERM is supplied', async () => {
@@ -1705,7 +1705,7 @@ describe('PtyHandler', () => {
     }
     expect(spawnEnv.name).toBe('xterm-256color')
     expect(spawnEnv.env.TERM).toBe('xterm-256color')
-    expect(spawnEnv.env.TERM_PROGRAM).toBe('Orca')
+    expect(spawnEnv.env.TERM_PROGRAM).toBe('Yiru')
   })
 
   it('uses the safe terminal default when TERM is deleted without a custom value', async () => {
@@ -1746,7 +1746,7 @@ describe('PtyHandler', () => {
     await expect(
       dispatcher.callRequest('pty.spawn', {
         cwd: '/repo/removing/nested',
-        env: { ORCA_WORKTREE_ID: 'repo-id::/repo/sibling' }
+        env: { YIRU_WORKTREE_ID: 'repo-id::/repo/sibling' }
       })
     ).rejects.toThrow('Remote worktree deletion already in progress')
 
@@ -1777,12 +1777,12 @@ describe('PtyHandler', () => {
     async () => {
       const oldShell = process.env.SHELL
       const oldHome = process.env.HOME
-      const oldOrcaPi = process.env.ORCA_PI_CODING_AGENT_DIR
+      const oldYiruPi = process.env.YIRU_PI_CODING_AGENT_DIR
       const homeDir = mkdtempSync(join(tmpdir(), 'relay-pty-shell-launch-'))
 
       process.env.SHELL = '/bin/bash'
       process.env.HOME = homeDir
-      delete process.env.ORCA_PI_CODING_AGENT_DIR
+      delete process.env.YIRU_PI_CODING_AGENT_DIR
       try {
         if (!existsSync('/bin/bash')) {
           return
@@ -1790,8 +1790,8 @@ describe('PtyHandler', () => {
 
         handler.addEnvAugmenter(() => ({
           OPENCODE_CONFIG_DIR: '/remote/overlay/opencode',
-          ORCA_OPENCODE_CONFIG_DIR: '/remote/overlay/opencode',
-          ORCA_OMP_STATUS_EXTENSION: '/remote/.omp/agent/extensions/orca-agent-status.ts'
+          YIRU_OPENCODE_CONFIG_DIR: '/remote/overlay/opencode',
+          YIRU_OMP_STATUS_EXTENSION: '/remote/.omp/agent/extensions/yiru-agent-status.ts'
         }))
 
         await dispatcher.callRequest('pty.spawn', { env: { HOME: homeDir } })
@@ -1806,24 +1806,24 @@ describe('PtyHandler', () => {
         } else {
           process.env.HOME = oldHome
         }
-        if (oldOrcaPi === undefined) {
-          delete process.env.ORCA_PI_CODING_AGENT_DIR
+        if (oldYiruPi === undefined) {
+          delete process.env.YIRU_PI_CODING_AGENT_DIR
         } else {
-          process.env.ORCA_PI_CODING_AGENT_DIR = oldOrcaPi
+          process.env.YIRU_PI_CODING_AGENT_DIR = oldYiruPi
         }
       }
 
       const shellArgs = mockPtySpawn.mock.calls[0][1]
       const spawnOptions = mockPtySpawn.mock.calls[0][2] as { env: Record<string, string> }
-      const rcfile = join(homeDir, '.orca-relay', 'shell-ready', 'bash', 'rcfile')
+      const rcfile = join(homeDir, '.yiru-relay', 'shell-ready', 'bash', 'rcfile')
 
       expect(shellArgs).toEqual(['--rcfile', rcfile])
-      expect(spawnOptions.env.ORCA_OPENCODE_CONFIG_DIR).toBe('/remote/overlay/opencode')
-      expect(spawnOptions.env.ORCA_PI_CODING_AGENT_DIR).toBeUndefined()
+      expect(spawnOptions.env.YIRU_OPENCODE_CONFIG_DIR).toBe('/remote/overlay/opencode')
+      expect(spawnOptions.env.YIRU_PI_CODING_AGENT_DIR).toBeUndefined()
       expect(readFileSync(rcfile, 'utf8')).toContain(
-        'export OPENCODE_CONFIG_DIR="${ORCA_OPENCODE_CONFIG_DIR}"'
+        'export OPENCODE_CONFIG_DIR="${YIRU_OPENCODE_CONFIG_DIR}"'
       )
-      expect(readFileSync(rcfile, 'utf8')).not.toContain('ORCA_PI_CODING_AGENT_DIR')
+      expect(readFileSync(rcfile, 'utf8')).not.toContain('YIRU_PI_CODING_AGENT_DIR')
       expect(readFileSync(rcfile, 'utf8')).toContain('command omp --extension')
 
       rmSync(homeDir, { recursive: true, force: true })
@@ -1836,9 +1836,9 @@ describe('PtyHandler', () => {
       rows: 30,
       cwd: '/tmp',
       env: {
-        ORCA_PANE_KEY: 'tab-5:1',
-        ORCA_TAB_ID: 'tab-5',
-        ORCA_WORKTREE_ID: 'wt-5'
+        YIRU_PANE_KEY: 'tab-5:1',
+        YIRU_TAB_ID: 'tab-5',
+        YIRU_WORKTREE_ID: 'wt-5'
       }
     })
     const state = (await dispatcher.callRequest('pty.serialize', { ids: ['pty-1'] })) as string
@@ -1848,8 +1848,8 @@ describe('PtyHandler', () => {
     dispatcher = createMockDispatcher()
     handler = new PtyHandler(dispatcher as unknown as RelayDispatcher)
     handler.addEnvAugmenter(() => ({
-      ORCA_AGENT_HOOK_PORT: '12345',
-      ORCA_AGENT_HOOK_TOKEN: 'abc-uuid'
+      YIRU_AGENT_HOOK_PORT: '12345',
+      YIRU_AGENT_HOOK_TOKEN: 'abc-uuid'
     }))
     const killSpy = vi.spyOn(process, 'kill').mockImplementation(() => true)
     try {
@@ -1860,13 +1860,13 @@ describe('PtyHandler', () => {
 
     expect(mockPtySpawn).toHaveBeenCalledTimes(1)
     const callArgs = mockPtySpawn.mock.calls[0][2] as { env: Record<string, string> }
-    expect(callArgs.env.ORCA_PANE_KEY).toBe('tab-5:1')
-    expect(callArgs.env.ORCA_TAB_ID).toBe('tab-5')
-    expect(callArgs.env.ORCA_WORKTREE_ID).toBe('wt-5')
-    expect(callArgs.env.ORCA_AGENT_HOOK_PORT).toBe('12345')
-    expect(callArgs.env.ORCA_AGENT_HOOK_TOKEN).toBe('abc-uuid')
+    expect(callArgs.env.YIRU_PANE_KEY).toBe('tab-5:1')
+    expect(callArgs.env.YIRU_TAB_ID).toBe('tab-5')
+    expect(callArgs.env.YIRU_WORKTREE_ID).toBe('wt-5')
+    expect(callArgs.env.YIRU_AGENT_HOOK_PORT).toBe('12345')
+    expect(callArgs.env.YIRU_AGENT_HOOK_TOKEN).toBe('abc-uuid')
     expect(callArgs.env.TERM).toBe('xterm-256color')
-    expect(callArgs.env.TERM_PROGRAM).toBe('Orca')
+    expect(callArgs.env.TERM_PROGRAM).toBe('Yiru')
   })
 
   it('fences both revived worktree identity and cwd with rollback', async () => {
@@ -2018,7 +2018,7 @@ describe('PtyHandler', () => {
   it('normalizes an explicit empty TERM and preserves sanitized env deletions on revive', async () => {
     await dispatcher.callRequest('pty.spawn', {
       env: { TERM: '' },
-      envToDelete: ['ORCA_ATTRIBUTION_SHIM_DIR', '', 42]
+      envToDelete: ['YIRU_ATTRIBUTION_SHIM_DIR', '', 42]
     })
 
     const initialEnv = mockPtySpawn.mock.calls[0][2] as {
@@ -2034,14 +2034,14 @@ describe('PtyHandler', () => {
       envToDelete?: string[]
     }[]
     expect(serialized.explicitTerm).toBeUndefined()
-    expect(serialized.envToDelete).toEqual(['ORCA_ATTRIBUTION_SHIM_DIR'])
+    expect(serialized.envToDelete).toEqual(['YIRU_ATTRIBUTION_SHIM_DIR'])
 
     await handler.dispose({ waitForPhysicalExit: false })
     mockPtySpawn.mockClear()
     dispatcher = createMockDispatcher()
     handler = new PtyHandler(dispatcher as unknown as RelayDispatcher)
     handler.addEnvAugmenter(() => ({
-      ORCA_ATTRIBUTION_SHIM_DIR: '/tmp/revived-attribution'
+      YIRU_ATTRIBUTION_SHIM_DIR: '/tmp/revived-attribution'
     }))
     const killSpy = vi.spyOn(process, 'kill').mockImplementation(() => true)
     try {
@@ -2056,7 +2056,7 @@ describe('PtyHandler', () => {
     }
     expect(revivedEnv.name).toBe('xterm-256color')
     expect(revivedEnv.env.TERM).toBe('xterm-256color')
-    expect(revivedEnv.env.ORCA_ATTRIBUTION_SHIM_DIR).toBeUndefined()
+    expect(revivedEnv.env.YIRU_ATTRIBUTION_SHIM_DIR).toBeUndefined()
   })
 
   it('drops legacy empty explicit TERM metadata after revive', async () => {
@@ -2068,11 +2068,11 @@ describe('PtyHandler', () => {
         rows: 24,
         cwd: process.cwd(),
         explicitTerm: '',
-        envToDelete: ['ORCA_ATTRIBUTION_SHIM_DIR']
+        envToDelete: ['YIRU_ATTRIBUTION_SHIM_DIR']
       }
     ])
     handler.addEnvAugmenter(() => ({
-      ORCA_ATTRIBUTION_SHIM_DIR: '/tmp/legacy-empty-attribution'
+      YIRU_ATTRIBUTION_SHIM_DIR: '/tmp/legacy-empty-attribution'
     }))
     const killSpy = vi.spyOn(process, 'kill').mockImplementation(() => true)
     try {
@@ -2087,7 +2087,7 @@ describe('PtyHandler', () => {
     }
     expect(revivedEnv.name).toBe('xterm-256color')
     expect(revivedEnv.env.TERM).toBe('xterm-256color')
-    expect(revivedEnv.env.ORCA_ATTRIBUTION_SHIM_DIR).toBeUndefined()
+    expect(revivedEnv.env.YIRU_ATTRIBUTION_SHIM_DIR).toBeUndefined()
 
     const serializedState = (await dispatcher.callRequest('pty.serialize', {
       ids: ['pty-8']
@@ -2097,13 +2097,13 @@ describe('PtyHandler', () => {
       envToDelete?: string[]
     }[]
     expect(serialized.explicitTerm).toBeUndefined()
-    expect(serialized.envToDelete).toEqual(['ORCA_ATTRIBUTION_SHIM_DIR'])
+    expect(serialized.envToDelete).toEqual(['YIRU_ATTRIBUTION_SHIM_DIR'])
   })
 
   it('preserves explicit TERM and env deletions through repeated revive cycles', async () => {
     await dispatcher.callRequest('pty.spawn', {
       env: { TERM: 'screen-256color' },
-      envToDelete: ['ORCA_ATTRIBUTION_SHIM_DIR']
+      envToDelete: ['YIRU_ATTRIBUTION_SHIM_DIR']
     })
     let state = (await dispatcher.callRequest('pty.serialize', { ids: ['pty-1'] })) as string
 
@@ -2114,7 +2114,7 @@ describe('PtyHandler', () => {
       dispatcher = createMockDispatcher()
       handler = new PtyHandler(dispatcher as unknown as RelayDispatcher)
       handler.addEnvAugmenter(() => ({
-        ORCA_ATTRIBUTION_SHIM_DIR: '/tmp/first-revive'
+        YIRU_ATTRIBUTION_SHIM_DIR: '/tmp/first-revive'
       }))
       await dispatcher.callRequest('pty.revive', { state })
 
@@ -2124,12 +2124,12 @@ describe('PtyHandler', () => {
       }
       expect(firstRevivedEnv.name).toBe('screen-256color')
       expect(firstRevivedEnv.env.TERM).toBe('screen-256color')
-      expect(firstRevivedEnv.env.ORCA_ATTRIBUTION_SHIM_DIR).toBeUndefined()
+      expect(firstRevivedEnv.env.YIRU_ATTRIBUTION_SHIM_DIR).toBeUndefined()
       state = (await dispatcher.callRequest('pty.serialize', { ids: ['pty-1'] })) as string
       expect(JSON.parse(state)).toMatchObject([
         {
           explicitTerm: 'screen-256color',
-          envToDelete: ['ORCA_ATTRIBUTION_SHIM_DIR']
+          envToDelete: ['YIRU_ATTRIBUTION_SHIM_DIR']
         }
       ])
 
@@ -2138,7 +2138,7 @@ describe('PtyHandler', () => {
       dispatcher = createMockDispatcher()
       handler = new PtyHandler(dispatcher as unknown as RelayDispatcher)
       handler.addEnvAugmenter(() => ({
-        ORCA_ATTRIBUTION_SHIM_DIR: '/tmp/second-revive'
+        YIRU_ATTRIBUTION_SHIM_DIR: '/tmp/second-revive'
       }))
       await dispatcher.callRequest('pty.revive', { state })
     } finally {
@@ -2151,12 +2151,12 @@ describe('PtyHandler', () => {
     }
     expect(secondRevivedEnv.name).toBe('screen-256color')
     expect(secondRevivedEnv.env.TERM).toBe('screen-256color')
-    expect(secondRevivedEnv.env.ORCA_ATTRIBUTION_SHIM_DIR).toBeUndefined()
+    expect(secondRevivedEnv.env.YIRU_ATTRIBUTION_SHIM_DIR).toBeUndefined()
   })
 
   it('revives legacy serialized entries with default TERM and no env deletions', async () => {
     handler.addEnvAugmenter(() => ({
-      ORCA_ATTRIBUTION_SHIM_DIR: '/tmp/legacy-attribution'
+      YIRU_ATTRIBUTION_SHIM_DIR: '/tmp/legacy-attribution'
     }))
     const state = JSON.stringify([
       {
@@ -2176,14 +2176,14 @@ describe('PtyHandler', () => {
 
     const revivedEnv = mockPtySpawn.mock.calls[0][2] as { env: Record<string, string> }
     expect(revivedEnv.env.TERM).toBe('xterm-256color')
-    expect(revivedEnv.env.ORCA_ATTRIBUTION_SHIM_DIR).toBe('/tmp/legacy-attribution')
+    expect(revivedEnv.env.YIRU_ATTRIBUTION_SHIM_DIR).toBe('/tmp/legacy-attribution')
   })
 
   it('revive preserves attach identity metadata without exporting hook identity env', async () => {
-    const oldPaneKey = process.env.ORCA_PANE_KEY
-    const oldTabId = process.env.ORCA_TAB_ID
-    delete process.env.ORCA_PANE_KEY
-    delete process.env.ORCA_TAB_ID
+    const oldPaneKey = process.env.YIRU_PANE_KEY
+    const oldTabId = process.env.YIRU_TAB_ID
+    delete process.env.YIRU_PANE_KEY
+    delete process.env.YIRU_TAB_ID
     try {
       await dispatcher.callRequest('pty.spawn', {
         cols: 90,
@@ -2195,14 +2195,14 @@ describe('PtyHandler', () => {
       })
     } finally {
       if (oldPaneKey === undefined) {
-        delete process.env.ORCA_PANE_KEY
+        delete process.env.YIRU_PANE_KEY
       } else {
-        process.env.ORCA_PANE_KEY = oldPaneKey
+        process.env.YIRU_PANE_KEY = oldPaneKey
       }
       if (oldTabId === undefined) {
-        delete process.env.ORCA_TAB_ID
+        delete process.env.YIRU_TAB_ID
       } else {
-        process.env.ORCA_TAB_ID = oldTabId
+        process.env.YIRU_TAB_ID = oldTabId
       }
     }
     const state = (await dispatcher.callRequest('pty.serialize', { ids: ['pty-1'] })) as string
@@ -2212,27 +2212,27 @@ describe('PtyHandler', () => {
     dispatcher = createMockDispatcher()
     handler = new PtyHandler(dispatcher as unknown as RelayDispatcher)
     const killSpy = vi.spyOn(process, 'kill').mockImplementation(() => true)
-    delete process.env.ORCA_PANE_KEY
-    delete process.env.ORCA_TAB_ID
+    delete process.env.YIRU_PANE_KEY
+    delete process.env.YIRU_TAB_ID
     try {
       await dispatcher.callRequest('pty.revive', { state })
     } finally {
       killSpy.mockRestore()
       if (oldPaneKey === undefined) {
-        delete process.env.ORCA_PANE_KEY
+        delete process.env.YIRU_PANE_KEY
       } else {
-        process.env.ORCA_PANE_KEY = oldPaneKey
+        process.env.YIRU_PANE_KEY = oldPaneKey
       }
       if (oldTabId === undefined) {
-        delete process.env.ORCA_TAB_ID
+        delete process.env.YIRU_TAB_ID
       } else {
-        process.env.ORCA_TAB_ID = oldTabId
+        process.env.YIRU_TAB_ID = oldTabId
       }
     }
 
     const callArgs = mockPtySpawn.mock.calls[0][2] as { env: Record<string, string> }
-    expect(callArgs.env.ORCA_PANE_KEY).toBeUndefined()
-    expect(callArgs.env.ORCA_TAB_ID).toBeUndefined()
+    expect(callArgs.env.YIRU_PANE_KEY).toBeUndefined()
+    expect(callArgs.env.YIRU_TAB_ID).toBeUndefined()
 
     await expect(
       dispatcher.callRequest('pty.attach', {
@@ -2257,7 +2257,7 @@ describe('PtyHandler', () => {
     handler.setExitListener((evt) => exits.push(evt))
 
     await dispatcher.callRequest('pty.spawn', {
-      env: { ORCA_PANE_KEY: 'tab-2:1' }
+      env: { YIRU_PANE_KEY: 'tab-2:1' }
     })
     expect(onExitCb).toBeDefined()
     onExitCb!({ exitCode: 0 })
@@ -2280,7 +2280,7 @@ describe('PtyHandler', () => {
     handler.setExitListener((evt) => exits.push(evt))
 
     await dispatcher.callRequest('pty.spawn', {
-      env: { ORCA_PANE_KEY: 'tab-shutdown:0' }
+      env: { YIRU_PANE_KEY: 'tab-shutdown:0' }
     })
     let settled = false
     const shutdown = dispatcher.callRequest('pty.shutdown', { id: 'pty-1', immediate: true })
@@ -2325,11 +2325,11 @@ describe('PtyHandler', () => {
 
     await dispatcher.callRequest('pty.spawn', {
       cwd: '/repo',
-      env: { ORCA_WORKTREE_ID: 'repo-id::/repo' }
+      env: { YIRU_WORKTREE_ID: 'repo-id::/repo' }
     })
     await dispatcher.callRequest('pty.spawn', {
       cwd: '/sibling',
-      env: { ORCA_WORKTREE_ID: 'repo-id::/sibling' }
+      env: { YIRU_WORKTREE_ID: 'repo-id::/sibling' }
     })
 
     let settled = false
@@ -2499,8 +2499,8 @@ describe('PtyHandler', () => {
     const exits: { id: string; paneKey?: string }[] = []
     handler.setExitListener((evt) => exits.push(evt))
 
-    await dispatcher.callRequest('pty.spawn', { env: { ORCA_PANE_KEY: 'tab-dispose:0' } })
-    await dispatcher.callRequest('pty.spawn', { env: { ORCA_PANE_KEY: 'tab-dispose:1' } })
+    await dispatcher.callRequest('pty.spawn', { env: { YIRU_PANE_KEY: 'tab-dispose:0' } })
+    await dispatcher.callRequest('pty.spawn', { env: { YIRU_PANE_KEY: 'tab-dispose:1' } })
     expect(handler.activePtyCount).toBe(2)
 
     const dispose = handler.dispose()

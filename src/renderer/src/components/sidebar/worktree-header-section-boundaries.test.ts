@@ -41,8 +41,8 @@ describe('workspace project header section boundaries', () => {
       key: 'spool-worktree-one',
       desktopRef: 'desktop-chen',
       connectionEpoch: 1,
-      projectRef: 'project-orca',
-      projectIdentityKey: 'github:paperboytm/orca',
+      projectRef: 'project-yiru',
+      projectIdentityKey: 'github:paperboytm/yiru',
       worktreeRef: 'worktree-one',
       shareEpoch: 'share-one',
       desktop: {

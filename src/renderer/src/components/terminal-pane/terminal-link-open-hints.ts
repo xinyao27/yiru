@@ -8,8 +8,8 @@ export function getTerminalFileOpenHint(): string {
     : 'Ctrl+click to open or Shift+Ctrl+click for default app'
 }
 
-export function getTerminalOrcaFileOpenHint(): string {
-  return isMacPlatform() ? '⌘+click to open in Orca' : 'Ctrl+click to open in Orca'
+export function getTerminalYiruFileOpenHint(): string {
+  return isMacPlatform() ? '⌘+click to open in Yiru' : 'Ctrl+click to open in Yiru'
 }
 
 // Why: detected local .html/.htm file paths keep the same modifier gate as

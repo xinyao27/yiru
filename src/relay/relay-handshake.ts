@@ -1,4 +1,4 @@
-// Wire-level handshake helpers for the Orca relay.
+// Wire-level handshake helpers for the Yiru relay.
 //
 // Why this lives in its own module: oxlint enforces a 300-line limit (with
 // blanks/comments stripped) on .ts files, and relay.ts already runs near that
@@ -105,15 +105,15 @@ export function setupDaemonHandshake(sock: Socket, cb: DaemonHandshakeCallbacks)
     decoder.feed(chunk)
   }
   sock.on('data', onHandshakeData)
-  ;(sock as Socket & { __orcaOnHandshake?: typeof onHandshakeData }).__orcaOnHandshake =
+  ;(sock as Socket & { __yiruOnHandshake?: typeof onHandshakeData }).__yiruOnHandshake =
     onHandshakeData
 }
 
 export function detachHandshakeListener(sock: Socket): void {
-  const tagged = sock as Socket & { __orcaOnHandshake?: (chunk: Buffer) => void }
-  if (tagged.__orcaOnHandshake) {
-    sock.removeListener('data', tagged.__orcaOnHandshake)
-    delete tagged.__orcaOnHandshake
+  const tagged = sock as Socket & { __yiruOnHandshake?: (chunk: Buffer) => void }
+  if (tagged.__yiruOnHandshake) {
+    sock.removeListener('data', tagged.__yiruOnHandshake)
+    delete tagged.__yiruOnHandshake
   }
 }
 
@@ -137,7 +137,7 @@ function handleDaemonHandshakeFrame(
     sock.destroy()
     return false
   }
-  if (msg.type !== 'orca-relay-handshake') {
+  if (msg.type !== 'yiru-relay-handshake') {
     relayLogLine(`[relay] Unexpected handshake type from client: ${msg.type}; closing socket`)
     sock.destroy()
     return false
@@ -149,7 +149,7 @@ function handleDaemonHandshakeFrame(
     try {
       sock.write(
         encodeHandshakeFrame({
-          type: 'orca-relay-handshake-mismatch',
+          type: 'yiru-relay-handshake-mismatch',
           expected: launchVersion,
           got: msg.version
         })
@@ -161,7 +161,7 @@ function handleDaemonHandshakeFrame(
     return false
   }
   process.stderr.write(`[relay] Handshake OK from version=${msg.version}\n`)
-  sock.write(encodeHandshakeFrame({ type: 'orca-relay-handshake-ok', version: launchVersion }))
+  sock.write(encodeHandshakeFrame({ type: 'yiru-relay-handshake-ok', version: launchVersion }))
   return true
 }
 
@@ -213,7 +213,7 @@ export function runConnectHandshake(
         sock.destroy()
         process.exit(1)
       }
-      if (msg.type === 'orca-relay-handshake-ok') {
+      if (msg.type === 'yiru-relay-handshake-ok') {
         process.stderr.write(`[relay-connect] Handshake OK at version=${msg.version}\n`)
         handshakeDone = true
         const leftover = decoder.drain()
@@ -221,7 +221,7 @@ export function runConnectHandshake(
         cb.onAccepted(leftover)
         return
       }
-      if (msg.type === 'orca-relay-handshake-mismatch') {
+      if (msg.type === 'yiru-relay-handshake-mismatch') {
         // Why: explicit stderr flush + exit so the diagnostic line is
         // delivered to the client BEFORE the process exits. Without this,
         // process.stderr writes can be buffered/async on pipe transports
@@ -252,5 +252,5 @@ export function runConnectHandshake(
     }
   })
 
-  sock.write(encodeHandshakeFrame({ type: 'orca-relay-handshake', version: myVersion }))
+  sock.write(encodeHandshakeFrame({ type: 'yiru-relay-handshake', version: myVersion }))
 }

@@ -11,7 +11,7 @@ function primaryLanIp(lanIpCandidates) {
 
 export async function startHeadlessPairingRuntime({
   enabled,
-  orcaCli,
+  yiruCli,
   cwd,
   lanIpCandidates,
   logStep,
@@ -22,17 +22,17 @@ export async function startHeadlessPairingRuntime({
   }
 
   logStep('0', 'Starting temporary desktop runtime for mobile pairing...')
-  const runDir = mkdtempSync(path.join(os.tmpdir(), 'orca-mobile-run.'))
+  const runDir = mkdtempSync(path.join(os.tmpdir(), 'yiru-mobile-run.'))
   const userData = path.join(runDir, 'userData')
   const pairingAddress = primaryLanIp(lanIpCandidates)
   const child = spawn(
-    orcaCli,
+    yiruCli,
     ['serve', '--mobile-pairing', '--pairing-address', pairingAddress, '--json'],
     {
       cwd,
       env: {
         ...process.env,
-        ORCA_E2E_USER_DATA_DIR: userData
+        YIRU_E2E_USER_DATA_DIR: userData
       },
       stdio: ['ignore', 'pipe', 'pipe']
     }
@@ -46,7 +46,7 @@ export async function registerWorktreeForPairingRuntime(runtime, worktree, tools
     return
   }
   tools.logStep('0.1', 'Registering current worktree in temporary runtime...')
-  await tools.orca(['repo', 'add', '--path', worktree, '--json'], {
+  await tools.yiru(['repo', 'add', '--path', worktree, '--json'], {
     cwd: worktree,
     env: runtime.env,
     timeout: 60000
@@ -78,7 +78,7 @@ async function waitForPairingRuntime({ child, userData, pairingAddress, logSucce
     process: child,
     env: {
       ...process.env,
-      ORCA_USER_DATA_PATH: userData
+      YIRU_USER_DATA_PATH: userData
     },
     stop
   })

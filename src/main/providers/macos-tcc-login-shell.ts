@@ -9,7 +9,7 @@ const MACOS_ENV_PATH = '/usr/bin/env'
  * user's environment misbehaves under login(1); terminals fall back to today's
  * direct-spawn behavior.
  */
-const DISABLE_ENV_VAR = 'ORCA_DISABLE_MACOS_LOGIN_SHELL'
+const DISABLE_ENV_VAR = 'YIRU_DISABLE_MACOS_LOGIN_SHELL'
 
 function isDisabledByEnv(): boolean {
   const value = process.env[DISABLE_ENV_VAR]
@@ -18,12 +18,12 @@ function isDisabledByEnv(): boolean {
 
 /**
  * Wrap a macOS shell spawn in `/usr/bin/login -flpq <user> …` so terminal children
- * get their own TCC identity instead of collapsing into Orca's bundle id — signed
+ * get their own TCC identity instead of collapsing into Yiru's bundle id — signed
  * CLIs like `op` otherwise re-prompt every launch because tccd attributes the grant
- * to Orca and never persists it (#6996). This mirrors how Terminal.app spawns shells.
+ * to Yiru and never persists it (#6996). This mirrors how Terminal.app spawns shells.
  *
  * Why the env(1) interposition: login(1) overwrites SHELL from the account DB even
- * under -p, so `/usr/bin/env SHELL=<shell>` re-asserts the shell Orca actually runs
+ * under -p, so `/usr/bin/env SHELL=<shell>` re-asserts the shell Yiru actually runs
  * without disturbing login's attribution (skipped when the shell path contains `=`).
  *
  * No-op off macOS, when already wrapped, or when disabled via {@link DISABLE_ENV_VAR}.

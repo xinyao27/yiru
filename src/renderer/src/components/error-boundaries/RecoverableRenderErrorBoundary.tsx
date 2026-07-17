@@ -90,7 +90,7 @@ export class RecoverableRenderErrorBoundary extends React.Component<Props, State
             {this.props.title ??
               translate(
                 'auto.components.error.boundaries.RecoverableRenderErrorBoundary.ab855c11f4',
-                'This part of Orca hit an error.'
+                'This part of Yiru hit an error.'
               )}
           </div>
           <div className="max-w-md text-xs">

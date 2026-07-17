@@ -1,9 +1,9 @@
 import { getPowerShellOmpShellWrapper } from './pty/omp-shell-wrapper'
 export { encodePowerShellCommand } from '../shared/powershell-command-encoding'
 
-const POWERSHELL_OSC133_BOOTSTRAP = `# Orca OSC 133 shell integration for PowerShell.
-if ((Test-Path variable:global:__OrcaOsc133State) -and
-    $null -ne $Global:__OrcaOsc133State.OriginalPrompt) {
+const POWERSHELL_OSC133_BOOTSTRAP = `# Yiru OSC 133 shell integration for PowerShell.
+if ((Test-Path variable:global:__YiruOsc133State) -and
+    $null -ne $Global:__YiruOsc133State.OriginalPrompt) {
     return
 }
 
@@ -22,13 +22,13 @@ try {
     $OutputEncoding = [Console]::OutputEncoding
 } catch { Write-Error $_ -ErrorAction Continue }
 
-# Profiles can re-export user defaults after Orca's spawn env is set.
-if ($env:ORCA_OPENCODE_CONFIG_DIR) { $env:OPENCODE_CONFIG_DIR = $env:ORCA_OPENCODE_CONFIG_DIR }
-if ($env:ORCA_MIMOCODE_HOME) { $env:MIMOCODE_HOME = $env:ORCA_MIMOCODE_HOME }
+# Profiles can re-export user defaults after Yiru's spawn env is set.
+if ($env:YIRU_OPENCODE_CONFIG_DIR) { $env:OPENCODE_CONFIG_DIR = $env:YIRU_OPENCODE_CONFIG_DIR }
+if ($env:YIRU_MIMOCODE_HOME) { $env:MIMOCODE_HOME = $env:YIRU_MIMOCODE_HOME }
 ${getPowerShellOmpShellWrapper()}
-if ($env:ORCA_CODEX_HOME) { $env:CODEX_HOME = $env:ORCA_CODEX_HOME }
+if ($env:YIRU_CODEX_HOME) { $env:CODEX_HOME = $env:YIRU_CODEX_HOME }
 
-$Global:__OrcaOsc133State = @{
+$Global:__YiruOsc133State = @{
     OriginalPrompt = $function:prompt
     OriginalReadLine = $function:PSConsoleHostReadLine
     HasSeenPrompt = $false
@@ -45,24 +45,24 @@ function Global:prompt {
 
     # Emit D from prompt, not readline state. Some profile setups bypass
     # PSConsoleHostReadLine; the consumer only needs completion.
-    if ($Global:__OrcaOsc133State.HasSeenPrompt) {
-        $result += "$($Global:__OrcaOsc133State.Esc)]133;D;$fakeExitCode$($Global:__OrcaOsc133State.Bel)"
+    if ($Global:__YiruOsc133State.HasSeenPrompt) {
+        $result += "$($Global:__YiruOsc133State.Esc)]133;D;$fakeExitCode$($Global:__YiruOsc133State.Bel)"
     }
-    $Global:__OrcaOsc133State.HasSeenPrompt = $true
+    $Global:__YiruOsc133State.HasSeenPrompt = $true
 
-    $result += "$($Global:__OrcaOsc133State.Esc)]133;A$($Global:__OrcaOsc133State.Bel)"
+    $result += "$($Global:__YiruOsc133State.Esc)]133;A$($Global:__YiruOsc133State.Bel)"
     # Preserve the previous success/failure value for prompts that inspect it.
     if ($fakeExitCode -ne 0) { Write-Error "failure" -ea ignore }
-    $result += $Global:__OrcaOsc133State.OriginalPrompt.Invoke()
-    $result += "$($Global:__OrcaOsc133State.Esc)]133;B$($Global:__OrcaOsc133State.Bel)"
+    $result += $Global:__YiruOsc133State.OriginalPrompt.Invoke()
+    $result += "$($Global:__YiruOsc133State.Esc)]133;B$($Global:__YiruOsc133State.Bel)"
     $result
 }
 
-if ($Global:__OrcaOsc133State.HasPSReadLine -and
-    $null -ne $Global:__OrcaOsc133State.OriginalReadLine) {
+if ($Global:__YiruOsc133State.HasPSReadLine -and
+    $null -ne $Global:__YiruOsc133State.OriginalReadLine) {
     function Global:PSConsoleHostReadLine {
-        $commandLine = $Global:__OrcaOsc133State.OriginalReadLine.Invoke()
-        [Console]::Write("$($Global:__OrcaOsc133State.Esc)]133;C$($Global:__OrcaOsc133State.Bel)")
+        $commandLine = $Global:__YiruOsc133State.OriginalReadLine.Invoke()
+        [Console]::Write("$($Global:__YiruOsc133State.Esc)]133;C$($Global:__YiruOsc133State.Bel)")
         return $commandLine
     }
 }

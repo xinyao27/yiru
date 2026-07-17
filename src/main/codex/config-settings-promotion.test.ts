@@ -51,10 +51,10 @@ let userDataDir: string
 let previousUserDataPath: string | undefined
 
 beforeEach(() => {
-  tmpHome = mkdtempSync(join(tmpdir(), 'orca-codex-settings-home-'))
-  userDataDir = mkdtempSync(join(tmpdir(), 'orca-codex-settings-user-data-'))
-  previousUserDataPath = process.env.ORCA_USER_DATA_PATH
-  process.env.ORCA_USER_DATA_PATH = userDataDir
+  tmpHome = mkdtempSync(join(tmpdir(), 'yiru-codex-settings-home-'))
+  userDataDir = mkdtempSync(join(tmpdir(), 'yiru-codex-settings-user-data-'))
+  previousUserDataPath = process.env.YIRU_USER_DATA_PATH
+  process.env.YIRU_USER_DATA_PATH = userDataDir
   homedirMock.mockReturnValue(tmpHome)
   promotionTestState.failAtomicWrite = false
   // Why: promotion writes into homedir()/.codex — if the mock ever fails to
@@ -68,9 +68,9 @@ afterEach(() => {
   rmSync(tmpHome, { recursive: true, force: true })
   rmSync(userDataDir, { recursive: true, force: true })
   if (previousUserDataPath === undefined) {
-    delete process.env.ORCA_USER_DATA_PATH
+    delete process.env.YIRU_USER_DATA_PATH
   } else {
-    process.env.ORCA_USER_DATA_PATH = previousUserDataPath
+    process.env.YIRU_USER_DATA_PATH = previousUserDataPath
   }
   vi.clearAllMocks()
 })
@@ -88,7 +88,7 @@ function runtimeConfigPath(): string {
 }
 
 function baselinePath(): string {
-  return join(runtimeHomeDir(), '.orca-config-settings-baseline.json')
+  return join(runtimeHomeDir(), '.yiru-config-settings-baseline.json')
 }
 
 function writeSystemConfig(content: string): void {

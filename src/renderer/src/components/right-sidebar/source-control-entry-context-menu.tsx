@@ -54,7 +54,7 @@ export function SourceControlEntryContextMenu({
     void window.api.ui.writeClipboardText(absolutePath)
   }, [absolutePath])
 
-  const handleRevealInOrcaExplorer = useCallback(() => {
+  const handleRevealInYiruExplorer = useCallback(() => {
     if (!absolutePath) {
       return
     }
@@ -125,7 +125,7 @@ export function SourceControlEntryContextMenu({
           </ContextMenuSubContent>
         </ContextMenuSub>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleRevealInOrcaExplorer} disabled={!absolutePath}>
+        <ContextMenuItem onClick={handleRevealInYiruExplorer} disabled={!absolutePath}>
           <FolderOpen className="size-3.5" />
           {translate(
             'auto.components.right.sidebar.SourceControl.cc05b2d088',

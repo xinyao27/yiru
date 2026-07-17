@@ -37,7 +37,7 @@ export function getMobilePrCreateSuccessWarning(
       : `${copy.titleLabel} is already open.`
   }
   if (outcome.linkError) {
-    return `${copy.titleLabel} created, but Orca could not refresh it yet.`
+    return `${copy.titleLabel} created, but Yiru could not refresh it yet.`
   }
   return undefined
 }

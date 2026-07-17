@@ -90,4 +90,4 @@ Playwright coverage is optional for this change. The behavior crosses app restar
 
 ## Ref-OSS
 
-Not used. The change follows Orca's existing per-user settings pipeline and does not need external editor behavior to resolve the design.
+Not used. The change follows Yiru's existing per-user settings pipeline and does not need external editor behavior to resolve the design.

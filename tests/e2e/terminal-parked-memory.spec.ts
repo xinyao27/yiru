@@ -2,7 +2,7 @@ import type { Page, TestInfo } from '@stablyai/playwright-test'
 import { randomUUID } from 'node:crypto'
 import { rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/yiru-app'
 import {
   ensureTerminalVisible,
   getActiveTabId,
@@ -17,20 +17,20 @@ import {
 } from './helpers/terminal'
 
 // Why: production cold-park hysteresis is 30s. The fast-park env override is
-// scoped to this spec's app launches via orcaAppExtraEnv (same pattern as
+// scoped to this spec's app launches via yiruAppExtraEnv (same pattern as
 // terminal-hidden-view-parking.spec.ts) so it cannot leak into other specs.
-const PARKING_DELAY_MS = Number(process.env.ORCA_E2E_TERMINAL_PARKING_DELAY_MS) || 500
+const PARKING_DELAY_MS = Number(process.env.YIRU_E2E_TERMINAL_PARKING_DELAY_MS) || 500
 
 test.use({
-  orcaAppExtraEnv: { ORCA_E2E_TERMINAL_PARKING_DELAY_MS: String(PARKING_DELAY_MS) },
+  yiruAppExtraEnv: { YIRU_E2E_TERMINAL_PARKING_DELAY_MS: String(PARKING_DELAY_MS) },
   // Why: without this switch Chromium quantizes performance.memory and only
   // refreshes it every ~20 minutes, so both scenarios report the same stale
   // launch-time bucket instead of a comparable heap figure.
-  orcaAppExtraArgs: ['--enable-precise-memory-info']
+  yiruAppExtraArgs: ['--enable-precise-memory-info']
 })
 
 // Why: 8 hidden tabs is below the 12-tab hot-retain limit, but that limit
-// never retains anything here — the ORCA_E2E_TERMINAL_PARKING_DELAY_MS
+// never retains anything here — the YIRU_E2E_TERMINAL_PARKING_DELAY_MS
 // collapse (terminal-parking-e2e-overrides.ts) shrinks hotRetainMs to the
 // same delay as coldParkDelayMs, and the policy cold-parks any tab hidden
 // past hotRetainMs before the retain-count limit is even consulted. The one
@@ -257,33 +257,33 @@ function formatParkedMemoryAnnotation(metrics: ParkedMemoryMetrics, parkedTabs: 
 
 test.describe('Terminal parked memory', () => {
   test('releases renderer terminal memory when hidden tabs park', async ({
-    orcaPage,
+    yiruPage,
     testRepoPath
   }, testInfo: TestInfo) => {
     test.setTimeout(PARKED_MEMORY_TEST_TIMEOUT_MS)
-    await waitForSessionReady(orcaPage)
+    await waitForSessionReady(yiruPage)
 
     const runId = randomUUID()
-    const scriptPath = path.join(testRepoPath, `.orca-parked-memory-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.yiru-parked-memory-${runId}.mjs`)
     writeScrollbackFillScript(scriptPath, runId)
     try {
-      const { worktreeId, scrollbackTabs } = await setUpScrollbackTabs(orcaPage, scriptPath, runId)
+      const { worktreeId, scrollbackTabs } = await setUpScrollbackTabs(yiruPage, scriptPath, runId)
 
       // A fresh 9th tab hides all 8 scrollback tabs. The last one filled is the
       // most-recently-hidden, so it stays warm under the last-active exemption;
       // the other 7 park.
-      const visibleTab = await createActiveTerminalTab(orcaPage, worktreeId)
+      const visibleTab = await createActiveTerminalTab(yiruPage, worktreeId)
       const lastActiveTab = scrollbackTabs.at(-1)
       if (!lastActiveTab) {
         throw new Error('parked memory spec: no scrollback tabs were created')
       }
       const parkableTabs = scrollbackTabs.slice(0, -1)
       await waitForTabsParkedExceptLastActive(
-        orcaPage,
+        yiruPage,
         scrollbackTabs.map((tab) => tab.tabId)
       )
 
-      const metrics = await sampleParkedMemoryMetrics(orcaPage)
+      const metrics = await sampleParkedMemoryMetrics(yiruPage)
       testInfo.annotations.push({
         type: 'opencode-parked-memory',
         description: formatParkedMemoryAnnotation(metrics, parkableTabs.length)
@@ -292,10 +292,10 @@ test.describe('Terminal parked memory', () => {
       // Structural assertions: the 7 non-last-active tabs parked (managers
       // gone); the visible tab and the exempt last-active tab keep theirs.
       for (const tab of parkableTabs) {
-        expect((await readTerminalTabViewState(orcaPage, tab.tabId)).hasManager).toBe(false)
+        expect((await readTerminalTabViewState(yiruPage, tab.tabId)).hasManager).toBe(false)
       }
-      expect((await readTerminalTabViewState(orcaPage, lastActiveTab.tabId)).hasManager).toBe(true)
-      const visibleState = await readTerminalTabViewState(orcaPage, visibleTab.tabId)
+      expect((await readTerminalTabViewState(yiruPage, lastActiveTab.tabId)).hasManager).toBe(true)
+      const visibleState = await readTerminalTabViewState(yiruPage, visibleTab.tabId)
       expect(visibleState.hasManager).toBe(true)
       expect(visibleState.paneCount).toBeGreaterThan(0)
       // Why: design invariant 5 — renderer terminal views scale with mounted
@@ -308,18 +308,18 @@ test.describe('Terminal parked memory', () => {
   })
 
   test('retains terminal views when parking is disabled', async ({
-    orcaPage,
+    yiruPage,
     testRepoPath
   }, testInfo: TestInfo) => {
     test.setTimeout(PARKED_MEMORY_TEST_TIMEOUT_MS)
-    await waitForSessionReady(orcaPage)
+    await waitForSessionReady(yiruPage)
 
     // Why: settings.terminalHiddenViewParking === false is the design-doc
     // kill switch. updateSettings persists it through window.api.settings.set
     // and updates the store slice the cold-park hook subscribes to — the same
     // mutation path dead-terminal-repro.spec.ts uses, so no extra launch-env
     // wiring is needed.
-    await orcaPage.evaluate(async () => {
+    await yiruPage.evaluate(async () => {
       const store = window.__store
       if (!store) {
         throw new Error('parked memory spec: window.__store is unavailable')
@@ -329,26 +329,26 @@ test.describe('Terminal parked memory', () => {
     await expect
       .poll(
         () =>
-          orcaPage.evaluate(() => window.__store?.getState().settings?.terminalHiddenViewParking),
+          yiruPage.evaluate(() => window.__store?.getState().settings?.terminalHiddenViewParking),
         { timeout: 5_000, message: 'terminalHiddenViewParking kill switch did not persist' }
       )
       .toBe(false)
 
     const runId = randomUUID()
-    const scriptPath = path.join(testRepoPath, `.orca-parked-memory-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.yiru-parked-memory-${runId}.mjs`)
     writeScrollbackFillScript(scriptPath, runId)
     try {
-      const { worktreeId, scrollbackTabs } = await setUpScrollbackTabs(orcaPage, scriptPath, runId)
+      const { worktreeId, scrollbackTabs } = await setUpScrollbackTabs(yiruPage, scriptPath, runId)
       const scrollbackTabIds = scrollbackTabs.map((tab) => tab.tabId)
 
-      const visibleTab = await createActiveTerminalTab(orcaPage, worktreeId)
+      const visibleTab = await createActiveTerminalTab(yiruPage, worktreeId)
       // Why: with parking enabled these tabs park within ~1x the collapsed
       // delay (the first test proves the machinery in this app build), so
       // surviving 3x the delay shows the kill switch held.
-      await orcaPage.waitForTimeout(PARKING_DELAY_MS * 3)
-      expect(await countMountedPaneManagers(orcaPage, scrollbackTabIds)).toBe(SCROLLBACK_TAB_COUNT)
+      await yiruPage.waitForTimeout(PARKING_DELAY_MS * 3)
+      expect(await countMountedPaneManagers(yiruPage, scrollbackTabIds)).toBe(SCROLLBACK_TAB_COUNT)
 
-      const metrics = await sampleParkedMemoryMetrics(orcaPage)
+      const metrics = await sampleParkedMemoryMetrics(yiruPage)
       testInfo.annotations.push({
         type: 'opencode-parked-memory-disabled',
         description: formatParkedMemoryAnnotation(metrics, 0)
@@ -357,11 +357,11 @@ test.describe('Terminal parked memory', () => {
       // Structural assertions: every hidden tab keeps its pane manager and
       // xterm; nothing parked even after the settle + sampling window.
       for (const tab of scrollbackTabs) {
-        const state = await readTerminalTabViewState(orcaPage, tab.tabId)
+        const state = await readTerminalTabViewState(yiruPage, tab.tabId)
         expect(state.hasManager).toBe(true)
         expect(state.paneCount).toBeGreaterThan(0)
       }
-      expect((await readTerminalTabViewState(orcaPage, visibleTab.tabId)).hasManager).toBe(true)
+      expect((await readTerminalTabViewState(yiruPage, visibleTab.tabId)).hasManager).toBe(true)
       expect(metrics.livePaneManagers).toBe(SCROLLBACK_TAB_COUNT + 1)
       expect(metrics.liveTerminals).toBe(SCROLLBACK_TAB_COUNT + 1)
     } finally {

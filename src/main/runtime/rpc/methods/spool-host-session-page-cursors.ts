@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { SpoolExecutionError } from '../../../spool/spool-execution-error'
-import type { OrcaRuntimeService } from '../../orca-runtime'
+import type { YiruRuntimeService } from '../../yiru-runtime'
 import {
   encodeSpoolHostSessionPageBinding,
   encodeSpoolHostSessionPageReleaseBinding,
@@ -36,7 +36,7 @@ export class SpoolHostSessionPageCursors {
   private readonly activeConnections = new Set<string>()
   private expiryTimer: NodeJS.Timeout | null = null
 
-  ensureConnection(runtime: OrcaRuntimeService, connectionId: string): void {
+  ensureConnection(runtime: YiruRuntimeService, connectionId: string): void {
     if (this.activeConnections.has(connectionId)) {
       return
     }

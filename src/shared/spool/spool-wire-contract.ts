@@ -36,7 +36,7 @@ export type SpoolProbeResponse = {
   ownerRuntimeId: string
   ownerPublicKeyB64: string
   ownerKeyFingerprint: string
-  orcaVersion: string
+  yiruVersion: string
   osFamily: SpoolOsFamily
   ticket: string
   ticketExpiresAt: number

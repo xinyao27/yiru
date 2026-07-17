@@ -9,9 +9,9 @@ describe('getLinkedWorkItemProvider', () => {
         type: 'issue',
         provider: 'jira',
         number: 0,
-        title: 'ORCA-123 Fix Jira',
-        url: 'https://example.atlassian.net/browse/ORCA-123',
-        jiraIdentifier: 'ORCA-123'
+        title: 'YIRU-123 Fix Jira',
+        url: 'https://example.atlassian.net/browse/YIRU-123',
+        jiraIdentifier: 'YIRU-123'
       },
       'jira'
     ],
@@ -20,8 +20,8 @@ describe('getLinkedWorkItemProvider', () => {
       {
         type: 'issue',
         number: 0,
-        title: 'ORCA-123 Fix Jira',
-        url: 'https://example.atlassian.net/browse/ORCA-123'
+        title: 'YIRU-123 Fix Jira',
+        url: 'https://example.atlassian.net/browse/YIRU-123'
       },
       'jira'
     ],

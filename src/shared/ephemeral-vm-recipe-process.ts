@@ -128,17 +128,17 @@ function buildRecipeEnv(
   return {
     ...process.env,
     ...env,
-    ORCA_VM_MODE: mode,
-    ORCA_VM_INSTANCE_ID: context.instanceId ?? '',
-    ORCA_RECIPE_ID: context.recipeId,
-    ORCA_PROJECT_ID: context.projectId ?? '',
-    ORCA_WORKSPACE_ID: context.workspaceId ?? '',
-    ORCA_WORKSPACE_NAME: context.workspaceName ?? '',
-    ORCA_REPO_PATH: context.repoPath,
-    ORCA_REPO_URL: context.repoUrl ?? '',
-    ORCA_REPO_BRANCH: context.branch ?? '',
-    ORCA_REPO_REF: context.ref ?? '',
-    ORCA_VERSION: context.orcaVersion ?? ''
+    YIRU_VM_MODE: mode,
+    YIRU_VM_INSTANCE_ID: context.instanceId ?? '',
+    YIRU_RECIPE_ID: context.recipeId,
+    YIRU_PROJECT_ID: context.projectId ?? '',
+    YIRU_WORKSPACE_ID: context.workspaceId ?? '',
+    YIRU_WORKSPACE_NAME: context.workspaceName ?? '',
+    YIRU_REPO_PATH: context.repoPath,
+    YIRU_REPO_URL: context.repoUrl ?? '',
+    YIRU_REPO_BRANCH: context.branch ?? '',
+    YIRU_REPO_REF: context.ref ?? '',
+    YIRU_VERSION: context.yiruVersion ?? ''
   }
 }
 

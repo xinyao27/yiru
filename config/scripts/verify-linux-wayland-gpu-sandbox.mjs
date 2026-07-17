@@ -87,7 +87,7 @@ function buildAppIfNeeded() {
 }
 
 function createGitRepo() {
-  const repoDir = mkdtempSync(path.join(tmpdir(), 'orca-wayland-gpu-repo-'))
+  const repoDir = mkdtempSync(path.join(tmpdir(), 'yiru-wayland-gpu-repo-'))
   run('git', ['init'], { cwd: repoDir, stdio: 'pipe' })
   run('git', ['config', 'user.email', 'wayland-gpu@test.local'], { cwd: repoDir, stdio: 'pipe' })
   run('git', ['config', 'user.name', 'Wayland GPU Test'], { cwd: repoDir, stdio: 'pipe' })
@@ -147,7 +147,7 @@ async function runValidation(mode) {
   buildAppIfNeeded()
 
   const repoPath = createGitRepo()
-  const userDataPath = mkdtempSync(path.join(tmpdir(), 'orca-wayland-gpu-userdata-'))
+  const userDataPath = mkdtempSync(path.join(tmpdir(), 'yiru-wayland-gpu-userdata-'))
   const runId = `${Date.now()}`
   let app
   let page
@@ -204,7 +204,7 @@ async function runValidation(mode) {
           env: {
             ...env,
             NODE_ENV: 'development',
-            ORCA_DEV_USER_DATA_PATH: userDataPath,
+            YIRU_DEV_USER_DATA_PATH: userDataPath,
             ELECTRON_ENABLE_LOGGING: '1',
             ELECTRON_ENABLE_STACK_DUMPING: '1',
             ELECTRON_OZONE_PLATFORM_HINT: 'wayland',
@@ -217,7 +217,7 @@ async function runValidation(mode) {
     app.process().stderr?.on('data', (chunk) => {
       const text = chunk.toString()
       stderrLines.push(...text.split(/\r?\n/).filter(Boolean))
-      if (process.env.ORCA_WAYLAND_GPU_VERBOSE === '1') {
+      if (process.env.YIRU_WAYLAND_GPU_VERBOSE === '1') {
         process.stderr.write(text)
       }
     })

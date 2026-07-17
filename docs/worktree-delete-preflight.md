@@ -4,7 +4,7 @@
 
 - Local delete paths kill PTYs before git deletion:
 - `worktrees:remove` IPC (`src/main/ipc/worktrees.ts`)
-- `removeManagedWorktree` runtime/RPC (`src/main/runtime/orca-runtime.ts`)
+- `removeManagedWorktree` runtime/RPC (`src/main/runtime/yiru-runtime.ts`)
 - On non-force failures (dirty/untracked is common), the worktree stays on disk but terminals are already gone.
 - PTY teardown is intentionally destructive and best-effort (`src/main/runtime/worktree-teardown.ts`), so non-force deletability must be checked first.
 
@@ -74,5 +74,5 @@
 
 1. Implement `assertWorktreeCleanForRemoval` + unit tests in `src/main/git/remove-worktree.test.ts`.
 2. Wire IPC ordering and failure mapping in `src/main/ipc/worktrees.ts`; update `src/main/ipc/worktrees.test.ts`.
-3. Wire runtime ordering and failure mapping in `src/main/runtime/orca-runtime.ts`; update `src/main/runtime/orca-runtime.test.ts`.
+3. Wire runtime ordering and failure mapping in `src/main/runtime/yiru-runtime.ts`; update `src/main/runtime/yiru-runtime.test.ts`.
 4. Run focused tests, then `pnpm typecheck` and `pnpm lint`.

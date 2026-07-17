@@ -197,7 +197,7 @@ export function exitEmptyDetailsBody(editor: Editor): boolean {
   return true
 }
 
-const OrcaDetails = Details.extend({
+const YiruDetails = Details.extend({
   // Why: details summary Enter must run before StarterKit's generic paragraph
   // splitting so typing a toggle title then pressing Enter moves into the body.
   priority: 1000,
@@ -207,10 +207,10 @@ const OrcaDetails = Details.extend({
       ...this.parent?.(),
       variant: {
         default: null,
-        parseHTML: (element) => parseToggleHeadingVariant(element.getAttribute('data-orca-toggle')),
+        parseHTML: (element) => parseToggleHeadingVariant(element.getAttribute('data-yiru-toggle')),
         renderHTML: ({ variant }) => {
           const parsed = parseToggleHeadingVariant(variant)
-          return parsed ? { 'data-orca-toggle': parsed } : {}
+          return parsed ? { 'data-yiru-toggle': parsed } : {}
         }
       }
     }
@@ -285,7 +285,7 @@ const OrcaDetails = Details.extend({
   }
 })
 
-const OrcaDetailsContent = DetailsContent.extend({
+const YiruDetailsContent = DetailsContent.extend({
   // Why: detailsContent's double-Enter escape must run before StarterKit's
   // generic paragraph split, otherwise users can get stuck inside a toggle.
   priority: 1000,
@@ -305,15 +305,15 @@ const OrcaDetailsContent = DetailsContent.extend({
   }
 })
 
-export function createOrcaDetailsExtensions(): AnyExtension[] {
+export function createYiruDetailsExtensions(): AnyExtension[] {
   return [
-    OrcaDetails.configure({
+    YiruDetails.configure({
       persist: true,
       HTMLAttributes: {
-        class: 'orca-details'
+        class: 'yiru-details'
       }
     }),
     DetailsSummary,
-    OrcaDetailsContent
+    YiruDetailsContent
   ]
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-const DISMISS_KEY = 'orca.mobile.sidebar-onboarding-dismissed'
+const DISMISS_KEY = 'yiru.mobile.sidebar-onboarding-dismissed'
 
 function readDismissed(): boolean {
   try {
@@ -17,7 +17,7 @@ export function shouldLoadMobileSidebarOnboardingBadge(
   return enabled && !dismissed
 }
 
-// Why: surface a one-time "Try it" badge on the Orca Mobile sidebar entry
+// Why: surface a one-time "Try it" badge on the Yiru Mobile sidebar entry
 // for users who haven't paired any device. Clicking the row dismisses it
 // permanently, mirroring the once-and-done feel of an inbox unread dot.
 export function useMobileSidebarOnboardingBadge(enabled = true): {

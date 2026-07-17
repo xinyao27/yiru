@@ -2,14 +2,14 @@
 
 **Date:** 2026-07-13
 **Status:** Root cause identified; fixes proposed
-**Severity:** P0 — machine-wide outage. Once the pty cap is hit, _nothing_ on the host can open a terminal (Orca, Ghostty, IDEs, `ssh`, agent spawns all fail with "cannot allocate pty").
-**Source refs:** file:line references below are against the main checkout at `~/orca/orca` as of 2026-07-13.
+**Severity:** P0 — machine-wide outage. Once the pty cap is hit, _nothing_ on the host can open a terminal (Yiru, Ghostty, IDEs, `ssh`, agent spawns all fail with "cannot allocate pty").
+**Source refs:** file:line references below are against the main checkout at `~/yiru/yiru` as of 2026-07-13.
 
 ---
 
 ## 1. Summary
 
-An Orca desktop instance exhausted the macOS pseudo-terminal limit (`kern.tty.ptmx_max = 511`). Investigation on the live machine found **526 allocated ptys**, of which **~476 belonged to three `Orca Helper` processes** — hundreds of idle `login → zsh → codex resume <session-id>` chains, some alive for almost 4 days, all at 0% CPU. Sessions the user had explicitly closed in the UI were still running, and closed sessions kept _coming back_ in bulk waves after restarts.
+A Yiru desktop instance exhausted the macOS pseudo-terminal limit (`kern.tty.ptmx_max = 511`). Investigation on the live machine found **526 allocated ptys**, of which **~476 belonged to three `Yiru Helper` processes** — hundreds of idle `login → zsh → codex resume <session-id>` chains, some alive for almost 4 days, all at 0% CPU. Sessions the user had explicitly closed in the UI were still running, and closed sessions kept _coming back_ in bulk waves after restarts.
 
 The root cause is **two independent defects that compound into a self-perpetuating leak**:
 
@@ -28,15 +28,15 @@ Measurements taken 2026-07-13 on the affected desktop:
 | ------------------------------------------------- | ----------------------------------------------------------------------- |
 | Allocated ptys (`/dev/ttys*`)                     | 526 (cap: `kern.tty.ptmx_max = 511`)                                    |
 | `login` + `zsh` session pairs                     | 506                                                                     |
-| Sessions parented to installed `Orca.app` helpers | 476 (helper pids 53960: **377**, 31662: 58, 1510: 41)                   |
-| Sessions from dev-build Orca instances            | ~25                                                                     |
+| Sessions parented to installed `Yiru.app` helpers | 476 (helper pids 53960: **377**, 31662: 58, 1510: 41)                   |
+| Sessions from dev-build Yiru instances            | ~25                                                                     |
 | `codex` agent processes                           | ~280 (~270 **unique** session IDs; a handful resumed 2–3× concurrently) |
 | `claude` agent processes                          | ~38                                                                     |
 | Processes using >1% CPU                           | 7 of 763 — everything else fully idle                                   |
 
 Key observations:
 
-- **`Orca Helper` pid 53960 alone held 376 open ptmx master fds.** Every leaked chain was still fully parented: `Orca Helper → /usr/bin/login → zsh → node → codex`. Nothing was orphaned to launchd — the app-side master fd was simply never closed.
+- **`Yiru Helper` pid 53960 alone held 376 open ptmx master fds.** Every leaked chain was still fully parented: `Yiru Helper → /usr/bin/login → zsh → node → codex`. Nothing was orphaned to launchd — the app-side master fd was simply never closed.
 - **Working directories were overwhelmingly finished PR-review worktrees** (`review-p1-pr-7511-issue-7026` alone had 79 codex processes; `review-p0-pr-8370-issue-8212` had 76; `review-p0-pr-8279-issue-8260` had 67).
 - **Start times cluster in same-second waves** — batches on Fri Jul 10 (~15:41–18:14) and large bursts on Sun Jul 12 (14:03, 14:27, 14:36–14:40, 15:09). These are bulk resumes on workspace open / app restart, not user-opened sessions.
 - **The user had closed these tabs.** The tabs were gone from the UI; the processes survived (Bug A) and were then re-resumed in later waves (Bug B).
@@ -46,7 +46,7 @@ Key observations:
 
 ## 3. Background: pty ownership architecture
 
-- Terminal sessions are spawned in an Electron utility/helper process which holds the **pty master** (hence the ptmx fds on `Orca Helper`).
+- Terminal sessions are spawned in an Electron utility/helper process which holds the **pty master** (hence the ptmx fds on `Yiru Helper`).
 - A **daemon** hosts sessions so they survive app restarts for warm reattach: it is forked `detached: true` + `unref()` and deliberately outlives the app (`daemon/daemon-init.ts:306-319`; comment at `:741` — "sessions stay alive for warm reattach").
 - Background (non-active) worktrees are **"cold-parked"**: their `TerminalPane` React components unmount, the transport calls `detach()` (`pty-transport.ts:929` — "keep the PTY exit observer alive"), and pane-less byte watchers observe the still-running pty.
 - Agent sessions are additionally tracked in a persisted map, `sleepingAgentSessionsByPaneKey` (`src/renderer/src/store/slices/agent-status.ts:121`), so they can be resumed (`codex resume <id>`) after sleep/quit.
@@ -81,7 +81,7 @@ Every existing reaper is scoped to an event _other than_ tab close:
 
 ### The codebase already knows close ≠ kill
 
-`kill-all-terminal-surfaces.ts` performs daemon `killAll()`, then `closeTerminalTab({force: true})` per tab, **then an explicit `window.api.pty.kill(ptyId)` loop over `ptyIdsByTabId`** (`:140-147`, `:188-190`) — direct evidence that tab close alone is known not to kill. There is even a manual mop-up UI: **Manage Sessions → "Kill orphan terminals"** for sessions "that have no tab in this Orca instance" (`status-bar/ResourceUsageStatusSegment.tsx:~1114-1155`) — a hand-operated workaround for exactly this leak.
+`kill-all-terminal-surfaces.ts` performs daemon `killAll()`, then `closeTerminalTab({force: true})` per tab, **then an explicit `window.api.pty.kill(ptyId)` loop over `ptyIdsByTabId`** (`:140-147`, `:188-190`) — direct evidence that tab close alone is known not to kill. There is even a manual mop-up UI: **Manage Sessions → "Kill orphan terminals"** for sessions "that have no tab in this Yiru instance" (`status-bar/ResourceUsageStatusSegment.tsx:~1114-1155`) — a hand-operated workaround for exactly this leak.
 
 ---
 
@@ -151,15 +151,15 @@ Implement the daemon `detach` handler (`daemon-server.ts:508-512`) and an idle r
 
 ## 7. Verification plan
 
-1. **Repro (pre-fix):** in a background worktree, open an agent session, switch to another worktree (parking the pane), close the tab → `ps` shows the `login/zsh/codex` chain still alive and the helper still holds its ptmx fd. Restart Orca → the session is resumed again.
+1. **Repro (pre-fix):** in a background worktree, open an agent session, switch to another worktree (parking the pane), close the tab → `ps` shows the `login/zsh/codex` chain still alive and the helper still holds its ptmx fd. Restart Yiru → the session is resumed again.
 2. **Post-fix:** same steps → chain dies on tab close (Fix 1); record removed so restart resumes nothing (Fix 2). Origin-aware defensive expiry is verified separately when implemented (Fix 3).
 3. **Regression:** worktree Sleep → wake still resumes sessions; quit → relaunch still warm-reattaches sessions whose tabs were _not_ closed; daemon warm-reattach unaffected.
-4. **Soak:** count `Orca Helper` ptmx fds (`lsof -p <helper> | grep -c ptmx`) across a day of open/close/restart cycles — should stay flat.
+4. **Soak:** count `Yiru Helper` ptmx fds (`lsof -p <helper> | grep -c ptmx`) across a day of open/close/restart cycles — should stay flat.
 
 ## 8. Immediate mitigation (ops, no code)
 
 - Use **Manage Sessions → "Kill orphan terminals"** or exact-session termination
-  to release the leaked ptys. A normal Orca.app restart is insufficient because
+  to release the leaked ptys. A normal Yiru.app restart is insufficient because
   the persistent terminal daemon deliberately survives for warm reattach.
 - `sudo sysctl kern.tty.ptmx_max=999` raises the cap to its macOS hard max — buys headroom only, hours at current leak rate.
 - Restart the terminal daemon only when exact-session cleanup is unavailable;
@@ -173,6 +173,6 @@ Implement the daemon `detach` handler (`daemon-server.ts:508-512`) and an idle r
 ls /dev/ttys* | wc -l && sysctl kern.tty.ptmx_max        # allocation vs cap
 ps -ax -o pid,tty,etime,comm | grep -E 'ttys[0-9]+'      # who holds ptys
 lsof -a -d cwd -c codex | awk '{print $NF}' | sort | uniq -c | sort -rn   # per-worktree counts
-lsof -p <helper-pid> | grep -c ptmx                       # master fds per Orca Helper
+lsof -p <helper-pid> | grep -c ptmx                       # master fds per Yiru Helper
 ps -ax -o args | grep -oE '[0-9a-f-]{36}' | sort | uniq -c # duplicate session resumes
 ```

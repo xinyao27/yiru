@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import nacl from 'tweetnacl'
 import { hardenExistingSecureFile, writeSecureJsonFile } from '../../shared/secure-file'
 
-const SPOOL_KEYPAIR_FILENAME = 'orca-spool-e2ee-keypair.json'
+const SPOOL_KEYPAIR_FILENAME = 'yiru-spool-e2ee-keypair.json'
 const SPOOL_KEYPAIR_VERSION = 1
 const MAX_SPOOL_KEYPAIR_BYTES = 8 * 1024
 

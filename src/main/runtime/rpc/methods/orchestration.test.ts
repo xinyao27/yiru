@@ -4,7 +4,7 @@ import { ORCHESTRATION_METHODS } from './orchestration'
 import { RpcDispatcher } from '../dispatcher'
 import { buildRegistry, type RpcContext, type RpcRequest } from '../core'
 import { OrchestrationDb } from '../../orchestration/db'
-import { OrcaRuntimeService } from '../../orca-runtime'
+import { YiruRuntimeService } from '../../yiru-runtime'
 import type { RuntimeTerminalSummary } from '../../../../shared/runtime-types'
 
 function lifecycleGroupRecipientError(type: 'worker_done' | 'heartbeat'): string {
@@ -14,13 +14,13 @@ function lifecycleGroupRecipientError(type: 'worker_done' | 'heartbeat'): string
 describe('orchestration RPC methods', () => {
   let db: OrchestrationDb
   let dbOpen = false
-  let runtime: OrcaRuntimeService
+  let runtime: YiruRuntimeService
   let ctx: RpcContext
 
   function setup(): void {
     db = new OrchestrationDb(':memory:')
     dbOpen = true
-    runtime = new OrcaRuntimeService()
+    runtime = new YiruRuntimeService()
     runtime.setOrchestrationDb(db)
     ctx = { runtime }
   }
@@ -1365,14 +1365,14 @@ describe('orchestration RPC methods', () => {
 
       expect(send).toHaveBeenCalledWith(
         'term_a',
-        expect.stringContaining('orca-dev orchestration send')
+        expect.stringContaining('yiru-dev orchestration send')
       )
     })
 
     it('uses the target pane CLI command for the returned preamble', async () => {
       setup()
       const task = db.createTask({ spec: 'work' })
-      vi.spyOn(runtime, 'getTerminalOrchestrationCliCommand').mockReturnValue('orca-ide')
+      vi.spyOn(runtime, 'getTerminalOrchestrationCliCommand').mockReturnValue('yiru')
 
       const result = (await call('orchestration.dispatch', {
         task: task.id,
@@ -1381,8 +1381,7 @@ describe('orchestration RPC methods', () => {
       })) as { preamble: string }
 
       expect(runtime.getTerminalOrchestrationCliCommand).toHaveBeenCalledWith('term_wsl')
-      expect(result.preamble).toContain('orca-ide orchestration send')
-      expect(result.preamble).not.toMatch(/(^|\s)orca orchestration/m)
+      expect(result.preamble).toContain('yiru orchestration send')
     })
 
     it('injects preamble through the agent prompt path instead of raw terminal send', async () => {

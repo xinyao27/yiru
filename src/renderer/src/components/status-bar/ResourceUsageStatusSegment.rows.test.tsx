@@ -141,8 +141,8 @@ describe('resource manager row presentation', () => {
           {
             id: 'browser-1',
             worktreeId: 'wt-1',
-            title: 'Orca docs',
-            url: 'https://docs.orca.dev',
+            title: 'Yiru docs',
+            url: 'https://docs.yiru.dev',
             loading: false,
             faviconUrl: null,
             canGoBack: false,
@@ -154,7 +154,7 @@ describe('resource manager row presentation', () => {
       })
     )
 
-    expect(container.textContent).toContain('Orca docs')
+    expect(container.textContent).toContain('Yiru docs')
     expect(container.querySelector('.lucide-globe')).not.toBeNull()
     expect(container.querySelector('button[aria-label^="Open browser"]')).toBeNull()
   })

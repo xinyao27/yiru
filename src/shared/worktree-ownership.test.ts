@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { GlobalSettings, Repo, Worktree, WorktreeMeta } from './types'
 import {
-  buildKnownOrcaWorkspaceLayouts,
+  buildKnownYiruWorkspaceLayouts,
   classifyWorktreeOwnership,
   effectiveExternalWorktreeVisibility,
   isLegacyRepoForExternalWorktreeVisibility,
@@ -71,7 +71,7 @@ function makeMeta(overrides: Partial<WorktreeMeta> = {}): WorktreeMeta {
 
 function makeSettings(overrides: Partial<GlobalSettings> = {}): GlobalSettings {
   return {
-    workspaceDir: '/orca/workspaces',
+    workspaceDir: '/yiru/workspaces',
     nestWorkspaces: true,
     workspaceDirHistory: [],
     refreshLocalBaseRefOnWorktreeCreate: false,
@@ -94,7 +94,7 @@ function makeSettings(overrides: Partial<GlobalSettings> = {}): GlobalSettings {
 }
 
 describe('worktree ownership classification', () => {
-  it('treats explicit Orca metadata as managed even outside the workspace root', () => {
+  it('treats explicit Yiru metadata as managed even outside the workspace root', () => {
     const repo = makeRepo()
     const settings = makeSettings()
     expect(
@@ -102,79 +102,79 @@ describe('worktree ownership classification', () => {
         repo,
         settings,
         worktree: makeWorktree({ path: '/tmp/outside' }),
-        meta: makeMeta({ orcaCreatedAt: 1 }),
-        knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+        meta: makeMeta({ yiruCreatedAt: 1 }),
+        knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
       })
-    ).toBe('orca-managed')
+    ).toBe('yiru-managed')
   })
 
-  it('treats nested Orca workspace paths without metadata as external', () => {
+  it('treats nested Yiru workspace paths without metadata as external', () => {
     const repo = makeRepo()
     const settings = makeSettings()
-    const layouts = buildKnownOrcaWorkspaceLayouts(settings, repo)
+    const layouts = buildKnownYiruWorkspaceLayouts(settings, repo)
     expect(
       classifyWorktreeOwnership({
         repo,
         settings,
-        worktree: makeWorktree({ path: '/orca/workspaces/app/feature' }),
-        knownOrcaLayouts: layouts
+        worktree: makeWorktree({ path: '/yiru/workspaces/app/feature' }),
+        knownYiruLayouts: layouts
       })
     ).toBe('external')
     expect(
       classifyWorktreeOwnership({
         repo,
         settings,
-        worktree: makeWorktree({ path: '/orca/workspaces/other/feature' }),
-        knownOrcaLayouts: layouts
+        worktree: makeWorktree({ path: '/yiru/workspaces/other/feature' }),
+        knownYiruLayouts: layouts
       })
     ).toBe('external')
   })
 
-  it('treats explicit Orca creation layout metadata as managed', () => {
+  it('treats explicit Yiru creation layout metadata as managed', () => {
     const repo = makeRepo()
     const settings = makeSettings()
     expect(
       classifyWorktreeOwnership({
         repo,
         settings,
-        worktree: makeWorktree({ path: '/orca/workspaces/app/feature' }),
+        worktree: makeWorktree({ path: '/yiru/workspaces/app/feature' }),
         meta: makeMeta({
-          orcaCreationWorkspaceLayout: { path: '/orca/workspaces', nestWorkspaces: true }
+          yiruCreationWorkspaceLayout: { path: '/yiru/workspaces', nestWorkspaces: true }
         }),
-        knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+        knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
       })
-    ).toBe('orca-managed')
+    ).toBe('yiru-managed')
   })
 
-  it('does not treat metadata-free nested workspace paths as Orca-managed for new repos', () => {
+  it('does not treat metadata-free nested workspace paths as Yiru-managed for new repos', () => {
     const repo = makeRepo({ externalWorktreeVisibility: 'hide' })
     const settings = makeSettings()
     const detected = toDetectedWorktree({
       repo,
       settings,
       worktree: makeWorktree({
-        path: '/orca/workspaces/app/manual-git-worktree',
+        path: '/yiru/workspaces/app/manual-git-worktree',
         isMainWorktree: false
       }),
-      knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+      knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
     })
 
     expect(detected.ownership).toBe('external')
     expect(detected.visible).toBe(false)
   })
 
-  it('does not treat generic discovery metadata on nested workspace paths as Orca-managed', () => {
+  it('does not treat generic discovery metadata on nested workspace paths as Yiru-managed', () => {
     const repo = makeRepo({ externalWorktreeVisibility: 'hide' })
     const settings = makeSettings()
     const detected = toDetectedWorktree({
       repo,
       settings,
       worktree: makeWorktree({
-        path: '/orca/workspaces/app/manual-git-worktree',
+        path: '/yiru/workspaces/app/manual-git-worktree',
         isMainWorktree: false
       }),
       meta: makeMeta({ displayName: 'manual-git-worktree' }),
-      knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+      knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
     })
 
     expect(detected.ownership).toBe('external')
@@ -188,10 +188,10 @@ describe('worktree ownership classification', () => {
       repo,
       settings,
       worktree: makeWorktree({
-        path: '/orca/workspaces/app/manual-git-worktree',
+        path: '/yiru/workspaces/app/manual-git-worktree',
         isMainWorktree: false
       }),
-      knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+      knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
     })
 
     expect(detected.ownership).toBe('external')
@@ -208,10 +208,10 @@ describe('worktree ownership classification', () => {
       repo,
       settings,
       worktree: makeWorktree({
-        path: '/orca/workspaces/app/manual-git-worktree',
+        path: '/yiru/workspaces/app/manual-git-worktree',
         isMainWorktree: false
       }),
-      knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+      knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
     })
 
     expect(detected.ownership).toBe('external')
@@ -225,8 +225,8 @@ describe('worktree ownership classification', () => {
       classifyWorktreeOwnership({
         repo,
         settings,
-        worktree: makeWorktree({ path: '/orca/workspaces/feature' }),
-        knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+        worktree: makeWorktree({ path: '/yiru/workspaces/feature' }),
+        knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
       })
     ).toBe('unknown-legacy')
   })
@@ -235,14 +235,14 @@ describe('worktree ownership classification', () => {
     const repo = makeRepo()
     const settings = makeSettings({
       nestWorkspaces: true,
-      workspaceDirHistory: [{ path: '/orca/workspaces', nestWorkspaces: false }]
+      workspaceDirHistory: [{ path: '/yiru/workspaces', nestWorkspaces: false }]
     })
     expect(
       classifyWorktreeOwnership({
         repo,
         settings,
-        worktree: makeWorktree({ path: '/orca/workspaces/feature' }),
-        knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+        worktree: makeWorktree({ path: '/yiru/workspaces/feature' }),
+        knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
       })
     ).toBe('unknown-legacy')
   })
@@ -258,7 +258,7 @@ describe('worktree ownership classification', () => {
         repo,
         settings,
         worktree: makeWorktree({ path: '/old/workspaces/app/feature' }),
-        knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+        knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
       })
     ).toBe('external')
   })
@@ -277,7 +277,7 @@ describe('worktree ownership classification', () => {
       workspaceDirHistory
     })
 
-    const layouts = buildKnownOrcaWorkspaceLayouts(settings, repo)
+    const layouts = buildKnownYiruWorkspaceLayouts(settings, repo)
 
     expect(layouts).toHaveLength(LARGE_WORKSPACE_HISTORY_COUNT + 1)
     expect(layouts[0]).toEqual({ path: '/new/workspaces', nestWorkspaces: true })
@@ -290,17 +290,17 @@ describe('worktree ownership classification', () => {
 
   it('handles Windows drive casing and separators', () => {
     const repo = makeRepo({ path: 'C:\\repos\\App' })
-    const settings = makeSettings({ workspaceDir: 'C:\\Orca\\Workspaces' })
+    const settings = makeSettings({ workspaceDir: 'C:\\Yiru\\Workspaces' })
     expect(
       classifyWorktreeOwnership({
         repo,
         settings,
         worktree: makeWorktree({
-          id: 'repo-1::C:\\ORCA\\WORKSPACES\\App\\Feature',
-          path: 'C:\\ORCA\\WORKSPACES\\App\\Feature',
+          id: 'repo-1::C:\\YIRU\\WORKSPACES\\App\\Feature',
+          path: 'C:\\YIRU\\WORKSPACES\\App\\Feature',
           isMainWorktree: false
         }),
-        knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+        knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
       })
     ).toBe('external')
   })
@@ -315,7 +315,7 @@ describe('worktree ownership classification', () => {
         path: '/repos/app-linked',
         isMainWorktree: false
       }),
-      knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+      knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
     })
     const gitMain = toDetectedWorktree({
       repo,
@@ -324,7 +324,7 @@ describe('worktree ownership classification', () => {
         path: '/repos/app-main',
         isMainWorktree: true
       }),
-      knownOrcaLayouts: buildKnownOrcaWorkspaceLayouts(settings, repo)
+      knownYiruLayouts: buildKnownYiruWorkspaceLayouts(settings, repo)
     })
 
     expect(selected.visible).toBe(true)
@@ -415,7 +415,7 @@ describe('external worktree visibility policy', () => {
     expect(
       shouldShowWorktree({
         repo,
-        worktree: makeWorktree({ path: '/orca/workspaces/feature' }),
+        worktree: makeWorktree({ path: '/yiru/workspaces/feature' }),
         ownership: 'unknown-legacy',
         isLegacyRepoForVisibility: true,
         isSelectedCheckout: false

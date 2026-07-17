@@ -18,7 +18,7 @@ export function resolveOpenCodeSourceConfigDir(
   shell: string | undefined
 ): string | undefined {
   return firstNonEmpty(
-    env.ORCA_OPENCODE_SOURCE_CONFIG_DIR,
+    env.YIRU_OPENCODE_SOURCE_CONFIG_DIR,
     readStartupEnv('OPENCODE_CONFIG_DIR', env, shell),
     env.OPENCODE_CONFIG_DIR
   )
@@ -29,9 +29,9 @@ export function resolvePiSourceAgentDir(
   shell: string | undefined,
   kind: PiAgentKind
 ): string | undefined {
-  const sourceKey = kind === 'omp' ? 'ORCA_OMP_SOURCE_AGENT_DIR' : 'ORCA_PI_SOURCE_AGENT_DIR'
-  const overlayKey = kind === 'omp' ? 'ORCA_OMP_CODING_AGENT_DIR' : 'ORCA_PI_CODING_AGENT_DIR'
-  const otherOverlayKey = kind === 'omp' ? 'ORCA_PI_CODING_AGENT_DIR' : 'ORCA_OMP_CODING_AGENT_DIR'
+  const sourceKey = kind === 'omp' ? 'YIRU_OMP_SOURCE_AGENT_DIR' : 'YIRU_PI_SOURCE_AGENT_DIR'
+  const overlayKey = kind === 'omp' ? 'YIRU_OMP_CODING_AGENT_DIR' : 'YIRU_PI_CODING_AGENT_DIR'
+  const otherOverlayKey = kind === 'omp' ? 'YIRU_PI_CODING_AGENT_DIR' : 'YIRU_OMP_CODING_AGENT_DIR'
 
   const sourceDir = firstNonEmpty(env[sourceKey])
   if (sourceDir) {
@@ -43,7 +43,7 @@ export function resolvePiSourceAgentDir(
     return startupDir
   }
 
-  // Why: a mismatched Orca overlay shadow means this shell inherited the other
+  // Why: a mismatched Yiru overlay shadow means this shell inherited the other
   // Pi-compatible agent's PTY overlay. Do not remirror that overlay into this
   // launch; let plugin-overlay default to the selected kind's own home dir.
   if (

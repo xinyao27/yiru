@@ -86,7 +86,7 @@ export const TERMINAL_HANDLERS: Record<string, CommandHandler> = {
       text: getOptionalStringFlag(flags, 'text'),
       enter: flags.get('enter') === true,
       interrupt: flags.get('interrupt') === true,
-      client: { id: 'orca-cli', type: 'desktop' }
+      client: { id: 'yiru-cli', type: 'desktop' }
     })
     printResult(result, json, formatTerminalSend)
   },

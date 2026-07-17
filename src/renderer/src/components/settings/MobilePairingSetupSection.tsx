@@ -44,7 +44,7 @@ export function MobilePairingSetupSection({
         {connectionMode === 'automatic'
           ? translate(
               'auto.components.settings.MobilePairingSetupSection.automaticDescription',
-              'The pairing code includes direct access and encrypted Orca Relay fallback.'
+              'The pairing code includes direct access and encrypted Yiru Relay fallback.'
             )
           : translate(
               'auto.components.settings.MobilePairingSetupSection.localDescription',
@@ -84,7 +84,7 @@ export function MobilePairingSetupSection({
           <p className="text-xs text-muted-foreground">
             {translate(
               'auto.components.settings.MobilePairingSetupSection.localAddressDescription',
-              'Choose the LAN or private-network address that Orca Mobile can use to reach this computer directly.'
+              'Choose the LAN or private-network address that Yiru Mobile can use to reach this computer directly.'
             )}
           </p>
         </div>

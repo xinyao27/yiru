@@ -2,7 +2,7 @@
 
 ## Goal
 
-Make Orca's Claude usage limit tracking behave like CodexBar's Claude implementation: automatic, resilient, and source-aware internally, without asking users to choose between OAuth, CLI, or other data sources.
+Make Yiru's Claude usage limit tracking behave like CodexBar's Claude implementation: automatic, resilient, and source-aware internally, without asking users to choose between OAuth, CLI, or other data sources.
 
 This plan intentionally does not introduce new product behavior from scratch. Each proposed change is based on CodexBar's existing implementation.
 
@@ -15,7 +15,7 @@ The normal product behavior should remain automatic:
 - Try the best live Claude usage source.
 - Repair or fall back when a source fails.
 - Keep the last useful usage snapshot visible when refresh is deferred or temporarily unavailable.
-- Show a specific, actionable status only when Orca cannot recover automatically.
+- Show a specific, actionable status only when Yiru cannot recover automatically.
 
 Any "source planner" described below is internal plumbing only. It should not imply a visible source picker for normal users.
 
@@ -49,9 +49,9 @@ CodexBar's Codex implementation is also a useful pattern for fallback discipline
 - Codex CLI usage is fetched through `codex app-server` JSON-RPC.
   Reference: `/Users/jinwoohong/stably/codexbar/Sources/CodexBarCore/UsageFetcher.swift:1012`
 
-## Current Orca Behavior To Preserve Or Change
+## Current Yiru Behavior To Preserve Or Change
 
-Orca currently reads Claude OAuth credentials and calls Anthropic's OAuth usage endpoint:
+Yiru currently reads Claude OAuth credentials and calls Anthropic's OAuth usage endpoint:
 
 - OAuth usage endpoint and headers are in `claude-fetcher.ts`.
   Reference: `src/main/rate-limits/claude-fetcher.ts:24`
@@ -85,7 +85,7 @@ Initial app automatic order should match CodexBar's app auto ordering:
 
 1. OAuth usage API.
 2. CLI/PTY usage fallback.
-3. Web usage source later, only if Orca intentionally adopts CodexBar's web/cookie machinery.
+3. Web usage source later, only if Yiru intentionally adopts CodexBar's web/cookie machinery.
 
 CodexBar basis:
 
@@ -94,7 +94,7 @@ CodexBar basis:
 - `ClaudeUsageDataSource` defines source identifiers separately from execution.
   Reference: `/Users/jinwoohong/stably/codexbar/Sources/CodexBarCore/Providers/Claude/ClaudeUsageDataSource.swift:3`
 
-Orca implementation target:
+Yiru implementation target:
 
 - Add a focused module near `src/main/rate-limits/`, for example `claude-usage-refresh-plan.ts`.
 - Keep it internal to main-process rate-limit refresh.
@@ -109,7 +109,7 @@ CodexBar basis:
 - `StepExecutor.loadLatestUsage` switches on source and executes OAuth, web, or CLI.
   Reference: `/Users/jinwoohong/stably/codexbar/Sources/CodexBarCore/Providers/Claude/ClaudeUsageFetcher.swift:461`
 
-Orca implementation target:
+Yiru implementation target:
 
 - Split Claude refresh into source attempt functions:
   - `fetchClaudeUsageViaOAuth(...)`
@@ -145,7 +145,7 @@ CodexBar basis:
 - Missing Claude OAuth scope gets a specific actionable message.
   Reference: `/Users/jinwoohong/stably/codexbar/Sources/CodexBarCore/Providers/Claude/ClaudeUsageFetcher.swift:444`
 
-Orca implementation target:
+Yiru implementation target:
 
 - Add `claude-usage-error-classification.ts`.
 - Use classification to decide:
@@ -167,15 +167,15 @@ CodexBar basis:
 - After delegated refresh, CodexBar invalidates changed credential caches, syncs Keychain without prompt, reloads credentials, and retries OAuth.
   Reference: `/Users/jinwoohong/stably/codexbar/Sources/CodexBarCore/Providers/Claude/ClaudeUsageFetcher.swift:369`
 
-Orca implementation target:
+Yiru implementation target:
 
 - Add a guarded delegated refresh step for system-default accounts and managed accounts only when no live Claude PTY owns the same credentials.
-- After delegation, re-run Orca's existing credential read order and retry the OAuth usage request once.
-- Keep this disabled for cases where Orca already knows live Claude is using/rotating that credential set.
+- After delegation, re-run Yiru's existing credential read order and retry the OAuth usage request once.
+- Keep this disabled for cases where Yiru already knows live Claude is using/rotating that credential set.
 
 ### 5. Preserve Managed Live-Session Safety, But Change The State
 
-Current Orca managed-account behavior avoids rotating refresh tokens while a live Claude terminal may rotate them. Keep that safety rule.
+Current Yiru managed-account behavior avoids rotating refresh tokens while a live Claude terminal may rotate them. Keep that safety rule.
 
 Change the user-visible outcome from generic failure to a deferred state.
 
@@ -186,7 +186,7 @@ CodexBar basis:
 - CodexBar tracks delegated refresh outcomes and reports them distinctly.
   Reference: `/Users/jinwoohong/stably/codexbar/Sources/CodexBarCore/Providers/Claude/ClaudeUsageFetcher.swift:350`
 
-Orca implementation target:
+Yiru implementation target:
 
 - Add a first-class `deferredByLiveClaudeSession` usage refresh outcome.
 - Keep last successful snapshot visible if present.
@@ -199,7 +199,7 @@ Do not assume failures are managed-account only.
 System default can still fail when:
 
 - Keychain access is denied.
-- Claude rotated credentials and Orca has stale cached data.
+- Claude rotated credentials and Yiru has stale cached data.
 - The access token is rejected by the OAuth usage endpoint.
 - Required scope is missing.
 - Network/proxy settings block `api.anthropic.com`.
@@ -211,7 +211,7 @@ CodexBar basis:
 - Post-delegation retry re-reads credentials instead of reusing the stale token.
   Reference: `/Users/jinwoohong/stably/codexbar/Sources/CodexBarCore/Providers/Claude/ClaudeUsageFetcher.swift:408`
 
-Orca implementation target:
+Yiru implementation target:
 
 - Use the same internal plan for system default and managed accounts.
 - For system default, allow delegated refresh when safe.
@@ -239,7 +239,7 @@ CodexBar basis:
 - Claude planner logs selected source and ordered steps.
   Reference: `/Users/jinwoohong/stably/codexbar/Sources/CodexBarCore/Providers/Claude/ClaudeUsageFetcher.swift:512`
 
-Orca implementation target:
+Yiru implementation target:
 
 - Extend shared rate-limit types conservatively.
 - Keep renderer copy based on structured state, not regex-only string matching.
@@ -265,7 +265,7 @@ CodexBar basis:
 - Codex OAuth refresh errors include specific relogin messages for expired/revoked/reused refresh tokens.
   Reference: `/Users/jinwoohong/stably/codexbar/Sources/CodexBarCore/Providers/Codex/CodexOAuth/CodexTokenRefresher.swift:17`
 
-Orca implementation target:
+Yiru implementation target:
 
 - Update status-bar tooltip mapping to prefer structured `failureKind`.
 - Keep the current auth regex fallback only for older/unstructured provider errors.
@@ -289,7 +289,7 @@ CodexBar basis:
 - Claude planner can describe selected and ordered sources.
   Reference: `/Users/jinwoohong/stably/codexbar/Sources/CodexBarCore/Providers/Claude/ClaudeSourcePlanner.swift:99`
 
-Orca implementation target:
+Yiru implementation target:
 
 - Add internal logs and possibly a debug tooltip line.
 - Avoid a normal user-facing setting unless support data later proves it is needed.
@@ -305,7 +305,7 @@ CodexBar basis:
 - CodexBar's web paths are substantial and involve browser session/cookie machinery.
   Reference: `/Users/jinwoohong/stably/codexbar/Sources/CodexBarCore/Providers/Claude/ClaudeWeb/ClaudeWebAPIFetcher.swift:100`
 
-Orca implementation target:
+Yiru implementation target:
 
 - Put web source behind a future milestone.
 - First match the high-value resilience behavior: OAuth classification, delegated refresh, CLI fallback, deferred live-session state.

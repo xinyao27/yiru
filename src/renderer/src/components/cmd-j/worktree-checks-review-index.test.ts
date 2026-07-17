@@ -8,8 +8,8 @@ import { buildWorktreeChecksReviewIndex } from './worktree-checks-review-index'
 
 const repo: Repo = {
   id: 'repo-1',
-  path: '/remote/orca',
-  displayName: 'orca',
+  path: '/remote/yiru',
+  displayName: 'yiru',
   badgeColor: '#000000',
   addedAt: 0,
   executionHostId: 'ssh:staging'
@@ -18,7 +18,7 @@ const repo: Repo = {
 const worktree: Worktree = {
   id: 'worktree-1',
   repoId: repo.id,
-  path: '/remote/orca-worktrees/search',
+  path: '/remote/yiru-worktrees/search',
   head: 'abc123',
   branch: 'refs/heads/feature/search',
   isBare: false,
@@ -41,7 +41,7 @@ function makePR(): PRInfo {
     number: 42,
     title: 'Search worktrees by their pull requests',
     state: 'open',
-    url: 'https://github.com/acme/orca/pull/42',
+    url: 'https://github.com/acme/yiru/pull/42',
     checksStatus: 'success',
     updatedAt: '2026-07-12T00:00:00Z',
     mergeable: 'MERGEABLE'
@@ -54,7 +54,7 @@ function makeGitLabReview(): HostedReviewInfo {
     number: 17,
     title: 'Search worktrees by merge request',
     state: 'open',
-    url: 'https://gitlab.com/acme/orca/-/merge_requests/17',
+    url: 'https://gitlab.com/acme/yiru/-/merge_requests/17',
     status: 'pending',
     updatedAt: '2026-07-12T00:00:00Z',
     mergeable: 'UNKNOWN'
@@ -148,7 +148,7 @@ describe('buildWorktreeChecksReviewIndex', () => {
   it('keeps same-id worktrees isolated across execution hosts', () => {
     const localRepo: Repo = {
       ...repo,
-      path: '/local/orca',
+      path: '/local/yiru',
       executionHostId: 'local'
     }
     const localWorktree: Worktree = { ...worktree, hostId: 'local' }

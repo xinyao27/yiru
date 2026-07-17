@@ -29,7 +29,7 @@ import {
   mergeWorkspacePortScans,
   openWorkspacePortInBrowser,
   refreshWorkspacePortScanAfterStop,
-  resolvePortOpenInOrcaBrowser,
+  resolvePortOpenInYiruBrowser,
   scanWorkspacePortsForTarget
 } from '@/lib/workspace-port-actions'
 
@@ -120,7 +120,7 @@ describe('PortsPanel runtime routing', () => {
 
   it('maps macOS Shift+Cmd-click to system-browser port routing', () => {
     expect(
-      resolvePortOpenInOrcaBrowser({
+      resolvePortOpenInYiruBrowser({
         settings: { openLinksInApp: true },
         event: portOpenClick({ metaKey: true, shiftKey: true }),
         isMac: true
@@ -130,7 +130,7 @@ describe('PortsPanel runtime routing', () => {
 
   it('maps non-macOS Shift+Ctrl-click to system-browser port routing', () => {
     expect(
-      resolvePortOpenInOrcaBrowser({
+      resolvePortOpenInYiruBrowser({
         settings: { openLinksInApp: true },
         event: portOpenClick({ ctrlKey: true, shiftKey: true }),
         isMac: false
@@ -140,7 +140,7 @@ describe('PortsPanel runtime routing', () => {
 
   it('does not treat macOS Shift+Ctrl-click as a system-browser port override', () => {
     expect(
-      resolvePortOpenInOrcaBrowser({
+      resolvePortOpenInYiruBrowser({
         settings: { openLinksInApp: true },
         event: portOpenClick({ ctrlKey: true, shiftKey: true }),
         isMac: true
@@ -150,14 +150,14 @@ describe('PortsPanel runtime routing', () => {
 
   it('keeps plain and no-event port opens on the saved link-routing setting', () => {
     expect(
-      resolvePortOpenInOrcaBrowser({
+      resolvePortOpenInYiruBrowser({
         settings: { openLinksInApp: true },
         event: portOpenClick(),
         isMac: false
       })
     ).toBe(true)
     expect(
-      resolvePortOpenInOrcaBrowser({
+      resolvePortOpenInYiruBrowser({
         settings: { openLinksInApp: false },
         event: null,
         isMac: false
@@ -373,7 +373,7 @@ describe('PortsPanel runtime routing', () => {
         runtimeTarget: { kind: 'local' },
         createBrowserTab: createBrowserTab as never,
         setRemoteBrowserPageHandle: setRemoteBrowserPageHandle as never,
-        openInOrcaBrowser: false
+        openInYiruBrowser: false
       })
     ).resolves.toEqual({ ok: true })
 
@@ -386,7 +386,7 @@ describe('PortsPanel runtime routing', () => {
     const createBrowserTab = vi.fn()
     const setRemoteBrowserPageHandle = vi.fn()
     openUrl.mockResolvedValueOnce(undefined)
-    const openInOrcaBrowser = resolvePortOpenInOrcaBrowser({
+    const openInYiruBrowser = resolvePortOpenInYiruBrowser({
       settings: { openLinksInApp: true },
       event: portOpenClick({ ctrlKey: true, shiftKey: true }),
       isMac: false
@@ -398,7 +398,7 @@ describe('PortsPanel runtime routing', () => {
         runtimeTarget: { kind: 'local' },
         createBrowserTab: createBrowserTab as never,
         setRemoteBrowserPageHandle: setRemoteBrowserPageHandle as never,
-        openInOrcaBrowser
+        openInYiruBrowser
       })
     ).resolves.toEqual({ ok: true })
 
@@ -567,7 +567,7 @@ describe('PortsPanel runtime routing', () => {
         runtimeTarget: { kind: 'environment', environmentId: 'env-1' },
         createBrowserTab: createBrowserTab as never,
         setRemoteBrowserPageHandle: setRemoteBrowserPageHandle as never,
-        openInOrcaBrowser: false
+        openInYiruBrowser: false
       })
     ).resolves.toEqual({ ok: true })
 

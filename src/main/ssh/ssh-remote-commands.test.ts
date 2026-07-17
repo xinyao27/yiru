@@ -22,13 +22,13 @@ function decodePowerShellCommand(command: string): string {
 describe('ssh remote command builders', () => {
   it('keeps POSIX deploy commands POSIX-native', () => {
     expect(readRemoteHomeCommand(posix)).toBe('echo $HOME')
-    expect(makeRemoteDirectoryCommand(posix, '/home/me/.orca-remote')).toContain('mkdir -p')
+    expect(makeRemoteDirectoryCommand(posix, '/home/me/.yiru-remote')).toContain('mkdir -p')
     expect(probeRelayInstalledCommand(posix, '/home/me/relay')).toContain('test -d')
   })
 
   it('uses encoded PowerShell for Windows deploy commands', () => {
     expect(readRemoteHomeCommand(windows)).toContain('powershell.exe')
-    expect(makeRemoteDirectoryCommand(windows, 'C:/Users/me/.orca-remote')).toContain(
+    expect(makeRemoteDirectoryCommand(windows, 'C:/Users/me/.yiru-remote')).toContain(
       '-EncodedCommand'
     )
     expect(probeRelayInstalledCommand(windows, 'C:/Users/me/relay')).toContain('-EncodedCommand')
@@ -36,10 +36,10 @@ describe('ssh remote command builders', () => {
 
   it('uses -Path for Windows New-Item commands', () => {
     const mkdirScript = decodePowerShellCommand(
-      makeRemoteDirectoryCommand(windows, 'C:/Users/me/.orca-remote')
+      makeRemoteDirectoryCommand(windows, 'C:/Users/me/.yiru-remote')
     )
     const lockScript = decodePowerShellCommand(
-      tryCreateInstallLockCommand(windows, 'C:/Users/me/.orca-remote/relay/.install-lock')
+      tryCreateInstallLockCommand(windows, 'C:/Users/me/.yiru-remote/relay/.install-lock')
     )
 
     expect(mkdirScript).toContain('New-Item -ItemType Directory -Force -Path')
@@ -49,9 +49,9 @@ describe('ssh remote command builders', () => {
   })
 
   it('uses named pipe try-connect liveness for Windows GC', () => {
-    const command = relayLivenessProbeCommand(windows, 'C:/Users/me/.orca-remote/relay-0.1.0', {
+    const command = relayLivenessProbeCommand(windows, 'C:/Users/me/.yiru-remote/relay-0.1.0', {
       nodePath: 'C:/Program Files/nodejs/node.exe',
-      pipePaths: ['\\\\.\\pipe\\orca-relay-1234567890abcdef1234']
+      pipePaths: ['\\\\.\\pipe\\yiru-relay-1234567890abcdef1234']
     })
     const script = decodePowerShellCommand(command)
 
@@ -61,16 +61,16 @@ describe('ssh remote command builders', () => {
     expect(script).toContain('markerCount===0&&pipes.length===0')
     expect(script).toContain('C:\\Program Files\\nodejs')
     expect(script).not.toContain('Win32_Process')
-    expect(listRelayBaseDirsCommand(windows, 'C:/Users/me/.orca-remote')).toContain(
+    expect(listRelayBaseDirsCommand(windows, 'C:/Users/me/.yiru-remote')).toContain(
       '-EncodedCommand'
     )
   })
 
   it('escapes double quotes before passing JavaScript to native Windows commands', () => {
     const script = decodePowerShellCommand(
-      relayLivenessProbeCommand(windows, 'C:/Users/me/.orca-remote/relay-0.1.0', {
+      relayLivenessProbeCommand(windows, 'C:/Users/me/.yiru-remote/relay-0.1.0', {
         nodePath: 'C:/Program Files/nodejs/node.exe',
-        pipePaths: ['\\\\.\\pipe\\orca-relay-1234567890abcdef1234']
+        pipePaths: ['\\\\.\\pipe\\yiru-relay-1234567890abcdef1234']
       })
     )
 
@@ -83,7 +83,7 @@ describe('ssh remote command builders', () => {
       commandWithNodePath(
         windows,
         'C:/Program Files/nodejs/node.exe',
-        'C:/Users/me/.orca-remote/relay-0.1.0',
+        'C:/Users/me/.yiru-remote/relay-0.1.0',
         "'READY'"
       )
     )
@@ -93,7 +93,7 @@ describe('ssh remote command builders', () => {
 
   it('keeps the Windows install-lock try/catch parseable', () => {
     const script = decodePowerShellCommand(
-      tryCreateInstallLockCommand(windows, 'C:/Users/me/.orca-remote/relay/.install-lock')
+      tryCreateInstallLockCommand(windows, 'C:/Users/me/.yiru-remote/relay/.install-lock')
     )
 
     expect(script).toContain('$ErrorActionPreference = "Stop"; try {')
@@ -103,22 +103,22 @@ describe('ssh remote command builders', () => {
 
   it('makes Windows remote directory changes fail before running scoped commands', () => {
     const scopedCommand = decodePowerShellCommand(
-      commandInRemoteDirectory(windows, 'C:/Users/me/.orca-remote/relay-0.1.0', "'READY'")
+      commandInRemoteDirectory(windows, 'C:/Users/me/.yiru-remote/relay-0.1.0', "'READY'")
     )
     const nodeScopedCommand = decodePowerShellCommand(
       commandWithNodePath(
         windows,
         'C:/Program Files/nodejs/node.exe',
-        'C:/Users/me/.orca-remote/relay-0.1.0',
+        'C:/Users/me/.yiru-remote/relay-0.1.0',
         "'READY'"
       )
     )
 
     expect(scopedCommand).toContain(
-      "Set-Location -ErrorAction Stop -LiteralPath 'C:/Users/me/.orca-remote/relay-0.1.0'"
+      "Set-Location -ErrorAction Stop -LiteralPath 'C:/Users/me/.yiru-remote/relay-0.1.0'"
     )
     expect(nodeScopedCommand).toContain(
-      "Set-Location -ErrorAction Stop -LiteralPath 'C:/Users/me/.orca-remote/relay-0.1.0'"
+      "Set-Location -ErrorAction Stop -LiteralPath 'C:/Users/me/.yiru-remote/relay-0.1.0'"
     )
   })
 })

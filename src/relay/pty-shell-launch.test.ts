@@ -45,14 +45,14 @@ function expectBashOsc133Lifecycle(output: string): void {
 }
 
 function expectZdotdirSourceContext(content: string, fileName: '.zprofile' | '.zshrc' | '.zlogin') {
-  expect(content).toContain('export ZDOTDIR="$_orca_home"')
-  expect(content).toContain(`source "$_orca_home/${fileName}"`)
-  expect(content).toContain('export ZDOTDIR="$_orca_wrapper_zdotdir"')
+  expect(content).toContain('export ZDOTDIR="$_yiru_home"')
+  expect(content).toContain(`source "$_yiru_home/${fileName}"`)
+  expect(content).toContain('export ZDOTDIR="$_yiru_wrapper_zdotdir"')
 }
 
 function expectFinalZdotdirRestoreContext(content: string) {
-  expect(content).toContain("after Orca's last wrapper file has loaded")
-  expect(content).toContain('export ZDOTDIR="$_orca_home"')
+  expect(content).toContain("after Yiru's last wrapper file has loaded")
+  expect(content).toContain('export ZDOTDIR="$_yiru_home"')
 }
 
 describe('getRelayShellLaunchConfig', () => {
@@ -71,23 +71,23 @@ describe('getRelayShellLaunchConfig', () => {
     () => {
       const config = getRelayShellLaunchConfig('/bin/zsh', {
         HOME: homeDir,
-        ORCA_OPENCODE_CONFIG_DIR: '/tmp/orca-opencode-overlay'
+        YIRU_OPENCODE_CONFIG_DIR: '/tmp/yiru-opencode-overlay'
       })
-      const zshRoot = join(homeDir, '.orca-relay', 'shell-ready', 'zsh')
+      const zshRoot = join(homeDir, '.yiru-relay', 'shell-ready', 'zsh')
 
       expect(config.args).toEqual(['-l'])
       expect(config.env.ZDOTDIR).toBe(zshRoot)
       expect(readFileSync(join(zshRoot, '.zshenv'), 'utf8')).toContain(
-        'export ORCA_USER_ZDOTDIR="${ZDOTDIR:-${ORCA_ORIG_ZDOTDIR:-$HOME}}"'
+        'export YIRU_USER_ZDOTDIR="${ZDOTDIR:-${YIRU_ORIG_ZDOTDIR:-$HOME}}"'
       )
       expect(readFileSync(join(zshRoot, '.zprofile'), 'utf8')).toContain(
-        '_orca_home="${ORCA_USER_ZDOTDIR:-${ORCA_ORIG_ZDOTDIR:-$HOME}}"'
+        '_yiru_home="${YIRU_USER_ZDOTDIR:-${YIRU_ORIG_ZDOTDIR:-$HOME}}"'
       )
       const zprofile = readFileSync(join(zshRoot, '.zprofile'), 'utf8')
       const zshrc = readFileSync(join(zshRoot, '.zshrc'), 'utf8')
       const zlogin = readFileSync(join(zshRoot, '.zlogin'), 'utf8')
-      expect(zshrc).toContain('_orca_home="${ORCA_USER_ZDOTDIR:-${ORCA_ORIG_ZDOTDIR:-$HOME}}"')
-      expect(zlogin).toContain('_orca_home="${ORCA_USER_ZDOTDIR:-${ORCA_ORIG_ZDOTDIR:-$HOME}}"')
+      expect(zshrc).toContain('_yiru_home="${YIRU_USER_ZDOTDIR:-${YIRU_ORIG_ZDOTDIR:-$HOME}}"')
+      expect(zlogin).toContain('_yiru_home="${YIRU_USER_ZDOTDIR:-${YIRU_ORIG_ZDOTDIR:-$HOME}}"')
       expectZdotdirSourceContext(zprofile, '.zprofile')
       expectZdotdirSourceContext(zshrc, '.zshrc')
       expectZdotdirSourceContext(zlogin, '.zlogin')
@@ -123,17 +123,17 @@ describe('getRelayShellLaunchConfig', () => {
   })
 
   it.skipIf(process.platform === 'win32')('rewrites stale persistent wrapper files', () => {
-    const zshRoot = join(homeDir, '.orca-relay', 'shell-ready', 'zsh')
+    const zshRoot = join(homeDir, '.yiru-relay', 'shell-ready', 'zsh')
     mkdirSync(zshRoot, { recursive: true })
     writeFileSync(join(zshRoot, '.zshenv'), '# stale relay wrapper\n')
 
     getRelayShellLaunchConfig('/bin/zsh', {
       HOME: homeDir,
-      ORCA_OPENCODE_CONFIG_DIR: '/tmp/orca-opencode-overlay'
+      YIRU_OPENCODE_CONFIG_DIR: '/tmp/yiru-opencode-overlay'
     })
 
     expect(readFileSync(join(zshRoot, '.zshenv'), 'utf8')).toContain(
-      'export ORCA_USER_ZDOTDIR="${ZDOTDIR:-${ORCA_ORIG_ZDOTDIR:-$HOME}}"'
+      'export YIRU_USER_ZDOTDIR="${ZDOTDIR:-${YIRU_ORIG_ZDOTDIR:-$HOME}}"'
     )
   })
 
@@ -142,15 +142,15 @@ describe('getRelayShellLaunchConfig', () => {
     () => {
       const config = getRelayShellLaunchConfig('/bin/zsh', {
         HOME: homeDir,
-        ORCA_MIMOCODE_HOME: '/tmp/orca-mimocode-overlay'
+        YIRU_MIMOCODE_HOME: '/tmp/yiru-mimocode-overlay'
       })
-      const zshRoot = join(homeDir, '.orca-relay', 'shell-ready', 'zsh')
+      const zshRoot = join(homeDir, '.yiru-relay', 'shell-ready', 'zsh')
       const zshrc = readFileSync(join(zshRoot, '.zshrc'), 'utf8')
 
       expect(config.args).toEqual(['-l'])
       expect(config.env.ZDOTDIR).toBe(zshRoot)
       expect(zshrc).toContain(
-        '[[ -n "${ORCA_MIMOCODE_HOME:-}" ]] && export MIMOCODE_HOME="${ORCA_MIMOCODE_HOME}"'
+        '[[ -n "${YIRU_MIMOCODE_HOME:-}" ]] && export MIMOCODE_HOME="${YIRU_MIMOCODE_HOME}"'
       )
     }
   )
@@ -159,7 +159,7 @@ describe('getRelayShellLaunchConfig', () => {
     'wraps bash even without overlay env for OSC 133 lifecycle markers',
     () => {
       const config = getRelayShellLaunchConfig('/bin/bash', { HOME: homeDir })
-      const rcfile = join(homeDir, '.orca-relay', 'shell-ready', 'bash', 'rcfile')
+      const rcfile = join(homeDir, '.yiru-relay', 'shell-ready', 'bash', 'rcfile')
       const bashRc = readFileSync(rcfile, 'utf8')
 
       expect(config.args).toEqual(['--rcfile', rcfile])
@@ -175,14 +175,14 @@ describe('getRelayShellLaunchConfig', () => {
       const config = getRelayShellLaunchConfig('/bin/zsh', { HOME: homeDir }, 'linux', {
         emitReadyMarker: true
       })
-      const zshRoot = join(homeDir, '.orca-relay', 'shell-ready', 'zsh')
+      const zshRoot = join(homeDir, '.yiru-relay', 'shell-ready', 'zsh')
       const zlogin = readFileSync(join(zshRoot, '.zlogin'), 'utf8')
 
       expect(config.args).toEqual(['-l'])
       expect(config.env.ZDOTDIR).toBe(zshRoot)
-      expect(config.env.ORCA_SHELL_READY_MARKER).toBe('1')
-      expect(zlogin).toContain('zle -N zle-line-init __orca_prompt_mark')
-      expect(zlogin).toContain('printf "\\033]777;orca-shell-ready\\007"')
+      expect(config.env.YIRU_SHELL_READY_MARKER).toBe('1')
+      expect(zlogin).toContain('zle -N zle-line-init __yiru_prompt_mark')
+      expect(zlogin).toContain('printf "\\033]777;yiru-shell-ready\\007"')
     }
   )
 
@@ -194,9 +194,9 @@ describe('getRelayShellLaunchConfig', () => {
       })
       const bashRc = readFileSync(config.args[1] as string, 'utf8')
 
-      expect(config.env.ORCA_SHELL_READY_MARKER).toBe('1')
-      expect(bashRc).toContain('__orca_append_prompt_command "__orca_prompt_mark"')
-      expect(bashRc).toContain('printf "\\033]777;orca-shell-ready\\007"')
+      expect(config.env.YIRU_SHELL_READY_MARKER).toBe('1')
+      expect(bashRc).toContain('__yiru_append_prompt_command "__yiru_prompt_mark"')
+      expect(bashRc).toContain('printf "\\033]777;yiru-shell-ready\\007"')
     }
   )
 
@@ -237,7 +237,7 @@ describe('getRelayShellLaunchConfig', () => {
 
   // Why: RHEL-family /etc/bashrc prepends "history -a; " to PROMPT_COMMAND
   // outside its BASHRCSOURCED guard (repeated across re-sources), so the value
-  // Orca inherits ends in a ";"+whitespace separator. Prepend/append must not
+  // Yiru inherits ends in a ";"+whitespace separator. Prepend/append must not
   // splice an empty command (";;") that breaks the prompt with a syntax error.
   itWithBash('normalizes an inherited PROMPT_COMMAND ending in a separator', () => {
     writeFileSync(

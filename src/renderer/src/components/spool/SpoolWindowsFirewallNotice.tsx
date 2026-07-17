@@ -93,13 +93,13 @@ export function SpoolWindowsFirewallNotice(): React.JSX.Element {
                     )
                   : translate(
                       'auto.components.spool.SpoolWindowsFirewallNotice.ruleMissing',
-                      'The packaged Orca app does not have the required Private-network rule.'
+                      'The packaged Yiru app does not have the required Private-network rule.'
                     )}
             </p>
             <p className="mt-1 font-mono text-[11px] text-muted-foreground">
               {translate(
                 'auto.components.spool.SpoolWindowsFirewallNotice.ruleDetails',
-                'Orca.Spool · TCP {{port}} · Private',
+                'Yiru.Spool · TCP {{port}} · Private',
                 { port }
               )}
             </p>

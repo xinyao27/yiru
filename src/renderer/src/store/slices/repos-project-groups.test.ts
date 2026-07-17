@@ -823,7 +823,7 @@ describe('project group store routing', () => {
         name: 'Broken folder'
       })
     ).rejects.toThrow(
-      'Folder not found. Orca cannot find /srv/app. Remove and re-import the folder.'
+      'Folder not found. Yiru cannot find /srv/app. Remove and re-import the folder.'
     )
   })
 })

@@ -100,7 +100,7 @@ function validateProbeResponse(value: unknown): asserts value is SpoolProbeRespo
       'ownerRuntimeId',
       'ownerPublicKeyB64',
       'ownerKeyFingerprint',
-      'orcaVersion',
+      'yiruVersion',
       'osFamily',
       'ticket',
       'ticketExpiresAt'
@@ -109,7 +109,7 @@ function validateProbeResponse(value: unknown): asserts value is SpoolProbeRespo
       response.protocolVersion as (typeof SPOOL_SUPPORTED_PROTOCOL_VERSIONS)[number]
     ) ||
     !isBoundedText(response.ownerRuntimeId, 2_048) ||
-    !isBoundedText(response.orcaVersion, 128) ||
+    !isBoundedText(response.yiruVersion, 128) ||
     (response.osFamily !== 'macos' &&
       response.osFamily !== 'linux' &&
       response.osFamily !== 'windows') ||

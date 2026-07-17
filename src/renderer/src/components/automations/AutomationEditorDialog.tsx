@@ -8,7 +8,7 @@ import type {
 } from '../../../../shared/automations-types'
 import type {
   GlobalSettings,
-  OrcaHooks,
+  YiruHooks,
   ProjectHostSetup,
   Repo,
   SetupDecision,
@@ -52,7 +52,7 @@ export type AutomationDraft = {
   scheduleWarning: string | null
 }
 
-export type AutomationCreateTarget = 'orca' | 'hermes'
+export type AutomationCreateTarget = 'yiru' | 'hermes'
 
 type AutomationEditorDialogProps = {
   open: boolean
@@ -63,7 +63,7 @@ type AutomationEditorDialogProps = {
   createTarget: AutomationCreateTarget
   repos: Repo[]
   projectHostSetups: ProjectHostSetup[]
-  automationYamlHooksByRepoKey: Record<string, OrcaHooks | null>
+  automationYamlHooksByRepoKey: Record<string, YiruHooks | null>
   getAutomationHooksCacheKey: (repoId: string) => string
   repoMap: Map<string, Repo>
   worktrees: Worktree[]

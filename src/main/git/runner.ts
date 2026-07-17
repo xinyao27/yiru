@@ -566,7 +566,7 @@ export function gitOptionalLocksDisabledEnv(
 export { appendGitConfigEnv }
 
 /**
- * Pin Orca-spawned git to untranslated English output so stderr/progress
+ * Pin Yiru-spawned git to untranslated English output so stderr/progress
  * parsers keep working under any user locale (issue #7808; see
  * UNTRANSLATED_GIT_OUTPUT_ENV for the full rationale). Terminal git is
  * untouched. Injected by every git runner in this module; WSL-routed spawns
@@ -586,7 +586,7 @@ export function promptGuardGitEnv(
 /**
  * Credential-prompt guard for a general-purpose shell environment (terminal
  * PTYs, hook scripts): everything promptGuardGitEnv does EXCEPT the issue-7808
- * locale pins. Those exist so Orca can parse stderr of git it spawns itself;
+ * locale pins. Those exist so Yiru can parse stderr of git it spawns itself;
  * forcing LC_ALL/LANG/LANGUAGE onto a user's shell would change the locale of
  * every child process, not just git's.
  */
@@ -1387,7 +1387,7 @@ async function sleep(ms: number): Promise<void> {
 }
 
 function defaultGhExecTimeoutMs(env: NodeJS.ProcessEnv = process.env): number {
-  const raw = env.ORCA_GH_EXEC_TIMEOUT_MS
+  const raw = env.YIRU_GH_EXEC_TIMEOUT_MS
   if (!raw) {
     return DEFAULT_GH_EXEC_TIMEOUT_MS
   }
@@ -1646,7 +1646,7 @@ export function wslAwareSpawn(
  * Translate absolute Linux paths in git output back to Windows UNC paths.
  *
  * Why: when git runs inside WSL, paths in output (e.g. `git worktree list`)
- * are Linux-native (/home/user/repo). The rest of Orca needs Windows UNC
+ * are Linux-native (/home/user/repo). The rest of Yiru needs Windows UNC
  * paths (\\wsl.localhost\Ubuntu\home\user\repo) to read files via Node fs.
  */
 export function translateWslOutputPaths(

@@ -49,8 +49,8 @@ import {
   rerunPRChecks,
   requestPRReviewers,
   removePRReviewers,
-  checkOrcaStarred,
-  starOrca
+  checkYiruStarred,
+  starYiru
 } from '../github/client'
 import type { GitHubPRBranchLookupOptions } from '../github/client'
 import {
@@ -302,7 +302,7 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
       )
       // Emit pr_created when a PR is first detected for a branch.
       // Why here: the renderer polls gh:prForBranch to check PR status per worktree.
-      // This captures PRs opened from any workflow (Orca UI, gh CLI, github.com).
+      // This captures PRs opened from any workflow (Yiru UI, gh CLI, github.com).
       if (pr && !stats.hasCountedPR(pr.url)) {
         stats.record({
           type: 'pr_created',
@@ -1131,16 +1131,16 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
     )
   })
 
-  // Star operations target the Orca repo itself — no repoPath validation needed
+  // Star operations target the Yiru repo itself — no repoPath validation needed
   ipcMain.handle('gh:viewer', () => getAuthenticatedViewer())
-  ipcMain.handle('gh:checkOrcaStarred', () => checkOrcaStarred())
-  ipcMain.handle('gh:starOrca', async (_event, source: unknown) => {
+  ipcMain.handle('gh:checkYiruStarred', () => checkYiruStarred())
+  ipcMain.handle('gh:starYiru', async (_event, source: unknown) => {
     const sourceParse = appStarSourceSchema.safeParse(source)
-    const starred = await starOrca()
+    const starred = await starYiru()
     if (starred && sourceParse.success) {
       // Why: this main-owned event bypasses renderer telemetry IPC, so cohort
       // context must be attached here on the successful star path.
-      track('app_starred_orca', {
+      track('app_starred_yiru', {
         source: sourceParse.data,
         ...getCohortAtEmit()
       })

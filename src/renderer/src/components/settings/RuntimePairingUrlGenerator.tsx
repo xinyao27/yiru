@@ -336,7 +336,7 @@ export function RuntimePairingUrlGenerator({
           <Label id="runtime-share-server-label">
             {translate(
               'auto.components.settings.RuntimePairingUrlGenerator.f8500e134a',
-              'Share this Orca server'
+              'Share this Yiru server'
             )}
           </Label>
           <p className="text-xs text-muted-foreground">

@@ -1,6 +1,6 @@
 import { rmSync, writeFileSync } from 'node:fs'
 import type { Page } from '@stablyai/playwright-test'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/yiru-app'
 import { waitForSessionReady } from './helpers/store'
 import { getLargeDiffRenderLimit } from '../../src/shared/large-diff-render-limit'
 import {
@@ -9,8 +9,8 @@ import {
   createIsolatedStagedLocaleDiffRepo
 } from './large-diff-repro-fixtures'
 
-async function addAndActivateRepo(orcaPage: Page, repoPath: string): Promise<string> {
-  const repoId = await orcaPage.evaluate(async (pathToRepo: string) => {
+async function addAndActivateRepo(yiruPage: Page, repoPath: string): Promise<string> {
+  const repoId = await yiruPage.evaluate(async (pathToRepo: string) => {
     const store = window.__store
     if (!store) {
       throw new Error('window.__store is not available')
@@ -29,7 +29,7 @@ async function addAndActivateRepo(orcaPage: Page, repoPath: string): Promise<str
   await expect
     .poll(
       () =>
-        orcaPage.evaluate(async (targetRepoId: string) => {
+        yiruPage.evaluate(async (targetRepoId: string) => {
           const store = window.__store
           if (!store) {
             return 0
@@ -44,7 +44,7 @@ async function addAndActivateRepo(orcaPage: Page, repoPath: string): Promise<str
     )
     .toBeGreaterThan(0)
 
-  const worktreeId = await orcaPage.evaluate(
+  const worktreeId = await yiruPage.evaluate(
     ({ targetRepoId, pathToRepo }) => {
       const store = window.__store
       if (!store) {
@@ -70,13 +70,13 @@ async function addAndActivateRepo(orcaPage: Page, repoPath: string): Promise<str
 test.describe('Large diff freeze repro', () => {
   test.describe.configure({ mode: 'serial' })
   test.use({ seedTestRepo: false })
-  test('opening a large single-file diff keeps the renderer responsive', async ({ orcaPage }) => {
-    await waitForSessionReady(orcaPage)
+  test('opening a large single-file diff keeps the renderer responsive', async ({ yiruPage }) => {
+    await waitForSessionReady(yiruPage)
     const fixture = createIsolatedLargeDiffRepo()
-    const lineCount = Number(process.env.ORCA_LARGE_DIFF_REPRO_LINES ?? '60000')
+    const lineCount = Number(process.env.YIRU_LARGE_DIFF_REPRO_LINES ?? '60000')
     if (!Number.isFinite(lineCount) || lineCount < 0) {
       throw new Error(
-        `Invalid ORCA_LARGE_DIFF_REPRO_LINES: ${process.env.ORCA_LARGE_DIFF_REPRO_LINES}`
+        `Invalid YIRU_LARGE_DIFF_REPRO_LINES: ${process.env.YIRU_LARGE_DIFF_REPRO_LINES}`
       )
     }
     const modifiedContent = buildLargeTypeScriptFile(lineCount)
@@ -86,9 +86,9 @@ test.describe('Large diff freeze repro', () => {
     }).limited
 
     try {
-      const worktreeId = await addAndActivateRepo(orcaPage, fixture.repoPath)
+      const worktreeId = await addAndActivateRepo(yiruPage, fixture.repoPath)
       writeFileSync(fixture.absolutePath, modifiedContent)
-      const measurement = await orcaPage.evaluate(
+      const measurement = await yiruPage.evaluate(
         async ({ wId, absolutePath, relativePath, expectFallback }) => {
           const store = window.__store
           if (!store) {
@@ -161,14 +161,14 @@ test.describe('Large diff freeze repro', () => {
   })
 
   test('opening stale unstaged combined diffs after staging keeps the renderer responsive', async ({
-    orcaPage
+    yiruPage
   }) => {
-    await waitForSessionReady(orcaPage)
+    await waitForSessionReady(yiruPage)
     const fixture = createIsolatedStagedLocaleDiffRepo()
 
     try {
-      const worktreeId = await addAndActivateRepo(orcaPage, fixture.repoPath)
-      const measurement = await orcaPage.evaluate(
+      const worktreeId = await addAndActivateRepo(yiruPage, fixture.repoPath)
+      const measurement = await yiruPage.evaluate(
         async ({ wId, repoPath, expectedPaths }) => {
           const store = window.__store
           if (!store) {

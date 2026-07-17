@@ -333,7 +333,7 @@ export default function TerminalPane({
   const nativeChatTranscriptIsLocalReadable = useAppStore((store) =>
     isNativeChatTranscriptLocalReadable(getConnectionIdFromState(store, worktreeId))
   )
-  // Which machine's SSH store this target belongs to: a remote Orca server's
+  // Which machine's SSH store this target belongs to: a remote Yiru server's
   // per-environment bucket, or null for this machine's local SSH maps. The
   // explicit-owner resolver never lets a merely focused runtime make a
   // local-owned workspace look remote. The paired web client mirrors its one
@@ -681,7 +681,7 @@ export default function TerminalPane({
     useShallow((store) => store.runtimePaneTitlesByTabId[tabId] ?? {})
   )
   // The native-chat toggle joins the pane header's split/close cluster. Eligible
-  // when Orca launched a *supported* agent here or one was detected live for the
+  // when Yiru launched a *supported* agent here or one was detected live for the
   // leaf, keyed `${tabId}:${leafId}`. Carry the agent identity, not just "an
   // agent exists", so the gate can reject Grok et al.
   // Scope to this tab's panes and reuse the shared map index so hidden tabs do
@@ -977,15 +977,15 @@ export default function TerminalPane({
         return openLinksInAppPreferencePromiseRef.current
       }
       const preferencePromise = (async () => {
-        const openInOrca = await requestLinkRoutingPreference({
+        const openInYiru = await requestLinkRoutingPreference({
           openLinksInAppDefault: settingsRef.current?.openLinksInApp === true,
           url
         })
         await updateSettings({
-          openLinksInApp: openInOrca,
+          openLinksInApp: openInYiru,
           openLinksInAppPreferencePrompted: true
         })
-        return openInOrca
+        return openInYiru
       })()
       openLinksInAppPreferencePromiseRef.current = preferencePromise
       void preferencePromise.finally(() => {
@@ -1562,7 +1562,7 @@ export default function TerminalPane({
     // must materialize their panes; local desktop tabs split directly.
     if (
       !isHostAuthoritativeLayout({
-        isWebClient: !!(globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__,
+        isWebClient: !!(globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__,
         ptyIdsByLeafId: restoredLayout.ptyIdsByLeafId
       })
     ) {
@@ -1841,7 +1841,7 @@ export default function TerminalPane({
     macOptionAsAltRef,
     paneKittyKeyboardModesRef,
     keybindings,
-    terminalShortcutPolicy: settings?.terminalShortcutPolicy ?? 'orca-first'
+    terminalShortcutPolicy: settings?.terminalShortcutPolicy ?? 'yiru-first'
   })
 
   useTerminalPaneGlobalEffects({
@@ -1870,7 +1870,7 @@ export default function TerminalPane({
 
   useEffect(() => {
     if (
-      !(globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__ ||
+      !(globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ ||
       !isVisible ||
       !isActive
     ) {
@@ -2947,9 +2947,9 @@ export default function TerminalPane({
     // `hidden` reliably clips that pseudo-element paint at the terminal body.
     overflow: 'hidden',
     ...hiddenStartupStyle,
-    ['--orca-terminal-divider-color' as string]:
+    ['--yiru-terminal-divider-color' as string]:
       effectiveAppearance?.dividerColor ?? DEFAULT_TERMINAL_DIVIDER_DARK,
-    ['--orca-terminal-divider-color-strong' as string]: normalizeColor(
+    ['--yiru-terminal-divider-color-strong' as string]: normalizeColor(
       effectiveAppearance?.dividerColor,
       DEFAULT_TERMINAL_DIVIDER_DARK
     )

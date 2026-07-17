@@ -9,7 +9,7 @@ import type {
 } from '../../../spool/spool-session-source'
 import { SpoolExecutionError } from '../../../spool/spool-execution-error'
 import type { SpoolTerminalSessionBindings } from '../../../spool/spool-terminal-session-bindings'
-import type { OrcaRuntimeService } from '../../orca-runtime'
+import type { YiruRuntimeService } from '../../yiru-runtime'
 import type { SpoolPairedRuntimeResolvedWorktree } from '../../../../shared/spool/spool-paired-runtime-host-contract'
 import type { RuntimeMobileSessionTerminalClientTab } from '../../../../shared/runtime-types'
 import {
@@ -17,7 +17,7 @@ import {
   spoolObservedAgentProvider
 } from '../../../spool/spool-live-session-display-identity'
 
-type SessionRuntime = Pick<OrcaRuntimeService, 'listMobileSessionTabs'>
+type SessionRuntime = Pick<YiruRuntimeService, 'listMobileSessionTabs'>
 type ReadyMobileSessionTerminalTab = Extract<
   RuntimeMobileSessionTerminalClientTab,
   { status: 'ready' }

@@ -2,7 +2,7 @@
 
 ## Problem
 
-Issue https://github.com/stablyai/orca-internal/issues/101 reports that the GitHub issues list can stay stale after creating a new issue.
+Issue https://github.com/stablyai/yiru-internal/issues/101 reports that the GitHub issues list can stay stale after creating a new issue.
 
 - `src/renderer/src/components/TaskPage.tsx:3891` bumps `taskRefreshNonce` after successful issue creation, intending to refetch the list.
 - `src/renderer/src/store/slices/github.ts:1644` honors `force` only for the renderer cache and in-flight dedupe.
@@ -12,7 +12,7 @@ Issue https://github.com/stablyai/orca-internal/issues/101 reports that the GitH
 
 ## Root Cause
 
-The post-create flow forces only Orca's renderer-side work-item cache. It does not bypass the GitHub CLI REST cache used by the main-process recent work-item fetch, so the refreshed request can reuse stale `gh api --cache 120s` data.
+The post-create flow forces only Yiru's renderer-side work-item cache. It does not bypass the GitHub CLI REST cache used by the main-process recent work-item fetch, so the refreshed request can reuse stale `gh api --cache 120s` data.
 
 ## Non-Goals
 
@@ -30,7 +30,7 @@ The post-create flow forces only Orca's renderer-side work-item cache. It does n
    - IPC handler args for `gh:listWorkItems`;
    - web preload routing, which forwards `gh.listWorkItems` to `github.listWorkItems` for web/remote clients;
    - runtime RPC schema and handler for `github.listWorkItems`;
-   - `OrcaRuntime.listRepoWorkItems`;
+   - `YiruRuntime.listRepoWorkItems`;
    - `listWorkItems` and the internal recent-list helper in `src/main/github/client.ts`.
 
 2. Keep `force` and `noCache` separate. `force` means "bypass renderer cache and in-flight dedupe"; `noCache` means "bypass `gh api --cache`". In TaskPage, pass `{ force: forcedFetch || shouldProbeOnLanding, noCache: forcedFetch }` so nonce-triggered refreshes and preference invalidation bypass the GitHub CLI cache, while the one-time landing probe still behaves like today's background revalidation. Today `taskRefreshNonce` is shared by create, manual refresh, retry, filtering, preset changes, and PR merge refresh, so the implementation should either accept that whole nonce-triggered set as the no-cache scope or split create/manual refresh intent into a separate signal before narrowing it.
@@ -78,7 +78,7 @@ The post-create flow forces only Orca's renderer-side work-item cache. It does n
 - Search query active: queried paths already use `gh issue list` / `gh pr list` rather than cached REST calls, so no behavior change is required.
 - Pagination: next-page fetches use queried/cursor paths and do not populate the renderer work-items cache, so `noCache` is page-0-only.
 - Concurrent windows: the creating window refreshes immediately; other renderer windows keep their own cache until their next refresh, landing probe, or TTL expiry. This change should not introduce cross-window invalidation.
-- External GitHub mutations: external issue changes still rely on existing TTL/manual refresh behavior; this fix only guarantees freshness for Orca-originated create flows.
+- External GitHub mutations: external issue changes still rely on existing TTL/manual refresh behavior; this fix only guarantees freshness for Yiru-originated create flows.
 - Network/auth errors: existing partial-failure handling and banners remain unchanged.
 
 ## Test Plan
@@ -88,7 +88,7 @@ The post-create flow forces only Orca's renderer-side work-item cache. It does n
 - Unit: extend `src/main/ipc/github.test.ts` to assert `gh:listWorkItems` forwards `noCache` to the client.
 - Unit: extend `src/renderer/src/web/web-preload-api.test.ts` to assert web/remote `gh.listWorkItems` preserves `noCache`.
 - Unit: extend `src/main/github/client-issue-source.test.ts` or `src/main/github/client-work-items.test.ts` to assert recent no-cache requests omit `--cache 120s` while normal recent requests keep it.
-- Unit: extend `src/main/runtime/rpc/methods/github.test.ts` and/or `src/main/runtime/orca-runtime.test.ts` for `noCache` schema/forwarding.
+- Unit: extend `src/main/runtime/rpc/methods/github.test.ts` and/or `src/main/runtime/yiru-runtime.test.ts` for `noCache` schema/forwarding.
 - Typecheck: `pnpm typecheck`.
 - Lint: `pnpm lint`.
 - Electron validation: create an issue only in a throwaway/test repo if available; otherwise validate the refresh behavior with mocked/local unit tests and capture the Tasks issue list state without mutating live data.

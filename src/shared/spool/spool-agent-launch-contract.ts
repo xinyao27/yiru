@@ -2,7 +2,7 @@ import { z } from 'zod'
 import type { TuiAgent } from '../types'
 
 // Why: Spool peers must opt into new wire values through a protocol-version change;
-// deriving this list from Orca's global catalog would silently widen older contracts.
+// deriving this list from Yiru's global catalog would silently widen older contracts.
 export const SPOOL_AGENT_LAUNCH_IDS = [
   'claude',
   'claude-agent-teams',

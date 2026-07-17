@@ -2,11 +2,11 @@
 
 ## Problem
 
-- [TaskPage.tsx](/Users/jinwoohong/orca/workspaces/orca/tasks-page-parity/src/renderer/src/components/TaskPage.tsx:1025) renders `GHStatusCell` with only `Open` and `Closed`.
-- [TaskPage.tsx](/Users/jinwoohong/orca/workspaces/orca/tasks-page-parity/src/renderer/src/components/TaskPage.tsx:1064) sends `{ state: 'closed' }`, so the list path cannot choose GitHub close reasons.
-- [TaskPage.tsx](/Users/jinwoohong/orca/workspaces/orca/tasks-page-parity/src/renderer/src/components/TaskPage.tsx:1137) styles closed issues with rose/destructive color, while GitHub treats closing as a neutral/purple completion action rather than a delete/error action.
-- [GitHubItemDialog.tsx](/Users/jinwoohong/orca/workspaces/orca/tasks-page-parity/src/renderer/src/components/GitHubItemDialog.tsx:4960) has a separate issue-detail status popover; it must expose the same close reasons so opening an issue from Tasks does not fall back to the old Open/Closed-only UI.
-- [GitHubIssueCommentComposer.tsx](/Users/jinwoohong/orca/workspaces/orca/tasks-page-parity/src/renderer/src/components/github/GitHubIssueCommentComposer.tsx:188) already supports close reasons in the detail composer, but the Tasks list does not.
+- [TaskPage.tsx](/Users/jinwoohong/yiru/workspaces/yiru/tasks-page-parity/src/renderer/src/components/TaskPage.tsx:1025) renders `GHStatusCell` with only `Open` and `Closed`.
+- [TaskPage.tsx](/Users/jinwoohong/yiru/workspaces/yiru/tasks-page-parity/src/renderer/src/components/TaskPage.tsx:1064) sends `{ state: 'closed' }`, so the list path cannot choose GitHub close reasons.
+- [TaskPage.tsx](/Users/jinwoohong/yiru/workspaces/yiru/tasks-page-parity/src/renderer/src/components/TaskPage.tsx:1137) styles closed issues with rose/destructive color, while GitHub treats closing as a neutral/purple completion action rather than a delete/error action.
+- [GitHubItemDialog.tsx](/Users/jinwoohong/yiru/workspaces/yiru/tasks-page-parity/src/renderer/src/components/GitHubItemDialog.tsx:4960) has a separate issue-detail status popover; it must expose the same close reasons so opening an issue from Tasks does not fall back to the old Open/Closed-only UI.
+- [GitHubIssueCommentComposer.tsx](/Users/jinwoohong/yiru/workspaces/yiru/tasks-page-parity/src/renderer/src/components/github/GitHubIssueCommentComposer.tsx:188) already supports close reasons in the detail composer, but the Tasks list does not.
 
 ## Goal
 
@@ -39,11 +39,11 @@ Bring the GitHub Tasks list status menu closer to GitHub:
 
 ## API Notes
 
-- The local path in [issues.ts](/Users/jinwoohong/orca/workspaces/orca/tasks-page-parity/src/main/github/issues.ts:231) already closes issues with `gh issue close`. Preserve that model and pass:
+- The local path in [issues.ts](/Users/jinwoohong/yiru/workspaces/yiru/tasks-page-parity/src/main/github/issues.ts:231) already closes issues with `gh issue close`. Preserve that model and pass:
   - `--reason completed` for `stateReason: 'completed'`
   - `--reason "not planned"` for `stateReason: 'not_planned'`
   - `--duplicate-of <number>` for `stateReason: 'duplicate'` with `duplicateOf`
-- The slug path in [mutations.ts](/Users/jinwoohong/orca/workspaces/orca/tasks-page-parity/src/main/github/project-view/mutations.ts:160) must not implement duplicates by PATCHing `duplicate_of` on `repos/{owner}/{repo}/issues/{n}`. `gh issue close --duplicate-of` is the supported CLI surface already used by the path-based mutation, so slug-addressed state changes should use `gh issue close/reopen --repo owner/repo` for state and reserve REST PATCH for title/body.
+- The slug path in [mutations.ts](/Users/jinwoohong/yiru/workspaces/yiru/tasks-page-parity/src/main/github/project-view/mutations.ts:160) must not implement duplicates by PATCHing `duplicate_of` on `repos/{owner}/{repo}/issues/{n}`. `gh issue close --duplicate-of` is the supported CLI surface already used by the path-based mutation, so slug-addressed state changes should use `gh issue close/reopen --repo owner/repo` for state and reserve REST PATCH for title/body.
 - When `stateReason: 'duplicate'` is sent without a valid `duplicateOf`, reject it before dispatch. Do not silently downgrade to plain closed or `--reason duplicate`, because GitHub's duplicate UX expects the target issue to be recorded.
 - Keep `state_reason` REST PATCH only for non-duplicate close reasons if the implementation deliberately stays on REST for completed/not-planned. The simpler consistency target is to route all slug-addressed state changes through `gh issue close/reopen`.
 
@@ -134,4 +134,4 @@ Bring the GitHub Tasks list status menu closer to GitHub:
   4. Tasks header/search smoke.
 - Residual risks:
   - Duplicate target search is limited to loaded Tasks cache candidates, with exact-number fallback for unloaded same-repository issues.
-  - Other open Orca windows may show stale status until their normal GitHub Tasks data refresh runs.
+  - Other open Yiru windows may show stale status until their normal GitHub Tasks data refresh runs.

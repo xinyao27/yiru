@@ -5,7 +5,7 @@
 The built-in browser does not behave like a normal desktop browser when a page downloads a file.
 
 - `src/main/browser/browser-session-registry.ts:553` installs a `will-download` handler for browser sessions.
-- `src/main/browser/browser-manager.ts:952` pauses every download before Orca has a save path.
+- `src/main/browser/browser-manager.ts:952` pauses every download before Yiru has a save path.
 - `src/renderer/src/components/browser-pane/BrowserPane.tsx:4915` shows a `Save` / `Cancel` prompt instead of starting the download.
 - `src/main/ipc/browser.ts:342` opens a native save dialog after the renderer clicks `Save`.
 - `src/main/browser/browser-manager.ts:1026` calls `DownloadItem.setSavePath()` only after that renderer + dialog round trip.
@@ -15,7 +15,7 @@ That late path assignment explains the "clicked Save, still did not save" failur
 
 ## Root Cause
 
-Orca treats downloads as renderer-approved actions. Electron treats the destination as a main-process `will-download` decision. The current flow crosses that boundary too late: it pauses the download, asks the renderer to approve it, asks the OS where to save it, and only then sets the save path.
+Yiru treats downloads as renderer-approved actions. Electron treats the destination as a main-process `will-download` decision. The current flow crosses that boundary too late: it pauses the download, asks the renderer to approve it, asks the OS where to save it, and only then sets the save path.
 
 ## Goal
 
@@ -50,7 +50,7 @@ Make built-in browser downloads feel like a normal browser:
    - keys reservations by a normalized absolute path, with platform-aware case folding where the target filesystem is conventionally case-insensitive, so `Report.csv` and `report.csv` cannot collide on Windows;
    - caps suffix attempts and fails the download with a clear error instead of spinning forever in a crowded Downloads directory.
 
-   Do not create a placeholder file just to reserve the path: Electron may treat an existing target as an overwrite. The in-memory reservation prevents Orca-internal concurrent collisions; an external process can still create the same path after the check, so this remains best-effort at the filesystem boundary.
+   Do not create a placeholder file just to reserve the path: Electron may treat an existing target as an overwrite. The in-memory reservation prevents Yiru-internal concurrent collisions; an external process can still create the same path after the check, so this remains best-effort at the filesystem boundary.
 
 2. **Set the destination during `will-download`**
 
@@ -99,7 +99,7 @@ Browser session will-download
 ## Edge Cases
 
 - Duplicate filenames must not overwrite existing files.
-- Simultaneous same-name downloads in the same Orca process must not choose the same path before either file exists.
+- Simultaneous same-name downloads in the same Yiru process must not choose the same path before either file exists.
 - Same-name reservation checks must respect platform path identity, including case-insensitive collisions on Windows.
 - External filesystem races between path selection and Chromium's file creation are unavoidable with `setSavePath()`; treat them as residual risk, not a guarantee.
 - Path traversal or separator-like filenames must collapse to a safe basename.
@@ -159,7 +159,7 @@ Stage 5 must capture:
 - Architecture/data flow: Main owns destination choice and file writes because Electron requires `setSavePath()` during `will-download`. Renderer owns only display and user actions (`Cancel`, `Open`, `Show`, dismiss). Existing session policy installation remains the entry point; existing shell bridges handle file actions. Browser web clients remain unchanged.
 - Failure modes covered:
   - Late `setSavePath()` is removed by assigning the path synchronously in `will-download`.
-  - Duplicate filenames use existing-file checks plus active path reservations instead of overwriting each other inside Orca.
+  - Duplicate filenames use existing-file checks plus active path reservations instead of overwriting each other inside Yiru.
   - Unsafe or empty filenames are normalized before `path.join`.
   - Downloads starting or finishing before tab registration are snapshotted and flushed in order.
   - Queued downloads are canceled if their guest is destroyed or retired before registration.
@@ -180,4 +180,4 @@ Stage 5 must capture:
   3. Repeat same-name download completed with distinct filename.
   4. Multiple downloads visible or capped as designed.
   5. Browser toolbar after dismissing download chrome.
-- Residual risks: Headless Electron may not reliably prove absence of a native save dialog; validation should instead verify no Orca `Save` prompt appears and the file lands in Downloads. If the OS Downloads path is redirected or unavailable, behavior depends on Electron's `app.getPath('downloads')` result.
+- Residual risks: Headless Electron may not reliably prove absence of a native save dialog; validation should instead verify no Yiru `Save` prompt appears and the file lands in Downloads. If the OS Downloads path is redirected or unavailable, behavior depends on Electron's `app.getPath('downloads')` result.

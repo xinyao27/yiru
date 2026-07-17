@@ -20,8 +20,8 @@ globalThis.window = { api: { gh: apiMocks } }
 function makeRepo(overrides: Partial<Repo> = {}): Repo {
   return {
     id: 'repo-1',
-    path: '/workspace/orca',
-    displayName: 'orca',
+    path: '/workspace/yiru',
+    displayName: 'yiru',
     badgeColor: '#2563eb',
     addedAt: 1,
     kind: 'git',
@@ -36,16 +36,16 @@ describe('repository GitHub avatar resolution', () => {
   })
 
   it('uses stored upstream by default to avoid unnecessary live checks', async () => {
-    const repo = makeRepo({ upstream: { owner: 'stablyai', repo: 'orca' } })
+    const repo = makeRepo({ upstream: { owner: 'stablyai', repo: 'yiru' } })
 
     await expect(resolveRepositoryGitHubAvatar({ kind: 'local' }, repo)).resolves.toEqual({
       repoIcon: {
         type: 'image',
         src: 'https://github.com/stablyai.png?size=64',
         source: 'github',
-        label: 'stablyai/orca'
+        label: 'stablyai/yiru'
       },
-      upstream: { owner: 'stablyai', repo: 'orca' }
+      upstream: { owner: 'stablyai', repo: 'yiru' }
     })
 
     expect(apiMocks.repoUpstream).not.toHaveBeenCalled()
@@ -61,11 +61,11 @@ describe('repository GitHub avatar resolution', () => {
         type: 'image',
         src: 'https://github.com/stablyai.png?size=64',
         source: 'github',
-        label: 'stablyai/orca'
+        label: 'stablyai/yiru'
       }
     })
     apiMocks.repoUpstream.mockResolvedValueOnce(null)
-    apiMocks.repoSlug.mockResolvedValueOnce({ owner: 'parkerrex', repo: 'orca' })
+    apiMocks.repoSlug.mockResolvedValueOnce({ owner: 'parkerrex', repo: 'yiru' })
 
     const resolution = await resolveRepositoryGitHubAvatar({ kind: 'local' }, repo, {
       forceLive: true
@@ -76,16 +76,16 @@ describe('repository GitHub avatar resolution', () => {
         type: 'image',
         src: 'https://github.com/parkerrex.png?size=64',
         source: 'github',
-        label: 'parkerrex/orca'
+        label: 'parkerrex/yiru'
       },
       upstream: null
     })
     expect(apiMocks.repoUpstream).toHaveBeenCalledExactlyOnceWith({
-      repoPath: '/workspace/orca',
+      repoPath: '/workspace/yiru',
       repoId: 'repo-1'
     })
     expect(apiMocks.repoSlug).toHaveBeenCalledExactlyOnceWith({
-      repoPath: '/workspace/orca',
+      repoPath: '/workspace/yiru',
       repoId: 'repo-1'
     })
     // upstream stays null (unchanged); only the avatar advances to the new owner.
@@ -94,7 +94,7 @@ describe('repository GitHub avatar resolution', () => {
         type: 'image',
         src: 'https://github.com/parkerrex.png?size=64',
         source: 'github',
-        label: 'parkerrex/orca'
+        label: 'parkerrex/yiru'
       }
     })
   })
@@ -105,7 +105,7 @@ describe('repository GitHub avatar resolution', () => {
         type: 'image',
         src: 'https://github.com/stablyai.png?size=64',
         source: 'github',
-        label: 'stablyai/orca'
+        label: 'stablyai/yiru'
       }
     })
 
@@ -130,17 +130,17 @@ describe('repository GitHub avatar resolution', () => {
     // A fork whose avatar tracks its parent org. The live upstream probe fails
     // (offline/unauthed → null), which must NOT downgrade to the origin slug.
     const repo = makeRepo({
-      upstream: { owner: 'stablyai', repo: 'orca' },
+      upstream: { owner: 'stablyai', repo: 'yiru' },
       repoIcon: {
         type: 'image',
         src: 'https://github.com/stablyai.png?size=64',
         source: 'github',
-        label: 'stablyai/orca'
+        label: 'stablyai/yiru'
       }
     })
     apiMocks.repoUpstream.mockResolvedValueOnce(null)
     // The fork's own origin owner — the value we must NOT persist over the parent.
-    apiMocks.repoSlug.mockResolvedValueOnce({ owner: 'parkerrex', repo: 'orca' })
+    apiMocks.repoSlug.mockResolvedValueOnce({ owner: 'parkerrex', repo: 'yiru' })
 
     const resolution = await resolveRepositoryGitHubAvatar({ kind: 'local' }, repo, {
       forceLive: true
@@ -151,9 +151,9 @@ describe('repository GitHub avatar resolution', () => {
         type: 'image',
         src: 'https://github.com/stablyai.png?size=64',
         source: 'github',
-        label: 'stablyai/orca'
+        label: 'stablyai/yiru'
       },
-      upstream: { owner: 'stablyai', repo: 'orca' }
+      upstream: { owner: 'stablyai', repo: 'yiru' }
     })
     // The origin slug must never be consulted once we fall back to the known parent.
     expect(apiMocks.repoSlug).not.toHaveBeenCalled()

@@ -58,7 +58,7 @@ describe('startup ordering', () => {
 
     // Why: the barrier fails open, so the serve-ready payload must carry the
     // reconciliation state and the bounded wait must be traceable via a milestone.
-    const readyStart = source.indexOf("type: 'orca_server_ready'")
+    const readyStart = source.indexOf("type: 'yiru_server_ready'")
     const readyEnd = source.indexOf('pairing: pairing.available', readyStart)
     const readyPayload = source.slice(readyStart, readyEnd)
     expect(readyPayload).toContain('managedWslCliReconciliation: managedWslCliReconciliationStatus')

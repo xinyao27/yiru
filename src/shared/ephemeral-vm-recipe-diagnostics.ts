@@ -16,7 +16,7 @@ export function getEphemeralVmRecipeResultWarnings(
   result: EphemeralVmRecipeResult
 ): EphemeralVmRecipeResultWarning[] {
   const connection = getEphemeralVmRecipeResultConnection(result)
-  if (connection.type !== 'orca-server') {
+  if (connection.type !== 'yiru-server') {
     return []
   }
   const pairing = parsePairingCode(connection.pairingCode)
@@ -39,7 +39,7 @@ export function redactEphemeralVmRecipeDiagnosticText(text: string): string {
     return text
   }
   return text
-    .replace(/orca:\/\/pair\?code=[A-Za-z0-9_-]+/g, 'orca://pair?code=[redacted]')
+    .replace(/yiru:\/\/pair\?code=[A-Za-z0-9_-]+/g, 'yiru://pair?code=[redacted]')
     .replace(
       /("(?:pairingCode|deviceToken|publicKeyB64|token|secret|password|apiKey|accessToken|identityFile|identityAgent|proxyCommand)"\s*:\s*)"[^"]*"/gi,
       '$1"[redacted]"'
@@ -59,14 +59,14 @@ export function redactEphemeralVmRecipeResultForDiagnostics(
   }
   return {
     ...result,
-    pairingCode: 'orca://pair?code=[redacted]',
+    pairingCode: 'yiru://pair?code=[redacted]',
     ...(userData ? { userData } : {})
   }
 }
 
 function redactConnection(connection: EphemeralVmRecipeConnection): EphemeralVmRecipeConnection {
-  if (connection.type === 'orca-server') {
-    return { ...connection, pairingCode: 'orca://pair?code=[redacted]' }
+  if (connection.type === 'yiru-server') {
+    return { ...connection, pairingCode: 'yiru://pair?code=[redacted]' }
   }
   return {
     ...connection,
