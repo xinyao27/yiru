@@ -17,7 +17,7 @@
  *     tests/e2e/source-control-large-file-count.spec.ts \
  *     --config tests/playwright.config.ts --project electron-headless
  */
-import type { ElectronApplication, Page } from '@stablyai/playwright-test'
+import type { ElectronApplication, Page } from '@playwright/test'
 import { test, expect } from './helpers/yiru-app'
 import { waitForSessionReady } from './helpers/store'
 import { createLargeFileCountRepo, removeLargeFileCountRepo } from './large-file-count-fixtures'

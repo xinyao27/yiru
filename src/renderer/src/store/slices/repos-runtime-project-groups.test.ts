@@ -27,9 +27,9 @@ beforeEach(() => {
 describe('repo slice runtime project groups', () => {
   it('keeps runtime copies of a grouped canonical project in the same project group', async () => {
     const gitRemoteIdentity = {
-      canonicalKey: 'github.com/stablyai/yiru',
+      canonicalKey: 'github.com/xinyao27/yiru',
       remoteName: 'origin',
-      remoteUrl: 'https://github.com/stablyai/yiru.git'
+      remoteUrl: 'https://github.com/xinyao27/yiru.git'
     }
     const localYiru: Repo = {
       id: 'local-yiru',

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { _electron as electron } from '@stablyai/playwright-test'
+import { _electron as electron } from '@playwright/test'
 import { execFileSync, spawnSync } from 'node:child_process'
 import { existsSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'

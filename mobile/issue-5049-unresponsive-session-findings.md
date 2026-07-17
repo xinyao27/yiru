@@ -1,7 +1,7 @@
 # Issue #5049: Android Remote Session Unresponsiveness — Findings
 
 Date: 2026-06-09
-Issue: https://github.com/stablyai/yiru/issues/5049
+Reference: legacy issue #5049
 
 ## Reported symptoms
 

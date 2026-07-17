@@ -110,24 +110,24 @@ describe('project host setup projection', () => {
         id: 'local-repo',
         path: '/Users/alice/yiru',
         displayName: 'Yiru',
-        upstream: { owner: 'StablyAI', repo: 'Yiru' }
+        upstream: { owner: 'xinyao27', repo: 'Yiru' }
       }),
       repo({
         id: 'remote-repo',
         path: '/home/alice/yiru',
         displayName: 'yiru',
         connectionId: 'gpu-vm',
-        upstream: { owner: 'stablyai', repo: 'yiru' }
+        upstream: { owner: 'xinyao27', repo: 'yiru' }
       })
     ])
 
     expect(projection.projects).toHaveLength(1)
     expect(projection.projects[0]).toMatchObject({
-      id: 'github:stablyai/yiru',
+      id: 'github:xinyao27/yiru',
       sourceRepoIds: ['local-repo', 'remote-repo'],
-      providerIdentity: { provider: 'github', owner: 'StablyAI', repo: 'Yiru' }
+      providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'Yiru' }
     })
-    expect(getProjectHostSetupsForProject(projection.setups, 'github:stablyai/yiru')).toHaveLength(
+    expect(getProjectHostSetupsForProject(projection.setups, 'github:xinyao27/yiru')).toHaveLength(
       2
     )
   })
@@ -140,9 +140,9 @@ describe('project host setup projection', () => {
         displayName: 'Yiru',
         repoIcon: {
           type: 'image',
-          src: 'https://github.com/stablyai.png?size=64',
+          src: 'https://github.com/xinyao27.png?size=64',
           source: 'github',
-          label: 'stablyai/yiru'
+          label: 'xinyao27/yiru'
         }
       }),
       repo({
@@ -152,20 +152,20 @@ describe('project host setup projection', () => {
         connectionId: 'gpu-vm',
         repoIcon: {
           type: 'image',
-          src: 'https://github.com/stablyai.png?size=64',
+          src: 'https://github.com/xinyao27.png?size=64',
           source: 'github',
-          label: 'StablyAI/Yiru'
+          label: 'xinyao27/Yiru'
         }
       })
     ])
 
     expect(projection.projects).toHaveLength(1)
     expect(projection.projects[0]).toMatchObject({
-      id: 'github:stablyai/yiru',
+      id: 'github:xinyao27/yiru',
       sourceRepoIds: ['local-repo', 'remote-repo'],
-      providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+      providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
     })
-    expect(getProjectHostSetupsForProject(projection.setups, 'github:stablyai/yiru')).toHaveLength(
+    expect(getProjectHostSetupsForProject(projection.setups, 'github:xinyao27/yiru')).toHaveLength(
       2
     )
   })
@@ -177,9 +177,9 @@ describe('project host setup projection', () => {
         path: '/Users/alice/stably/yiru',
         displayName: 'yiru',
         gitRemoteIdentity: {
-          canonicalKey: 'github.com/stablyai/yiru',
+          canonicalKey: 'github.com/xinyao27/yiru',
           remoteName: 'origin',
-          remoteUrl: 'git@github.com:stablyai/yiru.git'
+          remoteUrl: 'git@github.com:xinyao27/yiru.git'
         }
       }),
       repo({
@@ -188,19 +188,19 @@ describe('project host setup projection', () => {
         displayName: 're-enable-webgl-for-remote-runtime-terminals',
         repoIcon: {
           type: 'image',
-          src: 'https://github.com/stablyai.png?size=64',
+          src: 'https://github.com/xinyao27.png?size=64',
           source: 'github',
-          label: 'stablyai/yiru'
+          label: 'xinyao27/yiru'
         }
       })
     ])
 
     expect(projection.projects).toHaveLength(1)
     expect(projection.projects[0]).toMatchObject({
-      id: 'github:stablyai/yiru',
+      id: 'github:xinyao27/yiru',
       displayName: 'yiru',
       sourceRepoIds: ['canonical-local-repo', 'old-branch-checkout'],
-      providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+      providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
     })
   })
 
@@ -340,7 +340,7 @@ describe('project host setup projection', () => {
         id: 'repo-1',
         path: '/Users/alice/yiru',
         displayName: 'yiru',
-        upstream: { owner: 'stablyai', repo: 42 } as never
+        upstream: { owner: 'xinyao27', repo: 42 } as never
       })
     ])
 
@@ -354,12 +354,12 @@ describe('project host setup projection', () => {
       path: '/home/alice/yiru',
       displayName: 'yiru',
       connectionId: 'openclaw 2',
-      upstream: { owner: 'stablyai', repo: 'yiru' }
+      upstream: { owner: 'xinyao27', repo: 'yiru' }
     })
     const projection = projectHostSetupProjectionFromRepos([targetRepo])
 
     expect(getProjectHostSetupWorktreeMeta(projection.setups, targetRepo)).toEqual({
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'ssh:openclaw%202',
       projectHostSetupId: 'remote-repo'
     })
@@ -372,7 +372,7 @@ describe('isGitHubBackedRepo', () => {
       id: 'r',
       path: '/r',
       displayName: 'r',
-      upstream: { owner: 'stablyai', repo: 'yiru' }
+      upstream: { owner: 'xinyao27', repo: 'yiru' }
     })
     expect(isGitHubBackedRepo(target)).toBe(true)
   })
@@ -384,9 +384,9 @@ describe('isGitHubBackedRepo', () => {
       displayName: 'r',
       repoIcon: {
         type: 'image',
-        src: 'https://github.com/stablyai.png?size=64',
+        src: 'https://github.com/xinyao27.png?size=64',
         source: 'github',
-        label: 'stablyai/yiru'
+        label: 'xinyao27/yiru'
       }
     })
     expect(isGitHubBackedRepo(target)).toBe(true)

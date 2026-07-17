@@ -306,19 +306,19 @@ describe('store selectors', () => {
         id: 'local-yiru',
         path: '/Users/alice/stably/yiru',
         displayName: 'yiru',
-        upstream: { owner: 'stablyai', repo: 'yiru' }
+        upstream: { owner: 'xinyao27', repo: 'yiru' }
       }),
       makeRepo({
         id: 'vm-yiru',
         path: '/vercel/sandbox/yiru',
         displayName: 'yiru',
-        upstream: { owner: 'stablyai', repo: 'yiru' },
+        upstream: { owner: 'xinyao27', repo: 'yiru' },
         executionHostId: toRuntimeExecutionHostId('vm-env')
       })
     ]
     const projects = [
       {
-        id: 'github:stablyai/yiru',
+        id: 'github:xinyao27/yiru',
         displayName: 'yiru',
         badgeColor: '#737373',
         sourceRepoIds: ['local-yiru'],
@@ -337,7 +337,7 @@ describe('store selectors', () => {
     const projectHostSetups = [
       {
         id: 'local-setup',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'local' as const,
         repoId: 'local-yiru',
         path: '/Users/alice/stably/yiru',
@@ -367,11 +367,11 @@ describe('store selectors', () => {
       projectHostSetups
     })
 
-    expect(projection.projects.map((project) => project.id)).toEqual(['github:stablyai/yiru'])
+    expect(projection.projects.map((project) => project.id)).toEqual(['github:xinyao27/yiru'])
     expect(projection.setups).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ id: 'local-setup', projectId: 'github:stablyai/yiru' }),
-        expect.objectContaining({ id: 'vm-setup', projectId: 'github:stablyai/yiru' })
+        expect.objectContaining({ id: 'local-setup', projectId: 'github:xinyao27/yiru' }),
+        expect.objectContaining({ id: 'vm-setup', projectId: 'github:xinyao27/yiru' })
       ])
     )
   })
@@ -382,7 +382,7 @@ describe('store selectors', () => {
         id: 'repo-1',
         path: '/Users/alice/yiru',
         displayName: 'yiru',
-        upstream: { owner: 'stablyai', repo: 'yiru' }
+        upstream: { owner: 'xinyao27', repo: 'yiru' }
       })
     ]
 
@@ -394,14 +394,14 @@ describe('store selectors', () => {
 
     expect(projection.projects).toEqual([
       expect.objectContaining({
-        id: 'github:stablyai/yiru',
+        id: 'github:xinyao27/yiru',
         sourceRepoIds: ['repo-1']
       })
     ])
     expect(projection.setups).toEqual([
       expect.objectContaining({
         id: 'repo-1',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         repoId: 'repo-1',
         hostId: 'local',
         path: '/Users/alice/yiru'

@@ -3963,10 +3963,8 @@
           "5b120b9634": "Enviar de forma anónima",
           "c9e5ea0791": "GitHub:",
           "d46ddd66fc": "¿Qué podríamos mejorar?",
-          "3460258a54": "Sigue en X",
-          "26108d3699": "Únete a Discord",
           "d245c4ef6c": "Issues de GitHub",
-          "9b33530b3d": "Otras formas de contactarnos",
+          "9b33530b3d": "Informa de errores y solicita funciones",
           "a828fa4aee": "Comparte qué funciona, qué está roto o qué debería hacer Yiru después.",
           "0eb643f07f": "Enviar feedback",
           "60b721e857": "No se pudo enviar el feedback. Inténtalo de nuevo.",
@@ -4026,7 +4024,6 @@
         "SidebarSettingsHelpMenu": {
           "ad3d3ed7f1": "Reiniciar Yiru",
           "29c56f30ee": "Buscar actualizaciones",
-          "eb9884e55b": "Discord",
           "5687ab246a": "GitHub",
           "5f83d86d92": "Changelog",
           "cdc87f897e": "Documentación",
@@ -4038,8 +4035,7 @@
           "5161eef55d": "Reiniciando Yiru...",
           "d396773ef0": "comprobando",
           "f8a2c91d4e": "Milestones",
-          "b7e4d2a19c": "Onboarding",
-          "c4f8e1b72a": "X"
+          "b7e4d2a19c": "Onboarding"
         },
         "SidebarToolbar": {
           "19e32d0e5f": "Abrir el selector de carpetas para agregar un proyecto",
@@ -6158,9 +6154,7 @@
         },
         "MobileSettingsPane": {
           "9a3c280e49": "GitHub Releases",
-          "b0088412a1": "o el APK de Android desde",
-          "b5a2ed83ff": "App Store",
-          "c8491c17ef": "Controla Yiru desde tu teléfono escaneando un código QR. Beta/vista previa temprana: espera errores y cambios importantes. Obtén la app para iOS en",
+          "c8491c17ef": "Controla Yiru desde tu teléfono escaneando un código QR. Compilaciones móviles:",
           "e7a3ae8c4e": "Móvil",
           "174f4a3c6d": "Controla terminales y agentes desde tu teléfono.",
           "1de96ec8a6": "Mostrar botón de Yiru Mobile",
@@ -9451,9 +9445,8 @@
         "MobileRelayBetaAvailability": {
           "about": "Acerca de la beta de Yiru Relay",
           "beta": "Beta",
-          "availability": "Disponible en",
-          "testFlight": "TestFlight",
-          "androidApk": "APK de Android"
+          "availability": "Compilaciones móviles:",
+          "githubReleases": "GitHub Releases"
         }
       },
       "right": {
@@ -10932,12 +10925,7 @@
           "a6cffbbb0b": "Generar código",
           "e59a252eca": "Regenerar código",
           "d0b52871ce": "Tus teléfonos están emparejados.",
-          "051978a785": "Tu teléfono está emparejado.",
-          "channel": {
-            "group": "Canal de versión",
-            "preview": "Vista previa",
-            "stable": "Estable"
-          }
+          "051978a785": "Tu teléfono está emparejado."
         },
         "MobilePage": {
           "e17393c6a3": "Vista previa del teléfono",
@@ -10970,13 +10958,8 @@
         "mobile": {
           "platform": {
             "copy": {
-              "2a532d6fd7": "Escanea con la cámara de tu Android para descargar el APK más reciente desde GitHub Releases.",
-              "432db52b73": "Escanea con la cámara de tu iPhone para abrir la App Store.",
-              "preview": {
-                "tagline": "Las funciones más recientes, actualizadas a diario."
-              },
-              "stable": {
-                "tagline": "La versión pública, actualizada semanalmente."
+              "releases": {
+                "cta": "Ver compilaciones móviles"
               }
             }
           }

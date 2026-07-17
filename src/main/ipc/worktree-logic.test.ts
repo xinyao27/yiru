@@ -341,7 +341,7 @@ describe('mergeWorktree', () => {
       linkedIssue: 42,
       linkedPR: 10,
       linkedLinearIssue: null,
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'ssh:openclaw-2' as const,
       projectHostSetupId: 'remote-repo',
       linkedGitLabMR: null,
@@ -363,7 +363,7 @@ describe('mergeWorktree', () => {
         createdAt: 123,
         executionTargetType: 'ssh' as const,
         executionTargetId: 'openclaw-2',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         repoId: 'repo1',
         hostId: 'ssh:openclaw-2' as const
       }
@@ -390,7 +390,7 @@ describe('mergeWorktree', () => {
       linkedAzureDevOpsPR: null,
       linkedGiteaPR: null,
       mobileDiffReview: undefined,
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'ssh:openclaw-2',
       projectHostSetupId: 'remote-repo',
       isArchived: true,
@@ -410,7 +410,7 @@ describe('mergeWorktree', () => {
         createdAt: 123,
         executionTargetType: 'ssh',
         executionTargetId: 'openclaw-2',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         repoId: 'repo1',
         hostId: 'ssh:openclaw-2'
       }

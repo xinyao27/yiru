@@ -147,7 +147,7 @@ export function patchPackagedProcessPath(): void {
         // Pi's vite-plus installer). GUI-launched Electron inherits a minimal PATH
         // without shell rc files, so these stay invisible to `which` probes — and
         // the Agents settings page reports them as "Not installed" even when the
-        // user can run them from Terminal. See stablyai/yiru#829.
+        // user can run them from Terminal. See legacy issue #829.
         join(home, '.opencode/bin'),
         join(home, '.vite-plus/bin')
       )

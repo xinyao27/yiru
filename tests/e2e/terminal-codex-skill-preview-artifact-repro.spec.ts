@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { realpathSync } from 'node:fs'
 import path from 'node:path'
-import type { ElectronApplication, Page, TestInfo } from '@stablyai/playwright-test'
+import type { ElectronApplication, Page, TestInfo } from '@playwright/test'
 import { test, expect } from './helpers/yiru-app'
 import { removeWorktreeViaStore } from './helpers/dead-terminal'
 import {

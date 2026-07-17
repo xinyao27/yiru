@@ -37,7 +37,7 @@ describe('Yiru cloud auth config', () => {
         orgEndpoint: 'https://yiru-cloud.example/v1/desktop/auth/org',
         logoutEndpoint: 'https://yiru-cloud.example/v1/desktop/auth/logout',
         relayTokenEndpoint: 'https://yiru-cloud.example/v1/desktop/auth/relay-token',
-        relayDirectorUrl: 'https://relay.onyiru.dev',
+        relayDirectorUrl: 'https://relay.yiru.ai',
         clientId: 'desktop-client',
         scope: 'openid profile email offline_access'
       }
@@ -48,16 +48,16 @@ describe('Yiru cloud auth config', () => {
     expect(getYiruCloudAuthConfig({}, true)).toEqual({
       configured: true,
       config: {
-        apiBaseUrl: 'https://login.onyiru.dev',
-        authorizeEndpoint: 'https://login.onyiru.dev/v1/desktop/auth/authorize',
-        sessionEndpoint: 'https://login.onyiru.dev/v1/desktop/auth/session',
-        refreshEndpoint: 'https://login.onyiru.dev/v1/desktop/auth/refresh',
-        capabilitiesEndpoint: 'https://login.onyiru.dev/v1/desktop/auth/capabilities',
-        profileEndpoint: 'https://login.onyiru.dev/v1/desktop/auth/profile',
-        orgEndpoint: 'https://login.onyiru.dev/v1/desktop/auth/org',
-        logoutEndpoint: 'https://login.onyiru.dev/v1/desktop/auth/logout',
-        relayTokenEndpoint: 'https://login.onyiru.dev/v1/desktop/auth/relay-token',
-        relayDirectorUrl: 'https://relay.onyiru.dev',
+        apiBaseUrl: 'https://login.yiru.ai',
+        authorizeEndpoint: 'https://login.yiru.ai/v1/desktop/auth/authorize',
+        sessionEndpoint: 'https://login.yiru.ai/v1/desktop/auth/session',
+        refreshEndpoint: 'https://login.yiru.ai/v1/desktop/auth/refresh',
+        capabilitiesEndpoint: 'https://login.yiru.ai/v1/desktop/auth/capabilities',
+        profileEndpoint: 'https://login.yiru.ai/v1/desktop/auth/profile',
+        orgEndpoint: 'https://login.yiru.ai/v1/desktop/auth/org',
+        logoutEndpoint: 'https://login.yiru.ai/v1/desktop/auth/logout',
+        relayTokenEndpoint: 'https://login.yiru.ai/v1/desktop/auth/relay-token',
+        relayDirectorUrl: 'https://relay.yiru.ai',
         clientId: 'yiru-desktop',
         scope: 'openid profile email offline_access'
       }

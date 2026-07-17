@@ -1316,11 +1316,9 @@ describe('registerPtyHandlers', () => {
       }))
 
       expect(env.YIRU_ENABLE_GIT_ATTRIBUTION).toBe('1')
-      expect(env.YIRU_GIT_COMMIT_TRAILER).toBe('Co-authored-by: Yiru <help@stably.ai>')
+      expect(env.YIRU_GIT_COMMIT_TRAILER).toBe('Co-authored-by: Yiru <noreply@yiru.ai>')
       expect(env.YIRU_GH_PR_FOOTER).toBe('Made with [Yiru](https://github.com/xinyao27/yiru) 🐋')
-      expect(env.YIRU_GH_ISSUE_FOOTER).toBe(
-        'Made with [Yiru](https://github.com/xinyao27/yiru) 🐋'
-      )
+      expect(env.YIRU_GH_ISSUE_FOOTER).toBe('Made with [Yiru](https://github.com/xinyao27/yiru) 🐋')
       expect(env.PATH).toContain(expectedAttributionShimDir())
     })
 

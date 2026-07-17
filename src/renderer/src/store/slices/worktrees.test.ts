@@ -1323,7 +1323,7 @@ describe('fetchWorktrees', () => {
       projectHostSetups: [
         {
           id: 'repo-remote',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           hostId: 'runtime:env-1',
           repoId: 'repo-remote',
           path: '/vercel/sandbox/yiru',
@@ -1348,7 +1348,7 @@ describe('fetchWorktrees', () => {
       {
         ...remote,
         hostId: 'runtime:env-1',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         projectHostSetupId: 'repo-remote'
       }
     ])
@@ -1356,7 +1356,7 @@ describe('fetchWorktrees', () => {
       expect.objectContaining({
         id: remote.id,
         hostId: 'runtime:env-1',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         projectHostSetupId: 'repo-remote'
       })
     ])
@@ -7283,15 +7283,15 @@ describe('pending worktree creation state', () => {
         taskSourceContext: {
           kind: 'task-source',
           provider: 'github',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           hostId: 'local',
           projectHostSetupId: 'setup-local',
           repoId: 'repo-local',
-          providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+          providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
         },
         workspaceRunContext: {
           kind: 'workspace-run',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           hostId: 'ssh:ssh-1',
           projectHostSetupId: 'setup-ssh',
           repoId: 'repo-ssh',

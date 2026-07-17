@@ -6,7 +6,7 @@ function makeRepo(overrides: Partial<Repo> = {}): Repo {
   return {
     id: 'repo-1',
     path: '/Users/test/src/yiru',
-    displayName: 'stablyai/yiru',
+    displayName: 'xinyao27/yiru',
     badgeColor: '#22c55e',
     addedAt: 0,
     ...overrides
@@ -34,8 +34,8 @@ describe('repo-search', () => {
 
   it('matches display names case-insensitively', () => {
     const repos = [
-      makeRepo({ id: '1', displayName: 'stablyai/yiru', path: '/repos/yiru' }),
-      makeRepo({ id: '2', displayName: 'stablyai/noqa', path: '/repos/noqa' })
+      makeRepo({ id: '1', displayName: 'xinyao27/yiru', path: '/repos/yiru' }),
+      makeRepo({ id: '2', displayName: 'xinyao27/noqa', path: '/repos/noqa' })
     ]
 
     expect(searchRepos(repos, 'YIRU').map((repo) => repo.id)).toEqual(['1'])

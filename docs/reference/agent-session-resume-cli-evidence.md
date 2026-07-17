@@ -2,7 +2,7 @@
 
 Date: June 5, 2026
 
-Scope: issue [stablyai/yiru#1796](https://github.com/stablyai/yiru/issues/1796), current worktree code, installed agent CLIs on this machine, cloned open-source CLI repos under `/tmp/yiru-agent-resume-research`, and official provider docs where available.
+Scope: legacy issue #1796, current worktree code, installed agent CLIs on this machine, cloned open-source CLI repos under `/tmp/yiru-agent-resume-research`, and official provider docs where available.
 
 ## Executive conclusion
 
@@ -48,18 +48,18 @@ Implementation implication: provider-session metadata must be extracted before n
 
 These exact binaries were available on this machine:
 
-| Agent | Version checked |
-| --- | --- |
-| Claude Code | `2.1.165` |
-| Codex | `codex-cli 0.137.0` |
-| Gemini | `0.44.0` |
-| OpenCode | `1.15.13` |
-| Cursor Agent | `2025.09.18-7ae6800` |
-| Antigravity | `1.0.5` |
-| Droid | `0.122.0` |
-| Grok | `grok 0.2.22 (967574cb117) [stable]` |
-| Pi | `0.72.1` |
-| Amp, Copilot, Command Code, Hermes | Not installed locally |
+| Agent                              | Version checked                      |
+| ---------------------------------- | ------------------------------------ |
+| Claude Code                        | `2.1.165`                            |
+| Codex                              | `codex-cli 0.137.0`                  |
+| Gemini                             | `0.44.0`                             |
+| OpenCode                           | `1.15.13`                            |
+| Cursor Agent                       | `2025.09.18-7ae6800`                 |
+| Antigravity                        | `1.0.5`                              |
+| Droid                              | `0.122.0`                            |
+| Grok                               | `grok 0.2.22 (967574cb117) [stable]` |
+| Pi                                 | `0.72.1`                             |
+| Amp, Copilot, Command Code, Hermes | Not installed locally                |
 
 ## Provider matrix
 
@@ -70,23 +70,23 @@ Legend:
 - `ID seen, resume not verified`: Yiru/source exposes an ID, but no exact resume CLI command was verified.
 - `Out of current hook scope`: Yiru has no current hook source for this TUI agent.
 
-| Agent | Resume command evidence | Exact ID source evidence | Current Yiru support status |
-| --- | --- | --- | --- |
-| Claude | `claude --resume <session_id>` verified by local `claude --help` and Anthropic CLI docs. | Claude hook docs show hook input includes `session_id` and `transcript_path`; current Yiru normalizer drops `session_id`. | Exact supported after adding provider-session metadata extraction. |
-| Codex | `codex resume <session_id>` verified by local help and cloned Codex source `codex-rs/utils/cli/src/resume_command.rs`. | Cloned Codex source `codex-rs/core/src/hook_runtime.rs` sends `session_id` on `SessionStart`, `PreToolUse`, `PermissionRequest`, and `PostToolUse` hook requests. | Exact supported after extraction. |
-| Gemini | `gemini --resume <session_id>` verified by local help and Gemini docs. | Gemini hooks reference says all hooks receive `session_id` and `transcript_path`. | Exact supported after extraction. |
-| Antigravity | `agy --conversation <uuid>` verified by local help and Antigravity docs. | Antigravity hook docs list `conversationId` as the active conversation UUID. | Exact supported after extraction. |
-| OpenCode | `opencode --session <sessionID>` verified by local help, official docs, and cloned OpenCode TUI source. | Yiru's OpenCode plugin already reads `event.properties?.sessionID` before posting. | Exact supported after preserving `sessionID`. |
-| Droid | `droid --resume <sessionId>` verified by local help and Factory CLI docs. | Factory hooks reference includes `session_id`; Yiru installs Droid hooks and already subscribes to `SessionStart`. | Exact supported after extraction. |
-| Grok | `grok --resume <SESSION_ID>` verified by local help. | Yiru already reads `sessionId`/`session_id` in `getGrokChatHistoryPath`, but only to locate chat history. | Exact supported after preserving that same ID. |
-| Cursor | `cursor-agent --resume <chatId>` and `cursor-agent resume` verified by local help and Cursor docs. | Current Yiru Cursor hook install deliberately omits `sessionStart`/`sessionEnd`; the subscribed event set does not currently prove a chat ID source. `cursor-agent create-chat` was locally verified to return a UUID, but preallocation for Yiru launches still needs an end-to-end test before relying on it. | Resume verified, ID capture missing. |
-| Pi | `pi --session <path|id>`, `pi --resume`, and `pi --continue` verified by local help and Pi docs. | Yiru's bundled Pi/OMP extension posts status events but does not include session file path, session UUID, or session name in the status payload. | Resume verified, ID capture missing. |
-| OMP | Same launch family as Pi in Yiru. | Yiru reuses Pi extension API shape and does not include exact session pointer. | Resume verified by inheritance only from Pi-like CLI contract; exact OMP ID capture missing. |
-| Amp | Yiru's managed plugin posts `threadId: event.thread.id`. | Amp is not installed locally, and no exact Amp CLI resume command was verified in this investigation. | ID seen, resume not verified. |
-| Hermes | Yiru's managed Hermes plugin selects `session_id` for session/LLM/tool events. | Hermes is not installed locally, and no exact Hermes CLI resume command was verified in this investigation. | ID seen, resume not verified. |
-| Copilot | Yiru installs broad Copilot hooks. | Local Copilot CLI not installed; no exact resume command or session ID contract was verified. | Not supported for exact resume yet. |
-| Command Code | Yiru installs hooks for `PreToolUse`, `PostToolUse`, and `Stop`. | Local Command Code CLI not installed; no exact resume command or session ID contract was verified. | Not supported for exact resume yet. |
-| openclaude, autohand, aider, goose, kilo, kiro, crush, aug, cline, codebuff, continue, kimi, mistral-vibe, qwen-code, rovo, openclaw | Not investigated to exact-resume standard. | Not in `HOOK_SOURCE_BY_PATHNAME` today. | Out of current hook scope. |
+| Agent                                                                                                                                | Resume command evidence                                                                                                | Exact ID source evidence                                                                                                                                                                                                                                                                                        | Current Yiru support status                                                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| Claude                                                                                                                               | `claude --resume <session_id>` verified by local `claude --help` and Anthropic CLI docs.                               | Claude hook docs show hook input includes `session_id` and `transcript_path`; current Yiru normalizer drops `session_id`.                                                                                                                                                                                       | Exact supported after adding provider-session metadata extraction.                                                                               |
+| Codex                                                                                                                                | `codex resume <session_id>` verified by local help and cloned Codex source `codex-rs/utils/cli/src/resume_command.rs`. | Cloned Codex source `codex-rs/core/src/hook_runtime.rs` sends `session_id` on `SessionStart`, `PreToolUse`, `PermissionRequest`, and `PostToolUse` hook requests.                                                                                                                                               | Exact supported after extraction.                                                                                                                |
+| Gemini                                                                                                                               | `gemini --resume <session_id>` verified by local help and Gemini docs.                                                 | Gemini hooks reference says all hooks receive `session_id` and `transcript_path`.                                                                                                                                                                                                                               | Exact supported after extraction.                                                                                                                |
+| Antigravity                                                                                                                          | `agy --conversation <uuid>` verified by local help and Antigravity docs.                                               | Antigravity hook docs list `conversationId` as the active conversation UUID.                                                                                                                                                                                                                                    | Exact supported after extraction.                                                                                                                |
+| OpenCode                                                                                                                             | `opencode --session <sessionID>` verified by local help, official docs, and cloned OpenCode TUI source.                | Yiru's OpenCode plugin already reads `event.properties?.sessionID` before posting.                                                                                                                                                                                                                              | Exact supported after preserving `sessionID`.                                                                                                    |
+| Droid                                                                                                                                | `droid --resume <sessionId>` verified by local help and Factory CLI docs.                                              | Factory hooks reference includes `session_id`; Yiru installs Droid hooks and already subscribes to `SessionStart`.                                                                                                                                                                                              | Exact supported after extraction.                                                                                                                |
+| Grok                                                                                                                                 | `grok --resume <SESSION_ID>` verified by local help.                                                                   | Yiru already reads `sessionId`/`session_id` in `getGrokChatHistoryPath`, but only to locate chat history.                                                                                                                                                                                                       | Exact supported after preserving that same ID.                                                                                                   |
+| Cursor                                                                                                                               | `cursor-agent --resume <chatId>` and `cursor-agent resume` verified by local help and Cursor docs.                     | Current Yiru Cursor hook install deliberately omits `sessionStart`/`sessionEnd`; the subscribed event set does not currently prove a chat ID source. `cursor-agent create-chat` was locally verified to return a UUID, but preallocation for Yiru launches still needs an end-to-end test before relying on it. | Resume verified, ID capture missing.                                                                                                             |
+| Pi                                                                                                                                   | `pi --session <path                                                                                                    | id>`, `pi --resume`, and `pi --continue` verified by local help and Pi docs.                                                                                                                                                                                                                                    | Yiru's bundled Pi/OMP extension posts status events but does not include session file path, session UUID, or session name in the status payload. | Resume verified, ID capture missing. |
+| OMP                                                                                                                                  | Same launch family as Pi in Yiru.                                                                                      | Yiru reuses Pi extension API shape and does not include exact session pointer.                                                                                                                                                                                                                                  | Resume verified by inheritance only from Pi-like CLI contract; exact OMP ID capture missing.                                                     |
+| Amp                                                                                                                                  | Yiru's managed plugin posts `threadId: event.thread.id`.                                                               | Amp is not installed locally, and no exact Amp CLI resume command was verified in this investigation.                                                                                                                                                                                                           | ID seen, resume not verified.                                                                                                                    |
+| Hermes                                                                                                                               | Yiru's managed Hermes plugin selects `session_id` for session/LLM/tool events.                                         | Hermes is not installed locally, and no exact Hermes CLI resume command was verified in this investigation.                                                                                                                                                                                                     | ID seen, resume not verified.                                                                                                                    |
+| Copilot                                                                                                                              | Yiru installs broad Copilot hooks.                                                                                     | Local Copilot CLI not installed; no exact resume command or session ID contract was verified.                                                                                                                                                                                                                   | Not supported for exact resume yet.                                                                                                              |
+| Command Code                                                                                                                         | Yiru installs hooks for `PreToolUse`, `PostToolUse`, and `Stop`.                                                       | Local Command Code CLI not installed; no exact resume command or session ID contract was verified.                                                                                                                                                                                                              | Not supported for exact resume yet.                                                                                                              |
+| openclaude, autohand, aider, goose, kilo, kiro, crush, aug, cline, codebuff, continue, kimi, mistral-vibe, qwen-code, rovo, openclaw | Not investigated to exact-resume standard.                                                                             | Not in `HOOK_SOURCE_BY_PATHNAME` today.                                                                                                                                                                                                                                                                         | Out of current hook scope.                                                                                                                       |
 
 ## Exact resume behavior by provider
 
@@ -266,17 +266,17 @@ Important constraints:
 
 This is the extraction map that is supported by the evidence above:
 
-| Hook source | Provider session field(s) to extract | Resume argv |
-| --- | --- | --- |
-| `claude` | `session_id` | `['claude', '--resume', id]` |
-| `codex` | `session_id` | `['codex', 'resume', id]` |
-| `gemini` | `session_id` | `['gemini', '--resume', id]` |
-| `antigravity` | `conversationId` | `['agy', '--conversation', id]` |
-| `opencode` | `sessionID` | `['opencode', '--session', id]` |
-| `droid` | `session_id` | `['droid', '--resume', id]` |
-| `grok` | `sessionId`, fallback `session_id` | `['grok', '--resume', id]` |
-| `amp` | `threadId` | not enabled until Amp resume command is verified |
-| `hermes` | `session_id` | not enabled until Hermes resume command is verified |
+| Hook source   | Provider session field(s) to extract | Resume argv                                         |
+| ------------- | ------------------------------------ | --------------------------------------------------- |
+| `claude`      | `session_id`                         | `['claude', '--resume', id]`                        |
+| `codex`       | `session_id`                         | `['codex', 'resume', id]`                           |
+| `gemini`      | `session_id`                         | `['gemini', '--resume', id]`                        |
+| `antigravity` | `conversationId`                     | `['agy', '--conversation', id]`                     |
+| `opencode`    | `sessionID`                          | `['opencode', '--session', id]`                     |
+| `droid`       | `session_id`                         | `['droid', '--resume', id]`                         |
+| `grok`        | `sessionId`, fallback `session_id`   | `['grok', '--resume', id]`                          |
+| `amp`         | `threadId`                           | not enabled until Amp resume command is verified    |
+| `hermes`      | `session_id`                         | not enabled until Hermes resume command is verified |
 
 ## Required implementation shape
 
@@ -327,7 +327,7 @@ Cloned source:
 
 Official docs:
 
-- GitHub issue: https://github.com/stablyai/yiru/issues/1796
+- Historical reference: legacy issue #1796
 - Claude CLI reference: https://docs.anthropic.com/en/docs/claude-code/cli-usage
 - Claude hooks reference: https://code.claude.com/docs/en/hooks
 - Gemini hooks reference: https://geminicli.com/docs/hooks/reference/

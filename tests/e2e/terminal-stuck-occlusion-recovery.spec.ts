@@ -13,7 +13,7 @@
  * claims hidden — which unlatches the gate and repaints the missed output from
  * the main-owned snapshot, WITHOUT a reload and WITHOUT any visibilitychange.
  */
-import type { Page } from '@stablyai/playwright-test'
+import type { Page } from '@playwright/test'
 import { test, expect } from './helpers/yiru-app'
 import { waitForSessionReady, waitForActiveWorktree, ensureTerminalVisible } from './helpers/store'
 import {

@@ -1,13 +1,11 @@
 <h1 align="center">
-  <a href="https://onYiru.dev"><img src="resources/build/icon.png" alt="Yiru" width="64" valign="middle" /></a> Yiru
+  <a href="https://yiru.ai"><img src="resources/build/icon.png" alt="Yiru" width="64" valign="middle" /></a> Yiru
 </h1>
 
 <p align="center">
   <a href="https://github.com/xinyao27/yiru/stargazers"><img src="https://badgen.net/github/stars/xinyao27/yiru?label=%E2%98%85" alt="GitHub stars" /></a>
   <a href="https://github.com/xinyao27/yiru/releases"><img src="docs/assets/readme-downloads.svg" alt="Total downloads across all releases" /></a>
   <img src="https://badgen.net/github/license/xinyao27/yiru" alt="License" />
-  <a href="https://discord.gg/fzjDKHxv8Q"><img src="https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white" alt="Join the Yiru Discord" /></a>
-  <a href="https://x.com/yiru_build"><img src="https://img.shields.io/badge/X-000000?logo=x&logoColor=white" alt="Follow Yiru on X" /></a>
   <img src="https://img.shields.io/badge/macOS%20%7C%20Windows%20%7C%20Linux-4493F8?style=flat-square" alt="Supported platforms: macOS, Windows, and Linux" />
 </p>
 
@@ -20,7 +18,7 @@
   Run Codex, ClaudeCode, OpenCode or Pi side-by-side — each in its own worktree, tracked in one place.
 </p>
 
-<h3 align="center"><a href="https://onyiru.dev/download"><ins>Download Yiru</ins></a></h3>
+<h3 align="center"><a href="https://yiru.ai/download"><ins>Download Yiru</ins></a></h3>
 
 <p align="center">
   <img src="docs/assets/yiru-hero.svg" alt="Yiru" width="960" />
@@ -36,7 +34,7 @@
 
 Monitor and steer your agents from your phone — get notified when an agent finishes and send follow-ups from anywhere.
 
-[iOS App Store](https://apps.apple.com/us/app/yiru/id6766130217) · [TestFlight](https://testflight.apple.com/join/YjeGMQBA) · [Android APK 0.0.31](https://github.com/xinyao27/yiru/releases/download/mobile-android-v0.0.31/app-release.apk) · [Docs →](https://www.onyiru.dev/docs/mobile)
+[Mobile docs →](https://yiru.ai/docs/mobile)
 
 </td>
 <td width="50%">
@@ -49,7 +47,7 @@ Monitor and steer your agents from your phone — get notified when an agent fin
 
 Fan one prompt across five agents, each in its own isolated git worktree — compare the results and merge the winner.
 
-[Docs →](https://www.onyiru.dev/docs/model/worktrees)
+[Docs →](https://yiru.ai/docs/model/worktrees)
 
 </td>
 <td width="50%">
@@ -62,7 +60,7 @@ Fan one prompt across five agents, each in its own isolated git worktree — com
 
 Ghostty-class terminals with WebGL rendering, infinite splits, and scrollback that survives restarts.
 
-[Docs →](https://www.onyiru.dev/docs/terminal)
+[Docs →](https://yiru.ai/docs/terminal)
 
 </td>
 <td width="50%">
@@ -75,7 +73,7 @@ Ghostty-class terminals with WebGL rendering, infinite splits, and scrollback th
 
 Click any UI element in a real Chromium window to send its HTML, CSS, and a cropped screenshot straight into your agent's prompt.
 
-[Docs →](https://www.onyiru.dev/docs/browser/design-mode)
+[Docs →](https://yiru.ai/docs/browser/design-mode)
 
 </td>
 <td width="50%">
@@ -88,7 +86,7 @@ Click any UI element in a real Chromium window to send its HTML, CSS, and a crop
 
 Browse PRs, issues, and project boards in-app — open a worktree from any task and review without a context switch.
 
-[Docs →](https://www.onyiru.dev/docs/review/linear)
+[Docs →](https://yiru.ai/docs/review/linear)
 
 </td>
 <td width="50%">
@@ -101,7 +99,7 @@ Browse PRs, issues, and project boards in-app — open a worktree from any task 
 
 Run agents on a beefy remote box with full file editing, git, and terminals — auto-reconnect and port forwarding included.
 
-[Docs →](https://www.onyiru.dev/docs/ssh)
+[Docs →](https://yiru.ai/docs/ssh)
 
 </td>
 <td width="50%">
@@ -114,7 +112,7 @@ Run agents on a beefy remote box with full file editing, git, and terminals — 
 
 Drop comments on any diff line and ship them back to the agent — review, edit, and commit without leaving Yiru.
 
-[Docs →](https://www.onyiru.dev/docs/review/annotate-ai-diff)
+[Docs →](https://yiru.ai/docs/review/annotate-ai-diff)
 
 </td>
 <td width="50%">
@@ -127,7 +125,7 @@ Drop comments on any diff line and ship them back to the agent — review, edit,
 
 VS Code's editor with autosave everywhere — drag files or images straight into an agent prompt.
 
-[Docs →](https://www.onyiru.dev/docs/editing/file-explorer)
+[Docs →](https://yiru.ai/docs/editing/file-explorer)
 
 </td>
 <td width="50%">
@@ -140,7 +138,7 @@ VS Code's editor with autosave everywhere — drag files or images straight into
 
 Agents drive Yiru too — script every workflow with `yiru worktree create`, `snapshot`, `click`, and `fill`.
 
-[Docs →](https://www.onyiru.dev/docs/cli/overview)
+[Docs →](https://yiru.ai/docs/cli/overview)
 
 </td>
 <td width="50%">
@@ -150,11 +148,11 @@ Agents drive Yiru too — script every workflow with `yiru worktree create`, `sn
 
 **Also in the box:**
 
-- **[Quick open](https://www.onyiru.dev/docs/model/quick-open)** — Search across worktrees, files, agents, commands, and repo context without leaving your flow.
-- **[Account switcher &amp; usage tracking](https://www.onyiru.dev/docs/agents/usage-tracking)** — See Claude and Codex usage and rate-limit resets, and hot-swap accounts without re-logging in.
-- **[Rich repo previews](https://www.onyiru.dev/docs/editing/markdown)** — Preview Markdown, images, PDFs, and repo docs in the workspace.
-- **[Computer Use](https://www.onyiru.dev/docs/cli/computer-use)** — Let agents operate desktop apps and visible UI when a workflow needs real interaction.
-- **[Notifications and unread state](https://www.onyiru.dev/docs/notifications)** — Know when an agent finishes or needs attention, then mark threads unread to come back later.
+- **[Quick open](https://yiru.ai/docs/model/quick-open)** — Search across worktrees, files, agents, commands, and repo context without leaving your flow.
+- **[Account switcher &amp; usage tracking](https://yiru.ai/docs/agents/usage-tracking)** — See Claude and Codex usage and rate-limit resets, and hot-swap accounts without re-logging in.
+- **[Rich repo previews](https://yiru.ai/docs/editing/markdown)** — Preview Markdown, images, PDFs, and repo docs in the workspace.
+- **[Computer Use](https://yiru.ai/docs/cli/computer-use)** — Let agents operate desktop apps and visible UI when a workflow needs real interaction.
+- **[Notifications and unread state](https://yiru.ai/docs/notifications)** — Know when an agent finishes or needs attention, then mark threads unread to come back later.
 - **And many, many more** — we ship daily, so this list is perpetually behind. The [changelog](https://github.com/xinyao27/yiru/releases) is the real feature list.
 
 ---
@@ -202,40 +200,23 @@ Works with **any CLI agent** — if it runs in a terminal, it runs in Yiru.
 
 ### Desktop — macOS, Windows, Linux
 
-- **[Download from onYiru.dev](https://onyiru.dev/download)**
-- Or grab a build directly: [macOS Apple Silicon](https://github.com/xinyao27/yiru/releases/latest/download/yiru-macos-arm64.dmg) · [macOS Intel](https://github.com/xinyao27/yiru/releases/latest/download/yiru-macos-x64.dmg) · [Windows (.exe)](https://github.com/xinyao27/yiru/releases/latest/download/yiru-windows-setup.exe) · [Linux AppImage](https://github.com/xinyao27/yiru/releases/latest/download/yiru-linux.AppImage) · [All builds](https://github.com/xinyao27/yiru/releases/latest)
+- **[Download from yiru.ai](https://yiru.ai/download)**
+- Or grab a build directly: [macOS Apple Silicon](https://github.com/xinyao27/yiru/releases/latest/download/yiru-macos-arm64.dmg) · [macOS Intel](https://github.com/xinyao27/yiru/releases/latest/download/yiru-macos-x64.dmg) · [Windows (.exe, when available)](https://github.com/xinyao27/yiru/releases) · [Linux AppImage](https://github.com/xinyao27/yiru/releases/latest/download/yiru-linux.AppImage) · [All builds](https://github.com/xinyao27/yiru/releases/latest)
+- Windows builds are published only when SignPath signing is configured; macOS and Linux releases can ship independently.
 - Running `yiru serve` on a headless Linux server? See the [headless Linux server guide](docs/reference/headless-linux-server.md).
-
-_Or via a package manager:_
-
-```bash
-# macOS (Homebrew)
-brew install --cask stablyai/yiru/yiru
-
-# Arch Linux (AUR) — or stably-yiru-git to build from source
-yay -S stably-yiru-bin
-```
 
 ### Mobile Companion — iOS, Android
 
 Pair with your desktop app to monitor and steer your agents from your phone.
 
-- **iOS:** [Download on the App Store](https://apps.apple.com/us/app/yiru/id6766130217) or [join TestFlight](https://testflight.apple.com/join/YjeGMQBA)
-- **Android:** [Download APK 0.0.31](https://github.com/xinyao27/yiru/releases/download/mobile-android-v0.0.31/app-release.apk)
+New mobile builds will be announced on [GitHub Releases](https://github.com/xinyao27/yiru/releases) when available.
 
 ---
 
-## Community &amp; Support
-
-- **Discord:** Join the community on **[Discord](https://discord.gg/fzjDKHxv8Q)**.
-- **Twitter / X:** Follow **[@yiru_build](https://x.com/yiru_build)** for updates and announcements.
-- **WeChat:** Scan the QR code to join the community. If the first group is full, use the backup group.
-
-  <img src="docs/assets/wechat-qr.png" alt="WeChat QR code for the Yiru community" width="160" />
-  <img src="docs/assets/wechat-qr-backup.jpg" alt="Backup WeChat QR code for the Yiru community" width="160" />
+## Support
 
 - **Feedback &amp; Ideas:** We ship fast. Missing something? [Request a new feature](https://github.com/xinyao27/yiru/issues).
-- **Privacy:** See the [privacy &amp; telemetry docs](https://www.onyiru.dev/docs/telemetry) for what anonymous usage data Yiru collects and how to opt out.
+- **Privacy:** See the [privacy &amp; telemetry docs](https://yiru.ai/docs/telemetry) for what anonymous usage data Yiru collects and how to opt out.
 - **Show Support:** [Star](https://github.com/xinyao27/yiru) this repo to follow along with our daily ships.
 
 ---
@@ -253,7 +234,8 @@ Want to contribute or run locally? See our [CONTRIBUTING.md](.github/CONTRIBUTIN
 </p>
 
 ## Signed Builds
-Windows code signing sponored/provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+Windows code signing sponsored/provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org).
 
 ## License
 

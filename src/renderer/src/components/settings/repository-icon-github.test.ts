@@ -36,16 +36,16 @@ describe('repository GitHub avatar resolution', () => {
   })
 
   it('uses stored upstream by default to avoid unnecessary live checks', async () => {
-    const repo = makeRepo({ upstream: { owner: 'stablyai', repo: 'yiru' } })
+    const repo = makeRepo({ upstream: { owner: 'xinyao27', repo: 'yiru' } })
 
     await expect(resolveRepositoryGitHubAvatar({ kind: 'local' }, repo)).resolves.toEqual({
       repoIcon: {
         type: 'image',
-        src: 'https://github.com/stablyai.png?size=64',
+        src: 'https://github.com/xinyao27.png?size=64',
         source: 'github',
-        label: 'stablyai/yiru'
+        label: 'xinyao27/yiru'
       },
-      upstream: { owner: 'stablyai', repo: 'yiru' }
+      upstream: { owner: 'xinyao27', repo: 'yiru' }
     })
 
     expect(apiMocks.repoUpstream).not.toHaveBeenCalled()
@@ -53,15 +53,15 @@ describe('repository GitHub avatar resolution', () => {
   })
 
   it('force-resolves the live origin owner when a non-fork repo was transferred', async () => {
-    // Non-fork repo (upstream resolved to null) transferred stablyai -> parkerrex.
+    // Non-fork repo (upstream resolved to null) transferred xinyao27 -> parkerrex.
     // The cached avatar is stale; forceLive must consult the live origin slug.
     const repo = makeRepo({
       upstream: null,
       repoIcon: {
         type: 'image',
-        src: 'https://github.com/stablyai.png?size=64',
+        src: 'https://github.com/xinyao27.png?size=64',
         source: 'github',
-        label: 'stablyai/yiru'
+        label: 'xinyao27/yiru'
       }
     })
     apiMocks.repoUpstream.mockResolvedValueOnce(null)
@@ -103,9 +103,9 @@ describe('repository GitHub avatar resolution', () => {
     const repo = makeRepo({
       repoIcon: {
         type: 'image',
-        src: 'https://github.com/stablyai.png?size=64',
+        src: 'https://github.com/xinyao27.png?size=64',
         source: 'github',
-        label: 'stablyai/yiru'
+        label: 'xinyao27/yiru'
       }
     })
 
@@ -130,12 +130,12 @@ describe('repository GitHub avatar resolution', () => {
     // A fork whose avatar tracks its parent org. The live upstream probe fails
     // (offline/unauthed → null), which must NOT downgrade to the origin slug.
     const repo = makeRepo({
-      upstream: { owner: 'stablyai', repo: 'yiru' },
+      upstream: { owner: 'xinyao27', repo: 'yiru' },
       repoIcon: {
         type: 'image',
-        src: 'https://github.com/stablyai.png?size=64',
+        src: 'https://github.com/xinyao27.png?size=64',
         source: 'github',
-        label: 'stablyai/yiru'
+        label: 'xinyao27/yiru'
       }
     })
     apiMocks.repoUpstream.mockResolvedValueOnce(null)
@@ -149,11 +149,11 @@ describe('repository GitHub avatar resolution', () => {
     expect(resolution).toEqual({
       repoIcon: {
         type: 'image',
-        src: 'https://github.com/stablyai.png?size=64',
+        src: 'https://github.com/xinyao27.png?size=64',
         source: 'github',
-        label: 'stablyai/yiru'
+        label: 'xinyao27/yiru'
       },
-      upstream: { owner: 'stablyai', repo: 'yiru' }
+      upstream: { owner: 'xinyao27', repo: 'yiru' }
     })
     // The origin slug must never be consulted once we fall back to the known parent.
     expect(apiMocks.repoSlug).not.toHaveBeenCalled()

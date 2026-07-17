@@ -187,7 +187,7 @@ write_app_report() {
 
 start_log_stream() {
   local file="$1"
-  local predicate='process == "Yiru" OR eventMessage CONTAINS[c] "Yiru" OR eventMessage CONTAINS[c] "com.stablyai.yiru"'
+  local predicate='process == "Yiru" OR eventMessage CONTAINS[c] "Yiru" OR eventMessage CONTAINS[c] "com.xinyao27.yiru"'
   if command -v log >/dev/null 2>&1; then
     command log stream --style compact --predicate "$predicate" >"$file" 2>&1 &
     echo "$!"
@@ -333,7 +333,7 @@ run_direct_exec_probe() {
 }
 
 write_system_log_snapshot() {
-  local predicate='process == "Yiru" OR eventMessage CONTAINS[c] "Yiru" OR eventMessage CONTAINS[c] "com.stablyai.yiru"'
+  local predicate='process == "Yiru" OR eventMessage CONTAINS[c] "Yiru" OR eventMessage CONTAINS[c] "com.xinyao27.yiru"'
   if command -v log >/dev/null 2>&1; then
     diag_log "capturing recent unified log snapshot"
     command log show --style syslog --last 10m --predicate "$predicate" >"$OUT_DIR/system-log-last-10m.log" 2>&1 || true

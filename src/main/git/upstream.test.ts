@@ -168,7 +168,7 @@ describe('getUpstreamStatus', () => {
         return Promise.reject(new Error('missing branch base'))
       }
       if (args[0] === 'remote' && args[1] === 'get-url' && args[2] === 'origin') {
-        return Promise.resolve({ stdout: 'https://github.com/stablyai/yiru.git\n' })
+        return Promise.resolve({ stdout: 'https://github.com/xinyao27/yiru.git\n' })
       }
       if (args[0] === 'remote' && args[1] === 'get-url' && args[2] === 'pr-pynickle-yiru') {
         return Promise.resolve({ stdout: 'https://github.com/pynickle/yiru.git\n' })
@@ -258,7 +258,7 @@ describe('getUpstreamStatus', () => {
         return Promise.reject(new Error('missing branch base'))
       }
       if (args[0] === 'remote' && args[1] === 'get-url') {
-        return Promise.resolve({ stdout: 'https://github.com/stablyai/yiru.git\n' })
+        return Promise.resolve({ stdout: 'https://github.com/xinyao27/yiru.git\n' })
       }
       if (args[0] === 'remote') {
         return Promise.resolve({ stdout: 'origin\n' })

@@ -1,6 +1,6 @@
 {
   "name": "yiru-mobile",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
@@ -19,11 +19,11 @@
   },
   "dependencies": {
     "@noble/hashes": "1.8.0",
-    "@yiru/expo-two-way-audio": "file:./packages/expo-two-way-audio",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@xterm/addon-unicode11": "0.10.0-beta.285",
     "@xterm/addon-webgl": "0.20.0-beta.284",
     "@xterm/xterm": "6.1.0-beta.285",
+    "@yiru/expo-two-way-audio": "file:./packages/expo-two-way-audio",
     "buffer": "^6.0.3",
     "expo": "^55.0.27",
     "expo-build-properties": "^55.0.13",

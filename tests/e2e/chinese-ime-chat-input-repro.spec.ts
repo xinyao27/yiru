@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import type { CDPSession, Page, TestInfo } from '@stablyai/playwright-test'
+import type { CDPSession, Page, TestInfo } from '@playwright/test'
 import { test, expect } from './helpers/yiru-app'
 import { ensureTerminalVisible, waitForActiveWorktree, waitForSessionReady } from './helpers/store'
 import {

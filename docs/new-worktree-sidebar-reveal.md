@@ -2,7 +2,7 @@
 
 ## Problem
 
-Issue https://github.com/stablyai/yiru-internal/issues/350 asks that newly created worktrees jump into view in the left sidebar list with no scroll animation.
+Legacy yiru-internal issue #350 asks that newly created worktrees jump into view in the left sidebar list with no scroll animation.
 
 Current behavior:
 

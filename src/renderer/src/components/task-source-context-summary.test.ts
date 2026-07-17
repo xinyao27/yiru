@@ -17,17 +17,17 @@ describe('task source context summary', () => {
         {
           kind: 'task-source',
           provider: 'github',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           hostId: 'ssh:devbox',
           projectHostSetupId: 'setup-1',
           repoId: 'repo-1',
-          providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+          providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
         }
       ]
     })
 
-    expect(summary.label).toBe('GitHub · devbox · stablyai/yiru')
-    expect(summary.title).toBe('GitHub · Host: devbox · Source: stablyai/yiru')
+    expect(summary.label).toBe('GitHub · devbox · xinyao27/yiru')
+    expect(summary.title).toBe('GitHub · Host: devbox · Source: xinyao27/yiru')
   })
 
   it('shows repo-backed provider account labels when accounts can differ by host', () => {
@@ -39,21 +39,21 @@ describe('task source context summary', () => {
         {
           kind: 'task-source',
           provider: 'github',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           hostId: 'local',
           projectHostSetupId: 'setup-local',
           repoId: 'repo-local',
-          providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' },
+          providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' },
           accountLabel: 'personal-gh'
         },
         {
           kind: 'task-source',
           provider: 'github',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           hostId: 'ssh:builder',
           projectHostSetupId: 'setup-builder',
           repoId: 'repo-builder',
-          providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' },
+          providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' },
           accountLabel: 'work-gh'
         }
       ]
@@ -61,7 +61,7 @@ describe('task source context summary', () => {
 
     expect(summary.label).toBe(`GitHub · ${LOCAL_HOST_LABEL}, builder · personal-gh, work-gh`)
     expect(summary.title).toBe(
-      `GitHub · Host: ${LOCAL_HOST_LABEL}, builder · Account: personal-gh, work-gh · Source: stablyai/yiru · 2 selected projects`
+      `GitHub · Host: ${LOCAL_HOST_LABEL}, builder · Account: personal-gh, work-gh · Source: xinyao27/yiru · 2 selected projects`
     )
   })
 
@@ -74,18 +74,18 @@ describe('task source context summary', () => {
         {
           kind: 'task-source',
           provider: 'github',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           hostId: 'ssh:devbox',
           repoId: 'repo-1',
-          providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+          providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
         }
       ],
       hostAvailability: [{ hostId: 'ssh:devbox', status: 'disconnected' }]
     })
 
-    expect(summary.label).toBe('GitHub · devbox · disconnected · stablyai/yiru')
+    expect(summary.label).toBe('GitHub · devbox · disconnected · xinyao27/yiru')
     expect(summary.title).toBe(
-      'GitHub · Host: devbox · Availability: devbox disconnected · Source: stablyai/yiru'
+      'GitHub · Host: devbox · Availability: devbox disconnected · Source: xinyao27/yiru'
     )
   })
 
@@ -170,15 +170,15 @@ describe('task source context summary', () => {
           projectId: 'project-a',
           hostId: 'runtime:old-server',
           repoId: 'repo-a',
-          providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+          providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
         }
       ],
       hostAvailability: [{ hostId: 'runtime:old-server', health: 'blocked' }]
     })
 
-    expect(summary.label).toBe('GitHub · old-server · server update needed · stablyai/yiru')
+    expect(summary.label).toBe('GitHub · old-server · server update needed · xinyao27/yiru')
     expect(summary.title).toBe(
-      'GitHub · Host: old-server · Availability: old-server server update needed · Source: stablyai/yiru'
+      'GitHub · Host: old-server · Availability: old-server server update needed · Source: xinyao27/yiru'
     )
   })
 
@@ -194,7 +194,7 @@ describe('task source context summary', () => {
           projectId: 'project-a',
           hostId: 'runtime:old-server',
           repoId: 'repo-a',
-          providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+          providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
         }
       ],
       hostAvailability: [
@@ -202,9 +202,9 @@ describe('task source context summary', () => {
       ]
     })
 
-    expect(summary.label).toBe('GitHub · old-server · checking server capabilities · stablyai/yiru')
+    expect(summary.label).toBe('GitHub · old-server · checking server capabilities · xinyao27/yiru')
     expect(summary.title).toBe(
-      'GitHub · Host: old-server · Availability: old-server checking server capabilities · Source: stablyai/yiru'
+      'GitHub · Host: old-server · Availability: old-server checking server capabilities · Source: xinyao27/yiru'
     )
   })
 
@@ -221,10 +221,10 @@ describe('task source context summary', () => {
           {
             kind: 'task-source',
             provider: 'github',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'runtime:03ef704c-b180-4b10-998d-e28fbd5de9a3',
             repoId: 'repo-runtime',
-            providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+            providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
           }
         ],
         hostAvailability: [
@@ -235,9 +235,9 @@ describe('task source context summary', () => {
         ]
       })
     ).toEqual({
-      label: 'GitHub · dev box · server update needed · stablyai/yiru',
+      label: 'GitHub · dev box · server update needed · xinyao27/yiru',
       title:
-        'GitHub · Host: dev box · Availability: dev box server update needed · Source: stablyai/yiru'
+        'GitHub · Host: dev box · Availability: dev box server update needed · Source: xinyao27/yiru'
     })
 
     expect(
@@ -341,18 +341,18 @@ describe('task source context summary', () => {
           {
             kind: 'task-source',
             provider: 'github',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'ssh:devbox',
             repoId: 'repo-1',
-            providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+            providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
           }
         ],
         hostAvailability: [{ hostId: 'ssh:devbox', reason: 'missing-provider-auth' }]
       })
     ).toEqual({
-      label: 'GitHub · devbox · provider auth needed · stablyai/yiru',
+      label: 'GitHub · devbox · provider auth needed · xinyao27/yiru',
       title:
-        'GitHub · Host: devbox · Availability: devbox provider auth needed · Source: stablyai/yiru'
+        'GitHub · Host: devbox · Availability: devbox provider auth needed · Source: xinyao27/yiru'
     })
 
     expect(

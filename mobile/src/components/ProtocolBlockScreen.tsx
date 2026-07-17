@@ -1,10 +1,8 @@
-import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { colors, radii, spacing, typography } from '../theme/mobile-theme'
 import type { CompatVerdict } from '../transport/protocol-compat'
 import { YIRU_GITHUB_RELEASES_URL } from '../../../src/shared/yiru-github-repository'
-
-const IOS_APP_STORE_URL = 'itms-apps://apps.apple.com/app/yiru/id6766130217'
 
 type Props = {
   verdict: Extract<CompatVerdict, { kind: 'blocked' }>
@@ -12,19 +10,14 @@ type Props = {
 
 export function ProtocolBlockScreen({ verdict }: Props) {
   const isMobileTooOld = verdict.reason === 'mobile-too-old'
-  const mobileUpdateTarget =
-    Platform.OS === 'ios'
-      ? { label: 'Open App Store', url: IOS_APP_STORE_URL, storeName: 'the App Store' }
-      : { label: null, url: null, storeName: 'your mobile app store' }
-  const primaryAction = isMobileTooOld
-    ? mobileUpdateTarget.url && mobileUpdateTarget.label
-      ? { label: mobileUpdateTarget.label, url: mobileUpdateTarget.url }
-      : null
-    : { label: 'Open GitHub Releases', url: YIRU_GITHUB_RELEASES_URL }
+  const primaryAction = {
+    label: isMobileTooOld ? 'View mobile builds' : 'Open GitHub Releases',
+    url: YIRU_GITHUB_RELEASES_URL
+  }
 
   const title = isMobileTooOld ? 'Update Yiru Mobile' : 'Update Yiru on your computer'
   const body = isMobileTooOld
-    ? `This desktop needs a newer Yiru Mobile app. Update Yiru Mobile from ${mobileUpdateTarget.storeName}, then try this host again.`
+    ? 'This desktop needs a newer Yiru Mobile app. View available mobile builds on GitHub Releases, then try this host again.'
     : 'This paired desktop app is too old for your current Yiru Mobile app. Update Yiru on your computer, then try this host again.'
   const recoveryNote =
     'Already updated? Go back to Hosts and refresh the connection. If this message stays, remove this host and pair it again.'
@@ -34,18 +27,16 @@ export function ProtocolBlockScreen({ verdict }: Props) {
       <View style={styles.card}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.body}>{body}</Text>
-        {/* Why: desktop updates come from GitHub; mobile update links depend
-            on the native store available for this platform. */}
-        {primaryAction ? (
-          <Pressable
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
-            onPress={() => {
-              void Linking.openURL(primaryAction.url)
-            }}
-          >
-            <Text style={styles.primaryButtonText}>{primaryAction.label}</Text>
-          </Pressable>
-        ) : null}
+        {/* Why: GitHub Releases is the distribution source of truth while the
+            replacement mobile store listings are not yet established. */}
+        <Pressable
+          style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
+          onPress={() => {
+            void Linking.openURL(primaryAction.url)
+          }}
+        >
+          <Text style={styles.primaryButtonText}>{primaryAction.label}</Text>
+        </Pressable>
         <Pressable
           style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
           onPress={() => {

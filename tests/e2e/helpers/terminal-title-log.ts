@@ -1,4 +1,4 @@
-import type { Page } from '@stablyai/playwright-test'
+import type { Page } from '@playwright/test'
 
 export async function installRendererTitleLog(page: Page): Promise<void> {
   await page.evaluate(() => {

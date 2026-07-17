@@ -53,7 +53,7 @@ function makeAutomation(overrides: Partial<Automation> = {}): Automation {
     updatedAt: 1,
     runContext: {
       kind: 'workspace-run',
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'runtime:gpu',
       projectHostSetupId: 'setup-gpu',
       repoId: 'repo-1',
@@ -134,7 +134,7 @@ describe('automation host client', () => {
     const automation = makeAutomation({
       runContext: {
         kind: 'workspace-run',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'ssh:devbox',
         projectHostSetupId: 'setup-devbox',
         repoId: 'repo-1',

@@ -209,7 +209,7 @@ describe('registerNotificationHandlers', () => {
     const originalPlatform = process.platform
     const originalBundleId = process.env.YIRU_DEV_MACOS_BUNDLE_ID
     Object.defineProperty(process, 'platform', { value: 'darwin', configurable: true })
-    process.env.YIRU_DEV_MACOS_BUNDLE_ID = 'com.stablyai.yiru.dev.fb5a47066f08'
+    process.env.YIRU_DEV_MACOS_BUNDLE_ID = 'com.xinyao27.yiru.dev.fb5a47066f08'
     try {
       registerNotificationHandlers({
         getSettings: () => ({
@@ -226,7 +226,7 @@ describe('registerNotificationHandlers', () => {
       handler({})
 
       expect(shellOpenExternalMock).toHaveBeenCalledWith(
-        'x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=com.stablyai.yiru.dev.fb5a47066f08'
+        'x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=com.xinyao27.yiru.dev.fb5a47066f08'
       )
     } finally {
       Object.defineProperty(process, 'platform', { value: originalPlatform, configurable: true })

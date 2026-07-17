@@ -26,19 +26,19 @@ describe('parseMobileMarkdown', () => {
   it('normalizes common README HTML into readable Markdown preview text', () => {
     const normalized = normalizeMobileMarkdownPreviewHtml(`
 <h1 align="center">
-  <a href="https://onYiru.dev"><img src="resources/build/icon.png" alt="Yiru" width="64" /></a>
+  <a href="https://yiru.ai"><img src="resources/build/icon.png" alt="Yiru" width="64" /></a>
   Yiru
 </h1>
 
 <p align="center">
-  <a href="https://github.com/stablyai/yiru/stargazers"><img src="https://badgen.net/github/stars/stablyai/yiru" alt="GitHub stars" /></a>
+  <a href="https://github.com/xinyao27/yiru/stargazers"><img src="https://badgen.net/github/stars/xinyao27/yiru" alt="GitHub stars" /></a>
   <strong>The AI Orchestrator</strong><br/>
   Run Codex side-by-side.
 </p>
 `)
 
-    expect(normalized).toContain('# [Yiru](https://onYiru.dev)')
-    expect(normalized).toContain('[GitHub stars](https://github.com/stablyai/yiru/stargazers)')
+    expect(normalized).toContain('# [Yiru](https://yiru.ai)')
+    expect(normalized).toContain('[GitHub stars](https://github.com/xinyao27/yiru/stargazers)')
     expect(normalized).toContain('**The AI Orchestrator**')
     expect(normalized).not.toContain('<h1')
     expect(normalized).not.toContain('<img')

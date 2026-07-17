@@ -10,7 +10,7 @@ type ChangelogEntry = {
   releaseNotesUrl: string
 }
 
-const CHANGELOG_URL = 'https://onyiru.dev/changelog'
+const CHANGELOG_URL = 'https://yiru.ai/changelog'
 
 function isValidEntry(entry: ChangelogEntry): boolean {
   return (
@@ -42,7 +42,7 @@ export async function fetchChangelog(
   incomingVersion: string,
   localVersion: string
 ): Promise<ChangelogData | null> {
-  const res = await net.fetch('https://onyiru.dev/whats-new/changelog.json', {
+  const res = await net.fetch('https://yiru.ai/whats-new/changelog.json', {
     signal: AbortSignal.timeout(5000)
   })
   if (!res.ok) {

@@ -8,12 +8,13 @@ import { afterEach, describe, expect, it } from 'vitest'
 const scriptPath = fileURLToPath(
   new URL('../../scripts/prepare-android-release.mjs', import.meta.url)
 )
+const committedAppConfigPath = fileURLToPath(new URL('../../app.json', import.meta.url))
 
 const appConfig = {
   expo: {
-    version: '0.0.22',
+    version: '0.0.1',
     android: {
-      versionCode: 4
+      versionCode: 1
     }
   }
 }
@@ -37,6 +38,20 @@ describe('prepare Android release script', () => {
     tempDirs = []
   })
 
+  it('keeps the new mobile package identity on its unreleased 0.0.0 baseline', () => {
+    const committedConfig = JSON.parse(readFileSync(committedAppConfigPath, 'utf8'))
+
+    expect(committedConfig.expo.version).toBe('0.0.0')
+    expect(committedConfig.expo.ios).toMatchObject({
+      buildNumber: '1',
+      bundleIdentifier: 'com.xinyao27.yiru.mobile'
+    })
+    expect(committedConfig.expo.android).toMatchObject({
+      package: 'com.xinyao27.yiru.mobile',
+      versionCode: 1
+    })
+  })
+
   it('uses committed Android release identity without mutating app config', () => {
     const { configPath, contents } = createAppConfig()
 
@@ -49,8 +64,8 @@ describe('prepare Android release script', () => {
       }
     })
 
-    expect(output).toContain('Prepared Yiru Mobile Android 0.0.22 (4)')
-    expect(output).toContain('Release tag: mobile-android-v0.0.22')
+    expect(output).toContain('Prepared Yiru Mobile Android 0.0.1 (1)')
+    expect(output).toContain('Release tag: mobile-android-v0.0.1')
     expect(readFileSync(configPath, 'utf8')).toBe(contents)
   })
 

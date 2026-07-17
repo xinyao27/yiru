@@ -140,7 +140,7 @@ describe('git remote operations', () => {
         return { stdout: 'refs/heads/imp/chinese-translation\n', stderr: '' }
       }
       if (args[0] === 'remote' && args[1] === 'get-url') {
-        return { stdout: 'https://github.com/stablyai/yiru.git\n', stderr: '' }
+        return { stdout: 'https://github.com/xinyao27/yiru.git\n', stderr: '' }
       }
       if (args[0] === 'remote') {
         return { stdout: 'origin\n', stderr: '' }
@@ -179,7 +179,7 @@ describe('git remote operations', () => {
         return { stdout: 'refs/heads/imp/chinese-translation\n', stderr: '' }
       }
       if (args[0] === 'remote' && args[1] === 'get-url' && args[2] === 'origin') {
-        return { stdout: 'https://github.com/stablyai/yiru.git\n', stderr: '' }
+        return { stdout: 'https://github.com/xinyao27/yiru.git\n', stderr: '' }
       }
       if (args[0] === 'remote' && args[1] === 'get-url' && args[2] === 'pr-pynickle-yiru') {
         return { stdout: 'https://github.com/pynickle/yiru.git\n', stderr: '' }

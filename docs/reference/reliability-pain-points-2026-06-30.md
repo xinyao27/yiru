@@ -31,23 +31,23 @@ The last-seven-day issue set is the strongest signal for the current pain. It in
 
 Open `P0` issues:
 
-- [#6877](https://github.com/stablyai/yiru/issues/6877): macOS 1.4.106 nested `simcam` dylib is unnotarized and rejected by Gatekeeper.
-- [#6874](https://github.com/stablyai/yiru/issues/6874): Windows `AppHangB1` when opening or activating a terminal session; runtime stuck in `stale_bootstrap`.
-- [#6873](https://github.com/stablyai/yiru/issues/6873): likely duplicate or near-duplicate of #6874, though the issue metadata says macOS while the title/body describe Windows.
-- [#6795](https://github.com/stablyai/yiru/issues/6795): app became very slow after an update; typing can lag by 2-5 seconds.
-- [#6773](https://github.com/stablyai/yiru/issues/6773): cannot create a new terminal tab or agent; the tab opens and closes immediately.
-- [#6655](https://github.com/stablyai/yiru/issues/6655): high `Yiru Helper (Renderer)` CPU on Mac Mini M4 causing severe UI/input lag.
-- [#5787](https://github.com/stablyai/yiru/issues/5787): whole Windows window freezes; input dies in every pane; sessions close on click.
-- [#5356](https://github.com/stablyai/yiru/issues/5356): session loss on first launch after upgrading from 1.4.65 to 1.4.68.
-- [#5314](https://github.com/stablyai/yiru/issues/5314): Windows close button and Alt+F4 do nothing.
+- legacy issue #6877: macOS 1.4.106 nested `simcam` dylib is unnotarized and rejected by Gatekeeper.
+- legacy issue #6874: Windows `AppHangB1` when opening or activating a terminal session; runtime stuck in `stale_bootstrap`.
+- legacy issue #6873: likely duplicate or near-duplicate of #6874, though the issue metadata says macOS while the title/body describe Windows.
+- legacy issue #6795: app became very slow after an update; typing can lag by 2-5 seconds.
+- legacy issue #6773: cannot create a new terminal tab or agent; the tab opens and closes immediately.
+- legacy issue #6655: high `Yiru Helper (Renderer)` CPU on Mac Mini M4 causing severe UI/input lag.
+- legacy issue #5787: whole Windows window freezes; input dies in every pane; sessions close on click.
+- legacy issue #5356: session loss on first launch after upgrading from 1.4.65 to 1.4.68.
+- legacy issue #5314: Windows close button and Alt+F4 do nothing.
 
 Closed `P0` issues worth keeping in the reliability history:
 
-- [#6233](https://github.com/stablyai/yiru/issues/6233): Windows window fails to appear while the process runs in the background.
-- [#6163](https://github.com/stablyai/yiru/issues/6163): Yiru-managed Codex `config.toml` duplicate key.
-- [#5377](https://github.com/stablyai/yiru/issues/5377): native watcher main-process crash on macOS.
-- [#5144](https://github.com/stablyai/yiru/issues/5144): Windows close-confirmation deadlock.
-- [#5109](https://github.com/stablyai/yiru/issues/5109): sidebar agent status mismatch.
+- legacy issue #6233: Windows window fails to appear while the process runs in the background.
+- legacy issue #6163: Yiru-managed Codex `config.toml` duplicate key.
+- legacy issue #5377: native watcher main-process crash on macOS.
+- legacy issue #5144: Windows close-confirmation deadlock.
+- legacy issue #5109: sidebar agent status mismatch.
 
 ## P1 Reliability Clusters
 
@@ -55,101 +55,101 @@ The `P1` set is too large to treat as a flat list. The high-signal reliability c
 
 ### Terminal Rendering and Input
 
-- [#6901](https://github.com/stablyai/yiru/issues/6901): garbled text.
-- [#6764](https://github.com/stablyai/yiru/issues/6764): Windows terminal issues.
-- [#6632](https://github.com/stablyai/yiru/issues/6632): display artifacts in Claude Code full-screen TUI.
-- [#6144](https://github.com/stablyai/yiru/issues/6144): laggy Claude Code terminal scroll.
-- [#5969](https://github.com/stablyai/yiru/issues/5969): remote-over-SSH Codex display artifacts.
-- [#5345](https://github.com/stablyai/yiru/issues/5345): Windows/WSL scrolling causes duplicated or garbled text and content overlap.
+- legacy issue #6901: garbled text.
+- legacy issue #6764: Windows terminal issues.
+- legacy issue #6632: display artifacts in Claude Code full-screen TUI.
+- legacy issue #6144: laggy Claude Code terminal scroll.
+- legacy issue #5969: remote-over-SSH Codex display artifacts.
+- legacy issue #5345: Windows/WSL scrolling causes duplicated or garbled text and content overlap.
 
 ### IME and International Text
 
-- [#6905](https://github.com/stablyai/yiru/issues/6905): Vietnamese IME input broken in terminal.
-- [#6765](https://github.com/stablyai/yiru/issues/6765): Linux Sogou Pinyin/fcitx only commits the first CJK character.
-- [#6698](https://github.com/stablyai/yiru/issues/6698): Vietnamese Telex input loses characters.
-- [#5921](https://github.com/stablyai/yiru/issues/5921): CJK characters duplicated in Yiru terminal on Windows.
-- [#5262](https://github.com/stablyai/yiru/issues/5262): Arabic text rendering appears reversed or disconnected in terminal input.
+- legacy issue #6905: Vietnamese IME input broken in terminal.
+- legacy issue #6765: Linux Sogou Pinyin/fcitx only commits the first CJK character.
+- legacy issue #6698: Vietnamese Telex input loses characters.
+- legacy issue #5921: CJK characters duplicated in Yiru terminal on Windows.
+- legacy issue #5262: Arabic text rendering appears reversed or disconnected in terminal input.
 
 ### Paste and Clipboard
 
-- [#5365](https://github.com/stablyai/yiru/issues/5365): terminal freezes for seconds when pasting long text on Windows.
-- [#5358](https://github.com/stablyai/yiru/issues/5358): Windows paste preview collapses long text and cannot expand it.
-- [#5919](https://github.com/stablyai/yiru/issues/5919): generic paste reliability issue.
-- [#5960](https://github.com/stablyai/yiru/issues/5960): bad screen result when pasting links.
-- [#6364](https://github.com/stablyai/yiru/issues/6364): pasting images into an agent CLI does not work using Remote Host.
+- legacy issue #5365: terminal freezes for seconds when pasting long text on Windows.
+- legacy issue #5358: Windows paste preview collapses long text and cannot expand it.
+- legacy issue #5919: generic paste reliability issue.
+- legacy issue #5960: bad screen result when pasting links.
+- legacy issue #6364: pasting images into an agent CLI does not work using Remote Host.
 
 ### SSH, Remote Runtime, WSL, and Provider Boundaries
 
-- [#6106](https://github.com/stablyai/yiru/issues/6106): SSH terminal loses pre-TUI shell output after Codex tab restore.
-- [#6846](https://github.com/stablyai/yiru/issues/6846): remote PTY sessions do not stay alive on disconnect.
-- [#6908](https://github.com/stablyai/yiru/issues/6908): WSL project added through UI does not discover branches/base refs, while CLI repo add works.
-- [#6907](https://github.com/stablyai/yiru/issues/6907): Codex launched in a WSL worktree does not appear in agent status/sidebar.
-- [#6916](https://github.com/stablyai/yiru/issues/6916): OMP launched in a WSL worktree has no live agent status.
-- [#6032](https://github.com/stablyai/yiru/issues/6032): Remote Yiru Servers can lose host-scoped repo and project state.
-- [#6688](https://github.com/stablyai/yiru/issues/6688): viewing a diff on remote host errors.
-- [#6753](https://github.com/stablyai/yiru/issues/6753): remote-host GitHub merge errors.
+- legacy issue #6106: SSH terminal loses pre-TUI shell output after Codex tab restore.
+- legacy issue #6846: remote PTY sessions do not stay alive on disconnect.
+- legacy issue #6908: WSL project added through UI does not discover branches/base refs, while CLI repo add works.
+- legacy issue #6907: Codex launched in a WSL worktree does not appear in agent status/sidebar.
+- legacy issue #6916: OMP launched in a WSL worktree has no live agent status.
+- legacy issue #6032: Remote Yiru Servers can lose host-scoped repo and project state.
+- legacy issue #6688: viewing a diff on remote host errors.
+- legacy issue #6753: remote-host GitHub merge errors.
 
 ### Agent, Tab, Session, and Sidebar State Drift
 
-- [#6910](https://github.com/stablyai/yiru/issues/6910): active agent tabs duplicate UI sessions when switching repositories.
-- [#6803](https://github.com/stablyai/yiru/issues/6803): multiple working agents thrash their order in the sidebar.
-- [#6072](https://github.com/stablyai/yiru/issues/6072): mobile keeps showing old agent rows after terminals are closed.
-- [#5913](https://github.com/stablyai/yiru/issues/5913): Pi compact agent row remains after closing its terminal tab.
-- [#5718](https://github.com/stablyai/yiru/issues/5718): OMP sessions not showing up in Agent Session History or filter options.
-- [#5404](https://github.com/stablyai/yiru/issues/5404): false "agent running" notifications persist after starting Claude Agents on VSSH/WSL.
+- legacy issue #6910: active agent tabs duplicate UI sessions when switching repositories.
+- legacy issue #6803: multiple working agents thrash their order in the sidebar.
+- legacy issue #6072: mobile keeps showing old agent rows after terminals are closed.
+- legacy issue #5913: Pi compact agent row remains after closing its terminal tab.
+- legacy issue #5718: OMP sessions not showing up in Agent Session History or filter options.
+- legacy issue #5404: false "agent running" notifications persist after starting Claude Agents on VSSH/WSL.
 
 ### Mobile Terminal and Tabs
 
-- [#5421](https://github.com/stablyai/yiru/issues/5421): iOS workspace tabs do not open.
-- [#6756](https://github.com/stablyai/yiru/issues/6756): iOS terminal renders in cursive/italic font and continuously flickers.
-- [#5628](https://github.com/stablyai/yiru/issues/5628): mobile resizing feature request, closely related to terminal fit/reflow reliability.
+- legacy issue #5421: iOS workspace tabs do not open.
+- legacy issue #6756: iOS terminal renders in cursive/italic font and continuously flickers.
+- legacy issue #5628: mobile resizing feature request, closely related to terminal fit/reflow reliability.
 
 ### Browser, Profile, and Embedded Runtime
 
-- [#6923](https://github.com/stablyai/yiru/issues/6923): browser profiles do not isolate storage.
-- [#6760](https://github.com/stablyai/yiru/issues/6760): floating browser cannot load any page.
-- [#6268](https://github.com/stablyai/yiru/issues/6268): embedded-browser cookie/session limitation prevents Auth0 login.
-- [#6875](https://github.com/stablyai/yiru/issues/6875): cannot copy Google Chrome cookies database.
-- [#6652](https://github.com/stablyai/yiru/issues/6652): browser zoom broken.
+- legacy issue #6923: browser profiles do not isolate storage.
+- legacy issue #6760: floating browser cannot load any page.
+- legacy issue #6268: embedded-browser cookie/session limitation prevents Auth0 login.
+- legacy issue #6875: cannot copy Google Chrome cookies database.
+- legacy issue #6652: browser zoom broken.
 
 ### Startup, Install, and Platform Hangs
 
-- [#5657](https://github.com/stablyai/yiru/issues/5657): macOS startup PATH probe can hang under Endpoint Security agents.
-- [#5107](https://github.com/stablyai/yiru/issues/5107): Yiru opens very slowly on Windows 11 and leaves a residual process.
-- [#5989](https://github.com/stablyai/yiru/issues/5989): Windows Defender blocks application during installation.
+- legacy issue #5657: macOS startup PATH probe can hang under Endpoint Security agents.
+- legacy issue #5107: Yiru opens very slowly on Windows 11 and leaves a residual process.
+- legacy issue #5989: Windows Defender blocks application during installation.
 
 ## Recent Reliability PR Context
 
 The late-June reliability work clustered around the same few subsystems:
 
-- New terminal tabs opening and immediately closing: [#6796](https://github.com/stablyai/yiru/pull/6796), [#6801](https://github.com/stablyai/yiru/pull/6801).
-- Stale/frozen/blank terminals: [#6514](https://github.com/stablyai/yiru/pull/6514), [#6800](https://github.com/stablyai/yiru/pull/6800), [#6833](https://github.com/stablyai/yiru/pull/6833), [#6830](https://github.com/stablyai/yiru/pull/6830), [#6866](https://github.com/stablyai/yiru/pull/6866).
-- PTY size and layout desync: [#6644](https://github.com/stablyai/yiru/pull/6644), [#6649](https://github.com/stablyai/yiru/pull/6649), [#6684](https://github.com/stablyai/yiru/pull/6684), [#6725](https://github.com/stablyai/yiru/pull/6725), [#6785](https://github.com/stablyai/yiru/pull/6785), [#6853](https://github.com/stablyai/yiru/pull/6853).
-- Renderer/xterm crash hardening: [#6852](https://github.com/stablyai/yiru/pull/6852), [#6872](https://github.com/stablyai/yiru/pull/6872), [#6855](https://github.com/stablyai/yiru/pull/6855), [#6868](https://github.com/stablyai/yiru/pull/6868), [#6856](https://github.com/stablyai/yiru/pull/6856), [#6857](https://github.com/stablyai/yiru/pull/6857).
-- Windows shell/spawn/input: [#6537](https://github.com/stablyai/yiru/pull/6537), [#6876](https://github.com/stablyai/yiru/pull/6876), [#6858](https://github.com/stablyai/yiru/pull/6858), [#6890](https://github.com/stablyai/yiru/pull/6890).
-- Hidden/agent startup behavior: [#6824](https://github.com/stablyai/yiru/pull/6824), [#6798](https://github.com/stablyai/yiru/pull/6798), [#6836](https://github.com/stablyai/yiru/pull/6836).
+- New terminal tabs opening and immediately closing: legacy PR #6796, legacy PR #6801.
+- Stale/frozen/blank terminals: legacy PR #6514, legacy PR #6800, legacy PR #6833, legacy PR #6830, legacy PR #6866.
+- PTY size and layout desync: legacy PR #6644, legacy PR #6649, legacy PR #6684, legacy PR #6725, legacy PR #6785, legacy PR #6853.
+- Renderer/xterm crash hardening: legacy PR #6852, legacy PR #6872, legacy PR #6855, legacy PR #6868, legacy PR #6856, legacy PR #6857.
+- Windows shell/spawn/input: legacy PR #6537, legacy PR #6876, legacy PR #6858, legacy PR #6890.
+- Hidden/agent startup behavior: legacy PR #6824, legacy PR #6798, legacy PR #6836.
 
 ## Last-Seven-Day Regression Origin Map
 
 This section maps recent regressions to the place where the system failed, and to the gate that should catch the same class next time.
 
-| Issue | Symptom | Regression point | Fix / related PR | Missing gate |
-| --- | --- | --- | --- | --- |
-| [#6773](https://github.com/stablyai/yiru/issues/6773) | New terminal/agent tab opens and closes immediately | Dead-session reconciliation could treat a fresh PTY binding as absent from a stale `listSessions()` snapshot. This likely traces to the local dead-session reconcile path introduced for hidden exited panes in [#6514](https://github.com/stablyai/yiru/pull/6514). | [#6796](https://github.com/stablyai/yiru/pull/6796), [#6801](https://github.com/stablyai/yiru/pull/6801) | Newborn terminal lifecycle test: create shell and agent tabs while liveness reconciliation is in flight; assert the tab cannot be closed by an older snapshot. |
-| [#5356](https://github.com/stablyai/yiru/issues/5356) | First launch after upgrade loses active floating/agent terminal sessions | Cold-restore relied on state that only versions after the fix could write, so users upgrading from pre-fix versions had no migration source. Issue text explicitly names [#5234](https://github.com/stablyai/yiru/pull/5234) and [#5240](https://github.com/stablyai/yiru/pull/5240). | Not fully closed in current open `P0` set | Upgrade fixture test: boot current app with persisted state from the last affected production version and assert active terminal/agent sessions are preserved or visibly recoverable. |
-| [#5319](https://github.com/stablyai/yiru/issues/5319) | Linux/Wayland terminals render but stop accepting keyboard/scroll input | Wayland-aware GPU safeguard was removed in [#1344](https://github.com/stablyai/yiru/pull/1344), leaving eager GPU channel setup able to wedge terminal input on affected systems. | [#6557](https://github.com/stablyai/yiru/pull/6557) | Platform GPU matrix test: Linux Wayland launch with terminal WebGL/input smoke and assertion that GPU flags preserve input, not only rendering. |
-| [#6233](https://github.com/stablyai/yiru/issues/6233) | Windows process runs but no window appears | Startup window reveal depended on Electron `ready-to-show`; if that event stalled, there was no fallback reveal or user-visible failure. | [#6462](https://github.com/stablyai/yiru/pull/6462) | Startup watchdog test: simulate missing `ready-to-show` on Windows and assert the app either reveals or exits with a clear recovery path. |
-| [#6163](https://github.com/stablyai/yiru/issues/6163) | Yiru-managed Codex `config.toml` fails with duplicate `hooks.state` keys on Windows | Two TOML writers serialized the same Windows path key differently, and Yiru deduped textually rather than by decoded key. | [#6318](https://github.com/stablyai/yiru/pull/6318), follow-up [#6388](https://github.com/stablyai/yiru/pull/6388) bug-scan fix | Cross-writer config round-trip test: seed config with Codex-written literal Windows paths, run Yiru hook sync twice, then parse with a TOML parser and assert one decoded key. |
-| [#6244](https://github.com/stablyai/yiru/issues/6244) | Headless-launched automation terminal showed only a bash prompt until unmount/remount | Hidden/background automation worktrees were not mounted early enough for output/replay to hydrate on first view. | [#6568](https://github.com/stablyai/yiru/pull/6568) | Headless automation mount test: launch background automation, wait for output, first-focus the tab, and assert output is already visible. |
-| [#6331](https://github.com/stablyai/yiru/issues/6331) | WSL workspaces with UNC cwd hit `DaemonProtocolError` | Windows/WSL path handling crossed provider boundaries and daemon spawn assumptions. | [#6536](https://github.com/stablyai/yiru/pull/6536) | WSL UNC provider contract: add/open/delete workspace whose root is `\\wsl.localhost\...`; assert daemon and file operations use the right host/path semantics. |
-| [#6336](https://github.com/stablyai/yiru/issues/6336) | Monorepo subfolder import opened the repo root instead of the selected subfolder | Git-root normalization leaked into the first-terminal cwd/user-facing workspace root behavior. | [#6574](https://github.com/stablyai/yiru/pull/6574) | Add-project matrix: repo root, monorepo subfolder, folder workspace, remote runtime; assert file tree root and first terminal cwd separately. |
-| [#6147](https://github.com/stablyai/yiru/issues/6147) | Chinese full-width punctuation became half-width ASCII in terminal | IME/composition forwarding lacked coverage for macOS full-width punctuation and composition-owned text. | [#6417](https://github.com/stablyai/yiru/pull/6417) | IME matrix test: macOS CJK full-width punctuation, Vietnamese Telex, Linux fcitx/Sogou, Windows CJK; assert committed bytes and displayed cells. |
-| [#5656](https://github.com/stablyai/yiru/issues/5656) / [#5653](https://github.com/stablyai/yiru/issues/5653) | Windows Claude Code prompt showed phantom/overwritten characters until resize | Rewrite-style terminal output did not reliably force visible row repaint for CR/CHA/erase updates. | [#6544](https://github.com/stablyai/yiru/pull/6544), [#6449](https://github.com/stablyai/yiru/pull/6449) | Terminal redraw fixture: feed CR, CHA, backspace, erase-line/screen and assert visible cells after each chunk without resize. |
-| [#5161](https://github.com/stablyai/yiru/issues/5161) | PowerShell terminal failed to spawn with Windows error code 5 | Windows shell resolver handed ConPTY a bare `pwsh.exe`, which could resolve to an App Execution Alias stub. | [#6537](https://github.com/stablyai/yiru/pull/6537), [#6876](https://github.com/stablyai/yiru/pull/6876) | Windows shell resolution contract: auto and explicit PowerShell selections must resolve to real executables and skip WindowsApps aliases. |
-| [#6270](https://github.com/stablyai/yiru/issues/6270) | Restoring agent sessions was not working for SSH/runtime use cases | Resume logic and runtime host restrictions did not cover SSH workspaces. | [#6685](https://github.com/stablyai/yiru/pull/6685) | Agent resume provider matrix: local, daemon, SSH, remote runtime, Windows shell; assert resume command is queued on the configured host/provider. |
-| [#6852](https://github.com/stablyai/yiru/pull/6852) / [#6872](https://github.com/stablyai/yiru/pull/6872) | Terminal search could crash terminal surface on narrow viewports | xterm search decorations received invalid dimensions and threw through the terminal surface. | [#6852](https://github.com/stablyai/yiru/pull/6852), [#6872](https://github.com/stablyai/yiru/pull/6872) | xterm addon safety test: narrow viewport, zero/near-zero columns, wrapped matches, keyboard next/previous; assert addon errors are caught and pane remains usable. |
-| [#6855](https://github.com/stablyai/yiru/pull/6855) | xterm web-link provider `RangeError` could kill the Windows renderer | Link provider ran synchronously inside xterm with no guard around pathological wrapped lines. | [#6855](https://github.com/stablyai/yiru/pull/6855) | Addon boundary policy: all xterm addon callbacks are guarded and failure disables only that addon for that pane. |
-| [#6853](https://github.com/stablyai/yiru/pull/6853) | Split-right PTY stayed at `0x0` and rendered a white screen | Deferred spawn measured an unlaid-out pane; post-spawn reconcile could terminate before forwarding a usable size. | [#6853](https://github.com/stablyai/yiru/pull/6853) | Split spawn invariant: visible panes must never keep PTY size `0x0`; fallback size must be forwarded if measurement is unavailable. |
+| Issue                                   | Symptom                                                                               | Regression point                                                                                                                                                                                                                 | Fix / related PR                                        | Missing gate                                                                                                                                                                          |
+| --------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| legacy issue #6773                      | New terminal/agent tab opens and closes immediately                                   | Dead-session reconciliation could treat a fresh PTY binding as absent from a stale `listSessions()` snapshot. This likely traces to the local dead-session reconcile path introduced for hidden exited panes in legacy PR #6514. | legacy PR #6796, legacy PR #6801                        | Newborn terminal lifecycle test: create shell and agent tabs while liveness reconciliation is in flight; assert the tab cannot be closed by an older snapshot.                        |
+| legacy issue #5356                      | First launch after upgrade loses active floating/agent terminal sessions              | Cold-restore relied on state that only versions after the fix could write, so users upgrading from pre-fix versions had no migration source. Issue text explicitly names legacy PR #5234 and legacy PR #5240.                    | Not fully closed in current open `P0` set               | Upgrade fixture test: boot current app with persisted state from the last affected production version and assert active terminal/agent sessions are preserved or visibly recoverable. |
+| legacy issue #5319                      | Linux/Wayland terminals render but stop accepting keyboard/scroll input               | Wayland-aware GPU safeguard was removed in legacy PR #1344, leaving eager GPU channel setup able to wedge terminal input on affected systems.                                                                                    | legacy PR #6557                                         | Platform GPU matrix test: Linux Wayland launch with terminal WebGL/input smoke and assertion that GPU flags preserve input, not only rendering.                                       |
+| legacy issue #6233                      | Windows process runs but no window appears                                            | Startup window reveal depended on Electron `ready-to-show`; if that event stalled, there was no fallback reveal or user-visible failure.                                                                                         | legacy PR #6462                                         | Startup watchdog test: simulate missing `ready-to-show` on Windows and assert the app either reveals or exits with a clear recovery path.                                             |
+| legacy issue #6163                      | Yiru-managed Codex `config.toml` fails with duplicate `hooks.state` keys on Windows   | Two TOML writers serialized the same Windows path key differently, and Yiru deduped textually rather than by decoded key.                                                                                                        | legacy PR #6318, follow-up legacy PR #6388 bug-scan fix | Cross-writer config round-trip test: seed config with Codex-written literal Windows paths, run Yiru hook sync twice, then parse with a TOML parser and assert one decoded key.        |
+| legacy issue #6244                      | Headless-launched automation terminal showed only a bash prompt until unmount/remount | Hidden/background automation worktrees were not mounted early enough for output/replay to hydrate on first view.                                                                                                                 | legacy PR #6568                                         | Headless automation mount test: launch background automation, wait for output, first-focus the tab, and assert output is already visible.                                             |
+| legacy issue #6331                      | WSL workspaces with UNC cwd hit `DaemonProtocolError`                                 | Windows/WSL path handling crossed provider boundaries and daemon spawn assumptions.                                                                                                                                              | legacy PR #6536                                         | WSL UNC provider contract: add/open/delete workspace whose root is `\\wsl.localhost\...`; assert daemon and file operations use the right host/path semantics.                        |
+| legacy issue #6336                      | Monorepo subfolder import opened the repo root instead of the selected subfolder      | Git-root normalization leaked into the first-terminal cwd/user-facing workspace root behavior.                                                                                                                                   | legacy PR #6574                                         | Add-project matrix: repo root, monorepo subfolder, folder workspace, remote runtime; assert file tree root and first terminal cwd separately.                                         |
+| legacy issue #6147                      | Chinese full-width punctuation became half-width ASCII in terminal                    | IME/composition forwarding lacked coverage for macOS full-width punctuation and composition-owned text.                                                                                                                          | legacy PR #6417                                         | IME matrix test: macOS CJK full-width punctuation, Vietnamese Telex, Linux fcitx/Sogou, Windows CJK; assert committed bytes and displayed cells.                                      |
+| legacy issue #5656 / legacy issue #5653 | Windows Claude Code prompt showed phantom/overwritten characters until resize         | Rewrite-style terminal output did not reliably force visible row repaint for CR/CHA/erase updates.                                                                                                                               | legacy PR #6544, legacy PR #6449                        | Terminal redraw fixture: feed CR, CHA, backspace, erase-line/screen and assert visible cells after each chunk without resize.                                                         |
+| legacy issue #5161                      | PowerShell terminal failed to spawn with Windows error code 5                         | Windows shell resolver handed ConPTY a bare `pwsh.exe`, which could resolve to an App Execution Alias stub.                                                                                                                      | legacy PR #6537, legacy PR #6876                        | Windows shell resolution contract: auto and explicit PowerShell selections must resolve to real executables and skip WindowsApps aliases.                                             |
+| legacy issue #6270                      | Restoring agent sessions was not working for SSH/runtime use cases                    | Resume logic and runtime host restrictions did not cover SSH workspaces.                                                                                                                                                         | legacy PR #6685                                         | Agent resume provider matrix: local, daemon, SSH, remote runtime, Windows shell; assert resume command is queued on the configured host/provider.                                     |
+| legacy PR #6852 / legacy PR #6872       | Terminal search could crash terminal surface on narrow viewports                      | xterm search decorations received invalid dimensions and threw through the terminal surface.                                                                                                                                     | legacy PR #6852, legacy PR #6872                        | xterm addon safety test: narrow viewport, zero/near-zero columns, wrapped matches, keyboard next/previous; assert addon errors are caught and pane remains usable.                    |
+| legacy PR #6855                         | xterm web-link provider `RangeError` could kill the Windows renderer                  | Link provider ran synchronously inside xterm with no guard around pathological wrapped lines.                                                                                                                                    | legacy PR #6855                                         | Addon boundary policy: all xterm addon callbacks are guarded and failure disables only that addon for that pane.                                                                      |
+| legacy PR #6853                         | Split-right PTY stayed at `0x0` and rendered a white screen                           | Deferred spawn measured an unlaid-out pane; post-spawn reconcile could terminate before forwarding a usable size.                                                                                                                | legacy PR #6853                                         | Split spawn invariant: visible panes must never keep PTY size `0x0`; fallback size must be forwarded if measurement is unavailable.                                                   |
 
 The repeated pattern is not one person repeatedly making the same mistake. It is that Yiru does not yet have enough executable contracts around lifecycle, provider boundaries, terminal sizing, xterm safety, platform shell behavior, and upgrade state.
 
@@ -159,7 +159,7 @@ Reading the PR descriptions for the confirmed or likely regression chains shows 
 
 ### #6514: Dead-Session Reconcile Introduced a Newborn-Tab Hazard
 
-[PR #6514](https://github.com/stablyai/yiru/pull/6514) was a Brennan-authored reliability fix for frozen terminal panes after a backgrounded agent exits. The PR body shows a substantial process: design review, completeness verification, headline behavior status, perf audit, code-review loop, Electron validation, and targeted unit tests. The stated non-goal explicitly excluded SSH/remote reconciliation, and the implementation revalidated pane/PTY identity at apply time.
+legacy PR #6514 was a Brennan-authored reliability fix for frozen terminal panes after a backgrounded agent exits. The PR body shows a substantial process: design review, completeness verification, headline behavior status, perf audit, code-review loop, Electron validation, and targeted unit tests. The stated non-goal explicitly excluded SSH/remote reconciliation, and the implementation revalidated pane/PTY identity at apply time.
 
 What still got through:
 
@@ -174,7 +174,7 @@ Skill implication:
 
 ### #5234 and #5240: Session-Restore Fixes Missed Old-Version Upgrade Fixtures
 
-[PR #5234](https://github.com/stablyai/yiru/pull/5234) and [PR #5240](https://github.com/stablyai/yiru/pull/5240) were Jinwoo-authored fixes for slow-startup daemon PTY restoration and quit-time agent session persistence. Their PR descriptions show AI review, negative controls, targeted tests, and high-quality e2e coverage against the newly modeled behavior.
+legacy PR #5234 and legacy PR #5240 were Jinwoo-authored fixes for slow-startup daemon PTY restoration and quit-time agent session persistence. Their PR descriptions show AI review, negative controls, targeted tests, and high-quality e2e coverage against the newly modeled behavior.
 
 What still got through:
 
@@ -189,11 +189,11 @@ Skill implication:
 
 ### #1344: GPU Rendering Parity Missed Linux Wayland Input Failure
 
-[PR #1344](https://github.com/stablyai/yiru/pull/1344) replaced global GPU opt-ins with VS Code-style GPU startup flags and terminal GPU acceleration settings. The PR description cites reference behavior and local tests, but it does not show the later, stricter Brennan PR process markers used in the June reliability fixes.
+legacy PR #1344 replaced global GPU opt-ins with VS Code-style GPU startup flags and terminal GPU acceleration settings. The PR description cites reference behavior and local tests, but it does not show the later, stricter Brennan PR process markers used in the June reliability fixes.
 
 What still got through:
 
-- The change removed or bypassed the Wayland-aware GPU safeguard later identified by [PR #6557](https://github.com/stablyai/yiru/pull/6557).
+- The change removed or bypassed the Wayland-aware GPU safeguard later identified by legacy PR #6557.
 - Validation covered configuration and pane lifecycle tests, but not a Linux Wayland terminal input smoke where rendering appears live while keyboard/scroll input is wedged.
 - One TypeScript command was reported as failing on existing project-include issues, which made the PR less clean as a release-risk artifact.
 
@@ -206,12 +206,12 @@ Skill implication:
 
 Fresh reviewer passes on the recent regression chains pointed to these reusable misses. These are class-level gates, not new blame findings.
 
-- [#6514](https://github.com/stablyai/yiru/pull/6514) -> [#6773](https://github.com/stablyai/yiru/issues/6773), fixed by [#6796](https://github.com/stablyai/yiru/pull/6796) and [#6801](https://github.com/stablyai/yiru/pull/6801): the original PR correctly proved the forward cleanup case, where a hidden local/daemon PTY exits and should reconcile on resume while live listed panes survive. The missed invariant was the inverse lifecycle property: a destructive liveness snapshot can only close state that existed before the snapshot was requested. The escaped path was a macOS local new shell or agent tab where `listSessions()` was requested, a new PTY bound before the response returned, the stale response omitted the newborn id, and the renderer routed the healthy binding through exit teardown. The next gate is a Terminal Snapshot Freshness and Ownership Gate: a fake daemon holds `listSessions()` at `t0`, binds a newborn PTY at `t1`, resolves the stale `t0` snapshot without that PTY, and asserts the tab/pane survives, still owns the same PTY, accepts input, and renders output. A later post-bind snapshot may close a genuinely dead PTY, but only when provider, pane, PTY id, and binding epoch still match.
-- [#6800](https://github.com/stablyai/yiru/pull/6800), with [#5240](https://github.com/stablyai/yiru/pull/5240), [#6411](https://github.com/stablyai/yiru/pull/6411), [#6514](https://github.com/stablyai/yiru/pull/6514), and [#6833](https://github.com/stablyai/yiru/pull/6833) as related context: the original fix correctly proved that active worktree-sleep records should not be claimed merely because old tab/layout state exists; visible connecting panes with restorable identity can own wake, stale hidden panes fresh-resume, and completed hibernation evidence stays passive. The missed invariant was provider-session ownership, not "pane connects now." For each provider-session claim key, exactly one durable owner must exist: a live hook/status for that same provider session, a queued/sent resume command for that same provider session, or an explicit retained record because spawn/connect failed. Layout match, PTY wake hints, replayed terminal bytes, and cold-restored screen snapshots are display evidence, not ownership evidence. The next gate is an Agent Provider Session Ownership Matrix covering active focused tabs, inactive tabs, visible non-focused splits, live/quit/worktree-sleep origins, replay-only/cold-restore-only/wrong-session/no-hook/delayed-hook cases, and repeated workspace activation.
-- [#5234](https://github.com/stablyai/yiru/pull/5234) / [#5240](https://github.com/stablyai/yiru/pull/5240) -> [#5356](https://github.com/stablyai/yiru/issues/5356): the original PRs correctly proved slow-daemon restoration and newly written quit-origin provider-session persistence. The missed invariant was first-open-after-upgrade compatibility: startup/restore fixes must preserve or explicitly recover user sessions from the last affected production persisted-state schema, not only from state written by the fixed build. The escaped path was first launch after a 1.4.65 -> 1.4.68 upgrade, including Windows 10 active floating shell and Claude panes, where the old version had no `sleepingAgentSessionsByPaneKey` payload to consume. The next gate is a Persisted Session Upgrade/Restore Contract: boot current Yiru against immutable user-data fixtures from the last affected version, including active and inactive tabs, visible and hidden splits, old tab-level PTY wake hints, missing `sleepingAgentSessionsByPaneKey`, live/quit/worktree-sleep/legacy origins, repeat activation, and a second restart after current code writes upgraded state. The oracle rejects blank replacement panes, duplicate resume tabs, silent session loss, and "works only after current code writes new state."
-- [#1344](https://github.com/stablyai/yiru/pull/1344) -> [#5319](https://github.com/stablyai/yiru/issues/5319) / [#6557](https://github.com/stablyai/yiru/pull/6557): the original PR correctly attempted to replace broad GPU opt-ins with VS Code-style GPU channel flags and prove terminal GPU/WebGL fallback at unit level. The missed invariant was terminal platform liveness, not visual readiness. A terminal is healthy only if it renders output, receives focus, delivers keyboard input to the correct PTY, echoes process output back to the xterm buffer, scrolls, and survives GPU/renderer startup on the target platform. The next gate is a Terminal Platform Liveness Gate across Linux Wayland GPU paths, headless Weston plus at least one scheduled/manual headful Wayland run, control Linux/macOS/Windows paths when renderer policy is shared, active and inactive tabs, visible and hidden panes, first mount, tab switch, repeated workspace activation, local PTY, and SSH/remote PTY. Screenshots alone never pass.
-- [#6644](https://github.com/stablyai/yiru/pull/6644) / [#6649](https://github.com/stablyai/yiru/pull/6649) / [#6725](https://github.com/stablyai/yiru/pull/6725) / [#6785](https://github.com/stablyai/yiru/pull/6785) / [#6794](https://github.com/stablyai/yiru/pull/6794) / [#6853](https://github.com/stablyai/yiru/pull/6853) / [#6939](https://github.com/stablyai/yiru/pull/6939): the fixes correctly proved pieces of the PTY geometry class: first-mount column desync, single-frame insufficiency, split-mount convergence, requested-size versus applied-size drift, mobile-owned PTY exceptions, visible split `0x0` fallback, and visible geometry reassertion after stable fit. The missed invariant was cross-layer terminal geometry authority. A visible desktop-owned terminal is not valid until xterm `cols/rows`, fit/proposed dimensions, applied PTY winsize, shell-visible `stty`/`stdout.columns`, and echo-wrap behavior converge after layout settles. Hidden/inactive panes may defer resize, and mobile/remote providers may intentionally diverge, but every transition into visible desktop ownership must converge. The next gate is a terminal geometry matrix with fault injection for first `0x0` fit, delayed layout settle, dropped/delayed resize acknowledgement, requested-size-versus-applied-size drift, SSH-style unknown applied size, hidden-to-visible activation, split create/collapse, restore, repeated workspace activation, and no redundant hidden SIGWINCH.
-- [#6852](https://github.com/stablyai/yiru/pull/6852) / [#6872](https://github.com/stablyai/yiru/pull/6872) / [#6855](https://github.com/stablyai/yiru/pull/6855), with [#6868](https://github.com/stablyai/yiru/pull/6868), [#6856](https://github.com/stablyai/yiru/pull/6856), and [#6857](https://github.com/stablyai/yiru/pull/6857) as nearby WebGL/renderer-risk hardening: the fixes correctly moved toward safe wrappers for search dimensions, keyboard search navigation, link providers, WebGL addon patches, and renderer/GPU crash fallback. The missed invariant was xterm addon boundary containment. Optional addons are untrusted boundary code: search decorations, link providers, WebGL attach/reset/dispose, renderer fallback, hover callbacks, and stale async callbacks must not throw across the pane, React, or window boundary. The next gate is an xterm-addon-boundary harness that injects throwing addon behavior under active tabs, inactive tabs, visible and hidden splits, hidden-to-visible resume, floating tab switch, repeated workspace activation, and pane destroy/recreate; the oracle is pane-scoped addon disable/degrade with one breadcrumb, no React/window crash, and surviving focus, input, PTY echo, and rendering.
+- legacy PR #6514 -> legacy issue #6773, fixed by legacy PR #6796 and legacy PR #6801: the original PR correctly proved the forward cleanup case, where a hidden local/daemon PTY exits and should reconcile on resume while live listed panes survive. The missed invariant was the inverse lifecycle property: a destructive liveness snapshot can only close state that existed before the snapshot was requested. The escaped path was a macOS local new shell or agent tab where `listSessions()` was requested, a new PTY bound before the response returned, the stale response omitted the newborn id, and the renderer routed the healthy binding through exit teardown. The next gate is a Terminal Snapshot Freshness and Ownership Gate: a fake daemon holds `listSessions()` at `t0`, binds a newborn PTY at `t1`, resolves the stale `t0` snapshot without that PTY, and asserts the tab/pane survives, still owns the same PTY, accepts input, and renders output. A later post-bind snapshot may close a genuinely dead PTY, but only when provider, pane, PTY id, and binding epoch still match.
+- legacy PR #6800, with legacy PR #5240, legacy PR #6411, legacy PR #6514, and legacy PR #6833 as related context: the original fix correctly proved that active worktree-sleep records should not be claimed merely because old tab/layout state exists; visible connecting panes with restorable identity can own wake, stale hidden panes fresh-resume, and completed hibernation evidence stays passive. The missed invariant was provider-session ownership, not "pane connects now." For each provider-session claim key, exactly one durable owner must exist: a live hook/status for that same provider session, a queued/sent resume command for that same provider session, or an explicit retained record because spawn/connect failed. Layout match, PTY wake hints, replayed terminal bytes, and cold-restored screen snapshots are display evidence, not ownership evidence. The next gate is an Agent Provider Session Ownership Matrix covering active focused tabs, inactive tabs, visible non-focused splits, live/quit/worktree-sleep origins, replay-only/cold-restore-only/wrong-session/no-hook/delayed-hook cases, and repeated workspace activation.
+- legacy PR #5234 / legacy PR #5240 -> legacy issue #5356: the original PRs correctly proved slow-daemon restoration and newly written quit-origin provider-session persistence. The missed invariant was first-open-after-upgrade compatibility: startup/restore fixes must preserve or explicitly recover user sessions from the last affected production persisted-state schema, not only from state written by the fixed build. The escaped path was first launch after a 1.4.65 -> 1.4.68 upgrade, including Windows 10 active floating shell and Claude panes, where the old version had no `sleepingAgentSessionsByPaneKey` payload to consume. The next gate is a Persisted Session Upgrade/Restore Contract: boot current Yiru against immutable user-data fixtures from the last affected version, including active and inactive tabs, visible and hidden splits, old tab-level PTY wake hints, missing `sleepingAgentSessionsByPaneKey`, live/quit/worktree-sleep/legacy origins, repeat activation, and a second restart after current code writes upgraded state. The oracle rejects blank replacement panes, duplicate resume tabs, silent session loss, and "works only after current code writes new state."
+- legacy PR #1344 -> legacy issue #5319 / legacy PR #6557: the original PR correctly attempted to replace broad GPU opt-ins with VS Code-style GPU channel flags and prove terminal GPU/WebGL fallback at unit level. The missed invariant was terminal platform liveness, not visual readiness. A terminal is healthy only if it renders output, receives focus, delivers keyboard input to the correct PTY, echoes process output back to the xterm buffer, scrolls, and survives GPU/renderer startup on the target platform. The next gate is a Terminal Platform Liveness Gate across Linux Wayland GPU paths, headless Weston plus at least one scheduled/manual headful Wayland run, control Linux/macOS/Windows paths when renderer policy is shared, active and inactive tabs, visible and hidden panes, first mount, tab switch, repeated workspace activation, local PTY, and SSH/remote PTY. Screenshots alone never pass.
+- legacy PR #6644 / legacy PR #6649 / legacy PR #6725 / legacy PR #6785 / legacy PR #6794 / legacy PR #6853 / legacy PR #6939: the fixes correctly proved pieces of the PTY geometry class: first-mount column desync, single-frame insufficiency, split-mount convergence, requested-size versus applied-size drift, mobile-owned PTY exceptions, visible split `0x0` fallback, and visible geometry reassertion after stable fit. The missed invariant was cross-layer terminal geometry authority. A visible desktop-owned terminal is not valid until xterm `cols/rows`, fit/proposed dimensions, applied PTY winsize, shell-visible `stty`/`stdout.columns`, and echo-wrap behavior converge after layout settles. Hidden/inactive panes may defer resize, and mobile/remote providers may intentionally diverge, but every transition into visible desktop ownership must converge. The next gate is a terminal geometry matrix with fault injection for first `0x0` fit, delayed layout settle, dropped/delayed resize acknowledgement, requested-size-versus-applied-size drift, SSH-style unknown applied size, hidden-to-visible activation, split create/collapse, restore, repeated workspace activation, and no redundant hidden SIGWINCH.
+- legacy PR #6852 / legacy PR #6872 / legacy PR #6855, with legacy PR #6868, legacy PR #6856, and legacy PR #6857 as nearby WebGL/renderer-risk hardening: the fixes correctly moved toward safe wrappers for search dimensions, keyboard search navigation, link providers, WebGL addon patches, and renderer/GPU crash fallback. The missed invariant was xterm addon boundary containment. Optional addons are untrusted boundary code: search decorations, link providers, WebGL attach/reset/dispose, renderer fallback, hover callbacks, and stale async callbacks must not throw across the pane, React, or window boundary. The next gate is an xterm-addon-boundary harness that injects throwing addon behavior under active tabs, inactive tabs, visible and hidden splits, hidden-to-visible resume, floating tab switch, repeated workspace activation, and pane destroy/recreate; the oracle is pane-scoped addon disable/degrade with one breadcrumb, no React/window crash, and surviving focus, input, PTY echo, and rendering.
 
 Concrete gate shapes from the fresh passes:
 
@@ -224,7 +224,7 @@ Concrete gate shapes from the fresh passes:
 
 ### Corrective PRs Show the Desired Direction
 
-The later fixes, especially [#6801](https://github.com/stablyai/yiru/pull/6801), show the right shape: root-cause description, happens-before proof, explicit `auto-design-review-fix`, completeness verification, code-review loop, `brennan-test-changes`, and targeted tests for the stale snapshot/newborn binding race. [#6852](https://github.com/stablyai/yiru/pull/6852), [#6853](https://github.com/stablyai/yiru/pull/6853), and [#6855](https://github.com/stablyai/yiru/pull/6855) also show good local invariant tests around xterm addon throws and PTY `0x0` sizing.
+The later fixes, especially legacy PR #6801, show the right shape: root-cause description, happens-before proof, explicit `auto-design-review-fix`, completeness verification, code-review loop, `brennan-test-changes`, and targeted tests for the stale snapshot/newborn binding race. Legacy PR #6852, legacy PR #6853, and legacy PR #6855 also show good local invariant tests around xterm addon throws and PTY `0x0` sizing.
 
 The process improvement is to make that shape mandatory before the regression escapes, and to promote only the deterministic, red/green parts into blocking CI.
 
@@ -623,7 +623,7 @@ Factory changes to carry forward:
 
 Current implementation status:
 
-- Internal factory skill update PR: https://github.com/stablyai/yiru-internal/pull/491
+- Internal factory skill update: legacy yiru-internal PR #491
 - Scope of that PR: add the reliability gate to `brennan-yolo-lite` and expand `review-code` to inspect the recent terminal/session/provider/startup/release failure classes.
 - Follow-up needed: once the concrete repo-side harnesses exist, update the skills again to name the exact commands and required CI jobs instead of only naming the expected reliability evidence.
 
@@ -667,12 +667,12 @@ This will make future reports much easier to attribute without guessing. It shou
 
 ### Confirmed Regression Chains
 
-- [#5356](https://github.com/stablyai/yiru/issues/5356), session loss on first launch after upgrading from 1.4.65 to 1.4.68, explicitly names PRs [#5234](https://github.com/stablyai/yiru/pull/5234) and [#5240](https://github.com/stablyai/yiru/pull/5240). Local git history shows both PRs were authored by Jinwoo Hong. Count: Jinwoo 1 confirmed open `P0` regression chain.
-- [#5319](https://github.com/stablyai/yiru/issues/5319), Linux/Wayland terminal input freeze, is closed, but the fixing PR [#6557](https://github.com/stablyai/yiru/pull/6557) says the Wayland-aware GPU path had been removed in [#1344](https://github.com/stablyai/yiru/pull/1344). Local git history shows #1344 was authored by Neil. Count: Neil 1 confirmed closed `P1` regression chain.
+- legacy issue #5356, session loss on first launch after upgrading from 1.4.65 to 1.4.68, explicitly names legacy PRs #5234 and #5240. Local git history shows both PRs were authored by Jinwoo Hong. Count: Jinwoo 1 confirmed open `P0` regression chain.
+- legacy issue #5319, Linux/Wayland terminal input freeze, is closed, but the fixing legacy PR #6557 says the Wayland-aware GPU path had been removed in legacy PR #1344. Local git history shows #1344 was authored by Neil. Count: Neil 1 confirmed closed `P1` regression chain.
 
 ### Likely Regression Chains
 
-- [#6773](https://github.com/stablyai/yiru/issues/6773), new terminal/agent tabs opening and immediately closing, was fixed by [#6796](https://github.com/stablyai/yiru/pull/6796) and [#6801](https://github.com/stablyai/yiru/pull/6801). Those PRs identify the dead-session reconciler as the cause. Local git history shows [#6514](https://github.com/stablyai/yiru/pull/6514), which introduced the focused dead-session reconcile module for hidden exited panes, was authored by Brennan Benson. Count: Brennan 1 likely open `P0` regression chain.
+- legacy issue #6773, new terminal/agent tabs opening and immediately closing, was fixed by legacy PR #6796 and legacy PR #6801. Those PRs identify the dead-session reconciler as the cause. Local git history shows legacy PR #6514, which introduced the focused dead-session reconcile module for hidden exited panes, was authored by Brennan Benson. Count: Brennan 1 likely open `P0` regression chain.
 
 ### Area Ownership Without Clear Causation
 

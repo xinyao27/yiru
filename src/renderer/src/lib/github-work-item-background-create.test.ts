@@ -54,7 +54,7 @@ function makeIssue(overrides: Partial<GitHubWorkItem> = {}): GitHubWorkItem {
     type: 'issue',
     number: 42,
     title: 'Make issue workspace creation async',
-    url: 'https://github.com/stablyai/yiru/issues/42',
+    url: 'https://github.com/xinyao27/yiru/issues/42',
     state: 'open',
     author: null,
     labels: [],
@@ -172,7 +172,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
           type: 'pr',
           number: 6933,
           title: 'The board columns are displayed backwards',
-          url: 'https://github.com/stablyai/yiru/issues/6933',
+          url: 'https://github.com/xinyao27/yiru/issues/6933',
           branchName: 'fix-issue-6933',
           baseRefName: 'main',
           isCrossRepository: true
@@ -580,7 +580,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
 
     const result = await createGitHubWorkItemWorkspaceInBackground(
       {
-        item: makeIssue({ type: 'pr', number: 7, url: 'https://github.com/stablyai/yiru/pull/7' }),
+        item: makeIssue({ type: 'pr', number: 7, url: 'https://github.com/xinyao27/yiru/pull/7' }),
         repoId: 'repo-1',
         openModalFallback
       },
@@ -609,7 +609,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
         item: makeIssue({
           type: 'pr',
           number: 6934,
-          url: 'https://github.com/stablyai/yiru/pull/6934',
+          url: 'https://github.com/xinyao27/yiru/pull/6934',
           branchName: 'fix-issue-6933',
           baseRefName: 'main',
           isCrossRepository: true
@@ -699,7 +699,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
     expect(continueCall).toBeDefined()
     const request = continueCall?.[1] as WorktreeCreationRequest
     expect(request.issueCommand?.command).toBe(
-      'gh issue view 42 --repo https://github.com/stablyai/yiru/issues/42'
+      'gh issue view 42 --repo https://github.com/xinyao27/yiru/issues/42'
     )
   })
 
@@ -772,7 +772,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
 
     await createGitHubWorkItemWorkspaceInBackground(
       {
-        item: makeIssue({ type: 'pr', number: 7, url: 'https://github.com/stablyai/yiru/pull/7' }),
+        item: makeIssue({ type: 'pr', number: 7, url: 'https://github.com/xinyao27/yiru/pull/7' }),
         repoId: 'repo-1',
         openModalFallback: vi.fn()
       },
@@ -869,7 +869,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
     const request = continueCall?.[1] as WorktreeCreationRequest
     // Why: Brennan's confirmed scope keeps the quick-start prompt the bare link;
     // the issue command runs as a side-pane split, not as the agent prompt.
-    expect(request.startupPlan?.draftPrompt).toBe('https://github.com/stablyai/yiru/issues/42')
+    expect(request.startupPlan?.draftPrompt).toBe('https://github.com/xinyao27/yiru/issues/42')
     expect(request.startupPlan?.draftPrompt ?? '').not.toContain('Complete')
     expect(request.quickPrompt).not.toContain('Complete')
     // The issue command itself still threads through as a side-pane split.

@@ -2,8 +2,7 @@
 
 ## Status
 
-Implemented reference design for
-[issue #8454](https://github.com/stablyai/yiru/issues/8454).
+Implemented reference design for legacy issue #8454.
 
 The branch includes scheme-less local-dev URL classification, certificate-specific
 failure copy, `Try HTTPS`, exact per-WebContents certificate grants,

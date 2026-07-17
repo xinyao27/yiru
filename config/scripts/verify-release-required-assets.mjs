@@ -3,22 +3,30 @@
 import { pathToFileURL } from 'node:url'
 
 const API_VERSION = '2022-11-28'
+const WINDOWS_RELEASE_ASSET_NAMES = [
+  'latest.yml',
+  'yiru-windows-setup.exe',
+  'yiru-windows-setup.exe.blockmap'
+]
 
-export function getRequiredReleaseAssetNames(tag) {
+export function getWindowsReleaseAssetNames() {
+  return [...WINDOWS_RELEASE_ASSET_NAMES]
+}
+
+export function getRequiredReleaseAssetNames(tag, { includeWindows = true } = {}) {
   const version = tag.replace(/^v/i, '')
   return [
     'latest-linux.yml',
     'latest-linux-arm64.yml',
     'latest-mac.yml',
-    'latest.yml',
+    ...(includeWindows ? ['latest.yml'] : []),
     'yiru-linux.AppImage',
     'yiru-linux-arm64.AppImage',
     `yiru_${version}_amd64.deb`,
     `yiru_${version}_arm64.deb`,
     `yiru-${version}.x86_64.rpm`,
     `yiru-${version}.aarch64.rpm`,
-    'yiru-windows-setup.exe',
-    'yiru-windows-setup.exe.blockmap',
+    ...(includeWindows ? WINDOWS_RELEASE_ASSET_NAMES.slice(1) : []),
     `Yiru-${version}-mac.zip`,
     `Yiru-${version}-mac.zip.blockmap`,
     `Yiru-${version}-arm64-mac.zip`,
@@ -28,6 +36,22 @@ export function getRequiredReleaseAssetNames(tag) {
     'yiru-macos-arm64.dmg',
     'yiru-macos-arm64.dmg.blockmap'
   ]
+}
+
+export function readWindowsReleaseEnabled(env = process.env) {
+  const value = env.YIRU_WINDOWS_RELEASE_ENABLED
+  if (value == null || value.trim().length === 0) {
+    // Why: missing workflow plumbing must fail closed by retaining the legacy
+    // requirement for Windows assets instead of silently publishing less.
+    return true
+  }
+  if (value === 'true') {
+    return true
+  }
+  if (value === 'false') {
+    return false
+  }
+  throw new Error('YIRU_WINDOWS_RELEASE_ENABLED must be "true" or "false"')
 }
 
 export function extractManifestAssetNames(manifestText) {
@@ -85,16 +109,30 @@ async function fetchAssetText(repo, asset, token) {
   return res.text()
 }
 
-export async function verifyRequiredReleaseAssets({ repo, tag, token }) {
+export async function verifyRequiredReleaseAssets({ repo, tag, token, includeWindows = true }) {
   const release = await fetchRelease(repo, tag, token)
   const assetsByName = new Map(release.assets.map((asset) => [asset.name, asset]))
 
-  const requiredNames = new Set(getRequiredReleaseAssetNames(tag))
+  if (!includeWindows) {
+    const unexpectedWindowsAssets = WINDOWS_RELEASE_ASSET_NAMES.filter((name) =>
+      assetsByName.has(name)
+    )
+    if (unexpectedWindowsAssets.length > 0) {
+      // Why: omitting Windows from the required set is insufficient when a
+      // retried draft still contains Windows artifacts from an earlier run.
+      throw new Error(
+        `Release ${tag} includes Windows assets while Windows publishing is disabled.\n` +
+          `Unexpected Windows assets: ${unexpectedWindowsAssets.join(', ')}`
+      )
+    }
+  }
+
+  const requiredNames = new Set(getRequiredReleaseAssetNames(tag, { includeWindows }))
   const manifestNames = [
     'latest-linux.yml',
     'latest-linux-arm64.yml',
     'latest-mac.yml',
-    'latest.yml'
+    ...(includeWindows ? ['latest.yml'] : [])
   ]
 
   for (const manifestName of manifestNames) {
@@ -151,7 +189,8 @@ async function main() {
     throw new Error('GH_TOKEN or GITHUB_TOKEN must be set')
   }
   const repo = process.env.GITHUB_REPOSITORY || 'xinyao27/yiru'
-  const result = await verifyRequiredReleaseAssets({ repo, tag, token })
+  const includeWindows = readWindowsReleaseEnabled()
+  const result = await verifyRequiredReleaseAssets({ repo, tag, token, includeWindows })
   console.log(`Verified ${result.checked.length} required release assets for ${repo}@${tag}`)
 }
 

@@ -4001,10 +4001,8 @@
           "5b120b9634": "Submit anonymously",
           "c9e5ea0791": "GitHub:",
           "d46ddd66fc": "What could we improve?",
-          "3460258a54": "Follow on X",
-          "26108d3699": "Join Discord",
           "d245c4ef6c": "GitHub issues",
-          "9b33530b3d": "Other ways to reach us",
+          "9b33530b3d": "Report bugs and request features",
           "a828fa4aee": "Share what's working, what's broken, or what Yiru should do next.",
           "0eb643f07f": "Send Feedback",
           "60b721e857": "Failed to submit feedback. Please try again.",
@@ -4064,7 +4062,6 @@
         "SidebarSettingsHelpMenu": {
           "ad3d3ed7f1": "Restart Yiru",
           "29c56f30ee": "Check for Updates",
-          "eb9884e55b": "Discord",
           "5687ab246a": "GitHub",
           "5f83d86d92": "Changelog",
           "cdc87f897e": "Docs",
@@ -4076,8 +4073,7 @@
           "5161eef55d": "Restarting Yiru…",
           "d396773ef0": "checking",
           "f8a2c91d4e": "Milestones",
-          "b7e4d2a19c": "Onboarding",
-          "c4f8e1b72a": "X"
+          "b7e4d2a19c": "Onboarding"
         },
         "SidebarToolbar": {
           "87d0064026": "Workspace board moved to the bottom bar",
@@ -6218,9 +6214,7 @@
         },
         "MobileSettingsPane": {
           "9a3c280e49": "GitHub Releases",
-          "b0088412a1": "or the Android APK from",
-          "b5a2ed83ff": "App Store",
-          "c8491c17ef": "Control Yiru from your phone by scanning a QR code. Beta / early preview - expect bugs and breaking changes. Get the iOS app from the",
+          "c8491c17ef": "Control Yiru from your phone by scanning a QR code. Mobile builds:",
           "e7a3ae8c4e": "Mobile",
           "174f4a3c6d": "Control terminals and agents from your phone.",
           "1de96ec8a6": "Show Yiru Mobile Button",
@@ -9474,9 +9468,8 @@
         "MobileRelayBetaAvailability": {
           "about": "About the Yiru Relay beta",
           "beta": "Beta",
-          "availability": "Available on",
-          "testFlight": "TestFlight",
-          "androidApk": "Android APK"
+          "availability": "Mobile builds:",
+          "githubReleases": "GitHub Releases"
         }
       },
       "right": {
@@ -10955,12 +10948,7 @@
           "a6cffbbb0b": "Generate code",
           "e59a252eca": "Regenerate code",
           "d0b52871ce": "Your phones are paired.",
-          "051978a785": "Your phone is paired.",
-          "channel": {
-            "group": "Release channel",
-            "preview": "Preview",
-            "stable": "Stable"
-          }
+          "051978a785": "Your phone is paired."
         },
         "MobilePage": {
           "e17393c6a3": "Phone preview",
@@ -10993,13 +10981,8 @@
         "mobile": {
           "platform": {
             "copy": {
-              "2a532d6fd7": "Scan with your Android camera to download the latest APK from GitHub Releases.",
-              "432db52b73": "Scan with your iPhone camera to open the App Store.",
-              "preview": {
-                "tagline": "Newest features, updated daily."
-              },
-              "stable": {
-                "tagline": "The public release, updated weekly."
+              "releases": {
+                "cta": "View mobile builds"
               }
             }
           }

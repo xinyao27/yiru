@@ -96,7 +96,7 @@ describe('useAddRepoCloneFlow', () => {
     mocks.stateSetters = []
     mocks.refIndex = 0
     mocks.refValues = []
-    mocks.stateValues = ['https://github.com/stablyai/yiru.git', '/srv', false, null, null]
+    mocks.stateValues = ['https://github.com/xinyao27/yiru.git', '/srv', false, null, null]
     mocks.storeState.repos = []
     mocks.storeState.projects = []
     mocks.storeState.projectHostSetups = []
@@ -131,7 +131,7 @@ describe('useAddRepoCloneFlow', () => {
 
     expect(mocks.cloneRemote).toHaveBeenCalledWith({
       connectionId: 'ssh-1',
-      url: 'https://github.com/stablyai/yiru.git',
+      url: 'https://github.com/xinyao27/yiru.git',
       destination: '/srv'
     })
     expect(mocks.cloneLocal).not.toHaveBeenCalled()
@@ -148,7 +148,7 @@ describe('useAddRepoCloneFlow', () => {
   })
 
   it('does not prefill SSH clone destinations from the local workspace directory', async () => {
-    mocks.stateValues = ['https://github.com/stablyai/yiru.git', '', false, null, null]
+    mocks.stateValues = ['https://github.com/xinyao27/yiru.git', '', false, null, null]
     const { useAddRepoCloneFlow } = await import('./useAddRepoCloneFlow')
 
     const result = useAddRepoCloneFlow({
@@ -205,7 +205,7 @@ describe('useAddRepoCloneFlow', () => {
       { kind: 'environment', environmentId: 'env-1' },
       'repo.clone',
       {
-        url: 'https://github.com/stablyai/yiru.git',
+        url: 'https://github.com/xinyao27/yiru.git',
         destination: '/srv'
       },
       { timeoutMs: 10 * 60_000 }

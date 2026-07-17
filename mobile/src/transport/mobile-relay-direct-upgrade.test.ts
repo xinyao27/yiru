@@ -15,8 +15,8 @@ vi.mock('expo-crypto', () => ({ getRandomBytes: (length: number) => new Uint8Arr
 
 const relay: MobileRelayEndpoint = {
   v: 1,
-  directorUrl: 'https://relay-staging.onyiru.dev',
-  cellUrl: 'https://c1.relay-staging.onyiru.dev',
+  directorUrl: 'https://relay-staging.yiru.ai',
+  cellUrl: 'https://c1.relay-staging.yiru.ai',
   assignmentEpoch: 4,
   relayHostId: 'AbCdEf0123_-xyZ9',
   e2eeFraming: 2

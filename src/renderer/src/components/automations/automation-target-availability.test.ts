@@ -389,10 +389,10 @@ describe('automation target availability', () => {
           sourceContext: {
             kind: 'task-source',
             provider: 'github',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'local',
             repoId: 'repo-1',
-            providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+            providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
           }
         }),
         repo: makeRepo(),
@@ -415,15 +415,15 @@ describe('automation target availability', () => {
           sourceContext: {
             kind: 'task-source',
             provider: 'gitlab',
-            projectId: 'gitlab:stablyai/yiru',
+            projectId: 'gitlab:xinyao27/yiru',
             hostId: 'runtime:old-server',
             repoId: 'repo-1',
             providerIdentity: {
               provider: 'gitlab',
-              projectId: 'stablyai/yiru',
-              namespace: 'stablyai',
+              projectId: 'xinyao27/yiru',
+              namespace: 'xinyao27',
               project: 'yiru',
-              webUrl: 'https://gitlab.com/stablyai/yiru'
+              webUrl: 'https://gitlab.com/xinyao27/yiru'
             }
           }
         }),

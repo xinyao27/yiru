@@ -74,10 +74,10 @@ describe('project-host workspace target resolution', () => {
 
   it('chooses the focused host setup when one project exists on multiple hosts', () => {
     const repos = [makeRepo('yiru-local'), makeRepo('yiru-ssh', { connectionId: 'openclaw-2' })]
-    const projects = [makeProject('github:stablyai/yiru', ['yiru-local', 'yiru-ssh'])]
+    const projects = [makeProject('github:xinyao27/yiru', ['yiru-local', 'yiru-ssh'])]
     const projectHostSetups = [
-      makeSetup('yiru-local', 'github:stablyai/yiru', 'local', 'yiru-local'),
-      makeSetup('yiru-ssh', 'github:stablyai/yiru', 'ssh:openclaw-2', 'yiru-ssh')
+      makeSetup('yiru-local', 'github:xinyao27/yiru', 'local', 'yiru-local'),
+      makeSetup('yiru-ssh', 'github:xinyao27/yiru', 'ssh:openclaw-2', 'yiru-ssh')
     ]
 
     expect(
@@ -85,7 +85,7 @@ describe('project-host workspace target resolution', () => {
         eligibleRepos: repos,
         projects,
         projectHostSetups,
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         focusedHostScope: 'ssh:openclaw-2'
       })
     ).toBe('yiru-ssh')
@@ -96,24 +96,24 @@ describe('project-host workspace target resolution', () => {
       makeRepo('yiru-local'),
       makeRepo('yiru-runtime', { executionHostId: 'runtime:gpu-1' })
     ]
-    const projects = [makeProject('github:stablyai/yiru', ['yiru-local', 'yiru-runtime'])]
+    const projects = [makeProject('github:xinyao27/yiru', ['yiru-local', 'yiru-runtime'])]
     const projectHostSetups = [
-      makeSetup('yiru-local', 'github:stablyai/yiru', 'local', 'yiru-local'),
-      makeSetup('yiru-runtime', 'github:stablyai/yiru', 'runtime:gpu-1', 'yiru-runtime')
+      makeSetup('yiru-local', 'github:xinyao27/yiru', 'local', 'yiru-local'),
+      makeSetup('yiru-runtime', 'github:xinyao27/yiru', 'runtime:gpu-1', 'yiru-runtime')
     ]
 
     const resolution = resolveWorkspaceCreationTarget({
       eligibleRepos: repos,
       projects,
       projectHostSetups,
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'runtime:gpu-1'
     })
 
     expect(resolution).toMatchObject({
       status: 'ready',
       target: {
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'runtime:gpu-1',
         projectHostSetupId: 'yiru-runtime',
         repoId: 'yiru-runtime'
@@ -138,15 +138,15 @@ describe('project-host workspace target resolution', () => {
 
   it('reports unavailable when the project is not set up on the selected host', () => {
     const repo = makeRepo('yiru')
-    const projects = [makeProject('github:stablyai/yiru', ['yiru'])]
-    const projectHostSetups = [makeSetup('yiru', 'github:stablyai/yiru', 'local', 'yiru')]
+    const projects = [makeProject('github:xinyao27/yiru', ['yiru'])]
+    const projectHostSetups = [makeSetup('yiru', 'github:xinyao27/yiru', 'local', 'yiru')]
 
     expect(
       resolveWorkspaceCreationTarget({
         eligibleRepos: [repo],
         projects,
         projectHostSetups,
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'ssh:openclaw-2'
       })
     ).toEqual({
@@ -157,10 +157,10 @@ describe('project-host workspace target resolution', () => {
 
   it('reports setup-not-ready when the selected host has pending setup metadata', () => {
     const repo = makeRepo('yiru')
-    const projects = [makeProject('github:stablyai/yiru', ['yiru'])]
+    const projects = [makeProject('github:xinyao27/yiru', ['yiru'])]
     const projectHostSetups = [
-      makeSetup('yiru', 'github:stablyai/yiru', 'local', 'yiru'),
-      makeSetup('gpu-pending', 'github:stablyai/yiru', 'runtime:gpu', '', {
+      makeSetup('yiru', 'github:xinyao27/yiru', 'local', 'yiru'),
+      makeSetup('gpu-pending', 'github:xinyao27/yiru', 'runtime:gpu', '', {
         path: '',
         setupState: 'setting-up',
         setupMethod: 'provisioned'
@@ -172,7 +172,7 @@ describe('project-host workspace target resolution', () => {
         eligibleRepos: [repo],
         projects,
         projectHostSetups,
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'runtime:gpu'
       })
     ).toEqual({
@@ -183,9 +183,9 @@ describe('project-host workspace target resolution', () => {
 
   it('reports unavailable when an explicit setup is not ready', () => {
     const repo = makeRepo('yiru')
-    const projects = [makeProject('github:stablyai/yiru', ['yiru'])]
+    const projects = [makeProject('github:xinyao27/yiru', ['yiru'])]
     const projectHostSetups = [
-      makeSetup('yiru', 'github:stablyai/yiru', 'local', 'yiru', { setupState: 'setting-up' })
+      makeSetup('yiru', 'github:xinyao27/yiru', 'local', 'yiru', { setupState: 'setting-up' })
     ]
 
     expect(

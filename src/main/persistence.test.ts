@@ -424,14 +424,14 @@ describe('Store', () => {
           id: 'local-repo',
           path: '/Users/alice/yiru',
           displayName: 'Yiru',
-          upstream: { owner: 'StablyAI', repo: 'Yiru' }
+          upstream: { owner: 'xinyao27', repo: 'Yiru' }
         }),
         makeRepo({
           id: 'remote-repo',
           path: '/home/alice/yiru',
           displayName: 'yiru',
           connectionId: 'gpu-vm',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         })
       ]
     })
@@ -440,20 +440,20 @@ describe('Store', () => {
 
     expect(store.getProjects()).toEqual([
       expect.objectContaining({
-        id: 'github:stablyai/yiru',
+        id: 'github:xinyao27/yiru',
         sourceRepoIds: ['local-repo', 'remote-repo']
       })
     ])
     expect(store.getProjectHostSetups()).toEqual([
       expect.objectContaining({
         id: 'local-repo',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'local',
         path: '/Users/alice/yiru'
       }),
       expect.objectContaining({
         id: 'remote-repo',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'ssh:gpu-vm',
         path: '/home/alice/yiru'
       })
@@ -1743,7 +1743,7 @@ describe('Store', () => {
     const store = await createStore()
     store.addRepo(
       makeRepo({
-        upstream: { owner: 'stablyai', repo: 'yiru' },
+        upstream: { owner: 'xinyao27', repo: 'yiru' },
         connectionId: 'builder'
       })
     )
@@ -1761,7 +1761,7 @@ describe('Store', () => {
 
     expect(automation.runContext).toMatchObject({
       kind: 'workspace-run',
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: toSshExecutionHostId('builder'),
       projectHostSetupId: 'r1',
       repoId: 'r1',
@@ -1770,11 +1770,11 @@ describe('Store', () => {
     expect(automation.sourceContext).toMatchObject({
       kind: 'task-source',
       provider: 'github',
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: toSshExecutionHostId('builder'),
       projectHostSetupId: 'r1',
       repoId: 'r1',
-      providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+      providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
     })
   })
 
@@ -1783,7 +1783,7 @@ describe('Store', () => {
     store.addRepo(
       makeRepo({
         executionHostId: toRuntimeExecutionHostId('gpu-server'),
-        upstream: { owner: 'stablyai', repo: 'yiru' }
+        upstream: { owner: 'xinyao27', repo: 'yiru' }
       })
     )
 
@@ -1806,7 +1806,7 @@ describe('Store', () => {
 
   it('snapshots automation contexts onto runs', async () => {
     const store = await createStore()
-    store.addRepo(makeRepo({ upstream: { owner: 'stablyai', repo: 'yiru' } }))
+    store.addRepo(makeRepo({ upstream: { owner: 'xinyao27', repo: 'yiru' } }))
     const automation = store.createAutomation({
       name: 'Nightly',
       prompt: 'Run checks',
@@ -1834,7 +1834,7 @@ describe('Store', () => {
     const store = await createStore()
     store.addRepo(
       makeRepo({
-        upstream: { owner: 'stablyai', repo: 'yiru' },
+        upstream: { owner: 'xinyao27', repo: 'yiru' },
         connectionId: 'builder'
       })
     )
@@ -1869,7 +1869,7 @@ describe('Store', () => {
 
     expect(migratedAutomation?.runContext).toMatchObject({
       kind: 'workspace-run',
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: toSshExecutionHostId('builder'),
       projectHostSetupId: 'r1',
       repoId: 'r1',
@@ -1878,11 +1878,11 @@ describe('Store', () => {
     expect(migratedAutomation?.sourceContext).toMatchObject({
       kind: 'task-source',
       provider: 'github',
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: toSshExecutionHostId('builder'),
       projectHostSetupId: 'r1',
       repoId: 'r1',
-      providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+      providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
     })
     expect(migratedRun?.runContext).toEqual(migratedAutomation?.runContext)
     expect(migratedRun?.sourceContext).toEqual(migratedAutomation?.sourceContext)
@@ -1892,7 +1892,7 @@ describe('Store', () => {
     const seed = await createStore()
     seed.addRepo(
       makeRepo({
-        upstream: { owner: 'stablyai', repo: 'yiru' },
+        upstream: { owner: 'xinyao27', repo: 'yiru' },
         connectionId: 'builder'
       })
     )
@@ -1956,7 +1956,7 @@ describe('Store', () => {
     const store = await createStore()
     store.addRepo(
       makeRepo({
-        upstream: { owner: 'stablyai', repo: 'yiru' },
+        upstream: { owner: 'xinyao27', repo: 'yiru' },
         connectionId: 'builder'
       })
     )
@@ -3708,10 +3708,10 @@ describe('Store', () => {
     const store = await createStore()
     store.addRepo({
       ...makeRepo({ id: 'r1', displayName: 'Cloud Project' }),
-      upstream: { owner: 'stablyai', repo: 'cloud-project' }
+      upstream: { owner: 'xinyao27', repo: 'cloud-project' }
     })
     store.createProjectHostSetup({
-      projectId: 'github:stablyai/cloud-project',
+      projectId: 'github:xinyao27/cloud-project',
       hostId: 'ssh:ssh-old',
       setupId: 'cloud-project::ssh-old',
       setupMethod: 'provisioned'
@@ -3730,16 +3730,16 @@ describe('Store', () => {
     const store = await createStore()
     store.addRepo({
       ...makeRepo({ id: 'r1', displayName: 'Cloud Project' }),
-      upstream: { owner: 'stablyai', repo: 'cloud-project' }
+      upstream: { owner: 'xinyao27', repo: 'cloud-project' }
     })
     store.createProjectHostSetup({
-      projectId: 'github:stablyai/cloud-project',
+      projectId: 'github:xinyao27/cloud-project',
       hostId: 'ssh:ssh-old',
       setupId: 'setup-old',
       setupMethod: 'provisioned'
     })
     store.createProjectHostSetup({
-      projectId: 'github:stablyai/cloud-project',
+      projectId: 'github:xinyao27/cloud-project',
       hostId: 'ssh:ssh-new',
       setupId: 'setup-new',
       setupMethod: 'provisioned'
@@ -3771,12 +3771,12 @@ describe('Store', () => {
     store.updateRepo('r1', {
       displayName: 'renamed',
       worktreeBasePath: '../new-worktrees',
-      upstream: { owner: 'stablyai', repo: 'yiru' }
+      upstream: { owner: 'xinyao27', repo: 'yiru' }
     })
 
     expect(store.getProjects()).toEqual([
       expect.objectContaining({
-        id: 'github:stablyai/yiru',
+        id: 'github:xinyao27/yiru',
         displayName: 'renamed',
         sourceRepoIds: ['r1']
       })
@@ -3784,7 +3784,7 @@ describe('Store', () => {
     expect(store.getProjectHostSetups()).toEqual([
       expect.objectContaining({
         id: 'r1',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         displayName: 'renamed',
         worktreeBasePath: '../new-worktrees'
       })
@@ -3876,11 +3876,11 @@ describe('Store', () => {
     const store = await createStore()
     store.addRepo({
       ...makeRepo({ id: 'r1', displayName: 'Cloud Project' }),
-      upstream: { owner: 'stablyai', repo: 'cloud-project' }
+      upstream: { owner: 'xinyao27', repo: 'cloud-project' }
     })
 
     const result = store.createProjectHostSetup({
-      projectId: 'github:stablyai/cloud-project',
+      projectId: 'github:xinyao27/cloud-project',
       hostId: 'runtime:gpu-vm',
       setupId: 'cloud-project::gpu-vm',
       displayName: 'GPU VM',
@@ -3889,12 +3889,12 @@ describe('Store', () => {
     })
 
     expect(result?.project).toMatchObject({
-      id: 'github:stablyai/cloud-project',
+      id: 'github:xinyao27/cloud-project',
       displayName: 'Cloud Project'
     })
     expect(result?.setup).toMatchObject({
       id: 'cloud-project::gpu-vm',
-      projectId: 'github:stablyai/cloud-project',
+      projectId: 'github:xinyao27/cloud-project',
       hostId: 'runtime:gpu-vm',
       repoId: '',
       path: '',
@@ -3913,11 +3913,11 @@ describe('Store', () => {
     const store = await createStore()
     store.addRepo({
       ...makeRepo({ id: 'r1', displayName: 'Cloud Project' }),
-      upstream: { owner: 'stablyai', repo: 'cloud-project' }
+      upstream: { owner: 'xinyao27', repo: 'cloud-project' }
     })
     const independentSetup = makeProjectHostSetup({
       id: 'cloud-project::gpu-vm',
-      projectId: 'github:stablyai/cloud-project',
+      projectId: 'github:xinyao27/cloud-project',
       hostId: 'runtime:gpu-vm'
     })
     store.createProjectHostSetup({
@@ -3928,7 +3928,7 @@ describe('Store', () => {
 
     expect(() =>
       store.createProjectHostSetup({
-        projectId: 'github:stablyai/cloud-project',
+        projectId: 'github:xinyao27/cloud-project',
         hostId: 'runtime:gpu-vm',
         setupId: 'duplicate'
       })
@@ -4094,9 +4094,9 @@ describe('Store', () => {
     store.addRepo(makeRepo())
 
     const updated = store.updateRepo('r1', {
-      upstream: { owner: ' stablyai ', repo: ' yiru ' }
+      upstream: { owner: ' xinyao27 ', repo: ' yiru ' }
     })
-    expect(updated!.upstream).toEqual({ owner: 'stablyai', repo: 'yiru' })
+    expect(updated!.upstream).toEqual({ owner: 'xinyao27', repo: 'yiru' })
 
     store.updateRepo('r1', { upstream: null })
     store.flush()

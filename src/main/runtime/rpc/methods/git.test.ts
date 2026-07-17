@@ -425,12 +425,12 @@ describe('git RPC methods', () => {
     const response = await dispatcher.dispatch(
       makeRequest('git.forkSync', {
         worktree: 'id:wt-1',
-        expectedUpstream: { owner: 'stablyai', repo: 'yiru' }
+        expectedUpstream: { owner: 'xinyao27', repo: 'yiru' }
       })
     )
 
     expect(runtime.syncRuntimeGitForkDefaultBranch).toHaveBeenCalledWith('id:wt-1', {
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru'
     })
     expect(response).toMatchObject({

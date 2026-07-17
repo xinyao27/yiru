@@ -8,11 +8,8 @@ import {
 } from './mobile-settings-search'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import { YIRU_GITHUB_RELEASE_DOWNLOADS_URL } from '../../../../shared/yiru-github-repository'
+import { YIRU_GITHUB_RELEASES_URL } from '../../../../shared/yiru-github-repository'
 export { getMobileSettingsPaneSearchEntries }
-
-const YIRU_IOS_APP_STORE_URL = 'https://apps.apple.com/app/yiru/id6766130217'
-const YIRU_ANDROID_APK_URL = `${YIRU_GITHUB_RELEASE_DOWNLOADS_URL}/mobile-android-v0.0.31/app-release.apk`
 
 export function MobileSettingsPane(): React.JSX.Element {
   const showMobileButton = useAppStore((s) => s.settings?.showMobileButton !== false)
@@ -32,24 +29,11 @@ export function MobileSettingsPane(): React.JSX.Element {
         <p className="text-xs text-muted-foreground">
           {translate(
             'auto.components.settings.MobileSettingsPane.c8491c17ef',
-            'Control Yiru from your phone by scanning a QR code. Get the iOS app from the'
+            'Control Yiru from your phone by scanning a QR code. Mobile builds:'
           )}{' '}
           <button
             type="button"
-            onClick={() => void window.api.shell.openUrl(YIRU_IOS_APP_STORE_URL)}
-            className="cursor-pointer underline underline-offset-2 hover:text-foreground"
-          >
-            {translate('auto.components.settings.MobileSettingsPane.b5a2ed83ff', 'App Store')}
-          </button>{' '}
-          {translate(
-            'auto.components.settings.MobileSettingsPane.b0088412a1',
-            'or the Android APK from'
-          )}{' '}
-          <button
-            type="button"
-            // Why: Android is moving to Google Play soon, but until then
-            // link directly to the pinned APK asset for the current mobile release.
-            onClick={() => void window.api.shell.openUrl(YIRU_ANDROID_APK_URL)}
+            onClick={() => void window.api.shell.openUrl(YIRU_GITHUB_RELEASES_URL)}
             className="cursor-pointer underline underline-offset-2 hover:text-foreground"
           >
             {translate('auto.components.settings.MobileSettingsPane.9a3c280e49', 'GitHub Releases')}

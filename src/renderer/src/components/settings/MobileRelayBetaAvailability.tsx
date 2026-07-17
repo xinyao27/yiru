@@ -1,8 +1,5 @@
 import { translate } from '@/i18n/i18n'
-import { YIRU_GITHUB_RELEASE_DOWNLOADS_URL } from '../../../../shared/yiru-github-repository'
-
-const TESTFLIGHT_URL = 'https://testflight.apple.com/join/YjeGMQBA'
-const ANDROID_APK_URL = `${YIRU_GITHUB_RELEASE_DOWNLOADS_URL}/mobile-android-v0.0.31/app-release.apk`
+import { YIRU_GITHUB_RELEASES_URL } from '../../../../shared/yiru-github-repository'
 
 export function MobileRelayBetaAvailability(): React.JSX.Element {
   return (
@@ -14,25 +11,17 @@ export function MobileRelayBetaAvailability(): React.JSX.Element {
       <span>
         {translate(
           'auto.components.settings.MobileRelayBetaAvailability.availability',
-          'Available on'
+          'Mobile builds:'
         )}
       </span>
       <button
         type="button"
         className="rounded-sm font-medium text-foreground underline decoration-border underline-offset-2 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        onClick={() => void window.api.shell.openUrl(TESTFLIGHT_URL)}
-      >
-        {translate('auto.components.settings.MobileRelayBetaAvailability.testFlight', 'TestFlight')}
-      </button>
-      <span aria-hidden="true">/</span>
-      <button
-        type="button"
-        className="rounded-sm font-medium text-foreground underline decoration-border underline-offset-2 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        onClick={() => void window.api.shell.openUrl(ANDROID_APK_URL)}
+        onClick={() => void window.api.shell.openUrl(YIRU_GITHUB_RELEASES_URL)}
       >
         {translate(
-          'auto.components.settings.MobileRelayBetaAvailability.androidApk',
-          'Android APK'
+          'auto.components.settings.MobileRelayBetaAvailability.githubReleases',
+          'GitHub Releases'
         )}
       </button>
     </span>

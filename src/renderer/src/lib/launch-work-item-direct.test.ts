@@ -237,7 +237,7 @@ describe('launchWorkItemDirect', () => {
         type: 'pr',
         number: 6934,
         title: 'Fix the bug',
-        url: 'https://github.com/stablyai/yiru/pull/6934',
+        url: 'https://github.com/xinyao27/yiru/pull/6934',
         branchName: 'feature/fix',
         baseRefName: 'main',
         isCrossRepository: true
@@ -294,7 +294,7 @@ describe('launchWorkItemDirect', () => {
           type: 'pr',
           number: 6933,
           title: 'The board columns are displayed backwards',
-          url: 'https://github.com/stablyai/yiru/issues/6933',
+          url: 'https://github.com/xinyao27/yiru/issues/6933',
           branchName: 'fix-issue-6933',
           baseRefName: 'main',
           isCrossRepository: true

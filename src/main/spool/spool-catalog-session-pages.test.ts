@@ -35,7 +35,7 @@ describe('Spool catalog session pages', () => {
     const description = sanitizeCatalogWorktreeDescription(instance, {
       kind: 'git',
       projectKey: 'project:project-one',
-      projectIdentityKey: 'github:paperboytm/paperboy',
+      projectIdentityKey: 'github:xinyao27/paperboy',
       projectName: 'paperboy',
       worktreeName: 'main-2',
       branch: 'refs/heads/main-2'

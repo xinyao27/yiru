@@ -51,8 +51,8 @@ class FakeSocket {
 
 const relay = {
   v: 1 as const,
-  directorUrl: 'https://relay.onyiru.dev',
-  cellUrl: 'https://relay-c1.onyiru.dev',
+  directorUrl: 'https://relay.yiru.ai',
+  cellUrl: 'https://relay-c1.yiru.ai',
   assignmentEpoch: 7,
   relayHostId: 'AbCdEf0123_-xyZ9',
   inviteToken: 'abcdefghijklmnopqrstuvwxyzABCDEFGH012345678',
@@ -80,7 +80,7 @@ describe('mobile relay physical pairing client', () => {
       }
     })
     socket.onopen?.()
-    expect(openedUrl).toBe('wss://relay-c1.onyiru.dev/v1/connect/AbCdEf0123_-xyZ9')
+    expect(openedUrl).toBe('wss://relay-c1.yiru.ai/v1/connect/AbCdEf0123_-xyZ9')
     expect(openedUrl).not.toContain('?')
     expect(JSON.parse(socket.sent[0] as string)).toEqual({
       type: 'relay-auth',

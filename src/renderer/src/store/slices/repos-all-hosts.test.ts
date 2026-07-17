@@ -198,17 +198,17 @@ function configureSharedProjectCompatibilityMocks(
   sharedProjectId: string
   sharedRemoteProject: Project
 } {
-  const sharedProjectId = 'github:stablyai/yiru'
+  const sharedProjectId = 'github:xinyao27/yiru'
   const localRepoForSharedProject: Repo =
     options.localRepoHasProviderIdentity === false
       ? localRepo
       : {
           ...localRepo,
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         }
   const remoteRepoWithIdentity: Repo = {
     ...remoteRepo,
-    upstream: { owner: 'stablyai', repo: 'yiru' }
+    upstream: { owner: 'xinyao27', repo: 'yiru' }
   }
   const sharedLocalProject: Project = {
     id: sharedProjectId,
@@ -682,7 +682,7 @@ describe('fetchReposForAllHosts', () => {
         .getState()
         .projects.map((project) => project.id)
         .sort()
-    ).toEqual(['github:stablyai/yiru', 'repo:remote-repo'])
+    ).toEqual(['github:xinyao27/yiru', 'repo:remote-repo'])
     expect(store.getState().projectHostSetups).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

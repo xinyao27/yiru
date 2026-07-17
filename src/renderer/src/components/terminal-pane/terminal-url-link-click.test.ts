@@ -382,7 +382,7 @@ describe('hard-wrapped terminal HTTP clicks', () => {
   it('does not glue the next logical line onto a URL that ends mid-row (#8832)', () => {
     const { terminal, registrations } = makeTerminal({
       cols: 80,
-      urlRows: ['Repo: https://github.com/stablyai/yiru/', 'Description: 123'],
+      urlRows: ['Repo: https://github.com/xinyao27/yiru/', 'Description: 123'],
       softWrapped: false
     })
     const disposable = installHttpLinkClickFallback(terminal, { worktreeId: 'wt-1' })
@@ -393,7 +393,7 @@ describe('hard-wrapped terminal HTTP clicks', () => {
     fallback!(mouseEventForRow(0))
 
     expect(openUrlMock).toHaveBeenCalledOnce()
-    expect(openUrlMock).toHaveBeenCalledWith('https://github.com/stablyai/yiru/')
+    expect(openUrlMock).toHaveBeenCalledWith('https://github.com/xinyao27/yiru/')
     disposable.dispose()
   })
 

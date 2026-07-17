@@ -198,7 +198,7 @@ describe('submitFolderWorkspaceCreate', () => {
       type: 'issue' as const,
       number: 42,
       title: 'Restore checkout polish',
-      url: 'https://github.com/stablyai/yiru/issues/42',
+      url: 'https://github.com/xinyao27/yiru/issues/42',
       repoId: 'repo-1'
     }
 
@@ -231,7 +231,7 @@ describe('submitFolderWorkspaceCreate', () => {
       type: 'pr' as const,
       number: 91,
       title: 'Restore linked quick-create',
-      url: 'https://github.com/stablyai/yiru/pull/91',
+      url: 'https://github.com/xinyao27/yiru/pull/91',
       repoId: 'repo-1'
     }
 
@@ -288,7 +288,7 @@ describe('submitFolderWorkspaceCreate', () => {
       type: 'pr' as const,
       number: 92,
       title: 'Trust remote folder draft',
-      url: 'https://github.com/stablyai/yiru/pull/92',
+      url: 'https://github.com/xinyao27/yiru/pull/92',
       repoId: 'repo-1'
     }
     const projectGroup = {
@@ -456,7 +456,7 @@ describe('submitFolderWorkspaceCreate', () => {
       type: 'issue' as const,
       number: 42,
       title: 'Restore checkout polish',
-      url: 'https://github.com/stablyai/yiru/issues/42',
+      url: 'https://github.com/xinyao27/yiru/issues/42',
       repoId: 'repo-1'
     }
 
@@ -644,7 +644,7 @@ describe('buildFolderWorkspaceLinkedStartupPlan', () => {
         type: 'issue',
         number: 42,
         title: 'Restore linked quick-create',
-        url: 'https://github.com/stablyai/yiru/issues/42',
+        url: 'https://github.com/xinyao27/yiru/issues/42',
         repoId: 'repo-1'
       },
       note: '',

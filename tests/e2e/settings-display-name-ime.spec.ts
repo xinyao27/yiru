@@ -7,7 +7,7 @@
  * pipeline, so a controlled-input value reset mid-composition cancels the
  * composition exactly like a real OS IME session.
  */
-import type { CDPSession, Locator, Page } from '@stablyai/playwright-test'
+import type { CDPSession, Locator, Page } from '@playwright/test'
 import { test, expect } from './helpers/yiru-app'
 import { getStoreState, waitForSessionReady } from './helpers/store'
 import type { Repo } from '../../src/shared/types'

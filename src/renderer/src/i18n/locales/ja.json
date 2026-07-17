@@ -3944,10 +3944,8 @@
           "5b120b9634": "匿名で送信",
           "c9e5ea0791": "GitHub:",
           "d46ddd66fc": "何を改善できるでしょうか?",
-          "3460258a54": "Xをフォロー",
-          "26108d3699": "Discord に参加",
           "d245c4ef6c": "GitHub Issue",
-          "9b33530b3d": "その他の連絡方法",
+          "9b33530b3d": "バグを報告して機能をリクエスト",
           "a828fa4aee": "何が機能しているのか、何が壊れているのか、Yiru が次に何をすべきかを共有します。",
           "0eb643f07f": "フィードバックを送信する",
           "60b721e857": "フィードバックの送信に失敗しました。もう一度試す。",
@@ -4007,7 +4005,6 @@
         "SidebarSettingsHelpMenu": {
           "ad3d3ed7f1": "Yiru を再起動",
           "29c56f30ee": "アップデートをチェックする",
-          "eb9884e55b": "Discord",
           "5687ab246a": "GitHub",
           "5f83d86d92": "変更履歴",
           "cdc87f897e": "ドキュメント",
@@ -4019,8 +4016,7 @@
           "5161eef55d": "Yiru を再起動しています…",
           "d396773ef0": "チェック中",
           "f8a2c91d4e": "マイルストーン",
-          "b7e4d2a19c": "オンボーディング",
-          "c4f8e1b72a": "X"
+          "b7e4d2a19c": "オンボーディング"
         },
         "SidebarToolbar": {
           "19e32d0e5f": "フォルダーピッカーを開いてプロジェクトを追加します",
@@ -6179,10 +6175,8 @@
           "1592afcc7a": "まだデバイスがペアリングされていません。 Yiru モバイル アプリで QR コードをスキャンします。"
         },
         "MobileSettingsPane": {
-          "9a3c280e49": "GitHub リリース",
-          "b0088412a1": "または Android APK から",
-          "b5a2ed83ff": "アプリストア",
-          "c8491c17ef": "QR コードをスキャンしてスマートフォンから Yiru を制御します。ベータ/早期プレビュー - バグや重大な変更が予想されます。 iOS アプリを次の場所から入手します。",
+          "9a3c280e49": "GitHub Releases",
+          "c8491c17ef": "QR コードをスキャンして、スマートフォンから Yiru を操作できます。モバイルビルド：",
           "e7a3ae8c4e": "モバイル",
           "174f4a3c6d": "スマートフォンから terminals と agents を操作",
           "1de96ec8a6": "Yiru Mobile ボタンを表示",
@@ -9451,9 +9445,8 @@
         "MobileRelayBetaAvailability": {
           "about": "Yiru Relay ベータについて",
           "beta": "ベータ",
-          "availability": "利用可能:",
-          "testFlight": "TestFlight",
-          "androidApk": "Android APK"
+          "availability": "モバイルビルド：",
+          "githubReleases": "GitHub Releases"
         }
       },
       "right": {
@@ -10932,12 +10925,7 @@
           "a6cffbbb0b": "コードを生成する",
           "e59a252eca": "コードを再生成する",
           "d0b52871ce": "スマートフォンはペアリングされています。",
-          "051978a785": "スマートフォンはペアリングされています。",
-          "channel": {
-            "group": "リリースチャンネル",
-            "preview": "プレビュー",
-            "stable": "安定版"
-          }
+          "051978a785": "スマートフォンはペアリングされています。"
         },
         "MobilePage": {
           "e17393c6a3": "スマートフォンプレビュー",
@@ -10970,13 +10958,8 @@
         "mobile": {
           "platform": {
             "copy": {
-              "2a532d6fd7": "Android カメラでスキャンして、GitHub リリースから最新の APK をダウンロードします。",
-              "432db52b73": "iPhone のカメラでスキャンして App Store を開きます。",
-              "preview": {
-                "tagline": "最新機能を毎日更新。"
-              },
-              "stable": {
-                "tagline": "一般公開版、毎週更新。"
+              "releases": {
+                "cta": "モバイルビルドを見る"
               }
             }
           }

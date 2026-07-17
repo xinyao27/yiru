@@ -10,7 +10,7 @@ import type {
   ComputerUsePermissionStatusResult
 } from '../../shared/computer-use-permissions-types'
 
-const DEFAULT_COMPUTER_USE_BUNDLE_ID = 'com.stablyai.yiru.computer-use'
+const DEFAULT_COMPUTER_USE_BUNDLE_ID = 'com.xinyao27.yiru.computer-use'
 
 export { getComputerUsePermissionStatus } from './macos-computer-use-permission-status'
 

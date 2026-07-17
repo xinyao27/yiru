@@ -3,7 +3,11 @@
 import { execFileSync } from 'node:child_process'
 import { appendFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
-import { verifyRequiredReleaseAssets } from './verify-release-required-assets.mjs'
+import {
+  getWindowsReleaseAssetNames,
+  readWindowsReleaseEnabled,
+  verifyRequiredReleaseAssets
+} from './verify-release-required-assets.mjs'
 
 const API_VERSION = '2022-11-28'
 const RELEASE_CUT_AUTHOR = 'github-actions[bot]'
@@ -44,7 +48,7 @@ export function isTagBuiltFromCurrentRef(tag, { cwd = process.cwd() } = {}) {
   }
 }
 
-async function githubJson(fetchImpl, url, token, options = {}) {
+async function githubRequest(fetchImpl, url, token, options = {}) {
   const res = await fetchImpl(url, {
     ...options,
     headers: {
@@ -58,6 +62,11 @@ async function githubJson(fetchImpl, url, token, options = {}) {
     const body = await res.text().catch(() => '')
     throw new Error(`GitHub request failed ${res.status} ${res.statusText}: ${body.slice(0, 300)}`)
   }
+  return res
+}
+
+async function githubJson(fetchImpl, url, token, options = {}) {
+  const res = await githubRequest(fetchImpl, url, token, options)
   return res.json()
 }
 
@@ -73,11 +82,57 @@ async function fetchReleases(repo, token, fetchImpl) {
   return releases
 }
 
+export async function deleteWindowsReleaseAssets({ repo, release, token, fetchImpl = fetch }) {
+  const windowsNames = new Set(getWindowsReleaseAssetNames())
+  const assets = Array.isArray(release?.assets) ? release.assets : []
+  const deleted = []
+
+  for (const asset of assets) {
+    if (!windowsNames.has(asset.name)) {
+      continue
+    }
+    await githubRequest(
+      fetchImpl,
+      `https://api.github.com/repos/${repo}/releases/assets/${asset.id}`,
+      token,
+      { method: 'DELETE' }
+    )
+    deleted.push(asset.name)
+  }
+
+  return deleted
+}
+
+export async function deleteWindowsReleaseAssetsForTag({ repo, tag, token, fetchImpl = fetch }) {
+  if (!repo) {
+    throw new Error('repo is required')
+  }
+  if (!tag) {
+    throw new Error('tag is required')
+  }
+  if (!token) {
+    throw new Error('token is required')
+  }
+
+  const releases = await fetchReleases(repo, token, fetchImpl)
+  const release = releases.find((candidate) => candidate.tag_name === tag)
+  if (!release) {
+    throw new Error(`Release ${repo}@${tag} was not found in the draft-aware releases list`)
+  }
+  if (release.draft !== true) {
+    throw new Error(`Release ${repo}@${tag} is not a draft; refusing to delete assets`)
+  }
+
+  return deleteWindowsReleaseAssets({ repo, release, token, fetchImpl })
+}
+
 export async function publishCompleteDraftReleases({
   repo,
   token,
+  includeWindows = true,
   fetchImpl = fetch,
   verifyReleaseAssets = verifyRequiredReleaseAssets,
+  removeWindowsReleaseAssets = deleteWindowsReleaseAssets,
   isDraftBuiltFromCurrentRef = ({ tag }) => isTagBuiltFromCurrentRef(tag),
   log = console.log
 }) {
@@ -105,8 +160,17 @@ export async function publishCompleteDraftReleases({
       continue
     }
 
+    if (!includeWindows) {
+      // Why: release retries reuse bot-authored drafts, so stale Windows
+      // artifacts must be removed before a macOS/Linux-only draft is exposed.
+      const removed = await removeWindowsReleaseAssets({ repo, release, token, fetchImpl })
+      if (removed.length > 0) {
+        log(`Removed disabled Windows assets from RC draft ${tag}: ${removed.join(', ')}`)
+      }
+    }
+
     try {
-      await verifyReleaseAssets({ repo, tag, token })
+      await verifyReleaseAssets({ repo, tag, token, includeWindows })
     } catch (error) {
       const reason = error instanceof Error ? error.message.split('\n')[0] : String(error)
       skipped.push({ tag, reason })
@@ -158,7 +222,8 @@ export function writeGithubOutputs({ published, skipped }, outputPath = process.
 async function main() {
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN
   const repo = process.env.GITHUB_REPOSITORY || 'xinyao27/yiru'
-  const result = await publishCompleteDraftReleases({ repo, token })
+  const includeWindows = readWindowsReleaseEnabled()
+  const result = await publishCompleteDraftReleases({ repo, token, includeWindows })
   writeGithubOutputs(result)
 }
 

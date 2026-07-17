@@ -121,18 +121,18 @@ describe('RepositoryHostSetupsSection', () => {
     })
     useAppStore.setState({
       repos: [localRepo, remoteRepo],
-      projects: [makeProject({ id: 'github:stablyai/yiru' })],
+      projects: [makeProject({ id: 'github:xinyao27/yiru' })],
       projectHostSetups: [
         makeSetup({
           id: 'local-repo',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           repoId: 'local-repo',
           hostId: 'local',
           path: '/Users/alice/yiru'
         }),
         makeSetup({
           id: 'remote-repo',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           repoId: 'remote-repo',
           hostId: toSshExecutionHostId('openclaw 2'),
           path: '/home/alice/yiru'
@@ -164,18 +164,18 @@ describe('RepositoryHostSetupsSection', () => {
     })
     useAppStore.setState({
       repos: [localRepo, remoteRepo],
-      projects: [makeProject({ id: 'github:stablyai/yiru' })],
+      projects: [makeProject({ id: 'github:xinyao27/yiru' })],
       projectHostSetups: [
         makeSetup({
           id: 'local-repo',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           repoId: 'local-repo',
           hostId: 'local',
           path: '/Users/alice/yiru'
         }),
         makeSetup({
           id: 'remote-repo',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           repoId: 'remote-repo',
           hostId: toSshExecutionHostId('openclaw 2'),
           path: '/home/alice/yiru'
@@ -200,7 +200,7 @@ describe('RepositoryHostSetupsSection', () => {
 
     // The single project pane switches host in place — no navigation.
     expect(setSettingsProjectHostSelection).toHaveBeenCalledWith(
-      'github:stablyai/yiru',
+      'github:xinyao27/yiru',
       toSshExecutionHostId('openclaw 2')
     )
     expect(openSettingsPage).not.toHaveBeenCalled()
@@ -209,10 +209,10 @@ describe('RepositoryHostSetupsSection', () => {
 
   it('removes independent setup metadata instead of opening an empty repo target', async () => {
     const deleteProjectHostSetup = vi.fn().mockResolvedValue({
-      project: makeProject({ id: 'github:stablyai/yiru' }),
+      project: makeProject({ id: 'github:xinyao27/yiru' }),
       setup: makeSetup({
         id: 'gpu-setup',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         repoId: '',
         hostId: 'runtime:gpu',
         path: ''
@@ -227,18 +227,18 @@ describe('RepositoryHostSetupsSection', () => {
     })
     useAppStore.setState({
       repos: [localRepo],
-      projects: [makeProject({ id: 'github:stablyai/yiru' })],
+      projects: [makeProject({ id: 'github:xinyao27/yiru' })],
       projectHostSetups: [
         makeSetup({
           id: 'local-repo',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           repoId: 'local-repo',
           hostId: 'local',
           path: '/Users/alice/yiru'
         }),
         makeSetup({
           id: 'gpu-setup',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           repoId: '',
           hostId: 'runtime:gpu',
           path: '',
@@ -273,10 +273,10 @@ describe('RepositoryHostSetupsSection', () => {
     const openSettingsTarget = vi.fn()
     const setSettingsProjectHostSelection = vi.fn()
     const setupProjectExistingFolder = vi.fn().mockResolvedValue({
-      project: makeProject({ id: 'github:stablyai/yiru' }),
+      project: makeProject({ id: 'github:xinyao27/yiru' }),
       setup: makeSetup({
         id: 'remote-repo',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         repoId: 'remote-repo',
         hostId: toSshExecutionHostId('openclaw 2'),
         path: '/home/alice/yiru'
@@ -295,11 +295,11 @@ describe('RepositoryHostSetupsSection', () => {
     })
     useAppStore.setState({
       repos: [localRepo],
-      projects: [makeProject({ id: 'github:stablyai/yiru' })],
+      projects: [makeProject({ id: 'github:xinyao27/yiru' })],
       projectHostSetups: [
         makeSetup({
           id: 'local-repo',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           repoId: 'local-repo',
           hostId: 'local',
           path: '/Users/alice/yiru'
@@ -330,14 +330,14 @@ describe('RepositoryHostSetupsSection', () => {
     })
 
     expect(setupProjectExistingFolder).toHaveBeenCalledWith({
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'ssh:openclaw%202',
       path: '/home/alice/yiru',
       kind: 'git',
       displayName: 'Yiru'
     })
     expect(setSettingsProjectHostSelection).toHaveBeenCalledWith(
-      'github:stablyai/yiru',
+      'github:xinyao27/yiru',
       'ssh:openclaw%202'
     )
     expect(openSettingsPage).not.toHaveBeenCalled()
@@ -349,10 +349,10 @@ describe('RepositoryHostSetupsSection', () => {
     const openSettingsTarget = vi.fn()
     const setSettingsProjectHostSelection = vi.fn()
     const setupProjectClone = vi.fn().mockResolvedValue({
-      project: makeProject({ id: 'github:stablyai/yiru' }),
+      project: makeProject({ id: 'github:xinyao27/yiru' }),
       setup: makeSetup({
         id: 'remote-repo',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         repoId: 'remote-repo',
         hostId: toSshExecutionHostId('openclaw 2'),
         path: '/home/alice/yiru'
@@ -371,11 +371,11 @@ describe('RepositoryHostSetupsSection', () => {
     })
     useAppStore.setState({
       repos: [localRepo],
-      projects: [makeProject({ id: 'github:stablyai/yiru' })],
+      projects: [makeProject({ id: 'github:xinyao27/yiru' })],
       projectHostSetups: [
         makeSetup({
           id: 'local-repo',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           repoId: 'local-repo',
           hostId: 'local',
           path: '/Users/alice/yiru'
@@ -400,7 +400,7 @@ describe('RepositoryHostSetupsSection', () => {
     )
     expect(urlInput).toBeTruthy()
     expect(destinationInput).toBeTruthy()
-    typeIntoInput(urlInput!, 'https://github.com/stablyai/yiru.git')
+    typeIntoInput(urlInput!, 'https://github.com/xinyao27/yiru.git')
     typeIntoInput(destinationInput!, '/home/alice')
 
     const cloneButton = findButton('Clone')
@@ -411,14 +411,14 @@ describe('RepositoryHostSetupsSection', () => {
     })
 
     expect(setupProjectClone).toHaveBeenCalledWith({
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'ssh:openclaw%202',
-      url: 'https://github.com/stablyai/yiru.git',
+      url: 'https://github.com/xinyao27/yiru.git',
       destination: '/home/alice',
       displayName: 'Yiru'
     })
     expect(setSettingsProjectHostSelection).toHaveBeenCalledWith(
-      'github:stablyai/yiru',
+      'github:xinyao27/yiru',
       'ssh:openclaw%202'
     )
     expect(openSettingsPage).not.toHaveBeenCalled()
@@ -427,10 +427,10 @@ describe('RepositoryHostSetupsSection', () => {
 
   it('creates pending setup metadata for a known host without requiring a path', async () => {
     const createProjectHostSetup = vi.fn().mockResolvedValue({
-      project: makeProject({ id: 'github:stablyai/yiru' }),
+      project: makeProject({ id: 'github:xinyao27/yiru' }),
       setup: makeSetup({
         id: 'gpu-setup',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         repoId: '',
         hostId: 'runtime:gpu',
         path: '',
@@ -445,11 +445,11 @@ describe('RepositoryHostSetupsSection', () => {
     })
     useAppStore.setState({
       repos: [localRepo],
-      projects: [makeProject({ id: 'github:stablyai/yiru' })],
+      projects: [makeProject({ id: 'github:xinyao27/yiru' })],
       projectHostSetups: [
         makeSetup({
           id: 'local-repo',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           repoId: 'local-repo',
           hostId: 'local',
           path: '/Users/alice/yiru'
@@ -495,7 +495,7 @@ describe('RepositoryHostSetupsSection', () => {
     })
 
     expect(createProjectHostSetup).toHaveBeenCalledWith({
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'runtime:gpu',
       displayName: 'Yiru',
       setupState: 'not-set-up',
@@ -514,11 +514,11 @@ describe('RepositoryHostSetupsSection', () => {
     })
     useAppStore.setState({
       repos: [localRepo],
-      projects: [makeProject({ id: 'github:stablyai/yiru' })],
+      projects: [makeProject({ id: 'github:xinyao27/yiru' })],
       projectHostSetups: [
         makeSetup({
           id: 'local-repo',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           repoId: 'local-repo',
           hostId: 'local',
           path: '/Users/alice/yiru'
@@ -570,10 +570,10 @@ describe('RepositoryHostSetupsSection', () => {
 
   it('offers inactive runtime hosts discovered from hydrated runtime status', async () => {
     const createProjectHostSetup = vi.fn().mockResolvedValue({
-      project: makeProject({ id: 'github:stablyai/yiru' }),
+      project: makeProject({ id: 'github:xinyao27/yiru' }),
       setup: makeSetup({
         id: 'gpu-setup',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         repoId: '',
         hostId: 'runtime:gpu',
         path: '',
@@ -588,11 +588,11 @@ describe('RepositoryHostSetupsSection', () => {
     })
     useAppStore.setState({
       repos: [localRepo],
-      projects: [makeProject({ id: 'github:stablyai/yiru' })],
+      projects: [makeProject({ id: 'github:xinyao27/yiru' })],
       projectHostSetups: [
         makeSetup({
           id: 'local-repo',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           repoId: 'local-repo',
           hostId: 'local',
           path: '/Users/alice/yiru'
@@ -637,7 +637,7 @@ describe('RepositoryHostSetupsSection', () => {
     })
 
     expect(createProjectHostSetup).toHaveBeenCalledWith({
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'runtime:gpu',
       displayName: 'Yiru',
       setupState: 'not-set-up',

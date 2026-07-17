@@ -27,7 +27,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["local", "ssh"],
       "coverageNotes": "Local deterministic evidence covers git-common classification, desktop watcher debounce counts, non-overlapping poller semantics, macOS native-watch fallback, preload cleanup, and Source Control active-visible repo filtering. Linux/Windows are covered at the shared poller layer by forcing the non-darwin path; live platform runs remain gaps.",
-      "motivatingLinks": ["https://github.com/stablyai/yiru/pull/7086"],
+      "motivatingLinks": ["legacy PR #7086"],
       "invariant": "Index-only Git activity below the common Git directory must not emit worktrees:changed, invalidate worktree caches, or trigger fetchWorktrees fanout; structural add/remove/HEAD/gitdir/locked/config.worktree changes must still refresh worktrees and nudge Source Control; external head moves (commit, amend, reset) must reach background worktree rows through spawn-free metadata reads, never through structural fanout.",
       "oracle": "Classify exact git-common paths as structural, status-only, or ignored; count notifications from debounced watcher events; force the Linux/Windows poll path to emit allowlisted leaf events, detect linked HEAD rewrites independent of entry-directory mtime, and surface in-place index rewrites via the backstop re-stat; diff head identities from metadata-file reads and notify only real head moves; assert Source Control subscribes to both structural and status-only signals with active-repo and visibility filters.",
       "commands": [
@@ -158,7 +158,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["local", "daemon", "ssh"],
       "coverageNotes": "Deterministic unit coverage exercises activation gating, single-instance ownership, quit policy, local/remote CLI status, headless binding persistence, local daemon identity, and SSH identity transfer. A macOS Electron journey starts one headless owner in an isolated profile, creates and writes to a daemon PTY, activates the GUI through a second process, and verifies the original owner/runtime/daemon/PTY identities plus pre- and post-promotion I/O. Live packaged, Linux, and Windows journeys remain uncollected.",
-      "motivatingLinks": ["https://github.com/stablyai/yiru/issues/8457"],
+      "motivatingLinks": ["legacy issue #8457"],
       "invariant": "A safely promotable headless serve process is the single app owner. Desktop activation opens a window in that same process only after the persistent PTY provider and runtime RPC are ready; every live persisted local or SSH terminal remains bound to the same PTY/session, and a committed Cmd+Q still exits the promoted app.",
       "oracle": "Unit tests coalesce early activation, fail closed on a fallback local provider, preserve the production single-instance path for serve, expose explicit desktop window state to local and remote clients, persist headless tab/leaf bindings, transfer local and SSH reattach metadata, and retain quit intent. The Electron journey asserts one main-process PID, runtime id, daemon PID, and PTY id across activation; confirms output written before promotion is visible afterward; confirms new terminal input still works; and requires the activating second process to exit.",
       "commands": [
@@ -300,7 +300,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["local"],
       "coverageNotes": "Focused tests and real-Monaco 9/50 MiB performance and undo-retention benchmarks are platform-independent. Local macOS Electron evidence opens a synthetic 9 MiB transcript through Agent Session History at fixed 900x720 viewport, 13px font, 1x zoom, and asserts the full 9 MiB model length loaded as a font-metric-independent containment check (word-wrap pixel geometry varies ~10% across runners, so a generous content-height floor is only a collapsed/truncated-render smoke check), then verifies three five-second-cadence watcher appends with Find open and closed. Live Windows/Linux evidence remains uncollected.",
-      "motivatingLinks": ["https://github.com/stablyai/yiru/pull/8432"],
+      "motivatingLinks": ["legacy PR #8432"],
       "invariant": "Append-only external file growth changes only Monaco's model suffix, retaining the viewport, selection, Find state, and renderer liveness above the append point; read-only live tails do not create undo history, while editable external updates remain undoable and arbitrary rewrites continue to replace the model content.",
       "oracle": "Focused tests assert one post-mount content owner, actual outer lifecycle remount ordering across retained path models, exact end-of-model suffix edits with one model read, no-op equality, full replacement for non-appends, and real-Monaco undo behavior for read-only live tails versus editable files. With Node forced GC, real-Monaco benchmarks alternate 30 suffix and 30 replacement samples after five warmups on fresh equivalent models at 9 and 50 MiB, then compare exact Monaco undo-service and ArrayBuffer retention after five 10 MiB appends. The Electron scenario alternates an e2e-only legacy setValue red control and the fixed watcher append from restored equivalent model/geometry at the measured legacy-failure cadence, asserting that the control disrupts anchor state while the fixed path preserves visible ranges, selection, complete Find state, scroll offset, non-undoability, renderer survival, and forced-GC heap/native-memory budgets.",
       "commands": [
@@ -461,10 +461,10 @@
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence over the reconcile guards that exist on main@1282f5c2d. Broader targeted-hasPty resume paths, no-hot listing counts, and live Electron survival arrive with the pending reliability stack.",
       "motivatingLinks": [
-        "https://github.com/stablyai/yiru/issues/6773",
-        "https://github.com/stablyai/yiru/pull/6514",
-        "https://github.com/stablyai/yiru/pull/6796",
-        "https://github.com/stablyai/yiru/pull/6801"
+        "legacy issue #6773",
+        "legacy PR #6514",
+        "legacy PR #6796",
+        "legacy PR #6801"
       ],
       "invariant": "A local or daemon liveness snapshot requested before a pane binds a PTY cannot prove that newer binding dead or route it through exit teardown.",
       "oracle": "The decision layer rejects reconciliation when ptyBoundAt is greater than or equal to snapshotRequestedAt, still reconciles genuinely absent older local ids, and treats rejected provider listing as unknown.",
@@ -542,7 +542,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["local", "daemon", "ssh"],
       "coverageNotes": "Local macOS deterministic evidence covers the renderer snapshot/coordinator, exact local and SSH-shaped PTY request settlement, active-last and pinned terminal-tab routing, component-unmount continuation, and the existing current/legacy daemon management contract. Windows Electron process absence, live SSH/WSL behavior, and remote-runtime/mobile host completion remain explicit gaps.",
-      "motivatingLinks": ["https://github.com/stablyai/yiru/issues/8001"],
+      "motivatingLinks": ["legacy issue #8001"],
       "invariant": "Every terminal surface confirmed in the invoking renderer is force-closed exactly once after daemon management settles, later-created surfaces and non-terminal tabs survive, and exact shutdown requests are limited to deduplicated current non-runtime PTY bindings of the confirmed surfaces.",
       "oracle": "Snapshot terminal entity IDs before the first await; mutate ownership, active selection, bindings, and tab presence while daemon management is pending and between bounded close batches; then assert only the immutable targets disappear from both terminal stores, active targets close last with valid editor/browser/deactivated post-state, every captured exact PTY promise settles before callbacks, and no provider inventory sweep or late-tab kill occurs.",
       "commands": [
@@ -650,10 +650,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["local", "daemon", "ssh", "runtime"],
       "coverageNotes": "Live macOS Electron tests prove exact local PTY disappearance after parked-tab close and detached-pgid descendant death after agent close. Deterministic tests cover daemon and SSH routing, local/daemon pending-snapshot ownership across natural exit, stale-root descendant-signal suppression, graceful-to-immediate kill upgrades, duplicate-kill completion sharing, locale-stable bounded/fresh/coalesced process-table reads, deadline-safe successor scans, cycle-safe linear descendant traversal, target-only escalation indexing, 32-wide bulk teardown, source-scan timestamp identity, same-second PID ambiguity, ordinary runtime close ownership, unified-only hydration, split ownership, pane detach transfer, restart alias hydration, and late-hook suppression; live Linux, Windows, WSL, SSH, and remote-runtime process evidence remains pending.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/8628",
-        "https://github.com/stablyai/yiru/pull/8706"
-      ],
+      "motivatingLinks": ["legacy PR #8628", "legacy PR #8706"],
       "invariant": "Close permanently removes the owned provider session, agent descendants, and resume authority even when no TerminalPane is mounted; a terminating id remains reserved through natural exit, duplicate callers await the same completion, and immediate teardown upgrades any graceful request without signalling a recycled PID or a descendant tree after root ownership is lost; process-table work is locale-stable, bounded, fresh for each post-start request, same-turn coalesced, and begins within the requesting caller's deadline, including bulk worktree cleanup; detach and park preserve ownership; aliases prevent a detached agent's immutable physical pane key from being retired with its former tab.",
       "oracle": "Capture the exact PTY before parking, prove it remains listed while the view is absent, close through the product state boundary, and poll the provider inventory until that exact ID disappears; an agent-marked PTY's detached-pgid child is alive before close and absent afterward; unit tests keep a naturally exited id reserved without re-killing its PID or signalling its captured tree, upgrade pending and post-snapshot graceful kills to immediate, force ps into the C locale, coalesce each bounded bulk-shutdown batch, share duplicate teardown completion, coalesce 20 same-turn process-table requests, start one shared successor without waiting for the prior scan, terminate cyclic-looking traversal, retain the source scan's timestamp, bound both read phases, avoid ambiguous SIGKILL, and assert canonical owner dedupe, exact pane tombstones, chained detach transfer, and restart alias restoration.",
       "commands": [
@@ -809,11 +806,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["local", "ssh", "remote-runtime"],
       "coverageNotes": "Local macOS evidence covers the shared missing-dir fallback policy, main pty:spawn recovery and metadata, no-flag and reattach strictness, renderer IPC flag routing, SSH-tagged and remote-runtime omission, and the visibility-gated terminal notice. Daemon shares the same pre-provider main cwd decision but lacks a live daemon-provider run; WSL UNC paths are exempt from the probe by design and lack a live run; Linux/Windows and mobile/API strictness are gaps.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/issues/7239",
-        "https://github.com/stablyai/yiru/pull/7750",
-        "https://github.com/stablyai/yiru/pull/7678"
-      ],
+      "motivatingLinks": ["legacy issue #7239", "legacy PR #7750", "legacy PR #7678"],
       "invariant": "A fresh local renderer terminal spawn may recover from a saved startup cwd whose directory no longer exists only by spawning at the selected workspace root and printing a generic in-terminal notice; existing directories — including ones outside the worktree (#7685) — spawn as requested, and reattach, SSH, remote-runtime, runtime/API, and mobile callers keep exact cwd semantics.",
       "oracle": "The shared resolver falls back to the workspace root only when the injected existence probe reports the resolved cwd missing and the workspace root present, and never probes floating terminals or a cwd equal to the root. The renderer sends cwdFallback only for fresh local IPC spawns, main honors it only when connectionId and sessionId are absent, WSL UNC paths never engage the probe-based fallback, main returns fallback metadata only after an actual fallback, the IPC transport preserves that metadata, and the connection layer writes a generic notice that omits the missing path.",
       "commands": [
@@ -949,11 +942,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS execution of the generated Pi/OMP extension plus the shared hook normalizer. WSL fallback behavior is covered with mocked native-fetch failure and Windows curl handoff. Daemon PTYs use the same generated extension without a distinct delivery path. SSH/relay ingest uses the shared normalizer, but no live remote Pi process is exercised.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/issues/7791",
-        "https://github.com/stablyai/yiru/pull/7802",
-        "https://github.com/stablyai/yiru/pull/7838"
-      ],
+      "motivatingLinks": ["legacy issue #7791", "legacy PR #7802", "legacy PR #7838"],
       "invariant": "Yiru status reporting must return synchronously from every Pi/OMP extension handler, retain at most one active request and one latest pending snapshot, and abandon stalled loopback delivery within one second. A Pi session_shutdown event cannot mark a turn done because Pi also emits it for reload, new, resume, and fork while the PTY remains alive; only agent_end proves turn completion, while real process exit is cleared by PTY teardown.",
       "oracle": "Execute the generated extension with a fetch that remains pending and assert the Pi handler returns before delivery; emit three statuses during the stall and assert exactly one request is active and only the latest pending status is sent next; advance fake time by one second and assert the active signal aborts and the latest status proceeds. Through the shared normalizer, assert session_shutdown yields no status while agent_end still yields done.",
       "commands": [
@@ -1042,10 +1031,10 @@
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence over the ownership/dedupe suite on main@1282f5c2d. Queued/pending resume-claim indexing, same-session and wrong-session hook proofs, and Electron repeat-activation coverage arrive with the pending stack (#7008).",
       "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6800",
-        "https://github.com/stablyai/yiru/pull/5240",
-        "https://github.com/stablyai/yiru/pull/6411",
-        "https://github.com/stablyai/yiru/pull/6833"
+        "legacy PR #6800",
+        "legacy PR #5240",
+        "legacy PR #6411",
+        "legacy PR #6833"
       ],
       "invariant": "Workspace activation, launch, restore, sleep, hibernate, dedupe, clearing, and reconnect code must not replay or resume a provider session id already owned, queued, pending, or live in that workspace.",
       "oracle": "The current renderer-state slice asserts provider-session claim keys are owned by preserved active tabs, inactive split leaves, visible non-focused split groups, live records, quit records, worktree-sleep records, queued startup payloads, time-bounded resume bridge claims, and same-session live hook evidence; duplicates clear without launching a second resume command. The provider list is the risk scope, not proof that every provider has a live integration gate.",
@@ -1117,13 +1106,13 @@
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence on main@1282f5c2d, including #7192's runtime-mirror geometry authority slice. Shell-visible size, SSH/remote geometry, Windows ConPTY readback, and resume-time reassertion coverage arrive with the pending stack and #7006.",
       "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6644",
-        "https://github.com/stablyai/yiru/pull/6649",
-        "https://github.com/stablyai/yiru/pull/6725",
-        "https://github.com/stablyai/yiru/pull/6785",
-        "https://github.com/stablyai/yiru/pull/6853",
-        "https://github.com/stablyai/yiru/pull/6939",
-        "https://github.com/stablyai/yiru/pull/7192"
+        "legacy PR #6644",
+        "legacy PR #6649",
+        "legacy PR #6725",
+        "legacy PR #6785",
+        "legacy PR #6853",
+        "legacy PR #6939",
+        "legacy PR #7192"
       ],
       "invariant": "A visible desktop-owned terminal cannot trust 0x0, stale requested size, or renderer-only size; xterm, fit/proposed size, applied PTY size, shell-visible size, and the runtime mirror's parse dimensions must converge or enter explicit degraded state, and mirror resize reflow must stay ordered with queued output writes.",
       "oracle": "The current executable slice uses deterministic frame schedulers and fake providers to force 0x0 first fit, delayed layout settle, dropped resize/readback drift, and hidden-to-visible activation, then asserts the renderer forwards a usable size, pty:getSize reports applied rather than merely requested size where available, and visibility resume reasserts real drift without hot listSessions. Shell-visible stty/echo-wrap convergence remains a live-gate follow-up.",
@@ -1221,11 +1210,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence over the WebGL/link/search containment suites on main@1282f5c2d, adopting the #6949 atlas-recovery rename and #7133's reveal hardening tests. Core addon-load throw containment and live typed-input survival arrive with #7004 and a live follow-up.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6852",
-        "https://github.com/stablyai/yiru/pull/6872",
-        "https://github.com/stablyai/yiru/pull/6855"
-      ],
+      "motivatingLinks": ["legacy PR #6852", "legacy PR #6872", "legacy PR #6855"],
       "invariant": "Search, link, WebGL, decoration, input-protocol, or keyboard-navigation errors must not unmount the terminal surface, crash React/window, break focus, or stop PTY input/output.",
       "oracle": "The current executable slice injects a core addon load throw and asserts pane opening continues through later addons, covers link provider throws as pane-scoped no-link results, covers search decoration positive-integer failures as false results instead of renderer crashes, and covers WebGL attach/refresh/recovery containment. Focused typed input echo after addon failure still needs a live/component follow-up.",
       "commands": [
@@ -1416,11 +1401,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/issues/5356",
-        "https://github.com/stablyai/yiru/pull/5234",
-        "https://github.com/stablyai/yiru/pull/5240"
-      ],
+      "motivatingLinks": ["legacy issue #5356", "legacy PR #5234", "legacy PR #5240"],
       "invariant": "Startup and restore fixes must preserve or explicitly recover sessions from the last affected production persisted-state schema, not only from state written by current code.",
       "oracle": "Boot current Yiru against immutable copied user-data fixtures from affected versions and reject blank replacement panes, duplicate resume tabs, silent session loss, or works-only-after-current-write behavior.",
       "commands": [],
@@ -1473,10 +1454,10 @@
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The live Electron Playwright slice exists only on the pending reliability stack. It registers here with its owning split PR.",
       "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6801",
-        "https://github.com/stablyai/yiru/pull/6842",
-        "https://github.com/stablyai/yiru/pull/6939",
-        "https://github.com/stablyai/yiru/pull/6989"
+        "legacy PR #6801",
+        "legacy PR #6842",
+        "legacy PR #6939",
+        "legacy PR #6989"
       ],
       "invariant": "An active local Electron terminal has one active PTY id listed exactly once, accepts real keyboard input through focused xterm, renders process output visibly, keeps the same live PTY across repeated workspace hide/restore cycles, applies an actual size change, and removes the old PTY from liveness state after exit.",
       "oracle": "A deterministic raw-mode probe prints a ready marker, ordered key markers from real keyboard input, the active PTY id appears exactly once in pty:listSessions, remains bound to the same PTY id across two worktree switch-away/switch-back cycles, accepts more keyboard input after each restore, changes pty:getSize after viewport resize, prints the same process-visible size, and prints an exit marker; after shell exit, pty:listSessions no longer contains the old id.",
@@ -1533,13 +1514,13 @@
       "coveredProviders": ["daemon"],
       "coverageNotes": "Issue #8048 now has deterministic wrapper and cold-restore re-anchor tests plus a Windows PR-CI harness that drives the built daemon through 25 real ConPTY workspace-close races while an unrelated witness PTY stays alive. Keyboard reset, CJK repaint, WSL, and full visible Electron coverage remain gaps.",
       "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6541",
-        "https://github.com/stablyai/yiru/pull/6858",
-        "https://github.com/stablyai/yiru/pull/6876",
-        "https://github.com/stablyai/yiru/pull/6968",
-        "https://github.com/stablyai/yiru/pull/6970",
-        "https://github.com/stablyai/yiru/pull/6999",
-        "https://github.com/stablyai/yiru/issues/8048"
+        "legacy PR #6541",
+        "legacy PR #6858",
+        "legacy PR #6876",
+        "legacy PR #6968",
+        "legacy PR #6970",
+        "legacy PR #6999",
+        "legacy issue #8048"
       ],
       "invariant": "Windows local and daemon terminals must spawn with the intended shell, survive overlapping graceful/forced workspace teardown without affecting unrelated PTYs, retain recovered scrollback across the fresh daemon's first checkpoint, accept normal Enter/Backspace/Arrow input after agent or TUI exit, render cursor/CJK/wide-glyph redraws without stale cells, and converge to nonzero applied size.",
       "oracle": "The issue #8048 slice asserts one node-pty ConPTY close for a graceful-then-force sequence, atomically seeds recovered history before fresh shell output and re-anchoring, preserves recovery after seed failure plus adapter restart, and runs 25 built-daemon close races while checking victim session/PID reaping, a stable daemon PID, and a live witness PTY. A broader Windows live gate still needs shell input, resize, cursor, and CJK/wide-glyph pixel evidence.",
@@ -1633,10 +1614,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The targeted-hasPty product hardening and no-hot count assertions exist only on the pending reliability stack. It registers here with its owning split PR.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/7002",
-        "https://github.com/stablyai/yiru/pull/6858"
-      ],
+      "motivatingLinks": ["legacy PR #7002", "legacy PR #6858"],
       "invariant": "Typing, focus, terminal switch, workspace switch, visibility resume, resize, render, and per-pane liveness paths must not call global pty:listSessions; they must use targeted per-PTY APIs or cached provider-owned state.",
       "oracle": "The current executable slice asserts targeted visibility/first-input liveness, resize re-assertion after visibility resume, light tab/active-state resume, SSH/remote skip behavior, and closed Resource Manager status badges avoid pty:listSessions; targeted hasPty/getSize calls are allowed for liveness/resize slices and forbidden for light tab/active-state resume. The full hot-path oracle still needs instrumentation around raw focus, split focus, workspace switch, render ticks, and high-session local/daemon/SSH fixtures.",
       "commands": [],
@@ -1690,10 +1668,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The crash-breadcrumb recording and its test exist only on the pending reliability stack. It registers here with its owning split PR.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6800",
-        "https://github.com/stablyai/yiru/issues/6773"
-      ],
+      "motivatingLinks": ["legacy PR #6800", "legacy issue #6773"],
       "invariant": "Terminal lifecycle anomalies around reattach, restore, provider ownership, stale liveness, and fallback routing must leave compact, deduped, privacy-safe breadcrumbs in crash diagnostics so future reports can be attributed from evidence.",
       "oracle": "The current executable slice calls warnTerminalLifecycleAnomaly with terminal identity, provider, PTY id, binding epoch, and reason, then asserts the existing console warning is preserved and a compact terminal_lifecycle_anomaly crash breadcrumb is recorded once per lifecycle identity. Full pane transition traces and diagnostics-bundle artifact proof remain follow-ups.",
       "commands": [],
@@ -1751,10 +1726,10 @@
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence covers the existing main-process pending-output caps plus deterministic runtime path-provenance history reuse and saturated-tail wait detection. Daemon stream write(false)/drain contracts, cross-session drain priority, and bounded queued tails arrive with the pending perf slice; live flood/latency artifacts remain gaps.",
       "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6836",
-        "https://github.com/stablyai/yiru/pull/6858",
-        "https://github.com/stablyai/yiru/pull/7002",
-        "https://github.com/stablyai/yiru/pull/7054"
+        "legacy PR #6836",
+        "legacy PR #6858",
+        "legacy PR #7002",
+        "legacy PR #7054"
       ],
       "invariant": "High-volume terminal output must stay bounded across daemon socket writes, main runtime metadata, detectors, and tail checks, main-to-renderer in-flight bytes, renderer scheduler queues, and hidden-output restore without starving focused input.",
       "oracle": "The current executable slice injects main-process renderer backlog pressure, then asserts unchanged path-provenance history reuse for pathless output, ordinary terminal-wait detection without a joined-tail allocation and with full prompt-family continuity, per-PTY and total pending-output caps, preserved sequenced-tail metadata, active-pending protection ahead of background trimming, and ACK-gated in-flight bounds. The live Electron perf oracle adds hidden-output floods, renderer scheduler queue depth, dropped-output-zero normal scenarios, and active key latency budgets before promotion.",
@@ -1881,11 +1856,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The fail-closed degraded-daemon hardening and its contracts exist only on the pending reliability stack. It registers here with its owning split PR.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6830",
-        "https://github.com/stablyai/yiru/pull/6866",
-        "https://github.com/stablyai/yiru/pull/7002"
-      ],
+      "motivatingLinks": ["legacy PR #6830", "legacy PR #6866", "legacy PR #7002"],
       "invariant": "Daemon startup reconciliation must preserve valid live daemon sessions, reap only true orphans, and degraded mode must not route an existing-looking daemon session through local fallback unless the caller explicitly marks a fresh degraded-mode spawn.",
       "oracle": "The current provider-contract corpus covers valid current-worktree ids, folder/floating workspace ids, invalid removed-worktree ids, mixed live/orphan dry-run reconciliation, hyphenated worktree ids, malformed ids, daemon sessions discovered after restart, router discovery before existing-session spawn, router fail-closed behavior when legacy ownership cannot be listed or a known session has exited, degraded daemon fallback for fresh sessions, fail-closed behavior for unknown restored ids, benign inspection defaults for unknown ownership, and synthetic exits on daemon restart. Prior-worktree aliases and renamed-worktree startup wiring are promotion gaps, not current proof.",
       "commands": [],
@@ -1940,11 +1911,11 @@
       "coveredProviders": ["ssh"],
       "coverageNotes": "Deterministic renderer coverage proves startup publishes the state returned by ssh.connect, remote or unresolved hosts cannot enter local-daemon cold activation deferral, and stale cleanup cannot unregister a replacement runtime terminal. A macOS Electron journey connects to a real Linux SSH relay in Docker, persists six terminals, reloads the renderer, and verifies all six original relay PTYs remount eagerly and still execute remote input. Linux and Windows desktop clients, WSL, and remote-runtime restore remain gaps.",
       "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6951",
-        "https://github.com/stablyai/yiru/pull/6955",
-        "https://github.com/stablyai/yiru/pull/6979",
-        "https://github.com/stablyai/yiru/pull/7009",
-        "https://github.com/stablyai/yiru/pull/8597"
+        "legacy PR #6951",
+        "legacy PR #6955",
+        "legacy PR #6979",
+        "legacy PR #7009",
+        "legacy PR #8597"
       ],
       "invariant": "SSH, WSL, and remote-runtime restore paths must treat provider listing failures and unknown liveness as unknown, not dead, while still avoiding duplicate spawn and clearing expired relay leases exactly once. Snapshot-backed cold activation deferral is local-daemon-only; every restored remote terminal must mount a manager eagerly and preserve its provider PTY identity.",
       "oracle": "Deterministic tests assert startup publishes ssh.connect's authoritative state before terminal reconnect, only an explicit local execution host can defer cold activation, host ownership changes clear old restrictions, and replacement runtime registrations survive stale cleanup. The live Docker SSH journey commits six terminal records to the relay, reloads Electron, requires the exact six manager ids with no parked tabs, compares all restored PTY ids to their pre-reload identities, and sends a marker through the restored terminal to a proof file on the Linux host.",
@@ -2048,10 +2019,10 @@
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
       "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6801",
-        "https://github.com/stablyai/yiru/pull/6830",
-        "https://github.com/stablyai/yiru/pull/6866",
-        "https://github.com/stablyai/yiru/pull/6951"
+        "legacy PR #6801",
+        "legacy PR #6830",
+        "legacy PR #6866",
+        "legacy PR #6951"
       ],
       "invariant": "WSL terminal restore must preserve Windows-host and Linux-guest path/cwd identity, shell launch args, startup command delivery, provider liveness semantics, and saved session ownership without being treated as ordinary local Windows ConPTY or generic SSH.",
       "oracle": "No executable slice yet. Promotion needs a Windows provider contract plus one focused live WSL smoke proving cwd/path mapping, shell echo, startup command delivery, targeted liveness unknown handling, and restore without duplicate panes or destructive false-dead cleanup.",
@@ -2106,11 +2077,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The replay FIFO/burst coalescing product change and its tests exist only on the pending reliability stack; main still uses a single pendingReplayData slot. It registers here with its owning split PR.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/7012",
-        "https://github.com/stablyai/yiru/pull/7054",
-        "https://github.com/stablyai/yiru/pull/6949"
-      ],
+      "motivatingLinks": ["legacy PR #7012", "legacy PR #7054", "legacy PR #6949"],
       "invariant": "Multiple replay notifications, metadata-only eager replays, hidden-output restores, and WebGL recovery must preserve FIFO ordering, apply clear-before-replay only when intended, and never overlay stale bytes on newer terminal output.",
       "oracle": "The current executable slice injects overlapping replay notifications while async replay drains and asserts pre-parse coalescing, in-flight replay preservation, FIFO draining after xterm parsing starts, and bounded burst-tail coalescing. Metadata-only replay, hidden output chunks, live output interleaving, clear semantics, and stale-overlap checks remain promotion-scope gaps.",
       "commands": [],
@@ -2167,10 +2134,10 @@
       "coveredProviders": [],
       "coverageNotes": "Local macOS and containerized Linux evidence, deterministic renderer-unit coverage for the Linux/Sogou candidate-key policy including the legacy orphaned-keyup fallback, and Electron/CDP live-PTY Sogou-style repros. Real Linux/Sogou OS IME automation, Windows ConPTY post-agent reset, and the CJK/Vietnamese/Arabic matrix remain registered gaps.",
       "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6699",
-        "https://github.com/stablyai/yiru/pull/6682",
-        "https://github.com/stablyai/yiru/pull/6513",
-        "https://github.com/stablyai/yiru/pull/6999"
+        "legacy PR #6699",
+        "legacy PR #6682",
+        "legacy PR #6513",
+        "legacy PR #6999"
       ],
       "invariant": "Composition, native text forwarding, synthetic input, paste, and platform keyboard bypass paths must not send preedit/control bytes before commit and must commit text exactly once to the intended PTY.",
       "oracle": "The current renderer-unit slice asserts native text commits route to the intended PTY once, composition/preedit bookkeeping does not leak premature text, input-source classification handles synthetic/native paths, paste/runtime forwarding avoids duplicate terminal payloads for covered fixtures, and Linux/Sogou candidate Space/digit selectors do not leak keydown/keypress/keyup while ordinary and long-held letter-to-digit typing remains available. The Electron/CDP live-PTY repro verifies Sogou-style Space and digit selectors submit only the committed Chinese text, while the legacy orphaned-letter-keyup sequence sends no selector byte to the PTY. Real legacy IME commit preservation and the full CJK/Vietnamese/Arabic/JIS-yen matrix run in follow-up platform soak where automation is possible.",
@@ -2348,10 +2315,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6999",
-        "https://github.com/stablyai/yiru/pull/6858"
-      ],
+      "motivatingLinks": ["legacy PR #6999", "legacy PR #6858"],
       "invariant": "After an agent or TUI exits on Windows ConPTY, ordinary Enter, Backspace, Arrow, paste, and printable keys must be delivered as standard shell input, not stale Kitty/CSI-u or application-mode bytes.",
       "oracle": "A Windows gate records PTY input bytes before and after agent/TUI exit, submits real shell commands, and proves standard keys work without protocol leakage.",
       "commands": [],
@@ -2406,10 +2370,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Deterministic main/renderer tests run on macOS and exercise simulated Windows plus POSIX/Linux process-confirmation behavior. They cover exact local-ConPTY membership, detached-child rejection, SSH and paired-runtime host-platform routing including legacy runtime PTY IDs, active-PTY ownership after worktree host changes, Windows-to-WSL routing, unknown-metadata fallback, production handler composition, KKP authorization on every host, process-confirmed Droid routing and launch-triggered confirmation, typed-alias and forged-OSC isolation, shells without OSC 133, split/detach ownership with preserved shell classification, stale PTY exit/rebind rejection, command-generation revocation, daemon v21 warm-reattach identity, unavailable inspection, and lazy subprocess/RPC callback counts. A live linux-arm64 Docker target additionally proved real relay deployment, SSH PTY host detection, and exact inactive/active KKP bytes. The Electron byte test runs only on Windows; live Windows evidence remains uncollected. Test failures report exact expected bytes; no product telemetry or raw terminal logging is added.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/issues/7620",
-        "https://github.com/stablyai/yiru/pull/7668"
-      ],
+      "motivatingLinks": ["legacy issue #7620", "legacy PR #7668"],
       "invariant": "Shift+Enter key recognition follows the client OS, while emitted bytes follow the active application and PTY host: active Kitty keyboard protocol authorizes CSI-u on every host; otherwise Windows hosts use Esc+CR except when allowlisted Droid ownership or fresh routing-trusted Droid process evidence authorizes CSI-u, and non-Windows hosts use Esc+CR. The active SSH connection, remote-runtime PTY owner, or live local session outranks later worktree ownership changes, and missing host-platform metadata falls back to the client. Every new command and PTY replacement revokes stale agent routing until current evidence settles; split or reused panes cannot inherit sibling or prior-PTY authority; unrelated keys perform no host, agent, protocol, or ConPTY lookup.",
       "oracle": "Renderer tests assert exact bytes across client/PTY-host combinations, including Kitty keyboard protocol active and inactive on Windows and non-Windows hosts, and prove SSH identity, the environment encoded in an active remote-runtime PTY id, and live local-session identity outrank current worktree ownership, while unavailable platform metadata falls back to the client. A live linux-arm64 SSH PTY independently captured Esc+CR with KKP inactive and CSI-u with KKP active. Fresh Windows process evidence authorizes Droid bytes only after a recognized global candidate is intersected with the exact ConPTY console process list; detached descendants, helper failure/timeout/root-only fallback, stale PTY exit/rebind results, typed text, and hook/OSC output fail closed. A new OSC 133;C immediately publishes a routing-neutral generation, including during D-to-C races. In cmd.exe/Git Bash/custom shells without OSC 133, accepted inferred commands start the same fresh generation; accepted submit/interrupt, title exit, focus, and visibility revoke trusted Droid bytes while one bounded confirmation runs. Detach preserves the live PTY's source shell override so WSL/native classification cannot change with the current default. Ordinary fast shell commands use cached/no-scan paths; routing-relevant confirmation bypasses cached process snapshots and keeps the bounded three-read ladder. Daemon protocol v21 persists only an allowlisted launchAgent; warm reattach uses it as a display/confirmation hint and restores routing only after current process proof. The Windows Electron test focuses the real xterm textarea and records exact renderer-to-main PTY writes.",
       "commands": [
@@ -2669,7 +2630,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["local", "daemon"],
       "coverageNotes": "Runtime and provider-contract tests on macOS cover exact-PTY authorization, local/daemon fresh confirmation, exact ConPTY membership, and unsupported-provider fail-closed behavior. Physical Windows, live Linux, SSH, WSL, and remote-runtime validation remain explicit gaps; providers without confirmation preserve conservative refusal on a shell conflict.",
-      "motivatingLinks": ["https://github.com/stablyai/yiru/issues/8303"],
+      "motivatingLinks": ["legacy issue #8303"],
       "invariant": "A guarded note send writes only to the exact PTY binding checked by the guard and only while permission/wait evidence allows input; fresh hook state conflicting with an ordinary shell foreground requires fresh provider confirmation of a recognized agent in that PTY.",
       "oracle": "Fresh explicit state plus ordinary PowerShell plus confirmed recognized agent is sendable on the same PTY. Confirmed shell/non-agent, unavailable confirmation, PTY exit, handle rebind, or a callback PTY mismatch returns a refusal or not-writable result and writes zero bytes.",
       "commands": [
@@ -2813,7 +2774,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["local"],
       "coverageNotes": "Local macOS evidence covers the runtime PTY write contract and a live dev-runtime CLI repro. SSH, daemon, remote-runtime, Linux, and Windows remain provider/platform gaps; the product path stays provider-owned and does not add local filesystem or process assumptions.",
-      "motivatingLinks": ["https://github.com/stablyai/yiru/issues/7226"],
+      "motivatingLinks": ["legacy issue #7226"],
       "invariant": "Injected orchestration task prompts for recognized agent CLIs must send the prompt body inside one bracketed-paste frame, sanitize embedded ESC bytes, preserve chunk boundaries without losing the frame, and send Enter only after the paste frame completes.",
       "oracle": "Runtime tests assert the exact PTY write sequence and failure cleanup; orchestration tests assert dispatch/coordinator use the agent prompt path; the live CLI harness dispatches a 32KB task to a fake Codex-like TUI and requires marker present, bracketed paste present, zero unframed line breaks, and submit observed.",
       "commands": [
@@ -2937,11 +2898,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6876",
-        "https://github.com/stablyai/yiru/pull/6968",
-        "https://github.com/stablyai/yiru/pull/6970"
-      ],
+      "motivatingLinks": ["legacy PR #6876", "legacy PR #6968", "legacy PR #6970"],
       "invariant": "Windows terminal repaint must not leave stale cells, clipped wide glyphs, or hidden cursor state after CJK, emoji, or cursor-rewrite output.",
       "oracle": "A Windows gate combines xterm buffer assertions with bounded screenshot/canvas evidence for representative CJK, emoji, and rewrite sequences.",
       "commands": [],
@@ -2992,10 +2949,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6541",
-        "https://github.com/stablyai/yiru/pull/6858"
-      ],
+      "motivatingLinks": ["legacy PR #6541", "legacy PR #6858"],
       "invariant": "Windows local and daemon terminals must resolve equivalent shell paths, args, cwd, env, startup command delivery, and fallback behavior for PowerShell 5/7, cmd, Git Bash, WSL, and missing pwsh.",
       "oracle": "Provider-contract fixtures compare resolved command descriptors and live shell markers for supported Windows shells across local and daemon providers.",
       "commands": [],
@@ -3048,10 +3002,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/7002",
-        "https://github.com/stablyai/yiru/pull/6858"
-      ],
+      "motivatingLinks": ["legacy PR #7002", "legacy PR #6858"],
       "invariant": "Terminal typing, paste, resize, and output rendering must stay within latency and throughput budgets under realistic active and hidden-output load.",
       "oracle": "Perf artifacts record median/p95/max key latency, event-loop delay, renderer CPU, output bytes/sec, resize count, hidden restore latency, queue depth, and dropped-output counts.",
       "commands": [],
@@ -3098,10 +3049,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The daemon batcher write(false)/drain contracts exist only on the pending reliability stack. It registers here with its owning split PR.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6836",
-        "https://github.com/stablyai/yiru/pull/6858"
-      ],
+      "motivatingLinks": ["legacy PR #6836", "legacy PR #6858"],
       "invariant": "Daemon terminal output floods must pause when socket writes return false, resume on drain, keep buffered bytes bounded, and not starve focused input.",
       "oracle": "The current executable slice injects a slow socket and asserts write(false)/drain ordering, bounded queued daemon stream bytes, close/error listener cleanup, newest-tail preservation under sustained pressure, and flush-immediate cross-session priority ahead of unrelated background backlog on drain. Active input latency remains part of the broader perf gate.",
       "commands": [],
@@ -3157,7 +3105,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The boot-hydration counters and their tests exist only on the pending reliability stack. It registers here with its owning split PR.",
-      "motivatingLinks": ["https://github.com/stablyai/yiru/pull/7002"],
+      "motivatingLinks": ["legacy PR #7002"],
       "invariant": "Terminal typing, focus, resize, tab/workspace switch, and agent/session restore must not trigger unbounded store projection, git status, provider listing, or per-pane polling work.",
       "oracle": "The current executable slice instruments boot-time local PTY registry hydration with repo counts, local-vs-remote repo skips, worktree enumeration counts, adapter/session listing counts, registration/skipped-session counts, duration, and failure phase. The broader oracle still needs instrumentation that counts store selector recomputes, git status requests, provider listings, and session scans during scripted hot interactions with many worktrees and terminal panes.",
       "commands": [],
@@ -3212,11 +3160,11 @@
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence over the merged #7133/#7173 restore and hidden-output ordering tests on main@1282f5c2d. The dirty-state exactness contract, normal-buffer clear semantics, and metadata-only replay remain pending-stack work.",
       "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/7173",
-        "https://github.com/stablyai/yiru/pull/7133",
-        "https://github.com/stablyai/yiru/pull/7012",
-        "https://github.com/stablyai/yiru/pull/7054",
-        "https://github.com/stablyai/yiru/pull/6949"
+        "legacy PR #7173",
+        "legacy PR #7133",
+        "legacy PR #7012",
+        "legacy PR #7054",
+        "legacy PR #6949"
       ],
       "invariant": "Hidden-output restore, snapshot replay, metadata-only replay, and clear-before-replay must preserve order and never overlay stale bytes on newer live terminal output; restoring a snapshot onto an already-dirty pane must yield a buffer exactly equal to the snapshot frame.",
       "oracle": "Apply snapshots onto adversarially dirty pane states (already on the alternate screen, stale content occupying cells the new frame leaves blank, scrollback present, wide glyphs, revived sessions with restarted PTY seq counters) and assert exact buffer equality with the snapshot frame; fault injection interleaves hidden chunks, live output, metadata-only replay, and clear-before-replay, then asserts ordered terminal buffer content, clear decisions, and replay diagnostics. Marker-presence checks are not acceptable evidence on restore paths.",
@@ -3296,7 +3244,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
-      "motivatingLinks": ["https://github.com/stablyai/yiru/pull/6949"],
+      "motivatingLinks": ["legacy PR #6949"],
       "invariant": "Startup OSC 10/11 color queries are answered out of band at startup only, never leak into shell/provider output streams, and ordinary runtime OSC color queries remain renderer-handled.",
       "oracle": "A provider-contract fixture records startup query replies, shell-visible bytes, renderer-visible bytes, and later runtime OSC behavior to prove no query leakage or color deadlock.",
       "commands": [],
@@ -3346,10 +3294,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Deterministic local tests execute the exact injected mobile replay/generation gate, the React Native query classifier, stale-subscription sender, server-side single-responder election, query-reply RPC semantics, and live-output capture during async mobile fit. The provider write path is shared, but no live iOS/Android, SSH, WSL, or multi-device run is registered yet.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/issues/8128",
-        "https://github.com/stablyai/yiru/pull/8206"
-      ],
+      "motivatingLinks": ["legacy issue #8128", "legacy PR #8206"],
       "invariant": "Snapshot and replacement-terminal replay answer no terminal queries; every live query delivered to subscribed mobile views has at most one current responder; a live query queued behind replay is answered after the replay boundary; terminal-generated replies never transfer the user-input floor.",
       "oracle": "The injected gate emits zero replies during replay, exactly one after its live boundary, and ignores a superseded generation; native routing rejects ordinary input; the sender rejects disconnected or unsubscribed handles; runtime election accepts only the earliest active mobile subscriber and promotes its survivor; terminal.send writes only validated query grammar without mobileTookFloor; legacy binary subscribe captures a query while phone-fit is still pending and emits it after the snapshot.",
       "commands": [
@@ -3480,11 +3425,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence over the runtime-RPC stream budgets on main@1282f5c2d. PR #5824 adds a platform-neutral mobile decision gate proving chat-covered terminal streams pause and resume only after the mounted WebView is ready; live Android restore evidence remains required. The pending stack adds byte-exact 512KB/2MB/256KB/48KB budget assertions; legacy JSON subscribe parity remains undecided.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6951",
-        "https://github.com/stablyai/yiru/pull/6955",
-        "https://github.com/stablyai/yiru/pull/7009"
-      ],
+      "motivatingLinks": ["legacy PR #6951", "legacy PR #6955", "legacy PR #7009"],
       "invariant": "Runtime and mobile terminal subscriptions must cap initial snapshots, live output buffered while snapshots load, chunk sizes, and batch sizes; a terminal covered by native chat must have no live output subscription and must restore from fresh scrollback when revealed, while preserving output order, input locks, resize/driver events, and fallback parity or explicit fallback deprecation.",
       "oracle": "The current executable slice asserts mobile initial snapshots downgrade until they fit <=512KB, requested binary snapshots downgrade until they fit <=2MB, binary live output queued while the initial snapshot loads stays <=256KB while preserving the newest tail, large binary output is split into <=48KB frames, output bursts are coalesced before emit, aborts do not register stale listeners, and stale mobile resize re-stream completions are dropped. The mobile native-chat decision test asserts an active stream pauses while covered and resumes only for a ready active terminal. JSON fallback parity and live Android scrollback restoration remain explicit gaps.",
       "commands": [
@@ -3606,10 +3547,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence over #7148's width-parity oracle on main@1282f5c2d. A broader byte corpus, a shared parser-construction assertion over terminal-unicode-provider.ts/pane-terminal-options.ts, and recorded agent-session corpora remain gaps.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/7148",
-        "https://github.com/stablyai/yiru/pull/7133"
-      ],
+      "motivatingLinks": ["legacy PR #7148", "legacy PR #7133"],
       "invariant": "The main-process headless terminal mirror and the renderer xterm must parse identical byte streams into cell-identical buffers (unicode width tables, joining behavior, modes, and addon-visible semantics), so snapshots, restores, reads, and mobile streams never encode a frame the renderer would not have produced.",
       "oracle": "Feed identical byte corpora (emoji/ZWJ/wide glyphs, positioned overwrites after wide characters, alternate-screen transitions, wrapped lines) to both parser configurations and assert cell-identical visible buffers; both parsers must be constructed from one shared configuration module so one-sided drift fails the gate.",
       "commands": [
@@ -3678,10 +3616,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; the anomaly-breadcrumb machinery exists in this branch but no convergence probe is implemented.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/7133",
-        "https://github.com/stablyai/yiru/pull/7054"
-      ],
+      "motivatingLinks": ["legacy PR #7133", "legacy PR #7054"],
       "invariant": "After every hidden-to-visible reveal settles — whether or not a restore was triggered — the renderer buffer must converge with the current main-mirror state; divergence is recorded as a compact, content-free terminal_lifecycle_anomaly breadcrumb and counted in telemetry instead of failing silently. Restore-scoped checking is insufficient: #7173's frozen-output variant restores faithfully and then silently drops later hidden output, so it never triggers another restore.",
       "oracle": "Deterministic tests inject forced divergence in both shapes — stale bytes written after a faithful restore, and a frozen pane whose reveal triggers no restore — and assert exactly one deduped breadcrumb with row-hash evidence and no terminal content; the production probe is a bounded row-hash sample comparison against current mirror rows that runs once per reveal with no polling and a strict time budget.",
       "commands": [],
@@ -3736,10 +3671,7 @@
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; the live repro harness with a refresh-repair oracle exists but is not productized into the release-blocking terminal-rendering-golden suite.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/7133",
-        "https://github.com/stablyai/yiru/pull/7054"
-      ],
+      "motivatingLinks": ["legacy PR #7133", "legacy PR #7054"],
       "invariant": "After any reveal, restore, or wake, the pixels a pane displays must equal what a forced full model-invalidating repaint would draw from the buffer; a material refresh-repair diff means stale rendering escaped, whatever the mechanism.",
       "oracle": "Screenshot the revealed pane, force a model-invalidating full repaint, screenshot again, and assert the bounded pixel diff is immaterial; pair with a JS-level render-model-vs-buffer comparison. Compositor screenshots only, because WebGL canvas readback is blank with preserveDrawingBuffer disabled.",
       "commands": [],
@@ -3795,8 +3727,8 @@
         // #5787 introduced the renderer-reload delivery-accounting path this gate hardens;
         // kept for lineage, not the primary motivation. THIS fix is motivated by the
         // v1.4.131 three-frozen-panes incident (see coverageNotes).
-        "https://github.com/stablyai/yiru/pull/5787",
-        "https://github.com/stablyai/yiru/pull/8034"
+        "legacy PR #5787",
+        "legacy PR #8034"
       ],
       "invariant": "After a renderer lifecycle reset (did-start-loading / render-process-gone / destroyed), no surviving PTY remains delivery-gated by pre-reset unacked bytes: main's in-flight counters and pending backlog equal the true state of the new page (zero in-flight, zero pending). Delivery then resumes only once the reloaded page's pty:data dispatcher re-registers and signals pty:rendererDispatcherReady; during the boot window before that handshake main holds all sends (data accrues losslessly in the capped pending backlog) so bytes cannot be dropped into a listener-less page and re-pin the gate. The hold itself cannot become a permanent freeze: a one-shot ~10s watchdog armed on each reset force-opens the gate (incrementing rendererDispatcherReadyForcedCount) if the handshake is lost, and the real handshake or a re-registration cancels it. The reset fires only for a main-frame load: did-start-loading also fires for in-page subframe loads (sandboxed srcDoc iframes in notebook HTML output), which are filtered out via isLoadingMainFrame() so a subframe load never clears accounting or holds the gate on the still-alive page. If a lifecycle-reset edge is missed entirely — a main-frame reload overlapped by an in-page subframe load emits no did-start-loading at all — a backstop still recovers: because the handshake is one-shot per page load, receiving pty:rendererDispatcherReady while the gate is already open proves a reset was missed (or the watchdog force-opened the gate), so the handler reconciles by clearing the stale accounting before re-opening. The renderer sends that handshake exactly once per page load, after its pty:data listener registers.",
       "oracle": "Ingest more than 512 KB of PTY output with no renderer ACKs and assert the per-PTY gate closes (sends stop at the 512 KB high-water, remainder accrues as pending). Fire the registered did-start-loading listener and assert rendererInFlightChars and pendingChars are zero and the new diagnostics record the reset (rendererLifecycleResetCount 1, lastLifecycleResetClearedChars 512 KB). Then, before any dispatcher-ready handshake, ingest another chunk and assert it is NOT sent and NOT counted in-flight (held for the boot window, accruing in pending). Finally fire the pty:rendererDispatcherReady handshake and assert the held chunk is delivered to the renderer. Counters-zero without proving both the boot-window hold and that delivery resumes is insufficient. Additional cases prove the boot-window hold also covers the interactive direct-send fast path (input-primed keystroke echo is held, not sent, until the handshake) and that the self-heal watchdog force-opens the gate (rendererDispatcherReadyForcedCount 1) when no handshake arrives, while a timely handshake cancels the watchdog and leaves no orphaned timer. A further case fires did-start-loading with isLoadingMainFrame() false (a subframe/iframe load) and asserts accounting is untouched (rendererLifecycleResetCount stays 0, pending preserved, ready stays true) and delivery still drains on ACK — proving an in-page iframe load cannot trigger a spurious freeze. A backstop case saturates the gate, then fires pty:rendererDispatcherReady while the gate is still open (ready true) with no preceding reset — modeling a missed lifecycle edge — and asserts the handler reconciles: in-flight and pending clear, rendererLifecycleResetCount increments, and fresh output flows immediately (a straggler ACK is clamped and cannot underflow). A renderer-side case (pty-dispatcher-pi-routing.test.ts) asserts ensurePtyDispatcher() sends pty:rendererDispatcherReady exactly once across two attach calls — proving the send fires (it is optional-chained) and the one-shot guard holds.",
@@ -3887,11 +3819,7 @@
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["local", "remote-runtime", "ssh"],
       "coverageNotes": "Deterministic tests cover one shared healthy child per runtime process plus at most four bounded fault-quarantine children, native desktop, paired-runtime, and WSL snapshot processes sharing the same eight-physical-child reservation with typed serialized event-driven capacity recovery, including recursive re-wait when crash recovery reclaims an announced slot, one quarantine attempt per watch lifetime, generation-scoped cancellation, bounded termination with removable deadline waiters, replacement-crawl errors that cannot be blessed by a late readiness ack, pre-ready paired-web cancellation registered before an unbounded capacity wait, already-resolved and late physical-exit retry of a rejected paired-web teardown, physical desktop-install and local/SSH PTY teardown, stale-generation rejection, per-child stat bounds, final-overflow RPC delivery, and renderer eviction before terminal callbacks can retry. Destructive local and SSH removal fences both ID-derived and resolved-cwd terminal roots, including sibling-root/cwd combinations with reverse admission rollback, closes descendant relay watches before parent deletion, enumerates authoritative provider/cwd ownership, falls back to daemon spawn cwd before OSC 7, and keeps daemon/relay immediate shutdown pending until native exit or a bounded fail-closed error; a dead relay PID discovered during attach also settles concurrent shutdown before its stale entry is reaped, while Windows runtime watcher deadlines retain one removable physical-close waiter, treat Node's error-close path as positive physical-exit proof, and clear root ownership on late close. The relay policy test maps a standard repository's base, Git common directory, and worktree roots to one healthy supervisor, then proves a shared-child failure recovers those roots in separate quarantine supervisors with overflow and resumed events. Abortable capacity, quarantine, runtime-root, relay, SSH, and relay pre-install setup waits attach one reaction to each shared promise and explicitly remove 10,000 cancelled caller closures while one anchor remains. Built-entry macOS harnesses kill the desktop/runtime and SSH relay watcher children, then require automatic resubscription and later events while the host process and relay PTY survive. SSH bundles the child boundary beside relay.js, requires both artifacts for install completeness, and preserves registration-owned same-root cancellation.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/issues/5308",
-        "https://github.com/stablyai/yiru/issues/7547",
-        "https://github.com/stablyai/yiru/issues/8212"
-      ],
+      "motivatingLinks": ["legacy issue #5308", "legacy issue #7547", "legacy issue #8212"],
       "invariant": "Local runtime and SSH relay roots share one watcher child per host process while healthy and use at most four quarantine children after shard failure; native desktop, paired-runtime, and direct WSL snapshot children consume the same process-wide eight-child reservation and retry transient exhaustion without permanently disabling a root. Cancellation remains owned by its child generation and settles only after acknowledgement or bounded physical exit; paired-web retains cleanup ownership and can cancel before readiness even while capacity is exhausted, retries a failed unwatch after already-resolved or late physical exit without duplicating stream termination, replacements never overlap a still-retiring generation, and aborted or timed-out callers detach immediately even while queued behind same-root relay teardown. Destructive local and SSH cleanup holds one containment-aware watcher/terminal removal fence through descendant watcher and PTY physical exit plus parent Git/filesystem deletion; daemon and relay kill requests retain ownership until the actual subprocess exit callback or an equivalent positive dead-PID proof and propagate rejected signals or a bounded failure otherwise. A crash-fused shared shard moves affected roots into the bounded quarantine pool, a second fused quarantine ends those watch lifetimes, interrupted setup emits overflow after recovery, metadata work stays bounded, and the SSH relay, PTYs, Git, and other filesystem operations never load the watcher native addon or share its fault boundary.",
       "oracle": "Fill the global watcher-child reservation, require native desktop, paired-runtime, and WSL setup to retain typed transient capacity and retry after one serialized release, then cancel pending desktop and paired-client watches and require no retry. Hold one live anchor while aborting 10,000 callers at the capacity, quarantine-assignment, runtime-root, relay-setup, and SSH-registration layers; require exactly one explicit waiter and one base-promise reaction to remain, then zero after settlement. Hold an old relay unsubscribe, queue one same-root setup leader and one anchor, then abort 10,000 joiners; require every cancellation to settle before teardown releases, exactly one anchor waiter, and only one later physical install. Advance the former paired-web callback deadline while capacity remains full, require cancellation ownership to stay live, publish the server token before ready, and require files.unwatch to abort setup before a later slot release can install a native root. Reject the first ready-watch unwatch with a physical-exit promise, resolve that exit later, and require a fresh physical unwatch attempt, registry release, and exactly one stream end. Fill one healthy shared child with multiple roots, map a standard SSH repository's base, Git common directory, and worktree roots to one relay supervisor, then inject IPC disconnect-before-exit, queued and active cancellation, operations during termination, kill-without-exit, repeated unkillable generations, initial and recovery timeouts, and shard failure. During local and SSH deletion, attempt a late terminal spawn whose worktree identity and cwd name different roots, enumerate a non-prefix remote PTY by authoritative worktree ownership, withhold daemon/relay exit callbacks, make attach positively prove a concurrent-shutdown PID dead, and make the provider unavailable; require every acquired admission to roll back on rejection, dead-PID proof to settle physical exit before reaping, timeout to retain ownership, and Git/filesystem deletion never to start. Require bounded watcher process count, physical-exit settlement, healthy-root recovery, stale-generation rejection, overflow plus later events, and fail-closed destructive cleanup. Verify relay build hashes and remote install probes require both relay.js and relay-watcher.js. Launch the built relay with a real PTY and Parcel watch, kill only the watcher child, and require the same relay PID and PTY to answer before a replacement child delivers overflow and a post-crash event.",
       "commands": [

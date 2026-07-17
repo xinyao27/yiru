@@ -1763,7 +1763,7 @@ describe('GitHandler', () => {
       await expect(
         dispatcher.callRequest(
           'git.forkSync',
-          { worktreePath: tmpDir, expectedUpstream: { owner: 'stablyai', repo: 'yiru' } },
+          { worktreePath: tmpDir, expectedUpstream: { owner: 'xinyao27', repo: 'yiru' } },
           { isStale: () => false, signal: controller.signal }
         )
       ).rejects.toThrow(/abort/i)

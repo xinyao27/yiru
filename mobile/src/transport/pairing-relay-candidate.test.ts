@@ -23,8 +23,8 @@ const journal = {
     },
     relay: {
       v: 1,
-      directorUrl: 'https://relay.onyiru.dev',
-      cellUrl: 'https://relay-c1.onyiru.dev',
+      directorUrl: 'https://relay.yiru.ai',
+      cellUrl: 'https://relay-c1.yiru.ai',
       assignmentEpoch: 7,
       relayHostId: 'AbCdEf0123_-xyZ9',
       inviteExpiresAt: 10_000,
@@ -72,7 +72,7 @@ describe('recovering pairing relay candidate', () => {
       },
       resolveDirector: async (relay) => ({
         ...relay,
-        cellUrl: 'https://relay-c2.onyiru.dev',
+        cellUrl: 'https://relay-c2.yiru.ai',
         assignmentEpoch: 8
       }),
       persistMove: async (relay) => {
@@ -116,7 +116,7 @@ describe('recovering pairing relay candidate', () => {
     const target = client(Promise.resolve(success()))
     const resolveDirector = vi.fn(async (relay) => ({
       ...relay,
-      cellUrl: 'https://relay-c2.onyiru.dev',
+      cellUrl: 'https://relay-c2.yiru.ai',
       assignmentEpoch: 8
     }))
     let connects = 0
@@ -143,7 +143,7 @@ describe('recovering pairing relay candidate', () => {
       .mockRejectedValueOnce(new RelayOuterError(1006))
       .mockImplementationOnce(async (relay) => ({
         ...relay,
-        cellUrl: 'https://relay-c2.onyiru.dev',
+        cellUrl: 'https://relay-c2.yiru.ai',
         assignmentEpoch: 8
       }))
     const sleep = vi.fn(async () => {})

@@ -15,7 +15,7 @@
 // real console flash to our child, and the heartbeat proves the session is
 // live and streaming.
 
-import { _electron as electron } from '@stablyai/playwright-test'
+import { _electron as electron } from '@playwright/test'
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'

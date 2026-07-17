@@ -117,15 +117,15 @@ describe('detectRepoIcon', () => {
   it('falls back to the GitHub owner avatar for GitHub repos', async () => {
     const repoPath = await makeTempRepoDir()
     await gitExecFileAsync(['init'], { cwd: repoPath })
-    await gitExecFileAsync(['remote', 'add', 'origin', 'git@github.com:stablyai/yiru.git'], {
+    await gitExecFileAsync(['remote', 'add', 'origin', 'git@github.com:xinyao27/yiru.git'], {
       cwd: repoPath
     })
 
     await expect(detectRepoIcon({ repoPath, kind: 'git' })).resolves.toEqual({
       type: 'image',
-      src: 'https://github.com/stablyai.png?size=64',
+      src: 'https://github.com/xinyao27.png?size=64',
       source: 'github',
-      label: 'stablyai/yiru'
+      label: 'xinyao27/yiru'
     })
   })
 
@@ -133,18 +133,18 @@ describe('detectRepoIcon', () => {
     const repoPath = await makeTempRepoDir()
     await writeFile(
       join(repoPath, 'package.json'),
-      JSON.stringify({ homepage: 'https://github.com/stablyai/yiru' })
+      JSON.stringify({ homepage: 'https://github.com/xinyao27/yiru' })
     )
     await gitExecFileAsync(['init'], { cwd: repoPath })
-    await gitExecFileAsync(['remote', 'add', 'origin', 'https://github.com/stablyai/yiru.git'], {
+    await gitExecFileAsync(['remote', 'add', 'origin', 'https://github.com/xinyao27/yiru.git'], {
       cwd: repoPath
     })
 
     await expect(detectRepoIcon({ repoPath, kind: 'git' })).resolves.toEqual({
       type: 'image',
-      src: 'https://github.com/stablyai.png?size=64',
+      src: 'https://github.com/xinyao27.png?size=64',
       source: 'github',
-      label: 'stablyai/yiru'
+      label: 'xinyao27/yiru'
     })
   })
 
@@ -163,23 +163,23 @@ describe('detectRepoIcon', () => {
     await gitExecFileAsync(['remote', 'add', 'origin', 'git@github.com:tmchow/yiru.git'], {
       cwd: repoPath
     })
-    await gitExecFileAsync(['remote', 'add', 'upstream', 'git@github.com:stablyai/yiru.git'], {
+    await gitExecFileAsync(['remote', 'add', 'upstream', 'git@github.com:xinyao27/yiru.git'], {
       cwd: repoPath
     })
 
     await expect(detectRepoIconAndUpstream({ repoPath, kind: 'git' })).resolves.toEqual({
       gitRemoteIdentity: {
-        canonicalKey: 'github.com/stablyai/yiru',
+        canonicalKey: 'github.com/xinyao27/yiru',
         remoteName: 'upstream',
-        remoteUrl: 'git@github.com:stablyai/yiru.git'
+        remoteUrl: 'git@github.com:xinyao27/yiru.git'
       },
       repoIcon: {
         type: 'image',
-        src: 'https://github.com/stablyai.png?size=64',
+        src: 'https://github.com/xinyao27.png?size=64',
         source: 'github',
-        label: 'stablyai/yiru'
+        label: 'xinyao27/yiru'
       },
-      upstream: { owner: 'stablyai', repo: 'yiru' }
+      upstream: { owner: 'xinyao27', repo: 'yiru' }
     })
   })
 

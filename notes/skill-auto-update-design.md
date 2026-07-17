@@ -16,7 +16,7 @@ linear-tickets, yiru-per-workspace-env, yiru-emulator, yiru-emulator-android). U
 them with the skills CLI:
 
 ```sh
-npx skills add https://github.com/stablyai/yiru --skill <names> --global
+npx skills add https://github.com/xinyao27/yiru --skill <names> --global
 ```
 
 Nothing then keeps those installations aligned with the Yiru release they describe. Settings
@@ -154,16 +154,16 @@ of which this feature may mutate.
 
 Classify every discovered physical destination before offering adoption:
 
-| Installation topology | Behavior |
-| --- | --- |
-| Canonical `~/.agents/skills/<name>` with a known official snapshot | Eligible for adoption |
-| Provider symlink/junction resolving to that canonical copy | Dedupe; manage the canonical copy once |
-| Independent copy in an approved global provider root with a known official snapshot | Eligible for separate adoption |
-| Modified, incomplete, or unknown same-named copy | Never auto-write; show diff/replacement action |
-| Symlink/junction into dotfiles, a checkout, Nix/Home Manager output, network storage, or another external tree | Unmanaged; never write through the link |
-| Broken/dangling provider symlink (target missing) | Inaccessible; never adopt or write through; offer provenance-verified repair only with consent |
-| Read-only/generated root | Detection only |
-| Repo-scoped skill or plugin cache | Out of scope; never mutate |
+| Installation topology                                                                                          | Behavior                                                                                       |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Canonical `~/.agents/skills/<name>` with a known official snapshot                                             | Eligible for adoption                                                                          |
+| Provider symlink/junction resolving to that canonical copy                                                     | Dedupe; manage the canonical copy once                                                         |
+| Independent copy in an approved global provider root with a known official snapshot                            | Eligible for separate adoption                                                                 |
+| Modified, incomplete, or unknown same-named copy                                                               | Never auto-write; show diff/replacement action                                                 |
+| Symlink/junction into dotfiles, a checkout, Nix/Home Manager output, network storage, or another external tree | Unmanaged; never write through the link                                                        |
+| Broken/dangling provider symlink (target missing)                                                              | Inaccessible; never adopt or write through; offer provenance-verified repair only with consent |
+| Read-only/generated root                                                                                       | Detection only                                                                                 |
+| Repo-scoped skill or plugin cache                                                                              | Out of scope; never mutate                                                                     |
 
 Hardlinks, directory junctions, case-insensitive aliases, and symlinked parent directories must
 be deduplicated by physical identity where the host API exposes it, with normalized real paths
@@ -242,12 +242,12 @@ For each adopted physical destination whose bundle revision is newer and app-com
    2. publish `SKILL.md` with same-directory temp + rename as the semantic commit marker;
    3. unlink only obsolete files recorded in the old ledger, rechecking that each still has
       its old verified hash, then remove only empty recorded directories.
-   This order ensures a removed file cannot make the new digest permanently unreachable and
-   avoids deleting an asset while the new entry point is not yet present. It does not make a
-   multi-file update atomic: a reader may briefly observe the old entry point with new assets,
-   or the new entry point with harmless obsolete assets. Skills requiring cross-file atomicity
-   must use package-level replacement; if the host cannot provide it, skip and retry rather
-   than use the in-place fallback. Do not claim stronger consistency than the host provides.
+      This order ensures a removed file cannot make the new digest permanently unreachable and
+      avoids deleting an asset while the new entry point is not yet present. It does not make a
+      multi-file update atomic: a reader may briefly observe the old entry point with new assets,
+      or the new entry point with harmless obsolete assets. Skills requiring cross-file atomicity
+      must use package-level replacement; if the host cannot provide it, skip and retry rather
+      than use the in-place fallback. Do not claim stronger consistency than the host provides.
 6. Verify the live package digest. Only then update the destination ledger and remove the
    backup. On failure, restore the old package when possible, retain the prior ledger digest,
    and leave the destination retryable.
@@ -391,8 +391,8 @@ Both load-bearing assumptions were tested on a real developer machine against li
 skills, not deferred to Phase 1 telemetry. Results are recorded so the evidence travels with
 the design.
 
-- **Verbatim install (decisive).** A clean-room `npx skills add https://github.com/stablyai/yiru
-  --skill yiru-cli orchestration --global --yes` into a throwaway home produced files
+- **Verbatim install (decisive).** A clean-room `npx skills add https://github.com/xinyao27/yiru
+--skill yiru-cli orchestration --global --yes` into a throwaway home produced files
   byte-identical to `origin/main`: equal Git blob hashes, equal byte counts, zero CRLF, exactly
   one `SKILL.md` per skill, and no injected or stripped files. The CLI does not transform content
   on macOS, so exact-content provenance is viable.
@@ -410,7 +410,7 @@ the design.
   collapses provider and canonical to one physical destination, confirming physical-identity
   dedup yields a single write. A live broken/dangling provider symlink was also present (target
   missing), which is why the topology table has an explicit inaccessible row.
-- **Lockfile corroboration present (macOS).** Lock entries carry `source: stablyai/yiru` and a
+- **Lockfile corroboration present (macOS).** Lock entries carry `source: xinyao27/yiru` and a
   folder hash, usable only as corroboration, consistent with the design.
 
 **Windows (2026-07-12, validated on a real machine via the handoff below).** A clean-room
@@ -446,7 +446,7 @@ CLI writes to disk:
   (`../../.agents/skills/yiru-cli`) into the canonical `~/.agents/skills` copy, matching macOS;
   realpath dedup collapses provider and canonical to one write.
 - **XDG lockfile path confirmed, with a sharper rule.** With `XDG_STATE_HOME` unset the lock is
-  `~/.agents/.skill-lock.json` (`source: stablyai/yiru`); with `XDG_STATE_HOME` set the lock is
+  `~/.agents/.skill-lock.json` (`source: xinyao27/yiru`); with `XDG_STATE_HOME` set the lock is
   at `$XDG_STATE_HOME/skills/.skill-lock.json` and **not** at `~/.agents` — it moves, it is not
   duplicated. So the corroboration reader must resolve `XDG_STATE_HOME` and read the single
   correct location; checking only `~/.agents` finds no lock at all on such hosts. This is a
@@ -489,12 +489,12 @@ New-Item -ItemType Directory -Path $sandbox | Out-Null
 $old = @{ USERPROFILE=$env:USERPROFILE; HOME=$env:HOME; XDG_STATE_HOME=$env:XDG_STATE_HOME }
 $env:USERPROFILE = $sandbox; $env:HOME = $sandbox; Remove-Item Env:XDG_STATE_HOME -ErrorAction SilentlyContinue
 try {
-  npx --yes skills add https://github.com/stablyai/yiru --skill yiru-cli --global --yes 2>&1 | Tee-Object "$sandbox\install.log" | Out-Null
+  npx --yes skills add https://github.com/xinyao27/yiru --skill yiru-cli --global --yes 2>&1 | Tee-Object "$sandbox\install.log" | Out-Null
 
   $installed = Join-Path $sandbox '.agents\skills\yiru-cli\SKILL.md'
   $truth     = Join-Path $sandbox 'truth-SKILL.md'
   # Ground truth = exact bytes Git stores on main (LF), fetched without transformation.
-  Invoke-WebRequest 'https://raw.githubusercontent.com/stablyai/yiru/main/skills/yiru-cli/SKILL.md' -OutFile $truth
+  Invoke-WebRequest 'https://raw.githubusercontent.com/xinyao27/yiru/main/skills/yiru-cli/SKILL.md' -OutFile $truth
 
   function Info($label,$f){
     if(!(Test-Path $f)){ Write-Host "$label`: MISSING"; return }

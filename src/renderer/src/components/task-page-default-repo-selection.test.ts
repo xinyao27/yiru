@@ -23,16 +23,16 @@ describe('getDefaultTaskRepoSelection', () => {
     const selection = getDefaultTaskRepoSelection([
       repo({
         id: 'local-yiru',
-        upstream: { owner: 'StablyAI', repo: 'Yiru' }
+        upstream: { owner: 'xinyao27', repo: 'Yiru' }
       }),
       repo({
         id: 'ssh-yiru',
         connectionId: 'builder',
-        upstream: { owner: 'stablyai', repo: 'yiru' }
+        upstream: { owner: 'xinyao27', repo: 'yiru' }
       }),
       repo({
         id: 'other',
-        upstream: { owner: 'stablyai', repo: 'other' }
+        upstream: { owner: 'xinyao27', repo: 'other' }
       })
     ])
 
@@ -45,12 +45,12 @@ describe('getDefaultTaskRepoSelection', () => {
         id: 'ssh-yiru',
         addedAt: 1,
         connectionId: 'builder',
-        upstream: { owner: 'stablyai', repo: 'yiru' }
+        upstream: { owner: 'xinyao27', repo: 'yiru' }
       }),
       repo({
         id: 'local-yiru',
         addedAt: 2,
-        upstream: { owner: 'stablyai', repo: 'yiru' }
+        upstream: { owner: 'xinyao27', repo: 'yiru' }
       })
     ])
 
@@ -73,9 +73,9 @@ describe('getDefaultTaskRepoSelection', () => {
         displayName: 'claude-swap',
         repoIcon: {
           type: 'image',
-          src: 'https://github.com/stablyai.png?size=64',
+          src: 'https://github.com/xinyao27.png?size=64',
           source: 'github',
-          label: 'stablyai/claude-swap'
+          label: 'xinyao27/claude-swap'
         }
       }),
       repo({
@@ -84,9 +84,9 @@ describe('getDefaultTaskRepoSelection', () => {
         connectionId: 'builder',
         repoIcon: {
           type: 'image',
-          src: 'https://github.com/stablyai.png?size=64',
+          src: 'https://github.com/xinyao27.png?size=64',
           source: 'github',
-          label: 'StablyAI/claude-swap'
+          label: 'xinyao27/claude-swap'
         }
       })
     ])
@@ -100,16 +100,16 @@ describe('getTaskProjectPickerRepos', () => {
     const pickerRepos = getTaskProjectPickerRepos([
       repo({
         id: 'local-yiru',
-        upstream: { owner: 'StablyAI', repo: 'Yiru' }
+        upstream: { owner: 'xinyao27', repo: 'Yiru' }
       }),
       repo({
         id: 'ssh-yiru',
         connectionId: 'builder',
-        upstream: { owner: 'stablyai', repo: 'yiru' }
+        upstream: { owner: 'xinyao27', repo: 'yiru' }
       }),
       repo({
         id: 'other',
-        upstream: { owner: 'stablyai', repo: 'other' }
+        upstream: { owner: 'xinyao27', repo: 'other' }
       })
     ])
 
@@ -121,12 +121,12 @@ describe('getTaskProjectPickerRepos', () => {
       [
         repo({
           id: 'local-yiru',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         }),
         repo({
           id: 'ssh-yiru',
           connectionId: 'builder',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         })
       ],
       new Set(['ssh-yiru'])
@@ -142,9 +142,9 @@ describe('getTaskProjectPickerRepos', () => {
         displayName: 'claude-swap',
         repoIcon: {
           type: 'image',
-          src: 'https://github.com/stablyai.png?size=64',
+          src: 'https://github.com/xinyao27.png?size=64',
           source: 'github',
-          label: 'stablyai/claude-swap'
+          label: 'xinyao27/claude-swap'
         }
       }),
       repo({
@@ -153,9 +153,9 @@ describe('getTaskProjectPickerRepos', () => {
         connectionId: 'builder',
         repoIcon: {
           type: 'image',
-          src: 'https://github.com/stablyai.png?size=64',
+          src: 'https://github.com/xinyao27.png?size=64',
           source: 'github',
-          label: 'StablyAI/claude-swap'
+          label: 'xinyao27/claude-swap'
         }
       })
     ])
@@ -169,27 +169,27 @@ describe('getTaskProjectPickerGroups', () => {
     const groups = getTaskProjectPickerGroups([
       repo({
         id: 'local-yiru',
-        upstream: { owner: 'stablyai', repo: 'yiru' }
+        upstream: { owner: 'xinyao27', repo: 'yiru' }
       }),
       repo({
         id: 'ssh-yiru',
         connectionId: 'builder',
-        upstream: { owner: 'stablyai', repo: 'yiru' }
+        upstream: { owner: 'xinyao27', repo: 'yiru' }
       }),
       repo({
         id: 'docs',
-        upstream: { owner: 'stablyai', repo: 'docs' }
+        upstream: { owner: 'xinyao27', repo: 'docs' }
       })
     ])
 
     expect(groups).toHaveLength(2)
     expect(groups[0]).toMatchObject({
-      projectKey: 'github:stablyai/yiru',
+      projectKey: 'github:xinyao27/yiru',
       repo: { id: 'local-yiru' }
     })
     expect(groups[0]?.sources.map((source) => source.id)).toEqual(['local-yiru', 'ssh-yiru'])
     expect(groups[1]).toMatchObject({
-      projectKey: 'github:stablyai/docs',
+      projectKey: 'github:xinyao27/docs',
       repo: { id: 'docs' }
     })
   })
@@ -199,12 +199,12 @@ describe('getTaskProjectPickerGroups', () => {
       [
         repo({
           id: 'local-yiru',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         }),
         repo({
           id: 'ssh-yiru',
           connectionId: 'builder',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         })
       ],
       new Set(['ssh-yiru'])
@@ -221,12 +221,12 @@ describe('normalizeTaskRepoSelection', () => {
       [
         repo({
           id: 'local-yiru',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         }),
         repo({
           id: 'ssh-yiru',
           connectionId: 'builder',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         })
       ],
       new Set(['local-yiru', 'ssh-yiru'])
@@ -240,12 +240,12 @@ describe('normalizeTaskRepoSelection', () => {
       [
         repo({
           id: 'local-yiru',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         }),
         repo({
           id: 'ssh-yiru',
           connectionId: 'builder',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         })
       ],
       new Set(['ssh-yiru'])
@@ -259,16 +259,16 @@ describe('normalizeTaskRepoSelection', () => {
       [
         repo({
           id: 'local-yiru',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         }),
         repo({
           id: 'ssh-yiru',
           connectionId: 'builder',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         }),
         repo({
           id: 'docs',
-          upstream: { owner: 'stablyai', repo: 'docs' }
+          upstream: { owner: 'xinyao27', repo: 'docs' }
         })
       ],
       new Set(['local-yiru', 'ssh-yiru', 'docs'])

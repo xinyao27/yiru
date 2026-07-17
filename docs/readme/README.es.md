@@ -1,13 +1,11 @@
 <h1 align="center">
-  <a href="https://onYiru.dev"><img src="../../resources/build/icon.png" alt="Yiru" width="64" valign="middle" /></a> Yiru
+  <a href="https://yiru.ai"><img src="../../resources/build/icon.png" alt="Yiru" width="64" valign="middle" /></a> Yiru
 </h1>
 
 <p align="center">
   <a href="https://github.com/xinyao27/yiru/stargazers"><img src="https://badgen.net/github/stars/xinyao27/yiru?label=%E2%98%85" alt="Estrellas en GitHub" /></a>
   <a href="https://github.com/xinyao27/yiru/releases"><img src="../assets/readme-downloads.svg" alt="Descargas totales en todas las versiones" /></a>
   <img src="https://badgen.net/github/license/xinyao27/yiru" alt="Licencia" />
-  <a href="https://discord.gg/fzjDKHxv8Q"><img src="https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white" alt="Únete al Discord de Yiru" /></a>
-  <a href="https://x.com/yiru_build"><img src="https://img.shields.io/badge/X-000000?logo=x&logoColor=white" alt="Sigue a Yiru en X" /></a>
   <img src="https://img.shields.io/badge/macOS%20%7C%20Windows%20%7C%20Linux-4493F8?style=flat-square" alt="Plataformas compatibles: macOS, Windows y Linux" />
 </p>
 
@@ -20,7 +18,7 @@
   Ejecuta Codex, Claude Code, OpenCode u Pi en paralelo — cada uno en su propio worktree, supervisados desde un solo lugar.
 </p>
 
-<h3 align="center"><a href="https://onyiru.dev/download"><ins>Descargar Yiru</ins></a></h3>
+<h3 align="center"><a href="https://yiru.ai/download"><ins>Descargar Yiru</ins></a></h3>
 
 <p align="center">
   <img src="../assets/yiru-hero.svg" alt="Yiru" width="960" />
@@ -36,7 +34,7 @@
 
 Supervisa y dirige a tus agentes desde el teléfono — recibe una notificación cuando un agente termine y envía instrucciones de seguimiento desde cualquier lugar.
 
-[App Store de iOS](https://apps.apple.com/us/app/yiru/id6766130217) · [APK para Android](https://github.com/xinyao27/yiru/releases/download/mobile-android-v0.0.31/app-release.apk) · [Docs →](https://www.onyiru.dev/docs/mobile)
+[Documentación móvil →](https://yiru.ai/docs/mobile)
 
 </td>
 <td width="50%">
@@ -49,7 +47,7 @@ Supervisa y dirige a tus agentes desde el teléfono — recibe una notificación
 
 Lanza un mismo prompt a cinco agentes, cada uno en su propio worktree de git aislado — compara los resultados y haz merge del ganador.
 
-[Docs →](https://www.onyiru.dev/docs/model/worktrees)
+[Docs →](https://yiru.ai/docs/model/worktrees)
 
 </td>
 <td width="50%">
@@ -62,7 +60,7 @@ Lanza un mismo prompt a cinco agentes, cada uno en su propio worktree de git ais
 
 Terminales de nivel Ghostty con renderizado WebGL, divisiones infinitas y un scrollback que sobrevive a los reinicios.
 
-[Docs →](https://www.onyiru.dev/docs/terminal)
+[Docs →](https://yiru.ai/docs/terminal)
 
 </td>
 <td width="50%">
@@ -75,7 +73,7 @@ Terminales de nivel Ghostty con renderizado WebGL, divisiones infinitas y un scr
 
 Haz clic en cualquier elemento de UI en una ventana real de Chromium para enviar su HTML, su CSS y una captura recortada directo al prompt de tu agente.
 
-[Docs →](https://www.onyiru.dev/docs/browser/design-mode)
+[Docs →](https://yiru.ai/docs/browser/design-mode)
 
 </td>
 <td width="50%">
@@ -88,7 +86,7 @@ Haz clic en cualquier elemento de UI en una ventana real de Chromium para enviar
 
 Explora PRs, issues y tableros de proyecto dentro de la app — abre un worktree desde cualquier tarea y revisa sin cambiar de contexto.
 
-[Docs →](https://www.onyiru.dev/docs/review/linear)
+[Docs →](https://yiru.ai/docs/review/linear)
 
 </td>
 <td width="50%">
@@ -101,7 +99,7 @@ Explora PRs, issues y tableros de proyecto dentro de la app — abre un worktree
 
 Ejecuta agentes en una máquina remota potente con edición completa de archivos, git y terminales — con reconexión automática y reenvío de puertos incluidos.
 
-[Docs →](https://www.onyiru.dev/docs/ssh)
+[Docs →](https://yiru.ai/docs/ssh)
 
 </td>
 <td width="50%">
@@ -114,7 +112,7 @@ Ejecuta agentes en una máquina remota potente con edición completa de archivos
 
 Deja comentarios en cualquier línea de un diff y envíalos de vuelta al agente — revisa, edita y haz commit sin salir de Yiru.
 
-[Docs →](https://www.onyiru.dev/docs/review/annotate-ai-diff)
+[Docs →](https://yiru.ai/docs/review/annotate-ai-diff)
 
 </td>
 <td width="50%">
@@ -127,7 +125,7 @@ Deja comentarios en cualquier línea de un diff y envíalos de vuelta al agente 
 
 El editor de VS Code con autoguardado en todas partes — arrastra archivos o imágenes directo al prompt de un agente.
 
-[Docs →](https://www.onyiru.dev/docs/editing/file-explorer)
+[Docs →](https://yiru.ai/docs/editing/file-explorer)
 
 </td>
 <td width="50%">
@@ -140,7 +138,7 @@ El editor de VS Code con autoguardado en todas partes — arrastra archivos o im
 
 Los agentes también manejan Yiru — automatiza cualquier flujo de trabajo con `yiru worktree create`, `snapshot`, `click` y `fill`.
 
-[Docs →](https://www.onyiru.dev/docs/cli/overview)
+[Docs →](https://yiru.ai/docs/cli/overview)
 
 </td>
 <td width="50%">
@@ -150,11 +148,11 @@ Los agentes también manejan Yiru — automatiza cualquier flujo de trabajo con 
 
 **También incluye:**
 
-- **[Apertura rápida](https://www.onyiru.dev/docs/model/quick-open)** — Busca entre worktrees, archivos, agentes, comandos y contexto del repo sin salir de tu flujo.
-- **[Cambio de cuenta y seguimiento de uso](https://www.onyiru.dev/docs/agents/usage-tracking)** — Consulta el uso de Claude y Codex y los reinicios de límites de uso, y cambia de cuenta al instante sin volver a iniciar sesión.
-- **[Previews ricos del repo](https://www.onyiru.dev/docs/editing/markdown)** — Previsualiza Markdown, imágenes, PDFs y documentos del repo en el workspace.
-- **[Computer Use](https://www.onyiru.dev/docs/cli/computer-use)** — Deja que los agentes manejen apps de escritorio y UI visible cuando un flujo de trabajo necesita interacción real.
-- **[Notificaciones y estado de no leído](https://www.onyiru.dev/docs/notifications)** — Entérate cuando un agente termine o necesite tu atención, y marca hilos como no leídos para retomarlos después.
+- **[Apertura rápida](https://yiru.ai/docs/model/quick-open)** — Busca entre worktrees, archivos, agentes, comandos y contexto del repo sin salir de tu flujo.
+- **[Cambio de cuenta y seguimiento de uso](https://yiru.ai/docs/agents/usage-tracking)** — Consulta el uso de Claude y Codex y los reinicios de límites de uso, y cambia de cuenta al instante sin volver a iniciar sesión.
+- **[Previews ricos del repo](https://yiru.ai/docs/editing/markdown)** — Previsualiza Markdown, imágenes, PDFs y documentos del repo en el workspace.
+- **[Computer Use](https://yiru.ai/docs/cli/computer-use)** — Deja que los agentes manejen apps de escritorio y UI visible cuando un flujo de trabajo necesita interacción real.
+- **[Notificaciones y estado de no leído](https://yiru.ai/docs/notifications)** — Entérate cuando un agente termine o necesite tu atención, y marca hilos como no leídos para retomarlos después.
 - **Y muchas, muchas más** — lanzamos a diario, así que esta lista siempre va atrasada. El [changelog](https://github.com/xinyao27/yiru/releases) es la verdadera lista de funciones.
 
 ---
@@ -200,34 +198,22 @@ Funciona con **cualquier agente CLI** — si corre en una terminal, corre en Yir
 
 ### Escritorio — macOS, Windows, Linux
 
-- **[Descarga desde onYiru.dev](https://onyiru.dev/download)**
-- O descarga un build directamente: [macOS Apple Silicon](https://github.com/xinyao27/yiru/releases/latest/download/yiru-macos-arm64.dmg) · [macOS Intel](https://github.com/xinyao27/yiru/releases/latest/download/yiru-macos-x64.dmg) · [Windows (.exe)](https://github.com/xinyao27/yiru/releases/latest/download/yiru-windows-setup.exe) · [Linux AppImage](https://github.com/xinyao27/yiru/releases/latest/download/yiru-linux.AppImage) · [Todos los builds](https://github.com/xinyao27/yiru/releases/latest)
-
-_O mediante un gestor de paquetes:_
-
-```bash
-# macOS (Homebrew)
-brew install --cask stablyai/yiru/yiru
-
-# Arch Linux (AUR) — or stably-yiru-git to build from source
-yay -S stably-yiru-bin
-```
+- **[Descarga desde yiru.ai](https://yiru.ai/download)**
+- O descarga un build directamente: [macOS Apple Silicon](https://github.com/xinyao27/yiru/releases/latest/download/yiru-macos-arm64.dmg) · [macOS Intel](https://github.com/xinyao27/yiru/releases/latest/download/yiru-macos-x64.dmg) · [Windows (.exe, cuando esté disponible)](https://github.com/xinyao27/yiru/releases) · [Linux AppImage](https://github.com/xinyao27/yiru/releases/latest/download/yiru-linux.AppImage) · [Todos los builds](https://github.com/xinyao27/yiru/releases/latest)
+- Los builds de Windows solo se publican cuando la firma de SignPath está configurada; las versiones de macOS y Linux pueden publicarse de forma independiente.
 
 ### App companion móvil — iOS, Android
 
 Vincúlala con tu app de escritorio para supervisar y dirigir a tus agentes desde el teléfono.
 
-- **iOS:** [Descargar desde App Store](https://apps.apple.com/us/app/yiru/id6766130217)
-- **Android:** [Descargar el APK](https://github.com/xinyao27/yiru/releases/download/mobile-android-v0.0.31/app-release.apk)
+Las nuevas versiones móviles se anunciarán en [GitHub Releases](https://github.com/xinyao27/yiru/releases) cuando estén disponibles.
 
 ---
 
-## Comunidad y soporte
+## Soporte
 
-- **Discord:** Únete a la comunidad en **[Discord](https://discord.gg/fzjDKHxv8Q)**.
-- **Twitter / X:** Sigue a **[@yiru_build](https://x.com/yiru_build)** para novedades y anuncios.
 - **Feedback e ideas:** Lanzamos rápido. ¿Te falta algo? [Pide una nueva feature](https://github.com/xinyao27/yiru/issues).
-- **Privacidad:** Consulta la [documentación de privacidad y telemetría](https://www.onyiru.dev/docs/telemetry) para saber qué datos anónimos de uso recopila Yiru y cómo desactivar su envío.
+- **Privacidad:** Consulta la [documentación de privacidad y telemetría](https://yiru.ai/docs/telemetry) para saber qué datos anónimos de uso recopila Yiru y cómo desactivar su envío.
 - **Muéstranos tu apoyo:** Dale una [estrella](https://github.com/xinyao27/yiru) a este repo para seguir nuestros lanzamientos diarios.
 
 ---

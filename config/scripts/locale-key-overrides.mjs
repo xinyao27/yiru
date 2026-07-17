@@ -181,11 +181,6 @@ const BASE_LOCALE_KEY_OVERRIDES = {
     zh: '新建',
     ja: '新規'
   },
-  'auto.components.sidebar.SidebarSettingsHelpMenu.eb9884e55b': {
-    ko: 'Discord',
-    zh: 'Discord',
-    ja: 'Discord'
-  },
   'auto.components.sidebar.SidebarSettingsHelpMenu.ad3d3ed7f1': {
     ko: 'Yiru 재시작',
     zh: '重启 Yiru',

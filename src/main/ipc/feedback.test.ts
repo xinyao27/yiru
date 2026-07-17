@@ -173,9 +173,9 @@ describe('submitFeedback', () => {
     })
 
     expect(fetchMock).toHaveBeenCalledTimes(2)
-    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://www.onyiru.dev/v1/feedback')
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://yiru.ai/v1/feedback')
     expect(requestInit(0).body).toBeInstanceOf(FormData)
-    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://www.onyiru.dev/v1/feedback')
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://yiru.ai/v1/feedback')
     expect(requestInit(1).headers).toEqual({
       'Content-Type': 'application/json'
     })
@@ -195,7 +195,7 @@ describe('submitFeedback', () => {
       diagnosticBundleFailure: { status: 500, error: 'status 500' }
     })
 
-    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://api.onyiru.dev/v1/feedback')
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://api.yiru.ai/v1/feedback')
     expect(requestInit(1).headers).toEqual({ 'Content-Type': 'application/json' })
     expect(postedBody(1)).not.toHaveProperty('diagnosticBundle')
   })
@@ -210,7 +210,7 @@ describe('submitFeedback', () => {
     })
 
     expect(fetchMock).toHaveBeenCalledTimes(2)
-    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://api.onyiru.dev/v1/feedback')
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://api.yiru.ai/v1/feedback')
     expect(requestInit(1).body).not.toBeInstanceOf(FormData)
     expect(postedBody(1)).not.toHaveProperty('diagnosticBundle')
   })
@@ -234,7 +234,7 @@ describe('submitFeedback', () => {
       diagnosticBundleFailure: { status: null, error: 'request timed out after 60 seconds' }
     })
     expect(fetchMock).toHaveBeenCalledTimes(2)
-    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://api.onyiru.dev/v1/feedback')
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://api.yiru.ai/v1/feedback')
     expect(postedBody(1)).not.toHaveProperty('diagnosticBundle')
   })
 
@@ -245,7 +245,7 @@ describe('submitFeedback', () => {
       ok: true,
       diagnosticBundleFailure: { status: 403, error: 'status 403' }
     })
-    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://www.onyiru.dev/v1/feedback')
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://yiru.ai/v1/feedback')
     expect(requestInit(1).body).not.toBeInstanceOf(FormData)
   })
 
@@ -279,7 +279,7 @@ describe('submitFeedback', () => {
   it('falls back when the primary feedback request stalls', async () => {
     vi.useFakeTimers()
     fetchMock.mockImplementation((url: string, init?: RequestInit) => {
-      if (url.includes('www.onyiru.dev')) {
+      if (url.startsWith('https://yiru.ai/')) {
         return new Promise((_resolve, reject) => {
           init?.signal?.addEventListener('abort', () => reject(new Error('request aborted')))
         })
@@ -302,7 +302,7 @@ describe('submitFeedback', () => {
   it('does not retry the fallback when the fallback fails after a primary server error', async () => {
     vi.useFakeTimers()
     fetchMock.mockImplementation((url: string, init?: RequestInit) => {
-      if (url.includes('www.onyiru.dev')) {
+      if (url.startsWith('https://yiru.ai/')) {
         return Promise.resolve({ ok: false, status: 500 } as Response)
       }
       return new Promise((_resolve, reject) => {
@@ -335,7 +335,7 @@ describe('submitFeedback', () => {
       githubEmail: null
     } as Parameters<typeof submitFeedback>[0])
 
-    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://www.onyiru.dev/v1/feedback')
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://yiru.ai/v1/feedback')
   })
 
   it('forces renderer IPC submissions onto the feedback lane', async () => {

@@ -1401,7 +1401,7 @@ describe('YiruRuntimeRpcServer', () => {
         id: 'req_project_issue_types',
         method: 'github.project.listIssueTypesBySlug',
         deviceToken: mobile.token,
-        params: { owner: 'stablyai', repo: 'yiru' }
+        params: { owner: 'xinyao27', repo: 'yiru' }
       }),
       (response) => replies.push(JSON.parse(response) as Record<string, unknown>),
       () => {}
@@ -1411,7 +1411,7 @@ describe('YiruRuntimeRpcServer', () => {
         id: 'req_project_labels',
         method: 'github.project.listLabelsBySlug',
         deviceToken: mobile.token,
-        params: { owner: 'stablyai', repo: 'yiru' }
+        params: { owner: 'xinyao27', repo: 'yiru' }
       }),
       (response) => replies.push(JSON.parse(response) as Record<string, unknown>),
       () => {}
@@ -1421,7 +1421,7 @@ describe('YiruRuntimeRpcServer', () => {
         id: 'req_project_assignees',
         method: 'github.project.listAssignableUsersBySlug',
         deviceToken: mobile.token,
-        params: { owner: 'stablyai', repo: 'yiru', seedLogins: ['alex'] }
+        params: { owner: 'xinyao27', repo: 'yiru', seedLogins: ['alex'] }
       }),
       (response) => replies.push(JSON.parse(response) as Record<string, unknown>),
       () => {}
@@ -1432,7 +1432,7 @@ describe('YiruRuntimeRpcServer', () => {
         method: 'github.project.updateIssueBySlug',
         deviceToken: mobile.token,
         params: {
-          owner: 'stablyai',
+          owner: 'xinyao27',
           repo: 'yiru',
           number: 123,
           updates: { title: 'New title' }
@@ -1447,7 +1447,7 @@ describe('YiruRuntimeRpcServer', () => {
         method: 'github.project.updateIssueTypeBySlug',
         deviceToken: mobile.token,
         params: {
-          owner: 'stablyai',
+          owner: 'xinyao27',
           repo: 'yiru',
           number: 123,
           issueTypeId: 'type-1'
@@ -1491,7 +1491,7 @@ describe('YiruRuntimeRpcServer', () => {
         method: 'github.project.updatePullRequestBySlug',
         deviceToken: mobile.token,
         params: {
-          owner: 'stablyai',
+          owner: 'xinyao27',
           repo: 'yiru',
           number: 456,
           updates: { state: 'closed' }
@@ -1506,7 +1506,7 @@ describe('YiruRuntimeRpcServer', () => {
         method: 'github.project.addIssueCommentBySlug',
         deviceToken: mobile.token,
         params: {
-          owner: 'stablyai',
+          owner: 'xinyao27',
           repo: 'yiru',
           number: 123,
           body: 'done'
@@ -1521,7 +1521,7 @@ describe('YiruRuntimeRpcServer', () => {
         method: 'github.project.updateIssueCommentBySlug',
         deviceToken: mobile.token,
         params: {
-          owner: 'stablyai',
+          owner: 'xinyao27',
           repo: 'yiru',
           commentId: 101,
           body: 'edited'
@@ -1536,7 +1536,7 @@ describe('YiruRuntimeRpcServer', () => {
         method: 'github.project.deleteIssueCommentBySlug',
         deviceToken: mobile.token,
         params: {
-          owner: 'stablyai',
+          owner: 'xinyao27',
           repo: 'yiru',
           commentId: 101
         }
@@ -2186,50 +2186,50 @@ describe('YiruRuntimeRpcServer', () => {
       page: 'page-1'
     })
     expect(listGitHubIssueTypesBySlug).toHaveBeenCalledWith({
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru'
     })
     expect(listGitHubLabelsBySlug).toHaveBeenCalledWith({
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru'
     })
     expect(listGitHubAssignableUsersBySlug).toHaveBeenCalledWith({
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru',
       seedLogins: ['alex']
     })
     expect(updateGitHubIssueBySlug).toHaveBeenCalledWith({
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru',
       number: 123,
       updates: { title: 'New title' }
     })
     expect(updateGitHubIssueTypeBySlug).toHaveBeenCalledWith({
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru',
       number: 123,
       issueTypeId: 'type-1'
     })
     expect(updateGitHubPullRequestBySlug).toHaveBeenCalledWith({
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru',
       number: 456,
       updates: { state: 'closed' }
     })
     expect(addGitHubIssueCommentBySlug).toHaveBeenCalledWith({
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru',
       number: 123,
       body: 'done'
     })
     expect(updateGitHubIssueCommentBySlug).toHaveBeenCalledWith({
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru',
       commentId: 101,
       body: 'edited'
     })
     expect(deleteGitHubIssueCommentBySlug).toHaveBeenCalledWith({
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru',
       commentId: 101
     })

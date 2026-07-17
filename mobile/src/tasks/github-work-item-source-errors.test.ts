@@ -39,7 +39,7 @@ describe('extractGitHubIssueSourceError', () => {
       extractGitHubIssueSourceError(
         { id: 'repo-1', path: '/work/yiru' },
         {
-          sources: { issues: { owner: 'stablyai', repo: 'yiru' } }
+          sources: { issues: { owner: 'xinyao27', repo: 'yiru' } }
         }
       )
     ).toBeNull()
@@ -54,15 +54,15 @@ describe('extractGitHubIssueSourceFallback', () => {
         {
           issueSourceFellBack: true,
           sources: {
-            issues: { owner: 'stablyai', repo: 'yiru-fork' },
-            prs: { owner: 'stablyai', repo: 'yiru' }
+            issues: { owner: 'xinyao27', repo: 'yiru-fork' },
+            prs: { owner: 'xinyao27', repo: 'yiru' }
           }
         }
       )
     ).toEqual({
       repoId: 'repo-1',
       repoPath: '/work/yiru',
-      repoLabel: 'stablyai/yiru'
+      repoLabel: 'xinyao27/yiru'
     })
   })
 
@@ -87,7 +87,7 @@ describe('extractGitHubIssueSourceFallback', () => {
       extractGitHubIssueSourceFallback(
         { id: 'repo-1', path: '/work/yiru', displayName: 'yiru' },
         {
-          sources: { issues: { owner: 'stablyai', repo: 'yiru' } }
+          sources: { issues: { owner: 'xinyao27', repo: 'yiru' } }
         }
       )
     ).toBeNull()

@@ -57,7 +57,7 @@ const winSpeechNativeResource = {
 
 /** @type {import('electron-builder').Configuration} */
 module.exports = {
-  appId: 'com.stablyai.yiru',
+  appId: 'com.xinyao27.yiru',
   productName: 'Yiru',
   directories: {
     buildResources: 'resources/build'

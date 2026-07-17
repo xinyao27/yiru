@@ -205,9 +205,9 @@ describe('runBackgroundWorktreeCreation', () => {
         id: 'repo-1',
         connectionId: null,
         gitRemoteIdentity: {
-          canonicalKey: 'github.com/stablyai/yiru',
+          canonicalKey: 'github.com/xinyao27/yiru',
           remoteName: 'origin',
-          remoteUrl: 'git@github.com:stablyai/yiru.git'
+          remoteUrl: 'git@github.com:xinyao27/yiru.git'
         }
       } as never
     ]
@@ -250,7 +250,7 @@ describe('runBackgroundWorktreeCreation', () => {
     expect(prepareEphemeralVmWorkspaceTargetMock).toHaveBeenCalledWith({
       repoId: 'repo-1',
       recipeId: 'cloud-sandbox',
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       workspaceName: 'feature',
       provisionId: 'creation-1',
       setupExistingFolder: store.setupProjectExistingFolder
@@ -297,7 +297,7 @@ describe('runBackgroundWorktreeCreation', () => {
         ephemeralVmRecipe: {
           sourceRepoId: 'repo-1',
           recipeId: 'cloud-sandbox',
-          projectId: 'github:stablyai/yiru'
+          projectId: 'github:xinyao27/yiru'
         },
         baseBranch: 'abc123',
         compareBaseRef: 'refs/remotes/origin/main',

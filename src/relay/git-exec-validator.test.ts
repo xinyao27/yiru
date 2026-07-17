@@ -209,18 +209,18 @@ describe('validateGitExecArgs', () => {
 
   describe('git clone', () => {
     it('allows only the project setup clone shape', () => {
-      expectAllowed(['clone', '--', 'https://github.com/stablyai/yiru.git', 'yiru'])
-      expectAllowed(['clone', '--progress', '--', 'git@github.com:stablyai/yiru.git', 'yiru'])
+      expectAllowed(['clone', '--', 'https://github.com/xinyao27/yiru.git', 'yiru'])
+      expectAllowed(['clone', '--progress', '--', 'git@github.com:xinyao27/yiru.git', 'yiru'])
     })
 
     it.each([
-      [['clone', 'https://github.com/stablyai/yiru.git']],
-      [['clone', 'https://github.com/stablyai/yiru.git', 'yiru']],
-      [['clone', '--depth=1', '--', 'https://github.com/stablyai/yiru.git', 'yiru']],
-      [['clone', '--', 'https://github.com/stablyai/yiru.git', '.']],
-      [['clone', '--', 'https://github.com/stablyai/yiru.git', '..']],
-      [['clone', '--', 'https://github.com/stablyai/yiru.git', 'nested/yiru']],
-      [['clone', '--', 'https://github.com/stablyai/yiru.git', 'nested\\yiru']]
+      [['clone', 'https://github.com/xinyao27/yiru.git']],
+      [['clone', 'https://github.com/xinyao27/yiru.git', 'yiru']],
+      [['clone', '--depth=1', '--', 'https://github.com/xinyao27/yiru.git', 'yiru']],
+      [['clone', '--', 'https://github.com/xinyao27/yiru.git', '.']],
+      [['clone', '--', 'https://github.com/xinyao27/yiru.git', '..']],
+      [['clone', '--', 'https://github.com/xinyao27/yiru.git', 'nested/yiru']],
+      [['clone', '--', 'https://github.com/xinyao27/yiru.git', 'nested\\yiru']]
     ])('rejects unsafe clone args %j', (args) => {
       expectBlocked(args, 'git clone')
     })

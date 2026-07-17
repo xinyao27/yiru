@@ -10,7 +10,7 @@ notes still applies and is referenced below.
 ## Problem (unchanged)
 
 Yiru ships agent skills that teach coding agents to drive the `yiru` CLI. Users install them
-with `npx skills add stablyai/yiru --global`. Installed copies are frozen files; the Yiru
+with `npx skills add xinyao27/yiru --global`. Installed copies are frozen files; the Yiru
 binary keeps moving. A stale skill tells an agent to use commands that are wrong or unsafe
 for the binary it is driving.
 

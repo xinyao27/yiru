@@ -5258,14 +5258,14 @@ describe('YiruRuntimeService', () => {
     }
     const runtime = new YiruRuntimeService(runtimeStore as never)
     getRepoSlugMock.mockResolvedValueOnce({ owner: 'acme', repo: 'yiru' })
-    getRepoUpstreamMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
+    getRepoUpstreamMock.mockResolvedValueOnce({ owner: 'xinyao27', repo: 'yiru' })
 
     await expect(runtime.getRepoSlug('id:repo-1')).resolves.toEqual({
       owner: 'acme',
       repo: 'yiru'
     })
     await expect(runtime.getRepoUpstream('id:repo-1')).resolves.toEqual({
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru'
     })
 
@@ -6034,7 +6034,7 @@ describe('YiruRuntimeService', () => {
   it('sets up an existing folder on a fresh runtime after importing the repo project', async () => {
     const tempRoot = await mkdtemp(join(tmpdir(), 'yiru-runtime-project-setup-'))
     const repos: Record<string, unknown>[] = []
-    getRepoUpstreamMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'yiru' })
+    getRepoUpstreamMock.mockResolvedValueOnce({ owner: 'xinyao27', repo: 'yiru' })
     const runtimeStore = {
       ...store,
       getRepos: () => [...repos] as never,
@@ -6091,17 +6091,17 @@ describe('YiruRuntimeService', () => {
     try {
       execFileSync('git', ['init'], { cwd: tempRoot, stdio: 'ignore' })
       const result = await runtime.setupProjectExistingFolder({
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'runtime:env-1',
         path: tempRoot,
         kind: 'git',
         setupMethod: 'imported-existing-folder'
       })
 
-      expect(result.project.id).toBe('github:stablyai/yiru')
+      expect(result.project.id).toBe('github:xinyao27/yiru')
       expect(result.repo.path).toBe(tempRoot)
       expect(result.setup).toMatchObject({
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         path: tempRoot,
         setupMethod: 'imported-existing-folder'
       })
@@ -6113,7 +6113,7 @@ describe('YiruRuntimeService', () => {
   it('keeps existing-folder imports split by runtime host on the same normalized path', async () => {
     const tempRoot = await mkdtemp(join(tmpdir(), 'yiru-runtime-project-host-'))
     const repos: Record<string, unknown>[] = []
-    getRepoUpstreamMock.mockResolvedValue({ owner: 'stablyai', repo: 'yiru' })
+    getRepoUpstreamMock.mockResolvedValue({ owner: 'xinyao27', repo: 'yiru' })
     const runtimeStore = {
       ...store,
       getRepos: () => [...repos] as never,
@@ -6138,14 +6138,14 @@ describe('YiruRuntimeService', () => {
     try {
       execFileSync('git', ['init'], { cwd: tempRoot, stdio: 'ignore' })
       const first = await runtime.setupProjectExistingFolder({
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'runtime:env-1',
         path: tempRoot,
         kind: 'git',
         setupMethod: 'imported-existing-folder'
       })
       const second = await runtime.setupProjectExistingFolder({
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'runtime:env-2',
         path: tempRoot,
         kind: 'git',
@@ -6307,7 +6307,7 @@ describe('YiruRuntimeService', () => {
     const clonePath = join(destination, 'yiru')
     const spawnSpy = vi.spyOn(gitRunner, 'gitSpawn')
     const repos: Record<string, unknown>[] = []
-    getRepoUpstreamMock.mockResolvedValue({ owner: 'stablyai', repo: 'yiru' })
+    getRepoUpstreamMock.mockResolvedValue({ owner: 'xinyao27', repo: 'yiru' })
     const runtimeStore = {
       ...store,
       getRepos: () => [...repos] as never,
@@ -6341,7 +6341,7 @@ describe('YiruRuntimeService', () => {
 
     try {
       const result = await runtime.setupProjectClone({
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'runtime:env-1',
         url: 'https://example.com/yiru.git',
         destination
@@ -6369,7 +6369,7 @@ describe('YiruRuntimeService', () => {
     const clonePath = join(destination, 'yiru')
     const spawnSpy = vi.spyOn(gitRunner, 'gitSpawn')
     const repos: Record<string, unknown>[] = []
-    getRepoUpstreamMock.mockResolvedValue({ owner: 'stablyai', repo: 'yiru' })
+    getRepoUpstreamMock.mockResolvedValue({ owner: 'xinyao27', repo: 'yiru' })
     const runtimeStore = {
       ...store,
       getRepos: () => [...repos] as never,
@@ -6409,7 +6409,7 @@ describe('YiruRuntimeService', () => {
       expect(cloned).not.toHaveProperty('executionHostId')
 
       const result = await runtime.setupProjectExistingFolder({
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'runtime:env-1',
         path: clonePath,
         kind: 'git',
@@ -6449,7 +6449,7 @@ describe('YiruRuntimeService', () => {
         executionHostId: 'runtime:env-1'
       }
     ]
-    getRepoUpstreamMock.mockResolvedValue({ owner: 'stablyai', repo: 'yiru' })
+    getRepoUpstreamMock.mockResolvedValue({ owner: 'xinyao27', repo: 'yiru' })
     const runtimeStore = {
       ...store,
       getRepos: () => [...repos] as never,
@@ -6483,7 +6483,7 @@ describe('YiruRuntimeService', () => {
 
     try {
       const result = await runtime.setupProjectClone({
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         hostId: 'runtime:env-2',
         url: 'https://example.com/yiru.git',
         destination
@@ -27228,7 +27228,7 @@ describe('YiruRuntimeService', () => {
       }
     ])
 
-    const draftUrl = 'https://github.com/stablyai/yiru/issues/123'
+    const draftUrl = 'https://github.com/xinyao27/yiru/issues/123'
     const result = await runtime.createManagedWorktree({
       repoSelector: 'id:repo-1',
       name: 'runtime-startup-draft',
@@ -27548,7 +27548,7 @@ describe('YiruRuntimeService', () => {
     const result = await runtime.createManagedWorktree({
       repoSelector: TEST_REPO_ID,
       name: 'runtime-fallback-draft',
-      startupDraft: 'https://github.com/stablyai/yiru/issues/456',
+      startupDraft: 'https://github.com/xinyao27/yiru/issues/456',
       createdWithAgent: 'codex',
       activate: true
     })
@@ -27637,7 +27637,7 @@ describe('YiruRuntimeService', () => {
     const result = await runtime.createManagedWorktree({
       repoSelector: 'id:repo-1',
       name: 'runtime-startup-setup-split',
-      startupDraft: 'https://github.com/stablyai/yiru/issues/123',
+      startupDraft: 'https://github.com/xinyao27/yiru/issues/123',
       setupDecision: 'run',
       activate: true
     })
@@ -27825,7 +27825,7 @@ describe('YiruRuntimeService', () => {
       }
     ])
 
-    const draftUrl = 'https://github.com/stablyai/yiru/issues/789'
+    const draftUrl = 'https://github.com/xinyao27/yiru/issues/789'
     const result = await runtime.createManagedWorktree({
       repoSelector: 'id:repo-1',
       name: 'runtime-explicit-draft',
@@ -27908,7 +27908,7 @@ describe('YiruRuntimeService', () => {
     const result = await runtime.createManagedWorktree({
       repoSelector: 'id:repo-1',
       name: 'runtime-blank-draft',
-      startupDraft: 'https://github.com/stablyai/yiru/issues/123',
+      startupDraft: 'https://github.com/xinyao27/yiru/issues/123',
       activate: true
     })
 
@@ -28000,7 +28000,7 @@ describe('YiruRuntimeService', () => {
       getForegroundProcess: async () => null
     })
 
-    const draftUrl = 'https://github.com/stablyai/yiru/pull/456'
+    const draftUrl = 'https://github.com/xinyao27/yiru/pull/456'
     const result = await runtime.createManagedWorktree({
       repoSelector: TEST_REPO_ID,
       name: 'mobile-startup-draft',
@@ -28106,7 +28106,7 @@ describe('YiruRuntimeService', () => {
       const result = await runtime.createManagedWorktree({
         repoSelector: TEST_REPO_ID,
         name: 'mobile-codex-draft',
-        startupDraft: 'https://github.com/stablyai/yiru/issues/789'
+        startupDraft: 'https://github.com/xinyao27/yiru/issues/789'
       })
 
       expect(detectRemoteAgentsMock).not.toHaveBeenCalled()
@@ -29551,7 +29551,7 @@ describe('YiruRuntimeService', () => {
         return { stdout: 'origin\n', stderr: '' }
       }
       if (args[0] === 'remote' && args[1] === 'get-url') {
-        return { stdout: 'git@github.com:stablyai/yiru.git\n', stderr: '' }
+        return { stdout: 'git@github.com:xinyao27/yiru.git\n', stderr: '' }
       }
       return { stdout: '', stderr: '' }
     })

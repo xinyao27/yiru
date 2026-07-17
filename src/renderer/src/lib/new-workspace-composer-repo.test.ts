@@ -99,12 +99,12 @@ describe('new-workspace-composer-repo', () => {
   })
 
   describe('resolveComposerActiveRepoId', () => {
-    const localYiru = makeRepo('local-yiru', { upstream: { owner: 'stablyai', repo: 'yiru' } })
+    const localYiru = makeRepo('local-yiru', { upstream: { owner: 'xinyao27', repo: 'yiru' } })
     const runtimeYiru = makeRepo('runtime-yiru', {
       connectionId: 'runtime-ssh-yiru-1',
-      upstream: { owner: 'stablyai', repo: 'yiru' }
+      upstream: { owner: 'xinyao27', repo: 'yiru' }
     })
-    const otherProject = makeRepo('noqa', { upstream: { owner: 'stablyai', repo: 'noqa' } })
+    const otherProject = makeRepo('noqa', { upstream: { owner: 'xinyao27', repo: 'noqa' } })
     const repos = [otherProject, localYiru, runtimeYiru]
     const eligibleRepos = getComposerEligibleRepos(repos)
 

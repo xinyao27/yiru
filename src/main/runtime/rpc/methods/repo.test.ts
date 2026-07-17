@@ -309,7 +309,7 @@ describe('repo RPC methods', () => {
       updateRepo: vi.fn().mockResolvedValue({
         id: 'repo-1',
         path: '/srv/repo',
-        upstream: { owner: 'stablyai', repo: 'yiru' }
+        upstream: { owner: 'xinyao27', repo: 'yiru' }
       })
     } as unknown as YiruRuntimeService
     const dispatcher = new RpcDispatcher({ runtime, methods: REPO_METHODS })
@@ -317,16 +317,16 @@ describe('repo RPC methods', () => {
     const response = await dispatcher.dispatch(
       makeRequest('repo.update', {
         repo: 'repo-1',
-        updates: { upstream: { owner: 'stablyai', repo: 'yiru' } }
+        updates: { upstream: { owner: 'xinyao27', repo: 'yiru' } }
       })
     )
 
     expect(runtime.updateRepo).toHaveBeenCalledWith('repo-1', {
-      upstream: { owner: 'stablyai', repo: 'yiru' }
+      upstream: { owner: 'xinyao27', repo: 'yiru' }
     })
     expect(response).toMatchObject({
       ok: true,
-      result: { repo: { id: 'repo-1', upstream: { owner: 'stablyai', repo: 'yiru' } } }
+      result: { repo: { id: 'repo-1', upstream: { owner: 'xinyao27', repo: 'yiru' } } }
     })
   })
 

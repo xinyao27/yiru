@@ -17,7 +17,7 @@
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import type { Page } from '@stablyai/playwright-test'
+import type { Page } from '@playwright/test'
 import { test, expect } from './helpers/yiru-app'
 import { waitForSessionReady, waitForActiveWorktree } from './helpers/store'
 

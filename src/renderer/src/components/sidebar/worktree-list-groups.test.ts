@@ -83,7 +83,7 @@ const remoteWorktree: Worktree = {
 }
 
 const project: Project = {
-  id: 'github:stablyai/yiru',
+  id: 'github:xinyao27/yiru',
   displayName: 'Yiru',
   badgeColor: '#737373',
   sourceRepoIds: [repo.id, remoteRepo.id],
@@ -357,7 +357,7 @@ describe('buildRows with pinned worktrees', () => {
     )
 
     expect(rows).toMatchObject([
-      { type: 'header', key: 'project:github:stablyai/yiru', label: 'Yiru', count: 2 },
+      { type: 'header', key: 'project:github:xinyao27/yiru', label: 'Yiru', count: 2 },
       { type: 'item', worktree: { id: worktree.id }, hostContextLabel: LOCAL_HOST_LABEL },
       { type: 'item', worktree: { id: remoteWorktree.id }, hostContextLabel: 'gpu-vm' }
     ])
@@ -555,7 +555,7 @@ describe('buildRows with pinned worktrees', () => {
   it('orders project identity headers by the manual repo order anchor', () => {
     const analyticsProject: Project = {
       ...project,
-      id: 'github:stablyai/analytics',
+      id: 'github:xinyao27/analytics',
       displayName: 'Analytics',
       sourceRepoIds: ['repo-analytics']
     }
@@ -564,7 +564,7 @@ describe('buildRows with pinned worktrees', () => {
       id: 'repo-analytics',
       path: '/tmp/analytics',
       displayName: 'analytics',
-      upstream: { owner: 'stablyai', repo: 'analytics' }
+      upstream: { owner: 'xinyao27', repo: 'analytics' }
     }
     const analyticsWorktree: Worktree = {
       ...worktree,
@@ -620,13 +620,13 @@ describe('buildRows with pinned worktrees', () => {
 
     const headers = rows.filter((row) => row.type === 'header')
     expect(headers.map((row) => row.key)).toEqual([
-      'project:github:stablyai/yiru',
-      'project:github:stablyai/analytics'
+      'project:github:xinyao27/yiru',
+      'project:github:xinyao27/analytics'
     ])
     expect(headers[0]).toMatchObject({
-      key: 'project:github:stablyai/yiru',
-      projectId: 'github:stablyai/yiru',
-      projectIdentityKey: 'github:stablyai/yiru',
+      key: 'project:github:xinyao27/yiru',
+      projectId: 'github:xinyao27/yiru',
+      projectIdentityKey: 'github:xinyao27/yiru',
       collapsed: false,
       repo: { id: repo.id, badgeColor: repo.badgeColor }
     })
@@ -683,11 +683,11 @@ describe('buildRows with pinned worktrees', () => {
     expect(headers).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: 'project:github:stablyai/yiru::setup:repo-1',
+          key: 'project:github:xinyao27/yiru::setup:repo-1',
           label: 'yiru'
         }),
         expect.objectContaining({
-          key: 'project:github:stablyai/yiru::setup:repo-2',
+          key: 'project:github:xinyao27/yiru::setup:repo-2',
           label: 'yiru-2'
         })
       ])
@@ -749,9 +749,9 @@ describe('buildRows with pinned worktrees', () => {
 
     const headers = rows.filter((row) => row.type === 'header')
     expect(headers.map((row) => row.key)).toEqual([
-      'project:github:stablyai/yiru::setup:repo-1',
-      'project:github:stablyai/yiru::setup:repo-local-b',
-      'project:github:stablyai/yiru::setup:repo-remote'
+      'project:github:xinyao27/yiru::setup:repo-1',
+      'project:github:xinyao27/yiru::setup:repo-local-b',
+      'project:github:xinyao27/yiru::setup:repo-remote'
     ])
   })
 
@@ -813,7 +813,7 @@ describe('buildRows with pinned worktrees', () => {
     const headers = rows.filter((row) => row.type === 'header')
     expect(headers).toHaveLength(1)
     expect(headers[0]).toMatchObject({
-      key: 'project:github:stablyai/yiru',
+      key: 'project:github:xinyao27/yiru',
       label: 'Yiru',
       count: 2
     })
@@ -899,17 +899,17 @@ describe('buildRows with pinned worktrees', () => {
 
     const headers = rows.filter((row) => row.type === 'header')
     expect(headers.map((row) => row.key).sort()).toEqual([
-      'project:github:stablyai/yiru',
-      'project:github:stablyai/yiru::setup:repo-1',
-      'project:github:stablyai/yiru::setup:repo-local-b'
+      'project:github:xinyao27/yiru',
+      'project:github:xinyao27/yiru::setup:repo-1',
+      'project:github:xinyao27/yiru::setup:repo-local-b'
     ])
     // The provisioned copy nests under the plain project key with only its own
     // worktree; it never gets a path-scoped `::setup:` header like the real
     // checkouts do. (buildRows disambiguates its visible label to the repo name.)
     expect(
-      headers.some((row) => row.key === 'project:github:stablyai/yiru::setup:repo-runtime-b')
+      headers.some((row) => row.key === 'project:github:xinyao27/yiru::setup:repo-runtime-b')
     ).toBe(false)
-    expect(headers.find((row) => row.key === 'project:github:stablyai/yiru')).toMatchObject({
+    expect(headers.find((row) => row.key === 'project:github:xinyao27/yiru')).toMatchObject({
       count: 1
     })
   })
@@ -988,7 +988,7 @@ describe('buildRows with pinned worktrees', () => {
 
     expect(rows.filter((row) => row.type === 'header')).toMatchObject([
       {
-        key: 'project:github:stablyai/yiru',
+        key: 'project:github:xinyao27/yiru',
         label: 'Yiru',
         count: 2
       }
@@ -1048,7 +1048,7 @@ describe('buildRows with pinned worktrees', () => {
     )
 
     expect(rows).toMatchObject([
-      { type: 'header', key: 'project:github:stablyai/yiru', label: 'Yiru', count: 2 },
+      { type: 'header', key: 'project:github:xinyao27/yiru', label: 'Yiru', count: 2 },
       { type: 'item', worktree: { id: worktree.id }, hostContextLabel: LOCAL_HOST_LABEL },
       { type: 'item', worktree: { id: runtimeWorktree.id }, hostContextLabel: 'dev box' }
     ])
@@ -1088,7 +1088,7 @@ describe('buildRows with pinned worktrees', () => {
     )
 
     expect(rows).toMatchObject([
-      { type: 'header', key: 'project:github:stablyai/yiru', label: 'Yiru', count: 2 },
+      { type: 'header', key: 'project:github:xinyao27/yiru', label: 'Yiru', count: 2 },
       { type: 'item', worktree: { id: worktree.id } },
       { type: 'item', worktree: { id: secondLocalWorktree.id } }
     ])
@@ -1131,7 +1131,7 @@ describe('buildRows with pinned worktrees', () => {
           projectHostSetups
         }
       )
-    ).toBe('project:github:stablyai/yiru')
+    ).toBe('project:github:xinyao27/yiru')
   })
 
   it('emits an imported worktrees card at the top of repo-group rows', () => {

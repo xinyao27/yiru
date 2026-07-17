@@ -221,7 +221,7 @@ describe('ghExecFileAsync WSL fallback', () => {
     })
 
     await expect(
-      ghExecFileAsync(['api', '-X', 'POST', 'repos/stablyai/yiru/issues'])
+      ghExecFileAsync(['api', '-X', 'POST', 'repos/xinyao27/yiru/issues'])
     ).rejects.toThrow('HTTP 502 Bad Gateway')
 
     expect(execFileMock).toHaveBeenCalledTimes(1)
@@ -260,7 +260,7 @@ describe('ghExecFileAsync WSL fallback', () => {
     })
 
     await expect(
-      ghExecFileAsync(['issue', 'edit', '5', '--repo', 'stablyai/yiru'])
+      ghExecFileAsync(['issue', 'edit', '5', '--repo', 'xinyao27/yiru'])
     ).rejects.toThrow('HTTP 502 Bad Gateway')
 
     expect(execFileMock).toHaveBeenCalledTimes(1)
@@ -301,7 +301,7 @@ describe('ghExecFileAsync WSL fallback', () => {
     })
 
     await expect(
-      glabExecFileAsync(['api', '-X', 'POST', 'projects/stablyai%2Fyiru/issues/5/notes'], {
+      glabExecFileAsync(['api', '-X', 'POST', 'projects/xinyao27%2Fyiru/issues/5/notes'], {
         cwd: String.raw`C:\repo`
       })
     ).rejects.toThrow('HTTP 502 Bad Gateway')
@@ -320,7 +320,7 @@ describe('ghExecFileAsync WSL fallback', () => {
     })
 
     await expect(
-      glabExecFileAsync(['issue', 'update', '5', '-R', 'stablyai/yiru'], {
+      glabExecFileAsync(['issue', 'update', '5', '-R', 'xinyao27/yiru'], {
         cwd: String.raw`C:\repo`
       })
     ).rejects.toThrow('HTTP 502 Bad Gateway')
@@ -390,7 +390,7 @@ describe('ghExecFileAsync WSL fallback', () => {
       })
 
     await expect(
-      glabExecFileAsync(['api', 'projects/stablyai%2Fyiru/issues'], {
+      glabExecFileAsync(['api', 'projects/xinyao27%2Fyiru/issues'], {
         cwd: String.raw`C:\repo`
       })
     ).resolves.toEqual({ stdout: '[]', stderr: '' })

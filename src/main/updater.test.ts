@@ -3186,9 +3186,9 @@ describe('updater', () => {
   // Why: /releases/latest/download is a moving redirect. If a new stable
   // release publishes between check and manual download, a relative ZIP URL
   // from the old manifest can resolve against the new release and 404.
-  it('pins the generic feed to a concrete stable tag for a stable user', async () => {
-    appMock.getVersion.mockReturnValue('1.3.17')
-    fetchNewerReleaseTagsMock.mockResolvedValue(['v1.3.18'])
+  it('pins 0.0.1 users to the concrete 0.0.2 stable release', async () => {
+    appMock.getVersion.mockReturnValue('0.0.1')
+    fetchNewerReleaseTagsMock.mockResolvedValue(['v0.0.2'])
     autoUpdaterMock.checkForUpdates.mockResolvedValue(undefined)
 
     const { setupAutoUpdater, checkForUpdatesFromMenu } = await import('./updater')
@@ -3199,14 +3199,14 @@ describe('updater', () => {
     checkForUpdatesFromMenu()
 
     await vi.waitFor(() => {
-      expect(fetchNewerReleaseTagsMock).toHaveBeenCalledWith('1.3.17', 1, {
+      expect(fetchNewerReleaseTagsMock).toHaveBeenCalledWith('0.0.1', 1, {
         includePrerelease: false
       })
       expect(autoUpdaterMock.checkForUpdates).toHaveBeenCalledTimes(1)
     })
     expect(autoUpdaterMock.setFeedURL).toHaveBeenLastCalledWith({
       provider: 'generic',
-      url: 'https://github.com/xinyao27/yiru/releases/download/v1.3.18'
+      url: 'https://github.com/xinyao27/yiru/releases/download/v0.0.2'
     })
   })
 

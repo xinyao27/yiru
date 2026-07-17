@@ -21,8 +21,8 @@ const RICH_CHANGELOG: ChangelogData = {
   release: {
     title: 'Inline Diffs',
     description: 'Review diffs without leaving the terminal.',
-    mediaUrl: 'https://onyiru.dev/media/inline-diffs.png',
-    releaseNotesUrl: 'https://onyiru.dev/changelog/1.2.0'
+    mediaUrl: 'https://yiru.ai/media/inline-diffs.png',
+    releaseNotesUrl: 'https://yiru.ai/changelog/1.2.0'
   },
   releasesBehind: 3
 }

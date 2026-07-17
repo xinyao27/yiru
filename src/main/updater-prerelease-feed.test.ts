@@ -97,9 +97,9 @@ describe('fetchNewerReleaseTag', () => {
   })
 
   it('can exclude prerelease tags for stable-channel checks', async () => {
-    respondWithAtom(['v1.4.1-rc.0', 'v1.4.0', 'v1.3.52-rc.3', 'v1.3.51'])
+    respondWithAtom(['v0.0.2-rc.0', 'v0.0.2', 'v0.0.1'])
     const { fetchNewerReleaseTag } = await import('./updater-prerelease-feed')
-    expect(await fetchNewerReleaseTag('1.3.51', { includePrerelease: false })).toBe('v1.4.0')
+    expect(await fetchNewerReleaseTag('0.0.1', { includePrerelease: false })).toBe('v0.0.2')
   })
 
   it.each([

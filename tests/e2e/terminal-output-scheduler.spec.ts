@@ -7,7 +7,7 @@
  * the shared scheduler instead of direct xterm writes.
  */
 
-import type { Page } from '@stablyai/playwright-test'
+import type { Page } from '@playwright/test'
 import { test, expect } from './helpers/yiru-app'
 import {
   ensureTerminalVisible,

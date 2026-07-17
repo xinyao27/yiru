@@ -84,11 +84,11 @@ describe('buildSourceControlManualReviewUrl', () => {
         baseRef: 'refs/remotes/origin/main',
         branchName: 'native-chat-does-not-auto-open',
         repoRemoteName: 'origin',
-        repoRemoteUrl: 'git@github.com:stablyai/yiru.git',
+        repoRemoteUrl: 'git@github.com:xinyao27/yiru.git',
         upstreamName: 'origin/native-chat-does-not-auto-open'
       })
     ).toBe(
-      'https://github.com/stablyai/yiru/compare/main...native-chat-does-not-auto-open?expand=1'
+      'https://github.com/xinyao27/yiru/compare/main...native-chat-does-not-auto-open?expand=1'
     )
   })
 
@@ -98,14 +98,14 @@ describe('buildSourceControlManualReviewUrl', () => {
         baseRef: 'refs/remotes/upstream/main',
         branchName: 'feature/fork-head',
         repoRemoteName: 'upstream',
-        repoRemoteUrl: 'https://github.com/stablyai/yiru.git',
+        repoRemoteUrl: 'https://github.com/xinyao27/yiru.git',
         pushTarget: {
           remoteName: 'fork',
           branchName: 'feature/fork-head',
           remoteUrl: 'git@github.com:contributor/yiru.git'
         }
       })
-    ).toBe('https://github.com/stablyai/yiru/compare/main...contributor:feature/fork-head?expand=1')
+    ).toBe('https://github.com/xinyao27/yiru/compare/main...contributor:feature/fork-head?expand=1')
   })
 
   it('keeps slashes literal in a GitHub compare URL for a slash-containing branch name', () => {
@@ -114,11 +114,11 @@ describe('buildSourceControlManualReviewUrl', () => {
         baseRef: 'refs/remotes/origin/main',
         branchName: 'slashdevcorpse/identifying-pwsh.exe-error',
         repoRemoteName: 'origin',
-        repoRemoteUrl: 'git@github.com:stablyai/yiru.git',
+        repoRemoteUrl: 'git@github.com:xinyao27/yiru.git',
         upstreamName: 'origin/slashdevcorpse/identifying-pwsh.exe-error'
       })
     ).toBe(
-      'https://github.com/stablyai/yiru/compare/main...slashdevcorpse/identifying-pwsh.exe-error?expand=1'
+      'https://github.com/xinyao27/yiru/compare/main...slashdevcorpse/identifying-pwsh.exe-error?expand=1'
     )
   })
 
@@ -186,7 +186,7 @@ describe('buildSourceControlManualReviewUrl', () => {
         baseRef: 'refs/remotes/origin/main',
         branchName: 'quick-commands',
         repoRemoteName: 'origin',
-        repoRemoteUrl: 'https://github.com/stablyai/yiru.git',
+        repoRemoteUrl: 'https://github.com/xinyao27/yiru.git',
         upstreamName: 'pr-devajmeireles-yiru/quick-commands'
       })
     ).toBeNull()
@@ -198,10 +198,10 @@ describe('buildSourceControlManualReviewUrl', () => {
         baseRef: 'refs/remotes/origin/main',
         branchName: 'local-wip-name',
         repoRemoteName: 'origin',
-        repoRemoteUrl: 'git@github.com:stablyai/yiru.git',
+        repoRemoteUrl: 'git@github.com:xinyao27/yiru.git',
         upstreamName: 'origin/feature/pushed-name'
       })
-    ).toBe('https://github.com/stablyai/yiru/compare/main...feature/pushed-name?expand=1')
+    ).toBe('https://github.com/xinyao27/yiru/compare/main...feature/pushed-name?expand=1')
   })
 
   it('still qualifies the fork head when Yiru resolved the fork push URL', () => {
@@ -210,7 +210,7 @@ describe('buildSourceControlManualReviewUrl', () => {
         baseRef: 'refs/remotes/origin/main',
         branchName: 'quick-commands',
         repoRemoteName: 'origin',
-        repoRemoteUrl: 'https://github.com/stablyai/yiru.git',
+        repoRemoteUrl: 'https://github.com/xinyao27/yiru.git',
         upstreamName: 'pr-devajmeireles-yiru/quick-commands',
         pushTarget: {
           remoteName: 'pr-devajmeireles-yiru',
@@ -218,7 +218,7 @@ describe('buildSourceControlManualReviewUrl', () => {
           remoteUrl: 'git@github.com:devajmeireles/yiru.git'
         }
       })
-    ).toBe('https://github.com/stablyai/yiru/compare/main...devajmeireles:quick-commands?expand=1')
+    ).toBe('https://github.com/xinyao27/yiru/compare/main...devajmeireles:quick-commands?expand=1')
   })
 
   it('does not guess a provider for unknown hosts without a provider hint', () => {
@@ -241,7 +241,7 @@ describe('buildSourceControlManualReviewUrl', () => {
         baseRef: 'refs/remotes/origin/main',
         branchName: 'codex-runtime-home-refactor-design',
         repoRemoteName: 'origin',
-        repoRemoteUrl: 'git@github.com:stablyai/yiru.git',
+        repoRemoteUrl: 'git@github.com:xinyao27/yiru.git',
         upstreamName: null
       })
     ).toBeNull()

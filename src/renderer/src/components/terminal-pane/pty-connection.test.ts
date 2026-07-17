@@ -4631,7 +4631,7 @@ describe('connectPanePty', () => {
         launchAgent: 'codex',
         launchConfig: { agentArgs: '', agentEnv: {} },
         launchToken: 'launch-token-1',
-        draftPrompt: 'https://github.com/stablyai/yiru/issues/42'
+        draftPrompt: 'https://github.com/xinyao27/yiru/issues/42'
       }
     })
 
@@ -4651,11 +4651,11 @@ describe('connectPanePty', () => {
     await flushAsyncTicks()
 
     expect(transport.sendInputAccepted).toHaveBeenCalledWith(
-      '\x1b[200~https://github.com/stablyai/yiru/issues/42\x1b[201~'
+      '\x1b[200~https://github.com/xinyao27/yiru/issues/42\x1b[201~'
     )
     expect(transport.sendInput.mock.calls.map(([data]) => data)).toEqual([
       '\x1b[I',
-      '\x1b[200~https://github.com/stablyai/yiru/issues/42\x1b[201~'
+      '\x1b[200~https://github.com/xinyao27/yiru/issues/42\x1b[201~'
     ])
     expect(window.api.pty.writeAccepted).not.toHaveBeenCalled()
     expect(mockStoreState.recordTerminalInput).toHaveBeenCalledOnce()
@@ -4683,7 +4683,7 @@ describe('connectPanePty', () => {
           launchAgent: 'codex',
           launchConfig: { agentArgs: '', agentEnv: {} },
           launchToken: 'launch-token-1',
-          draftPrompt: 'https://github.com/stablyai/yiru/issues/42'
+          draftPrompt: 'https://github.com/xinyao27/yiru/issues/42'
         }
       }) as never
     )

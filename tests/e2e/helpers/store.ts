@@ -6,8 +6,8 @@
  * fragile DOM scraping.
  */
 
-import type { Page } from '@stablyai/playwright-test'
-import { expect } from '@stablyai/playwright-test'
+import type { Page } from '@playwright/test'
+import { expect } from '@playwright/test'
 import type { BrowserTabSummary, ExplorerFileSummary, TerminalTabSummary } from './runtime-types'
 
 /** Read a value from the Zustand store. Returns the raw JS value. */

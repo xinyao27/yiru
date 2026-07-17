@@ -1,8 +1,8 @@
 import { translate } from '@/i18n/i18n'
 import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
-import { HeroFlow, HeroIntro, HeroPaired, type PairedDevice, type Platform } from './MobileHero'
+import { HeroFlow, HeroIntro, HeroPaired, type PairedDevice } from './MobileHero'
 import type { StepIndex } from './MobileHero'
-import { getInstallCopy, type IosChannel } from './mobile-platform-copy'
+import { getMobileReleaseLink } from './mobile-release-link'
 import type { MobilePageStage } from './mobile-page-stage'
 import { MobilePageToolbar } from './MobilePageToolbar'
 import { PhoneCarousel } from './PhoneCarousel'
@@ -19,8 +19,6 @@ type MobilePageContentProps = {
   handleBack: () => void
   handleContinue: () => void
   installQrUrl: string | null
-  iosChannel: IosChannel
-  setIosChannel: (channel: IosChannel) => void
   loadNetworkInterfaces: () => void
   networkInterfaces: MobileNetworkInterface[]
   openInstallUrl: () => void
@@ -30,12 +28,10 @@ type MobilePageContentProps = {
   handleConnectionModeChange: (mode: MobilePairingConnectionMode) => void
   pairQrDataUrl: string | null
   pairingUrl: string | null
-  platform: Platform
   refreshingNetworkInterfaces: boolean
   revokeDevice: (id: string) => void
   revokingDeviceIds: string[]
   selectedAddress: string | undefined
-  setPlatform: (platform: Platform) => void
   showMobileButton: boolean
   showPairedDevices: (deviceCount: number) => void
   stage: MobilePageStage | null
@@ -54,8 +50,6 @@ export function MobilePageContent({
   handleBack,
   handleContinue,
   installQrUrl,
-  iosChannel,
-  setIosChannel,
   loadNetworkInterfaces,
   networkInterfaces,
   openInstallUrl,
@@ -65,12 +59,10 @@ export function MobilePageContent({
   handleConnectionModeChange,
   pairQrDataUrl,
   pairingUrl,
-  platform,
   refreshingNetworkInterfaces,
   revokeDevice,
   revokingDeviceIds,
   selectedAddress,
-  setPlatform,
   showMobileButton,
   showPairedDevices,
   stage,
@@ -98,12 +90,8 @@ export function MobilePageContent({
           ) : (
             <HeroFlow
               stepIdx={stepIdx}
-              platform={platform}
-              onPlatformChange={setPlatform}
               installQrUrl={installQrUrl}
-              installCopy={getInstallCopy(platform, iosChannel)}
-              iosChannel={iosChannel}
-              onIosChannelChange={setIosChannel}
+              installCopy={getMobileReleaseLink()}
               onOpenInstallUrl={openInstallUrl}
               onCopyInstallUrl={copyInstallUrl}
               pairQrDataUrl={pairQrDataUrl}

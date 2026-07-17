@@ -2,9 +2,14 @@ import { readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { parse } from 'yaml'
+import { createReleaseDesktopBuildMatrix } from './release-desktop-build-matrix.mjs'
 
 const projectDir = resolve(import.meta.dirname, '../..')
 const packageJson = JSON.parse(readFileSync(join(projectDir, 'package.json'), 'utf8'))
+const configuredDesktopBuilds = createReleaseDesktopBuildMatrix({
+  SIGNPATH_API_TOKEN: 'test-token',
+  SIGNPATH_ORGANIZATION_ID: 'test-organization'
+}).matrix.include
 
 describe('Electron runtime package contract', () => {
   it('keeps shared WebGL atlas invalidation reproducible from vendored source', () => {
@@ -68,19 +73,11 @@ describe('Electron runtime package contract', () => {
   })
 
   it('guards release publishing before electron-builder runs', () => {
-    const releaseWorkflow = readFileSync(
-      join(projectDir, '.github/workflows/release-cut.yml'),
-      'utf8'
-    )
-    const parsedWorkflow = parse(releaseWorkflow)
     const macWorkflow = parse(
       readFileSync(join(projectDir, '.github/workflows/release-mac-build.yml'), 'utf8')
     )
     const releaseCommands = new Map(
-      parsedWorkflow.jobs.build.strategy.matrix.include.map(({ platform, release_command }) => [
-        platform,
-        release_command
-      ])
+      configuredDesktopBuilds.map(({ platform, release_command }) => [platform, release_command])
     )
     const macReleaseCommand = macWorkflow.jobs['build-mac'].steps.find(
       (step) => step.name === 'Publish release artifacts (macOS)'
@@ -179,20 +176,19 @@ describe('Electron runtime package contract', () => {
     const releaseWorkflow = parse(
       readFileSync(join(projectDir, '.github/workflows/release-cut.yml'), 'utf8')
     )
-    const windowsReleaseEntry = releaseWorkflow.jobs.build.strategy.matrix.include.find(
-      ({ platform }) => platform === 'win'
-    )
+    const windowsReleaseEntry = configuredDesktopBuilds.find(({ platform }) => platform === 'win')
 
     expect(windowsReleaseEntry.os).toBe('windows-2022')
+    expect(releaseWorkflow.jobs.build.strategy.matrix).toBe(
+      '${{ fromJSON(needs.cut.outputs.desktop_matrix) }}'
+    )
   })
 
   it('keeps release-cut signing provenance on GitHub-hosted runners', () => {
     const releaseWorkflow = parse(
       readFileSync(join(projectDir, '.github/workflows/release-cut.yml'), 'utf8')
     )
-    const buildMatrixRunners = releaseWorkflow.jobs.build.strategy.matrix.include.map(
-      ({ os }) => os
-    )
+    const buildMatrixRunners = configuredDesktopBuilds.map(({ os }) => os)
     const releaseWorkflowText = readFileSync(
       join(projectDir, '.github/workflows/release-cut.yml'),
       'utf8'
@@ -305,6 +301,79 @@ describe('Electron runtime package contract', () => {
     expect(installRun).not.toMatch(/throw\s+\$_/)
   })
 
+  it('uses repository-owned SignPath configuration and Actions approval links', () => {
+    const workflowCases = [
+      ['.github/workflows/release-cut.yml', 'build'],
+      ['.github/workflows/windows-signing-rehearsal.yml', 'rehearse']
+    ]
+
+    for (const [workflowPath, jobName] of workflowCases) {
+      const source = readFileSync(join(projectDir, workflowPath), 'utf8')
+      const workflow = parse(source)
+      const steps = workflow.jobs[jobName].steps
+      const stepByName = (name) => steps.find((step) => step.name === name)
+      const legacySlackSecret = ['SLACK', 'WEBHOOK', 'URL'].join('_')
+      const legacyOrganizationId = ['c37aa192', 'a27a', '4377', '9c90', '5d6c95912dc0'].join('-')
+
+      expect(source, workflowPath).not.toContain(legacySlackSecret)
+      expect(source, workflowPath).not.toContain(legacyOrganizationId)
+
+      const validateStep = stepByName('Validate SignPath configuration')
+      expect(validateStep.env.SIGNPATH_ORGANIZATION_ID, workflowPath).toBe(
+        '${{ vars.SIGNPATH_ORGANIZATION_ID }}'
+      )
+      expect(validateStep.run, workflowPath).toContain(
+        'Set the SIGNPATH_ORGANIZATION_ID repository variable'
+      )
+
+      for (const stepName of [
+        'Submit inner binaries signing request',
+        'Submit Windows installer signing request'
+      ]) {
+        expect(stepByName(stepName).with['organization-id'], `${workflowPath}: ${stepName}`).toBe(
+          '${{ vars.SIGNPATH_ORGANIZATION_ID }}'
+        )
+      }
+
+      for (const stepName of [
+        'Publish inner-binary SignPath approval link',
+        'Publish installer SignPath approval link'
+      ]) {
+        const step = stepByName(stepName)
+        expect(step.env.SIGNPATH_ORGANIZATION_ID, `${workflowPath}: ${stepName}`).toBe(
+          '${{ vars.SIGNPATH_ORGANIZATION_ID }}'
+        )
+        expect(step.run, `${workflowPath}: ${stepName}`).toContain('GITHUB_STEP_SUMMARY')
+        expect(step.run, `${workflowPath}: ${stepName}`).toContain('::warning title=SignPath')
+        expect(step.run, `${workflowPath}: ${stepName}`).toContain('SIGNPATH_REQUEST_URL')
+      }
+
+      for (const stepName of [
+        'Download signed inner binaries from SignPath',
+        'Download signed Windows installer from SignPath'
+      ]) {
+        const step = stepByName(stepName)
+        expect(step.env.SIGNPATH_ORGANIZATION_ID, `${workflowPath}: ${stepName}`).toBe(
+          '${{ vars.SIGNPATH_ORGANIZATION_ID }}'
+        )
+        expect(step.run, `${workflowPath}: ${stepName}`).toContain(
+          '-OrganizationId $env:SIGNPATH_ORGANIZATION_ID'
+        )
+      }
+
+      // Why: the outer installer signature is the release trust boundary, so
+      // configuration migration must never turn its submit/download into fail-open steps.
+      expect(
+        stepByName('Submit Windows installer signing request')['continue-on-error'],
+        workflowPath
+      ).toBeUndefined()
+      expect(
+        stepByName('Download signed Windows installer from SignPath')['continue-on-error'],
+        workflowPath
+      ).toBeUndefined()
+    }
+  })
+
   it('verifies Windows inner binary signatures fail-open before publishing', () => {
     const releaseWorkflow = readFileSync(
       join(projectDir, '.github/workflows/release-cut.yml'),
@@ -335,7 +404,7 @@ describe('Electron runtime package contract', () => {
       'Stage unsigned inner PE files for signing',
       'Upload unsigned inner binaries for SignPath',
       'Submit inner binaries signing request',
-      'Notify Slack that inner-binary signing is waiting for approval',
+      'Publish inner-binary SignPath approval link',
       'Download signed inner binaries from SignPath',
       'Restore signed inner binaries into unpacked app',
       'Replace cached elevate.exe with the signed copy',
@@ -399,6 +468,21 @@ describe('Electron runtime package contract', () => {
     expect(bumpStep.run).toContain('git commit --allow-empty -m "$commit_message"')
   })
 
+  it('starts the fresh stable release line at 0.0.1 and defaults later cuts to patch', () => {
+    const releaseWorkflow = parse(
+      readFileSync(join(projectDir, '.github/workflows/release-cut.yml'), 'utf8')
+    )
+    const versionStep = releaseWorkflow.jobs.cut.steps.find(
+      (step) => step.name === 'Compute next version'
+    )
+
+    expect(packageJson.version).toBe('0.0.0')
+    expect(releaseWorkflow.on.workflow_dispatch.inputs.kind.default).toBe('patch')
+    expect(versionStep.run).toContain('latest_stable="0.0.0"')
+    expect(versionStep.run).toContain('new="$(bump "$latest_stable" "$KIND")"')
+    expect(versionStep.run).toContain('else console.log(`${v[0]||0}.${v[1]||0}.${(v[2]||0)+1}`)')
+  })
+
   it('keeps release-cut RC retries monotonic across stale attempts', () => {
     const releaseWorkflow = readFileSync(
       join(projectDir, '.github/workflows/release-cut.yml'),
@@ -415,37 +499,13 @@ describe('Electron runtime package contract', () => {
     expect(versionStep.run).toContain('git rev-parse "$existing_rc_tag"')
   })
 
-  it('bumps separate Homebrew casks for stable and RC desktop tags', () => {
-    const releaseWorkflow = parse(
-      readFileSync(join(projectDir, '.github/workflows/release-cut.yml'), 'utf8')
-    )
-    const homebrewWorkflow = parse(
-      readFileSync(join(projectDir, '.github/workflows/homebrew-bump.yml'), 'utf8')
-    )
+  it('keeps release cuts independent of retired Homebrew tap automation', () => {
+    const source = readFileSync(join(projectDir, '.github/workflows/release-cut.yml'), 'utf8')
+    const releaseWorkflow = parse(source)
 
-    expect(releaseWorkflow.jobs['homebrew-bump'].if).toContain(
-      "startsWith(needs.cut.outputs.tag, 'v')"
-    )
-    expect(releaseWorkflow.jobs['homebrew-bump'].if).not.toContain('-rc.')
-    expect(releaseWorkflow.jobs['homebrew-bump-published-rc-draft'].with.tag).toBe(
-      '${{ needs.cut.outputs.latest_published_rc_tag }}'
-    )
-
-    const resolveCaskStep = homebrewWorkflow.jobs['bump-cask'].steps.find(
-      (step) => step.name === 'Resolve cask target'
-    )
-    const renderStep = homebrewWorkflow.jobs['bump-cask'].steps.find(
-      (step) => step.name === 'Render updated cask file'
-    )
-    const copyStep = homebrewWorkflow.jobs['bump-cask'].steps.find(
-      (step) => step.name === 'Copy cask into tap and open PR'
-    )
-
-    expect(resolveCaskStep.run).toContain('token="yiru@rc"')
-    expect(resolveCaskStep.run).toContain('token="yiru"')
-    expect(renderStep.env.CASK_PATH).toBe('${{ steps.cask.outputs.path }}')
-    expect(copyStep.run).toContain('cp "$CASK_PATH" "tap/$CASK_PATH"')
-    expect(copyStep.run).toContain('git add "$CASK_PATH"')
+    expect(releaseWorkflow.jobs['homebrew-bump']).toBeUndefined()
+    expect(releaseWorkflow.jobs['homebrew-bump-published-rc-draft']).toBeUndefined()
+    expect(source).not.toContain('homebrew-bump.yml')
   })
 
   it('installs the Electron package binary in PR checks without changing native module ABI', () => {

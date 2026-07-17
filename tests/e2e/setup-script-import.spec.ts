@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import type { Locator, Page } from '@stablyai/playwright-test'
+import type { Locator, Page } from '@playwright/test'
 import { test, expect } from './helpers/yiru-app'
 import { waitForActiveWorktree, waitForSessionReady } from './helpers/store'
 

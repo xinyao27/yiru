@@ -10,7 +10,7 @@ const DEFAULT_MARKETING_REPO = path.join(
   homedir(),
   'source',
   'repos',
-  'Stably',
+  'xinyao27',
   'yiru-marketing-website'
 )
 const MARKETING_REPO = process.env.YIRU_MARKETING_REPO || DEFAULT_MARKETING_REPO

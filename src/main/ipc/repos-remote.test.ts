@@ -1089,13 +1089,13 @@ describe('repos:addRemote', () => {
   it('clones a repo on an SSH target and registers the cloned path', async () => {
     const result = await handlers.get('repos:cloneRemote')!(null, {
       connectionId: 'conn-1',
-      url: 'https://github.com/stablyai/yiru.git',
+      url: 'https://github.com/xinyao27/yiru.git',
       destination: '/home/user'
     })
 
     expect(mockFilesystemProvider.createDir).toHaveBeenCalledWith('/home/user')
     expect(mockGitProvider.clone).toHaveBeenCalledWith(
-      ['clone', '--progress', '--', 'https://github.com/stablyai/yiru.git', 'yiru'],
+      ['clone', '--progress', '--', 'https://github.com/xinyao27/yiru.git', 'yiru'],
       '/home/user',
       expect.objectContaining({
         signal: expect.any(AbortSignal),
@@ -1135,7 +1135,7 @@ describe('repos:addRemote', () => {
 
     await handlers.get('repos:cloneRemote')!(null, {
       connectionId: 'conn-1',
-      url: 'https://github.com/stablyai/yiru.git',
+      url: 'https://github.com/xinyao27/yiru.git',
       destination: '/home/user'
     })
 
@@ -1159,7 +1159,7 @@ describe('repos:addRemote', () => {
 
     const result = await handlers.get('repos:cloneRemote')!(null, {
       connectionId: 'conn-1',
-      url: 'https://github.com/stablyai/yiru.git',
+      url: 'https://github.com/xinyao27/yiru.git',
       destination: '/home/user'
     })
 
@@ -1184,12 +1184,12 @@ describe('repos:addRemote', () => {
 
     const result = await handlers.get('repos:cloneRemote')!(null, {
       connectionId: 'conn-1',
-      url: 'https://github.com/stablyai/yiru.git',
+      url: 'https://github.com/xinyao27/yiru.git',
       destination: '/home/user'
     })
 
     expect(mockGitProvider.clone).toHaveBeenCalledWith(
-      ['clone', '--progress', '--', 'https://github.com/stablyai/yiru.git', 'yiru'],
+      ['clone', '--progress', '--', 'https://github.com/xinyao27/yiru.git', 'yiru'],
       '/home/user',
       expect.objectContaining({
         signal: expect.any(AbortSignal),
@@ -1212,7 +1212,7 @@ describe('repos:addRemote', () => {
     await expect(
       handlers.get('repos:cloneRemote')!(null, {
         connectionId: 'conn-1',
-        url: 'https://github.com/stablyai/yiru.git',
+        url: 'https://github.com/xinyao27/yiru.git',
         destination: '/home/user'
       })
     ).rejects.toThrow('repository not found')
@@ -1231,7 +1231,7 @@ describe('repos:addRemote', () => {
 
     const firstClone = handlers.get('repos:cloneRemote')!(null, {
       connectionId: 'conn-1',
-      url: 'https://github.com/stablyai/yiru.git',
+      url: 'https://github.com/xinyao27/yiru.git',
       destination: '/home/user'
     })
     await waitForAssertion(() => expect(mockGitProvider.clone).toHaveBeenCalledTimes(1))
@@ -1239,7 +1239,7 @@ describe('repos:addRemote', () => {
     await expect(
       handlers.get('repos:cloneRemote')!(null, {
         connectionId: 'conn-1',
-        url: 'https://github.com/stablyai/yiru.git',
+        url: 'https://github.com/xinyao27/yiru.git',
         destination: '/home/user'
       })
     ).rejects.toThrow('A clone is already in progress for this SSH destination')
@@ -1253,7 +1253,7 @@ describe('repos:addRemote', () => {
 
     await handlers.get('repos:cloneRemote')!(null, {
       connectionId: 'conn-1',
-      url: 'https://github.com/stablyai/yiru.git',
+      url: 'https://github.com/xinyao27/yiru.git',
       destination: '~/projects'
     })
 
@@ -1261,7 +1261,7 @@ describe('repos:addRemote', () => {
       path: '~/projects'
     })
     expect(mockGitProvider.clone).toHaveBeenCalledWith(
-      ['clone', '--progress', '--', 'https://github.com/stablyai/yiru.git', 'yiru'],
+      ['clone', '--progress', '--', 'https://github.com/xinyao27/yiru.git', 'yiru'],
       '/home/ubuntu/projects',
       expect.any(Object)
     )
@@ -1274,7 +1274,7 @@ describe('repos:addRemote', () => {
     await expect(
       handlers.get('repos:cloneRemote')!(null, {
         connectionId: 'conn-1',
-        url: 'https://github.com/stablyai/yiru.git',
+        url: 'https://github.com/xinyao27/yiru.git',
         destination: '/home/user'
       })
     ).rejects.toThrow('destination already exists')
@@ -1293,7 +1293,7 @@ describe('repos:addRemote', () => {
 
     const clonePromise = handlers.get('repos:cloneRemote')!(null, {
       connectionId: 'conn-1',
-      url: 'https://github.com/stablyai/yiru.git',
+      url: 'https://github.com/xinyao27/yiru.git',
       destination: '/home/user'
     })
     await waitForAssertion(() => expect(mockGitProvider.clone).toHaveBeenCalledTimes(1))
@@ -1310,7 +1310,7 @@ describe('repos:addRemote', () => {
     await expect(
       handlers.get('repos:cloneRemote')!(null, {
         connectionId: 'conn-1',
-        url: 'https://github.com/stablyai/yiru.git',
+        url: 'https://github.com/xinyao27/yiru.git',
         destination: 'relative/path'
       })
     ).rejects.toThrow('Clone destination must be an absolute path on the SSH host')

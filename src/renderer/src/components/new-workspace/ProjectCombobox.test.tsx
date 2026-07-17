@@ -40,19 +40,19 @@ let root: Root
 const projects: NewWorkspaceProjectOption[] = [
   {
     kind: 'project',
-    id: 'github:stablyai/yiru',
-    projectId: 'github:stablyai/yiru',
+    id: 'github:xinyao27/yiru',
+    projectId: 'github:xinyao27/yiru',
     displayName: 'yiru',
     badgeColor: '#111111',
-    detail: 'stablyai/yiru'
+    detail: 'xinyao27/yiru'
   },
   {
     kind: 'project',
-    id: 'github:stablyai/noqa',
-    projectId: 'github:stablyai/noqa',
+    id: 'github:xinyao27/noqa',
+    projectId: 'github:xinyao27/noqa',
     displayName: 'noqa',
     badgeColor: '#222222',
-    detail: 'stablyai/noqa'
+    detail: 'xinyao27/noqa'
   },
   {
     kind: 'project-group',
@@ -83,7 +83,7 @@ describe('ProjectCombobox', () => {
   it('renders a logical project label without host-specific SSH chrome', () => {
     act(() => {
       root.render(
-        <ProjectCombobox options={projects} value="github:stablyai/yiru" onValueChange={vi.fn()} />
+        <ProjectCombobox options={projects} value="github:xinyao27/yiru" onValueChange={vi.fn()} />
       )
     })
 
@@ -99,18 +99,18 @@ describe('ProjectCombobox', () => {
       root.render(
         <ProjectCombobox
           options={projects}
-          value="github:stablyai/yiru"
+          value="github:xinyao27/yiru"
           onValueChange={onValueChange}
         />
       )
     })
     act(() => {
       container
-        .querySelector<HTMLButtonElement>('[data-command-value="github:stablyai/noqa"]')
+        .querySelector<HTMLButtonElement>('[data-command-value="github:xinyao27/noqa"]')
         ?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     })
 
-    expect(onValueChange).toHaveBeenCalledWith('github:stablyai/noqa')
+    expect(onValueChange).toHaveBeenCalledWith('github:xinyao27/noqa')
   })
 
   it('renders and selects project-group options', () => {

@@ -195,7 +195,7 @@ describe('GitLab IPC handlers', () => {
         sourceContext: {
           kind: 'task-source',
           provider: 'gitlab',
-          projectId: 'gitlab:stablyai/yiru',
+          projectId: 'gitlab:xinyao27/yiru',
           hostId: toSshExecutionHostId('builder'),
           repoId: 'repo-ssh'
         }
@@ -288,7 +288,7 @@ describe('GitLab IPC handlers', () => {
         sourceContext: {
           kind: 'task-source',
           provider: 'gitlab',
-          projectId: 'gitlab:stablyai/yiru',
+          projectId: 'gitlab:xinyao27/yiru',
           hostId: toSshExecutionHostId('builder'),
           repoId: 'repo-local'
         }
@@ -318,12 +318,12 @@ describe('GitLab IPC handlers', () => {
         sourceContext: {
           kind: 'task-source',
           provider: 'gitlab',
-          projectId: 'gitlab:stablyai/yiru',
+          projectId: 'gitlab:xinyao27/yiru',
           hostId: toSshExecutionHostId('builder'),
           repoId: 'repo-ssh'
         },
         host: 'gitlab.com',
-        path: 'stablyai/yiru',
+        path: 'xinyao27/yiru',
         iid: 42,
         type: 'issue'
       })
@@ -331,7 +331,7 @@ describe('GitLab IPC handlers', () => {
 
     expect(getWorkItemByProjectRefMock).toHaveBeenCalledWith(
       '/ssh/yiru',
-      { host: 'gitlab.com', path: 'stablyai/yiru' },
+      { host: 'gitlab.com', path: 'xinyao27/yiru' },
       42,
       'issue',
       'builder'
@@ -361,7 +361,7 @@ describe('GitLab IPC handlers', () => {
     listLabelsMock.mockResolvedValue([])
     listAssignableUsersMock.mockResolvedValue([])
     listTodosMock.mockResolvedValue([])
-    getProjectSlugMock.mockResolvedValue({ host: 'gitlab.com', path: 'stablyai/yiru' })
+    getProjectSlugMock.mockResolvedValue({ host: 'gitlab.com', path: 'xinyao27/yiru' })
     getMergeRequestForBranchMock.mockResolvedValue(null)
     getMergeRequestMock.mockResolvedValue(null)
     registerGitLabHandlers(storeWithRepos([repo()], projects) as Store)

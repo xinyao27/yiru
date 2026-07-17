@@ -29,7 +29,7 @@
  * variant and keeps the full reveal path exercised under the field ordering.
  */
 
-import type { Page, TestInfo } from '@stablyai/playwright-test'
+import type { Page, TestInfo } from '@playwright/test'
 import { writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { test, expect } from './helpers/yiru-app'

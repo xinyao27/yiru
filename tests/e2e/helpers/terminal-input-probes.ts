@@ -23,7 +23,7 @@
  *     the app recovers, so the harness must drive the renderer from main.
  */
 
-import { expect, type ElectronApplication, type Page } from '@stablyai/playwright-test'
+import { expect, type ElectronApplication, type Page } from '@playwright/test'
 import { sendToTerminal, waitForTerminalOutput } from './terminal'
 
 // ─── Page-based probes (healthy CDP session) ────────────────────────

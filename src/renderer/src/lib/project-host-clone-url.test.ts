@@ -21,12 +21,12 @@ describe('getProjectHostCloneUrl', () => {
         createProject({
           providerIdentity: {
             provider: 'github',
-            owner: ' stablyai ',
+            owner: ' xinyao27 ',
             repo: ' yiru '
           }
         })
       )
-    ).toBe('https://github.com/stablyai/yiru.git')
+    ).toBe('https://github.com/xinyao27/yiru.git')
   })
 
   it('returns null when provider identity is missing or incomplete', () => {

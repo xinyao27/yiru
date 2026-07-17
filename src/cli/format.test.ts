@@ -177,7 +177,7 @@ describe('formatAutomationShow', () => {
       automation: automation({
         runContext: {
           kind: 'workspace-run',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           hostId: 'runtime:gpu',
           projectHostSetupId: 'setup-gpu',
           repoId: 'repo-gpu',
@@ -186,7 +186,7 @@ describe('formatAutomationShow', () => {
       })
     })
 
-    expect(output).toContain('runProjectId: github:stablyai/yiru')
+    expect(output).toContain('runProjectId: github:xinyao27/yiru')
     expect(output).toContain('runHostId: runtime:gpu')
     expect(output).toContain('projectHostSetupId: setup-gpu')
     expect(output).toContain('runRepoId: repo-gpu')

@@ -7,7 +7,7 @@ import {
 
 describe('work item link query bounds', () => {
   it('allows normal work item link queries', () => {
-    expect(isWorkItemLinkQueryTooLarge('https://github.com/stablyai/yiru/issues/923')).toBe(false)
+    expect(isWorkItemLinkQueryTooLarge('https://github.com/xinyao27/yiru/issues/923')).toBe(false)
   })
 
   it('measures UTF-8 bytes for pasted link queries', () => {

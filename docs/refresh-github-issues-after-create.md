@@ -2,7 +2,7 @@
 
 ## Problem
 
-Issue https://github.com/stablyai/yiru-internal/issues/101 reports that the GitHub issues list can stay stale after creating a new issue.
+Legacy yiru-internal issue #101 reports that the GitHub issues list can stay stale after creating a new issue.
 
 - `src/renderer/src/components/TaskPage.tsx:3891` bumps `taskRefreshNonce` after successful issue creation, intending to refetch the list.
 - `src/renderer/src/store/slices/github.ts:1644` honors `force` only for the renderer cache and in-flight dedupe.

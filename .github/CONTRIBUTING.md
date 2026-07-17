@@ -64,7 +64,6 @@ Each pull request should:
 - include high-quality tests when behavior changes or bug fixes warrant them
 - include a brief code review summary from your AI coding agent that explicitly checks cross-platform compatibility, SSH/remote/local compatibility, supported agent and integration compatibility, performance risk, UI quality when applicable, and basic security risk
 - mention any platform-specific, remote/SSH-specific, agent-specific, integration-specific, or git-provider-specific behavior and testing notes
-- **Include your X (Twitter) handle!** We love giving shoutouts to our contributors when we merge features on [@yiru_build](https://x.com/yiru_build).
 
 If there is no visual change, say that explicitly in the PR description.
 
@@ -78,23 +77,24 @@ All releases are cut from the **Cut Release** GitHub Actions workflow. There is 
 
 **To cut a release:**
 
-1. Open [Actions → Cut Release](../../actions/workflows/release-cut.yml).
+1. Open [Actions → Cut Release](https://github.com/xinyao27/yiru/actions/workflows/release-cut.yml).
 2. Click **Run workflow** and pick:
    - **kind**: one of `rc`, `patch`, `minor`, `major`.
    - **ref**: the branch, tag, or SHA to build from. Defaults to `main`.
 3. Run it.
 
-The workflow resolves the next version from GitHub Releases, bumps `package.json`, tags, pushes, and runs the multi-platform build + publish inline.
+The workflow resolves the next version from GitHub Releases, bumps `package.json`, tags, pushes, and runs the enabled desktop builds + publish inline. macOS and Linux are always included. Windows is included only when both the `SIGNPATH_API_TOKEN` repository secret and `SIGNPATH_ORGANIZATION_ID` repository variable are set; when both are absent, Windows is intentionally omitted. Setting only one fails before a tag is created.
 
 **How the next version is chosen:**
 
 All stable kinds (`patch`, `minor`, `major`) are computed off the latest _stable_ release, ignoring any RCs in between.
 
-- `kind=rc` + last tag was stable (e.g. `v1.3.14`) → `v1.3.15-rc.0`.
-- `kind=rc` + active RC series (e.g. `v1.3.15-rc.2`) → `v1.3.15-rc.3`.
-- `kind=patch` + latest stable `v1.3.14` → `v1.3.15` (regardless of any intermediate RCs).
-- `kind=minor` + latest stable `v1.3.14` → `v1.4.0`.
-- `kind=major` + latest stable `v1.3.14` → `v2.0.0`.
+- `kind=rc` + latest stable `v0.0.0` → `v0.0.1-rc.0`.
+- `kind=rc` + active RC series `v0.0.1-rc.2` → `v0.0.1-rc.3`.
+- `kind=patch` + latest stable `v0.0.0` → `v0.0.1` (regardless of any intermediate RCs).
+- The next `kind=patch` after stable `v0.0.1` → `v0.0.2`.
+- `kind=minor` + latest stable `v0.0.1` → `v0.1.0`.
+- `kind=major` + latest stable `v0.0.1` → `v1.0.0`.
 
 **Safety guarantees:**
 
@@ -111,24 +111,3 @@ All stable kinds (`patch`, `minor`, `major`) are computed off the latest _stable
 - **"A bad commit just landed on main, release the commit before it":** `kind=patch`, `ref=<good-sha>`. `main` is left alone; the tag points at the good SHA. Fix forward on `main` afterward.
 - **One-off RC for a feature branch:** `kind=rc`, `ref=<branch-or-sha>`. Produces an RC tag that does not touch `main`.
 - **Minor or major bump:** `kind=minor` or `kind=major`.
-
-The scheduled 2x/day RC cron in [`release-rc.yml`](../../actions/workflows/release-rc.yml) is independent and continues to run automatically from `main`.
-
-
-## Release Channels
-
-The public Homebrew cask tracks stable desktop releases:
-
-```bash
-brew install --cask stablyai/yiru/yiru
-```
-
-Release candidates use a separate cask token:
-
-```bash
-brew install --cask stablyai/yiru/yiru@rc
-```
-
-The two casks conflict because both install `Yiru.app`. Switch channels with a
-normal `brew uninstall --cask` followed by the install for the other channel.
-Do not use `--zap` unless you intentionally want to remove local Yiru state.

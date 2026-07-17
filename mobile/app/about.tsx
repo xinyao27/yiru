@@ -32,14 +32,6 @@ function GithubIcon({ size = 16, color = colors.textSecondary }) {
   )
 }
 
-function XIcon({ size = 16, color = colors.textSecondary }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </Svg>
-  )
-}
-
 export default function AboutScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
@@ -62,10 +54,10 @@ export default function AboutScreen() {
       <View style={styles.section}>
         <Pressable
           style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-          onPress={() => void Linking.openURL('https://onYiru.dev')}
+          onPress={() => void Linking.openURL('https://yiru.ai')}
         >
           <Globe size={16} color={colors.textSecondary} />
-          <Text style={styles.rowValue}>onYiru.dev</Text>
+          <Text style={styles.rowValue}>yiru.ai</Text>
         </Pressable>
         <View style={styles.separator} />
         <Pressable
@@ -74,14 +66,6 @@ export default function AboutScreen() {
         >
           <GithubIcon />
           <Text style={styles.rowValue}>{YIRU_GITHUB_REPOSITORY_SLUG}</Text>
-        </Pressable>
-        <View style={styles.separator} />
-        <Pressable
-          style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-          onPress={() => void Linking.openURL('https://x.com/yiru_build')}
-        >
-          <XIcon />
-          <Text style={styles.rowValue}>@yiru_build</Text>
         </Pressable>
       </View>
 

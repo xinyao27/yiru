@@ -36,7 +36,7 @@ const repoMap = new Map<string, Repo>([
     {
       id: 'repo-1',
       path: '/repo/yiru',
-      displayName: 'stablyai/yiru',
+      displayName: 'xinyao27/yiru',
       badgeColor: '#22c55e',
       addedAt: 0
     }

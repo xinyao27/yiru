@@ -59,9 +59,9 @@ describe('client UI RPC methods', () => {
         pinned: [],
         recent: [],
         lastViewByProject: {
-          'organization:stablyai:1': { viewId: 'view-1' }
+          'organization:xinyao27:1': { viewId: 'view-1' }
         },
-        activeProject: { owner: 'stablyai', ownerType: 'organization', number: 1 }
+        activeProject: { owner: 'xinyao27', ownerType: 'organization', number: 1 }
       }
     }
     const runtime = {

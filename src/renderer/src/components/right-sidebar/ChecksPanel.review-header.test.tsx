@@ -46,7 +46,7 @@ function renderHeader({
         state: 'open',
         url: isGitLab
           ? 'https://gitlab.com/acme/yiru/-/merge_requests/31'
-          : 'https://github.com/stablyai/yiru/pull/2964',
+          : 'https://github.com/xinyao27/yiru/pull/2964',
         status: 'pending',
         updatedAt: '2026-05-31T22:58:01Z',
         mergeable: 'UNKNOWN'

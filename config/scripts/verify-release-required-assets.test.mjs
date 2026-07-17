@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   extractManifestAssetNames,
   getRequiredReleaseAssetNames,
+  getWindowsReleaseAssetNames,
+  readWindowsReleaseEnabled,
   verifyRequiredReleaseAssets
 } from './verify-release-required-assets.mjs'
 
@@ -58,6 +60,49 @@ describe('getRequiredReleaseAssetNames', () => {
       ])
     )
   })
+
+  it('omits Windows assets when Windows publishing is disabled', () => {
+    const required = getRequiredReleaseAssetNames('v1.4.27', { includeWindows: false })
+
+    expect(required).not.toEqual(
+      expect.arrayContaining([
+        'latest.yml',
+        'yiru-windows-setup.exe',
+        'yiru-windows-setup.exe.blockmap'
+      ])
+    )
+    expect(required).toEqual(
+      expect.arrayContaining(['latest-mac.yml', 'latest-linux.yml', 'yiru-macos-arm64.dmg'])
+    )
+  })
+
+  it('keeps the forbidden Windows asset list aligned with required assets', () => {
+    expect(getWindowsReleaseAssetNames()).toEqual([
+      'latest.yml',
+      'yiru-windows-setup.exe',
+      'yiru-windows-setup.exe.blockmap'
+    ])
+    expect(getRequiredReleaseAssetNames('v1.4.27')).toEqual(
+      expect.arrayContaining(getWindowsReleaseAssetNames())
+    )
+  })
+})
+
+describe('readWindowsReleaseEnabled', () => {
+  it('defaults to requiring Windows assets', () => {
+    expect(readWindowsReleaseEnabled({})).toBe(true)
+  })
+
+  it('parses explicit workflow output values', () => {
+    expect(readWindowsReleaseEnabled({ YIRU_WINDOWS_RELEASE_ENABLED: 'true' })).toBe(true)
+    expect(readWindowsReleaseEnabled({ YIRU_WINDOWS_RELEASE_ENABLED: 'false' })).toBe(false)
+  })
+
+  it('rejects unexpected values', () => {
+    expect(() => readWindowsReleaseEnabled({ YIRU_WINDOWS_RELEASE_ENABLED: 'sometimes' })).toThrow(
+      'YIRU_WINDOWS_RELEASE_ENABLED must be "true" or "false"'
+    )
+  })
 })
 
 describe('extractManifestAssetNames', () => {
@@ -76,6 +121,43 @@ describe('extractManifestAssetNames', () => {
 })
 
 describe('verifyRequiredReleaseAssets', () => {
+  it('accepts a complete macOS and Linux release without Windows assets', async () => {
+    const tag = 'v1.4.27'
+    const required = getRequiredReleaseAssetNames(tag, { includeWindows: false })
+    const release = releaseWithAssets(tag, required)
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse([release]))
+      .mockResolvedValue(jsonResponse('version: 1.4.27\n'))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(
+      verifyRequiredReleaseAssets({
+        repo: 'xinyao27/yiru',
+        tag,
+        token: 'token',
+        includeWindows: false
+      })
+    ).resolves.toEqual(expect.objectContaining({ tag }))
+    expect(fetchMock).toHaveBeenCalledTimes(4)
+  })
+
+  it('rejects stale Windows assets when Windows publishing is disabled', async () => {
+    const tag = 'v1.4.27'
+    const required = getRequiredReleaseAssetNames(tag, { includeWindows: false })
+    const release = releaseWithAssets(tag, [...required, 'latest.yml'])
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(jsonResponse([release])))
+
+    await expect(
+      verifyRequiredReleaseAssets({
+        repo: 'xinyao27/yiru',
+        tag,
+        token: 'token',
+        includeWindows: false
+      })
+    ).rejects.toThrow('Unexpected Windows assets: latest.yml')
+  })
+
   it('fails when a manifest-referenced asset has not been uploaded', async () => {
     const tag = 'v1.4.27'
     const required = getRequiredReleaseAssetNames(tag)

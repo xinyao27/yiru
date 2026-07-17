@@ -123,7 +123,7 @@ describe('resolveRelayPushTarget', () => {
       branchRemote: forkUrl,
       remotes: ['origin', 'pr-contributor-yiru'],
       remoteUrls: {
-        origin: 'https://github.com/stablyai/yiru.git',
+        origin: 'https://github.com/xinyao27/yiru.git',
         'pr-contributor-yiru': forkUrl
       }
     })
@@ -141,7 +141,7 @@ describe('resolveRelayPushTarget', () => {
       branchRemote: forkUrl,
       remotes: ['origin'],
       remoteUrls: {
-        origin: 'git@github.com:stablyai/yiru.git'
+        origin: 'git@github.com:xinyao27/yiru.git'
       }
     })
 

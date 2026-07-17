@@ -17,7 +17,7 @@ const CODEX_TRUST_PROMPT_RE = /Do[\s\S]*you[\s\S]*trust[\s\S]*contents/i
 
 function pastePayload(repeats = 4): string {
   const lines = [
-    'Repository: stablyai/yiru',
+    'Repository: xinyao27/yiru',
     '',
     'Required exact revision:',
     '',

@@ -53,7 +53,7 @@ function forkTarget(overrides: Partial<GitPushTarget> = {}): GitPushTarget {
 
 describe('prepareWorktreePushTargetWithExec', () => {
   it('adds a new fork remote and fetches its head when none matches', async () => {
-    const exec = makeRepoExec({ origin: 'git@github.com:stablyai/yiru.git' })
+    const exec = makeRepoExec({ origin: 'git@github.com:xinyao27/yiru.git' })
 
     const result = await prepareWorktreePushTargetWithExec(exec, REPO, forkTarget(), () => false)
 
@@ -77,7 +77,7 @@ describe('prepareWorktreePushTargetWithExec', () => {
 
   it('reuses an existing remote pointing at the same fork (SSH vs HTTPS) without adding', async () => {
     const exec = makeRepoExec({
-      origin: 'git@github.com:stablyai/yiru.git',
+      origin: 'git@github.com:xinyao27/yiru.git',
       'pr-contributor-yiru': FORK_HTTPS
     })
 
@@ -121,7 +121,7 @@ describe('prepareWorktreePushTargetWithExec', () => {
   })
 
   it('strips an incoming remoteCreated flag and fetches the given remote when there is no remoteUrl', async () => {
-    const exec = makeRepoExec({ origin: 'git@github.com:stablyai/yiru.git' })
+    const exec = makeRepoExec({ origin: 'git@github.com:xinyao27/yiru.git' })
 
     const result = await prepareWorktreePushTargetWithExec(
       exec,
@@ -141,14 +141,14 @@ describe('prepareWorktreePushTargetWithExec', () => {
 describe('findRemoteForUrl', () => {
   it('matches by GitHub owner/repo across URL protocols', async () => {
     const exec = makeRepoExec({
-      origin: 'git@github.com:stablyai/yiru.git',
+      origin: 'git@github.com:xinyao27/yiru.git',
       fork: FORK_SSH
     })
     await expect(findRemoteForUrl(exec, REPO, FORK_HTTPS)).resolves.toBe('fork')
   })
 
   it('returns null when no remote points at the fork', async () => {
-    const exec = makeRepoExec({ origin: 'git@github.com:stablyai/yiru.git' })
+    const exec = makeRepoExec({ origin: 'git@github.com:xinyao27/yiru.git' })
     await expect(findRemoteForUrl(exec, REPO, FORK_SSH)).resolves.toBeNull()
   })
 })

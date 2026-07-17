@@ -82,9 +82,9 @@ describe('landing preflight issues', () => {
           displayName: 'yiru',
           repoIcon: {
             type: 'image',
-            src: 'https://github.com/stablyai.png?size=64',
+            src: 'https://github.com/xinyao27.png?size=64',
             source: 'github',
-            label: 'stablyai/yiru'
+            label: 'xinyao27/yiru'
           }
         })
       ])
@@ -98,7 +98,7 @@ describe('landing preflight issues', () => {
           id: 'github-repo',
           path: '/Users/alice/yiru',
           displayName: 'yiru',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         })
       ])
     ).toBe(true)

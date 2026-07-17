@@ -268,7 +268,7 @@ describe('repo slice project runtime updates', () => {
 
   it('preserves shared project source repos when updating local runtime preferences', async () => {
     const project: Project = {
-      id: 'github:stablyai/yiru',
+      id: 'github:xinyao27/yiru',
       displayName: 'Yiru',
       badgeColor: '#000',
       sourceRepoIds: ['local-repo', 'remote-repo'],
@@ -296,7 +296,7 @@ describe('repo slice project runtime updates', () => {
 
   it('clears local runtime preferences without dropping shared project source repos', async () => {
     const project: Project = {
-      id: 'github:stablyai/yiru',
+      id: 'github:xinyao27/yiru',
       displayName: 'Yiru',
       badgeColor: '#000',
       sourceRepoIds: ['local-repo', 'remote-repo'],

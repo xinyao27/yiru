@@ -19,7 +19,7 @@ describe('task source context', () => {
       normalizeTaskSourceContext({
         provider: 'github',
         projectId: ' project-1 ',
-        providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+        providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
       })
     ).toEqual({
       kind: 'task-source',
@@ -28,7 +28,7 @@ describe('task source context', () => {
       hostId: 'local',
       projectHostSetupId: null,
       repoId: null,
-      providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' },
+      providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' },
       accountLabel: null
     })
   })
@@ -79,14 +79,14 @@ describe('task source context', () => {
       projectId: 'project-1',
       hostId: 'local',
       repoId: 'repo-1',
-      providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+      providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
     })
     const ssh = getTaskSourceCacheScope({
       provider: 'github',
       projectId: 'project-1',
       hostId: toSshExecutionHostId('builder'),
       repoId: 'repo-1',
-      providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+      providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
     })
     const differentRepo = getTaskSourceCacheScope({
       provider: 'github',
@@ -139,7 +139,7 @@ describe('task source context', () => {
       normalizeTaskSourceContext({
         provider: 'gitlab',
         projectId: 'project-1',
-        providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+        providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
       })?.providerIdentity
     ).toBeNull()
   })

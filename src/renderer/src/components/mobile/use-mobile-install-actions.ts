@@ -2,22 +2,21 @@ import { useCallback } from 'react'
 import { toast } from 'sonner'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { translate } from '@/i18n/i18n'
-import type { Platform } from './MobileHero'
-import { getInstallCopy, type IosChannel } from './mobile-platform-copy'
+import { getMobileReleaseLink } from './mobile-release-link'
 
-export function useMobileInstallActions(
-  platform: Platform,
-  iosChannel: IosChannel
-): { copyInstallUrl: () => Promise<void>; openInstallUrl: () => void } {
+export function useMobileInstallActions(): {
+  copyInstallUrl: () => Promise<void>
+  openInstallUrl: () => void
+} {
   const mountedRef = useMountedRef()
 
   const openInstallUrl = useCallback((): void => {
-    void window.api.shell.openUrl(getInstallCopy(platform, iosChannel).url)
-  }, [iosChannel, platform])
+    void window.api.shell.openUrl(getMobileReleaseLink().url)
+  }, [])
 
   const copyInstallUrl = useCallback(async (): Promise<void> => {
     try {
-      await window.api.ui.writeClipboardText(getInstallCopy(platform, iosChannel).url)
+      await window.api.ui.writeClipboardText(getMobileReleaseLink().url)
       if (mountedRef.current) {
         toast.success(
           translate('auto.components.mobile.MobilePage.fad833de8d', 'Install link copied')
@@ -31,7 +30,7 @@ export function useMobileInstallActions(
         )
       }
     }
-  }, [iosChannel, mountedRef, platform])
+  }, [mountedRef])
 
   return { copyInstallUrl, openInstallUrl }
 }

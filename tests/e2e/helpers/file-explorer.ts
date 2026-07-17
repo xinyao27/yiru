@@ -1,5 +1,5 @@
-import type { Page } from '@stablyai/playwright-test'
-import { expect } from '@stablyai/playwright-test'
+import type { Page } from '@playwright/test'
+import { expect } from '@playwright/test'
 
 /** Open the right sidebar file explorer and wait for store state to match. */
 export async function openFileExplorer(page: Page): Promise<void> {

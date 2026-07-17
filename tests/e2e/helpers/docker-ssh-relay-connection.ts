@@ -1,4 +1,4 @@
-import type { Page } from '@stablyai/playwright-test'
+import type { Page } from '@playwright/test'
 
 import {
   DOCKER_SSH_RELAY_REMOTE_REPO_PATH,

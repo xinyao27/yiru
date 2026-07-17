@@ -1735,7 +1735,7 @@ describe('createFilePathLinkProvider range bounds', () => {
   it('does not intercept regular URL clicks in the file-path fallback', async () => {
     setPlatform('Macintosh')
     const rows = [
-      makeBufferLine('PR opened: https://github.com/stablyai/yiru-marketing-website/pull/82')
+      makeBufferLine('PR opened: https://github.com/xinyao27/yiru-marketing-website/pull/82')
     ]
     const { terminal, element } = makeFallbackTerminal(rows)
     const disposable = installFilePathLinkClickFallback(1, terminal, {
@@ -1774,7 +1774,7 @@ describe('createFilePathLinkProvider range bounds', () => {
     setPlatform('Macintosh')
     storeState.settings = { openLinksInApp: false }
     const rows = [
-      makeBufferLine('PR opened: https://github.com/stablyai/yiru-marketing-website/pull/82')
+      makeBufferLine('PR opened: https://github.com/xinyao27/yiru-marketing-website/pull/82')
     ]
     const { terminal, element } = makeFallbackTerminal(rows)
     const disposable = installHttpLinkClickFallback(terminal, { worktreeId: 'wt-1' })
@@ -1807,7 +1807,7 @@ describe('createFilePathLinkProvider range bounds', () => {
     setPlatform('Macintosh')
     storeState.settings = { openLinksInApp: false }
     const rows = [
-      makeBufferLine('PR opened: https://github.com/stablyai/yiru-marketing-website/pull/82')
+      makeBufferLine('PR opened: https://github.com/xinyao27/yiru-marketing-website/pull/82')
     ]
     const { terminal, element } = makeFallbackTerminal(rows)
     const disposable = installHttpLinkClickFallback(terminal, { worktreeId: 'wt-1' })
@@ -1828,7 +1828,7 @@ describe('createFilePathLinkProvider range bounds', () => {
     } as unknown as MouseEvent)
 
     expect(openUrlMock).toHaveBeenCalledWith(
-      'https://github.com/stablyai/yiru-marketing-website/pull/82'
+      'https://github.com/xinyao27/yiru-marketing-website/pull/82'
     )
     expect(preventDefault).toHaveBeenCalled()
     expect(stopPropagation).not.toHaveBeenCalled()
@@ -1841,7 +1841,7 @@ describe('createFilePathLinkProvider range bounds', () => {
   it('does not steal macOS ctrl-click context-menu gestures in the URL fallback', async () => {
     setPlatform('Macintosh')
     storeState.settings = { openLinksInApp: false }
-    const rows = [makeBufferLine('Open https://github.com/stablyai/yiru/pull/2914')]
+    const rows = [makeBufferLine('Open https://github.com/xinyao27/yiru/pull/2914')]
     const { terminal, element } = makeFallbackTerminal(rows)
     const disposable = installHttpLinkClickFallback(terminal, { worktreeId: 'wt-1' })
     const mouseUp = getRegisteredBubbleMouseUpHandler(element)
@@ -1870,7 +1870,7 @@ describe('createFilePathLinkProvider range bounds', () => {
     setPlatform('Macintosh')
     storeState.settings = { openLinksInApp: false, openLinksInAppPreferencePrompted: false }
     const rows = [
-      makeBufferLine('PR opened: https://github.com/stablyai/yiru-marketing-website/pull/82')
+      makeBufferLine('PR opened: https://github.com/xinyao27/yiru-marketing-website/pull/82')
     ]
     const requestOpenLinksInAppPreference = vi.fn(async () => {
       storeState.settings = { openLinksInApp: true, openLinksInAppPreferencePrompted: true }
@@ -1897,7 +1897,7 @@ describe('createFilePathLinkProvider range bounds', () => {
     } as unknown as MouseEvent)
 
     expect(requestOpenLinksInAppPreference).toHaveBeenCalledWith(
-      'https://github.com/stablyai/yiru-marketing-website/pull/82'
+      'https://github.com/xinyao27/yiru-marketing-website/pull/82'
     )
     expect(openUrlMock).not.toHaveBeenCalled()
     expect(createBrowserTabMock).not.toHaveBeenCalled()
@@ -1906,7 +1906,7 @@ describe('createFilePathLinkProvider range bounds', () => {
 
     expect(createBrowserTabMock).toHaveBeenCalledWith(
       'wt-1',
-      'https://github.com/stablyai/yiru-marketing-website/pull/82',
+      'https://github.com/xinyao27/yiru-marketing-website/pull/82',
       { activate: true }
     )
     expect(preventDefault).toHaveBeenCalled()
@@ -1918,7 +1918,7 @@ describe('createFilePathLinkProvider range bounds', () => {
   it('does not double-open URLs when xterm already handled the mouseup', () => {
     setPlatform('Macintosh')
     storeState.settings = { openLinksInApp: false }
-    const rows = [makeBufferLine('Open https://github.com/stablyai/yiru/pull/2914')]
+    const rows = [makeBufferLine('Open https://github.com/xinyao27/yiru/pull/2914')]
     const { terminal, element } = makeFallbackTerminal(rows)
     const disposable = installHttpLinkClickFallback(terminal, { worktreeId: 'wt-1' })
     const mouseUp = getRegisteredBubbleMouseUpHandler(element)

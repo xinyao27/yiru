@@ -25,7 +25,9 @@ on:
         description: Release kind
         required: true
         type: choice
-        default: rc
+        # Why: a fresh 0.0.0 repository should publish stable v0.0.1 unless the
+        # caller explicitly opts into RCs.
+        default: patch
         options:
           - rc
           - patch
@@ -67,6 +69,8 @@ jobs:
       tag: ${{ steps.tag.outputs.tag || steps.version.outputs.recovered_tag }}
       should_release: ${{ steps.tag.outputs.tag != '' || steps.version.outputs.recovered_tag != '' }}
       latest_published_rc_tag: ${{ steps.publish_drafts.outputs.latest_published_tag }}
+      desktop_matrix: ${{ steps.desktop-platforms.outputs.matrix }}
+      windows_enabled: ${{ steps.desktop-platforms.outputs.windows_enabled }}
     steps:
       - name: Checkout ref
         uses: actions/checkout@v6
@@ -78,6 +82,15 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version-file: package.json
+
+      - name: Resolve desktop release platforms
+        id: desktop-platforms
+        # Why: a completely absent SignPath setup intentionally produces a
+        # macOS/Linux-only release; partial configuration fails before tagging.
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+        run: node config/scripts/release-desktop-build-matrix.mjs >> "$GITHUB_OUTPUT"
 
       - name: Configure git author
         run: |
@@ -186,6 +199,7 @@ jobs:
         if: steps.window.outputs.allowed == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          YIRU_WINDOWS_RELEASE_ENABLED: ${{ steps.desktop-platforms.outputs.windows_enabled }}
         run: node config/scripts/publish-complete-draft-releases.mjs
 
       - name: Compute next version
@@ -713,28 +727,7 @@ jobs:
     if: needs.cut.outputs.should_release == 'true'
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          # Why: windows-latest moved to the Windows 2025 / VS 2026 image before
-          # node-gyp could detect VS 18, breaking native dependency install.
-          - os: windows-2022
-            platform: win
-            release_command: 'node config/scripts/ensure-native-runtime.mjs --runtime=electron; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm exec electron-builder --config config/electron-builder.config.cjs --win --publish never'
-            eb_cache_path: |
-              ~\AppData\Local\electron\Cache
-              ~\AppData\Local\electron-builder\Cache
-          - os: ubuntu-latest
-            platform: linux-x64
-            release_command: node config/scripts/ensure-native-runtime.mjs --runtime=electron && pnpm exec electron-builder --config config/electron-builder.config.cjs --linux AppImage deb rpm --x64 --publish always
-            eb_cache_path: |
-              ~/.cache/electron
-              ~/.cache/electron-builder
-          - os: ubuntu-24.04-arm
-            platform: linux-arm64
-            release_command: node config/scripts/ensure-native-runtime.mjs --runtime=electron && YIRU_LINUX_ARM64_RELEASE=1 pnpm exec electron-builder --config config/electron-builder.config.cjs --linux AppImage deb rpm --arm64 --publish always
-            eb_cache_path: |
-              ~/.cache/electron
-              ~/.cache/electron-builder
+      matrix: ${{ fromJSON(needs.cut.outputs.desktop_matrix) }}
 
     runs-on: ${{ matrix.os }}
     # Why: hosted runners hard-cap jobs at 6h; the Windows SignPath waits
@@ -860,7 +853,7 @@ jobs:
           # the macOS release runner, leaving v1.4.2-rc.8 as an incomplete draft.
           NODE_OPTIONS: --max-old-space-size=4096
           YIRU_BUILD_IDENTITY: ${{ steps.tag-classify.outputs.identity }}
-          YIRU_DIAGNOSTICS_TOKEN_URL: https://www.onyiru.dev/diagnostics/token
+          YIRU_DIAGNOSTICS_TOKEN_URL: https://yiru.ai/diagnostics/token
           YIRU_POSTHOG_WRITE_KEY: ${{ secrets.YIRU_POSTHOG_WRITE_KEY }}
 
       - name: Gate runtime file-watcher process isolation
@@ -887,6 +880,20 @@ jobs:
           command: ${{ matrix.release_command }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate SignPath configuration
+        if: matrix.platform == 'win'
+        shell: pwsh
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+        run: |
+          if (
+            [string]::IsNullOrWhiteSpace($env:SIGNPATH_API_TOKEN) -or
+            [string]::IsNullOrWhiteSpace($env:SIGNPATH_ORGANIZATION_ID)
+          ) {
+            throw 'Set the SIGNPATH_ORGANIZATION_ID repository variable and SIGNPATH_API_TOKEN secret before cutting a Windows release.'
+          }
 
       # Why: SignPath signs GitHub workflow artifacts, so Windows builds must
       # upload only after the production-signed installer has been returned.
@@ -1065,67 +1072,58 @@ jobs:
         uses: signpath/github-action-submit-signing-request@v2
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: c37aa192-a27a-4377-9c90-5d6c95912dc0
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           project-slug: yiru
           signing-policy-slug: release-signing
           artifact-configuration-slug: windows-inner-binaries-zip
           github-artifact-id: ${{ steps.upload-unsigned-inner.outputs.artifact-id }}
           wait-for-completion: false
 
-      - name: Notify Slack that inner-binary signing is waiting for approval
-        id: notify-inner-signing
+      - name: Publish inner-binary SignPath approval link
+        id: publish-inner-signing-approval
         if: matrix.platform == 'win' && steps.submit-inner-signing.outcome == 'success'
         continue-on-error: true
         shell: pwsh
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SIGNPATH_ORGANIZATION_ID: c37aa192-a27a-4377-9c90-5d6c95912dc0
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           SIGNPATH_REQUEST_ID: ${{ steps.submit-inner-signing.outputs.signing-request-id }}
           SIGNPATH_REQUEST_URL: ${{ steps.submit-inner-signing.outputs.signing-request-web-url }}
           TAG: ${{ needs.cut.outputs.tag }}
           GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          if ([string]::IsNullOrWhiteSpace($env:SLACK_WEBHOOK_URL)) {
-            throw 'SLACK_WEBHOOK_URL secret is required so release approvers know when SignPath is waiting.'
-          }
-
           $requestUrl = $env:SIGNPATH_REQUEST_URL
           if ([string]::IsNullOrWhiteSpace($requestUrl)) {
+            if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_REQUEST_ID)) {
+              throw 'SignPath did not return a signing request URL or request ID.'
+            }
             $requestUrl = "https://app.signpath.io/Web/$env:SIGNPATH_ORGANIZATION_ID/SigningRequests/$env:SIGNPATH_REQUEST_ID"
           }
 
-          $message = "Yiru Windows release $env:TAG inner-binaries signing request (1 of 2) is ready for SignPath approval.`n<$requestUrl|Open SignPath signing request>`n<$env:GITHUB_RUN_URL|Open GitHub Actions run>"
-          $payload = @{
-            text = $message
-            blocks = @(
-              @{
-                type = 'section'
-                text = @{
-                  type = 'mrkdwn'
-                  text = $message
-                }
-              }
-            )
-          } | ConvertTo-Json -Depth 5
+          @"
+          ### SignPath approval required: Windows inner binaries
 
-          Invoke-RestMethod -Method Post -Uri $env:SLACK_WEBHOOK_URL -ContentType 'application/json' -Body $payload
+          Yiru Windows release ``$env:TAG`` is waiting for inner-binary signing approval (1 of 2).
 
-      # Why gate on the notify outcome too: if nobody was told to approve,
-      # don't hold the release for the approval window — fall through and
-      # ship like today instead. The 1h wait (vs the installer's 4h) keeps
-      # both waits plus the build inside the 360-minute job cap; missing it
-      # falls through to today's unsigned-inner flow rather than blocking.
+          - [Open SignPath signing request]($requestUrl)
+          - [Open GitHub Actions run]($env:GITHUB_RUN_URL)
+          "@ | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+          Write-Host "::warning title=SignPath approval required::Approve the Windows inner-binary signing request: $requestUrl"
+
+      # Why: the 1h wait (vs the installer's 4h) keeps both waits plus the
+      # build inside the 360-minute job cap; missing it falls through to the
+      # existing unsigned-inner flow rather than blocking the release.
       - name: Download signed inner binaries from SignPath
         id: download-signed-inner
-        if: matrix.platform == 'win' && steps.submit-inner-signing.outcome == 'success' && steps.notify-inner-signing.outcome == 'success'
+        if: matrix.platform == 'win' && steps.submit-inner-signing.outcome == 'success'
         continue-on-error: true
         shell: pwsh
         env:
           SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           SIGNPATH_REQUEST_ID: ${{ steps.submit-inner-signing.outputs.signing-request-id }}
         run: |
           Get-SignedArtifact `
-            -OrganizationId c37aa192-a27a-4377-9c90-5d6c95912dc0 `
+            -OrganizationId $env:SIGNPATH_ORGANIZATION_ID `
             -ApiToken $env:SIGNPATH_API_TOKEN `
             -SigningRequestId $env:SIGNPATH_REQUEST_ID `
             -OutputArtifactPath signed-inner.zip `
@@ -1234,7 +1232,6 @@ jobs:
             Write-Warning 'Restored pre-rebuild installer; this release ships with unsigned inner binaries.'
           }
       # ── End Windows inner-binary signing ───────────────────────────────
-
       - name: Upload unsigned Windows installer for SignPath
         if: matrix.platform == 'win'
         id: upload-unsigned-windows-installer
@@ -1252,61 +1249,54 @@ jobs:
         uses: signpath/github-action-submit-signing-request@v2
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: c37aa192-a27a-4377-9c90-5d6c95912dc0
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           project-slug: yiru
           signing-policy-slug: release-signing
           artifact-configuration-slug: github-actions-windows-installer
           github-artifact-id: ${{ steps.upload-unsigned-windows-installer.outputs.artifact-id }}
           wait-for-completion: false
 
-      - name: Notify Slack that Windows signing is waiting for approval
+      - name: Publish installer SignPath approval link
         if: matrix.platform == 'win'
         shell: pwsh
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SIGNPATH_ORGANIZATION_ID: c37aa192-a27a-4377-9c90-5d6c95912dc0
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           SIGNPATH_REQUEST_ID: ${{ steps.submit-signing-request.outputs.signing-request-id }}
           SIGNPATH_REQUEST_URL: ${{ steps.submit-signing-request.outputs.signing-request-web-url }}
           TAG: ${{ needs.cut.outputs.tag }}
           GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           INNER_SIGNING_SUBMITTED: ${{ steps.submit-inner-signing.outcome == 'success' }}
         run: |
-          if ([string]::IsNullOrWhiteSpace($env:SLACK_WEBHOOK_URL)) {
-            throw 'SLACK_WEBHOOK_URL secret is required so release approvers know when SignPath is waiting.'
-          }
-
           $requestUrl = $env:SIGNPATH_REQUEST_URL
           if ([string]::IsNullOrWhiteSpace($requestUrl)) {
+            if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_REQUEST_ID)) {
+              throw 'SignPath did not return a signing request URL or request ID.'
+            }
             $requestUrl = "https://app.signpath.io/Web/$env:SIGNPATH_ORGANIZATION_ID/SigningRequests/$env:SIGNPATH_REQUEST_ID"
           }
 
           # Why: releases where inner signing fell through have only this one request.
           $stage = if ($env:INNER_SIGNING_SUBMITTED -eq 'true') { 'installer signing request (2 of 2)' } else { 'signing request' }
-          $message = "Yiru Windows release $env:TAG $stage is ready for SignPath approval.`n<$requestUrl|Open SignPath signing request>`n<$env:GITHUB_RUN_URL|Open GitHub Actions run>"
-          $payload = @{
-            text = $message
-            blocks = @(
-              @{
-                type = 'section'
-                text = @{
-                  type = 'mrkdwn'
-                  text = $message
-                }
-              }
-            )
-          } | ConvertTo-Json -Depth 5
+          @"
+          ### SignPath approval required: Windows installer
 
-          Invoke-RestMethod -Method Post -Uri $env:SLACK_WEBHOOK_URL -ContentType 'application/json' -Body $payload
+          Yiru Windows release ``$env:TAG`` is waiting for $stage.
+
+          - [Open SignPath signing request]($requestUrl)
+          - [Open GitHub Actions run]($env:GITHUB_RUN_URL)
+          "@ | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+          Write-Host "::warning title=SignPath approval required::Approve the Windows installer signing request: $requestUrl"
 
       - name: Download signed Windows installer from SignPath
         if: matrix.platform == 'win'
         shell: pwsh
         env:
           SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           SIGNPATH_REQUEST_ID: ${{ steps.submit-signing-request.outputs.signing-request-id }}
         run: |
           Get-SignedArtifact `
-            -OrganizationId c37aa192-a27a-4377-9c90-5d6c95912dc0 `
+            -OrganizationId $env:SIGNPATH_ORGANIZATION_ID `
             -ApiToken $env:SIGNPATH_API_TOKEN `
             -SigningRequestId $env:SIGNPATH_REQUEST_ID `
             -OutputArtifactPath signed-windows.zip `
@@ -1569,6 +1559,15 @@ jobs:
             exit 1
           fi
 
+      - name: Remove disabled Windows release assets
+        if: needs.cut.outputs.windows_enabled == 'false'
+        # Why: stable and RC retries may reuse drafts from a Windows-enabled
+        # attempt; those assets must not escape in a macOS/Linux-only release.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.cut.outputs.tag }}
+        run: node config/scripts/remove-disabled-windows-release-assets.mjs "$TAG"
+
       - name: Verify release assets complete
         # Why: publish-release is the only intended draft -> published
         # transition. Refuse to un-draft until every updater manifest and
@@ -1576,6 +1575,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.cut.outputs.tag }}
+          YIRU_WINDOWS_RELEASE_ENABLED: ${{ needs.cut.outputs.windows_enabled }}
         run: node config/scripts/verify-release-required-assets.mjs "$TAG"
 
       - name: Publish release
@@ -1600,24 +1600,3 @@ jobs:
             --draft=false \
             --prerelease="$prerelease" \
             --repo "$GITHUB_REPOSITORY"
-
-  homebrew-bump-published-rc-draft:
-    needs:
-      - cut
-    # Why: publish-complete-draft-releases can expose a recovered RC without
-    # running the build/publish jobs; still advance the RC cask to that tag.
-    if: ${{ needs.cut.outputs.latest_published_rc_tag != '' }}
-    uses: ./.github/workflows/homebrew-bump.yml
-    with:
-      tag: ${{ needs.cut.outputs.latest_published_rc_tag }}
-    secrets: inherit
-
-  homebrew-bump:
-    needs:
-      - cut
-      - publish-release
-    if: ${{ needs.cut.outputs.tag != '' && startsWith(needs.cut.outputs.tag, 'v') }}
-    uses: ./.github/workflows/homebrew-bump.yml
-    with:
-      tag: ${{ needs.cut.outputs.tag }}
-    secrets: inherit

@@ -285,7 +285,7 @@ for arg in "$@"; do
   esac
 done
 
-trailer="\${YIRU_GIT_COMMIT_TRAILER:-Co-authored-by: Yiru <help@stably.ai>}"
+trailer="\${YIRU_GIT_COMMIT_TRAILER:-Co-authored-by: Yiru <noreply@yiru.ai>}"
 
 has_explicit_commit_message() {
   local arg
@@ -703,7 +703,7 @@ exit /b %ERRORLEVEL%
 
 const WIN32_GIT_PS_WRAPPER = String.raw`$ErrorActionPreference = 'Stop'
 $realGit = if ($env:YIRU_REAL_GIT) { $env:YIRU_REAL_GIT } else { 'git' }
-$trailer = if ($env:YIRU_GIT_COMMIT_TRAILER) { $env:YIRU_GIT_COMMIT_TRAILER } else { 'Co-authored-by: Yiru <help@stably.ai>' }
+$trailer = if ($env:YIRU_GIT_COMMIT_TRAILER) { $env:YIRU_GIT_COMMIT_TRAILER } else { 'Co-authored-by: Yiru <noreply@yiru.ai>' }
 
 if ($args -contains '--dry-run') {
   & $realGit @args

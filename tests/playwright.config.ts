@@ -1,4 +1,4 @@
-import { defineConfig } from '@stablyai/playwright-test'
+import { defineConfig } from '@playwright/test'
 
 /**
  * Playwright config for Yiru E2E tests.

@@ -101,7 +101,7 @@ describe('project visible table cache', () => {
   })
 
   it('layers selection only onto the renderer visible-table cache key', () => {
-    const storeCacheKey = 'organization:stablyai:1:view-id:local'
+    const storeCacheKey = 'organization:xinyao27:1:view-id:local'
 
     expect(getVisibleProjectTableCacheKey(storeCacheKey, '["repo-1"]')).not.toBe(storeCacheKey)
   })

@@ -26,18 +26,18 @@ function project(
 describe('github-project-picker-filter', () => {
   it('excludes pinned and recent projects from browse results', () => {
     const projects = [
-      project('stablyai', 1, 'Pinned Project'),
-      project('stablyai', 2, 'Recent Project'),
-      project('stablyai', 3, 'Browse Project')
+      project('xinyao27', 1, 'Pinned Project'),
+      project('xinyao27', 2, 'Recent Project'),
+      project('xinyao27', 3, 'Browse Project')
     ]
 
     expect(
       filterGitHubProjectPickerProjects({
         projects,
-        pinned: [{ owner: 'stablyai', ownerType: 'organization', number: 1 }],
+        pinned: [{ owner: 'xinyao27', ownerType: 'organization', number: 1 }],
         recent: [
           {
-            owner: 'stablyai',
+            owner: 'xinyao27',
             ownerType: 'organization',
             number: 2,
             lastOpenedAt: '2026-06-17T00:00:00.000Z'
@@ -50,7 +50,7 @@ describe('github-project-picker-filter', () => {
 
   it('matches project title, owner, and number case-insensitively', () => {
     const projects = [
-      project('stablyai', 42, 'Roadmap'),
+      project('xinyao27', 42, 'Roadmap'),
       project('openai', 7, 'Launch Plan'),
       project('linear', 11, 'Triage')
     ]
@@ -80,7 +80,7 @@ describe('github-project-picker-filter', () => {
     expect(isGitHubProjectPickerQueryTooLarge(query)).toBe(true)
     expect(
       filterGitHubProjectPickerProjects({
-        projects: [project('stablyai', 1, 'Roadmap')],
+        projects: [project('xinyao27', 1, 'Roadmap')],
         pinned: [],
         recent: [],
         query
@@ -121,7 +121,7 @@ describe('github-project-picker-filter', () => {
   it('rejects oversized whitespace before trimming project searches', () => {
     expect(
       filterGitHubProjectPickerProjects({
-        projects: [project('stablyai', 1, 'Roadmap')],
+        projects: [project('xinyao27', 1, 'Roadmap')],
         pinned: [],
         recent: [],
         query: ' '.repeat(GITHUB_PROJECT_PICKER_QUERY_MAX_BYTES + 1)

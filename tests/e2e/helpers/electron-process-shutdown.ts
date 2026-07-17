@@ -2,7 +2,7 @@ import type { ChildProcess } from 'node:child_process'
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
-import type { ElectronApplication } from '@stablyai/playwright-test'
+import type { ElectronApplication } from '@playwright/test'
 
 const GRACEFUL_CLOSE_TIMEOUT_MS = 10_000
 const PROCESS_EXIT_TIMEOUT_MS = 5_000

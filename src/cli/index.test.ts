@@ -1327,7 +1327,7 @@ describe('yiru cli worktree awareness', () => {
         setups: [
           {
             id: 'setup-local',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'local',
             repoId: 'repo-local',
             path: '/tmp/yiru',
@@ -1339,7 +1339,7 @@ describe('yiru cli worktree awareness', () => {
           },
           {
             id: 'setup-gpu',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'runtime:gpu',
             repoId: 'repo-gpu',
             path: '/srv/yiru',
@@ -1364,7 +1364,7 @@ describe('yiru cli worktree awareness', () => {
         'worktree',
         'create',
         '--project',
-        'github:stablyai/yiru',
+        'github:xinyao27/yiru',
         '--host',
         'runtime:gpu',
         '--name',
@@ -1397,7 +1397,7 @@ describe('yiru cli worktree awareness', () => {
         setups: [
           {
             id: 'setup-gpu',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'runtime:gpu',
             repoId: 'repo-gpu',
             path: '/srv/yiru',
@@ -1450,7 +1450,7 @@ describe('yiru cli worktree awareness', () => {
         '--repo',
         'id:repo-local',
         '--project',
-        'github:stablyai/yiru',
+        'github:xinyao27/yiru',
         '--name',
         'feature',
         '--json'
@@ -2496,12 +2496,12 @@ describe('yiru cli worktree awareness', () => {
       okFixture('req_project_list', {
         projects: [
           {
-            id: 'github:stablyai/yiru',
+            id: 'github:xinyao27/yiru',
             displayName: 'Yiru',
             badgeColor: '#7c3aed',
             providerIdentity: {
               provider: 'github',
-              owner: 'stablyai',
+              owner: 'xinyao27',
               repo: 'yiru'
             },
             sourceRepoIds: ['repo-1'],
@@ -2525,7 +2525,7 @@ describe('yiru cli worktree awareness', () => {
         setups: [
           {
             id: 'setup-local',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'local',
             repoId: 'repo-local',
             path: '/tmp/yiru',
@@ -2537,7 +2537,7 @@ describe('yiru cli worktree awareness', () => {
           },
           {
             id: 'setup-remote',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'runtime:gpu',
             repoId: 'repo-remote',
             path: '/srv/yiru',
@@ -2553,7 +2553,7 @@ describe('yiru cli worktree awareness', () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     await main(
-      ['project', 'setups', '--project', 'github:stablyai/yiru', '--host', 'runtime:gpu'],
+      ['project', 'setups', '--project', 'github:xinyao27/yiru', '--host', 'runtime:gpu'],
       '/tmp/repo'
     )
 
@@ -2568,7 +2568,7 @@ describe('yiru cli worktree awareness', () => {
       okFixture('req_project_setup', {
         result: {
           project: {
-            id: 'github:stablyai/yiru',
+            id: 'github:xinyao27/yiru',
             displayName: 'Yiru',
             badgeColor: '#7c3aed',
             sourceRepoIds: ['repo-1'],
@@ -2577,7 +2577,7 @@ describe('yiru cli worktree awareness', () => {
           },
           setup: {
             id: 'setup-local',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'local',
             repoId: 'repo-1',
             path: path.resolve('/tmp/yiru'),
@@ -2604,7 +2604,7 @@ describe('yiru cli worktree awareness', () => {
         'project',
         'setup-existing-folder',
         '--project',
-        'github:stablyai/yiru',
+        'github:xinyao27/yiru',
         '--host',
         'local',
         '--path',
@@ -2619,7 +2619,7 @@ describe('yiru cli worktree awareness', () => {
     )
 
     expect(callMock).toHaveBeenCalledWith('projectHostSetup.setupExistingFolder', {
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'local',
       path: path.resolve('/tmp/yiru/worktrees'),
       kind: 'git',
@@ -2637,7 +2637,7 @@ describe('yiru cli worktree awareness', () => {
         'project',
         'setup-existing-folder',
         '--project',
-        'github:stablyai/yiru',
+        'github:xinyao27/yiru',
         '--host',
         'runtime:gpu',
         '--path',
@@ -3961,7 +3961,7 @@ describe('yiru cli worktree awareness', () => {
         setups: [
           {
             id: 'setup-local',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'local',
             repoId: 'repo-local',
             path: '/tmp/yiru',
@@ -3973,7 +3973,7 @@ describe('yiru cli worktree awareness', () => {
           },
           {
             id: 'setup-gpu',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'runtime:gpu',
             repoId: 'repo-gpu',
             path: '/srv/yiru',
@@ -4004,7 +4004,7 @@ describe('yiru cli worktree awareness', () => {
         '--provider',
         'codex',
         '--project',
-        'github:stablyai/yiru',
+        'github:xinyao27/yiru',
         '--host',
         'runtime:gpu',
         '--json'
@@ -4020,7 +4020,7 @@ describe('yiru cli worktree awareness', () => {
         repo: 'id:repo-gpu',
         runContext: {
           kind: 'workspace-run',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           hostId: 'runtime:gpu',
           projectHostSetupId: 'setup-gpu',
           repoId: 'repo-gpu',
@@ -4039,7 +4039,7 @@ describe('yiru cli worktree awareness', () => {
         setups: [
           {
             id: 'setup-gpu',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'runtime:gpu',
             repoId: 'repo-gpu',
             path: '/srv/yiru',
@@ -4072,7 +4072,7 @@ describe('yiru cli worktree awareness', () => {
           repo: 'id:repo-gpu',
           runContext: {
             kind: 'workspace-run',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'runtime:gpu',
             projectHostSetupId: 'setup-gpu',
             repoId: 'repo-gpu',
@@ -4087,11 +4087,11 @@ describe('yiru cli worktree awareness', () => {
     const sourceContext = {
       kind: 'task-source',
       provider: 'github',
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'runtime:gpu',
       projectHostSetupId: 'setup-gpu',
       repoId: 'repo-gpu',
-      providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' },
+      providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' },
       accountLabel: 'gpu-bot'
     }
     queueFixtures(
@@ -4670,7 +4670,7 @@ describe('yiru cli worktree awareness', () => {
       okFixture('req_project_setup_update', {
         result: {
           project: {
-            id: 'github:stablyai/yiru',
+            id: 'github:xinyao27/yiru',
             displayName: 'Yiru',
             badgeColor: '#7c3aed',
             sourceRepoIds: [],
@@ -4679,7 +4679,7 @@ describe('yiru cli worktree awareness', () => {
           },
           setup: {
             id: 'setup-gpu',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'runtime:gpu',
             repoId: '',
             path: '/srv/yiru',
@@ -4735,7 +4735,7 @@ describe('yiru cli worktree awareness', () => {
       okFixture('req_project_setup_create', {
         result: {
           project: {
-            id: 'github:stablyai/yiru',
+            id: 'github:xinyao27/yiru',
             displayName: 'Yiru',
             badgeColor: '#7c3aed',
             sourceRepoIds: [],
@@ -4744,7 +4744,7 @@ describe('yiru cli worktree awareness', () => {
           },
           setup: {
             id: 'setup-gpu',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'runtime:gpu',
             repoId: '',
             path: '',
@@ -4764,7 +4764,7 @@ describe('yiru cli worktree awareness', () => {
         'project',
         'setup-create',
         '--project',
-        'github:stablyai/yiru',
+        'github:xinyao27/yiru',
         '--host',
         'runtime:gpu',
         '--setup-id',
@@ -4781,7 +4781,7 @@ describe('yiru cli worktree awareness', () => {
     )
 
     expect(callMock).toHaveBeenCalledWith('projectHostSetup.create', {
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'runtime:gpu',
       setupId: 'setup-gpu',
       path: undefined,
@@ -4800,7 +4800,7 @@ describe('yiru cli worktree awareness', () => {
       okFixture('req_project_setup_delete', {
         result: {
           project: {
-            id: 'github:stablyai/yiru',
+            id: 'github:xinyao27/yiru',
             displayName: 'Yiru',
             badgeColor: '#7c3aed',
             sourceRepoIds: [],
@@ -4809,7 +4809,7 @@ describe('yiru cli worktree awareness', () => {
           },
           setup: {
             id: 'setup-gpu',
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             hostId: 'runtime:gpu',
             repoId: '',
             path: '/srv/yiru',

@@ -8,7 +8,7 @@ describe('dev-instance-identity', () => {
       isDev: false,
       devLabel: null,
       dockBadgeLabel: null,
-      appUserModelId: 'com.stablyai.yiru'
+      appUserModelId: 'com.xinyao27.yiru'
     })
   })
 
@@ -28,7 +28,7 @@ describe('dev-instance-identity', () => {
     })
     expect(identity.name).toBe('Yiru: nwparker/dev-indicator')
     expect(identity.dockBadgeLabel).toBeNull()
-    expect(identity.appUserModelId).toMatch(/^com\.stablyai\.yiru\.dev\.[a-f0-9]{10}$/)
+    expect(identity.appUserModelId).toMatch(/^com\.xinyao27\.yiru\.dev\.[a-f0-9]{10}$/)
   })
 
   it('includes the branch when it differs from the worktree basename', () => {

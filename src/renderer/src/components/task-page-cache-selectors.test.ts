@@ -77,20 +77,20 @@ describe('task page cache selectors', () => {
     const localRepo = {
       id: 'repo-1',
       path: '/same/path',
-      sourceCacheScope: 'source:local:github:stablyai/yiru'
+      sourceCacheScope: 'source:local:github:xinyao27/yiru'
     }
     const sshRepo = {
       id: 'repo-1',
       path: '/same/path',
-      sourceCacheScope: 'source:ssh:devbox:github:stablyai/yiru'
+      sourceCacheScope: 'source:ssh:devbox:github:xinyao27/yiru'
     }
 
     expect(buildTaskPageRepoSourceState([localRepo, sshRepo], [])).toMatchObject([
       {
-        sourceKey: 'repo-1::source:local:github:stablyai/yiru'
+        sourceKey: 'repo-1::source:local:github:xinyao27/yiru'
       },
       {
-        sourceKey: 'repo-1::source:ssh:devbox:github:stablyai/yiru'
+        sourceKey: 'repo-1::source:ssh:devbox:github:xinyao27/yiru'
       }
     ])
   })

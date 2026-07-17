@@ -6,7 +6,7 @@ import type { ShellHydrationFailureReason } from '../../shared/types'
 // that does not include dirs appended by the user's shell rc files (~/.zshrc,
 // ~/.bashrc). Tools installed into ~/.opencode/bin, ~/.cargo/bin, pyenv/volta
 // shims, and countless other user-local locations end up invisible to our
-// `which` probe even though they work fine from Terminal (see stablyai/yiru#829).
+// `which` probe even though they work fine from Terminal (see legacy issue #829).
 //
 // Rather than play whack-a-mole adding every agent's install dir to a hardcoded
 // list, we spawn the user's login shell once per app session and read the PATH

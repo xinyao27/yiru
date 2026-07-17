@@ -56,23 +56,23 @@ describe('github owner/repo resolution', () => {
       owner: 'acme',
       repo: 'widgets'
     })
-    expect(parseGitHubOwnerRepo('git@github.com:stablyai/yiru.git')).toEqual({
-      owner: 'stablyai',
+    expect(parseGitHubOwnerRepo('git@github.com:xinyao27/yiru.git')).toEqual({
+      owner: 'xinyao27',
       repo: 'yiru'
     })
     expect(parseGitHubOwnerRepo('git@github.com:TheBoredTeam/boring.notch.git')).toEqual({
       owner: 'TheBoredTeam',
       repo: 'boring.notch'
     })
-    expect(parseGitHubOwnerRepo('ssh://git@github.com/stablyai/yiru.git')).toEqual({
-      owner: 'stablyai',
+    expect(parseGitHubOwnerRepo('ssh://git@github.com/xinyao27/yiru.git')).toEqual({
+      owner: 'xinyao27',
       repo: 'yiru'
     })
-    expect(parseGitHubOwnerRepo('ssh://git@ssh.github.com:443/stablyai/yiru.git')).toEqual({
-      owner: 'stablyai',
+    expect(parseGitHubOwnerRepo('ssh://git@ssh.github.com:443/xinyao27/yiru.git')).toEqual({
+      owner: 'xinyao27',
       repo: 'yiru'
     })
-    expect(parseGitHubOwnerRepo('git@example.com:stablyai/yiru.git')).toBeNull()
+    expect(parseGitHubOwnerRepo('git@example.com:xinyao27/yiru.git')).toBeNull()
   })
 
   it('parses GitHub Enterprise host identity', () => {
@@ -113,10 +113,10 @@ describe('github owner/repo resolution', () => {
 
   it('prefers upstream for issue owner/repo resolution', async () => {
     gitExecFileAsyncMock.mockResolvedValueOnce({
-      stdout: 'git@github.com:stablyai/yiru.git\n'
+      stdout: 'git@github.com:xinyao27/yiru.git\n'
     })
 
-    await expect(getIssueOwnerRepo('/repo')).resolves.toEqual({ owner: 'stablyai', repo: 'yiru' })
+    await expect(getIssueOwnerRepo('/repo')).resolves.toEqual({ owner: 'xinyao27', repo: 'yiru' })
     expect(gitExecFileAsyncMock).toHaveBeenCalledWith(['remote', 'get-url', 'upstream'], {
       cwd: '/repo'
     })
@@ -124,7 +124,7 @@ describe('github owner/repo resolution', () => {
 
   it('falls back to origin when upstream is missing or non-GitHub', async () => {
     gitExecFileAsyncMock
-      .mockResolvedValueOnce({ stdout: 'git@example.com:stablyai/yiru.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@example.com:xinyao27/yiru.git\n' })
       .mockResolvedValueOnce({ stdout: 'git@github.com:fork/yiru.git\n' })
 
     await expect(getIssueOwnerRepo('/repo')).resolves.toEqual({ owner: 'fork', repo: 'yiru' })
@@ -139,10 +139,10 @@ describe('github owner/repo resolution', () => {
   it('does not mix origin and upstream cache entries for the same repo path', async () => {
     gitExecFileAsyncMock
       .mockResolvedValueOnce({ stdout: 'git@github.com:fork/yiru.git\n' })
-      .mockResolvedValueOnce({ stdout: 'git@github.com:stablyai/yiru.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@github.com:xinyao27/yiru.git\n' })
 
     await expect(getOwnerRepo('/repo')).resolves.toEqual({ owner: 'fork', repo: 'yiru' })
-    await expect(getIssueOwnerRepo('/repo')).resolves.toEqual({ owner: 'stablyai', repo: 'yiru' })
+    await expect(getIssueOwnerRepo('/repo')).resolves.toEqual({ owner: 'xinyao27', repo: 'yiru' })
   })
 
   it('coalesces concurrent missing remote probes for the same repo and remote', async () => {
@@ -171,12 +171,12 @@ describe('github owner/repo resolution', () => {
 
   it('resolves SSH repo remotes through the registered SSH git provider', async () => {
     const sshProvider = {
-      exec: vi.fn().mockResolvedValue({ stdout: 'git@github.com:stablyai/yiru.git\n', stderr: '' })
+      exec: vi.fn().mockResolvedValue({ stdout: 'git@github.com:xinyao27/yiru.git\n', stderr: '' })
     }
     getSshGitProviderMock.mockReturnValue(sshProvider)
 
     await expect(getOwnerRepo('/home/user/yiru', 'openclaw-2')).resolves.toEqual({
-      owner: 'stablyai',
+      owner: 'xinyao27',
       repo: 'yiru'
     })
 
@@ -229,9 +229,9 @@ describe('github owner/repo resolution', () => {
     try {
       nowSpy.mockReturnValue(1_000)
       gitExecFileAsyncMock.mockResolvedValueOnce({
-        stdout: 'git@github.com:stablyai/yiru.git\n'
+        stdout: 'git@github.com:xinyao27/yiru.git\n'
       })
-      await expect(getOwnerRepo('/repo-a')).resolves.toEqual({ owner: 'stablyai', repo: 'yiru' })
+      await expect(getOwnerRepo('/repo-a')).resolves.toEqual({ owner: 'xinyao27', repo: 'yiru' })
       expect(_getOwnerRepoCacheSize()).toBe(1)
 
       nowSpy.mockReturnValue(32_000)
@@ -666,18 +666,18 @@ describe('resolveIssueSource', () => {
 
   it("'auto' + upstream exists → upstream, fellBack=false", async () => {
     gitExecFileAsyncMock.mockResolvedValueOnce({
-      stdout: 'git@github.com:stablyai/yiru.git\n'
+      stdout: 'git@github.com:xinyao27/yiru.git\n'
     })
 
     await expect(resolveIssueSource('/repo', 'auto')).resolves.toEqual({
-      source: { owner: 'stablyai', repo: 'yiru' },
+      source: { owner: 'xinyao27', repo: 'yiru' },
       fellBack: false
     })
   })
 
   it("'auto' + no upstream → origin, fellBack=false", async () => {
     gitExecFileAsyncMock
-      .mockResolvedValueOnce({ stdout: 'git@example.com:stablyai/yiru.git\n' })
+      .mockResolvedValueOnce({ stdout: 'git@example.com:xinyao27/yiru.git\n' })
       .mockResolvedValueOnce({ stdout: 'git@github.com:solo/yiru.git\n' })
 
     await expect(resolveIssueSource('/repo', 'auto')).resolves.toEqual({
@@ -688,11 +688,11 @@ describe('resolveIssueSource', () => {
 
   it("'upstream' + upstream exists → upstream, fellBack=false", async () => {
     gitExecFileAsyncMock.mockResolvedValueOnce({
-      stdout: 'git@github.com:stablyai/yiru.git\n'
+      stdout: 'git@github.com:xinyao27/yiru.git\n'
     })
 
     await expect(resolveIssueSource('/repo', 'upstream')).resolves.toEqual({
-      source: { owner: 'stablyai', repo: 'yiru' },
+      source: { owner: 'xinyao27', repo: 'yiru' },
       fellBack: false
     })
   })
@@ -738,11 +738,11 @@ describe('resolveIssueSource', () => {
 
   it('undefined preference is treated identically to auto', async () => {
     gitExecFileAsyncMock.mockResolvedValueOnce({
-      stdout: 'git@github.com:stablyai/yiru.git\n'
+      stdout: 'git@github.com:xinyao27/yiru.git\n'
     })
 
     await expect(resolveIssueSource('/repo', undefined)).resolves.toEqual({
-      source: { owner: 'stablyai', repo: 'yiru' },
+      source: { owner: 'xinyao27', repo: 'yiru' },
       fellBack: false
     })
   })

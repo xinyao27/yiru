@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import type { TestInfo } from '@stablyai/playwright-test'
+import type { TestInfo } from '@playwright/test'
 
 export const DOCKER_SSH_RELAY_REMOTE_REPO_PATH = '/tmp/yiru-docker-relay-perf-repo'
 

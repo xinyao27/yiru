@@ -16,9 +16,9 @@ export type YiruCloudAuthConfig = {
 }
 
 const DEFAULT_SCOPE = 'openid profile email offline_access'
-const PRODUCTION_API_BASE_URL = 'https://login.onyiru.dev'
+const PRODUCTION_API_BASE_URL = 'https://login.yiru.ai'
 const PRODUCTION_CLIENT_ID = 'yiru-desktop'
-const PRODUCTION_RELAY_DIRECTOR_URL = 'https://relay.onyiru.dev'
+const PRODUCTION_RELAY_DIRECTOR_URL = 'https://relay.yiru.ai'
 
 // Why: packaged main bundles never define NODE_ENV, so packaged-ness is the
 // only reliable production signal for gating dev-only auth escape hatches.

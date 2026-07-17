@@ -17,17 +17,17 @@ function repo(id: string, overrides: Partial<Repo> = {}): Repo {
     displayName: id,
     badgeColor: '#111111',
     addedAt: 1,
-    upstream: { owner: 'stablyai', repo: 'yiru' },
+    upstream: { owner: 'xinyao27', repo: 'yiru' },
     ...overrides
   }
 }
 
 function project(overrides: Partial<Project> = {}): Project {
   return {
-    id: 'github:stablyai/yiru',
+    id: 'github:xinyao27/yiru',
     displayName: 'yiru',
     badgeColor: '#111111',
-    providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' },
+    providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' },
     sourceRepoIds: ['local-repo', 'ssh-repo'],
     createdAt: 1,
     updatedAt: 1,
@@ -38,7 +38,7 @@ function project(overrides: Partial<Project> = {}): Project {
 function setup(overrides: Partial<ProjectHostSetup>): ProjectHostSetup {
   return {
     id: overrides.id ?? 'local-setup',
-    projectId: overrides.projectId ?? 'github:stablyai/yiru',
+    projectId: overrides.projectId ?? 'github:xinyao27/yiru',
     hostId: overrides.hostId ?? 'local',
     repoId: overrides.repoId ?? 'local-repo',
     path: overrides.path ?? '/tmp/yiru',
@@ -80,12 +80,12 @@ describe('buildNewWorkspaceProjectOptions', () => {
 
     expect(options).toEqual([
       {
-        id: 'github:stablyai/yiru',
+        id: 'github:xinyao27/yiru',
         kind: 'project',
-        projectId: 'github:stablyai/yiru',
+        projectId: 'github:xinyao27/yiru',
         displayName: 'yiru',
         badgeColor: '#111111',
-        detail: 'stablyai/yiru'
+        detail: 'xinyao27/yiru'
       }
     ])
   })
@@ -105,7 +105,7 @@ describe('buildNewWorkspaceProjectOptions', () => {
       eligibleRepos: [repo('local-repo'), repo('other-repo')]
     })
 
-    expect(options.map((option) => option.id)).toEqual(['github:stablyai/yiru'])
+    expect(options.map((option) => option.id)).toEqual(['github:xinyao27/yiru'])
   })
 
   it('shows configured directories when project names are duplicated', () => {
@@ -367,7 +367,7 @@ describe('buildNewWorkspaceProjectOptions', () => {
         projectId: 'yiru',
         displayName: 'Yiru',
         badgeColor: '#111111',
-        detail: 'stablyai/yiru'
+        detail: 'xinyao27/yiru'
       },
       {
         kind: 'project',
@@ -375,12 +375,12 @@ describe('buildNewWorkspaceProjectOptions', () => {
         projectId: 'docs',
         displayName: 'Docs',
         badgeColor: '#222222',
-        detail: 'stablyai/docs'
+        detail: 'xinyao27/docs'
       }
     ]
 
     expect(searchNewWorkspaceProjectOptions(options, 'docs')).toEqual([options[1]])
-    expect(searchNewWorkspaceProjectOptions(options, 'stablyai/yiru')).toEqual([options[0]])
+    expect(searchNewWorkspaceProjectOptions(options, 'xinyao27/yiru')).toEqual([options[0]])
   })
 
   it('rejects oversized pasted searches before reading project options', () => {
@@ -439,7 +439,7 @@ describe('buildNewWorkspaceCreateTargetOptions', () => {
     })
 
     expect(options.map((option) => option.id).sort()).toEqual([
-      'github:stablyai/yiru',
+      'github:xinyao27/yiru',
       'project-group:folder-group'
     ])
     expect(options.find((option) => option.id === 'project-group:folder-group')).toMatchObject({

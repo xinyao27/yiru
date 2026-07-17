@@ -35,8 +35,8 @@ const journal = {
     },
     relay: {
       v: 1,
-      directorUrl: 'https://relay.onyiru.dev',
-      cellUrl: 'https://relay-c1.onyiru.dev',
+      directorUrl: 'https://relay.yiru.ai',
+      cellUrl: 'https://relay-c1.yiru.ai',
       assignmentEpoch: 7,
       relayHostId: 'AbCdEf0123_-xyZ9',
       inviteExpiresAt: 10_000,

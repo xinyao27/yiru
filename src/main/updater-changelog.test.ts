@@ -26,7 +26,7 @@ function makeEntries(
     title: item.title ?? `Release ${item.version}`,
     description: item.description ?? '',
     mediaUrl: item.mediaUrl,
-    releaseNotesUrl: item.releaseNotesUrl ?? `https://onyiru.dev/changelog/${item.version}`
+    releaseNotesUrl: item.releaseNotesUrl ?? `https://yiru.ai/changelog/${item.version}`
   }))
 }
 
@@ -40,7 +40,7 @@ describe('fetchChangelog', () => {
       {
         version: '1.1.21',
         description: 'New feature',
-        mediaUrl: 'https://onyiru.dev/media/1.1.21.gif'
+        mediaUrl: 'https://yiru.ai/media/1.1.21.gif'
       },
       { version: '1.1.20' },
       { version: '1.1.19' }
@@ -51,7 +51,7 @@ describe('fetchChangelog', () => {
 
     expect(result).not.toBeNull()
     expect(result!.release.title).toBe('Release 1.1.21')
-    expect(result!.release.releaseNotesUrl).toBe('https://onyiru.dev/changelog/1.1.21')
+    expect(result!.release.releaseNotesUrl).toBe('https://yiru.ai/changelog/1.1.21')
     expect(result!.releasesBehind).toBe(2)
   })
 
@@ -62,8 +62,8 @@ describe('fetchChangelog', () => {
       {
         version: '1.1.17',
         description: 'Cool feature',
-        mediaUrl: 'https://onyiru.dev/media/1.1.17.gif',
-        releaseNotesUrl: 'https://onyiru.dev/changelog/1.1.17'
+        mediaUrl: 'https://yiru.ai/media/1.1.17.gif',
+        releaseNotesUrl: 'https://yiru.ai/changelog/1.1.17'
       },
       { version: '1.1.16' },
       { version: '1.1.15' }
@@ -76,7 +76,7 @@ describe('fetchChangelog', () => {
     expect(result!.release.title).toBe('Release 1.1.17')
     expect(result!.release.description).toBe('Cool feature')
     // Why: fallback entries link to the generic changelog, not a version-specific page.
-    expect(result!.release.releaseNotesUrl).toBe('https://onyiru.dev/changelog')
+    expect(result!.release.releaseNotesUrl).toBe('https://yiru.ai/changelog')
     expect(result!.releasesBehind).toBe(2)
   })
 
@@ -88,7 +88,7 @@ describe('fetchChangelog', () => {
       {
         version: '1.1.17',
         description: 'Great update',
-        mediaUrl: 'https://onyiru.dev/media/1.1.17.gif'
+        mediaUrl: 'https://yiru.ai/media/1.1.17.gif'
       },
       { version: '1.1.15' }
     ])
@@ -98,7 +98,7 @@ describe('fetchChangelog', () => {
 
     expect(result).not.toBeNull()
     expect(result!.release.title).toBe('Release 1.1.17')
-    expect(result!.release.releaseNotesUrl).toBe('https://onyiru.dev/changelog')
+    expect(result!.release.releaseNotesUrl).toBe('https://yiru.ai/changelog')
     // releasesBehind is from local (index 2) to incoming (index 0) = 2
     expect(result!.releasesBehind).toBe(2)
   })
@@ -138,7 +138,7 @@ describe('fetchChangelog', () => {
       {
         version: '1.1.17',
         description: 'Old feature',
-        mediaUrl: 'https://onyiru.dev/media/old.gif'
+        mediaUrl: 'https://yiru.ai/media/old.gif'
       }
     ])
     fetchMock.mockResolvedValue(jsonResponse(entries))
@@ -158,7 +158,7 @@ describe('fetchChangelog', () => {
       {
         version: '1.1.18',
         description: 'Current feature',
-        mediaUrl: 'https://onyiru.dev/media/current.gif'
+        mediaUrl: 'https://yiru.ai/media/current.gif'
       },
       { version: '1.1.17' }
     ])
@@ -168,7 +168,7 @@ describe('fetchChangelog', () => {
 
     expect(result).not.toBeNull()
     expect(result!.release.title).toBe('Release 1.1.18')
-    expect(result!.release.releaseNotesUrl).toBe('https://onyiru.dev/changelog')
+    expect(result!.release.releaseNotesUrl).toBe('https://yiru.ai/changelog')
   })
 
   it('shows rich entry when local version is not in JSON (very old user)', async () => {
@@ -177,7 +177,7 @@ describe('fetchChangelog', () => {
       {
         version: '1.1.17',
         description: 'Feature demo',
-        mediaUrl: 'https://onyiru.dev/media/demo.gif'
+        mediaUrl: 'https://yiru.ai/media/demo.gif'
       }
     ])
     fetchMock.mockResolvedValue(jsonResponse(entries))
@@ -186,7 +186,7 @@ describe('fetchChangelog', () => {
 
     expect(result).not.toBeNull()
     expect(result!.release.title).toBe('Release 1.1.17')
-    expect(result!.release.releaseNotesUrl).toBe('https://onyiru.dev/changelog')
+    expect(result!.release.releaseNotesUrl).toBe('https://yiru.ai/changelog')
     // releasesBehind is null because the local version isn't in the JSON.
     expect(result!.releasesBehind).toBeNull()
   })
@@ -200,7 +200,7 @@ describe('fetchChangelog', () => {
       {
         version: '1.1.17',
         description: 'Old feature',
-        mediaUrl: 'https://onyiru.dev/media/old.gif'
+        mediaUrl: 'https://yiru.ai/media/old.gif'
       }
     ])
     fetchMock.mockResolvedValue(jsonResponse(entries))
@@ -231,12 +231,12 @@ describe('fetchChangelog', () => {
       {
         version: '1.1.21',
         description: 'Latest feature',
-        mediaUrl: 'https://onyiru.dev/media/latest.gif'
+        mediaUrl: 'https://yiru.ai/media/latest.gif'
       },
       {
         version: '1.1.17',
         description: 'Older feature',
-        mediaUrl: 'https://onyiru.dev/media/old.gif'
+        mediaUrl: 'https://yiru.ai/media/old.gif'
       },
       { version: '1.1.15' }
     ])
@@ -246,12 +246,12 @@ describe('fetchChangelog', () => {
 
     expect(result!.release.title).toBe('Release 1.1.21')
     // Exact match keeps its own releaseNotesUrl.
-    expect(result!.release.releaseNotesUrl).toBe('https://onyiru.dev/changelog/1.1.21')
+    expect(result!.release.releaseNotesUrl).toBe('https://yiru.ai/changelog/1.1.21')
   })
 
   it('strips version from the returned release object', async () => {
     const entries = makeEntries([
-      { version: '1.1.17', description: 'Feature', mediaUrl: 'https://onyiru.dev/media/demo.gif' },
+      { version: '1.1.17', description: 'Feature', mediaUrl: 'https://yiru.ai/media/demo.gif' },
       { version: '1.1.15' }
     ])
     fetchMock.mockResolvedValue(jsonResponse(entries))

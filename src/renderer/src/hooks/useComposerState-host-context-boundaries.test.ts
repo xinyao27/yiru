@@ -31,7 +31,7 @@ describe('useComposerState host-context boundaries', () => {
     expect(isExplicitWorkspaceNameInput({ name: '#1234', lastAutoName: '' })).toBe(false)
     expect(
       isExplicitWorkspaceNameInput({
-        name: 'https://github.com/stablyai/yiru/pull/1234',
+        name: 'https://github.com/xinyao27/yiru/pull/1234',
         lastAutoName: ''
       })
     ).toBe(false)
@@ -64,7 +64,7 @@ describe('useComposerState host-context boundaries', () => {
         resolutionKind: 'pr-start-point',
         smartWorkspaceName: 'title-derived-name',
         smartDisplayName: 'Title derived name',
-        fallbackWorkspaceName: 'https://github.com/stablyai/yiru/pull/6772',
+        fallbackWorkspaceName: 'https://github.com/xinyao27/yiru/pull/6772',
         nameIsAutoManaged: true
       })
     ).toEqual({ workspaceName: 'title-derived-name', displayName: 'Title derived name' })
@@ -79,7 +79,7 @@ describe('useComposerState host-context boundaries', () => {
           provider: 'github',
           number: 1234,
           title: 'Fix workspace name',
-          url: 'https://github.com/stablyai/yiru/issues/1234'
+          url: 'https://github.com/xinyao27/yiru/issues/1234'
         }
       })
     ).toBe('fix-workspace-name')

@@ -2,7 +2,7 @@
 
 ## Problem
 
-GitHub issue [#5864](https://github.com/stablyai/yiru/issues/5864) reports that Yiru on Windows v0.14.80 fails to delete a workspace created from a project `+` button:
+Legacy issue #5864 reports that Yiru on Windows v0.14.80 fails to delete a workspace created from a project `+` button:
 
 `Error invoking remote method 'worktrees:remove': Error: Refusing to delete unregistered worktree path: C:/Users/andy/yiru/workspaces/ops-tools/packaging-improvements-2`
 

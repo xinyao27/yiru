@@ -2,7 +2,7 @@
 
 ## Problem
 
-On Windows, choosing **Open in VS Code** for a workspace stored under a WSL UNC path opens the folder in a Windows VS Code environment instead of a Remote - WSL window ([issue #7649](https://github.com/stablyai/yiru/issues/7649)). The renderer passes the workspace path and configured editor command unchanged (`src/renderer/src/components/sidebar/WorktreeOpenInMenu.tsx:103-121`), and the main process delegates launch argument construction to `resolveExternalEditorLaunchSpec` (`src/main/ipc/shell.ts:101-110`). The builder currently gives every non-Cursor executable only the original path (`src/main/external-editor-launch.ts:109-116`).
+On Windows, choosing **Open in VS Code** for a workspace stored under a WSL UNC path opens the folder in a Windows VS Code environment instead of a Remote - WSL window (legacy issue #7649). The renderer passes the workspace path and configured editor command unchanged (`src/renderer/src/components/sidebar/WorktreeOpenInMenu.tsx:103-121`), and the main process delegates launch argument construction to `resolveExternalEditorLaunchSpec` (`src/main/ipc/shell.ts:101-110`). The builder currently gives every non-Cursor executable only the original path (`src/main/external-editor-launch.ts:109-116`).
 
 The deterministic reproduction for `\\wsl.localhost\Ubuntu\home\aliuq\project` produces `code <UNC path>` with no remote authority. VS Code's supported Windows CLI form is `code --remote wsl+<distro> <Linux path>`.
 

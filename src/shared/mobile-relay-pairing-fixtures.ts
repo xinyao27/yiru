@@ -18,8 +18,8 @@ export function createMobileRelayPairingFixtures(now: number): PairingFixture[] 
   }
   const relay = {
     v: 1 as const,
-    directorUrl: 'https://relay.onyiru.dev',
-    cellUrl: 'https://relay-c1.onyiru.dev',
+    directorUrl: 'https://relay.yiru.ai',
+    cellUrl: 'https://relay-c1.yiru.ai',
     assignmentEpoch: 7,
     relayHostId: 'AbCdEf0123_-xyZ9',
     inviteToken: INVITE_TOKEN,
@@ -65,12 +65,12 @@ export function createMobileRelayPairingFixtures(now: number): PairingFixture[] 
     },
     {
       name: 'non-canonical director origin is invalid',
-      payload: { ...directOffer, relay: { ...relay, directorUrl: 'https://relay.onyiru.dev/' } },
+      payload: { ...directOffer, relay: { ...relay, directorUrl: 'https://relay.yiru.ai/' } },
       expected: null
     },
     {
       name: 'non-HTTPS cell origin is invalid',
-      payload: { ...directOffer, relay: { ...relay, cellUrl: 'http://relay-c1.onyiru.dev' } },
+      payload: { ...directOffer, relay: { ...relay, cellUrl: 'http://relay-c1.yiru.ai' } },
       expected: null
     },
     {

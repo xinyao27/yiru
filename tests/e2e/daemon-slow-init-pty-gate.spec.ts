@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import type { ElectronApplication } from '@stablyai/playwright-test'
+import type { ElectronApplication } from '@playwright/test'
 import { test, expect } from './helpers/yiru-app'
 import { TEST_REPO_PATH_FILE } from './global-setup'
 import {

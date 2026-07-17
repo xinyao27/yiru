@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import {
+  deleteWindowsReleaseAssetsForTag,
   isTagBuiltFromCurrentRef,
   isReleaseCutDraft,
   publishCompleteDraftReleases,
@@ -123,7 +124,8 @@ describe('publishCompleteDraftReleases', () => {
             draft: true,
             tag_name: 'v1.4.2-rc.7',
             created_at: '2026-05-15T07:31:19Z',
-            author: { login: 'github-actions[bot]' }
+            author: { login: 'github-actions[bot]' },
+            assets: [{ id: 701, name: 'latest.yml' }]
           },
           {
             id: 8,
@@ -134,6 +136,7 @@ describe('publishCompleteDraftReleases', () => {
           }
         ])
       )
+      .mockResolvedValueOnce(jsonResponse(null, { status: 204, statusText: 'No Content' }))
       .mockResolvedValueOnce(jsonResponse({ tag_name: 'v1.4.2-rc.7', draft: false }))
     const verifyReleaseAssets = vi.fn(async ({ tag }) => {
       if (tag === 'v1.4.2-rc.8') {
@@ -145,6 +148,7 @@ describe('publishCompleteDraftReleases', () => {
     const result = await publishCompleteDraftReleases({
       repo: 'xinyao27/yiru',
       token: 'token',
+      includeWindows: false,
       fetchImpl,
       verifyReleaseAssets,
       isDraftBuiltFromCurrentRef: vi.fn(async () => true),
@@ -166,6 +170,13 @@ describe('publishCompleteDraftReleases', () => {
         method: 'PATCH',
         body: JSON.stringify({ draft: false, prerelease: true })
       })
+    )
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'https://api.github.com/repos/xinyao27/yiru/releases/assets/701',
+      expect.objectContaining({ method: 'DELETE' })
+    )
+    expect(verifyReleaseAssets).toHaveBeenCalledWith(
+      expect.objectContaining({ includeWindows: false })
     )
   })
 
@@ -199,6 +210,41 @@ describe('publishCompleteDraftReleases', () => {
     })
     expect(verifyReleaseAssets).not.toHaveBeenCalled()
     expect(fetchImpl).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('deleteWindowsReleaseAssetsForTag', () => {
+  it('removes Windows assets from a stable draft without touching other platforms', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse([
+          {
+            id: 9,
+            draft: true,
+            tag_name: 'v1.4.2',
+            assets: [
+              { id: 901, name: 'latest.yml' },
+              { id: 902, name: 'latest-mac.yml' }
+            ]
+          }
+        ])
+      )
+      .mockResolvedValueOnce(jsonResponse(null, { status: 204, statusText: 'No Content' }))
+
+    await expect(
+      deleteWindowsReleaseAssetsForTag({
+        repo: 'xinyao27/yiru',
+        tag: 'v1.4.2',
+        token: 'token',
+        fetchImpl
+      })
+    ).resolves.toEqual(['latest.yml'])
+    expect(fetchImpl).toHaveBeenCalledTimes(2)
+    expect(fetchImpl).toHaveBeenLastCalledWith(
+      'https://api.github.com/repos/xinyao27/yiru/releases/assets/901',
+      expect.objectContaining({ method: 'DELETE' })
+    )
   })
 })
 

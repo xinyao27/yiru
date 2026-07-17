@@ -26,7 +26,7 @@ APP_CONFIG_PATH = File.join(MOBILE_ROOT, "app.json")
 WORKSPACE = File.join(MOBILE_ROOT, "ios", "Yiru.xcworkspace")
 BUILD_OUTPUT_DIRECTORY = File.join(MOBILE_ROOT, "build")
 SCHEME = "Yiru"
-BUNDLE_ID = "com.stably.yiru.mobile"
+BUNDLE_ID = "com.xinyao27.yiru.mobile"
 TESTFLIGHT_GROUPS = ["peeps"].freeze
 DEFAULT_TESTFLIGHT_CHANGELOG = "Latest Yiru Mobile updates and fixes.".freeze
 

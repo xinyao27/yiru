@@ -126,11 +126,11 @@ describe('buildAiVaultProjectContext', () => {
       repos: [repo],
       worktrees: [worktree],
       projectHostSetupProjection: makeProjection({
-        projects: [makeProject({ id: 'github:stablyai/yiru', displayName: 'Canonical Yiru' })],
+        projects: [makeProject({ id: 'github:xinyao27/yiru', displayName: 'Canonical Yiru' })],
         setups: [
           makeSetup({
             repoId: repo.id,
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             path: repo.path
           })
         ]
@@ -140,10 +140,10 @@ describe('buildAiVaultProjectContext', () => {
       sessions: [session]
     })
 
-    expect(context.activeProjectKey).toBe('project:github:stablyai/yiru')
+    expect(context.activeProjectKey).toBe('project:github:xinyao27/yiru')
     expect(context.sessionProjectById.get(session.id)).toMatchObject({
       kind: 'repo',
-      key: 'project:github:stablyai/yiru',
+      key: 'project:github:xinyao27/yiru',
       label: 'Canonical Yiru'
     })
   })
@@ -161,11 +161,11 @@ describe('buildAiVaultProjectContext', () => {
       repos: [repo],
       worktrees: [worktree],
       projectHostSetupProjection: makeProjection({
-        projects: [makeProject({ id: 'github:stablyai/yiru', displayName: 'Canonical Yiru' })],
+        projects: [makeProject({ id: 'github:xinyao27/yiru', displayName: 'Canonical Yiru' })],
         setups: [
           makeSetup({
             repoId: repo.id,
-            projectId: 'github:stablyai/yiru',
+            projectId: 'github:xinyao27/yiru',
             path: repo.path
           })
         ]
@@ -175,8 +175,8 @@ describe('buildAiVaultProjectContext', () => {
       sessions: [session]
     })
 
-    expect(context.activeProjectKey).toBe('project:github:stablyai/yiru')
-    expect(context.sessionProjectById.get(session.id)?.key).toBe('project:github:stablyai/yiru')
+    expect(context.activeProjectKey).toBe('project:github:xinyao27/yiru')
+    expect(context.sessionProjectById.get(session.id)?.key).toBe('project:github:xinyao27/yiru')
   })
 
   it('inherits setup host ids for legacy worktrees without host metadata', () => {

@@ -45,6 +45,15 @@ jobs:
           # Why: nothing here pushes; keep the token out of .git/config.
           persist-credentials: false
 
+      - name: Validate SignPath configuration
+        shell: pwsh
+        env:
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_ORGANIZATION_ID)) {
+            throw 'Set the SIGNPATH_ORGANIZATION_ID repository variable before running the signing rehearsal.'
+          }
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
@@ -164,22 +173,45 @@ jobs:
         uses: signpath/github-action-submit-signing-request@v2
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: c37aa192-a27a-4377-9c90-5d6c95912dc0
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           project-slug: yiru
           signing-policy-slug: ${{ inputs.signing-policy-slug || 'test-signing' }}
           artifact-configuration-slug: ${{ inputs.inner-artifact-configuration-slug || 'windows-inner-binaries-zip' }}
           github-artifact-id: ${{ steps.upload-unsigned-inner.outputs.artifact-id }}
           wait-for-completion: false
 
+      - name: Publish inner-binary SignPath approval link
+        shell: pwsh
+        env:
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_REQUEST_ID: ${{ steps.submit-inner-signing.outputs.signing-request-id }}
+          SIGNPATH_REQUEST_URL: ${{ steps.submit-inner-signing.outputs.signing-request-web-url }}
+        run: |
+          $requestUrl = $env:SIGNPATH_REQUEST_URL
+          if ([string]::IsNullOrWhiteSpace($requestUrl)) {
+            if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_REQUEST_ID)) {
+              throw 'SignPath did not return a signing request URL or request ID.'
+            }
+            $requestUrl = "https://app.signpath.io/Web/$env:SIGNPATH_ORGANIZATION_ID/SigningRequests/$env:SIGNPATH_REQUEST_ID"
+          }
+
+          @"
+          ### SignPath approval: rehearsal inner binaries
+
+          - [Open SignPath signing request]($requestUrl)
+          "@ | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+          Write-Host "::warning title=SignPath approval::Review the rehearsal inner-binary signing request: $requestUrl"
+
       - name: Download signed inner binaries from SignPath
         shell: pwsh
         env:
           SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           SIGNPATH_REQUEST_ID: ${{ steps.submit-inner-signing.outputs.signing-request-id }}
         run: |
           Get-SignedArtifact `
             -ApiToken $env:SIGNPATH_API_TOKEN `
-            -OrganizationId 'c37aa192-a27a-4377-9c90-5d6c95912dc0' `
+            -OrganizationId $env:SIGNPATH_ORGANIZATION_ID `
             -SigningRequestId $env:SIGNPATH_REQUEST_ID `
             -OutputArtifactPath signed-inner.zip `
             -Force `
@@ -238,22 +270,45 @@ jobs:
         uses: signpath/github-action-submit-signing-request@v2
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: c37aa192-a27a-4377-9c90-5d6c95912dc0
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           project-slug: yiru
           signing-policy-slug: ${{ inputs.signing-policy-slug || 'test-signing' }}
           artifact-configuration-slug: github-actions-windows-installer
           github-artifact-id: ${{ steps.upload-unsigned-installer.outputs.artifact-id }}
           wait-for-completion: false
 
+      - name: Publish installer SignPath approval link
+        shell: pwsh
+        env:
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_REQUEST_ID: ${{ steps.submit-installer-signing.outputs.signing-request-id }}
+          SIGNPATH_REQUEST_URL: ${{ steps.submit-installer-signing.outputs.signing-request-web-url }}
+        run: |
+          $requestUrl = $env:SIGNPATH_REQUEST_URL
+          if ([string]::IsNullOrWhiteSpace($requestUrl)) {
+            if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_REQUEST_ID)) {
+              throw 'SignPath did not return a signing request URL or request ID.'
+            }
+            $requestUrl = "https://app.signpath.io/Web/$env:SIGNPATH_ORGANIZATION_ID/SigningRequests/$env:SIGNPATH_REQUEST_ID"
+          }
+
+          @"
+          ### SignPath approval: rehearsal Windows installer
+
+          - [Open SignPath signing request]($requestUrl)
+          "@ | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+          Write-Host "::warning title=SignPath approval::Review the rehearsal Windows installer signing request: $requestUrl"
+
       - name: Download signed Windows installer from SignPath
         shell: pwsh
         env:
           SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           SIGNPATH_REQUEST_ID: ${{ steps.submit-installer-signing.outputs.signing-request-id }}
         run: |
           Get-SignedArtifact `
             -ApiToken $env:SIGNPATH_API_TOKEN `
-            -OrganizationId 'c37aa192-a27a-4377-9c90-5d6c95912dc0' `
+            -OrganizationId $env:SIGNPATH_ORGANIZATION_ID `
             -SigningRequestId $env:SIGNPATH_REQUEST_ID `
             -OutputArtifactPath signed-windows.zip `
             -Force `

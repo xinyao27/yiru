@@ -5707,12 +5707,12 @@ describe('Endpoint file lifecycle', () => {
     await server.start({
       env: 'development',
       userDataPath,
-      endpointNamespace: 'com.stablyai.yiru.dev.test123'
+      endpointNamespace: 'com.xinyao27.yiru.dev.test123'
     })
     try {
       const env = server.buildPtyEnv()
       expect(env.YIRU_AGENT_HOOK_ENDPOINT).toBe(server.endpointFilePath)
-      expect(env.YIRU_AGENT_HOOK_ENDPOINT).toContain('com.stablyai.yiru.dev.test123')
+      expect(env.YIRU_AGENT_HOOK_ENDPOINT).toContain('com.xinyao27.yiru.dev.test123')
       expect(env.YIRU_AGENT_HOOK_PORT).toBeTruthy()
       expect(env.YIRU_AGENT_HOOK_TOKEN).toBeTruthy()
     } finally {

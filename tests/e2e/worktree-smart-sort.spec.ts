@@ -1,5 +1,5 @@
 import { test, expect } from './helpers/yiru-app'
-import type { Page } from '@stablyai/playwright-test'
+import type { Page } from '@playwright/test'
 import type { TerminalPaneLayoutNode } from '../../src/shared/types'
 import { ensureTerminalVisible, waitForActiveWorktree, waitForSessionReady } from './helpers/store'
 import { worktreeRow } from './worktree-row-locators'

@@ -58,11 +58,11 @@ describe('getAutomationProjectGroups', () => {
   it('finds and preserves the selected concrete source', () => {
     const groups = getAutomationProjectGroups(
       [
-        repo({ id: 'local', upstream: { owner: 'stablyai', repo: 'yiru' } }),
+        repo({ id: 'local', upstream: { owner: 'xinyao27', repo: 'yiru' } }),
         repo({
           id: 'ssh',
           connectionId: 'builder',
-          upstream: { owner: 'stablyai', repo: 'yiru' }
+          upstream: { owner: 'xinyao27', repo: 'yiru' }
         })
       ],
       'ssh'

@@ -2164,7 +2164,7 @@ describe('createUISlice page navigation history', () => {
       hostId: 'ssh:devbox',
       projectHostSetupId: 'setup-1',
       repoId: 'repo-remote',
-      providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+      providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
     }
 
     store.getState().openTaskPage({

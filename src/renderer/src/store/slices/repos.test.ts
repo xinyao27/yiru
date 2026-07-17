@@ -394,7 +394,7 @@ describe('repo slice runtime routing', () => {
       store.getState().setupProjectClone({
         projectId: project.id,
         hostId: 'local',
-        url: 'https://github.com/stablyai/yiru.git',
+        url: 'https://github.com/xinyao27/yiru.git',
         destination: '/workspace',
         displayName: 'Project'
       })
@@ -405,7 +405,7 @@ describe('repo slice runtime routing', () => {
     })
 
     expect(reposClone).toHaveBeenCalledWith({
-      url: 'https://github.com/stablyai/yiru.git',
+      url: 'https://github.com/xinyao27/yiru.git',
       destination: '/workspace'
     })
     expect(projectsSetupExistingFolder).toHaveBeenCalledWith({
@@ -459,7 +459,7 @@ describe('repo slice runtime routing', () => {
       store.getState().setupProjectClone({
         projectId: project.id,
         hostId: 'runtime:env-1',
-        url: 'https://github.com/stablyai/yiru.git',
+        url: 'https://github.com/xinyao27/yiru.git',
         destination: '/srv',
         displayName: 'Project'
       })
@@ -473,7 +473,7 @@ describe('repo slice runtime routing', () => {
       selector: 'env-1',
       method: 'repo.clone',
       params: {
-        url: 'https://github.com/stablyai/yiru.git',
+        url: 'https://github.com/xinyao27/yiru.git',
         destination: '/srv'
       },
       timeoutMs: 10 * 60_000
@@ -523,7 +523,7 @@ describe('repo slice runtime routing', () => {
       store.getState().setupProjectClone({
         projectId: project.id,
         hostId: 'ssh:ssh-1',
-        url: 'https://github.com/stablyai/yiru.git',
+        url: 'https://github.com/xinyao27/yiru.git',
         destination: '/srv',
         displayName: 'Project'
       })
@@ -535,7 +535,7 @@ describe('repo slice runtime routing', () => {
 
     expect(reposCloneRemote).toHaveBeenCalledWith({
       connectionId: 'ssh-1',
-      url: 'https://github.com/stablyai/yiru.git',
+      url: 'https://github.com/xinyao27/yiru.git',
       destination: '/srv'
     })
     expect(projectsSetupExistingFolder).toHaveBeenCalledWith({

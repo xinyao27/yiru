@@ -32,7 +32,7 @@ describe('automation RPC methods', () => {
         agentId: 'codex',
         runContext: {
           kind: 'workspace-run',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           hostId: 'runtime:gpu',
           projectHostSetupId: 'setup-gpu',
           repoId: 'repo-gpu',
@@ -41,11 +41,11 @@ describe('automation RPC methods', () => {
         sourceContext: {
           kind: 'task-source',
           provider: 'github',
-          projectId: 'github:stablyai/yiru',
+          projectId: 'github:xinyao27/yiru',
           hostId: 'local',
           projectHostSetupId: 'setup-local',
           repoId: 'repo-local',
-          providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+          providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
         },
         repo: 'repo-1',
         setupDecision: 'skip',

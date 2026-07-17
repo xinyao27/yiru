@@ -9,11 +9,6 @@ vi.mock('@/i18n/i18n', () => ({
   translate: (_key: string, fallback: string) => fallback
 }))
 
-vi.mock('./MobileBrandIcons', () => ({
-  AndroidLogo: () => null,
-  IosBrandIcon: () => null
-}))
-
 vi.mock('./NetworkInterfacePicker', () => ({
   NetworkInterfacePicker: () => null
 }))
@@ -61,12 +56,8 @@ describe('HeroFlow height', () => {
     return render(
       <HeroFlow
         stepIdx={stepIdx}
-        platform="ios"
-        onPlatformChange={vi.fn()}
         installQrUrl={null}
-        installCopy={{ ctaLabel: 'Open TestFlight', url: 'https://example.com' }}
-        iosChannel="preview"
-        onIosChannelChange={vi.fn()}
+        installCopy={{ ctaLabel: 'View mobile builds', url: 'https://example.com' }}
         onOpenInstallUrl={vi.fn()}
         onCopyInstallUrl={vi.fn()}
         pairQrDataUrl={null}
@@ -87,6 +78,16 @@ describe('HeroFlow height', () => {
     )
   }
 
+  it('shows one neutral release link without fake platform or channel choices', () => {
+    renderFlow(0)
+
+    expect(screen.getByRole('button', { name: 'View mobile builds' })).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'iOS' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Android' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: 'Preview' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: 'Stable' })).not.toBeInTheDocument()
+  })
+
   it('sizes to the active step and updates when the taller pairing step opens', () => {
     const { rerender } = renderFlow(0)
     const viewport = document.querySelector<HTMLElement>('.mp-flow-viewport')
@@ -96,12 +97,8 @@ describe('HeroFlow height', () => {
     rerender(
       <HeroFlow
         stepIdx={1}
-        platform="ios"
-        onPlatformChange={vi.fn()}
         installQrUrl={null}
-        installCopy={{ ctaLabel: 'Open TestFlight', url: 'https://example.com' }}
-        iosChannel="preview"
-        onIosChannelChange={vi.fn()}
+        installCopy={{ ctaLabel: 'View mobile builds', url: 'https://example.com' }}
         onOpenInstallUrl={vi.fn()}
         onCopyInstallUrl={vi.fn()}
         pairQrDataUrl={null}

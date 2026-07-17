@@ -1,6 +1,6 @@
 # Kill all sessions also closes terminal tabs
 
-GitHub: https://github.com/stablyai/yiru/issues/8001
+GitHub: legacy issue #8001
 Branch: `bug-kill-all-sessions-doesnt-kill-terminals`
 
 ## Problem
@@ -105,21 +105,21 @@ confirm
 
 ## Concurrency and consistency
 
-| Case                                      | Required behavior                                                                                                 |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| No daemon sessions; dead/empty tabs exist | Close target tabs and report tab cleanup, not “No sessions.”                                                      |
+| Case                                      | Required behavior                                                                                                            |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| No daemon sessions; dead/empty tabs exist | Close target tabs and report tab cleanup, not “No sessions.”                                                                 |
 | Daemon session refuses to exit            | Close the confirmed tab; report that management saw it remaining before the exact retry. Refresh may expose it as an orphan. |
-| Adapter listing fails                     | Close target tabs; do not claim all processes were verified dead. Existing management counts may read as zero.    |
-| Management IPC rejects                    | Still close confirmed tabs and issue exact current-binding kills; report daemon uncertainty and exact-kill errors. |
-| New tab/session during the wait           | New tab ID survives. No post-snapshot provider sweep.                                                             |
-| Target closes or moves during the wait    | Missing target no-ops; moved target closes by current ownership.                                                  |
-| Target tab rebinds to a new PTY           | Close it because the confirmed surface, not the old PTY snapshot, is the authority.                               |
-| Pinned or split terminal                  | `force: true` bypasses a second prompt; closing the tab closes all of its panes.                                  |
-| Active last terminal                      | Existing close routing selects editor/browser or deactivates; no replacement terminal spawns.                     |
-| Two overlapping invocations               | Cleanup is idempotent by tab ID. Each main call retains its own initial daemon snapshot/counts.                   |
-| Binding changes after exact-ID capture     | Surface close still wins; transport unmount kills the replacement, but that late kill is not in the awaited count. |
-| Runtime-host snapshot races close         | Existing close intent suppresses stale snapshots temporarily; host completion remains an accepted gap.            |
-| External/mobile session creation          | Sessions created after the main/renderer snapshots are not chased. Existing PTY-exit publication updates mirrors. |
+| Adapter listing fails                     | Close target tabs; do not claim all processes were verified dead. Existing management counts may read as zero.               |
+| Management IPC rejects                    | Still close confirmed tabs and issue exact current-binding kills; report daemon uncertainty and exact-kill errors.           |
+| New tab/session during the wait           | New tab ID survives. No post-snapshot provider sweep.                                                                        |
+| Target closes or moves during the wait    | Missing target no-ops; moved target closes by current ownership.                                                             |
+| Target tab rebinds to a new PTY           | Close it because the confirmed surface, not the old PTY snapshot, is the authority.                                          |
+| Pinned or split terminal                  | `force: true` bypasses a second prompt; closing the tab closes all of its panes.                                             |
+| Active last terminal                      | Existing close routing selects editor/browser or deactivates; no replacement terminal spawns.                                |
+| Two overlapping invocations               | Cleanup is idempotent by tab ID. Each main call retains its own initial daemon snapshot/counts.                              |
+| Binding changes after exact-ID capture    | Surface close still wins; transport unmount kills the replacement, but that late kill is not in the awaited count.           |
+| Runtime-host snapshot races close         | Existing close intent suppresses stale snapshots temporarily; host completion remains an accepted gap.                       |
+| External/mobile session creation          | Sessions created after the main/renderer snapshots are not chased. Existing PTY-exit publication updates mirrors.            |
 
 Yiru's production UI currently tracks a single desktop `mainWindow`/renderer. The main daemon action is process-global while renderer cleanup is renderer-local. If multiple desktop windows become supported, this action must be broadcast from main with an action ID and per-window acknowledgement; “shared store probably mirrors it” is not sufficient.
 
@@ -153,14 +153,14 @@ Electron validation on Windows must reproduce an empty shell plus an established
 
 Planned provider/platform accounting:
 
-| Row | Planned status |
-| --- | --- |
-| Local PTY / daemon / Windows | Covered by deterministic coordinator/main tests plus the required live Electron run. |
-| macOS / Linux local and daemon | Shared code is covered deterministically; live process absence remains an accepted gap until run there. |
-| SSH | Exact request/settlement is covered by provider-contract mocks; live remote-process absence is covered only when the SSH fixture runs, otherwise accepted-gap. |
-| WSL | Uses the local exact-ID path, but real WSL process absence is an accepted gap unless included in the Windows run. |
-| Remote runtime | Local mirror removal is covered; host completion is accepted-gap while `closeTerminalTab` discards the async result. |
-| Mobile/relay | No newly created session is chased; shared host-tab disappearance and live relay shutdown remain accepted gaps unless exercised with their fixtures. |
+| Row                            | Planned status                                                                                                                                                 |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local PTY / daemon / Windows   | Covered by deterministic coordinator/main tests plus the required live Electron run.                                                                           |
+| macOS / Linux local and daemon | Shared code is covered deterministically; live process absence remains an accepted gap until run there.                                                        |
+| SSH                            | Exact request/settlement is covered by provider-contract mocks; live remote-process absence is covered only when the SSH fixture runs, otherwise accepted-gap. |
+| WSL                            | Uses the local exact-ID path, but real WSL process absence is an accepted gap unless included in the Windows run.                                              |
+| Remote runtime                 | Local mirror removal is covered; host completion is accepted-gap while `closeTerminalTab` discards the async result.                                           |
+| Mobile/relay                   | No newly created session is chased; shared host-tab disappearance and live relay shutdown remain accepted gaps unless exercised with their fixtures.           |
 
 Screenshots are UI evidence only; they do not prove PTY or memory cleanup.
 

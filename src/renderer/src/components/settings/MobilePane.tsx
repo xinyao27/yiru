@@ -32,8 +32,8 @@ export function MobilePane(): React.JSX.Element {
   const [codeCopied, setCodeCopied] = useState(false)
   const [deviceCountAtQr, setDeviceCountAtQr] = useState<number | null>(null)
   const signedIn = useAppStore((state) => state.yiruProfileAuthStatus?.state === 'connected')
-  // Why: Relay is opt-in while compatible mobile builds are limited to the
-  // TestFlight preview and Android APK.
+  // Why: Relay remains opt-in while current mobile builds are distributed
+  // through the neutral GitHub Releases entry point.
   const [connectionMode, setConnectionMode] = useState<MobilePairingConnectionMode>('local-only')
   const [rotateNextQr, setRotateNextQr] = useState(false)
   const devicesRef = useRef<PairedDevice[]>([])

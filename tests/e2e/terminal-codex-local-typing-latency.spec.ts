@@ -1,4 +1,4 @@
-import type { Page } from '@stablyai/playwright-test'
+import type { Page } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { test, expect } from './helpers/yiru-app'

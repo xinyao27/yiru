@@ -3,8 +3,8 @@ import { resolveMobileRelayEndpoint } from './mobile-relay-resume-director'
 
 const relay = {
   v: 1 as const,
-  directorUrl: 'https://relay.onyiru.dev',
-  cellUrl: 'https://relay-old.onyiru.dev',
+  directorUrl: 'https://relay.yiru.ai',
+  cellUrl: 'https://relay-old.yiru.ai',
   assignmentEpoch: 7,
   relayHostId: 'AbCdEf0123_-xyZ9',
   e2eeFraming: 2 as const
@@ -17,7 +17,7 @@ describe('mobile relay resume director', () => {
         new Response(
           JSON.stringify({
             v: 1,
-            cellUrl: 'https://relay-c2.onyiru.dev',
+            cellUrl: 'https://relay-c2.yiru.ai',
             assignmentEpoch: 8,
             leaseExpiresAt: Date.now() + 60_000
           }),
@@ -27,9 +27,9 @@ describe('mobile relay resume director', () => {
 
     await expect(
       resolveMobileRelayEndpoint({ relay, resumeToken: 'A'.repeat(43), fetchImpl })
-    ).resolves.toMatchObject({ cellUrl: 'https://relay-c2.onyiru.dev', assignmentEpoch: 8 })
+    ).resolves.toMatchObject({ cellUrl: 'https://relay-c2.yiru.ai', assignmentEpoch: 8 })
     const [url, init] = fetchImpl.mock.calls[0]!
-    expect(url).toBe('https://relay.onyiru.dev/v1/resolve')
+    expect(url).toBe('https://relay.yiru.ai/v1/resolve')
     expect(url).not.toContain('A'.repeat(43))
     expect(init).toMatchObject({ method: 'POST' })
     expect(JSON.parse(init!.body as string)).toEqual({
@@ -45,7 +45,7 @@ describe('mobile relay resume director', () => {
         new Response(
           JSON.stringify({
             v: 1,
-            cellUrl: 'http://relay-c2.onyiru.dev',
+            cellUrl: 'http://relay-c2.yiru.ai',
             assignmentEpoch: 8,
             leaseExpiresAt: 1
           })

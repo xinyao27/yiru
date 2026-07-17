@@ -150,7 +150,7 @@ describe('app_starred_yiru schema', () => {
   it('rejects extra keys via .strict()', () => {
     const parsed = eventSchemas.app_starred_yiru.safeParse({
       source: 'landing',
-      repo: 'stablyai/yiru'
+      repo: 'xinyao27/yiru'
     })
     expect(parsed.success).toBe(false)
   })

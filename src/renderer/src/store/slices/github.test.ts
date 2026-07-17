@@ -178,11 +178,11 @@ function githubSourceContext(
   return {
     kind: 'task-source',
     provider: 'github',
-    projectId: 'github:stablyai/yiru',
+    projectId: 'github:xinyao27/yiru',
     hostId,
     projectHostSetupId: 'setup-1',
     repoId,
-    providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'yiru' }
+    providerIdentity: { provider: 'github', owner: 'xinyao27', repo: 'yiru' }
   }
 }
 
@@ -5868,11 +5868,11 @@ describe('createGitHubSlice.fetchWorkItems source/error envelope', () => {
     const sourceContext = {
       kind: 'task-source' as const,
       provider: 'github' as const,
-      projectId: 'github:stablyai/yiru',
+      projectId: 'github:xinyao27/yiru',
       hostId: 'runtime:source-runtime' as const,
       projectHostSetupId: 'setup-1',
       repoId: 'source-runtime-repo-id',
-      providerIdentity: { provider: 'github' as const, owner: 'stablyai', repo: 'yiru' }
+      providerIdentity: { provider: 'github' as const, owner: 'xinyao27', repo: 'yiru' }
     }
 
     await store.getState().fetchWorkItems('caller-repo-id', '/server/repo', 24, 'is:open', {
@@ -5915,7 +5915,7 @@ describe('createGitHubSlice.fetchWorkItems source/error envelope', () => {
     }
     const secondSourceContext = {
       ...firstSourceContext,
-      providerIdentity: { provider: 'github' as const, owner: 'stablyai', repo: 'yiru' }
+      providerIdentity: { provider: 'github' as const, owner: 'xinyao27', repo: 'yiru' }
     }
     mockApi.gh.listWorkItems
       .mockResolvedValueOnce({
@@ -5925,8 +5925,8 @@ describe('createGitHubSlice.fetchWorkItems source/error envelope', () => {
       .mockResolvedValueOnce({
         items: [{ type: 'issue', number: 2, title: 'Stably', url: 'https://example.test/2' }],
         sources: {
-          issues: { owner: 'stablyai', repo: 'yiru' },
-          prs: { owner: 'stablyai', repo: 'yiru' }
+          issues: { owner: 'xinyao27', repo: 'yiru' },
+          prs: { owner: 'xinyao27', repo: 'yiru' }
         }
       })
 
@@ -6903,10 +6903,10 @@ describe('IssueSourceIndicator suppression', () => {
 
     // Same slug → null (no information to convey)
     expect(sameGitHubOwnerRepo({ owner: 'o', repo: 'r' }, { owner: 'o', repo: 'r' })).toBe(true)
-    // Case-insensitive equality — the parent design doc calls out that `StablyAI/Yiru`
-    // and `stablyai/yiru` resolve to the same repo and must suppress.
+    // Case-insensitive equality — the parent design doc calls out that `xinyao27/Yiru`
+    // and `xinyao27/yiru` resolve to the same repo and must suppress.
     expect(
-      sameGitHubOwnerRepo({ owner: 'StablyAI', repo: 'Yiru' }, { owner: 'stablyai', repo: 'yiru' })
+      sameGitHubOwnerRepo({ owner: 'xinyao27', repo: 'Yiru' }, { owner: 'xinyao27', repo: 'yiru' })
     ).toBe(true)
     expect(sameGitHubOwnerRepo({ owner: 'a', repo: 'r' }, { owner: 'b', repo: 'r' })).toBe(false)
 

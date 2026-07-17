@@ -15,8 +15,8 @@ class FakeSocket {
 
 const relay = {
   v: 1 as const,
-  directorUrl: 'https://relay.onyiru.dev',
-  cellUrl: 'https://relay-c1.onyiru.dev',
+  directorUrl: 'https://relay.yiru.ai',
+  cellUrl: 'https://relay-c1.yiru.ai',
   assignmentEpoch: 7,
   relayHostId: 'AbCdEf0123_-xyZ9',
   inviteToken: 'abcdefghijklmnopqrstuvwxyzABCDEFGH012345678',
@@ -36,7 +36,7 @@ describe('pairing invite director resolution', () => {
       }
     })
     socket.onopen?.()
-    expect(url).toBe('wss://relay.onyiru.dev/v1/connect/AbCdEf0123_-xyZ9')
+    expect(url).toBe('wss://relay.yiru.ai/v1/connect/AbCdEf0123_-xyZ9')
     expect(url).not.toContain('?')
     expect(JSON.parse(socket.sent[0]!)).toEqual({
       type: 'relay-auth',
@@ -48,13 +48,13 @@ describe('pairing invite director resolution', () => {
       data: JSON.stringify({
         type: 'relay-moved',
         v: 1,
-        cellUrl: 'https://relay-c2.onyiru.dev',
+        cellUrl: 'https://relay-c2.yiru.ai',
         assignmentEpoch: 8
       })
     })
 
     await expect(resolving).resolves.toMatchObject({
-      cellUrl: 'https://relay-c2.onyiru.dev',
+      cellUrl: 'https://relay-c2.yiru.ai',
       assignmentEpoch: 8
     })
   })
@@ -69,7 +69,7 @@ describe('pairing invite director resolution', () => {
       data: JSON.stringify({
         type: 'relay-moved',
         v: 1,
-        cellUrl: 'https://relay-c2.onyiru.dev',
+        cellUrl: 'https://relay-c2.yiru.ai',
         assignmentEpoch: 7,
         targetFromCell: true
       })

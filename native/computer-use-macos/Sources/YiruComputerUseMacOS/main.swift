@@ -3605,8 +3605,8 @@ private func isTrustedYiruApplication(_ pid: pid_t) -> Bool {
     }
     // Why: dev validation runs from per-worktree wrapper apps with stable
     // Yiru-owned bundle ids; the sidecar peer check must still authorize them.
-    return bundleId == "com.stablyai.yiru" ||
-        bundleId.hasPrefix("com.stablyai.yiru.dev.") ||
+    return bundleId == "com.xinyao27.yiru" ||
+        bundleId.hasPrefix("com.xinyao27.yiru.dev.") ||
         bundleId == "com.github.Electron"
 }
 

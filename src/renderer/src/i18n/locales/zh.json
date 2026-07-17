@@ -3944,10 +3944,8 @@
           "5b120b9634": "匿名提交",
           "c9e5ea0791": "GitHub：",
           "d46ddd66fc": "我们可以改进什么？",
-          "3460258a54": "关注 X",
-          "26108d3699": "加入 Discord",
           "d245c4ef6c": "GitHub 议题",
-          "9b33530b3d": "其他联系我们的方式",
+          "9b33530b3d": "报告问题并请求新功能",
           "a828fa4aee": "分享什么是有效的、什么是有问题的，或者 Yiru 接下来应该做什么。",
           "0eb643f07f": "发送反馈",
           "60b721e857": "提交反馈失败。请再试一次。",
@@ -4007,7 +4005,6 @@
         "SidebarSettingsHelpMenu": {
           "ad3d3ed7f1": "重启 Yiru",
           "29c56f30ee": "检查更新",
-          "eb9884e55b": "Discord",
           "5687ab246a": "GitHub",
           "5f83d86d92": "变更日志",
           "cdc87f897e": "文档",
@@ -4019,8 +4016,7 @@
           "5161eef55d": "正在重启 Yiru…",
           "d396773ef0": "检查中",
           "f8a2c91d4e": "里程碑",
-          "b7e4d2a19c": "入门引导",
-          "c4f8e1b72a": "X"
+          "b7e4d2a19c": "入门引导"
         },
         "SidebarToolbar": {
           "19e32d0e5f": "打开文件夹选择器以添加项目",
@@ -6143,9 +6139,7 @@
         },
         "MobileSettingsPane": {
           "9a3c280e49": "GitHub 发布",
-          "b0088412a1": "或 Android APK 来自",
-          "b5a2ed83ff": "应用商店",
-          "c8491c17ef": "通过扫描二维码从手机控制 Yiru。 Beta/早期预览 - 预计会出现错误和重大更改。从以下位置获取 iOS 应用程序",
+          "c8491c17ef": "扫描二维码即可通过手机控制 Yiru。移动端构建：",
           "e7a3ae8c4e": "移动端",
           "174f4a3c6d": "通过手机控制终端和智能体。",
           "1de96ec8a6": "显示 Yiru 手机端按钮",
@@ -9451,9 +9445,8 @@
         "MobileRelayBetaAvailability": {
           "about": "关于 Yiru Relay 测试版",
           "beta": "测试版",
-          "availability": "可用平台：",
-          "testFlight": "TestFlight",
-          "androidApk": "Android APK"
+          "availability": "移动端构建：",
+          "githubReleases": "GitHub 发布"
         }
       },
       "right": {
@@ -10932,12 +10925,7 @@
           "a6cffbbb0b": "生成代码",
           "e59a252eca": "重新生成代码",
           "d0b52871ce": "您的手机已配对。",
-          "051978a785": "您的手机已配对。",
-          "channel": {
-            "group": "发布渠道",
-            "preview": "预览版",
-            "stable": "稳定版"
-          }
+          "051978a785": "您的手机已配对。"
         },
         "MobilePage": {
           "e17393c6a3": "手机预览",
@@ -10970,13 +10958,8 @@
         "mobile": {
           "platform": {
             "copy": {
-              "2a532d6fd7": "使用 Android 相机扫描以从 GitHub Releases 下载最新的 APK。",
-              "432db52b73": "使用 iPhone 相机扫描以打开 App Store。",
-              "preview": {
-                "tagline": "最新功能，每日更新。"
-              },
-              "stable": {
-                "tagline": "公开发布版，每周更新。"
+              "releases": {
+                "cta": "查看移动端构建"
               }
             }
           }

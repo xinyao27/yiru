@@ -5,7 +5,7 @@ import type { AppIdentity } from '../../shared/app-identity'
 const BASE_APP_NAME = 'Yiru'
 // Why: Windows notification grouping and existing permissions are keyed to the
 // shipped legacy identity, so the display-name migration must not replace it.
-const BASE_APP_USER_MODEL_ID = 'com.stablyai.yiru'
+const BASE_APP_USER_MODEL_ID = 'com.xinyao27.yiru'
 const MAX_LABEL_LENGTH = 80
 
 export type DevInstanceIdentity = AppIdentity & {

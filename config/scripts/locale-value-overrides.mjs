@@ -146,7 +146,6 @@ export const LOCALE_VALUE_OVERRIDES = {
     teams: '팀',
     passing: '통과',
     'opened this issue': '이 이슈를 열었습니다',
-    'Join Discord': 'Discord 참여',
     Send: '보내기',
     'Sending…': '전송 중…',
     'Sending...': '전송 중...',
@@ -306,7 +305,6 @@ export const LOCALE_VALUE_OVERRIDES = {
     passing: '通过',
     'opened this issue': '创建了此议题',
     Open: '进行中',
-    'Join Discord': '加入 Discord',
     'Pull request merged': '拉取请求已合并',
     'Agent Skills': '代理技能',
     'Agent skills': '代理技能',
@@ -514,7 +512,6 @@ export const LOCALE_VALUE_OVERRIDES = {
     passing: '合格',
     'opened this issue': 'このイシューを作成しました',
     Open: 'オープン',
-    'Join Discord': 'Discord に参加',
     ...JA_VALUE_OVERRIDES
   }
 }

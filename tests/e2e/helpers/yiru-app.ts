@@ -20,7 +20,7 @@ import {
   type Page,
   type ElectronApplication,
   type TestInfo
-} from '@stablyai/playwright-test'
+} from '@playwright/test'
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -421,4 +421,4 @@ export const test = base.extend<YiruTestFixtures, YiruWorkerFixtures>({
   }
 })
 
-export { expect } from '@stablyai/playwright-test'
+export { expect } from '@playwright/test'

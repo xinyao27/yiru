@@ -24,6 +24,10 @@ describe('updater-nudge', () => {
 
       const result = await fetchNudge()
       expect(result).toEqual({ id: 'campaign-1', minVersion: '1.1.0', maxVersion: '1.1.19' })
+      expect(netFetchMock).toHaveBeenCalledWith(
+        'https://yiru.ai/whats-new/nudge.json',
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      )
     })
 
     it('returns a valid config with only maxVersion', async () => {

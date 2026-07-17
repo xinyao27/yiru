@@ -3944,10 +3944,8 @@
           "5b120b9634": "익명으로 제출",
           "c9e5ea0791": "GitHub:",
           "d46ddd66fc": "무엇을 개선할 수 있나요?",
-          "3460258a54": "X에서 팔로우",
-          "26108d3699": "Discord 참여",
           "d245c4ef6c": "GitHub 이슈",
-          "9b33530b3d": "우리에게 연락하는 다른 방법",
+          "9b33530b3d": "버그 신고 및 기능 요청",
           "a828fa4aee": "작동하는 부분, 손상된 부분 또는 Yiru가 다음에 수행해야 할 작업을 공유하세요.",
           "0eb643f07f": "피드백 보내기",
           "60b721e857": "의견을 제출하지 못했습니다. 다시 시도해 주세요.",
@@ -4007,7 +4005,6 @@
         "SidebarSettingsHelpMenu": {
           "ad3d3ed7f1": "Yiru 재시작",
           "29c56f30ee": "업데이트 확인",
-          "eb9884e55b": "Discord",
           "5687ab246a": "GitHub",
           "5f83d86d92": "변경 내역",
           "cdc87f897e": "문서",
@@ -4019,8 +4016,7 @@
           "5161eef55d": "Yiru를 다시 시작하는 중…",
           "d396773ef0": "확인 중",
           "f8a2c91d4e": "마일스톤",
-          "b7e4d2a19c": "온보딩",
-          "c4f8e1b72a": "X"
+          "b7e4d2a19c": "온보딩"
         },
         "SidebarToolbar": {
           "19e32d0e5f": "폴더 선택기를 열어 프로젝트를 추가하세요.",
@@ -6143,9 +6139,7 @@
         },
         "MobileSettingsPane": {
           "9a3c280e49": "GitHub 릴리스",
-          "b0088412a1": "또는 다음에서 Android APK를 받으세요",
-          "b5a2ed83ff": "앱스토어",
-          "c8491c17ef": "QR 코드를 스캔하여 휴대폰에서 Yiru를 제어하세요. 베타/초기 미리보기 - 버그 및 주요 변경 사항이 예상됩니다. 다음에서 iOS 앱을 받으세요.",
+          "c8491c17ef": "QR 코드를 스캔하여 휴대폰에서 Yiru를 제어하세요. 모바일 빌드:",
           "e7a3ae8c4e": "모바일",
           "174f4a3c6d": "휴대폰에서 terminals과 agents를 제어하세요.",
           "1de96ec8a6": "Yiru Mobile 버튼 표시",
@@ -9451,9 +9445,8 @@
         "MobileRelayBetaAvailability": {
           "about": "Yiru Relay 베타 정보",
           "beta": "베타",
-          "availability": "이용 가능:",
-          "testFlight": "TestFlight",
-          "androidApk": "Android APK"
+          "availability": "모바일 빌드:",
+          "githubReleases": "GitHub 릴리스"
         }
       },
       "right": {
@@ -10932,12 +10925,7 @@
           "a6cffbbb0b": "코드 생성",
           "e59a252eca": "코드 재생성",
           "d0b52871ce": "휴대전화가 페어링되었습니다.",
-          "051978a785": "휴대전화가 페어링되었습니다.",
-          "channel": {
-            "group": "릴리스 채널",
-            "preview": "미리 보기",
-            "stable": "안정 버전"
-          }
+          "051978a785": "휴대전화가 페어링되었습니다."
         },
         "MobilePage": {
           "e17393c6a3": "휴대폰 미리보기",
@@ -10970,13 +10958,8 @@
         "mobile": {
           "platform": {
             "copy": {
-              "2a532d6fd7": "Android 카메라로 스캔하여 GitHub 릴리스에서 최신 APK를 다운로드하세요.",
-              "432db52b73": "iPhone 카메라로 스캔하여 App Store를 엽니다.",
-              "preview": {
-                "tagline": "최신 기능, 매일 업데이트."
-              },
-              "stable": {
-                "tagline": "정식 출시 버전, 매주 업데이트."
+              "releases": {
+                "cta": "모바일 빌드 보기"
               }
             }
           }

@@ -87,7 +87,7 @@ function sessionSnapshotWithInactiveThenActiveTerminal(
 const publicWorktree: SpoolPublicWorktreeInstance = {
   worktreeId: 'worktree-main-2',
   instanceId: 'instance-main-2',
-  projectId: 'github:paperboytm/paperboy',
+  projectId: 'github:xinyao27/paperboy',
   shareEpoch: 'share-main-2',
   spoolIncarnationId: 'incarnation-main-2',
   actualHostScope: 'local-owner',
@@ -95,7 +95,7 @@ const publicWorktree: SpoolPublicWorktreeInstance = {
     kind: 'git',
     worktreeId: 'worktree-main-2',
     instanceId: 'instance-main-2',
-    projectId: 'github:paperboytm/paperboy',
+    projectId: 'github:xinyao27/paperboy',
     repoId: 'repo-paperboy',
     executionHostId: 'local',
     worktreePath: '/owner/paperboy/main-2'
