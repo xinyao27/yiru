@@ -8,6 +8,7 @@ import React, { useCallback, useRef, useState } from 'react'
 import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import type { SshTarget, SshConnectionState } from '../../../../shared/ssh-types'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 
 type Props = {
   target: SshTarget & { state?: SshConnectionState }
@@ -69,9 +70,11 @@ export function SshTargetRow({
       ref={handleRowRootRef}
       role={isConnected ? 'button' : undefined}
       tabIndex={isConnected ? 0 : undefined}
-      className={`w-full flex items-center gap-2 px-3 py-2 rounded-md border text-xs transition-colors ${
-        isSelected ? 'border-foreground/30 bg-accent' : 'border-border hover:bg-accent/50'
-      } ${isConnected ? 'cursor-pointer' : ''}`}
+      className={cn(
+        'w-full flex items-center gap-2 px-3 py-2 rounded-md border text-xs transition-colors',
+        isSelected ? 'border-foreground/30 bg-accent' : 'border-border hover:bg-accent/50',
+        isConnected ? 'cursor-pointer' : ''
+      )}
       onClick={handleRowClick}
       onKeyDown={(e) => {
         if (isConnected && (e.key === 'Enter' || e.key === ' ')) {
@@ -80,8 +83,8 @@ export function SshTargetRow({
         }
       }}
     >
-      <span className={`size-2 rounded-full shrink-0 ${dotColor}`} />
-      <span className={`font-medium truncate ${!isConnected ? 'text-muted-foreground' : ''}`}>
+      <span className={cn('size-2 rounded-full shrink-0', dotColor)} />
+      <span className={cn('font-medium truncate', !isConnected ? 'text-muted-foreground' : '')}>
         {target.label || `${target.username}@${target.host}`}
       </span>
       {!isConnected && (

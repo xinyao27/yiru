@@ -19,6 +19,7 @@ import type { MarkdownReviewNote } from '@/lib/markdown-review-notes'
 import type { RichMarkdownAnnotationTarget } from './rich-markdown-review-annotations'
 import type { RichMarkdownReviewNotePosition } from './rich-markdown-review-note-layout'
 import type { DiffComment } from '../../../../shared/types'
+import { cn } from '@/lib/utils'
 
 function shouldFocusEmptyEditorFromSurfaceClick(
   event: React.MouseEvent<HTMLDivElement>,
@@ -191,9 +192,10 @@ export function RichMarkdownEditorSurface({
       ) : null}
       <div
         ref={rootRef}
-        className={`rich-markdown-editor-shell ${
-          reviewRailExpanded ? 'has-rich-markdown-review-notes' : ''
-        }`.trim()}
+        className={cn(
+          'rich-markdown-editor-shell',
+          reviewRailExpanded && 'has-rich-markdown-review-notes'
+        )}
         style={{ '--editor-font-zoom-level': editorFontZoomLevel } as React.CSSProperties}
       >
         <RichMarkdownToolbar

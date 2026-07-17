@@ -1,4 +1,6 @@
 /* eslint-disable max-lines -- Why: split-tree DOM reparent, promote, and equalize rules need one consistent owner. */
+import { cn } from '@/lib/utils'
+
 import type {
   DropZone,
   ManagedPane,
@@ -118,7 +120,7 @@ export function insertPaneNextTo(
 
   // Create split wrapper
   const split = document.createElement('div')
-  split.className = `pane-split ${isVertical ? 'is-vertical' : 'is-horizontal'}`
+  split.className = cn('pane-split', isVertical ? 'is-vertical' : 'is-horizontal')
   split.style.display = 'flex'
   split.style.flexDirection = isVertical ? 'row' : 'column'
 
@@ -325,7 +327,7 @@ export function wrapInSplit(
 
   // Create split container
   const split = document.createElement('div')
-  split.className = `pane-split ${isVertical ? 'is-vertical' : 'is-horizontal'}`
+  split.className = cn('pane-split', isVertical ? 'is-vertical' : 'is-horizontal')
   split.style.display = 'flex'
   split.style.flexDirection = isVertical ? 'row' : 'column'
 

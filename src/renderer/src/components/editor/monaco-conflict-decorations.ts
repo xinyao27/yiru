@@ -1,5 +1,7 @@
 import type { editor, IRange } from 'monaco-editor'
 
+import { cn } from '@/lib/utils'
+
 type ConflictBlock = {
   startLine: number
   baseLine?: number
@@ -73,7 +75,7 @@ function makeSectionDecoration(
     range: makeWholeLineRange(startLineNumber, endLineNumber),
     options: {
       isWholeLine: true,
-      className: `yiru-conflict-section-line yiru-conflict-${section}-line`
+      className: cn('yiru-conflict-section-line', `yiru-conflict-${section}-line`)
     }
   }
 }

@@ -12,6 +12,7 @@ import type { SearchState } from '@/components/terminal-pane/keyboard-handlers'
 import { translate } from '@/i18n/i18n'
 import { getFindRequestQuery } from '@/lib/find-query-bounds'
 import { safeFind } from './terminal-search-safe-find'
+import { cn } from '@/lib/utils'
 
 type TerminalSearchProps = {
   isOpen: boolean
@@ -140,9 +141,10 @@ export default function TerminalSearch({
         variant="ghost"
         size="icon-xs"
         onClick={() => setCaseSensitive((v) => !v)}
-        className={`flex size-6 shrink-0 items-center justify-center rounded ${
+        className={cn(
+          'flex size-6 shrink-0 items-center justify-center rounded',
           caseSensitive ? 'bg-zinc-700/50 text-blue-400' : 'text-zinc-400 hover:text-zinc-200'
-        }`}
+        )}
         title={translate('auto.components.TerminalSearch.90c61387d9', 'Case sensitive')}
       >
         <CaseSensitive size={14} />
@@ -153,9 +155,10 @@ export default function TerminalSearch({
         variant="ghost"
         size="icon-xs"
         onClick={() => setRegex((v) => !v)}
-        className={`flex size-6 shrink-0 items-center justify-center rounded ${
+        className={cn(
+          'flex size-6 shrink-0 items-center justify-center rounded',
           regex ? 'bg-zinc-700/50 text-blue-400' : 'text-zinc-400 hover:text-zinc-200'
-        }`}
+        )}
         title={translate('auto.components.TerminalSearch.42e466b9f1', 'Regex')}
       >
         <Regex size={14} />

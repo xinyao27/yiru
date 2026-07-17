@@ -12,6 +12,7 @@ import { ReviewPRViewVisualStyles } from './review-animated-visual-pr-view-style
 import { CheckTinyIcon, ChevDownIcon, CursorIcon } from './review-animated-visual-shared'
 import { useReviewPrViewAnimation } from './review-pr-view-animation'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 
 type SidebarTabId = 'explorer' | 'search' | 'source-control' | 'checks'
 
@@ -72,7 +73,7 @@ function SidebarTabs(props: { active: SidebarTabId; interactiveChecks?: boolean 
       {SIDEBAR_TABS.map((tab) => {
         const Icon = tab.icon
         const isActive = tab.id === props.active
-        const className = ['ravpr-tab', isActive ? 'is-active' : ''].filter(Boolean).join(' ')
+        const className = cn('ravpr-tab', isActive && 'is-active')
         return (
           <span
             key={tab.id}
@@ -107,7 +108,7 @@ function StatusCell(): JSX.Element {
 
 function ExplorerSkeletonRow(props: { active?: boolean; width: number }): JSX.Element {
   return (
-    <div className={props.active ? 'ravpr-file is-active' : 'ravpr-file'}>
+    <div className={cn('ravpr-file', props.active && 'is-active')}>
       <span className="ravpr-file-icon" />
       <span className="ravpr-file-name" style={{ width: props.width }} />
       <span className="ravpr-file-status" />

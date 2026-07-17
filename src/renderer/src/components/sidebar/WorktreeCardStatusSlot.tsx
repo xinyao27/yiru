@@ -34,7 +34,10 @@ function getDefaultBranchIdentityLabel(): string {
 // Why: branch-style SVGs are optically left-heavy; this keeps them aligned with
 // the centered activity dots in the shared status column.
 const compactReviewAndBranchStatusIconClassName = 'size-[13px] translate-x-px'
-const branchStatusIconClassName = `${compactReviewAndBranchStatusIconClassName} text-muted-foreground/70`
+const branchStatusIconClassName = cn(
+  compactReviewAndBranchStatusIconClassName,
+  'text-muted-foreground/70'
+)
 // Why: a left-edge badge overlays unread on the status glyph without widening
 // the lane or indenting the title; ring-sidebar cuts the dot out from busy icons.
 const newCardUnreadAlertClassName =

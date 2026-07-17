@@ -37,6 +37,7 @@ import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-widt
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_ROOT_CLASSES } from './tab-root-classes'
 import { TabCloseButton } from './TabCloseButton'
+import { cn } from '@/lib/utils'
 
 export default function EditorFileTab({
   file,
@@ -219,6 +220,12 @@ export default function EditorFileTab({
     onActivate,
     disabled: isRenaming
   })
+  const tabIconTone = isActive ? 'text-foreground' : 'text-muted-foreground'
+  const tabIconClassName = cn('mr-1 size-4 shrink-0', tabIconTone)
+  const conflictIconClassName = cn(
+    'mr-1 size-4 shrink-0',
+    isActive ? 'text-orange-400' : 'text-orange-400/70'
+  )
 
   const tabRoot = (
     <div
@@ -227,7 +234,12 @@ export default function EditorFileTab({
       data-pinned={isPinned ? 'true' : 'false'}
       {...attributes}
       {...dragListeners}
-      className={`${TAB_ROOT_CLASSES} ${getTabDividerClasses(hasTabsToRight)} ${getDropIndicatorClasses(dropIndicator ?? null)} ${getTabRootStateClasses(isActive)}`}
+      className={cn(
+        TAB_ROOT_CLASSES,
+        getTabDividerClasses(hasTabsToRight),
+        getDropIndicatorClasses(dropIndicator ?? null),
+        getTabRootStateClasses(isActive)
+      )}
       onPointerDown={(e) => {
         onTabPointerDown(
           e,
@@ -257,25 +269,15 @@ export default function EditorFileTab({
       }}
     >
       {isConflictReview ? (
-        <ShieldAlert
-          className={`mr-1 size-4 shrink-0 ${isActive ? 'text-orange-400' : 'text-orange-400/70'}`}
-        />
+        <ShieldAlert className={conflictIconClassName} />
       ) : isCheckDetails ? (
-        <ListChecks
-          className={`mr-1 size-4 shrink-0 ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}
-        />
+        <ListChecks className={tabIconClassName} />
       ) : isDiff ? (
-        <GitCompareArrows
-          className={`mr-1 size-4 shrink-0 ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}
-        />
+        <GitCompareArrows className={tabIconClassName} />
       ) : isMarkdownPreviewTab ? (
-        <Eye
-          className={`mr-1 size-4 shrink-0 ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}
-        />
+        <Eye className={tabIconClassName} />
       ) : (
-        <FileIcon
-          className={`mr-1 size-4 shrink-0 ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}
-        />
+        <FileIcon className={tabIconClassName} />
       )}
       {isPinned && <Pin className="mr-1 size-4 shrink-0 text-muted-foreground" aria-hidden />}
       <span className="mr-1 flex min-w-0 flex-1 items-baseline gap-1">
@@ -318,7 +320,11 @@ export default function EditorFileTab({
           />
         ) : (
           <span
-            className={`${TAB_LABEL_WIDTH_CLASSES}${file.isPreview ? ' italic' : ''}${isMissingFileMutation ? ' line-through' : ''}`}
+            className={cn(
+              TAB_LABEL_WIDTH_CLASSES,
+              file.isPreview && 'italic',
+              isMissingFileMutation && 'line-through'
+            )}
             style={tabStatusColor ? { color: tabStatusColor } : undefined}
             onDoubleClick={(e) => {
               if (file.isPreview && onMakePermanent) {

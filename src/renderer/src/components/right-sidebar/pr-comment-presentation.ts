@@ -57,19 +57,16 @@ export function getPRCommentGroupSurfaceClasses(
   actionState: PRCommentGroupActionState,
   options?: { queued?: boolean }
 ): string {
-  const classes = [presentation.group]
   if (options?.queued) {
-    classes.push(presentation.groupQueued)
     // Why: queued selection already owns the leading affordance; stacking the
     // open rail next to its checkbox makes the card edge visually crowded.
-    return classes.join(' ')
+    return cn(presentation.group, presentation.groupQueued)
   }
-  if (actionState === 'open' && presentation.groupOpen) {
-    classes.push(presentation.groupOpen)
-  } else if (actionState === 'resolved') {
-    classes.push(presentation.groupResolved)
-  }
-  return classes.join(' ')
+  return cn(
+    presentation.group,
+    actionState === 'open' && presentation.groupOpen,
+    actionState === 'resolved' && presentation.groupResolved
+  )
 }
 
 const MARKDOWN_BASE =
@@ -140,8 +137,8 @@ export function getPRCommentPresentationClasses(
       commentBodyMarkdown: MARKDOWN_BASE,
       author: 'shrink-0 text-[11px] font-semibold text-foreground',
       authorResolved: 'text-muted-foreground',
-      avatar: `size-4 ${COMMENT_AVATAR}`,
-      avatarReply: `size-3.5 ${COMMENT_AVATAR}`,
+      avatar: cn('size-4', COMMENT_AVATAR),
+      avatarReply: cn('size-3.5', COMMENT_AVATAR),
       botBadge:
         'shrink-0 rounded border border-border bg-accent/40 px-1 py-px text-[9px] font-medium uppercase tracking-wide text-muted-foreground',
       pathBadge: 'min-w-0 flex-1 truncate text-[10px] font-mono text-muted-foreground/60',
@@ -175,21 +172,29 @@ export function getPRCommentPresentationClasses(
   return {
     variant,
     useCardLayout: true,
-    list: `flex flex-col ${CARD_COMMENT_LIST_GAP} px-3 py-2`,
+    list: cn('flex flex-col', CARD_COMMENT_LIST_GAP, 'px-3 py-2'),
     group: COMMENT_CARD_SURFACE,
     groupStandalone: '',
     groupThread: '',
     commentRow: 'group/comment',
-    commentRowReply: `border-t ${COMMENT_CARD_DIVIDER} bg-muted/25 dark:bg-muted/10`,
-    commentHeader: `flex flex-col gap-1 border-b ${COMMENT_CARD_DIVIDER} ${CARD_COMMENT_HEADER_PADDING}`,
-    commentHeaderReply: `flex min-w-0 items-center gap-2 ${CARD_COMMENT_HEADER_PADDING}`,
-    commentBody: `${CARD_COMMENT_BODY_PADDING} ${CARD_COMMENT_BODY_SIZE} text-foreground`,
-    commentBodyReply: `${CARD_COMMENT_BODY_PADDING} ${CARD_COMMENT_BODY_SIZE} text-foreground`,
+    commentRowReply: cn('border-t', COMMENT_CARD_DIVIDER, 'bg-muted/25 dark:bg-muted/10'),
+    commentHeader: cn(
+      'flex flex-col gap-1 border-b',
+      COMMENT_CARD_DIVIDER,
+      CARD_COMMENT_HEADER_PADDING
+    ),
+    commentHeaderReply: cn('flex min-w-0 items-center gap-2', CARD_COMMENT_HEADER_PADDING),
+    commentBody: cn(CARD_COMMENT_BODY_PADDING, CARD_COMMENT_BODY_SIZE, 'text-foreground'),
+    commentBodyReply: cn(CARD_COMMENT_BODY_PADDING, CARD_COMMENT_BODY_SIZE, 'text-foreground'),
     commentBodyMarkdown: MARKDOWN_BASE,
-    author: `min-w-0 flex-1 truncate ${CARD_COMMENT_AUTHOR_SIZE} font-semibold text-foreground`,
+    author: cn(
+      'min-w-0 flex-1 truncate',
+      CARD_COMMENT_AUTHOR_SIZE,
+      'font-semibold text-foreground'
+    ),
     authorResolved: 'text-muted-foreground',
-    avatar: `size-5 ${COMMENT_AVATAR}`,
-    avatarReply: `size-4 ${COMMENT_AVATAR}`,
+    avatar: cn('size-5', COMMENT_AVATAR),
+    avatarReply: cn('size-4', COMMENT_AVATAR),
     botBadge:
       'shrink-0 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground',
     pathBadge: 'min-w-0 max-w-full truncate font-mono text-muted-foreground',

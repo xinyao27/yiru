@@ -17,6 +17,7 @@ import { useAppStore } from '@/store'
 import { resolveDropZone } from './tab-drop-zone'
 import type { TabDropZone } from './useTabDragSplit'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 
 type PaneDropTarget = {
   groupId: string
@@ -330,9 +331,10 @@ export default function AiVaultSessionDropLayer({
       aria-hidden="true"
       data-ai-vault-session-drop-layer="true"
       data-worktree-id={worktreeId}
-      className={`absolute inset-0 z-[10000] ${
+      className={cn(
+        'absolute inset-0 z-[10000]',
         isDragActive ? 'pointer-events-auto' : 'pointer-events-none'
-      }`}
+      )}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onDragLeave={handleDragLeave}

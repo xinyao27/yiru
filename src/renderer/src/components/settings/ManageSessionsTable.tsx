@@ -10,6 +10,7 @@ import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { formatState, formatWorkspace } from './manage-sessions-format'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 
 type ManageSessionsTableProps = {
   sessions: PtyManagementSession[]
@@ -143,9 +144,10 @@ export function ManageSessionsTable({
                 return (
                   <tr
                     key={session.sessionId}
-                    className={`border-t border-border/50 first:border-t-0 ${
+                    className={cn(
+                      'border-t border-border/50 first:border-t-0',
                       rowClickable ? 'cursor-pointer hover:bg-accent/60' : ''
-                    }`}
+                    )}
                     onClick={rowClickable ? () => onNavigate(tabId) : undefined}
                     aria-label={
                       rowClickable
@@ -159,7 +161,7 @@ export function ManageSessionsTable({
                   >
                     <td className="px-3 py-1.5">
                       <span
-                        className={`block size-1.5 rounded-full ${dotClass}`}
+                        className={cn('block size-1.5 rounded-full', dotClass)}
                         aria-label={formatState(session)}
                         title={formatState(session)}
                       />

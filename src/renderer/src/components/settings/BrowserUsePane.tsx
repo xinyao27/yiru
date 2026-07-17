@@ -226,11 +226,12 @@ export function BrowserUseSetup({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+            className={cn(
+              'rounded-full px-2 py-0.5 text-[10px] font-medium',
               completedCount === 3
                 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
                 : 'bg-muted text-muted-foreground'
-            }`}
+            )}
           >
             {completedCount}/3
           </span>

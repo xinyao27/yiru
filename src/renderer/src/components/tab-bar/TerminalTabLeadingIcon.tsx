@@ -109,7 +109,10 @@ export function TerminalTabLeadingIcon({
   // Git Bash, and WSL while retaining the generic terminal fallback elsewhere.
   return (
     <span
-      className={`mr-1 inline-flex size-4 shrink-0 [&>*]:size-full ${isActive ? '' : 'opacity-70'}`}
+      className={cn(
+        'mr-1 inline-flex size-4 shrink-0 [&>*]:size-full',
+        isActive ? '' : 'opacity-70'
+      )}
       data-shell-icon={shell ?? 'generic'}
       aria-hidden
     >

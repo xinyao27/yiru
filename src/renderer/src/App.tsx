@@ -306,7 +306,10 @@ function WindowControls(): React.JSX.Element {
         type="button"
         variant="ghost"
         size="icon-sm"
-        className={`${WINDOW_CONTROL_BUTTON_CLASS_NAME} hover:bg-destructive hover:text-white dark:hover:bg-destructive/60 dark:hover:text-white`}
+        className={cn(
+          WINDOW_CONTROL_BUTTON_CLASS_NAME,
+          'hover:bg-destructive hover:text-white dark:hover:bg-destructive/60 dark:hover:text-white'
+        )}
         aria-label={translate('auto.App.e960d18540', 'Close')}
         // Why: IPC to main so the BrowserWindow 'close' event fires, which
         // sends 'window:close-requested' back to the renderer and keeps the
@@ -2052,9 +2055,10 @@ function App(): React.JSX.Element {
     // keeps the complete control cluster reachable above the tab strip.
     <div
       ref={titlebarLeftControlsRef}
-      className={`flex h-full shrink-0 items-center${
-        leftTitlebarChromeLayout.isFloating ? ' w-max' : ' w-full'
-      }`}
+      className={cn(
+        'flex h-full shrink-0 items-center',
+        leftTitlebarChromeLayout.isFloating ? 'w-max' : 'w-full'
+      )}
     >
       <div className="flex h-full items-center">
         {isMac && !isFullScreen ? (
@@ -2078,7 +2082,7 @@ function App(): React.JSX.Element {
                     type="button"
                     variant="ghost"
                     size="icon-xs"
-                    className={`mr-2 text-muted-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
+                    className={cn('mr-2 text-muted-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
                     aria-label={translate('auto.App.8b0b8eb54f', 'Application menu')}
                     onClick={() => window.api.ui.popupMenu()}
                   >
@@ -2102,7 +2106,7 @@ function App(): React.JSX.Element {
                   type="button"
                   variant="ghost"
                   size="icon-sm"
-                  className={`text-muted-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
+                  className={cn('text-muted-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
                   onClick={actions.toggleSidebar}
                   aria-label={translate('auto.App.e4b9e7dff7', 'Toggle sidebar')}
                 >
@@ -2132,7 +2136,7 @@ function App(): React.JSX.Element {
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className={`text-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
+                  className={cn('text-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
                   onClick={() => useAppStore.getState().goBackWorktree()}
                   disabled={!canGoBackWorktree}
                   aria-label={translate('auto.App.064bd07810', 'Go back')}
@@ -2154,7 +2158,7 @@ function App(): React.JSX.Element {
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className={`text-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
+                  className={cn('text-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
                   onClick={() => useAppStore.getState().goForwardWorktree()}
                   disabled={!canGoForwardWorktree}
                   aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
@@ -2182,7 +2186,7 @@ function App(): React.JSX.Element {
             type="button"
             variant="ghost"
             size="icon-sm"
-            className={`mr-2 text-muted-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
+            className={cn('mr-2 text-muted-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
             onClick={actions.toggleRightSidebar}
             aria-label={translate('auto.App.9e0b441a91', 'Toggle right sidebar')}
           >
@@ -2206,7 +2210,10 @@ function App(): React.JSX.Element {
       ) : creationLayoutActive ? null : (
         <div
           id="titlebar-tabs"
-          className={`flex flex-1 min-w-0 self-stretch${!workspaceChromeActive ? ' invisible pointer-events-none' : ''}`}
+          className={cn(
+            'flex flex-1 min-w-0 self-stretch',
+            !workspaceChromeActive ? 'invisible pointer-events-none' : ''
+          )}
         />
       )}
       {showTitlebarExpandButton && (
@@ -2217,7 +2224,7 @@ function App(): React.JSX.Element {
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                className={`mr-2 text-muted-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
+                className={cn('mr-2 text-muted-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
                 onClick={handleToggleExpand}
                 aria-label={translate('auto.App.c1cf0b0e4a', 'Collapse pane')}
                 disabled={!activeTabCanExpand}
@@ -2330,7 +2337,10 @@ function App(): React.JSX.Element {
                      layout so the terminal/editor reclaim the left edge instead of
                      leaving behind a content-width blank strip. */
                         <div
-                          className={`flex min-h-0 flex-col shrink-0${sidebarOpen ? '' : ' relative w-0 overflow-visible'}`}
+                          className={cn(
+                            'flex min-h-0 flex-col shrink-0',
+                            sidebarOpen ? '' : 'relative w-0 overflow-visible'
+                          )}
                         >
                           <div
                             // Why: when the sidebar is collapsed, titlebar-left floats

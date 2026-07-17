@@ -20,6 +20,7 @@ import {
 } from './usage-overview-model'
 import { DailyIntensityGrid, ProviderUsageRow, TokenMixBar } from './usage-overview-sections'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 
 const RECENT_DAY_COUNT = 42
 
@@ -140,7 +141,7 @@ export function UsageOverviewPane(): React.JSX.Element {
                     'Refresh usage overview'
                   )}
                 >
-                  <RefreshCw className={`size-3.5 ${isScanning ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={cn('size-3.5', isScanning ? 'animate-spin' : '')} />
                 </Button>
               }
             />

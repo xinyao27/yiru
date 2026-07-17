@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Label } from '../ui/label'
+import { cn } from '@/lib/utils'
 
 export type NotificationSettingToggleProps = {
   label: string
@@ -33,14 +34,17 @@ export function NotificationSettingToggle({
         aria-label={label}
         disabled={disabled}
         onClick={onToggle}
-        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors ${
-          checked ? 'bg-foreground' : 'bg-muted-foreground/30'
-        } ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+        className={cn(
+          'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors',
+          checked ? 'bg-foreground' : 'bg-muted-foreground/30',
+          disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+        )}
       >
         <span
-          className={`pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform ${
+          className={cn(
+            'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
             checked ? 'translate-x-4' : 'translate-x-0.5'
-          }`}
+          )}
         />
       </button>
     </div>

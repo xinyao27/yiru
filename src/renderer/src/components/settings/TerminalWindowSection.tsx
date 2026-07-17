@@ -15,6 +15,7 @@ type TerminalWindowSectionProps = {
 }
 
 import { COLOR_OVERRIDE_GROUPS } from './terminal-window-color-groups'
+import { cn } from '@/lib/utils'
 
 export function TerminalWindowSection({
   settings,
@@ -125,16 +126,18 @@ export function TerminalWindowSection({
               onClick={() =>
                 updateSettings({ windowBackgroundBlur: !settings.windowBackgroundBlur })
               }
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors ${
+              className={cn(
+                'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
                 (settings.windowBackgroundBlur ?? false)
                   ? 'bg-foreground'
                   : 'bg-muted-foreground/30'
-              }`}
+              )}
             >
               <span
-                className={`pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform ${
+                className={cn(
+                  'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
                   (settings.windowBackgroundBlur ?? false) ? 'translate-x-4' : 'translate-x-0.5'
-                }`}
+                )}
               />
             </button>
           </div>
@@ -162,7 +165,7 @@ export function TerminalWindowSection({
                 disabled={relaunchingBlur}
                 onClick={() => void handleRelaunch()}
               >
-                <RotateCw className={`size-3 ${relaunchingBlur ? 'animate-spin' : ''}`} />
+                <RotateCw className={cn('size-3', relaunchingBlur ? 'animate-spin' : '')} />
                 {relaunchingBlur
                   ? translate(
                       'auto.components.settings.TerminalWindowSection.907131d741',
@@ -261,18 +264,20 @@ export function TerminalWindowSection({
                 terminalMouseHideWhileTyping: !settings.terminalMouseHideWhileTyping
               })
             }
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors ${
+            className={cn(
+              'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
               (settings.terminalMouseHideWhileTyping ?? false)
                 ? 'bg-foreground'
                 : 'bg-muted-foreground/30'
-            }`}
+            )}
           >
             <span
-              className={`pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform ${
+              className={cn(
+                'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
                 (settings.terminalMouseHideWhileTyping ?? false)
                   ? 'translate-x-4'
                   : 'translate-x-0.5'
-              }`}
+              )}
             />
           </button>
         </SearchableSetting>
@@ -294,7 +299,9 @@ export function TerminalWindowSection({
               onClick={() => setColorOverridesExpanded((prev) => !prev)}
               className="flex items-center gap-2 text-sm font-medium"
             >
-              <span className={`transition-transform ${colorOverridesExpanded ? 'rotate-90' : ''}`}>
+              <span
+                className={cn('transition-transform', colorOverridesExpanded ? 'rotate-90' : '')}
+              >
                 ▶
               </span>
               {translate(
@@ -303,9 +310,10 @@ export function TerminalWindowSection({
               )}
             </button>
             <div
-              className={`grid overflow-hidden transition-all duration-300 ease-out ${
+              className={cn(
+                'grid overflow-hidden transition-all duration-300 ease-out',
                 colorOverridesExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-              }`}
+              )}
             >
               <div className="min-h-0 space-y-4">
                 {COLOR_OVERRIDE_GROUPS.map((group) => (

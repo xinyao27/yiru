@@ -17,6 +17,7 @@ import { useAppStore } from '../../store'
 import { BUNDLED_PET, BUNDLED_PETS, findBundledPet, isBundledPetId } from '../pet/pet-models'
 import { PET_SIZE_MAX, PET_SIZE_MIN } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 
 // Why: cluster pet-related controls (show/hide, character picker, custom
 // upload + removal, jump-to-settings) behind a single status-bar segment. Only
@@ -124,7 +125,10 @@ function PetStatusSegmentInner(): React.JSX.Element {
             )}
           >
             <span
-              className={`rounded px-1 py-0.5 text-[11px] font-medium text-muted-foreground group-hover:bg-accent/70 group-hover:text-foreground ${petVisible ? '' : 'opacity-50'}`}
+              className={cn(
+                'rounded px-1 py-0.5 text-[11px] font-medium text-muted-foreground group-hover:bg-accent/70 group-hover:text-foreground',
+                petVisible ? '' : 'opacity-50'
+              )}
             >
               {label}
             </span>

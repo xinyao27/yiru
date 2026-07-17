@@ -2276,11 +2276,12 @@ export default function AutomationsPage(): React.JSX.Element {
             className="flex items-center gap-2 rounded-sm px-1 py-1 text-xs text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <span
-              className={`flex size-4 items-center justify-center rounded-sm border transition-colors ${
+              className={cn(
+                'flex size-4 items-center justify-center rounded-sm border transition-colors',
                 dontAskDeleteAgain
                   ? 'border-foreground bg-foreground text-background'
                   : 'border-muted-foreground bg-transparent'
-              }`}
+              )}
             >
               {dontAskDeleteAgain ? <Check className="size-3" strokeWidth={3} /> : null}
             </span>

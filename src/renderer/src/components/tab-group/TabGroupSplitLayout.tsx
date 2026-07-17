@@ -11,6 +11,7 @@ import {
   WORKSPACE_COLUMN_BODY_CLASS_NAME,
   WORKSPACE_COLUMN_FRAME_CLASS_NAME
 } from './workspace-column-chrome'
+import { cn } from '@/lib/utils'
 
 const MIN_RATIO = 0.15
 const MAX_RATIO = 0.85
@@ -107,9 +108,11 @@ function ResizeHandle({
 
   return (
     <div
-      className={`tab-group-split-resize-handle ${
-        isHorizontal ? 'is-vertical' : 'is-horizontal'
-      }${dragging ? ' is-dragging' : ''}`}
+      className={cn(
+        'tab-group-split-resize-handle',
+        isHorizontal ? 'is-vertical' : 'is-horizontal',
+        dragging ? 'is-dragging' : ''
+      )}
       onPointerDown={onPointerDown}
     />
   )

@@ -51,11 +51,12 @@ export function MobileEmulatorAgentControlRow(): React.JSX.Element {
           </p>
         </div>
         <span
-          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+          className={cn(
+            'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
             setup.completedCount === 2
               ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
               : 'bg-muted text-muted-foreground'
-          }`}
+          )}
         >
           {setup.completedCount}/2
         </span>

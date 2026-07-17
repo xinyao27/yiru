@@ -7,6 +7,7 @@ import { useAppStore } from '../../store'
 import { STATUS_LABELS, statusColor } from '../settings/SshTargetCard'
 import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import type { RemoteWorkspaceSyncStatus } from '../../store/slices/ssh'
+import { cn } from '@/lib/utils'
 
 function isReconnectable(status: SshConnectionStatus): boolean {
   return ['disconnected', 'reconnection-failed', 'error', 'auth-failed'].includes(status)
@@ -102,7 +103,7 @@ export function SshTargetStatusRow({
 
   return (
     <div className="flex items-center gap-2.5 px-2 py-1.5">
-      <span className={`size-1.5 shrink-0 rounded-full ${statusColor(status)}`} />
+      <span className={cn('size-1.5 shrink-0 rounded-full', statusColor(status))} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-[12px] font-medium">{label}</div>
         <div className="flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
@@ -115,7 +116,7 @@ export function SshTargetStatusRow({
             <>
               <span aria-hidden="true">·</span>
               <span
-                className={`inline-flex min-w-0 items-center gap-1 ${syncStatusTone(syncStatus)}`}
+                className={cn('inline-flex min-w-0 items-center gap-1', syncStatusTone(syncStatus))}
               >
                 {syncStatus?.phase === 'pulling' || syncStatus?.phase === 'pushing' ? (
                   <Loader2 className="size-2.5 shrink-0 animate-spin" />

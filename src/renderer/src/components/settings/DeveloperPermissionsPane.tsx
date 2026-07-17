@@ -21,6 +21,7 @@ import type {
 } from '../../../../shared/developer-permissions-types'
 import { Button } from '../ui/button'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 export { getDeveloperPermissionsPaneSearchEntries } from './developer-permissions-search'
 
 type PermissionDefinition = {
@@ -334,7 +335,7 @@ export function DeveloperPermissionsPane(): React.JSX.Element {
           </p>
         </div>
         <Button variant="outline" size="sm" className="gap-1.5" onClick={() => void refresh()}>
-          <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={cn('size-3.5', loading ? 'animate-spin' : '')} />
           {translate('auto.components.settings.DeveloperPermissionsPane.4c17304beb', 'Refresh')}
         </Button>
       </div>
@@ -352,9 +353,10 @@ export function DeveloperPermissionsPane(): React.JSX.Element {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-medium">{permission.label}</span>
                     <span
-                      className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${statusClass(
-                        status
-                      )}`}
+                      className={cn(
+                        'rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+                        statusClass(status)
+                      )}
                     >
                       {statusLabel(status)}
                     </span>

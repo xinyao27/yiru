@@ -17,6 +17,7 @@ import { Button } from '../ui/button'
 import { Badge } from '../ui/badge'
 import { ComputerUseSkillSetupPanel } from './ComputerUseSkillSetupPanel'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 export { getComputerUsePaneSearchEntries } from './computer-use-search'
 
 type PermissionDefinition = {
@@ -287,7 +288,7 @@ export function ComputerUsePane(): React.JSX.Element {
               disabled={resetting}
               onClick={() => void refresh()}
             >
-              <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={cn('size-3.5', loading ? 'animate-spin' : '')} />
               {translate('auto.components.settings.ComputerUsePane.d95d1cfab8', 'Refresh')}
             </Button>
           </div>
@@ -311,9 +312,10 @@ export function ComputerUsePane(): React.JSX.Element {
                             {translate(permission.labelKey, permission.labelDefault)}
                           </span>
                           <span
-                            className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${statusClass(
-                              status
-                            )}`}
+                            className={cn(
+                              'rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+                              statusClass(status)
+                            )}
                           >
                             {statusLabel(status)}
                           </span>

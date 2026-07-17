@@ -135,6 +135,7 @@ import { translate } from '@/i18n/i18n'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { getResolvedExecutionHostIdForWorktree } from '@/lib/resolved-worktree-execution-host'
 import { browserWorkspaceHasRemoteOwner } from '@/runtime/remote-browser-tab-ownership'
+import { cn } from '@/lib/utils'
 
 const EditorPanel = lazy(() => import('./editor/EditorPanel'))
 
@@ -2173,7 +2174,10 @@ function Terminal(): React.JSX.Element | null {
 
   return (
     <div
-      className={`flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden${renderedActiveWorktreeId ? '' : ' hidden'}`}
+      className={cn(
+        'flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden',
+        renderedActiveWorktreeId ? '' : 'hidden'
+      )}
       data-rendered-active-worktree-id={renderedActiveWorktreeId ?? undefined}
     >
       <EditorAutosaveController />
@@ -2243,7 +2247,10 @@ function Terminal(): React.JSX.Element | null {
 
       {anyMountedWorktreeHasLayout ? (
         <div
-          className={`relative flex flex-1 min-w-0 min-h-0 overflow-hidden${effectiveActiveLayout ? '' : ' hidden'}`}
+          className={cn(
+            'relative flex flex-1 min-w-0 min-h-0 overflow-hidden',
+            effectiveActiveLayout ? '' : 'hidden'
+          )}
         >
           {/* Why: each mounted worktree surface is absolutely positioned so we
               can preserve hidden trees without reflowing the active one. Keep
@@ -2311,18 +2318,14 @@ function Terminal(): React.JSX.Element | null {
               dot green moments after the user clicked Shutdown. */}
           {/* Terminal panes container - hidden when editor tab active */}
           <div
-            className={`relative flex-1 min-h-0 overflow-hidden ${
-              // Why: only hide the terminal container when another tab type has
-              // content to display. Hiding unconditionally for non-terminal types
-              // causes a blank screen when activeTabType is stale (e.g. 'editor'
-              // with no files after session restore). The terminal stays visible
-              // as a fallback until another surface is ready.
+            className={cn(
+              'relative flex-1 min-h-0 overflow-hidden',
               (activeTabType === 'editor' && worktreeFiles.length > 0) ||
-              (activeTabType === 'browser' && worktreeBrowserTabs.length > 0) ||
-              activeTabType === 'simulator'
+                (activeTabType === 'browser' && worktreeBrowserTabs.length > 0) ||
+                activeTabType === 'simulator'
                 ? 'hidden'
                 : ''
-            }`}
+            )}
           >
             {workspaceSurfaces
               .filter((workspace) => mountedWorktreeIdsRef.current.has(workspace.id))
@@ -2414,9 +2417,10 @@ function Terminal(): React.JSX.Element | null {
               webviews park into the bounded registry instead of keeping hidden
               Electron guest renderers alive indefinitely. */}
           <div
-            className={`relative flex-1 min-h-0 overflow-hidden ${
+            className={cn(
+              'relative flex-1 min-h-0 overflow-hidden',
               activeTabType !== 'browser' ? 'hidden' : ''
-            }`}
+            )}
           >
             {workspaceSurfaces.map((workspace) => {
               const browserTabs = browserTabsByWorktree[workspace.id] ?? []
@@ -2441,7 +2445,10 @@ function Terminal(): React.JSX.Element | null {
                     return (
                       <div
                         key={browserTab.id}
-                        className={`absolute inset-0${isBrowserActive ? '' : ' pointer-events-none hidden'}`}
+                        className={cn(
+                          'absolute inset-0',
+                          isBrowserActive ? '' : 'pointer-events-none hidden'
+                        )}
                       >
                         {isBrowserActive ? (
                           <BrowserPane browserTab={browserTab} isActive={isBrowserActive} />

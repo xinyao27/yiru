@@ -28,6 +28,7 @@ import {
 } from './terminal-tab-activity-status'
 import { TAB_ROOT_CLASSES } from './tab-root-classes'
 import { TabCloseButton } from './TabCloseButton'
+import { cn } from '@/lib/utils'
 
 type SortableTabProps = {
   tab: TerminalTab
@@ -261,7 +262,12 @@ export default function SortableTab({
       // tab still reads as "selected + has activity". The wash is
       // rendered as an absolutely-positioned child below so the ::after
       // pseudo-element stays free for the drop indicator.
-      className={`${TAB_ROOT_CLASSES} ${getTabDividerClasses(hasTabsToRight)} ${getDropIndicatorClasses(dropIndicator ?? null)} ${getTabRootStateClasses(isActive)}`}
+      className={cn(
+        TAB_ROOT_CLASSES,
+        getTabDividerClasses(hasTabsToRight),
+        getDropIndicatorClasses(dropIndicator ?? null),
+        getTabRootStateClasses(isActive)
+      )}
       onDoubleClick={(e) => {
         if (isEditing) {
           return
@@ -365,11 +371,11 @@ export default function SortableTab({
           spellCheck={false}
         />
       ) : isEditing || menuOpen ? (
-        <span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1`}>{displayTitle}</span>
+        <span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{displayTitle}</span>
       ) : (
         <Tooltip>
           <TooltipTrigger
-            render={<span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1`}>{displayTitle}</span>}
+            render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{displayTitle}</span>}
           />
           <TooltipContent
             side="bottom"
@@ -391,11 +397,13 @@ export default function SortableTab({
           // Why: hover-close occupies this same trailing overlay position; hide
           // collapse only when that close control exists so hit targets never stack.
           <button
-            className={`mr-1 flex items-center justify-center w-4 h-4 rounded-sm shrink-0 ${!isPinned ? 'group-hover:pointer-events-none group-hover:opacity-0' : ''} ${
+            className={cn(
+              'mr-1 flex items-center justify-center w-4 h-4 rounded-sm shrink-0',
+              !isPinned ? 'group-hover:pointer-events-none group-hover:opacity-0' : '',
               isActive
                 ? 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 : 'text-transparent group-hover:text-muted-foreground hover:!text-foreground hover:!bg-muted'
-            }`}
+            )}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation()

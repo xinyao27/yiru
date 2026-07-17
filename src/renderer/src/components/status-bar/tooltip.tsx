@@ -17,6 +17,7 @@ import {
   type UsagePercentageDisplay
 } from '../../../../shared/usage-percentage-display'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
+import { cn } from '@/lib/utils'
 
 // Re-exported from its shared home so status-bar callers keep a single import.
 export { clampUsedPercent }
@@ -128,7 +129,7 @@ function ErrorMessage({
 
   return (
     <div className="space-y-0.5">
-      <div className={`text-[11px] font-medium ${labelClass}`}>{resolvedLabel}</div>
+      <div className={cn('text-[11px] font-medium', labelClass)}>{resolvedLabel}</div>
       <div className={detailClass}>{message}</div>
     </div>
   )
@@ -219,7 +220,7 @@ export function ProviderPanel({
 
   if (!p) {
     return (
-      <span className={`text-xs ${mutedClass}`}>
+      <span className={cn('text-xs', mutedClass)}>
         {translate('auto.components.status.bar.tooltip.6d6df77f41', 'No data available')}
       </span>
     )
@@ -229,8 +230,8 @@ export function ProviderPanel({
 
   if (p.status === 'unavailable') {
     return (
-      <div className={`text-xs ${className ?? 'w-full'}`}>
-        <div className={`flex items-center gap-1.5 font-medium ${textClass}`}>
+      <div className={cn('text-xs', className ?? 'w-full')}>
+        <div className={cn('flex items-center gap-1.5 font-medium', textClass)}>
           <ProviderIcon provider={p.provider} />
           {name}
         </div>
@@ -243,8 +244,8 @@ export function ProviderPanel({
 
   if (p.status === 'error' && !p.session && !p.weekly && !p.fableWeekly && !p.monthly) {
     return (
-      <div className={`text-xs ${className ?? 'w-full'}`}>
-        <div className={`flex items-center gap-1.5 font-medium ${textClass}`}>
+      <div className={cn('text-xs', className ?? 'w-full')}>
+        <div className={cn('flex items-center gap-1.5 font-medium', textClass)}>
           <ProviderIcon provider={p.provider} />
           {name}
         </div>
@@ -285,15 +286,15 @@ export function ProviderPanel({
 
     return (
       <div className="space-y-1">
-        <div className={`font-medium ${textClass}`}>{label}</div>
-        <div className={`h-[6px] w-full overflow-hidden rounded-full ${emptyBarClass}`}>
+        <div className={cn('font-medium', textClass)}>{label}</div>
+        <div className={cn('h-[6px] w-full overflow-hidden rounded-full', emptyBarClass)}>
           {/* Why: fill follows the selected percentage; color still signals consumption urgency. */}
           <div
-            className={`h-full rounded-full ${barColor(usedPct)} transition-all duration-300`}
+            className={cn('h-full rounded-full', barColor(usedPct), 'transition-all duration-300')}
             style={{ width: `${displayedPct}%` }}
           />
         </div>
-        <div className={`flex justify-between ${mutedClass}`}>
+        <div className={cn('flex justify-between', mutedClass)}>
           <span>{formatUsagePercentageLabel(usedPct, usagePercentageDisplay)}</span>
           {resetLabel && <span>{resetLabel}</span>}
         </div>
@@ -302,9 +303,9 @@ export function ProviderPanel({
   }
 
   return (
-    <div className={`${className ?? 'w-full'} space-y-3 text-xs`}>
+    <div className={cn(className ?? 'w-full', 'space-y-3 text-xs')}>
       <div>
-        <div className={`flex items-center gap-1.5 text-[13px] font-medium ${textClass}`}>
+        <div className={cn('flex items-center gap-1.5 text-[13px] font-medium', textClass)}>
           <ProviderIcon provider={p.provider} />
           {name}
         </div>
@@ -326,7 +327,7 @@ export function ProviderPanel({
         {resetCreditExpiry ? <div className={faintClass}>{resetCreditExpiry}</div> : null}
       </div>
 
-      <div className={`border-t ${dividerClass}`} />
+      <div className={cn('border-t', dividerClass)} />
 
       {getWindowSections(p).map((s) => (
         <PanelWindowSection key={s.label} w={s.window} label={s.label} />

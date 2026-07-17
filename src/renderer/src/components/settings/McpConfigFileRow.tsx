@@ -2,6 +2,7 @@ import { WarningCircle as AlertCircle, CheckCircle as CheckCircle2 } from '@phos
 import type { McpConfigInspection } from '../../../../shared/mcp-config'
 import { Button } from '../ui/button'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 
 export type LoadedMcpConfigInspection = McpConfigInspection & {
   absolutePath: string
@@ -67,7 +68,10 @@ export function McpConfigFileRow({ config, onOpen }: McpConfigFileRowProps): Rea
           </div>
         </div>
         <span
-          className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] font-medium ${statusClassName(config)}`}
+          className={cn(
+            'shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] font-medium',
+            statusClassName(config)
+          )}
         >
           {statusLabel(config)}
         </span>

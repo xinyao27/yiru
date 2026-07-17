@@ -25,6 +25,7 @@ import { EditorPanelHeaderPath } from './EditorPanelHeaderPath'
 import { useDiffNavigation } from './diff-navigation-context'
 import { useShortcutKeyDetails } from '@/hooks/useShortcutLabel'
 import { ShortcutKeyCombo } from '@/components/ShortcutKeyCombo'
+import { cn } from '@/lib/utils'
 
 type EditorPanelHeaderProps = {
   activeFile: OpenFile
@@ -298,11 +299,12 @@ export function EditorPanelHeader({
               render={
                 <button
                   type="button"
-                  className={`p-1 rounded hover:bg-accent hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground ${
+                  className={cn(
+                    'p-1 rounded hover:bg-accent hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground',
                     showMarkdownTableOfContents && !isMarkdownTableOfContentsDisabled
                       ? 'bg-accent text-foreground'
                       : 'text-muted-foreground'
-                  }`}
+                  )}
                   onClick={onToggleMarkdownTableOfContents}
                   disabled={isMarkdownTableOfContentsDisabled}
                   aria-label={translate(

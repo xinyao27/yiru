@@ -833,11 +833,13 @@ export function AccountsPane({
                 )
               }
               disabled={claudeAction !== 'idle' || accountRuntimeUnavailable}
-              className={`flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors ${
+              className={cn(
+                'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
                 systemClaudeActive
                   ? 'border-foreground/20 bg-accent/15'
-                  : 'border-border/70 hover:border-border hover:bg-accent/8'
-              } disabled:cursor-default disabled:opacity-100`}
+                  : 'border-border/70 hover:border-border hover:bg-accent/8',
+                'disabled:cursor-default disabled:opacity-100'
+              )}
             >
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <div className="flex min-w-0 items-center gap-2">
@@ -893,11 +895,12 @@ export function AccountsPane({
                 return (
                   <div
                     key={account.id}
-                    className={`flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors ${
+                    className={cn(
+                      'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
                       isActive
                         ? 'border-foreground/20 bg-accent/15'
                         : 'border-border/70 hover:border-border hover:bg-accent/8'
-                    }`}
+                    )}
                   >
                     <div className="flex w-full items-center justify-between gap-3 max-md:flex-col max-md:items-start">
                       <button
@@ -1125,13 +1128,15 @@ export function AccountsPane({
                 )
               }
               disabled={codexAction !== 'idle' || accountRuntimeUnavailable}
-              className={`flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors ${
+              className={cn(
+                'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
                 systemCodexNeedsReauthentication
                   ? 'border-destructive/50 bg-destructive/5'
                   : systemCodexActive
                     ? 'border-foreground/20 bg-accent/15'
-                    : 'border-border/70 hover:border-border hover:bg-accent/8'
-              } disabled:cursor-default disabled:opacity-100`}
+                    : 'border-border/70 hover:border-border hover:bg-accent/8',
+                'disabled:cursor-default disabled:opacity-100'
+              )}
             >
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <div className="flex min-w-0 items-center gap-2">
@@ -1162,9 +1167,10 @@ export function AccountsPane({
                   ) : null}
                 </div>
                 <span
-                  className={`truncate text-[11px] ${
+                  className={cn(
+                    'truncate text-[11px]',
                     systemCodexNeedsReauthentication ? 'text-destructive' : 'text-muted-foreground'
-                  }`}
+                  )}
                 >
                   {systemCodexNeedsReauthentication
                     ? translate(
@@ -1221,13 +1227,14 @@ export function AccountsPane({
                 return (
                   <div
                     key={account.id}
-                    className={`flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors ${
+                    className={cn(
+                      'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
                       needsReauthentication
                         ? 'border-destructive/50 bg-destructive/5'
                         : isActive
                           ? 'border-foreground/20 bg-accent/15'
                           : 'border-border/70 hover:border-border hover:bg-accent/8'
-                    }`}
+                    )}
                   >
                     <div className="flex w-full items-center justify-between gap-3 max-md:flex-col max-md:items-start">
                       <button
@@ -1279,9 +1286,10 @@ export function AccountsPane({
                           ) : null}
                         </div>
                         <div
-                          className={`flex min-w-0 items-center gap-1.5 text-[11px] max-sm:flex-wrap ${
+                          className={cn(
+                            'flex min-w-0 items-center gap-1.5 text-[11px] max-sm:flex-wrap',
                             needsReauthentication ? 'text-destructive' : 'text-muted-foreground'
-                          }`}
+                          )}
                         >
                           {needsReauthentication ? (
                             <span className="truncate">
@@ -1422,14 +1430,16 @@ export function AccountsPane({
                 geminiCliOAuthEnabled: !settings.geminiCliOAuthEnabled
               })
             }}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors ${
+            className={cn(
+              'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
               settings.geminiCliOAuthEnabled ? 'bg-foreground' : 'bg-muted-foreground/30'
-            }`}
+            )}
           >
             <span
-              className={`pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform ${
+              className={cn(
+                'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
                 settings.geminiCliOAuthEnabled ? 'translate-x-4' : 'translate-x-0.5'
-              }`}
+              )}
             />
           </button>
         </SearchableSetting>

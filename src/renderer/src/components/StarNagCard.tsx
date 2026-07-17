@@ -6,6 +6,7 @@ import { useAppStore } from '../store'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { translate } from '@/i18n/i18n'
 import { YIRU_GITHUB_REPOSITORY_URL } from '../../../shared/yiru-github-repository'
+import { cn } from '@/lib/utils'
 
 type StarNagMode = 'gh' | 'web'
 
@@ -151,10 +152,10 @@ export function StarNagCard(): React.JSX.Element | null {
       // Why: when UpdateCard is up, it occupies bottom-10. Raise the star-nag
       // card above it so both are visible — the update action stays on top
       // visually (it's the higher-priority one) and the star-nag sits above.
-      className={`fixed right-4 z-40 w-[360px] max-w-[calc(100vw-32px)]
-      max-[480px]:left-4 max-[480px]:right-4 max-[480px]:w-auto ${
+      className={cn(
+        'fixed right-4 z-40 w-[360px] max-w-[calc(100vw-32px)] max-[480px]:left-4 max-[480px]:right-4 max-[480px]:w-auto',
         updateCardVisible ? 'bottom-[220px]' : 'bottom-10'
-      }`}
+      )}
     >
       <Card className="py-0 gap-0" role="complementary" aria-labelledby="star-nag-heading">
         <div className="flex flex-col gap-2.5 p-3.5">

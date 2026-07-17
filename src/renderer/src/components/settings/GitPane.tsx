@@ -19,6 +19,7 @@ import {
 } from './keep-local-main-up-to-date-setting'
 import { translate } from '@/i18n/i18n'
 import { SettingsRow, SettingsSegmentedControl } from './SettingsFormControls'
+import { cn } from '@/lib/utils'
 
 export { getGitPaneSearchEntries }
 
@@ -181,11 +182,12 @@ export function GitPane({
             <button
               key={option}
               onClick={() => updateSettings({ branchPrefix: option })}
-              className={`rounded-sm px-3 py-1 text-sm transition-colors ${
+              className={cn(
+                'rounded-sm px-3 py-1 text-sm transition-colors',
                 settings.branchPrefix === option
                   ? 'bg-accent font-medium text-accent-foreground'
                   : 'text-muted-foreground hover:text-foreground'
-              }`}
+              )}
             >
               {option === 'git-username'
                 ? translate('auto.components.settings.GitPane.a182c5125e', 'Git Username')
@@ -258,16 +260,18 @@ export function GitPane({
               refreshLocalBaseRefOnWorktreeCreate: !settings.refreshLocalBaseRefOnWorktreeCreate
             })
           }
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors ${
+          className={cn(
+            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
             settings.refreshLocalBaseRefOnWorktreeCreate
               ? 'bg-foreground'
               : 'bg-muted-foreground/30'
-          }`}
+          )}
         >
           <span
-            className={`pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform ${
+            className={cn(
+              'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
               settings.refreshLocalBaseRefOnWorktreeCreate ? 'translate-x-4' : 'translate-x-0.5'
-            }`}
+            )}
           />
         </button>
       </SearchableSetting>
@@ -354,14 +358,16 @@ export function GitPane({
               enableGitHubAttribution: !settings.enableGitHubAttribution
             })
           }
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors ${
+          className={cn(
+            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
             settings.enableGitHubAttribution ? 'bg-foreground' : 'bg-muted-foreground/30'
-          }`}
+          )}
         >
           <span
-            className={`pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform ${
+            className={cn(
+              'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
               settings.enableGitHubAttribution ? 'translate-x-4' : 'translate-x-0.5'
-            }`}
+            )}
           />
         </button>
       </SearchableSetting>

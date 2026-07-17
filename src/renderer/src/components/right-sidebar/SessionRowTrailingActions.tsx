@@ -36,7 +36,11 @@ const HOVER_ACTION_GROUP_COLLAPSED =
 const HOVER_ACTION_GROUP_REVEALED =
   'group-hover/session-row:max-w-none group-hover/session-row:ml-0 group-hover/session-row:overflow-visible group-hover/session-row:opacity-100 group-focus-within/session-row:max-w-none group-focus-within/session-row:ml-0 group-focus-within/session-row:overflow-visible group-focus-within/session-row:opacity-100'
 
-const HOVER_ACTION_GROUP_CLASS = `${HOVER_ACTION_GROUP_BASE} ${HOVER_ACTION_GROUP_COLLAPSED} ${HOVER_ACTION_GROUP_REVEALED}`
+const HOVER_ACTION_GROUP_CLASS = cn(
+  HOVER_ACTION_GROUP_BASE,
+  HOVER_ACTION_GROUP_COLLAPSED,
+  HOVER_ACTION_GROUP_REVEALED
+)
 
 export function SessionRowTrailingActions({
   session,

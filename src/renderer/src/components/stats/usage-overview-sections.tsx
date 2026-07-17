@@ -9,6 +9,7 @@ import {
   type UsageProviderOverview
 } from './usage-overview-model'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 
 const INTENSITY_CLASS: Record<UsageOverviewDailyPoint['intensity'], string> = {
   0: 'border-border/60 bg-muted/40',
@@ -110,7 +111,7 @@ export function TokenMixBar({ overview }: { overview: UsageOverviewModel }): Rea
       <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
         {segments.map((segment) => (
           <div key={segment.key} className="flex min-w-0 items-center gap-2">
-            <span className={`size-2 shrink-0 rounded-full ${segment.className}`} />
+            <span className={cn('size-2 shrink-0 rounded-full', segment.className)} />
             <span className="min-w-0 truncate">
               {segment.label}: {formatUsageTokens(segment.value)}
             </span>
@@ -163,7 +164,10 @@ export function DailyIntensityGrid({
         {days.map((day) => (
           <div
             key={day.day}
-            className={`aspect-square min-h-3 rounded-[2px] border ${INTENSITY_CLASS[day.intensity]}`}
+            className={cn(
+              'aspect-square min-h-3 rounded-[2px] border',
+              INTENSITY_CLASS[day.intensity]
+            )}
             aria-label={translate(
               'auto.components.stats.usage.overview.sections.32330a6e66',
               '{{value0}}: {{value1}} tokens',
@@ -180,7 +184,10 @@ export function DailyIntensityGrid({
           {[0, 1, 2, 3, 4].map((intensity) => (
             <span
               key={intensity}
-              className={`size-2 rounded-[2px] border ${INTENSITY_CLASS[intensity as UsageOverviewDailyPoint['intensity']]}`}
+              className={cn(
+                'size-2 rounded-[2px] border',
+                INTENSITY_CLASS[intensity as UsageOverviewDailyPoint['intensity']]
+              )}
             />
           ))}
         </div>

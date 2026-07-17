@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import type { AddRepoDialogStep } from './add-repo-dialog-types'
 import { AddRepoStepIndicator } from './AddRepoStepIndicator'
+import { cn } from '@/lib/utils'
 
 export function AddRepoDialogChrome({
   children,
@@ -21,9 +22,10 @@ export function AddRepoDialogChrome({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className={`min-w-0 overflow-hidden sm:max-w-lg [&>*]:min-w-0 ${
+        className={cn(
+          'min-w-0 overflow-hidden sm:max-w-lg [&>*]:min-w-0',
           step === 'nested' ? 'max-h-[calc(100vh-2rem)] grid-rows-[auto_auto_minmax(0,1fr)]' : ''
-        }`}
+        )}
       >
         <AddRepoStepIndicator step={step} isAdding={isAdding} onBack={onBack} />
         {children}

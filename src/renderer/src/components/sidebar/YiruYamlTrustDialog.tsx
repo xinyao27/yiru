@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store'
 import type { YiruHookScriptKind } from '@/lib/yiru-hook-trust'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 
 type ScriptKind = YiruHookScriptKind
 
@@ -177,11 +178,12 @@ const YiruYamlTrustDialog = React.memo(function YiruYamlTrustDialog() {
         )}
 
         <label
-          className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 transition-colors ${
+          className={cn(
+            'flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 transition-colors',
             alwaysTrust
               ? 'border-primary/60 bg-primary/5'
               : 'border-border/70 bg-muted/25 hover:border-border hover:bg-muted/40'
-          }`}
+          )}
         >
           <input
             type="checkbox"

@@ -59,6 +59,7 @@ import type {
 } from '../../../shared/types'
 import type { TaskSourceContext } from '../../../shared/task-source-context'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 
 type LinearIssueWorkspaceProps = {
   issue: LinearIssue | null
@@ -97,13 +98,18 @@ function LinearIssueAvatar({
   className?: string
 }): React.JSX.Element {
   if (avatarUrl) {
-    return <img src={avatarUrl} alt={name ?? ''} className={`${className} shrink-0 rounded-full`} />
+    return (
+      <img src={avatarUrl} alt={name ?? ''} className={cn(className, 'shrink-0 rounded-full')} />
+    )
   }
 
   const initial = name?.trim().charAt(0).toUpperCase() || '?'
   return (
     <span
-      className={`${className} flex shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground`}
+      className={cn(
+        className,
+        'flex shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground'
+      )}
       aria-hidden="true"
     >
       {initial}

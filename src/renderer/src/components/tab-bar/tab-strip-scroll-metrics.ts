@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils'
+
 export type TabStripScrollMetrics = {
   hasOverflow: boolean
   canScrollStart: boolean
@@ -26,14 +28,10 @@ export function getTabStripScrollMaskClassName(
     return ''
   }
 
-  const classes: string[] = []
-  if (metrics.canScrollStart) {
-    classes.push('terminal-tab-strip--fade-start')
-  }
-  if (metrics.canScrollEnd) {
-    classes.push('terminal-tab-strip--fade-end')
-  }
-  return classes.join(' ')
+  return cn(
+    metrics.canScrollStart && 'terminal-tab-strip--fade-start',
+    metrics.canScrollEnd && 'terminal-tab-strip--fade-end'
+  )
 }
 
 export function sameTabStripScrollMetrics(

@@ -77,6 +77,7 @@ import {
 } from '../../../../shared/usage-percentage-display'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
 import { ProviderUsageSegment } from './ProviderUsageSegment'
+import { cn } from '@/lib/utils'
 
 type StatusBarProps = {
   floatingTerminalOpen: boolean
@@ -637,11 +638,12 @@ function AccountRuntimeToggle<TGroup extends { key: string; label: string }>({
               role="radio"
               aria-checked={active}
               onClick={() => onChange(group)}
-              className={`min-w-0 flex-1 rounded-sm px-2 py-1 text-center text-xs outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+              className={cn(
+                'min-w-0 flex-1 rounded-sm px-2 py-1 text-center text-xs outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
                 active
                   ? 'bg-accent font-medium text-accent-foreground'
                   : 'text-muted-foreground hover:text-foreground'
-              }`}
+              )}
             >
               <span className="block truncate">{group.label}</span>
             </button>
@@ -977,7 +979,7 @@ export function InlineUsageBars({
 
   return (
     <div
-      className={`grid w-full items-center gap-1.5 ${isFetching ? 'animate-pulse' : ''}`}
+      className={cn('grid w-full items-center gap-1.5', isFetching ? 'animate-pulse' : '')}
       style={{
         gridTemplateColumns: `repeat(${Math.max(1, usageWindows.length)}, minmax(0, 1fr))`
       }}
@@ -987,7 +989,7 @@ export function InlineUsageBars({
           <div className="h-[4px] min-w-0 flex-1 overflow-hidden rounded-full bg-muted">
             {/* Why: fill follows the selected percentage; color still signals consumption urgency. */}
             <div
-              className={`h-full rounded-full ${barColor(window.used)}`}
+              className={cn('h-full rounded-full', barColor(window.used))}
               style={{ width: `${getDisplayedUsagePercentage(window.used, display)}%` }}
             />
           </div>
@@ -1023,7 +1025,7 @@ function InlineUsageSignInAction({
   onSignIn: () => void
 }): React.JSX.Element {
   return (
-    <div className={`flex w-full items-center gap-2 ${isFetching ? 'animate-pulse' : ''}`}>
+    <div className={cn('flex w-full items-center gap-2', isFetching ? 'animate-pulse' : '')}>
       <span className="min-w-0 flex-1 text-[10px] text-muted-foreground">
         {translate('auto.components.status.bar.StatusBar.f19a63e7cd', 'Sign in to see usage')}
       </span>
@@ -1625,7 +1627,12 @@ export function ProviderDetailsMenu({
             {iconOnly ? (
               <span className="inline-flex items-center gap-1">
                 <span
-                  className={`inline-block h-2 w-2 rounded-full ${provider.session || provider.weekly || provider.fableWeekly || provider.monthly ? 'bg-muted-foreground/60' : 'bg-muted-foreground/30'}`}
+                  className={cn(
+                    'inline-block h-2 w-2 rounded-full',
+                    provider.session || provider.weekly || provider.fableWeekly || provider.monthly
+                      ? 'bg-muted-foreground/60'
+                      : 'bg-muted-foreground/30'
+                  )}
                 />
                 <span className="text-muted-foreground">
                   {provider.provider === 'claude'

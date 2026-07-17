@@ -19,6 +19,7 @@ import {
 import type { ChangelogData } from '../../../shared/types'
 import { YIRU_GITHUB_RELEASES_URL } from '../../../shared/yiru-github-repository'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/utils'
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -599,7 +600,7 @@ export function UpdateCard() {
       max-[480px]:left-4 max-[480px]:right-4 max-[480px]:w-auto"
     >
       {showReassurance && (
-        <Card className={`py-0 gap-0 ${animationClass}`}>
+        <Card className={cn('py-0 gap-0', animationClass)}>
           <div className="flex items-center gap-3 p-3">
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">
@@ -627,7 +628,7 @@ export function UpdateCard() {
         aria-live="polite"
         tabIndex={-1}
         onKeyDown={handleKeyDown}
-        className={`py-0 gap-0 ${animationClass}`}
+        className={cn('py-0 gap-0', animationClass)}
       >
         {cardContent}
       </Card>
@@ -695,7 +696,7 @@ function RichCardContent({
           <img
             src={release.mediaUrl}
             alt=""
-            className={`w-full rounded-md ${mediaLoaded ? '' : 'absolute inset-0'}`}
+            className={cn('w-full rounded-md', mediaLoaded ? '' : 'absolute inset-0')}
             style={!mediaLoaded ? { visibility: 'hidden' } : undefined}
             onError={onMediaError}
             onLoad={onMediaLoad}
@@ -854,7 +855,7 @@ function DownloadingContent({
           <img
             src={release.mediaUrl}
             alt=""
-            className={`w-full rounded-md ${mediaLoaded ? '' : 'absolute inset-0'}`}
+            className={cn('w-full rounded-md', mediaLoaded ? '' : 'absolute inset-0')}
             style={!mediaLoaded ? { visibility: 'hidden' } : undefined}
             onError={onMediaError}
             onLoad={onMediaLoad}

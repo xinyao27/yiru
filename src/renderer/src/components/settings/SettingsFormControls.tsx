@@ -878,11 +878,12 @@ export function FontAutocomplete({
                     onMouseDown={(e) => e.preventDefault()}
                     onMouseEnter={() => setHighlightedIndex(sourceIndex)}
                     onClick={() => commitValue(font)}
-                    className={`flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors ${
+                    className={cn(
+                      'flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors',
                       sourceIndex === highlightedIndex
                         ? 'bg-accent text-accent-foreground'
                         : 'hover:bg-muted/60'
-                    }`}
+                    )}
                   >
                     <span className="truncate">{font}</span>
                     {font === value ? <Check className="ml-3 size-4 shrink-0" /> : null}

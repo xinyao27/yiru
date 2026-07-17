@@ -94,7 +94,7 @@ export function AutomationEditorDialogFooter({
               'auto.components.automations.AutomationEditorDialog.0d17f4ca8f',
               'Select project'
             )}
-            triggerClassName={`h-9 w-full min-w-0 ${pickerTriggerClassName}`}
+            triggerClassName={cn('h-9 w-full min-w-0', pickerTriggerClassName)}
             getRepoHostLabel={getRepoHostLabel}
           />
         </Field>
@@ -173,7 +173,7 @@ export function AutomationEditorDialogFooter({
                 <WorkspaceCombobox
                   worktrees={worktrees}
                   value={draft.workspaceId}
-                  triggerClassName={`min-w-0 ${pickerTriggerClassName}`}
+                  triggerClassName={cn('min-w-0', pickerTriggerClassName)}
                   onValueChange={(workspaceId) =>
                     onDraftChange((current) => ({ ...current, workspaceId }))
                   }
@@ -187,7 +187,7 @@ export function AutomationEditorDialogFooter({
                   repoMap={repoMap}
                   worktrees={worktrees}
                   value={draft.baseBranch}
-                  triggerClassName={`min-w-0 ${pickerTriggerClassName}`}
+                  triggerClassName={cn('min-w-0', pickerTriggerClassName)}
                   onValueChange={(baseBranch) =>
                     onDraftChange((current) => ({ ...current, baseBranch }))
                   }
@@ -232,7 +232,7 @@ export function AutomationEditorDialogFooter({
                   agentId && onDraftChange((current) => ({ ...current, agentId }))
                 }
                 defaultAgent={settings?.defaultTuiAgent ?? null}
-                triggerClassName={`h-9 w-full min-w-0 ${pickerTriggerClassName}`}
+                triggerClassName={cn('h-9 w-full min-w-0', pickerTriggerClassName)}
                 allowNarrowTrigger
               />
             </Field>

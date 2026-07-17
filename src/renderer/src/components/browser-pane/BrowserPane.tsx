@@ -5870,11 +5870,12 @@ function BrowserPagePane({
                     }}
                   />
                   <div
-                    className={`flex items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 shadow-lg ${
+                    className={cn(
+                      'flex items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 shadow-lg',
                       grabToast.type === 'success'
                         ? 'bg-white text-gray-900'
                         : 'bg-white text-red-600'
-                    }`}
+                    )}
                   >
                     {grabToast.type === 'success' ? (
                       <CircleCheck className="size-4 fill-blue-600 text-white" />
