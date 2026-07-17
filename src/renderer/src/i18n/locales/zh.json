@@ -2893,6 +2893,10 @@
           },
           "TerminalTabLeadingIcon": {
             "7ab2964bea": "未读的代理完成"
+          },
+          "TabBarOpenInMenuButton": {
+            "3f5d946e01": "打开于 {{value0}}",
+            "50ec9a165e": "选择应用程序"
           }
         }
       },

@@ -2513,6 +2513,8 @@ export type OpenInApplication = {
   command: string
 }
 
+export type OpenInTargetKey = `application:${string}` | 'file-manager'
+
 export type SourceControlViewMode = 'list' | 'tree'
 export type SourceControlGroupOrder = 'changes-first' | 'staged-first' | 'untracked-first'
 
@@ -2719,6 +2721,8 @@ export type GlobalSettings = {
   nativeChatSessionOptions?: PersistedNativeChatSessionOptions
   /** Extra launcher rows for the worktree "Open in" submenu. VS Code is always shown first. */
   openInApplications?: OpenInApplication[]
+  /** Last launcher chosen from the tab-bar split button. Namespacing keeps built-ins collision-free. */
+  lastOpenInTargetKey?: OpenInTargetKey
   /** Deprecated: migration/backward-compat only. Use PersistedUIState.rightSidebarOpen. */
   rightSidebarOpenByDefault: boolean
   showGitIgnoredFiles?: boolean

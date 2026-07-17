@@ -2893,6 +2893,10 @@
           },
           "TerminalTabLeadingIcon": {
             "7ab2964bea": "未読のエージェント完了"
+          },
+          "TabBarOpenInMenuButton": {
+            "3f5d946e01": "Open in {{value0}}",
+            "50ec9a165e": "Choose application"
           }
         }
       },

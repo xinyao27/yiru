@@ -2916,6 +2916,10 @@
           },
           "TerminalTabLeadingIcon": {
             "7ab2964bea": "Unread agent completion"
+          },
+          "TabBarOpenInMenuButton": {
+            "3f5d946e01": "Open in {{value0}}",
+            "50ec9a165e": "Choose application"
           }
         }
       },
