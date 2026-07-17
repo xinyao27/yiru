@@ -4,6 +4,7 @@ import type { CheckStatus } from '../../../../shared/types'
 import type { ActiveRightSidebarTab, ActivityBarPosition } from '@/store/slices/editor'
 import { cn } from '@/lib/utils'
 import { useSidebarResize } from '@/hooks/useSidebarResize'
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   ContextMenu,
@@ -95,9 +96,11 @@ export function RightSidebarFrame({
     <Tooltip>
       <TooltipTrigger
         render={
-          <button
+          <Button
             type="button"
-            className="sidebar-toggle mr-1"
+            variant="ghost"
+            size="icon-sm"
+            className={cn('mr-1 text-muted-foreground', RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)}
             onClick={onToggle}
             aria-label={translate(
               'auto.components.right.sidebar.index.e8e2e4ce74',
@@ -105,8 +108,8 @@ export function RightSidebarFrame({
             )}
           >
             {/* Why: Phosphor's sidebar glyph is left-oriented by default. */}
-            <PanelRight className="-scale-x-100" size={16} />
-          </button>
+            <PanelRight className="-scale-x-100" />
+          </Button>
         }
       />
       <TooltipContent side="bottom" sideOffset={6}>

@@ -107,30 +107,32 @@ vi.mock('@/store/selectors', () => ({
   getWorktreeMapFromState: () => new Map()
 }))
 
+type TriggerMockProps = { children?: ReactNode; render?: ReactElement }
+
+function renderTriggerMock(
+  { children, render }: TriggerMockProps,
+  dataAttribute: 'data-tooltip-trigger' | 'data-context-menu-trigger' | 'data-dropdown-trigger'
+): ReactElement {
+  const trigger = render ?? (isValidElement(children) ? children : null)
+  if (trigger) {
+    return cloneElement(trigger as ReactElement<Record<string, unknown>>, {
+      [dataAttribute]: 'true'
+    })
+  }
+  return <span {...{ [dataAttribute]: true }}>{children}</span>
+}
+
 vi.mock('@/components/ui/tooltip', () => ({
   TooltipProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipContent: ({ children }: { children: ReactNode }) => <span>{children}</span>,
-  TooltipTrigger: ({ children, asChild }: { children: ReactNode; asChild?: boolean }) => {
-    if (asChild && isValidElement(children)) {
-      return cloneElement(children as ReactElement<Record<string, unknown>>, {
-        'data-tooltip-trigger': 'true'
-      })
-    }
-    return <span data-tooltip-trigger>{children}</span>
-  }
+  TooltipTrigger: (props: TriggerMockProps) => renderTriggerMock(props, 'data-tooltip-trigger')
 }))
 
 vi.mock('@/components/ui/context-menu', () => ({
   ContextMenu: ({ children }: { children: ReactNode }) => <>{children}</>,
-  ContextMenuTrigger: ({ children, asChild }: { children: ReactNode; asChild?: boolean }) => {
-    if (asChild && isValidElement(children)) {
-      return cloneElement(children as ReactElement<Record<string, unknown>>, {
-        'data-context-menu-trigger': 'true'
-      })
-    }
-    return <span data-context-menu-trigger>{children}</span>
-  },
+  ContextMenuTrigger: (props: TriggerMockProps) =>
+    renderTriggerMock(props, 'data-context-menu-trigger'),
   ContextMenuContent: ({ children }: { children: ReactNode }) => <>{children}</>,
   ContextMenuLabel: ({ children }: { children: ReactNode }) => <>{children}</>,
   ContextMenuRadioGroup: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -142,14 +144,8 @@ vi.mock('@/components/ui/dropdown-menu', () => ({
   DropdownMenuContent: ({ children }: { children: ReactNode }) => <>{children}</>,
   DropdownMenuItem: ({ children }: { children: ReactNode }) => <>{children}</>,
   DropdownMenuShortcut: ({ children }: { children: ReactNode }) => <>{children}</>,
-  DropdownMenuTrigger: ({ children, asChild }: { children: ReactNode; asChild?: boolean }) => {
-    if (asChild && isValidElement(children)) {
-      return cloneElement(children as ReactElement<Record<string, unknown>>, {
-        'data-dropdown-trigger': 'true'
-      })
-    }
-    return <span data-dropdown-trigger>{children}</span>
-  }
+  DropdownMenuTrigger: (props: TriggerMockProps) =>
+    renderTriggerMock(props, 'data-dropdown-trigger')
 }))
 
 vi.mock('./FileExplorer', () => ({
@@ -249,10 +245,11 @@ describe('rendered right sidebar titlebar drag regions', () => {
     expectNoDrag(buttonOpeningTag(markup, 'Checks'))
     expect(buttonOpeningTag(markup, 'Explorer')).toContain('my-auto h-7')
     expect(buttonOpeningTag(markup, 'Explorer')).toContain('bg-accent')
-    expect(buttonOpeningTag(markup, 'Explorer')).not.toContain('border-r')
+    expect(buttonOpeningTag(markup, 'Explorer')).not.toContain(' border-r ')
     expect(buttonOpeningTag(markup, 'Source Control')).toContain('hover:bg-accent')
     expect(markup).not.toContain('absolute bottom-0 left-[25%]')
-    expect(buttonOpeningTag(markup, 'Toggle right sidebar')).toContain('sidebar-toggle')
+    expect(buttonOpeningTag(markup, 'Toggle right sidebar')).toContain('data-slot="button"')
+    expect(buttonOpeningTag(markup, 'Toggle right sidebar')).toContain('data-size="icon-sm"')
     expect(markup).toContain('-scale-x-100')
     expect(markup).toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
   })
@@ -314,7 +311,8 @@ describe('rendered right sidebar titlebar drag regions', () => {
     expectNoDrag(buttonOpeningTag(markup, 'Explorer'))
     expectNoDrag(buttonOpeningTag(markup, 'Source Control'))
     expectNoDrag(buttonOpeningTag(markup, 'Checks'))
-    expect(buttonOpeningTag(markup, 'Toggle right sidebar')).toContain('sidebar-toggle')
+    expect(buttonOpeningTag(markup, 'Toggle right sidebar')).toContain('data-slot="button"')
+    expect(buttonOpeningTag(markup, 'Toggle right sidebar')).toContain('data-size="icon-sm"')
   })
 
   it('hides git-only activity buttons for folder workspace ids without a backing repo', () => {

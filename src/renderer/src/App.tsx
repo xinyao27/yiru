@@ -34,6 +34,7 @@ import { shouldShowWorktreeCreationSurface } from '@/lib/worktree-creation-surfa
 import { buildAppFontFamily } from '@/lib/app-font-family'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAppStore } from './store'
 import { useShallow } from 'zustand/react/shallow'
@@ -197,6 +198,10 @@ const hasCustomTitleBar = shouldRenderDesktopWindowChrome({
   platform: shortcutPlatform,
   isWebClient: isPairedWebClientWindow()
 })
+// Why: Electron drag regions swallow clicks even when a control is visibly above them.
+const TITLEBAR_BUTTON_NO_DRAG_STYLE = {
+  WebkitAppRegion: 'no-drag'
+} as React.CSSProperties
 
 async function listRuntimeSessionHostIdsForStartup(): Promise<ExecutionHostId[]> {
   try {
@@ -255,16 +260,22 @@ function WindowControls(): React.JSX.Element {
   }, [])
   return (
     <div className="window-controls">
-      <button
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
         className="window-controls-btn"
         aria-label={translate('auto.App.bbb7f90669', 'Minimize')}
         onClick={() => window.api.ui.minimize()}
       >
-        <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden>
+        <svg className="size-2.5" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
           <path d="M0 5h10v1H0z" fill="currentColor" />
         </svg>
-      </button>
-      <button
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
         className="window-controls-btn"
         aria-label={
           maximized
@@ -275,17 +286,20 @@ function WindowControls(): React.JSX.Element {
       >
         {maximized ? (
           // Restore icon (two overlapping squares)
-          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden>
+          <svg className="size-2.5" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
             <path d="M2 0v2H0v8h8V8h2V0H2zm6 9H1V3h7v6zM9 7H8V2H3V1h6v6z" fill="currentColor" />
           </svg>
         ) : (
           // Maximize icon (single square outline)
-          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden>
+          <svg className="size-2.5" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
             <path d="M0 0v10h10V0H0zm9 9H1V1h8v8z" fill="currentColor" />
           </svg>
         )}
-      </button>
-      <button
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
         className="window-controls-btn window-controls-close"
         aria-label={translate('auto.App.e960d18540', 'Close')}
         // Why: IPC to main so the BrowserWindow 'close' event fires, which
@@ -294,10 +308,10 @@ function WindowControls(): React.JSX.Element {
         // unreliable in sandboxed renderers.
         onClick={() => window.api.ui.requestClose()}
       >
-        <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden>
+        <svg className="size-2.5" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
           <path d="M1 0L0 1l4 4-4 4 1 1 4-4 4 4 1-1-4-4 4-4-1-1-4 4-4-4z" fill="currentColor" />
         </svg>
-      </button>
+      </Button>
     </div>
   )
 }
@@ -2049,13 +2063,17 @@ function App(): React.JSX.Element {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <button
-                    className="titlebar-icon-button"
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="mr-2 text-muted-foreground"
+                    style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
                     aria-label={translate('auto.App.8b0b8eb54f', 'Application menu')}
                     onClick={() => window.api.ui.popupMenu()}
                   >
-                    <MoreHorizontal size={14} />
-                  </button>
+                    <MoreHorizontal className="size-3.5" />
+                  </Button>
                 }
               />
               <TooltipContent side="bottom" sideOffset={6}>
@@ -2070,13 +2088,17 @@ function App(): React.JSX.Element {
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
-                  className="sidebar-toggle"
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-muted-foreground"
+                  style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
                   onClick={actions.toggleSidebar}
                   aria-label={translate('auto.App.e4b9e7dff7', 'Toggle sidebar')}
                 >
-                  <PanelLeft size={16} />
-                </button>
+                  <PanelLeft />
+                </Button>
               }
             />
             <TooltipContent side="bottom" sideOffset={6}>
@@ -2097,14 +2119,18 @@ function App(): React.JSX.Element {
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
-                  className="sidebar-toggle sidebar-toggle-compact"
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  className="text-foreground"
+                  style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
                   onClick={() => useAppStore.getState().goBackWorktree()}
                   disabled={!canGoBackWorktree}
                   aria-label={translate('auto.App.064bd07810', 'Go back')}
                 >
-                  <ArrowLeft size={12} />
-                </button>
+                  <ArrowLeft />
+                </Button>
               }
             />
             <TooltipContent side="bottom" sideOffset={6}>
@@ -2116,14 +2142,18 @@ function App(): React.JSX.Element {
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
-                  className="sidebar-toggle sidebar-toggle-compact"
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  className="text-foreground"
+                  style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
                   onClick={() => useAppStore.getState().goForwardWorktree()}
                   disabled={!canGoForwardWorktree}
                   aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
                 >
-                  <ArrowRight size={12} />
-                </button>
+                  <ArrowRight />
+                </Button>
               }
             />
             <TooltipContent side="bottom" sideOffset={6}>
@@ -2141,14 +2171,18 @@ function App(): React.JSX.Element {
     <Tooltip>
       <TooltipTrigger
         render={
-          <button
-            className="sidebar-toggle mr-2"
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="mr-2 text-muted-foreground"
+            style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
             onClick={actions.toggleRightSidebar}
             aria-label={translate('auto.App.9e0b441a91', 'Toggle right sidebar')}
           >
             {/* Why: Phosphor's sidebar glyph is left-oriented by default. */}
-            <PanelRight className="-scale-x-100" size={16} />
-          </button>
+            <PanelRight className="-scale-x-100" />
+          </Button>
         }
       />
       <TooltipContent side="bottom" sideOffset={6}>
@@ -2173,14 +2207,18 @@ function App(): React.JSX.Element {
         <Tooltip>
           <TooltipTrigger
             render={
-              <button
-                className="titlebar-icon-button"
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="mr-2 text-muted-foreground"
+                style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
                 onClick={handleToggleExpand}
                 aria-label={translate('auto.App.c1cf0b0e4a', 'Collapse pane')}
                 disabled={!activeTabCanExpand}
               >
-                <Minimize2 size={14} />
-              </button>
+                <Minimize2 className="size-3.5" />
+              </Button>
             }
           />
           <TooltipContent side="bottom" sideOffset={6}>
