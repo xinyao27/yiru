@@ -107,11 +107,12 @@ import {
   rateLimitGuard,
   type RateLimitBucketKind
 } from './rate-limit'
+import { YIRU_GITHUB_REPOSITORY_SLUG } from '../../shared/yiru-github-repository'
 
 type GhExecOptions = ReturnType<typeof ghRepoExecOptions> & { signal?: AbortSignal }
 type HostedReviewLocalGitOptions = ReturnType<typeof getHostedReviewLocalGitOptions>
 
-const YIRU_REPO = 'stablyai/yiru'
+const YIRU_REPO = YIRU_GITHUB_REPOSITORY_SLUG
 const PR_CHECK_LOG_TAIL_JOB_LIMIT = 5
 // Why: each entry holds up to 16KB of log text; bound the cache so a long
 // session reviewing many failing checks can't grow it without limit.
@@ -1494,7 +1495,7 @@ async function countWorkItemsForQuery(
 
 function sameOwnerRepo(left: OwnerRepo | null, right: OwnerRepo | null): boolean {
   // Why: GitHub treats owner and repo names as case-insensitive, so remotes
-  // with different casing (StablyAI/Yiru vs stablyai/yiru) point at the same
+  // with different casing (Paperboytm/Yiru vs paperboytm/yiru) point at the same
   // repo and should not split into two search queries.
   return (
     left?.owner.toLowerCase() === right?.owner.toLowerCase() &&

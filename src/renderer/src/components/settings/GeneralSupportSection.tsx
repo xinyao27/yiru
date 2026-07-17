@@ -8,8 +8,7 @@ import { Separator } from '../ui/separator'
 import { SearchableSetting } from './SearchableSetting'
 import { SettingsSubsectionHeader } from './SettingsFormControls'
 import { translate } from '@/i18n/i18n'
-
-const YIRU_STARGAZERS_URL = 'https://github.com/stablyai/yiru/stargazers'
+import { YIRU_GITHUB_STARGAZERS_URL } from '../../../../shared/yiru-github-repository'
 
 type SupportState =
   | 'loading'
@@ -58,7 +57,7 @@ export function GeneralSupportSection({
   const handleStarClick = async (): Promise<void> => {
     if (starState === 'web-fallback') {
       setStarState('opening-github')
-      await window.api.shell.openUrl(YIRU_STARGAZERS_URL)
+      await window.api.shell.openUrl(YIRU_GITHUB_STARGAZERS_URL)
       if (mountedRef.current) {
         setStarState('web-fallback')
       }

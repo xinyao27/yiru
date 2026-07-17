@@ -124,7 +124,7 @@ export const CORE_COMMAND_SPECS: CommandSpec[] = [
     examples: [
       'yiru worktree create --name agent-task --agent codex --prompt "hi" --json',
       'yiru worktree create --repo id:<repoId> --name related-task --json',
-      'yiru worktree create --project github:stablyai/yiru --host runtime:gpu --name benchmark --json',
+      'yiru worktree create --project github:paperboytm/yiru --host runtime:gpu --name benchmark --json',
       'yiru worktree create --repo id:<repoId> --name linear-task --linear-issue https://linear.app/stably/issue/STA-335/test-issue --json',
       'yiru worktree create --repo id:<repoId> --name agent-task --agent codex --prompt "hi" --json',
       'yiru worktree create --repo id:<repoId> --name folder-child --parent-worktree folder:<folderId> --json',

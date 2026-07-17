@@ -1,4 +1,6 @@
-export const YIRU_SKILLS_REPOSITORY_URL = 'https://github.com/stablyai/yiru'
+import { YIRU_GITHUB_REPOSITORY_URL } from './yiru-github-repository'
+
+export const YIRU_SKILLS_REPOSITORY_URL = YIRU_GITHUB_REPOSITORY_URL
 
 export const YIRU_CLI_SKILL_NAME = 'yiru-cli'
 export const COMPUTER_USE_SKILL_NAME = 'computer-use'

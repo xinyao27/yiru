@@ -63,12 +63,13 @@ import {
 } from './project-visible-table-cache'
 import { translate } from '@/i18n/i18n'
 import { buildTaskSourceContextFromRepo } from '../../../../shared/task-source-context'
+import { YIRU_GITHUB_ISSUES_URL } from '../../../../shared/yiru-github-repository'
 
 type Props = {
   selectedRepoIds: ReadonlySet<string>
 }
 
-const YIRU_FEATURE_REQUEST_URL = 'https://github.com/stablyai/yiru/issues/new'
+const YIRU_FEATURE_REQUEST_URL = `${YIRU_GITHUB_ISSUES_URL}/new`
 
 function listProjectViewsForRuntime(
   settings: Parameters<typeof getActiveRuntimeTarget>[0],

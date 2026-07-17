@@ -1,8 +1,8 @@
 import { translate } from '@/i18n/i18n'
+import { YIRU_GITHUB_RELEASE_DOWNLOADS_URL } from '../../../../shared/yiru-github-repository'
 
 const TESTFLIGHT_URL = 'https://testflight.apple.com/join/YjeGMQBA'
-const ANDROID_APK_URL =
-  'https://github.com/stablyai/yiru/releases/download/mobile-android-v0.0.31/app-release.apk'
+const ANDROID_APK_URL = `${YIRU_GITHUB_RELEASE_DOWNLOADS_URL}/mobile-android-v0.0.31/app-release.apk`
 
 export function MobileRelayBetaAvailability(): React.JSX.Element {
   return (

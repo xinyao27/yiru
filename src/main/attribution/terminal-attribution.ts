@@ -5,10 +5,13 @@ instead of scattering generated shell fragments across files. */
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, win32 as pathWin32 } from 'node:path'
 import { YIRU_GIT_COMMIT_TRAILER } from '../../shared/yiru-attribution'
+import { YIRU_GITHUB_REPOSITORY_URL } from '../../shared/yiru-github-repository'
 
 const ATTRIBUTION_ROOT_DIR = 'yiru-terminal-attribution'
-const ATTRIBUTION_SHIM_VERSION = '6'
-const YIRU_PRODUCT_URL = 'https://github.com/stablyai/yiru'
+// Why: v7 rewrites persisted wrappers so their fallback footer points at the
+// migrated canonical repository even before PTY environment overrides apply.
+const ATTRIBUTION_SHIM_VERSION = '7'
+const YIRU_PRODUCT_URL = YIRU_GITHUB_REPOSITORY_URL
 const YIRU_GH_FOOTER = `Made with [Yiru](${YIRU_PRODUCT_URL}) 🐋`
 const SHELL_DOLLAR = '$'
 const POWERSHELL_TICK = '`'
@@ -566,7 +569,7 @@ if [[ "\${YIRU_ENABLE_GIT_ATTRIBUTION:-0}" != "1" || "\${YIRU_ATTRIBUTION_BYPASS
 fi
 
 if [[ "\${1:-}" == "pr" && "\${2:-}" == "create" ]]; then
-  footer="\${YIRU_GH_PR_FOOTER:-Made with [Yiru](https://github.com/stablyai/yiru) 🐋}"
+  footer="\${YIRU_GH_PR_FOOTER:-${YIRU_GH_FOOTER}}"
   if has_passthrough_create_args "$@"; then
     PATH="$real_path" exec "$real_gh" "$@"
   fi
@@ -600,7 +603,7 @@ if [[ "\${1:-}" == "pr" && "\${2:-}" == "create" ]]; then
 fi
 
 if [[ "\${1:-}" == "issue" && "\${2:-}" == "create" ]]; then
-  footer="\${YIRU_GH_ISSUE_FOOTER:-Made with [Yiru](https://github.com/stablyai/yiru) 🐋}"
+  footer="\${YIRU_GH_ISSUE_FOOTER:-${YIRU_GH_FOOTER}}"
   if has_passthrough_create_args "$@"; then
     PATH="$real_path" exec "$real_gh" "$@"
   fi
@@ -975,7 +978,7 @@ if ($isPrCreate) {
     if ($LASTEXITCODE -ne 0) {
       $body = $null
     }
-    $footer = if ($env:YIRU_GH_PR_FOOTER) { $env:YIRU_GH_PR_FOOTER } else { 'Made with [Yiru](https://github.com/stablyai/yiru) 🐋' }
+    $footer = if ($env:YIRU_GH_PR_FOOTER) { $env:YIRU_GH_PR_FOOTER } else { '${YIRU_GH_FOOTER}' }
     if ($null -ne $body -and $body -notmatch [Regex]::Escape($footer)) {
       $tmpFile = [System.IO.Path]::GetTempFileName()
       try {
@@ -1006,7 +1009,7 @@ if ($isIssueCreate) {
     if ($LASTEXITCODE -ne 0) {
       $body = $null
     }
-    $footer = if ($env:YIRU_GH_ISSUE_FOOTER) { $env:YIRU_GH_ISSUE_FOOTER } else { 'Made with [Yiru](https://github.com/stablyai/yiru) 🐋' }
+    $footer = if ($env:YIRU_GH_ISSUE_FOOTER) { $env:YIRU_GH_ISSUE_FOOTER } else { '${YIRU_GH_FOOTER}' }
     if ($null -ne $body -and $body -notmatch [Regex]::Escape($footer)) {
       $tmpFile = [System.IO.Path]::GetTempFileName()
       try {

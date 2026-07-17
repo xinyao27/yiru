@@ -8,6 +8,7 @@ import { SearchableSetting } from './SearchableSetting'
 import { SettingsSubsectionHeader } from './SettingsFormControls'
 import { translate } from '@/i18n/i18n'
 import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-check-click-options'
+import { YIRU_GITHUB_RELEASES_URL } from '../../../../shared/yiru-github-repository'
 
 export function GeneralUpdateSettingsSection(): React.JSX.Element {
   const updateStatus = useAppStore((s) => s.updateStatus)
@@ -170,7 +171,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
               <a
                 href={
                   updateStatus.releaseUrl ??
-                  `https://github.com/stablyai/yiru/releases/tag/v${updateStatus.version}`
+                  `${YIRU_GITHUB_RELEASES_URL}/tag/v${updateStatus.version}`
                 }
                 target="_blank"
                 rel="noopener noreferrer"
@@ -208,7 +209,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
               <a
                 href={
                   updateStatus.releaseUrl ??
-                  `https://github.com/stablyai/yiru/releases/tag/v${updateStatus.version}`
+                  `${YIRU_GITHUB_RELEASES_URL}/tag/v${updateStatus.version}`
                 }
                 target="_blank"
                 rel="noopener noreferrer"

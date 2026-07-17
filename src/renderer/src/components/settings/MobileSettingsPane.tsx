@@ -8,11 +8,11 @@ import {
 } from './mobile-settings-search'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
+import { YIRU_GITHUB_RELEASE_DOWNLOADS_URL } from '../../../../shared/yiru-github-repository'
 export { getMobileSettingsPaneSearchEntries }
 
 const YIRU_IOS_APP_STORE_URL = 'https://apps.apple.com/app/yiru/id6766130217'
-const YIRU_ANDROID_APK_URL =
-  'https://github.com/stablyai/yiru/releases/download/mobile-android-v0.0.31/app-release.apk'
+const YIRU_ANDROID_APK_URL = `${YIRU_GITHUB_RELEASE_DOWNLOADS_URL}/mobile-android-v0.0.31/app-release.apk`
 
 export function MobileSettingsPane(): React.JSX.Element {
   const showMobileButton = useAppStore((s) => s.settings?.showMobileButton !== false)

@@ -6,6 +6,10 @@ import Svg, { Path } from 'react-native-svg'
 import Constants from 'expo-constants'
 import { YiruLogo } from '../src/components/YiruLogo'
 import { colors, spacing, typography } from '../src/theme/mobile-theme'
+import {
+  YIRU_GITHUB_REPOSITORY_SLUG,
+  YIRU_GITHUB_REPOSITORY_URL
+} from '../../src/shared/yiru-github-repository'
 
 // Why: read version + native build identifier from expo-constants at
 // runtime so the About screen never drifts out of sync with app.json.
@@ -66,10 +70,10 @@ export default function AboutScreen() {
         <View style={styles.separator} />
         <Pressable
           style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-          onPress={() => void Linking.openURL('https://github.com/stablyai/yiru')}
+          onPress={() => void Linking.openURL(YIRU_GITHUB_REPOSITORY_URL)}
         >
           <GithubIcon />
-          <Text style={styles.rowValue}>stablyai/yiru</Text>
+          <Text style={styles.rowValue}>{YIRU_GITHUB_REPOSITORY_SLUG}</Text>
         </Pressable>
         <View style={styles.separator} />
         <Pressable

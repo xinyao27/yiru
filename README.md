@@ -3,9 +3,9 @@
 </h1>
 
 <p align="center">
-  <a href="https://github.com/stablyai/yiru/stargazers"><img src="https://badgen.net/github/stars/stablyai/yiru?label=%E2%98%85" alt="GitHub stars" /></a>
-  <a href="https://github.com/stablyai/yiru/releases"><img src="docs/assets/readme-downloads.svg" alt="Total downloads across all releases" /></a>
-  <img src="https://badgen.net/github/license/stablyai/yiru" alt="License" />
+  <a href="https://github.com/paperboytm/yiru/stargazers"><img src="https://badgen.net/github/stars/paperboytm/yiru?label=%E2%98%85" alt="GitHub stars" /></a>
+  <a href="https://github.com/paperboytm/yiru/releases"><img src="docs/assets/readme-downloads.svg" alt="Total downloads across all releases" /></a>
+  <img src="https://badgen.net/github/license/paperboytm/yiru" alt="License" />
   <a href="https://discord.gg/fzjDKHxv8Q"><img src="https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white" alt="Join the Yiru Discord" /></a>
   <a href="https://x.com/yiru_build"><img src="https://img.shields.io/badge/X-000000?logo=x&logoColor=white" alt="Follow Yiru on X" /></a>
   <img src="https://img.shields.io/badge/macOS%20%7C%20Windows%20%7C%20Linux-4493F8?style=flat-square" alt="Supported platforms: macOS, Windows, and Linux" />
@@ -36,7 +36,7 @@
 
 Monitor and steer your agents from your phone — get notified when an agent finishes and send follow-ups from anywhere.
 
-[iOS App Store](https://apps.apple.com/us/app/yiru/id6766130217) · [TestFlight](https://testflight.apple.com/join/YjeGMQBA) · [Android APK 0.0.31](https://github.com/stablyai/yiru/releases/download/mobile-android-v0.0.31/app-release.apk) · [Docs →](https://www.onyiru.dev/docs/mobile)
+[iOS App Store](https://apps.apple.com/us/app/yiru/id6766130217) · [TestFlight](https://testflight.apple.com/join/YjeGMQBA) · [Android APK 0.0.31](https://github.com/paperboytm/yiru/releases/download/mobile-android-v0.0.31/app-release.apk) · [Docs →](https://www.onyiru.dev/docs/mobile)
 
 </td>
 <td width="50%">
@@ -155,7 +155,7 @@ Agents drive Yiru too — script every workflow with `yiru worktree create`, `sn
 - **[Rich repo previews](https://www.onyiru.dev/docs/editing/markdown)** — Preview Markdown, images, PDFs, and repo docs in the workspace.
 - **[Computer Use](https://www.onyiru.dev/docs/cli/computer-use)** — Let agents operate desktop apps and visible UI when a workflow needs real interaction.
 - **[Notifications and unread state](https://www.onyiru.dev/docs/notifications)** — Know when an agent finishes or needs attention, then mark threads unread to come back later.
-- **And many, many more** — we ship daily, so this list is perpetually behind. The [changelog](https://github.com/stablyai/yiru/releases) is the real feature list.
+- **And many, many more** — we ship daily, so this list is perpetually behind. The [changelog](https://github.com/paperboytm/yiru/releases) is the real feature list.
 
 ---
 
@@ -203,7 +203,7 @@ Works with **any CLI agent** — if it runs in a terminal, it runs in Yiru.
 ### Desktop — macOS, Windows, Linux
 
 - **[Download from onYiru.dev](https://onyiru.dev/download)**
-- Or grab a build directly: [macOS Apple Silicon](https://github.com/stablyai/yiru/releases/latest/download/yiru-macos-arm64.dmg) · [macOS Intel](https://github.com/stablyai/yiru/releases/latest/download/yiru-macos-x64.dmg) · [Windows (.exe)](https://github.com/stablyai/yiru/releases/latest/download/yiru-windows-setup.exe) · [Linux AppImage](https://github.com/stablyai/yiru/releases/latest/download/yiru-linux.AppImage) · [All builds](https://github.com/stablyai/yiru/releases/latest)
+- Or grab a build directly: [macOS Apple Silicon](https://github.com/paperboytm/yiru/releases/latest/download/yiru-macos-arm64.dmg) · [macOS Intel](https://github.com/paperboytm/yiru/releases/latest/download/yiru-macos-x64.dmg) · [Windows (.exe)](https://github.com/paperboytm/yiru/releases/latest/download/yiru-windows-setup.exe) · [Linux AppImage](https://github.com/paperboytm/yiru/releases/latest/download/yiru-linux.AppImage) · [All builds](https://github.com/paperboytm/yiru/releases/latest)
 - Running `yiru serve` on a headless Linux server? See the [headless Linux server guide](docs/reference/headless-linux-server.md).
 
 _Or via a package manager:_
@@ -221,7 +221,7 @@ yay -S stably-yiru-bin
 Pair with your desktop app to monitor and steer your agents from your phone.
 
 - **iOS:** [Download on the App Store](https://apps.apple.com/us/app/yiru/id6766130217) or [join TestFlight](https://testflight.apple.com/join/YjeGMQBA)
-- **Android:** [Download APK 0.0.31](https://github.com/stablyai/yiru/releases/download/mobile-android-v0.0.31/app-release.apk)
+- **Android:** [Download APK 0.0.31](https://github.com/paperboytm/yiru/releases/download/mobile-android-v0.0.31/app-release.apk)
 
 ---
 
@@ -234,9 +234,9 @@ Pair with your desktop app to monitor and steer your agents from your phone.
   <img src="docs/assets/wechat-qr.png" alt="WeChat QR code for the Yiru community" width="160" />
   <img src="docs/assets/wechat-qr-backup.jpg" alt="Backup WeChat QR code for the Yiru community" width="160" />
 
-- **Feedback &amp; Ideas:** We ship fast. Missing something? [Request a new feature](https://github.com/stablyai/yiru/issues).
+- **Feedback &amp; Ideas:** We ship fast. Missing something? [Request a new feature](https://github.com/paperboytm/yiru/issues).
 - **Privacy:** See the [privacy &amp; telemetry docs](https://www.onyiru.dev/docs/telemetry) for what anonymous usage data Yiru collects and how to opt out.
-- **Show Support:** [Star](https://github.com/stablyai/yiru) this repo to follow along with our daily ships.
+- **Show Support:** [Star](https://github.com/paperboytm/yiru) this repo to follow along with our daily ships.
 
 ---
 
@@ -244,12 +244,12 @@ Pair with your desktop app to monitor and steer your agents from your phone.
 
 Want to contribute or run locally? See our [CONTRIBUTING.md](.github/CONTRIBUTING.md) guide.
 
-<a href="https://github.com/stablyai/yiru/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=stablyai/yiru" alt="Yiru contributors" />
+<a href="https://github.com/paperboytm/yiru/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=paperboytm/yiru" alt="Yiru contributors" />
 </a>
 
 <p align="center">
-  <img src="docs/assets/star-history.png" alt="GitHub star history chart for stablyai/yiru" width="880" />
+  <img src="docs/assets/star-history.png" alt="Historical GitHub star history chart" width="880" />
 </p>
 
 ## Signed Builds

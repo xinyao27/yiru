@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFocusEffect, useRouter } from 'expo-router'
+import { YIRU_GITHUB_ISSUES_URL } from '../../src/shared/yiru-github-repository'
 import {
   ChevronLeft,
   ChevronRight,
@@ -210,7 +211,7 @@ export default function SettingsScreen() {
           <View style={styles.separator} />
           <Pressable
             style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-            onPress={() => void Linking.openURL('https://github.com/stablyai/yiru/issues')}
+            onPress={() => void Linking.openURL(YIRU_GITHUB_ISSUES_URL)}
           >
             <LifeBuoy size={16} color={colors.textSecondary} />
             <Text style={styles.rowLabel}>Support</Text>

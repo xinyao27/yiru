@@ -4,6 +4,7 @@ import type {
 } from '../../../../shared/claude-usage-types'
 import type { CodexUsageDailyPoint, CodexUsageSummary } from '../../../../shared/codex-usage-types'
 import { translate } from '@/i18n/i18n'
+import { YIRU_GITHUB_REPOSITORY_HOST_PATH } from '../../../../shared/yiru-github-repository'
 
 export type ClaudeShareData = {
   provider: 'claude'
@@ -208,10 +209,7 @@ export function CardFooter(props: {
             marginLeft: 5
           }}
         >
-          {translate(
-            'auto.components.stats.share.card.utils.19f4b4dc75',
-            'github.com/stablyai/yiru'
-          )}
+          {YIRU_GITHUB_REPOSITORY_HOST_PATH}
         </span>
       </div>
     </div>

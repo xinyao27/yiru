@@ -3,6 +3,7 @@ import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { parse } from 'yaml'
 
 const require = createRequire(import.meta.url)
 const electronBuilderConfig = require('../electron-builder.config.cjs')
@@ -19,6 +20,27 @@ const {
 } = require('../packaged-runtime-node-modules.cjs')
 
 describe('electron-builder config', () => {
+  it('publishes desktop updates to the canonical GitHub repository', () => {
+    expect(electronBuilderConfig.publish).toEqual({
+      provider: 'github',
+      owner: 'paperboytm',
+      repo: 'yiru',
+      releaseType: 'release'
+    })
+  })
+
+  it('keeps the development updater metadata on the canonical GitHub repository', async () => {
+    const devUpdateConfig = parse(
+      await readFile(new URL('../dev-app-update.yml', import.meta.url), 'utf8')
+    )
+
+    expect(devUpdateConfig).toMatchObject({
+      provider: 'github',
+      owner: 'paperboytm',
+      repo: 'yiru'
+    })
+  })
+
   it('excludes repo-only source trees from app.asar', () => {
     expect(electronBuilderConfig.files).toEqual(
       expect.arrayContaining([

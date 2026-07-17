@@ -9,6 +9,7 @@ import { Button } from './ui/button'
 import { Progress } from './ui/progress'
 import { AlertCircle, Check, Loader2, Minus, Network, RotateCw, X } from 'lucide-react'
 import type { ChangelogData } from '../../../shared/types'
+import { YIRU_GITHUB_RELEASES_URL } from '../../../shared/yiru-github-repository'
 import { translate } from '@/i18n/i18n'
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -18,9 +19,7 @@ function releaseUrlForVersion(version: string | null): string {
   // plain releases listing rather than /releases/latest — /latest also breaks
   // when GitHub's release API is degraded, and the listing is the most
   // reliable manual fallback.
-  return version
-    ? `https://github.com/stablyai/yiru/releases/tag/v${version}`
-    : 'https://github.com/stablyai/yiru/releases'
+  return version ? `${YIRU_GITHUB_RELEASES_URL}/tag/v${version}` : YIRU_GITHUB_RELEASES_URL
 }
 
 function isAnimatedGif(url: string | undefined): boolean {

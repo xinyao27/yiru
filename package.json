@@ -2,7 +2,7 @@
   "name": "yiru",
   "version": "1.4.144-rc.4",
   "description": "Next-gen IDE for parallel agentic development",
-  "homepage": "https://github.com/stablyai/yiru",
+  "homepage": "https://github.com/paperboytm/yiru",
   "author": "stablyai",
   "bin": {
     "yiru": "./out/cli/index.js",

@@ -2,8 +2,8 @@ import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-nati
 import { router } from 'expo-router'
 import { colors, radii, spacing, typography } from '../theme/mobile-theme'
 import type { CompatVerdict } from '../transport/protocol-compat'
+import { YIRU_GITHUB_RELEASES_URL } from '../../../src/shared/yiru-github-repository'
 
-const RELEASES_URL = 'https://github.com/stablyai/yiru/releases'
 const IOS_APP_STORE_URL = 'itms-apps://apps.apple.com/app/yiru/id6766130217'
 
 type Props = {
@@ -20,7 +20,7 @@ export function ProtocolBlockScreen({ verdict }: Props) {
     ? mobileUpdateTarget.url && mobileUpdateTarget.label
       ? { label: mobileUpdateTarget.label, url: mobileUpdateTarget.url }
       : null
-    : { label: 'Open GitHub Releases', url: RELEASES_URL }
+    : { label: 'Open GitHub Releases', url: YIRU_GITHUB_RELEASES_URL }
 
   const title = isMobileTooOld ? 'Update Yiru Mobile' : 'Update Yiru on your computer'
   const body = isMobileTooOld

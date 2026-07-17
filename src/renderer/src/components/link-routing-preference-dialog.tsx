@@ -101,7 +101,7 @@ export function LinkRoutingPreferenceDialogProvider({
     void requestPreference({
       openLinksInAppDefault: previewDefault === 'yiru',
       preview: true,
-      url: 'https://github.com/stablyai/yiru/pull/1234'
+      url: 'https://github.com/paperboytm/yiru/pull/1234'
     })
   }, [requestPreference])
 

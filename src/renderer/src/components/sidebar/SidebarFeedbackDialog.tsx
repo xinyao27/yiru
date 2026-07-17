@@ -14,9 +14,9 @@ import {
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { cn } from '@/lib/utils'
 import type { GitHubViewer } from '../../../../shared/types'
+import { YIRU_GITHUB_ISSUES_URL } from '../../../../shared/yiru-github-repository'
 import { translate } from '@/i18n/i18n'
 
-const GITHUB_ISSUES_URL = 'https://github.com/stablyai/yiru/issues/'
 const DISCORD_URL = 'https://discord.gg/fzjDKHxv8Q'
 const X_URL = 'https://x.com/yiru_build'
 
@@ -178,7 +178,7 @@ export function SidebarFeedbackDialog({
               variant="outline"
               size="sm"
               className="h-8 text-xs"
-              onClick={() => openExternalUrl(GITHUB_ISSUES_URL)}
+              onClick={() => openExternalUrl(`${YIRU_GITHUB_ISSUES_URL}/`)}
             >
               <Github className="size-3.5" />
               {translate(

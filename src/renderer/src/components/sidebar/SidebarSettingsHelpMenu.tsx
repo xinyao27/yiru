@@ -33,11 +33,11 @@ import { SetupGuideProgressRing } from '../setup-guide/SetupGuideProgressRing'
 import { useSetupGuideProgress } from '../setup-guide/use-setup-guide-progress'
 import { SidebarFeedbackDialog } from './SidebarFeedbackDialog'
 import { translate } from '@/i18n/i18n'
+import { YIRU_GITHUB_REPOSITORY_URL } from '../../../../shared/yiru-github-repository'
 import { getUpdateCheckClickOptions, getUpdateCheckHint } from '@/lib/update-check-click-options'
 
 const DOCS_URL = 'https://www.onyiru.dev/docs'
 const CHANGELOG_URL = 'https://onyiru.dev/changelog'
-const GITHUB_URL = 'https://github.com/stablyai/yiru'
 const DISCORD_URL = 'https://discord.gg/fzjDKHxv8Q'
 const X_URL = 'https://x.com/yiru_build'
 const NO_UPDATE_CHECK_MODIFIERS = { ctrlKey: false, metaKey: false, shiftKey: false }
@@ -299,7 +299,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
                 'auto.components.sidebar.SidebarSettingsHelpMenu.5687ab246a',
                 'GitHub'
               )}
-              url={GITHUB_URL}
+              url={YIRU_GITHUB_REPOSITORY_URL}
               icon={<Github className="size-3.5" />}
             />
             <DropdownMenuItem onClick={() => openExternalUrl(DISCORD_URL)}>

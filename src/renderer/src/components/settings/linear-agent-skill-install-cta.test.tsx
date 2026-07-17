@@ -115,7 +115,7 @@ describe('LinearAgentSkillInstallCta', () => {
     expect(rendered.textContent).toContain('Not installed')
     expect(rendered.textContent).toContain('Let your agents read and edit Linear tasks.')
     expect(rendered.textContent).toContain(
-      'npx skills add https://github.com/stablyai/yiru --skill yiru-linear --global'
+      'npx skills add https://github.com/paperboytm/yiru --skill yiru-linear --global'
     )
   })
 
@@ -129,7 +129,7 @@ describe('LinearAgentSkillInstallCta', () => {
     })
 
     expect(mocks.clipboardWrite).toHaveBeenCalledWith(
-      'npx skills add https://github.com/stablyai/yiru --skill yiru-linear --global'
+      'npx skills add https://github.com/paperboytm/yiru --skill yiru-linear --global'
     )
     expect(mocks.toastSuccess).toHaveBeenCalled()
   })

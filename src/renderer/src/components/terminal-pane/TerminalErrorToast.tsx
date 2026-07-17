@@ -1,4 +1,5 @@
 import { translate } from '@/i18n/i18n'
+import { YIRU_GITHUB_ISSUES_URL } from '../../../../shared/yiru-github-repository'
 const SSH_PREFIX = 'SSH connection is not active'
 const STALE_NODE_PTY_DAEMON_MARKERS = [
   "Daemon's node-pty install is gone",
@@ -69,7 +70,7 @@ export function TerminalErrorToast({
                 'If this persists, please'
               )}{' '}
               <a
-                href="https://github.com/stablyai/yiru/issues"
+                href={YIRU_GITHUB_ISSUES_URL}
                 style={{ color: '#fca5a5', textDecoration: 'underline' }}
               >
                 {translate(

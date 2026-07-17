@@ -759,6 +759,24 @@ exit 1
     expect(new Set(shimEntries).size).toBe(shimEntries.length)
   })
 
+  it('refreshes persisted shims after the canonical repository changes', () => {
+    const root = makeTmpRoot()
+    const userDataPath = join(root, 'user-data')
+    const attributionRoot = join(userDataPath, 'yiru-terminal-attribution')
+    const posixDir = join(attributionRoot, 'posix')
+    mkdirSync(posixDir, { recursive: true })
+    writeFileSync(join(attributionRoot, 'VERSION'), '6\n')
+    writeFileSync(join(posixDir, 'gh'), 'legacy shim\n')
+
+    applyTerminalAttributionEnv(
+      { PATH: stripInheritedAttributionPath(process.env.PATH ?? '') },
+      { enabled: true, userDataPath }
+    )
+
+    expect(readFileSync(join(attributionRoot, 'VERSION'), 'utf8')).toBe('7\n')
+    expect(readFileSync(join(posixDir, 'gh'), 'utf8')).toContain('github.com/paperboytm/yiru')
+  })
+
   it('puts only Windows shims on PATH for native Windows shells', () => {
     const root = makeTmpRoot()
     const userDataPath = join(root, 'user-data')
@@ -818,6 +836,8 @@ exit 1
     expect(gitWrapper).toContain('"`r`n`r`n"')
     expect(ghWrapper).toContain('$body.TrimEnd("`r", "`n")')
     expect(ghWrapper).toContain('"`r`n`r`n"')
+    expect(ghWrapper).toContain('github.com/paperboytm/yiru')
+    expect(ghWrapper).not.toContain('github.com/stablyai/yiru')
     expect(gitWrapper).not.toContain('"\\`r"')
     expect(ghWrapper).not.toContain('"\\`r"')
   })

@@ -32,6 +32,7 @@ import {
   getReleaseDownloadUrl
 } from './updater-prerelease-feed'
 import { fetchNudge, shouldApplyNudge } from './updater-nudge'
+import { YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL } from '../shared/yiru-github-repository'
 
 type CheckFailureSource = 'event' | 'promise' | 'fallback-promise'
 type MissingManifestPrereleaseFallbackResult = { userInitiated: boolean }
@@ -1026,7 +1027,7 @@ async function pinDefaultReleaseFeed(
   } else {
     clearPrereleaseFallbackContext()
     clearPublishingWindowLastGoodCheck()
-    const url = 'https://github.com/stablyai/yiru/releases/latest/download'
+    const url = YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL
     console.info(
       `[updater] release feed fallback: current=${currentVersion} includePrerelease=${includePrerelease} → ${url}`
     )
@@ -1413,7 +1414,7 @@ export function setupAutoUpdater(
   // moving /latest redirect changing between check and download.
   autoUpdater.setFeedURL({
     provider: 'generic',
-    url: 'https://github.com/stablyai/yiru/releases/latest/download'
+    url: YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL
   })
 
   if (autoUpdaterInitialized) {

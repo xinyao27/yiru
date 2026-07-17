@@ -205,7 +205,7 @@ the hook clients themselves are absent from the WSL filesystem.
   (E_UNEXPECTED)" from `wsl.exe -d <distro> -- bash -lc` under concurrent spawn load
   (cleared by `wsl --terminate`). The relay spawn path should tolerate/retry this.
 - Fork-PR CI runs sit in `action_required` until approved:
-  `gh api repos/stablyai/yiru/actions/runs/<id>/approve -X POST`.
+  `gh api repos/paperboytm/yiru/actions/runs/<id>/approve -X POST`.
 
 ## Acceptance
 

@@ -7,7 +7,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AgentSkillSetupPanel } from './AgentSkillSetupPanel'
 import { TooltipProvider } from '../ui/tooltip'
 
-const INSTALL_COMMAND = 'npx skills add https://github.com/stablyai/yiru --skill yiru-cli --global'
+const INSTALL_COMMAND =
+  'npx skills add https://github.com/paperboytm/yiru --skill yiru-cli --global'
 const UPDATE_COMMAND = 'npx skills update yiru-cli --global'
 
 const mocks = vi.hoisted(() => ({

@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   build-mac:
-    if: github.repository == 'stablyai/yiru'
+    if: github.repository == 'paperboytm/yiru'
     # Why: this workflow is outside the SignPath signing run, so Blacksmith
     # cannot enter Windows artifact provenance while mac notarization gets the
     # faster runner.

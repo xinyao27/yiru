@@ -1,16 +1,25 @@
 import { net } from 'electron'
 import { parse } from 'yaml'
 import { compareVersions, isPrereleaseVersion, isValidVersion } from './updater-fallback'
+import {
+  YIRU_GITHUB_RELEASE_DOWNLOADS_URL,
+  YIRU_GITHUB_RELEASES_URL,
+  YIRU_GITHUB_REPOSITORY_URL
+} from '../shared/yiru-github-repository'
 
-const ATOM_FEED_URL = 'https://github.com/stablyai/yiru/releases.atom'
-const RELEASES_DOWNLOAD_BASE = 'https://github.com/stablyai/yiru/releases/download'
+const ATOM_FEED_URL = `${YIRU_GITHUB_RELEASES_URL}.atom`
+const RELEASES_DOWNLOAD_BASE = YIRU_GITHUB_RELEASE_DOWNLOADS_URL
 const FETCH_TIMEOUT_MS = 5000
 const MAX_MANIFEST_PROBE_CANDIDATES = 6
 
 // Why: GitHub's atom feed lists every release (prerelease or stable) in a
 // single flat list. Each entry has a /releases/tag/<tag> URL we can mine
 // without any channel filtering.
-const TAG_HREF_RE = /href="https:\/\/github\.com\/stablyai\/yiru\/releases\/tag\/([^"]+)"/g
+const escapedReleaseTagUrl = `${YIRU_GITHUB_REPOSITORY_URL}/releases/tag/`.replace(
+  /[.*+?^${}()|[\]\\]/g,
+  '\\$&'
+)
+const TAG_HREF_RE = new RegExp(`href="${escapedReleaseTagUrl}([^"]+)"`, 'g')
 
 export function getReleaseDownloadUrl(tag: string): string {
   return `${RELEASES_DOWNLOAD_BASE}/${encodeURIComponent(tag)}`

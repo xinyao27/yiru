@@ -4,6 +4,7 @@ import { cn } from '../lib/utils'
 import { useAppStore } from '../store'
 import { isGitRepoKind } from '../../../shared/repo-kind'
 import type { Repo } from '../../../shared/types'
+import { YIRU_GITHUB_STARGAZERS_URL } from '../../../shared/yiru-github-repository'
 import {
   dismissPreflightIssue,
   githubProjectKeys,
@@ -25,8 +26,6 @@ type ShortcutItem = {
   shortcut: ShortcutKeyComboDetails
   action: string
 }
-
-const YIRU_STARGAZERS_URL = 'https://github.com/stablyai/yiru/stargazers'
 
 type StarState = 'loading' | 'starred' | 'not-starred' | 'web-fallback' | 'hidden'
 
@@ -72,7 +71,7 @@ function GitHubStarButton({ hasRepos }: { hasRepos: boolean }): React.JSX.Elemen
       return
     }
     if (state === 'web-fallback') {
-      await window.api.shell.openUrl(YIRU_STARGAZERS_URL)
+      await window.api.shell.openUrl(YIRU_GITHUB_STARGAZERS_URL)
       return
     }
     if (state !== 'not-starred') {

@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 
-const repository = process.env.GITHUB_REPOSITORY ?? 'stablyai/yiru'
+const repository = process.env.GITHUB_REPOSITORY ?? 'paperboytm/yiru'
 const token = process.env.GITHUB_TOKEN
 const outputPath = process.env.DOWNLOADS_BADGE_PATH ?? 'docs/assets/readme-downloads.svg'
 

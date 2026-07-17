@@ -141,7 +141,7 @@ describe('checkYiruStarred', () => {
 
     expect(execFileAsyncMock).toHaveBeenCalledWith(
       'gh',
-      ['api', '--include', 'user/starred/stablyai/yiru'],
+      ['api', '--include', 'user/starred/paperboytm/yiru'],
       { encoding: 'utf-8' }
     )
   })
