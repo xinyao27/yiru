@@ -62,7 +62,7 @@ export function WorkspaceTabStripViewport({
           {...stripProps}
           ref={tabStripRef}
           className={cn(
-            'terminal-tab-strip flex h-full min-w-0 max-w-full flex-1 items-stretch overflow-x-auto overflow-y-hidden pl-1',
+            'terminal-tab-strip flex h-full min-w-0 max-w-full flex-1 items-stretch gap-0.5 overflow-x-auto overflow-y-hidden pl-1',
             getTabStripScrollMaskClassName(tabStripOverflowState),
             stripClassName
           )}

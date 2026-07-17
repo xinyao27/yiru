@@ -2146,7 +2146,8 @@ function App(): React.JSX.Element {
             onClick={actions.toggleRightSidebar}
             aria-label={translate('auto.App.9e0b441a91', 'Toggle right sidebar')}
           >
-            <PanelRight size={16} />
+            {/* Why: Phosphor's sidebar glyph is left-oriented by default. */}
+            <PanelRight className="-scale-x-100" size={16} />
           </button>
         }
       />

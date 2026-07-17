@@ -104,7 +104,8 @@ export function RightSidebarFrame({
               'Toggle right sidebar'
             )}
           >
-            <PanelRight size={16} />
+            {/* Why: Phosphor's sidebar glyph is left-oriented by default. */}
+            <PanelRight className="-scale-x-100" size={16} />
           </button>
         }
       />
@@ -264,7 +265,7 @@ function TopActivityItems({
         containerNoDrag && RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
       )}
     >
-      <div className="flex min-w-0 shrink">
+      <div className="flex min-w-0 shrink gap-0.5">
         {layout.visibleItems.map((item) => (
           <ActivityBarButton
             key={item.id}
