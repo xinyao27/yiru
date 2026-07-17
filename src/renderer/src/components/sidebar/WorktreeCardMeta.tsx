@@ -1,7 +1,14 @@
 import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
-import { CalendarClock, CircleDot, ExternalLink, MonitorUp, Pencil, StickyNote } from 'lucide-react'
+import {
+  CalendarDots as CalendarClock,
+  Circle as CircleDot,
+  ArrowSquareOut as ExternalLink,
+  MonitorArrowUp as MonitorUp,
+  Pencil,
+  Note as StickyNote
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { LinearIcon } from '@/components/icons/LinearIcon'

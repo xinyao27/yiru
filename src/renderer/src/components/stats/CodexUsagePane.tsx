@@ -1,14 +1,14 @@
 import { useEffect } from 'react'
 import {
-  Activity,
+  ActivityIcon as Activity,
   Brain,
   Coins,
-  DatabaseZap,
-  FolderKanban,
-  RefreshCw,
+  Database as DatabaseZap,
+  FolderSimple as FolderKanban,
+  ArrowClockwise as RefreshCw,
   SlidersHorizontal,
-  Sparkles
-} from 'lucide-react'
+  Sparkle as Sparkles
+} from '@phosphor-icons/react'
 import type { CodexUsageRange, CodexUsageScope } from '../../../../shared/codex-usage-types'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'

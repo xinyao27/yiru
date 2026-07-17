@@ -1,4 +1,4 @@
-import { Copy, Sparkles } from 'lucide-react'
+import { Copy, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'

@@ -1,5 +1,5 @@
 import type React from 'react'
-import { ChevronLeft, GitCompareArrows } from 'lucide-react'
+import { CaretLeft as ChevronLeft, GitDiff as GitCompareArrows } from '@phosphor-icons/react'
 import type {
   SpoolGitDiffResult,
   SpoolGitHistoryEntry,

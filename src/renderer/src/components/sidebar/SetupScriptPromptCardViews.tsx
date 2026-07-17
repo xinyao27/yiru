@@ -1,5 +1,13 @@
 import React from 'react'
-import { Check, Download, LoaderCircle, PackageCheck, RefreshCw, Settings, X } from 'lucide-react'
+import {
+  Check,
+  Download,
+  CircleNotch as LoaderCircle,
+  Package as PackageCheck,
+  ArrowClockwise as RefreshCw,
+  Gear as Settings,
+  X
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'

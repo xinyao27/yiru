@@ -9,6 +9,7 @@ import type {
   AiVaultSessionInventorySnapshot
 } from './session-inventory-page-types'
 import { partitionSubagentTranscriptPaths } from './session-scanner-subagent-transcripts'
+import { createAntigravityWorkspaceResolver } from './session-scanner-antigravity-history'
 import type { FileWithMtime } from './session-scanner-types'
 import { remoteClaudeCodexSessionSources } from './remote-session-scanner-sources'
 import type {
@@ -57,7 +58,16 @@ export async function openRemoteAiVaultSessionInventory(args: {
     provider: args.provider,
     executionHostId: args.executionHostId,
     hostPlatform: args.hostPlatform,
-    titleCaches: new Map()
+    titleCaches: new Map(),
+    // Why: paged remote inventories must enrich Antigravity sessions like the full scanner does.
+    antigravityWorkspaceResolver: createAntigravityWorkspaceResolver(async (historyPath) => {
+      try {
+        const read = await args.provider.readFile(historyPath)
+        return read.isBinary ? null : read.content
+      } catch {
+        return null
+      }
+    })
   }
   const budget = createRemoteSessionInventoryBudget()
   const candidates: RemoteSessionCandidate[] = []

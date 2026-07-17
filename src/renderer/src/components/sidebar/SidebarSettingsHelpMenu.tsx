@@ -1,18 +1,18 @@
 import React, { useState } from 'react'
 import {
   BookOpen,
-  CircleHelp,
-  ExternalLink,
-  Github,
+  Question as CircleHelp,
+  ArrowSquareOut as ExternalLink,
+  GithubLogo as Github,
   Keyboard,
-  Loader2,
-  MessageSquareText,
-  RefreshCw,
-  RotateCw,
-  School,
-  ScrollText,
-  Settings
-} from 'lucide-react'
+  SpinnerGap as Loader2,
+  ChatText as MessageSquareText,
+  ArrowClockwise as RefreshCw,
+  ArrowClockwise as RotateCw,
+  Student as School,
+  Scroll as ScrollText,
+  Gear as Settings
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import logo from '../../../../../resources/logo.svg'
 import { useAppStore } from '@/store'

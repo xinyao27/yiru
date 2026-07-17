@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight } from '@phosphor-icons/react'
 import { AndroidLogo, IosBrandIcon } from './MobileBrandIcons'
 import { translate } from '@/i18n/i18n'
 

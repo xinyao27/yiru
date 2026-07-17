@@ -1,8 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { XIcon } from 'lucide-react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
+import { XIcon } from '@phosphor-icons/react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'

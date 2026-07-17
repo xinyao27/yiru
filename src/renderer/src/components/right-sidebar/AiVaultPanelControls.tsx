@@ -1,15 +1,15 @@
 import type React from 'react'
 import {
-  ArchiveRestore,
+  Archive as ArchiveRestore,
   Calendar,
-  ChevronRight,
-  Clock3,
+  CaretRight as ChevronRight,
+  Clock as Clock3,
   FolderOpen,
-  ListFilter,
-  LoaderCircle,
-  PanelsTopLeft,
-  Server
-} from 'lucide-react'
+  Funnel as ListFilter,
+  CircleNotch as LoaderCircle,
+  Layout as PanelsTopLeft,
+  HardDrives as Server
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

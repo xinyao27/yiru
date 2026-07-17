@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useRef, useState } from 'react'
-import { FolderOpen, RotateCcw } from 'lucide-react'
+import { FolderOpen, ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
 import type { GlobalSettings } from '../../../../shared/types'
 import {
   getEffectiveHostSetting,

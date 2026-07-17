@@ -1,11 +1,11 @@
 import {
-  ChevronDown,
+  CaretDown as ChevronDown,
   GitMerge,
-  GitPullRequestArrow,
-  RefreshCw,
-  Sparkles,
+  GitPullRequest as GitPullRequestArrow,
+  ArrowClockwise as RefreshCw,
+  Sparkle as Sparkles,
   Square
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {

@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import { BellRing, FileAudio, Upload } from 'lucide-react'
+import { BellRinging as BellRing, FileAudio, Upload } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { GlobalSettings } from '../../../../shared/types'
 import { Button } from '@/components/ui/button'

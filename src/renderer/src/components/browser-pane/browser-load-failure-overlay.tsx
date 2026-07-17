@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { Copy, ExternalLink, Globe, Loader2, RefreshCw, ShieldAlert } from 'lucide-react'
+import {
+  Copy,
+  ArrowSquareOut as ExternalLink,
+  Globe,
+  SpinnerGap as Loader2,
+  ArrowClockwise as RefreshCw,
+  ShieldWarning as ShieldAlert
+} from '@phosphor-icons/react'
 
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'

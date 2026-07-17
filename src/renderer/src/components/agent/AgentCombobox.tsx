@@ -1,5 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { ArrowRight, Check, ChevronsUpDown, Star, Terminal } from 'lucide-react'
+import {
+  ArrowRight,
+  Check,
+  CaretUpDown as ChevronsUpDown,
+  Star,
+  Terminal
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   Command,

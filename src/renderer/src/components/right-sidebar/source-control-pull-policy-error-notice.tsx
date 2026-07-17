@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
-import { Check, Copy, TriangleAlert } from 'lucide-react'
+import { Check, Copy, Warning as TriangleAlert } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'

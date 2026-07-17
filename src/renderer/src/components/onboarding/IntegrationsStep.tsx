@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
-import { ExternalLink, Github, Terminal } from 'lucide-react'
+import {
+  ArrowSquareOut as ExternalLink,
+  GithubLogo as Github,
+  Terminal
+} from '@phosphor-icons/react'
 import { LinearIcon } from '@/components/icons/LinearIcon'
 import { Button } from '@/components/ui/button'
 import { LinearApiKeyDialog } from '@/components/linear-api-key-dialog'

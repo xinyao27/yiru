@@ -20,7 +20,6 @@ import {
   getMenuBarIconEntries,
   getSystemTrayEntries,
   getThemeEntries,
-  getTitlebarEntries,
   getTypographyEntries,
   getZoomEntries
 } from './appearance-search'
@@ -63,12 +62,10 @@ export function AppearanceInterfaceSection({
   const systemTrayEntry = getSystemTrayEntries({ showSystemTray: true })[0]
   const themeEntry = getThemeEntries()[0]
   const themeLabel = translate('auto.components.settings.AppearancePane.932ff1fbff', 'Theme')
-  const titlebarEntry = getTitlebarEntries()[0]
   const typographyEntry = getTypographyEntries()[0]
   const zoomEntry = getZoomEntries()[0]
   const advancedEntries = [
     ...(SHOW_UI_LANGUAGE_SETTING ? getLanguageEntries() : []),
-    ...getTitlebarEntries(),
     ...getSystemTrayEntries({ showSystemTray: isDesktopWindows }),
     ...getMenuBarIconEntries({ showMenuBarIcon: isDesktopMac })
   ]
@@ -193,26 +190,6 @@ export function AppearanceInterfaceSection({
                 />
               </SearchableSetting>
             ) : null}
-
-            <SearchableSetting
-              title={translate(
-                'auto.components.settings.AppearancePane.9868f39007',
-                'Titlebar App Name'
-              )}
-              description={titlebarEntry?.description}
-              keywords={titlebarEntry?.keywords ?? ['titlebar', 'yiru', 'app', 'name']}
-            >
-              <SettingsSwitchRow
-                label={translate(
-                  'auto.components.settings.AppearancePane.9868f39007',
-                  'Titlebar App Name'
-                )}
-                checked={settings.showTitlebarAppName}
-                onChange={() =>
-                  updateSettings({ showTitlebarAppName: !settings.showTitlebarAppName })
-                }
-              />
-            </SearchableSetting>
 
             {isDesktopWindows ? (
               <SearchableSetting

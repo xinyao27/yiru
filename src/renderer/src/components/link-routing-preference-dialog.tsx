@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { ExternalLink, Settings } from 'lucide-react'
+import { ArrowSquareOut as ExternalLink, Gear as Settings } from '@phosphor-icons/react'
 
 import { Button } from '@/components/ui/button'
 import {

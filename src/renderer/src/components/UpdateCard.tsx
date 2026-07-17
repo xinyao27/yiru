@@ -7,7 +7,15 @@ import { useAppStore } from '../store'
 import { Card } from './ui/card'
 import { Button } from './ui/button'
 import { Progress } from './ui/progress'
-import { AlertCircle, Check, Loader2, Minus, Network, RotateCw, X } from 'lucide-react'
+import {
+  WarningCircle as AlertCircle,
+  Check,
+  SpinnerGap as Loader2,
+  Minus,
+  Network,
+  ArrowClockwise as RotateCw,
+  X
+} from '@phosphor-icons/react'
 import type { ChangelogData } from '../../../shared/types'
 import { YIRU_GITHUB_RELEASES_URL } from '../../../shared/yiru-github-repository'
 import { translate } from '@/i18n/i18n'

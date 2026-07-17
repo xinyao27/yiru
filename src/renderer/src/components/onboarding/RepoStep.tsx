@@ -1,12 +1,12 @@
 import {
   ArrowRight,
-  CircleStop,
+  StopCircle as CircleStop,
   FolderOpen,
   GitBranch,
   Lightbulb,
-  Loader2,
-  Server
-} from 'lucide-react'
+  SpinnerGap as Loader2,
+  HardDrives as Server
+} from '@phosphor-icons/react'
 import type { Dispatch, SetStateAction } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

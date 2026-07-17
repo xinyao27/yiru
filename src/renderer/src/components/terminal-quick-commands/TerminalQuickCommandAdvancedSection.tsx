@@ -1,5 +1,5 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type { Repo, TerminalQuickCommand } from '../../../../shared/types'
 import type { getTerminalQuickCommandScope } from '../../../../shared/terminal-quick-commands'
 import { isTerminalAgentQuickCommand } from '../../../../shared/terminal-quick-commands'

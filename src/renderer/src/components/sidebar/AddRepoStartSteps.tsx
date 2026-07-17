@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ComponentType, type ReactNode, type Ref } from 'react'
-import { CircleStop, Loader2 } from 'lucide-react'
+import { StopCircle as CircleStop, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { ShortcutKeyCombo } from '@/components/ShortcutKeyCombo'

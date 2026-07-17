@@ -1,4 +1,4 @@
-import { Copy, GitFork } from 'lucide-react'
+import { Copy, GitFork } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {

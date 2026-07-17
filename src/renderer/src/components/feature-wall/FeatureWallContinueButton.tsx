@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { CornerDownLeft } from 'lucide-react'
+import { ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 
 export function FeatureWallContinueButton(props: {

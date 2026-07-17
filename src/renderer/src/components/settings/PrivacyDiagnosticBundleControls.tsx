@@ -1,4 +1,13 @@
-import { Check, Clipboard, Eye, FileText, Loader2, Trash2, UploadCloud, X } from 'lucide-react'
+import {
+  Check,
+  Clipboard,
+  Eye,
+  FileText,
+  SpinnerGap as Loader2,
+  Trash as Trash2,
+  CloudArrowUp as UploadCloud,
+  X
+} from '@phosphor-icons/react'
 import type {
   DiagnosticsBundlePayload,
   DiagnosticsStatusPayload

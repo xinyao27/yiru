@@ -8,17 +8,17 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import {
-  AlertCircle,
-  AlertTriangle,
-  ChevronDown,
+  WarningCircle as AlertCircle,
+  Warning as AlertTriangle,
+  CaretDown as ChevronDown,
   GitMerge,
-  LoaderCircle,
-  Server,
-  ServerOff,
+  CircleNotch as LoaderCircle,
+  HardDrives as Server,
+  HardDrive as ServerOff,
   Star,
-  Trash2,
-  Workflow
-} from 'lucide-react'
+  Trash as Trash2,
+  FlowArrow as Workflow
+} from '@phosphor-icons/react'
 import CacheTimer, { usePromptCacheCountdownStartedAt } from './CacheTimer'
 import WorktreeContextMenu from './WorktreeContextMenu'
 import { SshDisconnectedDialog } from './SshDisconnectedDialog'

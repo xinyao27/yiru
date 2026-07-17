@@ -1,5 +1,11 @@
 import { useMemo, useState } from 'react'
-import { ArrowRightLeft, Copy, FolderGit2, Loader2, MoveRight } from 'lucide-react'
+import {
+  ArrowsLeftRight as ArrowRightLeft,
+  Copy,
+  FolderSimple as FolderGit2,
+  SpinnerGap as Loader2,
+  ArrowRight as MoveRight
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {

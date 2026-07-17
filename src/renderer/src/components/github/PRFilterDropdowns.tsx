@@ -3,7 +3,7 @@
 // own collapsed Filters dropdown so the toolbar stays uncluttered when nothing
 // is set. Active filters surface as inline removable pills next to the button.
 import React, { useMemo, useState } from 'react'
-import { ListFilter, X } from 'lucide-react'
+import { Funnel as ListFilter, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'

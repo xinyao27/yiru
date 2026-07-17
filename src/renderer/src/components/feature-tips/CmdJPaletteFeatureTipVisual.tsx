@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState, type JSX } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Plus, MagnifyingGlass as Search } from '@phosphor-icons/react'
 import { usePrefersReducedMotion } from '@/components/feature-wall/feature-wall-modal-helpers'
 import { formatShortcutKeyComboDetails, useShortcutKeyDetails } from '@/hooks/useShortcutLabel'
 import { translate } from '@/i18n/i18n'

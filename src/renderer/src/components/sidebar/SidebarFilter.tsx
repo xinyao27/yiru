@@ -1,5 +1,13 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { Check, FolderPlus, GitBranch, ListFilter, Moon, Server, Workflow } from 'lucide-react'
+import {
+  Check,
+  FolderPlus,
+  GitBranch,
+  Funnel as ListFilter,
+  Moon,
+  HardDrives as Server,
+  FlowArrow as Workflow
+} from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import {

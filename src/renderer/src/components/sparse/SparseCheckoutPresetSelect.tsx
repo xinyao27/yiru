@@ -1,5 +1,12 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
-import { Check, ChevronsUpDown, LoaderCircle, Pencil, Plus, RefreshCcw } from 'lucide-react'
+import {
+  Check,
+  CaretUpDown as ChevronsUpDown,
+  CircleNotch as LoaderCircle,
+  Pencil,
+  Plus,
+  ArrowCounterClockwise as RefreshCcw
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useAppStore } from '@/store'

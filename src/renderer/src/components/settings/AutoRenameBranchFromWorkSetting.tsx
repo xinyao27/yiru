@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type { GlobalSettings } from '../../../../shared/types'
 import type {
   SourceControlAiSettingsPatch,

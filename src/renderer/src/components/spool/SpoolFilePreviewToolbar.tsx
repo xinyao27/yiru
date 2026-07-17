@@ -1,5 +1,12 @@
 import type React from 'react'
-import { ChevronLeft, ChevronRight, MoreHorizontal, RefreshCw, Save, Trash2 } from 'lucide-react'
+import {
+  ArrowClockwise as RefreshCw,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  DotsThree as MoreHorizontal,
+  FloppyDisk as Save,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import type { SpoolFileReadResult } from '../../../../shared/spool/spool-operation-contract'
 import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'

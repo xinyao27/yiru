@@ -1,5 +1,11 @@
 import { useState } from 'react'
-import { Check, ChevronRight, ChevronsUpDown, Loader2, Plus } from 'lucide-react'
+import {
+  Check,
+  CaretRight as ChevronRight,
+  CaretUpDown as ChevronsUpDown,
+  SpinnerGap as Loader2,
+  Plus
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Command, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'

@@ -41,7 +41,6 @@ function buildMenuOptions() {
       showTasksButton: true,
       showAutomationsButton: true,
       showMobileButton: true,
-      showTitlebarAppName: true,
       statusBarVisible: true
     }))
   }
@@ -320,7 +319,6 @@ describe('registerAppMenu', () => {
       showTasksButton: false,
       showAutomationsButton: false,
       showMobileButton: true,
-      showTitlebarAppName: true,
       statusBarVisible: true
     })
     registerAppMenu(options)
@@ -345,9 +343,6 @@ describe('registerAppMenu', () => {
     expect(mobileItem?.type).toBe('checkbox')
     expect(mobileItem?.checked).toBe(true)
 
-    const titlebarItem = appearanceSubmenu.find((item) => item.label === 'Show Titlebar App Name')
-    expect(titlebarItem?.checked).toBe(true)
-
     const statusBarItem = appearanceSubmenu.find((item) => item.label === 'Show Status Bar')
     expect(statusBarItem?.checked).toBe(true)
   })
@@ -369,14 +364,9 @@ describe('registerAppMenu', () => {
     appearanceSubmenu
       .find((item) => item.label === 'Show Yiru Mobile Button')
       ?.click?.({} as never, {} as never, {} as never)
-    appearanceSubmenu
-      .find((item) => item.label === 'Show Titlebar App Name')
-      ?.click?.({} as never, {} as never, {} as never)
-
     expect(options.onToggleAppearance).toHaveBeenCalledWith('showTasksButton')
     expect(options.onToggleAppearance).toHaveBeenCalledWith('showAutomationsButton')
     expect(options.onToggleAppearance).toHaveBeenCalledWith('showMobileButton')
-    expect(options.onToggleAppearance).toHaveBeenCalledWith('showTitlebarAppName')
   })
 
   it('routes sidebar toggle items through their callbacks', () => {

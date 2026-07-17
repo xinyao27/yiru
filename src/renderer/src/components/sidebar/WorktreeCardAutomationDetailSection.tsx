@@ -1,5 +1,5 @@
 import React from 'react'
-import { CalendarClock, PlayCircle } from 'lucide-react'
+import { CalendarDots as CalendarClock, PlayCircle } from '@phosphor-icons/react'
 import type { ExecutionHostId } from '../../../../shared/execution-host'
 import type { AutomationWorkspaceProvenance } from '../../../../shared/types'
 import {

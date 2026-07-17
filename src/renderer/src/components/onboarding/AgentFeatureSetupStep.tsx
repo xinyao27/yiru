@@ -1,4 +1,4 @@
-import { Loader2, Terminal } from 'lucide-react'
+import { SpinnerGap as Loader2, Terminal } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { FeatureSetupChecklist } from './FeatureSetupChecklist'
 import { FeatureSetupInlineTerminal } from './FeatureSetupInlineTerminal'

@@ -1,6 +1,12 @@
 import type React from 'react'
 import { useCallback, useMemo, useState } from 'react'
-import { Loader2, LockKeyhole, ShieldCheck, SquareTerminal, TriangleAlert } from 'lucide-react'
+import {
+  LockKey as LockKeyhole,
+  ShieldCheck,
+  SpinnerGap as Loader2,
+  TerminalWindow as SquareTerminal,
+  Warning as TriangleAlert
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 import type {

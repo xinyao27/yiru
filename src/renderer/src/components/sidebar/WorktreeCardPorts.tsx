@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react'
-import { Plug, Copy, ExternalLink, Trash2 } from 'lucide-react'
+import { Plug, Copy, ArrowSquareOut as ExternalLink, Trash as Trash2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useAppStore } from '@/store'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'

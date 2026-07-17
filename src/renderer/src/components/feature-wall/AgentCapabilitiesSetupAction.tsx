@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import { Check, Globe2, Loader2, MonitorCog, Terminal, Workflow } from 'lucide-react'
+import {
+  Check,
+  Globe as Globe2,
+  SpinnerGap as Loader2,
+  Monitor as MonitorCog,
+  Terminal,
+  FlowArrow as Workflow
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'

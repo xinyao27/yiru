@@ -1,5 +1,5 @@
 import React from 'react'
-import { Pencil, Play, RefreshCw, Trash2 } from 'lucide-react'
+import { Pencil, Play, ArrowClockwise as RefreshCw, Trash as Trash2 } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { SettingsSwitch } from '@/components/settings/SettingsFormControls'

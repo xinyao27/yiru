@@ -1,4 +1,11 @@
-import { ChevronRight, Heading1, Heading2, Heading3, Heading4, Heading5 } from 'lucide-react'
+import {
+  CaretRight as ChevronRight,
+  TextHOne as Heading1,
+  TextHTwo as Heading2,
+  TextHThree as Heading3,
+  TextHFour as Heading4,
+  TextHFive as Heading5
+} from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { icon, insertToggle, type SlashCommand } from './rich-markdown-slash-command-primitives'
 

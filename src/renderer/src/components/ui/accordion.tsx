@@ -1,8 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { ChevronDown } from 'lucide-react'
 import { Accordion as AccordionPrimitive } from '@base-ui/react/accordion'
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 
 import { cn } from '@/lib/utils'
 

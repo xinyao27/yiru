@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { RotateCw } from 'lucide-react'
+import { ArrowClockwise as RotateCw } from '@phosphor-icons/react'
 import type { GlobalSettings } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'

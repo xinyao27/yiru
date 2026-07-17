@@ -96,11 +96,11 @@ vi.mock('@/components/ui/tooltip', () => ({
   }
 }))
 
-vi.mock('lucide-react', () => ({
-  Maximize2: function Maximize2() {
+vi.mock('@phosphor-icons/react', () => ({
+  ArrowsOut: function Maximize2() {
     return null
   },
-  Minimize2: function Minimize2() {
+  ArrowsIn: function Minimize2() {
     return null
   },
   Minus: function Minus() {

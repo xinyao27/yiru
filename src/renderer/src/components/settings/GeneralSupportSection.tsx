@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useEffect, useState } from 'react'
-import { ExternalLink, Loader2, Star } from 'lucide-react'
+import { ArrowSquareOut as ExternalLink, SpinnerGap as Loader2, Star } from '@phosphor-icons/react'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'

@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash as Trash2 } from '@phosphor-icons/react'
 import type {
   Repo,
   TerminalQuickCommand,

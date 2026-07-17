@@ -1,10 +1,10 @@
 import {
-  CircleCheckIcon,
+  CheckCircle as CircleCheckIcon,
   InfoIcon,
-  Loader2Icon,
-  OctagonXIcon,
-  TriangleAlertIcon
-} from 'lucide-react'
+  SpinnerGap as Loader2Icon,
+  XCircle as OctagonXIcon,
+  Warning as TriangleAlertIcon
+} from '@phosphor-icons/react'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
 import { useAppStore } from '@/store'
 

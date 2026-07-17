@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState, type ReactElement } from 'react'
-import { Smartphone } from 'lucide-react'
+import { DeviceMobile as Smartphone } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { DriverState } from '@/lib/pane-manager/mobile-driver-state'

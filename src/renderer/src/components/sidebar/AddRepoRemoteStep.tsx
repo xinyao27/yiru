@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CircleStop, FolderOpen, Settings } from 'lucide-react'
+import { StopCircle as CircleStop, FolderOpen, Gear as Settings } from '@phosphor-icons/react'
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

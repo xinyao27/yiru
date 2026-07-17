@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { FolderGit2, MousePointer2 } from 'lucide-react'
+import { FolderSimple as FolderGit2, Cursor as MousePointer2 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
 // Why: these static marks replace storyboarded animations for setup steps whose

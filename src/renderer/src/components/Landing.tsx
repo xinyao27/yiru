@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle, ExternalLink, FolderPlus, GitBranchPlus, Star, X } from 'lucide-react'
+import {
+  Warning as AlertTriangle,
+  ArrowSquareOut as ExternalLink,
+  FolderPlus,
+  GitBranch as GitBranchPlus,
+  Star,
+  X
+} from '@phosphor-icons/react'
 import { cn } from '../lib/utils'
 import { useAppStore } from '../store'
 import { isGitRepoKind } from '../../../shared/repo-kind'

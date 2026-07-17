@@ -1,6 +1,6 @@
 // Step for AddRepoDialog (yiru#763), split out so create-project state stays scoped.
 import React, { useMemo, useState } from 'react'
-import { ChevronDown, GitBranch, Loader2 } from 'lucide-react'
+import { CaretDown as ChevronDown, GitBranch, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

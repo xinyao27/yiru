@@ -6,17 +6,17 @@
    docs/resource-usage-merge-spec.md for the full design. */
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  AlertTriangle,
-  ChevronDown,
-  ChevronRight,
+  Warning as AlertTriangle,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
   Globe,
-  LoaderCircle,
-  MemoryStick,
-  RotateCw,
+  CircleNotch as LoaderCircle,
+  Memory as MemoryStick,
+  ArrowClockwise as RotateCw,
   Terminal,
-  Trash2,
+  Trash as Trash2,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'

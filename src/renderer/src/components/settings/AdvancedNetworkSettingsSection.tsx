@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type { GlobalSettings } from '../../../../shared/types'
 import { normalizeProxyBypassRules, normalizeProxyUrl } from '../../../../shared/network-proxy'
 import { cn } from '@/lib/utils'

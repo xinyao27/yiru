@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
-import { FileText } from 'lucide-react'
+import { FileText } from '@phosphor-icons/react'
 import {
   CommandDialog,
   CommandEmpty,

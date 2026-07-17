@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { FileText } from 'lucide-react'
+import { FileText } from '@phosphor-icons/react'
 import type {
   DiagnosticsBundlePayload,
   DiagnosticsStatusPayload

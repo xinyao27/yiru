@@ -1,4 +1,9 @@
-import { Home, Power, RotateCw, Smartphone } from 'lucide-react'
+import {
+  House as Home,
+  Power,
+  ArrowClockwise as RotateCw,
+  DeviceMobile as Smartphone
+} from '@phosphor-icons/react'
 import {
   Select,
   SelectContent,

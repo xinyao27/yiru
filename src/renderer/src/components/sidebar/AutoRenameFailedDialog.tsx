@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AlertCircle, Check, Copy } from 'lucide-react'
+import { WarningCircle as AlertCircle, Check, Copy } from '@phosphor-icons/react'
 import {
   Dialog,
   DialogContent,

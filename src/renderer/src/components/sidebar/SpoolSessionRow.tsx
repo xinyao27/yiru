@@ -1,5 +1,5 @@
 import type React from 'react'
-import { SquareTerminal } from 'lucide-react'
+import { TerminalWindow as SquareTerminal } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'

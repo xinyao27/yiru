@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react'
+import { Check } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import type { IntegrationStepState } from './use-integration-connection-status'
 import { translate } from '@/i18n/i18n'

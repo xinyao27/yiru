@@ -12,7 +12,6 @@ export type AppearanceMenuState = {
   showTasksButton: boolean
   showAutomationsButton: boolean
   showMobileButton: boolean
-  showTitlebarAppName: boolean
   statusBarVisible: boolean
 }
 
@@ -228,12 +227,6 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
         type: 'checkbox',
         checked: appearance.showMobileButton,
         click: () => onToggleAppearance('showMobileButton')
-      },
-      {
-        label: translateMain('menu.showTitlebarAppName', 'Show Titlebar App Name'),
-        type: 'checkbox',
-        checked: appearance.showTitlebarAppName,
-        click: () => onToggleAppearance('showTitlebarAppName')
       }
     ]
   }

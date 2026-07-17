@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { RefreshCw } from 'lucide-react'
+import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { CliInstallStatus } from '../../../../shared/cli-install-types'
 import { useWindowsTerminalCapabilities } from '@/lib/windows-terminal-capabilities'

@@ -1,5 +1,10 @@
 /* eslint-disable max-lines -- Why: sidebar row construction keeps every grouping mode in one pure module so reveal, virtualized rendering, and tests share the same flat row contract. */
-import { CircleX, FolderTree, List, Pin } from 'lucide-react'
+import {
+  XCircle as CircleX,
+  Folders as FolderTree,
+  List,
+  PushPin as Pin
+} from '@phosphor-icons/react'
 import type React from 'react'
 import type {
   DetectedWorktree,

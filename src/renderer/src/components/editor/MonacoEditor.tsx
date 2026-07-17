@@ -53,7 +53,7 @@ import {
   installEditorSaveShortcut,
   installMonacoEditorFindShortcut
 } from './editor-shortcuts'
-import { Plus } from 'lucide-react'
+import { Plus } from '@phosphor-icons/react'
 import {
   getMonacoMarkdownSelectionAnnotationTarget,
   type MonacoMarkdownSelectionAnnotationTarget

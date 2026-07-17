@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useState } from 'react'
-import { ChevronLeft } from 'lucide-react'
+import { CaretLeft as ChevronLeft } from '@phosphor-icons/react'
 import type {
   SpoolFileDiffResult,
   SpoolFileReadResult,

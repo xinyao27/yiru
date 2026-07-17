@@ -1,4 +1,4 @@
-import { Check, Copy } from 'lucide-react'
+import { Check, Copy } from '@phosphor-icons/react'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { translate } from '@/i18n/i18n'

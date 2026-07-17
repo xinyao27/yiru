@@ -5,7 +5,7 @@
  * while isolating the inline-connect interaction logic.
  */
 import React, { useCallback, useRef, useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import type { SshTarget, SshConnectionState } from '../../../../shared/ssh-types'
 import { translate } from '@/i18n/i18n'
 

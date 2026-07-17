@@ -1,4 +1,11 @@
-import { Check, Ellipsis, Import, Monitor, Plus, Settings } from 'lucide-react'
+import {
+  Check,
+  DotsThree as Ellipsis,
+  DownloadSimple as Import,
+  Monitor,
+  Plus,
+  Gear as Settings
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

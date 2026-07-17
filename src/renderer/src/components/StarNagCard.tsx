@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ExternalLink, Star, X } from 'lucide-react'
+import { ArrowSquareOut as ExternalLink, Star, X } from '@phosphor-icons/react'
 import { Card } from './ui/card'
 import { Button } from './ui/button'
 import { useAppStore } from '../store'

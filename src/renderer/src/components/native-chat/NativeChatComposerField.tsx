@@ -1,5 +1,5 @@
 import type { ClipboardEventHandler, KeyboardEventHandler, RefObject } from 'react'
-import { Image as ImageIcon, ImageOff, X } from 'lucide-react'
+import { Image as ImageIcon, ImageBroken as ImageOff, X } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/utils'
 import { NATIVE_FILE_DROP_TARGET } from '../../../../shared/native-file-drop'

@@ -1,6 +1,6 @@
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: picker base-ref defaults and search results come from debounced runtime IPC, so loading/result state is intentionally synchronized from effects. */
 import React from 'react'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   Command,

@@ -9,7 +9,7 @@ import type {
   SetupAgentStartupPolicy,
   SetupRunPolicy
 } from '../../../../shared/types'
-import { AlertTriangle, ChevronRight, Plus } from 'lucide-react'
+import { Warning as AlertTriangle, CaretRight as ChevronRight, Plus } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../ui/button'

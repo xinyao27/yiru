@@ -1,5 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { RefreshCw, Save, Sparkles, Terminal, TriangleAlert } from 'lucide-react'
+import {
+  ArrowClockwise as RefreshCw,
+  FloppyDisk as Save,
+  Sparkle as Sparkles,
+  Terminal,
+  Warning as TriangleAlert
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'

@@ -1,5 +1,5 @@
 import { useState, type RefObject } from 'react'
-import { Check, Pencil, X } from 'lucide-react'
+import { Check, Pencil, X } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import type { AskAnswerSelection, AskPrompt } from './native-chat-interactive-prompt'

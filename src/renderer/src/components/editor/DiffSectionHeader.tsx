@@ -1,4 +1,8 @@
-import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react'
+import {
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  ArrowSquareOut as ExternalLink
+} from '@phosphor-icons/react'
 import type { MouseEvent, ReactElement, ReactNode } from 'react'
 import { translate } from '@/i18n/i18n'
 

@@ -2,7 +2,14 @@
    selection, per-agent controls, and runtime location together so settings
    reconciliation stays visible in one file. */
 import { useId, useMemo, useState } from 'react'
-import { Check, ChevronDown, ExternalLink, Info, RefreshCw, Terminal } from 'lucide-react'
+import {
+  Check,
+  CaretDown as ChevronDown,
+  ArrowSquareOut as ExternalLink,
+  Info,
+  ArrowClockwise as RefreshCw,
+  Terminal
+} from '@phosphor-icons/react'
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
 import { getAgentCatalog, AgentIcon } from '@/lib/agent-catalog'
 import { useDetectedAgents } from '@/hooks/useDetectedAgents'

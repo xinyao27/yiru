@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { CalendarClock, ExternalLink, RefreshCw, Sparkles } from 'lucide-react'
+import {
+  CalendarDots as CalendarClock,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw,
+  Sparkle as Sparkles
+} from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'

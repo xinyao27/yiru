@@ -4,15 +4,15 @@ import React from 'react'
 import {
   ArrowLeft,
   ArrowRight,
-  CalendarDays,
-  ExternalLink,
+  CalendarBlank as CalendarDays,
+  ArrowSquareOut as ExternalLink,
   FileText,
-  FolderKanban,
-  Layers3,
-  LoaderCircle,
-  RefreshCw,
-  UserRound
-} from 'lucide-react'
+  FolderSimple as FolderKanban,
+  StackSimple as Layers3,
+  CircleNotch as LoaderCircle,
+  ArrowClockwise as RefreshCw,
+  User as UserRound
+} from '@phosphor-icons/react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

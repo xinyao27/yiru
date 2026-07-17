@@ -1,5 +1,9 @@
 import { useCallback, useState } from 'react'
-import { Loader2, Server, ServerOff } from 'lucide-react'
+import {
+  SpinnerGap as Loader2,
+  HardDrives as Server,
+  HardDrive as ServerOff
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/useMountedRef'

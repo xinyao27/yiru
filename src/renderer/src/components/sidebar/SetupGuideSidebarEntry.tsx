@@ -1,5 +1,5 @@
 import React from 'react'
-import { EyeOff } from 'lucide-react'
+import { EyeSlash as EyeOff } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
 import {

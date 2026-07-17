@@ -1,4 +1,4 @@
-import { ServerCog } from 'lucide-react'
+import { HardDrives as ServerCog } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store'
 import type { ProviderAccountScope, ProviderRateLimitScope } from './provider-account-scope'

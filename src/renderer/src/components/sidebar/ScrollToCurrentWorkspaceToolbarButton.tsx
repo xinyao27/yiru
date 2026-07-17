@@ -1,4 +1,4 @@
-import { Crosshair } from 'lucide-react'
+import { Crosshair } from '@phosphor-icons/react'
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

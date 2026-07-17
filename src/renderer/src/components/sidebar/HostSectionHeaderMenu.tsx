@@ -1,15 +1,15 @@
 import React, { useCallback, useState } from 'react'
 import {
-  AlertTriangle,
-  Ellipsis,
-  Loader2,
+  Warning as AlertTriangle,
+  DotsThree as Ellipsis,
+  SpinnerGap as Loader2,
   Pencil,
   Plug,
-  PlugZap,
-  RefreshCw,
-  Settings2,
-  Trash2
-} from 'lucide-react'
+  PlugCharging as PlugZap,
+  ArrowClockwise as RefreshCw,
+  GearSix as Settings2,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {

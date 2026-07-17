@@ -15,11 +15,11 @@ import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import {
   ArrowLeft,
   ArrowRight,
-  Minimize2,
-  MoreHorizontal,
-  PanelLeft,
-  PanelRight
-} from 'lucide-react'
+  ArrowsIn as Minimize2,
+  DotsThree as MoreHorizontal,
+  SidebarSimple as PanelLeft,
+  Sidebar as PanelRight
+} from '@phosphor-icons/react'
 import logo from '../../../resources/logo.svg'
 import { SYNC_FIT_PANES_EVENT, TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '@/constants/terminal'
 import { syncZoomCSSVar } from '@/lib/ui-zoom'
@@ -35,12 +35,6 @@ import { buildAppFontFamily } from '@/lib/app-font-family'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger
-} from '@/components/ui/context-menu'
 import { useAppStore } from './store'
 import { useShallow } from 'zustand/react/shallow'
 import { isRemoteWorkspaceSnapshotApplyInProgress, useIpcEvents } from './hooks/useIpcEvents'
@@ -2015,13 +2009,7 @@ function App(): React.JSX.Element {
     })
     observer.observe(controls)
     return () => observer.disconnect()
-  }, [
-    isFullScreen,
-    settings?.showTitlebarAppName,
-    showSidebar,
-    leftTitlebarChromeLayout.isFloating,
-    sidebarOpen
-  ])
+  }, [isFullScreen, showSidebar, leftTitlebarChromeLayout.isFloating, sidebarOpen])
 
   const resolvedMountedLazyModalIds = resolveMountedLazyModalIds(activeModal, mountedLazyModalIds)
   if (resolvedMountedLazyModalIds !== mountedLazyModalIds) {
@@ -2041,7 +2029,7 @@ function App(): React.JSX.Element {
     // back/forward arrows hanging over the first tab when the sidebar was
     // collapsed (Cmd+B), producing a half-occluded, non-scrollable tab strip.
     // Why: collapsed workspace mode floats inside a w-0 sidebar wrapper; w-max
-    // prevents Windows Chromium from shrinking the app name down to one glyph.
+    // keeps the complete control cluster reachable above the tab strip.
     <div
       ref={titlebarLeftControlsRef}
       className={`flex h-full shrink-0 items-center${
@@ -2077,35 +2065,6 @@ function App(): React.JSX.Element {
           </>
         ) : (
           <div className="pl-2" />
-        )}
-        {showSidebar && !hasCustomTitleBar && (
-          <>
-            {settings?.showTitlebarAppName !== false && (
-              <ContextMenu>
-                <ContextMenuTrigger
-                  render={
-                    <div
-                      className="titlebar-app-name"
-                      aria-label={translate('auto.App.5096cbbc86', 'Yiru')}
-                    >
-                      <span className="titlebar-app-name-main">
-                        {translate('auto.App.5096cbbc86', 'Yiru')}
-                      </span>
-                    </div>
-                  }
-                />
-                <ContextMenuContent>
-                  <ContextMenuItem
-                    onClick={() => {
-                      void actions.updateSettings({ showTitlebarAppName: false })
-                    }}
-                  >
-                    {translate('auto.App.e81217c1b7', 'Hide App Name')}
-                  </ContextMenuItem>
-                </ContextMenuContent>
-              </ContextMenu>
-            )}
-          </>
         )}
         {showSidebar && (
           <Tooltip>
@@ -2320,7 +2279,7 @@ function App(): React.JSX.Element {
                       leftTitlebarChromeLayout.shouldMount ? (
                         /* Why: left column wraps the sidebar with a titlebar-height
                      header above it. The header holds the same controls
-                     (traffic lights, sidebar toggle, "Yiru" title, agent badge)
+                     (traffic lights, sidebar toggle, agent badge)
                      that the full-width titlebar held while the center and right
                      columns keep their own top strips at the same 36px height.
                      When the sidebar is collapsed, take this header out of flex

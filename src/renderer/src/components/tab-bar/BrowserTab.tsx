@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
-import { Globe, X, ExternalLink, Copy, Pin, PinOff, PanelRightClose } from 'lucide-react'
+import {
+  Globe,
+  X,
+  ArrowSquareOut as ExternalLink,
+  Copy,
+  PushPin as Pin,
+  PushPinSlash as PinOff,
+  Sidebar as PanelRightClose
+} from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,10 +24,9 @@ import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from './SortableTab'
 import { getLiveBrowserUrl } from '../browser-pane/browser-runtime'
 import type { TabDragItemData } from '../tab-group/useTabDragSplit'
 import {
-  ACTIVE_TAB_INDICATOR_CLASSES,
   getDropIndicatorClasses,
+  getTabDividerClasses,
   getTabRootStateClasses,
-  getTabStripBorderClasses,
   type DropIndicator
 } from './drop-indicator'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
@@ -27,6 +34,8 @@ import { translate } from '@/i18n/i18n'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 import { TabWorkspaceLayoutMenuSection } from './TabWorkspaceLayoutMenuSection'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
+import { TAB_ROOT_CLASSES } from './tab-root-classes'
+import { TabCloseButton } from './TabCloseButton'
 
 function formatBrowserTabUrlLabel(url: string): string {
   if (url === YIRU_BROWSER_BLANK_URL || url === 'about:blank') {
@@ -91,14 +100,14 @@ function BrowserTabFavicon({
         aria-hidden
         draggable={false}
         // Why: transparent dark/light-mode favicons can disappear against tab
-        // chrome; a token-colored 1px shadow keeps the 12px mark legible.
-        className="size-3 mr-1 shrink-0 rounded-sm object-contain drop-shadow-[0_0_1px_var(--foreground)]"
+        // chrome; a token-colored 1px shadow keeps the 16px mark legible.
+        className="mr-1 size-4 shrink-0 rounded-sm object-contain drop-shadow-[0_0_1px_var(--foreground)]"
         onError={() => setFailedFavicon({ tabId, faviconUrl: displayFaviconUrl })}
       />
     )
   }
 
-  return <Globe className="size-3 mr-1 shrink-0 text-blue-500" />
+  return <Globe className="mr-1 size-4 shrink-0 text-blue-500" />
 }
 
 export default function BrowserTab({
@@ -112,8 +121,7 @@ export default function BrowserTab({
   onDuplicate,
   onTogglePin,
   dragData,
-  dropIndicator,
-  includeTopTabBorder = true
+  dropIndicator
 }: {
   tab: BrowserTabState
   isActive: boolean
@@ -126,7 +134,6 @@ export default function BrowserTab({
   onTogglePin: () => void
   dragData: TabDragItemData
   dropIndicator?: DropIndicator
-  includeTopTabBorder?: boolean
 }): React.JSX.Element {
   // Why: no transform/transition/isDragging styling — the drag design is
   // that tabs stay visually anchored; only the blue insertion bar moves.
@@ -181,7 +188,7 @@ export default function BrowserTab({
       data-pinned={isPinned ? 'true' : 'false'}
       {...attributes}
       {...listeners}
-      className={`group relative flex items-center h-full px-1.5 text-xs cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none ${getTabStripBorderClasses(hasTabsToRight, { includeTopBorder: includeTopTabBorder })} ${getDropIndicatorClasses(dropIndicator ?? null)} ${getTabRootStateClasses(isActive)}`}
+      className={`${TAB_ROOT_CLASSES} ${getTabDividerClasses(hasTabsToRight)} ${getDropIndicatorClasses(dropIndicator ?? null)} ${getTabRootStateClasses(isActive)}`}
       onPointerDown={(e) => {
         onTabPointerDown(
           e,
@@ -205,7 +212,6 @@ export default function BrowserTab({
         }
       }}
     >
-      {isActive && <span className={ACTIVE_TAB_INDICATOR_CLASSES} aria-hidden />}
       {/* Why: the browser tab icon is the only non-terminal, non-editor
           surface in the tab strip. Coloring the Globe blue (matching the
           in-app browser's identity and the default tab insertion bar)
@@ -214,26 +220,36 @@ export default function BrowserTab({
           keep full color on both active and inactive tabs — dimming to
           muted-foreground made the icon read as "disabled" in practice. */}
       <BrowserTabFavicon tabId={tab.id} faviconUrl={tab.faviconUrl} />
-      {isPinned && <Pin className="mr-1 size-3 shrink-0 text-muted-foreground" aria-hidden />}
-      <span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1`}>{tabLabel}</span>
+      {isPinned && <Pin className="mr-1 size-4 shrink-0 text-muted-foreground" aria-hidden />}
+      {menuOpen ? (
+        <span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1`}>{tabLabel}</span>
+      ) : (
+        <Tooltip>
+          <TooltipTrigger
+            render={<span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1`}>{tabLabel}</span>}
+          />
+          <TooltipContent
+            side="bottom"
+            sideOffset={6}
+            className="max-w-80 whitespace-normal break-words text-left"
+          >
+            {tabLabel}
+          </TooltipContent>
+        </Tooltip>
+      )}
       {tab.loading && !tab.loadError && !isBlankBrowserTab(tab) && (
         <span className="mr-1 size-1.5 rounded-full bg-sky-500/80 shrink-0" />
       )}
       {!isPinned && (
-        <button
-          className={`flex items-center justify-center w-4 h-4 rounded-sm shrink-0 ${
-            isActive
-              ? 'text-muted-foreground hover:text-foreground hover:bg-muted'
-              : 'text-transparent group-hover:text-muted-foreground hover:!text-foreground hover:!bg-muted'
-          }`}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.stopPropagation()
-            onClose()
-          }}
-        >
-          <X className="w-3 h-3" />
-        </button>
+        <TabCloseButton
+          className="right-1"
+          ariaLabel={translate(
+            'auto.components.tab.bar.SortableTab.6df69d9388',
+            'Close tab {{value0}}',
+            { value0: tabLabel }
+          )}
+          onClose={onClose}
+        />
       )}
     </div>
   )
@@ -249,20 +265,7 @@ export default function BrowserTab({
           setMenuOpen(true)
         }}
       >
-        {menuOpen ? (
-          tabRoot
-        ) : (
-          <Tooltip>
-            <TooltipTrigger render={tabRoot} />
-            <TooltipContent
-              side="bottom"
-              sideOffset={6}
-              className="max-w-80 whitespace-normal break-words text-left"
-            >
-              {tabLabel}
-            </TooltipContent>
-          </Tooltip>
-        )}
+        {tabRoot}
       </div>
 
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
@@ -287,30 +290,30 @@ export default function BrowserTab({
             trailingSeparator
           />
           <DropdownMenuItem onClick={onDuplicate}>
-            <Copy className="size-3.5" />
+            <Copy className="size-4" />
             {translate('auto.components.tab.bar.BrowserTab.5d6e89891f', 'Duplicate Tab')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onTogglePin}>
-            {isPinned ? <PinOff className="size-3.5" /> : <Pin className="size-3.5" />}
+            {isPinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
             {isPinned
               ? translate('auto.components.tab.bar.BrowserTab.c5aaee8c39', 'Unpin Tab')
               : translate('auto.components.tab.bar.BrowserTab.911542656f', 'Pin Tab')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => !isPinned && onClose()} disabled={isPinned}>
-            <X className="size-3.5" />
+            <X className="size-4" />
             {translate('auto.components.tab.bar.BrowserTab.1611a1324b', 'Close')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onCloseToRight} disabled={!hasTabsToRight}>
-            <PanelRightClose className="size-3.5" />
+            <PanelRightClose className="size-4" />
             {translate('auto.components.tab.bar.BrowserTab.9dd880bd56', 'Close Tabs To The Right')}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => void window.api.shell.openUrl(openInBrowserUrl)}
             disabled={!isHttpUrl}
           >
-            <ExternalLink className="size-3.5" />
+            <ExternalLink className="size-4" />
             {translate('auto.components.tab.bar.BrowserTab.6e0bc8f3a8', 'Open In Browser')}
           </DropdownMenuItem>
         </DropdownMenuContent>

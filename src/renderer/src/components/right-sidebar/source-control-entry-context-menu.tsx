@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { Copy, ExternalLink, Eye, FolderOpen } from 'lucide-react'
+import { Copy, ArrowSquareOut as ExternalLink, Eye, FolderOpen } from '@phosphor-icons/react'
 import {
   ContextMenu,
   ContextMenuContent,

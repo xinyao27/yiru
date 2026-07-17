@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ChevronUp, ChevronDown, X } from 'lucide-react'
+import { CaretUp as ChevronUp, CaretDown as ChevronDown, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import type { EventBus } from 'pdfjs-dist/web/pdf_viewer.mjs'
 import { translate } from '@/i18n/i18n'

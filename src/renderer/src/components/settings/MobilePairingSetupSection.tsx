@@ -1,5 +1,10 @@
 import type { ReactNode } from 'react'
-import { ExternalLink, Loader2, QrCode, RefreshCw } from 'lucide-react'
+import {
+  ArrowSquareOut as ExternalLink,
+  SpinnerGap as Loader2,
+  QrCode,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'

@@ -1,6 +1,12 @@
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: slug dialog details are loaded through GitHub IPC and must clear stale request state before each lookup. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { CircleDot, ExternalLink, GitPullRequest, LoaderCircle, X } from 'lucide-react'
+import {
+  Circle as CircleDot,
+  ArrowSquareOut as ExternalLink,
+  GitPullRequest,
+  CircleNotch as LoaderCircle,
+  X
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

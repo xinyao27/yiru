@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { FileKey } from 'lucide-react'
+import { FileLock as FileKey } from '@phosphor-icons/react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'

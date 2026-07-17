@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
-import { BellRing, Check, Settings, TriangleAlert } from 'lucide-react'
+import {
+  BellRinging as BellRing,
+  Check,
+  Gear as Settings,
+  Warning as TriangleAlert
+} from '@phosphor-icons/react'
 import type { NotificationDeliveryProbeResult } from '../../../../shared/types'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'

@@ -454,11 +454,9 @@ test.describe('Tabs', () => {
     const activeId = await getActiveTabId(yiruPage)
     expect(activeId).not.toBeNull()
     const activeTab = tabLocator(yiruPage, activeId!)
-    // Why: hover the tab first so the close button reveals its hover style.
-    // The button is interactive regardless but hovering matches real user
-    // behaviour and keeps click coordinates stable.
+    // Why: close is intentionally non-interactive until the tab reveals it on hover.
     await activeTab.hover()
-    await activeTab.getByRole('button', { name: /^Close tab /i }).click()
+    await activeTab.locator('[data-tab-close-button="true"]').click()
 
     await expect
       .poll(() => countRenderedTabs(yiruPage), {
@@ -498,7 +496,7 @@ test.describe('Tabs', () => {
 
     const activeTab = tabLocator(yiruPage, activeTabBefore!)
     await activeTab.hover()
-    await activeTab.getByRole('button', { name: /^Close tab /i }).click()
+    await activeTab.locator('[data-tab-close-button="true"]').click()
 
     // Final DOM assertion: some *other* tab element now carries data-active.
     await expect

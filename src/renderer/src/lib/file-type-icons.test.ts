@@ -2,22 +2,22 @@ import {
   Database,
   File,
   FileArchive,
-  FileBox,
-  FileChartColumn,
+  FileArchive as FileBox,
+  ChartBar as FileChartColumn,
   FileCode,
-  FileCog,
-  FileDiff,
+  FileText as FileCog,
+  FileCode as FileDiff,
   FileImage,
-  FileJson,
-  FileKey,
+  FileCode as FileJson,
+  FileLock as FileKey,
   FileLock,
-  FileMusic,
-  FileSliders,
-  FileSpreadsheet,
+  FileAudio as FileMusic,
+  SlidersHorizontal as FileSliders,
+  FileXls as FileSpreadsheet,
   FileText,
-  FileType,
+  FileText as FileType,
   FileVideo
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { describe, expect, it } from 'vitest'
 import { getFileTypeIcon } from './file-type-icons'
 

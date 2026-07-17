@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react'
-import { Trash, Undo2 } from 'lucide-react'
+import { Trash, ArrowCounterClockwise as Undo2 } from '@phosphor-icons/react'
 
 import { Button } from '@/components/ui/button'
 import {

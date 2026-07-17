@@ -1,5 +1,5 @@
 import React from 'react'
-import { Bell, GitBranch } from 'lucide-react'
+import { Bell, GitBranch } from '@phosphor-icons/react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/utils'

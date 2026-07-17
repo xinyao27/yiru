@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { Plus } from 'lucide-react'
+import { Plus } from '@phosphor-icons/react'
 import { ActionButton } from './SourceControl'
 import { Button } from '@/components/ui/button'
 

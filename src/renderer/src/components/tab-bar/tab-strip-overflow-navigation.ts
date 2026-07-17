@@ -28,9 +28,7 @@ export function scrollTabStripByStep(
 const EMPTY_TAB_STRIP_OVERFLOW_STATE: TabStripScrollMetrics = {
   hasOverflow: false,
   canScrollStart: false,
-  canScrollEnd: false,
-  thumbSizeFraction: 1,
-  thumbOffsetFraction: 0
+  canScrollEnd: false
 }
 
 export function useTabStripOverflowNavigation({

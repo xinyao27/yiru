@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Bold, Code2, Italic, List, Quote } from 'lucide-react'
+import {
+  TextB as Bold,
+  Code as Code2,
+  TextItalic as Italic,
+  List,
+  Quotes as Quote
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { ShortcutKeyCombo } from '@/components/ShortcutKeyCombo'

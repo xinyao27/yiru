@@ -13,15 +13,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Check,
-  CircleDot,
-  ExternalLink,
+  Circle as CircleDot,
+  ArrowSquareOut as ExternalLink,
   GitMerge,
-  LoaderCircle,
+  CircleNotch as LoaderCircle,
   Pencil,
-  RefreshCw,
-  Send,
+  ArrowClockwise as RefreshCw,
+  PaperPlaneRight as Send,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'

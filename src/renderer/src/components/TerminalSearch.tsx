@@ -1,5 +1,11 @@
 import { useEffect, useState, useCallback } from 'react'
-import { ChevronUp, ChevronDown, X, CaseSensitive, Regex } from 'lucide-react'
+import {
+  CaretUp as ChevronUp,
+  CaretDown as ChevronDown,
+  X,
+  TextAa as CaseSensitive,
+  Asterisk as Regex
+} from '@phosphor-icons/react'
 import type { SearchAddon } from '@xterm/addon-search'
 import { Button } from '@/components/ui/button'
 import type { SearchState } from '@/components/terminal-pane/keyboard-handlers'

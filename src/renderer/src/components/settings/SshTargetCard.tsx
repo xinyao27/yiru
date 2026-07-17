@@ -1,14 +1,14 @@
 import { useCallback, useRef, useState } from 'react'
 import {
-  CircleStop,
-  Loader2,
-  MonitorSmartphone,
+  StopCircle as CircleStop,
+  SpinnerGap as Loader2,
+  Devices as MonitorSmartphone,
   Pencil,
-  RotateCcw,
-  Server,
-  ServerOff,
-  Trash2
-} from 'lucide-react'
+  ArrowCounterClockwise as RotateCcw,
+  HardDrives as Server,
+  HardDrive as ServerOff,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import {
   DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
   type SshConnectionState,

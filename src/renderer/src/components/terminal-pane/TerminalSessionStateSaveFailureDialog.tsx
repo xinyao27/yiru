@@ -1,4 +1,4 @@
-import { HardDrive } from 'lucide-react'
+import { HardDrive } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

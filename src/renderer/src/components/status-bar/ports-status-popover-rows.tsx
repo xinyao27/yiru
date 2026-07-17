@@ -1,5 +1,10 @@
 import React, { useCallback, useMemo } from 'react'
-import { Copy, ExternalLink, FolderOpen, Trash2 } from 'lucide-react'
+import {
+  Copy,
+  ArrowSquareOut as ExternalLink,
+  FolderOpen,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

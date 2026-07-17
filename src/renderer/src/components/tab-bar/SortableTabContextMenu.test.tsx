@@ -49,20 +49,20 @@ vi.mock('@/components/ui/dropdown-menu', () => ({
   DropdownMenuTrigger: ({ children }: { children?: ReactNode }) => children
 }))
 
-vi.mock('lucide-react', () => ({
+vi.mock('@phosphor-icons/react', () => ({
   ArrowDown: () => null,
   ArrowLeft: () => null,
   ArrowRight: () => null,
   ArrowUp: () => null,
-  Columns2: () => null,
-  ListX: () => null,
-  MessageSquare: () => null,
-  PanelBottomClose: () => null,
-  PanelRightClose: () => null,
+  Columns: () => null,
+  List: () => null,
+  Chat: () => null,
+  Layout: () => null,
+  Sidebar: () => null,
   Pencil: () => null,
-  Pin: () => null,
-  PinOff: () => null,
-  SquareTerminal: () => null,
+  PushPin: () => null,
+  PushPinSlash: () => null,
+  TerminalWindow: () => null,
   X: () => null
 }))
 

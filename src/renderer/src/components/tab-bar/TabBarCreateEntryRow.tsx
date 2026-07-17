@@ -1,5 +1,12 @@
 import React from 'react'
-import { FilePlus, FileText, Globe, Loader2, Smartphone, TerminalSquare } from 'lucide-react'
+import {
+  FilePlus,
+  FileText,
+  Globe,
+  SpinnerGap as Loader2,
+  DeviceMobile as Smartphone,
+  TerminalWindow as TerminalSquare
+} from '@phosphor-icons/react'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'

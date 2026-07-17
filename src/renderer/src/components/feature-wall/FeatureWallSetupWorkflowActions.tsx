@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ArrowUpRight, Plus, Save, Settings } from 'lucide-react'
+import { ArrowUpRight, Plus, FloppyDisk as Save, Gear as Settings } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

@@ -1,5 +1,9 @@
 import type React from 'react'
-import { Check, GitCommitHorizontal, RefreshCw } from 'lucide-react'
+import {
+  ArrowClockwise as RefreshCw,
+  Check,
+  GitCommit as GitCommitHorizontal
+} from '@phosphor-icons/react'
 import type {
   SpoolGitHistoryEntry,
   SpoolGitHistoryResult,

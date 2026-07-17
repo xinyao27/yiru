@@ -1,5 +1,5 @@
 import { useCallback, useMemo, type Dispatch, type SetStateAction } from 'react'
-import { GitBranch } from 'lucide-react'
+import { GitBranch } from '@phosphor-icons/react'
 import type { NestedRepoScanResult } from '../../../../shared/types'
 import { cn } from '@/lib/utils'
 import { getRepoDisplayLabelKey, getRepoDisplayLabelsByPath } from '@/lib/repo-display-labels'

@@ -1,5 +1,5 @@
 import type React from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import classicIconUrl from '../../../../../resources/icon.png?url'
 import watercolorIconUrl from '../../../../../resources/app-icons/yiru-warm.png?url'
 import blueIconUrl from '../../../../../resources/app-icons/yiru-graphite.png?url'

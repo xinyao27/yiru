@@ -1,6 +1,6 @@
 import { useAppStore } from '@/store'
 import { cn } from '@/lib/utils'
-import { Timer } from 'lucide-react'
+import { Timer } from '@phosphor-icons/react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { useShallow } from 'zustand/react/shallow'
 import { usePromptCacheCountdownNow } from './prompt-cache-countdown-clock'

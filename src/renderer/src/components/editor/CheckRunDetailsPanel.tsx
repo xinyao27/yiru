@@ -1,5 +1,9 @@
 import React from 'react'
-import { ExternalLink, LoaderCircle, RefreshCw } from 'lucide-react'
+import {
+  ArrowSquareOut as ExternalLink,
+  CircleNotch as LoaderCircle,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'

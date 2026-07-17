@@ -3,16 +3,16 @@ merge actions, and conflict state in one component to keep the data flow straigh
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { SpoolChecksPane } from '@/components/spool/SpoolChecksPane'
 import {
-  LoaderCircle,
-  RefreshCw,
+  CircleNotch as LoaderCircle,
+  ArrowClockwise as RefreshCw,
   Check,
   X,
   Pencil,
   GitMerge,
-  Ellipsis,
+  DotsThree as Ellipsis,
   Link,
-  Unlink
-} from 'lucide-react'
+  LinkBreak as Unlink
+} from '@phosphor-icons/react'
 import { useAppStore, type AppState } from '@/store'
 import {
   buildGitHubPRRefreshStateClearToken,

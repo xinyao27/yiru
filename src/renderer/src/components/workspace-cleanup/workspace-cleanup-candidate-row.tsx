@@ -1,18 +1,18 @@
 import React from 'react'
 import {
-  AlertTriangle,
+  Warning as AlertTriangle,
   Check,
-  ChevronDown,
-  Clock3,
-  EyeOff,
-  FileWarning,
+  CaretDown as ChevronDown,
+  Clock as Clock3,
+  EyeSlash as EyeOff,
+  FileText as FileWarning,
   GitBranch,
   GitPullRequest,
-  Search,
-  SquareTerminal,
-  Trash2,
-  type LucideIcon
-} from 'lucide-react'
+  MagnifyingGlass as Search,
+  TerminalWindow as SquareTerminal,
+  Trash as Trash2,
+  type Icon as PhosphorIcon
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
@@ -62,7 +62,7 @@ function MetadataIconChip({
   value,
   tone = 'neutral'
 }: {
-  icon: LucideIcon
+  icon: PhosphorIcon
   label: string
   value?: string
   tone?: StatusPillTone

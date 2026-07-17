@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { SlidersHorizontal } from 'lucide-react'
+import { SlidersHorizontal } from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import {

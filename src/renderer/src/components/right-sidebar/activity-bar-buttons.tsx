@@ -1,5 +1,5 @@
 import React from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { DotsThree as MoreHorizontal } from '@phosphor-icons/react'
 import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 import type { CheckStatus } from '../../../../shared/types'
 import { cn } from '@/lib/utils'
@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
+import { getTabRootStateClasses } from '../tab-bar/drop-indicator'
 
 export type ActivityBarItem = {
   id: ActiveRightSidebarTab
@@ -57,7 +58,8 @@ export function TopActivityOverflowMenu({
           <button
             type="button"
             className={cn(
-              'relative flex h-[36px] w-8 shrink-0 items-center justify-center text-muted-foreground/60 transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+              'relative my-auto flex h-7 w-8 shrink-0 items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+              getTabRootStateClasses(false),
               RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
             )}
             aria-label={translate(
@@ -69,7 +71,7 @@ export function TopActivityOverflowMenu({
             {hiddenChecksStatus && (
               <div
                 className={cn(
-                  'absolute top-[8px] right-[4px] size-[7px] rounded-full ring-1 ring-sidebar',
+                  'absolute top-[4px] right-[4px] size-[7px] rounded-full ring-1 ring-sidebar',
                   STATUS_DOT_COLOR[hiddenChecksStatus] ?? 'bg-muted-foreground'
                 )}
               />
@@ -124,8 +126,12 @@ export function ActivityBarButton({
             className={cn(
               'relative flex shrink-0 items-center justify-center transition-colors',
               RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME,
-              isTop ? 'h-[36px] w-9' : 'w-10 h-10',
-              active ? 'text-foreground' : 'text-muted-foreground/60 hover:text-muted-foreground'
+              isTop ? 'my-auto h-7 w-9' : 'w-10 h-10',
+              isTop
+                ? getTabRootStateClasses(active)
+                : active
+                  ? 'text-foreground'
+                  : 'text-muted-foreground/60 hover:text-muted-foreground'
             )}
             onClick={onClick}
             aria-label={item.shortcut ? `${item.title} (${item.shortcut})` : item.title}
@@ -136,15 +142,12 @@ export function ActivityBarButton({
               <div
                 className={cn(
                   'absolute rounded-full size-[7px] ring-1 ring-sidebar',
-                  isTop ? 'top-[8px] right-[5px]' : 'top-[7px] right-[7px]',
+                  isTop ? 'top-[4px] right-[5px]' : 'top-[7px] right-[7px]',
                   STATUS_DOT_COLOR[statusIndicator] ?? 'bg-muted-foreground'
                 )}
               />
             )}
 
-            {active && isTop && (
-              <div className="absolute bottom-0 left-[25%] right-[25%] h-[2px] bg-foreground rounded-t" />
-            )}
             {active && !isTop && (
               <div className="absolute right-0 top-[25%] bottom-[25%] w-[2px] bg-foreground rounded-l" />
             )}

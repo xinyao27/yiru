@@ -1,8 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { XIcon } from 'lucide-react'
 import { Dialog as SheetPrimitive } from '@base-ui/react/dialog'
+import { XIcon } from '@phosphor-icons/react'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/utils'

@@ -243,7 +243,7 @@ For local development, use a trusted local certificate when possible.
   a tooltip.
 - The unsafe action does not use the destructive color. It does not delete or
   irreversibly mutate user data, and the explicit label carries the warning.
-- Use a muted `ShieldAlert` icon from `lucide-react`; do not add a warning color
+- Use a muted `ShieldWarning` icon from `@phosphor-icons/react`; do not add a warning color
   or new token.
 
 For a remote-owned page whose URL is remote localhost, `Open Externally` is

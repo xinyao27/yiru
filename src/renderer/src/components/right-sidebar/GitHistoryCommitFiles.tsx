@@ -1,5 +1,5 @@
 import type React from 'react'
-import { ArrowUpRight, RefreshCw } from 'lucide-react'
+import { ArrowUpRight, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { STATUS_COLORS, STATUS_LABELS } from './status-display'
 import {
   toPermanentSourceControlRowOpenEvent,

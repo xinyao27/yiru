@@ -1,5 +1,11 @@
 import type { ReactNode } from 'react'
-import { Check, Globe2, MonitorCog, TicketCheck, Workflow } from 'lucide-react'
+import {
+  Check,
+  Globe as Globe2,
+  Monitor as MonitorCog,
+  Ticket as TicketCheck,
+  FlowArrow as Workflow
+} from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import type {
   OnboardingFeatureSetupId,

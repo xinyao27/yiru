@@ -1,4 +1,11 @@
-import { Copy, FileJson, FolderOpen, LocateFixed, PanelTopOpen, Play } from 'lucide-react'
+import {
+  Copy,
+  FileCode as FileJson,
+  FolderOpen,
+  Crosshair as LocateFixed,
+  Layout as PanelTopOpen,
+  Play
+} from '@phosphor-icons/react'
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { ContextMenuItem, ContextMenuSeparator } from '@/components/ui/context-menu'
 import { translate } from '@/i18n/i18n'

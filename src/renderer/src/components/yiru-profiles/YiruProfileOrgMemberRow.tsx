@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Loader2, UserMinus } from 'lucide-react'
+import { SpinnerGap as Loader2, UserMinus } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   Select,

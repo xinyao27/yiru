@@ -1,5 +1,10 @@
 import React, { useCallback, useMemo } from 'react'
-import { LoaderCircle, GitMerge, ChevronDown, GitPullRequestClosed } from 'lucide-react'
+import {
+  CircleNotch as LoaderCircle,
+  GitMerge,
+  CaretDown as ChevronDown,
+  GitPullRequest as GitPullRequestClosed
+} from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'

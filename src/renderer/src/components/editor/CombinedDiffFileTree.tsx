@@ -1,5 +1,10 @@
 import React from 'react'
-import { Check, Filter, PanelLeftClose, Search } from 'lucide-react'
+import {
+  Check,
+  Funnel as Filter,
+  SidebarSimple as PanelLeftClose,
+  MagnifyingGlass as Search
+} from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

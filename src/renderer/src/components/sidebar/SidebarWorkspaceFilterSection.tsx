@@ -1,5 +1,5 @@
 import React from 'react'
-import { GitBranch, Moon, Workflow } from 'lucide-react'
+import { GitBranch, Moon, FlowArrow as Workflow } from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'

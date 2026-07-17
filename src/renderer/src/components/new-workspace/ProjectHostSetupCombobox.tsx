@@ -1,5 +1,5 @@
 import React from 'react'
-import { Check, ChevronsUpDown, Server } from 'lucide-react'
+import { Check, CaretUpDown as ChevronsUpDown, HardDrives as Server } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'

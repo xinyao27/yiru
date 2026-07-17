@@ -1,5 +1,5 @@
 import type React from 'react'
-import { Terminal } from 'lucide-react'
+import { Terminal } from '@phosphor-icons/react'
 import type { TuiAgent } from '../../../../shared/types'
 import { CUSTOM_AGENT_ID } from '../../../../shared/commit-message-agent-spec'
 import type {

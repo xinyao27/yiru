@@ -1,4 +1,4 @@
-import { Check, Copy } from 'lucide-react'
+import { Check, Copy } from '@phosphor-icons/react'
 import type { DiffComment } from '../../../../shared/types'
 import { DiffCommentCard } from '../diff-comments/DiffCommentCard'
 import { NotesSendMenu } from './NotesSendMenu'

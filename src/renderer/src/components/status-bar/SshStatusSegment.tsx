@@ -1,5 +1,11 @@
 import React, { useCallback, useMemo } from 'react'
-import { AlertTriangle, Loader2, MonitorSmartphone, Server, ServerOff } from 'lucide-react'
+import {
+  Warning as AlertTriangle,
+  SpinnerGap as Loader2,
+  Devices as MonitorSmartphone,
+  HardDrives as Server,
+  HardDrive as ServerOff
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import {
   DropdownMenu,

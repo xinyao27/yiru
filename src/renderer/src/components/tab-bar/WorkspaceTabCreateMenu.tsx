@@ -1,5 +1,5 @@
 import type React from 'react'
-import { Plus, TerminalSquare } from 'lucide-react'
+import { Plus, TerminalWindow as TerminalSquare } from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +33,7 @@ export function WorkspaceTabCreateMenu({
     <button
       type="button"
       className={cn(
-        'ml-2 my-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent/50 hover:text-foreground',
+        'ml-1 my-auto flex h-7 w-6 shrink-0 items-center justify-center text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground',
         disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent hover:text-muted-foreground'
       )}
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
@@ -57,7 +57,7 @@ export function WorkspaceTabCreateMenu({
         }
       }}
     >
-      <Plus className="size-3.5" />
+      <Plus className="size-4" />
     </button>
   )
   const trigger = <TooltipTrigger render={<DropdownMenuTrigger render={triggerButton} />} />

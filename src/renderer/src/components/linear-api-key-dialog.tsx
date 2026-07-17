@@ -1,5 +1,9 @@
 import { useId, useMemo, useState } from 'react'
-import { ExternalLink, LoaderCircle, Lock } from 'lucide-react'
+import {
+  ArrowSquareOut as ExternalLink,
+  CircleNotch as LoaderCircle,
+  Lock
+} from '@phosphor-icons/react'
 import type { LinearWorkspace } from '../../../shared/types'
 import {
   buildLinearPersonalApiKeySettingsUrl,

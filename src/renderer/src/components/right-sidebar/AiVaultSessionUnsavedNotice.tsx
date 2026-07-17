@@ -1,5 +1,5 @@
 import type React from 'react'
-import { Archive } from 'lucide-react'
+import { Archive } from '@phosphor-icons/react'
 import {
   aiVaultSessionRecoverableSignalCount,
   isAiVaultSessionRecoverableEmpty,

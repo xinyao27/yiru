@@ -2,22 +2,22 @@ import { useMemo } from 'react'
 import type { Menu } from '@base-ui/react/menu'
 import {
   Clipboard,
-  ClipboardCopy,
+  Copy as ClipboardCopy,
   Copy,
   Eraser,
   GitFork,
-  Maximize2,
-  MessageSquare,
-  Minimize2,
-  PanelBottomClose,
-  PanelsTopLeft,
-  PanelRightClose,
+  ArrowsOut as Maximize2,
+  Chat as MessageSquare,
+  ArrowsIn as Minimize2,
+  Layout as PanelBottomClose,
+  Layout as PanelsTopLeft,
+  Sidebar as PanelRightClose,
   Pencil,
   Play,
   Plus,
-  SquareTerminal,
+  TerminalWindow as SquareTerminal,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,

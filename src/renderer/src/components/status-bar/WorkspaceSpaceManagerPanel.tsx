@@ -3,28 +3,28 @@
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: the relative time clock advances from a wall-clock interval, which is an external timer rather than render-derived state. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  AlertTriangle,
+  Warning as AlertTriangle,
   ArrowDown,
   ArrowUp,
-  Bot,
+  Robot as Bot,
   Check,
   Circle,
-  ExternalLink,
-  FileWarning,
+  ArrowSquareOut as ExternalLink,
+  FileText as FileWarning,
   GitBranch,
   GitPullRequest,
   HardDrive,
-  Loader2,
+  SpinnerGap as Loader2,
   Minus,
-  RefreshCw,
-  Search,
-  Server,
+  ArrowClockwise as RefreshCw,
+  MagnifyingGlass as Search,
+  HardDrives as Server,
   Terminal,
-  Trash2,
-  ZoomIn,
-  ZoomOut,
+  Trash as Trash2,
+  MagnifyingGlassPlus as ZoomIn,
+  MagnifyingGlassMinus as ZoomOut,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import type {
   AgentStatusEntry,
   MigrationUnsupportedPtyEntry

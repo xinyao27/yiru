@@ -1,4 +1,4 @@
-import { Keyboard } from 'lucide-react'
+import { Keyboard } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import {
   formatKeybindingList,

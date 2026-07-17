@@ -1,5 +1,5 @@
 import type React from 'react'
-import { Braces } from 'lucide-react'
+import { BracketsCurly as Braces } from '@phosphor-icons/react'
 import {
   SOURCE_CONTROL_ACTION_VARIABLE_INFO,
   SOURCE_CONTROL_ACTION_VARIABLES,

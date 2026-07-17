@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Info } from 'lucide-react'
+import { Info } from '@phosphor-icons/react'
 import type { GlobalSettings } from '../../../../shared/types'
 import { normalizeGlobalWindowsRuntimeDefault } from '../../../../shared/project-execution-runtime'
 import { Button } from '../ui/button'

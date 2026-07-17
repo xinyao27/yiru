@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react'
-import { CheckCircle2, Info } from 'lucide-react'
+import { CheckCircle as CheckCircle2, Info } from '@phosphor-icons/react'
 import { IntegrationStatusPill } from '@/components/integration-status-pill'
 import { AgentSkillSetupPanel } from '@/components/settings/AgentSkillSetupPanel'
 import { Button } from '@/components/ui/button'

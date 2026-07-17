@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Check,
-  ChevronDown,
-  CircleUserRound,
+  CaretDown as ChevronDown,
+  UserCircle as CircleUserRound,
   Cloud,
   Laptop,
-  Loader2,
+  SpinnerGap as Loader2,
   Plus,
-  Settings2,
+  GearSix as Settings2,
   Users
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'
 import {

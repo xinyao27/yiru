@@ -1,4 +1,4 @@
-import { Check, Loader2 } from 'lucide-react'
+import { Check, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 
 export type StepState = 'pending' | 'done' | 'in-progress'
 

@@ -1,15 +1,15 @@
 import { useEffect } from 'react'
 import {
-  Activity,
+  ActivityIcon as Activity,
   Coins,
-  DatabaseZap,
-  FolderKanban,
+  Database as DatabaseZap,
+  FolderSimple as FolderKanban,
   Gauge,
-  RefreshCw,
+  ArrowClockwise as RefreshCw,
   SlidersHorizontal,
-  Sparkles,
-  Waypoints
-} from 'lucide-react'
+  Sparkle as Sparkles,
+  Path as Waypoints
+} from '@phosphor-icons/react'
 import type { ClaudeUsageRange, ClaudeUsageScope } from '../../../../shared/claude-usage-types'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'

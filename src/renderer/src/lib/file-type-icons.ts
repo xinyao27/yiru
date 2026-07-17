@@ -3,29 +3,29 @@ import {
   Database,
   File,
   FileArchive,
-  FileAxis3D,
-  FileBox,
-  FileBraces,
-  FileChartColumn,
+  Cube as FileAxis3D,
+  FileArchive as FileBox,
+  FileCode as FileBraces,
+  ChartBar as FileChartColumn,
   FileCode,
-  FileCog,
-  FileDiff,
+  FileText as FileCog,
+  FileCode as FileDiff,
   FileImage,
-  FileJson,
-  FileKey,
+  FileCode as FileJson,
+  FileLock as FileKey,
   FileLock,
-  FileMusic,
-  FileSliders,
-  FileSpreadsheet,
-  FileTerminal,
+  FileAudio as FileMusic,
+  SlidersHorizontal as FileSliders,
+  FileXls as FileSpreadsheet,
+  FileCode as FileTerminal,
   FileText,
-  FileType,
+  FileText as FileType,
   FileVideo,
-  Smartphone,
-  type LucideIcon
-} from 'lucide-react'
+  DeviceMobile as Smartphone,
+  type Icon as PhosphorIcon
+} from '@phosphor-icons/react'
 
-const FILE_ICON_BY_NAME: Record<string, LucideIcon> = {
+const FILE_ICON_BY_NAME: Record<string, PhosphorIcon> = {
   '.babelrc': FileSliders,
   '.dockerignore': FileSliders,
   '.editorconfig': FileSliders,
@@ -101,7 +101,7 @@ const FILE_ICON_BY_NAME: Record<string, LucideIcon> = {
   'yarn.lock': FileBox
 }
 
-const FILE_ICON_BY_EXTENSION: Record<string, LucideIcon> = {
+const FILE_ICON_BY_EXTENSION: Record<string, PhosphorIcon> = {
   '7z': FileArchive,
   aac: FileMusic,
   adoc: FileText,
@@ -302,7 +302,7 @@ function getExtension(filename: string): string {
   return filename.slice(lastDot + 1).toLowerCase()
 }
 
-export function getFileTypeIcon(filePath: string | undefined | null): LucideIcon {
+export function getFileTypeIcon(filePath: string | undefined | null): PhosphorIcon {
   const filename = getFilename(filePath)
   if (!filename) {
     return File

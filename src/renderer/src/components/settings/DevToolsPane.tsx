@@ -1,5 +1,11 @@
 import { toast } from 'sonner'
-import { Bell, Info, OctagonX, Sparkles, Trash2 } from 'lucide-react'
+import {
+  Bell,
+  Info,
+  XCircle as OctagonX,
+  Sparkle as Sparkles,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import { Button } from '../ui/button'
 import { Badge } from '../ui/badge'
 import { SettingsSubsectionHeader } from './SettingsFormControls'

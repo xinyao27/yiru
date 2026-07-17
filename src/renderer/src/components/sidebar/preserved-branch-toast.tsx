@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { Trash as Trash2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { RemoveWorktreeResult, Worktree } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'

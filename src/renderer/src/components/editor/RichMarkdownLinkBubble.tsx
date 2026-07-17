@@ -1,7 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Editor } from '@tiptap/react'
-import { Copy, ExternalLink, Pencil, Unlink } from 'lucide-react'
+import {
+  Copy,
+  ArrowSquareOut as ExternalLink,
+  Pencil,
+  LinkBreak as Unlink
+} from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

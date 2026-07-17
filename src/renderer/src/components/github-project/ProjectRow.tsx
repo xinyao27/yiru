@@ -1,5 +1,5 @@
 import React from 'react'
-import { ExternalLink, Play } from 'lucide-react'
+import { ArrowSquareOut as ExternalLink, Play } from '@phosphor-icons/react'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'

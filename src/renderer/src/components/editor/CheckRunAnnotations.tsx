@@ -1,5 +1,5 @@
 import React from 'react'
-import { ExternalLink } from 'lucide-react'
+import { ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import type { PRCheckAnnotation } from '../../../../shared/types'
 import {

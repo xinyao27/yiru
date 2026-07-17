@@ -1,13 +1,13 @@
 import {
-  MessageSquare,
-  PanelRightClose,
-  Pin,
-  PinOff,
+  Chat as MessageSquare,
+  Sidebar as PanelRightClose,
+  PushPin as Pin,
+  PushPinSlash as PinOff,
   Pencil,
-  SquareTerminal,
+  TerminalWindow as SquareTerminal,
   X,
-  ListX
-} from 'lucide-react'
+  List as ListX
+} from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'
 import { Menu as DropdownMenuPrimitive } from '@base-ui/react/menu'
+import { CheckIcon, CaretRight as ChevronRightIcon, CircleIcon } from '@phosphor-icons/react'
 
 import { cn } from '@/lib/utils'
 

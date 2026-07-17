@@ -1,6 +1,6 @@
 import React from 'react'
 import type { Editor } from '@tiptap/react'
-import { Search } from 'lucide-react'
+import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { runSlashCommand } from './rich-markdown-slash-commands'
 import type { SlashCommand, SlashMenuState } from './rich-markdown-slash-commands'

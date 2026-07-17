@@ -1,4 +1,8 @@
-import { Import, Loader2, Trash2 } from 'lucide-react'
+import {
+  DownloadSimple as Import,
+  SpinnerGap as Loader2,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { BrowserCookieImportSummary, BrowserSessionProfile } from '../../../../shared/types'
 import { Button } from '../ui/button'

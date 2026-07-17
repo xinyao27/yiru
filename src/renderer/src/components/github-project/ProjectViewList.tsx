@@ -1,5 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { ArrowDown, ArrowUp, ArrowUpDown, Columns3 } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowsVertical as ArrowUpDown,
+  Columns as Columns3
+} from '@phosphor-icons/react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import ColumnResizeHandle from './ColumnResizeHandle'

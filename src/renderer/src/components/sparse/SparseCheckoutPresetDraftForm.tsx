@@ -1,4 +1,4 @@
-import { LoaderCircle } from 'lucide-react'
+import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import type { SparsePresetDirectoryParseResult } from '@/lib/sparse-preset-draft'

@@ -2,16 +2,16 @@
 interaction menus, and compact-layout behavior together so the hover/click
 states stay consistent across Claude and Codex. */
 import {
-  Activity,
-  RotateCcw,
+  ActivityIcon as Activity,
+  ArrowCounterClockwise as RotateCcw,
   Plug,
-  ChevronDown,
-  ChevronRight,
-  Loader2,
-  PanelsTopLeft,
-  RefreshCw,
-  Server
-} from 'lucide-react'
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  SpinnerGap as Loader2,
+  Layout as PanelsTopLeft,
+  ArrowClockwise as RefreshCw,
+  HardDrives as Server
+} from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
 import { Button } from '@/components/ui/button'

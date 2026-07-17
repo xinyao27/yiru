@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
   computeTabStripScrollMetrics,
-  computeTabStripThumbLayout,
   getTabStripScrollMaskClassName
 } from './tab-strip-scroll-metrics'
 
@@ -16,9 +15,7 @@ describe('computeTabStripScrollMetrics', () => {
     ).toEqual({
       hasOverflow: false,
       canScrollStart: false,
-      canScrollEnd: false,
-      thumbSizeFraction: 1,
-      thumbOffsetFraction: 0
+      canScrollEnd: false
     })
   })
 
@@ -32,9 +29,7 @@ describe('computeTabStripScrollMetrics', () => {
     ).toEqual({
       hasOverflow: true,
       canScrollStart: true,
-      canScrollEnd: true,
-      thumbSizeFraction: 0.5,
-      thumbOffsetFraction: 0.5
+      canScrollEnd: true
     })
   })
 
@@ -68,32 +63,6 @@ describe('computeTabStripScrollMetrics', () => {
         scrollLeft: 400
       }).canScrollEnd
     ).toBe(false)
-  })
-})
-
-describe('computeTabStripThumbLayout', () => {
-  it('clamps thumb width and keeps the thumb inside the track', () => {
-    expect(
-      computeTabStripThumbLayout(200, {
-        thumbSizeFraction: 0.04,
-        thumbOffsetFraction: 1
-      })
-    ).toEqual({
-      widthPx: 18,
-      leftPx: 182
-    })
-  })
-
-  it('uses the raw width when it is already above the minimum', () => {
-    expect(
-      computeTabStripThumbLayout(400, {
-        thumbSizeFraction: 0.5,
-        thumbOffsetFraction: 0.25
-      })
-    ).toEqual({
-      widthPx: 200,
-      leftPx: 50
-    })
   })
 })
 

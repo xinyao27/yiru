@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { GlobalSettings } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Separator } from '../ui/separator'
-import { BellRing, Bot, Siren } from 'lucide-react'
+import { BellRinging as BellRing, Robot as Bot, Siren } from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import {
   MacNotificationPermissionCard,

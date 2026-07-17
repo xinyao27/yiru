@@ -1,4 +1,8 @@
-import { Loader2, RefreshCw, Trash2 } from 'lucide-react'
+import {
+  SpinnerGap as Loader2,
+  ArrowClockwise as RefreshCw,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import type { RuntimeAccessGrant } from '../../../../shared/runtime-access-grants'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'

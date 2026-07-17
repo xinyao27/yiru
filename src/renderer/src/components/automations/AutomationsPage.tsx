@@ -2,7 +2,7 @@
  * orchestration while the form and detail presentation live in sibling files. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  CalendarClock,
+  CalendarDots as CalendarClock,
   Check,
   Clock,
   Eye,
@@ -10,10 +10,10 @@ import {
   Pencil,
   Play,
   Plus,
-  RefreshCw,
-  Trash2,
+  ArrowClockwise as RefreshCw,
+  Trash as Trash2,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import type { Badge } from '@/components/ui/badge'

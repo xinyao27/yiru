@@ -1,5 +1,5 @@
 import type React from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { DotsThree as MoreHorizontal } from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,

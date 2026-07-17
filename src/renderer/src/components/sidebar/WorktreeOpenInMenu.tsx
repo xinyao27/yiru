@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { ExternalLink, FolderOpen } from 'lucide-react'
+import { ArrowSquareOut as ExternalLink, FolderOpen } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import {
   DropdownMenuItem,
@@ -176,6 +176,30 @@ export function WorktreeOpenInMenuItems({
   )
 }
 
+export function WorktreeOpenInMenuContent({
+  worktreePath,
+  connectionId,
+  disabled
+}: WorktreeOpenInMenuItemsProps): React.JSX.Element {
+  return (
+    <>
+      <WorktreeOpenInMenuItems
+        worktreePath={worktreePath}
+        connectionId={connectionId}
+        disabled={disabled}
+      />
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
+        onClick={stopMenuPropagation}
+        onSelect={openOpenInAppsSettings}
+        disabled={disabled}
+      >
+        {translate('auto.components.sidebar.WorktreeOpenInMenu.1417fd8380', 'Customize apps...')}
+      </DropdownMenuItem>
+    </>
+  )
+}
+
 export function WorktreeOpenInSubMenu({
   worktreePath,
   connectionId,
@@ -192,21 +216,11 @@ export function WorktreeOpenInSubMenu({
         onClick={stopMenuPropagation}
         onPointerDown={stopMenuPropagation}
       >
-        <WorktreeOpenInMenuItems
+        <WorktreeOpenInMenuContent
           worktreePath={worktreePath}
           connectionId={connectionId}
           disabled={disabled}
         />
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={(event) => {
-            stopMenuPropagation(event)
-            openOpenInAppsSettings()
-          }}
-          disabled={disabled}
-        >
-          {translate('auto.components.sidebar.WorktreeOpenInMenu.1417fd8380', 'Customize apps...')}
-        </DropdownMenuItem>
       </DropdownMenuSubContent>
     </DropdownMenuSub>
   )

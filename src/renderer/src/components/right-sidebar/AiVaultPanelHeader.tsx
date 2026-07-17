@@ -1,4 +1,9 @@
-import { LoaderCircle, RefreshCw, Search, X } from 'lucide-react'
+import {
+  CircleNotch as LoaderCircle,
+  ArrowClockwise as RefreshCw,
+  MagnifyingGlass as Search,
+  X
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import type {

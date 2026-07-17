@@ -1,21 +1,21 @@
 import React from 'react'
 import type { Editor } from '@tiptap/react'
 import {
-  ChevronRight,
-  Heading1,
-  Heading2,
-  Heading3,
-  Heading4,
-  Heading5,
+  CaretRight as ChevronRight,
+  TextHOne as Heading1,
+  TextHTwo as Heading2,
+  TextHThree as Heading3,
+  TextHFour as Heading4,
+  TextHFive as Heading5,
   ImageIcon,
   Link as LinkIcon,
   List,
-  ListOrdered,
-  ListTodo,
-  MoreHorizontal,
-  Pilcrow,
-  Quote
-} from 'lucide-react'
+  ListNumbers as ListOrdered,
+  ListChecks as ListTodo,
+  DotsThree as MoreHorizontal,
+  Paragraph as Pilcrow,
+  Quotes as Quote
+} from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,

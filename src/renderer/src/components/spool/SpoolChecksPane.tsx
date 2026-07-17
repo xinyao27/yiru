@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Loader2, RefreshCw } from 'lucide-react'
+import { ArrowClockwise as RefreshCw, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import type { SpoolChecksReadResult } from '../../../../shared/spool/spool-operation-contract'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

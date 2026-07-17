@@ -1,4 +1,9 @@
-import { ExternalLink, Github, Gitlab, Terminal } from 'lucide-react'
+import {
+  ArrowSquareOut as ExternalLink,
+  GithubLogo as Github,
+  GitlabLogo as Gitlab,
+  Terminal
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store'
 import { IntegrationCardDetails, IntegrationCardShell } from './integration-card-shell'

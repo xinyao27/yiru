@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { Loader2 } from 'lucide-react'
+import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import type { FeatureTip, FeatureTipAction } from '../../../../shared/feature-tips'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'

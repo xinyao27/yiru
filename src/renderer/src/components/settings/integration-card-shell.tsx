@@ -1,4 +1,4 @@
-import { LoaderCircle } from 'lucide-react'
+import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { useIntegrationCardShellClass } from './integration-card-presentation'
 

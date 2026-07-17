@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { TriangleAlert } from 'lucide-react'
+import { Warning as TriangleAlert } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { getConnectionIdForFile } from '@/lib/connection-context'

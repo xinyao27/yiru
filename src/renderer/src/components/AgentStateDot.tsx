@@ -1,5 +1,5 @@
 import React from 'react'
-import { CircleCheck } from 'lucide-react'
+import { CheckCircle as CircleCheck } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
 // Why: shared state-indicator primitive so the dashboard and the sidebar's

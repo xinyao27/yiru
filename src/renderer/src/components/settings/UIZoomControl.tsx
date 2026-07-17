@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Button } from '../ui/button'
-import { Minus, Plus, RotateCcw } from 'lucide-react'
+import { Minus, Plus, ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
 import { applyUIZoom } from '@/lib/ui-zoom'
 import { ZOOM_STEP, ZOOM_MIN, ZOOM_MAX, zoomLevelToPercent } from './SettingsConstants'
 import { translate } from '@/i18n/i18n'

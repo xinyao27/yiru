@@ -17,22 +17,22 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import {
   Copy,
   Bell,
-  BellOff,
-  CircleX,
+  BellSlash as BellOff,
+  XCircle as CircleX,
   Moon,
   Pencil,
-  Pin,
-  PinOff,
+  PushPin as Pin,
+  PushPinSlash as PinOff,
   Kanban,
-  Trash2,
-  Unlink,
-  Workflow,
-  FolderInput,
+  Trash as Trash2,
+  LinkBreak as Unlink,
+  FlowArrow as Workflow,
+  FolderOpen as FolderInput,
   FolderPlus,
-  FolderTree,
-  Globe2,
-  LockKeyhole
-} from 'lucide-react'
+  Folders as FolderTree,
+  Globe as Globe2,
+  LockKey as LockKeyhole
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'

@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { LoaderCircle } from 'lucide-react'
+import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { Worktree } from '../../../../shared/types'
 import { DeleteWorktreeDirtyChangeHint } from './DeleteWorktreeDirtyChangeHint'

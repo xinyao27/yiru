@@ -3,14 +3,14 @@
    in one modal flow. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  AlertTriangle,
-  Loader2,
-  RefreshCcw,
-  Search,
+  Warning as AlertTriangle,
+  SpinnerGap as Loader2,
+  ArrowCounterClockwise as RefreshCcw,
+  MagnifyingGlass as Search,
   SlidersHorizontal,
-  Trash2,
+  Trash as Trash2,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 import {

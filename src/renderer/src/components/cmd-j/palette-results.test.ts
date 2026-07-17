@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Globe, Settings } from 'lucide-react'
+import { Globe, Gear as Settings } from '@phosphor-icons/react'
 import type { CmdJQuickAction } from './quick-actions'
 import {
   CMD_J_PALETTE_QUERY_MAX_BYTES,

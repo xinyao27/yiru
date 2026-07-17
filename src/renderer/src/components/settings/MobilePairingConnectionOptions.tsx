@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Cloud, Loader2 } from 'lucide-react'
+import { Cloud, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { translate } from '../../i18n/i18n'

@@ -1,5 +1,5 @@
 import type { JSX, Ref } from 'react'
-import { LoaderCircle, Trash2 } from 'lucide-react'
+import { CircleNotch as LoaderCircle, Trash as Trash2 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

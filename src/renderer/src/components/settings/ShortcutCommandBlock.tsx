@@ -1,5 +1,10 @@
 import React from 'react'
-import { Ban, Plus, RotateCcw, Terminal } from 'lucide-react'
+import {
+  Prohibit as Ban,
+  Plus,
+  ArrowCounterClockwise as RotateCcw,
+  Terminal
+} from '@phosphor-icons/react'
 import {
   isDigitIndexActionId,
   type KeybindingActionId,

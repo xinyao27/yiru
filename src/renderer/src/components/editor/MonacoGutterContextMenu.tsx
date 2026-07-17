@@ -1,5 +1,5 @@
 import React from 'react'
-import { Copy, ExternalLink } from 'lucide-react'
+import { Copy, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,

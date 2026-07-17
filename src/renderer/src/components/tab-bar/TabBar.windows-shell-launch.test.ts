@@ -129,7 +129,7 @@ vi.mock('zustand/react/shallow', () => ({
   useShallow: (selector: unknown) => selector
 }))
 
-vi.mock('lucide-react', () => ({
+vi.mock('@phosphor-icons/react', () => ({
   FilePlus: function FilePlus() {
     return null
   },
@@ -139,7 +139,7 @@ vi.mock('lucide-react', () => ({
   Plus: function Plus() {
     return null
   },
-  TerminalSquare: function TerminalSquare() {
+  TerminalWindow: function TerminalSquare() {
     return null
   }
 }))

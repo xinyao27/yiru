@@ -1,5 +1,10 @@
 import React, { useMemo, useState } from 'react'
-import { ArrowRight, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react'
+import {
+  ArrowRight,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  ArrowSquareOut as ExternalLink
+} from '@phosphor-icons/react'
 
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'

@@ -1,5 +1,10 @@
 import React, { useCallback, useEffect, useRef } from 'react'
-import { GitPullRequestArrow, Loader2, Search, X } from 'lucide-react'
+import {
+  GitPullRequest as GitPullRequestArrow,
+  SpinnerGap as Loader2,
+  MagnifyingGlass as Search,
+  X
+} from '@phosphor-icons/react'
 import type {
   GitBranchCompareSummary,
   GitUpstreamStatus,

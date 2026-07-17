@@ -1,4 +1,4 @@
-import { LoaderCircle } from 'lucide-react'
+import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
 import type { PtyManagementSession } from '../../../../preload/api-types'
 import { Button } from '../ui/button'
 import {

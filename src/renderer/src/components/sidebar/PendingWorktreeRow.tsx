@@ -1,5 +1,5 @@
 import React from 'react'
-import { AlertTriangle, Loader2, X } from 'lucide-react'
+import { Warning as AlertTriangle, SpinnerGap as Loader2, X } from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { cn } from '@/lib/utils'
 import {

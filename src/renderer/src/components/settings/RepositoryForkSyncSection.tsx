@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { RefreshCw } from 'lucide-react'
+import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { ForkSyncMode, GitForkSyncResult, Repo } from '../../../../shared/types'
 import { Button } from '../ui/button'

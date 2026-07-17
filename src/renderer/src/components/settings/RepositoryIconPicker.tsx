@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { RotateCcw } from 'lucide-react'
+import { ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
 import type { Repo } from '../../../../shared/types'
 import type { RepoIcon } from '../../../../shared/repo-icon'
 import { DEFAULT_REPO_BADGE_COLOR } from '../../../../shared/constants'

@@ -1,4 +1,4 @@
-import { Check, Copy, MessageSquare } from 'lucide-react'
+import { Check, Copy, Chat as MessageSquare } from '@phosphor-icons/react'
 import { NotesSendMenu, type NotesSendMenuScope } from './NotesSendMenu'
 import type { MarkdownReviewNote } from '@/lib/markdown-review-notes'
 import { translate } from '@/i18n/i18n'

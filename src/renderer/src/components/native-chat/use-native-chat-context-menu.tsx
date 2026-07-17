@@ -11,15 +11,15 @@ import {
   Clipboard,
   Copy,
   GitFork,
-  Maximize2,
-  Minimize2,
-  PanelBottomClose,
-  PanelsTopLeft,
-  PanelRightClose,
+  ArrowsOut as Maximize2,
+  ArrowsIn as Minimize2,
+  Layout as PanelBottomClose,
+  Layout as PanelsTopLeft,
+  Sidebar as PanelRightClose,
   Pencil,
-  SquareTerminal,
+  TerminalWindow as SquareTerminal,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,

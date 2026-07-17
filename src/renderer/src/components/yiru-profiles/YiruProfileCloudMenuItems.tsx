@@ -1,4 +1,11 @@
-import { Check, Cloud, Loader2, LogIn, LogOut, Plus } from 'lucide-react'
+import {
+  Check,
+  Cloud,
+  SpinnerGap as Loader2,
+  SignIn as LogIn,
+  SignOut as LogOut,
+  Plus
+} from '@phosphor-icons/react'
 import {
   DropdownMenuItem,
   DropdownMenuLabel,

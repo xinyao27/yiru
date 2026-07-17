@@ -4,14 +4,14 @@
 // documented in the design doc.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ExternalLink,
-  RefreshCw,
-  KanbanSquare,
-  Map as MapIcon,
-  Search,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw,
+  Kanban as KanbanSquare,
+  MapTrifold as MapIcon,
+  MagnifyingGlass as Search,
   Table as TableIcon,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

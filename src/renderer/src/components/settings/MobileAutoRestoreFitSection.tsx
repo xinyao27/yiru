@@ -1,4 +1,4 @@
-import { Smartphone } from 'lucide-react'
+import { DeviceMobile as Smartphone } from '@phosphor-icons/react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { AUTO_RESTORE_FIT_OPTIONS, autoRestoreValueFromMs } from './mobile-auto-restore-options'
 import { translate } from '@/i18n/i18n'

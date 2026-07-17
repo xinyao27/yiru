@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { PenTool } from 'lucide-react'
+import { PenNib as PenTool } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'

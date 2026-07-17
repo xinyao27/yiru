@@ -1,5 +1,5 @@
 import type React from 'react'
-import { Info } from 'lucide-react'
+import { Info } from '@phosphor-icons/react'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import type {

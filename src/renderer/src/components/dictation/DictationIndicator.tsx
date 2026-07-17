@@ -1,5 +1,5 @@
 import { useAppStore } from '@/store'
-import { Mic } from 'lucide-react'
+import { Microphone as Mic } from '@phosphor-icons/react'
 
 export function DictationIndicator() {
   const dictationState = useAppStore((s) => s.dictationState)

@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { Copy, type LucideIcon } from 'lucide-react'
+import { Copy, type Icon as PhosphorIcon } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { ORCHESTRATION_SKILL_NAME } from '@/lib/agent-feature-install-commands'
 import { Button } from '@/components/ui/button'
@@ -42,7 +42,7 @@ function OrchestrationExamplePromptText(props: { prompt: string }): React.JSX.El
 
 export function OrchestrationExampleDialog(props: {
   example: OrchestrationUsageExample
-  icon?: LucideIcon
+  icon?: PhosphorIcon
   open: boolean
   onOpenChange: (open: boolean) => void
 }): React.JSX.Element {

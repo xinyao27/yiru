@@ -188,11 +188,20 @@ function textSpanHtml(markup: string, text: string): string {
 
 function expectTabContainerWidth(markup: string, root: string): void {
   const container = firstOpeningTag(markup)
-  const widthClasses = 'min-w-[88px] max-w-[280px] flex-[1_1_180px] min-[1280px]:flex-[1_1_220px]'
+  const widthClasses = 'grid min-w-[88px] max-w-[240px] flex-[0_1_auto] items-center'
   expect(container).toContain(widthClasses)
   expect(root).not.toContain('min-w-[88px]')
-  expect(root).not.toContain('max-w-[280px]')
-  expect(root).not.toContain('flex-[1_1_180px]')
+  expect(root).not.toContain('max-w-[240px]')
+  expect(root).not.toContain('flex-[0_1_auto]')
+}
+
+function expectHoverOnlyOverlayClose(markup: string): void {
+  const match = markup.match(/<button(?=[^>]*data-tab-close-button="true")[^>]*>/)
+  expect(match).not.toBeNull()
+  const close = match?.[0] ?? ''
+  expect(close).toContain('absolute')
+  expect(close).toContain('opacity-0')
+  expect(close).toContain('group-hover:opacity-100')
 }
 
 function expectTooltipContent(markup: string, text: string): void {
@@ -284,6 +293,7 @@ describe('tab title tooltips', () => {
     expect(root).toContain('role="tab"')
     expect(root).toContain('tabindex="0"')
     expectTabContainerWidth(markup, root)
+    expectHoverOnlyOverlayClose(markup)
   })
 
   it("shows the provider icon while stripping the agent's leading status glyph from the label", () => {
@@ -337,11 +347,12 @@ describe('tab title tooltips', () => {
     expectTooltipContent(markup, 'example.com/docs/long-browser-tab-path')
     expect(markup).not.toContain('live.example')
     const root = openingTag(markup, 'data-sortable-id', 'browser-1')
-    expect(root).toContain('data-tooltip-trigger="true"')
+    expect(markup).toContain('data-tooltip-trigger="true"')
     expect(root).toContain('role="tab"')
     expect(root).toContain('tabindex="0"')
     expect(root).toContain('data-tab-id="browser-1"')
     expectTabContainerWidth(markup, root)
+    expectHoverOnlyOverlayClose(markup)
   })
 
   it('uses the editor display label while leaving adjacent adornments outside the label', () => {
@@ -372,5 +383,6 @@ describe('tab title tooltips', () => {
     expect(root).toContain('data-tab-id="editor-tab-1"')
     expect(textSpanHtml(markup, 'VeryLongEditorFileName.tsx')).not.toContain('renamed')
     expectTabContainerWidth(markup, root)
+    expectHoverOnlyOverlayClose(markup)
   })
 })

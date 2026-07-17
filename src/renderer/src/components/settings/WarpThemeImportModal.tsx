@@ -1,4 +1,4 @@
-import { FileUp, FolderOpen, Loader2 } from 'lucide-react'
+import { FileArrowUp as FileUp, FolderOpen, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import type { WarpThemeImportPreviewTheme } from '../../../../shared/terminal-custom-themes'
 import { Button } from '../ui/button'
 import {

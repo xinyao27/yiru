@@ -1,5 +1,5 @@
 import type React from 'react'
-import { Monitor } from 'lucide-react'
+import { Monitor } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import type { SpoolRemoteDesktopStatusSidebarRow } from './spool-sidebar-rows'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'

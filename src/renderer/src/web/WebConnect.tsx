@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Cable, Loader2, Server, Trash2 } from 'lucide-react'
+import {
+  PlugsConnected as Cable,
+  SpinnerGap as Loader2,
+  HardDrives as Server,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

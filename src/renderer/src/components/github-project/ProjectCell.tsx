@@ -6,7 +6,7 @@
 // fetched value is never silently dropped.
 import React, { useMemo, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-import { CircleDot, FileText, GitPullRequest, Lock, Plus } from 'lucide-react'
+import { Circle as CircleDot, FileText, GitPullRequest, Lock, Plus } from '@phosphor-icons/react'
 import { TYPE_FIELD_DATA_TYPE } from './columns'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Input } from '@/components/ui/input'

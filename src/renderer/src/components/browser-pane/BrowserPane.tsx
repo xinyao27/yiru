@@ -25,26 +25,26 @@ import {
 import {
   ArrowLeft,
   ArrowRight,
-  CircleCheck,
+  CheckCircle as CircleCheck,
   Copy,
-  CornerDownLeft,
+  ArrowElbowDownLeft as CornerDownLeft,
   Crosshair,
   Download,
-  ExternalLink,
+  ArrowSquareOut as ExternalLink,
   FolderOpen,
   Globe,
   Image,
-  Loader2,
-  MessageCircleQuestionMark,
-  MessageSquarePlus,
-  OctagonX,
+  SpinnerGap as Loader2,
+  ChatCircle as MessageCircleQuestionMark,
+  ChatCentered as MessageSquarePlus,
+  XCircle as OctagonX,
   PencilLine,
-  RefreshCw,
-  Send,
-  SquareCode,
-  Trash2,
+  ArrowClockwise as RefreshCw,
+  PaperPlaneRight as Send,
+  BracketsAngle as SquareCode,
+  Trash as Trash2,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { BrowserAnnotationSendMenuContent } from './BrowserAnnotationSendMenuContent'

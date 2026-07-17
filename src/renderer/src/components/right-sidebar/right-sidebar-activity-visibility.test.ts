@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { Files } from 'lucide-react'
+import { Files } from '@phosphor-icons/react'
 import type { ActivityBarItem } from './activity-bar-buttons'
 import { getVisibleRightSidebarActivityItems } from './right-sidebar-activity-visibility'
 

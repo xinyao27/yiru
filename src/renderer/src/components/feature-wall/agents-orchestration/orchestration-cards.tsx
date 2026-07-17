@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { CircleCheck } from 'lucide-react'
+import { CheckCircle as CircleCheck } from '@phosphor-icons/react'
 import { AgentStateDot } from '@/components/AgentStateDot'
 import { cn } from '@/lib/utils'
 import type { AgentKey, AgentRowState } from './orchestration-types'

@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-import { RefreshCw } from 'lucide-react'
+import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '../store'
 import { selectCodexRestartInputs } from './codex-restart-chip-inputs'

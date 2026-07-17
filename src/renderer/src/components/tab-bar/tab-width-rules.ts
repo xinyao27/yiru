@@ -1,6 +1,6 @@
-// Why: tab strips should reveal as much title as space allows, then shrink to
-// a readable floor before horizontal overflow takes over.
+// Why: tabs hug their content like desktop browser tabs instead of stretching
+// across empty titlebar space, then shrink to a readable floor before overflow.
 export const TAB_CONTAINER_WIDTH_CLASSES =
-  'min-w-[88px] max-w-[280px] flex-[1_1_180px] min-[1280px]:flex-[1_1_220px]'
+  'grid min-w-[88px] max-w-[240px] flex-[0_1_auto] items-center'
 
 export const TAB_LABEL_WIDTH_CLASSES = 'min-w-0 flex-1 truncate'

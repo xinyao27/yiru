@@ -1,4 +1,4 @@
-import { CheckCircle2, Cloud, Unlink } from 'lucide-react'
+import { CheckCircle as CheckCircle2, Cloud, LinkBreak as Unlink } from '@phosphor-icons/react'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { translate } from '@/i18n/i18n'

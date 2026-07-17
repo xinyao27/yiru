@@ -1,5 +1,5 @@
 import type React from 'react'
-import { ExternalLink, GitMerge, GitPullRequest } from 'lucide-react'
+import { ArrowSquareOut as ExternalLink, GitMerge, GitPullRequest } from '@phosphor-icons/react'
 import type {
   SpoolChecksReadResult,
   SpoolChecksReview

@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { FolderPlus, Loader2 } from 'lucide-react'
+import { FolderPlus, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import {
   Dialog,
   DialogContent,

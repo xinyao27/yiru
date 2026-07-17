@@ -1,4 +1,4 @@
-import { Play } from 'lucide-react'
+import { Play } from '@phosphor-icons/react'
 import type React from 'react'
 import type { YiruHooks } from '../../../../shared/types'
 import { Button } from '../ui/button'

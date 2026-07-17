@@ -1,27 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
-import { X, Minimize2, Pin } from 'lucide-react'
+import { ArrowsIn as Minimize2, PushPin as Pin } from '@phosphor-icons/react'
 import { stripLeadingAgentTitleDecoration } from '../../../../shared/agent-title-decoration'
 import { useTabAgent } from '@/lib/use-tab-agent'
 import { isImeCompositionKeyDown } from '@/lib/ime-composition-keyboard-event'
 import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { ShortcutKeyCombo } from '@/components/ShortcutKeyCombo'
 import type { TerminalTab } from '../../../../shared/types'
 import type { TabDragItemData } from '../tab-group/useTabDragSplit'
 import { useAppStore } from '../../store'
 import {
-  ACTIVE_TAB_INDICATOR_CLASSES,
   getDropIndicatorClasses,
+  getTabDividerClasses,
   getTabRootStateClasses,
-  getTabStripBorderClasses,
   type DropIndicator
 } from './drop-indicator'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
 import { SortableTabContextMenu } from './SortableTabContextMenu'
 import { translate } from '@/i18n/i18n'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
-import { useShortcutKeyDetails } from '@/hooks/useShortcutLabel'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TerminalTabLeadingIcon } from './TerminalTabLeadingIcon'
 import {
@@ -29,6 +26,8 @@ import {
   isTerminalTabActivityLive,
   resolveTerminalTabActivityStatus
 } from './terminal-tab-activity-status'
+import { TAB_ROOT_CLASSES } from './tab-root-classes'
+import { TabCloseButton } from './TabCloseButton'
 
 type SortableTabProps = {
   tab: TerminalTab
@@ -49,7 +48,6 @@ type SortableTabProps = {
   onToggleExpand: (tabId: string) => void
   dragData: TabDragItemData
   dropIndicator?: DropIndicator
-  includeTopTabBorder?: boolean
   /** True when this tab is an agent terminal that can switch to the native chat
    *  view. Surfaces the "Switch view" item in the tab context menu. */
   canToggleViewMode?: boolean
@@ -80,7 +78,6 @@ export default function SortableTab({
   onToggleExpand,
   dragData,
   dropIndicator,
-  includeTopTabBorder = true,
   canToggleViewMode = false,
   isChatView = false,
   onToggleViewMode
@@ -240,7 +237,6 @@ export default function SortableTab({
     onActivate: handleActivate,
     disabled: isEditing
   })
-  const closeShortcut = useShortcutKeyDetails('tab.close')
   const tabTitle = tab.customTitle ?? tab.title
   const tabRoot = (
     <div
@@ -265,7 +261,7 @@ export default function SortableTab({
       // tab still reads as "selected + has activity". The wash is
       // rendered as an absolutely-positioned child below so the ::after
       // pseudo-element stays free for the drop indicator.
-      className={`group relative flex items-center h-full px-1.5 text-xs cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none ${getTabStripBorderClasses(hasTabsToRight, { includeTopBorder: includeTopTabBorder })} ${getDropIndicatorClasses(dropIndicator ?? null)} ${getTabRootStateClasses(isActive)}`}
+      className={`${TAB_ROOT_CLASSES} ${getTabDividerClasses(hasTabsToRight)} ${getDropIndicatorClasses(dropIndicator ?? null)} ${getTabRootStateClasses(isActive)}`}
       onDoubleClick={(e) => {
         if (isEditing) {
           return
@@ -303,7 +299,6 @@ export default function SortableTab({
         }
       }}
     >
-      {isActive && <span className={ACTIVE_TAB_INDICATOR_CLASSES} aria-hidden />}
       {showUnreadActivity && (
         // Why: a real DOM child leaves both drop-indicator pseudo-elements
         // available and keeps pointer events reaching the tab beneath it.
@@ -317,7 +312,7 @@ export default function SortableTab({
         isActive={isActive}
       />
       {isPinned && !isEditing && (
-        <Pin className="mr-1 size-3 shrink-0 text-muted-foreground" aria-hidden />
+        <Pin className="mr-1 size-4 shrink-0 text-muted-foreground" aria-hidden />
       )}
       {isEditing ? (
         <Input
@@ -391,72 +386,40 @@ export default function SortableTab({
           style={{ backgroundColor: tab.color }}
         />
       )}
-      {isExpanded && !isEditing && (
-        <button
-          className={`mr-1 flex items-center justify-center w-4 h-4 rounded-sm shrink-0 ${
-            isActive
-              ? 'text-muted-foreground hover:text-foreground hover:bg-muted'
-              : 'text-transparent group-hover:text-muted-foreground hover:!text-foreground hover:!bg-muted'
-          }`}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.stopPropagation()
-            onToggleExpand(tab.id)
-          }}
-          title={translate('auto.components.tab.bar.SortableTab.fdb2691425', 'Collapse pane')}
-          aria-label={translate('auto.components.tab.bar.SortableTab.fdb2691425', 'Collapse pane')}
-        >
-          <Minimize2 className="w-3 h-3" />
-        </button>
-      )}
-      {!isEditing && !isPinned && (
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <button
-                className={`relative z-10 flex items-center justify-center w-4 h-4 rounded-sm shrink-0 ${
-                  isActive
-                    ? 'text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:text-foreground focus-visible:bg-muted'
-                    : 'text-transparent group-hover:text-muted-foreground hover:!text-foreground hover:!bg-muted focus-visible:!text-foreground focus-visible:!bg-muted'
-                }`}
-                // Why: per-tab close affordance needs a stable accessible name so
-                // E2E specs can drive the same path a user takes (hover, then X)
-                // instead of bypassing the render layer by calling closeTab() on
-                // the store. A store-only assertion would miss an unmounted button.
-                aria-label={translate(
-                  'auto.components.tab.bar.SortableTab.6df69d9388',
-                  'Close tab {{value0}}',
-                  { value0: tabTitle }
-                )}
-                type="button"
-                data-tab-close-button="true"
-                onPointerDown={(e) => {
-                  if (e.button === 0) {
-                    e.stopPropagation()
-                  }
-                }}
-                onMouseDown={(e) => {
-                  if (e.button === 0) {
-                    e.stopPropagation()
-                  }
-                }}
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  onClose(tab.id)
-                }}
-              >
-                <X className="w-3 h-3" />
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={6} className="flex items-center gap-2">
-            <span>{translate('auto.components.tab.bar.SortableTab.95db5f2f7d', 'Close tab')}</span>
-            {closeShortcut.keys.length > 0 && (
-              <ShortcutKeyCombo keys={closeShortcut.keys} doubleTap={closeShortcut.doubleTap} />
+      {isExpanded &&
+        !isEditing && (
+          // Why: hover-close occupies this same trailing overlay position; hide
+          // collapse only when that close control exists so hit targets never stack.
+          <button
+            className={`mr-1 flex items-center justify-center w-4 h-4 rounded-sm shrink-0 ${!isPinned ? 'group-hover:pointer-events-none group-hover:opacity-0' : ''} ${
+              isActive
+                ? 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                : 'text-transparent group-hover:text-muted-foreground hover:!text-foreground hover:!bg-muted'
+            }`}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleExpand(tab.id)
+            }}
+            title={translate('auto.components.tab.bar.SortableTab.fdb2691425', 'Collapse pane')}
+            aria-label={translate(
+              'auto.components.tab.bar.SortableTab.fdb2691425',
+              'Collapse pane'
             )}
-          </TooltipContent>
-        </Tooltip>
+          >
+            <Minimize2 className="size-4" />
+          </button>
+        )}
+      {!isEditing && !isPinned && (
+        <TabCloseButton
+          className="right-1"
+          ariaLabel={translate(
+            'auto.components.tab.bar.SortableTab.6df69d9388',
+            'Close tab {{value0}}',
+            { value0: tabTitle }
+          )}
+          onClose={() => onClose(tab.id)}
+        />
       )}
     </div>
   )

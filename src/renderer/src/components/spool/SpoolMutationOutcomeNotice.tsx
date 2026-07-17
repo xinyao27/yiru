@@ -1,4 +1,4 @@
-import { CircleAlert } from 'lucide-react'
+import { WarningCircle as CircleAlert } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
 

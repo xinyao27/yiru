@@ -1,4 +1,8 @@
-import { ChevronLeft, CornerDownLeft, Loader2 } from 'lucide-react'
+import {
+  CaretLeft as ChevronLeft,
+  ArrowElbowDownLeft as CornerDownLeft,
+  SpinnerGap as Loader2
+} from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 
 type OnboardingFooterProps = {

@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { AlertCircle, CheckCircle2, LoaderCircle, Unlink } from 'lucide-react'
+import {
+  WarningCircle as AlertCircle,
+  CheckCircle as CheckCircle2,
+  CircleNotch as LoaderCircle,
+  LinkBreak as Unlink
+} from '@phosphor-icons/react'
 import { JiraConnectDialog } from '@/components/jira-connect-dialog'
 import { JiraIcon } from '@/components/icons/JiraIcon'
 import { Button } from '@/components/ui/button'

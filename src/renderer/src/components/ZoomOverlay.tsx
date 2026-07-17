@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Search } from 'lucide-react'
+import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import { ZOOM_LEVEL_CHANGED_EVENT } from '@/lib/zoom-events'
 import type { ZoomLevelChangedEventDetail } from '@/lib/zoom-events'
 

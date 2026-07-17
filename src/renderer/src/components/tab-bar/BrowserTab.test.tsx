@@ -41,7 +41,7 @@ vi.mock('@dnd-kit/sortable', () => ({
   })
 }))
 
-vi.mock('lucide-react', () => ({
+vi.mock('@phosphor-icons/react', () => ({
   ArrowDown: function ArrowDown(props: Record<string, unknown>) {
     return { type: 'ArrowDown', props }
   },
@@ -54,28 +54,28 @@ vi.mock('lucide-react', () => ({
   ArrowUp: function ArrowUp(props: Record<string, unknown>) {
     return { type: 'ArrowUp', props }
   },
-  Columns2: function Columns2(props: Record<string, unknown>) {
+  Columns: function Columns2(props: Record<string, unknown>) {
     return { type: 'Columns2', props }
   },
   Copy: function Copy(props: Record<string, unknown>) {
     return { type: 'Copy', props }
   },
-  ExternalLink: function ExternalLink(props: Record<string, unknown>) {
+  ArrowSquareOut: function ExternalLink(props: Record<string, unknown>) {
     return { type: 'ExternalLink', props }
   },
   Globe: function Globe(props: Record<string, unknown>) {
     return { type: 'Globe', props }
   },
-  Pin: function Pin(props: Record<string, unknown>) {
+  PushPin: function Pin(props: Record<string, unknown>) {
     return { type: 'Pin', props }
   },
-  PinOff: function PinOff(props: Record<string, unknown>) {
+  PushPinSlash: function PinOff(props: Record<string, unknown>) {
     return { type: 'PinOff', props }
   },
-  PanelRightClose: function PanelRightClose(props: Record<string, unknown>) {
+  Sidebar: function PanelRightClose(props: Record<string, unknown>) {
     return { type: 'PanelRightClose', props }
   },
-  Rows2: function Rows2(props: Record<string, unknown>) {
+  Rows: function Rows2(props: Record<string, unknown>) {
     return { type: 'Rows2', props }
   },
   X: function X(props: Record<string, unknown>) {
@@ -126,6 +126,12 @@ vi.mock('@/components/ui/tooltip', () => ({
   TooltipTrigger: function TooltipTrigger(props: { children?: unknown }) {
     return props.children
   }
+}))
+
+vi.mock('@/hooks/useShortcutLabel', () => ({
+  // Why: this suite expands components without a React renderer, so store-backed
+  // shortcut hooks need a deterministic non-hook value.
+  useShortcutKeyDetails: () => ({ keys: [], doubleTap: false })
 }))
 
 vi.mock('../browser-pane/browser-runtime', () => ({
@@ -246,7 +252,7 @@ describe('BrowserTab favicon', { timeout: 30_000 }, () => {
     expect(images[0].props.alt).toBe('')
     expect(images[0].props['aria-hidden']).toBe(true)
     expect(images[0].props.draggable).toBe(false)
-    expect(images[0].props.className).toContain('size-3 mr-1 shrink-0')
+    expect(images[0].props.className).toContain('mr-1 size-4 shrink-0')
     expect(images[0].props.className).toContain('object-contain')
     expect(images[0].props.className).toContain('drop-shadow-[0_0_1px_var(--foreground)]')
     expect(findElementsByType(element, 'Globe')).toHaveLength(0)
@@ -264,7 +270,7 @@ describe('BrowserTab favicon', { timeout: 30_000 }, () => {
     expect(findElementsByType(element, 'img')).toHaveLength(0)
     const globes = findElementsByType(element, 'Globe')
     expect(globes).toHaveLength(1)
-    expect(globes[0].props.className).toContain('size-3 mr-1 shrink-0')
+    expect(globes[0].props.className).toContain('mr-1 size-4 shrink-0')
     expect(globes[0].props.className).toContain('text-blue-500')
   })
 

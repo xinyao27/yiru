@@ -1,7 +1,7 @@
 import { Suspense, useMemo } from 'react'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { useDroppable } from '@dnd-kit/core'
-import { Ellipsis, X } from 'lucide-react'
+import { DotsThree as Ellipsis, X } from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import TabBar from '../tab-bar/TabBar'
 
+import { TabBarOpenInMenuButton } from '../tab-bar/TabBarOpenInMenuButton'
 import { TabBarQuickCommandsButton } from '../tab-bar/TabBarQuickCommandsButton'
 import { useTabGroupWorkspaceModel } from './useTabGroupWorkspaceModel'
 import { closeTerminalTab } from '../terminal/terminal-tab-actions'
@@ -184,7 +185,7 @@ export default function TabGroupPanel({
 
   const menuButtonClassName =
     'my-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent'
-  // Why: focused-only — quick commands and Close split pane stay with the
+  // Why: focused-only — workspace actions and Close split pane stay with the
   // active pane so unfocused strips stay compact.
   const focusedActionChromeClassName = `flex shrink-0 items-center gap-0.5 overflow-hidden transition-[opacity] duration-150 ${
     isFocused ? 'ml-1.5 pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 w-0'
@@ -205,6 +206,7 @@ export default function TabGroupPanel({
       tabBar={tabBar}
       trailingActions={
         <div className={focusedActionChromeClassName}>
+          {isFocused ? <TabBarOpenInMenuButton worktreeId={worktreeId} /> : null}
           {isFocused ? (
             <TabBarQuickCommandsButton worktreeId={worktreeId} groupId={groupId} />
           ) : null}

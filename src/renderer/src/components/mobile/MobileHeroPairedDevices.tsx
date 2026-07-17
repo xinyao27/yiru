@@ -1,4 +1,4 @@
-import { Smartphone, Trash2 } from 'lucide-react'
+import { DeviceMobile as Smartphone, Trash as Trash2 } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 
 export type PairedDevice = {

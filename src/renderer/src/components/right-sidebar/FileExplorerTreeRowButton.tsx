@@ -1,5 +1,12 @@
 import type React from 'react'
-import { ChevronRight, CircleSlash, Folder, FolderOpen, Link, Loader2 } from 'lucide-react'
+import {
+  CaretRight as ChevronRight,
+  Folder,
+  FolderOpen,
+  Link,
+  Prohibit as CircleSlash,
+  SpinnerGap as Loader2
+} from '@phosphor-icons/react'
 import type { GitFileStatus } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
 import { getFileTypeIcon } from '@/lib/file-type-icons'

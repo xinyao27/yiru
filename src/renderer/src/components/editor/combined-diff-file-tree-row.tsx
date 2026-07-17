@@ -1,5 +1,5 @@
 import type React from 'react'
-import { ChevronDown, Folder, FolderOpen } from 'lucide-react'
+import { CaretDown as ChevronDown, Folder, FolderOpen } from '@phosphor-icons/react'
 import { STATUS_COLORS, STATUS_LABELS } from '@/components/right-sidebar/status-display'
 import type { SourceControlTreeNode } from '@/components/right-sidebar/source-control-tree'
 import { getFileTypeIcon } from '@/lib/file-type-icons'

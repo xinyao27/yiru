@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Check, ChevronRight, ChevronsUpDown } from 'lucide-react'
+import { CaretRight, CaretUpDown, Check } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Command, CommandInput, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -229,7 +229,7 @@ export default function TaskProjectSourceCombobox({
             className={cn('h-8 w-full justify-between px-3 text-xs font-normal', triggerClassName)}
           >
             {renderTriggerLabel(groups, selected)}
-            <ChevronsUpDown className="size-3.5 opacity-50" />
+            <CaretUpDown className="size-3.5 opacity-50" />
           </Button>
         }
       />
@@ -351,7 +351,7 @@ export default function TaskProjectSourceCombobox({
                             onMouseDown={(event) => event.preventDefault()}
                             className="flex w-8 shrink-0 items-center justify-center text-muted-foreground"
                           >
-                            <ChevronRight className="size-3.5" />
+                            <CaretRight className="size-3.5" />
                           </button>
                         }
                       />

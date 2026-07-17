@@ -15,16 +15,19 @@
 ## File map
 
 **Create:**
+
 - `src/shared/network/manual-address.ts` — pure parser.
 - `src/shared/network/manual-address.test.ts` — parser unit tests.
 - `src/renderer/src/components/settings/MobileNetworkInterfaceSection.test.tsx` — UI render tests.
 
 **Modify:**
+
 - `src/renderer/src/components/settings/mobile-network-interface-selection.ts` — swap `mergeForSelect` for `buildComboboxEntries` (or add `buildComboboxEntries` and keep the old one if other call sites exist; confirm with grep before deleting).
 - `src/renderer/src/components/settings/mobile-network-interface-selection.test.ts` — replace `mergeForSelect` tests with `buildComboboxEntries` tests.
 - `src/renderer/src/components/settings/MobileNetworkInterfaceSection.tsx` — swap `Select` for `Popover + Command`.
 
 **Reference (read-only, do not modify):**
+
 - `src/renderer/src/components/ui/command.tsx` — `Command`, `CommandEmpty`, `CommandInput`, `CommandItem`, `CommandList`, `CommandSeparator`.
 - `src/renderer/src/components/ui/popover.tsx` — `Popover`, `PopoverTrigger`, `PopoverContent`.
 - `src/renderer/src/components/ui/button.tsx` — `Button`.
@@ -39,15 +42,18 @@
 ## Task 1: Add `parseManualNetworkAddress` (TDD)
 
 **Files:**
+
 - Create: `src/shared/network/manual-address.ts`
 - Create: `src/shared/network/manual-address.test.ts`
 
 - [ ] **Step 1: Confirm no existing call site for `mergeForSelect`**
 
   Run:
+
   ```bash
   grep -rn "mergeForSelect" src/ docs/ 2>/dev/null
   ```
+
   Expected: no matches. (If there are matches, stop and update Task 2 to keep `mergeForSelect` and only add `buildComboboxEntries` alongside it.)
 
 - [ ] **Step 2: Write the failing tests**
@@ -141,9 +147,11 @@
 - [ ] **Step 3: Run tests to verify they fail**
 
   Run from repo root:
+
   ```bash
   pnpm vitest run src/shared/network/manual-address.test.ts
   ```
+
   Expected: error like `Cannot find module './manual-address'`. This is the failing-test step — do not skip it.
 
 - [ ] **Step 4: Implement `parseManualNetworkAddress`**
@@ -194,9 +202,11 @@
 - [ ] **Step 5: Run tests to verify they pass**
 
   Run:
+
   ```bash
   pnpm vitest run src/shared/network/manual-address.test.ts
   ```
+
   Expected: all tests pass.
 
 - [ ] **Step 6: Lint and typecheck**
@@ -205,6 +215,7 @@
   pnpm lint src/shared/network/
   pnpm typecheck
   ```
+
   Expected: no errors. Fix any and re-run before continuing.
 
 - [ ] **Step 7: Commit**
@@ -219,6 +230,7 @@
 ## Task 2: Replace `mergeForSelect` with `buildComboboxEntries` (TDD)
 
 **Files:**
+
 - Modify: `src/renderer/src/components/settings/mobile-network-interface-selection.ts`
 - Modify: `src/renderer/src/components/settings/mobile-network-interface-selection.test.ts`
 
@@ -323,6 +335,7 @@
   ```bash
   pnpm vitest run src/renderer/src/components/settings/mobile-network-interface-selection.test.ts
   ```
+
   Expected: `buildComboboxEntries is not a function` (or import error) for the new block; the `selectRefreshedNetworkAddress` block still passes.
 
 - [ ] **Step 4: Rewrite `mobile-network-interface-selection.ts`**
@@ -409,6 +422,7 @@
   ```bash
   pnpm vitest run src/renderer/src/components/settings/mobile-network-interface-selection.test.ts
   ```
+
   Expected: all tests pass.
 
 - [ ] **Step 6: Lint and typecheck**
@@ -431,6 +445,7 @@
 ## Task 3: Rewrite `MobileNetworkInterfaceSection` UI to use Popover + Command
 
 **Files:**
+
 - Modify: `src/renderer/src/components/settings/MobileNetworkInterfaceSection.tsx`
 - Create: `src/renderer/src/components/settings/MobileNetworkInterfaceSection.test.tsx`
 
@@ -446,6 +461,7 @@
 - [ ] **Step 2: Read the current `MobileNetworkInterfaceSection.tsx` in full**
 
   Read the file. Note the props contract:
+
   ```ts
   type MobileNetworkInterfaceSectionProps = {
     networkInterfaces: MobileNetworkInterface[]
@@ -458,6 +474,7 @@
     onGenerateQr: () => void
   }
   ```
+
   The contract **must not change** — only the inner control does. `MobilePairingQrSection.tsx` consumes `selectedAddress` and is unaffected.
 
 - [ ] **Step 3: Write the failing render tests**
@@ -475,7 +492,9 @@
   const LAN: MobileNetworkInterface = { name: 'en0', address: '192.168.1.24' }
   const TAILNET: MobileNetworkInterface = { name: 'tailscale0', address: '100.64.1.20' }
 
-  function renderSection(overrides: Partial<React.ComponentProps<typeof MobileNetworkInterfaceSection>> = {}) {
+  function renderSection(
+    overrides: Partial<React.ComponentProps<typeof MobileNetworkInterfaceSection>> = {}
+  ) {
     const onSelectedAddressChange = vi.fn()
     const onRefreshNetworkInterfaces = vi.fn()
     const onGenerateQr = vi.fn()
@@ -514,7 +533,9 @@
       const { user } = renderSection()
       await user.click(screen.getByRole('combobox'))
       await user.type(screen.getByPlaceholderText(/search or type/i), 'not an address')
-      expect(screen.getByText(/Enter an IPv4 address or Tailscale MagicDNS hostname/i)).toBeInTheDocument()
+      expect(
+        screen.getByText(/Enter an IPv4 address or Tailscale MagicDNS hostname/i)
+      ).toBeInTheDocument()
       expect(screen.queryByRole('option', { name: /Use / })).not.toBeInTheDocument()
     })
 
@@ -523,7 +544,9 @@
       await user.click(screen.getByRole('combobox'))
       await user.type(screen.getByPlaceholderText(/search or type/i), '192.168.1.24')
       expect(screen.getByRole('option', { name: '192.168.1.24 (en0)' })).toBeInTheDocument()
-      expect(screen.queryByRole('option', { name: /Use "192\.168\.1\.24"/ })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole('option', { name: /Use "192\.168\.1\.24"/ })
+      ).not.toBeInTheDocument()
     })
 
     it('renders the (custom) label on the trigger after a custom selection', () => {
@@ -543,6 +566,7 @@
   ```bash
   pnpm vitest run src/renderer/src/components/settings/MobileNetworkInterfaceSection.test.tsx
   ```
+
   Expected: failures on every assertion — the component still uses `Select`. This is the failing-test step.
 
 - [ ] **Step 5: Rewrite the component**
@@ -551,13 +575,15 @@
 
   ```tsx
   import { useCallback, useMemo, useState } from 'react'
-  import { ChevronDown, ExternalLink, Loader2, QrCode, RefreshCw, Wifi } from 'lucide-react'
   import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger
-  } from '../ui/accordion'
+    ArrowClockwise as RefreshCw,
+    ArrowSquareOut as ExternalLink,
+    CaretDown as ChevronDown,
+    QrCode,
+    SpinnerGap as Loader2,
+    WifiHigh as Wifi
+  } from '@phosphor-icons/react'
+  import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion'
   import { Button } from '../ui/button'
   import {
     Command,
@@ -705,10 +731,12 @@
                   />
                   <CommandList>
                     <CommandEmpty>
-                      {showInlineError ? ERROR_MESSAGE : translate(
-                        'auto.components.settings.MobileNetworkInterfaceSection.new-combobox-empty',
-                        'No matching interfaces'
-                      )}
+                      {showInlineError
+                        ? ERROR_MESSAGE
+                        : translate(
+                            'auto.components.settings.MobileNetworkInterfaceSection.new-combobox-empty',
+                            'No matching interfaces'
+                          )}
                     </CommandEmpty>
                     {entries.map((entry, index) => {
                       if (entry.kind === 'interface') {
@@ -868,6 +896,7 @@
   ```bash
   pnpm vitest run src/renderer/src/components/settings/MobileNetworkInterfaceSection.test.tsx
   ```
+
   Expected: all six tests pass.
 
   If any fail:
@@ -880,6 +909,7 @@
   ```bash
   pnpm vitest run src/renderer/src/components/settings/
   ```
+
   Expected: all green. Confirm nothing else broke (e.g. `MobilePairingQrSection.test.tsx` if it exists).
 
 - [ ] **Step 8: Lint, typecheck, build**
@@ -889,6 +919,7 @@
   pnpm typecheck
   pnpm build
   ```
+
   Expected: all green. If `pnpm lint` complains about an unused import (e.g. `isCustomLabel` or `CommandSeparator`), remove it and re-run.
 
 - [ ] **Step 9: Commit**
@@ -913,6 +944,7 @@
   pnpm test
   pnpm build
   ```
+
   Expected: all green. This is exactly what `.github/workflows/` runs.
 
 - [ ] **Step 2: Manual smoke check**
@@ -931,9 +963,11 @@
 - [ ] **Step 3: Capture before/after screenshots**
 
   Save screenshots to a temp directory (NOT to the repo — `CONTRIBUTING.md` and `AGENTS.md` forbid committing PR evidence images). Use gstack browse if running the production binary:
+
   ```bash
   $HOME/.claude/skills/gstack/browse/dist/browse screenshot /tmp/yiru-mobile-section-before.png --selector ...
   ```
+
   Attach the screenshots to the PR conversation (never use `gh-attach`).
 
 - [ ] **Step 4: Push the branch and draft the PR**
@@ -959,6 +993,7 @@
   ```bash
   gh pr edit --add-reviewer <maintainer-handle>
   ```
+
   Or comment `@<maintainer>` in the PR if reviewer auto-assignment isn't available.
 
 ---

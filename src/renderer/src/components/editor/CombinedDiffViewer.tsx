@@ -50,7 +50,15 @@ import type {
   GitDiffResult,
   GitStatusEntry
 } from '../../../../shared/types'
-import { Check, Copy, MessageSquare, PanelLeftOpen, Sparkles, Trash2, WrapText } from 'lucide-react'
+import {
+  Check,
+  Copy,
+  Chat as MessageSquare,
+  SidebarSimple as PanelLeftOpen,
+  Sparkle as Sparkles,
+  Trash as Trash2,
+  TextAlignLeft as WrapText
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { DiffSectionItem } from './DiffSectionItem'
 import { DiffNotesSendMenu } from './DiffNotesSendMenu'

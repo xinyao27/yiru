@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, ExternalLink, Loader2, Star, X } from 'lucide-react'
+import {
+  Check,
+  ArrowSquareOut as ExternalLink,
+  SpinnerGap as Loader2,
+  Star,
+  X
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'

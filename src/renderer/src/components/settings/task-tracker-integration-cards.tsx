@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { AlertCircle, CheckCircle2, LoaderCircle, Unlink } from 'lucide-react'
+import {
+  WarningCircle as AlertCircle,
+  CheckCircle as CheckCircle2,
+  CircleNotch as LoaderCircle,
+  LinkBreak as Unlink
+} from '@phosphor-icons/react'
 import { LinearIcon } from '@/components/icons/LinearIcon'
 import { LinearApiKeyDialog } from '@/components/linear-api-key-dialog'
 import { Button } from '@/components/ui/button'

@@ -1,7 +1,7 @@
 'use client'
 
-import { CheckIcon } from 'lucide-react'
 import { Checkbox as CheckboxPrimitive } from '@base-ui/react/checkbox'
+import { CheckIcon } from '@phosphor-icons/react'
 
 import { cn } from '@/lib/utils'
 

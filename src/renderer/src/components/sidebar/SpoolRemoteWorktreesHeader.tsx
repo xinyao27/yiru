@@ -1,5 +1,5 @@
 import type React from 'react'
-import { Cloudy } from 'lucide-react'
+import { CloudFog as Cloudy } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { ProjectHeaderActions } from './ProjectHeaderActions'
 import { SidebarDisclosure } from './SidebarDisclosure'

@@ -5,14 +5,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowRight,
   Clipboard,
-  ExternalLink,
+  ArrowSquareOut as ExternalLink,
   GitBranch,
-  LoaderCircle,
-  RefreshCw,
-  Save,
-  Send,
+  CircleNotch as LoaderCircle,
+  ArrowClockwise as RefreshCw,
+  FloppyDisk as Save,
+  PaperPlaneRight as Send,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'

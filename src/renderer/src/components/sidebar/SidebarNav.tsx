@@ -1,5 +1,10 @@
 import React from 'react'
-import { Bell, CalendarClock, Search, Smartphone } from 'lucide-react'
+import {
+  Bell,
+  CalendarDots as CalendarClock,
+  MagnifyingGlass as Search,
+  DeviceMobile as Smartphone
+} from '@phosphor-icons/react'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '@/store'
 import { cn } from '@/lib/utils'

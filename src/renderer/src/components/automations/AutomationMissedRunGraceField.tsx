@@ -1,4 +1,4 @@
-import { Info } from 'lucide-react'
+import { Info } from '@phosphor-icons/react'
 import {
   Select,
   SelectContent,

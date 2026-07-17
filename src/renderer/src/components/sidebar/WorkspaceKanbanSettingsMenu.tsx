@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowDown, ArrowUp, Plus, Settings, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Plus, Gear as Settings, Trash as Trash2 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

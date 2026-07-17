@@ -1,5 +1,5 @@
 import React from 'react'
-import { Pin } from 'lucide-react'
+import { PushPin as Pin } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import type { Repo, Worktree } from '../../../../shared/types'
 import WorktreeCard from './WorktreeCard'

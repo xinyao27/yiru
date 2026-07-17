@@ -4,12 +4,12 @@ import {
   Circle,
   Highlighter,
   Pencil,
-  Redo2,
+  ArrowClockwise as Redo2,
   Square,
-  Trash2,
-  Type,
-  Undo2
-} from 'lucide-react'
+  Trash as Trash2,
+  TextT as Type,
+  ArrowCounterClockwise as Undo2
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'

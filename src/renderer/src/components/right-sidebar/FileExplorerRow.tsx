@@ -4,7 +4,7 @@ import { basename } from '@/lib/path'
 import {
   Copy,
   Download,
-  ExternalLink,
+  ArrowSquareOut as ExternalLink,
   Eye,
   File,
   FilePlus,
@@ -12,12 +12,12 @@ import {
   Folder,
   FolderPlus,
   Globe,
-  ListCollapse,
+  ListDashes as ListCollapse,
   Pencil,
-  Search,
-  SquareTerminal,
-  Trash2
-} from 'lucide-react'
+  MagnifyingGlass as Search,
+  TerminalWindow as SquareTerminal,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import {
   ContextMenu,

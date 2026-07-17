@@ -129,7 +129,7 @@
   --font-mono:
     'SF Mono', SFMono-Regular, ui-monospace, 'Cascadia Code', Menlo, Consolas, 'Liberation Mono',
     monospace;
-  --radius: 0.625rem;
+  --radius: 0;
   --background: #fff;
   --editor-surface: #ffffff;
   --foreground: #0a0a0a;
@@ -387,6 +387,9 @@
   *::before,
   *::after {
     @apply border-border outline-ring/50;
+    /* Why: the rectilinear design must also cover legacy utilities, inline
+       styles, and third-party components that bypass the radius token. */
+    border-radius: 0 !important;
   }
 
   body {
@@ -553,7 +556,8 @@
 .xterm .xterm-viewport::-webkit-scrollbar-thumb {
   background: rgba(121, 121, 121, 0.4);
   border: 3px solid transparent;
-  border-radius: 7px;
+  /* Why: scrollbar pseudo-elements sit outside the global element radius reset. */
+  border-radius: 0;
   background-clip: padding-box;
 }
 
@@ -711,11 +715,8 @@
   user-select: none;
 }
 
-/* Why: workspace view still needs a full titlebar-height strip above the
-   sidebar so the native macOS traffic lights and sidebar chrome sit in the
-   same vertical band they use in settings/landing. The center and right
-   workspace columns are offset separately to align with this 36px baseline
-   (4px drag strip + 32px tab row). */
+/* Why: keep the workspace titlebar aligned with the fixed 36px center and
+   right header rows. */
 .titlebar-left {
   height: 36px;
   min-height: 36px;
@@ -904,36 +905,6 @@
 .sidebar-toggle:disabled:hover {
   background: none;
   color: var(--muted-foreground);
-}
-
-.titlebar-app-name {
-  -webkit-app-region: no-drag;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 24px;
-  max-width: min(280px, 32vw);
-  margin-left: 2px;
-  margin-right: 4px;
-  padding: 0 6px;
-  border-radius: 4px;
-  color: var(--muted-foreground);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 24px;
-  white-space: nowrap;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-/* Why: when the app name sits inside the worktree sidebar header, it should
-   inherit that panel's contrast instead of the generic titlebar text color. */
-.titlebar-left:not(.titlebar-left-floating) .titlebar-app-name {
-  color: var(--worktree-sidebar-foreground);
-}
-
-.titlebar-app-name-main {
-  flex: 0 0 auto;
 }
 
 .titlebar-icon-button {

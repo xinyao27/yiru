@@ -1,4 +1,4 @@
-import { Plus, Minus, X, Loader2 } from 'lucide-react'
+import { Plus, Minus, X, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

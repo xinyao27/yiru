@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react'
-import { Maximize2, Minimize2, Minus } from 'lucide-react'
+import { ArrowsOut as Maximize2, ArrowsIn as Minimize2, Minus } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

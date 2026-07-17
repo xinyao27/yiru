@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { Settings as SettingsIcon } from 'lucide-react'
+import { Gear as SettingsIcon } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { getAgentCatalog } from '@/lib/agent-catalog'

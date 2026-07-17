@@ -1,5 +1,5 @@
 import React from 'react'
-import { CircleDot } from 'lucide-react'
+import { Circle as CircleDot } from '@phosphor-icons/react'
 import type { WorkspaceStatus, WorkspaceStatusDefinition } from '../../../../shared/types'
 import {
   DEFAULT_WORKSPACE_STATUS_COLOR_ID,

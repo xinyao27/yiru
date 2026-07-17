@@ -1,4 +1,4 @@
-import { Copy } from 'lucide-react'
+import { Copy } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {

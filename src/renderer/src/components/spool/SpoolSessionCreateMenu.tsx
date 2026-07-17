@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/spool-catalog-contract'
 import type { SpoolRequesterControlView } from '../../../../shared/spool/spool-ipc-contract'

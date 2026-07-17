@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
-import { Copy, Loader2, RefreshCw, Terminal } from 'lucide-react'
+import {
+  Copy,
+  SpinnerGap as Loader2,
+  ArrowClockwise as RefreshCw,
+  Terminal
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { IntegrationStatusPill } from '../integration-status-pill'
 import { SkillFreshnessStatusPill } from '../skills/SkillFreshnessStatusPill'

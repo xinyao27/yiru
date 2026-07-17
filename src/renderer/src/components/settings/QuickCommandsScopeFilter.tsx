@@ -1,4 +1,4 @@
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { Repo } from '../../../../shared/types'
 import { Button } from '../ui/button'

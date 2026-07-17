@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Loader2, RefreshCw } from 'lucide-react'
+import { SpinnerGap as Loader2, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import type { GlobalSettings } from '../../../../shared/types'
 import { cn } from '@/lib/utils'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ChevronUp, ChevronDown, X } from 'lucide-react'
+import { CaretUp as ChevronUp, CaretDown as ChevronDown, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { getFindRequestQuery } from '@/lib/find-query-bounds'

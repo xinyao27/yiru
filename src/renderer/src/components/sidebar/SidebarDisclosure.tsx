@@ -1,5 +1,5 @@
 import type React from 'react'
-import { ChevronDown } from 'lucide-react'
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 

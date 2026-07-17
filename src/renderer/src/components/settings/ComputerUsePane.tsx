@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { Accessibility, Camera, ExternalLink, RefreshCw, ShieldCheck } from 'lucide-react'
+import {
+  PersonArmsSpread as Accessibility,
+  Camera,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw,
+  ShieldCheck
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type {
   ComputerUsePermissionId,

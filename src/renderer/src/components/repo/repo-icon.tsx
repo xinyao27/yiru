@@ -1,27 +1,27 @@
 import React from 'react'
 import {
-  Bot,
-  Box,
-  Braces,
+  Robot as Bot,
+  Cube as Box,
+  BracketsCurly as Braces,
   Briefcase,
-  Building2,
-  Code2,
+  Buildings as Building2,
+  Code as Code2,
   Cpu,
   Database,
   Folder,
   Gauge,
   Globe,
-  Layers,
+  Stack as Layers,
   Package,
   Palette,
   Rocket,
-  Server,
+  HardDrives as Server,
   Shapes,
-  Sparkles,
-  SquareTerminal,
+  Sparkle as Sparkles,
+  TerminalWindow as SquareTerminal,
   Wrench,
-  type LucideIcon
-} from 'lucide-react'
+  type Icon as PhosphorIcon
+} from '@phosphor-icons/react'
 import type { RepoIcon } from '../../../../shared/repo-icon'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
@@ -30,7 +30,7 @@ import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 export type RepoLucideIconOption = {
   name: string
   label: string
-  icon: LucideIcon
+  icon: PhosphorIcon
 }
 
 export const getRepoLucideIconOptions = createLocalizedCatalog(() => [
@@ -132,7 +132,7 @@ export const getRepoLucideIconOptions = createLocalizedCatalog(() => [
   { name: 'Box', label: translate('auto.components.repo.repo.icon.0ad395d475', 'Box'), icon: Box }
 ])
 
-export function getRepoLucideIcon(name: string | null | undefined): LucideIcon {
+export function getRepoLucideIcon(name: string | null | undefined): PhosphorIcon {
   return getRepoLucideIconOptions().find((option) => option.name === name)?.icon ?? Folder
 }
 

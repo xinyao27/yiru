@@ -1,5 +1,12 @@
 import type React from 'react'
-import { AlertCircle, Loader2, LockKeyhole, Play, RotateCcw, SquareTerminal } from 'lucide-react'
+import {
+  ArrowCounterClockwise as RotateCcw,
+  LockKey as LockKeyhole,
+  Play,
+  SpinnerGap as Loader2,
+  TerminalWindow as SquareTerminal,
+  WarningCircle as AlertCircle
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

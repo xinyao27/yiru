@@ -4,7 +4,13 @@
 // from `listAccessibleProjects` and is cached for 5 minutes. Paste-to-add
 // accepts org/user project URLs and `owner/number` shorthand.
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, ChevronDown, Loader, Pin, Search } from 'lucide-react'
+import {
+  Warning as AlertTriangle,
+  CaretDown as ChevronDown,
+  SpinnerGap as Loader,
+  PushPin as Pin,
+  MagnifyingGlass as Search
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { GhAuthErrorHelp } from '@/components/github-project/GhAuthErrorHelp'
 import { Button } from '@/components/ui/button'

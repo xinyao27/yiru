@@ -1,5 +1,5 @@
 import React from 'react'
-import type { LucideIcon } from 'lucide-react'
+import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
@@ -9,7 +9,7 @@ export function SourceControlHeaderIconButton({
   onClick,
   disabled
 }: {
-  icon: LucideIcon
+  icon: PhosphorIcon
   label: string
   onClick: () => void
   disabled?: boolean

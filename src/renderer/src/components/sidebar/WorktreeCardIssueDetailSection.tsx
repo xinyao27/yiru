@@ -7,7 +7,14 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { CircleDot, Copy, Ellipsis, ExternalLink, MonitorUp, Pencil } from 'lucide-react'
+import {
+  Circle as CircleDot,
+  Copy,
+  DotsThree as Ellipsis,
+  ArrowSquareOut as ExternalLink,
+  MonitorArrowUp as MonitorUp,
+  Pencil
+} from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import {
   WorktreeCardDetailSection,

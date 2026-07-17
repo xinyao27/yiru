@@ -1,9 +1,9 @@
 import { createElement } from 'react'
-import type { LucideProps } from 'lucide-react'
+import type { IconProps } from '@phosphor-icons/react'
 import logo from '../../../../../resources/logo.svg'
 import { cn } from '@/lib/utils'
 
-export function YiruLogoSettingsIcon({ className }: LucideProps): React.JSX.Element {
+export function YiruLogoSettingsIcon({ className }: IconProps): React.JSX.Element {
   return createElement('img', {
     src: logo,
     alt: '',

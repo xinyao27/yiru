@@ -1,17 +1,17 @@
 import React, { useMemo, useState } from 'react'
 import {
-  AlertTriangle,
-  CalendarClock,
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
+  Warning as AlertTriangle,
+  CalendarDots as CalendarClock,
+  CheckCircle as CheckCircle2,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
   Clock,
   Fingerprint,
-  MessageSquare,
-  Sparkles,
+  Chat as MessageSquare,
+  Sparkle as Sparkles,
   Terminal
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+} from '@phosphor-icons/react'
+import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
 import { cn } from '@/lib/utils'
 import {
@@ -49,7 +49,7 @@ function getMetadataDisplayLabel(label: string): string {
   return isScheduleMetadataLabel(label) ? 'Schedule' : label
 }
 
-type MetadataIconStyle = { icon: LucideIcon; iconClass: string; ringClass: string }
+type MetadataIconStyle = { icon: PhosphorIcon; iconClass: string; ringClass: string }
 
 function getMetadataIconStyle(label: string): MetadataIconStyle {
   const normalized = label.toLowerCase()
@@ -86,7 +86,7 @@ type CollapsibleSectionProps = {
   defaultOpen?: boolean
   children: React.ReactNode
   tone?: 'default' | 'muted'
-  icon?: LucideIcon
+  icon?: PhosphorIcon
   iconClass?: string
 }
 

@@ -1,5 +1,10 @@
 import type { CSSProperties, RefObject } from 'react'
-import { MessageSquare, SquareSplitVertical, SquareTerminal, X } from 'lucide-react'
+import {
+  Chat as MessageSquare,
+  SquareSplitVertical,
+  TerminalWindow as SquareTerminal,
+  X
+} from '@phosphor-icons/react'
 import type { ManagedPane, PaneManager } from '@/lib/pane-manager/pane-manager'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

@@ -1,5 +1,10 @@
 import type React from 'react'
-import { FileJson, FolderGit2, MessageSquare, Play } from 'lucide-react'
+import {
+  FileCode as FileJson,
+  FolderSimple as FolderGit2,
+  Chat as MessageSquare,
+  Play
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'

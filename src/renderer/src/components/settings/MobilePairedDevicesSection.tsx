@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { Trash as Trash2 } from '@phosphor-icons/react'
 import { Button } from '../ui/button'
 import { translate } from '@/i18n/i18n'
 

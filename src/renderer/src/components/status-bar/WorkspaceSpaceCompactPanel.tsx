@@ -1,5 +1,11 @@
 import { useCallback } from 'react'
-import { AlertTriangle, HardDrive, Loader2, RefreshCw, X } from 'lucide-react'
+import {
+  Warning as AlertTriangle,
+  HardDrive,
+  SpinnerGap as Loader2,
+  ArrowClockwise as RefreshCw,
+  X
+} from '@phosphor-icons/react'
 import { useAppStore } from '../../store'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'

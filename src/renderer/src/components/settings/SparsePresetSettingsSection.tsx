@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus } from '@phosphor-icons/react'
 import type { SparsePreset } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import { parseSparsePresetDirectories } from '@/lib/sparse-preset-draft'

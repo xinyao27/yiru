@@ -133,26 +133,6 @@ export const getLayoutEntries = createLocalizedCatalog((): SettingsSearchEntry[]
   }
 ])
 
-export const getTitlebarEntries = createLocalizedCatalog((): SettingsSearchEntry[] => [
-  {
-    title: translate('auto.components.settings.appearance.search.fdd31b00d0', 'Titlebar App Name'),
-    description: translate(
-      'auto.components.settings.appearance.search.18b4c4c30b',
-      'Show Yiru in the titlebar.'
-    ),
-    keywords: [
-      ...translateSearchKeyword(
-        'auto.components.settings.appearance.search.bed343b03e',
-        'titlebar'
-      ),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.1f2880a9d5', 'yiru'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.36e006efc1', 'app'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.51f957ce39', 'name'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.a895d0f938', 'brand')
-    ]
-  }
-])
-
 export const getStatusBarEntries = createLocalizedCatalog((): SettingsSearchEntry[] => [
   getUsagePercentageDisplayEntry(),
   ...getStatusBarToggles().map(({ title, description, keywords }) => ({
@@ -228,7 +208,6 @@ function buildAppearancePaneSearchEntries(
     ...getZoomEntries(),
     ...getTerminalAppearanceSearchEntries(options),
     ...getLayoutEntries(),
-    ...getTitlebarEntries(),
     ...getStatusBarEntries(),
     ...getSidebarEntries(),
     ...getAppIconEntries(),

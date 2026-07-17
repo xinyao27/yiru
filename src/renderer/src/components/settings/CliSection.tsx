@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { FolderOpen, RefreshCw } from 'lucide-react'
+import { FolderOpen, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { CliInstallStatus } from '../../../../shared/cli-install-types'
 import type { GlobalSettings } from '../../../../shared/types'

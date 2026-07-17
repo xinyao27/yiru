@@ -1,5 +1,5 @@
 import { useId, useLayoutEffect, useState } from 'react'
-import { LoaderCircle, Lock } from 'lucide-react'
+import { CircleNotch as LoaderCircle, Lock } from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { Button } from '@/components/ui/button'

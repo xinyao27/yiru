@@ -1,7 +1,7 @@
 import type React from 'react'
 import { useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { FilePlus2, FolderPlus, Trash2 } from 'lucide-react'
+import { FilePlus as FilePlus2, FolderPlus, Trash as Trash2 } from '@phosphor-icons/react'
 import type {
   SpoolFileListResult,
   SpoolFileTreeEntry

@@ -1,5 +1,9 @@
 import { useRef, useState } from 'react'
-import { CircleAlert, Loader2, RefreshCw } from 'lucide-react'
+import {
+  ArrowClockwise as RefreshCw,
+  SpinnerGap as Loader2,
+  WarningCircle as CircleAlert
+} from '@phosphor-icons/react'
 import { SPOOL_INGRESS_PORT } from '../../../../shared/spool/spool-wire-contract'
 import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/useMountedRef'

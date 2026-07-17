@@ -1,4 +1,4 @@
-import { RefreshCw } from 'lucide-react'
+import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 
 type ClaudeUsageLoadingStateProps = {
   title?: string

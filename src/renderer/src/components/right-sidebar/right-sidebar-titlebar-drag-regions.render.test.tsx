@@ -247,7 +247,13 @@ describe('rendered right sidebar titlebar drag regions', () => {
     expectNoDrag(buttonOpeningTag(markup, 'Explorer'))
     expectNoDrag(buttonOpeningTag(markup, 'Source Control'))
     expectNoDrag(buttonOpeningTag(markup, 'Checks'))
+    expect(buttonOpeningTag(markup, 'Explorer')).toContain('my-auto h-7')
+    expect(buttonOpeningTag(markup, 'Explorer')).toContain('bg-accent')
+    expect(buttonOpeningTag(markup, 'Explorer')).not.toContain('border-r')
+    expect(buttonOpeningTag(markup, 'Source Control')).toContain('hover:bg-accent')
+    expect(markup).not.toContain('absolute bottom-0 left-[25%]')
     expect(buttonOpeningTag(markup, 'Toggle right sidebar')).toContain('sidebar-toggle')
+    expect(markup).toContain('-scale-x-100')
     expect(markup).toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
   })
 

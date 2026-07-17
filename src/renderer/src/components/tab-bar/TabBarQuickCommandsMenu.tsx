@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, Play } from 'lucide-react'
+import { CaretDown as ChevronDown, Play } from '@phosphor-icons/react'
 import {
   Command,
   CommandEmpty,

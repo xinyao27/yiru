@@ -1,14 +1,14 @@
 import React from 'react'
 import {
-  ChevronDown,
-  ChevronUp,
-  CircleCheck,
+  CaretDown as ChevronDown,
+  CaretUp as ChevronUp,
+  CheckCircle as CircleCheck,
   GitMerge,
-  PanelLeftOpen,
-  RefreshCw,
-  TriangleAlert,
+  SidebarSimple as PanelLeftOpen,
+  ArrowClockwise as RefreshCw,
+  Warning as TriangleAlert,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'

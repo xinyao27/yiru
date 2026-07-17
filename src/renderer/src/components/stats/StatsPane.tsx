@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react'
-import { BarChart3, Bot, Check, ChevronDown, Clock, GitPullRequest } from 'lucide-react'
+import {
+  ChartBar as BarChart3,
+  Robot as Bot,
+  Check,
+  CaretDown as ChevronDown,
+  Clock,
+  GitPullRequest
+} from '@phosphor-icons/react'
 import { useAppStore } from '../../store'
 import { StatCard } from './StatCard'
 import { ClaudeUsagePane } from './ClaudeUsagePane'

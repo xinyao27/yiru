@@ -1,17 +1,17 @@
 import {
-  Activity,
-  AudioWaveform,
+  ActivityIcon as Activity,
+  Waveform as AudioWaveform,
   Bell,
-  CircleDot,
+  Circle as CircleDot,
   FileAudio,
   Keyboard,
-  MousePointer2,
+  Cursor as MousePointer2,
   Radio,
-  Radar,
-  Volume1,
-  Zap,
-  type LucideIcon
-} from 'lucide-react'
+  Crosshair as Radar,
+  SpeakerLow as Volume1,
+  Lightning as Zap,
+  type Icon as PhosphorIcon
+} from '@phosphor-icons/react'
 import { basename } from '@/lib/path'
 import type { GlobalSettings } from '../../../shared/types'
 import { translate } from '@/i18n/i18n'
@@ -20,7 +20,7 @@ import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 export type NotificationSoundOption = {
   id: GlobalSettings['notifications']['customSoundId']
   title: string
-  icon: LucideIcon
+  icon: PhosphorIcon
 }
 
 export const getBuiltInNotificationSoundOptions = createLocalizedCatalog(

@@ -1,5 +1,12 @@
 import React from 'react'
-import { List, ListTree, MessageSquare, MoreHorizontal, RefreshCw, Settings2 } from 'lucide-react'
+import {
+  List,
+  TreeStructure as ListTree,
+  Chat as MessageSquare,
+  DotsThree as MoreHorizontal,
+  ArrowClockwise as RefreshCw,
+  GearSix as Settings2
+} from '@phosphor-icons/react'
 import type { SourceControlViewMode } from '../../../../shared/types'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

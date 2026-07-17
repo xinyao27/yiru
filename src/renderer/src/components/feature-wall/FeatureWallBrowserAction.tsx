@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { ArrowUpRight, Loader2, Terminal } from 'lucide-react'
+import { ArrowUpRight, SpinnerGap as Loader2, Terminal } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { PanelRight } from 'lucide-react'
+import { SidebarSimple as PanelRight } from '@phosphor-icons/react'
 import type { CheckStatus } from '../../../../shared/types'
 import type { ActiveRightSidebarTab, ActivityBarPosition } from '@/store/slices/editor'
 import { cn } from '@/lib/utils'

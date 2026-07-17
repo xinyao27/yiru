@@ -1,5 +1,5 @@
 import React from 'react'
-import { GitCommitHorizontal } from 'lucide-react'
+import { GitCommit as GitCommitHorizontal } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'

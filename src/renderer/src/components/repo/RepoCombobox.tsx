@@ -1,5 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { Check, ChevronsUpDown, FolderPlus, Server } from 'lucide-react'
+import {
+  Check,
+  CaretUpDown as ChevronsUpDown,
+  FolderPlus,
+  HardDrives as Server
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   Command,

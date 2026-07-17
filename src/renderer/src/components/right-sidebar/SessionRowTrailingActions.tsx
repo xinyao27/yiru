@@ -1,5 +1,11 @@
 import type React from 'react'
-import { ChevronDown, LocateFixed, MoreHorizontal, PanelTopOpen, Play } from 'lucide-react'
+import {
+  CaretDown as ChevronDown,
+  Crosshair as LocateFixed,
+  DotsThree as MoreHorizontal,
+  Layout as PanelTopOpen,
+  Play
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {

@@ -1,5 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { EyeOff, PanelBottom, PanelTop } from 'lucide-react'
+import {
+  EyeSlash as EyeOff,
+  Layout as PanelBottom,
+  Layout as PanelTop
+} from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -1,4 +1,10 @@
-import { AlertTriangle, Copy, Loader2, RefreshCw, Trash2 } from 'lucide-react'
+import {
+  Warning as AlertTriangle,
+  Copy,
+  SpinnerGap as Loader2,
+  ArrowClockwise as RefreshCw,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'

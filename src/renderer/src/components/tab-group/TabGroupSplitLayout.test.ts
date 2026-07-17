@@ -81,7 +81,7 @@ describe('TabGroupSplitLayout', () => {
     const layoutWrapperChildren = React.Children.toArray(
       asElement(getLayoutWrapper(element)).props.children as React.ReactNode
     )
-    const splitBody = layoutWrapperChildren[1]
+    const splitBody = layoutWrapperChildren[0]
     const splitNodeElement = React.Children.only(
       asElement(splitBody).props.children as React.ReactNode
     )

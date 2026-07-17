@@ -52,8 +52,8 @@ vi.mock('react', async () => {
   }
 })
 
-vi.mock('lucide-react', () => ({
-  PanelsTopLeft: function PanelsTopLeft() {
+vi.mock('@phosphor-icons/react', () => ({
+  Layout: function PanelsTopLeft() {
     return null
   }
 }))

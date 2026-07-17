@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FolderOpen } from 'lucide-react'
+import { FolderOpen } from '@phosphor-icons/react'
 import type { FloatingTerminalTriggerLocation, GlobalSettings } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'

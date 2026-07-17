@@ -1,13 +1,13 @@
 import React from 'react'
 import {
-  CheckCircle2,
+  CheckCircle as CheckCircle2,
   Info,
-  RefreshCw,
-  RotateCcw,
-  Settings,
-  Sparkles,
-  TriangleAlert
-} from 'lucide-react'
+  ArrowClockwise as RefreshCw,
+  ArrowCounterClockwise as RotateCcw,
+  Gear as Settings,
+  Sparkle as Sparkles,
+  Warning as TriangleAlert
+} from '@phosphor-icons/react'
 import AgentCombobox from '@/components/agent/AgentCombobox'
 import { Button } from '@/components/ui/button'
 import { DialogFooter } from '@/components/ui/dialog'

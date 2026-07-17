@@ -1,5 +1,12 @@
 import React from 'react'
-import { ChevronDown, Code2, ExternalLink, FileText, FolderOpen, RefreshCw } from 'lucide-react'
+import {
+  CaretDown as ChevronDown,
+  Code as Code2,
+  ArrowSquareOut as ExternalLink,
+  FileText,
+  FolderOpen,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import { useAppStore } from '../../store'

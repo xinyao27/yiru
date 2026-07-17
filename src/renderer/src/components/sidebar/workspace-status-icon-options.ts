@@ -1,16 +1,16 @@
 import React from 'react'
 import {
-  Ban,
+  Prohibit as Ban,
   Circle,
-  CircleAlert,
+  WarningCircle as CircleAlert,
   CircleDashed,
-  CircleDot,
-  CircleEllipsis,
-  CirclePause,
-  CirclePlay,
+  Circle as CircleDot,
+  DotsThreeCircle as CircleEllipsis,
+  PauseCircle as CirclePause,
+  PlayCircle as CirclePlay,
   Flag,
   Timer
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 import { translate } from '@/i18n/i18n'
 import {

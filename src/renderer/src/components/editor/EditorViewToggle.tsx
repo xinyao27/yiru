@@ -4,12 +4,12 @@ import {
   Code,
   Eye,
   FileText,
-  GitCompareArrows,
-  NotebookText,
+  GitDiff as GitCompareArrows,
+  Notebook as NotebookText,
   Pencil,
   Table as TableIcon,
-  type LucideIcon
-} from 'lucide-react'
+  type Icon as PhosphorIcon
+} from '@phosphor-icons/react'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { MarkdownViewMode } from '@/store/slices/editor'
@@ -24,7 +24,7 @@ import { translate } from '@/i18n/i18n'
 // distinction. See reviews/changes-view-mode-plan.md.
 export type EditorToggleValue = MarkdownViewMode | 'edit' | 'changes'
 
-type ViewModeMetadata = { label: string; icon: LucideIcon; title?: string }
+type ViewModeMetadata = { label: string; icon: PhosphorIcon; title?: string }
 
 const DEFAULT_VIEW_MODE_METADATA: Record<EditorToggleValue, ViewModeMetadata> = {
   source: {

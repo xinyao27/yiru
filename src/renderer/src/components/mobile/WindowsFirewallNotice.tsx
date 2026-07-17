@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { CircleAlert, Loader2, ShieldCheck } from 'lucide-react'
+import {
+  WarningCircle as CircleAlert,
+  SpinnerGap as Loader2,
+  ShieldCheck
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { WindowsMobileFirewallStatus } from '../../../../shared/windows-mobile-firewall'
 import { useMountedRef } from '../../hooks/useMountedRef'

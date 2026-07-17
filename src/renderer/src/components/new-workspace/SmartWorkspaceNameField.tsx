@@ -4,17 +4,17 @@ in one predictable form control instead of splitting state across fragments. */
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: this component's existing reset effects need a dedicated refactor outside the Linear API compatibility change. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  CaseSensitive,
-  CircleDot,
-  ExternalLink,
+  TextAa as CaseSensitive,
+  Circle as CircleDot,
+  ArrowSquareOut as ExternalLink,
   GitBranch,
-  GitBranchPlus,
+  GitBranch as GitBranchPlus,
   GitMerge,
   GitPullRequest,
-  LoaderCircle,
-  Search,
+  CircleNotch as LoaderCircle,
+  MagnifyingGlass as Search,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'

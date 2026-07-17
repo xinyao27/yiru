@@ -1,6 +1,6 @@
 import type { CSSProperties, RefObject } from 'react'
 import { useMemo } from 'react'
-import { ArrowLeft, Search, Server } from 'lucide-react'
+import { ArrowLeft, MagnifyingGlass as Search, HardDrives as Server } from '@phosphor-icons/react'
 import type { RepoIcon } from '../../../../shared/repo-icon'
 import type { SettingsNavIcon, SettingsNavInstallStatus } from '@/lib/settings-navigation-types'
 import type { GitHubRepositoryIdentity, GlobalSettings } from '../../../../shared/types'

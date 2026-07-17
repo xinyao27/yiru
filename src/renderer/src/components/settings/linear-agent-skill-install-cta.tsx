@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Copy, RefreshCw } from 'lucide-react'
+import { Copy, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { IntegrationStatusPill } from '@/components/integration-status-pill'
 import { Button } from '@/components/ui/button'

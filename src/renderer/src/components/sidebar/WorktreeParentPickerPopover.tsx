@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { GitBranch, Server } from 'lucide-react'
+import { GitBranch, HardDrives as Server } from '@phosphor-icons/react'
 import {
   Command,
   CommandEmpty,

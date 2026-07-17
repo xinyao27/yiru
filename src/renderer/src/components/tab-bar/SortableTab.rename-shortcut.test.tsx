@@ -71,7 +71,7 @@ vi.mock('@dnd-kit/sortable', () => ({
   })
 }))
 
-vi.mock('lucide-react', () => ({
+vi.mock('@phosphor-icons/react', () => ({
   ArrowDown: function ArrowDown(props: Record<string, unknown>) {
     return { type: 'ArrowDown', props }
   },
@@ -84,40 +84,40 @@ vi.mock('lucide-react', () => ({
   ArrowUp: function ArrowUp(props: Record<string, unknown>) {
     return { type: 'ArrowUp', props }
   },
-  Columns2: function Columns2(props: Record<string, unknown>) {
+  Columns: function Columns2(props: Record<string, unknown>) {
     return { type: 'Columns2', props }
   },
-  Minimize2: function Minimize2(props: Record<string, unknown>) {
+  ArrowsIn: function Minimize2(props: Record<string, unknown>) {
     return { type: 'Minimize2', props }
   },
-  PanelBottomClose: function PanelBottomClose(props: Record<string, unknown>) {
+  Layout: function PanelBottomClose(props: Record<string, unknown>) {
     return { type: 'PanelBottomClose', props }
   },
-  PanelRightClose: function PanelRightClose(props: Record<string, unknown>) {
+  Sidebar: function PanelRightClose(props: Record<string, unknown>) {
     return { type: 'PanelRightClose', props }
   },
-  ListX: function ListX(props: Record<string, unknown>) {
+  List: function ListX(props: Record<string, unknown>) {
     return { type: 'ListX', props }
   },
-  MessageSquare: function MessageSquare(props: Record<string, unknown>) {
+  Chat: function MessageSquare(props: Record<string, unknown>) {
     return { type: 'MessageSquare', props }
   },
   Pencil: function Pencil(props: Record<string, unknown>) {
     return { type: 'Pencil', props }
   },
-  Pin: function Pin(props: Record<string, unknown>) {
+  PushPin: function Pin(props: Record<string, unknown>) {
     return { type: 'Pin', props }
   },
-  PinOff: function PinOff(props: Record<string, unknown>) {
+  PushPinSlash: function PinOff(props: Record<string, unknown>) {
     return { type: 'PinOff', props }
   },
-  Rows2: function Rows2(props: Record<string, unknown>) {
+  Rows: function Rows2(props: Record<string, unknown>) {
     return { type: 'Rows2', props }
   },
   X: function X(props: Record<string, unknown>) {
     return { type: 'X', props }
   },
-  SquareTerminal: function SquareTerminal(props: Record<string, unknown>) {
+  TerminalWindow: function SquareTerminal(props: Record<string, unknown>) {
     return { type: 'SquareTerminal', props }
   }
 }))
@@ -192,9 +192,8 @@ vi.mock('../sidebar/WorktreeCardHelpers', () => ({
 }))
 
 vi.mock('./drop-indicator', () => ({
-  ACTIVE_TAB_INDICATOR_CLASSES: 'active-tab-indicator',
   getDropIndicatorClasses: () => '',
-  getTabStripBorderClasses: () => '',
+  getTabDividerClasses: () => '',
   getTabRootStateClasses: () => ''
 }))
 

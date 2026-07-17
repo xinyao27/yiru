@@ -1,4 +1,10 @@
-import { ArrowDownUp, Check, ChevronDown, Sparkles, TriangleAlert } from 'lucide-react'
+import {
+  ArrowsDownUp as ArrowDownUp,
+  Check,
+  CaretDown as ChevronDown,
+  Sparkle as Sparkles,
+  Warning as TriangleAlert
+} from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import type { LocalizedHostedReviewCopy } from '@/i18n/hosted-review-localized-copy'

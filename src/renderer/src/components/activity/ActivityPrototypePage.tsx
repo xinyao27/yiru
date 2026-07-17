@@ -5,13 +5,13 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { useShallow } from 'zustand/react/shallow'
 import {
   Bell,
-  BellDot,
-  ExternalLink,
-  MessageSquareText,
-  MoreVertical,
-  Search,
-  TerminalSquare
-} from 'lucide-react'
+  BellRinging as BellDot,
+  ArrowSquareOut as ExternalLink,
+  ChatText as MessageSquareText,
+  DotsThreeVertical as MoreVertical,
+  MagnifyingGlass as Search,
+  TerminalWindow as TerminalSquare
+} from '@phosphor-icons/react'
 
 import { AgentStateDot, agentStateLabel } from '@/components/AgentStateDot'
 import { AgentIcon } from '@/lib/agent-catalog'

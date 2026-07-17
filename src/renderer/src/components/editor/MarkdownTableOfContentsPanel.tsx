@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ChevronRight, ListTree, X } from 'lucide-react'
+import { CaretRight as ChevronRight, TreeStructure as ListTree, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { MarkdownTocItem, MarkdownTocLevel } from './markdown-table-of-contents'

@@ -1,5 +1,9 @@
 import React from 'react'
-import { ExternalLink, Loader2, RefreshCw } from 'lucide-react'
+import {
+  ArrowSquareOut as ExternalLink,
+  SpinnerGap as Loader2,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import type { GitBranchCompareSummary, GitUpstreamStatus } from '../../../../shared/types'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'

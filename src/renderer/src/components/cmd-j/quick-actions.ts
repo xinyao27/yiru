@@ -1,5 +1,12 @@
-import { FileText, FolderPlus, Globe, Play, SquareTerminal, Trash2 } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import {
+  FileText,
+  FolderPlus,
+  Globe,
+  Play,
+  TerminalWindow as SquareTerminal,
+  Trash as Trash2
+} from '@phosphor-icons/react'
+import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import type { CmdJQuickActionAvailability, CmdJQuickActionContext } from './quick-action-context'
 import {
   getCurrentWorkspaceActionAvailability,
@@ -20,7 +27,7 @@ export type CmdJQuickAction = {
   kind: 'action'
   title: string
   description: string
-  icon: LucideIcon
+  icon: PhosphorIcon
   verbKeywords: string[]
   isAvailable: (ctx: CmdJQuickActionContext) => CmdJQuickActionAvailability
   run: (ctx: CmdJQuickActionContext) => Promise<CmdJQuickActionRunResult>

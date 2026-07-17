@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { ChevronDown, Send, X } from 'lucide-react'
+import { CaretDown as ChevronDown, PaperPlaneRight as Send, X } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/utils'
 

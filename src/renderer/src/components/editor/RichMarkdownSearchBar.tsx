@@ -1,14 +1,14 @@
 import React from 'react'
 import {
-  CaseSensitive,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  Replace,
-  ReplaceAll,
-  WholeWord,
+  TextAa as CaseSensitive,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  CaretUp as ChevronUp,
+  Swap as Replace,
+  ArrowsClockwise as ReplaceAll,
+  BracketsSquare as WholeWord,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { translate } from '@/i18n/i18n'

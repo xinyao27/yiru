@@ -24,14 +24,14 @@ import rehypeSlug from 'rehype-slug'
 import { extractFrontMatter } from './markdown-frontmatter'
 import {
   Check,
-  ChevronDown,
-  ChevronUp,
+  CaretDown as ChevronDown,
+  CaretUp as ChevronUp,
   Copy,
-  CornerDownLeft,
-  MessageSquare,
+  ArrowElbowDownLeft as CornerDownLeft,
+  Chat as MessageSquare,
   Plus,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import type { Components } from 'react-markdown'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

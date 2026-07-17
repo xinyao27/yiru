@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Terminal } from 'lucide-react'
+import { Terminal } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useSkillFreshness } from '@/hooks/useSkillFreshness'
 import { translate } from '@/i18n/i18n'

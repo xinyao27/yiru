@@ -1,4 +1,4 @@
-import { CornerDownLeft, Pencil, Trash } from 'lucide-react'
+import { ArrowElbowDownLeft as CornerDownLeft, Pencil, Trash } from '@phosphor-icons/react'
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { getDiffCommentLineLabel } from '@/lib/diff-comment-compat'

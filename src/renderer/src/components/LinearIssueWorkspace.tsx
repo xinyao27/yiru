@@ -6,18 +6,18 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowRight,
   Check,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
+  CaretDown as ChevronDown,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
   Clipboard,
-  FolderKanban,
+  FolderSimple as FolderKanban,
   GitBranch,
   Link,
-  LoaderCircle,
+  CircleNotch as LoaderCircle,
   Plus,
-  RefreshCw,
+  ArrowClockwise as RefreshCw,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 import { LinearIcon } from '@/components/icons/LinearIcon'

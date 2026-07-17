@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeSlash as EyeOff } from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import {
   Dialog,

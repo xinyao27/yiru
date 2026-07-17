@@ -1,4 +1,4 @@
-import { Loader2, Lock } from 'lucide-react'
+import { SpinnerGap as Loader2, Lock } from '@phosphor-icons/react'
 import { Button } from '../ui/button'
 import {
   Dialog,

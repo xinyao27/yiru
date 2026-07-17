@@ -3,15 +3,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ArrowRight,
-  ChevronDown,
-  ExternalLink,
+  CaretDown as ChevronDown,
+  ArrowSquareOut as ExternalLink,
   Gauge,
-  LoaderCircle,
-  Send,
+  CircleNotch as LoaderCircle,
+  PaperPlaneRight as Send,
   Tag,
-  UserRound,
+  User as UserRound,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'

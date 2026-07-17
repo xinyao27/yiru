@@ -1,5 +1,12 @@
 import { useEffect, useMemo } from 'react'
-import { Activity, CalendarDays, Coins, DatabaseZap, RefreshCw, Sparkles } from 'lucide-react'
+import {
+  ActivityIcon as Activity,
+  CalendarBlank as CalendarDays,
+  Coins,
+  Database as DatabaseZap,
+  ArrowClockwise as RefreshCw,
+  Sparkle as Sparkles
+} from '@phosphor-icons/react'
 import { useAppStore } from '../../store'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'

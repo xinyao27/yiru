@@ -1,5 +1,5 @@
 import type React from 'react'
-import { ChevronRight } from 'lucide-react'
+import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
 type AppearanceSectionProps = {

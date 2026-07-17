@@ -1,6 +1,6 @@
 import React from 'react'
 import { createPortal } from 'react-dom'
-import { Copy } from 'lucide-react'
+import { Copy } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 
 type SelectedTextCopyMenuProps = {

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { BarChart3, EyeOff } from 'lucide-react'
+import { ChartBar as BarChart3, EyeSlash as EyeOff } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

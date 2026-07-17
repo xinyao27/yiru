@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server'
-import { Bot, Mic, Network } from 'lucide-react'
+import { Robot as Bot, Microphone as Mic, Network } from '@phosphor-icons/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDefaultSettings } from '../../../../shared/constants'
 import { SettingsSidebar } from './SettingsSidebar'

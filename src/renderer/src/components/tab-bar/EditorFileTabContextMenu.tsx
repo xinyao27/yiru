@@ -1,14 +1,14 @@
 import {
   Copy,
-  ExternalLink,
+  ArrowSquareOut as ExternalLink,
   Eye,
-  ListX,
-  PanelRightClose,
+  List as ListX,
+  Sidebar as PanelRightClose,
   Pencil,
-  Pin,
-  PinOff,
+  PushPin as Pin,
+  PushPinSlash as PinOff,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -11,7 +11,7 @@ import { getRepoExecutionHostId, type ExecutionHostId } from '../../../../shared
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Separator } from '../ui/separator'
-import { Trash2 } from 'lucide-react'
+import { Trash as Trash2 } from '@phosphor-icons/react'
 import { useShallow } from 'zustand/react/shallow'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { RepositoryHooksSection } from './RepositoryHooksSection'

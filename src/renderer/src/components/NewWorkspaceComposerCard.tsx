@@ -5,19 +5,19 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
-  AlertTriangle,
+  Warning as AlertTriangle,
   Check,
-  ChevronDown,
-  ChevronRight,
-  ChevronsUpDown,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  CaretUpDown as ChevronsUpDown,
   Cloud,
-  CornerDownLeft,
+  ArrowElbowDownLeft as CornerDownLeft,
   FolderPlus,
-  LoaderCircle,
-  PlugZap,
-  Settings2,
-  Server
-} from 'lucide-react'
+  CircleNotch as LoaderCircle,
+  PlugCharging as PlugZap,
+  GearSix as Settings2,
+  HardDrives as Server
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'

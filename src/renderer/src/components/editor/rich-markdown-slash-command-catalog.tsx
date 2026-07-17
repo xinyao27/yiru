@@ -1,14 +1,14 @@
 import type {} from '@tiptap/extension-mathematics'
 import {
-  ChevronRight,
+  CaretRight as ChevronRight,
   ImageIcon,
   List,
-  ListOrdered,
-  Quote,
+  ListNumbers as ListOrdered,
+  Quotes as Quote,
   Sigma,
-  Table2,
-  Workflow
-} from 'lucide-react'
+  Table as Table2,
+  FlowArrow as Workflow
+} from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 
 import {

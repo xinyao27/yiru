@@ -94,7 +94,7 @@ This keeps light/dark parity automatic.
 
 ## Radius
 
-`--radius: 0.625rem` (10px) is the base; the rest are computed (`--radius-sm` = 0.6×, `--radius-md` = 0.8×, `--radius-lg` = 1×, `--radius-xl` = 1.4×, etc.). Buttons and inputs use `rounded-md`; the `Card` primitive uses `rounded-xl`; badges use `rounded-full`. Match the existing primitive's radius rather than introducing a new one.
+Orca is fully rectilinear: `--radius: 0`, and every rendered element is held to `border-radius: 0`. This global rule intentionally covers legacy `rounded-*` utilities, arbitrary and inline values, pseudo-elements, and third-party components that do not use the token. New code must not introduce corner rounding; badges, status markers, avatars, buttons, inputs, cards, floating surfaces, and scrollbars all stay square.
 
 ## Elevation & shadows
 
@@ -180,14 +180,14 @@ Tooltips exist to _name_ a control whose meaning isn't obvious from its appearan
 
 ### Icons
 
-Icons come from **`lucide-react`**. Don't import a second icon library.
+Icons come from **`@phosphor-icons/react`**. Don't import a second icon library.
 
 - **Default size:** `size-4` (16px). `Button` auto-applies this to any `<svg>` it contains via `[&_svg:not([class*='size-'])]:size-4`, so most call sites don't need to set a size on the icon.
 - **`size-3` / `size-3.5`:** for metadata, captions, and dense list rows where 16px is too loud.
 - **`size-7`+:** for featured/empty-state hero icons only.
-- **Stroke width:** lucide's default 2px. Don't override per-icon.
+- **Weight:** use Phosphor's default `regular` weight. Don't override per-icon.
 - **Color:** inherit from surrounding text — `text-muted-foreground` for secondary, `text-destructive` for destructive, etc. Don't apply a token to the SVG directly when the parent already carries the right color.
-- **Spinner:** the canonical loading icon is `<Loader2 className="size-4 animate-spin" />`. For 3s+ multi-step work, prefer a label that names the stage ("Cloning…" → "Installing…") over an unlabeled spinner. See _UX rule 1_.
+- **Spinner:** the canonical loading icon is `<SpinnerGap className="size-4 animate-spin" />`. For 3s+ multi-step work, prefer a label that names the stage ("Cloning…" → "Installing…") over an unlabeled spinner. See _UX rule 1_.
 
 ### Keyboard shortcut chips
 

@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react'
+import { Sparkle as Sparkles } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'

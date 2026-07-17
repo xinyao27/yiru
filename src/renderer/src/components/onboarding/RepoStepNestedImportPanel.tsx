@@ -1,4 +1,9 @@
-import { ArrowLeft, CircleStop, FolderOpen, Loader2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  StopCircle as CircleStop,
+  FolderOpen,
+  SpinnerGap as Loader2
+} from '@phosphor-icons/react'
 import type { Dispatch, SetStateAction } from 'react'
 import { Button } from '@/components/ui/button'
 import { NestedRepoChecklist } from '@/components/repo/NestedRepoChecklist'

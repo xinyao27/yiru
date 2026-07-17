@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { JSX } from 'react'
-import { GitBranch, Sparkles } from 'lucide-react'
+import { GitBranch, Sparkle as Sparkles } from '@phosphor-icons/react'
 import {
   ArrowUpIcon,
   CheckTinyIcon,

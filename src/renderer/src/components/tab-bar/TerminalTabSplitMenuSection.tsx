@@ -6,7 +6,11 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger
 } from '@/components/ui/dropdown-menu'
-import { PanelBottomClose, PanelRightClose, SquareTerminal } from 'lucide-react'
+import {
+  Layout as PanelBottomClose,
+  Sidebar as PanelRightClose,
+  TerminalWindow as SquareTerminal
+} from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { TabWorkspaceLayoutMenuSection } from './TabWorkspaceLayoutMenuSection'
 import { requestActiveTerminalPaneSplit } from './request-active-terminal-pane-split'

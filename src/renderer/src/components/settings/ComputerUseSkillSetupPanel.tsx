@@ -1,4 +1,4 @@
-import { MonitorCog } from 'lucide-react'
+import { Monitor as MonitorCog } from '@phosphor-icons/react'
 import {
   COMPUTER_USE_SKILL_INSTALL_COMMAND,
   COMPUTER_USE_SKILL_NAME,

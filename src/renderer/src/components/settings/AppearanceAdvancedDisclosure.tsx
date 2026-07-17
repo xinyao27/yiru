@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useState } from 'react'
-import { ChevronRight } from 'lucide-react'
+import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '../../store'
 import { normalizeSettingsSearchQuery } from './settings-search'

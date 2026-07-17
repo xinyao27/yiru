@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Send, Sparkles } from 'lucide-react'
+import { PaperPlaneRight as Send, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import type { AgentSendPopoverTargetMode } from '@/store/slices/ui'
 import {

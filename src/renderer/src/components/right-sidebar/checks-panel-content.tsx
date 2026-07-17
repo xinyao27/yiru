@@ -2,31 +2,31 @@
 and threaded PR comments still share tightly coupled selection and composer state. */
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  CircleCheck,
-  CircleX,
-  LoaderCircle,
+  CheckCircle as CircleCheck,
+  XCircle as CircleX,
+  CircleNotch as LoaderCircle,
   CircleDashed,
   GitPullRequest,
   Files,
   Copy,
   Check,
-  MessageSquare,
+  Chat as MessageSquare,
   Plus,
-  ChevronDown,
-  ChevronRight,
-  PanelRight,
-  SendHorizontal,
-  Sparkles,
-  RefreshCw,
-  AlertTriangle,
-  Bot,
-  MoreHorizontal,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  Sidebar as PanelRight,
+  PaperPlaneTilt as SendHorizontal,
+  Sparkle as Sparkles,
+  ArrowClockwise as RefreshCw,
+  Warning as AlertTriangle,
+  Robot as Bot,
+  DotsThree as MoreHorizontal,
   Pencil,
   SlidersHorizontal,
   Trash,
   X
-} from 'lucide-react'
-import { ExternalLink } from 'lucide-react'
+} from '@phosphor-icons/react'
+import { ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

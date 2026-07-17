@@ -1,8 +1,8 @@
 import type { ComponentType } from 'react'
-import type { LucideProps } from 'lucide-react'
+import type { IconProps } from '@phosphor-icons/react'
 import type { SettingsSearchEntry } from '@/components/settings/settings-search'
 
-export type SettingsNavIcon = ComponentType<LucideProps>
+export type SettingsNavIcon = ComponentType<IconProps>
 export type SettingsNavInstallStatus =
   | 'install'
   | 'installed'

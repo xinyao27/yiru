@@ -1,5 +1,5 @@
 import React from 'react'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { isIterationCurrent, type ProjectGroup } from '../../../../shared/github-project-group-sort'
 import { translate } from '@/i18n/i18n'

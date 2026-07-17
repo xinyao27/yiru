@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, X } from 'lucide-react'
+import { Plus, X } from '@phosphor-icons/react'
 import type { ExecutionHostId } from '../../../../shared/execution-host'
 import type {
   ProjectHostSetup,

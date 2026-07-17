@@ -1,5 +1,5 @@
 import React from 'react'
-import { GitFork } from 'lucide-react'
+import { GitFork } from '@phosphor-icons/react'
 import type { GitHubRepositoryIdentity } from '../../../../shared/types'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { cn } from '@/lib/utils'

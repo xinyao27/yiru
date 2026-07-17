@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { FolderOpen, Globe, Monitor, Plus } from 'lucide-react'
+import { FolderOpen, Globe, Monitor, Plus } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 
 export type AddRepoLocalStartActionHandlers = {

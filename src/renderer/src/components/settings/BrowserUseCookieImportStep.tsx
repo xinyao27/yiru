@@ -1,4 +1,4 @@
-import { Import, Loader2 } from 'lucide-react'
+import { DownloadSimple as Import, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'

@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, Copy, RefreshCw } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Copy, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { cn } from '../../lib/utils'
 import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
 import { NetworkInterfacePicker } from './NetworkInterfacePicker'

@@ -1,5 +1,10 @@
 import React from 'react'
-import { Ellipsis, ListCollapse, Loader2, RefreshCw } from 'lucide-react'
+import {
+  DotsThree as Ellipsis,
+  ListDashes as ListCollapse,
+  SpinnerGap as Loader2,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

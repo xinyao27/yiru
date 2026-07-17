@@ -1,5 +1,11 @@
 import type { PtyManagementSession } from '../../../../preload/api-types'
-import { LoaderCircle, RefreshCw, RotateCw, Trash2, X } from 'lucide-react'
+import {
+  CircleNotch as LoaderCircle,
+  ArrowClockwise as RefreshCw,
+  ArrowClockwise as RotateCw,
+  Trash as Trash2,
+  X
+} from '@phosphor-icons/react'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { formatState, formatWorkspace } from './manage-sessions-format'

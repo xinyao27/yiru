@@ -1,34 +1,34 @@
 /* eslint-disable max-lines */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowDownUp,
-  AlertTriangle,
+  ArrowsDownUp as ArrowDownUp,
+  Warning as AlertTriangle,
   ArrowUp,
-  ChevronDown,
-  CloudUpload,
+  CaretDown as ChevronDown,
+  CloudArrowUp as CloudUpload,
   Minus,
   Plus,
-  Loader2,
-  RefreshCw,
-  Settings2,
-  Sparkles,
+  SpinnerGap as Loader2,
+  ArrowClockwise as RefreshCw,
+  GearSix as Settings2,
+  Sparkle as Sparkles,
   Square,
-  Undo2,
+  ArrowCounterClockwise as Undo2,
   Check,
   Copy,
   Folder,
   FolderOpen,
   GitFork,
   GitMerge,
-  GitPullRequestArrow,
-  MessageSquare,
+  GitPullRequest as GitPullRequestArrow,
+  Chat as MessageSquare,
   Trash,
-  Trash2,
-  TriangleAlert,
-  CircleCheck,
-  MoreHorizontal,
-  type LucideIcon
-} from 'lucide-react'
+  Trash as Trash2,
+  Warning as TriangleAlert,
+  CheckCircle as CircleCheck,
+  DotsThree as MoreHorizontal,
+  type Icon as PhosphorIcon
+} from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffCommentsOrEmpty } from '@/store/worktree-diff-comments-selector'
 import {
@@ -7224,7 +7224,7 @@ export function CompareSummaryToolbarButton({
   label,
   onClick
 }: {
-  icon: LucideIcon
+  icon: PhosphorIcon
   label: string
   onClick: () => void
 }): React.JSX.Element {

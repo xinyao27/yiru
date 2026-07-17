@@ -360,8 +360,6 @@ export const LOCALE_VALUE_OVERRIDES = {
     "Couldn't load issues from": '无法加载议题，来源',
     'Reading issue #': '阅读议题 #',
     'Connect Linear in Settings to search issues.': '在设置中连接 Linear 以搜索议题。',
-    'Show Titlebar App Name': '显示标题栏应用名称',
-    'Hide App Name': '隐藏应用名称',
     'Refresh Linear': '刷新 Linear',
     'Failed to update Linear state': '无法更新 Linear 状态',
     'Add Linear access to browse and link issues.': '添加 Linear 访问以浏览和链接议题。',

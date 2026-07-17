@@ -18,7 +18,7 @@ import {
 } from './worktree-meta-updates'
 import { useWorktreeIssueLink } from './use-worktree-issue-link'
 import { getScreenSubmitShortcutLabel, isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
-import { ExternalLink, LoaderCircle } from 'lucide-react'
+import { ArrowSquareOut as ExternalLink, CircleNotch as LoaderCircle } from '@phosphor-icons/react'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { translate } from '@/i18n/i18n'
 

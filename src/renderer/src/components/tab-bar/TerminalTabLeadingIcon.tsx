@@ -50,11 +50,11 @@ function TerminalTabAgentIdentityIcon({
 }: TerminalTabAgentIdentityIconProps): React.JSX.Element {
   return (
     <span
-      className={cn('inline-flex', !isActive && 'opacity-70', className)}
+      className={cn('inline-flex size-4 [&>*]:size-full', !isActive && 'opacity-70', className)}
       data-agent-icon={agent}
       aria-hidden
     >
-      <AgentIcon agent={agent} size={12} />
+      <AgentIcon agent={agent} />
     </span>
   )
 }
@@ -77,7 +77,7 @@ export function TerminalTabLeadingIcon({
         )}
         className="mr-1 inline-flex shrink-0 items-center gap-1"
       >
-        <FilledBellIcon className="size-3 text-amber-500 drop-shadow-sm" />
+        <FilledBellIcon className="size-4 text-amber-500 drop-shadow-sm" />
         {agent ? <TerminalTabAgentIdentityIcon agent={agent} isActive={isActive} /> : null}
       </span>
     )
@@ -109,11 +109,11 @@ export function TerminalTabLeadingIcon({
   // Git Bash, and WSL while retaining the generic terminal fallback elsewhere.
   return (
     <span
-      className={`mr-1 inline-flex shrink-0 ${isActive ? '' : 'opacity-70'}`}
+      className={`mr-1 inline-flex size-4 shrink-0 [&>*]:size-full ${isActive ? '' : 'opacity-70'}`}
       data-shell-icon={shell ?? 'generic'}
       aria-hidden
     >
-      <ShellIcon shell={shell} size={12} />
+      <ShellIcon shell={shell} />
     </span>
   )
 }

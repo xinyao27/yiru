@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
-  Accessibility,
+  PersonArmsSpread as Accessibility,
   Bluetooth,
   Camera,
-  ExternalLink,
+  ArrowSquareOut as ExternalLink,
   HardDrive,
-  Mic,
-  MonitorUp,
+  Microphone as Mic,
+  MonitorArrowUp as MonitorUp,
   Network,
-  RefreshCw,
+  ArrowClockwise as RefreshCw,
   ShieldCheck,
   Usb,
-  Workflow
-} from 'lucide-react'
+  FlowArrow as Workflow
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type {
   DeveloperPermissionId,

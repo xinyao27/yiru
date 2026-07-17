@@ -1,5 +1,12 @@
 import React from 'react'
-import { Search as SearchIcon, CaseSensitive, WholeWord, Regex, X, Loader2 } from 'lucide-react'
+import {
+  MagnifyingGlass as SearchIcon,
+  TextAa as CaseSensitive,
+  BracketsSquare as WholeWord,
+  Asterisk as Regex,
+  X,
+  SpinnerGap as Loader2
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { ToggleButton } from './SearchResultItems'
 import { translate } from '@/i18n/i18n'

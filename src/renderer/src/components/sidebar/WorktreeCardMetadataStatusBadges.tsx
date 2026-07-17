@@ -1,6 +1,12 @@
 import React from 'react'
 import { Badge } from '@/components/ui/badge'
-import { CircleCheck, CircleDot, CircleX, Clock, GitMerge } from 'lucide-react'
+import {
+  CheckCircle as CircleCheck,
+  Circle as CircleDot,
+  XCircle as CircleX,
+  Clock,
+  GitMerge
+} from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { PullRequestIcon, checksLabel } from './WorktreeCardHelpers'
 import type { WorktreeCardPrDisplay } from './worktree-card-pr-display'

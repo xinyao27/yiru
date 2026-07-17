@@ -1,12 +1,12 @@
 import type React from 'react'
 import {
-  AlertTriangle,
-  CircleCheck,
+  CheckCircle as CircleCheck,
   CircleDashed,
-  CircleMinus,
-  CircleX,
-  LoaderCircle
-} from 'lucide-react'
+  CircleNotch as LoaderCircle,
+  MinusCircle as CircleMinus,
+  Warning as AlertTriangle,
+  XCircle as CircleX
+} from '@phosphor-icons/react'
 
 export const CHECK_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
   success: CircleCheck,

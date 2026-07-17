@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Gauge, RefreshCw } from 'lucide-react'
+import { Gauge, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
 import { useAppStore } from '@/store'

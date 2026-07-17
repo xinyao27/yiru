@@ -1,5 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { Plug, ChevronDown, ChevronRight, LoaderCircle } from 'lucide-react'
+import {
+  Plug,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  CircleNotch as LoaderCircle
+} from '@phosphor-icons/react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAppStore } from '@/store'

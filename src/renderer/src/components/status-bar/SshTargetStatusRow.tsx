@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { AlertTriangle, Cloud, Loader2 } from 'lucide-react'
+import { Warning as AlertTriangle, Cloud, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
 import { useMountedRef } from '@/hooks/useMountedRef'

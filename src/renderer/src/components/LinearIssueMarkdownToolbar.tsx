@@ -2,19 +2,19 @@ import React, { useCallback } from 'react'
 import type { Editor } from '@tiptap/react'
 import { useTranslation } from 'react-i18next'
 import {
-  Bold,
+  TextB as Bold,
   Code,
-  Heading1,
-  Heading2,
-  Italic,
+  TextHOne as Heading1,
+  TextHTwo as Heading2,
+  TextItalic as Italic,
   Link as LinkIcon,
   List,
-  ListOrdered,
-  ListTodo,
-  Pilcrow,
-  Quote,
-  Strikethrough
-} from 'lucide-react'
+  ListNumbers as ListOrdered,
+  ListChecks as ListTodo,
+  Paragraph as Pilcrow,
+  Quotes as Quote,
+  TextStrikethrough as Strikethrough
+} from '@phosphor-icons/react'
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'

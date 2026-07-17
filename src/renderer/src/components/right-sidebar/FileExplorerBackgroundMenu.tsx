@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { FilePlus, FolderPlus } from 'lucide-react'
+import { FilePlus, FolderPlus } from '@phosphor-icons/react'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '@/components/tab-bar/SortableTab'
 import {
   DropdownMenu,

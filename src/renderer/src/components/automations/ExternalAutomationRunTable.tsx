@@ -1,6 +1,12 @@
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: run rows are fetched from the external automation store; the loading state tracks that async request lifecycle. */
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { AlertCircle, ChevronLeft, ChevronRight, FileText, Loader2 } from 'lucide-react'
+import {
+  WarningCircle as AlertCircle,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  FileText,
+  SpinnerGap as Loader2
+} from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

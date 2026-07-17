@@ -1,5 +1,10 @@
 import React from 'react'
-import { ChevronDown, Folder, FolderOpen, PanelLeftClose } from 'lucide-react'
+import {
+  CaretDown as ChevronDown,
+  Folder,
+  FolderOpen,
+  SidebarSimple as PanelLeftClose
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
 import { cn } from '@/lib/utils'

@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'

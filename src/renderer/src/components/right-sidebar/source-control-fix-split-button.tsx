@@ -1,5 +1,10 @@
 import React, { useState } from 'react'
-import { ChevronDown, RefreshCw, SlidersHorizontal, Sparkle } from 'lucide-react'
+import {
+  CaretDown as ChevronDown,
+  ArrowClockwise as RefreshCw,
+  SlidersHorizontal,
+  Sparkle
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

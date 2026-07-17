@@ -7,24 +7,24 @@ import {
 } from '@tanstack/react-virtual'
 import type { Range } from '@tanstack/react-virtual'
 import {
-  AlertTriangle,
-  ChevronDown,
-  CircleX,
-  Ellipsis,
+  Warning as AlertTriangle,
+  CaretDown as ChevronDown,
+  XCircle as CircleX,
+  DotsThree as Ellipsis,
   Eye,
-  FolderInput,
+  FolderOpen as FolderInput,
   FolderPlus,
-  FolderX,
-  Globe2,
-  Loader2,
-  LockKeyhole,
+  FolderMinus as FolderX,
+  Globe as Globe2,
+  SpinnerGap as Loader2,
+  LockKey as LockKeyhole,
   Plus,
-  Server,
-  ServerOff,
+  HardDrives as Server,
+  HardDrive as ServerOff,
   Shapes,
   SlidersHorizontal,
-  Trash2
-} from 'lucide-react'
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { useShallow } from 'zustand/react/shallow'
 import type { AppState } from '@/store/types'

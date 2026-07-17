@@ -5,34 +5,34 @@ import { useTranslation } from 'react-i18next'
 // Cmd+J and Settings visibility cannot drift. Keep it free of Settings pane UI
 // imports; the boundary is enforced by a focused architecture test.
 import {
-  BarChart3,
+  ChartBar as BarChart3,
   Bell,
-  Blocks,
-  Bot,
+  Stack as Blocks,
+  Robot as Bot,
   Bug,
-  Cable,
-  FlaskConical,
+  PlugsConnected as Cable,
+  Flask as FlaskConical,
   GitBranch,
   Globe,
   Keyboard,
   ListChecks,
   Lock,
-  Mic,
-  MousePointerClick,
+  Microphone as Mic,
+  CursorClick as MousePointerClick,
   Network,
   Palette,
-  PanelsTopLeft,
+  Layout as PanelsTopLeft,
   Play,
-  Server,
+  HardDrives as Server,
   ShieldCheck,
   SlidersHorizontal,
-  Smartphone,
-  TabletSmartphone,
-  SquareTerminal,
-  TextCursorInput,
-  UserCog,
+  DeviceMobile as Smartphone,
+  Devices as TabletSmartphone,
+  TerminalWindow as SquareTerminal,
+  CursorText as TextCursorInput,
+  UserGear as UserCog,
   Wrench
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { YiruLogoSettingsIcon } from '@/components/settings/yiru-logo-settings-icon'
 import type { Repo } from '../../../shared/types'
 import { getRepoKindLabel } from '../../../shared/repo-kind'

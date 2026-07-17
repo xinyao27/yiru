@@ -1,5 +1,5 @@
 import React from 'react'
-import { Check, PackageOpen, Trash2, Upload } from 'lucide-react'
+import { Check, Package as PackageOpen, Trash as Trash2, Upload } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import {
   DropdownMenu,

@@ -10,6 +10,10 @@ When writing or modifying code driven by a design doc or non-obvious constraint,
 
 Keep comments short — one or two lines. Capture only the non-obvious reason (safety constraint, compatibility shim, design-doc rule). Don't restate what the code does, narrate the mechanism, cite design-doc sections verbatim, or explain adjacent API choices unless they're the point.
 
+## Tests: Add Sparingly
+
+Add or modify tests only after carefully judging their value; do not write tests by default for low-risk changes.
+
 ## Lint Rules: Do Not Disable Max Lines
 
 Never add a `max-lines` disable (`eslint-disable max-lines`, `oxlint-disable max-lines`, or line-specific variants), and never add a per-file `max-lines` bump in `mobile/.oxlintrc.json`.

@@ -1,5 +1,10 @@
 import React from 'react'
-import { EyeOff, Github, Gitlab, List } from 'lucide-react'
+import {
+  EyeSlash as EyeOff,
+  GithubLogo as Github,
+  GitlabLogo as Gitlab,
+  List
+} from '@phosphor-icons/react'
 import { JiraIcon } from '@/components/icons/JiraIcon'
 import { LinearIcon } from '@/components/icons/LinearIcon'
 import {

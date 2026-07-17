@@ -1,5 +1,5 @@
 import React from 'react'
-import { AlertTriangle, RotateCw } from 'lucide-react'
+import { Warning as AlertTriangle, ArrowClockwise as RotateCw } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { isLazyChunkLoadError } from '@/lib/lazy-with-retry'

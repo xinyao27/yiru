@@ -6,7 +6,13 @@ import {
   useSyncExternalStore,
   type KeyboardEvent
 } from 'react'
-import { AlertTriangle, CheckCircle2, ChevronDown, Loader2, RefreshCw } from 'lucide-react'
+import {
+  Warning as AlertTriangle,
+  CheckCircle as CheckCircle2,
+  CaretDown as ChevronDown,
+  SpinnerGap as Loader2,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import type { SkillFreshnessInventory } from '../../../../shared/skill-freshness'
 import { buildTargetedSkillUpdateCommand } from '../../../../shared/skill-freshness'
 import { useSkillFreshness } from '@/hooks/useSkillFreshness'

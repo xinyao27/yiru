@@ -1,4 +1,4 @@
-import { AlertCircle } from 'lucide-react'
+import { WarningCircle as AlertCircle } from '@phosphor-icons/react'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import {

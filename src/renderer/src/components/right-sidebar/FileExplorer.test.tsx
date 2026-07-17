@@ -1,6 +1,11 @@
 /* eslint-disable max-lines -- File Explorer toolbar and row tests share element-walking fixtures. */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { Ellipsis, ListCollapse, Loader2, RefreshCw } from 'lucide-react'
+import {
+  DotsThree as Ellipsis,
+  ListDashes as ListCollapse,
+  SpinnerGap as Loader2,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu'
 import { WorktreeOpenInMenuItems } from '@/components/sidebar/WorktreeOpenInMenu'

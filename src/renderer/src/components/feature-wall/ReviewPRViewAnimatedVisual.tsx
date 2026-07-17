@@ -1,6 +1,12 @@
 import { useRef } from 'react'
 import type { ComponentType, JSX, ReactNode } from 'react'
-import { Files, GitBranch, ListChecks, MessageSquare, Search } from 'lucide-react'
+import {
+  Files,
+  GitBranch,
+  ListChecks,
+  Chat as MessageSquare,
+  MagnifyingGlass as Search
+} from '@phosphor-icons/react'
 import { useShortcutLabel } from '@/hooks/useShortcutLabel'
 import { ReviewPRViewVisualStyles } from './review-animated-visual-pr-view-styles'
 import { CheckTinyIcon, ChevDownIcon, CursorIcon } from './review-animated-visual-shared'

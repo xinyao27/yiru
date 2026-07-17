@@ -2,16 +2,16 @@
    server selection, saved server mutation, and confirmation dialogs together so
    the state transitions stay auditable. */
 import {
-  AlertTriangle,
-  ChevronDown,
-  Loader2,
+  Warning as AlertTriangle,
+  CaretDown as ChevronDown,
+  SpinnerGap as Loader2,
   Plus,
-  RefreshCw,
-  Server,
-  ServerOff,
-  Share2,
-  Trash2
-} from 'lucide-react'
+  ArrowClockwise as RefreshCw,
+  HardDrives as Server,
+  HardDrive as ServerOff,
+  ShareNetwork as Share2,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useMountedRef } from '@/hooks/useMountedRef'

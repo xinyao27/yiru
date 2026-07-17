@@ -35,7 +35,7 @@ vi.mock('@/components/ui/dropdown-menu', () => ({
   }
 }))
 
-vi.mock('lucide-react', () => ({
+vi.mock('@phosphor-icons/react', () => ({
   ArrowDown: function ArrowDown(props: Record<string, unknown>) {
     return { type: 'ArrowDown', props }
   },
@@ -51,31 +51,31 @@ vi.mock('lucide-react', () => ({
   Copy: function Copy(props: Record<string, unknown>) {
     return { type: 'Copy', props }
   },
-  ExternalLink: function ExternalLink(props: Record<string, unknown>) {
+  ArrowSquareOut: function ExternalLink(props: Record<string, unknown>) {
     return { type: 'ExternalLink', props }
   },
   Eye: function Eye(props: Record<string, unknown>) {
     return { type: 'Eye', props }
   },
-  ListX: function ListX(props: Record<string, unknown>) {
+  List: function ListX(props: Record<string, unknown>) {
     return { type: 'ListX', props }
   },
-  PanelRightClose: function PanelRightClose(props: Record<string, unknown>) {
+  Sidebar: function PanelRightClose(props: Record<string, unknown>) {
     return { type: 'PanelRightClose', props }
   },
-  Columns2: function Columns2(props: Record<string, unknown>) {
+  Columns: function Columns2(props: Record<string, unknown>) {
     return { type: 'Columns2', props }
   },
-  Rows2: function Rows2(props: Record<string, unknown>) {
+  Rows: function Rows2(props: Record<string, unknown>) {
     return { type: 'Rows2', props }
   },
   Pencil: function Pencil(props: Record<string, unknown>) {
     return { type: 'Pencil', props }
   },
-  Pin: function Pin(props: Record<string, unknown>) {
+  PushPin: function Pin(props: Record<string, unknown>) {
     return { type: 'Pin', props }
   },
-  PinOff: function PinOff(props: Record<string, unknown>) {
+  PushPinSlash: function PinOff(props: Record<string, unknown>) {
     return { type: 'PinOff', props }
   },
   X: function X(props: Record<string, unknown>) {

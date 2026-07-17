@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Check, ExternalLink, HardDrive, Loader2 } from 'lucide-react'
+import {
+  Check,
+  ArrowSquareOut as ExternalLink,
+  HardDrive,
+  SpinnerGap as Loader2
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type {
   DeveloperPermissionId,

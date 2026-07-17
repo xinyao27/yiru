@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ChevronRight, X } from 'lucide-react'
+import { CaretRight as ChevronRight, X } from '@phosphor-icons/react'
 
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react'
-import { Check, Copy, Maximize2 } from 'lucide-react'
+import { Check, Copy, ArrowsOut as Maximize2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Button } from '../ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'

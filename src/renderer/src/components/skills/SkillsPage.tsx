@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, BookOpen, Clock, FolderOpen, Loader2, RefreshCw, Search } from 'lucide-react'
+import {
+  ArrowLeft,
+  BookOpen,
+  Clock,
+  FolderOpen,
+  ArrowClockwise as RefreshCw,
+  MagnifyingGlass as Search
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -23,6 +30,7 @@ import type {
   SkillSourceKind
 } from '../../../../shared/skills'
 import { countSkillsBySource, filterSkills, type SkillsFilterState } from './skills-filter'
+import { SkillsEmptyState } from './SkillsEmptyState'
 import { translate } from '@/i18n/i18n'
 
 const providerLabels: Record<SkillProvider, string> = {
@@ -141,57 +149,6 @@ function SkillCard({ skill }: { skill: DiscoveredSkill }): React.JSX.Element {
         </div>
       </CardContent>
     </Card>
-  )
-}
-
-function EmptyState({
-  loading,
-  hasSkills,
-  onRefresh
-}: {
-  loading: boolean
-  hasSkills: boolean
-  onRefresh: () => void
-}): React.JSX.Element {
-  return (
-    <div className="flex flex-1 items-center justify-center p-8">
-      <div className="flex max-w-sm flex-col items-center gap-3 text-center">
-        {loading ? (
-          <Loader2 className="size-7 animate-spin text-muted-foreground" />
-        ) : (
-          <BookOpen className="size-7 text-muted-foreground" />
-        )}
-        <div className="space-y-1">
-          <h3 className="text-sm font-semibold">
-            {loading
-              ? translate('auto.components.skills.SkillsPage.cd7893fbc1', 'Scanning skills')
-              : hasSkills
-                ? translate('auto.components.skills.SkillsPage.6a62a0168c', 'No matches')
-                : translate(
-                    'auto.components.skills.SkillsPage.4acd6d68ec',
-                    'No local skills found'
-                  )}
-          </h3>
-          <p className="text-xs leading-5 text-muted-foreground">
-            {hasSkills
-              ? translate(
-                  'auto.components.skills.SkillsPage.08a321a984',
-                  'Adjust the search or filters.'
-                )
-              : translate(
-                  'auto.components.skills.SkillsPage.ab5b777350',
-                  'Checked local home, repository, bundled, and plugin skill folders.'
-                )}
-          </p>
-        </div>
-        {!loading ? (
-          <Button variant="outline" size="sm" onClick={onRefresh}>
-            <RefreshCw className="size-4" />
-            {translate('auto.components.skills.SkillsPage.cb142070b4', 'Refresh')}
-          </Button>
-        ) : null}
-      </div>
-    </div>
   )
 }
 
@@ -410,7 +367,7 @@ export default function SkillsPage(): React.JSX.Element {
             ))}
           </div>
         ) : (
-          <EmptyState
+          <SkillsEmptyState
             loading={loading}
             hasSkills={skills.length > 0}
             onRefresh={() => void loadSkills()}

@@ -19,18 +19,18 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import {
-  AlertCircle,
-  ArrowDownToLine,
-  ArrowUpToLine,
-  Braces,
-  FileCode2,
-  Loader2,
-  MoveDown,
-  MoveUp,
+  WarningCircle as AlertCircle,
+  ArrowLineDown as ArrowDownToLine,
+  ArrowLineUp as ArrowUpToLine,
+  BracketsCurly as Braces,
+  FileCode as FileCode2,
+  SpinnerGap as Loader2,
+  ArrowDown as MoveDown,
+  ArrowUp as MoveUp,
   Play,
-  Save,
-  Trash2
-} from 'lucide-react'
+  FloppyDisk as Save,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import { monaco } from '@/lib/monaco-setup'
 import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { getConnectionId } from '@/lib/connection-context'

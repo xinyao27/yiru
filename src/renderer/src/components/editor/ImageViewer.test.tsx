@@ -38,20 +38,20 @@ vi.mock('react', async () => {
   }
 })
 
-vi.mock('lucide-react', () => ({
+vi.mock('@phosphor-icons/react', () => ({
   Image: function Image(props: Record<string, unknown>) {
     return { type: 'Image', props }
   },
-  RotateCcw: function RotateCcw(props: Record<string, unknown>) {
+  ArrowCounterClockwise: function RotateCcw(props: Record<string, unknown>) {
     return { type: 'RotateCcw', props }
   },
   X: function X(props: Record<string, unknown>) {
     return { type: 'X', props }
   },
-  ZoomIn: function ZoomIn(props: Record<string, unknown>) {
+  MagnifyingGlassPlus: function ZoomIn(props: Record<string, unknown>) {
     return { type: 'ZoomIn', props }
   },
-  ZoomOut: function ZoomOut(props: Record<string, unknown>) {
+  MagnifyingGlassMinus: function ZoomOut(props: Record<string, unknown>) {
     return { type: 'ZoomOut', props }
   }
 }))

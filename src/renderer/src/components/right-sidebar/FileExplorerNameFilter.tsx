@@ -1,5 +1,5 @@
 import React from 'react'
-import { ListFilter, Loader2, X } from 'lucide-react'
+import { Funnel as ListFilter, SpinnerGap as Loader2, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

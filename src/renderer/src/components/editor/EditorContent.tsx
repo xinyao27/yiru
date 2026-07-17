@@ -6,7 +6,7 @@ renderers (MonacoEditor, DiffViewer, ChangesModeView, MarkdownPreview, etc.)
 already live in their own modules. */
 import React from 'react'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { WarningCircle as AlertCircle, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { detectLanguage } from '@/lib/language-detect'
 import { joinPath } from '@/lib/path'
 import { useAppStore } from '@/store'

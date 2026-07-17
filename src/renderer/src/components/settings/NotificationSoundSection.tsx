@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '../ui/select'
-import { FileAudio, Upload, Volume2 } from 'lucide-react'
+import { FileAudio, Upload, SpeakerHigh as Volume2 } from '@phosphor-icons/react'
 import { getNotificationSoundOptions } from '@/components/notification-sound-options'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { translate } from '@/i18n/i18n'

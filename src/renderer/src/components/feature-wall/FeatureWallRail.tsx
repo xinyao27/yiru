@@ -1,5 +1,5 @@
 import type { JSX, KeyboardEvent } from 'react'
-import { Check } from 'lucide-react'
+import { Check } from '@phosphor-icons/react'
 import {
   FEATURE_WALL_WORKFLOWS,
   type FeatureWallWorkflow,

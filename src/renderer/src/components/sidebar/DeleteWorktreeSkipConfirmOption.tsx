@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { Check } from 'lucide-react'
+import { Check } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 
 export function DeleteWorktreeSkipConfirmOption({

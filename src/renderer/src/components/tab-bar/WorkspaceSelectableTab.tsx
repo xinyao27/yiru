@@ -1,10 +1,6 @@
 import type React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import {
-  ACTIVE_TAB_INDICATOR_CLASSES,
-  getTabRootStateClasses,
-  getTabStripBorderClasses
-} from './drop-indicator'
+import { getTabDividerClasses, getTabRootStateClasses } from './drop-indicator'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 
 type WorkspaceSelectableTabProps = {
@@ -37,11 +33,10 @@ export function WorkspaceSelectableTab({
         tabIndex={tabIndex}
         data-tab-id={id}
         data-active={active ? 'true' : 'false'}
-        className={`group relative flex h-full w-full cursor-pointer select-none items-center px-1.5 text-xs outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${getTabStripBorderClasses(hasTabsToRight)} ${getTabRootStateClasses(active)}`}
+        className={`group relative flex h-full w-full cursor-pointer select-none items-center px-1.5 text-xs outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${getTabDividerClasses(hasTabsToRight)} ${getTabRootStateClasses(active)}`}
         onClick={() => onSelect(id)}
       >
-        {active ? <span className={ACTIVE_TAB_INDICATOR_CLASSES} aria-hidden /> : null}
-        <span className="mr-1.5 flex size-3.5 shrink-0 items-center justify-center" aria-hidden>
+        <span className="mr-1.5 flex size-4 shrink-0 items-center justify-center" aria-hidden>
           {icon}
         </span>
         <Tooltip>

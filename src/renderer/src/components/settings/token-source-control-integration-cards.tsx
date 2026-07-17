@@ -1,4 +1,7 @@
-import { ExternalLink, GitPullRequestArrow } from 'lucide-react'
+import {
+  ArrowSquareOut as ExternalLink,
+  GitPullRequest as GitPullRequestArrow
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { IntegrationCardDetails, IntegrationCardShell } from './integration-card-shell'
 import { usePreflightCardStatuses } from './source-control-preflight-card-status'

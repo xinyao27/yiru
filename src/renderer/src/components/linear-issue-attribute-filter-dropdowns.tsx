@@ -1,7 +1,7 @@
 // Why: Linear Filters chrome mirrors GitHub PR filters — one outline button,
 // sectioned popover, removable pills — without encoding facets into free-text search.
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { ListFilter, X } from 'lucide-react'
+import { Funnel as ListFilter, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useTeamLabels, useTeamMembers, useTeamStates } from '@/hooks/useIssueMetadata'

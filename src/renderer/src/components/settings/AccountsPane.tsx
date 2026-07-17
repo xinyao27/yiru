@@ -17,18 +17,18 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { Separator } from '../ui/separator'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import {
-  AlertTriangle,
-  ExternalLink,
-  HelpCircle,
-  Loader2,
+  Warning as AlertTriangle,
+  ArrowSquareOut as ExternalLink,
+  Question as HelpCircle,
+  SpinnerGap as Loader2,
   Lock,
   LockOpen,
   Plus,
-  RefreshCw,
+  ArrowClockwise as RefreshCw,
   ShieldCheck,
-  Trash2,
+  Trash as Trash2,
   X
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { useAppStore } from '../../store'
 import {
   ClaudeIcon,

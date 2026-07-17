@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type JSX } from 'react'
-import { Mic } from 'lucide-react'
+import { Microphone as Mic } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { getDefaultVoiceSettings } from '../../../../shared/constants'
 import type { FeatureTip } from '../../../../shared/feature-tips'

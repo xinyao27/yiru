@@ -1,10 +1,9 @@
 import type React from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { TabStripScrollIndicator } from './TabStripScrollIndicator'
 import { useTabStripDragScrollHandlers } from './tab-strip-drag-scroll'
 import { useTabStripOverflowNavigation } from './tab-strip-overflow-navigation'
 import { getTabStripScrollMaskClassName } from './tab-strip-scroll-metrics'
@@ -63,14 +62,13 @@ export function WorkspaceTabStripViewport({
           {...stripProps}
           ref={tabStripRef}
           className={cn(
-            'terminal-tab-strip flex h-full min-w-0 max-w-full flex-1 items-stretch overflow-x-auto overflow-y-hidden border-r border-border/70',
+            'terminal-tab-strip flex h-full min-w-0 max-w-full flex-1 items-stretch overflow-x-auto overflow-y-hidden pl-1',
             getTabStripScrollMaskClassName(tabStripOverflowState),
             stripClassName
           )}
         >
           {children}
         </div>
-        <TabStripScrollIndicator metrics={tabStripOverflowState} />
       </div>
       {tabStripOverflowState.hasOverflow ? (
         <TabStripScrollButton
@@ -122,7 +120,7 @@ function TabStripScrollButton({
             onPointerEnter={onPointerEnter}
             onPointerLeave={onPointerLeave}
           >
-            <Icon className="size-3.5" />
+            <Icon className="size-4" />
           </Button>
         }
       />

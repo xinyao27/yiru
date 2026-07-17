@@ -1,4 +1,4 @@
-import { Pencil, Play, Trash2 } from 'lucide-react'
+import { Pencil, Play, Trash as Trash2 } from '@phosphor-icons/react'
 import { CommandItem } from '@/components/ui/command'
 import { isTerminalAgentQuickCommand } from '../../../../shared/terminal-quick-commands'
 import type { TerminalQuickCommand } from '../../../../shared/types'

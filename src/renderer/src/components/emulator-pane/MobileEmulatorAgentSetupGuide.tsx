@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
 import { Button } from '../ui/button'

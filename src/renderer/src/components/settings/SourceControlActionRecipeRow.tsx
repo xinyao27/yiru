@@ -1,4 +1,4 @@
-import { Terminal } from 'lucide-react'
+import { Terminal } from '@phosphor-icons/react'
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
 import type { CustomAgentId } from '../../../../shared/commit-message-agent-spec'
 import { CUSTOM_AGENT_ID, isCustomAgentId } from '../../../../shared/commit-message-agent-spec'

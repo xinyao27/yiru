@@ -1,6 +1,10 @@
 import type React from 'react'
 import { useLayoutEffect, useState } from 'react'
-import { AppWindow, PanelLeft, TerminalSquare } from 'lucide-react'
+import {
+  AppWindow,
+  SidebarSimple as PanelLeft,
+  TerminalWindow as TerminalSquare
+} from '@phosphor-icons/react'
 
 import type { GlobalSettings } from '../../../../shared/types'
 
@@ -21,7 +25,6 @@ import {
   getStatusBarEntries,
   getSystemTrayEntries,
   getThemeEntries,
-  getTitlebarEntries,
   getTypographyEntries,
   getZoomEntries
 } from './appearance-search'
@@ -135,7 +138,6 @@ export function AppearancePane({
     ...getZoomEntries(),
     ...getTypographyEntries(),
     ...(SHOW_UI_LANGUAGE_SETTING ? getLanguageEntries() : []),
-    ...getTitlebarEntries(),
     ...getSystemTrayEntries({ showSystemTray: isDesktopWindows }),
     ...getMenuBarIconEntries({ showMenuBarIcon: isDesktopMac })
   ]

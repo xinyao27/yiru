@@ -1,4 +1,4 @@
-import { Files, GitBranch, ListChecks, Plug, Workflow } from 'lucide-react'
+import { Files, FlowArrow as Workflow, GitBranch, ListChecks, Plug } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { AgentSessionHistoryIcon } from './agent-session-history-icon'
 import type { ActivityBarItem } from './activity-bar-buttons'

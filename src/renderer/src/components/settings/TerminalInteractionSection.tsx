@@ -1,5 +1,5 @@
 import type { GlobalSettings } from '../../../../shared/types'
-import { RotateCcw } from 'lucide-react'
+import { ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
 import { Slider } from '../ui/slider'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'

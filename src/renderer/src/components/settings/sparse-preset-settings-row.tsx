@@ -1,4 +1,9 @@
-import { Bookmark, LoaderCircle, Pencil, Trash2 } from 'lucide-react'
+import {
+  Bookmark,
+  CircleNotch as LoaderCircle,
+  Pencil,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import type { SparsePreset } from '../../../../shared/types'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'

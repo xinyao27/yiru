@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react'
+import { Plus } from '@phosphor-icons/react'
 import { DiffCommentPopover } from '../diff-comments/DiffCommentPopover'
 import type { RichMarkdownAnnotationTarget } from './rich-markdown-review-annotations'
 import { translate } from '@/i18n/i18n'

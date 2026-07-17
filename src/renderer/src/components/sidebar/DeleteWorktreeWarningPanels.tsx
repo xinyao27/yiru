@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { AlertTriangle } from 'lucide-react'
+import { Warning as AlertTriangle } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 
 export function DeleteWorktreeWarningPanels({

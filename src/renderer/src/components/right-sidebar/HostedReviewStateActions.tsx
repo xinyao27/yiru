@@ -1,4 +1,8 @@
-import { CircleDot, LoaderCircle, Trash2 } from 'lucide-react'
+import {
+  Circle as CircleDot,
+  CircleNotch as LoaderCircle,
+  Trash as Trash2
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

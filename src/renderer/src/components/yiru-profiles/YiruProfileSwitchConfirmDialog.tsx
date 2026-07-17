@@ -1,4 +1,4 @@
-import { AlertTriangle, Loader2 } from 'lucide-react'
+import { Warning as AlertTriangle, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

@@ -1,5 +1,11 @@
 import React from 'react'
-import { AlertTriangle, GitBranch, Loader2, RotateCcw, X } from 'lucide-react'
+import {
+  Warning as AlertTriangle,
+  GitBranch,
+  SpinnerGap as Loader2,
+  ArrowCounterClockwise as RotateCcw,
+  X
+} from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
 import { retryBackgroundWorktreeCreation } from '@/lib/worktree-creation-flow'

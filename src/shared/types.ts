@@ -2731,7 +2731,7 @@ export type GlobalSettings = {
    *  default branch. Only affects the compare/diff view, not the PR/rebase
    *  merge target. Per-user, not per-workspace. */
   sourceControlCompareAgainstUpstream: boolean
-  /** Whether to show the Yiru app name in the titlebar. */
+  /** Deprecated: retained so older persisted settings remain readable. */
   showTitlebarAppName: boolean
   /** Why: some users do not use the Tasks feature and prefer to keep the
    *  left sidebar free of its button entirely. Hiding the button here also

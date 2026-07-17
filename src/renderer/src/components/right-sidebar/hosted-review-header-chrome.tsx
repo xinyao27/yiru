@@ -1,5 +1,5 @@
 import React from 'react'
-import { GitMerge } from 'lucide-react'
+import { GitMerge } from '@phosphor-icons/react'
 import type { HostedReviewInfo } from '../../../../shared/hosted-review'
 import { cn } from '@/lib/utils'
 import { PullRequestIcon } from './checks-panel-content'

@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
-import { CircleAlert, Loader2, ShieldCheck } from 'lucide-react'
+import {
+  ShieldCheck,
+  SpinnerGap as Loader2,
+  WarningCircle as CircleAlert
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { SpoolWindowsFirewallStatus } from '../../../../shared/spool/spool-windows-firewall-contract'
 import { SPOOL_INGRESS_PORT } from '../../../../shared/spool/spool-wire-contract'

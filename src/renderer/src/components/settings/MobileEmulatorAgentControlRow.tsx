@@ -1,4 +1,4 @@
-import { Import, Loader2 } from 'lucide-react'
+import { DownloadSimple as Import, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import {
   YIRU_CLI_SKILL_INSTALL_COMMAND,
   YIRU_CLI_SKILL_UPDATE_COMMAND

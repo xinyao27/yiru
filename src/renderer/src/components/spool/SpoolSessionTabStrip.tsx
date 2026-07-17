@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useEffect, useId, useMemo, useState, type KeyboardEvent } from 'react'
-import { SquareTerminal } from 'lucide-react'
+import { TerminalWindow as SquareTerminal } from '@phosphor-icons/react'
 import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/spool-catalog-contract'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { translate } from '@/i18n/i18n'

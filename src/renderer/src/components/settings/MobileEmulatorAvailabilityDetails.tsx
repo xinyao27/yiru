@@ -1,4 +1,9 @@
-import { CheckCircle2, CircleAlert, FolderOpen, X } from 'lucide-react'
+import {
+  CheckCircle as CheckCircle2,
+  WarningCircle as CircleAlert,
+  FolderOpen,
+  X
+} from '@phosphor-icons/react'
 import type React from 'react'
 import { toast } from 'sonner'
 import { Button } from '../ui/button'

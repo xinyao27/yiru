@@ -1,7 +1,11 @@
 'use client'
 
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { Select as SelectPrimitive } from '@base-ui/react/select'
+import {
+  CheckIcon,
+  CaretDown as ChevronDownIcon,
+  CaretUp as ChevronUpIcon
+} from '@phosphor-icons/react'
 
 import { cn } from '@/lib/utils'
 

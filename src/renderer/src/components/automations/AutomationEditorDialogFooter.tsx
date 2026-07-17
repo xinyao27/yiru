@@ -1,5 +1,5 @@
 import React from 'react'
-import { Info, Plus } from 'lucide-react'
+import { Info, Plus } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

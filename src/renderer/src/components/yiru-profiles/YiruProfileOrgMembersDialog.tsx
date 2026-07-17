@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Loader2, Mail, RefreshCw, Users } from 'lucide-react'
+import {
+  SpinnerGap as Loader2,
+  Envelope as Mail,
+  ArrowClockwise as RefreshCw,
+  Users
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

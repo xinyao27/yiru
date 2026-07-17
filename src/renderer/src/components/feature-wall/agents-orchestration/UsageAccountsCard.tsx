@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { JSX, ReactNode } from 'react'
-import { Loader2, Plus } from 'lucide-react'
+import { SpinnerGap as Loader2, Plus } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'

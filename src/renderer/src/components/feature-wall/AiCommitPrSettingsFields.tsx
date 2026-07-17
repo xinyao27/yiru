@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { Terminal } from 'lucide-react'
+import { Terminal } from '@phosphor-icons/react'
 import { CUSTOM_PROMPT_PLACEHOLDER } from '../../../../shared/commit-message-prompt'
 import {
   CUSTOM_AGENT_ID,

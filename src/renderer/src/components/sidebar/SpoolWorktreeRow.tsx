@@ -1,5 +1,5 @@
 import type React from 'react'
-import { Cloud } from 'lucide-react'
+import { Cloud } from '@phosphor-icons/react'
 import { getSpoolSessionCatalogStatusLabel } from '@/components/spool/spool-session-catalog-status'
 import { HoverCard, HoverCardTrigger } from '@/components/ui/hover-card'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'

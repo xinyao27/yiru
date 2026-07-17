@@ -2,18 +2,18 @@
 per-entry actions in one file to keep the data flow straightforward. */
 import React, { useCallback, useMemo, useState } from 'react'
 import {
-  ExternalLink,
+  ArrowSquareOut as ExternalLink,
   Copy,
-  Trash2,
+  Trash as Trash2,
   Plus,
-  Unplug,
-  ChevronRight,
+  Plugs as Unplug,
+  CaretRight as ChevronRight,
   Pencil,
-  RefreshCw,
-  Server,
-  Box,
+  ArrowClockwise as RefreshCw,
+  HardDrives as Server,
+  Cube as Box,
   Info
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useAppStore } from '@/store'
 import { useActiveWorktree, useRepoById } from '@/store/selectors'

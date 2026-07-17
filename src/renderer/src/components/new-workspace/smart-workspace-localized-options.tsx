@@ -1,5 +1,11 @@
 import type React from 'react'
-import { CaseSensitive, GitBranch, Github, Gitlab, Sparkles } from 'lucide-react'
+import {
+  TextAa as CaseSensitive,
+  GitBranch,
+  GithubLogo as Github,
+  GitlabLogo as Gitlab,
+  Sparkle as Sparkles
+} from '@phosphor-icons/react'
 
 import { translate } from '@/i18n/i18n'
 import type { SmartNameMode } from './smart-workspace-source-results'

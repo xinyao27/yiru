@@ -1,5 +1,11 @@
 import React from 'react'
-import { CheckCircle2, ChevronDown, CircleDashed, MinusCircle, XCircle } from 'lucide-react'
+import {
+  CheckCircle as CheckCircle2,
+  CaretDown as ChevronDown,
+  CircleDashed,
+  MinusCircle,
+  XCircle
+} from '@phosphor-icons/react'
 import { CheckJobLogTail } from '@/components/right-sidebar/check-job-log-tail'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/utils'

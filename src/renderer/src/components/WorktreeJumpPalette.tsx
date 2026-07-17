@@ -5,14 +5,14 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
   FileText,
-  FolderTree,
+  Folders as FolderTree,
   Globe,
   Plus,
-  Server,
-  ServerOff,
-  Smartphone,
-  SquareTerminal
-} from 'lucide-react'
+  HardDrives as Server,
+  HardDrive as ServerOff,
+  DeviceMobile as Smartphone,
+  TerminalWindow as SquareTerminal
+} from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { getRepoMapFromState, useAllWorktrees } from '@/store/selectors'
 import { selectPaletteStatusInputs } from './worktree-jump-palette-status-inputs'

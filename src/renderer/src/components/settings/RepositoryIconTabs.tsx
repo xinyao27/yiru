@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Github, Image, Link2 } from 'lucide-react'
+import { GithubLogo as Github, Image, LinkSimple as Link2 } from '@phosphor-icons/react'
 import type { RepoIcon } from '../../../../shared/repo-icon'
 import { faviconUrlFromWebsite } from '../../../../shared/repo-icon'
 import { Button } from '../ui/button'

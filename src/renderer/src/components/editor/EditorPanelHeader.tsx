@@ -1,5 +1,13 @@
 import { useMemo } from 'react'
-import { ArrowDown, ArrowUp, Columns2, Eye, FileText, ListTree, Rows2 } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  Columns as Columns2,
+  Eye,
+  FileText,
+  TreeStructure as ListTree,
+  Rows as Rows2
+} from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffCommentsOrEmpty } from '@/store/worktree-diff-comments-selector'
 import type { OpenFile } from '@/store/slices/editor'

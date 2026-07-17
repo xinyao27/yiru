@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { ArrowLeft, Download, FolderOpen, Plus } from 'lucide-react'
+import { ArrowLeft, Download, FolderOpen, Plus } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'

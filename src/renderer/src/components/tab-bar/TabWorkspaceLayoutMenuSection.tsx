@@ -5,7 +5,13 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuItem
 } from '@/components/ui/dropdown-menu'
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Columns2 } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  Columns as Columns2
+} from '@phosphor-icons/react'
 import type { TabSplitDirection } from '../../store/slices/tabs'
 import { translate } from '@/i18n/i18n'
 import { canMoveTabToNewPaneColumn, moveTabToNewPaneColumn } from './tab-move-to-pane-column'

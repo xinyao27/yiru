@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Play } from 'lucide-react'
+import { Play } from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {

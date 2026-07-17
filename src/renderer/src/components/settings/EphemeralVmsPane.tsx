@@ -1,4 +1,11 @@
-import { ArrowRight, Check, Copy, Loader2, RefreshCw, Server } from 'lucide-react'
+import {
+  ArrowRight,
+  Check,
+  Copy,
+  SpinnerGap as Loader2,
+  ArrowClockwise as RefreshCw,
+  HardDrives as Server
+} from '@phosphor-icons/react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'

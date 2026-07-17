@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { LoaderCircle } from 'lucide-react'
+import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { Button } from '../ui/button'

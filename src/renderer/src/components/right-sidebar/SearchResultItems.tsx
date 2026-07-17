@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { ChevronRight, Copy } from 'lucide-react'
+import { CaretRight as ChevronRight, Copy } from '@phosphor-icons/react'
 import { basename, dirname } from '@/lib/path'
 import { cn } from '@/lib/utils'
 import { getFileTypeIcon } from '@/lib/file-type-icons'

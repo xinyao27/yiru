@@ -10,7 +10,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '../ui/dropdown-menu'
-import { Cloud, Download, Trash2, Loader2, ChevronDown, Check } from 'lucide-react'
+import {
+  Cloud,
+  Download,
+  Trash as Trash2,
+  SpinnerGap as Loader2,
+  CaretDown as ChevronDown,
+  Check
+} from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 
 function describeSpeechModelDownloadError(error: unknown): string {

@@ -6,38 +6,38 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 import {
-  AlertCircle,
-  ArrowDownUp,
+  WarningCircle as AlertCircle,
+  ArrowsDownUp as ArrowDownUp,
   ArrowRight,
-  Ban,
+  Prohibit as Ban,
   Check,
-  CheckCircle2,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  CircleDot,
-  Clock3,
+  CheckCircle as CheckCircle2,
+  CaretDown as ChevronDown,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  Circle as CircleDot,
+  Clock as Clock3,
   Copy,
-  EllipsisVertical,
-  ExternalLink,
+  DotsThreeVertical as EllipsisVertical,
+  ArrowSquareOut as ExternalLink,
   Eye,
   Files,
   GitMerge,
   GitPullRequest,
-  GitPullRequestDraft,
+  GitPullRequest as GitPullRequestDraft,
   List,
-  LoaderCircle,
+  CircleNotch as LoaderCircle,
   Minus,
   Plus,
-  RefreshCw,
-  Search,
+  ArrowClockwise as RefreshCw,
+  MagnifyingGlass as Search,
   SlidersHorizontal,
   Users,
   X,
-  FolderKanban,
+  FolderSimple as FolderKanban,
   Tag,
-  UserRound
-} from 'lucide-react'
+  User as UserRound
+} from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 import { useAppStore } from '@/store'

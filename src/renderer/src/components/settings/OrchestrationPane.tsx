@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { ArrowRightLeft, GitBranch, ListChecks, Workflow } from 'lucide-react'
+import {
+  ArrowsLeftRight as ArrowRightLeft,
+  GitBranch,
+  ListChecks,
+  FlowArrow as Workflow
+} from '@phosphor-icons/react'
 import { ORCHESTRATION_SKILL_NAME } from '@/lib/agent-feature-install-commands'
 import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
