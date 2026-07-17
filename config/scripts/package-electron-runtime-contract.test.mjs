@@ -208,7 +208,7 @@ describe('Electron runtime package contract', () => {
     expect(releaseWorkflow.jobs['publish-release'].needs).toContain('build-mac')
   })
 
-  it('runs the macOS release build in an isolated Blacksmith workflow', () => {
+  it('runs the macOS release build in an isolated GitHub-hosted workflow', () => {
     const releaseMacWorkflowText = readFileSync(
       join(projectDir, '.github/workflows/release-mac-build.yml'),
       'utf8'
@@ -225,7 +225,7 @@ describe('Electron runtime package contract', () => {
     )
     expect(releaseMacWorkflow.on.workflow_dispatch.inputs.tag.required).toBe(true)
     expect(releaseMacWorkflow.on.workflow_dispatch.inputs.release_run_id.required).toBe(true)
-    expect(buildMacJob['runs-on']).toBe('blacksmith-6vcpu-macos-15')
+    expect(buildMacJob['runs-on']).toBe('macos-15')
     expect(checkoutStep.with.ref).toBe('refs/tags/${{ inputs.tag }}')
     expect(publishStep.with.command).toContain('YIRU_MAC_RELEASE=1')
     expect(publishStep.with.command).toContain('electron-builder')

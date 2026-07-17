@@ -24,10 +24,8 @@ concurrency:
 jobs:
   build-mac:
     if: github.repository == 'xinyao27/yiru'
-    # Why: this workflow is outside the SignPath signing run, so Blacksmith
-    # cannot enter Windows artifact provenance while mac notarization gets the
-    # faster runner.
-    runs-on: blacksmith-6vcpu-macos-15
+    # Why: keep macOS signing isolated from the Windows SignPath provenance workflow.
+    runs-on: macos-15
     timeout-minutes: 60
     env:
       NODE_OPTIONS: --max-old-space-size=4096
