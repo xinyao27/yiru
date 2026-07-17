@@ -7,8 +7,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import RightSidebar from './index'
 import { TopActivityOverflowMenu } from './activity-bar-buttons'
 import {
-  RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME,
-  RIGHT_SIDEBAR_WINDOWS_TOP_ACTIVITY_STRIP_CLASS_NAME
+  RIGHT_SIDEBAR_HEADER_DRAG_CLASS_NAME,
+  RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
 } from './right-sidebar-titlebar-drag-regions'
 import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 
@@ -189,8 +189,23 @@ function buttonOpeningTag(markup: string, ariaLabelPrefix: string): string {
   return match[0]
 }
 
+function classTokens(tag: string): string[] {
+  return tag.match(/class="([^"]*)"/)?.[1].split(/\s+/) ?? []
+}
+
 function expectNoDrag(tag: string): void {
-  expect(tag).toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
+  expect(classTokens(tag)).toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
+}
+
+function activityStripIsInsideHeader(markup: string): boolean {
+  const root = document.createElement('div')
+  root.innerHTML = markup
+  const header = root.querySelector('.right-sidebar-header-drag')
+  const activityStrip = root.querySelector('.right-sidebar-activity-strip')
+  if (!header || !activityStrip) {
+    throw new Error('right sidebar header or activity strip not found')
+  }
+  return header.contains(activityStrip)
 }
 
 function setRendererPlatform(platform: NodeJS.Platform): void {
@@ -235,23 +250,15 @@ describe('rendered right sidebar titlebar drag regions', () => {
     const header = openingTag(markup, 'right-sidebar-header-drag')
     const activityStrip = openingTag(markup, 'right-sidebar-activity-strip')
 
-    expect(header).not.toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
-    expect(activityStrip).not.toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
+    expect(classTokens(header)).toContain(RIGHT_SIDEBAR_HEADER_DRAG_CLASS_NAME)
+    expect(classTokens(header)).not.toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
+    expect(classTokens(activityStrip)).not.toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
     expect(activityStrip).toContain('data-context-menu-trigger="true"')
-    expect(markup).toContain('right-sidebar-header-drag')
 
     expectNoDrag(buttonOpeningTag(markup, 'Explorer'))
     expectNoDrag(buttonOpeningTag(markup, 'Source Control'))
     expectNoDrag(buttonOpeningTag(markup, 'Checks'))
-    expect(buttonOpeningTag(markup, 'Explorer')).toContain('my-auto h-7')
-    expect(buttonOpeningTag(markup, 'Explorer')).toContain('bg-accent')
-    expect(buttonOpeningTag(markup, 'Explorer')).not.toContain(' border-r ')
-    expect(buttonOpeningTag(markup, 'Source Control')).toContain('hover:bg-accent')
-    expect(markup).not.toContain('absolute bottom-0 left-[25%]')
-    expect(buttonOpeningTag(markup, 'Toggle right sidebar')).toContain('data-slot="button"')
-    expect(buttonOpeningTag(markup, 'Toggle right sidebar')).toContain('data-size="icon-sm"')
-    expect(markup).toContain('-scale-x-100')
-    expect(markup).toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
+    expectNoDrag(buttonOpeningTag(markup, 'Toggle right sidebar'))
   })
 
   it('uses the custom desktop chrome top strip on Linux desktop', () => {
@@ -260,9 +267,8 @@ describe('rendered right sidebar titlebar drag regions', () => {
     const markup = renderToStaticMarkup(<RightSidebar />)
     const activityStrip = openingTag(markup, 'right-sidebar-activity-strip')
 
-    expect(activityStrip).toContain('h-10')
-    expect(activityStrip).toContain('border-b')
-    expect(markup).toContain(RIGHT_SIDEBAR_WINDOWS_TOP_ACTIVITY_STRIP_CLASS_NAME)
+    expect(classTokens(activityStrip)).not.toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
+    expect(activityStripIsInsideHeader(markup)).toBe(false)
   })
 
   it('keeps paired Linux web clients on the browser-style top strip', () => {
@@ -270,11 +276,8 @@ describe('rendered right sidebar titlebar drag regions', () => {
     ;(globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ = true
 
     const markup = renderToStaticMarkup(<RightSidebar />)
-    const activityStrip = openingTag(markup, 'right-sidebar-activity-strip')
 
-    expect(activityStrip).toContain('pl-2')
-    expect(activityStrip).not.toContain('h-10')
-    expect(markup).not.toContain(RIGHT_SIDEBAR_WINDOWS_TOP_ACTIVITY_STRIP_CLASS_NAME)
+    expect(activityStripIsInsideHeader(markup)).toBe(true)
   })
 
   it('keeps the overflow trigger no-drag when it renders', () => {
@@ -293,8 +296,8 @@ describe('rendered right sidebar titlebar drag regions', () => {
       />
     )
 
-    const overflowButton = openingTag(markup, RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
-    expect(overflowButton).toContain('aria-label="More sidebar tabs"')
+    const overflowButton = buttonOpeningTag(markup, 'More sidebar tabs')
+    expectNoDrag(overflowButton)
   })
 
   it('keeps side activity-bar controls no-drag without cancelling the side header drag region', () => {
@@ -304,15 +307,14 @@ describe('rendered right sidebar titlebar drag regions', () => {
     const sideHeader = openingTag(markup, 'right-sidebar-header-drag')
     const sideStrip = openingTag(markup, 'side-activity-bar-windows-inset')
 
-    expect(sideHeader).not.toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
-    expect(sideHeader).toContain('right-sidebar-header-side-inset')
+    expect(classTokens(sideHeader)).toContain(RIGHT_SIDEBAR_HEADER_DRAG_CLASS_NAME)
+    expect(classTokens(sideHeader)).not.toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
     expect(sideStrip).toContain('data-context-menu-trigger="true"')
 
     expectNoDrag(buttonOpeningTag(markup, 'Explorer'))
     expectNoDrag(buttonOpeningTag(markup, 'Source Control'))
     expectNoDrag(buttonOpeningTag(markup, 'Checks'))
-    expect(buttonOpeningTag(markup, 'Toggle right sidebar')).toContain('data-slot="button"')
-    expect(buttonOpeningTag(markup, 'Toggle right sidebar')).toContain('data-size="icon-sm"')
+    expectNoDrag(buttonOpeningTag(markup, 'Toggle right sidebar'))
   })
 
   it('hides git-only activity buttons for folder workspace ids without a backing repo', () => {

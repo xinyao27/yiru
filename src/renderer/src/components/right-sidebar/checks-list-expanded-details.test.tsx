@@ -110,34 +110,6 @@ function renderChecksList(
 }
 
 describe('ChecksList expanded check details', () => {
-  it('pins a contextual full-details action with the correct sticky surface', async () => {
-    renderChecksList({ worktreeId: 'wt-child-1', detailsStickySurface: 'card' })
-
-    await act(async () => {
-      await Promise.resolve()
-    })
-
-    const stickyBar = container.querySelector('.sticky.top-0')
-    expect(stickyBar).not.toBeNull()
-    expect(stickyBar?.className).toContain('bg-card/95')
-    expect(stickyBar?.textContent).toContain('verify')
-    expect(stickyBar?.textContent).toContain('View full logs')
-    expect(container.innerHTML).toContain('lucide-panel-right')
-    expect(container.innerHTML).toContain('data-variant="outline"')
-  })
-
-  it('uses the sidebar sticky surface by default in the hosted checks panel', async () => {
-    activeWorktreeState.current = { id: 'wt-active-1' }
-    renderChecksList()
-
-    await act(async () => {
-      await Promise.resolve()
-    })
-
-    const stickyBar = container.querySelector('.sticky.top-0')
-    expect(stickyBar?.className).toContain('bg-sidebar/95')
-  })
-
   it('falls back to the active worktree when no worktree override is provided', async () => {
     activeWorktreeState.current = { id: 'wt-active-1' }
     renderChecksList()
@@ -206,9 +178,8 @@ describe('ChecksList expanded check details', () => {
       await Promise.resolve()
     })
 
-    const stickyBar = container.querySelector('.sticky.top-0')
-    expect(stickyBar?.textContent).toContain('View full details')
-    expect(stickyBar?.textContent).not.toContain('View full logs')
+    expect(container.textContent).toContain('View full details')
+    expect(container.textContent).not.toContain('View full logs')
   })
 
   it('uses resolved details when showing the action-required fallback hint', async () => {

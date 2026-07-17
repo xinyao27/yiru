@@ -23,6 +23,7 @@ import {
 import logo from '../../../resources/logo.svg'
 import { SYNC_FIT_PANES_EVENT, TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '@/constants/terminal'
 import { syncZoomCSSVar } from '@/lib/ui-zoom'
+import { cn } from '@/lib/utils'
 import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
 import { canShowRightSidebarForView } from '@/lib/right-sidebar-visibility'
 import {
@@ -199,9 +200,14 @@ const hasCustomTitleBar = shouldRenderDesktopWindowChrome({
   isWebClient: isPairedWebClientWindow()
 })
 // Why: Electron drag regions swallow clicks even when a control is visibly above them.
-const TITLEBAR_BUTTON_NO_DRAG_STYLE = {
-  WebkitAppRegion: 'no-drag'
-} as React.CSSProperties
+const TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME = '[-webkit-app-region:no-drag]'
+const TITLEBAR_CLASS_NAME =
+  'flex h-9 min-h-9 flex-row items-center border-b border-border bg-[var(--bg-titlebar,var(--card))] select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
+// Why: the inset seam preserves the full 36px content box, keeping controls aligned with traffic lights.
+const TITLEBAR_LEFT_CLASS_NAME =
+  'flex h-9 min-h-9 shrink-0 flex-row items-center overflow-hidden bg-worktree-sidebar shadow-[inset_0_-1px_0_var(--border)] select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
+const WINDOW_CONTROL_BUTTON_CLASS_NAME =
+  'h-9 w-[46px] bg-transparent text-muted-foreground transition-[background,color] duration-100 hover:bg-accent hover:text-foreground'
 
 async function listRuntimeSessionHostIdsForStartup(): Promise<ExecutionHostId[]> {
   try {
@@ -259,12 +265,12 @@ function WindowControls(): React.JSX.Element {
     }
   }, [])
   return (
-    <div className="window-controls">
+    <div className="fixed right-0 top-0 z-[9999] flex h-9 flex-row [-webkit-app-region:no-drag]">
       <Button
         type="button"
         variant="ghost"
         size="icon-sm"
-        className="window-controls-btn"
+        className={WINDOW_CONTROL_BUTTON_CLASS_NAME}
         aria-label={translate('auto.App.bbb7f90669', 'Minimize')}
         onClick={() => window.api.ui.minimize()}
       >
@@ -276,7 +282,7 @@ function WindowControls(): React.JSX.Element {
         type="button"
         variant="ghost"
         size="icon-sm"
-        className="window-controls-btn"
+        className={WINDOW_CONTROL_BUTTON_CLASS_NAME}
         aria-label={
           maximized
             ? translate('auto.App.66f0a552e5', 'Restore')
@@ -300,7 +306,7 @@ function WindowControls(): React.JSX.Element {
         type="button"
         variant="ghost"
         size="icon-sm"
-        className="window-controls-btn window-controls-close"
+        className={`${WINDOW_CONTROL_BUTTON_CLASS_NAME} hover:bg-destructive hover:text-white dark:hover:bg-destructive/60 dark:hover:text-white`}
         aria-label={translate('auto.App.e960d18540', 'Close')}
         // Why: IPC to main so the BrowserWindow 'close' event fires, which
         // sends 'window:close-requested' back to the renderer and keeps the
@@ -2052,14 +2058,19 @@ function App(): React.JSX.Element {
     >
       <div className="flex h-full items-center">
         {isMac && !isFullScreen ? (
-          <div className="titlebar-traffic-light-pad" />
+          <div className="w-[calc(80px/var(--ui-zoom-factor,1))] shrink-0" />
         ) : hasCustomTitleBar ? (
           /* Why: on Windows/Linux the native title bar is removed, so we render
              the Yiru logo as a non-interactive identity anchor and a ··· button
              that pops up the application menu (the same menu revealed by Alt
              on the default autoHideMenuBar). */
           <>
-            <img src={logo} alt="" aria-hidden className="titlebar-logo" />
+            <img
+              src={logo}
+              alt=""
+              aria-hidden
+              className="ml-2.5 mr-1 h-4 shrink-0 opacity-75 invert dark:invert-0"
+            />
             <Tooltip>
               <TooltipTrigger
                 render={
@@ -2067,8 +2078,7 @@ function App(): React.JSX.Element {
                     type="button"
                     variant="ghost"
                     size="icon-xs"
-                    className="mr-2 text-muted-foreground"
-                    style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
+                    className={`mr-2 text-muted-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
                     aria-label={translate('auto.App.8b0b8eb54f', 'Application menu')}
                     onClick={() => window.api.ui.popupMenu()}
                   >
@@ -2092,8 +2102,7 @@ function App(): React.JSX.Element {
                   type="button"
                   variant="ghost"
                   size="icon-sm"
-                  className="text-muted-foreground"
-                  style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
+                  className={`text-muted-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
                   onClick={actions.toggleSidebar}
                   aria-label={translate('auto.App.e4b9e7dff7', 'Toggle sidebar')}
                 >
@@ -2123,8 +2132,7 @@ function App(): React.JSX.Element {
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className="text-foreground"
-                  style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
+                  className={`text-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
                   onClick={() => useAppStore.getState().goBackWorktree()}
                   disabled={!canGoBackWorktree}
                   aria-label={translate('auto.App.064bd07810', 'Go back')}
@@ -2146,8 +2154,7 @@ function App(): React.JSX.Element {
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className="text-foreground"
-                  style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
+                  className={`text-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
                   onClick={() => useAppStore.getState().goForwardWorktree()}
                   disabled={!canGoForwardWorktree}
                   aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
@@ -2175,8 +2182,7 @@ function App(): React.JSX.Element {
             type="button"
             variant="ghost"
             size="icon-sm"
-            className="mr-2 text-muted-foreground"
-            style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
+            className={`mr-2 text-muted-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
             onClick={actions.toggleRightSidebar}
             aria-label={translate('auto.App.9e0b441a91', 'Toggle right sidebar')}
           >
@@ -2211,8 +2217,7 @@ function App(): React.JSX.Element {
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                className="mr-2 text-muted-foreground"
-                style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
+                className={`mr-2 text-muted-foreground ${TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}`}
                 onClick={handleToggleExpand}
                 aria-label={translate('auto.App.c1cf0b0e4a', 'Collapse pane')}
                 disabled={!activeTabCanExpand}
@@ -2233,7 +2238,9 @@ function App(): React.JSX.Element {
       {!rightSidebarOpen && rightSidebarToggle}
       {/* Why: reserve space so content is not obscured by the
       fixed-position window-controls overlay on Windows/Linux. */}
-      {hasCustomTitleBar && <div className="window-controls-titlebar-spacer" />}
+      {hasCustomTitleBar && (
+        <div className="w-[var(--window-controls-width,0px)] shrink-0 [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]" />
+      )}
     </>
   )
   const workspaceProfileSwitcher =
@@ -2243,15 +2250,13 @@ function App(): React.JSX.Element {
     leftTitlebarChromeLayout.shouldMount &&
     !stackedSidebarOpen ? (
       <div
-        className="absolute top-0 z-10 flex h-[36px] items-center"
-        style={
-          {
-            right: showRightSidebarControls
-              ? 'calc(var(--window-controls-width) + 42px)'
-              : 'var(--window-controls-width)',
-            WebkitAppRegion: 'no-drag'
-          } as React.CSSProperties
-        }
+        // Why: clear both the desktop controls and the adjacent sidebar toggle when it is present.
+        className={cn(
+          'absolute top-0 z-10 flex h-[36px] items-center [-webkit-app-region:no-drag]',
+          showRightSidebarControls
+            ? 'right-[calc(var(--window-controls-width)+42px)]'
+            : 'right-[var(--window-controls-width)]'
+        )}
       >
         <YiruProfileSwitcher />
       </div>
@@ -2308,7 +2313,7 @@ function App(): React.JSX.Element {
                 header above the sidebar. Settings, landing, and the tasks
                 page keep the titlebar. */}
                   {!leftTitlebarChromeLayout.shouldMount ? (
-                    <div className="titlebar">
+                    <div className={TITLEBAR_CLASS_NAME}>
                       <div className="flex items-center shrink-0 mr-2">{titlebarLeftControls}</div>
                       {titlebarMainStrip}
                     </div>
@@ -2336,11 +2341,11 @@ function App(): React.JSX.Element {
                             // stays visible in both states. w-max keeps the floating
                             // header sized to its own controls instead of the w-0
                             // sidebar wrapper.
-                            className={`titlebar-left${
-                              leftTitlebarChromeLayout.isFloating
-                                ? ' titlebar-left-floating absolute top-0 left-0 z-10 w-max border-r border-border'
-                                : ''
-                            }`}
+                            className={cn(
+                              TITLEBAR_LEFT_CLASS_NAME,
+                              leftTitlebarChromeLayout.isFloating &&
+                                'absolute left-0 top-0 z-10 w-max border-r border-border bg-[var(--bg-titlebar,var(--card))]'
+                            )}
                             style={{
                               // Why: custom sidebar appearances are scoped to the sidebar
                               // root, so mirror those variables onto the open header that
@@ -2405,7 +2410,7 @@ function App(): React.JSX.Element {
                     ) : null}
                     <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden">
                       {stackedSidebarOpen ? (
-                        <div className="titlebar">{titlebarMainStrip}</div>
+                        <div className={TITLEBAR_CLASS_NAME}>{titlebarMainStrip}</div>
                       ) : null}
                       <div className="relative flex flex-1 min-w-0 min-h-0 overflow-hidden">
                         {/* Why: right sidebar toggle floats at the top-right of the center
@@ -2416,20 +2421,9 @@ function App(): React.JSX.Element {
                     a few pixels, which reads as layout jitter. */}
                         {workspaceChromeActive && !rightSidebarOpen && (
                           <div
-                            className="absolute top-0 z-10 flex items-center h-[36px]"
-                            style={
-                              {
-                                // Why: right: var(--window-controls-width) is the single
-                                // mechanism that keeps the toggle clear of the
-                                // fixed-position window-controls overlay on custom desktop
-                                // chrome (138px) and sits at the right edge otherwise (0px).
-                                // No internal spacer needed — adding one would push the button
-                                // a further 138px to the left and cover the pane-actions
-                                // Ellipsis button with an un-clickable div.
-                                right: 'var(--window-controls-width)',
-                                WebkitAppRegion: 'no-drag'
-                              } as React.CSSProperties
-                            }
+                            // Why: this offset clears the desktop controls without adding a spacer
+                            // that could cover the pane-actions button with an unclickable region.
+                            className="absolute right-[var(--window-controls-width)] top-0 z-10 flex h-[36px] items-center [-webkit-app-region:no-drag]"
                           >
                             {rightSidebarToggle}
                           </div>

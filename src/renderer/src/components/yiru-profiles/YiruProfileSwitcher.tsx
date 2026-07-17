@@ -223,7 +223,7 @@ export function YiruProfileSwitcher({
                     variant="ghost"
                     size={sidebarPlacement ? 'icon-xs' : 'xs'}
                     className={cn(
-                      'text-muted-foreground titlebar-profile-switcher',
+                      'shrink-0 text-muted-foreground [-webkit-app-region:no-drag]',
                       sidebarPlacement ? 'px-0' : 'mr-2 max-w-[180px] gap-1.5 px-1.5'
                     )}
                     disabled={profileActionDisabled}

@@ -27,6 +27,7 @@ import {
   type ActivityBarItem
 } from './activity-bar-buttons'
 import {
+  RIGHT_SIDEBAR_HEADER_DRAG_CLASS_NAME,
   RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME,
   RIGHT_SIDEBAR_TOP_ACTIVITY_STRIP_CLASS_NAME,
   RIGHT_SIDEBAR_WINDOWS_TOP_ACTIVITY_STRIP_CLASS_NAME
@@ -132,12 +133,20 @@ export function RightSidebarFrame({
       )}
     >
       <div
-        className="flex min-w-0 flex-1 flex-col overflow-hidden bg-sidebar"
-        style={{ borderLeft: isOpen ? '1px solid var(--sidebar-border)' : 'none' }}
+        className={cn(
+          'flex min-w-0 flex-1 flex-col overflow-hidden bg-sidebar',
+          isOpen ? 'border-l border-sidebar-border' : 'border-l-0'
+        )}
       >
         {activityBarPosition === 'top' ? (
           <ContextMenu>
-            <div className="right-sidebar-header-inset right-sidebar-header-drag flex h-[36px] min-h-[36px] items-center overflow-hidden border-b border-border">
+            {/* Why: the desktop window controls overlay the right edge of this header. */}
+            <div
+              className={cn(
+                'right-sidebar-header-drag flex h-[36px] min-h-[36px] items-center overflow-hidden border-b border-border pr-[var(--window-controls-width,0px)] select-none [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]',
+                RIGHT_SIDEBAR_HEADER_DRAG_CLASS_NAME
+              )}
+            >
               {!hasDesktopWindowChrome ? (
                 <>
                   <ContextMenuTrigger
@@ -200,7 +209,13 @@ export function RightSidebarFrame({
             />
           </ContextMenu>
         ) : (
-          <div className="right-sidebar-header-side-inset right-sidebar-header-drag flex h-[36px] min-h-[36px] items-center justify-between border-b border-border px-3">
+          // Why: the adjacent 40px icon rail already clears part of the desktop controls.
+          <div
+            className={cn(
+              'right-sidebar-header-drag flex h-[36px] min-h-[36px] items-center justify-between border-b border-border pl-3 pr-[max(0px,calc(var(--window-controls-width,0px)-40px))] select-none [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]',
+              RIGHT_SIDEBAR_HEADER_DRAG_CLASS_NAME
+            )}
+          >
             <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground">
               {items.find((item) => item.id === activeTab)?.title ?? ''}
             </span>
@@ -224,7 +239,8 @@ export function RightSidebarFrame({
         <ContextMenu>
           <ContextMenuTrigger
             render={
-              <div className="side-activity-bar-windows-inset flex w-10 min-w-[40px] flex-col items-center border-l border-border bg-sidebar">
+              // Why: desktop window controls otherwise cover the first icon in the rail.
+              <div className="side-activity-bar-windows-inset flex w-10 min-w-[40px] flex-col items-center border-l border-border bg-sidebar pt-[var(--window-controls-height,0px)]">
                 {items.map((item) => (
                   <ActivityBarButton
                     key={item.id}
