@@ -2091,7 +2091,7 @@ function App(): React.JSX.Element {
                 <Button
                   type="button"
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   className="text-muted-foreground"
                   style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
                   onClick={actions.toggleSidebar}
@@ -2174,7 +2174,7 @@ function App(): React.JSX.Element {
           <Button
             type="button"
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             className="mr-2 text-muted-foreground"
             style={TITLEBAR_BUTTON_NO_DRAG_STYLE}
             onClick={actions.toggleRightSidebar}
