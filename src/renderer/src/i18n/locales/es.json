@@ -10558,6 +10558,9 @@
             "workspaceGone": "Couldn't open log — workspace is no longer available.",
             "notAuthorized": "Couldn't open log — path not authorized.",
             "alreadyEditable": "Log is already open for editing."
+          },
+          "PierreFileExplorerTree": {
+            "copied": "Copiado"
           }
         }
       },
@@ -12335,6 +12338,11 @@
         },
         "richMarkdownSourceOwningCutFeedback": {
           "selectLessContent": "Selecciona menos contenido o usa el modo de código para cortar citas HTML conservadas."
+        },
+        "PierreDiffViewer": {
+          "copy": "Copiar",
+          "selectAll": "Seleccionar todo",
+          "copyPath": "Copiar ruta"
         }
       },
       "diff": {

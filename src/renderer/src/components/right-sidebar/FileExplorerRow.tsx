@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- Why: the row owns dense file-tree rendering plus its context menu, drag target, and inline-input sibling contract. */
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { basename } from '@/lib/path'
 import {
   Copy,
@@ -290,6 +290,9 @@ type FileExplorerRowProps = {
   onDragExpandDir: (dirPath: string) => void
   onNativeDragTargetChange: (dir: string | null) => void
   onNativeDragExpandDir: (dirPath: string) => void
+  menuOnly?: boolean
+  menuPoint?: { x: number; y: number }
+  onMenuOpenChange?: (open: boolean) => void
 }
 
 export function shouldShowCollapseFolderAction(node: TreeNode, isExpanded: boolean): boolean {
@@ -436,7 +439,10 @@ export function FileExplorerRow({
   onDragSourceChange,
   onDragExpandDir,
   onNativeDragTargetChange,
-  onNativeDragExpandDir
+  onNativeDragExpandDir,
+  menuOnly = false,
+  menuPoint,
+  onMenuOpenChange
 }: FileExplorerRowProps): React.JSX.Element {
   const openMarkdownPreview = useAppStore((s) => s.openMarkdownPreview)
   const activeWorktreeId = useAppStore((s) => s.activeWorktreeId)
@@ -482,10 +488,43 @@ export function FileExplorerRow({
     void copyFileToOsClipboard(node, connectionId)
   }, [connectionId, node])
 
+  const menuTriggerRef = useRef<HTMLDivElement | null>(null)
+  const onContextMenuSelectRef = useRef(onContextMenuSelect)
+  onContextMenuSelectRef.current = onContextMenuSelect
+  const menuPointX = menuPoint?.x
+  const menuPointY = menuPoint?.y
+
+  useEffect(() => {
+    if (
+      !menuOnly ||
+      menuPointX === undefined ||
+      menuPointY === undefined ||
+      !menuTriggerRef.current
+    ) {
+      return
+    }
+    // Why: Pierre owns the row and opens this slotted React menu after its own
+    // selection pass; replay its pointer anchor into Base UI's menu trigger.
+    window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
+    onContextMenuSelectRef.current()
+    menuTriggerRef.current.dispatchEvent(
+      new MouseEvent('contextmenu', {
+        bubbles: true,
+        button: 2,
+        buttons: 2,
+        cancelable: true,
+        clientX: menuPointX,
+        clientY: menuPointY,
+        view: window
+      })
+    )
+  }, [menuOnly, menuPointX, menuPointY])
+
   return (
     <ContextMenu
       onOpenChange={(open) => {
-        if (!open) {
+        onMenuOpenChange?.(open)
+        if (!open || menuOnly) {
           return
         }
         window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
@@ -494,99 +533,105 @@ export function FileExplorerRow({
     >
       <ContextMenuTrigger
         render={
-          <FileExplorerTreeRowButton
-            node={node}
-            isExpanded={isExpanded}
-            isLoading={isLoading}
-            isSelected={isSelected}
-            isFlashing={isFlashing}
-            nodeStatus={nodeStatus}
-            statusColor={statusColor}
-            isIgnored={isIgnored}
-            buttonRef={setRowDragNode}
-            data-native-file-drop-dir={rowDropDir}
-            // Why: marks this draggable row so the wheel-capture handler can rescue
-            // scroll Chromium swallows over draggable nodes (file-explorer-drag-scroll-marker).
-            data-explorer-draggable="true"
-            draggable
-            onDragStart={(event) => {
-              const paths =
-                selectedPaths.has(node.path) && selectedPaths.size > 1
-                  ? [...selectedPaths]
-                  : [node.path]
-              event.dataTransfer.setData(WORKSPACE_FILE_PATH_MIME, node.path)
-              if (paths.length > 1) {
-                event.dataTransfer.setData(
-                  WORKSPACE_FILE_PATHS_MIME,
-                  encodeWorkspaceFilePaths(paths)
-                )
-              }
-              event.dataTransfer.effectAllowed = 'copyMove'
-              onDragSourceChange(node.path)
-
-              if (paths.length > 1) {
-                const MAX_SHOWN = 5
-                const btn = event.currentTarget
-                const rowW = btn.getBoundingClientRect().width
-
-                // Why: drag images are detached DOM nodes, so inline the same
-                // file glyph the real row renders.
-                const FILE_ICON =
-                  '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><polyline points="14 2 14 8 20 8"/></svg>'
-
-                const makeRow = (label: string, faded = false): HTMLDivElement => {
-                  const row = document.createElement('div')
-                  row.style.cssText = `display:flex;align-items:center;gap:4px;height:26px;padding:4px 8px;width:${rowW}px;box-sizing:border-box;font-size:12px;border-radius:2px;background:var(--accent);color:var(--accent-foreground);${faded ? 'opacity:0.6;' : ''}`
-                  const spacer = document.createElement('span')
-                  spacer.style.cssText = 'width:12px;height:12px;flex-shrink:0;'
-                  row.appendChild(spacer)
-                  const icon = document.createElement('span')
-                  icon.style.cssText =
-                    'width:12px;height:12px;flex-shrink:0;display:flex;align-items:center;color:var(--muted-foreground);'
-                  icon.innerHTML = FILE_ICON
-                  row.appendChild(icon)
-                  const name = document.createElement('span')
-                  name.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'
-                  name.textContent = label
-                  row.appendChild(name)
-                  return row
+          menuOnly ? (
+            <div ref={menuTriggerRef} data-file-tree-context-menu-root="true" className="size-px" />
+          ) : (
+            <FileExplorerTreeRowButton
+              node={node}
+              isExpanded={isExpanded}
+              isLoading={isLoading}
+              isSelected={isSelected}
+              isFlashing={isFlashing}
+              nodeStatus={nodeStatus}
+              statusColor={statusColor}
+              isIgnored={isIgnored}
+              buttonRef={setRowDragNode}
+              data-native-file-drop-dir={rowDropDir}
+              // Why: marks this draggable row so the wheel-capture handler can rescue
+              // scroll Chromium swallows over draggable nodes (file-explorer-drag-scroll-marker).
+              data-explorer-draggable="true"
+              draggable
+              onDragStart={(event) => {
+                const paths =
+                  selectedPaths.has(node.path) && selectedPaths.size > 1
+                    ? [...selectedPaths]
+                    : [node.path]
+                event.dataTransfer.setData(WORKSPACE_FILE_PATH_MIME, node.path)
+                if (paths.length > 1) {
+                  event.dataTransfer.setData(
+                    WORKSPACE_FILE_PATHS_MIME,
+                    encodeWorkspaceFilePaths(paths)
+                  )
                 }
+                event.dataTransfer.effectAllowed = 'copyMove'
+                onDragSourceChange(node.path)
 
-                const ghost = document.createElement('div')
-                ghost.style.cssText =
-                  'position:fixed;top:-9999px;left:-9999px;pointer-events:none;display:flex;flex-direction:column;gap:1px;'
+                if (paths.length > 1) {
+                  const MAX_SHOWN = 5
+                  const btn = event.currentTarget
+                  const rowW = btn.getBoundingClientRect().width
 
-                for (const p of paths.slice(0, MAX_SHOWN)) {
-                  ghost.appendChild(makeRow(basename(p)))
+                  // Why: drag images are detached DOM nodes, so inline the same
+                  // file glyph the real row renders.
+                  const FILE_ICON =
+                    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><polyline points="14 2 14 8 20 8"/></svg>'
+
+                  const makeRow = (label: string, faded = false): HTMLDivElement => {
+                    const row = document.createElement('div')
+                    row.style.cssText = `display:flex;align-items:center;gap:4px;height:26px;padding:4px 8px;width:${rowW}px;box-sizing:border-box;font-size:12px;border-radius:2px;background:var(--accent);color:var(--accent-foreground);${faded ? 'opacity:0.6;' : ''}`
+                    const spacer = document.createElement('span')
+                    spacer.style.cssText = 'width:12px;height:12px;flex-shrink:0;'
+                    row.appendChild(spacer)
+                    const icon = document.createElement('span')
+                    icon.style.cssText =
+                      'width:12px;height:12px;flex-shrink:0;display:flex;align-items:center;color:var(--muted-foreground);'
+                    icon.innerHTML = FILE_ICON
+                    row.appendChild(icon)
+                    const name = document.createElement('span')
+                    name.style.cssText =
+                      'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'
+                    name.textContent = label
+                    row.appendChild(name)
+                    return row
+                  }
+
+                  const ghost = document.createElement('div')
+                  ghost.style.cssText =
+                    'position:fixed;top:-9999px;left:-9999px;pointer-events:none;display:flex;flex-direction:column;gap:1px;'
+
+                  for (const p of paths.slice(0, MAX_SHOWN)) {
+                    ghost.appendChild(makeRow(basename(p)))
+                  }
+                  if (paths.length > MAX_SHOWN) {
+                    ghost.appendChild(makeRow(`+${paths.length - MAX_SHOWN} more`, true))
+                  }
+
+                  document.body.appendChild(ghost)
+                  event.dataTransfer.setDragImage(ghost, 12, 12)
+                  setTimeout(() => document.body.removeChild(ghost), 0)
                 }
-                if (paths.length > MAX_SHOWN) {
-                  ghost.appendChild(makeRow(`+${paths.length - MAX_SHOWN} more`, true))
-                }
-
-                document.body.appendChild(ghost)
-                event.dataTransfer.setDragImage(ghost, 12, 12)
-                setTimeout(() => document.body.removeChild(ghost), 0)
-              }
-            }}
-            onDragEnd={() => onDragSourceChange(null)}
-            onDragOver={handleDragOver}
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={onClick}
-            onDoubleClick={onDoubleClick}
-            onLabelDoubleClick={(event) => {
-              // Why: the row itself swallows double-click for "pin preview" /
-              // directory toggle. Scope rename to the filename text only so
-              // those behaviors stay intact on the icon and empty row area,
-              // matching VS Code's rename hotspot.
-              event.stopPropagation()
-              onStartRename(node)
-            }}
-          />
+              }}
+              onDragEnd={() => onDragSourceChange(null)}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={onClick}
+              onDoubleClick={onDoubleClick}
+              onLabelDoubleClick={(event) => {
+                // Why: the row itself swallows double-click for "pin preview" /
+                // directory toggle. Scope rename to the filename text only so
+                // those behaviors stay intact on the icon and empty row area,
+                // matching VS Code's rename hotspot.
+                event.stopPropagation()
+                onStartRename(node)
+              }}
+            />
+          )
         }
       />
       <ContextMenuContent
+        data-file-tree-context-menu-root="true"
         className="w-64 bg-[rgba(255,255,255,0.82)] dark:bg-[rgba(0,0,0,0.72)]"
         onPointerUpCapture={stopRightButtonMenuSelection}
         finalFocus={false}

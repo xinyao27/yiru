@@ -1,12 +1,10 @@
 /* eslint-disable max-lines -- Why: FileExplorer coordinates tree data, selection, drag/drop, and virtual rows; splitting it during this merge would obscure the interaction invariants. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useVirtualizer } from '@tanstack/react-virtual'
 import { useAppStore } from '@/store'
 import { useActiveWorktree, useRepoById } from '@/store/selectors'
-import { basename, dirname } from '@/lib/path'
+import { basename, dirname, normalizeRelativePath } from '@/lib/path'
 import { useRuntimeFileListForWorktree } from '@/components/quick-open-file-list'
 import { folderRelativePathToIncludeGlob } from './file-search-include-pattern'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
 import {
@@ -22,14 +20,18 @@ import { SearchQueryRow } from './SearchQueryRow'
 import { SearchResultsPane } from './SearchResultsPane'
 import { useFileSearchPanel } from './useFileSearchPanel'
 import { FileExplorerTreeStatus } from './FileExplorerTreeStatus'
-import { FileExplorerVirtualRows } from './FileExplorerVirtualRows'
 import {
   getNameFilterCollapsedPathsAfterExpand,
   getNextNameFilterCollapsedPaths,
   isFileExplorerNameFilterQueryTooLarge
 } from './file-explorer-name-filter-projection'
 import { splitPathSegments } from './path-tree'
-import { buildFolderStatusMap, buildStatusMap } from './status-display'
+import {
+  buildFolderStatusMap,
+  buildStatusMap,
+  shouldShowIgnoredDecoration,
+  STATUS_COLORS
+} from './status-display'
 import { useFileDeletion } from './useFileDeletion'
 import { useFileExplorerAutoReveal } from './useFileExplorerAutoReveal'
 import { useFileExplorerHandlers } from './useFileExplorerHandlers'
@@ -60,6 +62,9 @@ import {
   LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
   type RightSidebarPanelSource
 } from './right-sidebar-panel-source'
+import { PierreFileExplorerTree, type PierreFileExplorerTreeHandle } from './PierreFileExplorerTree'
+import { FileExplorerRow } from './FileExplorerRow'
+import { renameFileOnDisk } from '@/lib/rename-file'
 
 function FileExplorerFiles(): React.JSX.Element {
   const explorerView = useAppStore((s) => s.rightSidebarExplorerView)
@@ -229,8 +234,11 @@ function FileExplorerFiles(): React.JSX.Element {
   }, [setNameFilterQuery])
   const handleExplorerBackgroundContextMenuCapture = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
+      const isTreeRow = event.nativeEvent
+        .composedPath()
+        .some((entry) => entry instanceof HTMLElement && entry.dataset.type === 'item')
       const target = event.target as HTMLElement
-      if (target.closest('[data-slot="context-menu-trigger"]')) {
+      if (isTreeRow || target.closest('[data-slot="context-menu-trigger"]')) {
         return
       }
       event.preventDefault()
@@ -245,6 +253,7 @@ function FileExplorerFiles(): React.JSX.Element {
   const [bgMenuOpen, setBgMenuOpen] = useState(false)
   const [bgMenuPoint, setBgMenuPoint] = useState({ x: 0, y: 0 })
   const scrollRef = useRef<HTMLDivElement>(null)
+  const pierreTreeRef = useRef<PierreFileExplorerTreeHandle>(null)
   /** Includes Radix scroll viewport + scrollbar (scrollbar is not a child of the viewport). */
   const explorerShellRef = useRef<HTMLDivElement | null>(null)
   const flashTimeoutRef = useRef<number | null>(null)
@@ -256,7 +265,6 @@ function FileExplorerFiles(): React.JSX.Element {
     setSingleSelectedPath,
     setSelectedPaths,
     resetSelection,
-    selectRowWithModifiers,
     moveSelection,
     preserveSelectionForContextMenu,
     copyPathsForNode
@@ -281,7 +289,6 @@ function FileExplorerFiles(): React.JSX.Element {
   const {
     handleMoveDrop,
     handleDragExpandDir,
-    dropTargetDir,
     setDropTargetDir,
     dragSourcePath,
     setDragSourcePath,
@@ -352,28 +359,25 @@ function FileExplorerFiles(): React.JSX.Element {
     }
   }, [expanded, visibleFilesWorktreePath]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const {
-    inlineInput,
-    inlineInputIndex,
-    startNew,
-    startRename,
-    dismissInlineInput,
-    handleInlineSubmit
-  } = useFileExplorerInlineInput({
-    activeWorktreeId,
-    worktreePath: visibleFilesWorktreePath,
-    expanded,
-    rowProjection,
-    scrollRef,
-    refreshDir
-  })
+  const { inlineInput, startNew, startRename, dismissInlineInput, handleInlineSubmit } =
+    useFileExplorerInlineInput({
+      activeWorktreeId,
+      worktreePath: visibleFilesWorktreePath,
+      expanded,
+      rowProjection,
+      scrollRef,
+      refreshDir
+    })
   const handleExplorerBackgroundDoubleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (!worktreePath || inlineInput) {
         return
       }
+      const isTreeRow = event.nativeEvent
+        .composedPath()
+        .some((entry) => entry instanceof HTMLElement && entry.dataset.type === 'item')
       const target = event.target as HTMLElement
-      if (target.closest('[data-slot="context-menu-trigger"]')) {
+      if (isTreeRow || target.closest('[data-slot="context-menu-trigger"]')) {
         return
       }
       startNew('file', worktreePath, 0)
@@ -403,24 +407,20 @@ function FileExplorerFiles(): React.JSX.Element {
     setSelectedPath: setSingleSelectedPath
   })
 
-  const totalCount = visibleRowCount + (inlineInputIndex >= 0 ? 1 : 0)
-
-  const virtualizer = useVirtualizer({
-    count: totalCount,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => 26,
-    overscan: 20,
-    getItemKey: (index) => {
-      if (inlineInputIndex >= 0) {
-        if (index === inlineInputIndex) {
-          return '__inline_input__'
+  const explorerScrollController = useMemo(
+    () => ({
+      scrollToIndex: (index: number, options: { align: 'center' | 'auto' }) => {
+        const node = rowProjection.getRowAtIndex(index)
+        if (node) {
+          pierreTreeRef.current?.scrollToAbsolutePath(
+            node.path,
+            options.align === 'center' ? 'center' : 'nearest'
+          )
         }
-        const rowIndex = index > inlineInputIndex ? index - 1 : index
-        return rowProjection.getRowAtIndex(rowIndex)?.path ?? `__fallback_${index}`
       }
-      return rowProjection.getRowAtIndex(index)?.path ?? `__fallback_${index}`
-    }
-  })
+    }),
+    [rowProjection]
+  )
 
   const cancelRevealTimers = useFileExplorerReveal({
     activeWorktreeId,
@@ -435,7 +435,7 @@ function FileExplorerFiles(): React.JSX.Element {
     setSelectedPath: setSingleSelectedPath,
     setFlashingPath,
     flashTimeoutRef,
-    virtualizer
+    virtualizer: explorerScrollController
   })
   const setExplorerShellRef = useCallback(
     (node: HTMLDivElement | null): void => {
@@ -458,14 +458,8 @@ function FileExplorerFiles(): React.JSX.Element {
     openFiles,
     rowProjection,
     setSelectedPath: setSingleSelectedPath,
-    virtualizer
+    virtualizer: explorerScrollController
   })
-
-  useEffect(() => {
-    if (inlineInputIndex >= 0) {
-      virtualizer.scrollToIndex(inlineInputIndex, { align: 'auto' })
-    }
-  }, [inlineInputIndex, virtualizer])
 
   const selectedNode = selectedPath ? rowProjection.getRowByPath(selectedPath) : null
   const selectedNodes = useMemo(
@@ -485,7 +479,7 @@ function FileExplorerFiles(): React.JSX.Element {
       getNameFilterCollapsedPathsAfterExpand(current, dirPath)
     )
   }, [])
-  const { handleClick, handleDoubleClick, handleWheelCapture } = useFileExplorerHandlers({
+  const { handleClick, handleDoubleClick } = useFileExplorerHandlers({
     activeWorktreeId,
     runtimeEnvironmentId: activeRuntimeEnvironmentId,
     openFile,
@@ -509,9 +503,9 @@ function FileExplorerFiles(): React.JSX.Element {
   )
   const scrollToIndex = useCallback(
     (index: number) => {
-      virtualizer.scrollToIndex(index, { align: 'auto' })
+      explorerScrollController.scrollToIndex(index, { align: 'auto' })
     },
-    [virtualizer]
+    [explorerScrollController]
   )
 
   useFileExplorerKeys({
@@ -529,7 +523,8 @@ function FileExplorerFiles(): React.JSX.Element {
     requestDelete,
     requestDeleteAll,
     scrollToIndex,
-    activeWorktreeId
+    activeWorktreeId,
+    nativeTreeNavigation: true
   })
 
   // Why: context-menu Delete should respect the multi-selection — if the
@@ -547,11 +542,6 @@ function FileExplorerFiles(): React.JSX.Element {
   )
 
   const handleDuplicate = useFileDuplicate({ activeWorktreeId, worktreePath, refreshDir })
-  const handleRowClick = useCallback(
-    (node: TreeNode, event: React.MouseEvent<HTMLButtonElement>) =>
-      selectRowWithModifiers(node, event, handleClick),
-    [handleClick, selectRowWithModifiers]
-  )
   const handleCollapseFolderSubtree = useCallback(
     (node: TreeNode) => {
       if (!activeWorktreeId || !node.isDirectory) {
@@ -593,6 +583,21 @@ function FileExplorerFiles(): React.JSX.Element {
       createNewTerminalTab(activeWorktreeId, undefined, { startupCwd: node.path })
     },
     [activeWorktreeId]
+  )
+  const handlePierreRenameNode = useCallback(
+    (node: TreeNode, newName: string) => {
+      if (!activeWorktreeId || !worktreePath) {
+        return
+      }
+      void renameFileOnDisk({
+        oldPath: node.path,
+        newName,
+        worktreeId: activeWorktreeId,
+        worktreePath,
+        refreshDir
+      })
+    },
+    [activeWorktreeId, refreshDir, worktreePath]
   )
 
   if (!worktreePath) {
@@ -692,11 +697,9 @@ function FileExplorerFiles(): React.JSX.Element {
         {/* Why: the Files and Contents views share one body slot; layering them
            avoids remounting heavy virtualized panes while preserving full height. */}
         <div className="relative min-h-0 flex-1 overflow-hidden">
-          <ScrollArea
+          <div
             className={cn(
-              // Why: Radix ScrollArea.Root hard-sets inline `position: relative`,
-              // defeating `absolute`; size by height so the viewport can overflow.
-              'h-full min-h-0',
+              'h-full min-h-0 bg-sidebar py-2',
               explorerView !== 'files' && 'pointer-events-none invisible',
               isRootDragOver &&
                 explorerView === 'files' &&
@@ -704,12 +707,8 @@ function FileExplorerFiles(): React.JSX.Element {
                 'bg-border',
               isNativeDragOver && explorerView === 'files' && !nativeDropTargetDir && 'bg-border'
             )}
-            viewportRef={scrollRef}
-            viewportTabIndex={-1}
-            viewportClassName="h-full min-h-0 py-2"
             data-native-file-drop-target={isFilesViewActive ? 'file-explorer' : undefined}
             data-native-file-drop-dir={visibleFilesWorktreePath ?? undefined}
-            onWheelCapture={handleWheelCapture}
             onDragOver={rootDragHandlers.onDragOver}
             onDragEnter={rootDragHandlers.onDragEnter}
             onDragLeave={rootDragHandlers.onDragLeave}
@@ -718,10 +717,8 @@ function FileExplorerFiles(): React.JSX.Element {
               stopDragEdgeScroll()
               setDropTargetDir(null)
             }}
-            viewportProps={{
-              onContextMenuCapture: handleExplorerBackgroundContextMenuCapture,
-              onDoubleClick: handleExplorerBackgroundDoubleClick
-            }}
+            onContextMenuCapture={handleExplorerBackgroundContextMenuCapture}
+            onDoubleClick={handleExplorerBackgroundDoubleClick}
           >
             {!showTree && (
               <FileExplorerTreeStatus
@@ -732,53 +729,109 @@ function FileExplorerFiles(): React.JSX.Element {
               />
             )}
             {showTree && (
-              <FileExplorerVirtualRows
-                virtualizer={virtualizer}
-                inlineInputIndex={inlineInputIndex}
+              <PierreFileExplorerTree
+                ref={pierreTreeRef}
+                worktreePath={worktreePath}
                 rowProjection={rowProjection}
+                expandedPaths={rowExpandedPaths}
+                selectedPaths={selectedPaths}
+                flashingPath={flashingPath}
                 inlineInput={inlineInput}
-                handleInlineSubmit={handleInlineSubmit}
-                dismissInlineInput={dismissInlineInput}
-                folderStatusByRelativePath={folderStatusByRelativePath}
                 statusByRelativePath={statusByRelativePath}
                 ignoredByRelativePath={ignoredByRelativePath}
-                expanded={rowExpandedPaths}
-                canCollapseFolderSubtree={!hasNameFilter}
-                dirCache={dirCache}
-                selectedPaths={selectedPaths}
-                activeFileId={activeFileId}
-                flashingPath={flashingPath}
-                deleteShortcutLabel={deleteShortcutLabel}
-                connectionId={activeRepo?.connectionId ?? null}
-                runtimeDownloadContext={runtimeDownloadContext}
-                onClick={handleRowClick}
-                onDoubleClick={handleDoubleClick}
-                onViewFile={handleClick}
-                onContextMenuSelect={preserveSelectionForContextMenu}
-                onCopyPaths={copyPathsForNode}
-                onStartNew={startNew}
-                onStartRename={startRename}
-                onDuplicate={handleDuplicate}
-                onAddFolderAsProject={handleAddFolderAsProject}
-                canAddFolderAsProject={(node) => canShowAddAsProjectAction(node, activeRepo)}
-                onOpenInTerminal={handleOpenInTerminal}
-                onRequestDelete={handleContextMenuDelete}
-                onCollapseFolderSubtree={handleCollapseFolderSubtree}
-                onFindInFolder={handleFindInFolder}
+                scrollElementRef={scrollRef}
+                onActivateFile={handleClick}
+                onDoubleClickFile={handleDoubleClick}
+                onToggleDirectory={(node) => {
+                  if (hasNameFilter) {
+                    handleToggleNameFilterDir(activeWorktreeId!, node.path)
+                  } else {
+                    toggleDir(activeWorktreeId!, node.path)
+                  }
+                  if (!rowExpandedPaths.has(node.path)) {
+                    void loadDir(node.path, node.depth)
+                  }
+                }}
+                onSelectionChange={setSelectedPaths}
+                onRenameNode={handlePierreRenameNode}
+                onInlineInputSubmit={handleInlineSubmit}
+                onInlineInputCancel={dismissInlineInput}
                 onMoveDrop={handleMoveDrop}
-                onDragTargetChange={setDropTargetDir}
                 onDragSourceChange={setDragSourcePath}
-                onDragExpandDir={hasNameFilter ? handleExpandNameFilterDir : handleDragExpandDir}
                 onNativeDragTargetChange={setNativeDropTargetDir}
-                onNativeDragExpandDir={
+                onNativeDragExpandDirectory={
                   hasNameFilter ? handleExpandNameFilterDir : handleNativeDragExpandDir
                 }
-                dropTargetDir={dropTargetDir}
-                dragSourcePath={dragSourcePath}
-                nativeDropTargetDir={nativeDropTargetDir}
+                renderContextMenu={(node, context, isExpanded) => {
+                  const normalizedRelativePath = normalizeRelativePath(node.relativePath)
+                  const nodeStatus = node.isDirectory
+                    ? (folderStatusByRelativePath.get(normalizedRelativePath) ?? null)
+                    : (statusByRelativePath.get(normalizedRelativePath) ?? null)
+                  const isIgnored = shouldShowIgnoredDecoration(
+                    nodeStatus,
+                    ignoredByRelativePath,
+                    normalizedRelativePath
+                  )
+                  const rowParentDir = node.isDirectory ? node.path : dirname(node.path)
+                  return (
+                    <FileExplorerRow
+                      node={node}
+                      isExpanded={isExpanded}
+                      isLoading={node.isDirectory && Boolean(dirCache[node.path]?.loading)}
+                      isSelected={selectedPaths.has(node.path) || activeFileId === node.path}
+                      isFlashing={flashingPath === node.path}
+                      selectedPaths={selectedPaths}
+                      nodeStatus={nodeStatus}
+                      statusColor={nodeStatus ? STATUS_COLORS[nodeStatus] : null}
+                      isIgnored={isIgnored}
+                      deleteShortcutLabel={deleteShortcutLabel}
+                      connectionId={activeRepo?.connectionId ?? null}
+                      runtimeDownloadContext={runtimeDownloadContext}
+                      canCollapseFolderSubtree={!hasNameFilter}
+                      targetDir={node.isDirectory ? node.path : rowParentDir}
+                      targetDepth={node.isDirectory ? node.depth + 1 : node.depth}
+                      selectionSize={
+                        selectedPaths.has(node.path)
+                          ? rowProjection.countVisiblePaths(selectedPaths)
+                          : 1
+                      }
+                      onClick={() => undefined}
+                      onDoubleClick={() => undefined}
+                      onViewFile={() => handleClick(node)}
+                      onContextMenuSelect={() => preserveSelectionForContextMenu(node)}
+                      onCopyPaths={(pathKind) => copyPathsForNode(node, pathKind)}
+                      onStartNew={startNew}
+                      onStartRename={startRename}
+                      onDuplicate={handleDuplicate}
+                      onAddFolderAsProject={() => handleAddFolderAsProject(node)}
+                      canAddAsProject={canShowAddAsProjectAction(node, activeRepo)}
+                      onOpenInTerminal={() => handleOpenInTerminal(node)}
+                      onRequestDelete={() => handleContextMenuDelete(node)}
+                      onCollapseFolderSubtree={() => handleCollapseFolderSubtree(node)}
+                      onFindInFolder={() => handleFindInFolder(node)}
+                      onMoveDrop={handleMoveDrop}
+                      onDragTargetChange={setDropTargetDir}
+                      onDragSourceChange={setDragSourcePath}
+                      onDragExpandDir={
+                        hasNameFilter ? handleExpandNameFilterDir : handleDragExpandDir
+                      }
+                      onNativeDragTargetChange={setNativeDropTargetDir}
+                      onNativeDragExpandDir={
+                        hasNameFilter ? handleExpandNameFilterDir : handleNativeDragExpandDir
+                      }
+                      menuOnly
+                      menuPoint={{ x: context.anchorRect.x, y: context.anchorRect.y }}
+                      onMenuOpenChange={(open) => {
+                        if (!open) {
+                          context.close()
+                        }
+                      }}
+                    />
+                  )
+                }}
               />
             )}
-          </ScrollArea>
+          </div>
           <div
             className={cn(
               'absolute inset-0 flex min-h-0 flex-col',

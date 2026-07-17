@@ -1,12 +1,5 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MutableRefObject,
-  type ReactNode
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { MutableRefObject, ReactNode } from 'react'
 import type { DiffOnMount } from '@monaco-editor/react'
 import type { editor as monacoEditor } from 'monaco-editor'
 import { monaco } from '@/lib/monaco-setup'
@@ -33,7 +26,7 @@ import { useDiffSectionLayoutMetrics } from './useDiffSectionLayoutMetrics'
 import { disposeUnattachedMonacoModelPaths } from './diff-monaco-model-disposal'
 import { getLiveDiffSectionRenderLimit } from './diff-section-live-render-limit'
 import { useDiffSectionFallbackCleanup } from './useDiffSectionFallbackCleanup'
-import { submitDiffSectionComment } from './diff-section-comment-submit'
+import { useDiffSectionCommentActions } from './useDiffSectionCommentActions'
 
 export function DiffSectionItem({
   section,
@@ -243,22 +236,23 @@ export function DiffSectionItem({
     }
   }, [sideBySide])
 
-  const handleSubmitComment = async (body: string): Promise<void> => {
-    if (!popover) {
-      return
-    }
-    const submitted = await submitDiffSectionComment({
-      addDiffComment,
-      body,
-      onAddLineComment,
-      popover,
-      section,
-      worktreeId
-    })
-    if (submitted) {
-      setPopover(null)
-    }
-  }
+  const commentActions = useDiffSectionCommentActions({
+    addDiffComment,
+    deleteDiffComment,
+    diffComments,
+    getCommentableLineNumbers,
+    index,
+    inlineComments,
+    onAddLineComment,
+    pendingScrollCommentId: pendingScrollForThisSection,
+    popover,
+    section,
+    setPopover,
+    setScrollToDiffCommentId,
+    setSectionHeights,
+    updateDiffComment,
+    worktreeId
+  })
 
   const { lineStats, sectionBodyHeight, useIntrinsicImageHeight, isLargeDiffLimited } =
     useDiffSectionLayoutMetrics({
@@ -433,12 +427,13 @@ export function DiffSectionItem({
           diffWordWrap={settings?.diffWordWrap}
           terminalFontFamily={settings?.terminalFontFamily}
           onCancelComment={() => setPopover(null)}
-          onSubmitComment={handleSubmitComment}
+          onSubmitComment={commentActions.onSubmitComment}
           onRetrySection={retrySection}
           onSaveLimitedDiff={() => {
             void handleSectionSaveRef.current(index)
           }}
           onMount={handleMount}
+          pierreCommentProps={commentActions.pierreProps}
         />
       )}
     </div>

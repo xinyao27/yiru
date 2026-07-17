@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, RefObject, SetStateAction } from 'react'
-import type { Virtualizer } from '@tanstack/react-virtual'
 import { useAppStore } from '@/store'
 import { getRevealAncestorDirs } from './file-explorer-paths'
 import type { DirCache } from './file-explorer-types'
@@ -24,7 +23,9 @@ type UseFileExplorerRevealParams = {
   setSelectedPath: (path: string | null) => void
   setFlashingPath: Dispatch<SetStateAction<string | null>>
   flashTimeoutRef: RefObject<number | null>
-  virtualizer: Virtualizer<HTMLDivElement, Element>
+  virtualizer: {
+    scrollToIndex: (index: number, options: { align: 'center' | 'auto' }) => void
+  }
 }
 
 export function useFileExplorerReveal({

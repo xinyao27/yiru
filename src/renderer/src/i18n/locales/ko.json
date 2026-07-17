@@ -10558,6 +10558,9 @@
             "workspaceGone": "Couldn't open log — workspace is no longer available.",
             "notAuthorized": "Couldn't open log — path not authorized.",
             "alreadyEditable": "Log is already open for editing."
+          },
+          "PierreFileExplorerTree": {
+            "copied": "복사됨"
           }
         }
       },
@@ -12335,6 +12338,11 @@
         },
         "richMarkdownSourceOwningCutFeedback": {
           "selectLessContent": "보존된 HTML 인용을 잘라내려면 더 적은 콘텐츠를 선택하거나 코드 모드를 사용하세요."
+        },
+        "PierreDiffViewer": {
+          "copy": "복사",
+          "selectAll": "모두 선택",
+          "copyPath": "경로 복사"
         }
       },
       "diff": {

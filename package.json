@@ -134,6 +134,8 @@
     "@electron-toolkit/tsconfig": "^2.0.0",
     "@electron/rebuild": "^4.2.0",
     "@monaco-editor/react": "^4.7.0",
+    "@pierre/diffs": "1.2.12",
+    "@pierre/trees": "1.0.0-beta.5",
     "@playwright/test": "^1.59.1",
     "@sanity/diff-match-patch": "^3.2.0",
     "@tailwindcss/vite": "^4.2.4",
