@@ -187,7 +187,7 @@ jobs:
           # the PR title if creation reports that one already exists.
           gh pr create \
             --title "$TITLE" \
-            --body "Automated bump of $CASK_PATH from paperboytm/yiru release $TAG." \
+            --body "Automated bump of $CASK_PATH from xinyao27/yiru release $TAG." \
             --base main \
             --head "$branch" \
             || gh pr edit "$branch" --title "$TITLE"

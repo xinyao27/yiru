@@ -180,7 +180,7 @@ export async function createDraftRelease({
 async function main() {
   const tag = process.argv[2]
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN
-  const repo = process.env.GITHUB_REPOSITORY || 'paperboytm/yiru'
+  const repo = process.env.GITHUB_REPOSITORY || 'xinyao27/yiru'
   await createDraftRelease({ repo, tag, token })
 }
 

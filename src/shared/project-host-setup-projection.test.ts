@@ -21,9 +21,9 @@ describe('project host setup projection', () => {
   it('exposes only cross-host-stable Project identities', () => {
     expect(
       getPortableProjectIdentityKey({
-        providerIdentity: { provider: 'github', owner: 'PaperBoyTM', repo: 'Yiru' }
+        providerIdentity: { provider: 'github', owner: 'XinYao27', repo: 'Yiru' }
       })
-    ).toBe('github:paperboytm/yiru')
+    ).toBe('github:xinyao27/yiru')
     expect(
       getPortableProjectIdentityKey({
         gitRemoteIdentity: {

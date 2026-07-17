@@ -8,7 +8,7 @@ import { AgentSkillSetupPanel } from './AgentSkillSetupPanel'
 import { TooltipProvider } from '../ui/tooltip'
 
 const INSTALL_COMMAND =
-  'npx skills add https://github.com/paperboytm/yiru --skill yiru-cli --global'
+  'npx skills add https://github.com/xinyao27/yiru --skill yiru-cli --global'
 const UPDATE_COMMAND = 'npx skills update yiru-cli --global'
 
 const mocks = vi.hoisted(() => ({

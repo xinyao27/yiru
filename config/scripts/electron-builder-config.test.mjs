@@ -23,7 +23,7 @@ describe('electron-builder config', () => {
   it('publishes desktop updates to the canonical GitHub repository', () => {
     expect(electronBuilderConfig.publish).toEqual({
       provider: 'github',
-      owner: 'paperboytm',
+      owner: 'xinyao27',
       repo: 'yiru',
       releaseType: 'release'
     })
@@ -36,7 +36,7 @@ describe('electron-builder config', () => {
 
     expect(devUpdateConfig).toMatchObject({
       provider: 'github',
-      owner: 'paperboytm',
+      owner: 'xinyao27',
       repo: 'yiru'
     })
   })

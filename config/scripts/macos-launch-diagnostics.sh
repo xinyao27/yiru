@@ -6,7 +6,7 @@
 #   bash config/scripts/macos-launch-diagnostics.sh --tag v1.4.42-rc.1
 set -euo pipefail
 
-REPO="${YIRU_DIAGNOSTIC_REPO:-paperboytm/yiru}"
+REPO="${YIRU_DIAGNOSTIC_REPO:-xinyao27/yiru}"
 TAG="${YIRU_DIAGNOSTIC_TAG:-}"
 KEEP=0
 

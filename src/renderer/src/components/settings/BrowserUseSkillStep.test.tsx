@@ -16,7 +16,7 @@ vi.mock('./AgentSkillSetupPanel', () => ({
 describe('BrowserUseSkillStep', () => {
   it('forwards a single-skill installed command even when setup installs a bundle', () => {
     const bundleInstallCommand =
-      'npx skills add https://github.com/paperboytm/yiru --skill yiru-cli orchestration --global'
+      'npx skills add https://github.com/xinyao27/yiru --skill yiru-cli orchestration --global'
     const updateCommand = 'npx skills update yiru-cli --global'
 
     renderToStaticMarkup(

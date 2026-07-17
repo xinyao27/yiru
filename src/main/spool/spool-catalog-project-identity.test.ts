@@ -32,7 +32,7 @@ describe('Spool catalog Project identity', () => {
     const resolved = sanitizeCatalogWorktreeDescription(instance, {
       kind: 'git',
       projectKey: 'project:local-project-id',
-      projectIdentityKey: 'github:paperboytm/yiru',
+      projectIdentityKey: 'github:xinyao27/yiru',
       projectName: 'yiru',
       worktreeName: 'worktree-one',
       branch: 'feature/one'
@@ -42,7 +42,7 @@ describe('Spool catalog Project identity', () => {
     const references = new SpoolCatalogReferenceTable()
     references.reconcile(buildCatalogReferenceBindings([resolved!], 1, 0))
     const projects = projectCatalogEntries([resolved!], references, 1, 0)
-    expect(projects[0]?.projectRef).toBe('github:paperboytm/yiru')
+    expect(projects[0]?.projectRef).toBe('github:xinyao27/yiru')
 
     expect(
       isSpoolDesktopCatalog(

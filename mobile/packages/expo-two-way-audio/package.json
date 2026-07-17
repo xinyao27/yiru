@@ -9,15 +9,15 @@
     "expo-two-way-audio",
     "react-native"
   ],
-  "homepage": "https://github.com/paperboytm/yiru/tree/main/mobile/packages/expo-two-way-audio",
+  "homepage": "https://github.com/xinyao27/yiru/tree/main/mobile/packages/expo-two-way-audio",
   "bugs": {
-    "url": "https://github.com/paperboytm/yiru/issues"
+    "url": "https://github.com/xinyao27/yiru/issues"
   },
   "license": "MIT",
   "author": "Yiru contributors",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/paperboytm/yiru.git",
+    "url": "git+https://github.com/xinyao27/yiru.git",
     "directory": "mobile/packages/expo-two-way-audio"
   },
   "main": "src/index.ts",

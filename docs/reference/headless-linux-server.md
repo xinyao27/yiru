@@ -22,7 +22,7 @@ Download and make the AppImage executable:
 
 ```bash
 sudo mkdir -p /opt/yiru
-sudo curl -L https://github.com/paperboytm/yiru/releases/latest/download/yiru-linux.AppImage \
+sudo curl -L https://github.com/xinyao27/yiru/releases/latest/download/yiru-linux.AppImage \
   -o /opt/yiru/yiru-linux.AppImage
 sudo chmod +x /opt/yiru/yiru-linux.AppImage
 ```

@@ -71,17 +71,17 @@ describe('fetchReleases', () => {
       .mockResolvedValueOnce(jsonResponse(firstPage))
       .mockResolvedValueOnce(jsonResponse([{ tag_name: 'v1.4.44', draft: false }]))
 
-    const releases = await fetchReleases('paperboytm/yiru', 'token', fetchImpl)
+    const releases = await fetchReleases('xinyao27/yiru', 'token', fetchImpl)
 
     expect(releases).toHaveLength(101)
     expect(fetchImpl).toHaveBeenNthCalledWith(
       1,
-      'https://api.github.com/repos/paperboytm/yiru/releases?per_page=100&page=1',
+      'https://api.github.com/repos/xinyao27/yiru/releases?per_page=100&page=1',
       expect.any(Object)
     )
     expect(fetchImpl).toHaveBeenNthCalledWith(
       2,
-      'https://api.github.com/repos/paperboytm/yiru/releases?per_page=100&page=2',
+      'https://api.github.com/repos/xinyao27/yiru/releases?per_page=100&page=2',
       expect.any(Object)
     )
   })

@@ -119,7 +119,7 @@ describe('onboarding feature setup runner', () => {
 
     expect(text).toBe(ALL_SKILL_INSTALL_COMMAND)
     expect(text).toBe(
-      'npx skills add https://github.com/paperboytm/yiru --skill yiru-cli computer-use orchestration yiru-linear --global'
+      'npx skills add https://github.com/xinyao27/yiru --skill yiru-cli computer-use orchestration yiru-linear --global'
     )
   })
 

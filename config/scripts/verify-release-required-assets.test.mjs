@@ -100,7 +100,7 @@ describe('verifyRequiredReleaseAssets', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     await expect(
-      verifyRequiredReleaseAssets({ repo: 'paperboytm/yiru', tag, token: 'token' })
+      verifyRequiredReleaseAssets({ repo: 'xinyao27/yiru', tag, token: 'token' })
     ).rejects.toThrow('Missing: Yiru-1.4.27-arm64-mac.zip')
     expect(latestMacAsset).toBeTruthy()
   })
@@ -128,7 +128,7 @@ describe('verifyRequiredReleaseAssets', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     await expect(
-      verifyRequiredReleaseAssets({ repo: 'paperboytm/yiru', tag, token: 'token' })
+      verifyRequiredReleaseAssets({ repo: 'xinyao27/yiru', tag, token: 'token' })
     ).rejects.toThrow('Missing: yiru-linux-arm64.AppImage.blockmap')
     expect(arm64Manifest).toBeTruthy()
   })

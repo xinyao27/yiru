@@ -1,6 +1,6 @@
 // Why: updater, support, and install surfaces must move together when the
 // canonical product repository changes.
-export const YIRU_GITHUB_REPOSITORY_OWNER = 'paperboytm'
+export const YIRU_GITHUB_REPOSITORY_OWNER = 'xinyao27'
 export const YIRU_GITHUB_REPOSITORY_NAME = 'yiru'
 export const YIRU_GITHUB_REPOSITORY_SLUG = `${YIRU_GITHUB_REPOSITORY_OWNER}/${YIRU_GITHUB_REPOSITORY_NAME}`
 export const YIRU_GITHUB_REPOSITORY_HOST_PATH = `github.com/${YIRU_GITHUB_REPOSITORY_SLUG}`

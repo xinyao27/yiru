@@ -337,7 +337,7 @@ module.exports = {
       featureWallResources
     ],
     target: ['AppImage', 'deb'],
-    maintainer: 'stablyai',
+    maintainer: 'xinyao27',
     category: 'Utility'
   },
   appImage: {
@@ -392,7 +392,7 @@ module.exports = {
   npmRebuild: true,
   publish: {
     provider: 'github',
-    owner: 'paperboytm',
+    owner: 'xinyao27',
     repo: 'yiru',
     releaseType: 'release'
   }

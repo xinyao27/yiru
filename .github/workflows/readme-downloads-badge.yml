@@ -20,7 +20,7 @@ concurrency:
 jobs:
   update:
     # Why: this workflow commits to main, so forks should not create divergent badge commits.
-    if: github.repository == 'paperboytm/yiru'
+    if: github.repository == 'xinyao27/yiru'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main

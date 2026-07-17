@@ -1495,7 +1495,7 @@ async function countWorkItemsForQuery(
 
 function sameOwnerRepo(left: OwnerRepo | null, right: OwnerRepo | null): boolean {
   // Why: GitHub treats owner and repo names as case-insensitive, so remotes
-  // with different casing (Paperboytm/Yiru vs paperboytm/yiru) point at the same
+  // with different casing (Xinyao27/Yiru vs xinyao27/yiru) point at the same
   // repo and should not split into two search queries.
   return (
     left?.owner.toLowerCase() === right?.owner.toLowerCase() &&

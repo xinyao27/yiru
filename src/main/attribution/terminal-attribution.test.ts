@@ -774,7 +774,7 @@ exit 1
     )
 
     expect(readFileSync(join(attributionRoot, 'VERSION'), 'utf8')).toBe('7\n')
-    expect(readFileSync(join(posixDir, 'gh'), 'utf8')).toContain('github.com/paperboytm/yiru')
+    expect(readFileSync(join(posixDir, 'gh'), 'utf8')).toContain('github.com/xinyao27/yiru')
   })
 
   it('puts only Windows shims on PATH for native Windows shells', () => {
@@ -836,7 +836,7 @@ exit 1
     expect(gitWrapper).toContain('"`r`n`r`n"')
     expect(ghWrapper).toContain('$body.TrimEnd("`r", "`n")')
     expect(ghWrapper).toContain('"`r`n`r`n"')
-    expect(ghWrapper).toContain('github.com/paperboytm/yiru')
+    expect(ghWrapper).toContain('github.com/xinyao27/yiru')
     expect(ghWrapper).not.toContain('github.com/stablyai/yiru')
     expect(gitWrapper).not.toContain('"\\`r"')
     expect(ghWrapper).not.toContain('"\\`r"')

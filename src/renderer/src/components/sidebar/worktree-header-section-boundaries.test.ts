@@ -42,7 +42,7 @@ describe('workspace project header section boundaries', () => {
       desktopRef: 'desktop-chen',
       connectionEpoch: 1,
       projectRef: 'project-yiru',
-      projectIdentityKey: 'github:paperboytm/yiru',
+      projectIdentityKey: 'github:xinyao27/yiru',
       worktreeRef: 'worktree-one',
       shareEpoch: 'share-one',
       desktop: {
