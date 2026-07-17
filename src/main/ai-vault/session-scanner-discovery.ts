@@ -17,7 +17,7 @@ export async function discoverFiles(args: {
   issues: AiVaultScanIssue[]
   extensions: string[]
   filePredicate?: (path: string) => boolean
-  directoryPredicate?: (name: string) => boolean
+  directoryPredicate?: (name: string, depth: number) => boolean
   readErrorPolicy?: 'collect' | 'throw-except-missing'
   maxEntries?: number
   maxCandidates?: number
@@ -94,16 +94,17 @@ export async function walkSessionFiles(
   options: {
     extensions: Set<string>
     filePredicate?: (path: string) => boolean
-    // Return false to skip descending into a directory (matched by its name),
-    // so pruned subtrees are never stat'd or parsed.
-    directoryPredicate?: (name: string) => boolean
+    // Return false to skip descending into a directory; depth 0 is a child of
+    // rootDir, so pruned subtrees are never stat'd or parsed.
+    directoryPredicate?: (name: string, depth: number) => boolean
     readErrorPolicy?: 'collect' | 'throw-except-missing'
     maxEntries?: number
     maxCandidates?: number
     maxPathBytes?: number
     budget?: SessionFileDiscoveryBudget
     signal?: AbortSignal
-  }
+  },
+  depth = 0
 ): Promise<string[]> {
   options.budget ??= { entries: 0, candidates: 0, pathBytes: 0 }
   options.signal?.throwIfAborted()
@@ -128,8 +129,8 @@ export async function walkSessionFiles(
       if (entry.isDirectory()) {
         // Skip whole subtrees an agent never wants (e.g. subagent transcripts),
         // avoiding the readdir cost of descending into them.
-        if (options.directoryPredicate?.(entry.name) ?? true) {
-          files.push(...(await walkSessionFiles(fullPath, agent, issues, options)))
+        if (options.directoryPredicate?.(entry.name, depth) ?? true) {
+          files.push(...(await walkSessionFiles(fullPath, agent, issues, options, depth + 1)))
         }
         continue
       }

@@ -2,13 +2,7 @@
   "schemaVersion": 1,
   "updatedAt": "2026-07-13",
   "policy": {
-    "maturityLevels": [
-      "experimental",
-      "soak",
-      "blocking",
-      "accepted-gap",
-      "deprecated"
-    ],
+    "maturityLevels": ["experimental", "soak", "blocking", "accepted-gap", "deprecated"],
     "blockingPromotion": {
       "minimumSoakRuns": 100,
       "minimumSoakDays": 14,
@@ -28,26 +22,12 @@
         "worktree discovery",
         "Source Control status refresh"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "ssh"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
-      "coveredProviders": [
-        "local",
-        "ssh"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "ssh"],
+      "coveredPlatforms": ["macos"],
+      "coveredProviders": ["local", "ssh"],
       "coverageNotes": "Local deterministic evidence covers git-common classification, desktop watcher debounce counts, non-overlapping poller semantics, macOS native-watch fallback, preload cleanup, and Source Control active-visible repo filtering. Linux/Windows are covered at the shared poller layer by forcing the non-darwin path; live platform runs remain gaps.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/7086"
-      ],
+      "motivatingLinks": ["https://github.com/stablyai/yiru/pull/7086"],
       "invariant": "Index-only Git activity below the common Git directory must not emit worktrees:changed, invalidate worktree caches, or trigger fetchWorktrees fanout; structural add/remove/HEAD/gitdir/locked/config.worktree changes must still refresh worktrees and nudge Source Control; external head moves (commit, amend, reset) must reach background worktree rows through spawn-free metadata reads, never through structural fanout.",
       "oracle": "Classify exact git-common paths as structural, status-only, or ignored; count notifications from debounced watcher events; force the Linux/Windows poll path to emit allowlisted leaf events, detect linked HEAD rewrites independent of entry-directory mtime, and surface in-place index rewrites via the backstop re-stat; diff head identities from metadata-file reads and notify only real head moves; assert Source Control subscribes to both structural and status-only signals with active-repo and visibility filters.",
       "commands": [
@@ -173,28 +153,12 @@
         "CLI open",
         "persistent terminal reattach"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
-      "coveredProviders": [
-        "local",
-        "daemon",
-        "ssh"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh"],
+      "coveredPlatforms": ["macos"],
+      "coveredProviders": ["local", "daemon", "ssh"],
       "coverageNotes": "Deterministic unit coverage exercises activation gating, single-instance ownership, quit policy, local/remote CLI status, headless binding persistence, local daemon identity, and SSH identity transfer. A macOS Electron journey starts one headless owner in an isolated profile, creates and writes to a daemon PTY, activates the GUI through a second process, and verifies the original owner/runtime/daemon/PTY identities plus pre- and post-promotion I/O. Live packaged, Linux, and Windows journeys remain uncollected.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/issues/8457"
-      ],
+      "motivatingLinks": ["https://github.com/stablyai/yiru/issues/8457"],
       "invariant": "A safely promotable headless serve process is the single app owner. Desktop activation opens a window in that same process only after the persistent PTY provider and runtime RPC are ready; every live persisted local or SSH terminal remains bound to the same PTY/session, and a committed Cmd+Q still exits the promoted app.",
       "oracle": "Unit tests coalesce early activation, fail closed on a fallback local provider, preserve the production single-instance path for serve, expose explicit desktop window state to local and remote clients, persist headless tab/leaf bindings, transfer local and SSH reattach metadata, and retain quit intent. The Electron journey asserts one main-process PID, runtime id, daemon PID, and PTY id across activation; confirms output written before promotion is visible afterward; confirms new terminal input still works; and requires the activating second process to exit.",
       "commands": [
@@ -326,7 +290,11 @@
       "protection": "partial",
       "owner": "editor-runtime",
       "layer": "renderer-electron-contract",
-      "surfaces": ["Agent Session History View Log", "Monaco external-content reconciliation", "renderer crash containment"],
+      "surfaces": [
+        "Agent Session History View Log",
+        "Monaco external-content reconciliation",
+        "renderer crash containment"
+      ],
       "platforms": ["macos", "linux", "windows"],
       "providers": ["local"],
       "coveredPlatforms": ["macos"],
@@ -363,7 +331,9 @@
         },
         {
           "file": "src/renderer/src/components/editor/monaco-content-sync.undo-history.test.ts",
-          "assertions": ["a real Monaco read-only live-tail append leaves canUndo false while an ordinary external update remains undoable"]
+          "assertions": [
+            "a real Monaco read-only live-tail append leaves canUndo false while an ordinary external update remains undoable"
+          ]
         },
         {
           "file": "src/renderer/src/components/editor/MonacoEditor.content-owner.test.tsx",
@@ -371,15 +341,21 @@
         },
         {
           "file": "src/renderer/src/components/editor/EditorContent.monaco-lifecycle.test.tsx",
-          "assertions": ["a same-pane path switch unmounts the prior outer Monaco before real mount reconciliation refreshes the stale target; the prior retained model content and undo sentinel remain untouched"]
+          "assertions": [
+            "a same-pane path switch unmounts the prior outer Monaco before real mount reconciliation refreshes the stale target; the prior retained model content and undo sentinel remain untouched"
+          ]
         },
         {
           "file": "src/renderer/src/components/editor/monaco-content-sync.bench.ts",
-          "assertions": ["with forced GC and deterministic settlement between every arm, fresh real-Monaco 9 MiB and 50 MiB models alternate 30 append and 30 replacement samples after five warmups; append p95 stays below 50/100ms and at least 2x faster"]
+          "assertions": [
+            "with forced GC and deterministic settlement between every arm, fresh real-Monaco 9 MiB and 50 MiB models alternate 30 append and 30 replacement samples after five warmups; append p95 stays below 50/100ms and at least 2x faster"
+          ]
         },
         {
           "file": "src/renderer/src/components/editor/monaco-content-sync.undo-retention.bench.ts",
-          "assertions": ["five 10 MiB read-only live-tail appends retain zero Monaco undo-service and ArrayBuffer bytes while the undoable control retains at least 50 MiB"]
+          "assertions": [
+            "five 10 MiB read-only live-tail appends retain zero Monaco undo-service and ArrayBuffer bytes while the undoable control retains at least 50 MiB"
+          ]
         },
         {
           "file": "tests/e2e/agent-session-log-tail-stability.spec.ts",
@@ -448,17 +424,27 @@
           "summary": "The production View Log journey preserved viewport, selection, Find state, renderer liveness, and forced-GC/native budgets across three watcher appends while canUndo remained false."
         }
       ],
-      "runtimeBudget": { "p95Seconds": 600, "scope": "local focused renderer tests plus one Electron production-journey scenario" },
-      "flakeHistory": { "status": "unknown", "evidence": "New deterministic gate with local macOS passes; CI soak history is not yet available." },
-      "redGreenEvidence": { "status": "complete", "evidence": "A fail-first real-Monaco test observed canUndo=true after one read-only live-tail append, and the forced-GC 50 MiB control retained 104,858,630 bytes in Monaco's undo service. After the fix the read-only arm retained zero undo-service bytes while the editable control stayed undoable. The retained Electron gate also proves each fixed watcher arm preserves viewport, selection, Find state, and non-undoability. Production builds never install its legacy setValue control." },
-      "performanceBudget": { "required": true, "evidence": "Every update retrieves the model value once and performs at most one equality-or-prefix comparison; a matching append submits only the suffix. The registered Node commands require --expose-gc and --pool=threads so worker GC is available. Current p95: 9 MiB append 5.93-7.12ms versus replacement 114.09-145.89ms; 50 MiB append 26.84-34.91ms versus replacement 602.36-699.21ms. The new 50 MiB retention arm measured 104,858,630 undo-service bytes and 104,857,790 ArrayBuffer bytes for the undoable control versus zero for read-only live-tail sync. Electron forced-GC JS-heap, renderer working-set, and OS-private-memory budgets also pass." },
+      "runtimeBudget": {
+        "p95Seconds": 600,
+        "scope": "local focused renderer tests plus one Electron production-journey scenario"
+      },
+      "flakeHistory": {
+        "status": "unknown",
+        "evidence": "New deterministic gate with local macOS passes; CI soak history is not yet available."
+      },
+      "redGreenEvidence": {
+        "status": "complete",
+        "evidence": "A fail-first real-Monaco test observed canUndo=true after one read-only live-tail append, and the forced-GC 50 MiB control retained 104,858,630 bytes in Monaco's undo service. After the fix the read-only arm retained zero undo-service bytes while the editable control stayed undoable. The retained Electron gate also proves each fixed watcher arm preserves viewport, selection, Find state, and non-undoability. Production builds never install its legacy setValue control."
+      },
+      "performanceBudget": {
+        "required": true,
+        "evidence": "Every update retrieves the model value once and performs at most one equality-or-prefix comparison; a matching append submits only the suffix. The registered Node commands require --expose-gc and --pool=threads so worker GC is available. Current p95: 9 MiB append 5.93-7.12ms versus replacement 114.09-145.89ms; 50 MiB append 26.84-34.91ms versus replacement 602.36-699.21ms. The new 50 MiB retention arm measured 104,858,630 undo-service bytes and 104,857,790 ArrayBuffer bytes for the undoable control versus zero for read-only live-tail sync. Electron forced-GC JS-heap, renderer working-set, and OS-private-memory budgets also pass."
+      },
       "promotionCriteria": [
         "Collect stable soak history on macOS, Linux, and Windows.",
         "Accumulate 100 consecutive deterministic gate passes or 14 days without unexplained flakes."
       ],
-      "knownGaps": [
-        "No live Windows or Linux View Log evidence yet."
-      ],
+      "knownGaps": ["No live Windows or Linux View Log evidence yet."],
       "demotionRule": "Quarantine the Electron scenario if it flakes without a product or harness bug; demote if viewport/Find drift, renderer loss, p95 regression, or memory retention exceeds the registered budgets."
     },
     {
@@ -468,23 +454,10 @@
       "protection": "partial",
       "owner": "terminal-runtime",
       "layer": "renderer-unit",
-      "surfaces": [
-        "terminal lifecycle",
-        "dead-session reconciliation",
-        "tab creation"
-      ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "surfaces": ["terminal lifecycle", "dead-session reconciliation", "tab creation"],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence over the reconcile guards that exist on main@1282f5c2d. Broader targeted-hasPty resume paths, no-hot listing counts, and live Electron survival arrive with the pending reliability stack.",
       "motivatingLinks": [
@@ -564,31 +537,12 @@
         "Manage Sessions",
         "Resource Manager"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "wsl",
-        "remote-runtime",
-        "mobile-relay"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
-      "coveredProviders": [
-        "local",
-        "daemon",
-        "ssh"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "wsl", "remote-runtime", "mobile-relay"],
+      "coveredPlatforms": ["macos"],
+      "coveredProviders": ["local", "daemon", "ssh"],
       "coverageNotes": "Local macOS deterministic evidence covers the renderer snapshot/coordinator, exact local and SSH-shaped PTY request settlement, active-last and pinned terminal-tab routing, component-unmount continuation, and the existing current/legacy daemon management contract. Windows Electron process absence, live SSH/WSL behavior, and remote-runtime/mobile host completion remain explicit gaps.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/issues/8001"
-      ],
+      "motivatingLinks": ["https://github.com/stablyai/yiru/issues/8001"],
       "invariant": "Every terminal surface confirmed in the invoking renderer is force-closed exactly once after daemon management settles, later-created surfaces and non-terminal tabs survive, and exact shutdown requests are limited to deduplicated current non-runtime PTY bindings of the confirmed surfaces.",
       "oracle": "Snapshot terminal entity IDs before the first await; mutate ownership, active selection, bindings, and tab presence while daemon management is pending and between bounded close batches; then assert only the immutable targets disappear from both terminal stores, active targets close last with valid editor/browser/deactivated post-state, every captured exact PTY promise settles before callbacks, and no provider inventory sweep or late-tab kill occurs.",
       "commands": [
@@ -691,26 +645,10 @@
         "hidden terminal parking",
         "agent resume authority"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
-      "coveredProviders": [
-        "local",
-        "daemon",
-        "ssh",
-        "runtime"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "runtime"],
+      "coveredPlatforms": ["macos"],
+      "coveredProviders": ["local", "daemon", "ssh", "runtime"],
       "coverageNotes": "Live macOS Electron tests prove exact local PTY disappearance after parked-tab close and detached-pgid descendant death after agent close. Deterministic tests cover daemon and SSH routing, local/daemon pending-snapshot ownership across natural exit, stale-root descendant-signal suppression, graceful-to-immediate kill upgrades, duplicate-kill completion sharing, locale-stable bounded/fresh/coalesced process-table reads, deadline-safe successor scans, cycle-safe linear descendant traversal, target-only escalation indexing, 32-wide bulk teardown, source-scan timestamp identity, same-second PID ambiguity, ordinary runtime close ownership, unified-only hydration, split ownership, pane detach transfer, restart alias hydration, and late-hook suppression; live Linux, Windows, WSL, SSH, and remote-runtime process evidence remains pending.",
       "motivatingLinks": [
         "https://github.com/stablyai/yiru/pull/8628",
@@ -865,33 +803,11 @@
       "protection": "partial",
       "owner": "terminal-runtime",
       "layer": "shared-main-renderer-contract",
-      "surfaces": [
-        "terminal lifecycle",
-        "tab creation",
-        "PTY spawn",
-        "startup cwd persistence"
-      ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows",
-        "mobile"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "wsl",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
-      "coveredProviders": [
-        "local",
-        "ssh",
-        "remote-runtime"
-      ],
+      "surfaces": ["terminal lifecycle", "tab creation", "PTY spawn", "startup cwd persistence"],
+      "platforms": ["macos", "linux", "windows", "mobile"],
+      "providers": ["local", "daemon", "ssh", "wsl", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
+      "coveredProviders": ["local", "ssh", "remote-runtime"],
       "coverageNotes": "Local macOS evidence covers the shared missing-dir fallback policy, main pty:spawn recovery and metadata, no-flag and reattach strictness, renderer IPC flag routing, SSH-tagged and remote-runtime omission, and the visibility-gated terminal notice. Daemon shares the same pre-provider main cwd decision but lacks a live daemon-provider run; WSL UNC paths are exempt from the probe by design and lack a live run; Linux/Windows and mobile/API strictness are gaps.",
       "motivatingLinks": [
         "https://github.com/stablyai/yiru/issues/7239",
@@ -1028,21 +944,9 @@
         "runtime reload and session replacement",
         "loopback restart and stall recovery"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "wsl",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "wsl", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS execution of the generated Pi/OMP extension plus the shared hook normalizer. WSL fallback behavior is covered with mocked native-fetch failure and Windows curl handoff. Daemon PTYs use the same generated extension without a distinct delivery path. SSH/relay ingest uses the shared normalizer, but no live remote Pi process is exercised.",
       "motivatingLinks": [
@@ -1132,21 +1036,9 @@
         "provider session dedupe",
         "sidebar and mobile identity"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "wsl",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "wsl", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence over the ownership/dedupe suite on main@1282f5c2d. Queued/pending resume-claim indexing, same-session and wrong-session hook proofs, and Electron repeat-activation coverage arrive with the pending stack (#7008).",
       "motivatingLinks": [
@@ -1160,9 +1052,7 @@
       "commands": [
         "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/lib/resume-sleeping-agent-session.test.ts"
       ],
-      "testFiles": [
-        "src/renderer/src/lib/resume-sleeping-agent-session.test.ts"
-      ],
+      "testFiles": ["src/renderer/src/lib/resume-sleeping-agent-session.test.ts"],
       "assertionRefs": [
         {
           "file": "src/renderer/src/lib/resume-sleeping-agent-session.test.ts",
@@ -1220,26 +1110,10 @@
       "protection": "partial",
       "owner": "terminal-rendering",
       "layer": "renderer-provider-contract",
-      "surfaces": [
-        "PTY sizing",
-        "split layout",
-        "restore",
-        "hidden-to-visible transitions"
-      ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "surfaces": ["PTY sizing", "split layout", "restore", "hidden-to-visible transitions"],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence on main@1282f5c2d, including #7192's runtime-mirror geometry authority slice. Shell-visible size, SSH/remote geometry, Windows ConPTY readback, and resume-time reassertion coverage arrive with the pending stack and #7006.",
       "motivatingLinks": [
@@ -1341,27 +1215,10 @@
       "protection": "partial",
       "owner": "terminal-rendering",
       "layer": "renderer-unit",
-      "surfaces": [
-        "terminal search",
-        "links",
-        "WebGL",
-        "decorations",
-        "keyboard navigation"
-      ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "surfaces": ["terminal search", "links", "WebGL", "decorations", "keyboard navigation"],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence over the WebGL/link/search containment suites on main@1282f5c2d, adopting the #6949 atlas-recovery rename and #7133's reveal hardening tests. Core addon-load throw containment and live typed-input survival arrive with #7004 and a live follow-up.",
       "motivatingLinks": [
@@ -1485,34 +1342,18 @@
         "xterm scrollbar DOM",
         "scrollback"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "wsl",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "wsl", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Renderer-unit coverage proves the shared xterm DOM intent path. Live Electron evidence is PR validation evidence for local macOS only until the flow has stable automation; live SSH, WSL, Linux, and Windows paths remain unproved.",
-      "motivatingLinks": [
-        "STA-1341"
-      ],
+      "motivatingLinks": ["STA-1341"],
       "invariant": "A user-driven xterm scrollbar thumb or track scroll updates the live terminal scroll intent before tab, visibility, or layout resume enforces intent, so resume preserves the latest dragged viewport instead of an older pinned line.",
       "oracle": "Pointerdown on .xterm-scrollbar or .xterm-slider followed by xterm viewport movement records the new pinned viewport, and enforcing current intent restores that dragged line instead of stale top intent.",
       "commands": [
         "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/lib/pane-manager/terminal-scroll-intent.test.ts"
       ],
-      "testFiles": [
-        "src/renderer/src/lib/pane-manager/terminal-scroll-intent.test.ts"
-      ],
+      "testFiles": ["src/renderer/src/lib/pane-manager/terminal-scroll-intent.test.ts"],
       "assertionRefs": [
         {
           "file": "src/renderer/src/lib/pane-manager/terminal-scroll-intent.test.ts",
@@ -1569,23 +1410,9 @@
       "protection": "none",
       "owner": "startup-persistence",
       "layer": "upgrade-fixture",
-      "surfaces": [
-        "startup",
-        "upgrade",
-        "session restore",
-        "daemon restore"
-      ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "wsl"
-      ],
+      "surfaces": ["startup", "upgrade", "session restore", "daemon restore"],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "wsl"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
@@ -1621,9 +1448,7 @@
         "Run second restart after current code writes upgraded state.",
         "Record startup timing and failure artifact."
       ],
-      "knownGaps": [
-        "No fixture corpus or command yet."
-      ],
+      "knownGaps": ["No fixture corpus or command yet."],
       "demotionRule": "Cannot promote without old production fixture provenance."
     },
     {
@@ -1642,13 +1467,8 @@
         "resize",
         "exit cleanup"
       ],
-      "platforms": [
-        "linux",
-        "macos"
-      ],
-      "providers": [
-        "local"
-      ],
+      "platforms": ["linux", "macos"],
+      "providers": ["local"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The live Electron Playwright slice exists only on the pending reliability stack. It registers here with its owning split PR.",
@@ -1707,20 +1527,10 @@
         "CJK repaint",
         "cursor and resize"
       ],
-      "platforms": [
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "wsl"
-      ],
-      "coveredPlatforms": [
-        "windows"
-      ],
-      "coveredProviders": [
-        "daemon"
-      ],
+      "platforms": ["windows"],
+      "providers": ["local", "daemon", "wsl"],
+      "coveredPlatforms": ["windows"],
+      "coveredProviders": ["daemon"],
       "coverageNotes": "Issue #8048 now has deterministic wrapper and cold-restore re-anchor tests plus a Windows PR-CI harness that drives the built daemon through 25 real ConPTY workspace-close races while an unrelated witness PTY stays alive. Keyboard reset, CJK repaint, WSL, and full visible Electron coverage remain gaps.",
       "motivatingLinks": [
         "https://github.com/stablyai/yiru/pull/6541",
@@ -1818,18 +1628,8 @@
         "resize",
         "render"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "wsl",
-        "remote-runtime"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "wsl", "remote-runtime"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The targeted-hasPty product hardening and no-hot count assertions exist only on the pending reliability stack. It registers here with its owning split PR.",
@@ -1885,18 +1685,8 @@
         "provider ownership",
         "diagnostics bundle"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "wsl",
-        "remote-runtime"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "wsl", "remote-runtime"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The crash-breadcrumb recording and its test exist only on the pending reliability stack. It registers here with its owning split PR.",
@@ -1950,28 +1740,16 @@
         "daemon stream",
         "main PTY batching",
         "runtime path provenance",
-        "runtime serve-sim detection",
         "runtime terminal wait detection",
         "renderer ACK",
         "xterm scheduler",
         "hidden output"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
-      "coverageNotes": "Local macOS evidence covers the existing main-process pending-output caps plus deterministic runtime path-provenance history reuse, idle-path serve-sim detection, and saturated-tail wait detection. Daemon stream write(false)/drain contracts, cross-session drain priority, and bounded queued tails arrive with the pending perf slice; live flood/latency artifacts remain gaps.",
+      "coverageNotes": "Local macOS evidence covers the existing main-process pending-output caps plus deterministic runtime path-provenance history reuse and saturated-tail wait detection. Daemon stream write(false)/drain contracts, cross-session drain priority, and bounded queued tails arrive with the pending perf slice; live flood/latency artifacts remain gaps.",
       "motivatingLinks": [
         "https://github.com/stablyai/yiru/pull/6836",
         "https://github.com/stablyai/yiru/pull/6858",
@@ -1979,17 +1757,15 @@
         "https://github.com/stablyai/yiru/pull/7054"
       ],
       "invariant": "High-volume terminal output must stay bounded across daemon socket writes, main runtime metadata, detectors, and tail checks, main-to-renderer in-flight bytes, renderer scheduler queues, and hidden-output restore without starving focused input.",
-      "oracle": "The current executable slice injects daemon socket backpressure and main-process renderer backlog pressure, then asserts write(false)/drain ordering, bounded queued daemon bytes, unchanged path-provenance history reuse for pathless output, idle serve-sim detection with split-JSON continuity, ordinary terminal-wait detection without a joined-tail allocation and with full prompt-family continuity, per-PTY and total pending-output caps, preserved sequenced-tail metadata, active-pending protection ahead of background trimming, and ACK-gated in-flight bounds. The live Electron perf oracle adds hidden-output floods, renderer scheduler queue depth, dropped-output-zero normal scenarios, and active key latency budgets before promotion.",
+      "oracle": "The current executable slice injects main-process renderer backlog pressure, then asserts unchanged path-provenance history reuse for pathless output, ordinary terminal-wait detection without a joined-tail allocation and with full prompt-family continuity, per-PTY and total pending-output caps, preserved sequenced-tail metadata, active-pending protection ahead of background trimming, and ACK-gated in-flight bounds. The live Electron perf oracle adds hidden-output floods, renderer scheduler queue depth, dropped-output-zero normal scenarios, and active key latency budgets before promotion.",
       "commands": [
         "pnpm exec vitest run --config config/vitest.config.ts src/main/ipc/pty.test.ts",
         "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/yiru-runtime-path-candidate-history.test.ts",
-        "pnpm exec vitest run --config config/vitest.config.ts src/main/emulator/serve-sim-state-watcher.test.ts",
         "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/yiru-runtime.test.ts src/main/runtime/yiru-runtime-tail-wait-memo.test.ts"
       ],
       "testFiles": [
         "src/main/ipc/pty.test.ts",
         "src/main/runtime/yiru-runtime-path-candidate-history.test.ts",
-        "src/main/emulator/serve-sim-state-watcher.test.ts",
         "src/main/runtime/yiru-runtime.test.ts",
         "src/main/runtime/yiru-runtime-tail-wait-memo.test.ts"
       ],
@@ -2007,13 +1783,6 @@
           "assertions": [
             "reuses path-candidate history across repeated pathless PTY output",
             "copies history when new output adds a path candidate"
-          ]
-        },
-        {
-          "file": "src/main/emulator/serve-sim-state-watcher.test.ts",
-          "assertions": [
-            "does not buffer repeated brace-free PTY output while waiting for metadata",
-            "detects serve-sim metadata split across PTY chunks and releases the partial object"
           ]
         },
         {
@@ -2057,15 +1826,6 @@
           "date": "2026-07-10",
           "runner": "local",
           "platform": "macos",
-          "command": "pnpm exec vitest run --config config/vitest.config.ts src/main/emulator/serve-sim-state-watcher.test.ts",
-          "result": "passed",
-          "durationSeconds": 0.37,
-          "summary": "1 test file passed, 6 tests passed on pushed commit f0e3a185593b."
-        },
-        {
-          "date": "2026-07-10",
-          "runner": "local",
-          "platform": "macos",
           "command": "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/yiru-runtime.test.ts src/main/runtime/yiru-runtime-tail-wait-memo.test.ts",
           "result": "passed",
           "durationSeconds": 21.33,
@@ -2078,11 +1838,11 @@
       },
       "flakeHistory": {
         "status": "unknown",
-        "evidence": "Daemon stream backpressure and focused main/renderer backlog tests are deterministic unit slices. The combined perf soak still needs runtime history before promotion."
+        "evidence": "Focused main-process backlog tests are deterministic unit slices. The combined perf soak still needs runtime history before promotion."
       },
       "redGreenEvidence": {
         "status": "partial",
-        "evidence": "Tests assert daemon stream writes pause after socket write(false), later stream data queues behind the pressured socket, flush-immediate output from another session is prioritized ahead of unrelated queued background backlog on drain while preserving per-session order, queued lines resume on drain, global cleanup clears clients that only have backpressured writes, queued daemon stream bytes are bounded by keeping priority output and the newest tail under sustained pressure, pathless runtime output reuses unchanged path-provenance history with zero old-candidate byte scans, ordinary output leaves the niche serve-sim detector idle while split JSON still emits and releases its partial buffer, ordinary saturated terminal tails retain no rebuilt wait text or repeated phrase scans while every blocked/ready prompt family remains live, main pending renderer output is capped per PTY and in total, total-pressure trimming prefers background pending output before active pending output, trimmed pending tails preserve seq/rawLength metadata, and ACK-gated in-flight output remains bounded. Intentionally restoring the old path-history shape failed the focused scale test after 774ms and 4,096 replacements; restoring the old serve-sim buffer failed its scale test after 180ms with 4,096 buffer writes; disabling the ordinary-tail branch failed with a retained 253,999-character waitText. The fixed shapes passed their focused suites. Existing renderer tests cover replay/backlog slices. Needs broader hidden-output/input-latency perf artifacts before promotion."
+        "evidence": "Tests assert pathless runtime output reuses unchanged path-provenance history with zero old-candidate byte scans, ordinary saturated terminal tails retain no rebuilt wait text or repeated phrase scans while every blocked/ready prompt family remains live, main pending renderer output is capped per PTY and in total, total-pressure trimming prefers background pending output before active pending output, trimmed pending tails preserve seq/rawLength metadata, and ACK-gated in-flight output remains bounded. Intentionally restoring the old path-history shape failed the focused scale test after 774ms and 4,096 replacements; disabling the ordinary-tail branch failed with a retained 253,999-character waitText. The fixed shapes passed their focused suites. Existing renderer tests cover replay/backlog slices. Needs daemon-stream contract coverage and broader hidden-output/input-latency perf artifacts before promotion."
       },
       "performanceBudget": {
         "required": true,
@@ -2094,9 +1854,8 @@
         "Keep stress variants non-blocking until stable runtime history exists."
       ],
       "knownGaps": [
-        "Current command asserts daemon stream write(false)/drain/cleanup at the batcher contract layer and main pending renderer caps at the IPC contract layer.",
+        "Daemon stream write(false)/drain/cleanup and bounded queued-tail contracts are not registered in the current command.",
         "Runtime provenance coverage is deterministic and does not include a live high-throughput provider artifact.",
-        "Serve-sim detector coverage is deterministic and does not include a live external simulator helper.",
         "Terminal-wait scale evidence is deterministic and does not yet include a live saturated-tail event-loop artifact.",
         "Current command does not prove renderer parse pressure, scheduler queue depth, event-loop delay, or active key latency.",
         "Live hidden-output pressure, active input latency, and full Electron perf artifacts remain unproved."
@@ -2117,15 +1876,8 @@
         "provider ownership",
         "startup restore"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "daemon",
-        "local"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["daemon", "local"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The fail-closed degraded-daemon hardening and its contracts exist only on the pending reliability stack. It registers here with its owning split PR.",
@@ -2182,22 +1934,10 @@
         "reattach",
         "unknown liveness"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "ssh",
-        "remote-runtime",
-        "wsl"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
-      "coveredProviders": [
-        "ssh"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["ssh", "remote-runtime", "wsl"],
+      "coveredPlatforms": ["macos"],
+      "coveredProviders": ["ssh"],
       "coverageNotes": "Deterministic renderer coverage proves startup publishes the state returned by ssh.connect, remote or unresolved hosts cannot enter local-daemon cold activation deferral, and stale cleanup cannot unregister a replacement runtime terminal. A macOS Electron journey connects to a real Linux SSH relay in Docker, persists six terminals, reloads the renderer, and verifies all six original relay PTYs remount eagerly and still execute remote input. Linux and Windows desktop clients, WSL, and remote-runtime restore remain gaps.",
       "motivatingLinks": [
         "https://github.com/stablyai/yiru/pull/6951",
@@ -2302,12 +2042,8 @@
         "provider liveness",
         "restore"
       ],
-      "platforms": [
-        "windows"
-      ],
-      "providers": [
-        "wsl"
-      ],
+      "platforms": ["windows"],
+      "providers": ["wsl"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
@@ -2365,17 +2101,8 @@
         "metadata-only replay",
         "WebGL recovery"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The replay FIFO/burst coalescing product change and its tests exist only on the pending reliability stack; main still uses a single pendingReplayData slot. It registers here with its owning split PR.",
@@ -2434,21 +2161,9 @@
         "keyboard bypass",
         "JIS yen"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos",
-        "linux"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
+      "coveredPlatforms": ["macos", "linux"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS and containerized Linux evidence, deterministic renderer-unit coverage for the Linux/Sogou candidate-key policy including the legacy orphaned-keyup fallback, and Electron/CDP live-PTY Sogou-style repros. Real Linux/Sogou OS IME automation, Windows ConPTY post-agent reset, and the CJK/Vietnamese/Arabic matrix remain registered gaps.",
       "motivatingLinks": [
@@ -2491,9 +2206,7 @@
         },
         {
           "file": "src/renderer/src/components/terminal-pane/terminal-paste-runtime.test.ts",
-          "assertions": [
-            "paste/runtime forwarding avoids duplicate terminal payloads"
-          ]
+          "assertions": ["paste/runtime forwarding avoids duplicate terminal payloads"]
         },
         {
           "file": "src/renderer/src/components/terminal-pane/terminal-ime-composition-tracker.test.ts",
@@ -2630,14 +2343,8 @@
         "TUI exit",
         "standard key input"
       ],
-      "platforms": [
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "wsl"
-      ],
+      "platforms": ["windows"],
+      "providers": ["local", "daemon", "wsl"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
@@ -2694,21 +2401,9 @@
         "WSL",
         "remote runtime"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "wsl",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "wsl", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Deterministic main/renderer tests run on macOS and exercise simulated Windows plus POSIX/Linux process-confirmation behavior. They cover exact local-ConPTY membership, detached-child rejection, SSH and paired-runtime host-platform routing including legacy runtime PTY IDs, active-PTY ownership after worktree host changes, Windows-to-WSL routing, unknown-metadata fallback, production handler composition, KKP authorization on every host, process-confirmed Droid routing and launch-triggered confirmation, typed-alias and forged-OSC isolation, shells without OSC 133, split/detach ownership with preserved shell classification, stale PTY exit/rebind rejection, command-generation revocation, daemon v21 warm-reattach identity, unavailable inspection, and lazy subprocess/RPC callback counts. A live linux-arm64 Docker target additionally proved real relay deployment, SSH PTY host detection, and exact inactive/active KKP bytes. The Electron byte test runs only on Windows; live Windows evidence remains uncollected. Test failures report exact expected bytes; no product telemetry or raw terminal logging is added.",
       "motivatingLinks": [
@@ -2969,29 +2664,12 @@
         "PTY identity",
         "foreground process confirmation"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "wsl",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
-      "coveredProviders": [
-        "local",
-        "daemon"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "wsl", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
+      "coveredProviders": ["local", "daemon"],
       "coverageNotes": "Runtime and provider-contract tests on macOS cover exact-PTY authorization, local/daemon fresh confirmation, exact ConPTY membership, and unsupported-provider fail-closed behavior. Physical Windows, live Linux, SSH, WSL, and remote-runtime validation remain explicit gaps; providers without confirmation preserve conservative refusal on a shell conflict.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/issues/8303"
-      ],
+      "motivatingLinks": ["https://github.com/stablyai/yiru/issues/8303"],
       "invariant": "A guarded note send writes only to the exact PTY binding checked by the guard and only while permission/wait evidence allows input; fresh hook state conflicting with an ordinary shell foreground requires fresh provider confirmation of a recognized agent in that PTY.",
       "oracle": "Fresh explicit state plus ordinary PowerShell plus confirmed recognized agent is sendable on the same PTY. Confirmed shell/non-agent, unavailable confirmation, PTY exit, handle rebind, or a callback PTY mismatch returns a refusal or not-writable result and writes zero bytes.",
       "commands": [
@@ -3043,9 +2721,7 @@
         },
         {
           "file": "src/main/providers/local-pty-provider.test.ts",
-          "assertions": [
-            "fresh confirmation is discarded when its owning local PTY exits"
-          ]
+          "assertions": ["fresh confirmation is discarded when its owning local PTY exits"]
         },
         {
           "file": "src/main/providers/windows-conpty-process-membership.test.ts",
@@ -3068,9 +2744,7 @@
         },
         {
           "file": "src/renderer/src/lib/active-agent-note-send.test.ts",
-          "assertions": [
-            "selected active-agent note sends retain guarded paste and submit routing"
-          ]
+          "assertions": ["selected active-agent note sends retain guarded paste and submit routing"]
         },
         {
           "file": "src/renderer/src/components/browser-pane/BrowserAnnotationSendMenuContent.test.tsx",
@@ -3134,27 +2808,12 @@
         "PTY writes",
         "bracketed paste"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
-      "coveredProviders": [
-        "local"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
+      "coveredProviders": ["local"],
       "coverageNotes": "Local macOS evidence covers the runtime PTY write contract and a live dev-runtime CLI repro. SSH, daemon, remote-runtime, Linux, and Windows remain provider/platform gaps; the product path stays provider-owned and does not add local filesystem or process assumptions.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/issues/7226"
-      ],
+      "motivatingLinks": ["https://github.com/stablyai/yiru/issues/7226"],
       "invariant": "Injected orchestration task prompts for recognized agent CLIs must send the prompt body inside one bracketed-paste frame, sanitize embedded ESC bytes, preserve chunk boundaries without losing the frame, and send Enter only after the paste frame completes.",
       "oracle": "Runtime tests assert the exact PTY write sequence and failure cleanup; orchestration tests assert dispatch/coordinator use the agent prompt path; the live CLI harness dispatches a 32KB task to a fake Codex-like TUI and requires marker present, bracketed paste present, zero unframed line breaks, and submit observed.",
       "commands": [
@@ -3273,14 +2932,8 @@
         "cursor repaint",
         "rewrite output"
       ],
-      "platforms": [
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "wsl"
-      ],
+      "platforms": ["windows"],
+      "providers": ["local", "daemon", "wsl"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
@@ -3316,10 +2969,7 @@
         "Keep stress cases non-blocking until Windows runtime history is stable.",
         "Fail promotion on silent Windows environment skips."
       ],
-      "knownGaps": [
-        "No manifest command yet.",
-        "No Windows CJK/emoji repaint command is wired."
-      ],
+      "knownGaps": ["No manifest command yet.", "No Windows CJK/emoji repaint command is wired."],
       "demotionRule": "Cannot promote if the oracle is screenshot-only or environment-skipped."
     },
     {
@@ -3337,14 +2987,8 @@
         "local provider",
         "daemon provider"
       ],
-      "platforms": [
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "wsl"
-      ],
+      "platforms": ["windows"],
+      "providers": ["local", "daemon", "wsl"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
@@ -3399,17 +3043,8 @@
         "renderer CPU",
         "resize churn"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
@@ -3457,21 +3092,9 @@
       "protection": "none",
       "owner": "terminal-performance",
       "layer": "daemon-provider-contract",
-      "surfaces": [
-        "daemon stream",
-        "socket write",
-        "drain",
-        "hidden output",
-        "input starvation"
-      ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "daemon"
-      ],
+      "surfaces": ["daemon stream", "socket write", "drain", "hidden output", "input starvation"],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["daemon"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The daemon batcher write(false)/drain contracts exist only on the pending reliability stack. It registers here with its owning split PR.",
@@ -3529,23 +3152,12 @@
         "workspace switch",
         "agent status"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap on main. The boot-hydration counters and their tests exist only on the pending reliability stack. It registers here with its owning split PR.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/7002"
-      ],
+      "motivatingLinks": ["https://github.com/stablyai/yiru/pull/7002"],
       "invariant": "Terminal typing, focus, resize, tab/workspace switch, and agent/session restore must not trigger unbounded store projection, git status, provider listing, or per-pane polling work.",
       "oracle": "The current executable slice instruments boot-time local PTY registry hydration with repo counts, local-vs-remote repo skips, worktree enumeration counts, adapter/session listing counts, registration/skipped-session counts, duration, and failure phase. The broader oracle still needs instrumentation that counts store selector recomputes, git status requests, provider listings, and session scans during scripted hot interactions with many worktrees and terminal panes.",
       "commands": [],
@@ -3594,20 +3206,9 @@
         "metadata-only replay",
         "clear semantics"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence over the merged #7133/#7173 restore and hidden-output ordering tests on main@1282f5c2d. The dirty-state exactness contract, normal-buffer clear semantics, and metadata-only replay remain pending-stack work.",
       "motivatingLinks": [
@@ -3622,9 +3223,7 @@
       "commands": [
         "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/terminal-pane/pty-connection.test.ts"
       ],
-      "testFiles": [
-        "src/renderer/src/components/terminal-pane/pty-connection.test.ts"
-      ],
+      "testFiles": ["src/renderer/src/components/terminal-pane/pty-connection.test.ts"],
       "assertionRefs": [
         {
           "file": "src/renderer/src/components/terminal-pane/pty-connection.test.ts",
@@ -3692,23 +3291,12 @@
         "renderer stream",
         "terminal colors"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; no executable coverage is wired yet.",
-      "motivatingLinks": [
-        "https://github.com/stablyai/yiru/pull/6949"
-      ],
+      "motivatingLinks": ["https://github.com/stablyai/yiru/pull/6949"],
       "invariant": "Startup OSC 10/11 color queries are answered out of band at startup only, never leak into shell/provider output streams, and ordinary runtime OSC color queries remain renderer-handled.",
       "oracle": "A provider-contract fixture records startup query replies, shell-visible bytes, renderer-visible bytes, and later runtime OSC behavior to prove no query leakage or color deadlock.",
       "commands": [],
@@ -3736,10 +3324,7 @@
         "Cover startup-only and runtime OSC paths separately.",
         "Keep screenshot evidence diagnostic only."
       ],
-      "knownGaps": [
-        "No manifest command yet.",
-        "No startup color-query contract is wired."
-      ],
+      "knownGaps": ["No manifest command yet.", "No startup color-query contract is wired."],
       "demotionRule": "Cannot promote if success is based only on absence of visible artifacts."
     },
     {
@@ -3756,21 +3341,9 @@
         "mobile subscription replay",
         "multi-mobile input floor"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows",
-        "mobile"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "platforms": ["macos", "linux", "windows", "mobile"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Deterministic local tests execute the exact injected mobile replay/generation gate, the React Native query classifier, stale-subscription sender, server-side single-responder election, query-reply RPC semantics, and live-output capture during async mobile fit. The provider write path is shared, but no live iOS/Android, SSH, WSL, or multi-device run is registered yet.",
       "motivatingLinks": [
@@ -3896,42 +3469,35 @@
       "layer": "runtime-rpc-contract",
       "surfaces": [
         "mobile terminal",
+        "native-chat terminal overlay",
         "runtime RPC",
         "binary multiplex",
         "JSON subscribe fallback",
         "snapshot buffering"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows",
-        "mobile"
-      ],
-      "providers": [
-        "remote-runtime",
-        "ssh",
-        "local",
-        "daemon"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "platforms": ["macos", "linux", "windows", "mobile"],
+      "providers": ["remote-runtime", "ssh", "local", "daemon"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
-      "coverageNotes": "Local macOS evidence over the runtime-RPC stream budgets on main@1282f5c2d. The pending stack adds byte-exact 512KB/2MB/256KB/48KB budget assertions; legacy JSON subscribe parity remains undecided.",
+      "coverageNotes": "Local macOS evidence over the runtime-RPC stream budgets on main@1282f5c2d. PR #5824 adds a platform-neutral mobile decision gate proving chat-covered terminal streams pause and resume only after the mounted WebView is ready; live Android restore evidence remains required. The pending stack adds byte-exact 512KB/2MB/256KB/48KB budget assertions; legacy JSON subscribe parity remains undecided.",
       "motivatingLinks": [
         "https://github.com/stablyai/yiru/pull/6951",
         "https://github.com/stablyai/yiru/pull/6955",
         "https://github.com/stablyai/yiru/pull/7009"
       ],
-      "invariant": "Runtime and mobile terminal subscriptions must cap initial snapshots, live output buffered while snapshots load, chunk sizes, and batch sizes, while preserving output order, input locks, resize/driver events, and fallback parity or explicit fallback deprecation.",
-      "oracle": "The current executable slice asserts mobile initial snapshots downgrade until they fit <=512KB, requested binary snapshots downgrade until they fit <=2MB, binary live output queued while the initial snapshot loads stays <=256KB while preserving the newest tail, large binary output is split into <=48KB frames, output bursts are coalesced before emit, aborts do not register stale listeners, and stale mobile resize re-stream completions are dropped. JSON fallback parity/deprecation remains an explicit gap.",
+      "invariant": "Runtime and mobile terminal subscriptions must cap initial snapshots, live output buffered while snapshots load, chunk sizes, and batch sizes; a terminal covered by native chat must have no live output subscription and must restore from fresh scrollback when revealed, while preserving output order, input locks, resize/driver events, and fallback parity or explicit fallback deprecation.",
+      "oracle": "The current executable slice asserts mobile initial snapshots downgrade until they fit <=512KB, requested binary snapshots downgrade until they fit <=2MB, binary live output queued while the initial snapshot loads stays <=256KB while preserving the newest tail, large binary output is split into <=48KB frames, output bursts are coalesced before emit, aborts do not register stale listeners, and stale mobile resize re-stream completions are dropped. The mobile native-chat decision test asserts an active stream pauses while covered and resumes only for a ready active terminal. JSON fallback parity and live Android scrollback restoration remain explicit gaps.",
       "commands": [
-        "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/rpc/terminal-subscribe-buffer.test.ts src/main/runtime/rpc/terminal-output-batching.test.ts src/main/runtime/rpc/terminal-multiplex.test.ts"
+        "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/rpc/terminal-subscribe-buffer.test.ts src/main/runtime/rpc/terminal-output-batching.test.ts src/main/runtime/rpc/terminal-multiplex.test.ts",
+        "pnpm --dir mobile exec vitest run --root .. mobile/src/session/mobile-native-chat-terminal-stream.test.ts",
+        "pnpm --dir mobile exec vitest run --root .. mobile/src/session/use-mobile-native-chat-terminal-stream.test.ts"
       ],
       "testFiles": [
         "src/main/runtime/rpc/terminal-subscribe-buffer.test.ts",
         "src/main/runtime/rpc/terminal-output-batching.test.ts",
-        "src/main/runtime/rpc/terminal-multiplex.test.ts"
+        "src/main/runtime/rpc/terminal-multiplex.test.ts",
+        "mobile/src/session/mobile-native-chat-terminal-stream.test.ts",
+        "mobile/src/session/use-mobile-native-chat-terminal-stream.test.ts"
       ],
       "assertionRefs": [
         {
@@ -3956,6 +3522,21 @@
             "oversized live output frames are bounded for subscribed binary streams",
             "multibyte live output flushes when encoded bytes reach the batch budget"
           ]
+        },
+        {
+          "file": "mobile/src/session/mobile-native-chat-terminal-stream.test.ts",
+          "assertions": [
+            "an active terminal stream pauses while native chat covers its WebView",
+            "the stream resumes only for the ready active terminal after chat closes",
+            "non-terminal and already-settled stream states perform no lifecycle work"
+          ]
+        },
+        {
+          "file": "mobile/src/session/use-mobile-native-chat-terminal-stream.test.ts",
+          "assertions": [
+            "a late WebView-ready transition converts a cold-start lease-only stream back to output",
+            "ordinary WebView readiness does not rerender the mobile session route"
+          ]
         }
       ],
       "evidenceRuns": [
@@ -3967,6 +3548,15 @@
           "result": "passed",
           "durationSeconds": 3.8,
           "summary": "3 test file(s) passed, 28 tests passed on main@1282f5c2d in a clean checkout."
+        },
+        {
+          "date": "2026-07-12",
+          "runner": "local",
+          "platform": "macos",
+          "command": "pnpm --dir mobile exec vitest run --root .. mobile/src/session/mobile-native-chat-terminal-stream.test.ts",
+          "result": "passed",
+          "durationSeconds": 0.2,
+          "summary": "The focused mobile native-chat suite passed with 3 terminal-stream lifecycle assertions in the staged PR #5824 worktree."
         }
       ],
       "runtimeBudget": {
@@ -3991,7 +3581,7 @@
         "Record byte counts and order/cursor artifacts on failure."
       ],
       "knownGaps": [
-        "Current command covers binary runtime/mobile stream contracts only.",
+        "The pure mobile decision gate does not yet prove live Android WebView scrollback restore after a chat toggle.",
         "Legacy JSON subscribe parity is undecided."
       ],
       "demotionRule": "Cannot promote while a supported stream path has uncapped snapshot or live-output buffering."
@@ -4011,20 +3601,9 @@
         "unicode width",
         "parser configuration"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS evidence over #7148's width-parity oracle on main@1282f5c2d. A broader byte corpus, a shared parser-construction assertion over terminal-unicode-provider.ts/pane-terminal-options.ts, and recorded agent-session corpora remain gaps.",
       "motivatingLinks": [
@@ -4036,9 +3615,7 @@
       "commands": [
         "pnpm exec vitest run --config config/vitest.config.ts src/main/daemon/headless-emulator-unicode-width.test.ts"
       ],
-      "testFiles": [
-        "src/main/daemon/headless-emulator-unicode-width.test.ts"
-      ],
+      "testFiles": ["src/main/daemon/headless-emulator-unicode-width.test.ts"],
       "assertionRefs": [
         {
           "file": "src/main/daemon/headless-emulator-unicode-width.test.ts",
@@ -4095,23 +3672,9 @@
       "protection": "none",
       "owner": "terminal-rendering",
       "layer": "renderer-observability",
-      "surfaces": [
-        "hidden-output restore",
-        "snapshot replay",
-        "anomaly breadcrumbs",
-        "telemetry"
-      ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon",
-        "ssh",
-        "remote-runtime"
-      ],
+      "surfaces": ["hidden-output restore", "snapshot replay", "anomaly breadcrumbs", "telemetry"],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon", "ssh", "remote-runtime"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; the anomaly-breadcrumb machinery exists in this branch but no convergence probe is implemented.",
@@ -4168,15 +3731,8 @@
         "window wake",
         "render model"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon"],
       "coveredPlatforms": [],
       "coveredProviders": [],
       "coverageNotes": "Registered gap only; the live repro harness with a refresh-repair oracle exists but is not productized into the release-blocking terminal-rendering-golden suite.",
@@ -4230,18 +3786,9 @@
         "renderer reload / crash recovery",
         "surviving daemon and local PTYs"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "daemon"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "daemon"],
+      "coveredPlatforms": ["macos"],
       "coveredProviders": [],
       "coverageNotes": "Local macOS unit evidence over the shared main-process delivery pipeline in registerPtyHandlers. The oracle drives a local mock PTY, but the in-flight/pending accounting is provider-agnostic and daemon PTYs ride the identical pipeline (the manual dev repro that proved the freeze was daemon-backed). SSH is a separate relay/credit path and never enters these counters; mobile/relay ride unaffected paths; WSL terminals ride this same local/daemon pipeline and are covered by the same accounting (no dedicated provider-contract test yet). Motivated by a production incident on v1.4.131 (three frozen/broken terminal panes in one desktop session) diagnosed to leaked in-flight/pending accounting across a renderer reload (rendererGraphEpoch 3). Live validation of the fix on a rebuilt dev instance surfaced a second leak mode (the boot window): after the reset ran, main resumed flushing a flooding PTY into the still-booting page before its pty:data listener re-registered, so those sends were dropped yet counted and re-pinned rendererInFlightChars at 524288. The gate now also covers holding sends until the renderer's pty:rendererDispatcherReady handshake. A watchdog self-heals a lost handshake: on each reset a one-shot ~10s timer arms and, if the handshake never arrives, force-opens the gate (rendererDispatcherReadyForcedCount increments) so a dropped handshake degrades to pre-handshake behavior instead of a permanent hold; the real handshake or a re-registration cancels it. Two new diagnostics — rendererPtyDispatcherReady and rendererDispatcherReadyForcedCount — expose the otherwise-invisible boot-window hold, which early-returns before ackGatedFlushSkipCount increments.",
       "motivatingLinks": [
@@ -4335,24 +3882,10 @@
         "desktop filesystem watcher",
         "SSH relay filesystem watcher and live PTYs"
       ],
-      "platforms": [
-        "macos",
-        "linux",
-        "windows"
-      ],
-      "providers": [
-        "local",
-        "remote-runtime",
-        "ssh"
-      ],
-      "coveredPlatforms": [
-        "macos"
-      ],
-      "coveredProviders": [
-        "local",
-        "remote-runtime",
-        "ssh"
-      ],
+      "platforms": ["macos", "linux", "windows"],
+      "providers": ["local", "remote-runtime", "ssh"],
+      "coveredPlatforms": ["macos"],
+      "coveredProviders": ["local", "remote-runtime", "ssh"],
       "coverageNotes": "Deterministic tests cover one shared healthy child per runtime process plus at most four bounded fault-quarantine children, native desktop, paired-runtime, and WSL snapshot processes sharing the same eight-physical-child reservation with typed serialized event-driven capacity recovery, including recursive re-wait when crash recovery reclaims an announced slot, one quarantine attempt per watch lifetime, generation-scoped cancellation, bounded termination with removable deadline waiters, replacement-crawl errors that cannot be blessed by a late readiness ack, pre-ready paired-web cancellation registered before an unbounded capacity wait, already-resolved and late physical-exit retry of a rejected paired-web teardown, physical desktop-install and local/SSH PTY teardown, stale-generation rejection, per-child stat bounds, final-overflow RPC delivery, and renderer eviction before terminal callbacks can retry. Destructive local and SSH removal fences both ID-derived and resolved-cwd terminal roots, including sibling-root/cwd combinations with reverse admission rollback, closes descendant relay watches before parent deletion, enumerates authoritative provider/cwd ownership, falls back to daemon spawn cwd before OSC 7, and keeps daemon/relay immediate shutdown pending until native exit or a bounded fail-closed error; a dead relay PID discovered during attach also settles concurrent shutdown before its stale entry is reaped, while Windows runtime watcher deadlines retain one removable physical-close waiter, treat Node's error-close path as positive physical-exit proof, and clear root ownership on late close. The relay policy test maps a standard repository's base, Git common directory, and worktree roots to one healthy supervisor, then proves a shared-child failure recovers those roots in separate quarantine supervisors with overflow and resumed events. Abortable capacity, quarantine, runtime-root, relay, SSH, and relay pre-install setup waits attach one reaction to each shared promise and explicitly remove 10,000 cancelled caller closures while one anchor remains. Built-entry macOS harnesses kill the desktop/runtime and SSH relay watcher children, then require automatic resubscription and later events while the host process and relay PTY survive. SSH bundles the child boundary beside relay.js, requires both artifacts for install completeness, and preserves registration-owned same-root cancellation.",
       "motivatingLinks": [
         "https://github.com/stablyai/yiru/issues/5308",
@@ -4827,9 +4360,7 @@
         },
         {
           "file": "config/scripts/package-electron-runtime-contract.test.mjs",
-          "assertions": [
-            "every release platform packages and gates the hashed watcher child"
-          ]
+          "assertions": ["every release platform packages and gates the hashed watcher child"]
         },
         {
           "file": "config/scripts/runtime-file-watcher-resource-probe.mjs",

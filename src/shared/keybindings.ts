@@ -92,6 +92,7 @@ export type KeybindingActionId =
   | 'editor.copyContext'
   | 'editor.previousChange'
   | 'editor.nextChange'
+  | 'editor.addReviewNote'
   | 'fileExplorer.undo'
   | 'fileExplorer.redo'
   | 'fileExplorer.copyPath'
@@ -426,7 +427,9 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
     group: 'Global',
     scope: 'global',
     searchKeywords: ['shortcut', 'sidebar', 'worktree', 'focus'],
-    defaultBindings: platformBindings(['Mod+0'])
+    // Why: keep zoom.reset on the browser-standard Mod+0; this chord was
+    // unreachable while it shared that default (#8584).
+    defaultBindings: platformBindings(['Mod+Shift+0'])
   },
   {
     id: 'floatingTerminal.toggle',
@@ -567,8 +570,10 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
     group: 'Tabs',
     scope: 'tabs',
     searchKeywords: ['shortcut', 'tab', 'simulator', 'emulator', 'mobile', 'ios', 'new'],
+    // Why: keep explorer on Mod+Shift+E (VS Code muscle memory). Emulator is
+    // macOS-only and less common, so it yields to a free chord (#8533).
     defaultBindings: {
-      darwin: ['Mod+Shift+E'],
+      darwin: ['Mod+Alt+Shift+E'],
       linux: [],
       win32: []
     }
@@ -847,6 +852,14 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
     searchKeywords: ['shortcut', 'editor', 'diff', 'change', 'hunk', 'next'],
     defaultBindings: platformBindings(['F7']),
     allowBareKeybindings: true
+  },
+  {
+    id: 'editor.addReviewNote',
+    title: 'Add Review Note',
+    group: 'Editors',
+    scope: 'editor',
+    searchKeywords: ['shortcut', 'editor', 'markdown', 'note', 'comment', 'annotation', 'review'],
+    defaultBindings: platformBindings(['Mod+Alt+N'])
   },
   {
     id: 'fileExplorer.undo',

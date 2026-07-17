@@ -298,7 +298,7 @@ export type IFilesystemProvider = {
   search(opts: SearchOptions): Promise<SearchResult>
   listFiles(
     rootPath: string,
-    options?: { excludePaths?: string[]; signal?: AbortSignal }
+    options?: { excludePaths?: string[]; signal?: AbortSignal; maxResults?: number }
   ): Promise<string[]>
   scanWorkspaceSpace?(
     rootPath: string,

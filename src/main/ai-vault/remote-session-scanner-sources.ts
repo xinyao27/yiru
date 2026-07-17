@@ -1,6 +1,8 @@
 import type { AiVaultAgent, AiVaultSession } from '../../shared/ai-vault-types'
 import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
 import { joinRemotePath } from '../ssh/ssh-remote-platform'
+import { parseAntigravitySessionContent } from './session-scanner-antigravity-parser'
+import { isAntigravityTranscriptPath } from './session-scanner-antigravity-paths'
 import { parseCodexSessionContent } from './session-scanner-codex-parser'
 import { parseDevinSessionContent } from './session-scanner-devin-parser'
 import { parseDroidSessionContent } from './session-scanner-droid-parser'
@@ -38,6 +40,7 @@ export function remoteSessionSources(
 ): RemoteSessionSource[] {
   return [
     ...remoteClaudeCodexSessionSources(remoteHome, hostPlatform),
+    remoteAntigravitySource(remoteHome, hostPlatform),
     source(
       'gemini',
       remoteHome,
@@ -119,6 +122,30 @@ export function remoteClaudeCodexSessionSources(
   ]
 }
 
+function remoteAntigravitySource(
+  remoteHome: string,
+  hostPlatform: RemoteHostPlatform
+): RemoteSessionSource {
+  const cliRoot = joinRemotePath(hostPlatform, remoteHome, '.gemini', 'antigravity-cli')
+  const historyPath = joinRemotePath(hostPlatform, cliRoot, 'history.jsonl')
+  return {
+    agent: 'antigravity',
+    rootDir: joinRemotePath(hostPlatform, cliRoot, 'brain'),
+    extensions: ['.jsonl'],
+    filePredicate: isAntigravityTranscriptPath,
+    fixedChildFileSegments: ['.system_generated', 'logs', 'transcript.jsonl'],
+    parse: async (file, content, context) => {
+      const session = await parseAntigravitySessionContent(
+        file,
+        content,
+        context.hostPlatform.os,
+        parserOptions(context)
+      )
+      return session ? context.antigravityWorkspaceResolver.enrich(session, historyPath) : null
+    }
+  }
+}
+
 function source(
   agent: AiVaultAgent,
   remoteHome: string,
@@ -126,13 +153,15 @@ function source(
   segments: readonly string[],
   extensions: readonly string[],
   parseContent: RemoteContentParser,
-  filePredicate?: (path: string) => boolean
+  filePredicate?: (path: string) => boolean,
+  directoryPredicate?: (name: string, depth: number) => boolean
 ): RemoteSessionSource {
   return {
     agent,
     rootDir: joinRemotePath(hostPlatform, remoteHome, ...segments),
     extensions,
     filePredicate,
+    directoryPredicate,
     parse: (file, content, context) =>
       Promise.resolve(parseContent(file, content, context.hostPlatform.os, parserOptions(context)))
   }

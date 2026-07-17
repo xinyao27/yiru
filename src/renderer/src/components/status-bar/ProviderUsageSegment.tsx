@@ -7,7 +7,7 @@ import {
   type UsagePercentageDisplay
 } from '../../../../shared/usage-percentage-display'
 import { translate } from '@/i18n/i18n'
-import { formatWindowLabel } from '@/lib/window-label-formatter'
+import { formatRateLimitWindowChipLabel } from '@/lib/window-label-formatter'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
 import { getProviderUsageStatusLabel, ProviderIcon } from './tooltip'
 
@@ -127,7 +127,7 @@ export function ProviderUsageSegment({
         {visibleBuckets.length === 0 && limits.session ? (
           <WindowLabel
             window={limits.session}
-            label={formatWindowLabel(limits.session.windowMinutes)}
+            label={formatRateLimitWindowChipLabel(limits.session)}
             display={display}
           />
         ) : null}
@@ -141,14 +141,14 @@ export function ProviderUsageSegment({
       ? {
           key: 'session',
           window: limits.session,
-          label: formatWindowLabel(limits.session.windowMinutes)
+          label: formatRateLimitWindowChipLabel(limits.session)
         }
       : null,
     limits.weekly
       ? {
           key: 'weekly',
           window: limits.weekly,
-          label: formatWindowLabel(limits.weekly.windowMinutes)
+          label: formatRateLimitWindowChipLabel(limits.weekly)
         }
       : null,
     limits.fableWeekly
@@ -164,7 +164,7 @@ export function ProviderUsageSegment({
       ? {
           key: 'monthly',
           window: limits.monthly,
-          label: formatWindowLabel(limits.monthly.windowMinutes)
+          label: formatRateLimitWindowChipLabel(limits.monthly)
         }
       : null
   ].filter(

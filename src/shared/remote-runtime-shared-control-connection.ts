@@ -93,10 +93,7 @@ export class RemoteRuntimeSharedControlConnection {
       beforeSend: options.beforeSend,
       signal: options.signal,
       send: (id, name, input) => this.sender.request(id, name, input),
-      cancel: (id) => this.sender.cleanup(REMOTE_RUNTIME_CANCEL_REQUEST_METHOD, { requestId: id }),
-      // Why: a timed-out request marks the socket as suspect (#7718) — tear
-      // it down so reconnect+replay runs instead of keeping a zombie socket.
-      onTimeout: (error) => this.handleSocketClosed(error)
+      cancel: (id) => this.sender.cleanup(REMOTE_RUNTIME_CANCEL_REQUEST_METHOD, { requestId: id })
     })
   }
 

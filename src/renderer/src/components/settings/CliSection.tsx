@@ -392,6 +392,7 @@ export function CliSection({
                     }))
               }}
               onRecheck={refreshCliSkill}
+              freshnessSkillName={agentRuntime.runtime === 'host' ? YIRU_CLI_SKILL_NAME : undefined}
             />
           </div>
         ) : null}

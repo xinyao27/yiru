@@ -254,10 +254,16 @@ export const CORE_COMMAND_SPECS: CommandSpec[] = [
   },
   {
     path: ['terminal', 'close'],
-    summary: 'Close a terminal tab (kills PTY if running)',
-    usage: 'yiru terminal close [--terminal <handle>] [--json]',
-    allowedFlags: [...GLOBAL_FLAGS, 'terminal'],
-    examples: ['yiru terminal close --terminal term_abc123']
+    summary: 'Close a terminal pane/session, or its whole tab with --tab',
+    usage: 'yiru terminal close [--terminal <handle>] [--tab] [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'terminal', 'tab'],
+    notes: [
+      'Without --tab, preserves the existing pane/session close behavior. With --tab, waits until the whole tab is durably removed.'
+    ],
+    examples: [
+      'yiru terminal close --terminal term_abc123',
+      'yiru terminal close --terminal term_abc123 --tab --json'
+    ]
   },
   {
     path: ['terminal', 'rename'],

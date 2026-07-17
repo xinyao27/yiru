@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 2,
+  "skills": [
+    {
+      "name": "computer-use",
+      "sourcePath": "skills/computer-use",
+      "releaseRevision": 5,
+      "packageDigest": "ef81a2870b0bb05ca634e9ae23b2285de2531465136db2d4d98413251e42e352",
+      "gitTreeSha": "e7a237a142f1b2aff9f8a7a78b39e7ab15a98690",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 11081,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "cffd50936ee36e59a5e06006260323cdc36be48d204656f89eca88710c75a273",
+          "textNormalizedSha256": "cffd50936ee36e59a5e06006260323cdc36be48d204656f89eca88710c75a273",
+          "identitySha256": "cffd50936ee36e59a5e06006260323cdc36be48d204656f89eca88710c75a273"
+        }
+      ]
+    },
+    {
+      "name": "linear-tickets",
+      "sourcePath": "skills/linear-tickets",
+      "releaseRevision": 5,
+      "packageDigest": "45b42268f044e65fed0dbcc08f85230b6d8b5885f8cc212d3a55c285de2886ec",
+      "gitTreeSha": "37b177bd3e4ad99ed7128c4a26ddf54529f04b1d",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 10539,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "8bb334ea6a27679a5b47ec346351bb770f244634f9d644883b3768aa455d5574",
+          "textNormalizedSha256": "8bb334ea6a27679a5b47ec346351bb770f244634f9d644883b3768aa455d5574",
+          "identitySha256": "8bb334ea6a27679a5b47ec346351bb770f244634f9d644883b3768aa455d5574"
+        }
+      ]
+    },
+    {
+      "name": "orchestration",
+      "sourcePath": "skills/orchestration",
+      "releaseRevision": 25,
+      "packageDigest": "61e510a6d773700d25bd55245ab3eb9233fca3b08c8c554d510410aedd0e5dfc",
+      "gitTreeSha": "342516d29a5e7daf26c00477fa2398b520ba60af",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 22838,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "5d351cabcf403232afb30dd72fff1a767a88ea17c321d6c749f56e99b16ac5bc",
+          "textNormalizedSha256": "5d351cabcf403232afb30dd72fff1a767a88ea17c321d6c749f56e99b16ac5bc",
+          "identitySha256": "5d351cabcf403232afb30dd72fff1a767a88ea17c321d6c749f56e99b16ac5bc"
+        }
+      ]
+    },
+    {
+      "name": "yiru-cli",
+      "sourcePath": "skills/yiru-cli",
+      "releaseRevision": 32,
+      "packageDigest": "c4714c4dcc519687cc5060253c5e30d318e288b5d0600166a490137dfe3f0cec",
+      "gitTreeSha": "a19f81fc778924f6d452341d1e469f2ff8f13087",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 21065,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "ad07c76489c674a6f5da65f3dfab09373324820973fb866d4983a4635c39f25a",
+          "textNormalizedSha256": "ad07c76489c674a6f5da65f3dfab09373324820973fb866d4983a4635c39f25a",
+          "identitySha256": "ad07c76489c674a6f5da65f3dfab09373324820973fb866d4983a4635c39f25a"
+        }
+      ]
+    },
+    {
+      "name": "yiru-emulator",
+      "sourcePath": "skills/yiru-emulator",
+      "releaseRevision": 4,
+      "packageDigest": "58a54fd5243fd01d12a76bc8bbd61e8f660ed9ca8535c381f572e6f6f4f1d2d5",
+      "gitTreeSha": "312e30e3c99766a10d93aba58a944785211f3149",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 11368,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "ae16bf9d29dc4beef976b14912e4917f16b66e5ec72db0258501aa87a1ade903",
+          "textNormalizedSha256": "ae16bf9d29dc4beef976b14912e4917f16b66e5ec72db0258501aa87a1ade903",
+          "identitySha256": "ae16bf9d29dc4beef976b14912e4917f16b66e5ec72db0258501aa87a1ade903"
+        }
+      ]
+    },
+    {
+      "name": "yiru-emulator-android",
+      "sourcePath": "skills/yiru-emulator-android",
+      "releaseRevision": 2,
+      "packageDigest": "5528944ef689a78a288e2564b78c5049dbbcb075ccdf35820901a6304be71edf",
+      "gitTreeSha": "60acbb58f7799e42d205c27be1befafc21b94a18",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 8728,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "5af5226a0ea9573b06ac8bb828df55235a82dcf81ee0af13e823c7969fee5879",
+          "textNormalizedSha256": "5af5226a0ea9573b06ac8bb828df55235a82dcf81ee0af13e823c7969fee5879",
+          "identitySha256": "5af5226a0ea9573b06ac8bb828df55235a82dcf81ee0af13e823c7969fee5879"
+        }
+      ]
+    },
+    {
+      "name": "yiru-linear",
+      "sourcePath": "skills/yiru-linear",
+      "releaseRevision": 3,
+      "packageDigest": "c980911bdebb60d8f7ce45fddc95a4cfd8e79bfd1cc6b00c3a82ab25bd6c7940",
+      "gitTreeSha": "6206336ffe38f179cbc706f883dce7698779cc30",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 10263,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "9f212bab46ba8f6653e8a34703554ccf4ade8073e7459363da211fad7b670521",
+          "textNormalizedSha256": "9f212bab46ba8f6653e8a34703554ccf4ade8073e7459363da211fad7b670521",
+          "identitySha256": "9f212bab46ba8f6653e8a34703554ccf4ade8073e7459363da211fad7b670521"
+        }
+      ]
+    },
+    {
+      "name": "yiru-per-workspace-env",
+      "sourcePath": "skills/yiru-per-workspace-env",
+      "releaseRevision": 3,
+      "packageDigest": "408938ee4b1747217158106ec11a9513e0010a463c7183d8903d4e2e0e54f396",
+      "gitTreeSha": "1cf9cf6b49b9f22747afbb39331365e5f0c8af5a",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "size": 43767,
+          "executable": false,
+          "classification": "text",
+          "exactSha256": "a1ca3caacabede7cd582f04f083459f414904bba9d809a70ea3eda89bf59b810",
+          "textNormalizedSha256": "a1ca3caacabede7cd582f04f083459f414904bba9d809a70ea3eda89bf59b810",
+          "identitySha256": "a1ca3caacabede7cd582f04f083459f414904bba9d809a70ea3eda89bf59b810"
+        }
+      ]
+    }
+  ]
+}

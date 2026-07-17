@@ -224,7 +224,7 @@ Common Commands:
   yiru terminal create [--worktree <selector>] [--title <name>] [--command <text>] [--focus] [--json]
   yiru terminal split [--terminal <handle>] [--direction horizontal|vertical] [--json]
   yiru terminal switch [--terminal <handle>] [--json]
-  yiru terminal close [--terminal <handle>] [--json]
+  yiru terminal close [--terminal <handle>] [--tab] [--json]
   yiru project list [--json]
   yiru project setups [--project <id>] [--host <host-id>] [--json]
   yiru project setup-existing-folder --project <id> --host <host-id> --path <path> [--kind git|folder] [--display-name <name>] [--json]

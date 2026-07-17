@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto'
-import type { RemoteRuntimeClientError } from './remote-runtime-client-error'
 import {
   remoteRuntimeTimeoutError,
   remoteRuntimeUnavailableError
@@ -19,7 +18,6 @@ export function requestSharedControl<TResult>(args: {
   signal?: AbortSignal
   send: (requestId: string, method: string, params: unknown) => void
   cancel?: (requestId: string) => void
-  onTimeout?: (error: RemoteRuntimeClientError) => void
   // Why: default off — ordinary short RPCs keep an absolute deadline. Only
   // long-polls routed through this path opt in so keepalives extend them.
   refreshTimeoutOnKeepalive?: boolean
@@ -36,16 +34,9 @@ export function requestSharedControl<TResult>(args: {
       if (pending.sent) {
         args.cancel?.(requestId)
       }
+      // Why: one stalled method does not prove the shared socket is dead;
+      // socket liveness owns connection-wide teardown so other RPCs survive.
       rejectSharedControlPendingRequest(args.pendingRequests, requestId, timeoutError)
-      // Why: a request the server never answered means the socket is suspect
-      // (half-open tunnels swallow frames silently); mirror
-      // RemoteRuntimeRequestConnection and hand the connection a teardown
-      // error so reconnect+replay runs instead of keeping a zombie socket.
-      args.onTimeout?.(
-        remoteRuntimeUnavailableError(
-          'Remote Yiru runtime did not answer in time; resetting the control connection.'
-        )
-      )
     }, args.timeoutMs)
     const abortListener = (): void => {
       const pending = args.pendingRequests.get(requestId)
