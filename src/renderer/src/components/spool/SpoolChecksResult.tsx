@@ -1,11 +1,11 @@
 import type React from 'react'
 import { ExternalLink, GitMerge, GitPullRequest } from 'lucide-react'
 import type {
-  SpoolCheckEntry,
   SpoolChecksReadResult,
   SpoolChecksReview
 } from '../../../../shared/spool/spool-operation-contract'
 import { Button } from '@/components/ui/button'
+import { ChecksList } from '@/components/right-sidebar/checks-panel-content'
 import { CHECK_COLOR, CHECK_ICON } from '@/components/right-sidebar/check-status-presentation'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/utils'
@@ -53,48 +53,14 @@ export function SpoolChecksResult({
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-b border-sidebar-border px-3 py-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground">
-          {translate('auto.components.spool.SpoolChecksPane.checks', 'Checks')}
-        </span>
-        <span className="text-[11px] tabular-nums text-muted-foreground">
-          {result.checks.length}
-        </span>
-      </div>
-
-      {result.checks.map((check, index) => (
-        <SpoolCheckRow key={`${check.name}:${index}`} check={check} />
-      ))}
+      <ChecksList
+        checks={[...result.checks]}
+        checksLoading={false}
+        checkDetailsContextKey={`spool:${review.provider}:${review.number}:${review.updatedAt}`}
+        persistDetails={false}
+      />
       <SpoolCheckDetailNotice result={result} />
     </div>
-  )
-}
-
-function SpoolCheckRow({ check }: { check: SpoolCheckEntry }): React.JSX.Element {
-  const url = check.url
-  const content = (
-    <>
-      <CheckStateIcon check={check} />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[12px] font-medium text-foreground">{check.name}</span>
-        <span className="mt-0.5 block text-[11px] text-muted-foreground">
-          {checkStateLabel(check)}
-        </span>
-      </span>
-      {url ? <ExternalLink aria-hidden="true" className="size-3.5 text-muted-foreground" /> : null}
-    </>
-  )
-  const className = cn(
-    'flex w-full min-w-0 items-center gap-2 border-b border-sidebar-border px-3 py-2 text-left',
-    url &&
-      'transition-colors hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring'
-  )
-  return url ? (
-    <button type="button" className={className} onClick={() => openOwnerUrl(url)}>
-      {content}
-    </button>
-  ) : (
-    <div className={className}>{content}</div>
   )
 }
 
@@ -140,16 +106,6 @@ function ReviewStatus({ status }: { status: SpoolChecksReview['status'] }): Reac
   )
 }
 
-function CheckStateIcon({ check }: { check: SpoolCheckEntry }): React.JSX.Element {
-  const tone = checkPresentationTone(check)
-  const StatusIcon = CHECK_ICON[tone] ?? CHECK_ICON.neutral
-  return (
-    <StatusIcon
-      className={cn('size-4 shrink-0', CHECK_COLOR[tone], tone === 'pending' && 'animate-spin')}
-    />
-  )
-}
-
 function reviewStatusLabel(status: SpoolChecksReview['status']): string {
   switch (status) {
     case 'success':
@@ -160,41 +116,6 @@ function reviewStatusLabel(status: SpoolChecksReview['status']): string {
       return translate('auto.components.spool.SpoolChecksPane.pending', 'Pending')
     case 'neutral':
       return translate('auto.components.spool.SpoolChecksPane.neutral', 'Neutral')
-  }
-}
-
-function checkPresentationTone(check: SpoolCheckEntry): string {
-  if (check.status !== 'completed' || check.conclusion === 'pending' || check.conclusion === null) {
-    return 'pending'
-  }
-  return check.conclusion
-}
-
-function checkStateLabel(check: SpoolCheckEntry): string {
-  if (check.status === 'queued') {
-    return translate('auto.components.spool.SpoolChecksPane.queued', 'Queued')
-  }
-  if (check.status === 'in_progress') {
-    return translate('auto.components.spool.SpoolChecksPane.inProgress', 'In progress')
-  }
-  switch (check.conclusion) {
-    case 'success':
-      return translate('auto.components.spool.SpoolChecksPane.succeeded', 'Succeeded')
-    case 'failure':
-      return translate('auto.components.spool.SpoolChecksPane.failed', 'Failed')
-    case 'cancelled':
-      return translate('auto.components.spool.SpoolChecksPane.cancelled', 'Cancelled')
-    case 'timed_out':
-      return translate('auto.components.spool.SpoolChecksPane.timedOut', 'Timed out')
-    case 'skipped':
-      return translate('auto.components.spool.SpoolChecksPane.skipped', 'Skipped')
-    case 'action_required':
-      return translate('auto.components.spool.SpoolChecksPane.actionRequired', 'Action required')
-    case 'neutral':
-      return translate('auto.components.spool.SpoolChecksPane.neutral', 'Neutral')
-    case 'pending':
-    case null:
-      return translate('auto.components.spool.SpoolChecksPane.pending', 'Pending')
   }
 }
 

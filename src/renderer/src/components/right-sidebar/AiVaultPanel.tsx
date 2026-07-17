@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { SpoolAgentsPane } from '@/components/spool/SpoolAgentsPane'
 import { useShallow } from 'zustand/react/shallow'
 import { toast } from 'sonner'
 import { useAppStore } from '@/store'
@@ -45,6 +46,7 @@ import {
 } from '../../../../shared/ai-vault-types'
 import { translate } from '@/i18n/i18n'
 import { AiVaultPanelHeader } from './AiVaultPanelHeader'
+import { AiVaultPanelNotice, AiVaultPanelSurface } from './AiVaultPanelSurface'
 import { AiVaultSessionVirtualList } from './AiVaultSessionVirtualList'
 import { useAiVaultSessionRefresh } from './ai-vault-session-refresh'
 import {
@@ -52,8 +54,12 @@ import {
   buildRuntimeAiVaultHostScopeOptions,
   useAiVaultExecutionHostScope
 } from './ai-vault-host-scope'
+import {
+  LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  type RightSidebarPanelSource
+} from './right-sidebar-panel-source'
 
-export default function AiVaultPanel(): React.JSX.Element {
+function LocalAiVaultPanel(): React.JSX.Element {
   const activeWorktreeId = useActiveWorktreeId()
   const activeWorktree = useActiveWorktree()
   const activeRepo = useActiveRepo()
@@ -317,7 +323,7 @@ export default function AiVaultPanel(): React.JSX.Element {
   }, [])
 
   return (
-    <div className="@container/ai-vault flex h-full min-h-0 flex-col bg-sidebar">
+    <AiVaultPanelSurface>
       <AiVaultPanelHeader
         query={query}
         loading={loading}
@@ -345,20 +351,16 @@ export default function AiVaultPanel(): React.JSX.Element {
         onRefresh={() => void refresh({ force: true })}
       />
 
-      {error ? (
-        <div className="border-b border-sidebar-border px-3 py-2 text-xs text-destructive">
-          {error}
-        </div>
-      ) : null}
+      {error ? <AiVaultPanelNotice tone="destructive">{error}</AiVaultPanelNotice> : null}
 
       {scanResult && scanResult.issues.length > 0 ? (
-        <div className="border-b border-sidebar-border px-3 py-1.5 text-[11px] text-muted-foreground">
+        <AiVaultPanelNotice>
           {translate(
             'auto.components.right.sidebar.AiVaultPanel.transcriptsSkipped',
             '{{count}} transcript skipped',
             { count: scanResult.issues.length }
           )}
-        </div>
+        </AiVaultPanelNotice>
       ) : null}
 
       <AiVaultSessionVirtualList
@@ -400,6 +402,18 @@ export default function AiVaultPanel(): React.JSX.Element {
           }
         }}
       />
-    </div>
+    </AiVaultPanelSurface>
   )
+}
+
+export default function AiVaultPanel({
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
+}: {
+  source?: RightSidebarPanelSource
+}): React.JSX.Element {
+  if (source.kind === 'spool') {
+    const { route, sessions, catalogStatus } = source
+    return <SpoolAgentsPane {...{ route, sessions, catalogStatus }} />
+  }
+  return <LocalAiVaultPanel />
 }

@@ -116,6 +116,12 @@ import {
   type SourceControlSectionArea
 } from './source-control-section-order'
 import { SourceControlVirtualFileList } from './source-control-virtual-file-list'
+import { SourceControlSectionHeader as SectionHeader } from './SourceControlSectionHeader'
+import { SpoolGitPane } from '@/components/spool/SpoolGitPane'
+import {
+  LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  type RightSidebarPanelSource
+} from './right-sidebar-panel-source'
 import { selectReviewCacheData, selectReviewCacheEntry } from './review-cache-entry-selection'
 import {
   buildActiveOpenFileSignature,
@@ -6509,8 +6515,19 @@ function SourceControlInner(): React.JSX.Element {
   )
 }
 
-const SourceControl = React.memo(SourceControlInner)
-export default SourceControl
+function SourceControl({
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
+}: {
+  source?: RightSidebarPanelSource
+}): React.JSX.Element | null {
+  if (source.kind === 'spool') {
+    return source.supportsGit ? <SpoolGitPane route={source.route} /> : null
+  }
+  return <SourceControlInner />
+}
+
+const SourceControlMemo = React.memo(SourceControl)
+export default SourceControlMemo
 
 type CommitAreaProps = {
   worktreeId: string | null
@@ -7285,52 +7302,6 @@ function CompareUnavailable({
           <RefreshCw className="size-3.5" />
           {translate('auto.components.right.sidebar.SourceControl.286dbda4d6', 'Retry')}
         </Button>
-      </div>
-    </div>
-  )
-}
-
-function SectionHeader({
-  label,
-  count,
-  conflictCount = 0,
-  isCollapsed,
-  onToggle,
-  actions
-}: {
-  label: string
-  count: number
-  conflictCount?: number
-  isCollapsed: boolean
-  onToggle: () => void
-  actions?: React.ReactNode
-}): React.JSX.Element {
-  // Why: wrap the toggle button and actions in a shared rounded container
-  // so the hover background spans the entire row instead of clipping around
-  // the label. The outer div keeps the vertical spacing that separates
-  // sections; the inner wrapper owns the hover rectangle.
-  return (
-    <div className="pl-1 pr-3 pt-3 pb-1">
-      <div className="group/section flex items-center rounded-md pr-1 hover:bg-accent hover:text-accent-foreground">
-        <button
-          type="button"
-          className="flex flex-1 items-center gap-1 px-0.5 py-0.5 text-left text-xs font-semibold uppercase tracking-wider text-foreground/70 group-hover/section:text-accent-foreground"
-          onClick={onToggle}
-        >
-          <ChevronDown
-            className={cn('size-3.5 shrink-0 transition-transform', isCollapsed && '-rotate-90')}
-          />
-          <span>{label}</span>
-          <span className="text-[11px] font-medium tabular-nums">{count}</span>
-          {conflictCount > 0 && (
-            <span className="text-[11px] font-medium text-destructive/80">
-              · {conflictCount}{' '}
-              {translate('auto.components.right.sidebar.SourceControl.413a3ba113', 'conflict')}
-              {conflictCount === 1 ? '' : 's'}
-            </span>
-          )}
-        </button>
-        <div className="shrink-0 flex items-center">{actions}</div>
       </div>
     </div>
   )

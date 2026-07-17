@@ -4873,7 +4873,8 @@
           "itemActions": "ファイル操作",
           "rename": "名前を変更",
           "delete": "削除",
-          "unavailable": "ファイルを利用できません。"
+          "unavailable": "ファイルを利用できません。",
+          "retry": "Retry"
         },
         "SpoolFilesPane": {
           "listFailed": "ファイルを読み込めませんでした。",

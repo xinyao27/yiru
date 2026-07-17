@@ -8,6 +8,7 @@ import { shouldShowIgnoredDecoration, STATUS_COLORS } from './status-display'
 import type { DirCache, TreeNode } from './file-explorer-types'
 import type { FileExplorerRowProjection } from './file-explorer-row-projection'
 import type { RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
+import { renderFileExplorerVirtualList } from './FileExplorerVirtualList'
 
 type FileExplorerVirtualRowsProps = {
   virtualizer: Virtualizer<HTMLDivElement, Element>
@@ -100,110 +101,95 @@ export function FileExplorerVirtualRows(props: FileExplorerVirtualRowsProps): Re
 
   const visibleSelectionCount = rowProjection.countVisiblePaths(selectedPaths)
 
-  return (
-    <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
-      {virtualizer.getVirtualItems().map((vItem) => {
-        const isInlineRow = inlineInputIndex >= 0 && vItem.index === inlineInputIndex
-        const rowIndex =
-          !isInlineRow && inlineInputIndex >= 0 && vItem.index > inlineInputIndex
-            ? vItem.index - 1
-            : vItem.index
-        const node = isInlineRow ? null : rowProjection.getRowAtIndex(rowIndex)
-        if (!isInlineRow && !node) {
-          return null
-        }
+  return renderFileExplorerVirtualList({
+    virtualizer,
+    renderRow: (virtualIndex) => {
+      const isInlineRow = inlineInputIndex >= 0 && virtualIndex === inlineInputIndex
+      const rowIndex =
+        !isInlineRow && inlineInputIndex >= 0 && virtualIndex > inlineInputIndex
+          ? virtualIndex - 1
+          : virtualIndex
+      const node = isInlineRow ? null : rowProjection.getRowAtIndex(rowIndex)
+      if (!isInlineRow && !node) {
+        return null
+      }
 
-        const showInline =
-          isInlineRow ||
-          (inlineInput?.type === 'rename' && node && inlineInput.existingPath === node.path)
-        const inlineDepth = isInlineRow ? inlineInput!.depth : (node?.depth ?? 0)
+      const showInline =
+        isInlineRow ||
+        (inlineInput?.type === 'rename' && node && inlineInput.existingPath === node.path)
+      const inlineDepth = isInlineRow ? inlineInput!.depth : (node?.depth ?? 0)
 
-        if (showInline) {
-          return (
-            <div
-              key={vItem.key}
-              data-index={vItem.index}
-              ref={virtualizer.measureElement}
-              className="absolute left-0 right-0"
-              style={{ transform: `translateY(${vItem.start}px)` }}
-            >
-              <InlineInputRow
-                depth={inlineDepth}
-                inlineInput={inlineInput!}
-                onSubmit={handleInlineSubmit}
-                onCancel={dismissInlineInput}
-              />
-            </div>
-          )
-        }
-
-        const n = node!
-        const normalizedRelativePath = normalizeRelativePath(n.relativePath)
-        const nodeStatus = n.isDirectory
-          ? (folderStatusByRelativePath.get(normalizedRelativePath) ?? null)
-          : (statusByRelativePath.get(normalizedRelativePath) ?? null)
-        const isIgnored = shouldShowIgnoredDecoration(
-          nodeStatus,
-          ignoredByRelativePath,
-          normalizedRelativePath
-        )
-
-        const rowParentDir = n.isDirectory ? n.path : dirname(n.path)
-        const sourceParentDir = dragSourcePath ? dirname(dragSourcePath) : null
-        const isInDropTarget =
-          (dropTargetDir != null &&
-            dropTargetDir === rowParentDir &&
-            dropTargetDir !== sourceParentDir) ||
-          (nativeDropTargetDir != null && nativeDropTargetDir === rowParentDir)
+      if (showInline) {
         return (
-          <div
-            key={vItem.key}
-            data-index={vItem.index}
-            ref={virtualizer.measureElement}
-            className={cn('absolute left-0 right-0', isInDropTarget && 'bg-border')}
-            style={{ transform: `translateY(${vItem.start}px)` }}
-          >
-            <FileExplorerRow
-              node={n}
-              isExpanded={expanded.has(n.path)}
-              isLoading={n.isDirectory && Boolean(dirCache[n.path]?.loading)}
-              isSelected={selectedPaths.has(n.path) || activeFileId === n.path}
-              selectedPaths={selectedPaths}
-              isFlashing={flashingPath === n.path}
-              nodeStatus={nodeStatus}
-              statusColor={nodeStatus ? STATUS_COLORS[nodeStatus] : null}
-              isIgnored={isIgnored}
-              deleteShortcutLabel={deleteShortcutLabel}
-              connectionId={connectionId}
-              runtimeDownloadContext={runtimeDownloadContext}
-              canCollapseFolderSubtree={canCollapseFolderSubtree}
-              targetDir={n.isDirectory ? n.path : dirname(n.path)}
-              targetDepth={n.isDirectory ? n.depth + 1 : n.depth}
-              selectionSize={selectedPaths.has(n.path) ? visibleSelectionCount : 1}
-              onClick={(event) => onClick(n, event)}
-              onDoubleClick={() => onDoubleClick(n)}
-              onViewFile={() => onViewFile(n)}
-              onContextMenuSelect={() => onContextMenuSelect(n)}
-              onCopyPaths={(pathKind) => onCopyPaths(n, pathKind)}
-              onStartNew={onStartNew}
-              onStartRename={onStartRename}
-              onDuplicate={onDuplicate}
-              onAddFolderAsProject={() => onAddFolderAsProject(n)}
-              canAddAsProject={canAddFolderAsProject(n)}
-              onOpenInTerminal={() => onOpenInTerminal(n)}
-              onRequestDelete={() => onRequestDelete(n)}
-              onCollapseFolderSubtree={() => onCollapseFolderSubtree(n)}
-              onFindInFolder={() => onFindInFolder(n)}
-              onMoveDrop={onMoveDrop}
-              onDragTargetChange={onDragTargetChange}
-              onDragSourceChange={onDragSourceChange}
-              onDragExpandDir={onDragExpandDir}
-              onNativeDragTargetChange={onNativeDragTargetChange}
-              onNativeDragExpandDir={onNativeDragExpandDir}
-            />
-          </div>
+          <InlineInputRow
+            depth={inlineDepth}
+            inlineInput={inlineInput!}
+            onSubmit={handleInlineSubmit}
+            onCancel={dismissInlineInput}
+          />
         )
-      })}
-    </div>
-  )
+      }
+
+      const n = node!
+      const normalizedRelativePath = normalizeRelativePath(n.relativePath)
+      const nodeStatus = n.isDirectory
+        ? (folderStatusByRelativePath.get(normalizedRelativePath) ?? null)
+        : (statusByRelativePath.get(normalizedRelativePath) ?? null)
+      const isIgnored = shouldShowIgnoredDecoration(
+        nodeStatus,
+        ignoredByRelativePath,
+        normalizedRelativePath
+      )
+
+      const rowParentDir = n.isDirectory ? n.path : dirname(n.path)
+      const sourceParentDir = dragSourcePath ? dirname(dragSourcePath) : null
+      const isInDropTarget =
+        (dropTargetDir != null &&
+          dropTargetDir === rowParentDir &&
+          dropTargetDir !== sourceParentDir) ||
+        (nativeDropTargetDir != null && nativeDropTargetDir === rowParentDir)
+      return (
+        <div className={cn('w-full', isInDropTarget && 'bg-border')}>
+          <FileExplorerRow
+            node={n}
+            isExpanded={expanded.has(n.path)}
+            isLoading={n.isDirectory && Boolean(dirCache[n.path]?.loading)}
+            isSelected={selectedPaths.has(n.path) || activeFileId === n.path}
+            selectedPaths={selectedPaths}
+            isFlashing={flashingPath === n.path}
+            nodeStatus={nodeStatus}
+            statusColor={nodeStatus ? STATUS_COLORS[nodeStatus] : null}
+            isIgnored={isIgnored}
+            deleteShortcutLabel={deleteShortcutLabel}
+            connectionId={connectionId}
+            runtimeDownloadContext={runtimeDownloadContext}
+            canCollapseFolderSubtree={canCollapseFolderSubtree}
+            targetDir={n.isDirectory ? n.path : dirname(n.path)}
+            targetDepth={n.isDirectory ? n.depth + 1 : n.depth}
+            selectionSize={selectedPaths.has(n.path) ? visibleSelectionCount : 1}
+            onClick={(event) => onClick(n, event)}
+            onDoubleClick={() => onDoubleClick(n)}
+            onViewFile={() => onViewFile(n)}
+            onContextMenuSelect={() => onContextMenuSelect(n)}
+            onCopyPaths={(pathKind) => onCopyPaths(n, pathKind)}
+            onStartNew={onStartNew}
+            onStartRename={onStartRename}
+            onDuplicate={onDuplicate}
+            onAddFolderAsProject={() => onAddFolderAsProject(n)}
+            canAddAsProject={canAddFolderAsProject(n)}
+            onOpenInTerminal={() => onOpenInTerminal(n)}
+            onRequestDelete={() => onRequestDelete(n)}
+            onCollapseFolderSubtree={() => onCollapseFolderSubtree(n)}
+            onFindInFolder={() => onFindInFolder(n)}
+            onMoveDrop={onMoveDrop}
+            onDragTargetChange={onDragTargetChange}
+            onDragSourceChange={onDragSourceChange}
+            onDragExpandDir={onDragExpandDir}
+            onNativeDragTargetChange={onNativeDragTargetChange}
+            onNativeDragExpandDir={onNativeDragExpandDir}
+          />
+        </div>
+      )
+    }
+  })
 }

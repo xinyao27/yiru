@@ -1,7 +1,6 @@
 import type React from 'react'
 import { useMemo, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { Loader2 } from 'lucide-react'
 import type {
   SpoolSessionCatalogEntry,
   SpoolSessionCatalogPageState
@@ -9,6 +8,10 @@ import type {
 import { translate } from '@/i18n/i18n'
 import { AgentIcon, getAgentLabel } from '@/lib/agent-catalog'
 import { cn } from '@/lib/utils'
+import {
+  AiVaultPanelNotice,
+  AiVaultPanelSurface
+} from '@/components/right-sidebar/AiVaultPanelSurface'
 import { useAppStore } from '@/store'
 import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 import { getSpoolSessionCatalogStatusLabel } from './spool-session-catalog-status'
@@ -42,7 +45,7 @@ export function SpoolAgentsPane({
   })
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-sidebar">
+    <AiVaultPanelSurface>
       <div className="flex h-9 shrink-0 items-center justify-between border-b border-sidebar-border px-3">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground">
           {translate('auto.components.spool.SpoolAgentsPane.publicSessions', 'Public agents')}
@@ -53,18 +56,12 @@ export function SpoolAgentsPane({
       </div>
 
       {statusLabel ? (
-        <div
-          role="status"
-          className={cn(
-            'flex items-center gap-1.5 border-b border-sidebar-border px-3 py-2 text-[11px]',
-            catalogStatus === 'error' ? 'text-destructive' : 'text-muted-foreground'
-          )}
+        <AiVaultPanelNotice
+          loading={catalogStatus === 'loading'}
+          tone={catalogStatus === 'error' ? 'destructive' : 'muted'}
         >
-          {catalogStatus === 'loading' ? (
-            <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
-          ) : null}
           {statusLabel}
-        </div>
+        </AiVaultPanelNotice>
       ) : null}
 
       <div ref={scrollRef} className="scrollbar-sleek min-h-0 flex-1 overflow-y-auto">
@@ -118,7 +115,7 @@ export function SpoolAgentsPane({
           </div>
         ) : null}
       </div>
-    </div>
+    </AiVaultPanelSurface>
   )
 }
 

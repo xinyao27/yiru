@@ -2,8 +2,6 @@
 import React, { useCallback, useRef } from 'react'
 import { basename } from '@/lib/path'
 import {
-  ChevronRight,
-  CircleSlash,
   Copy,
   Download,
   ExternalLink,
@@ -12,12 +10,9 @@ import {
   FilePlus,
   Files,
   Folder,
-  FolderOpen,
   FolderPlus,
   Globe,
   ListCollapse,
-  Link,
-  Loader2,
   Pencil,
   Search,
   SquareTerminal,
@@ -32,11 +27,9 @@ import {
   ContextMenuShortcut,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
-import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
 import { useShortcutLabel } from '@/hooks/useShortcutLabel'
 import { detectLanguage } from '@/lib/language-detect'
-import { getFileTypeIcon } from '@/lib/file-type-icons'
 import { openFileInBrowserTab } from '@/lib/file-preview'
 import {
   encodeWorkspaceFilePaths,
@@ -44,8 +37,8 @@ import {
   WORKSPACE_FILE_PATHS_MIME
 } from '@/lib/workspace-file-drag'
 import type { GitFileStatus } from '../../../../shared/types'
-import { STATUS_LABELS } from './status-display'
 import type { TreeNode } from './file-explorer-types'
+import { FileExplorerTreeRowButton } from './FileExplorerTreeRowButton'
 import { useFileExplorerRowDrag } from './useFileExplorerRowDrag'
 import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/local-path-open-guard'
 import { translate } from '@/i18n/i18n'
@@ -450,7 +443,6 @@ export function FileExplorerRow({
   const copyPathShortcutLabel = useShortcutLabel('fileExplorer.copyPath')
   const copyRelativePathShortcutLabel = useShortcutLabel('fileExplorer.copyRelativePath')
   const findInFolderShortcutLabel = useShortcutLabel('sidebar.search.toggle')
-  const FileIcon = getFileTypeIcon(node.relativePath || node.name)
   const rowDropDir = node.isDirectory ? node.path : targetDir
   const showRemoteDownloadAction = shouldShowRemoteDownloadAction(
     node,
@@ -502,17 +494,16 @@ export function FileExplorerRow({
     >
       <ContextMenuTrigger
         render={
-          <button
-            data-file-explorer-row=""
-            data-selected={isSelected ? 'true' : undefined}
-            className={cn(
-              'flex w-full items-center gap-1 rounded-sm px-2 py-1 text-left text-xs transition-colors',
-              !isSelected && 'hover:bg-accent hover:text-foreground',
-              isSelected && 'text-accent-foreground',
-              isFlashing && 'bg-amber-400/20 ring-1 ring-inset ring-amber-400/70'
-            )}
-            style={{ paddingLeft: `${node.depth * 16 + 8}px` }}
-            ref={setRowDragNode}
+          <FileExplorerTreeRowButton
+            node={node}
+            isExpanded={isExpanded}
+            isLoading={isLoading}
+            isSelected={isSelected}
+            isFlashing={isFlashing}
+            nodeStatus={nodeStatus}
+            statusColor={statusColor}
+            isIgnored={isIgnored}
+            buttonRef={setRowDragNode}
             data-native-file-drop-dir={rowDropDir}
             // Why: marks this draggable row so the wheel-capture handler can rescue
             // scroll Chromium swallows over draggable nodes (file-explorer-drag-scroll-marker).
@@ -582,77 +573,17 @@ export function FileExplorerRow({
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={(e) => onClick(e)}
+            onClick={onClick}
             onDoubleClick={onDoubleClick}
-          >
-            {node.isDirectory ? (
-              <>
-                <ChevronRight
-                  className={cn(
-                    'size-3 shrink-0 text-muted-foreground transition-transform',
-                    isExpanded && 'rotate-90'
-                  )}
-                />
-                {isLoading ? (
-                  <Loader2 className="size-3 shrink-0 animate-spin text-muted-foreground" />
-                ) : isExpanded ? (
-                  <FolderOpen className="size-3 shrink-0 text-muted-foreground" />
-                ) : (
-                  <Folder className="size-3 shrink-0 text-muted-foreground" />
-                )}
-              </>
-            ) : (
-              <>
-                <span className="size-3 shrink-0" />
-                {node.isSymlink ? (
-                  <Link className="size-3 shrink-0 text-muted-foreground" />
-                ) : (
-                  <FileIcon className="size-3 shrink-0 text-muted-foreground" />
-                )}
-              </>
-            )}
-            <span
-              className={cn(
-                'truncate',
-                isSelected && !nodeStatus && !isIgnored && 'text-accent-foreground',
-                isIgnored && 'italic'
-              )}
-              style={
-                nodeStatus
-                  ? { color: statusColor ?? undefined }
-                  : isIgnored
-                    ? { color: 'var(--git-decoration-ignored)' }
-                    : undefined
-              }
-              onDoubleClick={(e) => {
-                // Why: the row itself swallows double-click for "pin preview" /
-                // directory toggle. Scope rename to the filename text only so
-                // those behaviors stay intact on the icon and empty row area,
-                // matching VS Code's rename hotspot.
-                e.stopPropagation()
-                onStartRename(node)
-              }}
-            >
-              {node.name}
-            </span>
-            {nodeStatus ? (
-              <span
-                className="ml-auto shrink-0 text-[10px] font-semibold tracking-wide mr-2"
-                style={{ color: statusColor ?? undefined }}
-              >
-                {STATUS_LABELS[nodeStatus]}
-              </span>
-            ) : isIgnored ? (
-              <CircleSlash
-                aria-label={translate(
-                  'auto.components.right.sidebar.FileExplorerRow.e26010014a',
-                  'Ignored by .gitignore'
-                )}
-                className="ml-auto size-3 shrink-0 mr-2"
-                style={{ color: 'var(--git-decoration-ignored)' }}
-              />
-            ) : null}
-          </button>
+            onLabelDoubleClick={(event) => {
+              // Why: the row itself swallows double-click for "pin preview" /
+              // directory toggle. Scope rename to the filename text only so
+              // those behaviors stay intact on the icon and empty row area,
+              // matching VS Code's rename hotspot.
+              event.stopPropagation()
+              onStartRename(node)
+            }}
+          />
         }
       />
       <ContextMenuContent

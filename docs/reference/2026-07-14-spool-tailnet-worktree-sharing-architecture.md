@@ -712,13 +712,15 @@ The virtualized left tree remains the complete navigator for every materialized 
 
 Existing sessions attach or continue only after explicit selection. A successful explicit create is different: the returned volatile alias is inserted, selected, and subscribed immediately. Catalog reconciliation later replaces or merges it with the stable entry without duplicate tabs or selection loss.
 
-The ordinary Worktree right sidebar is a presentation Seam: Spool reuses `RightSidebarFrame` plus the shared activity-tab definitions, ordering, icons, labels, and status-indicator semantics. `SpoolRightSidebar` filters that definition to Explorer, Agents, Source Control, and Checks for a Git worktree, and Explorer plus Agents for a folder worktree. It supplies remote panel adapters; it does not mount local panels whose selectors expect a requester-side Repo, Worktree, path, AI Vault, provider account, or Git client.
+The ordinary Worktree right sidebar is the presentation Seam, not merely a chrome reference. `SpoolRightSidebar` reuses `RightSidebarFrame`, `RightSidebarPanelContent`, and the shared activity-tab definitions, ordering, icons, labels, and status-indicator semantics. It filters that definition to Explorer, Agents, Source Control, and Checks for a Git worktree, and Explorer plus Agents for a folder worktree. Each ordinary top-level panel accepts a local or Spool source descriptor; the Spool branch delegates transport and state to a narrow remote adapter, while comparable toolbar, row, disclosure, virtual-list, section, check-list, notice, and surface presentation stays in ordinary right-sidebar Modules. Local selectors that require a requester-side Repo, Worktree, absolute path, AI Vault, provider account, or Git client remain behind the local branch.
 
 Agents is a second navigator over only the `kind: 'agent'` entries in the already-loaded Public paginated session catalog. Its row viewport is virtualized, so the bounded 55,000-row materialized catalog does not become a 55,000-node DOM. It renders the sanitized agent/title fields and selecting a row updates the remote route so `SpoolSessionPane` opens that session's terminal in the center. It does not query or mirror the requester's local AI Vault, and pagination remains authoritative rather than presenting a partial chain as complete.
 
 Checks is an owner-side sanitized read projection. The checked, Git-only `checks.read` RPC resolves the Public worktree on its actual host and returns bounded review fields needed by the read-only panel and its activity status indicator: provider, number, title, state, URL, aggregate status, updated time, mergeability, and review decision. It may also return at most 256 check rows containing only name, status, conclusion, and a normalized credential-free HTTP(S) URL, plus `truncated` and `detailStatus`. The owner keeps a 15-second, 128-entry per-publication single-flight cache and performs the provider lookup without analytics side effects. A provider failure projects `unavailable`; a successful lookup with no review projects an ordinary empty result. The strict result schema rejects excess fields, malformed dates, credential-bearing URLs, and unsafe protocols at direct and paired-runtime boundaries. It returns no repository path, credential, raw provider response/error, check log, or mutation capability; a control grant does not make Checks writable.
 
-Because remote previews use checked relative-path and patch contracts rather than local editor models, file and change selection uses a single-column drill-in within the sidebar and an explicit Back action. `SpoolFilesPane`, `SpoolFileTree`, and `SpoolFilePreview` continue to own relative-path RPC and requester-side previews. `SpoolGitPane`, `SpoolGitSidebar`, and `SpoolGitDiffPane` continue to own the bounded Git surface. Every panel invokes checked Spool IPC rather than requester-side filesystem, editor, Source Control, AI Vault, provider, or `PtyTransport` clients. This preserves the normal Worktree layout without synthesizing a `Repo`, `Worktree`, persisted `WorkspaceKey`, owner absolute path, or owner credential.
+Remote capability gaps do not authorize alternate directory navigation. Explorer uses the ordinary toolbar, row, disclosure, indentation, selection, loading, empty, and virtual-list components; opening a directory expands it in place and retains its ancestors and siblings. Source Control uses the ordinary section and virtual-file-list components, and Checks uses the ordinary check list. Agents remains a projection of the Public catalog through the ordinary Agents panel boundary. Checked file and diff previews remain secondary states selected from those ordinary lists and may temporarily occupy the panel with an explicit Back action; directory traversal never becomes preview-page navigation.
+
+`SpoolFilesPane`, `SpoolGitPane`, `SpoolChecksPane`, and `SpoolAgentsPane` are remote data/capability adapters and projection composers, not replacements for the ordinary sidebar router or its comparable presentation primitives. They own bounded RPC state, stale-route rejection, mutation authority, remote-only notices/actions, and sanitized requester-side preview data. Every adapter invokes checked Spool IPC rather than requester-side filesystem, editor, Source Control, AI Vault, provider, or `PtyTransport` clients. This preserves the normal Worktree UX without synthesizing a `Repo`, `Worktree`, persisted `WorkspaceKey`, owner absolute path, or owner credential.
 
 `SpoolSessionPane` resolves existing, continued, and newly created aliases and always converges on `SpoolTerminalPane`; it never renders a separate provider transcript UI. The center shows raw and agent terminals through the same xterm-backed remote surface, while the right sidebar provides the ordinary workspace navigation over remote projections.
 
@@ -978,8 +980,21 @@ src/renderer/src/components/tab-group/
 
 src/renderer/src/components/right-sidebar/
   RightSidebarFrame.tsx
+  right-sidebar-panel-content.tsx
+  right-sidebar-panel-source.ts
   right-sidebar-activity-items.ts
   check-status-presentation.ts
+  FileExplorer.tsx
+  FileExplorerToolbar.tsx
+  FileExplorerTreeRowButton.tsx
+  FileExplorerVirtualList.tsx
+  SourceControl.tsx
+  SourceControlSectionHeader.tsx
+  source-control-virtual-file-list.tsx
+  ChecksPanel.tsx
+  checks-panel-content.tsx
+  AiVaultPanel.tsx
+  AiVaultPanelSurface.tsx
 
 src/renderer/src/components/status-bar/
   ProviderUsageSegment.tsx
@@ -997,11 +1012,13 @@ src/renderer/src/components/spool/
   SpoolSessionContinuationNotice.tsx
   SpoolFilesPane.tsx
   SpoolFileTree.tsx
+  useSpoolFileTreeState.ts
   SpoolFilePreview.tsx
   SpoolFilePreviewToolbar.tsx
   SpoolTooltipIconButton.tsx
   SpoolGitPane.tsx
   SpoolGitSidebar.tsx
+  SpoolGitChangesList.tsx
   SpoolGitDiffPane.tsx
   SpoolControlRequestDialog.tsx
   SpoolWorktreeVisibilityDialog.tsx

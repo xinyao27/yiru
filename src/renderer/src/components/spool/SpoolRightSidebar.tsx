@@ -11,11 +11,9 @@ import { getVisibleRightSidebarActivityItems } from '@/components/right-sidebar/
 import { createRightSidebarActivityItems } from '@/components/right-sidebar/right-sidebar-activity-items'
 import { resolveRightSidebarEffectiveTab } from '@/components/right-sidebar/right-sidebar-effective-tab'
 import { RightSidebarFrame } from '@/components/right-sidebar/RightSidebarFrame'
+import { RightSidebarPanelContent } from '@/components/right-sidebar/right-sidebar-panel-content'
 import { normalizeRightSidebarRoute } from '@/store/right-sidebar-route'
-import { SpoolAgentsPane } from './SpoolAgentsPane'
-import { SpoolChecksPane, useSpoolChecksReadState } from './SpoolChecksPane'
-import { SpoolFilesPane } from './SpoolFilesPane'
-import { SpoolGitPane } from './SpoolGitPane'
+import { useSpoolChecksReadState } from './SpoolChecksPane'
 import { shouldReadSpoolChecks } from './spool-right-sidebar-read-policy'
 import { getSpoolWorktreeRouteKey } from './spool-worktree-route'
 
@@ -111,18 +109,18 @@ function SpoolRightSidebarContent({
       toggleShortcut={rightSidebarShortcut}
       width={rightSidebarWidth}
     >
-      {activeTab === 'explorer' ? (
-        <SpoolFilesPane route={route} supportsDiff={supportsGit} />
-      ) : null}
-      {activeTab === 'vault' ? (
-        <SpoolAgentsPane
-          route={route}
-          sessions={workspace?.worktree.sessions ?? []}
-          catalogStatus={workspace?.worktree.sessionCatalog.status ?? 'loading'}
-        />
-      ) : null}
-      {activeTab === 'source-control' && supportsGit ? <SpoolGitPane route={route} /> : null}
-      {activeTab === 'checks' && supportsGit ? <SpoolChecksPane state={checksState} /> : null}
+      <RightSidebarPanelContent
+        effectiveTab={activeTab}
+        rightSidebarOpen={rightSidebarOpen}
+        source={{
+          kind: 'spool',
+          route,
+          supportsGit,
+          sessions: workspace?.worktree.sessions ?? [],
+          catalogStatus: workspace?.worktree.sessionCatalog.status ?? 'loading',
+          checksState
+        }}
+      />
     </RightSidebarFrame>
   )
 }

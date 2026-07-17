@@ -923,6 +923,7 @@ export function ChecksList({
   checkDetailsContextKey,
   onLoadCheckDetails,
   worktreeId: worktreeIdOverride,
+  persistDetails = true,
   detailsStickySurface = 'sidebar'
 }: {
   checks: PRCheckDetail[]
@@ -931,10 +932,14 @@ export function ChecksList({
   onLoadCheckDetails?: (check: PRCheckDetail) => Promise<PRCheckRunDetails | null>
   /** Why: folder-workspace PR checks render rows for attached worktrees, not the active one. */
   worktreeId?: string
+  persistDetails?: boolean
   detailsStickySurface?: CheckDetailsStickySurface
 }): React.JSX.Element {
   const activeWorktree = useActiveWorktree()
-  const resolvedWorktreeId = worktreeIdOverride ?? activeWorktree?.id ?? null
+  // Why: projection-only remote checks must not write details into the local Worktree cache.
+  const resolvedWorktreeId = persistDetails
+    ? (worktreeIdOverride ?? activeWorktree?.id ?? null)
+    : null
   const patchOpenCheckRunDetails = useAppStore((s) => s.patchOpenCheckRunDetails)
   const [checksExpanded, setChecksExpanded] = useState(true)
   const [expandedCheckKeys, setExpandedCheckKeys] = useState<Set<string>>(new Set())

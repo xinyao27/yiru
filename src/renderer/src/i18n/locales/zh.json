@@ -4873,7 +4873,8 @@
           "itemActions": "文件操作",
           "rename": "重命名",
           "delete": "删除",
-          "unavailable": "文件不可用。"
+          "unavailable": "文件不可用。",
+          "retry": "Retry"
         },
         "SpoolFilesPane": {
           "listFailed": "无法加载文件。",

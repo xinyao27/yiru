@@ -4873,7 +4873,8 @@
           "itemActions": "File actions",
           "rename": "Rename",
           "delete": "Delete",
-          "unavailable": "Files are unavailable."
+          "unavailable": "Files are unavailable.",
+          "retry": "Retry"
         },
         "SpoolFilesPane": {
           "listFailed": "Could not load files.",

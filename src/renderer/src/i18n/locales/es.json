@@ -4873,7 +4873,8 @@
           "itemActions": "Acciones del archivo",
           "rename": "Cambiar nombre",
           "delete": "Eliminar",
-          "unavailable": "Los archivos no están disponibles."
+          "unavailable": "Los archivos no están disponibles.",
+          "retry": "Retry"
         },
         "SpoolFilesPane": {
           "listFailed": "No se pudieron cargar los archivos.",

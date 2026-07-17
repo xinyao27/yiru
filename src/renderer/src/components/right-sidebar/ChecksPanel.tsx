@@ -1,6 +1,7 @@
 /* eslint-disable max-lines -- Why: the checks panel co-locates PR header, checks, comments,
 merge actions, and conflict state in one component to keep the data flow straightforward. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { SpoolChecksPane } from '@/components/spool/SpoolChecksPane'
 import {
   LoaderCircle,
   RefreshCw,
@@ -102,6 +103,10 @@ import {
   getChecksPanelEmptyStateCopy,
   shouldShowChecksPanelPublishBranchAction
 } from './checks-panel-empty-state'
+import {
+  LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  type RightSidebarPanelSource
+} from './right-sidebar-panel-source'
 import { hasAmbiguousGitHubHostedReviewForChecksPanel } from './checks-panel-ambiguous-github-review'
 import { recordChecksPanelPRRefreshBreadcrumb } from './checks-panel-pr-refresh-breadcrumb'
 import {
@@ -374,7 +379,7 @@ async function resolveGitLabMRDiscussionForChecks(args: {
   })
 }
 
-export default function ChecksPanel(): React.JSX.Element {
+function LocalChecksPanel(): React.JSX.Element {
   // Why: the sidebar stays mounted when closed (for performance). Gate
   // polling on visibility so we don't fetch checks/comments — or poll the
   // terminal cwd — in the background when the panel isn't visible.
@@ -3918,4 +3923,15 @@ export default function ChecksPanel(): React.JSX.Element {
       />
     </div>
   )
+}
+
+export default function ChecksPanel({
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
+}: {
+  source?: RightSidebarPanelSource
+}): React.JSX.Element | null {
+  if (source.kind === 'spool') {
+    return source.supportsGit ? <SpoolChecksPane state={source.checksState} /> : null
+  }
+  return <LocalChecksPanel />
 }

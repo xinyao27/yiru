@@ -1,6 +1,10 @@
 import { Suspense } from 'react'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import type { ActiveRightSidebarTab } from '@/store/slices/editor'
+import {
+  LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  type RightSidebarPanelSource
+} from './right-sidebar-panel-source'
 
 const FileExplorer = lazy(() => import('./FileExplorer'))
 const SourceControl = lazy(() => import('./SourceControl'))
@@ -13,25 +17,27 @@ const FolderWorkspacePrChecksPanel = lazy(() => import('./FolderWorkspacePrCheck
 type RightSidebarPanelContentProps = {
   effectiveTab: ActiveRightSidebarTab
   rightSidebarOpen: boolean
+  source?: RightSidebarPanelSource
 }
 
 export function RightSidebarPanelContent({
   effectiveTab,
-  rightSidebarOpen
+  rightSidebarOpen,
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
 }: RightSidebarPanelContentProps): React.JSX.Element {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <Suspense fallback={null}>
-        {effectiveTab === 'explorer' && <FileExplorer />}
-        {effectiveTab === 'source-control' && <SourceControl />}
-        {effectiveTab === 'checks' && <ChecksPanel />}
+        {effectiveTab === 'explorer' && <FileExplorer source={source} />}
+        {effectiveTab === 'source-control' && <SourceControl source={source} />}
+        {effectiveTab === 'checks' && <ChecksPanel source={source} />}
         {/* Why: SSH port forwarding still depends on the raw ports.detect data,
             which the workspace-scoped status bar popover intentionally does not
             expose. Keep this panel reachable only for SSH worktrees. */}
         {effectiveTab === 'ports' && (
           <PortsPanel isVisible={rightSidebarOpen && effectiveTab === 'ports'} />
         )}
-        {effectiveTab === 'vault' && <AiVaultPanel />}
+        {effectiveTab === 'vault' && <AiVaultPanel source={source} />}
         {effectiveTab === 'workspaces' && <FolderWorkspaceWorktreesPanel />}
         {effectiveTab === 'pr-checks' && (
           <FolderWorkspacePrChecksPanel

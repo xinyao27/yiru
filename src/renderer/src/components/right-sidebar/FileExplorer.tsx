@@ -55,6 +55,11 @@ import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '@/components/tab-bar/SortableTab'
 import type { RightSidebarExplorerView } from '../../../../shared/types'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { createNewTerminalTab } from '@/components/terminal/terminal-tab-create'
+import { SpoolFilesPane } from '@/components/spool/SpoolFilesPane'
+import {
+  LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  type RightSidebarPanelSource
+} from './right-sidebar-panel-source'
 
 function FileExplorerFiles(): React.JSX.Element {
   const explorerView = useAppStore((s) => s.rightSidebarExplorerView)
@@ -807,7 +812,14 @@ function FileExplorerFiles(): React.JSX.Element {
 
 const FileExplorerFilesMemo = React.memo(FileExplorerFiles)
 
-function FileExplorer(): React.JSX.Element {
+function FileExplorer({
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
+}: {
+  source?: RightSidebarPanelSource
+}): React.JSX.Element {
+  if (source.kind === 'spool') {
+    return <SpoolFilesPane route={source.route} supportsDiff={source.supportsGit} />
+  }
   return <FileExplorerFilesMemo />
 }
 

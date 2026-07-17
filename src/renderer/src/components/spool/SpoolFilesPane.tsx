@@ -5,20 +5,21 @@ import {
   SPOOL_FILE_READ_MAX_BYTES,
   SPOOL_FILE_WRITE_MAX_BYTES,
   type SpoolFileDiffResult,
-  type SpoolFileListResult,
   type SpoolFileReadResult,
   type SpoolFileTreeEntry
 } from '../../../../shared/spool/spool-operation-contract'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import { selectSpoolCanControl } from '@/store/slices/spool-sharing-selectors'
+import {
+  resolveSpoolWorktreeRoute,
+  selectSpoolCanControl
+} from '@/store/slices/spool-sharing-selectors'
 import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 import { SpoolFileActionDialog, type SpoolFileAction } from './SpoolFileActionDialog'
 import { SpoolFilePreview } from './SpoolFilePreview'
 import { SpoolFileTree } from './SpoolFileTree'
 import {
   parseSpoolFileDiffResult,
-  parseSpoolFileListResult,
   parseSpoolFileReadResult,
   parseSpoolMutationResult
 } from './spool-owner-result-validation'
@@ -37,6 +38,7 @@ import {
   parentSpoolRelativePath
 } from './spool-file-mutation'
 import { useSpoolWorktreeOperationRoute } from './spool-worktree-route'
+import { useSpoolFileTreeState } from './useSpoolFileTreeState'
 
 export function SpoolFilesPane({
   route,
@@ -47,10 +49,11 @@ export function SpoolFilesPane({
 }): React.JSX.Element {
   const operationRoute = useSpoolWorktreeOperationRoute(route)
   const canControl = useAppStore((state) => selectSpoolCanControl(state, operationRoute))
+  const worktreeName = useAppStore(
+    (state) => resolveSpoolWorktreeRoute(state, route)?.worktree.name ?? 'Worktree'
+  )
   const [directory, setDirectory] = useState('')
-  const [listing, setListing] = useState<SpoolFileListResult | null>(null)
-  const [listLoading, setListLoading] = useState(true)
-  const [listUnavailable, setListUnavailable] = useState(false)
+  const fileTree = useSpoolFileTreeState(operationRoute)
   const [selectedEntry, setSelectedEntry] = useState<SpoolFileTreeEntry | null>(null)
   const [file, setFile] = useState<SpoolFileReadResult | null>(null)
   const [draft, setDraft] = useState('')
@@ -64,41 +67,9 @@ export function SpoolFilesPane({
   const [mutationOutcomeUnknown, setMutationOutcomeUnknown] = useState(false)
   const [sidebarView, setSidebarView] = useState<'tree' | 'preview'>('tree')
   const canMutate = canControl && !mutationOutcomeUnknown
-  const listRequestSequence = useRef(0)
   const fileRequestSequence = useRef(0)
   const diffRequestSequence = useRef(0)
-
-  const loadDirectory = useCallback(
-    async (relativePath: string): Promise<void> => {
-      const request = ++listRequestSequence.current
-      setDirectory(relativePath)
-      setListLoading(true)
-      setListUnavailable(false)
-      try {
-        const value = await invokeSpoolWorkspaceRead(operationRoute, 'files.list', {
-          relativePath,
-          limit: 5_000
-        })
-        const result = parseSpoolFileListResult(value)
-        if (request === listRequestSequence.current) {
-          setListing(result)
-        }
-      } catch (error) {
-        if (request === listRequestSequence.current && !isStaleRouteError(error)) {
-          setListing(null)
-          setListUnavailable(true)
-          toast.error(
-            translate('auto.components.spool.SpoolFilesPane.listFailed', 'Could not load files.')
-          )
-        }
-      } finally {
-        if (request === listRequestSequence.current) {
-          setListLoading(false)
-        }
-      }
-    },
-    [operationRoute]
-  )
+  const { loadDirectory } = fileTree
 
   const loadFile = useCallback(
     async (entry: SpoolFileTreeEntry, offset = 0): Promise<void> => {
@@ -141,13 +112,13 @@ export function SpoolFilesPane({
   )
 
   useEffect(() => {
-    void loadDirectory('')
+    const fileRequests = fileRequestSequence
+    const diffRequests = diffRequestSequence
     return () => {
-      listRequestSequence.current += 1
-      fileRequestSequence.current += 1
-      diffRequestSequence.current += 1
+      fileRequests.current += 1
+      diffRequests.current += 1
     }
-  }, [loadDirectory])
+  }, [])
 
   useEffect(() => {
     if (!canMutate) {
@@ -159,15 +130,17 @@ export function SpoolFilesPane({
     if (entry.kind === 'directory') {
       fileRequestSequence.current += 1
       diffRequestSequence.current += 1
-      setSelectedEntry(null)
+      setSelectedEntry(entry)
+      setDirectory(entry.relativePath)
       setFile(null)
       setDiff(null)
       setFileUnavailable(false)
       setDiffUnavailable(false)
       setSidebarView('tree')
-      void loadDirectory(entry.relativePath)
+      fileTree.toggleDirectory(entry.relativePath)
       return
     }
+    setDirectory(parentSpoolRelativePath(entry.relativePath))
     setSidebarView('preview')
     void loadFile(entry)
   }
@@ -311,16 +284,32 @@ export function SpoolFilesPane({
         {sidebarView === 'tree' ? (
           <SpoolFileTree
             canControl={canMutate}
-            directory={directory}
-            listing={listing}
-            loading={listLoading}
-            unavailable={listUnavailable}
+            expanded={fileTree.expanded}
+            listings={fileTree.listings}
+            loadingDirectories={fileTree.loadingDirectories}
+            unavailableDirectories={fileTree.unavailableDirectories}
+            repoName={worktreeName}
             selectedPath={selectedEntry?.relativePath ?? null}
+            showDotfiles={fileTree.showDotfiles}
             onOpen={openEntry}
-            onRefresh={() => void loadDirectory(directory)}
-            onUp={() => void loadDirectory(parentSpoolRelativePath(directory))}
-            onNewFile={() => setAction({ kind: 'new-file' })}
-            onNewDirectory={() => setAction({ kind: 'new-directory' })}
+            onRefresh={fileTree.refreshTree}
+            onRetryDirectory={(relativePath) => void fileTree.loadDirectory(relativePath)}
+            onCollapseAll={fileTree.collapseAll}
+            onToggleDotfiles={fileTree.toggleDotfiles}
+            onNewFile={(target) => {
+              setDirectory(target?.relativePath ?? directory)
+              if (target) {
+                fileTree.expandDirectory(target.relativePath)
+              }
+              setAction({ kind: 'new-file' })
+            }}
+            onNewDirectory={(target) => {
+              setDirectory(target?.relativePath ?? directory)
+              if (target) {
+                fileTree.expandDirectory(target.relativePath)
+              }
+              setAction({ kind: 'new-directory' })
+            }}
             onRename={(entry) => setAction({ kind: 'rename', entry })}
             onDelete={(entry) => setAction({ kind: 'delete', entry })}
           />

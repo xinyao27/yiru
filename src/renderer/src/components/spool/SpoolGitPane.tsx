@@ -13,11 +13,8 @@ import { useAppStore } from '@/store'
 import { selectSpoolCanControl } from '@/store/slices/spool-sharing-selectors'
 import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 import { SpoolGitDiffPane } from './SpoolGitDiffPane'
-import {
-  getSpoolGitStatusEntryKey,
-  SpoolGitSidebar,
-  type SpoolGitSidebarMode
-} from './SpoolGitSidebar'
+import { SpoolGitSidebar, type SpoolGitSidebarMode } from './SpoolGitSidebar'
+import { getSpoolGitStatusEntryKey } from './SpoolGitChangesList'
 import {
   parseSpoolGitDiffResult,
   parseSpoolGitHistoryResult,

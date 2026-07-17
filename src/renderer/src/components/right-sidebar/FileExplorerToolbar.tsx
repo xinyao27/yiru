@@ -15,8 +15,9 @@ import { cn } from '@/lib/utils'
 
 type FileExplorerToolbarProps = {
   repoName: string
-  worktreePath: string
+  worktreePath?: string
   connectionId?: string | null
+  mutationActions?: React.ReactNode
   refresh: {
     isRefreshing: boolean
     showRefreshSpinner: boolean
@@ -36,6 +37,7 @@ export function FileExplorerToolbar({
   repoName,
   worktreePath,
   connectionId,
+  mutationActions,
   refresh,
   canRefresh,
   canCollapseAll,
@@ -54,6 +56,7 @@ export function FileExplorerToolbar({
       >
         {repoName}
       </span>
+      {mutationActions}
       <Tooltip>
         <TooltipTrigger
           render={
@@ -177,12 +180,16 @@ export function FileExplorerToolbar({
               )}
             </DropdownMenuCheckboxItem>
           ) : null}
-          <DropdownMenuSeparator />
-          <WorktreeOpenInMenuItems
-            worktreePath={worktreePath}
-            connectionId={connectionId}
-            labelPrefix="Open in "
-          />
+          {worktreePath ? (
+            <>
+              <DropdownMenuSeparator />
+              <WorktreeOpenInMenuItems
+                worktreePath={worktreePath}
+                connectionId={connectionId}
+                labelPrefix="Open in "
+              />
+            </>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

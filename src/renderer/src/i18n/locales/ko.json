@@ -4873,7 +4873,8 @@
           "itemActions": "파일 작업",
           "rename": "이름 바꾸기",
           "delete": "삭제",
-          "unavailable": "파일을 사용할 수 없습니다."
+          "unavailable": "파일을 사용할 수 없습니다.",
+          "retry": "Retry"
         },
         "SpoolFilesPane": {
           "listFailed": "파일을 불러오지 못했습니다.",

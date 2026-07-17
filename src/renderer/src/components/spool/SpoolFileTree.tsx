@@ -1,209 +1,298 @@
 import type React from 'react'
-import {
-  ChevronUp,
-  File,
-  FilePlus2,
-  Folder,
-  FolderPlus,
-  Link2,
-  MoreHorizontal,
-  RefreshCw,
-  Trash2
-} from 'lucide-react'
+import { useRef } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
+import { FilePlus2, FolderPlus, Trash2 } from 'lucide-react'
 import type {
   SpoolFileListResult,
   SpoolFileTreeEntry
 } from '../../../../shared/spool/spool-operation-contract'
-import { translate } from '@/i18n/i18n'
-import { Button } from '@/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger
+} from '@/components/ui/context-menu'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { FileExplorerToolbar } from '@/components/right-sidebar/FileExplorerToolbar'
+import { FileExplorerVirtualList } from '@/components/right-sidebar/FileExplorerVirtualList'
+import { FileExplorerTreeRowButton } from '@/components/right-sidebar/FileExplorerTreeRowButton'
+import { FileExplorerTreeStatus } from '@/components/right-sidebar/FileExplorerTreeStatus'
+import { isDotfileRelativePath } from '@/components/right-sidebar/file-explorer-entries'
+import type { TreeNode } from '@/components/right-sidebar/file-explorer-types'
+import { useFileExplorerManualRefresh } from '@/components/right-sidebar/useFileExplorerManualRefresh'
+import { translate } from '@/i18n/i18n'
 import { SpoolTooltipIconButton } from './SpoolTooltipIconButton'
-import { SpoolTruncatedPathLabel } from './SpoolTruncatedPathLabel'
+
+type SpoolFileTreeRow =
+  | { kind: 'entry'; entry: SpoolFileTreeEntry; node: TreeNode }
+  | { kind: 'error'; directory: string; depth: number }
+
+const FILE_EXPLORER_VIRTUALIZE_MIN_ROWS = 50
 
 export function SpoolFileTree({
   canControl,
-  directory,
-  listing,
-  loading,
-  unavailable,
+  expanded,
+  listings,
+  loadingDirectories,
+  unavailableDirectories,
+  repoName,
   selectedPath,
+  showDotfiles,
+  onCollapseAll,
   onDelete,
   onNewDirectory,
   onNewFile,
   onOpen,
   onRefresh,
+  onRetryDirectory,
   onRename,
-  onUp
+  onToggleDotfiles
 }: {
   canControl: boolean
-  directory: string
-  listing: SpoolFileListResult | null
-  loading: boolean
-  unavailable: boolean
+  expanded: ReadonlySet<string>
+  listings: ReadonlyMap<string, SpoolFileListResult>
+  loadingDirectories: ReadonlySet<string>
+  unavailableDirectories: ReadonlySet<string>
+  repoName: string
   selectedPath: string | null
+  showDotfiles: boolean
+  onCollapseAll: () => void
   onDelete: (entry: SpoolFileTreeEntry) => void
-  onNewDirectory: () => void
-  onNewFile: () => void
+  onNewDirectory: (directory?: SpoolFileTreeEntry) => void
+  onNewFile: (directory?: SpoolFileTreeEntry) => void
   onOpen: (entry: SpoolFileTreeEntry) => void
-  onRefresh: () => void
+  onRefresh: () => Promise<void>
+  onRetryDirectory: (relativePath: string) => void
   onRename: (entry: SpoolFileTreeEntry) => void
-  onUp: () => void
+  onToggleDotfiles: () => void
 }): React.JSX.Element {
-  const entries = listing ? sortFileEntries(listing.entries) : []
+  const rootListing = listings.get('') ?? null
+  const rows = createSpoolFileTreeRows(listings, expanded, showDotfiles, unavailableDirectories)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const virtualizeRows = rows.length >= FILE_EXPLORER_VIRTUALIZE_MIN_ROWS
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    enabled: virtualizeRows,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 26,
+    overscan: 20,
+    initialRect: { width: 0, height: 600 },
+    getItemKey: (index) => {
+      const row = rows[index]
+      return row?.kind === 'entry' ? row.entry.relativePath : `error:${row?.directory ?? index}`
+    }
+  })
+  const refresh = useFileExplorerManualRefresh(onRefresh)
+  const rootLoading = loadingDirectories.has('') && !rootListing
+  const rootUnavailable = unavailableDirectories.has('') && !rootListing
+  const isEmpty = Boolean(rootListing) && rows.length === 0
+  const hasTruncatedDirectory = rows.some(
+    (row) =>
+      row.kind === 'entry' &&
+      row.entry.kind === 'directory' &&
+      listings.get(row.entry.relativePath)?.truncated
+  )
+
   return (
     <aside className="flex min-h-0 w-full flex-1 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
-      <header className="flex min-h-9 items-center gap-1 border-b border-border px-2 py-1">
-        <SpoolTooltipIconButton
-          disabled={!directory}
-          onClick={onUp}
-          label={translate('auto.components.spool.SpoolFileTree.up', 'Up one directory')}
-        >
-          <ChevronUp aria-hidden="true" />
-        </SpoolTooltipIconButton>
-        <SpoolTruncatedPathLabel
-          path={directory}
-          emptyLabel={translate('auto.components.spool.SpoolFileTree.root', 'Worktree root')}
-          className="flex-1 px-1 text-muted-foreground"
+      <FileExplorerToolbar
+        repoName={repoName}
+        refresh={refresh}
+        canRefresh
+        canCollapseAll={expanded.size > 0}
+        onCollapseAll={onCollapseAll}
+        showGitIgnoredFilesToggle={false}
+        showGitIgnoredFiles
+        onToggleGitIgnoredFiles={() => {}}
+        showDotfiles={showDotfiles}
+        onToggleDotfiles={onToggleDotfiles}
+        mutationActions={
+          canControl ? (
+            <>
+              <SpoolTooltipIconButton
+                onClick={() => onNewFile()}
+                label={translate('auto.components.spool.SpoolFileTree.newFile', 'New file')}
+              >
+                <FilePlus2 aria-hidden="true" />
+              </SpoolTooltipIconButton>
+              <SpoolTooltipIconButton
+                onClick={() => onNewDirectory()}
+                label={translate(
+                  'auto.components.spool.SpoolFileTree.newDirectory',
+                  'New directory'
+                )}
+              >
+                <FolderPlus aria-hidden="true" />
+              </SpoolTooltipIconButton>
+            </>
+          ) : null
+        }
+      />
+      <ScrollArea
+        viewportRef={scrollRef}
+        viewportClassName="h-full min-h-0 py-2"
+        className="min-h-0 flex-1"
+      >
+        {rootLoading || rootUnavailable || isEmpty ? (
+          <FileExplorerTreeStatus
+            isLoading={rootLoading}
+            error={
+              rootUnavailable
+                ? translate(
+                    'auto.components.spool.SpoolFileTree.unavailable',
+                    'Files are unavailable.'
+                  )
+                : null
+            }
+            isEmpty={isEmpty}
+            emptyMessage={translate(
+              'auto.components.spool.SpoolFileTree.empty',
+              'This directory is empty.'
+            )}
+          />
+        ) : null}
+        <FileExplorerVirtualList
+          virtualizer={virtualizer}
+          plainRowCount={virtualizeRows ? undefined : rows.length}
+          getRowKey={(index) => {
+            const row = rows[index]
+            return row?.kind === 'entry'
+              ? row.entry.relativePath
+              : `error:${row?.directory ?? index}`
+          }}
+          renderRow={(index) => {
+            const row = rows[index]
+            if (!row) {
+              return null
+            }
+            if (row.kind === 'error') {
+              return (
+                <div
+                  className="flex h-7 items-center gap-2 pr-2 text-xs text-destructive"
+                  style={{ paddingLeft: `${row.depth * 16 + 24}px` }}
+                >
+                  <span className="min-w-0 flex-1 truncate">
+                    {translate(
+                      'auto.components.spool.SpoolFileTree.unavailable',
+                      'Files are unavailable.'
+                    )}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="xs"
+                    onClick={() => onRetryDirectory(row.directory)}
+                  >
+                    {translate('auto.components.spool.SpoolFileTree.retry', 'Retry')}
+                  </Button>
+                </div>
+              )
+            }
+            const { entry, node } = row
+            return (
+              <ContextMenu>
+                <ContextMenuTrigger
+                  className="block w-full min-w-0"
+                  render={
+                    <FileExplorerTreeRowButton
+                      node={node}
+                      isExpanded={entry.kind === 'directory' && expanded.has(entry.relativePath)}
+                      isLoading={
+                        entry.kind === 'directory' && loadingDirectories.has(entry.relativePath)
+                      }
+                      isSelected={selectedPath === entry.relativePath}
+                      aria-expanded={
+                        entry.kind === 'directory' ? expanded.has(entry.relativePath) : undefined
+                      }
+                      onClick={() => onOpen(entry)}
+                    />
+                  }
+                />
+                {canControl ? (
+                  <ContextMenuContent>
+                    {entry.kind === 'directory' ? (
+                      <>
+                        <ContextMenuItem onClick={() => onNewFile(entry)}>
+                          <FilePlus2 aria-hidden="true" />
+                          {translate('auto.components.spool.SpoolFileTree.newFile', 'New file')}
+                        </ContextMenuItem>
+                        <ContextMenuItem onClick={() => onNewDirectory(entry)}>
+                          <FolderPlus aria-hidden="true" />
+                          {translate(
+                            'auto.components.spool.SpoolFileTree.newDirectory',
+                            'New directory'
+                          )}
+                        </ContextMenuItem>
+                        <ContextMenuSeparator />
+                      </>
+                    ) : null}
+                    <ContextMenuItem onClick={() => onRename(entry)}>
+                      {translate('auto.components.spool.SpoolFileTree.rename', 'Rename')}
+                    </ContextMenuItem>
+                    <ContextMenuItem variant="destructive" onClick={() => onDelete(entry)}>
+                      <Trash2 aria-hidden="true" />
+                      {translate('auto.components.spool.SpoolFileTree.delete', 'Delete')}
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                ) : null}
+              </ContextMenu>
+            )
+          }}
         />
-        <SpoolTooltipIconButton
-          onClick={onRefresh}
-          label={translate('auto.components.spool.SpoolFileTree.refresh', 'Refresh files')}
-        >
-          <RefreshCw aria-hidden="true" />
-        </SpoolTooltipIconButton>
-        <SpoolTooltipIconButton
-          disabled={!canControl}
-          onClick={onNewFile}
-          label={translate('auto.components.spool.SpoolFileTree.newFile', 'New file')}
-        >
-          <FilePlus2 aria-hidden="true" />
-        </SpoolTooltipIconButton>
-        <SpoolTooltipIconButton
-          disabled={!canControl}
-          onClick={onNewDirectory}
-          label={translate('auto.components.spool.SpoolFileTree.newDirectory', 'New directory')}
-        >
-          <FolderPlus aria-hidden="true" />
-        </SpoolTooltipIconButton>
-      </header>
-      <div className="scrollbar-sleek min-h-0 flex-1 overflow-y-auto p-1">
-        {loading ? (
-          <p className="px-2 py-3 text-xs text-muted-foreground">
-            {translate('auto.components.spool.SpoolFileTree.loading', 'Loading files…')}
-          </p>
-        ) : unavailable ? (
-          <p className="px-2 py-3 text-xs text-muted-foreground">
-            {translate('auto.components.spool.SpoolFileTree.unavailable', 'Files are unavailable.')}
-          </p>
-        ) : entries.length === 0 ? (
-          <p className="px-2 py-3 text-xs text-muted-foreground">
-            {translate('auto.components.spool.SpoolFileTree.empty', 'This directory is empty.')}
-          </p>
-        ) : (
-          entries.map((entry) => (
-            <FileTreeRow
-              key={entry.relativePath}
-              entry={entry}
-              selected={selectedPath === entry.relativePath}
-              canControl={canControl}
-              onOpen={() => onOpen(entry)}
-              onRename={() => onRename(entry)}
-              onDelete={() => onDelete(entry)}
-            />
-          ))
-        )}
-        {listing?.truncated ? (
-          <p className="px-2 py-2 text-[11px] text-muted-foreground">
+        {rootListing?.truncated || hasTruncatedDirectory ? (
+          <p className="px-4 py-2 text-[11px] text-muted-foreground">
             {translate(
               'auto.components.spool.SpoolFileTree.truncated',
               'Only part of this directory is shown.'
             )}
           </p>
         ) : null}
-      </div>
+      </ScrollArea>
     </aside>
   )
 }
 
-function FileTreeRow({
-  canControl,
-  entry,
-  onDelete,
-  onOpen,
-  onRename,
-  selected
-}: {
-  canControl: boolean
-  entry: SpoolFileTreeEntry
-  onDelete: () => void
-  onOpen: () => void
-  onRename: () => void
-  selected: boolean
-}): React.JSX.Element {
-  const Icon = entry.kind === 'directory' ? Folder : entry.kind === 'symlink' ? Link2 : File
-  return (
-    <div
-      data-current={selected ? 'true' : undefined}
-      className={cn(
-        'group flex items-center rounded-md text-[13px]',
-        selected ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent'
-      )}
-    >
-      <button
-        type="button"
-        className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring"
-        onClick={onOpen}
-      >
-        <Icon aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-        <span className="min-w-0 flex-1 truncate">{entry.name}</span>
-      </button>
-      {canControl ? (
-        <DropdownMenu>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      type="button"
-                      size="icon-xs"
-                      variant="ghost"
-                      className="mr-1"
-                      aria-label={translate(
-                        'auto.components.spool.SpoolFileTree.itemActions',
-                        'File actions'
-                      )}
-                    >
-                      <MoreHorizontal aria-hidden="true" />
-                    </Button>
-                  }
-                />
-              }
-            />
-            <TooltipContent side="top" sideOffset={4}>
-              {translate('auto.components.spool.SpoolFileTree.itemActions', 'File actions')}
-            </TooltipContent>
-          </Tooltip>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onRename}>
-              {translate('auto.components.spool.SpoolFileTree.rename', 'Rename')}
-            </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" onClick={onDelete}>
-              <Trash2 aria-hidden="true" />
-              {translate('auto.components.spool.SpoolFileTree.delete', 'Delete')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : null}
-    </div>
-  )
+export function createSpoolFileTreeRows(
+  listings: ReadonlyMap<string, SpoolFileListResult>,
+  expanded: ReadonlySet<string>,
+  showDotfiles: boolean,
+  unavailableDirectories: ReadonlySet<string> = new Set()
+): SpoolFileTreeRow[] {
+  const rows: SpoolFileTreeRow[] = []
+  const visit = (directory: string, depth: number): void => {
+    const listing = listings.get(directory)
+    if (unavailableDirectories.has(directory) && (directory !== '' || listing)) {
+      rows.push({ kind: 'error', directory, depth })
+    }
+    if (!listing) {
+      return
+    }
+    for (const entry of sortFileEntries(listing.entries)) {
+      if (!showDotfiles && isDotfileRelativePath(entry.relativePath)) {
+        continue
+      }
+      rows.push({
+        kind: 'entry',
+        entry,
+        node: {
+          name: entry.name,
+          path: entry.relativePath,
+          relativePath: entry.relativePath,
+          isDirectory: entry.kind === 'directory',
+          isSymlink: entry.kind === 'symlink',
+          depth,
+          operationOwner: { kind: 'unresolved' }
+        }
+      })
+      if (entry.kind === 'directory' && expanded.has(entry.relativePath)) {
+        visit(entry.relativePath, depth + 1)
+      }
+    }
+  }
+  visit('', 0)
+  return rows
 }
 
 function sortFileEntries(entries: readonly SpoolFileTreeEntry[]): SpoolFileTreeEntry[] {

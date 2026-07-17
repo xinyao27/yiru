@@ -10,7 +10,7 @@ import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
-import { SpoolTruncatedPathLabel } from './SpoolTruncatedPathLabel'
+import { SpoolGitChangesList } from './SpoolGitChangesList'
 
 export type SpoolGitSidebarMode = 'changes' | 'history'
 
@@ -105,7 +105,7 @@ export function SpoolGitSidebar({
           value="changes"
           className="min-h-0 overflow-hidden data-[state=active]:flex data-[state=active]:flex-col"
         >
-          <ChangesList
+          <SpoolGitChangesList
             canControl={canControl}
             entries={status?.entries ?? []}
             loading={loading}
@@ -161,104 +161,6 @@ export function SpoolGitSidebar({
         </div>
       ) : null}
     </aside>
-  )
-}
-
-function ChangesList({
-  canControl,
-  entries,
-  loading,
-  mutating,
-  unavailable,
-  truncated,
-  selectedKey,
-  onSelect,
-  onToggleStage
-}: {
-  canControl: boolean
-  entries: readonly SpoolGitStatusEntry[]
-  loading: boolean
-  mutating: boolean
-  unavailable: boolean
-  truncated: boolean
-  selectedKey: string | null
-  onSelect: (entry: SpoolGitStatusEntry) => void
-  onToggleStage: (entry: SpoolGitStatusEntry) => void
-}): React.JSX.Element {
-  return (
-    <div className="scrollbar-sleek min-h-0 flex-1 overflow-y-auto p-1">
-      {loading ? (
-        <SidebarMessage
-          text={translate(
-            'auto.components.spool.SpoolGitSidebar.loadingChanges',
-            'Loading changes…'
-          )}
-        />
-      ) : unavailable ? (
-        <SidebarMessage
-          text={translate(
-            'auto.components.spool.SpoolGitSidebar.stateUnavailable',
-            'Git state is unavailable.'
-          )}
-        />
-      ) : entries.length === 0 ? (
-        <SidebarMessage
-          text={translate('auto.components.spool.SpoolGitSidebar.clean', 'No worktree changes.')}
-        />
-      ) : (
-        entries.map((entry) => {
-          const key = getSpoolGitStatusEntryKey(entry)
-          return (
-            <div
-              key={key}
-              data-current={selectedKey === key ? 'true' : undefined}
-              className={cn(
-                'group flex items-center rounded-md text-[13px]',
-                selectedKey === key
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                  : 'hover:bg-sidebar-accent'
-              )}
-            >
-              <button
-                type="button"
-                className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring"
-                onClick={() => onSelect(entry)}
-              >
-                <span
-                  className={cn(
-                    'w-4 shrink-0 text-center font-mono text-[11px]',
-                    getGitStatusColor(entry)
-                  )}
-                >
-                  {getGitStatusLabel(entry)}
-                </span>
-                <SpoolTruncatedPathLabel path={entry.relativePath} className="flex-1" />
-              </button>
-              <Button
-                type="button"
-                size="xs"
-                variant="ghost"
-                className="mr-1"
-                disabled={!canControl || mutating}
-                onClick={() => onToggleStage(entry)}
-              >
-                {entry.area === 'staged'
-                  ? translate('auto.components.spool.SpoolGitSidebar.unstage', 'Unstage')
-                  : translate('auto.components.spool.SpoolGitSidebar.stage', 'Stage')}
-              </Button>
-            </div>
-          )
-        })
-      )}
-      {!loading && !unavailable && truncated ? (
-        <p className="px-2 py-2 text-[11px] text-muted-foreground">
-          {translate(
-            'auto.components.spool.SpoolGitSidebar.changesLimited',
-            'Only part of this status is shown.'
-          )}
-        </p>
-      ) : null}
-    </div>
   )
 }
 
@@ -333,52 +235,6 @@ function HistoryList({
 
 function SidebarMessage({ text }: { text: string }): React.JSX.Element {
   return <p className="px-2 py-3 text-xs text-muted-foreground">{text}</p>
-}
-
-export function getSpoolGitStatusEntryKey(entry: SpoolGitStatusEntry): string {
-  return `${entry.area}:${entry.relativePath}`
-}
-
-function getGitStatusLabel(entry: SpoolGitStatusEntry): string {
-  if (entry.conflicted) {
-    return '!'
-  }
-  if (entry.status === 'untracked') {
-    return '?'
-  }
-  if (entry.status === 'renamed') {
-    return 'R'
-  }
-  if (entry.status === 'deleted') {
-    return 'D'
-  }
-  if (entry.status === 'added') {
-    return 'A'
-  }
-  if (entry.status === 'copied') {
-    return 'C'
-  }
-  return 'M'
-}
-
-function getGitStatusColor(entry: SpoolGitStatusEntry): string {
-  if (entry.conflicted) {
-    return 'text-destructive'
-  }
-  switch (entry.status) {
-    case 'added':
-      return 'text-[var(--git-decoration-added)]'
-    case 'modified':
-      return 'text-[var(--git-decoration-modified)]'
-    case 'deleted':
-      return 'text-[var(--git-decoration-deleted)]'
-    case 'renamed':
-      return 'text-[var(--git-decoration-renamed)]'
-    case 'untracked':
-      return 'text-[var(--git-decoration-untracked)]'
-    case 'copied':
-      return 'text-[var(--git-decoration-copied)]'
-  }
 }
 
 function formatUpstream(status: SpoolGitStatusResult | null): string {
