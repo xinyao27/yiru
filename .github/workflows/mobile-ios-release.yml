@@ -1,8 +1,7 @@
 name: Mobile iOS Release
 
-# Why a separate workflow from Android: iOS releases go through App Store
-# review, which can take days. Decoupling the triggers lets an Android release
-# ship immediately without waiting on iOS, and vice versa.
+# Why: iOS needs Xcode and Apple signing while Android uses JDK/Gradle; separate
+# triggers keep their credentials and test distribution independent.
 on:
   push:
     tags:
@@ -10,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       bump_patch_version:
-        description: 'Bump the iOS marketing version patch number before release. Tick this after a version has shipped to the App Store (the release fails fast if the current version''s train is already closed).'
+        description: "Bump the iOS marketing version patch number before release. Tick this after a version has shipped to the App Store (the release fails fast if the current version's train is already closed)."
         required: false
         default: false
         type: boolean
@@ -18,8 +17,16 @@ on:
         description: 'Optional exact iOS marketing version override, e.g. 0.0.15'
         required: false
         type: string
+      testflight_distribution:
+        description: 'TestFlight audience. Internal is the safe default; external uses the peeps group and may require Beta App Review.'
+        required: true
+        default: internal
+        type: choice
+        options:
+          - internal
+          - external
       testflight_changelog:
-        description: 'Optional TestFlight external tester changelog'
+        description: 'Optional external TestFlight tester changelog; ignored for internal uploads'
         required: false
         type: string
 
@@ -49,6 +56,18 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
+
+      - name: Validate TestFlight credentials
+        # Why: signing and App Store Connect failures should surface before the
+        # workflow spends time installing dependencies or compiling native code.
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+          IOS_DIST_CERT_P12: ${{ secrets.IOS_DIST_CERT_P12 }}
+          IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+        run: node scripts/verify-ios-testflight-env.mjs
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -119,6 +138,7 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          TESTFLIGHT_DISTRIBUTION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.testflight_distribution || 'internal' }}
           TESTFLIGHT_CHANGELOG: ${{ github.event.inputs.testflight_changelog }}
           # Keep fastlane non-interactive and quiet about analytics in CI.
           FASTLANE_SKIP_UPDATE_CHECK: '1'
