@@ -108,6 +108,13 @@ def testflight_changelog
   changelog.empty? ? DEFAULT_TESTFLIGHT_CHANGELOG : changelog
 end
 
+def testflight_distribution
+  distribution = ENV.fetch("TESTFLIGHT_DISTRIBUTION", "internal").strip.downcase
+  return distribution if %w[internal external].include?(distribution)
+
+  UI.user_error!("TESTFLIGHT_DISTRIBUTION must be 'internal' or 'external'")
+end
+
 platform :ios do
   desc "Resolve the iOS release version and next TestFlight build number"
   lane :prepare_release_version do |options|
@@ -155,6 +162,7 @@ platform :ios do
   desc "Build, sign, upload, and share Yiru Mobile on TestFlight"
   lane :release do
     api_key = app_store_connect_api_key_from_env
+    distribution = testflight_distribution
 
     team_id = ENV.fetch("APPLE_TEAM_ID")
 
@@ -193,17 +201,27 @@ platform :ios do
       clean: true,
     )
 
-    upload_to_testflight(
-      api_key: api_key,
-      # Why: fastlane can only assign external TestFlight groups after Apple
-      # finishes processing the uploaded build.
-      skip_waiting_for_build_processing: false,
-      distribute_external: true,
-      groups: TESTFLIGHT_GROUPS,
-      notify_external_testers: true,
-      # Why: fastlane requires release notes when distributing to external
-      # TestFlight testers, even for CI-triggered smoke releases.
-      changelog: testflight_changelog,
-    )
+    if distribution == "external"
+      upload_to_testflight(
+        api_key: api_key,
+        # Why: fastlane can only assign external TestFlight groups after Apple
+        # finishes processing the uploaded build.
+        skip_waiting_for_build_processing: false,
+        distribute_external: true,
+        groups: TESTFLIGHT_GROUPS,
+        notify_external_testers: true,
+        # Why: fastlane requires release notes when distributing to external
+        # TestFlight testers, even for CI-triggered smoke releases.
+        changelog: testflight_changelog,
+      )
+    else
+      # Why: internal groups can auto-distribute processed uploads in App Store
+      # Connect, so CI only needs to upload and can finish without review waits.
+      upload_to_testflight(
+        api_key: api_key,
+        skip_waiting_for_build_processing: true,
+        distribute_external: false,
+      )
+    end
   end
 end
