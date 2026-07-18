@@ -3,6 +3,7 @@ import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { WarningCircle as AlertCircle, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { DiffEditor, type DiffOnMount } from '@monaco-editor/react'
 import { cn } from '@/lib/class-names'
+import { resolveCursorThemeName } from '@/lib/monaco-setup'
 import { Button } from '@/components/ui/button'
 import { DiffCommentPopover } from '../diff-comments/diff-comment-popover'
 import { combinedDiffSectionScrollbarOptions } from './diff-editor-scrollbar-options'
@@ -205,7 +206,7 @@ export function DiffSectionBody({
           language={language}
           original={section.originalContent}
           modified={section.modifiedContent}
-          theme={isDark ? 'vs-dark' : 'vs'}
+          theme={resolveCursorThemeName(isDark)}
           onMount={onMount}
           // Why: @monaco-editor/react can dispose models before widget teardown.
           // Keep them through unmount and dispose unattached models next tick.

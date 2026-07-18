@@ -17,6 +17,9 @@ import { PierreDiffCommentAnnotation } from './pierre-diff-comment-annotation'
 import { translate } from '@/i18n/i18n'
 import { setWithLRU } from '@/lib/scroll-cache'
 import { resolvePierreDiffLanguage } from './pierre-diff-language'
+import { CURSOR_DARK_THEME_NAME, CURSOR_LIGHT_THEME_NAME } from '@/lib/cursor-theme-source'
+import { CURSOR_PIERRE_UNSAFE_CSS, registerCursorPierreThemes } from '@/lib/cursor-pierre-theme'
+import { buildEditorFontFamily } from '@/lib/editor-font-family'
 
 type CommentComposer = {
   lineNumber: number
@@ -34,6 +37,8 @@ type HoveredDiffLine = {
 
 const pierreDiffScrollCache = new Map<string, number>()
 const EMPTY_DIFF_COMMENTS: readonly DecoratedDiffComment[] = []
+
+registerCursorPierreThemes()
 
 function formatNativeShortcut(isMac: boolean, key: string): string {
   return [isMac ? '⌘' : 'Ctrl', key].join(isMac ? '' : '+')
@@ -174,7 +179,7 @@ export function PierreDiffViewer({
 
   const options = useMemo<FileDiffOptions<PierreDiffAnnotation>>(
     () => ({
-      theme: { dark: 'github-dark', light: 'github-light' },
+      theme: { dark: CURSOR_DARK_THEME_NAME, light: CURSOR_LIGHT_THEME_NAME },
       themeType: isDark ? 'dark' : 'light',
       diffStyle: sideBySide ? 'split' : 'unified',
       diffIndicators: 'bars',
@@ -202,9 +207,9 @@ export function PierreDiffViewer({
       onLineLeave: () => {
         hoveredLineRef.current = null
       },
-      // Why: Pierre renders inside Shadow DOM, so the app-wide square-corner
-      // rule cannot cross the boundary without this narrow library override.
-      unsafeCSS: '* { border-radius: 0 !important; }'
+      // Why: Pierre renders inside Shadow DOM, so app-wide geometry and exact
+      // Cursor line fills need a narrow library-owned override.
+      unsafeCSS: CURSOR_PIERRE_UNSAFE_CSS
     }),
     [commentableLineNumbers, isDark, onAddLineComment, sideBySide, wordWrap]
   )
@@ -269,13 +274,15 @@ export function PierreDiffViewer({
         '--diffs-dark-bg': 'var(--editor-surface)',
         '--diffs-light': 'var(--foreground)',
         '--diffs-dark': 'var(--foreground)',
-        '--diffs-font-family': fontFamily || 'var(--font-mono)',
+        '--diffs-font-family': buildEditorFontFamily(fontFamily),
         '--diffs-header-font-family': 'var(--app-font-family)',
         '--diffs-font-size': `${fontSize}px`,
         '--diffs-line-height': `${Math.max(19, Math.round(fontSize * 1.5))}px`,
-        '--diffs-addition-color-override': 'var(--git-decoration-added)',
-        '--diffs-deletion-color-override': 'var(--git-decoration-deleted)',
-        '--diffs-modified-color-override': 'var(--git-decoration-modified)'
+        '--diffs-addition-color-override': 'var(--editor-diff-added-gutter)',
+        '--diffs-deletion-color-override': 'var(--editor-diff-deleted-gutter)',
+        '--diffs-modified-color-override': 'var(--editor-diff-modified-gutter)',
+        '--diffs-bg-addition-emphasis-override': 'var(--editor-diff-inserted-text-background)',
+        '--diffs-bg-deletion-emphasis-override': 'var(--editor-diff-removed-text-background)'
       }) as React.CSSProperties,
     [fontFamily, fontSize]
   )

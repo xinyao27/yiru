@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import type { MarkdownDocument } from '../../../../shared/types'
 import { useAppStore } from '@/store'
 import { scrollTopCache, cursorPositionCache, setWithLRU } from '@/lib/scroll-cache'
-import '@/lib/monaco-setup'
+import { resolveCursorThemeName } from '@/lib/monaco-setup'
 import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { registerFileSearchSelectedTextProvider } from '@/lib/file-search-selection'
 
@@ -865,7 +865,7 @@ export default function MonacoEditor({
         // Why: Yiru's mount/layout reconciliation is the sole post-mount content
         // owner; the wrapper's controlled read-only path would also call setValue.
         defaultValue={content}
-        theme={isDark ? 'vs-dark' : 'vs'}
+        theme={resolveCursorThemeName(isDark)}
         onChange={handleChange}
         onMount={handleMount}
         options={{
