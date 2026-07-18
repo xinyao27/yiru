@@ -4584,7 +4584,7 @@ describe('createGitHubSlice.refreshGitHubForWorktreeIfStale', () => {
           }
         ]
       },
-      worktreeCardProperties: ['status', 'pr'],
+      worktreeCardProperties: ['status'],
       prCache: {
         [`repo-1::${branch}`]: {
           data: makePR({ state: 'open' }),
@@ -4754,7 +4754,7 @@ describe('createGitHubSlice.refreshGitHubForWorktreeIfStale', () => {
           }
         ]
       },
-      worktreeCardProperties: ['status', 'pr']
+      worktreeCardProperties: ['status']
     } as unknown as Partial<AppState>)
 
     try {
@@ -4793,7 +4793,7 @@ describe('createGitHubSlice.refreshGitHubForWorktreeIfStale', () => {
           }
         ]
       },
-      worktreeCardProperties: ['status', 'pr'],
+      worktreeCardProperties: ['status'],
       hostedReviewCache: {
         [hostedReviewCacheKey]: {
           data: {

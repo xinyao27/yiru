@@ -82,10 +82,6 @@ describe('getDefaultSettings', () => {
     })
   })
 
-  it('keeps compact worktree cards disabled by default', () => {
-    expect(getDefaultSettings('/tmp').compactWorktreeCards).toBe(false)
-  })
-
   it('keeps per-workspace environments disabled by default', () => {
     expect(getDefaultSettings('/tmp').experimentalEphemeralVms).toBe(false)
   })

@@ -344,70 +344,28 @@ describe('web settings preload API', () => {
     expect(stored.autoRenameBranchFromWorkDefaultedOn).toBe(true)
   })
 
-  it('hydrates compact worktree cards from paired runtime settings', async () => {
-    const runtimeCalls: { method: string; params: unknown }[] = []
-    vi.doMock('./web-runtime-client', () => ({
-      WebRuntimeClient: class {
-        call(method: string, params?: unknown): Promise<RuntimeRpcResponse<unknown>> {
-          runtimeCalls.push({ method, params })
-          return Promise.resolve({
-            id: `call-${runtimeCalls.length}`,
-            ok: true,
-            result: { settings: { compactWorktreeCards: true } },
-            _meta: { runtimeId: 'runtime-1' }
-          })
-        }
-
-        close(): void {}
-      }
-    }))
-
+  it('drops retired worktree card settings from local web storage', async () => {
     const globals = installBrowserGlobals('Linux')
-    writeStoredRuntimeEnvironment(globals.storage)
+    globals.storage.setItem(
+      'yiru.web.settings.v1',
+      JSON.stringify({
+        experimentalNewWorktreeCardStyle: false,
+        compactWorktreeCards: true,
+        experimentalCompactWorktreeCards: true
+      })
+    )
     const { installWebPreloadApi } = await import('./web-preload-api')
     installWebPreloadApi()
 
-    const settings = await globals.window.api.settings.get()
-    const stored = JSON.parse(globals.storage.getItem('yiru.web.settings.v1') ?? '{}') as {
-      compactWorktreeCards?: boolean
-    }
+    await globals.window.api.settings.get()
+    const stored = JSON.parse(globals.storage.getItem('yiru.web.settings.v1') ?? '{}') as Record<
+      string,
+      unknown
+    >
 
-    expect(settings.compactWorktreeCards).toBe(true)
-    expect(stored.compactWorktreeCards).toBe(true)
-    expect(runtimeCalls).toEqual([{ method: 'settings.get', params: undefined }])
-  }, 15_000)
-
-  it('hydrates new worktree card style from a paired runtime', async () => {
-    const runtimeCalls: { method: string; params: unknown }[] = []
-    vi.doMock('./web-runtime-client', () => ({
-      WebRuntimeClient: class {
-        call(method: string, params?: unknown): Promise<RuntimeRpcResponse<unknown>> {
-          runtimeCalls.push({ method, params })
-          return Promise.resolve({
-            id: `call-${runtimeCalls.length}`,
-            ok: true,
-            result: { settings: { experimentalNewWorktreeCardStyle: true } },
-            _meta: { runtimeId: 'runtime-1' }
-          })
-        }
-
-        close(): void {}
-      }
-    }))
-
-    const globals = installBrowserGlobals('Linux')
-    writeStoredRuntimeEnvironment(globals.storage)
-    const { installWebPreloadApi } = await import('./web-preload-api')
-    installWebPreloadApi()
-
-    const settings = await globals.window.api.settings.get()
-    const stored = JSON.parse(globals.storage.getItem('yiru.web.settings.v1') ?? '{}') as {
-      experimentalNewWorktreeCardStyle?: boolean
-    }
-
-    expect(settings.experimentalNewWorktreeCardStyle).toBe(true)
-    expect(stored.experimentalNewWorktreeCardStyle).toBe(true)
-    expect(runtimeCalls).toEqual([{ method: 'settings.get', params: undefined }])
+    expect(stored).not.toHaveProperty('experimentalNewWorktreeCardStyle')
+    expect(stored).not.toHaveProperty('compactWorktreeCards')
+    expect(stored).not.toHaveProperty('experimentalCompactWorktreeCards')
   })
 
   it('hydrates MiniMax usage settings from a paired runtime', async () => {
@@ -478,75 +436,6 @@ describe('web settings preload API', () => {
 
     expect(settings.prBotAuthorOverrides).toEqual(['gretelflux'])
     expect(runtimeCalls).toEqual([{ method: 'settings.get', params: undefined }])
-  })
-
-  it('forwards compact worktree card updates to a paired runtime', async () => {
-    const runtimeCalls: { method: string; params: unknown }[] = []
-    vi.doMock('./web-runtime-client', () => ({
-      WebRuntimeClient: class {
-        call(method: string, params?: unknown): Promise<RuntimeRpcResponse<unknown>> {
-          runtimeCalls.push({ method, params })
-          return Promise.resolve({
-            id: `call-${runtimeCalls.length}`,
-            ok: true,
-            result: { settings: { compactWorktreeCards: true } },
-            _meta: { runtimeId: 'runtime-1' }
-          })
-        }
-
-        close(): void {}
-      }
-    }))
-
-    const globals = installBrowserGlobals('Linux')
-    writeStoredRuntimeEnvironment(globals.storage)
-    const { installWebPreloadApi } = await import('./web-preload-api')
-    installWebPreloadApi()
-
-    const settings = await globals.window.api.settings.set({ compactWorktreeCards: true })
-
-    const stored = JSON.parse(globals.storage.getItem('yiru.web.settings.v1') ?? '{}') as {
-      compactWorktreeCards?: boolean
-    }
-
-    expect(settings.compactWorktreeCards).toBe(true)
-    expect(stored.compactWorktreeCards).toBe(true)
-    expect(runtimeCalls).toEqual([
-      { method: 'settings.update', params: { compactWorktreeCards: true } }
-    ])
-  }, 15_000)
-
-  it('forwards new worktree card style updates to a paired runtime', async () => {
-    const runtimeCalls: { method: string; params: unknown }[] = []
-    vi.doMock('./web-runtime-client', () => ({
-      WebRuntimeClient: class {
-        call(method: string, params?: unknown): Promise<RuntimeRpcResponse<unknown>> {
-          runtimeCalls.push({ method, params })
-          return Promise.resolve({
-            id: `call-${runtimeCalls.length}`,
-            ok: true,
-            result: { settings: { experimentalNewWorktreeCardStyle: true } },
-            _meta: { runtimeId: 'runtime-1' }
-          })
-        }
-
-        close(): void {}
-      }
-    }))
-
-    const globals = installBrowserGlobals('Linux')
-    writeStoredRuntimeEnvironment(globals.storage)
-    const { installWebPreloadApi } = await import('./web-preload-api')
-    installWebPreloadApi()
-
-    const settings = await globals.window.api.settings.set({
-      experimentalNewWorktreeCardStyle: true
-    })
-
-    expect(settings.experimentalNewWorktreeCardStyle).toBe(true)
-    expect(runtimeCalls).toEqual([
-      { method: 'settings.update', params: { experimentalNewWorktreeCardStyle: true } }
-    ])
   })
 
   it('forwards MiniMax usage setting updates to a paired runtime', async () => {
@@ -1310,7 +1199,7 @@ describe('web UI preload API', () => {
     expect(ui.rightSidebarOpen).toBe(true)
   })
 
-  it('seeds missing local card display properties from runtime-backed compact settings when ui.get is unavailable', async () => {
+  it('seeds default local card display properties when ui.get is unavailable', async () => {
     const runtimeCalls: { method: string; params: unknown }[] = []
     vi.doMock('./web-runtime-client', () => ({
       WebRuntimeClient: class {
@@ -1344,13 +1233,20 @@ describe('web UI preload API', () => {
     await globals.window.api.settings.get()
     const ui = await globals.window.api.ui.get()
 
-    expect(ui.worktreeCardProperties).toEqual(['status', 'unread'])
-    expect(ui.worktreeCardProperties).not.toContain('ports')
-    expect(ui.worktreeCardProperties).not.toContain('inline-agents')
+    expect(ui.worktreeCardProperties).toEqual([
+      'status',
+      'unread',
+      'issue',
+      'linear-issue',
+      'automation',
+      'comment',
+      'ports',
+      'inline-agents'
+    ])
     expect(runtimeCalls.map((call) => call.method)).toEqual(['settings.get', 'ui.get'])
   })
 
-  it('preserves explicit local card display properties when compact fallback settings are present', async () => {
+  it('preserves explicit local card display properties when ui.get is unavailable', async () => {
     const runtimeCalls: { method: string; params: unknown }[] = []
     vi.doMock('./web-runtime-client', () => ({
       WebRuntimeClient: class {
@@ -1380,7 +1276,7 @@ describe('web UI preload API', () => {
     writeStoredRuntimeEnvironment(globals.storage)
     globals.storage.setItem(
       'yiru.web.ui.v1',
-      JSON.stringify({ worktreeCardProperties: ['status', 'pr'] })
+      JSON.stringify({ worktreeCardProperties: ['status', 'pr', 'comment'] })
     )
     const { installWebPreloadApi } = await import('./web-preload-api')
     installWebPreloadApi()
@@ -1388,7 +1284,7 @@ describe('web UI preload API', () => {
     await globals.window.api.settings.get()
     const ui = await globals.window.api.ui.get()
 
-    expect(ui.worktreeCardProperties).toEqual(['status', 'unread', 'pr'])
+    expect(ui.worktreeCardProperties).toEqual(['status', 'unread', 'comment'])
     expect(ui.worktreeCardProperties).not.toContain('ports')
     expect(ui.worktreeCardProperties).not.toContain('inline-agents')
     expect(runtimeCalls.map((call) => call.method)).toEqual(['settings.get', 'ui.get'])

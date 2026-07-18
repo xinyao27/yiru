@@ -6,9 +6,9 @@ const PROJECT_WORKTREE_CARD_EXTRA_INDENT = 2
 // raw tree indent to sit under the group header. A smaller pullback nudges
 // content rightward for clearer nesting; this is the knob to tune that gap.
 export const FLUSH_CARD_CONTENT_PULLBACK = 4
-// Why: experimental cards reserve a fixed status lane inside the padded
-// content box; pull the box back so title/meta text stay on the tree step.
-export const NEW_CARD_STYLE_STATUS_LANE_EXTRA_PULLBACK = 6
+// Why: cards reserve a fixed status lane inside the padded content box; pull
+// the box back so title/meta text stay on the tree step.
+export const STATUS_LANE_EXTRA_PULLBACK = 6
 // Why: even at zero indent a flush card keeps this minimal left inset so its
 // surface never sits hard against the sidebar edge.
 export const FLUSH_CARD_MIN_CONTENT_INSET = 2
@@ -111,7 +111,6 @@ export function getFolderWorkspaceCardSurfaceInset(args: {
 }
 
 export function getFolderWorkspaceRowGeometry(args: {
-  experimentalNewWorktreeCardStyle: boolean
   isFolderBackedWorkspaceChild: boolean
   isGrouped: boolean
   groupDepth: number
@@ -120,7 +119,7 @@ export function getFolderWorkspaceRowGeometry(args: {
   surfaceInset: number
   cardContentIndent: number
 } {
-  if (args.experimentalNewWorktreeCardStyle && args.isFolderBackedWorkspaceChild) {
+  if (args.isFolderBackedWorkspaceChild) {
     // Why: standalone folder workspace rows do not get a lineage wrapper
     // offset, so align them to the comparable folder-backed repo row anchor.
     const contentAnchor = getFolderBackedRepoWorktreeCardContentIndent({
@@ -147,8 +146,7 @@ export function getFolderWorkspaceRowGeometry(args: {
         groupDepth: args.groupDepth,
         lineageDepth: args.lineageDepth
       })
-  // Why: legacy folder-scanned folder workspaces keep their compact anchor,
-  // while all other folder rows share the normal worktree row surface path.
+  // Why: standalone folder rows share the normal worktree row surface path.
   const surfaceInset = args.isFolderBackedWorkspaceChild
     ? getFolderWorkspaceCardSurfaceInset({
         isGrouped: true,
@@ -174,31 +172,30 @@ export function getWorktreeCardSurfaceInset(args: {
 
 export function getFlushWorktreeCardPaddingLeft(
   contentIndent: number,
-  applyNewCardStyleStatusLaneOffset = false
+  applyStatusLaneOffset = false
 ): string {
   const pullback =
-    FLUSH_CARD_CONTENT_PULLBACK +
-    (applyNewCardStyleStatusLaneOffset ? NEW_CARD_STYLE_STATUS_LANE_EXTRA_PULLBACK : 0)
+    FLUSH_CARD_CONTENT_PULLBACK + (applyStatusLaneOffset ? STATUS_LANE_EXTRA_PULLBACK : 0)
   return contentIndent > 0
     ? `max(${FLUSH_CARD_MIN_CONTENT_INSET}px, calc(${contentIndent}px - ${pullback}px))`
     : `${FLUSH_CARD_MIN_CONTENT_INSET}px`
 }
 
-export function getNewCardStyleParentContentMarginLeft(contentIndent: number): number {
+export function getWorktreeCardParentContentMarginLeft(contentIndent: number): number {
   if (contentIndent <= 0) {
     return 0
   }
 
-  const legacyInnerPadding = Math.max(
+  const baseInnerPadding = Math.max(
     FLUSH_CARD_MIN_CONTENT_INSET,
     contentIndent - FLUSH_CARD_CONTENT_PULLBACK
   )
-  const newInnerPadding = Math.max(
+  const statusLaneInnerPadding = Math.max(
     FLUSH_CARD_MIN_CONTENT_INSET,
-    contentIndent - FLUSH_CARD_CONTENT_PULLBACK - NEW_CARD_STYLE_STATUS_LANE_EXTRA_PULLBACK
+    contentIndent - FLUSH_CARD_CONTENT_PULLBACK - STATUS_LANE_EXTRA_PULLBACK
   )
-  const paddingShift = legacyInnerPadding - newInnerPadding
-  const remainingShift = NEW_CARD_STYLE_STATUS_LANE_EXTRA_PULLBACK - paddingShift
+  const paddingShift = baseInnerPadding - statusLaneInnerPadding
+  const remainingShift = STATUS_LANE_EXTRA_PULLBACK - paddingShift
   if (remainingShift <= 0) {
     return 0
   }
@@ -206,35 +203,19 @@ export function getNewCardStyleParentContentMarginLeft(contentIndent: number): n
   // Why: shallow rows hit the flush-card padding floor; finish the status-lane
   // offset with margin, but never pull content past the card's inner edge.
   const rawMargin = -remainingShift
-  return Math.max(-newInnerPadding, rawMargin)
+  return Math.max(-statusLaneInnerPadding, rawMargin)
 }
 
-export function getLineageNestedRowGeometry(args: {
-  experimentalNewWorktreeCardStyle: boolean
-  inheritedCardContentIndent: number
-  lineageDepth: number
-}): {
+export function getLineageNestedRowGeometry(): {
   surfaceInset: number
   cardContentIndent: number
   lineageChildrenInlineOffset: number
 } {
-  if (args.experimentalNewWorktreeCardStyle) {
-    // Why: the parent card already contributes the inherited/group baseline;
-    // adding global lineage depth here would double-count nested descendants.
-    return {
-      surfaceInset: LINEAGE_NESTED_ROW_SURFACE_INSET,
-      cardContentIndent: 0,
-      lineageChildrenInlineOffset: LINEAGE_CHILDREN_INLINE_OFFSET
-    }
-  }
-
-  const surfaceInset = getWorktreeCardSurfaceInset({
-    isGrouped: true,
-    groupDepth: args.lineageDepth
-  })
+  // Why: the parent card already contributes the inherited/group baseline;
+  // adding global lineage depth here would double-count nested descendants.
   return {
-    surfaceInset,
-    cardContentIndent: Math.max(0, args.inheritedCardContentIndent - surfaceInset),
+    surfaceInset: LINEAGE_NESTED_ROW_SURFACE_INSET,
+    cardContentIndent: 0,
     lineageChildrenInlineOffset: LINEAGE_CHILDREN_INLINE_OFFSET
   }
 }

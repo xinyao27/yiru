@@ -15,7 +15,7 @@ const fetchLinearIssue = vi.fn()
 const openModal = vi.fn()
 const updateWorktreeMeta = vi.fn()
 
-let worktreeCardProperties: WorktreeCardProperty[] = ['pr']
+let worktreeCardProperties: WorktreeCardProperty[] = ['status']
 let hostedReviewCache: Record<string, unknown> = {}
 let prCache: Record<string, unknown> = {}
 let settings: Partial<GlobalSettings> | null = null
@@ -132,8 +132,8 @@ function renderWorktreeCardMarkup(element: ReactNode): string {
 describe('WorktreeCard merged PR fallback display', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    settings = { compactWorktreeCards: false, experimentalNewWorktreeCardStyle: false }
-    worktreeCardProperties = ['pr']
+    settings = null
+    worktreeCardProperties = ['status']
     hostedReviewCache = {
       'local::repo-1::feature/local-branch': {
         data: null,
@@ -160,7 +160,7 @@ describe('WorktreeCard merged PR fallback display', () => {
       />
     )
 
-    expect(markup).toContain('Linked PR #6340')
+    expect(markup).toContain('PR: Merged')
     expect(markup).not.toContain('Branch')
   })
 
@@ -184,7 +184,7 @@ describe('WorktreeCard merged PR fallback display', () => {
       />
     )
 
-    expect(markup).not.toContain('Linked PR #6340')
+    expect(markup).not.toContain('PR: Merged')
     expect(markup).not.toContain('Merged PR no longer checked out')
   })
 })

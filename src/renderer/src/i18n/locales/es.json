@@ -4065,11 +4065,7 @@
           "automationCreated": "Ocultar creados por automatizaciones"
         },
         "SidebarWorkspaceOptionsMenu": {
-          "95c9754653": "Diseño de actividad del Agent",
-          "3d4b9c4997": "Flotar",
-          "ba87080fb7": "Mostrar propiedades",
-          "320b675c9a": "Diseño de tarjeta",
-          "newCardDisplay": {
+          "cardDisplay": {
             "title": "Visualización de tarjeta"
           },
           "09faabd875": "Orden del proyecto",
@@ -4086,21 +4082,11 @@
           "b759bb87ee": "Agents que necesitan atención, luego actividad más reciente.",
           "503462f2b4": "Actividad de Agents",
           "3728165cdd": "Nombre",
-          "2a81e07366": "Lista completa",
-          "25105b28cb": "Compacto",
-          "d7084e8bc8": "Actividad de Agents",
-          "b64d8bcca0": "Puertos",
-          "26c71e536c": "Notas",
-          "b8dcc6f321": "Enlace PR/MR",
-          "ca4d3c522e": "Issue de Linear",
-          "91dfc653e8": "Ticket de GitHub",
           "bdd23b4e07": "Issues de GitHub",
           "44713a5d04": "Issues de Linear",
-          "cc17bd443b": "Detallado",
           "0f9b959b31": "PR",
           "e029a2d775": "Estado",
           "c2c7a45cda": "Ninguno",
-          "680043342f": "compacto",
           "c7591b6014": "repositorio",
           "hosts": "Hosts",
           "allHostsDetail": "Mostrar todos los hosts",
@@ -4109,9 +4095,6 @@
           "activeRuntimeHost": "Servidor activo",
           "projectRuntimeHost": "Servidor del proyecto",
           "631b97eea9": "Ámbito del host",
-          "2d4f0eb933": "Predeterminado",
-          "1a0eec0d35": "Estado",
-          "b5536d5a88": "Tareas",
           "8d62c68b35": "Notas",
           "automation": "Automatización",
           "2d74665a56": "Puertos",
@@ -5372,7 +5355,6 @@
             "tintOpacity": "Intensidad del tinte",
             "tintOpacityDescription": "Controla con qué fuerza se mezcla el tinte en la barra lateral."
           },
-          "workspaceCardLayoutGuidance": "Gestionado desde la barra lateral del espacio de trabajo.",
           "872af9556e": "Bandeja del sistema",
           "2edf606c46": "Minimizar a la bandeja al cerrar",
           "b707773a0d": "Cuando está activado, cerrar la ventana mantiene Yiru en ejecución en la bandeja del sistema en lugar de salir.",
@@ -5705,12 +5687,6 @@
             "idleMinutesSuffix": "minutos",
             "title": "Suspensión de agentes",
             "toggleLabel": "Alternar suspensión de agentes"
-          },
-          "newWorktreeCardStyle": {
-            "copy": "Previsualiza el diseño actualizado de tarjetas de worktree, la ubicación de metadatos, las opciones del menú de visualización de tarjetas y la presentación de estado.",
-            "description": "Previsualiza el diseño actualizado de tarjetas de worktree, la ubicación de metadatos, las opciones del menú de visualización de tarjetas y la presentación de estado.",
-            "title": "Nuevo estilo de tarjeta",
-            "toggleLabel": "Alternar nuevo estilo de tarjeta"
           },
           "nativeChat": {
             "title": "Chat nativo",
@@ -7582,17 +7558,6 @@
               "title": "Apariencia de la barra lateral izquierda",
               "description": "Haz que la barra lateral izquierda coincida con tu terminal, conserve el valor predeterminado o use un tinte."
             },
-            "workspaceCardLayout": {
-              "title": "Diseño de tarjetas de espacios de trabajo",
-              "description": "Las tarjetas de espacios de trabajo pueden usar diseños compactos o detallados.",
-              "compact": "compacto",
-              "compactDisplay": "vista compacta",
-              "workspaceCards": "tarjetas de espacios de trabajo",
-              "worktreeCards": "tarjetas de worktree",
-              "cardLayout": "diseño de tarjeta",
-              "workspaceOptions": "opciones de espacios de trabajo",
-              "detailed": "detallado"
-            },
             "9a115966d3": "Minimizar a la bandeja al cerrar",
             "4d5b9427b5": "Cuando está activado, cerrar la ventana mantiene Yiru en ejecución en la bandeja del sistema en lugar de salir.",
             "antigravityUsageTitle": "Uso de Antigravity",
@@ -7874,17 +7839,6 @@
               "sleep": "suspender",
               "terminal": "terminal",
               "title": "Suspensión de agentes"
-            },
-            "newWorktreeCardStyle": {
-              "card": "tarjeta",
-              "cards": "tarjetas",
-              "description": "Previsualiza el diseño actualizado de tarjetas de worktree, la ubicación de metadatos, las opciones del menú de visualización de tarjeta y la presentación de estado.",
-              "menu": "menú",
-              "metadata": "metadatos",
-              "status": "estado",
-              "title": "Nuevo estilo de tarjeta",
-              "worktree": "worktree",
-              "worktrees": "worktrees"
             },
             "nativeChat": {
               "title": "Chat nativo",

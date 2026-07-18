@@ -42,7 +42,6 @@ import {
   getDefaultSettings,
   getDefaultUIState,
   getDefaultWorkspaceSession,
-  getWorktreeCardModeProperties,
   normalizeAgentActivityDisplayMode,
   normalizeWorktreeCardProperties,
   ONBOARDING_FLOW_VERSION
@@ -3215,7 +3214,28 @@ function getStoredSettings(): GlobalSettings {
   const environment = (activeEnvironment = activeEnvironment ?? readStoredWebRuntimeEnvironment())
   const defaults = getDefaultSettings('~')
   const rawStoredSettings = window.localStorage.getItem(SETTINGS_STORAGE_KEY)
-  const stored = readJson<Partial<GlobalSettings>>(SETTINGS_STORAGE_KEY, {})
+  const rawStored = readJson<Partial<GlobalSettings>>(
+    SETTINGS_STORAGE_KEY,
+    {}
+  ) as Partial<GlobalSettings> & {
+    experimentalNewWorktreeCardStyle?: unknown
+    compactWorktreeCards?: unknown
+    experimentalCompactWorktreeCards?: unknown
+  }
+  const {
+    experimentalNewWorktreeCardStyle: _retiredCardStyle,
+    compactWorktreeCards: _retiredCompactCards,
+    experimentalCompactWorktreeCards: _retiredExperimentalCompactCards,
+    ...stored
+  } = rawStored
+  void _retiredCardStyle
+  void _retiredCompactCards
+  void _retiredExperimentalCompactCards
+  const hadRetiredCardSettings = [
+    'experimentalNewWorktreeCardStyle',
+    'compactWorktreeCards',
+    'experimentalCompactWorktreeCards'
+  ].some((key) => Object.prototype.hasOwnProperty.call(rawStored, key))
   const migratedStored = {
     ...stored,
     ...normalizeAutoRenameBranchFromWorkDefaultOn(stored),
@@ -3225,7 +3245,8 @@ function getStoredSettings(): GlobalSettings {
   }
   if (
     rawStoredSettings &&
-    (stored.autoRenameBranchFromWork !== migratedStored.autoRenameBranchFromWork ||
+    (hadRetiredCardSettings ||
+      stored.autoRenameBranchFromWork !== migratedStored.autoRenameBranchFromWork ||
       stored.autoRenameBranchFromWorkDefaultedOn !==
         migratedStored.autoRenameBranchFromWorkDefaultedOn ||
       stored.terminalCursorStyle !== migratedStored.terminalCursorStyle ||
@@ -3266,13 +3287,6 @@ async function getRuntimeBackedStoredSettings(): Promise<GlobalSettings> {
       15_000
     )
     const runtimeSettings: Partial<GlobalSettings> = {}
-    if (typeof result.settings.experimentalNewWorktreeCardStyle === 'boolean') {
-      runtimeSettings.experimentalNewWorktreeCardStyle =
-        result.settings.experimentalNewWorktreeCardStyle
-    }
-    if (typeof result.settings.compactWorktreeCards === 'boolean') {
-      runtimeSettings.compactWorktreeCards = result.settings.compactWorktreeCards
-    }
     if (typeof result.settings.minimaxGroupId === 'string') {
       runtimeSettings.minimaxGroupId = result.settings.minimaxGroupId
     }
@@ -3301,12 +3315,6 @@ async function syncRuntimeBackedSettings(
     return localNext
   }
   const runtimeUpdates: Partial<GlobalSettings> = {}
-  if (typeof updates.experimentalNewWorktreeCardStyle === 'boolean') {
-    runtimeUpdates.experimentalNewWorktreeCardStyle = updates.experimentalNewWorktreeCardStyle
-  }
-  if (typeof updates.compactWorktreeCards === 'boolean') {
-    runtimeUpdates.compactWorktreeCards = updates.compactWorktreeCards
-  }
   if (typeof updates.minimaxGroupId === 'string') {
     runtimeUpdates.minimaxGroupId = updates.minimaxGroupId
   }
@@ -3434,14 +3442,7 @@ function readLocalWebUIState(): PersistedUIState {
   const defaults = getDefaultUIState()
   const stored = readJson<Partial<PersistedUIState>>(UI_STORAGE_KEY, {})
   const storedSettings = getStoredSettings()
-  const base = {
-    ...defaults,
-    // Why: when runtime ui.get is unavailable, web fallback must mirror the
-    // main-process missing-property seed from the legacy card layout mode.
-    worktreeCardProperties: getWorktreeCardModeProperties(
-      storedSettings.compactWorktreeCards ? 'Compact' : 'Default'
-    )
-  }
+  const base = defaults
   if (typeof stored.rightSidebarOpen === 'boolean') {
     return mergeWebUIState(base, stored)
   }
@@ -3457,19 +3458,22 @@ function mergeWebUIState(
   base: PersistedUIState,
   updates: Partial<PersistedUIState>
 ): PersistedUIState {
-  const { featureInteractionTelemetryBuckets: _reserved, ...safeUpdates } =
-    updates as Partial<PersistedUIState> & {
-      featureInteractionTelemetryBuckets?: unknown
-    }
+  const {
+    featureInteractionTelemetryBuckets: _reserved,
+    _worktreeCardModeDefaulted: _retiredCardModeMarker,
+    ...safeUpdates
+  } = updates as Partial<PersistedUIState> & {
+    featureInteractionTelemetryBuckets?: unknown
+    _worktreeCardModeDefaulted?: unknown
+  }
   void _reserved
+  void _retiredCardModeMarker
   return {
     ...base,
     ...safeUpdates,
     worktreeCardProperties: normalizeWorktreeCardProperties(
       safeUpdates.worktreeCardProperties ?? base.worktreeCardProperties
     ),
-    _worktreeCardModeDefaulted:
-      safeUpdates._worktreeCardModeDefaulted ?? base._worktreeCardModeDefaulted,
     agentActivityDisplayMode: normalizeAgentActivityDisplayMode(
       safeUpdates.agentActivityDisplayMode ?? base.agentActivityDisplayMode
     ),

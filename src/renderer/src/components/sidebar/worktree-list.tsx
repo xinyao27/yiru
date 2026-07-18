@@ -1524,7 +1524,6 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
   const sshConnectedGeneration = useAppStore((s) => s.sshConnectedGeneration)
   const prVisibleRefreshGeneration = useAppStore((s) => s.prVisibleRefreshGeneration)
   const settings = useAppStore((s) => s.settings)
-  const newCardStyle = settings?.experimentalNewWorktreeCardStyle === true
   const reorderRepos = useAppStore((s) => s.reorderRepos)
   const folderBackedProjectGroupIds = useMemo(
     () =>
@@ -3852,11 +3851,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
       ((currentWorktree.linkedGitLabMR ?? null) === null ||
         (currentWorktree.linkedPR ?? null) !== null)
     const shouldTrackSidebarWorktree = rightSidebarShowsPR && sidebarWorktreeHasGitHubReview
-    const shouldTrackVisibleRows =
-      groupBy === 'pr-status' ||
-      (newCardStyle
-        ? cardProps.includes('status')
-        : cardProps.includes('pr') || cardProps.includes('ci'))
+    const shouldTrackVisibleRows = groupBy === 'pr-status' || cardProps.includes('status')
     if (!shouldTrackVisibleRows && !shouldTrackSidebarWorktree) {
       if (lastVisibleRefreshKeyRef.current !== '__hidden__') {
         lastVisibleRefreshKeyRef.current = '__hidden__'
@@ -3908,7 +3903,6 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
     prVisibleRefreshGeneration,
     rightSidebarShowsPR,
     sshConnectedGeneration,
-    newCardStyle,
     virtualItems,
     worktreeMap
   ])
@@ -4932,15 +4926,12 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
               forceActiveSurface = false
             ) => {
               const lineageToggleGroupKey = itemRow.lineageGroupKey
-              const experimentalNewWorktreeCardStyle =
-                settings?.experimentalNewWorktreeCardStyle === true
               const projectGroupId = itemRow.repo?.projectGroupId
               const isFolderBackedRepoChild =
                 groupBy === 'repo' &&
                 Boolean(projectGroupId && folderBackedProjectGroupIds.has(projectGroupId))
-              // Why: experimental in-card lineage inherits the parent surface;
-              // legacy cards keep the old depth-based nested row geometry.
-              const paddingDepth = nested ? Math.max(0, itemRow.depth - 1) : itemRow.depth
+              // Why: in-card lineage inherits the parent surface, while root
+              // rows keep their project/group depth.
               const getCardContentIndent = (lineageDepth: number): number =>
                 isFolderBackedRepoChild
                   ? getFolderBackedRepoWorktreeCardContentIndent({
@@ -4952,30 +4943,16 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                       groupDepth: itemRow.groupDepth,
                       lineageDepth
                     })
-              const inheritedCardContentIndent = getCardContentIndent(0)
-              const nestedLineageGeometry = nested
-                ? getLineageNestedRowGeometry({
-                    experimentalNewWorktreeCardStyle,
-                    inheritedCardContentIndent,
-                    lineageDepth: itemRow.depth
-                  })
-                : null
-              // Why: grouped rows inherit their project/group header depth,
+              const nestedLineageGeometry = nested ? getLineageNestedRowGeometry() : null
+              const rootCardContentIndent = getCardContentIndent(itemRow.depth)
+              // Why: grouped root rows inherit their project/group header depth,
               // while the card surface still spans the full hit/background row.
-              const paddingLeft =
-                nested && groupBy !== 'none'
-                  ? getWorktreeCardContentIndent({
-                      isGrouped: false,
-                      groupDepth: itemRow.groupDepth,
-                      lineageDepth: paddingDepth
-                    })
-                  : getCardContentIndent(paddingDepth)
               const surfaceInset = nested
                 ? nestedLineageGeometry!.surfaceInset
                 : isFolderBackedRepoChild
                   ? getFolderBackedRepoWorktreeCardSurfaceInset({
                       groupDepth: itemRow.groupDepth,
-                      lineageDepth: paddingDepth
+                      lineageDepth: itemRow.depth
                     })
                   : getWorktreeCardSurfaceInset({
                       isGrouped: groupBy !== 'none',
@@ -4983,7 +4960,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                     })
               const cardContentIndent = nested
                 ? nestedLineageGeometry!.cardContentIndent
-                : Math.max(0, paddingLeft - surfaceInset)
+                : Math.max(0, rootCardContentIndent - surfaceInset)
               const lineageChildrenStyle = lineageChildren
                 ? getLineageChildrenInlineStyle(
                     nestedLineageGeometry?.lineageChildrenInlineOffset ??
@@ -5267,7 +5244,6 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
               const isFolderBackedWorkspaceChild =
                 groupBy === 'repo' && folderWorkspaceRow.projectGroup.createdFrom === 'folder-scan'
               const { surfaceInset, cardContentIndent } = getFolderWorkspaceRowGeometry({
-                experimentalNewWorktreeCardStyle: newCardStyle,
                 isFolderBackedWorkspaceChild,
                 isGrouped: groupBy !== 'none',
                 groupDepth: folderWorkspaceRow.groupDepth,

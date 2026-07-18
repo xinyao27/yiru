@@ -94,15 +94,16 @@ async function renderExperimentalPane(args: {
 }
 
 describe('ExperimentalPane', () => {
-  it('does not render compact worktree cards after graduation from Experimental', () => {
+  it('does not render retired worktree card style controls', () => {
     const markup = renderToStaticMarkup(
       <ExperimentalPane settings={getDefaultSettings('/tmp')} updateSettings={vi.fn()} />
     )
+    const searchTitles = getExperimentalPaneSearchEntries().map((entry) => entry.title)
 
+    expect(markup).not.toContain('New card style')
     expect(markup).not.toContain('Compact worktree cards')
-    expect(getExperimentalPaneSearchEntries().map((entry) => entry.title)).not.toContain(
-      'Compact worktree cards'
-    )
+    expect(searchTitles).not.toContain('New card style')
+    expect(searchTitles).not.toContain('Compact worktree cards')
   })
 
   it('renders agent sleep as an off-by-default searchable experimental switch', () => {
@@ -118,20 +119,6 @@ describe('ExperimentalPane', () => {
     expect(markup).not.toContain('Sleep after')
     expect(markup).toContain('aria-checked="false"')
     expect(getExperimentalPaneSearchEntries().map((entry) => entry.title)).toContain('Agent sleep')
-  })
-
-  it('renders new card style as an off-by-default searchable experimental switch', () => {
-    const settings = getDefaultSettings('/tmp')
-    const markup = renderToStaticMarkup(
-      <ExperimentalPane settings={settings} updateSettings={vi.fn()} />
-    )
-
-    expect(settings.experimentalNewWorktreeCardStyle).toBe(false)
-    expect(markup).toContain('New card style')
-    expect(markup).toContain('aria-checked="false"')
-    expect(getExperimentalPaneSearchEntries().map((entry) => entry.title)).toContain(
-      'New card style'
-    )
   })
 
   it('renders per-workspace environments as an off-by-default experimental subsection', () => {
@@ -292,25 +279,6 @@ describe('ExperimentalPane', () => {
     })
 
     expect(updateSettings).toHaveBeenCalledWith({ experimentalAgentHibernation: true })
-    root.unmount()
-  })
-
-  it('enables new card style through the experimental switch', async () => {
-    const updateSettings = vi.fn()
-    const { root, container } = await renderExperimentalPane({ updateSettings })
-
-    const switchButton = container.querySelector<HTMLButtonElement>(
-      '#experimental-new-worktree-card-style button[role="switch"]'
-    )
-    if (!switchButton) {
-      throw new Error('New card style switch was not rendered')
-    }
-
-    await act(async () => {
-      switchButton.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-    })
-
-    expect(updateSettings).toHaveBeenCalledWith({ experimentalNewWorktreeCardStyle: true })
     root.unmount()
   })
 })

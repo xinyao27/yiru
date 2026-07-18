@@ -50,13 +50,17 @@ vi.mock('@/store', () => ({
 vi.mock('@/components/ui/hover-card', () => ({
   HoverCard: ({ children }: { children: ReactNode }) => <>{children}</>,
   HoverCardContent: ({ children }: { children: ReactNode }) => <>{children}</>,
-  HoverCardTrigger: ({ children }: { children: ReactNode }) => <>{children}</>
+  HoverCardTrigger: ({ children, render }: { children?: ReactNode; render?: ReactNode }) => (
+    <>{render ?? children}</>
+  )
 }))
 
 vi.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipContent: ({ children }: { children: ReactNode }) => <>{children}</>,
-  TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>
+  TooltipTrigger: ({ children, render }: { children?: ReactNode; render?: ReactNode }) => (
+    <>{render ?? children}</>
+  )
 }))
 
 vi.mock('@/lib/sidebar-worktree-activation', () => ({

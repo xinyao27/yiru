@@ -4,9 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { WorktreeCardStatusSlot } from './worktree-card-status-slot'
 import type { WorktreeCardPrDisplay } from './worktree-card-pr-display'
 
-const mocks = vi.hoisted(() => ({
-  status: 'active'
-}))
+const mocks = vi.hoisted(() => ({ status: 'active' }))
 
 vi.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -20,383 +18,119 @@ vi.mock('./use-worktree-activity-status', () => ({
   useWorktreeActivityStatus: () => mocks.status
 }))
 
+const review: WorktreeCardPrDisplay = {
+  provider: 'github',
+  number: 123,
+  title: 'Review me',
+  state: 'open',
+  status: 'failure'
+}
+const gitlabReview: WorktreeCardPrDisplay = {
+  provider: 'gitlab',
+  number: 456,
+  title: 'Review me',
+  state: 'open',
+  status: 'pending'
+}
+
+function renderSlot({
+  showStatus = true,
+  isUnread = false,
+  prDisplay = null,
+  hasBranchIdentity = false,
+  branchIdentityLabel
+}: {
+  showStatus?: boolean
+  isUnread?: boolean
+  prDisplay?: WorktreeCardPrDisplay | null
+  hasBranchIdentity?: boolean
+  branchIdentityLabel?: string
+} = {}): string {
+  return renderToStaticMarkup(
+    <WorktreeCardStatusSlot
+      worktreeId="wt-1"
+      showStatus={showStatus}
+      isUnread={isUnread}
+      prDisplay={prDisplay}
+      hasBranchIdentity={hasBranchIdentity}
+      branchIdentityLabel={branchIdentityLabel}
+    />
+  )
+}
+
 describe('WorktreeCardStatusSlot', () => {
   beforeEach(() => {
     mocks.status = 'active'
   })
 
-  const review: WorktreeCardPrDisplay = {
-    provider: 'github',
-    number: 123,
-    title: 'Review me',
-    state: 'open',
-    status: 'failure'
-  }
-  const gitlabReview: WorktreeCardPrDisplay = {
-    provider: 'gitlab',
-    number: 456,
-    title: 'Review me',
-    state: 'open',
-    status: 'pending'
-  }
+  it('reports unread status without a standalone read control', () => {
+    const markup = renderSlot({ isUnread: true })
 
-  it('uses a standalone read control by default', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction
-        isUnread
-        unreadTooltip="Mark as read"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-      />
-    )
-
-    expect(markup).toContain('aria-label="Mark as read"')
-    expect(markup).toContain('Mark as read')
-    expect(markup).not.toContain('Active · Mark as read')
-  })
-
-  it('reports unread status without a standalone read control in the new card mode', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction
-        isUnread
-        unreadTooltip="Mark as read"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        newCardStyle
-        hasBranchIdentity={false}
-      />
-    )
-
-    expect(markup).not.toContain('aria-label="Mark as read"')
-    expect(markup).not.toContain('Mark as read')
     expect(markup).toContain('Active · Unread')
+    expect(markup).toContain('data-worktree-unread-alert=""')
+    expect(markup).not.toContain('button')
   })
 
-  it('prioritizes working status over a standalone read control', () => {
-    mocks.status = 'working'
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction
-        isUnread
-        unreadTooltip="Mark as read"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        newCardStyle
-        hasBranchIdentity={false}
-      />
-    )
+  it.each([
+    ['working', 'Working · Unread'],
+    ['permission', 'Needs permission · Unread']
+  ])('keeps %s activity ahead of the unread overlay', (status, label) => {
+    mocks.status = status
+    const markup = renderSlot({ isUnread: true })
 
-    expect(markup).toContain('Working · Unread')
-    expect(markup).not.toContain('aria-label="Mark as read"')
+    expect(markup).toContain(label)
+    expect(markup).not.toContain('data-worktree-unread-alert=""')
   })
 
-  it('prioritizes permission status over a standalone read control', () => {
-    mocks.status = 'permission'
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction
-        isUnread
-        unreadTooltip="Mark as read"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        newCardStyle
-        hasBranchIdentity={false}
-      />
-    )
+  it.each(['active', 'done', 'inactive'])('prioritizes review status over %s status', (status) => {
+    mocks.status = status
 
-    expect(markup).toContain('Needs permission · Unread')
-    expect(markup).not.toContain('aria-label="Mark as read"')
-  })
-
-  it('keeps legacy unread working cards on the unread bell control', () => {
-    mocks.status = 'working'
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction
-        isUnread
-        unreadTooltip="Mark as read"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-      />
-    )
-
-    expect(markup).toContain('aria-label="Mark as read"')
-    expect(markup).toContain('Mark as read')
-    expect(markup).toContain('Working')
-  })
-
-  it('shows status in the unread toggle affordance', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction
-        isUnread={false}
-        unreadTooltip="Mark as unread"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-      />
-    )
-
-    expect(markup).toContain('Active · Mark as unread')
-  })
-
-  it('prioritizes active status over PR status by default', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction={false}
-        isUnread={false}
-        unreadTooltip="Mark as unread"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        prDisplay={review}
-      />
-    )
-
-    expect(markup).toContain('Active')
-    expect(markup).not.toContain('PR checks: Failed')
-  })
-
-  it('prioritizes PR status over active status in the new card mode', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction={false}
-        isUnread={false}
-        unreadTooltip="Mark as unread"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        prDisplay={review}
-        newCardStyle
-      />
-    )
-
-    expect(markup).toContain('PR checks: Failed')
+    expect(renderSlot({ prDisplay: review })).toContain('PR checks: Failed')
   })
 
   it('uses GitLab MR terminology for review status', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction={false}
-        isUnread={false}
-        unreadTooltip="Mark as unread"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        prDisplay={gitlabReview}
-        newCardStyle
-      />
-    )
-
-    expect(markup).toContain('MR checks: Pending')
-  })
-
-  it('prioritizes PR status over done status in the new card mode', () => {
-    mocks.status = 'done'
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction={false}
-        isUnread={false}
-        unreadTooltip="Mark as unread"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        prDisplay={review}
-        newCardStyle
-      />
-    )
-
-    expect(markup).toContain('PR checks: Failed')
-  })
-
-  it('prioritizes PR status over inactive status in the new card mode', () => {
-    mocks.status = 'inactive'
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction={false}
-        isUnread={false}
-        unreadTooltip="Mark as unread"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        prDisplay={review}
-        newCardStyle
-      />
-    )
-
-    expect(markup).toContain('PR checks: Failed')
+    expect(renderSlot({ prDisplay: gitlabReview })).toContain('MR checks: Pending')
   })
 
   it('uses branch-only tooltip copy by default', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction={false}
-        isUnread={false}
-        unreadTooltip="Mark as unread"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        newCardStyle
-        hasBranchIdentity
-      />
-    )
+    const markup = renderSlot({ hasBranchIdentity: true })
 
     expect(markup).toContain('Branch')
     expect(markup).not.toContain('Branch or folder path')
   })
 
   it('uses context-aware branch or folder path tooltip copy', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction={false}
-        isUnread={false}
-        unreadTooltip="Mark as unread"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        newCardStyle
-        hasBranchIdentity
-        branchIdentityLabel="Branch or folder path"
-      />
-    )
-
-    expect(markup).toContain('Branch or folder path')
+    expect(
+      renderSlot({ hasBranchIdentity: true, branchIdentityLabel: 'Branch or folder path' })
+    ).toContain('Branch or folder path')
   })
 
   it('uses active status when the row has no branch identity', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction={false}
-        isUnread={false}
-        unreadTooltip="Mark as unread"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        newCardStyle
-        hasBranchIdentity={false}
-      />
-    )
-
-    expect(markup).toContain('Active')
+    expect(renderSlot()).toContain('Active')
   })
 
-  it('keeps working activity ahead of PR status in new card style', () => {
-    mocks.status = 'working'
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction={false}
-        isUnread={false}
-        unreadTooltip="Mark as unread"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        prDisplay={review}
-        newCardStyle
-      />
-    )
+  it.each([
+    ['working', 'Working'],
+    ['permission', 'Needs permission']
+  ])('keeps %s activity ahead of review status', (status, label) => {
+    mocks.status = status
+    const markup = renderSlot({ prDisplay: review })
 
-    expect(markup).toContain('Working')
+    expect(markup).toContain(label)
     expect(markup).not.toContain('PR checks: Failed')
   })
 
-  it('keeps permission activity ahead of PR status in new card style', () => {
-    mocks.status = 'permission'
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction={false}
-        isUnread={false}
-        unreadTooltip="Mark as unread"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        prDisplay={review}
-        newCardStyle
-      />
+  it('reports unread review status', () => {
+    expect(renderSlot({ isUnread: true, prDisplay: review })).toContain(
+      'PR checks: Failed · Unread'
     )
-
-    expect(markup).toContain('Needs permission')
-    expect(markup).not.toContain('PR checks: Failed')
   })
 
-  it('keeps unread ahead of PR status by default', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction
-        isUnread
-        unreadTooltip="Mark as read"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        prDisplay={review}
-      />
-    )
-
-    expect(markup).toContain('aria-label="Mark as read"')
-    expect(markup).toContain('Mark as read')
-    expect(markup).not.toContain('Active · Mark as read')
-    expect(markup).not.toContain('PR checks: Failed')
+  it('reports unread branch status', () => {
+    expect(renderSlot({ isUnread: true, hasBranchIdentity: true })).toContain('Branch · Unread')
   })
 
-  it('reports unread PR status without a standalone read control in the new card mode', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction
-        isUnread
-        unreadTooltip="Mark as read"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        prDisplay={review}
-        newCardStyle
-      />
-    )
-
-    expect(markup).not.toContain('aria-label="Mark as read"')
-    expect(markup).not.toContain('Mark as read')
-    expect(markup).toContain('PR checks: Failed · Unread')
-  })
-
-  it('reports unread branch status without a standalone read control in the new card mode', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCardStatusSlot
-        worktreeId="wt-1"
-        showStatus
-        showUnreadAction
-        isUnread
-        unreadTooltip="Mark as read"
-        onPointerDown={vi.fn()}
-        onToggleUnread={vi.fn()}
-        newCardStyle
-        hasBranchIdentity
-      />
-    )
-
-    expect(markup).toContain('Branch · Unread')
-    expect(markup).not.toContain('Mark as read')
+  it('renders nothing when status is hidden', () => {
+    expect(renderSlot({ showStatus: false })).toBe('')
   })
 })

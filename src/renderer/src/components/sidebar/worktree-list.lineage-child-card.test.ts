@@ -339,7 +339,6 @@ function makeFolderWorkspacePathStatusState(): Record<string, unknown> {
 function setFolderWorkspaceFixtureState(
   options: {
     createdFrom?: ProjectGroup['createdFrom']
-    experimentalNewWorktreeCardStyle?: boolean
     nestedGroup?: boolean
   } = {}
 ): void {
@@ -405,9 +404,7 @@ function setFolderWorkspaceFixtureState(
     setRenamingWorktreeId: vi.fn(),
     setShowSleepingWorkspaces: vi.fn(),
     setSortBy: vi.fn(),
-    settings: options.experimentalNewWorktreeCardStyle
-      ? { experimentalNewWorktreeCardStyle: true }
-      : null,
+    settings: null,
     renamingWorktreeId: null,
     showSleepingWorkspaces: true,
     sortBy: 'manual',

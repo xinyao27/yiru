@@ -23,21 +23,19 @@ const TaskProviderParam = z.custom<TaskProvider>(isTaskProvider, {
 const FeatureTipIds = z.array(z.custom(isFeatureTipId, { message: 'Unknown feature tip id' }))
 const UnknownRecord = z.record(z.string(), z.unknown())
 const UnknownRecordArray = z.array(UnknownRecord)
-const LegacyWorktreeCardProperty = z.enum([
+const WorktreeCardPropertyParam = z.enum([
   'status',
   'unread',
-  'ci',
   'branch',
   'issue',
   'linear-issue',
-  'pr',
   'automation',
   'comment',
   'ports',
   'inline-agents'
 ])
 const WorktreeCardProperties = z
-  .array(LegacyWorktreeCardProperty)
+  .array(WorktreeCardPropertyParam)
   .transform((value) => normalizeWorktreeCardProperties(value))
 const AgentActivityDisplayMode = z.enum(['compact', 'full'])
 const StatusBarItem = z.enum([
@@ -152,11 +150,9 @@ export const SettingsUpdate = z
     defaultTaskViewPreset: z
       .enum(['issues', 'my-issues', 'prs', 'my-prs', 'review', 'all'])
       .optional(),
-    experimentalNewWorktreeCardStyle: z.boolean().optional(),
     agentStatusHooksEnabled: z.boolean().optional(),
     defaultRepoSelection: z.array(z.string()).nullable().optional(),
     defaultLinearTeamSelection: z.array(z.string()).nullable().optional(),
-    compactWorktreeCards: z.boolean().optional(),
     minimaxGroupId: z.string().optional(),
     minimaxUsageModels: z.string().optional(),
     githubProjects: GitHubProjectSettings.optional(),
@@ -201,7 +197,6 @@ export const UiUpdate = z
     uiZoomLevel: z.number().finite().optional(),
     editorFontZoomLevel: z.number().finite().optional(),
     worktreeCardProperties: WorktreeCardProperties.optional(),
-    _worktreeCardModeDefaulted: z.boolean().optional(),
     agentActivityDisplayMode: AgentActivityDisplayMode.optional(),
     workspaceStatuses: z.array(WorkspaceStatusDefinition).optional(),
     workspaceBoardOpacity: z.number().finite().optional(),

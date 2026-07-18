@@ -4,7 +4,7 @@ import type { WorktreeGroupBy } from './worktree-list-groups'
 
 export type WorktreeListReviewCacheState = Pick<
   AppState,
-  'folderWorkspaces' | 'hostedReviewCache' | 'prCache' | 'settings'
+  'folderWorkspaces' | 'hostedReviewCache' | 'prCache'
 >
 
 export type WorktreeListReviewCacheInputs = {
@@ -24,13 +24,10 @@ export function selectWorktreeListReviewCacheInputs(
   groupBy: WorktreeGroupBy,
   cardProperties: readonly WorktreeCardProperty[]
 ): WorktreeListReviewCacheInputs {
-  const hasFolderWorkspaces = state.folderWorkspaces.length > 0
-  const newCardStyle = state.settings?.experimentalNewWorktreeCardStyle === true
   const folderCardsNeedReview =
-    hasFolderWorkspaces &&
-    (newCardStyle ? cardProperties.includes('status') : cardProperties.includes('pr'))
+    state.folderWorkspaces.length > 0 && cardProperties.includes('status')
   const needsPrCache = groupBy === 'pr-status' || folderCardsNeedReview
-  const needsHostedReviewCache = newCardStyle && folderCardsNeedReview
+  const needsHostedReviewCache = folderCardsNeedReview
 
   // Why: ordinary git worktree cards own entry-level subscriptions. The list
   // needs whole caches only for PR grouping or synthetic folder-card displays.

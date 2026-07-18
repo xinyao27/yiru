@@ -4117,11 +4117,7 @@
           "projectSshHost": "Project SSH",
           "activeRuntimeHost": "Active server",
           "projectRuntimeHost": "Project server",
-          "95c9754653": "Agent activity layout",
-          "3d4b9c4997": "Hover",
-          "ba87080fb7": "Show properties",
-          "320b675c9a": "Card layout",
-          "newCardDisplay": {
+          "cardDisplay": {
             "title": "Card display"
           },
           "09faabd875": "Project order",
@@ -4139,26 +4135,13 @@
           "b759bb87ee": "Agents that need attention, then most recent activity.",
           "503462f2b4": "Agent Activity",
           "3728165cdd": "Name",
-          "2a81e07366": "Full list",
-          "25105b28cb": "Compact",
-          "d7084e8bc8": "Agent activity",
           "automation": "Automation",
-          "b64d8bcca0": "Ports",
-          "26c71e536c": "Notes",
-          "b8dcc6f321": "PR/MR link",
-          "ca4d3c522e": "Linear issue",
-          "91dfc653e8": "GitHub ticket",
           "bdd23b4e07": "GitHub issues",
           "44713a5d04": "Linear issues",
-          "cc17bd443b": "Detailed",
           "0f9b959b31": "PR",
           "e029a2d775": "Status",
           "c2c7a45cda": "None",
-          "680043342f": "compact",
           "c7591b6014": "repo",
-          "2d4f0eb933": "Default",
-          "1a0eec0d35": "Status",
-          "b5536d5a88": "Tasks",
           "8d62c68b35": "Notes",
           "2d74665a56": "Ports",
           "65a9820bd1": "Agent statuses",
@@ -5398,7 +5381,6 @@
             "tintOpacity": "Tint Strength",
             "tintOpacityDescription": "Controls how strongly the tint is mixed into the sidebar."
           },
-          "workspaceCardLayoutGuidance": "Managed from the workspace sidebar.",
           "interfaceDefaultFont": "Default font",
           "terminalDefaultFont": "Default font",
           "interfaceTitle": "Interface",
@@ -5725,12 +5707,6 @@
             "idleMinutesSuffix": "minutes",
             "title": "Agent sleep",
             "toggleLabel": "Toggle agent sleep"
-          },
-          "newWorktreeCardStyle": {
-            "copy": "Preview updated worktree-card layout, metadata placement, card-display menu options, and status presentation.",
-            "description": "Preview updated worktree-card layout, metadata placement, card-display menu options, and status presentation.",
-            "title": "New card style",
-            "toggleLabel": "Toggle new card style"
           },
           "ca2219fe5e": "Shows a small animated pet pinned to the bottom-right corner. Pick a character (Claudino, OpenCode, Gremlin) or upload your own PNG, APNG, GIF, WebP, JPG, or SVG from the status-bar pet menu. Hide it any time from the same menu without disabling this setting.",
           "dd6f0a1d45": "Pet",
@@ -7644,17 +7620,6 @@
               "title": "Left Sidebar Appearance",
               "description": "Make the left sidebar match your terminal, stay default, or use a tint."
             },
-            "workspaceCardLayout": {
-              "title": "Workspace Card Layout",
-              "description": "Workspace cards can use compact or detailed layouts.",
-              "compact": "compact",
-              "compactDisplay": "compact display",
-              "workspaceCards": "workspace cards",
-              "worktreeCards": "worktree cards",
-              "cardLayout": "card layout",
-              "workspaceOptions": "workspace options",
-              "detailed": "detailed"
-            },
             "antigravityUsageTitle": "Antigravity Usage",
             "antigravityUsageDescription": "Show Antigravity subscription usage in the status bar.",
             "antigravityKeyword": "antigravity",
@@ -7917,17 +7882,6 @@
               "sleep": "sleep",
               "terminal": "terminal",
               "title": "Agent sleep"
-            },
-            "newWorktreeCardStyle": {
-              "card": "card",
-              "cards": "cards",
-              "description": "Preview updated worktree-card layout, metadata placement, card-display menu options, and status presentation.",
-              "menu": "menu",
-              "metadata": "metadata",
-              "status": "status",
-              "title": "New card style",
-              "worktree": "worktree",
-              "worktrees": "worktrees"
             },
             "fe5688b761": "sidebar",
             "ca5d1f3f46": "timeline",

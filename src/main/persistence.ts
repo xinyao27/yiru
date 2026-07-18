@@ -96,8 +96,6 @@ import {
   getDefaultUIState,
   getDefaultRepoHookSettings,
   getDefaultWorkspaceSession,
-  getWorktreeCardModeProperties,
-  isDefaultedCompactWorktreeCardProperties,
   normalizeAgentActivityDisplayMode,
   normalizeWorktreeCardProperties,
   ONBOARDING_FLOW_VERSION,
@@ -611,12 +609,25 @@ function readLegacyTerminalScrollbackSettings(settings: unknown): LegacyTerminal
     : {}
 }
 
-function stripLegacyTerminalScrollbackBytes(
+function stripRetiredGlobalSettings(
   settings: Partial<GlobalSettings> | undefined
 ): Partial<GlobalSettings> {
-  const { terminalScrollbackBytes: _legacyScrollbackBytes, ...rest } = (settings ??
-    {}) as Partial<GlobalSettings> & { terminalScrollbackBytes?: unknown }
+  const {
+    terminalScrollbackBytes: _legacyScrollbackBytes,
+    experimentalNewWorktreeCardStyle: _retiredCardStyle,
+    compactWorktreeCards: _retiredCompactCards,
+    experimentalCompactWorktreeCards: _retiredExperimentalCompactCards,
+    ...rest
+  } = (settings ?? {}) as Partial<GlobalSettings> & {
+    terminalScrollbackBytes?: unknown
+    experimentalNewWorktreeCardStyle?: unknown
+    compactWorktreeCards?: unknown
+    experimentalCompactWorktreeCards?: unknown
+  }
   void _legacyScrollbackBytes
+  void _retiredCardStyle
+  void _retiredCompactCards
+  void _retiredExperimentalCompactCards
   return rest
 }
 
@@ -785,18 +796,22 @@ function mergeContextualTourSeenIds(
   return [...merged]
 }
 
-function stripMainOwnedTelemetryMarkerFromUI(
+function stripReservedAndRetiredUIState(
   value: Partial<PersistedState['ui']> | undefined
 ): Partial<PersistedState['ui']> {
   if (!value || typeof value !== 'object') {
     return {}
   }
-  const { featureInteractionTelemetryBuckets: _reserved, ...ui } = value as Partial<
-    PersistedState['ui']
-  > & {
+  const {
+    featureInteractionTelemetryBuckets: _reserved,
+    _worktreeCardModeDefaulted: _retiredCardModeMarker,
+    ...ui
+  } = value as Partial<PersistedState['ui']> & {
     featureInteractionTelemetryBuckets?: unknown
+    _worktreeCardModeDefaulted?: unknown
   }
   void _reserved
+  void _retiredCardModeMarker
   return ui
 }
 
@@ -3133,13 +3148,20 @@ export class Store {
           this.loadNeedsSave = true
         }
         const normalizedProjectGroups = normalizeProjectGroups(parsed.projectGroups)
-        const loadedCompactWorktreeCards =
-          parsed.settings?.compactWorktreeCards ??
-          parsed.settings?.experimentalCompactWorktreeCards ??
-          defaults.settings.compactWorktreeCards
         const normalizedSourceControlGroupOrder = normalizeSourceControlGroupOrder(
           parsed.settings?.sourceControlGroupOrder
         )
+        // Why: the updated worktree card is now the only implementation; drop
+        // retired rollout/layout flags so old profiles cannot carry dead state.
+        if (
+          [
+            'experimentalNewWorktreeCardStyle',
+            'compactWorktreeCards',
+            'experimentalCompactWorktreeCards'
+          ].some((key) => Object.prototype.hasOwnProperty.call(parsed.settings ?? {}, key))
+        ) {
+          this.loadNeedsSave = true
+        }
         if (
           parsed.settings?.sourceControlGroupOrder !== undefined &&
           parsed.settings.sourceControlGroupOrder !== normalizedSourceControlGroupOrder
@@ -3163,13 +3185,7 @@ export class Store {
           ),
           settings: {
             ...defaults.settings,
-            // Why (#7977): a persisted experimentalNewWorktreeCardStyle:true is
-            // kept even though the default is now false. The v1.4.130 open-
-            // onboarding auto-default wrote the same plain boolean as a real
-            // opt-in, so a rollback migration would also revert genuine opt-ins;
-            // product intent was only to change the default, and the setting
-            // stays user-toggleable.
-            ...stripLegacyTerminalScrollbackBytes(parsed.settings),
+            ...stripRetiredGlobalSettings(parsed.settings),
             prBotAuthorOverrides: normalizePRBotAuthorOverrides(
               parsed.settings?.prBotAuthorOverrides
             ),
@@ -3204,10 +3220,6 @@ export class Store {
             ...migratedTerminalTuiScrollSensitivity.settings,
             experimentalActivity: migratedExperimentalActivity,
             experimentalActivityDefaultedOffForAllUsers: true,
-            // Why: compact worktree cards graduated from Experimental; preserve
-            // the old opt-in for profiles written during the rollout.
-            compactWorktreeCards: loadedCompactWorktreeCards,
-            experimentalCompactWorktreeCards: undefined,
             terminalMacOptionAsAlt: migratedOptionAsAlt,
             terminalMacOptionAsAltMigrated: true,
             localWindowsRuntimeDefault: migratedWindowsRuntimeDefault,
@@ -3309,6 +3321,11 @@ export class Store {
               this.loadNeedsSave = true
             }
             const rawCardProps = parsed.ui?.worktreeCardProperties
+            if (
+              Object.prototype.hasOwnProperty.call(parsed.ui ?? {}, '_worktreeCardModeDefaulted')
+            ) {
+              this.loadNeedsSave = true
+            }
             const inlineAgentsMigrated = parsed.ui?._inlineAgentsDefaultedForAllUsers === true
             const expandedCardPropsMigrated =
               parsed.ui?._expandedWorktreeCardPropertiesDefaulted === true
@@ -3322,16 +3339,9 @@ export class Store {
               !deliberateUncheck &&
               Array.isArray(rawCardProps) &&
               !rawCardProps.includes('inline-agents')
-            const needsLegacyDefaultedCompactMigration =
-              loadedCompactWorktreeCards &&
-              parsed.ui?._worktreeCardModeDefaulted === true &&
-              isDefaultedCompactWorktreeCardProperties(rawCardProps)
             const migratedCardProps = (() => {
               if (!Array.isArray(rawCardProps)) {
                 return undefined
-              }
-              if (needsLegacyDefaultedCompactMigration) {
-                return getWorktreeCardModeProperties('Compact')
               }
               const candidate = needsInlineAgentsMigration
                 ? [...rawCardProps, 'inline-agents' as const]
@@ -3396,12 +3406,7 @@ export class Store {
             }
             return {
               ...defaults.ui,
-              // Why: missing card properties should follow the persisted card
-              // layout mode; explicit property choices are preserved below.
-              worktreeCardProperties: getWorktreeCardModeProperties(
-                loadedCompactWorktreeCards ? 'Compact' : 'Default'
-              ),
-              ...stripMainOwnedTelemetryMarkerFromUI(parsed.ui),
+              ...stripReservedAndRetiredUIState(parsed.ui),
               // Why: migrate once from the retired Appearance setting only
               // when no explicit persisted chrome preference exists yet.
               rightSidebarOpen,
@@ -5378,7 +5383,7 @@ export class Store {
     updates: Partial<GlobalSettings>,
     options: { notifyListeners?: boolean; originWebContentsId?: number } = {}
   ): GlobalSettings {
-    const sanitizedUpdates = stripLegacyTerminalScrollbackBytes(updates)
+    const sanitizedUpdates = stripRetiredGlobalSettings(updates)
     // Why: coerce strictly to boolean here (not at the IPC edge) so every write
     // path is covered and a non-bool renderer payload can never persist a
     // truthy non-bool that later reads as "tray-minimize on".
@@ -5532,7 +5537,7 @@ export class Store {
   // ── UI State ───────────────────────────────────────────────────────
 
   getUI(): PersistedState['ui'] {
-    const uiState = stripMainOwnedTelemetryMarkerFromUI(this.state.ui)
+    const uiState = stripReservedAndRetiredUIState(this.state.ui)
     return {
       ...getDefaultUIState(),
       ...uiState,
@@ -5581,11 +5586,11 @@ export class Store {
   }
 
   updateUI(updates: Partial<PersistedState['ui']>): void {
-    const sanitizedUpdates = stripMainOwnedTelemetryMarkerFromUI(updates)
+    const sanitizedUpdates = stripReservedAndRetiredUIState(updates)
     const previousUI = this.getUI()
     const currentUI = {
       ...getDefaultUIState(),
-      ...stripMainOwnedTelemetryMarkerFromUI(this.state.ui)
+      ...stripReservedAndRetiredUIState(this.state.ui)
     }
     const nextRightSidebarTab =
       sanitizedUpdates.rightSidebarTab !== undefined

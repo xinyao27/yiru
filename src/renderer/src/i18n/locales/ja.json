@@ -4046,11 +4046,7 @@
           "automationCreated": "自動化で作成されたワークスペースを非表示"
         },
         "SidebarWorkspaceOptionsMenu": {
-          "95c9754653": "Agent アクティビティのレイアウト",
-          "3d4b9c4997": "ホバー",
-          "ba87080fb7": "プロパティを表示する",
-          "320b675c9a": "カードのレイアウト",
-          "newCardDisplay": {
+          "cardDisplay": {
             "title": "カード表示"
           },
           "09faabd875": "プロジェクトの順序",
@@ -4067,21 +4063,11 @@
           "b759bb87ee": "注意が必要な Agents、次に最新のアクティビティ。",
           "503462f2b4": "Agent のアクティビティ",
           "3728165cdd": "名前",
-          "2a81e07366": "完全なリスト",
-          "25105b28cb": "コンパクト",
-          "d7084e8bc8": "Agent のアクティビティ",
-          "b64d8bcca0": "ポート",
-          "26c71e536c": "注意事項",
-          "b8dcc6f321": "PR/MR リンク",
-          "ca4d3c522e": "Linear Issue",
-          "91dfc653e8": "GitHub チケット",
           "bdd23b4e07": "GitHub イシュー",
           "44713a5d04": "Linear イシュー",
-          "cc17bd443b": "詳細",
           "0f9b959b31": "PR",
           "e029a2d775": "状態",
           "c2c7a45cda": "なし",
-          "680043342f": "コンパクト",
           "c7591b6014": "repo",
           "hosts": "ホスト",
           "allHostsDetail": "すべてのホストを表示",
@@ -4090,9 +4076,6 @@
           "activeRuntimeHost": "アクティブサーバー",
           "projectRuntimeHost": "プロジェクトサーバー",
           "631b97eea9": "ホストスコープ",
-          "2d4f0eb933": "デフォルト",
-          "1a0eec0d35": "ステータス",
-          "b5536d5a88": "タスク",
           "8d62c68b35": "ノート",
           "2d74665a56": "ポート",
           "65a9820bd1": "Agent ステータス",
@@ -5357,7 +5340,6 @@
             "tintOpacity": "色合いの強さ",
             "tintOpacityDescription": "サイドバーに色合いをどの程度強く混ぜるかを調整します。"
           },
-          "workspaceCardLayoutGuidance": "ワークスペースサイドバーで管理されます。",
           "872af9556e": "システムトレイ",
           "2edf606c46": "閉じるときにトレイへ最小化",
           "b707773a0d": "有効にすると、ウィンドウを閉じてもYiruは終了せず、システムトレイで実行を続けます。",
@@ -5690,12 +5672,6 @@
             "idleMinutesSuffix": "分",
             "title": "Agent のスリープ",
             "toggleLabel": "Agent のスリープを切り替え"
-          },
-          "newWorktreeCardStyle": {
-            "copy": "更新された worktree カードのレイアウト、メタデータ配置、カード表示メニュー項目、ステータス表示をプレビューします。",
-            "description": "更新された worktree カードのレイアウト、メタデータ配置、カード表示メニュー項目、ステータス表示をプレビューします。",
-            "title": "新しいカードスタイル",
-            "toggleLabel": "新しいカードスタイルを切り替え"
           },
           "nativeChat": {
             "title": "ネイティブチャット",
@@ -7604,17 +7580,6 @@
               "title": "左サイドバーの外観",
               "description": "左サイドバーを terminal に合わせるか、既定のままにするか、色合いを加えます。"
             },
-            "workspaceCardLayout": {
-              "title": "ワークスペースカードのレイアウト",
-              "description": "ワークスペースカードはコンパクトまたは詳細レイアウトを使用できます。",
-              "compact": "コンパクト",
-              "compactDisplay": "コンパクト表示",
-              "workspaceCards": "ワークスペースカード",
-              "worktreeCards": "ワークツリーカード",
-              "cardLayout": "カードレイアウト",
-              "workspaceOptions": "ワークスペースオプション",
-              "detailed": "詳細"
-            },
             "9a115966d3": "閉じるときにトレイへ最小化",
             "4d5b9427b5": "有効にすると、ウィンドウを閉じてもYiruは終了せず、システムトレイで実行を続けます。",
             "antigravityUsageTitle": "Antigravity の使用状況",
@@ -7896,17 +7861,6 @@
               "sleep": "スリープ",
               "terminal": "ターミナル",
               "title": "Agent のスリープ"
-            },
-            "newWorktreeCardStyle": {
-              "card": "カード",
-              "cards": "カード",
-              "description": "更新された worktree カードのレイアウト、メタデータ配置、カード表示メニュー項目、ステータス表示をプレビューします。",
-              "menu": "メニュー",
-              "metadata": "メタデータ",
-              "status": "ステータス",
-              "title": "新しいカードスタイル",
-              "worktree": "worktree",
-              "worktrees": "worktrees"
             },
             "nativeChat": {
               "title": "ネイティブチャット",

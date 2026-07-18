@@ -2252,12 +2252,6 @@
   "auto.components.settings.ExperimentalPane.agentHibernation.toggleLabel": {
     "ko": "Agent 최대 절전 전환"
   },
-  "auto.components.settings.ExperimentalPane.newWorktreeCardStyle.copy": {
-    "ko": "업데이트된 워크트리 카드 레이아웃, 메타데이터 배치, 카드 표시 메뉴 옵션 및 상태 표시를 미리 봅니다."
-  },
-  "auto.components.settings.ExperimentalPane.newWorktreeCardStyle.description": {
-    "ko": "업데이트된 워크트리 카드 레이아웃, 메타데이터 배치, 카드 표시 메뉴 옵션 및 상태 표시를 미리 봅니다."
-  },
   "auto.components.settings.GeneralEditorSettingsSection.45c6e85c4d": {
     "ko": "편집기"
   },
@@ -3280,9 +3274,6 @@
   },
   "auto.components.settings.experimental.search.agentHibernation.title": {
     "ko": "Agent 최대 절전"
-  },
-  "auto.components.settings.experimental.search.newWorktreeCardStyle.description": {
-    "ko": "업데이트된 워크트리 카드 레이아웃, 메타데이터 배치, 카드 표시 메뉴 옵션 및 상태 표시를 미리 봅니다."
   },
   "auto.components.settings.general.search.12ecc640a8": {
     "ko": "mru"

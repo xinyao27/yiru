@@ -4046,11 +4046,7 @@
           "automationCreated": "자동화로 생성된 워크스페이스 숨기기"
         },
         "SidebarWorkspaceOptionsMenu": {
-          "95c9754653": "Agent 활동 레이아웃",
-          "3d4b9c4997": "호버",
-          "ba87080fb7": "속성 표시",
-          "320b675c9a": "카드 레이아웃",
-          "newCardDisplay": {
+          "cardDisplay": {
             "title": "카드 표시"
           },
           "09faabd875": "프로젝트 순서",
@@ -4067,21 +4063,11 @@
           "b759bb87ee": "주의가 필요한 Agents, 가장 최근 활동 순입니다.",
           "503462f2b4": "Agent 활동",
           "3728165cdd": "이름",
-          "2a81e07366": "전체 목록",
-          "25105b28cb": "콤팩트",
-          "d7084e8bc8": "Agent 활동",
-          "b64d8bcca0": "포트",
-          "26c71e536c": "메모",
-          "b8dcc6f321": "PR/MR 링크",
-          "ca4d3c522e": "Linear 이슈",
-          "91dfc653e8": "GitHub 티켓",
           "bdd23b4e07": "GitHub 이슈",
           "44713a5d04": "Linear 이슈",
-          "cc17bd443b": "상세한",
           "0f9b959b31": "PR",
           "e029a2d775": "상태",
           "c2c7a45cda": "없음",
-          "680043342f": "콤팩트",
           "c7591b6014": "repo",
           "hosts": "호스트",
           "allHostsDetail": "모든 호스트 표시",
@@ -4090,9 +4076,6 @@
           "activeRuntimeHost": "활성 서버",
           "projectRuntimeHost": "프로젝트 서버",
           "631b97eea9": "호스트 범위",
-          "2d4f0eb933": "기본값",
-          "1a0eec0d35": "상태",
-          "b5536d5a88": "작업",
           "8d62c68b35": "메모",
           "2d74665a56": "포트",
           "65a9820bd1": "Agent 상태",
@@ -5360,7 +5343,6 @@
             "tintOpacity": "색조 강도",
             "tintOpacityDescription": "사이드바에 색조를 얼마나 강하게 섞을지 조절합니다."
           },
-          "workspaceCardLayoutGuidance": "워크스페이스 사이드바에서 관리됩니다.",
           "interfaceDefaultFont": "기본 글꼴",
           "terminalDefaultFont": "기본 글꼴",
           "interfaceTitle": "인터페이스",
@@ -5690,12 +5672,6 @@
             "idleMinutesSuffix": "분",
             "title": "Agent 최대 절전",
             "toggleLabel": "Agent 최대 절전 전환"
-          },
-          "newWorktreeCardStyle": {
-            "copy": "업데이트된 워크트리 카드 레이아웃, 메타데이터 배치, 카드 표시 메뉴 옵션 및 상태 표시를 미리 봅니다.",
-            "description": "업데이트된 워크트리 카드 레이아웃, 메타데이터 배치, 카드 표시 메뉴 옵션 및 상태 표시를 미리 봅니다.",
-            "title": "새 카드 스타일",
-            "toggleLabel": "새 카드 스타일 전환"
           },
           "nativeChat": {
             "title": "네이티브 채팅",
@@ -7569,17 +7545,6 @@
             },
             "9a115966d3": "닫을 때 트레이로 최소화",
             "4d5b9427b5": "활성화하면 창을 닫아도 Yiru가 종료되지 않고 시스템 트레이에서 계속 실행됩니다.",
-            "workspaceCardLayout": {
-              "title": "워크스페이스 카드 레이아웃",
-              "description": "워크스페이스 카드는 컴팩트 또는 상세 레이아웃을 사용할 수 있습니다.",
-              "compact": "컴팩트",
-              "compactDisplay": "컴팩트 보기",
-              "workspaceCards": "워크스페이스 카드",
-              "worktreeCards": "워크트리 카드",
-              "cardLayout": "카드 레이아웃",
-              "workspaceOptions": "워크스페이스 옵션",
-              "detailed": "상세"
-            },
             "antigravityUsageTitle": "Antigravity 사용량",
             "antigravityUsageDescription": "상태 표시줄에 Antigravity 구독 사용량을 표시합니다.",
             "antigravityKeyword": "antigravity",
@@ -7859,17 +7824,6 @@
               "sleep": "절전",
               "terminal": "터미널",
               "title": "Agent 최대 절전"
-            },
-            "newWorktreeCardStyle": {
-              "card": "카드",
-              "cards": "카드",
-              "description": "업데이트된 워크트리 카드 레이아웃, 메타데이터 배치, 카드 표시 메뉴 옵션 및 상태 표시를 미리 봅니다.",
-              "menu": "메뉴",
-              "metadata": "메타데이터",
-              "status": "상태",
-              "title": "새 카드 스타일",
-              "worktree": "worktree",
-              "worktrees": "worktrees"
             },
             "nativeChat": {
               "title": "네이티브 채팅",

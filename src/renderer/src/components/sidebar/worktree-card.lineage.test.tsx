@@ -41,7 +41,9 @@ vi.mock('@/lib/worktree-activation', () => ({
 vi.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipContent: ({ children }: { children: ReactNode }) => <>{children}</>,
-  TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>
+  TooltipTrigger: ({ children, render }: { children?: ReactNode; render?: ReactNode }) => (
+    <>{render ?? children}</>
+  )
 }))
 
 vi.mock('./cache-timer', () => ({

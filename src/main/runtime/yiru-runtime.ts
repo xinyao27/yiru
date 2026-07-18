@@ -888,8 +888,6 @@ type RuntimeStore = {
     defaultRepoSelection?: GlobalSettings['defaultRepoSelection']
     defaultLinearTeamSelection?: GlobalSettings['defaultLinearTeamSelection']
     githubProjects?: GlobalSettings['githubProjects']
-    experimentalNewWorktreeCardStyle?: GlobalSettings['experimentalNewWorktreeCardStyle']
-    compactWorktreeCards?: GlobalSettings['compactWorktreeCards']
     minimaxGroupId?: GlobalSettings['minimaxGroupId']
     minimaxUsageModels?: GlobalSettings['minimaxUsageModels']
     prBotAuthorOverrides?: GlobalSettings['prBotAuthorOverrides']
@@ -2742,8 +2740,6 @@ export class YiruRuntimeService {
     | 'defaultRepoSelection'
     | 'defaultLinearTeamSelection'
     | 'githubProjects'
-    | 'experimentalNewWorktreeCardStyle'
-    | 'compactWorktreeCards'
     | 'minimaxGroupId'
     | 'minimaxUsageModels'
     | 'prBotAuthorOverrides'
@@ -2765,8 +2761,6 @@ export class YiruRuntimeService {
       defaultRepoSelection: settings.defaultRepoSelection ?? null,
       defaultLinearTeamSelection: settings.defaultLinearTeamSelection ?? null,
       githubProjects: settings.githubProjects,
-      experimentalNewWorktreeCardStyle: settings.experimentalNewWorktreeCardStyle === true,
-      compactWorktreeCards: settings.compactWorktreeCards === true,
       minimaxGroupId: settings.minimaxGroupId ?? '',
       minimaxUsageModels: settings.minimaxUsageModels ?? 'general',
       prBotAuthorOverrides: settings.prBotAuthorOverrides ?? []
@@ -2787,8 +2781,6 @@ export class YiruRuntimeService {
       | 'defaultRepoSelection'
       | 'defaultLinearTeamSelection'
       | 'githubProjects'
-      | 'experimentalNewWorktreeCardStyle'
-      | 'compactWorktreeCards'
       | 'minimaxGroupId'
       | 'minimaxUsageModels'
       | 'prBotAuthorOverrides'
@@ -2807,8 +2799,6 @@ export class YiruRuntimeService {
     | 'defaultRepoSelection'
     | 'defaultLinearTeamSelection'
     | 'githubProjects'
-    | 'experimentalNewWorktreeCardStyle'
-    | 'compactWorktreeCards'
     | 'minimaxGroupId'
     | 'minimaxUsageModels'
     | 'prBotAuthorOverrides'

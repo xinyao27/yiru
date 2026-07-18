@@ -10,15 +10,14 @@ import {
 const EMPTY_STATE: WorktreeListReviewCacheState = {
   folderWorkspaces: [],
   hostedReviewCache: {},
-  prCache: {},
-  settings: null
+  prCache: {}
 }
 
 const FOLDER_WORKSPACE = { id: 'folder-1' } as FolderWorkspace
 
 describe('selectWorktreeListReviewCacheInputs', () => {
   it('ignores cache churn for ordinary cards outside PR-status grouping', () => {
-    const first = selectWorktreeListReviewCacheInputs(EMPTY_STATE, 'repo', ['pr'])
+    const first = selectWorktreeListReviewCacheInputs(EMPTY_STATE, 'repo', ['comment'])
     const afterCacheFill = selectWorktreeListReviewCacheInputs(
       {
         ...EMPTY_STATE,
@@ -26,7 +25,7 @@ describe('selectWorktreeListReviewCacheInputs', () => {
         hostedReviewCache: { branch: {} as never }
       },
       'repo',
-      ['pr']
+      ['comment']
     )
 
     expect(first).toBe(EMPTY_WORKTREE_LIST_REVIEW_CACHE_INPUTS)
@@ -45,18 +44,7 @@ describe('selectWorktreeListReviewCacheInputs', () => {
     expect(selected).toEqual({ prCache, hostedReviewCache: null })
   })
 
-  it('keeps the PR cache live for legacy folder-card review displays', () => {
-    const prCache = { branch: {} as never }
-    const selected = selectWorktreeListReviewCacheInputs(
-      { ...EMPTY_STATE, folderWorkspaces: [FOLDER_WORKSPACE], prCache },
-      'repo',
-      ['pr']
-    )
-
-    expect(selected).toEqual({ prCache, hostedReviewCache: null })
-  })
-
-  it('keeps both caches live for new-style folder status displays', () => {
+  it('keeps both caches live for folder status displays', () => {
     const prCache = { branch: {} as never }
     const hostedReviewCache = { branch: {} as never }
     const selected = selectWorktreeListReviewCacheInputs(
@@ -64,8 +52,7 @@ describe('selectWorktreeListReviewCacheInputs', () => {
         ...EMPTY_STATE,
         folderWorkspaces: [FOLDER_WORKSPACE],
         prCache,
-        hostedReviewCache,
-        settings: { experimentalNewWorktreeCardStyle: true } as never
+        hostedReviewCache
       },
       'repo',
       ['status']

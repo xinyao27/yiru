@@ -53,7 +53,9 @@ vi.mock('@/lib/worktree-activation', () => ({
 vi.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipContent: ({ children }: { children: ReactNode }) => <>{children}</>,
-  TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>
+  TooltipTrigger: ({ children, render }: { children?: ReactNode; render?: ReactNode }) => (
+    <>{render ?? children}</>
+  )
 }))
 
 vi.mock('./use-worktree-activity-status', () => ({
@@ -136,46 +138,13 @@ describe('WorktreeCard quick actions', () => {
     gitConflictOperationByWorktree = {}
   })
 
-  it('marks the unread toggle as a workspace-board-preserving action', () => {
+  it('renders unread state in the passive status lane', () => {
     const markup = renderToStaticMarkup(
       <WorktreeCard worktree={makeWorktree()} repo={makeRepo()} isActive={false} />
     )
 
-    expect(markup).toContain('aria-label="Mark as read"')
-    expect(markup).toContain('data-workspace-board-preserve-open=""')
-  })
-
-  it('uses the directory name for folder workspace identity', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCard
-        worktree={makeWorktree({ displayName: 'Docs folder', branch: '' })}
-        repo={{ ...makeRepo(), kind: 'folder' }}
-        isActive={false}
-      />
-    )
-
-    expect(markup).toContain('Docs folder')
-    expect(markup).not.toContain('>Folder</span>')
-    expect(markup).toContain('>quick-action</span>')
-  })
-
-  it('uses the directory name for synthetic folder workspace identity', () => {
-    const markup = renderToStaticMarkup(
-      <WorktreeCard
-        worktree={makeWorktree({
-          id: 'folder:folder-1',
-          displayName: 'Docs folder',
-          branch: '',
-          path: '/repo/worktrees/quick-action'
-        })}
-        repo={undefined}
-        isActive={false}
-      />
-    )
-
-    expect(markup).toContain('Docs folder')
-    expect(markup).not.toContain('>Folder</span>')
-    expect(markup).toContain('>quick-action</span>')
+    expect(markup).toContain('data-worktree-unread-alert=""')
+    expect(markup).not.toContain('aria-label="Mark as read"')
   })
 
   it('does not render a pending first-agent rename title badge', () => {
@@ -241,7 +210,7 @@ describe('WorktreeCard quick actions', () => {
     expect(markup).toContain('tabindex="0"')
   })
 
-  it('renders detached HEAD identity in detailed card metadata', () => {
+  it('renders detached HEAD identity in card metadata', () => {
     worktreeCardProperties = []
 
     const markup = renderToStaticMarkup(

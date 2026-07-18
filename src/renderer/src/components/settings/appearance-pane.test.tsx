@@ -24,7 +24,6 @@ const mocks = vi.hoisted(() => ({
     usagePercentageDisplay: 'used' as 'used' | 'remaining',
     setUsagePercentageDisplay: vi.fn(),
     recordFeatureInteraction: vi.fn(),
-    setWorktreeCardMode: vi.fn(),
     appearanceAccordionDeepLink: null as 'interface' | 'terminal' | 'window' | null,
     clearAppearanceAccordionDeepLink: vi.fn()
   }
@@ -178,6 +177,11 @@ describe('AppearancePane', () => {
   })
 
   beforeEach(() => {
+    // Why: Base UI checks active animations, which happy-dom does not implement.
+    Object.defineProperty(HTMLElement.prototype, 'getAnimations', {
+      configurable: true,
+      value: () => []
+    })
     vi.clearAllMocks()
     mocks.state.availableStatusBarToggles = []
     mocks.state.appPlatform = 'linux'
@@ -296,27 +300,6 @@ describe('AppearancePane', () => {
     })
 
     expect(updateSettings).toHaveBeenCalledWith({ showAutomationsButton: true })
-  })
-
-  it('changes workspace card layout from the Appearance sidebar controls', async () => {
-    mocks.state.settingsSearchQuery = 'workspace card layout'
-    const settings = {
-      ...getDefaultSettings('/tmp'),
-      compactWorktreeCards: false
-    }
-
-    const container = await renderAppearancePane(settings)
-    const compactButton = Array.from(
-      container.querySelectorAll<HTMLButtonElement>('button[role="radio"]')
-    ).find((button) => button.textContent === 'Compact')
-
-    expect(compactButton).toBeDefined()
-
-    await act(async () => {
-      compactButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-    })
-
-    expect(mocks.state.setWorktreeCardMode).toHaveBeenCalledWith('Compact')
   })
 
   it('renders the three top-level section rows and no Code & Markdown row when not searching', async () => {

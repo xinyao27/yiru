@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import { createStore, type StoreApi } from 'zustand/vanilla'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
-import { getDefaultUIState, getWorktreeCardModeProperties } from '../../../../shared/constants'
+import { getDefaultUIState } from '../../../../shared/constants'
 import type {
   GitHubWorkItem,
   JiraIssue,
@@ -1783,56 +1783,6 @@ describe('createUISlice hydratePersistedUI', () => {
     expect(setUI).toHaveBeenCalledWith({ taskResumeState: expected })
   })
 
-  it('sets Default worktree card mode with matching settings and UI writes', () => {
-    const setUI = vi.fn().mockResolvedValue(undefined)
-    const setSettings = vi.fn().mockResolvedValue({ compactWorktreeCards: false })
-    vi.stubGlobal('window', {
-      api: { ui: { set: setUI }, settings: { set: setSettings } }
-    })
-    const store = createUIStore()
-    store.setState({
-      settings: { compactWorktreeCards: true } as AppState['settings'],
-      worktreeCardProperties: ['status', 'branch']
-    })
-
-    store.getState().setWorktreeCardMode('Default')
-
-    const expected = getWorktreeCardModeProperties('Default')
-    expect(store.getState().settings?.compactWorktreeCards).toBe(false)
-    expect(store.getState().worktreeCardProperties).toEqual(expected)
-    expect(setSettings).toHaveBeenCalledWith({ compactWorktreeCards: false })
-    expect(setUI).toHaveBeenCalledWith({
-      worktreeCardProperties: expected,
-      _worktreeCardModeDefaulted: true
-    })
-  })
-
-  it('sets Compact worktree card mode and removes migrated branch', () => {
-    const setUI = vi.fn().mockResolvedValue(undefined)
-    const setSettings = vi.fn().mockResolvedValue({ compactWorktreeCards: true })
-    vi.stubGlobal('window', {
-      api: { ui: { set: setUI }, settings: { set: setSettings } }
-    })
-    const store = createUIStore()
-    store.setState({
-      settings: { compactWorktreeCards: false } as AppState['settings'],
-      worktreeCardProperties: ['status', 'branch', 'inline-agents']
-    })
-
-    store.getState().setWorktreeCardMode('Compact')
-
-    const expected = getWorktreeCardModeProperties('Compact')
-    expect(store.getState().settings?.compactWorktreeCards).toBe(true)
-    expect(store.getState().worktreeCardProperties).toEqual(expected)
-    expect(store.getState().worktreeCardProperties).not.toContain('branch')
-    expect(store.getState().worktreeCardProperties).not.toContain('inline-agents')
-    expect(setSettings).toHaveBeenCalledWith({ compactWorktreeCards: true })
-    expect(setUI).toHaveBeenCalledWith({
-      worktreeCardProperties: expected,
-      _worktreeCardModeDefaulted: true
-    })
-  })
-
   it('sets custom worktree card properties', () => {
     const setUI = vi.fn().mockResolvedValue(undefined)
     vi.stubGlobal('window', { api: { ui: { set: setUI } } })
@@ -1841,22 +1791,9 @@ describe('createUISlice hydratePersistedUI', () => {
     store.getState().setWorktreeCardProperties(['inline-agents', 'inline-agents'])
 
     expect(store.getState().worktreeCardProperties).toEqual(['status', 'unread', 'inline-agents'])
-    expect(store.getState()._worktreeCardModeDefaulted).toBe(false)
     expect(setUI).toHaveBeenCalledWith({
-      worktreeCardProperties: ['status', 'unread', 'inline-agents'],
-      _worktreeCardModeDefaulted: false
+      worktreeCardProperties: ['status', 'unread', 'inline-agents']
     })
-  })
-
-  it('persists the agent activity display mode', () => {
-    const setUI = vi.fn().mockResolvedValue(undefined)
-    vi.stubGlobal('window', { api: { ui: { set: setUI } } })
-    const store = createUIStore()
-
-    store.getState().setAgentActivityDisplayMode('full')
-
-    expect(store.getState().agentActivityDisplayMode).toBe('full')
-    expect(setUI).toHaveBeenCalledWith({ agentActivityDisplayMode: 'full' })
   })
 
   it('normalizes invalid persisted agent activity display modes', () => {

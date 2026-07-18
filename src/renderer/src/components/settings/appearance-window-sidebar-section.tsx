@@ -20,10 +20,7 @@ import {
 } from './appearance-search'
 import { USAGE_PERCENTAGE_DISPLAY_SETTING_ID } from './appearance-usage-percentage-search'
 import { LeftSidebarAppearanceSetting } from './left-sidebar-appearance-setting'
-import {
-  getLeftSidebarAppearanceEntry,
-  getWorkspaceCardLayoutEntry
-} from './appearance-sidebar-search'
+import { getLeftSidebarAppearanceEntry } from './appearance-sidebar-search'
 import { translate } from '@/i18n/i18n'
 import { matchesSettingsSearch, normalizeSettingsSearchQuery } from './settings-search'
 
@@ -69,12 +66,10 @@ export function AppearanceWindowSidebarSection({
   const usagePercentageDisplay = useAppStore((state) => state.usagePercentageDisplay)
   const setUsagePercentageDisplay = useAppStore((state) => state.setUsagePercentageDisplay)
   const recordFeatureInteraction = useAppStore((state) => state.recordFeatureInteraction)
-  const setWorktreeCardMode = useAppStore((state) => state.setWorktreeCardMode)
   const visibleStatusBarToggles = useAvailableStatusBarToggles(getStatusBarToggles())
   const usagePercentageDisplayEntry = getUsagePercentageDisplayEntry()
   const leftSidebarAppearanceEntry = getLeftSidebarAppearanceEntry()
   const sidebarEntries = getSidebarEntries()
-  const workspaceCardLayoutEntry = getWorkspaceCardLayoutEntry()
   const layoutEntries = getLayoutEntries()
   const statusBarTitle = translate(
     'auto.components.settings.AppearancePane.3e4175e5c6',
@@ -99,10 +94,7 @@ export function AppearanceWindowSidebarSection({
         keywords: toggle.keywords
       })
     )
-  const sidebarAdvancedMatches = matchesSettingsSearch(searchQuery, [
-    workspaceCardLayoutEntry,
-    ...sidebarEntries
-  ])
+  const sidebarAdvancedMatches = matchesSettingsSearch(searchQuery, sidebarEntries)
   const fileExplorerAdvancedMatches = matchesSettingsSearch(searchQuery, layoutEntries)
   const showStatusBarControls = !isSearching || statusBarSectionMatches || statusBarControlMatches
   const showSidebarAdvanced = !isSearching || sidebarAdvancedMatches
@@ -201,44 +193,6 @@ export function AppearanceWindowSidebarSection({
                   title={translate('auto.components.settings.AppearancePane.dc29f3cc0d', 'Sidebar')}
                 />
                 <div className="ml-4 divide-y divide-border/40">
-                  {/* Why: this setting lives with the sidebar layout controls; Settings only
-                  names that ownership so we do not create a second stateful control. */}
-                  <SearchableSetting
-                    title={workspaceCardLayoutEntry.title}
-                    description={workspaceCardLayoutEntry.description}
-                    keywords={workspaceCardLayoutEntry.keywords}
-                  >
-                    <SettingsRow
-                      label={workspaceCardLayoutEntry.title}
-                      description={workspaceCardLayoutEntry.description}
-                      control={
-                        <SettingsSegmentedControl
-                          value={settings.compactWorktreeCards ? 'compact' : 'detailed'}
-                          onChange={(value) =>
-                            setWorktreeCardMode(value === 'compact' ? 'Compact' : 'Default')
-                          }
-                          ariaLabel={workspaceCardLayoutEntry.title}
-                          options={[
-                            {
-                              value: 'detailed',
-                              label: translate(
-                                'auto.components.sidebar.SidebarWorkspaceOptionsMenu.cc17bd443b',
-                                'Detailed'
-                              )
-                            },
-                            {
-                              value: 'compact',
-                              label: translate(
-                                'auto.components.sidebar.SidebarWorkspaceOptionsMenu.25105b28cb',
-                                'Compact'
-                              )
-                            }
-                          ]}
-                        />
-                      }
-                    />
-                  </SearchableSetting>
-
                   <SearchableSetting
                     title={translate(
                       'auto.components.settings.AppearancePane.cf81907069',

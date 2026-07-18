@@ -581,7 +581,6 @@ describe('Store', () => {
     expect(settings.experimentalActivity).toBe(false)
     expect(settings.experimentalActivityDefaultedOffForAllUsers).toBe(true)
     expect(settings.experimentalTerminalAttention).toBe(false)
-    expect(settings.experimentalNewWorktreeCardStyle).toBe(false)
     expect(settings.floatingTerminalEnabled).toBe(true)
     expect(settings.floatingTerminalDefaultedForAllUsers).toBe(true)
     expect(settings.notifications.customSoundPath).toBeNull()
@@ -861,69 +860,40 @@ describe('Store', () => {
     expect(store.getUI().setupGuideSidebarDismissed).toBe(false)
   })
 
-  it('keeps new worktree card style off while onboarding is open', async () => {
-    writeDataFile({
-      settings: {},
-      onboarding: {
-        flowVersion: ONBOARDING_FLOW_VERSION,
-        closedAt: null,
-        outcome: null,
-        lastCompletedStep: -1,
-        checklist: {}
-      },
-      ui: {}
-    })
-
-    const store = await createStore()
-
-    expect(store.getSettings().experimentalNewWorktreeCardStyle).toBe(false)
-  })
-
-  it('preserves explicit new worktree card style opt-out while onboarding is open', async () => {
-    writeDataFile({
-      settings: {
-        experimentalNewWorktreeCardStyle: false
-      },
-      onboarding: {
-        flowVersion: ONBOARDING_FLOW_VERSION,
-        closedAt: null,
-        outcome: null,
-        lastCompletedStep: -1,
-        checklist: {}
-      },
-      ui: {}
-    })
-
-    const store = await createStore()
-
-    expect(store.getSettings().experimentalNewWorktreeCardStyle).toBe(false)
-  })
-
-  it('preserves explicit new worktree card style opt-in on load', async () => {
+  it('removes retired worktree card settings while preserving card properties', async () => {
     writeDataFile({
       schemaVersion: 1,
       settings: {
-        experimentalNewWorktreeCardStyle: true
+        experimentalNewWorktreeCardStyle: false,
+        compactWorktreeCards: true,
+        experimentalCompactWorktreeCards: true
       },
-      ui: {}
-    })
+      ui: {
+        worktreeCardProperties: ['status'],
+        _worktreeCardModeDefaulted: true,
+        _inlineAgentsDefaultedForAllUsers: true,
+        _expandedWorktreeCardPropertiesDefaulted: true
+      }
+    } as never)
 
     const store = await createStore()
+    const settings = store.getSettings() as unknown as Record<string, unknown>
+    const ui = store.getUI() as unknown as Record<string, unknown>
+    store.flushOrThrow()
+    const persisted = readDataFile() as unknown as {
+      settings: Record<string, unknown>
+      ui: Record<string, unknown>
+    }
 
-    expect(store.getSettings().experimentalNewWorktreeCardStyle).toBe(true)
-  })
-
-  it('keeps new worktree card style off for existing users backfilled as completed', async () => {
-    writeDataFile({
-      schemaVersion: 1,
-      settings: {},
-      ui: {}
-    })
-
-    const store = await createStore()
-
-    expect(store.getOnboarding().closedAt).not.toBeNull()
-    expect(store.getSettings().experimentalNewWorktreeCardStyle).toBe(false)
+    expect(settings).not.toHaveProperty('experimentalNewWorktreeCardStyle')
+    expect(settings).not.toHaveProperty('compactWorktreeCards')
+    expect(settings).not.toHaveProperty('experimentalCompactWorktreeCards')
+    expect(ui.worktreeCardProperties).toEqual(['status', 'unread'])
+    expect(ui).not.toHaveProperty('_worktreeCardModeDefaulted')
+    expect(persisted.settings).not.toHaveProperty('experimentalNewWorktreeCardStyle')
+    expect(persisted.settings).not.toHaveProperty('compactWorktreeCards')
+    expect(persisted.settings).not.toHaveProperty('experimentalCompactWorktreeCards')
+    expect(persisted.ui).not.toHaveProperty('_worktreeCardModeDefaulted')
   })
 
   it('treats persisted false setup guide sidebar dismissal as stale once onboarding is closed', async () => {
@@ -2227,7 +2197,6 @@ describe('Store', () => {
     const store = await createStore()
     expect(store.getRepos()).toEqual([])
     expect(store.getSettings().theme).toBe('system')
-    expect(store.getSettings().experimentalNewWorktreeCardStyle).toBe(false)
   })
 
   // ── 4. Schema migration: merges with defaults ───────────────────────
@@ -6485,23 +6454,6 @@ describe('Store', () => {
     expect(store.getSettings().experimentalPet).toBe(true)
   })
 
-  it('migrates the legacy experimental compact worktree cards setting', async () => {
-    writeDataFile({
-      schemaVersion: 1,
-      repos: [],
-      worktreeMeta: {},
-      settings: { experimentalCompactWorktreeCards: true },
-      ui: {},
-      githubCache: { pr: {}, issue: {} },
-      workspaceSession: {}
-    })
-
-    const store = await createStore()
-
-    expect(store.getSettings().compactWorktreeCards).toBe(true)
-    expect(store.getSettings().experimentalCompactWorktreeCards).toBeUndefined()
-  })
-
   it('defaults legacy experimentalActivity profiles off once', async () => {
     writeDataFile({
       schemaVersion: 1,
@@ -6540,12 +6492,12 @@ describe('Store', () => {
 
   // ── worktree-card property migration ───────────────────────────────
 
-  it('adds split-out default card properties for legacy detailed profiles', async () => {
+  it('adds split-out default card properties and drops retired metadata', async () => {
     writeDataFile({
       schemaVersion: 1,
       repos: [],
       worktreeMeta: {},
-      settings: { compactWorktreeCards: false },
+      settings: {},
       ui: {
         worktreeCardProperties: ['status', 'unread', 'ci', 'issue', 'pr', 'comment']
       },
@@ -6556,10 +6508,8 @@ describe('Store', () => {
     expect(store.getUI().worktreeCardProperties).toEqual([
       'status',
       'unread',
-      'ci',
       'issue',
       'linear-issue',
-      'pr',
       'comment',
       'ports',
       'inline-agents'
@@ -6573,7 +6523,7 @@ describe('Store', () => {
       schemaVersion: 1,
       repos: [],
       worktreeMeta: {},
-      settings: { compactWorktreeCards: true },
+      settings: {},
       ui: {
         worktreeCardProperties: [
           'status',
@@ -6592,10 +6542,8 @@ describe('Store', () => {
     expect(store.getUI().worktreeCardProperties).toEqual([
       'status',
       'unread',
-      'ci',
       'issue',
       'linear-issue',
-      'pr',
       'comment',
       'ports',
       'inline-agents'
@@ -6622,42 +6570,41 @@ describe('Store', () => {
       'unread',
       'issue',
       'linear-issue',
-      'pr',
       'automation',
       'comment',
       'ports',
       'inline-agents'
     ])
     expect(store.getUI().worktreeCardProperties).not.toContain('branch')
-    expect(store.getUI()._worktreeCardModeDefaulted).toBe(true)
   })
 
-  it('adds split-out defaults even when the mode marker exists but expansion has not run', async () => {
+  it('adds split-out defaults while removing the retired mode marker', async () => {
     writeDataFile({
       schemaVersion: 1,
       repos: [],
       worktreeMeta: {},
-      settings: { compactWorktreeCards: false },
+      settings: {},
       ui: {
         worktreeCardProperties: ['status', 'unread', 'ci', 'issue', 'pr'],
         _worktreeCardModeDefaulted: true
       },
       githubCache: { pr: {}, issue: {} },
       workspaceSession: {}
-    })
+    } as never)
     const store = await createStore()
 
     expect(store.getUI().worktreeCardProperties).toEqual([
       'status',
       'unread',
-      'ci',
       'issue',
       'linear-issue',
-      'pr',
       'ports',
       'inline-agents'
     ])
     expect(store.getUI().worktreeCardProperties).not.toContain('branch')
+    expect(store.getUI() as unknown as Record<string, unknown>).not.toHaveProperty(
+      '_worktreeCardModeDefaulted'
+    )
   })
 
   it('preserves deliberate post-migration card property opt-outs', async () => {
@@ -6665,7 +6612,7 @@ describe('Store', () => {
       schemaVersion: 1,
       repos: [],
       worktreeMeta: {},
-      settings: { compactWorktreeCards: false },
+      settings: {},
       ui: {
         worktreeCardProperties: ['status', 'pr'],
         _inlineAgentsDefaultedForAllUsers: true,
@@ -6676,18 +6623,18 @@ describe('Store', () => {
     })
     const store = await createStore()
 
-    expect(store.getUI().worktreeCardProperties).toEqual(['status', 'unread', 'pr'])
+    expect(store.getUI().worktreeCardProperties).toEqual(['status', 'unread'])
     expect(store.getUI().worktreeCardProperties).not.toContain('branch')
     expect(store.getUI().worktreeCardProperties).not.toContain('ports')
     expect(store.getUI().worktreeCardProperties).not.toContain('inline-agents')
   })
 
-  it('does not re-add branch after an explicit Default mode selection', async () => {
+  it('does not re-add branch after an explicit card property selection', async () => {
     writeDataFile({
       schemaVersion: 1,
       repos: [],
       worktreeMeta: {},
-      settings: { compactWorktreeCards: false },
+      settings: {},
       ui: {
         worktreeCardProperties: [
           'status',
@@ -6711,7 +6658,7 @@ describe('Store', () => {
     expect(store.getUI().worktreeCardProperties).toContain('inline-agents')
   })
 
-  it('preserves explicit Compact card properties after expansion has run', async () => {
+  it('preserves explicit card properties while retiring the compact setting', async () => {
     writeDataFile({
       schemaVersion: 1,
       repos: [],
@@ -6732,24 +6679,23 @@ describe('Store', () => {
       },
       githubCache: { pr: {}, issue: {} },
       workspaceSession: {}
-    })
+    } as never)
     const store = await createStore()
 
-    expect(store.getSettings().compactWorktreeCards).toBe(true)
+    expect(store.getSettings() as unknown as Record<string, unknown>).not.toHaveProperty(
+      'compactWorktreeCards'
+    )
     expect(store.getUI().worktreeCardProperties).toEqual([
       'status',
       'unread',
       'issue',
       'linear-issue',
-      'pr',
       'comment',
       'ports'
     ])
-    expect(store.getUI().worktreeCardProperties).not.toContain('branch')
-    expect(store.getUI().worktreeCardProperties).not.toContain('inline-agents')
   })
 
-  it('uses the compact preset when card properties are missing in compact mode', async () => {
+  it('uses current defaults when only the retired compact setting was persisted', async () => {
     writeDataFile({
       schemaVersion: 1,
       repos: [],
@@ -6758,15 +6704,22 @@ describe('Store', () => {
       ui: {},
       githubCache: { pr: {}, issue: {} },
       workspaceSession: {}
-    })
+    } as never)
     const store = await createStore()
 
-    expect(store.getSettings().compactWorktreeCards).toBe(true)
-    expect(store.getUI().worktreeCardProperties).toEqual(['status', 'unread'])
-    expect(store.getUI().worktreeCardProperties).not.toContain('automation')
+    expect(store.getUI().worktreeCardProperties).toEqual([
+      'status',
+      'unread',
+      'issue',
+      'linear-issue',
+      'automation',
+      'comment',
+      'ports',
+      'inline-agents'
+    ])
   })
 
-  it('preserves the current defaulted Compact preset without expanding display toggles', async () => {
+  it('preserves an explicit quiet card display while removing its retired mode marker', async () => {
     writeDataFile({
       schemaVersion: 1,
       repos: [],
@@ -6774,45 +6727,20 @@ describe('Store', () => {
       settings: { compactWorktreeCards: true, experimentalNewWorktreeCardStyle: true },
       ui: {
         worktreeCardProperties: ['status', 'unread'],
-        _worktreeCardModeDefaulted: true
+        _worktreeCardModeDefaulted: true,
+        _inlineAgentsDefaultedForAllUsers: true,
+        _expandedWorktreeCardPropertiesDefaulted: true
       },
       githubCache: { pr: {}, issue: {} },
       workspaceSession: {}
-    })
+    } as never)
     const store = await createStore()
 
-    expect(store.getSettings().compactWorktreeCards).toBe(true)
     expect(store.getUI().worktreeCardProperties).toEqual(['status', 'unread'])
-    expect(store.getUI().worktreeCardProperties).not.toContain('ports')
-    expect(store.getUI().worktreeCardProperties).not.toContain('inline-agents')
+    expect(store.getUI() as unknown as Record<string, unknown>).not.toHaveProperty(
+      '_worktreeCardModeDefaulted'
+    )
   })
-
-  it.each([
-    ['raw', ['status', 'automation']],
-    ['normalized', ['status', 'unread', 'automation']]
-  ] as const)(
-    'migrates the old %s defaulted compact preset without automation',
-    async (_, props) => {
-      writeDataFile({
-        schemaVersion: 1,
-        repos: [],
-        worktreeMeta: {},
-        settings: { compactWorktreeCards: true },
-        ui: {
-          worktreeCardProperties: [...props],
-          _worktreeCardModeDefaulted: true
-        },
-        githubCache: { pr: {}, issue: {} },
-        workspaceSession: {}
-      })
-      const store = await createStore()
-
-      expect(store.getSettings().compactWorktreeCards).toBe(true)
-      expect(store.getUI().worktreeCardProperties).toEqual(['status', 'unread'])
-      expect(store.getUI().worktreeCardProperties).not.toContain('automation')
-      expect(store.getUI()._worktreeCardModeDefaulted).toBe(true)
-    }
-  )
 
   // ── GitHub Cache ───────────────────────────────────────────────────
 
@@ -9769,7 +9697,6 @@ describe('Store', () => {
     expect(t!.installId).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
     )
-    expect(store.getSettings().experimentalNewWorktreeCardStyle).toBe(false)
   })
 
   it('preserves an already-migrated telemetry block on subsequent launches', async () => {

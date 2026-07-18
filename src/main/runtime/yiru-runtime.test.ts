@@ -1393,16 +1393,12 @@ describe('YiruRuntimeService', () => {
       ...store,
       getSettings: () => ({
         ...store.getSettings(),
-        experimentalNewWorktreeCardStyle: true,
-        compactWorktreeCards: true,
         minimaxGroupId: 'group-42',
         minimaxUsageModels: 'general,abab6.5'
       })
     } as never)
 
     expect(runtime.getClientSettings()).toMatchObject({
-      experimentalNewWorktreeCardStyle: true,
-      compactWorktreeCards: true,
       minimaxGroupId: 'group-42',
       minimaxUsageModels: 'general,abab6.5'
     })
@@ -1411,8 +1407,6 @@ describe('YiruRuntimeService', () => {
   it('accepts runtime-backed setting updates from paired clients', () => {
     let settings = {
       ...store.getSettings(),
-      experimentalNewWorktreeCardStyle: false,
-      compactWorktreeCards: false,
       minimaxGroupId: '',
       minimaxUsageModels: 'general'
     }
@@ -1428,29 +1422,21 @@ describe('YiruRuntimeService', () => {
 
     expect(
       runtime.updateClientSettings({
-        experimentalNewWorktreeCardStyle: true,
-        compactWorktreeCards: true,
         minimaxGroupId: 'group-42',
         minimaxUsageModels: 'general,abab6.5'
       })
     ).toMatchObject({
-      experimentalNewWorktreeCardStyle: true,
-      compactWorktreeCards: true,
       minimaxGroupId: 'group-42',
       minimaxUsageModels: 'general,abab6.5'
     })
     expect(updateSettings).toHaveBeenCalledWith(
       {
-        experimentalNewWorktreeCardStyle: true,
-        compactWorktreeCards: true,
         minimaxGroupId: 'group-42',
         minimaxUsageModels: 'general,abab6.5'
       },
       { notifyListeners: true }
     )
     expect(runtime.getClientSettings()).toMatchObject({
-      experimentalNewWorktreeCardStyle: true,
-      compactWorktreeCards: true,
       minimaxGroupId: 'group-42',
       minimaxUsageModels: 'general,abab6.5'
     })

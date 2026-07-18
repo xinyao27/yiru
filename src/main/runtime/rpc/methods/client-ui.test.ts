@@ -21,7 +21,6 @@ describe('client UI RPC methods', () => {
       visibleTaskProviders: ['github', 'gitlab'],
       defaultRepoSelection: ['repo-1'],
       defaultLinearTeamSelection: ['team-1'],
-      compactWorktreeCards: true,
       minimaxGroupId: 'group-42',
       minimaxUsageModels: 'general,abab6.5',
       githubProjects: {
@@ -53,8 +52,6 @@ describe('client UI RPC methods', () => {
       visibleTaskProviders: ['github', 'linear'],
       defaultRepoSelection: ['repo-1', 'repo-2'],
       defaultLinearTeamSelection: ['team-1', 'team-2'],
-      experimentalNewWorktreeCardStyle: true,
-      compactWorktreeCards: true,
       githubProjects: {
         pinned: [],
         recent: [],
@@ -77,8 +74,6 @@ describe('client UI RPC methods', () => {
         defaultTaskSource: 'linear',
         visibleTaskProviders: ['github', 'linear'],
         defaultTaskViewPreset: 'my-prs',
-        experimentalNewWorktreeCardStyle: true,
-        compactWorktreeCards: true,
         minimaxGroupId: 'group-42',
         minimaxUsageModels: 'general,abab6.5',
         defaultRepoSelection: settings.defaultRepoSelection,
@@ -93,8 +88,6 @@ describe('client UI RPC methods', () => {
       defaultTaskSource: 'linear',
       visibleTaskProviders: ['github', 'linear'],
       defaultTaskViewPreset: 'my-prs',
-      experimentalNewWorktreeCardStyle: true,
-      compactWorktreeCards: true,
       minimaxGroupId: 'group-42',
       minimaxUsageModels: 'general,abab6.5',
       defaultRepoSelection: settings.defaultRepoSelection,
@@ -238,7 +231,6 @@ describe('client UI RPC methods', () => {
     const updated: PersistedUIState = {
       ...getDefaultUIState(),
       worktreeCardProperties: ['status', 'branch', 'automation', 'inline-agents'],
-      _worktreeCardModeDefaulted: true,
       statusBarItems: ['codex', 'kimi', 'minimax', 'grok', 'antigravity', 'ports'],
       _portsStatusBarDefaultAdded: true,
       _kimiStatusBarDefaultAdded: true,
@@ -280,7 +272,6 @@ describe('client UI RPC methods', () => {
 
     const payload = {
       worktreeCardProperties: ['status', 'branch', 'automation', 'inline-agents'],
-      _worktreeCardModeDefaulted: true,
       statusBarItems: ['codex', 'kimi', 'minimax', 'grok', 'antigravity', 'ports'],
       _portsStatusBarDefaultAdded: true,
       _kimiStatusBarDefaultAdded: true,
@@ -394,14 +385,10 @@ describe('client UI RPC methods', () => {
     expect(runtime.updateUIState).not.toHaveBeenCalled()
   })
 
-  it('strips retired worktree card properties from legacy clients', async () => {
-    const updated: PersistedUIState = {
-      ...getDefaultUIState(),
-      worktreeCardProperties: ['status', 'issue']
-    }
+  it('rejects retired worktree card properties from legacy clients', async () => {
     const runtime = {
       getRuntimeId: () => 'test-runtime',
-      updateUIState: vi.fn(() => updated)
+      updateUIState: vi.fn()
     } as unknown as YiruRuntimeService
     const dispatcher = new RpcDispatcher({ runtime, methods: CLIENT_UI_METHODS })
 
@@ -409,10 +396,8 @@ describe('client UI RPC methods', () => {
       makeRequest('ui.set', { worktreeCardProperties: ['status', 'unread', 'ci', 'pr', 'issue'] })
     )
 
-    expect(runtime.updateUIState).toHaveBeenCalledWith({
-      worktreeCardProperties: ['status', 'unread', 'ci', 'issue', 'pr']
-    })
-    expect(response).toMatchObject({ ok: true, result: { ui: updated } })
+    expect(response).toMatchObject({ ok: false, error: { code: 'invalid_argument' } })
+    expect(runtime.updateUIState).not.toHaveBeenCalled()
   })
 
   it('rejects each star-nag persisted state mutation field from remote clients', async () => {

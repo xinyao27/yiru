@@ -30,8 +30,8 @@ function isBranchTitle(
 }
 
 export function coerceWorktreeCardVisibleTitle(value: string | null | undefined): string {
-  // Why: the legacy card path can bypass title selection but still feeds trim()
-  // and inline rename props, so nullish persisted titles stop at this boundary.
+  // Why: older profiles can contain nullish titles; inline rename and hover
+  // identity both require a stable string at this boundary.
   return typeof value === 'string' ? value : ''
 }
 

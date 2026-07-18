@@ -4384,16 +4384,11 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
     const now = Date.now()
     const stalePRCandidates: { candidate: GitHubPRRefreshCandidate; score: number }[] = []
     const cardProps = state.worktreeCardProperties ?? []
-    const rawCardProps = cardProps as readonly string[]
     const shouldRefreshIssues = shouldRefreshIssueDecorations(state)
     const isPRStatusGrouping = state.groupBy === 'pr-status'
     const rightSidebarShowsPR = rightSidebarShowsPullRequestData(state)
     const shouldRefreshPRs =
-      isPRStatusGrouping ||
-      rightSidebarShowsPR ||
-      (state.settings?.experimentalNewWorktreeCardStyle === true
-        ? cardProps.includes('status')
-        : cardProps.includes('pr') || rawCardProps.includes('ci'))
+      isPRStatusGrouping || rightSidebarShowsPR || cardProps.includes('status')
 
     for (const worktrees of Object.values(state.worktreesByRepo)) {
       for (const wt of worktrees) {
@@ -4712,12 +4707,9 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
     const now = Date.now()
     const branch = worktree.branch.replace(/^refs\/heads\//, '')
     const cardProps = state.worktreeCardProperties ?? []
-    const rawCardProps = cardProps as readonly string[]
     const shouldRefreshPR =
       state.groupBy === 'pr-status' ||
-      (state.settings?.experimentalNewWorktreeCardStyle === true
-        ? cardProps.includes('status')
-        : cardProps.includes('pr') || rawCardProps.includes('ci')) ||
+      cardProps.includes('status') ||
       rightSidebarShowsPullRequestData(state)
 
     if (shouldRefreshPR && !worktree.isBare && branch) {

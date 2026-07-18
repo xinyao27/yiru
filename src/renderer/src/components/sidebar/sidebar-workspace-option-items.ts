@@ -1,5 +1,4 @@
-import type { AgentActivityDisplayMode, WorktreeCardProperty } from '../../../../shared/types'
-import { TASK_WORKTREE_CARD_PROPERTIES } from '../../../../shared/constants'
+import type { WorktreeCardProperty } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
 
 export const GROUP_BY_OPTIONS = [
@@ -29,56 +28,13 @@ export const GROUP_BY_OPTIONS = [
   }
 ] as const
 
-export const CARD_LAYOUT_OPTIONS = [
-  {
-    id: 'detailed',
-    get label() {
-      return translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.cc17bd443b', 'Detailed')
-    }
-  },
-  {
-    id: 'compact',
-    get label() {
-      return translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.25105b28cb', 'Compact')
-    }
-  }
-] as const
-
-export const AGENT_ACTIVITY_DISPLAY_OPTIONS: {
-  id: AgentActivityDisplayMode
-  label: string
-}[] = [
-  {
-    id: 'compact',
-    get label() {
-      return translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.25105b28cb', 'Compact')
-    }
-  },
-  {
-    id: 'full',
-    get label() {
-      return translate(
-        'auto.components.sidebar.SidebarWorkspaceOptionsMenu.2a81e07366',
-        'Full list'
-      )
-    }
-  }
-]
-
 export type WorktreeCardPropertyOption = {
   id: string
   properties: readonly WorktreeCardProperty[]
   label: string
 }
 
-const BASE_WORKTREE_CARD_PROPERTY_OPTIONS: WorktreeCardPropertyOption[] = [
-  {
-    id: 'status',
-    properties: ['status'],
-    get label() {
-      return translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.1a0eec0d35', 'Status')
-    }
-  },
+const WORKTREE_CARD_METADATA_OPTIONS: WorktreeCardPropertyOption[] = [
   {
     id: 'comment',
     properties: ['comment'],
@@ -112,26 +68,8 @@ const BASE_WORKTREE_CARD_PROPERTY_OPTIONS: WorktreeCardPropertyOption[] = [
         'Agent statuses'
       )
     }
-  },
-  {
-    id: 'branch',
-    properties: ['branch'],
-    get label() {
-      return translate(
-        'auto.components.sidebar.SidebarWorkspaceOptionsMenu.219ebf1961',
-        'Branch name'
-      )
-    }
   }
 ]
-
-const TASK_WORKTREE_CARD_PROPERTY_OPTION: WorktreeCardPropertyOption = {
-  id: 'tasks',
-  properties: TASK_WORKTREE_CARD_PROPERTIES,
-  get label() {
-    return translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.b5536d5a88', 'Tasks')
-  }
-}
 
 const ISSUE_WORKTREE_CARD_PROPERTY_OPTIONS: WorktreeCardPropertyOption[] = [
   {
@@ -157,24 +95,19 @@ const ISSUE_WORKTREE_CARD_PROPERTY_OPTIONS: WorktreeCardPropertyOption[] = [
 ]
 
 type WorktreeCardPropertyOptionsInput = {
-  newCardStyle?: boolean
   hasProjectGroups?: boolean
 }
 
 export function getWorktreeCardPropertyOptions({
-  newCardStyle = false,
   hasProjectGroups = false
 }: WorktreeCardPropertyOptionsInput = {}): WorktreeCardPropertyOption[] {
-  const issueOptions = newCardStyle
-    ? ISSUE_WORKTREE_CARD_PROPERTY_OPTIONS
-    : [TASK_WORKTREE_CARD_PROPERTY_OPTION]
   const branchOption: WorktreeCardPropertyOption = {
     id: 'branch',
     properties: ['branch'],
     get label() {
-      // Why: new-card project groups can contain folder workspaces, so the
-      // branch setting copy must describe both repo and folder identity.
-      return newCardStyle && hasProjectGroups
+      // Why: project groups can contain folder workspaces, so this setting
+      // must describe both repository and folder identity.
+      return hasProjectGroups
         ? translate(
             'auto.components.sidebar.SidebarWorkspaceOptionsMenu.folderPathIdentity',
             'Branch / folder path'
@@ -182,15 +115,7 @@ export function getWorktreeCardPropertyOptions({
         : translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.219ebf1961', 'Branch name')
     }
   }
-  if (newCardStyle) {
-    return [...issueOptions, ...BASE_WORKTREE_CARD_PROPERTY_OPTIONS.slice(1, -1), branchOption]
-  }
-  return [
-    BASE_WORKTREE_CARD_PROPERTY_OPTIONS[0],
-    ...issueOptions,
-    ...BASE_WORKTREE_CARD_PROPERTY_OPTIONS.slice(1, -1),
-    branchOption
-  ]
+  return [...ISSUE_WORKTREE_CARD_PROPERTY_OPTIONS, ...WORKTREE_CARD_METADATA_OPTIONS, branchOption]
 }
 
 export const WORKTREE_CARD_PROPERTY_OPTIONS = getWorktreeCardPropertyOptions()

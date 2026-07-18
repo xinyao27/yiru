@@ -4046,11 +4046,7 @@
           "automationCreated": "隐藏自动化创建的工作区"
         },
         "SidebarWorkspaceOptionsMenu": {
-          "95c9754653": "智能体活动布局",
-          "3d4b9c4997": "悬停",
-          "ba87080fb7": "显示属性",
-          "320b675c9a": "卡片布局",
-          "newCardDisplay": {
+          "cardDisplay": {
             "title": "卡片显示"
           },
           "09faabd875": "项目排序",
@@ -4067,21 +4063,11 @@
           "b759bb87ee": "需要关注的智能体，然后是最近的活动。",
           "503462f2b4": "智能体活动",
           "3728165cdd": "姓名",
-          "2a81e07366": "完整列表",
-          "25105b28cb": "紧凑",
-          "d7084e8bc8": "智能体活动",
-          "b64d8bcca0": "端口",
-          "26c71e536c": "笔记",
-          "b8dcc6f321": "PR/MR链接",
-          "ca4d3c522e": "Linear 议题",
-          "91dfc653e8": "GitHub 票证",
           "bdd23b4e07": "GitHub 议题",
           "44713a5d04": "Linear 议题",
-          "cc17bd443b": "详细的",
           "0f9b959b31": "PR",
           "e029a2d775": "状态",
           "c2c7a45cda": "没有任何",
-          "680043342f": "紧凑",
           "c7591b6014": "仓库",
           "hosts": "主机",
           "allHostsDetail": "显示所有主机",
@@ -4090,9 +4076,6 @@
           "activeRuntimeHost": "活动服务器",
           "projectRuntimeHost": "项目服务器",
           "631b97eea9": "主机范围",
-          "2d4f0eb933": "默认",
-          "1a0eec0d35": "状态",
-          "b5536d5a88": "任务",
           "8d62c68b35": "笔记",
           "2d74665a56": "端口",
           "65a9820bd1": "智能体状态",
@@ -5357,7 +5340,6 @@
             "tintOpacity": "色调强度",
             "tintOpacityDescription": "控制色调混入边栏的强度。"
           },
-          "workspaceCardLayoutGuidance": "从工作区侧边栏管理。",
           "872af9556e": "系统托盘",
           "2edf606c46": "关闭时最小化到托盘",
           "b707773a0d": "启用后，关闭窗口会让 Yiru 继续在系统托盘中运行，而不是退出。",
@@ -5690,12 +5672,6 @@
             "idleMinutesSuffix": "分钟",
             "title": "智能体睡眠",
             "toggleLabel": "切换智能体睡眠"
-          },
-          "newWorktreeCardStyle": {
-            "copy": "预览更新后的 worktree 卡片布局、元数据位置、卡片显示菜单选项和状态呈现。",
-            "description": "预览更新后的 worktree 卡片布局、元数据位置、卡片显示菜单选项和状态呈现。",
-            "title": "新卡片样式",
-            "toggleLabel": "切换新卡片样式"
           },
           "nativeChat": {
             "title": "原生聊天",
@@ -7567,17 +7543,6 @@
               "title": "左侧边栏外观",
               "description": "让左侧边栏匹配终端、保持默认，或使用色调。"
             },
-            "workspaceCardLayout": {
-              "title": "工作区卡片布局",
-              "description": "工作区卡片可以使用紧凑或详细布局。",
-              "compact": "紧凑",
-              "compactDisplay": "紧凑显示",
-              "workspaceCards": "工作区卡片",
-              "worktreeCards": "工作树卡片",
-              "cardLayout": "卡片布局",
-              "workspaceOptions": "工作区选项",
-              "detailed": "详细"
-            },
             "9a115966d3": "关闭时最小化到托盘",
             "4d5b9427b5": "启用后，关闭窗口会让 Yiru 继续在系统托盘中运行，而不是退出。",
             "antigravityUsageTitle": "Antigravity 使用量",
@@ -7859,17 +7824,6 @@
               "sleep": "睡眠",
               "terminal": "终端",
               "title": "智能体睡眠"
-            },
-            "newWorktreeCardStyle": {
-              "card": "卡片",
-              "cards": "卡片",
-              "description": "预览更新后的 worktree 卡片布局、元数据位置、卡片显示菜单选项和状态呈现。",
-              "menu": "菜单",
-              "metadata": "元数据",
-              "status": "状态",
-              "title": "新卡片样式",
-              "worktree": "工作树",
-              "worktrees": "工作树"
             },
             "nativeChat": {
               "title": "原生聊天",

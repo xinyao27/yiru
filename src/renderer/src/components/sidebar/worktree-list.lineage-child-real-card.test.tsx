@@ -88,7 +88,9 @@ vi.mock('@/components/ui/hover-card', () => ({
   HoverCardContent: ({ children }: { children: ReactNode }) => (
     <div data-hover-card-content="">{children}</div>
   ),
-  HoverCardTrigger: ({ children }: { children: ReactNode }) => <>{children}</>
+  HoverCardTrigger: ({ children, render }: { children?: ReactNode; render?: ReactNode }) => (
+    <>{render ?? children}</>
+  )
 }))
 
 vi.mock('@/components/ui/tooltip', () => ({
@@ -330,12 +332,7 @@ function setLineageState(
     workspaceHostScope: 'all',
     workspacePortScan: null,
     workspaceStatuses: [],
-    worktreeCardProperties: [
-      'status',
-      'pr',
-      'comment',
-      'inline-agents'
-    ] satisfies WorktreeCardProperty[],
+    worktreeCardProperties: ['status', 'comment', 'inline-agents'] satisfies WorktreeCardProperty[],
     worktreeLineageById,
     worktreesByRepo: {
       [repo.id]: worktrees
