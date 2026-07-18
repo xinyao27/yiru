@@ -82,7 +82,7 @@ jobs:
       # Why: `plutil -lint` accepts duplicate plist keys, but `codesign`
       # rejects duplicate entitlements after the expensive app build.
       - name: Verify macOS entitlements
-        run: pnpm verify:macos-entitlements
+        run: node config/scripts/verify-macos-entitlements.mjs
 
       # Why: telemetry's transport gate (`src/main/telemetry/client.ts:IS_OFFICIAL_BUILD`)
       # requires the build identity to be the literal string `stable` or `rc`,

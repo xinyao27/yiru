@@ -219,7 +219,7 @@ jobs:
       # Why: this is the release-path proof that the deployed Linux relay keeps
       # its PTY and explorer live across a real watcher SIGSEGV.
       - name: Run Docker SSH watcher isolation E2E
-        run: xvfb-run --auto-servernum env SKIP_BUILD=1 YIRU_E2E_FORWARD_APP_LOGS=1 pnpm run test:e2e:ssh-docker-watcher-isolation
+        run: xvfb-run --auto-servernum env SKIP_BUILD=1 YIRU_E2E_FORWARD_APP_LOGS=1 node config/scripts/run-ssh-docker-watcher-isolation-e2e.mjs
 
       - name: Upload watcher isolation traces
         if: failure()

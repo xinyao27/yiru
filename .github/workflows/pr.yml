@@ -69,7 +69,7 @@ jobs:
         run: pnpm exec oxlint --format github
 
       - name: Check styled scrollbars
-        run: pnpm check:styled-scrollbars
+        run: node config/scripts/check-styled-scrollbars.mjs
 
       - name: Check reliability gate manifest
         run: pnpm run check:reliability-gates
@@ -108,10 +108,10 @@ jobs:
           fi
 
       - name: Check feature wall asset budget
-        run: pnpm check:feature-wall-assets
+        run: node config/scripts/check-feature-wall-assets.mjs
 
       - name: Verify macOS entitlements
-        run: pnpm verify:macos-entitlements
+        run: node config/scripts/verify-macos-entitlements.mjs
 
       - name: Typecheck
         run: pnpm typecheck

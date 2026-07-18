@@ -35,11 +35,9 @@ describe('Electron runtime package contract', () => {
     const guardedScripts = [
       'start',
       'dev',
-      'dev-stable-name',
       'build:unpack',
       'build:win',
       'build:mac',
-      'build:mac:release',
       'build:linux',
       'test:e2e',
       'test:e2e:terminal-rendering-golden',

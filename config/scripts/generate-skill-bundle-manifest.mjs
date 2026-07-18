@@ -544,7 +544,7 @@ async function verifyArtifacts(artifacts) {
     throw new Error(
       `Generated skill artifacts are stale:\n${stale
         .map((filePath) => path.relative(REPO_ROOT, filePath))
-        .join('\n')}\nRun pnpm generate:skill-bundle-manifest.`
+        .join('\n')}\nRun node config/scripts/generate-skill-bundle-manifest.mjs --write.`
     )
   }
 }
