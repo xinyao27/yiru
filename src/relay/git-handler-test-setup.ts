@@ -15,7 +15,7 @@ const TEST_GIT_USER_NAME = 'Test'
 // Why: declare an explicit type so the inferred return type of
 // createMockDispatcher doesn't transitively reference `@vitest/spy`'s
 // internal `Procedure` type (from `vi.fn(...)`). Without this annotation,
-// TS2883 fires under `pnpm run tc:node` because the generated .d.ts would
+// TS2883 fires under `pnpm run typecheck:node` because the generated .d.ts would
 // need to name a type that isn't portably resolvable from this module.
 export type MockDispatcher = {
   onRequest: (

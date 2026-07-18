@@ -130,7 +130,7 @@ try {
     console.error(
       '[rebuild] A Windows process appears to be using a native .node file. ' +
         'Close running Yiru/Electron/dev processes for this worktree, then rerun `pnpm install` ' +
-        'or `pnpm run rebuild:electron`.'
+        'or `pnpm run postinstall`.'
     )
     if (isPostinstall() && process.env.YIRU_STRICT_NATIVE_REBUILD !== '1') {
       console.error(
