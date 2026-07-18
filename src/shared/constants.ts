@@ -11,7 +11,7 @@ import type {
   AgentActivityDisplayMode
 } from './types'
 import { DEFAULT_STATUS_BAR_ITEMS } from './status-bar-defaults'
-import { DEFAULT_TERMINAL_FONT_WEIGHT } from './terminal-fonts'
+import { DEFAULT_TERMINAL_FONT_SIZE, DEFAULT_TERMINAL_FONT_WEIGHT } from './terminal-fonts'
 import { getDefaultTerminalQuickCommands } from './terminal-quick-commands'
 import type { VoiceSettings } from './speech-types'
 import { cloneDefaultWorkspaceStatuses } from './workspace-statuses'
@@ -42,7 +42,7 @@ export {
 } from './worktree-card-properties'
 
 export const SCHEMA_VERSION = 1
-export const DEFAULT_APP_FONT_FAMILY = 'Geist'
+export const DEFAULT_APP_FONT_FAMILY = 'system-ui'
 export const DEFAULT_SHOW_SLEEPING_WORKSPACES = true
 export const DEFAULT_HIDE_SLEEPING_WORKSPACES = false
 export const DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE: AgentActivityDisplayMode = 'compact'
@@ -203,6 +203,7 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     appIcon: DEFAULT_APP_ICON_ID,
     loaderStyle: DEFAULT_LOADER_STYLE,
     appFontFamily: DEFAULT_APP_FONT_FAMILY,
+    systemTypographyDefaultsMigrated: true,
     editorAutoSave: false,
     editorAutoSaveDelayMs: DEFAULT_EDITOR_AUTO_SAVE_DELAY_MS,
     editorMinimapEnabled: false,
@@ -214,7 +215,7 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
       typeof process !== 'undefined' && process.platform === 'linux',
     primarySelectionMiddleClickPasteDefaultedForTerminalDefaults:
       getDefaultPrimarySelectionMiddleClickPaste(),
-    terminalFontSize: 14,
+    terminalFontSize: DEFAULT_TERMINAL_FONT_SIZE,
     terminalFontFamily: defaultTerminalFontFamily(),
     terminalFontWeight: DEFAULT_TERMINAL_FONT_WEIGHT,
     terminalLineHeight: 1,

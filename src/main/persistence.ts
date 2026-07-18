@@ -2942,6 +2942,25 @@ export class Store {
         // Merge with defaults in case new fields were added
         const homeDir = homedir()
         const defaults = getDefaultPersistedState(homeDir)
+        const systemTypographyDefaultsMigrated =
+          parsed.settings?.systemTypographyDefaultsMigrated === true
+        const rawAppFontFamily = parsed.settings?.appFontFamily
+        const rawTerminalFontSize = parsed.settings?.terminalFontSize
+        // Why: old defaults were persisted like user choices. Move only those
+        // inherited values once; the guard preserves later Geist/14px selections.
+        const migratedAppFontFamily = systemTypographyDefaultsMigrated
+          ? (rawAppFontFamily ?? defaults.settings.appFontFamily)
+          : rawAppFontFamily === undefined || rawAppFontFamily === 'Geist'
+            ? defaults.settings.appFontFamily
+            : rawAppFontFamily
+        const migratedTerminalFontSize = systemTypographyDefaultsMigrated
+          ? (rawTerminalFontSize ?? defaults.settings.terminalFontSize)
+          : rawTerminalFontSize === undefined || rawTerminalFontSize === 14
+            ? defaults.settings.terminalFontSize
+            : rawTerminalFontSize
+        if (!systemTypographyDefaultsMigrated) {
+          this.loadNeedsSave = true
+        }
         const migratedTerminalScrollback = migrateTerminalScrollbackRows(parsed.settings)
         if (migratedTerminalScrollback.needsSave) {
           this.loadNeedsSave = true
@@ -3237,6 +3256,9 @@ export class Store {
             ),
             appIcon: normalizeAppIconId(parsed.settings?.appIcon),
             loaderStyle: normalizeLoaderStyle(parsed.settings?.loaderStyle),
+            appFontFamily: migratedAppFontFamily,
+            terminalFontSize: migratedTerminalFontSize,
+            systemTypographyDefaultsMigrated: true,
             // Why: persisted settings can be user-edited or written by older
             // builds; keep tray-minimize false unless the stored value is true.
             minimizeToTrayOnClose: parsed.settings?.minimizeToTrayOnClose === true,

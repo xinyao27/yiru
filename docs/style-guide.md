@@ -94,9 +94,10 @@ This keeps light/dark parity automatic.
 
 ## Typography
 
-- **Family:** `Geist` is loaded as a single variable woff2 (weight range 100–900). Always reach for `Geist` for sans, never `Inter` or system sans.
-- **Mono:** `var(--font-mono)` — used for paths, terminal-adjacent UI, code, and anywhere monospace conveys "this is literal."
-- **Body letter-spacing:** `0.01em` (set globally on `body`). Don't override per component.
+- **Family:** The platform system UI stack is the default. Consume `var(--font-sans)` or inherit it; don't hardcode a platform font. `Geist` remains bundled for users who explicitly select it.
+- **Mono:** `var(--font-mono)` — the platform system monospace stack, used for paths, terminal-adjacent UI, code, and anywhere monospace conveys "this is literal."
+- **Rendering:** Body text defaults to 14px with `0.01em` letter-spacing and antialiased macOS font smoothing. Don't override these globally in a component.
+- **Code size:** Editors, diffs, and terminals default to 13px. Editor zoom may adjust this at runtime, but source and diff views keep the same baseline.
 - **Sizes:** Tailwind's default scale. Common sizes in this repo:
   - 11px (uppercase meta, sidebar headers, captions) — pair with `font-weight: 600` and `text-transform: uppercase` and `letter-spacing: 0.05em` for category labels.
   - 12px (sub-text, paths, secondary content)

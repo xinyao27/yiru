@@ -10,7 +10,7 @@ export const PIERRE_FILE_TREE_STYLE = {
   '--trees-border-color-override': 'var(--sidebar-border)',
   '--trees-focus-ring-color-override': 'var(--sidebar-ring)',
   '--trees-border-radius-override': '0px',
-  '--trees-font-family-override': 'Geist',
+  '--trees-font-family-override': 'var(--app-font-family)',
   '--trees-font-size-override': '12px',
   '--trees-item-margin-x-override': '0px',
   '--trees-item-padding-x-override': '8px',

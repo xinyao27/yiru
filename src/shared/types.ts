@@ -2569,6 +2569,8 @@ export type GlobalSettings = {
   /** Optional only for profiles persisted before loader selection was introduced. */
   loaderStyle?: LoaderStyle
   appFontFamily: string
+  /** One-shot guard for moving inherited Geist/14px typography to system UI/13px code. */
+  systemTypographyDefaultsMigrated?: boolean
   editorAutoSave: boolean
   editorAutoSaveDelayMs: number
   editorMinimapEnabled: boolean
