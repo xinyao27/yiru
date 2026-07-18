@@ -1,8 +1,7 @@
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { MultiFileDiff, type DiffLineAnnotation, type SelectedLineRange } from '@pierre/diffs/react'
 import { DIFFS_TAG_NAME, type FileDiffOptions } from '@pierre/diffs'
-import { Copy, NotePencil, SelectionAll } from '@phosphor-icons/react'
-import { Button } from '@/components/ui/button'
+import { Copy, SelectionAll } from '@phosphor-icons/react'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -186,6 +185,8 @@ export function PierreDiffViewer({
       enableLineSelection: Boolean(onAddLineComment),
       enableGutterUtility: Boolean(onAddLineComment),
       lineHoverHighlight: onAddLineComment ? 'line' : 'disabled',
+      // Why: Pierre treats this callback as a complete gutter API and rejects
+      // pairing it with the React renderGutterUtility API.
       onGutterUtilityClick: (range) => {
         if (!isCommentableRange(range, commentableLineNumbers)) {
           return
@@ -360,19 +361,6 @@ export function PierreDiffViewer({
                 options={options}
                 lineAnnotations={lineAnnotations}
                 renderAnnotation={renderAnnotation}
-                renderGutterUtility={
-                  onAddLineComment
-                    ? () => (
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          aria-label={addLineCommentLabel ?? 'Add note for the AI'}
-                        >
-                          <NotePencil />
-                        </Button>
-                      )
-                    : undefined
-                }
                 style={diffStyle}
               />
             </div>

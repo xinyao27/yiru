@@ -1,0 +1,8 @@
+diff --git a/dist/react/utils/useFileDiffInstance.js b/dist/react/utils/useFileDiffInstance.js
+index 82585c811d94582b29769f4d0aa19d80f5ac03ef..5f3c6046565bf0c9620f1c788a159204e3416d82 100644
+--- a/dist/react/utils/useFileDiffInstance.js
++++ b/dist/react/utils/useFileDiffInstance.js
+@@ -38 +38,2 @@
+-			if (instanceRef.current == null) throw new Error("useFileDiffInstance: A FileDiff instance should exist when unmounting");
++			// React may detach refs repeatedly when nested Activity trees disappear.
++			if (instanceRef.current == null) return;
