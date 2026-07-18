@@ -3,6 +3,7 @@ import {
   getComposerRepoWorktreeBranches,
   isBranchCheckedOutInWorktrees,
   resolveComposerBranchNameOverrideForCreate,
+  resolveComposerBranchPick,
   resolveComposerBranchReuse,
   resolveComposerBranchSelection,
   resolveComposerManualBranchNameChange,
@@ -248,9 +249,9 @@ describe('resolveComposerReuseOverride', () => {
     ).toBeUndefined()
   })
 
-  it('keeps the override for a remote-only ref even if its local name is busy', () => {
-    // Why: a remote-only ref (ref !== local name) creates a fresh local tracking
-    // branch, so the busy check on the local name must not drop its override.
+  it('drops a remote-backed override when its local branch name is busy', () => {
+    // Why: remote-backed rows still create a local branch; keeping the busy name
+    // would silently turn it into a numbered sibling such as feature-x-2.
     expect(
       resolveComposerReuseOverride({
         refName: 'origin/feature-x',
@@ -258,7 +259,49 @@ describe('resolveComposerReuseOverride', () => {
         branchNameOverride: 'feature-x',
         branchCheckedOutElsewhere: true
       })
-    ).toBe('feature-x')
+    ).toBeUndefined()
+  })
+})
+
+describe('resolveComposerBranchPick', () => {
+  it.each(['main', 'origin/main'])(
+    'uses the unnamed-workspace flow when auto-selected %s maps to a busy local main',
+    (refName) => {
+      expect(
+        resolveComposerBranchPick({
+          refName,
+          localBranchName: 'main',
+          currentName: '',
+          lastAutoName: '',
+          worktreeBranches: ['refs/heads/main']
+        })
+      ).toEqual({
+        baseBranch: refName,
+        branchNameOverride: undefined,
+        branchAutoName: '',
+        name: '',
+        lastAutoName: '',
+        reuseEligibleBranch: null,
+        defaultReuse: false
+      })
+    }
+  )
+
+  it('preserves a user-authored name when branching from a busy branch', () => {
+    expect(
+      resolveComposerBranchPick({
+        refName: 'main',
+        localBranchName: 'main',
+        currentName: 'fix-auth',
+        lastAutoName: '',
+        worktreeBranches: ['main']
+      })
+    ).toMatchObject({
+      baseBranch: 'main',
+      branchNameOverride: undefined,
+      name: undefined,
+      lastAutoName: undefined
+    })
   })
 })
 
