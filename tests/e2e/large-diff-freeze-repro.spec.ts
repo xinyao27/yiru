@@ -29,14 +29,28 @@ async function addAndActivateRepo(yiruPage: Page, repoPath: string): Promise<str
   await expect
     .poll(
       () =>
-        yiruPage.evaluate(async (targetRepoId: string) => {
-          const store = window.__store
-          if (!store) {
-            return 0
-          }
-          await store.getState().fetchWorktrees(targetRepoId)
-          return store.getState().worktreesByRepo[targetRepoId]?.length ?? 0
-        }, repoId),
+        yiruPage
+          .evaluate(async (targetRepoId: string) => {
+            const store = window.__store
+            if (!store) {
+              return 0
+            }
+            await store.getState().fetchWorktrees(targetRepoId)
+            return store.getState().worktreesByRepo[targetRepoId]?.length ?? 0
+          }, repoId)
+          .catch((error: unknown) => {
+            // Why: adding a repo may reload the renderer; that expected navigation
+            // should retry the store poll without hiding unrelated evaluate errors.
+            if (
+              error instanceof Error &&
+              /Execution context was destroyed|Cannot find context with specified id/.test(
+                error.message
+              )
+            ) {
+              return 0
+            }
+            throw error
+          }),
       {
         timeout: 30_000,
         message: 'isolated large-diff worktree did not load'

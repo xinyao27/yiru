@@ -1,14 +1,14 @@
-name: Computer-use e2e
+name: Computer-use native smoke
 
 on:
   pull_request:
     paths:
-      - '.github/workflows/computer-e2e.yml'
+      - '.github/workflows/computer-native-smoke.yml'
       - 'config/electron-builder.config.cjs'
       - 'config/scripts/build-computer-macos.mjs'
       - 'config/scripts/build-windows-cli-launcher.mjs'
       - 'config/scripts/build-windows-cli-launcher.test.mjs'
-      - 'config/scripts/computer-e2e-workflow.test.mjs'
+      - 'config/scripts/computer-native-smoke-workflow.test.mjs'
       - 'config/scripts/computer-use-skill-guidance.test.mjs'
       - 'config/scripts/computer-use-smoke.mjs'
       - 'config/scripts/computer-use-smoke.test.mjs'
@@ -34,17 +34,6 @@ on:
       - 'src/main/ssh/ssh-remote-cli-launcher.ts'
       - 'src/main/ssh/ssh-remote-cli-launcher.test.ts'
       - 'src/shared/computer-use-*.ts'
-      - 'tests/e2e/computer-linux.e2e.ts'
-      - 'tests/e2e/computer-mac.e2e.ts'
-      - 'tests/e2e/computer-mac-safari.e2e.ts'
-      - 'tests/e2e/computer-windows.e2e.ts'
-      - 'tests/e2e/computer-windows-store.e2e.ts'
-      - 'tests/e2e/helpers/computer-cli-driver.ts'
-      - 'tests/e2e/helpers/computer-driver.ts'
-      - 'tests/e2e/vitest.config.ts'
-  workflow_dispatch:
-  schedule:
-    - cron: '0 6 * * *'
 
 jobs:
   native-smoke:
@@ -65,7 +54,7 @@ jobs:
         with:
           run_install: false
       - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y python3 python3-gi gir1.2-atspi-2.0 at-spi2-core gedit xvfb xclip xdotool
+        run: sudo apt-get update && sudo apt-get install -y python3 python3-gi gir1.2-atspi-2.0 at-spi2-core
       # Why: pnpm's bundled node-gyp can ship gyp_main.py without execute
       # permission on Linux runners; node-pty's install fallback then fails
       # before this smoke job can exercise the native package.
@@ -75,15 +64,13 @@ jobs:
           npm install -g node-gyp@11.5.0
           echo "npm_config_node_gyp=$(npm root -g)/node-gyp/bin/node-gyp.js" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
-      # Why: without --config, bare vitest ignores config/vitest.config.ts (there
-      # is no root config) and falls back to the 5s default timeout with no
-      # Windows worker cap, so the real csc.exe launcher-compile tests time out
-      # on hosted Windows. Use the shared config so this job matches pnpm test.
+      # Why: use the repo's Vite+ test runner; the former config path did not
+      # exist, so the native-smoke job exited before running any regression.
       - run: >-
-          pnpm vitest run --config config/vitest.config.ts
+          pnpm vp test run
           config/scripts/build-windows-cli-launcher.test.mjs
           src/main/ssh/ssh-remote-cli-launcher.test.ts
-          config/scripts/computer-e2e-workflow.test.mjs
+          config/scripts/computer-native-smoke-workflow.test.mjs
           config/scripts/computer-use-skill-guidance.test.mjs
           config/scripts/computer-use-smoke.test.mjs
           src/main/computer/computer-provider-lifecycle.test.ts
@@ -128,80 +115,3 @@ jobs:
       - name: Windows daemon workspace-close repro
         if: runner.os == 'Windows'
         run: node config/scripts/windows-daemon-workspace-close-repro.mjs
-      - if: runner.os == 'Linux'
-        env:
-          YIRU_COMPUTER_E2E: '1'
-          ACCESSIBILITY_ENABLED: '1'
-        run: xvfb-run --auto-servernum dbus-run-session -- pnpm test:e2e:computer --reporter=verbose tests/e2e/computer-linux.e2e.ts
-      - if: runner.os == 'Windows'
-        env:
-          YIRU_COMPUTER_E2E: '1'
-        run: pnpm test:e2e:computer --reporter=verbose tests/e2e/computer-windows.e2e.ts
-
-  mac:
-    # macOS Accessibility and Screen Recording require user-granted TCC entries.
-    # Keep this on manual/scheduled permission-bearing runners instead of PR CI.
-    if: github.event_name != 'pull_request'
-    runs-on: macos-15
-    env:
-      YIRU_COMPUTER_E2E: '1'
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: package.json
-      - uses: pnpm/action-setup@v6
-        with:
-          run_install: false
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build:computer-macos
-      - run: pnpm verify:computer-native
-      - run: pnpm build:cli
-      - run: pnpm build:electron-vite
-      - run: pnpm test:e2e:computer --reporter=verbose tests/e2e/computer-mac.e2e.ts tests/e2e/computer-mac-safari.e2e.ts
-
-  linux:
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-22.04
-    env:
-      YIRU_COMPUTER_E2E: '1'
-      ACCESSIBILITY_ENABLED: '1'
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: package.json
-      - uses: pnpm/action-setup@v6
-        with:
-          run_install: false
-      - run: sudo apt-get update && sudo apt-get install -y build-essential python3 python3-gi gir1.2-atspi-2.0 gedit at-spi2-core xvfb xclip xdotool
-      # Why: keep scheduled Linux e2e on the same native install path as PR
-      # smoke and pr.yml's verify job.
-      - name: Use external node-gyp to avoid pnpm's bundled copy (Linux only)
-        run: |
-          npm install -g node-gyp@11.5.0
-          echo "npm_config_node_gyp=$(npm root -g)/node-gyp/bin/node-gyp.js" >> "$GITHUB_ENV"
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm verify:computer-native
-      - run: pnpm build:cli
-      - run: pnpm build:electron-vite
-      - run: xvfb-run --auto-servernum dbus-run-session -- pnpm test:e2e:computer --reporter=verbose tests/e2e/computer-linux.e2e.ts
-
-  windows:
-    if: github.event_name != 'pull_request'
-    runs-on: windows-latest
-    env:
-      YIRU_COMPUTER_E2E: '1'
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: package.json
-      - uses: pnpm/action-setup@v6
-        with:
-          run_install: false
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm verify:computer-native
-      - run: pnpm build:cli
-      - run: pnpm build:electron-vite
-      - run: pnpm test:e2e:computer --reporter=verbose tests/e2e/computer-windows.e2e.ts tests/e2e/computer-windows-store.e2e.ts

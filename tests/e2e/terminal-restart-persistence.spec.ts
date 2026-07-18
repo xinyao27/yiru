@@ -46,6 +46,7 @@ import {
   ensureTerminalVisible
 } from './helpers/store'
 import { attachRepoAndOpenTerminal, createRestartSession } from './helpers/yiru-restart'
+import { nodeTerminalCommand } from './terminal-node-command'
 import { PTY_SESSION_ID_SEPARATOR } from '../../src/shared/pty-session-id-format'
 
 // Why: each test in this file does a full quit→relaunch cycle, which spawns
@@ -247,7 +248,7 @@ test.describe('Terminal restart persistence', () => {
     }
   })
 
-  test('daemon snapshot relaunch preserves the cursor on the shell prompt', async (// oxlint-disable-next-line no-empty-pattern -- Playwright's second fixture arg is testInfo; the first must be an object destructure to opt out of the default fixture set.
+  test('daemon snapshot relaunch preserves the cursor on a prompt line', async (// oxlint-disable-next-line no-empty-pattern -- Playwright's second fixture arg is testInfo; the first must be an object destructure to opt out of the default fixture set.
   {}, testInfo) => {
     const repoPath = readFileSync(TEST_REPO_PATH_FILE, 'utf-8').trim()
     if (!repoPath || !existsSync(repoPath)) {
@@ -265,11 +266,17 @@ test.describe('Terminal restart persistence', () => {
       const { worktreeId, ptyId } = await bootstrapFirstLaunch(firstLaunch.page, repoPath)
       expect(ptyId).toContain(PTY_SESSION_ID_SEPARATOR)
 
-      const prompt = `YIRU_RESTART_PROMPT_${Date.now()}_GT `
+      const prompt = `YIRU_RESTART_PROMPT_${Date.now()}_GT > `
       const marker = `YIRU_CURSOR_RESTART_${Date.now()}`
-      await execInTerminal(firstLaunch.page, ptyId, `export PS1='${prompt}'; PROMPT='${prompt}'`)
-      await waitForTerminalActiveLine(firstLaunch.page, prompt.trim())
-      await execInTerminal(firstLaunch.page, ptyId, `echo ${marker}`)
+      // Why: shell themes can overwrite PS1/PROMPT asynchronously. A quiet
+      // foreground process gives the daemon snapshot one deterministic cursor line.
+      const snapshotScript =
+        "process.stdout.write('\\x1b[2J\\x1b[H' + process.argv[1] + '\\r\\n' + process.argv[2]); setInterval(() => {}, 1000)"
+      await execInTerminal(
+        firstLaunch.page,
+        ptyId,
+        nodeTerminalCommand(['-e', snapshotScript, marker, prompt])
+      )
       await waitForTerminalOutput(firstLaunch.page, marker)
 
       const beforeActiveLine = await waitForTerminalActiveLine(firstLaunch.page, prompt.trim())
@@ -288,11 +295,7 @@ test.describe('Terminal restart persistence', () => {
             if (!activeLine || activeLine.includes(marker)) {
               return false
             }
-            // Why: daemon reattach may preserve the live shell process, or the
-            // restored scrollback can land before a fresh shell prompt repaints.
-            // The cursor-regression contract is that we settle on a prompt line,
-            // not that the temporary PS1 assignment itself survives relaunch.
-            return activeLine === beforeActiveLine || /[$#%>]\s*$/.test(activeLine)
+            return activeLine === beforeActiveLine
           },
           {
             timeout: 10_000,

@@ -6,12 +6,11 @@ import { waitForActiveWorktree, waitForSessionReady } from './helpers/store'
 import {
   createBranchCommit,
   createStagedCommitMessageChange,
-  openChecks,
-  openSourceControl,
   seedCleanBranchEmptyState,
   seedCommitMessageComposer,
   seedCreatePrComposer
 } from './helpers/source-control-ai-generation'
+import { openChecks, openSourceControl } from './helpers/source-control-sidebar-navigation'
 import {
   installDelayedCommitMessageGenerator,
   installDelayedPrGenerator

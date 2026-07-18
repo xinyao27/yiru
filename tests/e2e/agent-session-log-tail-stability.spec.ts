@@ -36,13 +36,13 @@ test.describe('Agent Session History live log', () => {
     testRepoPath
   }, testInfo) => {
     test.setTimeout(10 * 60_000)
-    const fixture = await seedSyntheticSession(electronApp, testRepoPath)
     await armMainProcessCrashProbe(electronApp)
     await electronApp.evaluate(({ BrowserWindow }) => {
       BrowserWindow.getAllWindows()[0]?.webContents.setZoomFactor(1)
     })
 
     await yiruPage.setViewportSize({ width: 520, height: 720 })
+    const fixture = await seedSyntheticSession(electronApp, testRepoPath)
     await openSessionHistory(yiruPage)
     const title = yiruPage.getByText(fixture.title, { exact: true }).first()
     await expect(title).toBeVisible({ timeout: 30_000 })
@@ -175,11 +175,44 @@ async function seedSyntheticSession(
 }
 
 async function openSessionHistory(page: Page): Promise<void> {
-  // Why: startup hydration can overwrite a direct store route; use the same
-  // activity-bar action a user takes so the Agents panel wins that race.
-  await page.getByRole('button', { name: 'Agents', exact: true }).click()
-  await page.evaluate(async () => window.api.aiVault.listSessions({ force: true }))
-  await page.getByRole('button', { name: 'Refresh Session History' }).click()
+  // Why: this spec exercises the log model, while Electron can swallow clicks
+  // in the draggable titlebar strip. Route through the public store actions.
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const state = window.__store?.getState()
+          return Boolean(state?.persistedUIReady && state.workspaceSessionReady)
+        }),
+      { timeout: 30_000 }
+    )
+    .toBe(true)
+  await page.evaluate(() => {
+    const state = window.__store?.getState()
+    state?.setRightSidebarOpen(true)
+    state?.setRightSidebarTab('vault')
+  })
+  const refreshButton = page.getByRole('button', { name: 'Refresh Session History' })
+  // Why: late worktree activation can restore Explorer while the initial scan
+  // is running. Reassert the requested route without starting a second scan.
+  await expect
+    .poll(
+      async () => {
+        if ((await refreshButton.isVisible()) && (await refreshButton.isEnabled())) {
+          return true
+        }
+        if (!(await refreshButton.isVisible())) {
+          await page.evaluate(() => {
+            const state = window.__store?.getState()
+            state?.setRightSidebarOpen(true)
+            state?.setRightSidebarTab('vault')
+          })
+        }
+        return false
+      },
+      { timeout: 120_000 }
+    )
+    .toBe(true)
 }
 
 async function focusAnchorWithFind(page: Page): Promise<void> {
@@ -384,8 +417,13 @@ function assertMemoryBudget(
     const pairedReplacement = replacement[index]
     expect(pairedReplacement).toBeDefined()
     for (const field of ['jsHeapMb', 'workingSetMb', 'privateMb'] as const) {
-      const suffixPeak = sample.after[field] - sample.before[field]
-      const replacementPeak = pairedReplacement.after[field] - pairedReplacement.before[field]
+      // Why: OS memory reclamation can make the post-operation sample lower
+      // than its baseline; a measured peak is zero in that case, not negative.
+      const suffixPeak = Math.max(0, sample.after[field] - sample.before[field])
+      const replacementPeak = Math.max(
+        0,
+        pairedReplacement.after[field] - pairedReplacement.before[field]
+      )
       // Why: the legacy control provably allocates more (getValue plus a whole
       // TextEncoder/Decoder round-trip and full model rebuild), so an append peak
       // above it is GC-timing noise, not a regression; allow a noise margin.

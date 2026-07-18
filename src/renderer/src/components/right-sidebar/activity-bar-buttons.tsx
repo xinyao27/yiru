@@ -140,6 +140,7 @@ export function ActivityBarButton({
             )}
             onClick={onClick}
             aria-label={item.shortcut ? `${item.title} (${item.shortcut})` : item.title}
+            aria-current={active ? 'page' : undefined}
           >
             <Icon className={isTop ? 'size-4' : 'size-[18px]'} />
 

@@ -3670,7 +3670,7 @@
       "providers": ["local", "daemon"],
       "coveredPlatforms": [],
       "coveredProviders": [],
-      "coverageNotes": "Registered gap only; the live repro harness with a refresh-repair oracle exists but is not productized into the release-blocking terminal-rendering-golden suite.",
+      "coverageNotes": "Registered gap only; the live repro harness with a refresh-repair oracle exists but is not productized into a stable local visual gate.",
       "motivatingLinks": ["legacy PR #7133", "legacy PR #7054"],
       "invariant": "After any reveal, restore, or wake, the pixels a pane displays must equal what a forced full model-invalidating repaint would draw from the buffer; a material refresh-repair diff means stale rendering escaped, whatever the mechanism.",
       "oracle": "Screenshot the revealed pane, force a model-invalidating full repaint, screenshot again, and assert the bounded pixel diff is immaterial; pair with a JS-level render-model-vs-buffer comparison. Compositor screenshots only, because WebGL canvas readback is blank with preserveDrawingBuffer disabled.",
@@ -3680,11 +3680,11 @@
       "evidenceRuns": [],
       "runtimeBudget": {
         "p95Seconds": 300,
-        "scope": "release-blocking golden Electron visual test"
+        "scope": "local golden Electron visual test"
       },
       "flakeHistory": {
         "status": "not-started",
-        "evidence": "Runs nightly only while the per-platform diff threshold stabilizes; the destination is the release-blocking terminal-rendering-golden suite in release-cut.yml."
+        "evidence": "Run locally while the per-platform diff threshold stabilizes; GitHub Actions no longer executes E2E suites."
       },
       "redGreenEvidence": {
         "status": "missing",
@@ -3696,15 +3696,15 @@
       },
       "promotionCriteria": [
         "Productize the existing stale-render repro harness with the refresh-repair oracle and failure artifacts.",
-        "Establish a stable material-diff threshold across platforms via nightly runs.",
-        "Promotion means membership in the release-blocking terminal-rendering-golden suite that release-cut.yml runs against every release tag; never PR-blocking.",
+        "Establish a stable material-diff threshold across platforms via repeated local runs.",
+        "Promotion means membership in the documented local terminal-rendering golden command; it must not be added to GitHub Actions.",
         "Register the gate command as a direct spec-file invocation; the checker rejects --grep tag selectors, so do not reuse the existing --grep-based golden script as the command."
       ],
       "knownGaps": [
         "No manifest command yet.",
         "Buffer-clean, pixels-stale variants are otherwise invisible to every buffer oracle in the manifest."
       ],
-      "demotionRule": "Drop from the golden suite back to nightly diagnostic if diff thresholds cannot be kept stable across CI runners."
+      "demotionRule": "Drop from the local golden suite if diff thresholds cannot be kept stable across supported development platforms."
     },
     {
       "id": "pty-delivery.renderer-lifecycle-accounting-reset",

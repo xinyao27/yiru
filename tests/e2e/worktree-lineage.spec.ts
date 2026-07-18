@@ -162,10 +162,11 @@ test.describe('Worktree Lineage', () => {
     await expect(childRow).toBeVisible()
 
     const childTabId = await seedWorkspaceLiveTerminal(yiruPage, childId)
-    await expect(childRow).toContainText('Active')
+    const childStatus = childRow.locator('[data-worktree-activity-status]').first()
+    await expect(childStatus).toHaveAttribute('data-worktree-activity-status', 'active')
 
     await markWorkspaceTerminalSlept(yiruPage, { worktreeId: childId, tabId: childTabId })
-    await expect(childRow).toContainText('Inactive')
+    await expect(childStatus).toHaveAttribute('data-worktree-activity-status', 'inactive')
   })
 
   test('shows parent and child agent rows while the parent workspace is active', async ({

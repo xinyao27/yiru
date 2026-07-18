@@ -182,11 +182,36 @@ function readDaemonPidFiles(userDataDir: string): number[] {
   return pids
 }
 
-export async function cleanupE2EDaemons(userDataDir: string): Promise<void> {
+function readPosixDaemonPids(userDataDir: string): number[] {
+  if (process.platform === 'win32') {
+    return []
+  }
+  try {
+    const output = execFileSync('ps', ['-axo', 'pid=,command='], { encoding: 'utf8' })
+    return output
+      .split('\n')
+      .filter((line) => line.includes('daemon-entry.js') && line.includes(userDataDir))
+      .map((line) => Number(line.trim().split(/\s+/, 1)[0]))
+      .filter((pid) => Number.isInteger(pid))
+  } catch {
+    return []
+  }
+}
+
+export function captureE2EDaemonPids(userDataDir: string): number[] {
+  // Why: some Electron quit paths unlink the temporary profile's pid file
+  // before teardown runs, even though the warm-reattach daemon stays alive.
+  return [...new Set([...readDaemonPidFiles(userDataDir), ...readPosixDaemonPids(userDataDir)])]
+}
+
+export async function cleanupE2EDaemons(
+  userDataDir: string,
+  capturedPids: readonly number[] = []
+): Promise<void> {
   // Why: app quit intentionally leaves daemon PTYs alive for warm reattach.
   // E2E temp profiles are deleted after each test, so their detached daemons
   // must be stopped explicitly or CI accumulates orphan Electron/shell trees.
-  for (const pid of readDaemonPidFiles(userDataDir)) {
+  for (const pid of new Set([...capturedPids, ...readDaemonPidFiles(userDataDir)])) {
     await forceKillPidTree(pid)
   }
 }

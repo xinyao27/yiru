@@ -20,6 +20,7 @@
 import type { ElectronApplication, Page } from '@playwright/test'
 import { test, expect } from './helpers/yiru-app'
 import { waitForSessionReady } from './helpers/store'
+import { openSourceControl } from './helpers/source-control-sidebar-navigation'
 import { createLargeFileCountRepo, removeLargeFileCountRepo } from './large-file-count-fixtures'
 import { DEFAULT_GIT_STATUS_LIMIT } from '../../src/shared/git-status-limit'
 
@@ -94,23 +95,12 @@ async function addAndActivateRepo(yiruPage: Page, repoPath: string): Promise<str
       }
       state.setActiveRepo(targetRepoId)
       state.setActiveWorktree(worktree.id)
-      state.setRightSidebarOpen(true)
-      state.setRightSidebarTab('source-control')
       return worktree.id
     },
     { targetRepoId: repoId, pathToRepo: repoPath }
   )
 
-  // Why: repo activation can finish sidebar routing after the store mutation;
-  // assert the user-visible panel before timing its render. Clicking the
-  // already-active activity button races the first cold status scan and tests
-  // Playwright's two-frame actionability window instead of panel readiness.
-  const sourceControlButton = yiruPage.getByRole('button', { name: /^Source Control/ })
-  await expect(sourceControlButton).toBeVisible()
-  await expect
-    .poll(() => yiruPage.evaluate(() => window.__store?.getState().rightSidebarTab))
-    .toBe('source-control')
-  await expect(yiruPage.getByRole('button', { name: 'Filter files by name' })).toBeVisible()
+  await openSourceControl(yiruPage, worktreeId)
 
   return worktreeId
 }

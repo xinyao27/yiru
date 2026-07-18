@@ -331,7 +331,8 @@ export async function readPaneIdentitySnapshot(page: Page): Promise<PaneIdentity
 
 export async function waitForPaneIdentitySnapshot(
   page: Page,
-  paneCount: number
+  paneCount: number,
+  timeoutMs = 15_000
 ): Promise<PaneIdentitySnapshot> {
   await expect
     .poll(
@@ -351,7 +352,7 @@ export async function waitForPaneIdentitySnapshot(
         )
       },
       {
-        timeout: 15_000,
+        timeout: timeoutMs,
         message: 'Split terminal panes did not settle with UUID leaf-keyed PTY bindings'
       }
     )

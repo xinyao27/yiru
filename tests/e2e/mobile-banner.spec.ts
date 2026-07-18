@@ -490,10 +490,9 @@ async function getPaneTerminalCols(page: Page, ptyId: string): Promise<number> {
   }, ptyId)
 }
 
-// Why: writing the screenshot to testInfo.outputPath() lands the file in the
-// per-test output dir that ships in the playwright-traces artifact uploaded by
-// .github/workflows/e2e.yml on failure. The `body` form of testInfo.attach
-// didn't reliably persist for the `list` reporter; the path round-trip does.
+// Why: writing the screenshot to testInfo.outputPath() keeps the attachment in
+// Playwright's local output directory; the `body` form did not reliably persist
+// for the `list` reporter, while the path round-trip does.
 async function captureAttachment(page: Page, testInfo: TestInfo, fileName: string): Promise<void> {
   const dest = testInfo.outputPath(fileName)
   await page.screenshot({ path: dest, fullPage: true })

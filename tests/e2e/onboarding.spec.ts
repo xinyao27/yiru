@@ -51,7 +51,9 @@ function onboardingNotificationSoundSelect(page: Page) {
 }
 
 async function expectOnboardingNotificationSoundMenuClosed(page: Page): Promise<void> {
-  await expect(page.getByRole('option', { name: /Choose Custom File/i })).toHaveCount(0)
+  // Why: the Select primitive retains closed option nodes for reuse, so
+  // visibility—not DOM removal—is the observable closed-state contract.
+  await expect(page.getByRole('option', { name: /Choose Custom File/i })).not.toBeVisible()
 }
 
 async function expectOnboardingSkipConfirmationClosed(page: Page): Promise<void> {

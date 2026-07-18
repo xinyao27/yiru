@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto'
 import { rmSync } from 'node:fs'
 import path from 'node:path'
 import {
+  hiddenPressureDoneMarker,
   type HiddenPressureOutputMode,
   writePressureOutputScript
 } from './artificial-opencode-hidden-pressure-script'
@@ -274,7 +275,7 @@ async function measureHiddenOutputRestoreLatency(
       timeout: 20_000,
       message: 'Hidden PTY output was not restored from main buffer on return'
     })
-    .toContain(`OPENCODE_PRESSURE_DONE_${runId}_`)
+    .toContain(hiddenPressureDoneMarker(runId))
   return performance.now() - restoreStart
 }
 

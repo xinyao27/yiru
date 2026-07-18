@@ -3,7 +3,10 @@ import { expect } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { rmSync } from 'node:fs'
 import path from 'node:path'
-import { writePressureOutputScript } from './artificial-opencode-hidden-pressure-script'
+import {
+  hiddenPressureDoneMarker,
+  writePressureOutputScript
+} from './artificial-opencode-hidden-pressure-script'
 import {
   ensureTerminalVisible,
   getAllWorktreeIds,
@@ -141,7 +144,7 @@ export async function runRendererBackpressureRevisitScenario<
   const typingScriptPath = path.join(testRepoPath, `.yiru-revisit-typing-${runId}.mjs`)
   const pressureScriptPath = path.join(testRepoPath, `.yiru-revisit-pressure-${runId}.mjs`)
   const revisitMarker = `OPENCODE_REVISIT_READY_${runId}`
-  const pressureDoneMarker = `OPENCODE_PRESSURE_DONE_${runId}_0`
+  const pressureDoneMarker = `${hiddenPressureDoneMarker(runId)}0`
   deps.writeInteractivePromptScript(typingScriptPath, runId)
   writePressureOutputScript(pressureScriptPath, runId, 'tui')
   await deps.resetTerminalPtyOutputDebug(yiruPage)

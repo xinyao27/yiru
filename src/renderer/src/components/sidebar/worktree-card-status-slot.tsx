@@ -104,6 +104,9 @@ export function WorktreeCardStatusSlot({
         ? (branchIdentityLabel ?? getDefaultBranchIdentityLabel())
         : statusLabel
   const passiveStatusTooltip = isUnread ? `${passiveStatusLabel} · Unread` : passiveStatusLabel
+  // Why: review or branch identity can own the visible glyph while activity
+  // still changes underneath; keep that computed state observable on the slot.
+  const activityStatusAttribute = { 'data-worktree-activity-status': status }
   // Why: working and permission own the status lane, but unread state remains
   // available in assistive copy and reappears visually afterward.
   const showUnreadAlert = isUnread && showStatus && status !== 'working' && status !== 'permission'
@@ -113,7 +116,10 @@ export function WorktreeCardStatusSlot({
       <Tooltip>
         <TooltipTrigger
           render={
-            <span className={cn('inline-flex size-5 items-center justify-center p-0.5', className)}>
+            <span
+              className={cn('inline-flex size-5 items-center justify-center p-0.5', className)}
+              {...activityStatusAttribute}
+            >
               <ReviewIcon
                 review={prDisplay}
                 className={reviewAndBranchStatusIconClassName}
@@ -131,7 +137,10 @@ export function WorktreeCardStatusSlot({
       <Tooltip>
         <TooltipTrigger
           render={
-            <span className={cn('inline-flex size-5 items-center justify-center p-0.5', className)}>
+            <span
+              className={cn('inline-flex size-5 items-center justify-center p-0.5', className)}
+              {...activityStatusAttribute}
+            >
               {branchStatusIcon}
               <span className="sr-only">{passiveStatusTooltip}</span>
             </span>
@@ -144,7 +153,7 @@ export function WorktreeCardStatusSlot({
     ) : (
       <>
         <span className={cn('inline-flex size-5 items-center justify-center', className)}>
-          <StatusIndicator status={status} aria-hidden="true" />
+          <StatusIndicator status={status} aria-hidden="true" {...activityStatusAttribute} />
         </span>
         <span className="sr-only">{passiveStatusTooltip}</span>
       </>

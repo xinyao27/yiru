@@ -1,53 +1,7 @@
 import type { Page } from '@playwright/test'
-import { expect } from '@playwright/test'
 import { execFileSync } from 'node:child_process'
 import { writeFileSync } from 'node:fs'
 import path from 'node:path'
-export async function openSourceControl(page: Page, worktreeId: string): Promise<void> {
-  await page.evaluate((targetWorktreeId) => {
-    const state = window.__store?.getState()
-    state?.setActiveWorktree(targetWorktreeId)
-    state?.setRightSidebarOpen(true)
-    state?.setRightSidebarTab('source-control')
-  }, worktreeId)
-  await expect
-    .poll(
-      () =>
-        page.evaluate((targetWorktreeId) => {
-          const state = window.__store?.getState()
-          return (
-            state?.activeWorktreeId === targetWorktreeId &&
-            state.rightSidebarOpen &&
-            state.rightSidebarTab === 'source-control'
-          )
-        }, worktreeId),
-      { timeout: 5_000 }
-    )
-    .toBe(true)
-}
-
-export async function openChecks(page: Page, worktreeId: string): Promise<void> {
-  await page.evaluate((targetWorktreeId) => {
-    const state = window.__store?.getState()
-    state?.setActiveWorktree(targetWorktreeId)
-    state?.setRightSidebarOpen(true)
-    state?.setRightSidebarTab('checks')
-  }, worktreeId)
-  await expect
-    .poll(
-      () =>
-        page.evaluate((targetWorktreeId) => {
-          const state = window.__store?.getState()
-          return (
-            state?.activeWorktreeId === targetWorktreeId &&
-            state.rightSidebarOpen &&
-            state.rightSidebarTab === 'checks'
-          )
-        }, worktreeId),
-      { timeout: 5_000 }
-    )
-    .toBe(true)
-}
 
 export async function seedCreatePrComposer(page: Page): Promise<{
   primaryWorktreeId: string

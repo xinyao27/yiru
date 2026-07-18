@@ -297,11 +297,10 @@ test.describe('Create Workspace', () => {
       await createButton.click()
 
       await expect(dialog).toBeHidden({ timeout: 15_000 })
-      await expect(yiruPage.getByRole('option', { name: linkedWorkspacePattern })).toBeVisible({
-        timeout: 10_000
-      })
+      const linkedWorkspace = yiruPage.getByRole('option', { name: linkedWorkspacePattern })
+      await expect(linkedWorkspace).toBeVisible({ timeout: 10_000 })
+      await expect(linkedWorkspace).toContainText(/PR:\s*Open/)
       await expect(yiruPage.getByRole('option', { name: url })).toHaveCount(0)
-      await expect(yiruPage.getByText('Linked PR #2049')).toBeVisible()
       // Why: quick create reuses the single GitHub lookup from typing (no
       // redundant re-fetch), and since #5733 ("Create PR worktrees from the PR
       // head") it resolves the PR start point exactly once at submit time — so
@@ -390,11 +389,10 @@ test.describe('Create Workspace', () => {
       await createButton.click()
 
       await expect(dialog).toBeHidden({ timeout: 15_000 })
-      await expect(yiruPage.getByRole('option', { name: linkedWorkspacePattern })).toBeVisible({
-        timeout: 10_000
-      })
+      const linkedWorkspace = yiruPage.getByRole('option', { name: linkedWorkspacePattern })
+      await expect(linkedWorkspace).toBeVisible({ timeout: 10_000 })
+      await expect(linkedWorkspace).toContainText(/PR:\s*Open/)
       await expect(yiruPage.getByRole('option', { name: /https-github/i })).toHaveCount(0)
-      await expect(yiruPage.getByText('Linked PR #2050')).toBeVisible()
     } finally {
       await yiruPage
         .evaluate(() => {

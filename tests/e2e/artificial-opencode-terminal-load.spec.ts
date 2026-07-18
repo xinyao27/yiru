@@ -29,6 +29,12 @@ import { runMainPressureScenario } from './artificial-opencode-main-pressure-sce
 import { runRendererBackpressureRevisitScenario } from './artificial-opencode-revisit-pressure-scenario'
 import { startSyntheticOpenCodeInjection } from './artificial-opencode-synthetic-injection'
 
+test.use({
+  // Why: these benchmarks measure Yiru's terminal scheduling, not arbitrary
+  // latency from a developer's interactive prompt plugins on every stress PTY.
+  launchEnv: process.platform === 'win32' ? {} : { SHELL: '/bin/sh' }
+})
+
 type TypingMeasurement = {
   latencies: number[]
   medianLatencyMs: number

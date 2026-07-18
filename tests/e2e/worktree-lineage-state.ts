@@ -23,6 +23,9 @@ export async function seedLineageScenario(page: Page): Promise<LineageScenario> 
     state.setShowSleepingWorkspaces(true)
     state.setHideDefaultBranchWorkspace(false)
     state.setFilterRepoIds([])
+    if (!state.worktreeCardProperties.includes('status')) {
+      state.toggleWorktreeCardProperty('status')
+    }
 
     const worktrees = Object.values(state.worktreesByRepo)
       .flat()

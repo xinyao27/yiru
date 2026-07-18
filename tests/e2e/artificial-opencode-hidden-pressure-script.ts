@@ -3,6 +3,12 @@ import path from 'node:path'
 
 export type HiddenPressureOutputMode = 'tui' | 'plain' | 'title' | 'latin' | 'rich-model'
 
+export function hiddenPressureDoneMarker(runId: string): string {
+  // Why: a full UUID wraps in narrow stress panes, where the following shell
+  // prompt can overwrite part of it before model-backed restore is observed.
+  return `OP_DONE_${runId.slice(0, 8)}_`
+}
+
 export function pressureOutputScript(runId: string, mode: HiddenPressureOutputMode): string {
   const headerPrefix = mode === 'tui' || mode === 'rich-model' ? '\\x1b[0m' : ''
   const donePrefix = mode === 'tui' || mode === 'rich-model' ? '\\x1b[0m' : ''
@@ -36,7 +42,7 @@ function writeMore() {
     process.stdout.once('drain', writeMore)
     return
   }
-  process.stdout.write('${donePrefix}OPENCODE_PRESSURE_DONE_${runId}_' + paneIndex + '\\n')
+  process.stdout.write('${donePrefix}${hiddenPressureDoneMarker(runId)}' + paneIndex + '\\n')
 }
 setTimeout(writeMore, Number.isFinite(delayMs) && delayMs > 0 ? delayMs : 0)
 `

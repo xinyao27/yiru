@@ -25,7 +25,11 @@ import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync
 import os from 'node:os'
 import path from 'node:path'
 import { TEST_REPO_PATH_FILE } from '../global-setup'
-import { cleanupE2EDaemons, closeElectronAppForE2E } from './electron-process-shutdown'
+import {
+  captureE2EDaemonPids,
+  cleanupE2EDaemons,
+  closeElectronAppForE2E
+} from './electron-process-shutdown'
 import { getYiruElectronLaunchArgs } from './electron-launch-args'
 import { getE2ECompletedOnboardingProfile } from './e2e-completed-onboarding-profile'
 import { createSeededTestRepo, isValidGitRepo } from './seeded-test-repo'
@@ -243,10 +247,13 @@ export const test = base.extend<YiruTestFixtures, YiruWorkerFixtures>({
     })
     forwardElectronProcessLogs(app, testInfo)
     await provideFixture(app)
+    // Why: Electron shutdown can remove the temporary profile before fixture
+    // cleanup reads its pid file, while the warm-reattach daemon stays alive.
+    const daemonPids = captureE2EDaemonPids(userDataDir)
     // Why: the Playwright close promise can settle before all Electron and PTY
     // descendants are gone in CI; worker teardown then hangs on open handles.
     await closeElectronAppForE2E(app)
-    await cleanupE2EDaemons(userDataDir)
+    await cleanupE2EDaemons(userDataDir, daemonPids)
     await removeUserDataDirAfterShutdown(userDataDir)
   },
 

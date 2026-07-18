@@ -1,17 +1,15 @@
 import { test, expect } from './helpers/yiru-app'
 import { waitForActiveWorktree, waitForSessionReady } from './helpers/store'
+import { openSourceControl } from './helpers/source-control-sidebar-navigation'
 import type { Locator, Page } from '@playwright/test'
 
 type SeededUntrackedFile = {
   fileName: string
+  worktreeId: string
 }
 
-async function openSourceControl(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    const state = window.__store?.getState()
-    state?.setRightSidebarOpen(true)
-  })
-  await page.getByRole('button', { name: /Source Control/ }).click()
+async function openSourceControlWithFilter(page: Page, worktreeId: string): Promise<void> {
+  await openSourceControl(page, worktreeId)
   await page.getByTestId('source-control-filter-toggle').click()
   await expect(page.getByPlaceholder(/Filter files/)).toBeVisible()
 }
@@ -48,7 +46,8 @@ async function seedUntrackedFile(page: Page): Promise<SeededUntrackedFile> {
     }
 
     return {
-      fileName
+      fileName,
+      worktreeId
     }
   })
 }
@@ -98,7 +97,7 @@ test.describe('Source Control discard confirmation', () => {
 
   test('deletes an untracked file without confirmation', async ({ yiruPage }) => {
     const seededFile = await seedUntrackedFile(yiruPage)
-    await openSourceControl(yiruPage)
+    await openSourceControlWithFilter(yiruPage, seededFile.worktreeId)
 
     const row = yiruPage
       .locator('[data-testid="source-control-entry"]')

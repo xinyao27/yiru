@@ -91,7 +91,9 @@ export async function ensureActiveWorktreePaneLoad(
   while (snapshot.panes.length < paneCount) {
     const direction = await focusLargestTerminalPane(page, snapshot.tabId)
     await splitActiveTerminalPane(page, direction)
-    snapshot = await waitForPaneIdentitySnapshot(page, snapshot.panes.length + 1)
+    // Why: native PTY creation becomes serialized under high pane pressure;
+    // retain the stress level without treating slow setup as product latency.
+    snapshot = await waitForPaneIdentitySnapshot(page, snapshot.panes.length + 1, 30_000)
   }
   return snapshot.panes.slice(0, paneCount).map((pane) => ({
     paneKey: `${snapshot.tabId}:${pane.leafId}`,

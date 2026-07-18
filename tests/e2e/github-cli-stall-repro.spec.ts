@@ -85,6 +85,22 @@ function configureGitHubRemote(repoPath: string): void {
   })
 }
 
+function removeGitHubRemotes(repoPath: string): void {
+  for (const remote of ['origin', 'upstream']) {
+    try {
+      execSync(`git remote remove ${remote}`, { cwd: repoPath, stdio: 'ignore' })
+    } catch {
+      // A failed test may exit before both disposable remotes are installed.
+    }
+  }
+}
+
+test.afterEach(({ testRepoPath }) => {
+  // Why: this repository is worker-scoped, so fake network remotes would alter
+  // Git behavior in every later E2E test handled by the same worker.
+  removeGitHubRemotes(testRepoPath)
+})
+
 test('GitHub Tasks drawer recovers when gh stalls on issue details', async ({
   yiruPage,
   testRepoPath
