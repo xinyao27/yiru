@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   CheckCircle as CircleCheck,
   XCircle as CircleX,
-  CircleNotch as LoaderCircle,
   CircleDashed,
   GitPullRequest,
   Files,
@@ -17,7 +16,6 @@ import {
   Sidebar as PanelRight,
   PaperPlaneTilt as SendHorizontal,
   Sparkle as Sparkles,
-  ArrowClockwise as RefreshCw,
   Warning as AlertTriangle,
   Robot as Bot,
   DotsThree as MoreHorizontal,
@@ -26,6 +24,7 @@ import {
   Trash,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -371,7 +370,7 @@ export function PRTriageStrip({
             onClick={onFixChecksWithAI}
           >
             {isFixingChecksWithAI ? (
-              <RefreshCw className="size-3 animate-spin" />
+              <LoadingIndicator className="size-3" />
             ) : (
               <Sparkles className="size-3" />
             )}
@@ -386,7 +385,7 @@ export function PRTriageStrip({
     return (
       <div className="border-b border-border px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
-          <LoaderCircle className="size-3.5 shrink-0 animate-spin text-amber-500" />
+          <LoadingIndicator className="size-3.5 shrink-0 text-amber-500" />
           <div className="min-w-0 flex-1">
             <div className="truncate text-[11px] font-medium text-foreground">
               {pendingCount}{' '}
@@ -473,7 +472,7 @@ export function ConflictTriageStrip({
           onClick={onResolveConflictsWithAI}
         >
           {isResolvingConflictsWithAI ? (
-            <RefreshCw className="size-3 animate-spin" />
+            <LoadingIndicator className="size-3" />
           ) : (
             <Sparkles className="size-3" />
           )}
@@ -693,7 +692,7 @@ function CheckRunDetails({
       {state?.loading ? (
         <div className="flex min-w-0 flex-col gap-2 py-1.5">
           <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-            <LoaderCircle className="size-3.5 animate-spin" />
+            <LoadingIndicator className="size-3.5" />
             {translate(
               'auto.components.right.sidebar.checks.panel.content.1f2b980522',
               'Loading check details…'
@@ -1180,7 +1179,7 @@ export function ChecksList({
           )}
           {pendingCount > 0 && (
             <span className="flex items-center gap-1">
-              <LoaderCircle className="size-3 text-amber-500" />
+              <LoadingIndicator className="size-3 text-amber-500" />
               {pendingCount}{' '}
               {translate(
                 'auto.components.right.sidebar.checks.panel.content.9ad98f2a17',
@@ -1189,14 +1188,14 @@ export function ChecksList({
             </span>
           )}
           <span className="flex-1" />
-          {checksLoading && <LoaderCircle className="size-3 animate-spin text-muted-foreground" />}
+          {checksLoading && <LoadingIndicator className="size-3 text-muted-foreground" />}
         </button>
       )}
 
       {/* Checks List */}
       {checksLoading && checks.length === 0 ? (
         <div className="flex items-center justify-center py-8">
-          <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+          <LoadingIndicator className="size-5 text-muted-foreground" />
         </div>
       ) : checks.length === 0 ? (
         <div className="px-4 py-8 text-[11px] text-muted-foreground">
@@ -1233,13 +1232,7 @@ export function ChecksList({
                         expanded && 'rotate-90'
                       )}
                     />
-                    <Icon
-                      className={cn(
-                        'size-3.5 shrink-0',
-                        color,
-                        conclusion === 'pending' && 'animate-spin'
-                      )}
-                    />
+                    <Icon className={cn('size-3.5 shrink-0', color)} />
                     <span className="flex-1 truncate text-[12px] text-foreground">
                       {check.name}
                     </span>
@@ -1421,7 +1414,7 @@ function ResolveButton({
   return (
     <span ref={setResolveButtonRootRef} className="contents">
       {loading ? (
-        <LoaderCircle className="size-3 animate-spin text-muted-foreground shrink-0" />
+        <LoadingIndicator className="size-3 text-muted-foreground shrink-0" />
       ) : (
         <button
           className="text-[10px] px-1.5 py-0.5 rounded transition-colors shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -2639,7 +2632,7 @@ export function PRCommentsList({
       {/* List */}
       {commentsLoading && comments.length === 0 ? (
         <div className="flex items-center justify-center py-6">
-          <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+          <LoadingIndicator className="size-4 text-muted-foreground" />
         </div>
       ) : comments.length === 0 && isAddingComment && onAddComment ? (
         renderAddCommentComposer(true)

@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
-import { Warning as AlertTriangle, Cloud, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { Warning as AlertTriangle, Cloud } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
 import { useMountedRef } from '@/hooks/useMountedRef'
@@ -119,7 +120,7 @@ export function SshTargetStatusRow({
                 className={cn('inline-flex min-w-0 items-center gap-1', syncStatusTone(syncStatus))}
               >
                 {syncStatus?.phase === 'pulling' || syncStatus?.phase === 'pushing' ? (
-                  <Loader2 className="size-2.5 shrink-0 animate-spin" />
+                  <LoadingIndicator className="size-2.5 shrink-0" />
                 ) : syncStatus?.phase === 'conflict' || syncStatus?.phase === 'error' ? (
                   <AlertTriangle className="size-2.5 shrink-0" />
                 ) : (
@@ -132,7 +133,7 @@ export function SshTargetStatusRow({
         </div>
       </div>
       {busy ? (
-        <Loader2 className="size-3 shrink-0 animate-spin text-muted-foreground" />
+        <LoadingIndicator className="size-3 shrink-0 text-muted-foreground" />
       ) : isReconnectable(status) ? (
         <button
           type="button"

@@ -8,6 +8,7 @@ import {
   MagnifyingGlass as Search
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -20,7 +21,6 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import type {
@@ -345,7 +345,7 @@ export default function SkillsPage(): React.JSX.Element {
                 void loadSkills()
               }}
             >
-              <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
+              {loading ? <LoadingIndicator className="size-4" /> : <RefreshCw className="size-4" />}
               {translate('auto.components.skills.SkillsPage.cb142070b4', 'Refresh')}
             </Button>
           </div>

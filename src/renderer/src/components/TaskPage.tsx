@@ -26,7 +26,6 @@ import {
   GitPullRequest,
   GitPullRequest as GitPullRequestDraft,
   List,
-  CircleNotch as LoaderCircle,
   Minus,
   Plus,
   ArrowClockwise as RefreshCw,
@@ -38,6 +37,7 @@ import {
   Tag,
   User as UserRound
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 
 import { useAppStore } from '@/store'
@@ -766,7 +766,7 @@ function LinearStateCell({
             />
             <span className="truncate">{issue.state.name}</span>
             {pending || states.loading ? (
-              <LoaderCircle className="size-3 shrink-0 animate-spin opacity-70" />
+              <LoadingIndicator className="size-3 shrink-0 opacity-70" />
             ) : (
               <ChevronDown className="size-3 shrink-0 opacity-55" />
             )}
@@ -782,7 +782,7 @@ function LinearStateCell({
           <div className="px-2 py-3 text-center text-[12px] text-destructive">{states.error}</div>
         ) : states.loading ? (
           <div className="flex items-center gap-2 px-2 py-3 text-[12px] text-muted-foreground">
-            <LoaderCircle className="size-3 animate-spin" />
+            <LoadingIndicator className="size-3" />
             {translate('auto.components.TaskPage.cc13109b5d', 'Loading states')}
           </div>
         ) : states.data.length > 0 ? (
@@ -1627,7 +1627,7 @@ function GitHubIssueLabelSelector({
                   ))}
                 </span>
               )}
-              {loading ? <LoaderCircle className="ml-auto size-3.5 animate-spin" /> : null}
+              {loading ? <LoadingIndicator className="ml-auto size-3.5" /> : null}
             </Button>
           }
         />
@@ -1727,7 +1727,7 @@ function GitHubIssueAssigneeSelector({
                   </span>
                 </span>
               )}
-              {loading ? <LoaderCircle className="ml-auto size-3.5 animate-spin" /> : null}
+              {loading ? <LoadingIndicator className="ml-auto size-3.5" /> : null}
             </Button>
           }
         />
@@ -1952,7 +1952,7 @@ function GHAssigneesCell({
           >
             {triggerContent}
             {pendingLogin ? (
-              <LoaderCircle className="size-3 shrink-0 animate-spin text-muted-foreground" />
+              <LoadingIndicator className="size-3 shrink-0 text-muted-foreground" />
             ) : assignees.length > 0 ? (
               <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
             ) : null}
@@ -2000,7 +2000,7 @@ function GHAssigneesCell({
                   )}
                 >
                   {pending ? (
-                    <LoaderCircle className="size-3 animate-spin" />
+                    <LoadingIndicator className="size-3" />
                   ) : isOn ? (
                     <Check className="size-3" />
                   ) : null}
@@ -2908,7 +2908,7 @@ function PRMergeCell({
                   )}
                 >
                   {merging ? (
-                    <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+                    <LoadingIndicator className="size-3 text-muted-foreground" />
                   ) : (
                     <GitMerge className="size-3" />
                   )}
@@ -3033,11 +3033,7 @@ function PaginationBar({
             aria-current={entry === currentPage ? 'page' : undefined}
             className={numClass(entry)}
           >
-            {loadingTarget === entry ? (
-              <LoaderCircle className="size-3.5 animate-spin" />
-            ) : (
-              entry + 1
-            )}
+            {loadingTarget === entry ? <LoadingIndicator className="size-3.5" /> : entry + 1}
           </button>
         )
       )}
@@ -8627,7 +8623,7 @@ export default function TaskPage(): React.JSX.Element {
                                 className="size-8 cursor-pointer border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md disabled:pointer-events-auto disabled:cursor-wait supports-[backdrop-filter]:bg-transparent"
                               >
                                 {githubTasksBusy ? (
-                                  <LoaderCircle className="size-4 animate-spin" />
+                                  <LoadingIndicator className="size-4" />
                                 ) : (
                                   <RefreshCw className="size-4" />
                                 )}
@@ -8845,13 +8841,13 @@ export default function TaskPage(): React.JSX.Element {
                                 className="size-8 border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
                               >
                                 {linearMode === 'issues' && linearLoading ? (
-                                  <LoaderCircle className="size-4 animate-spin" />
+                                  <LoadingIndicator className="size-4" />
                                 ) : linearMode === 'projects' &&
                                   (linearProjectsLoading || linearProjectDetailLoading) ? (
-                                  <LoaderCircle className="size-4 animate-spin" />
+                                  <LoadingIndicator className="size-4" />
                                 ) : linearMode === 'views' &&
                                   (linearCustomViewsLoading || linearCustomViewContentsLoading) ? (
-                                  <LoaderCircle className="size-4 animate-spin" />
+                                  <LoadingIndicator className="size-4" />
                                 ) : (
                                   <RefreshCw className="size-4" />
                                 )}
@@ -9023,7 +9019,7 @@ export default function TaskPage(): React.JSX.Element {
                                 className="border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
                               >
                                 {jiraProjectsLoading ? (
-                                  <LoaderCircle className="size-4 animate-spin" />
+                                  <LoadingIndicator className="size-4" />
                                 ) : (
                                   <Plus className="size-4" />
                                 )}
@@ -9049,7 +9045,7 @@ export default function TaskPage(): React.JSX.Element {
                                 className="border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
                               >
                                 {jiraLoading ? (
-                                  <LoaderCircle className="size-4 animate-spin" />
+                                  <LoadingIndicator className="size-4" />
                                 ) : (
                                   <RefreshCw className="size-4" />
                                 )}
@@ -9237,7 +9233,7 @@ export default function TaskPage(): React.JSX.Element {
                                   className="border-border/50 bg-transparent hover:bg-muted/50 backdrop-blur-md supports-[backdrop-filter]:bg-transparent"
                                 >
                                   {gitlabLoading || gitlabTodosLoading ? (
-                                    <LoaderCircle className="size-4 animate-spin" />
+                                    <LoadingIndicator className="size-4" />
                                   ) : (
                                     <RefreshCw className="size-4" />
                                   )}
@@ -9394,7 +9390,7 @@ export default function TaskPage(): React.JSX.Element {
                         >
                           {retryingSourceKeys.has(s.sourceKey) ? (
                             <span className="flex items-center gap-1">
-                              <LoaderCircle className="h-3 w-3 animate-spin" />
+                              <LoadingIndicator className="h-3 w-3" />
                               {translate('auto.components.TaskPage.5b6b2af943', 'Retrying…')}
                             </span>
                           ) : (
@@ -10097,7 +10093,7 @@ export default function TaskPage(): React.JSX.Element {
           ) : taskSource === 'jira' ? (
             !jiraStatusReady ? (
               <div className="mt-4 flex items-center justify-center py-14">
-                <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-5 text-muted-foreground" />
               </div>
             ) : !jiraConnected ? (
               <div className="mt-4 flex flex-col items-center justify-center rounded-md border border-border/50 bg-muted/50 px-6 py-14 text-center shadow-sm">
@@ -10220,7 +10216,7 @@ export default function TaskPage(): React.JSX.Element {
             />
           ) : !linearStatusReady ? (
             <div className="mt-4 flex items-center justify-center py-14">
-              <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+              <LoadingIndicator className="size-5 text-muted-foreground" />
             </div>
           ) : !linearConnected ? (
             <div className="mt-4 flex flex-col items-center justify-center rounded-md border border-border/50 bg-muted/50 px-6 py-14 text-center shadow-sm">
@@ -11412,7 +11408,7 @@ export default function TaskPage(): React.JSX.Element {
             >
               {newIssueSubmitting ? (
                 <>
-                  <LoaderCircle className="size-4 animate-spin" />
+                  <LoadingIndicator className="size-4" />
                   {translate('auto.components.TaskPage.8ff6fdc368', 'Creating…')}
                 </>
               ) : (
@@ -11618,7 +11614,7 @@ export default function TaskPage(): React.JSX.Element {
                   </div>
                   {newLinearProjectMembers.loading ? (
                     <div className="flex items-center justify-center p-4">
-                      <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                      <LoadingIndicator className="size-4 text-muted-foreground" />
                     </div>
                   ) : (
                     <div className="max-h-64 overflow-y-auto scrollbar-sleek">
@@ -11703,7 +11699,7 @@ export default function TaskPage(): React.JSX.Element {
                   </div>
                   {newLinearProjectMembers.loading ? (
                     <div className="flex items-center justify-center p-4">
-                      <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                      <LoadingIndicator className="size-4 text-muted-foreground" />
                     </div>
                   ) : (
                     <div className="max-h-64 overflow-y-auto scrollbar-sleek">
@@ -11779,7 +11775,7 @@ export default function TaskPage(): React.JSX.Element {
                   </div>
                   {newLinearProjectLabels.loading ? (
                     <div className="flex items-center justify-center p-4">
-                      <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                      <LoadingIndicator className="size-4 text-muted-foreground" />
                     </div>
                   ) : (
                     <div className="max-h-64 overflow-y-auto scrollbar-sleek">
@@ -11892,7 +11888,7 @@ export default function TaskPage(): React.JSX.Element {
             >
               {newLinearProjectSubmitting ? (
                 <>
-                  <LoaderCircle className="size-4 animate-spin" />
+                  <LoadingIndicator className="size-4" />
                   {translate('auto.components.TaskPage.1b59a07674', 'Creating...')}
                 </>
               ) : (
@@ -12046,7 +12042,7 @@ export default function TaskPage(): React.JSX.Element {
                   </div>
                   {newLinearStates.loading ? (
                     <div className="flex items-center justify-center p-4">
-                      <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                      <LoadingIndicator className="size-4 text-muted-foreground" />
                     </div>
                   ) : (
                     <div className="max-h-60 overflow-y-auto scrollbar-sleek">
@@ -12129,7 +12125,7 @@ export default function TaskPage(): React.JSX.Element {
                   </div>
                   {newLinearMembers.loading ? (
                     <div className="flex items-center justify-center p-4">
-                      <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                      <LoadingIndicator className="size-4 text-muted-foreground" />
                     </div>
                   ) : (
                     <div className="max-h-60 overflow-y-auto scrollbar-sleek">
@@ -12277,7 +12273,7 @@ export default function TaskPage(): React.JSX.Element {
                   </div>
                   {newLinearIssueProjectsLoading ? (
                     <div className="flex items-center justify-center p-4">
-                      <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                      <LoadingIndicator className="size-4 text-muted-foreground" />
                     </div>
                   ) : (
                     <div className="max-h-60 overflow-y-auto scrollbar-sleek">
@@ -12359,7 +12355,7 @@ export default function TaskPage(): React.JSX.Element {
                   </div>
                   {newLinearLabels.loading ? (
                     <div className="flex items-center justify-center p-4">
-                      <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                      <LoadingIndicator className="size-4 text-muted-foreground" />
                     </div>
                   ) : (
                     <div className="max-h-60 overflow-y-auto scrollbar-sleek">
@@ -12430,7 +12426,7 @@ export default function TaskPage(): React.JSX.Element {
               >
                 {newLinearIssueSubmitting ? (
                   <>
-                    <LoaderCircle className="size-3.5 animate-spin mr-1" />
+                    <LoadingIndicator className="size-3.5 mr-1" />
                     {translate('auto.components.TaskPage.8ff6fdc368', 'Creating…')}
                   </>
                 ) : (
@@ -12633,7 +12629,7 @@ export default function TaskPage(): React.JSX.Element {
             </div>
             {jiraCreateFieldsLoading ? (
               <div className="flex items-center gap-2 rounded-md border border-border/50 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                <LoaderCircle className="size-3.5 animate-spin" />
+                <LoadingIndicator className="size-3.5" />
                 {translate('auto.components.TaskPage.cbcdcbe244', 'Loading required Jira fields…')}
               </div>
             ) : null}
@@ -12738,7 +12734,7 @@ export default function TaskPage(): React.JSX.Element {
             >
               {newJiraIssueSubmitting ? (
                 <>
-                  <LoaderCircle className="size-4 animate-spin" />
+                  <LoadingIndicator className="size-4" />
                   {translate('auto.components.TaskPage.8ff6fdc368', 'Creating…')}
                 </>
               ) : (

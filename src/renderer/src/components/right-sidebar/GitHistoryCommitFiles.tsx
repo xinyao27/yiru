@@ -1,5 +1,6 @@
 import type React from 'react'
-import { ArrowUpRight, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { ArrowUpRight } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { STATUS_COLORS, STATUS_LABELS } from './status-display'
 import {
   toPermanentSourceControlRowOpenEvent,
@@ -68,7 +69,7 @@ function CommitFilesBody({
   if (state.status === 'loading') {
     return (
       <div className="flex items-center gap-2 py-1 pl-9 pr-3 text-[11px] text-muted-foreground">
-        <RefreshCw className="size-3 animate-spin" />
+        <LoadingIndicator className="size-3" />
         <span>
           {translate(
             'auto.components.right.sidebar.GitHistoryCommitFiles.a1b2c3d4e5',

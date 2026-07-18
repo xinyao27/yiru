@@ -3,10 +3,10 @@ import {
   ArrowCounterClockwise as RotateCcw,
   LockKey as LockKeyhole,
   Play,
-  SpinnerGap as Loader2,
   TerminalWindow as SquareTerminal,
   WarningCircle as AlertCircle
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
@@ -35,7 +35,7 @@ export function SpoolSessionContinuationNotice({
   const closed = phase === 'closed'
   const ended = phase === 'ended'
   const Icon = loading
-    ? Loader2
+    ? LoadingIndicator
     : waiting
       ? LockKeyhole
       : closed
@@ -49,9 +49,7 @@ export function SpoolSessionContinuationNotice({
       <div className="flex max-w-sm flex-col items-center gap-2 text-center">
         <Icon
           aria-hidden="true"
-          className={
-            loading ? 'size-4 animate-spin text-muted-foreground' : 'size-5 text-muted-foreground'
-          }
+          className={loading ? 'size-4 text-muted-foreground' : 'size-5 text-muted-foreground'}
         />
         <p className="text-xs leading-5 text-muted-foreground">{message}</p>
         {phase === 'closed' && canControl ? (

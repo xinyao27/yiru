@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { SpinnerGap as Loader2, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { GlobalSettings } from '../../../../shared/types'
 import { cn } from '@/lib/class-names'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
@@ -219,7 +220,7 @@ export function MobileEmulatorSettingsPane({
                 variant="outline"
                 className={cn('text-[11px]', statusBadgeClassName(availability, enabled))}
               >
-                {refreshing ? <Loader2 className="size-3 animate-spin" /> : null}
+                {refreshing ? <LoadingIndicator className="size-3" /> : null}
                 {statusText(availability, enabled)}
               </Badge>
               <Button
@@ -234,7 +235,7 @@ export function MobileEmulatorSettingsPane({
                 disabled={refreshing}
               >
                 {refreshing ? (
-                  <Loader2 className="size-3.5 animate-spin" />
+                  <LoadingIndicator className="size-3.5" />
                 ) : (
                   <RefreshCw className="size-3.5" />
                 )}

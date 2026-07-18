@@ -100,7 +100,7 @@ function ReviewStatus({ status }: { status: SpoolChecksReview['status'] }): Reac
   const StatusIcon = CHECK_ICON[status] ?? CHECK_ICON.neutral
   return (
     <span className={cn('flex items-center gap-1.5 text-[11px]', CHECK_COLOR[status])}>
-      <StatusIcon className={cn('size-3.5', status === 'pending' && 'animate-spin')} />
+      <StatusIcon className="size-3.5" />
       {reviewStatusLabel(status)}
     </span>
   )

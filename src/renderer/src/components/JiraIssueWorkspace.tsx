@@ -7,12 +7,12 @@ import {
   Clipboard,
   ArrowSquareOut as ExternalLink,
   GitBranch,
-  CircleNotch as LoaderCircle,
   ArrowClockwise as RefreshCw,
   FloppyDisk as Save,
   PaperPlaneRight as Send,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
@@ -420,7 +420,7 @@ export default function JiraIssueWorkspace({
                     {displayed.siteName ? <span>{displayed.siteName}</span> : null}
                     <span>{displayed.project.key}</span>
                     <span>{formatRelativeTime(displayed.updatedAt)}</span>
-                    {issueLoading ? <LoaderCircle className="size-3 animate-spin" /> : null}
+                    {issueLoading ? <LoadingIndicator className="size-3" /> : null}
                   </div>
                   <h2 className="mt-1 text-[20px] font-semibold leading-tight text-foreground">
                     {displayed.title}
@@ -472,7 +472,7 @@ export default function JiraIssueWorkspace({
                     >
                       {displayed.status.name}
                       {pendingField === 'transition' ? (
-                        <LoaderCircle className="size-3 animate-spin" />
+                        <LoadingIndicator className="size-3" />
                       ) : null}
                     </button>
                   }
@@ -511,7 +511,7 @@ export default function JiraIssueWorkspace({
                       {displayed.priority?.name ??
                         translate('auto.components.JiraIssueWorkspace.51bed73f88', 'No priority')}
                       {pendingField === 'priority' ? (
-                        <LoaderCircle className="ml-1 inline size-3 animate-spin" />
+                        <LoadingIndicator className="ml-1 size-3" />
                       ) : null}
                     </button>
                   }
@@ -554,9 +554,7 @@ export default function JiraIssueWorkspace({
                     >
                       {displayed.assignee?.displayName ??
                         translate('auto.components.JiraIssueWorkspace.54649eaeab', '+ Assignee')}
-                      {pendingField === 'assignee' ? (
-                        <LoaderCircle className="size-3 animate-spin" />
-                      ) : null}
+                      {pendingField === 'assignee' ? <LoadingIndicator className="size-3" /> : null}
                     </button>
                   }
                 />
@@ -626,7 +624,7 @@ export default function JiraIssueWorkspace({
                         disabled={pendingField === 'title'}
                       >
                         {pendingField === 'title' ? (
-                          <LoaderCircle className="size-4 animate-spin" />
+                          <LoadingIndicator className="size-4" />
                         ) : (
                           <Save className="size-4" />
                         )}
@@ -652,7 +650,7 @@ export default function JiraIssueWorkspace({
                         disabled={pendingField === 'labels'}
                       >
                         {pendingField === 'labels' ? (
-                          <LoaderCircle className="size-4 animate-spin" />
+                          <LoadingIndicator className="size-4" />
                         ) : (
                           <Save className="size-4" />
                         )}
@@ -708,7 +706,7 @@ export default function JiraIssueWorkspace({
                         className="gap-1"
                       >
                         {commentsLoading ? (
-                          <LoaderCircle className="size-3 animate-spin" />
+                          <LoadingIndicator className="size-3" />
                         ) : (
                           <RefreshCw className="size-3" />
                         )}
@@ -722,7 +720,7 @@ export default function JiraIssueWorkspace({
                     </div>
                   ) : commentsLoading && comments.length === 0 ? (
                     <div className="flex items-center justify-center py-8">
-                      <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                      <LoadingIndicator className="size-4 text-muted-foreground" />
                     </div>
                   ) : comments.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
@@ -824,7 +822,7 @@ export default function JiraIssueWorkspace({
                   className="self-end gap-2"
                 >
                   {commentSubmitting ? (
-                    <LoaderCircle className="size-4 animate-spin" />
+                    <LoadingIndicator className="size-4" />
                   ) : (
                     <Send className="size-4" />
                   )}

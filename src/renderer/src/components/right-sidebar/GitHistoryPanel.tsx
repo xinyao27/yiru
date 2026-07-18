@@ -4,6 +4,7 @@ import {
   Question as CircleHelp,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/class-names'
@@ -301,7 +302,11 @@ export function GitHistoryPanel({
                     'Refresh commits'
                   )}
                 >
-                  <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
+                  {loading ? (
+                    <LoadingIndicator className="size-3.5" />
+                  ) : (
+                    <RefreshCw className="size-3.5" />
+                  )}
                 </Button>
               }
             />
@@ -330,7 +335,7 @@ export function GitHistoryPanel({
           )}
           style={expandedBodyStyle}
         >
-          <RefreshCw className="size-3 animate-spin" />
+          <LoadingIndicator className="size-3" />
           <span>
             {translate(
               'auto.components.right.sidebar.GitHistoryPanel.781a8bcf7b',

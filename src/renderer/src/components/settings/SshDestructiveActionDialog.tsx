@@ -1,4 +1,4 @@
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '../ui/button'
 import {
   Dialog,
@@ -60,7 +60,7 @@ export function SshDestructiveActionDialog({
             {translate('auto.components.settings.SshDestructiveActionDialog.895b216267', 'Cancel')}
           </Button>
           <Button variant="destructive" onClick={onConfirm} disabled={isBusy} className="gap-1.5">
-            {isBusy ? <Loader2 className="size-3 animate-spin" /> : null}
+            {isBusy ? <LoadingIndicator className="size-3" /> : null}
             {isBusy ? (busyLabel ?? actionLabel) : actionLabel}
           </Button>
         </DialogFooter>

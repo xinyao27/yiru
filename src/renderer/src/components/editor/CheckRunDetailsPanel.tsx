@@ -1,9 +1,6 @@
 import React from 'react'
-import {
-  ArrowSquareOut as ExternalLink,
-  CircleNotch as LoaderCircle,
-  ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
+import { ArrowSquareOut as ExternalLink, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
@@ -13,7 +10,6 @@ import { translate } from '@/i18n/i18n'
 import { useCheckRunDetailsFixWithAI } from './check-run-details-fix-with-ai'
 import { CheckRunAnnotations } from './CheckRunAnnotations'
 import { CheckRunJobs } from './CheckRunJobs'
-import { cn } from '@/lib/class-names'
 
 function formatCheckTimestamp(value: string | null | undefined): string | null {
   if (!value) {
@@ -212,7 +208,11 @@ export function CheckRunDetailsPanel({
                 disabled={loading}
                 onClick={onRefresh}
               >
-                <RefreshCw className={cn('size-3.5', loading ? 'animate-spin' : '')} />
+                {loading ? (
+                  <LoadingIndicator className="size-3.5" />
+                ) : (
+                  <RefreshCw className="size-3.5" />
+                )}
                 {translate('auto.components.editor.CheckRunDetailsPanel.b7f5e2c91a', 'Refresh')}
               </Button>
             )}
@@ -253,7 +253,7 @@ export function CheckRunDetailsPanel({
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 scrollbar-sleek">
         {loading ? (
           <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-            <LoaderCircle className="size-4 animate-spin" />
+            <LoadingIndicator className="size-4" />
             {translate(
               'auto.components.editor.CheckRunDetailsPanel.1f2b980522',
               'Loading check details…'

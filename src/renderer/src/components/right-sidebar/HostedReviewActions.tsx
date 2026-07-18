@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo } from 'react'
 import {
-  CircleNotch as LoaderCircle,
   GitMerge,
   CaretDown as ChevronDown,
   GitPullRequest as GitPullRequestClosed
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '@/store'
 import { cn } from '@/lib/class-names'
 import { Button } from '@/components/ui/button'
@@ -140,7 +140,7 @@ export default function HostedReviewActions({
                       disabled={primaryMergeDisabled}
                     >
                       {merging ? (
-                        <LoaderCircle className="size-3.5 animate-spin" />
+                        <LoadingIndicator className="size-3.5" />
                       ) : (
                         <GitMerge className="size-3.5" />
                       )}
@@ -187,7 +187,7 @@ export default function HostedReviewActions({
                     )}
                   >
                     {stateUpdating === 'closed' ? (
-                      <LoaderCircle className="size-3.5 animate-spin" />
+                      <LoadingIndicator className="size-3.5" />
                     ) : (
                       <ChevronDown className="size-3.5" />
                     )}

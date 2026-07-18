@@ -1,5 +1,5 @@
 import React from 'react'
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 
 type FileExplorerTreeStatusProps = {
@@ -18,7 +18,7 @@ export function FileExplorerTreeStatus({
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center text-[11px] text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
+        <LoadingIndicator className="size-4" />
       </div>
     )
   }

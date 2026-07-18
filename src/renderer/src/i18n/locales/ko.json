@@ -35,6 +35,16 @@
       "menuBarIcon": {
         "title": "메뉴 바 아이콘 표시",
         "description": "macOS 메뉴 바에 Yiru 바로가기 및 활동 표시기를 유지합니다."
+      },
+      "loader": {
+        "title": "로더",
+        "description": "Yiru 전체에서 사용할 로딩 애니메이션을 선택합니다. 손그림 아이콘은 저금통, 계산기, 지갑, 고양이 순으로 전환됩니다.",
+        "drawing": "손그림 아이콘",
+        "code": "코드 중괄호",
+        "macos": "macOS",
+        "square": "사각형",
+        "flipbook": "플립북",
+        "escalade": "Escalade"
       }
     }
   },

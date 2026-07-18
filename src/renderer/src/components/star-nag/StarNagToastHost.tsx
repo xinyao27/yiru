@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  Check,
-  ArrowSquareOut as ExternalLink,
-  SpinnerGap as Loader2,
-  Star,
-  X
-} from '@phosphor-icons/react'
+import { Check, ArrowSquareOut as ExternalLink, Star, X } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
@@ -152,7 +147,7 @@ function StarNagToast({
           disabled={busy || status === 'starred' || status === 'opened'}
         >
           {busy ? (
-            <Loader2 className="size-3.5 animate-spin" />
+            <LoadingIndicator className="size-3.5" />
           ) : mode === 'web' ? (
             <ExternalLink className="size-3.5" />
           ) : (

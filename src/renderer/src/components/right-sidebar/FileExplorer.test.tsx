@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   DotsThree as Ellipsis,
   ListDashes as ListCollapse,
-  SpinnerGap as Loader2,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu'
 import { WorktreeOpenInMenuItems } from '@/components/sidebar/WorktreeOpenInMenu'
@@ -335,7 +335,7 @@ describe('FileExplorerToolbar', () => {
     expect(button.props.disabled).toBe(false)
     expect(button.props['aria-disabled']).toBe(false)
     expect(hasIcon(button, RefreshCw)).toBe(true)
-    expect(hasIcon(button, Loader2)).toBe(false)
+    expect(hasIcon(button, LoadingIndicator)).toBe(false)
   })
 
   it('shows the repo name in a truncated label', () => {
@@ -358,7 +358,7 @@ describe('FileExplorerToolbar', () => {
 
     expect(button.props.disabled).toBe(true)
     expect(button.props['aria-disabled']).toBe(true)
-    expect(hasIcon(button, Loader2)).toBe(true)
+    expect(hasIcon(button, LoadingIndicator)).toBe(true)
     expect(hasIcon(button, RefreshCw)).toBe(false)
   })
 

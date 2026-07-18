@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Cloud, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { Cloud } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { translate } from '../../i18n/i18n'
@@ -136,7 +137,7 @@ function CompactConnectionOptions({
               disabled={connecting}
               onClick={() => void connect()}
             >
-              {connecting ? <Loader2 className="animate-spin" /> : null}
+              {connecting ? <LoadingIndicator /> : null}
               {translate(
                 'auto.components.settings.MobilePairingConnectionOptions.signIn',
                 'Sign in'
@@ -227,7 +228,7 @@ export function MobilePairingConnectionOptions({
               disabled={connecting}
               onClick={() => void connect()}
             >
-              {connecting ? <Loader2 className="animate-spin" /> : null}
+              {connecting ? <LoadingIndicator /> : null}
               {translate(
                 'auto.components.settings.MobilePairingConnectionOptions.signIn',
                 'Sign in'

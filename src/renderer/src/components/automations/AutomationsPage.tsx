@@ -17,6 +17,7 @@ import {
 import { toast } from 'sonner'
 import { filterEnabledTuiAgents, isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import type { Badge } from '@/components/ui/badge'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
 import {
@@ -2186,7 +2187,11 @@ export default function AutomationsPage(): React.JSX.Element {
                   disabled={isLoading}
                   className="border border-border/50 bg-transparent hover:bg-muted/50"
                 >
-                  <RefreshCw className={cn('size-4', isLoading && 'animate-spin')} />
+                  {isLoading ? (
+                    <LoadingIndicator className="size-4" />
+                  ) : (
+                    <RefreshCw className="size-4" />
+                  )}
                 </Button>
               }
             />
@@ -2834,7 +2839,7 @@ export default function AutomationsPage(): React.JSX.Element {
                         }
                       >
                         {selectedExternalSourceAvailability?.isConnecting ? (
-                          <RefreshCw className="size-3.5 animate-spin" />
+                          <LoadingIndicator className="size-3.5" />
                         ) : null}
                         {selectedExternalSourceAvailability?.isConnecting
                           ? translate(
@@ -2935,12 +2940,11 @@ export default function AutomationsPage(): React.JSX.Element {
                               void rerunAutomationRun(selected, selectedAutomationRunPage)
                             }
                           >
-                            <RefreshCw
-                              className={cn(
-                                'size-3.5',
-                                isSelectedAutomationRunPageRerunPending && 'animate-spin'
-                              )}
-                            />
+                            {isSelectedAutomationRunPageRerunPending ? (
+                              <LoadingIndicator className="size-3.5" />
+                            ) : (
+                              <RefreshCw className="size-3.5" />
+                            )}
                             {translate(
                               'auto.components.automations.AutomationsPage.295698292f',
                               'Rerun'

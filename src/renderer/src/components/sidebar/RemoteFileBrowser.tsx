@@ -4,10 +4,10 @@ import {
   CaretRight as ChevronRight,
   Folder,
   ArrowUp,
-  CircleNotch as LoaderCircle,
   House as Home,
   MagnifyingGlass as Search
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
@@ -694,7 +694,7 @@ export function RemoteFileBrowser({
           )}
         />
         {showPreviewLoading && (
-          <LoaderCircle className="size-3.5 absolute right-2 top-1/2 -translate-y-1/2 animate-spin text-muted-foreground" />
+          <LoadingIndicator className="size-3.5 absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
         )}
       </div>
 
@@ -713,7 +713,7 @@ export function RemoteFileBrowser({
         <div className="h-[240px] overflow-y-auto scrollbar-sleek">
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+              <LoadingIndicator className="size-5 text-muted-foreground" />
             </div>
           ) : error ? (
             <div className="flex items-center justify-center h-full px-4">

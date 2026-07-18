@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Copy, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { IntegrationStatusPill } from '@/components/integration-status-pill'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -14,7 +15,6 @@ import {
   YIRU_LINEAR_SKILL_NAME
 } from '@/lib/agent-feature-install-commands'
 import { getLinearAgentSkillUpdateCommand } from '@/lib/linear-agent-skill-update-command'
-import { cn } from '@/lib/class-names'
 import { getLinearAgentSkillSetupInlineRuntimeCopy } from '../sidebar/linear-agent-skill-setup-copy'
 import {
   getCurrentPlatform,
@@ -128,7 +128,11 @@ export function LinearAgentSkillInstallCta({
           onClick={() => void skill.refresh()}
           disabled={skill.loading}
         >
-          <RefreshCw className={cn('size-3', skill.loading && 'animate-spin')} />
+          {skill.loading ? (
+            <LoadingIndicator className="size-3" />
+          ) : (
+            <RefreshCw className="size-3" />
+          )}
           {translate('auto.components.settings.linear.agent.skill.install.cta.recheck', 'Re-check')}
         </Button>
       </div>

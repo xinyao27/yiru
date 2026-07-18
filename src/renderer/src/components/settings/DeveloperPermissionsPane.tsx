@@ -19,6 +19,7 @@ import type {
   DeveloperPermissionState,
   DeveloperPermissionStatus
 } from '../../../../shared/developer-permissions-types'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '../ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -335,7 +336,7 @@ export function DeveloperPermissionsPane(): React.JSX.Element {
           </p>
         </div>
         <Button variant="outline" size="sm" className="gap-1.5" onClick={() => void refresh()}>
-          <RefreshCw className={cn('size-3.5', loading ? 'animate-spin' : '')} />
+          {loading ? <LoadingIndicator className="size-3.5" /> : <RefreshCw className="size-3.5" />}
           {translate('auto.components.settings.DeveloperPermissionsPane.4c17304beb', 'Refresh')}
         </Button>
       </div>

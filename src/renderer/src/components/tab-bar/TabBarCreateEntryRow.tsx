@@ -3,10 +3,10 @@ import {
   FilePlus,
   FileText,
   Globe,
-  SpinnerGap as Loader2,
   DeviceMobile as Smartphone,
   TerminalWindow as TerminalSquare
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
@@ -29,7 +29,7 @@ export function EntryStatusRow({
 }): React.JSX.Element {
   return (
     <div className="flex min-h-6 items-center gap-1.5 rounded-[7px] px-1 text-[11px] leading-5 text-muted-foreground">
-      {loading ? <Loader2 className="size-3.5 shrink-0 animate-spin" aria-hidden="true" /> : null}
+      {loading ? <LoadingIndicator className="size-3.5 shrink-0" aria-hidden="true" /> : null}
       <span className="truncate">{message}</span>
     </div>
   )

@@ -1,4 +1,5 @@
-import { FileArrowUp as FileUp, FolderOpen, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { FileArrowUp as FileUp, FolderOpen } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { WarpThemeImportPreviewTheme } from '../../../../shared/terminal-custom-themes'
 import { Button } from '../ui/button'
 import {
@@ -136,7 +137,7 @@ export function WarpThemeImportModal({
 
           {loading ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" />
+              <LoadingIndicator className="size-4" />
               {translate(
                 'auto.components.settings.WarpThemeImportModal.loading',
                 'Loading Warp themes...'

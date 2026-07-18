@@ -1,4 +1,5 @@
-import { Check, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { Check } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 
 export type StepState = 'pending' | 'done' | 'in-progress'
 
@@ -19,7 +20,7 @@ export function StepBadge({
   if (state === 'in-progress') {
     return (
       <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-        <Loader2 className="size-3.5 animate-spin" />
+        <LoadingIndicator className="size-3.5" />
       </div>
     )
   }

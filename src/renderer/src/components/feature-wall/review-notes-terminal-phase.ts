@@ -22,7 +22,18 @@ export function resetTerminal(term: HTMLDivElement): void {
   setLineHTML(term, '[data-term-line-loaded]', '')
   setLineHTML(term, '[data-term-line-ack-0]', '')
   setLineHTML(term, '[data-term-line-ack-1]', '')
-  setLineHTML(term, '[data-term-line-tail]', '')
+  setTerminalSpinnerHidden(term, true)
+  const tailText = term.querySelector<HTMLElement>('[data-term-tail-text]')
+  if (tailText) {
+    tailText.textContent = ''
+  }
+}
+
+function setTerminalSpinnerHidden(term: HTMLDivElement, hidden: boolean): void {
+  const spinner = term.querySelector<HTMLElement>('[data-term-spinner]')
+  if (spinner) {
+    spinner.hidden = hidden
+  }
 }
 
 function setLineHTML(term: HTMLDivElement, selector: string, html: string): void {
@@ -88,11 +99,7 @@ export async function runTerminalPhase(ctx: TerminalPhaseContext): Promise<void>
       }
     }
   }
-  const tail = term.querySelector<HTMLDivElement>('[data-term-line-tail]')
-  if (tail) {
-    tail.innerHTML =
-      '<span class="ravs-term-spinner" aria-hidden="true"></span><span class="ravs-term-muted" data-term-tail-text></span>'
-  }
+  setTerminalSpinnerHidden(term, false)
   await typeInto(ctx, '[data-term-tail-text]', 'Fixing both issues...', 14)
   if (isCancelled()) {
     return

@@ -1,10 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import {
-  Plug,
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
-  CircleNotch as LoaderCircle
-} from '@phosphor-icons/react'
+import { Plug, CaretDown as ChevronDown, CaretRight as ChevronRight } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAppStore } from '@/store'
@@ -99,7 +95,7 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
                     )}
                   >
                     {refreshing ? (
-                      <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+                      <LoadingIndicator className="size-3 text-muted-foreground" />
                     ) : (
                       <Plug className="size-3 text-muted-foreground" />
                     )}

@@ -35,6 +35,16 @@
       "menuBarIcon": {
         "title": "Mostrar icono en la barra de menús",
         "description": "Mantén un acceso directo de Yiru e indicador de actividad en la barra de menús de macOS."
+      },
+      "loader": {
+        "title": "Cargador",
+        "description": "Elige la animación de carga que se usa en Yiru. Los iconos dibujados alternan entre una alcancía, una calculadora, una cartera y un gatito.",
+        "drawing": "Iconos dibujados",
+        "code": "Llaves de código",
+        "macos": "macOS",
+        "square": "Cuadrado",
+        "flipbook": "Libro animado",
+        "escalade": "Escalade"
       }
     }
   },

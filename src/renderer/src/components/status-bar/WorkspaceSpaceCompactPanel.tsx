@@ -2,10 +2,10 @@ import { useCallback } from 'react'
 import {
   Warning as AlertTriangle,
   HardDrive,
-  SpinnerGap as Loader2,
   ArrowClockwise as RefreshCw,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '../../store'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
@@ -108,7 +108,7 @@ export function WorkspaceSpaceCompactPanel({
           >
             {isScanning ? (
               progress?.state === 'cancelling' ? (
-                <Loader2 className="size-3 animate-spin" />
+                <LoadingIndicator className="size-3" />
               ) : (
                 <X className="size-3" />
               )

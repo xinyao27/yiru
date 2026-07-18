@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import {
-  SpinnerGap as Loader2,
-  HardDrives as Server,
-  HardDrive as ServerOff
-} from '@phosphor-icons/react'
+import { HardDrives as Server, HardDrive as ServerOff } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import {
   Dialog,
   DialogContent,
@@ -171,7 +168,7 @@ export function ForgetSshWorkspaceDialog(): React.JSX.Element | null {
             onClick={() => void handleForget()}
             disabled={busy != null}
           >
-            {busy === 'forget' ? <Loader2 className="size-3.5 animate-spin" /> : null}
+            {busy === 'forget' ? <LoadingIndicator className="size-3.5" /> : null}
             {translate(
               'auto.components.sidebar.ForgetSshWorkspaceDialog.forget',
               'Remove from Yiru'
@@ -183,7 +180,7 @@ export function ForgetSshWorkspaceDialog(): React.JSX.Element | null {
               onClick={() => void handleReconnectAndDelete()}
               disabled={busy != null}
             >
-              {busy === 'reconnect' ? <Loader2 className="size-3.5 animate-spin" /> : null}
+              {busy === 'reconnect' ? <LoadingIndicator className="size-3.5" /> : null}
               {translate(
                 'auto.components.sidebar.ForgetSshWorkspaceDialog.reconnectAndDelete',
                 'Reconnect & Delete'

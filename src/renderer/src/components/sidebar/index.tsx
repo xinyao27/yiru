@@ -10,7 +10,8 @@ import SidebarToolbar from './SidebarToolbar'
 import WorkspaceKanbanDrawer from './WorkspaceKanbanDrawer'
 import type { VirtualizedScrollAnchor } from '@/hooks/useVirtualizedScrollAnchor'
 import { cn } from '@/lib/class-names'
-import { FolderPlus, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { FolderPlus } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useSidebarProjectDrop } from './useSidebarProjectDrop'
 import { useWorkspaceBoardPanel } from './useWorkspaceBoardPanel'
 import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
@@ -175,7 +176,7 @@ function Sidebar({
             )}
           >
             {affordance.tone === 'busy' ? (
-              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+              <LoadingIndicator className="size-5 text-muted-foreground" />
             ) : (
               <FolderPlus className="size-5 text-muted-foreground" />
             )}

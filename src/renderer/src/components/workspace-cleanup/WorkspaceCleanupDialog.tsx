@@ -4,13 +4,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Warning as AlertTriangle,
-  SpinnerGap as Loader2,
   ArrowCounterClockwise as RefreshCcw,
   MagnifyingGlass as Search,
   SlidersHorizontal,
   Trash as Trash2,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 import {
@@ -707,7 +707,11 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
                           onClick={refresh}
                           disabled={loading}
                         >
-                          <RefreshCcw className={cn('size-3.5', loading && 'animate-spin')} />
+                          {loading ? (
+                            <LoadingIndicator className="size-3.5" />
+                          ) : (
+                            <RefreshCcw className="size-3.5" />
+                          )}
                         </Button>
                       }
                     />
@@ -735,7 +739,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
 
             {initialLoading ? (
               <div className="flex items-start gap-2 border-b border-border bg-muted/25 px-5 py-3">
-                <Loader2 className="mt-0.5 size-3.5 shrink-0 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0">
                   <div className="text-xs font-medium text-foreground">
                     {translate(
@@ -796,7 +800,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
             {loading && scan && hasAnyCandidates ? (
               <div className="border-b border-border bg-muted/25 px-5 py-2">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-                  <Loader2 className="size-3.5 shrink-0 animate-spin" />
+                  <LoadingIndicator className="size-3.5 shrink-0" />
                   <span>
                     {translate(
                       'auto.components.workspace.cleanup.WorkspaceCleanupDialog.9a3be9f2df',
@@ -1303,7 +1307,7 @@ function ConfirmRemove({
           <div className="flex min-w-0 items-start gap-3">
             <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border border-destructive/25 bg-destructive/10 text-destructive">
               {deleting ? (
-                <Loader2 className="size-4 animate-spin" />
+                <LoadingIndicator className="size-4" />
               ) : (
                 <AlertTriangle className="size-4" />
               )}
@@ -1352,7 +1356,7 @@ function ConfirmRemove({
         {progress ? (
           <div className="border-b border-border bg-muted/25 px-5 py-3">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Loader2 className="size-3.5 shrink-0 animate-spin" />
+              <LoadingIndicator className="size-3.5 shrink-0" />
               <span className="font-medium text-foreground">
                 {formatWorkspaceCleanupRemovalProgress(progress)}
               </span>

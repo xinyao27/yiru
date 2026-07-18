@@ -15,6 +15,7 @@ import {
   Info
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '@/store'
 import { useActiveWorktree, useRepoById } from '@/store/selectors'
 import { cn } from '@/lib/class-names'
@@ -350,7 +351,7 @@ function LocalWorkspacePortsPanel({ isVisible }: { isVisible: boolean }): React.
                   'Refresh Ports'
                 )}
               >
-                <RefreshCw size={14} className={cn(refreshing && 'animate-spin')} />
+                {refreshing ? <LoadingIndicator size={14} /> : <RefreshCw size={14} />}
               </Button>
             }
           />

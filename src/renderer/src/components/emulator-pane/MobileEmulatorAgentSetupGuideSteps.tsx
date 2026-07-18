@@ -1,4 +1,4 @@
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 import { YIRU_CLI_SKILL_INSTALL_COMMAND } from '@/lib/agent-feature-install-commands'
@@ -112,7 +112,7 @@ export function MobileEmulatorAgentSetupGuideSteps({
                     }}
                   >
                     {setup.cliLoading || setup.cliBusy ? (
-                      <Loader2 className="size-3.5 animate-spin" />
+                      <LoadingIndicator className="size-3.5" />
                     ) : null}
                     {setup.cliActionLabel}
                   </Button>

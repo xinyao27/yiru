@@ -14,7 +14,6 @@ import {
   GitBranch,
   GitPullRequest,
   HardDrive,
-  SpinnerGap as Loader2,
   Minus,
   ArrowClockwise as RefreshCw,
   MagnifyingGlass as Search,
@@ -25,6 +24,7 @@ import {
   MagnifyingGlassMinus as ZoomOut,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type {
   AgentStatusEntry,
   MigrationUnsupportedPtyEntry
@@ -420,7 +420,7 @@ function StatusBadge({
   if (deleteState?.isDeleting) {
     return (
       <Badge variant="outline" className="gap-1.5 text-muted-foreground">
-        <Loader2 className="size-3 animate-spin" />
+        <LoadingIndicator className="size-3" />
         {translate('auto.components.status.bar.WorkspaceSpaceManagerPanel.33653dbac2', 'Deleting')}
       </Badge>
     )
@@ -827,7 +827,7 @@ function WorkspaceTreemap({
           </Button>
         ) : null}
         <span className="flex items-center gap-2">
-          {isScanning ? <Loader2 className="size-4 animate-spin" /> : null}
+          {isScanning ? <LoadingIndicator className="size-4" /> : null}
           {isScanning
             ? translate(
                 'auto.components.status.bar.WorkspaceSpaceManagerPanel.c5135e7e4a',
@@ -953,7 +953,7 @@ function BreakdownList({
     return (
       <div className="flex h-full min-h-72 items-center justify-center rounded-lg border border-dashed border-border/70 bg-muted/15 text-sm text-muted-foreground">
         <span className="flex items-center gap-2">
-          {isScanning ? <Loader2 className="size-4 animate-spin" /> : null}
+          {isScanning ? <LoadingIndicator className="size-4" /> : null}
           {isScanning
             ? translate(
                 'auto.components.status.bar.WorkspaceSpaceManagerPanel.c5135e7e4a',
@@ -1681,7 +1681,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
           {isScanning ? (
-            <Loader2 className="size-4 shrink-0 animate-spin" />
+            <LoadingIndicator className="size-4 shrink-0" />
           ) : (
             <HardDrive className="size-4 shrink-0" />
           )}
@@ -1719,7 +1719,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
         >
           {isScanning ? (
             progress?.state === 'cancelling' ? (
-              <Loader2 className="size-3.5 animate-spin" />
+              <LoadingIndicator className="size-3.5" />
             ) : (
               <X className="size-3.5" />
             )
@@ -2008,7 +2008,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
             <div className="max-h-[28rem] overflow-y-auto scrollbar-sleek">
               {isInitialScan ? (
                 <div className="flex items-center justify-center gap-2 px-4 py-10 text-center text-sm text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin" />
+                  <LoadingIndicator className="size-4" />
                   {translate(
                     'auto.components.status.bar.WorkspaceSpaceManagerPanel.a02d84d2d2',
                     'Scanning workspaces. You can leave this page.'

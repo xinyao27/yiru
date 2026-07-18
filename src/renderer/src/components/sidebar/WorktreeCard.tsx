@@ -12,13 +12,13 @@ import {
   Warning as AlertTriangle,
   CaretDown as ChevronDown,
   GitMerge,
-  CircleNotch as LoaderCircle,
   HardDrives as Server,
   HardDrive as ServerOff,
   Star,
   Trash as Trash2,
   FlowArrow as Workflow
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import CacheTimer, { usePromptCacheCountdownStartedAt } from './CacheTimer'
 import WorktreeContextMenu from './WorktreeContextMenu'
 import { SshDisconnectedDialog } from './SshDisconnectedDialog'
@@ -1926,7 +1926,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
         <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/50 backdrop-blur-[1px]">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-background px-3 py-1 text-[11px] font-medium text-foreground shadow-sm border border-border/50">
             {!isQueuedForDeletion ? (
-              <LoaderCircle className="size-3.5 animate-spin text-muted-foreground" />
+              <LoadingIndicator className="size-3.5 text-muted-foreground" />
             ) : null}
             {deleteLabel}
           </div>

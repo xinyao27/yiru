@@ -1,4 +1,4 @@
-import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { cn } from '@/lib/class-names'
 
 type ClaudeUsageLoadingStateProps = {
@@ -20,7 +20,7 @@ export function ClaudeUsageLoadingState({
           <div className="mt-2 h-3 w-40 animate-pulse rounded bg-muted/70" />
         </div>
         <div className="flex shrink-0 items-center gap-2 self-start">
-          <RefreshCw className="size-3.5 animate-spin text-muted-foreground" />
+          <LoadingIndicator className="size-3.5 text-muted-foreground" />
           <div className="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent bg-foreground/80">
             <span className="pointer-events-none block size-3.5 translate-x-4 rounded-full bg-background shadow-sm" />
           </div>

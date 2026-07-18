@@ -1,8 +1,5 @@
-import {
-  SpinnerGap as Loader2,
-  ArrowClockwise as RefreshCw,
-  Trash as Trash2
-} from '@phosphor-icons/react'
+import { ArrowClockwise as RefreshCw, Trash as Trash2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { RuntimeAccessGrant } from '../../../../shared/runtime-access-grants'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
@@ -59,7 +56,7 @@ export function RuntimeAccessGrantList({
                   'Refresh shared access'
                 )}
               >
-                <RefreshCw className={isLoading ? 'animate-spin' : undefined} />
+                {isLoading ? <LoadingIndicator /> : <RefreshCw />}
               </Button>
             }
           />
@@ -136,7 +133,7 @@ export function RuntimeAccessGrantList({
                         )}
                       >
                         {isRevoking ? (
-                          <Loader2 className="size-3.5 animate-spin" />
+                          <LoadingIndicator className="size-3.5" />
                         ) : (
                           <Trash2 className="size-3.5" />
                         )}

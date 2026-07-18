@@ -2,11 +2,11 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   Check,
   Globe as Globe2,
-  SpinnerGap as Loader2,
   Monitor as MonitorCog,
   Terminal,
   FlowArrow as Workflow
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/class-names'
@@ -228,7 +228,7 @@ function AgentCapabilitySetupControls(props: {
             onClick={props.onStartFeatureSetup}
           >
             {props.setupBusyLabel ? (
-              <Loader2 className="size-4 animate-spin" />
+              <LoadingIndicator className="size-4" />
             ) : (
               <Terminal className="size-4" />
             )}

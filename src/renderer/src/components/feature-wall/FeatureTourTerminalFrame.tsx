@@ -1,4 +1,5 @@
 import type { JSX } from 'react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { ClaudeIcon } from '../status-bar/icons'
 import { translate } from '@/i18n/i18n'
 
@@ -57,7 +58,7 @@ export function FeatureTourTerminalFrame(): JSX.Element {
                 className="feature-tour-terminal-output flex min-w-0 items-center gap-1.5"
                 data-line="3"
               >
-                <span className="inline-block size-2 animate-spin rounded-full border-[1.5px] border-foreground/20 border-t-foreground" />
+                <LoadingIndicator className="size-2 text-foreground" />
                 <span className="truncate">
                   {translate(
                     'auto.components.feature.wall.FeatureTourPreview.6ed43cb0e0',
@@ -105,7 +106,7 @@ export function FeatureTourTerminalFrame(): JSX.Element {
                 className="feature-tour-terminal-output flex min-w-0 items-center gap-1.5"
                 data-line="3"
               >
-                <span className="inline-block size-2 animate-spin rounded-full border-[1.5px] border-amber-600/20 border-t-amber-600" />
+                <LoadingIndicator className="size-2 text-amber-600" />
                 <span className="truncate text-muted-foreground">
                   {translate(
                     'auto.components.feature.wall.FeatureTourPreview.304ad0dfc1',

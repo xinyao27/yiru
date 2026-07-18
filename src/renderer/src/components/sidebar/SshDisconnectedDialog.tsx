@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import {
-  SpinnerGap as Loader2,
-  HardDrives as Server,
-  HardDrive as ServerOff
-} from '@phosphor-icons/react'
+import { HardDrives as Server, HardDrive as ServerOff } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import {
   Dialog,
   DialogContent,
@@ -150,7 +147,7 @@ export function SshDisconnectedDialog({
         <DialogHeader className="gap-1">
           <DialogTitle className="flex items-center gap-2 text-sm font-semibold">
             {isConnecting ? (
-              <Loader2 className="size-4 text-yellow-500 animate-spin" />
+              <LoadingIndicator className="size-4 text-yellow-500" />
             ) : (
               <ServerOff className="size-4 text-muted-foreground" />
             )}
@@ -173,7 +170,7 @@ export function SshDisconnectedDialog({
             <span className="text-xs font-medium">{targetLabel}</span>
           </div>
           {isConnecting ? (
-            <Loader2 className="size-3.5 shrink-0 text-yellow-500 animate-spin" />
+            <LoadingIndicator className="size-3.5 shrink-0 text-yellow-500" />
           ) : (
             <span className={cn('size-1.5 shrink-0 rounded-full', statusColor(status))} />
           )}
@@ -192,7 +189,7 @@ export function SshDisconnectedDialog({
             <Button size="sm" onClick={() => void handleReconnect()} disabled={isConnecting}>
               {isConnecting ? (
                 <>
-                  <Loader2 className="size-3.5 animate-spin" />
+                  <LoadingIndicator className="size-3.5" />
                   {translate(
                     'auto.components.sidebar.SshDisconnectedDialog.ca4a7892af',
                     'Connecting...'

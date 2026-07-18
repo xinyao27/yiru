@@ -1,5 +1,6 @@
 import React from 'react'
 import { CheckCircle as CircleCheck } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { cn } from '@/lib/class-names'
 
 // Why: shared state-indicator primitive so the dashboard and the sidebar's
@@ -64,9 +65,12 @@ export const AgentStateDot = React.memo(function AgentStateDot({
   size = 'sm',
   className
 }: Props): React.JSX.Element {
-  const box = size === 'md' ? 'h-3 w-3' : 'h-2.5 w-2.5'
+  const box = size === 'md' ? 'size-4' : 'size-2.5'
   const inner = size === 'md' ? 'size-2' : 'size-1.5'
   const icon = size === 'md' ? 'size-3' : 'size-2.5'
+  // Why: configurable loaders have more internal whitespace than simple dots,
+  // so they fill the status slot to remain legible in terminal tabs.
+  const loader = size === 'md' ? 'size-4' : 'size-2.5'
 
   if (state === 'working') {
     return (
@@ -74,14 +78,9 @@ export const AgentStateDot = React.memo(function AgentStateDot({
         className={cn('inline-flex shrink-0 items-center justify-center', box, className)}
         aria-label={agentStateLabel(state)}
       >
-        <span
-          className={cn(
-            // Why: match the sidebar worktree spinner's stepped cadence so
-            // long-running visible agents do not keep a full-frame-rate loop.
-            'block rounded-full border-2 border-yellow-500 border-t-transparent [animation:spin_1s_steps(12,end)_infinite] motion-reduce:animate-none',
-            inner
-          )}
-        />
+        {/* Why: working is a loading state, so it follows the same user-selected
+            indicator as every other in-flight surface. */}
+        <LoadingIndicator className={cn('text-yellow-500', loader)} />
       </span>
     )
   }

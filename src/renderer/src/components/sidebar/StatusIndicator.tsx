@@ -1,4 +1,5 @@
 import React from 'react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { cn } from '@/lib/class-names'
 import { getWorktreeStatusLabel, type WorktreeStatus } from '@/lib/worktree-status'
 
@@ -33,9 +34,9 @@ const StatusIndicator = React.memo(function StatusIndicator({
         title={resolvedTitle}
         {...rest}
       >
-        {/* Why: a stepped spin preserves the worker-is-running affordance while
-            avoiding a full-refresh-rate compositor loop for long agent runs. */}
-        <span className="block size-2 rounded-full border-2 border-yellow-500 border-t-transparent [animation:spin_1s_steps(12,end)_infinite]" />
+        {/* Why: worktree activity must follow the same user-selected indicator
+            as other loading states instead of maintaining a parallel spinner. */}
+        <LoadingIndicator className="size-2 text-yellow-500" />
       </span>
     )
   }

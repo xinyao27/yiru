@@ -2,10 +2,10 @@ import {
   ArrowRight,
   Check,
   Copy,
-  SpinnerGap as Loader2,
   ArrowClockwise as RefreshCw,
   HardDrives as Server
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -258,7 +258,7 @@ export function EphemeralVmsPane(): React.JSX.Element {
             onClick={() => void refresh()}
             disabled={isLoading}
           >
-            {isLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+            {isLoading ? <LoadingIndicator /> : <RefreshCw />}
           </Button>
         </div>
 

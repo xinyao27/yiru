@@ -1,4 +1,5 @@
 import { cn } from '../../../lib/class-names'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 
 type Indicator = 'spinner' | 'green' | 'muted' | 'red'
@@ -192,7 +193,7 @@ function WorktreeRow({
     <div className={cn('mp-wl-row', tapping && 'is-tapping')}>
       <div className="mp-wl-indicator">
         {indicator === 'spinner' ? (
-          <div className="mp-wl-spinner" />
+          <LoadingIndicator className="size-2 text-annotation-highlight" />
         ) : (
           <div className={cn('mp-wl-dot', `is-${indicator}`)} />
         )}

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   PlugsConnected as Cable,
-  SpinnerGap as Loader2,
   HardDrives as Server,
   Trash as Trash2
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -179,7 +179,7 @@ export default function WebConnect({
             className="gap-2"
           >
             {connecting ? (
-              <Loader2 size={15} className="animate-spin" aria-hidden />
+              <LoadingIndicator size={15} aria-hidden />
             ) : (
               <Cable size={15} aria-hidden />
             )}

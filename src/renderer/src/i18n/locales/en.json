@@ -58,6 +58,16 @@
       "menuBarIcon": {
         "title": "Show Menu Bar Icon",
         "description": "Keep an Yiru shortcut and activity indicator in the macOS menu bar."
+      },
+      "loader": {
+        "title": "Loader",
+        "description": "Choose the animation used across Yiru. The drawn icons option cycles through a piggy bank, calculator, wallet, and kitten.",
+        "drawing": "Drawn icons",
+        "code": "Code braces",
+        "macos": "macOS",
+        "square": "Square",
+        "flipbook": "Flipbook",
+        "escalade": "Escalade"
       }
     }
   },

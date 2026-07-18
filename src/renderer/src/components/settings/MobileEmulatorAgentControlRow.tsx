@@ -1,4 +1,5 @@
-import { DownloadSimple as Import, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { DownloadSimple as Import } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import {
   YIRU_CLI_SKILL_INSTALL_COMMAND,
   YIRU_CLI_SKILL_UPDATE_COMMAND
@@ -128,7 +129,7 @@ export function MobileEmulatorAgentControlRow(): React.JSX.Element {
                       onClick={() => void handleEnableCli()}
                     >
                       {setup.cliLoading || setup.cliBusy ? (
-                        <Loader2 className="size-3.5 animate-spin" />
+                        <LoadingIndicator className="size-3.5" />
                       ) : null}
                       {setup.cliActionLabel}
                     </Button>

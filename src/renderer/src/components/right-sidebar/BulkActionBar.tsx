@@ -1,4 +1,5 @@
-import { Plus, Minus, X, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { Plus, Minus, X } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
@@ -24,7 +25,7 @@ export function BulkActionBar({
       <div className="flex items-center gap-2 justify-between bg-accent/30 p-1.5 pr-2 rounded-md border border-border/50">
         <div className="flex items-center gap-2 text-xs font-medium text-foreground ml-1">
           {isExecuting ? (
-            <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+            <LoadingIndicator className="size-3.5 text-muted-foreground" />
           ) : (
             <span className="tabular-nums">
               {selectedCount}{' '}

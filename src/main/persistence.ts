@@ -157,6 +157,7 @@ import { normalizeOpenInApplications } from '../shared/open-in-applications'
 import { normalizeTerminalShortcutPolicy } from '../shared/keybindings'
 import { normalizeSourceControlGroupOrder } from '../shared/source-control-group-order'
 import { normalizeAppIconId } from '../shared/app-icon'
+import { normalizeLoaderStyle } from '../shared/loader-style'
 import { normalizeTerminalCustomThemes } from '../shared/terminal-custom-themes'
 import {
   legacyTerminalScrollbackBytesToRows,
@@ -3223,6 +3224,7 @@ export class Store {
               parsed.settings?.terminalCustomThemes
             ),
             appIcon: normalizeAppIconId(parsed.settings?.appIcon),
+            loaderStyle: normalizeLoaderStyle(parsed.settings?.loaderStyle),
             // Why: persisted settings can be user-edited or written by older
             // builds; keep tray-minimize false unless the stored value is true.
             minimizeToTrayOnClose: parsed.settings?.minimizeToTrayOnClose === true,
@@ -5453,6 +5455,9 @@ export class Store {
     }
     if ('appIcon' in updates) {
       sanitizedUpdates.appIcon = normalizeAppIconId(updates.appIcon)
+    }
+    if ('loaderStyle' in updates) {
+      sanitizedUpdates.loaderStyle = normalizeLoaderStyle(updates.loaderStyle)
     }
     if ('uiLanguage' in updates) {
       sanitizedUpdates.uiLanguage = normalizeUiLanguage(updates.uiLanguage)

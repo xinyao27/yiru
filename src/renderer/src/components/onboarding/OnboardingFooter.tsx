@@ -1,8 +1,8 @@
 import {
   CaretLeft as ChevronLeft,
-  ArrowElbowDownLeft as CornerDownLeft,
-  SpinnerGap as Loader2
+  ArrowElbowDownLeft as CornerDownLeft
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 
 type OnboardingFooterProps = {
@@ -64,7 +64,7 @@ export function OnboardingFooter({
             disabled={Boolean(busyLabel)}
             onClick={onPrimary}
           >
-            {primaryBusy ? <Loader2 className="size-4 animate-spin" /> : null}
+            {primaryBusy ? <LoadingIndicator className="size-4" /> : null}
             {primaryLabel}
             <span className="ml-1 inline-flex items-center gap-0.5 rounded border border-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-medium leading-none text-current/80">
               <span>{shortcutModifierLabel}</span>

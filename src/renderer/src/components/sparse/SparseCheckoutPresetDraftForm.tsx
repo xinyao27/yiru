@@ -1,4 +1,4 @@
-import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import type { SparsePresetDirectoryParseResult } from '@/lib/sparse-preset-draft'
@@ -127,7 +127,7 @@ export function SparseCheckoutPresetDraftForm({
             {translate('auto.components.sparse.SparseCheckoutPresetSelect.de8fce5854', 'Cancel')}
           </Button>
           <Button type="submit" size="sm" className="h-7 px-2 text-xs" disabled={!canSave}>
-            {submitting ? <LoaderCircle className="size-3 animate-spin" /> : null}
+            {submitting ? <LoadingIndicator className="size-3" /> : null}
             {translate('auto.components.sparse.SparseCheckoutPresetSelect.8b12c0850a', 'Save')}
           </Button>
         </div>

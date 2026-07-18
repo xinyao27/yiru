@@ -13,11 +13,11 @@ import {
   Cloud,
   ArrowElbowDownLeft as CornerDownLeft,
   FolderPlus,
-  CircleNotch as LoaderCircle,
   PlugCharging as PlugZap,
   GearSix as Settings2,
   HardDrives as Server
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -913,7 +913,7 @@ export default function NewWorkspaceComposerCard({
                 className="shrink-0"
               >
                 {selectedRepoConnectInProgress ? (
-                  <LoaderCircle className="size-3.5 animate-spin" />
+                  <LoadingIndicator className="size-3.5" />
                 ) : (
                   <PlugZap className="size-3.5" />
                 )}
@@ -1431,7 +1431,7 @@ export default function NewWorkspaceComposerCard({
           size="sm"
           className="text-xs"
         >
-          {creating ? <LoaderCircle className="size-4 animate-spin" /> : null}
+          {creating ? <LoadingIndicator className="size-4" /> : null}
           {primaryActionLabel}
           <span className="ml-1 inline-flex items-center gap-0.5 rounded border border-white/20 px-1.5 py-0.5 text-[10px] font-medium leading-none text-current/80">
             <span>{submitShortcutModifierLabel}</span>

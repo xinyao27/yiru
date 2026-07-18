@@ -2,11 +2,11 @@ import React, { useCallback, useMemo, useRef, useState } from 'react'
 import {
   Check,
   CaretUpDown as ChevronsUpDown,
-  CircleNotch as LoaderCircle,
   Pencil,
   Plus,
   ArrowCounterClockwise as RefreshCcw
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useAppStore } from '@/store'
@@ -237,7 +237,7 @@ export default function SparseCheckoutPresetSelect({
           >
             <span className="truncate">{triggerLabel}</span>
             {isLoadingPresets ? (
-              <LoaderCircle className="size-3.5 animate-spin opacity-60" />
+              <LoadingIndicator className="size-3.5 opacity-60" />
             ) : hasPresetLoadError || !presetsLoaded ? (
               <RefreshCcw className="size-3.5 opacity-60" />
             ) : (

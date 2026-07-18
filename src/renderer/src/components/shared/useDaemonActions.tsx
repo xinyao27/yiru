@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { Button } from '../ui/button'
@@ -309,7 +309,7 @@ export function DaemonActionDialog({
                 {translate('auto.components.shared.useDaemonActions.01af244097', 'Cancel')}
               </Button>
               <Button variant="destructive" onClick={runConfirmed} disabled={isBusy}>
-                {isBusy ? <LoaderCircle className="size-4 animate-spin" /> : null}
+                {isBusy ? <LoadingIndicator className="size-4" /> : null}
                 {isBusy && busyKind === pending ? copy.busyLabel : copy.confirmLabel}
               </Button>
             </DialogFooter>

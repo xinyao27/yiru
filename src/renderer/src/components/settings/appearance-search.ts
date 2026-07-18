@@ -31,6 +31,28 @@ export const getThemeEntries = createLocalizedCatalog((): SettingsSearchEntry[] 
   }
 ])
 
+export const getLoaderStyleEntries = createLocalizedCatalog((): SettingsSearchEntry[] => [
+  {
+    title: translate('settings.appearance.loader.title', 'Loader'),
+    description: translate(
+      'settings.appearance.loader.description',
+      'Choose the animation used across Yiru. The drawn icons option cycles through a piggy bank, calculator, wallet, and kitten.'
+    ),
+    keywords: [
+      ...translateSearchKeyword('settings.appearance.loader.keyword.loader', 'loader'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.loading', 'loading'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.spinner', 'spinner'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.animation', 'animation'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.kitten', 'kitten'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.code', 'code'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.macos', 'macos'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.square', 'square'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.flipbook', 'flipbook'),
+      ...translateSearchKeyword('settings.appearance.loader.keyword.escalade', 'escalade')
+    ]
+  }
+])
+
 export const getLanguageEntries = createLocalizedCatalog((): SettingsSearchEntry[] => [
   {
     title: translate('settings.appearance.language.title', 'Language'),
@@ -203,6 +225,7 @@ function buildAppearancePaneSearchEntries(
   return [
     ...getAppearanceSectionEntries(),
     ...getThemeEntries(),
+    ...getLoaderStyleEntries(),
     ...(SHOW_UI_LANGUAGE_SETTING ? getLanguageEntries() : []),
     ...getTypographyEntries(),
     ...getZoomEntries(),

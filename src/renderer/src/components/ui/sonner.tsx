@@ -1,10 +1,10 @@
 import {
   CheckCircle as CircleCheckIcon,
   InfoIcon,
-  SpinnerGap as Loader2Icon,
   XCircle as OctagonXIcon,
   Warning as TriangleAlertIcon
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
 import { useAppStore } from '@/store'
 
@@ -28,7 +28,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         info: <InfoIcon className="size-4" />,
         warning: <TriangleAlertIcon className="size-4" />,
         error: <OctagonXIcon className="size-4" />,
-        loading: <Loader2Icon className="size-4 animate-spin" />
+        loading: <LoadingIndicator className="size-4" />
       }}
       style={
         {

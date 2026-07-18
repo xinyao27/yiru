@@ -33,7 +33,6 @@ import {
   GitPullRequest as GitPullRequestClosed,
   GitPullRequest as GitPullRequestDraft,
   ListChecks,
-  CircleNotch as LoaderCircle,
   Chat as MessageSquare,
   ChatCentered as MessageSquarePlus,
   SidebarSimple as PanelLeftOpen,
@@ -45,6 +44,7 @@ import {
   Wrench,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
@@ -671,7 +671,7 @@ function PRAssigneesPanel({
                 className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
               >
                 {isPending('assignees') ? (
-                  <LoaderCircle className="size-3 animate-spin" />
+                  <LoadingIndicator className="size-3" />
                 ) : (
                   <Pencil className="size-3" />
                 )}
@@ -1246,7 +1246,7 @@ function PRReviewersPanel({
                 className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
               >
                 {submitting ? (
-                  <LoaderCircle className="size-3 animate-spin" />
+                  <LoadingIndicator className="size-3" />
                 ) : (
                   <Pencil className="size-3" />
                 )}
@@ -1367,7 +1367,7 @@ function PRReviewersPanel({
       </div>
       {loading && !hasReviewerMetadata ? (
         <div className="flex items-center gap-2 py-1 text-[12px] text-muted-foreground">
-          <LoaderCircle className="size-3.5 animate-spin" />
+          <LoadingIndicator className="size-3.5" />
           {translate('auto.components.PullRequestPage.acbd110867', 'Loading reviewers')}
         </div>
       ) : reviewers.length > 0 ? (
@@ -2095,7 +2095,7 @@ function PRViewedCheckbox({
               )}
             >
               {pending ? (
-                <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-3 text-muted-foreground" />
               ) : checked ? (
                 <Check className="size-3" strokeWidth={3} />
               ) : null}
@@ -2974,7 +2974,7 @@ function CommentCodeContext({
   if (!contents) {
     return (
       <div className="mb-3 flex items-center gap-2 rounded-md border border-border/40 bg-muted/20 px-3 py-2 text-[12px] text-muted-foreground">
-        <LoaderCircle className="size-3.5 animate-spin" />
+        <LoadingIndicator className="size-3.5" />
         {translate('auto.components.PullRequestPage.4b960e5978', 'Loading code context…')}
       </div>
     )
@@ -3682,7 +3682,7 @@ function ConversationTab({
                     onClick={() => void handleSaveBody()}
                   >
                     {bodySaving ? (
-                      <LoaderCircle className="size-3.5 animate-spin" />
+                      <LoadingIndicator className="size-3.5" />
                     ) : (
                       <Check className="size-3.5" />
                     )}
@@ -3721,7 +3721,7 @@ function ConversationTab({
           <div className="px-4 py-4 text-[14px] leading-relaxed text-foreground">
             {loading && !detailsLoaded ? (
               <div className="flex items-center justify-center py-5">
-                <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-4 text-muted-foreground" />
               </div>
             ) : bodyEditing ? (
               <MentionTextarea
@@ -4115,7 +4115,7 @@ function PRActionsPanel({
                       )}
                     >
                       {mergePending ? (
-                        <LoaderCircle className="size-3.5 animate-spin" />
+                        <LoadingIndicator className="size-3.5" />
                       ) : (
                         <GitMerge className="size-3.5" />
                       )}
@@ -4179,7 +4179,7 @@ function PRActionsPanel({
           onClick={() => void handleStateChange()}
         >
           {statePending ? (
-            <LoaderCircle className="size-3.5 animate-spin" />
+            <LoadingIndicator className="size-3.5" />
           ) : nextState === 'closed' ? (
             <GitPullRequestClosed className="size-3.5 text-destructive" />
           ) : (
@@ -4865,7 +4865,11 @@ function ChecksTab({
             onClick={() => void handleRefresh()}
             aria-label={translate('auto.components.PullRequestPage.5d0f42766d', 'Refresh checks')}
           >
-            <RefreshCw className={cn('size-3.5', refreshing && 'animate-spin')} />
+            {refreshing ? (
+              <LoadingIndicator className="size-3.5" />
+            ) : (
+              <RefreshCw className="size-3.5" />
+            )}
           </Button>
         }
       />
@@ -4888,7 +4892,7 @@ function ChecksTab({
               onClick={() => void handleFixBrokenChecks()}
             >
               {fixingChecks ? (
-                <LoaderCircle className="size-3 animate-spin" />
+                <LoadingIndicator className="size-3" />
               ) : (
                 <Wrench className="size-3" />
               )}
@@ -4919,7 +4923,7 @@ function ChecksTab({
               disabled={!canUseChecksRepoContext || rerunning || list.length === 0}
             >
               {rerunning ? (
-                <LoaderCircle className="size-3 animate-spin" />
+                <LoadingIndicator className="size-3" />
               ) : (
                 <RefreshCw className="size-3" />
               )}
@@ -4962,13 +4966,7 @@ function ChecksTab({
     <div className="border-b border-border/50 px-3 py-2">
       <div className="flex min-w-0 items-start gap-2">
         <div className="flex min-w-0 flex-1 items-start gap-2">
-          <SummaryIcon
-            className={cn(
-              'mt-0.5 size-3.5 shrink-0',
-              summaryColor,
-              counts.pending > 0 && counts.failing === 0 && 'animate-spin'
-            )}
-          />
+          <SummaryIcon className={cn('mt-0.5 size-3.5 shrink-0', summaryColor)} />
           <div className="min-w-0 flex-1">
             <div className="text-[13px] font-medium leading-5 text-foreground">
               {translate('auto.components.PullRequestPage.94d95cf1f7', 'Checks')}
@@ -5020,9 +5018,7 @@ function ChecksTab({
               !expanded && '-rotate-90'
             )}
           />
-          <Icon
-            className={cn('size-3.5 shrink-0', color, conclusion === 'pending' && 'animate-spin')}
-          />
+          <Icon className={cn('size-3.5 shrink-0', color)} />
           <span className="min-w-0 flex-1 truncate text-[12px] text-foreground">{check.name}</span>
           <span className="shrink-0 text-[11px] text-muted-foreground">{statusLabel}</span>
         </button>
@@ -5053,7 +5049,7 @@ function ChecksTab({
       <div className="mx-2 mb-2 mt-1 min-w-0 rounded-md border border-border/50 bg-muted/20 px-3 py-2">
         {state?.loading ? (
           <div className="flex items-center gap-2 py-2 text-[12px] text-muted-foreground">
-            <LoaderCircle className="size-3.5 animate-spin" />
+            <LoadingIndicator className="size-3.5" />
             {translate('auto.components.PullRequestPage.d8e82b7f15', 'Loading check details…')}
           </div>
         ) : (
@@ -5272,7 +5268,7 @@ function ChecksTab({
       <>
         {variant === 'compact' ? compactHeader : null}
         <div className="flex items-center justify-center py-10">
-          <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+          <LoadingIndicator className="size-5 text-muted-foreground" />
         </div>
       </>
     )
@@ -5361,13 +5357,7 @@ function ChecksTab({
       <>
         <div className="flex flex-col gap-3 px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
-            <SummaryIcon
-              className={cn(
-                'size-4 shrink-0',
-                summaryColor,
-                counts.pending > 0 && counts.failing === 0 && 'animate-spin'
-              )}
-            />
+            <SummaryIcon className={cn('size-4 shrink-0', summaryColor)} />
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <span className="truncate text-[13px] font-medium text-foreground">
                 {summaryLabel}
@@ -6188,7 +6178,7 @@ function GHEditSection({
                 ))
               )}
               {isPending('labels') ? (
-                <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-3 text-muted-foreground" />
               ) : (
                 <ChevronDown className="size-2.5 opacity-50" />
               )}
@@ -6248,7 +6238,7 @@ function GHEditSection({
                 ))
               )}
               {isPending('assignees') ? (
-                <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-3 text-muted-foreground" />
               ) : (
                 <ChevronDown className="size-2.5 opacity-50" />
               )}
@@ -6445,11 +6435,7 @@ function GHCommentComposer({
               className="absolute bottom-3 right-3 shadow-sm"
               aria-label={translate('auto.components.PullRequestPage.161d91ef02', 'Send comment')}
             >
-              {submitting ? (
-                <LoaderCircle className="size-4 animate-spin" />
-              ) : (
-                <Send className="size-4" />
-              )}
+              {submitting ? <LoadingIndicator className="size-4" /> : <Send className="size-4" />}
             </Button>
           }
         />
@@ -7361,7 +7347,7 @@ export default function PullRequestPage({
               <TabsContent value="files" className="mt-0 h-full min-h-0 overflow-hidden">
                 {loading && files.length === 0 ? (
                   <div className="flex items-center justify-center py-10">
-                    <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+                    <LoadingIndicator className="size-5 text-muted-foreground" />
                   </div>
                 ) : filesUnavailable && files.length === 0 ? (
                   // Why: the file fetch failed (rate limit, auth, unresolved

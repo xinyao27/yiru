@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import {
   GitPullRequest as GitPullRequestArrow,
-  SpinnerGap as Loader2,
   MagnifyingGlass as Search,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type {
   GitBranchCompareSummary,
   GitUpstreamStatus,
@@ -98,7 +98,7 @@ function CreatePrHeaderButton({
               title={action.title}
             >
               {isCreatePrIntentInFlight || isCreatingPr ? (
-                <Loader2 className="size-3.5 animate-spin" />
+                <LoadingIndicator className="size-3.5" />
               ) : (
                 <GitPullRequestArrow className="size-3.5" aria-hidden="true" />
               )}

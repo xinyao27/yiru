@@ -1,11 +1,6 @@
 import { useState, type ComponentType, type ReactNode } from 'react'
-import {
-  FolderOpen,
-  Globe,
-  Lightbulb,
-  SpinnerGap as Loader2,
-  HardDrives as Server
-} from '@phosphor-icons/react'
+import { FolderOpen, Globe, Lightbulb, HardDrives as Server } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -257,7 +252,7 @@ export function AddRepoServerPathStartStep({
         </div>
         {isAddingServerPath && addProjectBusyLabel ? (
           <div className="flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
-            <Loader2 className="size-3.5 shrink-0 animate-spin" />
+            <LoadingIndicator className="size-3.5 shrink-0" />
             <span>{addProjectBusyLabel}</span>
           </div>
         ) : null}

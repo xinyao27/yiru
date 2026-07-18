@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
-import { CaretDown as ChevronDown, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { cn } from '@/lib/class-names'
 import {
@@ -300,7 +301,7 @@ export function HostRemoveDialog({
               disabled={busy}
               onClick={() => void runSshRemoval()}
             >
-              {busy ? <Loader2 className="size-3.5 animate-spin" /> : null}
+              {busy ? <LoadingIndicator className="size-3.5" /> : null}
               {translate('auto.components.sidebar.HostRemoveDialog.8b9c0d1e2f', 'Remove host')}
             </Button>
           )}

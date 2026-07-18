@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { cn } from '@/lib/class-names'
+import { LoadingIndicator } from '@/components/loading-indicator'
 
 export function CodexInlineIcon(): JSX.Element {
   return (
@@ -19,26 +19,10 @@ export function CodexInlineIcon(): JSX.Element {
   )
 }
 
-export function WorkingSpinner({
-  size = 'sm',
-  reducedMotion = false
-}: {
-  size?: 'sm' | 'xs'
-  reducedMotion?: boolean
-}): JSX.Element {
-  // Why: matches AgentStateDot's working indicator so the preview teaches
-  // the same state language users see in the real app.
-  const ring = size === 'xs' ? 'size-1.5 border' : 'size-2 border-2'
-  return (
-    <span
-      className={cn(
-        'inline-block shrink-0 rounded-full border-yellow-500',
-        reducedMotion ? 'border-t-yellow-500' : 'animate-spin border-t-transparent',
-        ring
-      )}
-      aria-hidden
-    />
-  )
+export function WorkingSpinner({ size = 'sm' }: { size?: 'sm' | 'xs' }): JSX.Element {
+  // Why: the preview teaches the real app's user-selected working indicator.
+  const indicatorSize = size === 'xs' ? 'size-1.5' : 'size-2'
+  return <LoadingIndicator className={`${indicatorSize} text-yellow-500`} />
 }
 
 export function CursorIcon(): JSX.Element {

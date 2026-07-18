@@ -12,6 +12,7 @@ import type {
   ComputerUsePermissionState,
   ComputerUsePermissionStatus
 } from '../../../../shared/computer-use-permissions-types'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '@/store'
 import { Button } from '../ui/button'
 import { Badge } from '../ui/badge'
@@ -288,7 +289,11 @@ export function ComputerUsePane(): React.JSX.Element {
               disabled={resetting}
               onClick={() => void refresh()}
             >
-              <RefreshCw className={cn('size-3.5', loading ? 'animate-spin' : '')} />
+              {loading ? (
+                <LoadingIndicator className="size-3.5" />
+              ) : (
+                <RefreshCw className="size-3.5" />
+              )}
               {translate('auto.components.settings.ComputerUsePane.d95d1cfab8', 'Refresh')}
             </Button>
           </div>

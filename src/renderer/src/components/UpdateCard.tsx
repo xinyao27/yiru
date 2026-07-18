@@ -10,12 +10,12 @@ import { Progress } from './ui/progress'
 import {
   WarningCircle as AlertCircle,
   Check,
-  SpinnerGap as Loader2,
   Minus,
   Network,
   ArrowClockwise as RotateCw,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { ChangelogData } from '../../../shared/types'
 import { YIRU_GITHUB_RELEASES_URL } from '../../../shared/yiru-github-repository'
 import { translate } from '@/i18n/i18n'
@@ -74,7 +74,7 @@ function CompactCardContent({
   return (
     <div className="flex items-center gap-3 p-3">
       <div className="shrink-0 text-muted-foreground">
-        {icon === 'spinner' && <Loader2 className="size-4 animate-spin" />}
+        {icon === 'spinner' && <LoadingIndicator className="size-4" />}
         {icon === 'check' && <Check className="size-4" />}
         {icon === 'error' && <AlertCircle className="size-4" />}
       </div>
@@ -971,7 +971,7 @@ function ErrorCardContent({
             className="flex-1 gap-1.5"
           >
             {primaryAction.isPending ? (
-              <Loader2 className="size-3.5 animate-spin" />
+              <LoadingIndicator className="size-3.5" />
             ) : isCompatibility ? (
               <RotateCw className="size-3.5" />
             ) : null}

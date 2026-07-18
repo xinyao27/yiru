@@ -4,9 +4,9 @@ import {
   TextAa as CaseSensitive,
   BracketsSquare as WholeWord,
   Asterisk as Regex,
-  X,
-  SpinnerGap as Loader2
+  X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { ToggleButton } from './SearchResultItems'
 import { translate } from '@/i18n/i18n'
@@ -60,7 +60,7 @@ export function SearchQueryRow({
         onKeyDown={onKeyDown}
         spellCheck={false}
       />
-      {loading ? <Loader2 className="size-3 shrink-0 animate-spin text-muted-foreground" /> : null}
+      {loading ? <LoadingIndicator className="size-3 shrink-0 text-muted-foreground" /> : null}
       {query ? (
         <Button
           type="button"

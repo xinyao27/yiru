@@ -1,7 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import {
   StopCircle as CircleStop,
-  SpinnerGap as Loader2,
   Devices as MonitorSmartphone,
   Pencil,
   ArrowCounterClockwise as RotateCcw,
@@ -9,6 +8,7 @@ import {
   HardDrive as ServerOff,
   Trash as Trash2
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import {
   DEFAULT_SSH_RELAY_GRACE_PERIOD_SECONDS,
   type SshConnectionState,
@@ -188,7 +188,7 @@ export function SshTargetCard({
             }
           >
             {terminateInFlight ? (
-              <Loader2 className="size-3 animate-spin" />
+              <LoadingIndicator className="size-3" />
             ) : (
               <CircleStop className="size-3" />
             )}
@@ -224,7 +224,7 @@ export function SshTargetCard({
             }
           >
             {resetInFlight ? (
-              <Loader2 className="size-3 animate-spin" />
+              <LoadingIndicator className="size-3" />
             ) : (
               <RotateCcw className="size-3" />
             )}
@@ -282,7 +282,7 @@ export function SshTargetCard({
               }
             >
               {removeInFlight ? (
-                <Loader2 className="size-3 animate-spin" />
+                <LoadingIndicator className="size-3" />
               ) : (
                 <Trash2 className="size-3" />
               )}
@@ -338,7 +338,7 @@ export function SshTargetCard({
           <>
             {renderSecondaryIconActions(false)}
             <Button variant="ghost" size="xs" disabled className="gap-1.5">
-              <Loader2 className="size-3 animate-spin" />
+              <LoadingIndicator className="size-3" />
               {translate('auto.components.settings.SshTargetCard.1810b51482', 'Connecting')}
             </Button>
           </>
@@ -353,7 +353,7 @@ export function SshTargetCard({
               className="gap-1.5"
             >
               {testing ? (
-                <Loader2 className="size-3 animate-spin" />
+                <LoadingIndicator className="size-3" />
               ) : (
                 <MonitorSmartphone className="size-3" />
               )}
@@ -367,7 +367,7 @@ export function SshTargetCard({
               disabled={hasActionInFlight}
             >
               {actionInFlight === 'connect' ? (
-                <Loader2 className="size-3 animate-spin" />
+                <LoadingIndicator className="size-3" />
               ) : (
                 <Server className="size-3" />
               )}

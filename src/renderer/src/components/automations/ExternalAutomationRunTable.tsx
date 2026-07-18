@@ -4,9 +4,9 @@ import {
   WarningCircle as AlertCircle,
   CaretLeft as ChevronLeft,
   CaretRight as ChevronRight,
-  FileText,
-  SpinnerGap as Loader2
+  FileText
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -192,7 +192,7 @@ export function ExternalAutomationRunTable({
           <div className="text-xs font-medium">
             {translate('auto.components.automations.ExternalAutomationRunTable.2d4388a908', 'Runs')}
           </div>
-          {isLoading ? <Loader2 className="size-3.5 animate-spin text-muted-foreground" /> : null}
+          {isLoading ? <LoadingIndicator className="size-3.5 text-muted-foreground" /> : null}
           {fetchError ? (
             <Tooltip>
               <TooltipTrigger render={<AlertCircle className="size-3.5 text-destructive" />} />

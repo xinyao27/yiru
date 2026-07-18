@@ -15,6 +15,7 @@ import { applyElectronProxySettings } from '../network/proxy-settings'
 import { normalizeProxyBypassRules, normalizeProxyUrl } from '../../shared/network-proxy'
 import { normalizeAppIconId } from '../../shared/app-icon'
 import { normalizeUiLanguage } from '../../shared/ui-language'
+import { normalizeLoaderStyle } from '../../shared/loader-style'
 import { applyAppIcon } from '../app-icon'
 import { normalizeTerminalCustomThemes } from '../../shared/terminal-custom-themes'
 import { normalizeDesktopTerminalScrollbackRows } from '../../shared/terminal-scrollback-policy'
@@ -123,6 +124,9 @@ export function registerSettingsHandlers(
     }
     if ('uiLanguage' in args) {
       sanitizedArgs.uiLanguage = normalizeUiLanguage(args.uiLanguage)
+    }
+    if ('loaderStyle' in args) {
+      sanitizedArgs.loaderStyle = normalizeLoaderStyle(args.loaderStyle)
     }
     if (args.theme) {
       nativeTheme.themeSource = args.theme

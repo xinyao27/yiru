@@ -1,4 +1,5 @@
-import { DownloadSimple as Import, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { DownloadSimple as Import } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { cn } from '@/lib/class-names'
 import { Button } from '../ui/button'
@@ -150,7 +151,7 @@ export function BrowserUseCookieImportStep({
                 className="gap-1.5"
               >
                 {isImportingDefault ? (
-                  <Loader2 className="size-3.5 animate-spin" />
+                  <LoadingIndicator className="size-3.5" />
                 ) : (
                   <Import className="size-3.5" />
                 )}

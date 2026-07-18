@@ -1,5 +1,6 @@
 import React from 'react'
-import { Pencil, Play, ArrowClockwise as RefreshCw, Trash as Trash2 } from '@phosphor-icons/react'
+import { Pencil, Play, Trash as Trash2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { SettingsSwitch } from '@/components/settings/SettingsFormControls'
@@ -205,7 +206,7 @@ export function ExternalAutomationManagers({
                                   match would drop the spinner a render early. */}
                                 {runningActionKey === actionKey(manager, job, 'pause') ||
                                 runningActionKey === actionKey(manager, job, 'resume') ? (
-                                  <RefreshCw className="size-3.5 animate-spin" />
+                                  <LoadingIndicator className="size-3.5" />
                                 ) : null}
                                 <SettingsSwitch
                                   checked={job.enabled}
@@ -288,7 +289,7 @@ export function ExternalAutomationManagers({
                         onClick={() => onAction(manager, job, 'run')}
                       >
                         {runningActionKey === actionKey(manager, job, 'run') ? (
-                          <RefreshCw className="size-3.5 animate-spin" />
+                          <LoadingIndicator className="size-3.5" />
                         ) : (
                           <Play className="size-3.5" />
                         )}
@@ -321,7 +322,7 @@ export function ExternalAutomationManagers({
                         onClick={() => onAction(manager, job, 'delete')}
                       >
                         {runningActionKey === actionKey(manager, job, 'delete') ? (
-                          <RefreshCw className="size-3.5 animate-spin" />
+                          <LoadingIndicator className="size-3.5" />
                         ) : (
                           <Trash2 className="size-3.5" />
                         )}

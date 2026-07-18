@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Gauge, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { cn } from '@/lib/class-names'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
 import { useAppStore } from '@/store'
@@ -210,7 +211,11 @@ export function GitHubRateLimitPanel({ className }: { className?: string }): Rea
             'Refresh GitHub API budget'
           )}
         >
-          <RefreshCw className={cn('size-3.5', isFetching && 'animate-spin')} />
+          {isFetching ? (
+            <LoadingIndicator className="size-3.5" />
+          ) : (
+            <RefreshCw className="size-3.5" />
+          )}
         </button>
       </div>
       {hasError ? (

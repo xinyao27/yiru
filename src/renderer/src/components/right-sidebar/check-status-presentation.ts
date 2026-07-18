@@ -2,16 +2,16 @@ import type React from 'react'
 import {
   CheckCircle as CircleCheck,
   CircleDashed,
-  CircleNotch as LoaderCircle,
   MinusCircle as CircleMinus,
   Warning as AlertTriangle,
   XCircle as CircleX
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 
 export const CHECK_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
   success: CircleCheck,
   failure: CircleX,
-  pending: LoaderCircle,
+  pending: LoadingIndicator,
   neutral: CircleDashed,
   skipped: CircleMinus,
   cancelled: CircleX,

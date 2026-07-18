@@ -13,6 +13,7 @@ import {
   X
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -889,7 +890,11 @@ export default function ProjectViewWrapper({ selectedRepoIds }: Props): React.JS
                     )
               }
             >
-              <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
+              {loading ? (
+                <LoadingIndicator className="size-3.5" />
+              ) : (
+                <RefreshCw className="size-3.5" />
+              )}
             </Button>
           </>
         ) : null}

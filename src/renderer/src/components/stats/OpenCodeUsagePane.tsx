@@ -13,6 +13,7 @@ import type {
   OpenCodeUsageRange,
   OpenCodeUsageScope
 } from '../../../../shared/opencode-usage-types'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import {
@@ -30,7 +31,6 @@ import { OpenCodeUsageDetails } from './OpenCodeUsageDetails'
 import { StatCard } from './StatCard'
 import { formatCost, formatTokens, formatUpdatedAt } from './usage-formatters'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 
 const RANGE_OPTIONS: OpenCodeUsageRange[] = ['7d', '30d', '90d', 'all']
 const SCOPE_OPTIONS: { value: OpenCodeUsageScope; label: string }[] = [
@@ -233,9 +233,11 @@ export function OpenCodeUsagePane(): React.JSX.Element {
                       'Refresh OpenCode usage'
                     )}
                   >
-                    <RefreshCw
-                      className={cn('size-3.5', scanState.isScanning ? 'animate-spin' : '')}
-                    />
+                    {scanState.isScanning ? (
+                      <LoadingIndicator className="size-3.5" />
+                    ) : (
+                      <RefreshCw className="size-3.5" />
+                    )}
                   </Button>
                 }
               />

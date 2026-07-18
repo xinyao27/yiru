@@ -8,7 +8,6 @@ import {
   CloudArrowUp as CloudUpload,
   Minus,
   Plus,
-  SpinnerGap as Loader2,
   ArrowClockwise as RefreshCw,
   GearSix as Settings2,
   Sparkle as Sparkles,
@@ -29,6 +28,7 @@ import {
   DotsThree as MoreHorizontal,
   type Icon as PhosphorIcon
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffCommentsOrEmpty } from '@/store/worktree-diff-comments-selector'
 import {
@@ -6801,7 +6801,7 @@ export function CommitArea({
           {showGenerate &&
             (isGenerating ? (
               // Why: while generating the icon doubles as the cancel affordance.
-              // Default state shows the spinning RefreshCw; on hover/focus we
+              // Default state shows the configured loader; on hover/focus we
               // swap to a Square ("stop") with a destructive tint so the user
               // sees that clicking will abort the run. Group/group-hover toggles
               // keep this stateless on the React side.
@@ -6821,7 +6821,7 @@ export function CommitArea({
                       )}
                       className="group absolute right-1.5 top-1.5 inline-flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-destructive/40"
                     >
-                      <RefreshCw className="size-3.5 animate-spin group-hover:hidden group-focus-visible:hidden" />
+                      <LoadingIndicator className="size-3.5 group-hover:hidden group-focus-visible:hidden" />
                       <Square className="hidden size-3.5 fill-current group-hover:block group-focus-visible:block" />
                     </button>
                   }
@@ -6904,7 +6904,7 @@ export function CommitArea({
                     title={primaryAction.title}
                   >
                     {showSpinner ? (
-                      <Loader2 className="size-3.5 animate-spin" />
+                      <LoadingIndicator className="size-3.5" />
                     ) : PrimaryIcon ? (
                       <PrimaryIcon className="size-3.5" aria-hidden="true" />
                     ) : null}
@@ -6941,7 +6941,7 @@ export function CommitArea({
                           title={moreActionsLabel}
                         >
                           {showChevronSpinner ? (
-                            <Loader2 className="size-3.5 animate-spin" />
+                            <LoadingIndicator className="size-3.5" />
                           ) : (
                             <ChevronDown className="size-3.5" />
                           )}
@@ -7141,7 +7141,7 @@ export function CompareSummary({
   if (!summary || summary.status === 'loading') {
     return (
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <RefreshCw className="size-3.5 animate-spin" />
+        <LoadingIndicator className="size-3.5" />
         <span>
           {translate('auto.components.right.sidebar.SourceControl.11b5dd8e41', 'Comparing against')}
           {summary?.baseRef ?? '…'}
@@ -7583,7 +7583,7 @@ export function ConflictSummaryCard({
             onClick={onResolveWithAI}
           >
             {isResolvingWithAI ? (
-              <RefreshCw className="size-3.5 animate-spin" />
+              <LoadingIndicator className="size-3.5" />
             ) : (
               <Sparkles className="size-3.5" />
             )}
@@ -7611,7 +7611,7 @@ export function ConflictSummaryCard({
             disabled={isResolvingWithAI || isAbortingOperation}
             onClick={() => onAbortOperation(conflictOperation)}
           >
-            {isAbortingOperation ? <RefreshCw className="size-3.5 animate-spin" /> : null}
+            {isAbortingOperation ? <LoadingIndicator className="size-3.5" /> : null}
             {conflictOperation === 'rebase'
               ? translate('auto.components.right.sidebar.SourceControl.425f138269', 'Abort rebase')
               : translate('auto.components.right.sidebar.SourceControl.540ca8f78c', 'Abort merge')}
@@ -7664,7 +7664,7 @@ export function OperationBanner({
           disabled={isAbortingOperation}
           onClick={() => onAbortOperation(conflictOperation)}
         >
-          {isAbortingOperation ? <RefreshCw className="size-3.5 animate-spin" /> : null}
+          {isAbortingOperation ? <LoadingIndicator className="size-3.5" /> : null}
           {conflictOperation === 'rebase'
             ? translate('auto.components.right.sidebar.SourceControl.425f138269', 'Abort rebase')
             : translate('auto.components.right.sidebar.SourceControl.540ca8f78c', 'Abort merge')}
@@ -7889,7 +7889,7 @@ function SubmodulePlaceholderRow({
         paddingLeft: `${depth * SOURCE_CONTROL_TREE_INDENT_PX + SOURCE_CONTROL_TREE_FILE_PADDING_PX}px`
       }}
     >
-      {state === 'loading' && <Loader2 className="size-3 shrink-0 animate-spin" />}
+      {state === 'loading' && <LoadingIndicator className="size-3 shrink-0" />}
       <span className="min-w-0 truncate">{message ?? fallback}</span>
     </div>
   )

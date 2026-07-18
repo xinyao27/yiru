@@ -797,16 +797,6 @@
   height: 14px;
 }
 
-.mobile-page-root .mp-network-refresh.is-spinning svg {
-  animation: mp-network-refresh-spin 900ms linear infinite;
-}
-
-@keyframes mp-network-refresh-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .mobile-page-root .mp-action-divider {
   color: var(--muted-foreground);
   font-size: 12px;
@@ -1582,15 +1572,6 @@
   padding-top: 6px;
 }
 
-.mobile-page-root .mp-wl-spinner {
-  width: 8px;
-  height: 8px;
-  border-radius: 4px;
-  border: 2px solid #eab308;
-  border-top-color: transparent;
-  animation: mp-wl-spin 1s linear infinite;
-}
-
 .mobile-page-root .mp-wl-dot {
   width: 8px;
   height: 8px;
@@ -1607,12 +1588,6 @@
 
 .mobile-page-root .mp-wl-dot.is-red {
   background: #ef4444;
-}
-
-@keyframes mp-wl-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .mobile-page-root .mp-wl-main {

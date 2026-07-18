@@ -1,5 +1,6 @@
 import { useId, useLayoutEffect, useState } from 'react'
-import { CircleNotch as LoaderCircle, Lock } from '@phosphor-icons/react'
+import { Lock } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '@/store'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { Button } from '@/components/ui/button'
@@ -406,7 +407,7 @@ export function JiraConnectDialog({
             <Button type="submit" disabled={!canSubmit}>
               {connectState === 'connecting' ? (
                 <>
-                  <LoaderCircle className="size-4 animate-spin" />
+                  <LoadingIndicator className="size-4" />
                   {translate('auto.components.jira.connect.dialog.4a2ab52781', 'Verifying…')}
                 </>
               ) : (

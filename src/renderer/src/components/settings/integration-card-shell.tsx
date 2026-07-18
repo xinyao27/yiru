@@ -1,4 +1,4 @@
-import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { cn } from '@/lib/class-names'
 import { useIntegrationCardShellClass } from './integration-card-presentation'
 
@@ -23,7 +23,7 @@ export function IntegrationCardShell(props: {
 }): React.JSX.Element {
   const shellClass = useIntegrationCardShellClass(props.className)
   const status = props.checking ? (
-    <LoaderCircle className="size-4 shrink-0 animate-spin text-muted-foreground" />
+    <LoadingIndicator className="size-4 shrink-0 text-muted-foreground" />
   ) : (
     <span
       className={cn(

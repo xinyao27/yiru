@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import {
-  ShieldCheck,
-  SpinnerGap as Loader2,
-  WarningCircle as CircleAlert
-} from '@phosphor-icons/react'
+import { ShieldCheck, WarningCircle as CircleAlert } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import type { SpoolWindowsFirewallStatus } from '../../../../shared/spool/spool-windows-firewall-contract'
 import { SPOOL_INGRESS_PORT } from '../../../../shared/spool/spool-wire-contract'
@@ -114,7 +111,7 @@ export function SpoolWindowsFirewallNotice(): React.JSX.Element {
               disabled={repairing}
               onClick={() => void repair()}
             >
-              {repairing ? <Loader2 className="animate-spin" /> : <ShieldCheck />}
+              {repairing ? <LoadingIndicator /> : <ShieldCheck />}
               {repairing
                 ? translate(
                     'auto.components.spool.SpoolWindowsFirewallNotice.waiting',

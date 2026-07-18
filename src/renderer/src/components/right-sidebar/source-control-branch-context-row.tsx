@@ -1,9 +1,6 @@
 import React from 'react'
-import {
-  ArrowSquareOut as ExternalLink,
-  SpinnerGap as Loader2,
-  ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
+import { ArrowSquareOut as ExternalLink, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { GitBranchCompareSummary, GitUpstreamStatus } from '../../../../shared/types'
 import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
@@ -112,7 +109,7 @@ export function SourceControlBranchContextRow({
   if (!summary || summary.status === 'loading') {
     return (
       <div className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
-        <Loader2 className="size-3 shrink-0 animate-spin" />
+        <LoadingIndicator className="size-3 shrink-0" />
         <span className="shrink-0 text-muted-foreground">
           {translate('auto.components.right.sidebar.SourceControl.e8a1c4b203', 'vs')}
         </span>

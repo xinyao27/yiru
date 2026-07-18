@@ -1,4 +1,4 @@
-import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { PtyManagementSession } from '../../../../preload/api-types'
 import { Button } from '../ui/button'
 import {
@@ -67,7 +67,7 @@ export function ManageSessionKillDialog({
                 {translate('auto.components.settings.ManageSessionKillDialog.6bf4627168', 'Cancel')}
               </Button>
               <Button variant="destructive" onClick={onConfirm} disabled={isBusy}>
-                {isBusy ? <LoaderCircle className="size-4 animate-spin" /> : null}
+                {isBusy ? <LoadingIndicator className="size-4" /> : null}
                 {isBusy
                   ? translate(
                       'auto.components.settings.ManageSessionKillDialog.d3dba51b15',

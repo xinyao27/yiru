@@ -2,12 +2,12 @@ import React from 'react'
 import {
   Check,
   Download,
-  CircleNotch as LoaderCircle,
   Package as PackageCheck,
   ArrowClockwise as RefreshCw,
   Gear as Settings,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/class-names'
@@ -110,11 +110,7 @@ export function PackageManagerActions({
         onClick={onSave}
         disabled={isSaving}
       >
-        {isSaving ? (
-          <LoaderCircle className="size-3.5 animate-spin" />
-        ) : (
-          <Check className="size-3.5" />
-        )}
+        {isSaving ? <LoadingIndicator className="size-3.5" /> : <Check className="size-3.5" />}
         <span className={cn('truncate', isSaving && 'text-muted-foreground')}>
           {translate('auto.components.sidebar.SetupScriptPromptCardViews.ca4efcbc25', 'Save')}
         </span>
@@ -291,11 +287,7 @@ export function SaveLocalSetupAction({
       onClick={onSave}
       disabled={isSaving}
     >
-      {isSaving ? (
-        <LoaderCircle className="size-3.5 animate-spin" />
-      ) : (
-        <Download className="size-3.5" />
-      )}
+      {isSaving ? <LoadingIndicator className="size-3.5" /> : <Download className="size-3.5" />}
       <span className={cn('truncate', isSaving && 'text-muted-foreground')}>
         {translate(
           'auto.components.sidebar.SetupScriptPromptCardViews.96a7f4198c',

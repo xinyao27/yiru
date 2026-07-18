@@ -35,6 +35,16 @@
       "menuBarIcon": {
         "title": "显示菜单栏图标",
         "description": "在 macOS 菜单栏中保留 Yiru 快捷方式和活动指示器。"
+      },
+      "loader": {
+        "title": "加载动画",
+        "description": "选择 Yiru 全局使用的加载动画。手绘图标会依次显示存钱罐、计算器、钱包和小猫。",
+        "drawing": "手绘图标",
+        "code": "代码括号",
+        "macos": "macOS",
+        "square": "方块",
+        "flipbook": "翻书",
+        "escalade": "Escalade"
       }
     }
   },

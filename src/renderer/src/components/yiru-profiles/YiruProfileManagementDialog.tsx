@@ -3,9 +3,9 @@ import {
   ArrowsLeftRight as ArrowRightLeft,
   Copy,
   FolderSimple as FolderGit2,
-  SpinnerGap as Loader2,
   ArrowRight as MoveRight
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -85,7 +85,7 @@ function ProjectTransferMenu({
           {mode === 'move' ? <MoveRight /> : <Copy />}
           <YiruProfileAvatar profile={profile} />
           <span className="min-w-0 truncate">{profile.name}</span>
-          {targetPending ? <Loader2 className="ml-auto size-3.5 animate-spin" /> : null}
+          {targetPending ? <LoadingIndicator className="ml-auto size-3.5" /> : null}
         </DropdownMenuItem>
       )
     })
@@ -95,7 +95,7 @@ function ProjectTransferMenu({
       <DropdownMenuTrigger
         render={
           <Button variant="outline" size="xs" disabled={disabled}>
-            {repoPending ? <Loader2 className="size-3.5 animate-spin" /> : <ArrowRightLeft />}
+            {repoPending ? <LoadingIndicator className="size-3.5" /> : <ArrowRightLeft />}
             {translate('auto.components.yiru.profiles.management.04e7bd2a23', 'Transfer')}
           </Button>
         }

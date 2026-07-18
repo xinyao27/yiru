@@ -234,6 +234,27 @@ describe('AppearancePane', () => {
     expect(updateSettings).toHaveBeenCalledWith({ uiLanguage: 'zh' })
   })
 
+  it('previews and updates the global loading animation', async () => {
+    mocks.state.settingsSearchQuery = 'Loader'
+    const updateSettings = vi.fn()
+    const container = await renderAppearancePane(getDefaultSettings('/tmp'), updateSettings)
+    const options = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[aria-label="Loader"] [role="radio"]')
+    )
+    const flipbook = options.find((option) => option.textContent === 'Flipbook')
+
+    expect(options).toHaveLength(6)
+    expect(options[0]?.getAttribute('aria-checked')).toBe('true')
+    expect(container.querySelector('[data-loader-style="drawing"]')).not.toBeNull()
+    expect(flipbook).toBeDefined()
+
+    await act(async () => {
+      flipbook?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    expect(updateSettings).toHaveBeenCalledWith({ loaderStyle: 'flipbook' })
+  })
+
   it('updates the left sidebar appearance from sidebar settings', async () => {
     mocks.state.settingsSearchQuery = 'left sidebar'
     const updateSettings = vi.fn()

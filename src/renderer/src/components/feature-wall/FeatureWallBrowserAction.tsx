@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
-import { ArrowUpRight, SpinnerGap as Loader2, Terminal } from '@phosphor-icons/react'
+import { ArrowUpRight, Terminal } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
@@ -155,7 +156,7 @@ function BrowserSkillInstallButton(): React.JSX.Element {
       disabled={busy}
       onClick={() => void handleInstall()}
     >
-      {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Terminal className="size-3.5" />}
+      {busy ? <LoadingIndicator className="size-3.5" /> : <Terminal className="size-3.5" />}
       {busy
         ? translate(
             'auto.components.feature.wall.FeatureWallBrowserAction.5f97caf76b',

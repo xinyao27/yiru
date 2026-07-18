@@ -2,12 +2,12 @@ import React from 'react'
 import {
   CheckCircle as CheckCircle2,
   Info,
-  ArrowClockwise as RefreshCw,
   ArrowCounterClockwise as RotateCcw,
   Gear as Settings,
   Sparkle as Sparkles,
   Warning as TriangleAlert
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import AgentCombobox from '@/components/agent/AgentCombobox'
 import { Button } from '@/components/ui/button'
 import { DialogFooter } from '@/components/ui/dialog'
@@ -399,11 +399,7 @@ export function SourceControlAgentActionDialogForm({
           )}
         </Button>
         <Button type="button" size="sm" disabled={!canStart} onClick={onStart}>
-          {isStarting ? (
-            <RefreshCw className="size-4 animate-spin" />
-          ) : (
-            <Sparkles className="size-4" />
-          )}
+          {isStarting ? <LoadingIndicator className="size-4" /> : <Sparkles className="size-4" />}
           {effectiveStartLabel}
         </Button>
       </DialogFooter>

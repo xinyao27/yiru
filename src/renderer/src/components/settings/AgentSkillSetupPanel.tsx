@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
-import {
-  Copy,
-  SpinnerGap as Loader2,
-  ArrowClockwise as RefreshCw,
-  Terminal
-} from '@phosphor-icons/react'
+import { Copy, ArrowClockwise as RefreshCw, Terminal } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { IntegrationStatusPill } from '../integration-status-pill'
 import { SkillFreshnessStatusPill } from '../skills/SkillFreshnessStatusPill'
@@ -205,7 +201,7 @@ export function AgentSkillSetupPanel({
           disabled={terminalOpen || installDisabled || terminalOpening}
         >
           {terminalOpening ? (
-            <Loader2 className="size-3.5 animate-spin" />
+            <LoadingIndicator className="size-3.5" />
           ) : (
             <Terminal className="size-3.5" />
           )}
@@ -230,7 +226,7 @@ export function AgentSkillSetupPanel({
           }}
           disabled={loading}
         >
-          <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
+          {loading ? <LoadingIndicator className="size-3.5" /> : <RefreshCw className="size-3.5" />}
           {translate('auto.components.settings.AgentSkillSetupPanel.c689392435', 'Re-check')}
         </Button>
       ) : null}

@@ -20,7 +20,6 @@ import {
   Warning as AlertTriangle,
   ArrowSquareOut as ExternalLink,
   Question as HelpCircle,
-  SpinnerGap as Loader2,
   Lock,
   LockOpen,
   Plus,
@@ -29,6 +28,7 @@ import {
   Trash as Trash2,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '../../store'
 import {
   ClaudeIcon,
@@ -800,7 +800,7 @@ export function AccountsPane({
                 className="gap-1.5"
               >
                 {claudeAction === 'adding' ? (
-                  <Loader2 className="size-3 animate-spin" />
+                  <LoadingIndicator className="size-3" />
                 ) : (
                   <Plus className="size-3" />
                 )}
@@ -965,7 +965,7 @@ export function AccountsPane({
                           className="h-6 px-2 text-muted-foreground hover:text-foreground"
                         >
                           {isReauthing ? (
-                            <Loader2 className="size-3 animate-spin" />
+                            <LoadingIndicator className="size-3" />
                           ) : (
                             <RefreshCw className="size-3" />
                           )}
@@ -1107,7 +1107,7 @@ export function AccountsPane({
               className="gap-1.5"
             >
               {codexAction === 'adding' ? (
-                <Loader2 className="size-3 animate-spin" />
+                <LoadingIndicator className="size-3" />
               ) : (
                 <Plus className="size-3" />
               )}
@@ -1332,7 +1332,7 @@ export function AccountsPane({
                           className="h-6 px-2 text-muted-foreground hover:text-foreground"
                         >
                           {isReauthing ? (
-                            <Loader2 className="size-3 animate-spin" />
+                            <LoadingIndicator className="size-3" />
                           ) : (
                             <RefreshCw className="size-3" />
                           )}
@@ -1355,7 +1355,7 @@ export function AccountsPane({
                           className="h-6 px-2 text-muted-foreground hover:text-destructive"
                         >
                           {isRemoving ? (
-                            <Loader2 className="size-3 animate-spin" />
+                            <LoadingIndicator className="size-3" />
                           ) : (
                             <Trash2 className="size-3" />
                           )}
@@ -1708,7 +1708,7 @@ export function AccountsPane({
               disabled={miniMaxCredentialBusy || !miniMaxCookieDraft.trim()}
               className="h-7 shrink-0 text-xs"
             >
-              {miniMaxCredentialBusy ? <Loader2 className="size-3 animate-spin" /> : null}
+              {miniMaxCredentialBusy ? <LoadingIndicator className="size-3" /> : null}
               {miniMaxConfigured
                 ? translate('auto.components.settings.AccountsPane.f38b9cc4bd', 'Replace')
                 : translate('auto.components.settings.AccountsPane.590a3130f9', 'Save')}

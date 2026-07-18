@@ -3,9 +3,9 @@ import {
   Check,
   CaretRight as ChevronRight,
   CaretUpDown as ChevronsUpDown,
-  SpinnerGap as Loader2,
   Plus
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Command, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -221,7 +221,7 @@ export function AddRepoHostSelector({
                           onConnectHost?.(host.id)
                         }}
                       >
-                        {isConnecting ? <Loader2 className="size-3 animate-spin" /> : null}
+                        {isConnecting ? <LoadingIndicator className="size-3" /> : null}
                         {isConnecting
                           ? translate(
                               'auto.components.sidebar.AddRepoHostSelector.connecting',

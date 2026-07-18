@@ -1,11 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import {
-  ArrowClockwise as RefreshCw,
   FloppyDisk as Save,
   Sparkle as Sparkles,
   Terminal,
   Warning as TriangleAlert
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -350,7 +350,7 @@ export function SourceControlTextGenerationDialogForm({
             onClick={() => void handleSaveDefaults(selectedSaveTarget)}
           >
             {savingTargetKey === saveTargetKey ? (
-              <RefreshCw className="size-4 animate-spin" />
+              <LoadingIndicator className="size-4" />
             ) : (
               <Save className="size-4" />
             )}

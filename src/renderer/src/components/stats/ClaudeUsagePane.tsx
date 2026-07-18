@@ -11,6 +11,7 @@ import {
   Path as Waypoints
 } from '@phosphor-icons/react'
 import type { ClaudeUsageRange, ClaudeUsageScope } from '../../../../shared/claude-usage-types'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import {
@@ -29,7 +30,6 @@ import { ShareUsageButton } from './ShareUsageButton'
 import { StatCard } from './StatCard'
 import { formatCost, formatTokens, formatUpdatedAt } from './usage-formatters'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 
 const RANGE_OPTIONS: ClaudeUsageRange[] = ['7d', '30d', '90d', 'all']
 const SCOPE_OPTIONS: { value: ClaudeUsageScope; label: string }[] = [
@@ -220,9 +220,11 @@ export function ClaudeUsagePane(): React.JSX.Element {
                       'Refresh Claude usage'
                     )}
                   >
-                    <RefreshCw
-                      className={cn('size-3.5', scanState.isScanning ? 'animate-spin' : '')}
-                    />
+                    {scanState.isScanning ? (
+                      <LoadingIndicator className="size-3.5" />
+                    ) : (
+                      <RefreshCw className="size-3.5" />
+                    )}
                   </Button>
                 }
               />

@@ -7,6 +7,7 @@ import {
   ArrowClockwise as RefreshCw,
   Sparkle as Sparkles
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '../../store'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
@@ -20,7 +21,6 @@ import {
 } from './usage-overview-model'
 import { DailyIntensityGrid, ProviderUsageRow, TokenMixBar } from './usage-overview-sections'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 
 const RECENT_DAY_COUNT = 42
 
@@ -141,7 +141,11 @@ export function UsageOverviewPane(): React.JSX.Element {
                     'Refresh usage overview'
                   )}
                 >
-                  <RefreshCw className={cn('size-3.5', isScanning ? 'animate-spin' : '')} />
+                  {isScanning ? (
+                    <LoadingIndicator className="size-3.5" />
+                  ) : (
+                    <RefreshCw className="size-3.5" />
+                  )}
                 </Button>
               }
             />

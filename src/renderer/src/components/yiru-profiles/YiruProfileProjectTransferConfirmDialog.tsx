@@ -1,4 +1,5 @@
-import { ArrowsLeftRight as ArrowRightLeft, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { ArrowsLeftRight as ArrowRightLeft } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -144,7 +145,7 @@ export function YiruProfileProjectTransferConfirmDialog({
             {translate('auto.components.yiru.profiles.project.transfer.confirm.cancel', 'Cancel')}
           </Button>
           <Button size="sm" onClick={onConfirm} disabled={pending || !pendingTransfer}>
-            {pending ? <Loader2 className="size-4 animate-spin" /> : null}
+            {pending ? <LoadingIndicator className="size-4" /> : null}
             {mode === 'move'
               ? translate(
                   'auto.components.yiru.profiles.project.transfer.confirm.move.action',

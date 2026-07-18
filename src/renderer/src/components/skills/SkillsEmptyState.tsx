@@ -1,4 +1,5 @@
-import { ArrowClockwise, BookOpen, SpinnerGap } from '@phosphor-icons/react'
+import { ArrowClockwise, BookOpen } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
@@ -15,7 +16,7 @@ export function SkillsEmptyState({
     <div className="flex flex-1 items-center justify-center p-8">
       <div className="flex max-w-sm flex-col items-center gap-3 text-center">
         {loading ? (
-          <SpinnerGap className="size-7 animate-spin text-muted-foreground" />
+          <LoadingIndicator className="size-7 text-muted-foreground" />
         ) : (
           <BookOpen className="size-7 text-muted-foreground" />
         )}

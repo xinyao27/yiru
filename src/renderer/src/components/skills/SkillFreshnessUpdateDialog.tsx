@@ -10,9 +10,9 @@ import {
   Warning as AlertTriangle,
   CheckCircle as CheckCircle2,
   CaretDown as ChevronDown,
-  SpinnerGap as Loader2,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { SkillFreshnessInventory } from '../../../../shared/skill-freshness'
 import { buildTargetedSkillUpdateCommand } from '../../../../shared/skill-freshness'
 import { useSkillFreshness } from '@/hooks/useSkillFreshness'
@@ -68,7 +68,7 @@ function SummaryHeadline({
   if (kind === 'loading') {
     return (
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
+        <LoadingIndicator className="size-4" />
         {translate(
           'auto.components.skills.SkillFreshnessUpdateDialog.checking',
           'Checking installed Yiru skills…'
@@ -362,7 +362,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
             disabled={state.loading}
             onClick={() => void state.refresh()}
           >
-            <RefreshCw className={state.loading ? 'animate-spin' : undefined} />
+            {state.loading ? <LoadingIndicator /> : <RefreshCw />}
             {translate('auto.components.skills.SkillFreshnessUpdateDialog.checkNow', 'Re-check')}
           </Button>
           <Button type="button" variant="outline" size="sm" onClick={() => handleOpenChange(false)}>

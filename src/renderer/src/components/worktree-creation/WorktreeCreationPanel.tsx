@@ -2,10 +2,10 @@ import React from 'react'
 import {
   Warning as AlertTriangle,
   GitBranch,
-  SpinnerGap as Loader2,
   ArrowCounterClockwise as RotateCcw,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '@/store'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
 import { retryBackgroundWorktreeCreation } from '@/lib/worktree-creation-flow'
@@ -163,7 +163,7 @@ export default function WorktreeCreationPanel({
         ) : (
           <div className="flex min-h-0 max-w-3xl flex-col gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
-              <Loader2 className="size-3.5 shrink-0 animate-spin" />
+              <LoadingIndicator className="size-3.5 shrink-0" />
               <span>{getCreationProgressLabel(entry)}</span>
               <span className="text-muted-foreground/70">{elapsedLabel}</span>
             </div>
@@ -235,7 +235,7 @@ function VmProvisioningStatus({
           ) : (
             <>
               <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-4 shrink-0 text-muted-foreground" />
                 <span>
                   {translate(
                     'auto.components.worktree.creation.WorktreeCreationPanel.vmProvisioningTitle',

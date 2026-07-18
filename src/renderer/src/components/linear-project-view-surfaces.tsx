@@ -9,10 +9,10 @@ import {
   FileText,
   FolderSimple as FolderKanban,
   StackSimple as Layers3,
-  CircleNotch as LoaderCircle,
   ArrowClockwise as RefreshCw,
   User as UserRound
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -214,7 +214,7 @@ export function LinearCollectionNotice({
             >
               {loading ? (
                 <>
-                  <LoaderCircle className="size-3.5 animate-spin" />
+                  <LoadingIndicator className="size-3.5" />
                   {translate('auto.components.linear.project.view.surfaces.93e1f6bfca', 'Loading')}
                 </>
               ) : (
@@ -650,7 +650,11 @@ export function LinearProjectOverview({
             disabled={loading}
             className="gap-1 border-border/50 bg-background/70"
           >
-            <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
+            {loading ? (
+              <LoadingIndicator className="size-3.5" />
+            ) : (
+              <RefreshCw className="size-3.5" />
+            )}
             {translate('auto.components.linear.project.view.surfaces.a9785c7158', 'Refresh')}
           </Button>
           {project ? (

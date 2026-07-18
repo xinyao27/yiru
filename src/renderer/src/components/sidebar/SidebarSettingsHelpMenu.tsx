@@ -5,7 +5,6 @@ import {
   ArrowSquareOut as ExternalLink,
   GithubLogo as Github,
   Keyboard,
-  SpinnerGap as Loader2,
   ChatText as MessageSquareText,
   ArrowClockwise as RefreshCw,
   ArrowClockwise as RotateCw,
@@ -13,6 +12,7 @@ import {
   Scroll as ScrollText,
   Gear as Settings
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import logo from '../../../../../resources/logo.svg'
 import { useAppStore } from '@/store'
@@ -292,7 +292,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
               title={updateCheckHint}
             >
               {updateStatus.state === 'checking' ? (
-                <Loader2 className="size-3.5 animate-spin" />
+                <LoadingIndicator className="size-3.5" />
               ) : (
                 <RefreshCw className="size-3.5" />
               )}

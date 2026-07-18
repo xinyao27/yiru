@@ -24,13 +24,13 @@ import {
   ArrowLineUp as ArrowUpToLine,
   BracketsCurly as Braces,
   FileCode as FileCode2,
-  SpinnerGap as Loader2,
   ArrowDown as MoveDown,
   ArrowUp as MoveUp,
   Play,
   FloppyDisk as Save,
   Trash as Trash2
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { monaco } from '@/lib/monaco-setup'
 import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { getConnectionId } from '@/lib/connection-context'
@@ -202,7 +202,7 @@ function NotebookCellHeader({
           disabled={running}
           onClick={onRun}
         >
-          {running ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
+          {running ? <LoadingIndicator className="size-3.5" /> : <Play className="size-3.5" />}
         </NotebookHeaderButton>
       ) : null}
       <NotebookHeaderButton
