@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { FolderPlus, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { FolderPlus } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import {
   Dialog,
   DialogContent,
@@ -191,11 +192,7 @@ const AddProjectFromFolderDialog = React.memo(function AddProjectFromFolderDialo
             {translate('auto.components.sidebar.AddProjectFromFolderDialog.7726a16374', 'Cancel')}
           </Button>
           <Button onClick={handleConfirm} disabled={!folderPath || isAdding}>
-            {isAdding ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <FolderPlus className="size-4" />
-            )}
+            {isAdding ? <LoadingIndicator className="size-4" /> : <FolderPlus className="size-4" />}
             {translate(
               'auto.components.sidebar.AddProjectFromFolderDialog.7d1f51678c',
               'Add Project'

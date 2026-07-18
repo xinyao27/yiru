@@ -1,4 +1,5 @@
-import { SpinnerGap as Loader2, Terminal } from '@phosphor-icons/react'
+import { Terminal } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { FeatureSetupChecklist } from './FeatureSetupChecklist'
 import { FeatureSetupInlineTerminal } from './FeatureSetupInlineTerminal'
@@ -41,7 +42,7 @@ export function AgentFeatureSetupStep({
             onClick={onStartFeatureSetup}
           >
             {setupBusyLabel ? (
-              <Loader2 className="size-4 animate-spin" />
+              <LoadingIndicator className="size-4" />
             ) : (
               <Terminal className="size-4" />
             )}

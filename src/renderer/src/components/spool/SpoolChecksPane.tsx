@@ -1,6 +1,7 @@
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ArrowClockwise as RefreshCw, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { SpoolChecksReadResult } from '../../../../shared/spool/spool-operation-contract'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -132,7 +133,7 @@ function SpoolChecksLoading(): React.JSX.Element {
       role="status"
       className="flex flex-1 items-center justify-center gap-2 text-xs text-muted-foreground"
     >
-      <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+      <LoadingIndicator aria-hidden="true" className="size-4" />
       {translate('auto.components.spool.SpoolChecksPane.loading', 'Loading checks…')}
     </div>
   )

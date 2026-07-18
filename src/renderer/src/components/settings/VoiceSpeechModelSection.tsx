@@ -14,10 +14,10 @@ import {
   Cloud,
   Download,
   Trash as Trash2,
-  SpinnerGap as Loader2,
   CaretDown as ChevronDown,
   Check
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 
@@ -130,7 +130,7 @@ export function VoiceSpeechModelSection({
                   {isActive && isReady ? (
                     <Check className="size-3.5" />
                   ) : isDownloading ? (
-                    <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+                    <LoadingIndicator className="size-3.5 text-muted-foreground" />
                   ) : isCloud ? (
                     <Cloud className="size-3.5 text-muted-foreground" />
                   ) : null}
@@ -221,7 +221,7 @@ export function VoiceSpeechModelSection({
                     className="shrink-0 text-muted-foreground can-hover:opacity-0 group-hover:opacity-100 hover:text-destructive disabled:opacity-60 disabled:hover:text-muted-foreground"
                   >
                     {deletePending ? (
-                      <Loader2 className="size-3 animate-spin" />
+                      <LoadingIndicator className="size-3" />
                     ) : (
                       <Trash2 className="size-3" />
                     )}

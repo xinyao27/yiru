@@ -1,9 +1,6 @@
 import { useId, useMemo, useState } from 'react'
-import {
-  ArrowSquareOut as ExternalLink,
-  CircleNotch as LoaderCircle,
-  Lock
-} from '@phosphor-icons/react'
+import { ArrowSquareOut as ExternalLink, Lock } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { LinearWorkspace } from '../../../shared/types'
 import {
   buildLinearPersonalApiKeySettingsUrl,
@@ -239,7 +236,7 @@ export function LinearApiKeyDialog({
           >
             {connectState === 'connecting' ? (
               <>
-                <LoaderCircle className="size-4 animate-spin" />
+                <LoadingIndicator className="size-4" />
                 {translate('auto.components.linear.api.key.dialog.834a52c084', 'Verifying...')}
               </>
             ) : (

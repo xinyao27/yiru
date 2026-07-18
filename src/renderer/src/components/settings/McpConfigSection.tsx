@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   WarningCircle as AlertCircle,
   FileCode as FileCode2,
-  CircleNotch as LoaderCircle,
   Plus,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import type { Repo, Worktree } from '../../../../shared/types'
@@ -266,7 +266,7 @@ export function McpConfigSection({ repo }: McpConfigSectionProps): React.JSX.Ele
             )}
           >
             {loading ? (
-              <LoaderCircle className="size-3.5 animate-spin" />
+              <LoadingIndicator className="size-3.5" />
             ) : (
               <RefreshCw className="size-3.5" />
             )}
@@ -302,7 +302,7 @@ export function McpConfigSection({ repo }: McpConfigSectionProps): React.JSX.Ele
             {translate('auto.components.settings.McpConfigSection.3b224167ff', 'server')}
             {serverCount === 1 ? '' : 's'}
           </span>
-          {loading ? <LoaderCircle className="size-3.5 animate-spin" /> : null}
+          {loading ? <LoadingIndicator className="size-3.5" /> : null}
         </div>
         <div>
           {visibleConfigs.length === 0 ? (

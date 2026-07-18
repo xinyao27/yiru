@@ -3,11 +3,11 @@ import {
   Clipboard,
   Eye,
   FileText,
-  SpinnerGap as Loader2,
   Trash as Trash2,
   CloudArrowUp as UploadCloud,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type {
   DiagnosticsBundlePayload,
   DiagnosticsStatusPayload
@@ -186,7 +186,7 @@ export function getDiagnosticBundleDescription({
 }
 
 function ActionIcon({ busy, icon }: { readonly busy: boolean; readonly icon: React.ReactNode }) {
-  return busy ? <Loader2 className="size-3.5 animate-spin" /> : icon
+  return busy ? <LoadingIndicator className="size-3.5" /> : icon
 }
 
 function formatBytes(bytes: number): string {

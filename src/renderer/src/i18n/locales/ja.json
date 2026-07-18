@@ -35,6 +35,16 @@
       "menuBarIcon": {
         "title": "メニューバーアイコンを表示",
         "description": "macOS メニューバーに Yiru のショートカットとアクティビティインジケーターを表示します。"
+      },
+      "loader": {
+        "title": "ローダー",
+        "description": "Yiru 全体で使用する読み込みアニメーションを選択します。手描きアイコンは貯金箱、電卓、財布、子猫の順に切り替わります。",
+        "drawing": "手描きアイコン",
+        "code": "コードの波括弧",
+        "macos": "macOS",
+        "square": "スクエア",
+        "flipbook": "フリップブック",
+        "escalade": "Escalade"
       }
     }
   },

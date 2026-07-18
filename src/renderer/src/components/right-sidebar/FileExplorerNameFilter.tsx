@@ -1,5 +1,6 @@
 import React from 'react'
-import { Funnel as ListFilter, SpinnerGap as Loader2, X } from '@phosphor-icons/react'
+import { Funnel as ListFilter, X } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
@@ -37,7 +38,7 @@ export function FileExplorerNameFilter({
         onChange={(event) => onQueryChange(event.currentTarget.value)}
         spellCheck={false}
       />
-      {loading ? <Loader2 className="size-3 shrink-0 animate-spin text-muted-foreground" /> : null}
+      {loading ? <LoadingIndicator className="size-3 shrink-0 text-muted-foreground" /> : null}
       {query ? (
         <Button
           type="button"

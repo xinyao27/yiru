@@ -1,9 +1,6 @@
 import React from 'react'
-import {
-  ArrowSquareOut as ExternalLink,
-  CircleNotch as LoaderCircle,
-  ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
+import { ArrowSquareOut as ExternalLink, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
@@ -253,7 +250,7 @@ export function CheckRunDetailsPanel({
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 scrollbar-sleek">
         {loading ? (
           <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-            <LoaderCircle className="size-4 animate-spin" />
+            <LoadingIndicator className="size-4" />
             {translate(
               'auto.components.editor.CheckRunDetailsPanel.1f2b980522',
               'Loading check details…'

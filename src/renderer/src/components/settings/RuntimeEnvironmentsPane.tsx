@@ -4,7 +4,6 @@
 import {
   Warning as AlertTriangle,
   CaretDown as ChevronDown,
-  SpinnerGap as Loader2,
   Plus,
   ArrowClockwise as RefreshCw,
   HardDrives as Server,
@@ -12,6 +11,7 @@ import {
   ShareNetwork as Share2,
   Trash as Trash2
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useMountedRef } from '@/hooks/useMountedRef'
@@ -842,7 +842,7 @@ export function RuntimeEnvironmentsPane({
                 size="sm"
                 disabled={isBusy || !name.trim() || !pairingCode.trim()}
               >
-                {isSaving ? <Loader2 className="animate-spin" /> : <Plus />}
+                {isSaving ? <LoadingIndicator /> : <Plus />}
                 {translate(
                   'auto.components.settings.RuntimeEnvironmentsPane.9bee6bbeeb',
                   'Add Server'
@@ -898,7 +898,7 @@ export function RuntimeEnvironmentsPane({
                             {details?.compatibility?.kind === 'blocked' ? (
                               <AlertTriangle className="size-3.5 shrink-0 text-destructive" />
                             ) : details?.status === 'loading' ? (
-                              <Loader2 className="size-3.5 shrink-0 animate-spin text-muted-foreground" />
+                              <LoadingIndicator className="size-3.5 shrink-0 text-muted-foreground" />
                             ) : null}
                           </div>
                           <p className="truncate text-xs text-muted-foreground">
@@ -933,7 +933,7 @@ export function RuntimeEnvironmentsPane({
                               disabled={actionBusy}
                             >
                               {disconnectingId === environment.id ? (
-                                <Loader2 className="size-3 animate-spin" />
+                                <LoadingIndicator className="size-3" />
                               ) : (
                                 <ServerOff className="size-3" />
                               )}
@@ -952,7 +952,7 @@ export function RuntimeEnvironmentsPane({
                               disabled={actionBusy || connectionState === 'checking'}
                             >
                               {connectingId === environment.id ? (
-                                <Loader2 className="size-3 animate-spin" />
+                                <LoadingIndicator className="size-3" />
                               ) : (
                                 <Server className="size-3" />
                               )}
@@ -979,7 +979,7 @@ export function RuntimeEnvironmentsPane({
                             )}
                           >
                             {removingId === environment.id ? (
-                              <Loader2 className="size-3 animate-spin" />
+                              <LoadingIndicator className="size-3" />
                             ) : (
                               <Trash2 className="size-3" />
                             )}
@@ -1094,7 +1094,7 @@ export function RuntimeEnvironmentsPane({
                   onClick={() => void loadEnvironments()}
                   disabled={isLoading || isBusy}
                 >
-                  {isLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+                  {isLoading ? <LoadingIndicator /> : <RefreshCw />}
                 </Button>
               </div>
               {environments.length > 0 ? (
@@ -1285,7 +1285,7 @@ export function RuntimeEnvironmentsPane({
               }}
               disabled={switchingValue !== null}
             >
-              {switchingValue !== null ? <Loader2 className="animate-spin" /> : null}
+              {switchingValue !== null ? <LoadingIndicator /> : null}
               {translate('auto.components.settings.RuntimeEnvironmentsPane.d2e00809e4', 'Switch')}
             </Button>
           </DialogFooter>
@@ -1365,7 +1365,7 @@ export function RuntimeEnvironmentsPane({
               }}
               disabled={removingId !== null}
             >
-              {removingId !== null ? <Loader2 className="animate-spin" /> : <Trash2 />}
+              {removingId !== null ? <LoadingIndicator /> : <Trash2 />}
               {translate('auto.components.settings.RuntimeEnvironmentsPane.d25f0688b1', 'Remove')}
             </Button>
           </DialogFooter>

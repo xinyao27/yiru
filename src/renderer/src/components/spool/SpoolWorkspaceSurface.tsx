@@ -3,10 +3,10 @@ import { useCallback, useMemo, useState } from 'react'
 import {
   LockKey as LockKeyhole,
   ShieldCheck,
-  SpinnerGap as Loader2,
   TerminalWindow as SquareTerminal,
   Warning as TriangleAlert
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 import type {
@@ -269,7 +269,7 @@ function SpoolSessionCatalogStatus({
       className="flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground"
     >
       {loading ? (
-        <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+        <LoadingIndicator aria-hidden="true" className="size-4" />
       ) : (
         <TriangleAlert aria-hidden="true" className="size-3" />
       )}

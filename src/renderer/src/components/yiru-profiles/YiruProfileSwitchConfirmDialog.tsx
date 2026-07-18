@@ -1,4 +1,5 @@
-import { Warning as AlertTriangle, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { Warning as AlertTriangle } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -119,7 +120,7 @@ export function YiruProfileSwitchConfirmDialog({
             {translate('auto.components.yiru.profiles.switch.confirm.cancel', 'Cancel')}
           </Button>
           <Button size="sm" onClick={onConfirm} disabled={switching}>
-            {switching ? <Loader2 className="size-4 animate-spin" /> : null}
+            {switching ? <LoadingIndicator className="size-4" /> : null}
             {translate('auto.components.yiru.profiles.switch.confirm.switch', 'Switch profile')}
           </Button>
         </DialogFooter>

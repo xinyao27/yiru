@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import { Info, SpinnerGap as Loader2, ArrowClockwise as RotateCw } from '@phosphor-icons/react'
+import { Info, ArrowClockwise as RotateCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { GlobalSettings } from '../../../../shared/types'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { Button } from '../ui/button'
@@ -128,7 +129,7 @@ export function AdvancedPane({ settings, updateSettings }: AdvancedPaneProps): R
                 className="shrink-0 gap-1.5"
               >
                 {http1CompatibilityRelaunching ? (
-                  <Loader2 className="size-3.5 animate-spin" />
+                  <LoadingIndicator className="size-3.5" />
                 ) : (
                   <RotateCw className="size-3.5" />
                 )}

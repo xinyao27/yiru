@@ -13,11 +13,11 @@ import {
   FolderSimple as FolderKanban,
   GitBranch,
   Link,
-  CircleNotch as LoaderCircle,
   Plus,
   ArrowClockwise as RefreshCw,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 
 import { LinearIcon } from '@/components/icons/LinearIcon'
@@ -267,7 +267,7 @@ function LinearIssueSubIssueButton({
               <span className="shrink-0 font-mono text-xs">{subIssue.identifier}</span>
               <span className="min-w-0 flex-1 truncate">{subIssue.title}</span>
               {openingSubIssueId === subIssue.id ? (
-                <LoaderCircle className="size-3.5 shrink-0 animate-spin" />
+                <LoadingIndicator className="size-3.5 shrink-0" />
               ) : (
                 <ArrowRight className="size-3.5 shrink-0" />
               )}
@@ -313,7 +313,7 @@ function LinearIssueSubIssueButton({
                 onClick={() => void handleCreate()}
                 disabled={!title.trim() || submitting}
               >
-                {submitting ? <LoaderCircle className="size-3.5 animate-spin" /> : null}
+                {submitting ? <LoadingIndicator className="size-3.5" /> : null}
                 {translate('auto.components.LinearIssueWorkspace.42589845bc', 'Create')}
               </Button>
             </div>
@@ -465,7 +465,7 @@ function LinearIssueSidebarProjectCard({
             <div className="max-h-64 overflow-y-auto scrollbar-sleek">
               {loading ? (
                 <div className="flex items-center gap-2 px-2 py-3 text-sm text-muted-foreground">
-                  <LoaderCircle className="size-3.5 animate-spin" />
+                  <LoadingIndicator className="size-3.5" />
                   {translate('auto.components.LinearIssueWorkspace.937ba6ad9a', 'Loading projects')}
                 </div>
               ) : projects.length > 0 ? (
@@ -483,7 +483,7 @@ function LinearIssueSidebarProjectCard({
                     />
                     <span className="min-w-0 flex-1 truncate">{project.name}</span>
                     {savingProjectId === project.id ? (
-                      <LoaderCircle className="size-3.5 animate-spin" />
+                      <LoadingIndicator className="size-3.5" />
                     ) : issue.project?.id === project.id ? (
                       <Check className="size-3.5" />
                     ) : null}
@@ -748,7 +748,7 @@ export default function LinearIssueWorkspace({
           <ChevronRight className="size-3.5 shrink-0" />
           <span className="shrink-0 font-mono">{displayed.identifier}</span>
           <span className="min-w-0 truncate font-medium text-foreground">{displayed.title}</span>
-          {issueLoading ? <LoaderCircle className="size-3.5 shrink-0 animate-spin" /> : null}
+          {issueLoading ? <LoadingIndicator className="size-3.5 shrink-0" /> : null}
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <span className="hidden px-2 text-sm text-muted-foreground md:inline">2 / 17</span>
@@ -894,7 +894,7 @@ export default function LinearIssueWorkspace({
                     className="gap-1"
                   >
                     {commentsLoading ? (
-                      <LoaderCircle className="size-3 animate-spin" />
+                      <LoadingIndicator className="size-3" />
                     ) : (
                       <RefreshCw className="size-3" />
                     )}
@@ -905,7 +905,7 @@ export default function LinearIssueWorkspace({
 
               {commentsLoading && comments.length === 0 ? (
                 <div className="mb-5 flex items-center justify-center py-8">
-                  <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                  <LoadingIndicator className="size-4 text-muted-foreground" />
                 </div>
               ) : comments.length > 0 ? (
                 <div className="mb-6 flex flex-col gap-5">

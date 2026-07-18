@@ -4,9 +4,9 @@ import {
   Circle as CircleDot,
   ArrowSquareOut as ExternalLink,
   GitPullRequest,
-  CircleNotch as LoaderCircle,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -270,7 +270,7 @@ export function SlugDialogBody({
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 scrollbar-sleek">
         {loading && !details ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <LoaderCircle className="size-4 animate-spin" />{' '}
+            <LoadingIndicator className="size-4" />{' '}
             {translate(
               'auto.components.github.project.slug.dialog.SlugDialogBody.e4ef8281e9',
               'Loading…'

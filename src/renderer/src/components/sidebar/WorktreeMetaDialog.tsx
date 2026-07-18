@@ -18,7 +18,8 @@ import {
 } from './worktree-meta-updates'
 import { useWorktreeIssueLink } from './use-worktree-issue-link'
 import { getScreenSubmitShortcutLabel, isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
-import { ArrowSquareOut as ExternalLink, CircleNotch as LoaderCircle } from '@phosphor-icons/react'
+import { ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { translate } from '@/i18n/i18n'
 
@@ -266,7 +267,7 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
                       className="absolute right-1 top-1 text-muted-foreground"
                     >
                       {openingIssue ? (
-                        <LoaderCircle className="size-3 animate-spin" />
+                        <LoadingIndicator className="size-3" />
                       ) : (
                         <ExternalLink className="size-3" />
                       )}

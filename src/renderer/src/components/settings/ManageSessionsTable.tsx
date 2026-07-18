@@ -1,11 +1,11 @@
 import type { PtyManagementSession } from '../../../../preload/api-types'
 import {
-  CircleNotch as LoaderCircle,
   ArrowClockwise as RefreshCw,
   ArrowClockwise as RotateCw,
   Trash as Trash2,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { formatState, formatWorkspace } from './manage-sessions-format'
@@ -78,11 +78,7 @@ export function ManageSessionsTable({
                   )}
                   className="text-muted-foreground hover:text-destructive"
                 >
-                  {daemonBusyKind === 'killAll' ? (
-                    <LoaderCircle className="animate-spin" />
-                  ) : (
-                    <Trash2 />
-                  )}
+                  {daemonBusyKind === 'killAll' ? <LoadingIndicator /> : <Trash2 />}
                 </Button>
               }
             />
@@ -107,11 +103,7 @@ export function ManageSessionsTable({
                   )}
                   className="text-muted-foreground"
                 >
-                  {daemonBusyKind === 'restart' ? (
-                    <LoaderCircle className="animate-spin" />
-                  ) : (
-                    <RotateCw />
-                  )}
+                  {daemonBusyKind === 'restart' ? <LoadingIndicator /> : <RotateCw />}
                 </Button>
               }
             />

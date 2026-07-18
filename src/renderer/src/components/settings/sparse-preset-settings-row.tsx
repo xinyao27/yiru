@@ -1,9 +1,5 @@
-import {
-  Bookmark,
-  CircleNotch as LoaderCircle,
-  Pencil,
-  Trash as Trash2
-} from '@phosphor-icons/react'
+import { Bookmark, Pencil, Trash as Trash2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { SparsePreset } from '../../../../shared/types'
 import { cn } from '@/lib/class-names'
 import { Button } from '../ui/button'
@@ -104,7 +100,7 @@ export function SparsePresetSettingsRow({
             )}
           >
             {isDeleting ? (
-              <LoaderCircle className="size-3.5 animate-spin" />
+              <LoadingIndicator className="size-3.5" />
             ) : (
               <Trash2 className="size-3.5" />
             )}

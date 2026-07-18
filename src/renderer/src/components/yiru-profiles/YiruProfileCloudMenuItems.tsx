@@ -1,11 +1,5 @@
-import {
-  Check,
-  Cloud,
-  SpinnerGap as Loader2,
-  SignIn as LogIn,
-  SignOut as LogOut,
-  Plus
-} from '@phosphor-icons/react'
+import { Check, Cloud, SignIn as LogIn, SignOut as LogOut, Plus } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import {
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -128,7 +122,7 @@ export function YiruProfileCloudMenuItems({
       ) : null}
       {showSignIn ? (
         <DropdownMenuItem disabled={profileActionDisabled || !cloudConfigured} onClick={onConnect}>
-          {connecting ? <Loader2 className="size-4 animate-spin" /> : <LogIn />}
+          {connecting ? <LoadingIndicator className="size-4" /> : <LogIn />}
           {getConnectLabel(authStatus, connecting)}
         </DropdownMenuItem>
       ) : null}

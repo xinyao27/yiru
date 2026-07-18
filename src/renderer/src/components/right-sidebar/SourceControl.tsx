@@ -8,7 +8,6 @@ import {
   CloudArrowUp as CloudUpload,
   Minus,
   Plus,
-  SpinnerGap as Loader2,
   ArrowClockwise as RefreshCw,
   GearSix as Settings2,
   Sparkle as Sparkles,
@@ -29,6 +28,7 @@ import {
   DotsThree as MoreHorizontal,
   type Icon as PhosphorIcon
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffCommentsOrEmpty } from '@/store/worktree-diff-comments-selector'
 import {
@@ -6904,7 +6904,7 @@ export function CommitArea({
                     title={primaryAction.title}
                   >
                     {showSpinner ? (
-                      <Loader2 className="size-3.5 animate-spin" />
+                      <LoadingIndicator className="size-3.5" />
                     ) : PrimaryIcon ? (
                       <PrimaryIcon className="size-3.5" aria-hidden="true" />
                     ) : null}
@@ -6941,7 +6941,7 @@ export function CommitArea({
                           title={moreActionsLabel}
                         >
                           {showChevronSpinner ? (
-                            <Loader2 className="size-3.5 animate-spin" />
+                            <LoadingIndicator className="size-3.5" />
                           ) : (
                             <ChevronDown className="size-3.5" />
                           )}
@@ -7889,7 +7889,7 @@ function SubmodulePlaceholderRow({
         paddingLeft: `${depth * SOURCE_CONTROL_TREE_INDENT_PX + SOURCE_CONTROL_TREE_FILE_PADDING_PX}px`
       }}
     >
-      {state === 'loading' && <Loader2 className="size-3 shrink-0 animate-spin" />}
+      {state === 'loading' && <LoadingIndicator className="size-3 shrink-0" />}
       <span className="min-w-0 truncate">{message ?? fallback}</span>
     </div>
   )

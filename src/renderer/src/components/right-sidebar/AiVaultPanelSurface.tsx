@@ -1,5 +1,5 @@
 import type React from 'react'
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { cn } from '@/lib/class-names'
 
 export function AiVaultPanelSurface({
@@ -29,7 +29,7 @@ export function AiVaultPanelNotice({
         tone === 'destructive' ? 'text-destructive' : 'text-muted-foreground'
       )}
     >
-      {loading ? <Loader2 aria-hidden="true" className="size-3.5 animate-spin" /> : null}
+      {loading ? <LoadingIndicator aria-hidden="true" className="size-3.5" /> : null}
       {children}
     </div>
   )

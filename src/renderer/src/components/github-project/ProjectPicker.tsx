@@ -7,10 +7,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Warning as AlertTriangle,
   CaretDown as ChevronDown,
-  SpinnerGap as Loader,
   PushPin as Pin,
   MagnifyingGlass as Search
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { GhAuthErrorHelp } from '@/components/github-project/GhAuthErrorHelp'
 import { Button } from '@/components/ui/button'
@@ -545,7 +545,7 @@ export default function ProjectPicker({ activeProject, onSelect }: Props): React
               >
                 {browseLoading ? (
                   <div className="flex items-center gap-2 px-2 py-2 text-xs text-muted-foreground">
-                    <Loader className="size-3 animate-spin" />{' '}
+                    <LoadingIndicator className="size-3" />{' '}
                     {translate(
                       'auto.components.github.project.ProjectPicker.7b6d39627e',
                       'Loading…'
@@ -708,7 +708,7 @@ function ViewPickStep({
       <div className="max-h-[340px] overflow-y-auto p-1 scrollbar-sleek">
         {loading ? (
           <div className="flex items-center gap-2 px-2 py-2 text-xs text-muted-foreground">
-            <Loader className="size-3 animate-spin" />{' '}
+            <LoadingIndicator className="size-3" />{' '}
             {translate('auto.components.github.project.ProjectPicker.72a05c04a6', 'Loading views…')}
           </div>
         ) : views.length === 0 ? (

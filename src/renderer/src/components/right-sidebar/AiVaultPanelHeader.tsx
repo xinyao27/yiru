@@ -1,9 +1,5 @@
-import {
-  CircleNotch as LoaderCircle,
-  ArrowClockwise as RefreshCw,
-  MagnifyingGlass as Search,
-  X
-} from '@phosphor-icons/react'
+import { ArrowClockwise as RefreshCw, MagnifyingGlass as Search, X } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import type {
@@ -142,11 +138,7 @@ export function AiVaultPanelHeader({
             aria-busy={loading}
             className="size-6"
           >
-            {loading ? (
-              <LoaderCircle className="size-3 animate-spin" />
-            ) : (
-              <RefreshCw className="size-3" />
-            )}
+            {loading ? <LoadingIndicator className="size-3" /> : <RefreshCw className="size-3" />}
           </Button>
         </div>
       </div>
@@ -172,7 +164,7 @@ export function AiVaultPanelHeader({
           className="min-w-0 flex-1 bg-transparent py-1.5 text-xs text-foreground outline-none placeholder:text-muted-foreground/50"
           spellCheck={false}
         />
-        {loading ? <LoaderCircle className="size-3 animate-spin text-muted-foreground" /> : null}
+        {loading ? <LoadingIndicator className="size-3 text-muted-foreground" /> : null}
         {query ? (
           <Button
             type="button"

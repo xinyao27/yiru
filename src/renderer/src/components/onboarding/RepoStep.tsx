@@ -4,9 +4,9 @@ import {
   FolderOpen,
   GitBranch,
   Lightbulb,
-  SpinnerGap as Loader2,
   HardDrives as Server
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { Dispatch, SetStateAction } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -299,7 +299,7 @@ export function RepoStep({
                     )}
                     onClick={onStopNestedScan}
                   >
-                    <Loader2 className="size-3.5 animate-spin text-annotation-highlight group-hover:hidden group-focus-visible:hidden" />
+                    <LoadingIndicator className="size-3.5 text-annotation-highlight group-hover:hidden group-focus-visible:hidden" />
                     <CircleStop className="hidden size-3.5 group-hover:block group-focus-visible:block" />
                   </Button>
                 }

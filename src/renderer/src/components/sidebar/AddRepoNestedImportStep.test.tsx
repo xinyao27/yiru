@@ -181,8 +181,12 @@ describe('AddRepoNestedImportStep', () => {
     })
 
     expect(onImport).toHaveBeenCalledWith('group')
-    expect(findButton(host, 'Yes, import as group').querySelector('.animate-spin')).not.toBeNull()
-    expect(findButton(host, 'No, import separately').querySelector('.animate-spin')).toBeNull()
+    expect(
+      findButton(host, 'Yes, import as group').querySelector('[data-slot="loading-indicator"]')
+    ).not.toBeNull()
+    expect(
+      findButton(host, 'No, import separately').querySelector('[data-slot="loading-indicator"]')
+    ).toBeNull()
   })
 
   it('offers opening the parent folder when no repositories are selected', () => {

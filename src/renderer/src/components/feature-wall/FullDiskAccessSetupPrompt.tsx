@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  Check,
-  ArrowSquareOut as ExternalLink,
-  HardDrive,
-  SpinnerGap as Loader2
-} from '@phosphor-icons/react'
+import { Check, ArrowSquareOut as ExternalLink, HardDrive } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import type {
   DeveloperPermissionId,
@@ -79,7 +75,7 @@ function getFullDiskAccessButtonLabel(args: FullDiskAccessButtonState): string {
 
 function FullDiskAccessButtonIcon(props: FullDiskAccessButtonState): React.JSX.Element {
   if (props.requesting) {
-    return <Loader2 className="size-3.5 animate-spin" />
+    return <LoadingIndicator className="size-3.5" />
   }
   if (props.ready) {
     return <Check className="size-3.5" />

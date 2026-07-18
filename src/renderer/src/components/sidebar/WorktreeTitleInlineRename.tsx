@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -286,9 +286,9 @@ export function WorktreeTitleInlineRename({
           )}
         />
         {saving ? (
-          <LoaderCircle
+          <LoadingIndicator
             className={cn(
-              'pointer-events-none absolute top-1/2 size-3 -translate-y-1/2 animate-spin text-muted-foreground',
+              'pointer-events-none absolute top-1/2 size-3 -translate-y-1/2 text-muted-foreground',
               savingSpinnerClassName
             )}
           />

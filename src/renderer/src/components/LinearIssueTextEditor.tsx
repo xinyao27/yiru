@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 
 import { LinearIssueMarkdownDescriptionEditor } from '@/components/LinearIssueMarkdownDescriptionEditor'
@@ -230,7 +230,7 @@ export function LinearIssueTextEditor({
             <span>{translate('auto.components.LinearIssueTextEditor.947ba2d6f4', 'to save')}</span>
           </div>
           {savingField === 'title' ? (
-            <LoaderCircle className="absolute right-2 top-2 size-4 animate-spin text-muted-foreground" />
+            <LoadingIndicator className="absolute right-2 top-2 size-4 text-muted-foreground" />
           ) : null}
         </div>
       ) : null}

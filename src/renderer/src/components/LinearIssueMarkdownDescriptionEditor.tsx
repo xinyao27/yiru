@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { EditorContent, useEditor } from '@tiptap/react'
 import type { Editor } from '@tiptap/react'
 import Placeholder from '@tiptap/extension-placeholder'
-import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 
 import { createRichMarkdownExtensions } from '@/components/editor/rich-markdown-extensions'
 import { encodeRawMarkdownHtmlForRichEditor } from '@/components/editor/raw-markdown-html'
@@ -168,7 +168,7 @@ export function LinearIssueMarkdownDescriptionEditor({
         </span>
       </div>
       {disabled ? (
-        <LoaderCircle className="absolute right-2 top-2 size-4 animate-spin text-muted-foreground" />
+        <LoadingIndicator className="absolute right-2 top-2 size-4 text-muted-foreground" />
       ) : null}
     </div>
   )

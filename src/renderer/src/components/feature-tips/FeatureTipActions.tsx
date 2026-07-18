@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { FeatureTip, FeatureTipAction } from '../../../../shared/feature-tips'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
@@ -40,7 +40,7 @@ export function FeatureTipActions({
       >
         {primaryBusy ? (
           <>
-            <Loader2 className="size-4 animate-spin" />
+            <LoadingIndicator className="size-4" />
             {getPrimaryBusyLabel(currentTip.action)}
           </>
         ) : (

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   ArrowSquareOut as ExternalLink,
-  SpinnerGap as Loader2,
   ArrowClockwise as RefreshCw,
   ShieldCheck
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -148,11 +148,7 @@ export function GrokAccountsSection(): React.JSX.Element {
           onClick={() => void handleRefreshUsage()}
           className="shrink-0 gap-1"
         >
-          {refreshing ? (
-            <Loader2 className="size-3 animate-spin" />
-          ) : (
-            <RefreshCw className="size-3" />
-          )}
+          {refreshing ? <LoadingIndicator className="size-3" /> : <RefreshCw className="size-3" />}
           {translate('auto.components.settings.GrokAccountsSection.3325d996cb', 'Refresh usage')}
         </Button>
       </div>

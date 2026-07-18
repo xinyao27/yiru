@@ -1,11 +1,11 @@
 import React, { useCallback, useMemo } from 'react'
 import {
   Warning as AlertTriangle,
-  SpinnerGap as Loader2,
   Devices as MonitorSmartphone,
   HardDrives as Server,
   HardDrive as ServerOff
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -313,7 +313,7 @@ export function SshStatusSegment({
                 {syncProblem ? (
                   <AlertTriangle className="size-3 text-destructive" />
                 ) : anyConnecting ? (
-                  <Loader2 className="size-3 animate-spin text-muted-foreground" />
+                  <LoadingIndicator className="size-3 text-muted-foreground" />
                 ) : (
                   <MonitorSmartphone className="size-3 text-muted-foreground" />
                 )}
@@ -323,7 +323,7 @@ export function SshStatusSegment({
                 {syncProblem ? (
                   <AlertTriangle className="size-3 text-destructive" />
                 ) : anyConnecting ? (
-                  <Loader2 className="size-3 animate-spin text-yellow-500" />
+                  <LoadingIndicator className="size-3 text-yellow-500" />
                 ) : overall === 'connected' ? (
                   <Server className="size-3 text-emerald-500" />
                 ) : overall === 'partial' ? (

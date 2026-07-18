@@ -24,6 +24,7 @@ import type { GitBranchChangeStatus } from './git-status-types'
 import type { KeybindingOverrides, TerminalShortcutPolicy } from './keybindings'
 import type { RepoIcon } from './repo-icon'
 import type { AppIconId } from './app-icon'
+import type { LoaderStyle } from './loader-style'
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
@@ -2565,6 +2566,8 @@ export type GlobalSettings = {
   leftSidebarTintOpacity?: number
   uiLanguage: UiLanguage
   appIcon: AppIconId
+  /** Optional only for profiles persisted before loader selection was introduced. */
+  loaderStyle?: LoaderStyle
   appFontFamily: string
   editorAutoSave: boolean
   editorAutoSaveDelayMs: number

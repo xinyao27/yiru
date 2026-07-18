@@ -5,7 +5,7 @@
  * while isolating the inline-connect interaction logic.
  */
 import React, { useCallback, useRef, useState } from 'react'
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { SshTarget, SshConnectionState } from '../../../../shared/ssh-types'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -98,7 +98,7 @@ export function SshTargetRow({
         >
           {isBusy ? (
             <>
-              <Loader2 className="size-3 animate-spin" />
+              <LoadingIndicator className="size-3" />
               {translate('auto.components.sidebar.SshTargetRow.4677394048', 'Connecting…')}
             </>
           ) : (

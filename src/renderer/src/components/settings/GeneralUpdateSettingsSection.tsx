@@ -1,6 +1,7 @@
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { Download, SpinnerGap as Loader2, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { Download, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
@@ -98,7 +99,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
             className="gap-2"
           >
             {updateStatus.state === 'checking' ? (
-              <Loader2 className="size-3.5 animate-spin" />
+              <LoadingIndicator className="size-3.5" />
             ) : (
               <RefreshCw className="size-3.5" />
             )}

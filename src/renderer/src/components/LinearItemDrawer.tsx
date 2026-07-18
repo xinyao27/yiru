@@ -6,12 +6,12 @@ import {
   CaretDown as ChevronDown,
   ArrowSquareOut as ExternalLink,
   Gauge,
-  CircleNotch as LoaderCircle,
   PaperPlaneRight as Send,
   Tag,
   User as UserRound,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -93,7 +93,7 @@ function LinearEditChipAdornment({
   pending?: boolean
 }): React.JSX.Element {
   if (loading || pending) {
-    return <LoaderCircle className="size-3 shrink-0 animate-spin opacity-70" />
+    return <LoadingIndicator className="size-3 shrink-0 opacity-70" />
   }
 
   return <ChevronDown className="size-3 shrink-0 opacity-55" />
@@ -473,7 +473,7 @@ export function LinearIssueEditSection({
                   </div>
                 ) : states.loading ? (
                   <div className="flex items-center gap-2 px-2 py-3 text-[12px] text-muted-foreground">
-                    <LoaderCircle className="size-3 animate-spin" />
+                    <LoadingIndicator className="size-3" />
                     {translate('auto.components.LinearItemDrawer.59b6cd3706', 'Loading states')}
                   </div>
                 ) : states.data.length > 0 ? (
@@ -584,7 +584,7 @@ export function LinearIssueEditSection({
                     </div>
                   ) : members.loading ? (
                     <div className="flex items-center gap-2 px-2 py-3 text-[12px] text-muted-foreground">
-                      <LoaderCircle className="size-3 animate-spin" />
+                      <LoadingIndicator className="size-3" />
                       {translate('auto.components.LinearItemDrawer.b2376d0179', 'Loading members')}
                     </div>
                   ) : (
@@ -671,7 +671,7 @@ export function LinearIssueEditSection({
                       onClick={handleEstimateSubmit}
                       disabled={estimatePending}
                     >
-                      {estimatePending ? <LoaderCircle className="size-3.5 animate-spin" /> : null}
+                      {estimatePending ? <LoadingIndicator className="size-3.5" /> : null}
                       {translate('auto.components.LinearItemDrawer.b5675b0694', 'Save')}
                     </Button>
                   </div>
@@ -725,7 +725,7 @@ export function LinearIssueEditSection({
                   </div>
                 ) : labels.loading ? (
                   <div className="flex items-center gap-2 px-2 py-3 text-[12px] text-muted-foreground">
-                    <LoaderCircle className="size-3 animate-spin" />
+                    <LoadingIndicator className="size-3" />
                     {translate('auto.components.LinearItemDrawer.cddd9b04a7', 'Loading labels')}
                   </div>
                 ) : labels.data.length > 0 ? (
@@ -795,7 +795,7 @@ export function LinearIssueEditSection({
             <div className="px-2 py-3 text-center text-[12px] text-destructive">{states.error}</div>
           ) : states.loading ? (
             <div className="flex items-center gap-2 px-2 py-3 text-[12px] text-muted-foreground">
-              <LoaderCircle className="size-3 animate-spin" />
+              <LoadingIndicator className="size-3" />
               {translate('auto.components.LinearItemDrawer.59b6cd3706', 'Loading states')}
             </div>
           ) : states.data.length > 0 ? (
@@ -925,7 +925,7 @@ export function LinearIssueEditSection({
                 onClick={handleEstimateSubmit}
                 disabled={estimatePending}
               >
-                {estimatePending ? <LoaderCircle className="size-3.5 animate-spin" /> : null}
+                {estimatePending ? <LoadingIndicator className="size-3.5" /> : null}
                 {translate('auto.components.LinearItemDrawer.b5675b0694', 'Save')}
               </Button>
             </div>
@@ -967,7 +967,7 @@ export function LinearIssueEditSection({
               </div>
             ) : members.loading ? (
               <div className="flex items-center gap-2 px-2 py-3 text-[12px] text-muted-foreground">
-                <LoaderCircle className="size-3 animate-spin" />
+                <LoadingIndicator className="size-3" />
                 {translate('auto.components.LinearItemDrawer.b2376d0179', 'Loading members')}
               </div>
             ) : (
@@ -1016,7 +1016,7 @@ export function LinearIssueEditSection({
             <div className="px-2 py-3 text-center text-[12px] text-destructive">{labels.error}</div>
           ) : labels.loading ? (
             <div className="flex items-center gap-2 px-2 py-3 text-[12px] text-muted-foreground">
-              <LoaderCircle className="size-3 animate-spin" />
+              <LoadingIndicator className="size-3" />
               {translate('auto.components.LinearItemDrawer.cddd9b04a7', 'Loading labels')}
             </div>
           ) : labels.data.length > 0 ? (
@@ -1196,11 +1196,7 @@ export function LinearIssueCommentFooter({
             disabled={!canSubmitComment || submitting}
             aria-label={translate('auto.components.LinearItemDrawer.d369841269', 'Send comment')}
           >
-            {submitting ? (
-              <LoaderCircle className="size-3.5 animate-spin" />
-            ) : (
-              <Send className="size-3.5" />
-            )}
+            {submitting ? <LoadingIndicator className="size-3.5" /> : <Send className="size-3.5" />}
           </Button>
         </div>
       </div>
@@ -1231,11 +1227,7 @@ export function LinearIssueCommentFooter({
         className="size-8 shrink-0"
         aria-label={translate('auto.components.LinearItemDrawer.d369841269', 'Send comment')}
       >
-        {submitting ? (
-          <LoaderCircle className="size-3.5 animate-spin" />
-        ) : (
-          <Send className="size-3.5" />
-        )}
+        {submitting ? <LoadingIndicator className="size-3.5" /> : <Send className="size-3.5" />}
       </Button>
     </div>
   )
@@ -1515,7 +1507,7 @@ export default function LinearItemDrawer({
                 </div>
                 {commentsLoading && comments.length === 0 ? (
                   <div className="flex items-center justify-center py-6">
-                    <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                    <LoadingIndicator className="size-4 text-muted-foreground" />
                   </div>
                 ) : comments.length === 0 ? (
                   <p className="text-[13px] text-muted-foreground">

@@ -189,7 +189,7 @@ Icons come from **`@phosphor-icons/react`**. Don't import a second icon library.
 - **`size-7`+:** for featured/empty-state hero icons only.
 - **Weight:** use Phosphor's default `regular` weight. Don't override per-icon.
 - **Color:** inherit from surrounding text — `text-muted-foreground` for secondary, `text-destructive` for destructive, etc. Don't apply a token to the SVG directly when the parent already carries the right color.
-- **Spinner:** the canonical loading icon is `<SpinnerGap className="size-4 animate-spin" />`. For 3s+ multi-step work, prefer a label that names the stage ("Cloning…" → "Installing…") over an unlabeled spinner. See _UX rule 1_.
+- **Loader:** the canonical loading icon is `<LoadingIndicator className="size-4" />` from `components/loading-indicator.tsx`. It follows the user's Appearance setting, so don't import a one-off generic spinner. For 3s+ multi-step work, prefer a label that names the stage ("Cloning…" → "Installing…") over an unlabeled loader. See _UX rule 1_.
 
 ### Keyboard shortcut chips
 

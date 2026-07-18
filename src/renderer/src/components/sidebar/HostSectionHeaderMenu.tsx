@@ -2,7 +2,6 @@ import React, { useCallback, useState } from 'react'
 import {
   Warning as AlertTriangle,
   DotsThree as Ellipsis,
-  SpinnerGap as Loader2,
   Pencil,
   Plug,
   PlugCharging as PlugZap,
@@ -10,6 +9,7 @@ import {
   GearSix as Settings2,
   Trash as Trash2
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -201,7 +201,7 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
                   onKeyDown={(event) => event.stopPropagation()}
                 >
                   {busy ? (
-                    <Loader2 className="size-3.5 animate-spin" />
+                    <LoadingIndicator className="size-3.5" />
                   ) : (
                     <Ellipsis className="size-3.5" />
                   )}

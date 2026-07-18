@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/spool-catalog-contract'
 import type { SpoolRequesterControlView } from '../../../../shared/spool/spool-ipc-contract'
@@ -186,7 +186,7 @@ export function SpoolSessionCreateMenu({
           className="gap-2 rounded-[7px] px-2 py-1.5 text-[12px] leading-5 text-muted-foreground"
         >
           {launchOptions.status === 'loading' ? (
-            <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
+            <LoadingIndicator aria-hidden="true" className="size-3.5" />
           ) : null}
           {launchOptions.status === 'loading'
             ? translate(

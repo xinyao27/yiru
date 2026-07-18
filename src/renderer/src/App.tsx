@@ -35,6 +35,7 @@ import { shouldShowWorktreeCreationSurface } from '@/lib/worktree-creation-surfa
 import { buildAppFontFamily } from '@/lib/app-font-family'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
+import { LoadingIndicatorStyleProvider } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAppStore } from './store'
@@ -2270,7 +2271,8 @@ function App(): React.JSX.Element {
     ) : null
 
   return (
-    <div
+    <LoadingIndicatorStyleProvider
+      loaderStyle={settings?.loaderStyle}
       ref={setAppRootNode}
       className="flex flex-col h-dvh w-screen overflow-hidden"
       style={
@@ -2899,7 +2901,7 @@ function App(): React.JSX.Element {
           ignores z-index — placing WindowControls earlier caused the drag region to
           win, making the buttons unclickable. */}
       {hasCustomTitleBar && <WindowControls />}
-    </div>
+    </LoadingIndicatorStyleProvider>
   )
 }
 

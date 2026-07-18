@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Copy, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { cn } from '../../lib/class-names'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
 import { NetworkInterfacePicker } from './NetworkInterfacePicker'
 import { MobilePairingConnectionOptions } from '../settings/MobilePairingConnectionOptions'
@@ -235,7 +236,7 @@ export function HeroFlow({
                 />
                 <button
                   type="button"
-                  className={cn('mp-network-refresh', refreshingNetworkInterfaces && 'is-spinning')}
+                  className="mp-network-refresh"
                   onClick={onRefreshNetworkInterfaces}
                   disabled={refreshingNetworkInterfaces}
                   aria-label={translate(
@@ -247,7 +248,11 @@ export function HeroFlow({
                     'Refresh network interfaces'
                   )}
                 >
-                  <RefreshCw className="size-3.5" />
+                  {refreshingNetworkInterfaces ? (
+                    <LoadingIndicator className="size-3.5" />
+                  ) : (
+                    <RefreshCw className="size-3.5" />
+                  )}
                 </button>
               </div>
 

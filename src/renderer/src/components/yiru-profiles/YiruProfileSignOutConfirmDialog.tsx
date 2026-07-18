@@ -1,4 +1,4 @@
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -46,7 +46,7 @@ export function YiruProfileSignOutConfirmDialog({
             {translate('auto.components.yiru.profiles.signout.confirm.cancel', 'Cancel')}
           </Button>
           <Button size="sm" onClick={onConfirm} disabled={signingOut}>
-            {signingOut ? <Loader2 className="size-4 animate-spin" /> : null}
+            {signingOut ? <LoadingIndicator className="size-4" /> : null}
             {translate('auto.components.yiru.profiles.signout.confirm.action', 'Sign out')}
           </Button>
         </DialogFooter>

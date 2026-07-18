@@ -1,5 +1,6 @@
 import type { JSX, Ref } from 'react'
-import { CircleNotch as LoaderCircle, Trash as Trash2 } from '@phosphor-icons/react'
+import { Trash as Trash2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
@@ -54,7 +55,7 @@ export function DeleteWorktreeDialogFooter({
           onClick={canForceDelete ? onForceDelete : onDelete}
           disabled={isDeleting}
         >
-          {isDeleting ? <LoaderCircle className="size-4 animate-spin" /> : <Trash2 />}
+          {isDeleting ? <LoadingIndicator className="size-4" /> : <Trash2 />}
           {label}
         </Button>
       )}

@@ -1,0 +1,304 @@
+[data-slot='loading-indicator'] {
+  position: relative;
+  line-height: 1;
+}
+
+.yiru-loader-visual {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.yiru-loader-drawing {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.yiru-loader-drawing-frame path {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  animation: yiru-loader-drawing-line 6.4s infinite ease-in-out backwards;
+}
+
+.yiru-loader-drawing-pig path {
+  animation-delay: 0s;
+}
+
+.yiru-loader-drawing-calculator path {
+  animation-delay: 1.6s;
+}
+
+.yiru-loader-drawing-wallet path {
+  animation-delay: 3.2s;
+}
+
+.yiru-loader-drawing-kitten path {
+  animation-delay: 4.8s;
+}
+
+@keyframes yiru-loader-drawing-line {
+  0%,
+  1% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+
+  3% {
+    opacity: 1;
+  }
+
+  13%,
+  20% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+
+  24%,
+  100% {
+    stroke-dashoffset: -1;
+    opacity: 0;
+  }
+}
+
+.yiru-loader-code {
+  fill: currentColor;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.yiru-loader-code-brace {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: yiru-loader-code-pulse 0.4s alternate infinite ease-in-out;
+}
+
+.yiru-loader-code-open {
+  animation-delay: 0.4s;
+}
+
+@keyframes yiru-loader-code-pulse {
+  to {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+}
+
+.yiru-loader-macos-blade {
+  position: absolute;
+  bottom: 0;
+  left: 46.3%;
+  width: 7.4%;
+  height: 27.8%;
+  background: currentColor;
+  opacity: 0;
+  transform-origin: center -80%;
+  animation: yiru-loader-macos-fade 1s infinite linear;
+}
+
+@keyframes yiru-loader-macos-fade {
+  0% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.yiru-loader-square {
+  box-sizing: border-box;
+  width: 76%;
+  height: 76%;
+  margin: 12%;
+  border: max(1px, 0.1em) solid currentColor;
+  animation: yiru-loader-square-turn 2s infinite ease;
+}
+
+.yiru-loader-square-fill {
+  display: block;
+  width: 100%;
+  height: 0;
+  background: currentColor;
+  animation: yiru-loader-square-fill 2s infinite ease-in;
+}
+
+@keyframes yiru-loader-square-turn {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25%,
+  50% {
+    transform: rotate(180deg);
+  }
+
+  75%,
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes yiru-loader-square-fill {
+  0%,
+  25%,
+  100% {
+    height: 0;
+  }
+
+  50%,
+  75% {
+    height: 100%;
+  }
+}
+
+.yiru-loader-book {
+  top: 20%;
+  box-sizing: border-box;
+  height: 60%;
+  border: max(1px, 0.09em) solid currentColor;
+  perspective: 200px;
+}
+
+.yiru-loader-book-page {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  z-index: 1;
+  box-sizing: border-box;
+  width: calc(50% + 1px);
+  height: calc(100% + 2px);
+  border-top: max(1px, 0.09em) solid currentColor;
+  border-right: max(1px, 0.09em) solid currentColor;
+  border-bottom: max(1px, 0.09em) solid currentColor;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  transform-origin: 0 50%;
+  animation: yiru-loader-book-flip 1.2s infinite linear forwards;
+}
+
+@keyframes yiru-loader-book-flip {
+  0% {
+    opacity: 1;
+    transform: rotateY(0deg);
+  }
+
+  30% {
+    opacity: 1;
+    transform: rotateY(-90deg);
+  }
+
+  55% {
+    opacity: 0;
+  }
+
+  60%,
+  100% {
+    opacity: 0;
+    transform: rotateY(-180deg);
+  }
+}
+
+.yiru-loader-escalade {
+  overflow: visible;
+}
+
+.yiru-loader-escalade g {
+  animation: yiru-loader-escalade-slide 2s linear infinite;
+}
+
+.yiru-loader-escalade g:nth-child(2),
+.yiru-loader-escalade g:nth-child(2) path {
+  animation-delay: 0.5s;
+}
+
+.yiru-loader-escalade path {
+  fill: none;
+  stroke: var(--muted-foreground);
+  stroke-width: 20;
+  stroke-linecap: round;
+  stroke-dasharray: 0 1;
+  animation: yiru-loader-escalade-line 2s cubic-bezier(0.8, 0, 0.2, 1) infinite;
+}
+
+@keyframes yiru-loader-escalade-slide {
+  from {
+    transform: translateY(-25px);
+  }
+
+  to {
+    transform: translateY(25px);
+  }
+}
+
+@keyframes yiru-loader-escalade-line {
+  0% {
+    stroke-dasharray: 0 1;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 0;
+  }
+
+  100% {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yiru-loader-drawing-frame {
+    display: none;
+  }
+
+  .yiru-loader-drawing-pig {
+    display: inline;
+  }
+
+  .yiru-loader-drawing-pig path {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    animation: none;
+  }
+
+  .yiru-loader-code-brace,
+  .yiru-loader-macos-blade,
+  .yiru-loader-square,
+  .yiru-loader-square-fill,
+  .yiru-loader-book-page,
+  .yiru-loader-escalade g,
+  .yiru-loader-escalade path {
+    animation: none;
+  }
+
+  .yiru-loader-code-brace {
+    opacity: 0.75;
+  }
+
+  .yiru-loader-macos-blade {
+    opacity: 0.45;
+  }
+
+  .yiru-loader-square-fill {
+    height: 50%;
+  }
+
+  .yiru-loader-book-page {
+    opacity: 1;
+    transform: rotateY(-35deg);
+  }
+
+  .yiru-loader-book-page:not(:first-child) {
+    display: none;
+  }
+
+  .yiru-loader-escalade path {
+    stroke-dasharray: 0.72 1;
+  }
+}

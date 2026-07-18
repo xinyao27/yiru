@@ -2,9 +2,9 @@ import React from 'react'
 import {
   DotsThree as Ellipsis,
   ListDashes as ListCollapse,
-  SpinnerGap as Loader2,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -124,7 +124,7 @@ export function FileExplorerToolbar({
               }}
             >
               {refresh.showRefreshSpinner ? (
-                <Loader2 className="size-3 animate-spin" />
+                <LoadingIndicator className="size-3" />
               ) : (
                 <RefreshCw className="size-3" />
               )}

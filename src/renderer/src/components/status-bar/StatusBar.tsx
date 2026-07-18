@@ -7,11 +7,11 @@ import {
   Plug,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
-  SpinnerGap as Loader2,
   Layout as PanelsTopLeft,
   ArrowClockwise as RefreshCw,
   HardDrives as Server
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
 import { Button } from '@/components/ui/button'
@@ -1046,11 +1046,7 @@ function InlineUsageSignInAction({
           onSignIn()
         }}
       >
-        {isSigningIn ? (
-          <Loader2 className="size-3 animate-spin" />
-        ) : (
-          <RefreshCw className="size-3" />
-        )}
+        {isSigningIn ? <LoadingIndicator className="size-3" /> : <RefreshCw className="size-3" />}
         {translate('auto.components.status.bar.StatusBar.c35af53b73', 'Sign in')}
       </Button>
     </div>
@@ -1398,7 +1394,7 @@ function CodexSwitcherMenu({
             </Button>
             <Button onClick={() => void handleConfirmReset()} disabled={isRedeemingReset}>
               {isRedeemingReset ? (
-                <Loader2 className="size-4 animate-spin" />
+                <LoadingIndicator className="size-4" />
               ) : (
                 <RotateCcw className="size-4" />
               )}
@@ -1440,7 +1436,7 @@ function CodexSwitcherMenu({
               closeOnClick={false}
             >
               {isRedeemingReset ? (
-                <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-3.5 text-muted-foreground" />
               ) : null}
               {isRedeemingReset
                 ? translate('auto.components.status.bar.StatusBar.25d8bbde69', 'Using reset…')

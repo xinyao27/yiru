@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { CircleNotch as LoaderCircle } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { Worktree } from '../../../../shared/types'
 import { DeleteWorktreeDirtyChangeHint } from './DeleteWorktreeDirtyChangeHint'
@@ -44,7 +44,7 @@ export function DeleteWorktreeTargetPreview({
                     ) : null}
                   </div>
                   {itemDeleteState?.isDeleting ? (
-                    <LoaderCircle className="mt-0.5 size-3.5 shrink-0 animate-spin text-muted-foreground" />
+                    <LoadingIndicator className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                   ) : null}
                 </div>
               </div>

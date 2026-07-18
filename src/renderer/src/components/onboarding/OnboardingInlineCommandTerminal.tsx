@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import TerminalPane from '@/components/terminal-pane/TerminalPane'
 import { PASTE_TERMINAL_TEXT_EVENT, type PasteTerminalTextDetail } from '@/constants/terminal'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
@@ -304,7 +304,7 @@ export function OnboardingInlineCommandTerminal({
             />
           ) : (
             <div className="flex h-full items-center justify-center gap-2 text-xs text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" />
+              <LoadingIndicator className="size-4" />
               {translate(
                 'auto.components.onboarding.OnboardingInlineCommandTerminal.4123609efd',
                 'Starting terminal...'

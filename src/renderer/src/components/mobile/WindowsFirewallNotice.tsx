@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  WarningCircle as CircleAlert,
-  SpinnerGap as Loader2,
-  ShieldCheck
-} from '@phosphor-icons/react'
+import { WarningCircle as CircleAlert, ShieldCheck } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import type { WindowsMobileFirewallStatus } from '../../../../shared/windows-mobile-firewall'
 import { useMountedRef } from '../../hooks/useMountedRef'
@@ -192,11 +189,7 @@ export function WindowsFirewallNotice({
             </Button>
           ) : (
             <Button type="button" size="sm" onClick={() => void repair()} disabled={repairing}>
-              {repairing ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <ShieldCheck aria-hidden="true" />
-              )}
+              {repairing ? <LoadingIndicator /> : <ShieldCheck aria-hidden="true" />}
               {repairing
                 ? translate(
                     'auto.components.mobile.WindowsFirewallNotice.waiting',

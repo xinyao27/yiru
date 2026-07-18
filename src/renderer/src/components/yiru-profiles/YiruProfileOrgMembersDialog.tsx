@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import {
-  SpinnerGap as Loader2,
-  Envelope as Mail,
-  ArrowClockwise as RefreshCw,
-  Users
-} from '@phosphor-icons/react'
+import { Envelope as Mail, ArrowClockwise as RefreshCw, Users } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -173,7 +169,7 @@ export function YiruProfileOrgMembersDialog({
 
         {loading ? (
           <div className="flex items-center justify-center py-10 text-muted-foreground">
-            <Loader2 className="size-5 animate-spin" />
+            <LoadingIndicator className="size-5" />
           </div>
         ) : loadError ? (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
@@ -236,7 +232,7 @@ export function YiruProfileOrgMembersDialog({
                       onClick={() => void handleRevoke(invite.email)}
                     >
                       {pendingInviteEmail === invite.email ? (
-                        <Loader2 className="size-3 animate-spin" />
+                        <LoadingIndicator className="size-3" />
                       ) : null}
                       {translate(
                         'auto.components.yiru.profiles.org.members.pending.revoke',
@@ -292,7 +288,7 @@ export function YiruProfileOrgMembersDialog({
                   </SelectContent>
                 </Select>
                 <Button type="submit" size="sm" disabled={inviting || !inviteEmail.trim()}>
-                  {inviting ? <Loader2 className="size-4 animate-spin" /> : null}
+                  {inviting ? <LoadingIndicator className="size-4" /> : null}
                   {translate('auto.components.yiru.profiles.org.members.invite.submit', 'Send')}
                 </Button>
               </form>

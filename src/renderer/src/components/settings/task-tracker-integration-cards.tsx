@@ -2,9 +2,9 @@ import { useState } from 'react'
 import {
   WarningCircle as AlertCircle,
   CheckCircle as CheckCircle2,
-  CircleNotch as LoaderCircle,
   LinkBreak as Unlink
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { LinearIcon } from '@/components/icons/LinearIcon'
 import { LinearApiKeyDialog } from '@/components/linear-api-key-dialog'
 import { Button } from '@/components/ui/button'
@@ -156,7 +156,7 @@ export function LinearIntegrationCard(): React.JSX.Element {
                   >
                     {testing ? (
                       <>
-                        <LoaderCircle className="size-3.5 mr-1.5 animate-spin" />
+                        <LoadingIndicator className="size-3.5 mr-1.5" />
                         {translate(
                           'auto.components.settings.task.tracker.integration.cards.3e7c10d286',
                           'Testing...'

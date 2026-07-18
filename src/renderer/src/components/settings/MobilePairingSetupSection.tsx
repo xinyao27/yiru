@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
 import {
   ArrowSquareOut as ExternalLink,
-  SpinnerGap as Loader2,
   QrCode,
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
@@ -64,7 +64,7 @@ export function MobilePairingSetupSection({
         className="mt-3 gap-1.5"
       >
         {loading ? (
-          <Loader2 className="size-3.5 animate-spin" />
+          <LoadingIndicator className="size-3.5" />
         ) : hasQrCode ? (
           <RefreshCw className="size-3.5" />
         ) : (

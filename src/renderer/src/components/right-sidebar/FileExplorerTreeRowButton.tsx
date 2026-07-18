@@ -4,9 +4,9 @@ import {
   Folder,
   FolderOpen,
   Link,
-  Prohibit as CircleSlash,
-  SpinnerGap as Loader2
+  Prohibit as CircleSlash
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { GitFileStatus } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
@@ -72,7 +72,7 @@ export function FileExplorerTreeRowButton({
             )}
           />
           {isLoading ? (
-            <Loader2 className="size-3 shrink-0 animate-spin text-muted-foreground" />
+            <LoadingIndicator className="size-3 shrink-0 text-muted-foreground" />
           ) : isExpanded ? (
             <FolderOpen className="size-3 shrink-0 text-muted-foreground" />
           ) : (

@@ -17,6 +17,7 @@ import {
 import { DEFAULT_APP_FONT_FAMILY } from '../../../../shared/constants'
 import {
   getLanguageEntries,
+  getLoaderStyleEntries,
   getMenuBarIconEntries,
   getSystemTrayEntries,
   getThemeEntries,
@@ -31,6 +32,7 @@ import {
 import { translate } from '@/i18n/i18n'
 import type { UiLanguage } from '../../../../shared/ui-language'
 import { matchesSettingsSearch, normalizeSettingsSearchQuery } from './settings-search'
+import { LoaderStyleSetting } from './loader-style-setting'
 
 type AppearanceInterfaceSectionProps = {
   settings: GlobalSettings
@@ -58,6 +60,7 @@ export function AppearanceInterfaceSection({
   const zoomInKeyCombos = useShortcutKeyComboDetails('zoom.in')
   const zoomOutKeyCombos = useShortcutKeyComboDetails('zoom.out')
   const languageEntry = getLanguageEntries()[0]
+  const loaderStyleEntry = getLoaderStyleEntries()[0]
   const menuBarIconEntry = getMenuBarIconEntries({ showMenuBarIcon: true })[0]
   const systemTrayEntry = getSystemTrayEntries({ showSystemTray: true })[0]
   const themeEntry = getThemeEntries()[0]
@@ -105,6 +108,18 @@ export function AppearanceInterfaceSection({
               ]}
             />
           }
+        />
+      </SearchableSetting>
+
+      <SearchableSetting
+        title={translate('settings.appearance.loader.title', 'Loader')}
+        description={loaderStyleEntry?.description}
+        keywords={loaderStyleEntry?.keywords ?? []}
+        forceVisible={forceVisiblePrimary}
+      >
+        <LoaderStyleSetting
+          value={settings.loaderStyle}
+          onChange={(loaderStyle) => updateSettings({ loaderStyle })}
         />
       </SearchableSetting>
 

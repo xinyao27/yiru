@@ -21,6 +21,7 @@ import {
 } from '../../../../shared/tui-agent-launch-defaults'
 import { bumpProviderRuntimeSessionGeneration } from '@/lib/provider-runtime-context'
 import { normalizeUiLanguage } from '../../../../shared/ui-language'
+import { normalizeLoaderStyle } from '../../../../shared/loader-style'
 import { normalizeDesktopTerminalScrollbackRows } from '../../../../shared/terminal-scrollback-policy'
 import { translate } from '@/i18n/i18n'
 
@@ -129,6 +130,9 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
       }
       if ('uiLanguage' in updates) {
         sanitizedUpdates.uiLanguage = normalizeUiLanguage(updates.uiLanguage)
+      }
+      if ('loaderStyle' in updates) {
+        sanitizedUpdates.loaderStyle = normalizeLoaderStyle(updates.loaderStyle)
       }
       if ('terminalScrollbackRows' in updates) {
         sanitizedUpdates.terminalScrollbackRows = normalizeDesktopTerminalScrollbackRows(

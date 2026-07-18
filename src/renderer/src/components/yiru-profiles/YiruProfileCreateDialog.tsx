@@ -1,4 +1,4 @@
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -55,7 +55,7 @@ export function YiruProfileCreateDialog({
           />
           <DialogFooter>
             <Button type="submit" size="sm" disabled={creating || switching}>
-              {creating || switching ? <Loader2 className="size-4 animate-spin" /> : null}
+              {creating || switching ? <LoadingIndicator className="size-4" /> : null}
               {translate('auto.components.yiru.profiles.switcher.cfa59f8ad1', 'Create and Switch')}
             </Button>
           </DialogFooter>

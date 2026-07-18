@@ -1,10 +1,10 @@
 import {
   Warning as AlertTriangle,
   Copy,
-  SpinnerGap as Loader2,
   ArrowClockwise as RefreshCw,
   Trash as Trash2
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -203,7 +203,7 @@ export function EphemeralVmRuntimesSection(): React.JSX.Element {
           onClick={() => void refresh()}
           disabled={isLoading || cleaningId !== null}
         >
-          {isLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+          {isLoading ? <LoadingIndicator /> : <RefreshCw />}
         </Button>
       </div>
 
@@ -302,7 +302,7 @@ function EphemeralVmRuntimeRow({
           onClick={onCleanup}
           disabled={disabled}
         >
-          {isCleaning ? <Loader2 className="size-3 animate-spin" /> : <Trash2 className="size-3" />}
+          {isCleaning ? <LoadingIndicator className="size-3" /> : <Trash2 className="size-3" />}
           {runtime.cleanupStatus === 'failed'
             ? translate(
                 'auto.components.settings.EphemeralVmRuntimesSection.retry',

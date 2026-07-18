@@ -1,9 +1,6 @@
 import { useRef, useState } from 'react'
-import {
-  ArrowClockwise as RefreshCw,
-  SpinnerGap as Loader2,
-  WarningCircle as CircleAlert
-} from '@phosphor-icons/react'
+import { ArrowClockwise as RefreshCw, WarningCircle as CircleAlert } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { SPOOL_INGRESS_PORT } from '../../../../shared/spool/spool-wire-contract'
 import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/useMountedRef'
@@ -63,7 +60,7 @@ export function SpoolAvailabilityNotice({
               disabled={retrying}
               onClick={() => void retryAvailability()}
             >
-              {retrying ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+              {retrying ? <LoadingIndicator /> : <RefreshCw />}
               {retrying
                 ? translate('auto.components.spool.SpoolAvailabilityNotice.checking', 'Checking…')
                 : translate(

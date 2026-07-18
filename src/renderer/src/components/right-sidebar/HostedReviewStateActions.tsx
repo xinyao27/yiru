@@ -1,8 +1,5 @@
-import {
-  Circle as CircleDot,
-  CircleNotch as LoaderCircle,
-  Trash as Trash2
-} from '@phosphor-icons/react'
+import { Circle as CircleDot, Trash as Trash2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 
@@ -36,7 +33,7 @@ export function ClosedReviewActions({
         disabled={stateUpdating !== null}
       >
         {stateUpdating === 'open' ? (
-          <LoaderCircle className="size-3.5 animate-spin" />
+          <LoadingIndicator className="size-3.5" />
         ) : (
           <CircleDot className="size-3.5" />
         )}
@@ -75,7 +72,7 @@ export function MergedReviewActions({
       disabled={isDeletingWorktree}
     >
       {isDeletingWorktree ? (
-        <LoaderCircle className="size-3.5 animate-spin" />
+        <LoadingIndicator className="size-3.5" />
       ) : (
         <Trash2 className="size-3.5" />
       )}

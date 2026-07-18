@@ -34,7 +34,6 @@ import {
   FolderOpen,
   Globe,
   Image,
-  SpinnerGap as Loader2,
   ChatCircle as MessageCircleQuestionMark,
   ChatCentered as MessageSquarePlus,
   XCircle as OctagonX,
@@ -45,6 +44,7 @@ import {
   Trash as Trash2,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { BrowserAnnotationSendMenuContent } from './BrowserAnnotationSendMenuContent'
@@ -2580,7 +2580,7 @@ function RemoteBrowserPagePane({
           onClick={() => void runRemoteNavigation('browser.reload')}
         >
           {busy || browserTab.loading ? (
-            <Loader2 className="size-4 animate-spin" />
+            <LoadingIndicator className="size-4" />
           ) : (
             <RefreshCw className="size-4" />
           )}
@@ -2658,7 +2658,7 @@ function RemoteBrowserPagePane({
           <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
             <div className="flex max-w-sm flex-col items-center gap-2">
               {busy ? (
-                <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-5 text-muted-foreground" />
               ) : (
                 <Globe className="size-5 text-muted-foreground" />
               )}
@@ -5105,7 +5105,7 @@ function BrowserPagePane({
             }}
           >
             {browserTab.loading ? (
-              <Loader2 className="size-4 animate-spin" />
+              <LoadingIndicator className="size-4" />
             ) : (
               <RefreshCw className="size-4" />
             )}

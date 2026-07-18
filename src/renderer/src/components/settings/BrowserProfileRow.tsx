@@ -1,8 +1,5 @@
-import {
-  DownloadSimple as Import,
-  SpinnerGap as Loader2,
-  Trash as Trash2
-} from '@phosphor-icons/react'
+import { DownloadSimple as Import, Trash as Trash2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import type { BrowserCookieImportSummary, BrowserSessionProfile } from '../../../../shared/types'
 import { Button } from '../ui/button'
@@ -169,7 +166,7 @@ export function BrowserProfileRow({
                 disabled={isImporting}
               >
                 {isImporting ? (
-                  <Loader2 className="size-3 animate-spin" />
+                  <LoadingIndicator className="size-3" />
                 ) : (
                   <Import className="size-3" />
                 )}

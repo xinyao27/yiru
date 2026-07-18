@@ -16,7 +16,6 @@ import {
   FolderPlus,
   FolderMinus as FolderX,
   Globe as Globe2,
-  SpinnerGap as Loader2,
   LockKey as LockKeyhole,
   Plus,
   HardDrives as Server,
@@ -25,6 +24,7 @@ import {
   SlidersHorizontal,
   Trash as Trash2
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '@/store'
 import { useShallow } from 'zustand/react/shallow'
 import type { AppState } from '@/store/types'
@@ -771,7 +771,7 @@ function HostHeaderHealthIcon({
   // Why: healthy is the default state — indicating it adds noise. Only states
   // needing active attention get a separate mark.
   if (health === 'connecting') {
-    return <Loader2 className="size-3 shrink-0 animate-spin text-muted-foreground" />
+    return <LoadingIndicator className="size-3 shrink-0 text-muted-foreground" />
   }
   if (health === 'blocked' || health === 'error') {
     return <AlertTriangle className="size-3 shrink-0 text-destructive" />

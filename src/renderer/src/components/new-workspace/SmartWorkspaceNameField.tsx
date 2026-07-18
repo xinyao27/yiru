@@ -11,10 +11,10 @@ import {
   GitBranch as GitBranchPlus,
   GitMerge,
   GitPullRequest,
-  CircleNotch as LoaderCircle,
   MagnifyingGlass as Search,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
@@ -1138,7 +1138,7 @@ export default function SmartWorkspaceNameField({
   })
 
   const loading = githubLoading || gitlabLoading || branchesLoading || linearLoading
-  const ActiveInputIcon = mode === 'text' ? CaseSensitive : loading ? LoaderCircle : Search
+  const ActiveInputIcon = mode === 'text' ? CaseSensitive : loading ? LoadingIndicator : Search
 
   const handleSelect = useCallback(
     (row: RowEntry) => {

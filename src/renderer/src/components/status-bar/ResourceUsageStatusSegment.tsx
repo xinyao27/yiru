@@ -10,13 +10,13 @@ import {
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
   Globe,
-  CircleNotch as LoaderCircle,
   Memory as MemoryStick,
   ArrowClockwise as RotateCw,
   Terminal,
   Trash as Trash2,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
@@ -1685,7 +1685,7 @@ export function ResourceUsageStatusSegment({
               onClick={() => void runKillConfirmed()}
               disabled={killing}
             >
-              {killing ? <LoaderCircle className="size-4 animate-spin" /> : null}
+              {killing ? <LoadingIndicator className="size-4" /> : null}
               {killing
                 ? translate(
                     'auto.components.status.bar.ResourceUsageStatusSegment.41ae4fa725',

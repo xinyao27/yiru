@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { SpinnerGap as Loader2, UserMinus } from '@phosphor-icons/react'
+import { UserMinus } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -120,11 +121,7 @@ export function YiruProfileOrgMemberRow({
               'Remove teammate'
             )}
           >
-            {busy ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <UserMinus className="size-3.5" />
-            )}
+            {busy ? <LoadingIndicator className="size-3.5" /> : <UserMinus className="size-3.5" />}
           </Button>
         )
       ) : null}

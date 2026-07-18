@@ -35,9 +35,9 @@ vi.mock('react', async () => {
   }
 })
 
-vi.mock('@phosphor-icons/react', () => ({
-  CircleNotch: function LoaderCircle(props: Record<string, unknown>) {
-    return { type: 'LoaderCircle', props }
+vi.mock('@/components/loading-indicator', () => ({
+  LoadingIndicator: function LoadingIndicator(props: Record<string, unknown>) {
+    return { type: 'LoadingIndicator', props }
   }
 }))
 

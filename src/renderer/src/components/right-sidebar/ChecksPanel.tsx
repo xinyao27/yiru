@@ -3,7 +3,6 @@ merge actions, and conflict state in one component to keep the data flow straigh
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { SpoolChecksPane } from '@/components/spool/SpoolChecksPane'
 import {
-  CircleNotch as LoaderCircle,
   ArrowClockwise as RefreshCw,
   Check,
   X,
@@ -13,6 +12,7 @@ import {
   Link,
   LinkBreak as Unlink
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore, type AppState } from '@/store'
 import {
   buildGitHubPRRefreshStateClearToken,
@@ -3740,7 +3740,7 @@ function LocalChecksPanel(): React.JSX.Element {
               disabled={titleSaving}
             >
               {titleSaving ? (
-                <LoaderCircle className="size-3.5 animate-spin" />
+                <LoadingIndicator className="size-3.5" />
               ) : (
                 <Check className="size-3.5" />
               )}

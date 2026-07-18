@@ -1,4 +1,5 @@
-import { SpinnerGap as Loader2, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
@@ -164,7 +165,7 @@ export function RuntimePairingGeneratorForm({
             onClick={onGenerate}
             disabled={isGeneratingPairing}
           >
-            {isGeneratingPairing ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+            {isGeneratingPairing ? <LoadingIndicator /> : <RefreshCw />}
             {translate(
               'auto.components.settings.RuntimePairingUrlGenerator.8de0f84fff',
               'Generate Access Link'

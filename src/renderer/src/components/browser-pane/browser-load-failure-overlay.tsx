@@ -3,10 +3,10 @@ import {
   Copy,
   ArrowSquareOut as ExternalLink,
   Globe,
-  SpinnerGap as Loader2,
   ArrowClockwise as RefreshCw,
   ShieldWarning as ShieldAlert
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
@@ -314,7 +314,7 @@ export function BrowserLoadFailureOverlay({
                   {activeProceedAttempt?.state === 'submitting' &&
                   activeProceedAttempt.showConnecting ? (
                     <>
-                      <Loader2 className="size-4 animate-spin" />
+                      <LoadingIndicator className="size-4" />
                       {translate('browser.loadFailure.connecting', 'Connecting…')}
                     </>
                   ) : (

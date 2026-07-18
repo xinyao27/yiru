@@ -6,10 +6,10 @@ import {
   Clock as Clock3,
   FolderOpen,
   Funnel as ListFilter,
-  CircleNotch as LoaderCircle,
   Layout as PanelsTopLeft,
   HardDrives as Server
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -83,7 +83,7 @@ export function SessionLoadingState(): React.JSX.Element {
   return (
     <div className="px-3 py-3" aria-busy="true">
       <div className="mb-3 flex items-center gap-2 text-[11px] text-muted-foreground">
-        <LoaderCircle className="size-3.5 shrink-0 animate-spin" />
+        <LoadingIndicator className="size-3.5 shrink-0" />
         <span>
           {translate(
             'auto.components.right.sidebar.AiVaultPanelControls.scanningSessions',

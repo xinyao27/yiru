@@ -16,12 +16,12 @@ import {
   Circle as CircleDot,
   ArrowSquareOut as ExternalLink,
   GitMerge,
-  CircleNotch as LoaderCircle,
   Pencil,
   ArrowClockwise as RefreshCw,
   PaperPlaneRight as Send,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
@@ -201,7 +201,7 @@ function CommentCard({
               onClick={() => onResolve(comment.threadId ?? '', !comment.isResolved)}
               className="h-6"
             >
-              {resolving ? <LoaderCircle className="size-3 animate-spin" /> : null}
+              {resolving ? <LoadingIndicator className="size-3" /> : null}
               {comment.isResolved
                 ? translate('auto.components.GitLabItemDialog.65e784c1f1', 'Reopen')
                 : translate('auto.components.GitLabItemDialog.4168eb2c51', 'Resolve')}
@@ -275,7 +275,7 @@ function PipelineJobRow({
               onClick={() => onRetry(job)}
               className="h-6"
             >
-              {retrying ? <LoaderCircle className="size-3 animate-spin" /> : null}
+              {retrying ? <LoadingIndicator className="size-3" /> : null}
               {translate('auto.components.GitLabItemDialog.fa3e042203', 'Retry')}
             </Button>
           ) : null}
@@ -302,7 +302,7 @@ function PipelineJobRow({
           </div>
           {traceState?.loading ? (
             <div className="flex items-center gap-2 px-2.5 py-3 text-xs text-muted-foreground">
-              <LoaderCircle className="size-3.5 animate-spin" />
+              <LoadingIndicator className="size-3.5" />
               {translate('auto.components.GitLabItemDialog.d600c2619a', 'Loading log')}
             </div>
           ) : traceState?.error ? (
@@ -1061,7 +1061,7 @@ export default function GitLabItemDialog({
                   className="size-7"
                 >
                   {loading ? (
-                    <LoaderCircle className="size-3.5 animate-spin" />
+                    <LoadingIndicator className="size-3.5" />
                   ) : (
                     <RefreshCw className="size-3.5" />
                   )}
@@ -1151,9 +1151,7 @@ export default function GitLabItemDialog({
                           disabled={reviewerOptionsLoading}
                           onClick={() => void loadGitLabReviewerOptions()}
                         >
-                          {reviewerOptionsLoading ? (
-                            <LoaderCircle className="size-3 animate-spin" />
-                          ) : null}
+                          {reviewerOptionsLoading ? <LoadingIndicator className="size-3" /> : null}
                           {translate('auto.components.GitLabItemDialog.cb55b0390f', 'Manage')}
                         </Button>
                       </div>
@@ -1228,9 +1226,7 @@ export default function GitLabItemDialog({
                               }
                             }}
                           >
-                            {reviewerUpdating ? (
-                              <LoaderCircle className="size-3 animate-spin" />
-                            ) : null}
+                            {reviewerUpdating ? <LoadingIndicator className="size-3" /> : null}
                             {translate('auto.components.GitLabItemDialog.7a2117129a', 'Add')}
                           </Button>
                         </div>
@@ -1263,7 +1259,7 @@ export default function GitLabItemDialog({
                   ) : null}
                   {loading && !details ? (
                     <div className="flex items-center justify-center py-12">
-                      <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+                      <LoadingIndicator className="size-5 text-muted-foreground" />
                     </div>
                   ) : editingDetails ? (
                     <div className="space-y-3">
@@ -1308,7 +1304,7 @@ export default function GitLabItemDialog({
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {labelOptionsLoading ? (
                               <span className="inline-flex h-6 items-center gap-1 rounded-full border border-border/50 px-2 text-[11px] text-muted-foreground">
-                                <LoaderCircle className="size-3 animate-spin" />
+                                <LoadingIndicator className="size-3" />
                                 {translate(
                                   'auto.components.GitLabItemDialog.717b706849',
                                   'Loading labels'
@@ -1360,7 +1356,7 @@ export default function GitLabItemDialog({
                           onClick={() => void handleSaveDetails()}
                         >
                           {detailsSaving ? (
-                            <LoaderCircle className="size-3.5 animate-spin" />
+                            <LoadingIndicator className="size-3.5" />
                           ) : (
                             <Check className="size-3.5" />
                           )}
@@ -1415,7 +1411,7 @@ export default function GitLabItemDialog({
                 <TabsContent value="conversation" className="mt-0 space-y-3">
                   {loading && !details ? (
                     <div className="flex items-center justify-center py-12">
-                      <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+                      <LoadingIndicator className="size-5 text-muted-foreground" />
                     </div>
                   ) : details?.comments?.length ? (
                     details.comments.map((c) => (
@@ -1440,7 +1436,7 @@ export default function GitLabItemDialog({
                   <TabsContent value="files" className="mt-0 space-y-3">
                     {loading && !details ? (
                       <div className="flex items-center justify-center py-12">
-                        <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+                        <LoadingIndicator className="size-5 text-muted-foreground" />
                       </div>
                     ) : details?.files?.length ? (
                       <>
@@ -1494,7 +1490,7 @@ export default function GitLabItemDialog({
                               onClick={() => void handleSubmitInlineComment()}
                             >
                               {inlineCommentSubmitting ? (
-                                <LoaderCircle className="size-3.5 animate-spin" />
+                                <LoadingIndicator className="size-3.5" />
                               ) : (
                                 <Send className="size-3.5" />
                               )}
@@ -1559,7 +1555,7 @@ export default function GitLabItemDialog({
                   <TabsContent value="pipeline" className="mt-0">
                     {loading && !details ? (
                       <div className="flex items-center justify-center py-12">
-                        <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+                        <LoadingIndicator className="size-5 text-muted-foreground" />
                       </div>
                     ) : details?.pipelineJobs?.length ? (
                       <div className="space-y-1">
@@ -1619,7 +1615,7 @@ export default function GitLabItemDialog({
                   className="shrink-0 gap-1.5"
                 >
                   {commentSubmitting ? (
-                    <LoaderCircle className="size-3.5 animate-spin" />
+                    <LoadingIndicator className="size-3.5" />
                   ) : (
                     <Send className="size-3.5" />
                   )}
@@ -1650,7 +1646,7 @@ export default function GitLabItemDialog({
                       onClick={() => void handleMerge()}
                     >
                       {actionInFlight === 'merge' ? (
-                        <LoaderCircle className="size-3.5 animate-spin" />
+                        <LoadingIndicator className="size-3.5" />
                       ) : null}
                       {translate('auto.components.GitLabItemDialog.16b3412570', 'Merge')}
                     </Button>
@@ -1663,7 +1659,7 @@ export default function GitLabItemDialog({
                       onClick={() => void handleClose()}
                     >
                       {actionInFlight === 'close' ? (
-                        <LoaderCircle className="size-3.5 animate-spin" />
+                        <LoadingIndicator className="size-3.5" />
                       ) : null}
                       {translate('auto.components.GitLabItemDialog.a199eb364b', 'Close')}
                     </Button>
@@ -1676,7 +1672,7 @@ export default function GitLabItemDialog({
                       onClick={() => void handleReopen()}
                     >
                       {actionInFlight === 'reopen' ? (
-                        <LoaderCircle className="size-3.5 animate-spin" />
+                        <LoadingIndicator className="size-3.5" />
                       ) : null}
                       {translate('auto.components.GitLabItemDialog.65e784c1f1', 'Reopen')}
                     </Button>

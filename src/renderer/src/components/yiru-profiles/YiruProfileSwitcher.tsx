@@ -5,11 +5,11 @@ import {
   UserCircle as CircleUserRound,
   Cloud,
   Laptop,
-  SpinnerGap as Loader2,
   Plus,
   GearSix as Settings2,
   Users
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'
 import {
@@ -230,7 +230,7 @@ export function YiruProfileSwitcher({
                     aria-label={triggerLabel}
                   >
                     {sidebarPlacement && switching ? (
-                      <Loader2 className="size-3 animate-spin" />
+                      <LoadingIndicator className="size-3" />
                     ) : !multiProfileUi ? (
                       <CircleUserRound className="size-4" />
                     ) : (
@@ -252,7 +252,7 @@ export function YiruProfileSwitcher({
                               ? accountIdentity.title
                               : triggerLabel}
                         </span>
-                        {switching ? <Loader2 className="size-3 animate-spin" /> : <ChevronDown />}
+                        {switching ? <LoadingIndicator className="size-3" /> : <ChevronDown />}
                       </>
                     ) : null}
                   </Button>

@@ -1,6 +1,7 @@
 // Step for AddRepoDialog (yiru#763), split out so create-project state stays scoped.
 import React, { useMemo, useState } from 'react'
-import { CaretDown as ChevronDown, GitBranch, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { CaretDown as ChevronDown, GitBranch } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -194,7 +195,7 @@ export function CreateStep({
               </p>
               {showGitChecking ? (
                 <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <Loader2 className="size-3 animate-spin" />
+                  <LoadingIndicator className="size-3" />
                   {translate(
                     'auto.components.sidebar.AddRepoCreateStep.2a762f3b19',
                     'Checking Git on this host...'

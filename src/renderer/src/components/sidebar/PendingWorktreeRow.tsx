@@ -1,5 +1,6 @@
 import React from 'react'
-import { Warning as AlertTriangle, SpinnerGap as Loader2, X } from '@phosphor-icons/react'
+import { Warning as AlertTriangle, X } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '@/store'
 import { cn } from '@/lib/class-names'
 import {
@@ -57,7 +58,7 @@ export function PendingWorktreeRow({
           {isError ? (
             <AlertTriangle className="size-3.5 text-destructive" />
           ) : (
-            <Loader2 className="size-4 animate-spin text-muted-foreground" />
+            <LoadingIndicator className="size-4 text-muted-foreground" />
           )}
         </span>
         <span className="min-w-0 flex-1">

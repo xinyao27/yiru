@@ -1,4 +1,4 @@
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useEffect, type CSSProperties } from 'react'
 import { useEmulatorFrameStream } from './use-emulator-frame-stream'
 import { useEmulatorVideoStream } from './use-emulator-video-stream'
@@ -110,7 +110,7 @@ export function EmulatorScreenStreamContent({
     <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-muted/20 text-muted-foreground">
       {loading || waitingForFrame ? (
         <>
-          <Loader2 className="size-6 animate-spin text-primary" />
+          <LoadingIndicator className="size-6 text-primary" />
           <span className="text-xs">
             {translate(
               'auto.components.emulator.pane.emulator.screen.stream.content.5f818f12ab',

@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useState } from 'react'
-import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -106,7 +106,7 @@ export function ExternalFileChangeCompareDialog({
         <div className="min-h-0 flex-1">
           {diskState.kind === 'loading' ? (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              <Loader2 className="mr-2 size-4 animate-spin" />
+              <LoadingIndicator className="mr-2 size-4" />
               {translate(
                 'auto.components.editor.ExternalFileChangeCompareDialog.8fe30ab254',
                 'Reading file from disk...'
@@ -133,7 +133,7 @@ export function ExternalFileChangeCompareDialog({
               // without a fallback the 80vh body flashes blank in between.
               fallback={
                 <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  <LoadingIndicator className="mr-2 size-4" />
                   {translate(
                     'auto.components.editor.ExternalFileChangeCompareDialog.2c8f1e07b9',
                     'Loading comparison...'

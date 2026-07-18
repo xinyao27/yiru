@@ -35,7 +35,6 @@ import {
   GitPullRequest as GitPullRequestClosed,
   ListChecks,
   LinkSimple as Link2,
-  CircleNotch as LoaderCircle,
   Chat as MessageSquare,
   ChatCentered as MessageSquarePlus,
   ArrowRight as MoveRight,
@@ -52,6 +51,7 @@ import {
   Wrench,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
@@ -624,7 +624,7 @@ function PRAssigneesPanel({
                 className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
               >
                 {isPending('assignees') ? (
-                  <LoaderCircle className="size-3 animate-spin" />
+                  <LoadingIndicator className="size-3" />
                 ) : (
                   <Pencil className="size-3" />
                 )}
@@ -1201,7 +1201,7 @@ function PRReviewersPanel({
                 className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
               >
                 {submitting ? (
-                  <LoaderCircle className="size-3 animate-spin" />
+                  <LoadingIndicator className="size-3" />
                 ) : (
                   <Pencil className="size-3" />
                 )}
@@ -1322,7 +1322,7 @@ function PRReviewersPanel({
       </div>
       {loading && !hasReviewerMetadata ? (
         <div className="flex items-center gap-2 py-1 text-[12px] text-muted-foreground">
-          <LoaderCircle className="size-3.5 animate-spin" />
+          <LoadingIndicator className="size-3.5" />
           {translate('auto.components.GitHubItemDialog.6a45771d47', 'Loading reviewers')}
         </div>
       ) : reviewers.length > 0 ? (
@@ -2050,7 +2050,7 @@ function PRViewedCheckbox({
               )}
             >
               {pending ? (
-                <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-3 text-muted-foreground" />
               ) : checked ? (
                 <Check className="size-3" strokeWidth={3} />
               ) : null}
@@ -2803,7 +2803,7 @@ function CommentCodeContext({
   if (!contents) {
     return (
       <div className="mb-3 flex items-center gap-2 rounded-md border border-border/40 bg-muted/20 px-3 py-2 text-[12px] text-muted-foreground">
-        <LoaderCircle className="size-3.5 animate-spin" />
+        <LoadingIndicator className="size-3.5" />
         {translate('auto.components.GitHubItemDialog.db61d76cd5', 'Loading code context…')}
       </div>
     )
@@ -3678,7 +3678,7 @@ function ConversationTab({
                     onClick={() => void handleSaveBody()}
                   >
                     {bodySaving ? (
-                      <LoaderCircle className="size-3.5 animate-spin" />
+                      <LoadingIndicator className="size-3.5" />
                     ) : (
                       <Check className="size-3.5" />
                     )}
@@ -3717,7 +3717,7 @@ function ConversationTab({
           <div className="px-4 py-4 text-[14px] leading-relaxed text-foreground">
             {loading && !detailsLoaded ? (
               <div className="flex items-center justify-center py-5">
-                <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-4 text-muted-foreground" />
               </div>
             ) : bodyEditing ? (
               <GitHubMarkdownComposer
@@ -4124,7 +4124,7 @@ function PRActionsPanel({
                       )}
                     >
                       {mergePending ? (
-                        <LoaderCircle className="size-3.5 animate-spin" />
+                        <LoadingIndicator className="size-3.5" />
                       ) : (
                         <GitMerge className="size-3.5" />
                       )}
@@ -4188,7 +4188,7 @@ function PRActionsPanel({
           onClick={() => void handleStateChange()}
         >
           {statePending ? (
-            <LoaderCircle className="size-3.5 animate-spin" />
+            <LoadingIndicator className="size-3.5" />
           ) : nextState === 'closed' ? (
             <GitPullRequestClosed className="size-3.5 text-destructive" />
           ) : (
@@ -4790,7 +4790,7 @@ function ChecksTab({
               onClick={() => void handleFixBrokenChecks()}
             >
               {fixingChecks ? (
-                <LoaderCircle className="size-3 animate-spin" />
+                <LoadingIndicator className="size-3" />
               ) : (
                 <Wrench className="size-3" />
               )}
@@ -4821,7 +4821,7 @@ function ChecksTab({
               disabled={!canUseChecksRepoContext || rerunning || list.length === 0}
             >
               {rerunning ? (
-                <LoaderCircle className="size-3 animate-spin" />
+                <LoadingIndicator className="size-3" />
               ) : (
                 <RefreshCw className="size-3" />
               )}
@@ -4955,7 +4955,7 @@ function ChecksTab({
       <div className="mx-2 mb-2 mt-1 min-w-0 rounded-md border border-border/50 bg-muted/20 px-3 py-2">
         {state?.loading ? (
           <div className="flex items-center gap-2 py-2 text-[12px] text-muted-foreground">
-            <LoaderCircle className="size-3.5 animate-spin" />
+            <LoadingIndicator className="size-3.5" />
             {translate('auto.components.GitHubItemDialog.934d87ab96', 'Loading check details…')}
           </div>
         ) : (
@@ -5138,7 +5138,7 @@ function ChecksTab({
       <>
         {variant === 'compact' ? compactHeader : null}
         <div className="flex items-center justify-center py-10">
-          <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+          <LoadingIndicator className="size-5 text-muted-foreground" />
         </div>
       </>
     )
@@ -6212,7 +6212,7 @@ function GHEditSection({
                     className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
                   >
                     {isPending('assignees') ? (
-                      <LoaderCircle className="size-3 animate-spin" />
+                      <LoadingIndicator className="size-3" />
                     ) : (
                       <Pencil className="size-3" />
                     )}
@@ -6307,7 +6307,7 @@ function GHEditSection({
                     className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
                   >
                     {isPending('labels') ? (
-                      <LoaderCircle className="size-3 animate-spin" />
+                      <LoadingIndicator className="size-3" />
                     ) : (
                       <Pencil className="size-3" />
                     )}
@@ -6420,7 +6420,7 @@ function GHEditSection({
                 ))
               )}
               {isPending('labels') ? (
-                <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-3 text-muted-foreground" />
               ) : (
                 <ChevronDown className="size-2.5 opacity-50" />
               )}
@@ -6486,7 +6486,7 @@ function GHEditSection({
                 ))
               )}
               {isPending('assignees') ? (
-                <LoaderCircle className="size-3 animate-spin text-muted-foreground" />
+                <LoadingIndicator className="size-3 text-muted-foreground" />
               ) : (
                 <ChevronDown className="size-2.5 opacity-50" />
               )}
@@ -6694,11 +6694,7 @@ function GHCommentComposer({
               className="absolute bottom-3 right-3 shadow-sm"
               aria-label={translate('auto.components.GitHubItemDialog.0a73f59e85', 'Send comment')}
             >
-              {submitting ? (
-                <LoaderCircle className="size-4 animate-spin" />
-              ) : (
-                <Send className="size-4" />
-              )}
+              {submitting ? <LoadingIndicator className="size-4" /> : <Send className="size-4" />}
             </Button>
           }
         />
@@ -7838,7 +7834,7 @@ export default function GitHubItemDialog({
                   <TabsContent value="files" className="mt-0 h-full min-h-0 overflow-hidden">
                     {loading && files.length === 0 ? (
                       <div className="flex items-center justify-center py-10">
-                        <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+                        <LoadingIndicator className="size-5 text-muted-foreground" />
                       </div>
                     ) : filesUnavailable && files.length === 0 ? (
                       // Why: the file fetch failed (rate limit, auth, unresolved

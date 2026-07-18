@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ComponentType, type ReactNode, type Ref } from 'react'
-import { StopCircle as CircleStop, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { StopCircle as CircleStop } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { ShortcutKeyCombo } from '@/components/ShortcutKeyCombo'
@@ -23,7 +24,7 @@ function AddRepoNestedScanProgressNotice({
 }: AddRepoNestedScanProgressNoticeProps): React.JSX.Element {
   return (
     <div className="flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
-      <Loader2 className="size-3.5 shrink-0 animate-spin" />
+      <LoadingIndicator className="size-3.5 shrink-0" />
       <span className="min-w-0 flex-1">{busyLabel}</span>
       {nestedScanInProgress && nestedScanId ? (
         <Tooltip>
@@ -44,7 +45,7 @@ function AddRepoNestedScanProgressNotice({
                 )}
                 onClick={onStopNestedScan}
               >
-                <Loader2 className="size-3.5 animate-spin text-annotation-highlight group-hover:hidden group-focus-visible:hidden" />
+                <LoadingIndicator className="size-3.5 text-annotation-highlight group-hover:hidden group-focus-visible:hidden" />
                 <CircleStop className="hidden size-3.5 group-hover:block group-focus-visible:block" />
               </Button>
             }

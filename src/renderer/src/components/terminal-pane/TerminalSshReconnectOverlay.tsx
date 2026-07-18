@@ -1,9 +1,6 @@
 import { useCallback, useState } from 'react'
-import {
-  SpinnerGap as Loader2,
-  HardDrives as Server,
-  HardDrive as ServerOff
-} from '@phosphor-icons/react'
+import { HardDrives as Server, HardDrive as ServerOff } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/useMountedRef'
@@ -149,7 +146,7 @@ export function TerminalSshReconnectOverlay({
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-muted-foreground">
             {isConnecting ? (
-              <Loader2 className="size-4 animate-spin" />
+              <LoadingIndicator className="size-4" />
             ) : (
               <ServerOff className="size-4" />
             )}
@@ -201,7 +198,7 @@ export function TerminalSshReconnectOverlay({
             >
               {!showConnect || isConnecting ? (
                 <>
-                  <Loader2 className="size-3.5 animate-spin" />
+                  <LoadingIndicator className="size-3.5" />
                   {translate(
                     'auto.components.terminal.pane.TerminalSshReconnectOverlay.connectingButton',
                     'Connecting...'

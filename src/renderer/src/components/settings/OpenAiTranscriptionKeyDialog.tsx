@@ -1,4 +1,5 @@
-import { SpinnerGap as Loader2, Lock } from '@phosphor-icons/react'
+import { Lock } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '../ui/button'
 import {
   Dialog,
@@ -98,7 +99,7 @@ export function OpenAiTranscriptionKeyDialog({
             </Button>
           )}
           <Button disabled={pending || !apiKeyDraft.trim()} onClick={onSave}>
-            {pending ? <Loader2 className="size-4 animate-spin" /> : null}
+            {pending ? <LoadingIndicator className="size-4" /> : null}
             {translate(
               'auto.components.settings.OpenAiTranscriptionKeyDialog.fa83512e48',
               'Save Key'

@@ -1,4 +1,5 @@
-import { CircleNotch as LoaderCircle, FloppyDisk as Save, X } from '@phosphor-icons/react'
+import { FloppyDisk as Save, X } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { SparsePresetDirectoryParseResult } from '@/lib/sparse-preset-draft'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -142,11 +143,7 @@ export function SparsePresetDraftEditor({
           {translate('auto.components.settings.SparsePresetSettingsSection.2d7d45e991', 'Cancel')}
         </Button>
         <Button type="button" size="sm" onClick={onSave} disabled={!canSaveDraft}>
-          {submitting ? (
-            <LoaderCircle className="size-3.5 animate-spin" />
-          ) : (
-            <Save className="size-3.5" />
-          )}
+          {submitting ? <LoadingIndicator className="size-3.5" /> : <Save className="size-3.5" />}
           {translate(
             'auto.components.settings.SparsePresetSettingsSection.a05bc9183f',
             'Save Preset'

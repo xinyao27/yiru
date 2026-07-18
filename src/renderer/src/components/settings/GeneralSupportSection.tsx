@@ -1,6 +1,7 @@
 import type React from 'react'
 import { useEffect, useState } from 'react'
-import { ArrowSquareOut as ExternalLink, SpinnerGap as Loader2, Star } from '@phosphor-icons/react'
+import { ArrowSquareOut as ExternalLink, Star } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
@@ -186,7 +187,7 @@ function SupportRow({
           className="shrink-0 gap-1.5"
         >
           {state === 'starring' || state === 'opening-github' ? (
-            <Loader2 className="size-3.5 animate-spin" />
+            <LoadingIndicator className="size-3.5" />
           ) : state === 'web-fallback' ? (
             <ExternalLink className="size-3.5" />
           ) : (

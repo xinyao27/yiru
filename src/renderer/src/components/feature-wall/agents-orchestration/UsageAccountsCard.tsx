@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { JSX, ReactNode } from 'react'
-import { SpinnerGap as Loader2, Plus } from '@phosphor-icons/react'
+import { Plus } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { toast } from 'sonner'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
@@ -66,11 +67,7 @@ function ProviderRow(props: {
         <div className="flex shrink-0 items-center gap-2">
           {connected ? null : (
             <Button size="sm" onClick={onSignIn} disabled={isAdding}>
-              {isAdding ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <Plus className="size-3.5" />
-              )}
+              {isAdding ? <LoadingIndicator className="size-3.5" /> : <Plus className="size-3.5" />}
               {isAdding
                 ? translate(
                     'auto.components.feature.wall.agents.orchestration.UsageAccountsCard.945865332e',
