@@ -22,10 +22,17 @@ vi.mock('./external-automation-run-table', () => ({
 }))
 
 // Why: Tooltip needs a TooltipProvider mounted higher in the real app; stub the
-// primitives so the row renders standalone and the span trigger stays inspectable.
+// primitives so the row renders standalone. Base UI passes the actual trigger
+// through `render`, so the mock must preserve that slot for controls to mount.
 vi.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  TooltipTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({
+    children,
+    render
+  }: {
+    children?: React.ReactNode
+    render?: React.ReactNode
+  }) => <>{render ?? children}</>,
   TooltipContent: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }))
 

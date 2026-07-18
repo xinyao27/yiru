@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vite-plus/test'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { Check } from '@phosphor-icons/react'
 import { CommitArea, ConflictSummaryCard, OperationBanner } from './source-control'
 import {
   resolveCommitAreaPrimaryAction,
@@ -109,6 +110,16 @@ function textarea(markup: string): string {
 function hasDisabledAttribute(markup: string): boolean {
   return markup.includes(' disabled=""')
 }
+
+function phosphorCheckPathMarkup(): string {
+  const path = renderToStaticMarkup(<Check />).match(/<path\b[\s\S]*?<\/path>/)?.[0]
+  if (!path) {
+    throw new Error('Phosphor Check path not found')
+  }
+  return path
+}
+
+const CHECKMARK_PATH_MARKUP = phosphorCheckPathMarkup()
 
 describe('CommitArea', () => {
   it('disables the primary button when no staged files', () => {
@@ -404,7 +415,7 @@ describe('CommitArea', () => {
   })
 
   it('renders a leading checkmark on a Commit primary', () => {
-    expect(firstButton(renderCommitArea(baseProps()))).toContain('lucide-check')
+    expect(firstButton(renderCommitArea(baseProps()))).toContain(CHECKMARK_PATH_MARKUP)
   })
 
   it('omits the checkmark when the primary is a remote action', () => {
@@ -415,14 +426,14 @@ describe('CommitArea', () => {
         upstreamStatus: { hasUpstream: true, ahead: 1, behind: 0 }
       })
     )
-    expect(firstButton(markup)).not.toContain('lucide-check')
+    expect(firstButton(markup)).not.toContain(CHECKMARK_PATH_MARKUP)
   })
 
   it('replaces the checkmark with a loader while the commit is in flight', () => {
     const props = baseProps({ isCommitting: true })
     const button = firstButton(renderCommitArea({ ...props, isCommitting: true }))
     expect(button).toContain('data-slot="loading-indicator"')
-    expect(button).not.toContain('lucide-check')
+    expect(button).not.toContain(CHECKMARK_PATH_MARKUP)
   })
 
   it('keeps Stage All as the commit-area primary when review prep can stage changes', () => {
