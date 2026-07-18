@@ -21,7 +21,7 @@ import {
 import type { TerminalQuickCommand } from '../../../../shared/types'
 import { getAgentLabel } from '@/lib/agent-catalog'
 import { TabBarQuickCommandItem } from './TabBarQuickCommandItem'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import {
   getTerminalQuickCommandPickerValue,

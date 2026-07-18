@@ -1,7 +1,7 @@
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import { Button } from '../ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type SshTargetFormCollapsibleSectionProps = {
   open: boolean

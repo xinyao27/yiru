@@ -8,7 +8,7 @@ import {
   TerminalWindow as TerminalSquare
 } from '@phosphor-icons/react'
 import { AgentIcon } from '@/lib/agent-catalog'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import type { ActiveOption } from './tab-create-entry-active-option'
 

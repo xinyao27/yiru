@@ -1,5 +1,5 @@
 import React from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 // Why: desktop hover actions should not permanently reserve project-title width;
 // touch devices keep them in normal flow because there is no hover reveal.

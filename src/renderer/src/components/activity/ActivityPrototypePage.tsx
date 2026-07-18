@@ -46,7 +46,7 @@ import {
 } from '@/components/ui/select'
 import { Toggle } from '@/components/ui/toggle'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { FilledBellIcon } from '../sidebar/WorktreeCardHelpers'
 import CommentMarkdown from '../sidebar/CommentMarkdown'
 import {

@@ -9,7 +9,7 @@ import {
 } from '@/lib/markdown-review-notes'
 import type { RichMarkdownReviewNotePosition } from './rich-markdown-review-note-layout'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 function isRichMarkdownReviewNoteNavigationClick(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) {

@@ -4,7 +4,7 @@ import {
   MIN_PANEL_WIDTH,
   type FloatingTerminalPanelBounds
 } from './floating-terminal-panel-bounds'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 const RESIZE_HANDLES = [
   ['n', 'top-0 left-2 right-2 h-2 cursor-n-resize'],

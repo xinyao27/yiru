@@ -1,6 +1,6 @@
 import { useState, type RefObject } from 'react'
 import { Check, Pencil, X } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import type { AskAnswerSelection, AskPrompt } from './native-chat-interactive-prompt'
 

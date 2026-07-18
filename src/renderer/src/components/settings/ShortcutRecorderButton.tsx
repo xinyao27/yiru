@@ -10,7 +10,7 @@ import {
   modifierFromKeyEvent,
   toModifierDoubleTapEvent
 } from '../../../../shared/modifier-double-tap-detector'
-import { cn } from '../../lib/utils'
+import { cn } from '../../lib/class-names'
 import { ShortcutKeyCombo } from '../ShortcutKeyCombo'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { translate } from '@/i18n/i18n'

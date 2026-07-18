@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Check, Monitor, Moon, GearSix as Settings2, Sun } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { track } from '@/lib/telemetry'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { GhosttyDiscoveryRow } from './GhosttyDiscoveryRow'

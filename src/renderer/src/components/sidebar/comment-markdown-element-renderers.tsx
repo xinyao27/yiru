@@ -1,6 +1,6 @@
 import React from 'react'
 import type { Components } from 'react-markdown'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { isMermaidFence, isMermaidPre, renderMermaidFence } from './comment-mermaid-fence'
 import {
   GitHubUserAttachmentImage,

@@ -98,7 +98,7 @@ import { findWorktreeById } from '@/store/slices/worktree-helpers'
 import { dirname } from '@/lib/path'
 import { relativePathInsideRoot } from '../../../../shared/cross-platform-path'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 const EMPTY_MARKDOWN_DOCUMENTS: MarkdownDocument[] = []
 

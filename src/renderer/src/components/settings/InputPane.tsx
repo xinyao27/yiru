@@ -3,7 +3,7 @@ import { Label } from '../ui/label'
 import { SearchableSetting } from './SearchableSetting'
 import { isDefaultPrimarySelectionMiddleClickPasteUserAgent } from '@/hooks/usePrimarySelectionPaste'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 export { getInputPaneSearchEntries } from './input-search'
 
 type InputPaneProps = {

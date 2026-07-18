@@ -10,7 +10,7 @@ import { Circle as CircleDot, FileText, GitPullRequest, Lock, Plus } from '@phos
 import { TYPE_FIELD_DATA_TYPE } from './columns'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useRepoAssigneesBySlug, useRepoLabelsBySlug } from '@/hooks/useGitHubSlugMetadata'
 import { useAppStore } from '@/store'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'

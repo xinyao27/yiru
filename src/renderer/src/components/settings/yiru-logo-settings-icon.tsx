@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import type { IconProps } from '@phosphor-icons/react'
 import logo from '../../../../../resources/logo.svg'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export function YiruLogoSettingsIcon({ className }: IconProps): React.JSX.Element {
   return createElement('img', {

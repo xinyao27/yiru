@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import type { AddRepoDialogStep } from './add-repo-dialog-types'
 import { AddRepoStepIndicator } from './AddRepoStepIndicator'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export function AddRepoDialogChrome({
   children,

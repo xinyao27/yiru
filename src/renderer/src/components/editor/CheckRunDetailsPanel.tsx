@@ -13,7 +13,7 @@ import { translate } from '@/i18n/i18n'
 import { useCheckRunDetailsFixWithAI } from './check-run-details-fix-with-ai'
 import { CheckRunAnnotations } from './CheckRunAnnotations'
 import { CheckRunJobs } from './CheckRunJobs'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 function formatCheckTimestamp(value: string | null | undefined): string | null {
   if (!value) {

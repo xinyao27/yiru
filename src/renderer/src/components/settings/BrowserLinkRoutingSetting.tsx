@@ -2,7 +2,7 @@ import type { GlobalSettings } from '../../../../shared/types'
 import { Label } from '../ui/label'
 import { SearchableSetting } from './SearchableSetting'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type BrowserLinkRoutingSettingProps = {
   settings: GlobalSettings

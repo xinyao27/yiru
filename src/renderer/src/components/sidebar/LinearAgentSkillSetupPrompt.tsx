@@ -16,7 +16,7 @@ import {
   ensureYiruCliAvailableForAgentSkillTerminal,
   isYiruCliAvailableOnPath
 } from '@/lib/agent-skill-cli-prerequisite'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   buildSkillCommandForRuntime,
   ensureWslCliAvailableForAgentSkillTerminal,

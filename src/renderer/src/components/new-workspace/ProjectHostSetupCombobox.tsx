@@ -3,7 +3,7 @@ import { Check, CaretUpDown as ChevronsUpDown, HardDrives as Server } from '@pho
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { ProjectHostSetupOption } from '@/lib/project-host-setup-options'
 import { translate } from '@/i18n/i18n'
 

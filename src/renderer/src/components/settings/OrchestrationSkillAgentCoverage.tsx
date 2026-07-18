@@ -3,7 +3,7 @@ import type { OrchestrationSkillAgentStatus } from '@/lib/orchestration-skill-co
 import { AgentIcon } from '@/lib/agent-catalog'
 import { useDetectedAgents } from '@/hooks/useDetectedAgents'
 import { getOrchestrationSkillAgentStatuses } from '@/lib/orchestration-skill-coverage'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 
 function getAgentCoverageSummary(props: {

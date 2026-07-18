@@ -36,7 +36,7 @@ import { TabWorkspaceLayoutMenuSection } from './TabWorkspaceLayoutMenuSection'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_ROOT_CLASSES } from './tab-root-classes'
 import { TabCloseButton } from './TabCloseButton'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 function formatBrowserTabUrlLabel(url: string): string {
   if (url === YIRU_BROWSER_BLANK_URL || url === 'about:blank') {

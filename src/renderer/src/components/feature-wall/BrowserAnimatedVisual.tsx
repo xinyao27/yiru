@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- Why: this animation is a self-contained storyboard; splitting the phase markup from its timing constants would make the sequence harder to verify. */
 import { useEffect, useRef, useState, type JSX, type ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { ClaudeIcon } from '@/components/status-bar/icons'
 import { useShortcutLabel } from '@/hooks/useShortcutLabel'
 import { FeatureWallClickRing } from './FeatureWallClickRing'

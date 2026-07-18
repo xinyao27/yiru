@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { CaretRight as ChevronRight } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 
 type Props = {

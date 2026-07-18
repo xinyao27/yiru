@@ -1,7 +1,7 @@
 import React from 'react'
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { GitHistoryItem, GitHistoryItemRef } from '../../../../shared/git-history'
 import type { GitHistoryItemViewModel } from '../../../../shared/git-history-graph'
 import { GitHistoryGraphSvg, graphColor } from './GitHistoryGraphSvg'

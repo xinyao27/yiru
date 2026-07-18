@@ -3,7 +3,7 @@ import { Label } from '../ui/label'
 import { Separator } from '../ui/separator'
 import { useShortcutLabel } from '@/hooks/useShortcutLabel'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type VoiceDictationSettingsSectionProps = {
   voiceSettings: VoiceSettings

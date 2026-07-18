@@ -1,7 +1,7 @@
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
 import type { GitHubOwnerRepo } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export function GitHubMarkdownComposerPreviewPane({
   value,

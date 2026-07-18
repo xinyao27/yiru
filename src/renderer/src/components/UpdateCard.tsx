@@ -19,7 +19,7 @@ import {
 import type { ChangelogData } from '../../../shared/types'
 import { YIRU_GITHUB_RELEASES_URL } from '../../../shared/yiru-github-repository'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 // ── Helpers ──────────────────────────────────────────────────────────
 

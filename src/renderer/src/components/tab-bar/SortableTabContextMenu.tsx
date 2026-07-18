@@ -21,7 +21,7 @@ import { useAppStore } from '../../store'
 import { formatShortcutLabel, useOptionalShortcutLabel } from '@/hooks/useShortcutLabel'
 import { translate } from '@/i18n/i18n'
 import { TerminalTabSplitMenuSection } from './TerminalTabSplitMenuSection'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 const TAB_COLORS = [
   {

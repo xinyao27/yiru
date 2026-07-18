@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { useMountedRef } from '@/hooks/useMountedRef'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export type RuntimeHostConnectionState = 'connected' | 'checking' | 'reconnecting' | 'disconnected'
 

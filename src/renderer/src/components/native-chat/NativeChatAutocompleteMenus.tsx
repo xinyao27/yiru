@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { SlashCommandSuggestion } from './native-chat-composer-state'
 import type { DiscoveredSkill } from '../../../../shared/skills'
 

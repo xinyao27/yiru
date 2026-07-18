@@ -6,7 +6,7 @@ import {
   Columns as Columns3
 } from '@phosphor-icons/react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import ColumnResizeHandle from './ColumnResizeHandle'
 import ProjectGroupHeader from './ProjectGroupHeader'
 import ProjectRow from './ProjectRow'

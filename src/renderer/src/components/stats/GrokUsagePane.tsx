@@ -11,7 +11,7 @@ import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { StatCard } from './StatCard'
 import { formatUpdatedAt } from './usage-formatters'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export function GrokUsagePane(): React.JSX.Element {
   const grok = useAppStore((s) => s.rateLimits.grok)

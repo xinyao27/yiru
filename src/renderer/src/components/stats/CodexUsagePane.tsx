@@ -28,7 +28,7 @@ import { ShareUsageButton } from './ShareUsageButton'
 import { StatCard } from './StatCard'
 import { formatCost, formatTokens, formatUpdatedAt } from './usage-formatters'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 const RANGE_OPTIONS: CodexUsageRange[] = ['7d', '30d', '90d', 'all']
 const SCOPE_OPTIONS: { value: CodexUsageScope; label: string }[] = [

@@ -6,7 +6,7 @@ import {
   getAgentAwakeTitle
 } from './agent-awake-copy'
 import { SearchableSetting } from './SearchableSetting'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type AgentAwakeSettingProps = {
   settings: GlobalSettings

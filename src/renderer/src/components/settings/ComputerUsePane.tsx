@@ -17,7 +17,7 @@ import { Button } from '../ui/button'
 import { Badge } from '../ui/badge'
 import { ComputerUseSkillSetupPanel } from './ComputerUseSkillSetupPanel'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 export { getComputerUsePaneSearchEntries } from './computer-use-search'
 
 type PermissionDefinition = {

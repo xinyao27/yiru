@@ -14,7 +14,7 @@ import {
   YIRU_LINEAR_SKILL_NAME
 } from '@/lib/agent-feature-install-commands'
 import { getLinearAgentSkillUpdateCommand } from '@/lib/linear-agent-skill-update-command'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { getLinearAgentSkillSetupInlineRuntimeCopy } from '../sidebar/linear-agent-skill-setup-copy'
 import {
   getCurrentPlatform,

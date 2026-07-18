@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { XIcon } from '@phosphor-icons/react'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

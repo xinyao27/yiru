@@ -11,7 +11,7 @@
   "rsc": false,
   "tsx": true,
   "aliases": {
-    "utils": "@/lib/utils",
+    "utils": "@/lib/class-names",
     "components": "@/components",
     "ui": "@/components/ui",
     "lib": "@/lib",

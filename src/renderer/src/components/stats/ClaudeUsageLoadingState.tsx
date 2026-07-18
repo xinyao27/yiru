@@ -1,5 +1,5 @@
 import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type ClaudeUsageLoadingStateProps = {
   title?: string

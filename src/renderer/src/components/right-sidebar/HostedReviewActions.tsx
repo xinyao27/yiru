@@ -6,7 +6,7 @@ import {
   GitPullRequest as GitPullRequestClosed
 } from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 import {

@@ -12,7 +12,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { useMountedRef } from '@/hooks/useMountedRef'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { GitHubViewer } from '../../../../shared/types'
 import { YIRU_GITHUB_ISSUES_URL } from '../../../../shared/yiru-github-repository'
 import { translate } from '@/i18n/i18n'

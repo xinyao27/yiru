@@ -11,7 +11,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import type { Menu } from '@base-ui/react/menu'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import { getConnectionId } from '@/lib/connection-context'
 import { detectLanguage } from '@/lib/language-detect'

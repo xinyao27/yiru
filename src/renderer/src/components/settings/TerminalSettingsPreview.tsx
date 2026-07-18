@@ -15,7 +15,7 @@ import { PREVIEW_BUFFER } from './terminal-preview-content'
 import { SettingsSwitch } from './SettingsFormControls'
 import type { GlobalSettings } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 // Why: pin cols/rows so PREVIEW_BUFFER never wraps. Sized so the longest
 // line (the def total signature, 32 chars) plus a few cols of margin fits

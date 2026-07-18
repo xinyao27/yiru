@@ -59,7 +59,7 @@ import type {
 } from '../../../shared/types'
 import type { TaskSourceContext } from '../../../shared/task-source-context'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type LinearIssueWorkspaceProps = {
   issue: LinearIssue | null

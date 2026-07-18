@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { JSX } from 'react'
 import { AgentStateDot } from '@/components/AgentStateDot'
 import { ClaudeIcon, OpenCodeGoIcon } from '../status-bar/icons'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type AgentKind = 'claude' | 'codex' | 'opencode'
 

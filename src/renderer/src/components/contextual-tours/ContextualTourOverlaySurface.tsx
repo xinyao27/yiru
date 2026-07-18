@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { ArrowLeft, ArrowRight, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 import type {
   ContextualTourId,

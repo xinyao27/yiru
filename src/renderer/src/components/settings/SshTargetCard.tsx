@@ -19,7 +19,7 @@ import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { isSshTargetConnecting, type SshTargetBusyAction } from './ssh-target-action-state'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 // ── Shared status helpers ────────────────────────────────────────────
 

@@ -7,7 +7,7 @@ import {
 } from '@phosphor-icons/react'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '../../store'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'

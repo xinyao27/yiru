@@ -1,6 +1,6 @@
 import { DownloadSimple as Import, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,

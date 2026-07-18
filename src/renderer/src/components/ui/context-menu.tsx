@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ContextMenu as ContextMenuPrimitive } from '@base-ui/react/context-menu'
 import { CheckIcon, CaretRight as ChevronRightIcon, CircleIcon } from '@phosphor-icons/react'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 // FLAG: Base UI ContextMenu.Root has no `modal` prop (behavior is fixed), so the
 // previous `modal={false}` has no equivalent and was dropped.

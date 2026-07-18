@@ -77,7 +77,7 @@ import {
 } from '../../../../shared/usage-percentage-display'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
 import { ProviderUsageSegment } from './ProviderUsageSegment'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type StatusBarProps = {
   floatingTerminalOpen: boolean

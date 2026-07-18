@@ -37,7 +37,7 @@ import { getConnectionId } from '@/lib/connection-context'
 import { resolveDocumentTheme } from '@/lib/document-theme'
 import { useAppStore } from '@/store'
 import { scrollTopCache, setWithLRU } from '@/lib/scroll-cache'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

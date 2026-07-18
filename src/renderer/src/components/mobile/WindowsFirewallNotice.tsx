@@ -9,7 +9,7 @@ import type { WindowsMobileFirewallStatus } from '../../../../shared/windows-mob
 import { useMountedRef } from '../../hooks/useMountedRef'
 import { translate } from '../../i18n/i18n'
 import { Button } from '../ui/button'
-import { cn } from '../../lib/utils'
+import { cn } from '../../lib/class-names'
 
 type WindowsFirewallNoticeProps = {
   pairingReady: boolean

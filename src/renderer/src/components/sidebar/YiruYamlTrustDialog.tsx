@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store'
 import type { YiruHookScriptKind } from '@/lib/yiru-hook-trust'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type ScriptKind = YiruHookScriptKind
 

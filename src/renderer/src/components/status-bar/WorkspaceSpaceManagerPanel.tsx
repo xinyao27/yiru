@@ -34,7 +34,7 @@ import type {
   WorkspaceSpaceItem,
   WorkspaceSpaceWorktree
 } from '../../../../shared/workspace-space-types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
 import { toast } from 'sonner'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'

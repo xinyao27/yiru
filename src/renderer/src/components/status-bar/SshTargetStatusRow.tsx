@@ -7,7 +7,7 @@ import { useAppStore } from '../../store'
 import { STATUS_LABELS, statusColor } from '../settings/SshTargetCard'
 import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import type { RemoteWorkspaceSyncStatus } from '../../store/slices/ssh'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 function isReconnectable(status: SshConnectionStatus): boolean {
   return ['disconnected', 'reconnection-failed', 'error', 'auth-failed'].includes(status)

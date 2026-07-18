@@ -11,7 +11,7 @@ import {
 import { isRuntimeRepoRefSearchQueryWithinLimit } from '@/runtime/runtime-repo-search-bounds'
 import { translate } from '@/i18n/i18n'
 import { parseExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type BaseRefPickerProps = {
   repoId: string

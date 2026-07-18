@@ -1,7 +1,7 @@
 import React from 'react'
 import { Check, CaretDown as ChevronDown } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import { getVisibleAutomationSetupDecision } from './automation-setup-decision'
 import type { AutomationCreateTarget, AutomationDraft } from './AutomationEditorDialog'

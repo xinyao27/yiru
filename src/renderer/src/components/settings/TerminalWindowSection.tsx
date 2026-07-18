@@ -15,7 +15,7 @@ type TerminalWindowSectionProps = {
 }
 
 import { COLOR_OVERRIDE_GROUPS } from './terminal-window-color-groups'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export function TerminalWindowSection({
   settings,

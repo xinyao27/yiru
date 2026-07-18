@@ -25,7 +25,7 @@ import { EditorPanelHeaderPath } from './EditorPanelHeaderPath'
 import { useDiffNavigation } from './diff-navigation-context'
 import { useShortcutKeyDetails } from '@/hooks/useShortcutLabel'
 import { ShortcutKeyCombo } from '@/components/ShortcutKeyCombo'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type EditorPanelHeaderProps = {
   activeFile: OpenFile

@@ -8,7 +8,7 @@ import {
 import type { AgentsStep, AgentsStepId } from '../../../../shared/agents-orchestration-steps'
 import type { WorkbenchStep, WorkbenchStepId } from '../../../../shared/workbench-steps'
 import type { ReviewStep, ReviewStepId } from '../../../../shared/review-steps'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 
 const SUB_STEP_LABELS = ['a', 'b', 'c', 'd', 'e', 'f'] as const

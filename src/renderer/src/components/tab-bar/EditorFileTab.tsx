@@ -37,7 +37,7 @@ import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-widt
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_ROOT_CLASSES } from './tab-root-classes'
 import { TabCloseButton } from './TabCloseButton'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export default function EditorFileTab({
   file,

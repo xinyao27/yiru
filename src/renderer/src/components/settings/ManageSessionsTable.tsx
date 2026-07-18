@@ -10,7 +10,7 @@ import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { formatState, formatWorkspace } from './manage-sessions-format'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type ManageSessionsTableProps = {
   sessions: PtyManagementSession[]

@@ -9,7 +9,7 @@ import { SearchableSetting } from './SearchableSetting'
 import { SettingsSubsectionHeader } from './SettingsFormControls'
 import { translate } from '@/i18n/i18n'
 import { YIRU_GITHUB_STARGAZERS_URL } from '../../../../shared/yiru-github-repository'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type SupportState =
   | 'loading'

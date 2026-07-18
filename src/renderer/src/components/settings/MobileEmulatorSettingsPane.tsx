@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { SpinnerGap as Loader2, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import type { GlobalSettings } from '../../../../shared/types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'

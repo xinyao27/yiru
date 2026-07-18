@@ -20,7 +20,7 @@ import { getTabPaneBodyDroppableId, type HoveredTabInsertion } from './useTabDra
 import { tabGroupBodyAnchorName } from './tab-group-body-anchor'
 import { translate } from '@/i18n/i18n'
 import { WorkspacePaneFrame } from './WorkspacePaneFrame'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 const EditorPanel = lazy(() => import('../editor/EditorPanel'))
 

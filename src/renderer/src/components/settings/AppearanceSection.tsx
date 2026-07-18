@@ -1,6 +1,6 @@
 import type React from 'react'
 import { CaretRight as ChevronRight } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type AppearanceSectionProps = {
   /** Stable id used for the accordion toggle + aria wiring. */

@@ -1,7 +1,7 @@
 import type React from 'react'
 import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTabStripDragScrollHandlers } from './tab-strip-drag-scroll'

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import type { JSX } from 'react'
 import { ClaudeIcon, OpenAIIcon } from '../../status-bar/icons'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 
 type Phase = 'reset' | 'expanded' | 'targeted' | 'swapped'

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import RepoBadgeLabel from '@/components/repo/RepoBadgeLabel'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   searchNewWorkspaceProjectOptions,
   type NewWorkspaceProjectOption

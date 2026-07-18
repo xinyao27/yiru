@@ -2,7 +2,7 @@ import type React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getTabDividerClasses, getTabRootStateClasses } from './drop-indicator'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type WorkspaceSelectableTabProps = {
   id: string

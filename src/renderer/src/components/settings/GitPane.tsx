@@ -19,7 +19,7 @@ import {
 } from './keep-local-main-up-to-date-setting'
 import { translate } from '@/i18n/i18n'
 import { SettingsRow, SettingsSegmentedControl } from './SettingsFormControls'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export { getGitPaneSearchEntries }
 

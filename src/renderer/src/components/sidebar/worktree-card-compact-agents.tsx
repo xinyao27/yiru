@@ -4,7 +4,7 @@ import { AgentStateDot } from '@/components/AgentStateDot'
 import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/useDashboardData'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { agentTypeToIconAgent } from '@/lib/agent-status'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   buildSummaryAgentGroups,
   selectSummaryGroupIconAgents,

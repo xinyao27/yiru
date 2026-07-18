@@ -1,5 +1,5 @@
 import { ClaudeIcon, OpenAIIcon } from '../../status-bar/icons'
-import { cn } from '../../../lib/utils'
+import { cn } from '../../../lib/class-names'
 import { translate } from '@/i18n/i18n'
 
 export function HomeSlide({ tapping }: { tapping: boolean }): React.JSX.Element {

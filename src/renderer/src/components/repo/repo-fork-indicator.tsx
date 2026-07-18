@@ -2,7 +2,7 @@ import React from 'react'
 import { GitFork } from '@phosphor-icons/react'
 import type { GitHubRepositoryIdentity } from '../../../../shared/types'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 /**
  * Small muted glyph marking a repo as a fork, with a "Fork of owner/repo"

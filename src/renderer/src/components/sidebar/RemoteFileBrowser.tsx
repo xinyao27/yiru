@@ -9,7 +9,7 @@ import {
   MagnifyingGlass as Search
 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
 import {
   decideEnterAction,

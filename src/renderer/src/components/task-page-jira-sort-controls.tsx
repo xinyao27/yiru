@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { JiraIssueSortColumn, JiraIssueSortDirection } from './jira-issue-sorter'
 
 type JiraSortColumn = {

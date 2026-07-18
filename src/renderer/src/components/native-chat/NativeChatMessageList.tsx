@@ -3,7 +3,7 @@ import { ArrowDown, ArrowUp, Image as ImageIcon } from '@phosphor-icons/react'
 import CommentMarkdown, {
   type CommentMarkdownLinkClickHandler
 } from '@/components/sidebar/CommentMarkdown'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import { basename } from '@/lib/path'
 import {

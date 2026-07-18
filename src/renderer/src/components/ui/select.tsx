@@ -7,7 +7,7 @@ import {
   CaretUp as ChevronUpIcon
 } from '@phosphor-icons/react'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 // Bare re-export: SelectPrimitive.Root.Props is generic <Value, Multiple>, which
 // a wrapper function / ComponentProps cannot express without erasing the generic.

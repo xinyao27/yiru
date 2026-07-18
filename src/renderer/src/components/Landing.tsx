@@ -7,7 +7,7 @@ import {
   Star,
   X
 } from '@phosphor-icons/react'
-import { cn } from '../lib/utils'
+import { cn } from '../lib/class-names'
 import { useAppStore } from '../store'
 import { isGitRepoKind } from '../../../shared/repo-kind'
 import type { Repo } from '../../../shared/types'

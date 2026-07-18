@@ -11,7 +11,7 @@ import {
 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { ConflictReviewEntry, OpenFile } from '@/store/slices/editor'
 import type { GitConflictKind, GitStatusEntry } from '../../../../shared/types'
 import { ConflictReviewFileTree } from './ConflictReviewFileTree'

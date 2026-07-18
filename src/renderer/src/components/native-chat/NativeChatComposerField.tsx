@@ -1,7 +1,7 @@
 import type { ClipboardEventHandler, KeyboardEventHandler, RefObject } from 'react'
 import { Image as ImageIcon, ImageBroken as ImageOff, X } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { NATIVE_FILE_DROP_TARGET } from '../../../../shared/native-file-drop'
 import { basename } from '@/lib/path'
 import { isNativeChatPastedImagePath } from './native-chat-image-paste'

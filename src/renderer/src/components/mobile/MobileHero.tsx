@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Copy, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
-import { cn } from '../../lib/utils'
+import { cn } from '../../lib/class-names'
 import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
 import { NetworkInterfacePicker } from './NetworkInterfacePicker'
 import { MobilePairingConnectionOptions } from '../settings/MobilePairingConnectionOptions'

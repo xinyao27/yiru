@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useAppStore } from '@/store'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type WorkspacePaneFrameProps = {
   worktreeId: string

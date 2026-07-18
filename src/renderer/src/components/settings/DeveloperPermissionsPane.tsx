@@ -21,7 +21,7 @@ import type {
 } from '../../../../shared/developer-permissions-types'
 import { Button } from '../ui/button'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 export { getDeveloperPermissionsPaneSearchEntries } from './developer-permissions-search'
 
 type PermissionDefinition = {

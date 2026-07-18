@@ -6,7 +6,7 @@ import {
   MagnifyingGlassMinus as ZoomOut
 } from '@phosphor-icons/react'
 import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import ImageViewerPopup from './ImageViewerPopup'
 import PdfViewer from './PdfViewer'
 import {

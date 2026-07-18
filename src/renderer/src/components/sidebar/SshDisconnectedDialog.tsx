@@ -18,7 +18,7 @@ import { useMountedRef } from '@/hooks/useMountedRef'
 import { statusColor } from '@/components/settings/SshTargetCard'
 import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type SshDisconnectedDialogProps = {
   open: boolean

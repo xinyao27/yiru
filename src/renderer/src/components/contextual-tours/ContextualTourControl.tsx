@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 import type { ContextualTourStepControl } from '../../../../shared/contextual-tours'
 import { CONTEXTUAL_TOUR_ENABLE_AUTO_WORKSPACE_NAME_EVENT } from './contextual-tour-composer-events'

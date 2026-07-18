@@ -1,6 +1,6 @@
 import type React from 'react'
 import { TerminalWindow as SquareTerminal } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
 import type { SpoolSessionSidebarRow } from './spool-sidebar-rows'

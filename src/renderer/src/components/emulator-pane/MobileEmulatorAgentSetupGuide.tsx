@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 import { Button } from '../ui/button'
 import { MobileEmulatorAgentSetupGuideSteps } from './MobileEmulatorAgentSetupGuideSteps'

@@ -6,7 +6,7 @@ import { useAppStore } from '../store'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { translate } from '@/i18n/i18n'
 import { YIRU_GITHUB_REPOSITORY_URL } from '../../../shared/yiru-github-repository'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type StarNagMode = 'gh' | 'web'
 

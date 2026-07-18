@@ -167,7 +167,7 @@ import {
   loadTaskPageJiraProjectStatusOrder
 } from '@/components/task-page-jira-status-order'
 import { JiraIcon } from '@/components/icons/JiraIcon'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   getLinkedWorkItemSuggestedName,
   getLinkedWorkItemWorkspaceName,

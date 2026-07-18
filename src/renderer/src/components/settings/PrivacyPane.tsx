@@ -8,7 +8,7 @@ import { PRIVACY_URL, getConsentState, setOptIn as telemetrySetOptIn } from '../
 import { useAppStore } from '../../store'
 import { PrivacyDiagnosticsSection } from './PrivacyDiagnosticsSection'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export type EnvBlockedReason = 'do_not_track' | 'yiru_disabled' | 'ci'
 export type BlockedReason = { kind: 'env'; reason: EnvBlockedReason }

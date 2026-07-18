@@ -14,7 +14,7 @@ import {
   MIN_AGENT_HIBERNATION_IDLE_MS,
   getEffectiveAgentHibernationIdleMs
 } from '@/lib/agent-hibernation-planner'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export { getExperimentalPaneSearchEntries }
 

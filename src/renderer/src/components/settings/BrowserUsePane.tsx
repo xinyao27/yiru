@@ -18,7 +18,7 @@ import {
 } from '@/hooks/useInstalledAgentSkills'
 import { useActiveProjectSkillRuntime } from '@/hooks/useActiveProjectSkillRuntime'
 import { useMountedRef } from '@/hooks/useMountedRef'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '../../store'
 import { BROWSER_FAMILY_LABELS } from '../../../../shared/constants'
 import { SearchableSetting } from './SearchableSetting'

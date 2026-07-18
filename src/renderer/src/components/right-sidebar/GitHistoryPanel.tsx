@@ -6,7 +6,7 @@ import {
 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
 import type { GitHistoryItem, GitHistoryResult } from '../../../../shared/git-history'
 import type { GitBranchChangeEntry } from '../../../../shared/types'

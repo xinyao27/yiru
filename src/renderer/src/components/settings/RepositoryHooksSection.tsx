@@ -25,7 +25,7 @@ import { matchesSettingsSearch } from './settings-search'
 import { translate } from '@/i18n/i18n'
 import { getRepositoryHookScriptTextareaRows } from '@/lib/script-textarea-rows'
 import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type RepositoryHooksSectionProps = {
   repo: Repo

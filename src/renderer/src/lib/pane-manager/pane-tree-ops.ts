@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- Why: split-tree DOM reparent, promote, and equalize rules need one consistent owner. */
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 import type {
   DropZone,

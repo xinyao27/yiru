@@ -7,7 +7,7 @@ import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
   ensureYiruCliAvailableForAgentSkillTerminal
 } from '@/lib/agent-skill-cli-prerequisite'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useMobileEmulatorAgentSetupState } from '../emulator-pane/use-mobile-emulator-agent-setup-state'
 import { AgentSkillSetupPanel } from './AgentSkillSetupPanel'
 import { buildSkillCommandForRuntime } from './CliSkillRuntimeSetup'

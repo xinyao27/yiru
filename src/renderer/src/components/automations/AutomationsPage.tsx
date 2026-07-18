@@ -39,7 +39,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAppStore } from '@/store'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
 import { getLocalPreflightContext, localPreflightContextKey } from '@/lib/local-preflight-context'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import RepoBadgeLabel from '@/components/repo/RepoBadgeLabel'
 import { getAgentCatalog } from '@/lib/agent-catalog'
 import { useRepoMap, useWorktreeMap } from '@/store/selectors'

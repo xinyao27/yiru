@@ -86,7 +86,7 @@ import {
 import { translate } from '@/i18n/i18n'
 import { consumeFloatingTerminalOpenMaximizedIntent } from '@/lib/floating-terminal'
 import { selectFloatingTerminalPanelInputs } from './floating-terminal-panel-inputs'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 const LOCAL_RUNTIME_SETTINGS = { activeRuntimeEnvironmentId: null } as const
 
 const EditorPanel = lazy(() => import('@/components/editor/EditorPanel'))

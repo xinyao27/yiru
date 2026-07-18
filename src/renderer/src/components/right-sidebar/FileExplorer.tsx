@@ -5,7 +5,7 @@ import { useActiveWorktree, useRepoById } from '@/store/selectors'
 import { basename, dirname, normalizeRelativePath } from '@/lib/path'
 import { useRuntimeFileListForWorktree } from '@/components/quick-open-file-list'
 import { folderRelativePathToIncludeGlob } from './file-search-include-pattern'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
 import {
   getVisibleFileExplorerWorktreePath,

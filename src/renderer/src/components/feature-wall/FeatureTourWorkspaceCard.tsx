@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { ClaudeIcon, OpenCodeGoIcon } from '../status-bar/icons'
 import { CodexInlineIcon, WorkingSpinner } from './feature-tour-preview-glyphs'
 

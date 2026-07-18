@@ -6,7 +6,7 @@ import { AgentStateDot } from '@/components/AgentStateDot'
 import { ClaudeIcon } from '../status-bar/icons'
 import { FeatureWallClickRing } from './FeatureWallClickRing'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type Issue = {
   number: number

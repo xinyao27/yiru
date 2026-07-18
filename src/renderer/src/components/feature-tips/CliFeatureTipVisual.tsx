@@ -6,7 +6,7 @@ import {
 } from '@/components/feature-wall/agents-orchestration/orchestration-types'
 import { usePrefersReducedMotion } from '@/components/feature-wall/feature-wall-modal-helpers'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 const CLI_AGENT_COMMANDS = [
   'yiru worktree create --name auth-pr-1',

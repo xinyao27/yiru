@@ -1,6 +1,6 @@
 import React from 'react'
 import { EyeSlash as EyeOff } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 import {
   ContextMenu,

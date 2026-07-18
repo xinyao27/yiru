@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, type ReactElement } from 'react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { BrowserDriverState } from '@/lib/pane-manager/browser-mobile-driver-state'
 import { translate } from '@/i18n/i18n'
 

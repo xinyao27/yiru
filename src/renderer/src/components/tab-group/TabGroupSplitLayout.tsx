@@ -11,7 +11,7 @@ import {
   WORKSPACE_COLUMN_BODY_CLASS_NAME,
   WORKSPACE_COLUMN_FRAME_CLASS_NAME
 } from './workspace-column-chrome'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 const MIN_RATIO = 0.15
 const MAX_RATIO = 0.85

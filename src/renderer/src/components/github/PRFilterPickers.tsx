@@ -10,7 +10,7 @@ import {
   CommandItem,
   CommandList
 } from '@/components/ui/command'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
 

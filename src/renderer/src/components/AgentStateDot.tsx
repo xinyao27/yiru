@@ -1,6 +1,6 @@
 import React from 'react'
 import { CheckCircle as CircleCheck } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 // Why: shared state-indicator primitive so the dashboard and the sidebar's
 // agent hover share a single state vocabulary. Most states render as a dot;

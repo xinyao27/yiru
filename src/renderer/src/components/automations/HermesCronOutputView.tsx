@@ -13,7 +13,7 @@ import {
 } from '@phosphor-icons/react'
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   formatAutomationSchedule,
   isValidAutomationSchedule

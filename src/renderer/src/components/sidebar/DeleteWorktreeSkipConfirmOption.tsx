@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 import { Check } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export function DeleteWorktreeSkipConfirmOption({
   showDontAskAgain,

@@ -9,7 +9,7 @@ import {
   type UsageProviderOverview
 } from './usage-overview-model'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 const INTENSITY_CLASS: Record<UsageOverviewDailyPoint['intensity'], string> = {
   0: 'border-border/60 bg-muted/40',

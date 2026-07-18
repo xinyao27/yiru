@@ -11,7 +11,7 @@ import {
   type KeybindingDefinition,
   type KeybindingInput
 } from '../../../../shared/keybindings'
-import { cn } from '../../lib/utils'
+import { cn } from '../../lib/class-names'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'

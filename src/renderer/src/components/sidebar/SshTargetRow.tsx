@@ -8,7 +8,7 @@ import React, { useCallback, useRef, useState } from 'react'
 import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import type { SshTarget, SshConnectionState } from '../../../../shared/ssh-types'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type Props = {
   target: SshTarget & { state?: SshConnectionState }

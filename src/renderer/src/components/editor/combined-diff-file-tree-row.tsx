@@ -4,7 +4,7 @@ import { STATUS_COLORS, STATUS_LABELS } from '@/components/right-sidebar/status-
 import type { SourceControlTreeNode } from '@/components/right-sidebar/source-control-tree'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
 import { basename, dirname, joinPath } from '@/lib/path'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { WORKSPACE_FILE_PATH_MIME } from '@/lib/workspace-file-drag'
 import type {
   GitBranchChangeEntry,

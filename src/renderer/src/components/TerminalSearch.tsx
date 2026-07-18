@@ -12,7 +12,7 @@ import type { SearchState } from '@/components/terminal-pane/keyboard-handlers'
 import { translate } from '@/i18n/i18n'
 import { getFindRequestQuery } from '@/lib/find-query-bounds'
 import { safeFind } from './terminal-search-safe-find'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type TerminalSearchProps = {
   isOpen: boolean

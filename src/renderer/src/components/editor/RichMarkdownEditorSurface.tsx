@@ -19,7 +19,7 @@ import type { MarkdownReviewNote } from '@/lib/markdown-review-notes'
 import type { RichMarkdownAnnotationTarget } from './rich-markdown-review-annotations'
 import type { RichMarkdownReviewNotePosition } from './rich-markdown-review-note-layout'
 import type { DiffComment } from '../../../../shared/types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 function shouldFocusEmptyEditorFromSurfaceClick(
   event: React.MouseEvent<HTMLDivElement>,

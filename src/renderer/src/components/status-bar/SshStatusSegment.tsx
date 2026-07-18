@@ -26,7 +26,7 @@ import { isUserManagedRuntimeEnvironment } from '../../../../shared/runtime-envi
 import { RuntimeHostStatusRow, type RuntimeHostConnectionState } from './RuntimeHostStatusRow'
 import { SshTargetStatusRow } from './SshTargetStatusRow'
 import type { RemoteRuntimeSharedConnectionDiagnostics } from '../../../../shared/remote-runtime-shared-control-types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 function isConnecting(status: SshConnectionStatus): boolean {
   return ['connecting', 'deploying-relay', 'reconnecting'].includes(status)

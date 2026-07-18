@@ -8,7 +8,7 @@ import {
 import { Field } from './automation-page-parts'
 import type { AutomationDraft } from './AutomationEditorDialog'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type AutomationPrecheckFieldsProps = {
   draft: AutomationDraft

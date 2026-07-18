@@ -7,7 +7,7 @@ import {
   Clock,
   GitMerge
 } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { PullRequestIcon, checksLabel } from './WorktreeCardHelpers'
 import type { WorktreeCardPrDisplay } from './worktree-card-pr-display'
 import type { IssueInfo } from '../../../../shared/types'

@@ -28,7 +28,7 @@ import {
 } from './terminal-tab-activity-status'
 import { TAB_ROOT_CLASSES } from './tab-root-classes'
 import { TabCloseButton } from './TabCloseButton'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type SortableTabProps = {
   tab: TerminalTab

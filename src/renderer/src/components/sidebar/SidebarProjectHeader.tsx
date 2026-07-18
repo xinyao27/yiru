@@ -1,5 +1,5 @@
 import React from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type SidebarProjectHeaderIconProps = React.HTMLAttributes<HTMLDivElement> & {
   'data-repo-header-drag-handle'?: string

@@ -2,7 +2,7 @@ import { WarningCircle as AlertCircle, CheckCircle as CheckCircle2 } from '@phos
 import type { McpConfigInspection } from '../../../../shared/mcp-config'
 import { Button } from '../ui/button'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export type LoadedMcpConfigInspection = McpConfigInspection & {
   absolutePath: string

@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: this animation is a self-contained storyboard; splitting the slash-menu DOM, toolbar SVGs, and timing constants into separate modules would obscure the sequence rather than clarify it. */
 import { useEffect, useRef } from 'react'
 import type { JSX, ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { getShortcutPlatform } from '@/hooks/useShortcutLabel'
 import { translate } from '@/i18n/i18n'
 

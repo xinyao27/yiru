@@ -1,6 +1,6 @@
 import type { editor, IRange } from 'monaco-editor'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type ConflictBlock = {
   startLine: number

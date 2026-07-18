@@ -12,7 +12,7 @@ import { ReviewPRViewVisualStyles } from './review-animated-visual-pr-view-style
 import { CheckTinyIcon, ChevDownIcon, CursorIcon } from './review-animated-visual-shared'
 import { useReviewPrViewAnimation } from './review-pr-view-animation'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type SidebarTabId = 'explorer' | 'search' | 'source-control' | 'checks'
 

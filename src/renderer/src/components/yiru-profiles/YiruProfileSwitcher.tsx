@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 import type { YiruCloudOrgSummary, YiruProfileSummary } from '../../../../shared/yiru-profiles'
 import { YiruProfileAvatar } from './YiruProfileAvatar'

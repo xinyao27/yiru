@@ -17,7 +17,7 @@ import {
   type UsagePercentageDisplay
 } from '../../../../shared/usage-percentage-display'
 import { formatUsagePercentageLabel } from './usage-percentage-label'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 // Re-exported from its shared home so status-bar callers keep a single import.
 export { clampUsedPercent }

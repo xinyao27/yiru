@@ -1,5 +1,5 @@
 import { Shield as ShieldQuestion } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { ChatApproval } from './native-chat-interactive-prompt'
 
 export type NativeChatApprovalCardProps = {

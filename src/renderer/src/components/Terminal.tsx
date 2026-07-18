@@ -135,7 +135,7 @@ import { translate } from '@/i18n/i18n'
 import { getRuntimeEnvironmentIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { getResolvedExecutionHostIdForWorktree } from '@/lib/resolved-worktree-execution-host'
 import { browserWorkspaceHasRemoteOwner } from '@/runtime/remote-browser-tab-ownership'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 const EditorPanel = lazy(() => import('./editor/EditorPanel'))
 

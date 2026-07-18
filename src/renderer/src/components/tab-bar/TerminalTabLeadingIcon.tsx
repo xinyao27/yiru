@@ -1,6 +1,6 @@
 import { AgentStateDot, type AgentDotState } from '@/components/AgentStateDot'
 import { AgentIcon } from '@/lib/agent-catalog'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { TerminalTab, TuiAgent } from '../../../../shared/types'
 import { FilledBellIcon } from '../sidebar/WorktreeCardHelpers'
 import { ShellIcon } from './shell-icons'

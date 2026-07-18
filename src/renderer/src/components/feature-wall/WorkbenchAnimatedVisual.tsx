@@ -2,7 +2,7 @@
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: this visual is a timed storyboard; typed text, cursor, and phase state intentionally advance from animation effects. */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { ClaudeIcon } from '../status-bar/icons'
 import { useShortcutLabel } from '@/hooks/useShortcutLabel'
 import { FeatureWallClickRing } from './FeatureWallClickRing'

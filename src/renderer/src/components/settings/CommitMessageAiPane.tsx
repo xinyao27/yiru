@@ -27,7 +27,7 @@ import { matchesSettingsSearch } from './settings-search'
 import { getSettingOwnershipSummary } from './setting-ownership'
 import { translate } from '@/i18n/i18n'
 import { HostedReviewCreationDefaults } from './HostedReviewCreationDefaults'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type CommitMessageAiPaneProps = {
   settings: GlobalSettings

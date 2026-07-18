@@ -32,7 +32,7 @@ type DetectedBrowserEntry = {
 }
 import { BROWSER_VIEWPORT_PRESETS } from '../../../../shared/browser-viewport-presets'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 type BrowserToolbarMenuDropdownProps = {
   menuOpen: boolean
