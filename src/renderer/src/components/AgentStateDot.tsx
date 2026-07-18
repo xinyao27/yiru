@@ -65,9 +65,12 @@ export const AgentStateDot = React.memo(function AgentStateDot({
   size = 'sm',
   className
 }: Props): React.JSX.Element {
-  const box = size === 'md' ? 'h-3 w-3' : 'h-2.5 w-2.5'
+  const box = size === 'md' ? 'size-3.5' : 'size-2.5'
   const inner = size === 'md' ? 'size-2' : 'size-1.5'
   const icon = size === 'md' ? 'size-3' : 'size-2.5'
+  // Why: configurable loaders have more internal whitespace than simple dots,
+  // so they fill the status slot to remain legible in terminal tabs.
+  const loader = size === 'md' ? 'size-3.5' : 'size-2.5'
 
   if (state === 'working') {
     return (
@@ -77,7 +80,7 @@ export const AgentStateDot = React.memo(function AgentStateDot({
       >
         {/* Why: working is a loading state, so it follows the same user-selected
             indicator as every other in-flight surface. */}
-        <LoadingIndicator className={cn('text-yellow-500', inner)} />
+        <LoadingIndicator className={cn('text-yellow-500', loader)} />
       </span>
     )
   }
