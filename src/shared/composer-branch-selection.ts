@@ -89,12 +89,10 @@ export function resolveComposerBranchReuse(args: {
 }
 
 /**
- * Issue #5181: the branch-name override to apply for a picked branch. A local
- * branch already checked out in another worktree can't be reused, so it must
- * NOT be pinned as the override — pinning it would collide and silently produce
- * a suffixed branch. In that case fall back to letting the worktree name derive
- * a fresh branch from the selected ref as base; otherwise use the selection's
- * override unchanged.
+ * Issue #5181: the branch-name override to apply for a picked branch. A branch
+ * already checked out in another worktree can't be reused or recreated under
+ * the same local name, even when the selected row is remote-backed. Pinning it
+ * would collide and silently produce a numbered sibling.
  */
 export function resolveComposerReuseOverride(args: {
   refName: string
@@ -102,7 +100,7 @@ export function resolveComposerReuseOverride(args: {
   branchNameOverride: string | undefined
   branchCheckedOutElsewhere: boolean
 }): string | undefined {
-  if (args.branchCheckedOutElsewhere && args.refName === args.localBranchName) {
+  if (args.branchCheckedOutElsewhere) {
     return undefined
   }
   return args.branchNameOverride
@@ -131,14 +129,22 @@ export function resolveComposerBranchPick(args: {
     selectionProducedOverride: selection.branchNameOverride !== undefined,
     branchCheckedOutElsewhere
   })
+  const branchNameOverride = resolveComposerReuseOverride({
+    refName: args.refName,
+    localBranchName: args.localBranchName,
+    branchNameOverride: selection.branchNameOverride,
+    branchCheckedOutElsewhere
+  })
+  const shouldResetAutoNameForBusyBranch =
+    branchCheckedOutElsewhere &&
+    selection.branchNameOverride !== undefined &&
+    branchNameOverride === undefined
   return {
     ...selection,
-    branchNameOverride: resolveComposerReuseOverride({
-      refName: args.refName,
-      localBranchName: args.localBranchName,
-      branchNameOverride: selection.branchNameOverride,
-      branchCheckedOutElsewhere
-    }),
+    // Why: the selected branch is only the starting point. Leaving its auto-filled
+    // name behind turns a busy `main` into `main-2`; blank restores the temporary-name flow.
+    ...(shouldResetAutoNameForBusyBranch ? { branchAutoName: '', name: '', lastAutoName: '' } : {}),
+    branchNameOverride,
     ...reuse
   }
 }
