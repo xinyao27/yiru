@@ -1,5 +1,6 @@
 import type { ITerminalOptions } from '@xterm/xterm'
 import { DESKTOP_TERMINAL_SCROLLBACK_ROWS_DEFAULT } from '../../../../shared/terminal-scrollback-policy'
+import { DEFAULT_TERMINAL_FONT_SIZE } from '../../../../shared/terminal-fonts'
 
 type TerminalCursorStyle = NonNullable<ITerminalOptions['cursorStyle']>
 type TerminalCursorInactiveStyle = NonNullable<ITerminalOptions['cursorInactiveStyle']>
@@ -35,7 +36,7 @@ export function buildDefaultTerminalOptions(): ITerminalOptions {
     cursorBlink: true,
     cursorStyle,
     cursorInactiveStyle: resolveTerminalCursorInactiveStyle(cursorStyle),
-    fontSize: 14,
+    fontSize: DEFAULT_TERMINAL_FONT_SIZE,
     // Cross-platform fallback chain; keep in sync with FALLBACK_FONTS in layout-serialization.ts.
     fontFamily:
       '"SF Mono", "Menlo", "Monaco", "Cascadia Mono", "Consolas", "DejaVu Sans Mono", "Liberation Mono", "Symbols Nerd Font Mono", "MesloLGS Nerd Font", "JetBrainsMono Nerd Font", "Hack Nerd Font", monospace',

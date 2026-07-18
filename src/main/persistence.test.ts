@@ -561,10 +561,11 @@ describe('Store', () => {
     expect(settings.sourceControlGroupOrder).toBe('changes-first')
     expect(settings.theme).toBe('system')
     expect(settings.appIcon).toBe('classic')
-    expect(settings.appFontFamily).toBe('Geist')
+    expect(settings.appFontFamily).toBe('system-ui')
+    expect(settings.systemTypographyDefaultsMigrated).toBe(true)
     expect(settings.editorAutoSave).toBe(false)
     expect(settings.editorAutoSaveDelayMs).toBe(1000)
-    expect(settings.terminalFontSize).toBe(14)
+    expect(settings.terminalFontSize).toBe(13)
     expect(settings.terminalFontWeight).toBe(500)
     expect(settings.terminalScrollSensitivity).toBe(1.15)
     expect(settings.terminalFastScrollSensitivity).toBe(5)
@@ -2702,6 +2703,44 @@ describe('Store', () => {
       { id: 'cursor', label: 'Cursor', command: 'cursor' },
       { id: 'open-in-3', label: 'Zed', command: 'zed' }
     ])
+  })
+
+  it('migrates inherited typography defaults to the system baseline', async () => {
+    writeDataFile({
+      schemaVersion: 1,
+      repos: [],
+      worktreeMeta: {},
+      settings: { appFontFamily: 'Geist', terminalFontSize: 14 },
+      ui: {},
+      githubCache: { pr: {}, issue: {} },
+      workspaceSession: {}
+    })
+
+    const store = await createStore()
+    expect(store.getSettings().appFontFamily).toBe('system-ui')
+    expect(store.getSettings().terminalFontSize).toBe(13)
+    expect(store.getSettings().systemTypographyDefaultsMigrated).toBe(true)
+  })
+
+  it('preserves typography choices made after the system-default migration', async () => {
+    writeDataFile({
+      schemaVersion: 1,
+      repos: [],
+      worktreeMeta: {},
+      settings: {
+        appFontFamily: 'Geist',
+        terminalFontSize: 14,
+        systemTypographyDefaultsMigrated: true
+      },
+      ui: {},
+      githubCache: { pr: {}, issue: {} },
+      workspaceSession: {}
+    })
+
+    const store = await createStore()
+    expect(store.getSettings().appFontFamily).toBe('Geist')
+    expect(store.getSettings().terminalFontSize).toBe(14)
+    expect(store.getSettings().systemTypographyDefaultsMigrated).toBe(true)
   })
 
   it('migrates the legacy floating terminal disabled default to enabled', async () => {

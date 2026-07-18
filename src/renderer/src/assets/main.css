@@ -88,62 +88,65 @@
 /* ── Light Mode ──────────────────────────────────────── */
 
 :root {
-  --app-font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --app-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --app-font-size: 14px;
   --font-sans: var(--app-font-family);
   --font-mono:
-    'SF Mono', SFMono-Regular, ui-monospace, 'Cascadia Code', Menlo, Consolas, 'Liberation Mono',
+    ui-monospace, 'SF Mono', SFMono-Regular, 'Cascadia Code', Menlo, Consolas, 'Liberation Mono',
     monospace;
   --radius: 0;
-  --background: #fff;
-  --editor-surface: #ffffff;
-  --foreground: #0a0a0a;
-  --card: #fff;
-  --card-foreground: #0a0a0a;
-  --popover: #fff;
-  --popover-foreground: #0a0a0a;
-  --primary: #171717;
-  --primary-foreground: #fafafa;
-  --secondary: #f5f5f5;
-  --secondary-foreground: #171717;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --accent: #f5f5f5;
-  --accent-foreground: #171717;
-  --destructive: #e40014;
-  --destructive-foreground: #fcf3f3;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #a1a1a1;
-  --terminal-pane-locate: var(--color-blue-600);
-  --ai-action-accent: var(--color-violet-500);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --sidebar: #fafafa;
-  --sidebar-foreground: #0a0a0a;
-  --sidebar-primary: #171717;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #f5f5f5;
-  --sidebar-accent-foreground: #171717;
-  --sidebar-border: #e5e5e5;
-  --sidebar-ring: #a1a1a1;
-  --git-decoration-added: #587c0c;
-  --git-decoration-modified: #895503;
-  --git-decoration-deleted: #ad0707;
-  --git-decoration-renamed: #007acc;
-  --git-decoration-untracked: #007100;
-  --git-decoration-copied: #007acc;
-  --git-decoration-ignored: #8c8c8c;
-  --git-graph-ref: #007acc;
-  --git-graph-remote-ref: #b66dff;
-  --git-graph-base-ref: #ea5c00;
-  --git-graph-lane-1: #ffb000;
-  --git-graph-lane-2: #dc267f;
-  --git-graph-lane-3: #994f00;
-  --git-graph-lane-4: #40b0a6;
-  --git-graph-lane-5: #b66dff;
+  /* Why: project Cursor's core surfaces and semantic opacity ramps onto the
+     existing shadcn roles without expanding Yiru's closed token vocabulary. */
+  --background: #f8f8f8;
+  --editor-surface: #fcfcfc;
+  --foreground: #141414;
+  --card: #fcfcfc;
+  --card-foreground: #141414;
+  --popover: #fcfcfc;
+  --popover-foreground: #141414;
+  --primary: #2778c1;
+  --primary-foreground: #fcfcfc;
+  --secondary: color-mix(in srgb, var(--foreground) 8%, transparent);
+  --secondary-foreground: #141414;
+  --muted: color-mix(in srgb, var(--foreground) 6%, transparent);
+  --muted-foreground: color-mix(in srgb, var(--foreground) 60%, transparent);
+  --accent: color-mix(in srgb, var(--foreground) 14%, transparent);
+  --accent-foreground: #141414;
+  --destructive: #be1744;
+  --destructive-foreground: #fcfcfc;
+  --border: color-mix(in srgb, var(--foreground) 8%, transparent);
+  --input: color-mix(in srgb, var(--foreground) 12%, transparent);
+  --ring: #2778c1;
+  --terminal-pane-locate: var(--primary);
+  --ai-action-accent: #7565cc;
+  --chart-1: #2778c1;
+  --chart-2: #007041;
+  --chart-3: #a46700;
+  --chart-4: #92156a;
+  --chart-5: #7565cc;
+  --sidebar: #f3f3f3;
+  --sidebar-foreground: #141414;
+  --sidebar-primary: #2778c1;
+  --sidebar-primary-foreground: #fcfcfc;
+  --sidebar-accent: color-mix(in srgb, var(--sidebar-foreground) 14%, transparent);
+  --sidebar-accent-foreground: #141414;
+  --sidebar-border: color-mix(in srgb, var(--sidebar-foreground) 8%, transparent);
+  --sidebar-ring: #2778c1;
+  --git-decoration-added: #007041;
+  --git-decoration-modified: #a46700;
+  --git-decoration-deleted: #be1744;
+  --git-decoration-renamed: #2778c1;
+  --git-decoration-untracked: #176c74;
+  --git-decoration-copied: #2778c1;
+  --git-decoration-ignored: color-mix(in srgb, var(--foreground) 36%, transparent);
+  --git-graph-ref: #2778c1;
+  --git-graph-remote-ref: #7565cc;
+  --git-graph-base-ref: #cd4500;
+  --git-graph-lane-1: #a46700;
+  --git-graph-lane-2: #92156a;
+  --git-graph-lane-3: #cd4500;
+  --git-graph-lane-4: #176c74;
+  --git-graph-lane-5: #7565cc;
   /* Why: tab-group splits use a dedicated divider — `--border` is too faint on
      card/editor surfaces when panes are side-by-side or stacked. Default must
      meet >=3:1 against `--card`, not only the hover/drag strong state. */
@@ -154,69 +157,67 @@
 /* ── Dark Mode ───────────────────────────────────────── */
 
 .dark {
-  --background: #0a0a0a;
-  --editor-surface: #1e1e1e;
-  --foreground: #fafafa;
-  --card: #171717;
-  --card-foreground: #fafafa;
-  --popover: #171717;
-  --popover-foreground: #fafafa;
-  --primary: #e5e5e5;
-  --primary-foreground: #171717;
-  --secondary: #262626;
-  --secondary-foreground: #fafafa;
-  --muted: #262626;
-  --muted-foreground: #a1a1a1;
-  --accent: #404040;
-  --accent-foreground: #fafafa;
-  --destructive: #ff6568;
-  --destructive-foreground: #df2225;
-  --border: rgb(255 255 255 / 0.07);
-  --input: rgb(255 255 255 / 0.15);
-  --ring: #737373;
-  --terminal-pane-locate: var(--color-blue-400);
-  --ai-action-accent: var(--color-violet-400);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --sidebar: #171717;
-  --sidebar-foreground: #fafafa;
-  --sidebar-primary: #1447e6;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #262626;
-  --sidebar-accent-foreground: #fafafa;
-  --sidebar-border: rgb(255 255 255 / 0.07);
-  --sidebar-ring: #525252;
-  --git-decoration-added: #81b88b;
-  --git-decoration-modified: #e2c08d;
-  --git-decoration-deleted: #c74e39;
-  --git-decoration-renamed: #73c991;
-  --git-decoration-untracked: #73c991;
-  --git-decoration-copied: #73c991;
-  --git-decoration-ignored: #6e6e6e;
-  --git-graph-ref: #3794ff;
-  --git-graph-remote-ref: #b66dff;
-  --git-graph-base-ref: #ea5c00;
-  --git-graph-lane-1: #ffb000;
-  --git-graph-lane-2: #dc267f;
-  --git-graph-lane-3: #ce9178;
-  --git-graph-lane-4: #40b0a6;
-  --git-graph-lane-5: #b66dff;
+  --background: #141414;
+  --editor-surface: #181818;
+  --foreground: #f0f0f0;
+  --card: #181818;
+  --card-foreground: #f0f0f0;
+  --popover: #181818;
+  --popover-foreground: #f0f0f0;
+  --primary: #599ce7;
+  --primary-foreground: #191c22;
+  --secondary: color-mix(in srgb, var(--foreground) 8%, transparent);
+  --secondary-foreground: #f0f0f0;
+  --muted: color-mix(in srgb, var(--foreground) 6%, transparent);
+  --muted-foreground: color-mix(in srgb, var(--foreground) 60%, transparent);
+  --accent: color-mix(in srgb, var(--foreground) 14%, transparent);
+  --accent-foreground: #f0f0f0;
+  --destructive: #e34671;
+  --destructive-foreground: #141414;
+  --border: color-mix(in srgb, var(--foreground) 8%, transparent);
+  --input: color-mix(in srgb, var(--foreground) 12%, transparent);
+  --ring: #f0f0f0;
+  --terminal-pane-locate: var(--primary);
+  --ai-action-accent: #9386f2;
+  --chart-1: #7bafe9;
+  --chart-2: #3fa266;
+  --chart-3: #f1b467;
+  --chart-4: #b48ead;
+  --chart-5: #9386f2;
+  --sidebar: #181818;
+  --sidebar-foreground: #f0f0f0;
+  --sidebar-primary: #599ce7;
+  --sidebar-primary-foreground: #191c22;
+  --sidebar-accent: color-mix(in srgb, var(--sidebar-foreground) 14%, transparent);
+  --sidebar-accent-foreground: #f0f0f0;
+  --sidebar-border: color-mix(in srgb, var(--sidebar-foreground) 8%, transparent);
+  --sidebar-ring: #f0f0f0;
+  --git-decoration-added: #70b489;
+  --git-decoration-modified: #f1b467;
+  --git-decoration-deleted: #fc6b83;
+  --git-decoration-renamed: #7bafe9;
+  --git-decoration-untracked: #88c0d0;
+  --git-decoration-copied: #7bafe9;
+  --git-decoration-ignored: color-mix(in srgb, var(--foreground) 36%, transparent);
+  --git-graph-ref: #7bafe9;
+  --git-graph-remote-ref: #9386f2;
+  --git-graph-base-ref: #d08770;
+  --git-graph-lane-1: #f1b467;
+  --git-graph-lane-2: #b48ead;
+  --git-graph-lane-3: #d08770;
+  --git-graph-lane-4: #81a1c1;
+  --git-graph-lane-5: #9386f2;
   /* Brighter than terminal defaults so the always-visible line clears 3:1 on `--card`. */
   --tab-group-split-divider: #71717a;
   --tab-group-split-divider-strong: #a1a1aa;
 }
 
 .worktree-sidebar-theme {
-  /* Why: the left rail needs a slightly lifted local surface, but its children
-     should still consume only the standard shadcn sidebar token family. */
-  --sidebar: var(--secondary);
-  --sidebar-foreground: var(--secondary-foreground);
-  --sidebar-accent: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-  --sidebar-accent-foreground: var(--foreground);
-  --sidebar-border: var(--border);
+  /* Why: the workspace rail now shares Cursor's sidebar surface while keeping
+     its interaction states inside the standard shadcn sidebar family. */
+  --sidebar-accent: color-mix(in srgb, var(--sidebar-foreground) 14%, transparent);
+  --sidebar-accent-foreground: var(--sidebar-foreground);
+  --sidebar-border: color-mix(in srgb, var(--sidebar-foreground) 8%, transparent);
   --sidebar-ring: var(--ring);
 }
 
@@ -323,13 +324,15 @@
     height: 100dvh;
     font-family: var(
       --app-font-family,
-      'Geist',
+      system-ui,
       -apple-system,
       BlinkMacSystemFont,
       'Segoe UI',
       sans-serif
     );
+    font-size: var(--app-font-size, 14px);
     letter-spacing: 0.01em;
+    /* Why: keep the native macOS anti-aliasing baseline used by the reference typography. */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

@@ -3,6 +3,7 @@ import type { PaneManager } from '@/lib/pane-manager/pane-manager'
 import { dispatchZoomLevelChanged } from '@/lib/zoom-events'
 import { safeFit } from '@/lib/pane-manager/pane-tree-ops'
 import { getPaneOwnedActiveHelperTextarea } from './regular-terminal-focus-ownership'
+import { DEFAULT_TERMINAL_FONT_SIZE } from '../../../../shared/terminal-fonts'
 
 type FontZoomDeps = {
   isActive: boolean
@@ -41,7 +42,7 @@ export function useTerminalFontZoom({
         return
       }
 
-      const globalSize = settingsRef.current?.terminalFontSize ?? 14
+      const globalSize = settingsRef.current?.terminalFontSize ?? DEFAULT_TERMINAL_FONT_SIZE
       const currentSize = paneFontSizesRef.current.get(pane.id) ?? globalSize
 
       let nextSize: number

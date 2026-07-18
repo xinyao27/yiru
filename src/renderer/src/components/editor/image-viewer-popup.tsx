@@ -39,7 +39,7 @@ export default function ImageViewerPopup({
             'Full-size image preview'
           )}
         </DialogDescription>
-        <div className="flex shrink-0 items-center justify-between border-b border-border/60 bg-background/95 px-3 py-2">
+        <div className="flex shrink-0 items-center justify-between border-b border-border/60 bg-background px-3 py-2">
           <div className="min-w-0 truncate text-sm font-medium text-foreground">{filename}</div>
           <button
             type="button"
@@ -67,7 +67,7 @@ export default function ImageViewerPopup({
             </div>
           </div>
         </div>
-        <div className="flex shrink-0 items-center justify-between border-t border-border/60 bg-background/95 px-3 py-2 text-xs text-muted-foreground">
+        <div className="flex shrink-0 items-center justify-between border-t border-border/60 bg-background px-3 py-2 text-xs text-muted-foreground">
           <div>
             {translate('auto.components.editor.ImageViewerPopup.0ef78475e7', 'Press Esc to close')}
           </div>

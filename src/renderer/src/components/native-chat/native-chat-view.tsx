@@ -52,6 +52,7 @@ import { resolveNativeChatFileLinkContext } from './native-chat-file-link'
 import { selectNativeChatRuntimeEnvironmentId } from './native-chat-runtime-owner'
 import { useNativeChatPasteBridge } from './use-native-chat-paste-bridge'
 import { useNativeChatFileLinkClick } from './use-native-chat-file-link-click'
+import { NativeChatInputOverlay, useNativeChatInputRegionHeight } from './native-chat-layout'
 
 export type NativeChatViewProps = {
   /** The terminal tab hosting the agent. paneKey is `${tabId}:${leafId}`. */
@@ -172,6 +173,8 @@ function NativeChatResolvedView({
   const [questionActive, setQuestionActive] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const composerRef = useRef<NativeChatComposerHandle>(null)
+  const inputRegionRef = useRef<HTMLDivElement>(null)
+  const inputRegionHeight = useNativeChatInputRegionHeight(inputRegionRef)
   // The question card's free-text row; keeps Paste working while the card
   // replaces the composer.
   const questionAnswerInputRef = useRef<HTMLInputElement>(null)
@@ -392,7 +395,7 @@ function NativeChatResolvedView({
       onMouseUpCapture={contextMenu.onSelectionCapture}
       onKeyUpCapture={contextMenu.onSelectionCapture}
       onContextMenuCapture={contextMenu.onContextMenuCapture}
-      className="flex h-full min-h-0 w-full flex-col bg-background focus:outline-none"
+      className="relative flex h-full min-h-0 w-full flex-col bg-background focus:outline-none"
     >
       <div className="flex min-h-0 flex-1 flex-col">
         {viewState.kind === 'loading' ? (
@@ -410,38 +413,44 @@ function NativeChatResolvedView({
             onLinkClick={nativeChatFileLinkClick}
             allowFileUriLinks={fileLinkContext !== null}
             failedDeliveryMessageIds={failedLaunchPromptMessageIds}
+            bottomInset={inputRegionHeight}
           />
         )}
       </div>
-      {/* Live interactive prompt (question / approval) is the bottom input region
-          (mobile parity). A question card supplies its own answer input, so it
-          fully replaces the composer while active — no stray "Send a message". */}
-      <NativeChatInteractiveCard
-        paneKey={paneKey}
-        send={interactiveSend}
-        canSend={canSend}
-        onShowingQuestionChange={setQuestionActive}
-        answerInputRef={questionAnswerInputRef}
-      />
-      {/* canSend reflects the mobile presence-lock: when a mobile client holds
-          the pty, the composer shows its guarded state instead of racing the
-          mobile driver (R8). */}
-      {questionActive ? null : (
-        <NativeChatComposer
-          ref={composerRef}
-          terminalTabId={terminalTabId}
-          targetPtyId={targetPtyId}
-          agent={agent}
+      {/* Why: the input region overlays the transcript like Cursor's Agent
+          composer; its measured height keeps the final turn scrollable above it. */}
+      <NativeChatInputOverlay ref={inputRegionRef}>
+        {/* Pointer events are restored only by the centered input surfaces so
+            the transcript scrollbar and side lanes remain usable underneath. */}
+        {/* A question card supplies its own answer input, so it fully replaces
+            the composer while active — no stray "Send a message". */}
+        <NativeChatInteractiveCard
+          paneKey={paneKey}
+          send={interactiveSend}
           canSend={canSend}
-          isWorking={isWorking}
-          onStop={stopAgent}
-          onOptimisticSend={onOptimisticSend}
-          onOptimisticSendCanceled={onOptimisticSendCanceled}
-          onSlashCommand={onSlashCommand}
-          onSwitchToTerminal={onSwitchToTerminal}
-          readTerminalScreen={readTerminalScreen}
+          onShowingQuestionChange={setQuestionActive}
+          answerInputRef={questionAnswerInputRef}
         />
-      )}
+        {/* canSend reflects the mobile presence-lock: when a mobile client holds
+            the pty, the composer shows its guarded state instead of racing the
+            mobile driver (R8). */}
+        {questionActive ? null : (
+          <NativeChatComposer
+            ref={composerRef}
+            terminalTabId={terminalTabId}
+            targetPtyId={targetPtyId}
+            agent={agent}
+            canSend={canSend}
+            isWorking={isWorking}
+            onStop={stopAgent}
+            onOptimisticSend={onOptimisticSend}
+            onOptimisticSendCanceled={onOptimisticSendCanceled}
+            onSlashCommand={onSlashCommand}
+            onSwitchToTerminal={onSwitchToTerminal}
+            readTerminalScreen={readTerminalScreen}
+          />
+        )}
+      </NativeChatInputOverlay>
       {contextMenu.menu}
     </div>
   )

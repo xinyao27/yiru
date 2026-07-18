@@ -314,7 +314,7 @@ export function FeatureTourPreview(props: { className?: string }): JSX.Element {
       <div className="feature-tour-frame" data-frame="4">
         <FeatureTourTerminalFrame />
       </div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-[66px] border-t border-border/70 bg-card/95">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-[66px] border-t border-border/70 bg-card">
         {FEATURE_TOUR_PREVIEW_COPY.map((frame) => (
           <div
             key={frame.id}

@@ -26,7 +26,7 @@ export function computeEditorFontSize(baseFontSize: number, zoomLevel: number): 
 }
 
 export function computeDiffEditorFontSize(baseFontSize: number, zoomLevel: number): number {
-  // Why: diff editors have denser gutters and inline decorations, so matching
-  // terminal font size makes review views feel oversized relative to app chrome.
-  return computeEditorFontSize(baseFontSize - 0.5, zoomLevel)
+  // Why: the code font size is one shared baseline for editors and diffs, so
+  // moving between source and review views must not change the text scale.
+  return computeEditorFontSize(baseFontSize, zoomLevel)
 }

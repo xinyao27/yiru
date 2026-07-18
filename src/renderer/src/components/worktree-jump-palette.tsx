@@ -1736,7 +1736,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
         'Search worktrees, settings, tabs, and actions'
       )}
       overlayClassName="bg-black/55 backdrop-blur-[2px]"
-      contentClassName="top-[13%] w-[736px] max-w-[94vw] overflow-hidden rounded-xl border border-border/70 bg-background/96 shadow-[0_26px_84px_rgba(0,0,0,0.32)] backdrop-blur-xl"
+      contentClassName="top-[13%] w-[736px] max-w-[94vw] overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_26px_84px_rgba(0,0,0,0.32)]"
       commandProps={{
         loop: true,
         value: commandSelectedItemId,

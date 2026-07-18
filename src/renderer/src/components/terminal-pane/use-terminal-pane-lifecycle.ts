@@ -51,7 +51,10 @@ import type { TerminalPaneSplitSource } from '../../../../shared/feature-educati
 import type { EventProps } from '../../../../shared/telemetry-events'
 import type { StartupCommandDelivery } from '../../../../shared/codex-startup-delivery'
 import type { SleepingAgentLaunchConfig } from '../../../../shared/agent-session-resume'
-import { resolveTerminalFontWeights } from '../../../../shared/terminal-fonts'
+import {
+  DEFAULT_TERMINAL_FONT_SIZE,
+  resolveTerminalFontWeights
+} from '../../../../shared/terminal-fonts'
 import {
   buildFontFamily,
   normalizeTerminalLayoutSnapshot,
@@ -1474,7 +1477,7 @@ export function useTerminalPaneLifecycle({
         return {
           ...windowsPtyCompatibilityOptions,
           ...keyboardProtocolOptions,
-          fontSize: currentSettings?.terminalFontSize ?? 14,
+          fontSize: currentSettings?.terminalFontSize ?? DEFAULT_TERMINAL_FONT_SIZE,
           fontFamily: buildFontFamily(currentSettings?.terminalFontFamily ?? ''),
           fontWeight: terminalFontWeights.fontWeight,
           fontWeightBold: terminalFontWeights.fontWeightBold,

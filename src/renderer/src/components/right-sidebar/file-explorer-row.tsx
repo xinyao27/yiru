@@ -632,7 +632,7 @@ export function FileExplorerRow({
       />
       <ContextMenuContent
         data-file-tree-context-menu-root="true"
-        className="w-64 bg-[rgba(255,255,255,0.82)] dark:bg-[rgba(0,0,0,0.72)]"
+        className="w-64"
         onPointerUpCapture={stopRightButtonMenuSelection}
         finalFocus={false}
       >

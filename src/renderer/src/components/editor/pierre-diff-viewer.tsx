@@ -270,7 +270,7 @@ export function PierreDiffViewer({
         '--diffs-light': 'var(--foreground)',
         '--diffs-dark': 'var(--foreground)',
         '--diffs-font-family': fontFamily || 'var(--font-mono)',
-        '--diffs-header-font-family': 'Geist',
+        '--diffs-header-font-family': 'var(--app-font-family)',
         '--diffs-font-size': `${fontSize}px`,
         '--diffs-line-height': `${Math.max(19, Math.round(fontSize * 1.5))}px`,
         '--diffs-addition-color-override': 'var(--git-decoration-added)',

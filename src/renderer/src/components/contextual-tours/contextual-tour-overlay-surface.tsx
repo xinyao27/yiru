@@ -71,7 +71,7 @@ if (typeof window !== 'undefined') {
 }
 
 const PANEL_BASE_CLASSES =
-  'yiru-contextual-tour-panel rounded-lg border border-border text-popover-foreground backdrop-blur-[2px]'
+  'yiru-contextual-tour-panel rounded-lg border border-border text-popover-foreground'
 
 const PANEL_ANIMATION_CLASSES = 'animate-in fade-in-0 zoom-in-95 duration-200 ease-out'
 

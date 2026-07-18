@@ -123,7 +123,7 @@ export default function GrabConfirmationSheet({
   const { target, page, nearbyText } = payload
 
   return (
-    <div className="absolute inset-0 z-20 flex flex-col bg-background/98 backdrop-blur-sm">
+    <div className="absolute inset-0 z-20 flex flex-col bg-background">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border/70 px-4 py-3">
         <div className="flex items-center gap-2">

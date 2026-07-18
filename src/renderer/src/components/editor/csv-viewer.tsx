@@ -116,7 +116,7 @@ export default function CsvViewer({ content, filePath }: CsvViewerProps): React.
           <div
             role="row"
             aria-rowindex={1}
-            className="sticky top-0 z-10 grid bg-muted/90 backdrop-blur"
+            className="sticky top-0 z-10 grid bg-muted"
             style={{ gridTemplateColumns: gridTemplate, height: ROW_HEIGHT }}
           >
             <div
@@ -158,7 +158,7 @@ export default function CsvViewer({ content, filePath }: CsvViewerProps): React.
                 >
                   <div
                     role="rowheader"
-                    className="sticky left-0 z-[5] flex items-center justify-end border-b border-r border-border/40 bg-background/95 px-2 text-[10px] text-muted-foreground group-hover:bg-accent/40"
+                    className="sticky left-0 z-[5] flex items-center justify-end border-b border-r border-border/40 bg-background px-2 text-[10px] text-muted-foreground group-hover:bg-accent/40"
                   >
                     {vr.index + 1}
                   </div>
