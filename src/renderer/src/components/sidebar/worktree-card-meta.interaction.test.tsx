@@ -1,9 +1,11 @@
 // @vitest-environment happy-dom
 
-import { act, type ReactNode } from 'react'
+import { act, type MouseEventHandler, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { WorktreeCardDetailsHover } from './worktree-card-meta'
+
+;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
 const toastMocks = vi.hoisted(() => ({
   success: vi.fn(),
@@ -37,7 +39,9 @@ vi.mock('@/components/ui/hover-card', () => ({
     return <div data-hover-open={open ? 'true' : 'false'}>{children}</div>
   },
   HoverCardContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  HoverCardTrigger: ({ children }: { children: ReactNode }) => <>{children}</>
+  HoverCardTrigger: ({ children, render }: { children?: ReactNode; render?: ReactNode }) => (
+    <>{render ?? children}</>
+  )
 }))
 
 vi.mock('@/components/ui/tooltip', () => ({
@@ -45,7 +49,9 @@ vi.mock('@/components/ui/tooltip', () => ({
     <div data-tooltip-open={open === false ? 'false' : 'default'}>{children}</div>
   ),
   TooltipContent: ({ children }: { children: ReactNode }) => <>{children}</>,
-  TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>
+  TooltipTrigger: ({ children, render }: { children?: ReactNode; render?: ReactNode }) => (
+    <>{render ?? children}</>
+  )
 }))
 
 vi.mock('@/components/ui/dropdown-menu', () => ({
@@ -62,12 +68,18 @@ vi.mock('@/components/ui/dropdown-menu', () => ({
     interactionMocks.onReviewMenuOpenChange = onOpenChange
     return <div data-review-menu-open={open ? 'true' : 'false'}>{children}</div>
   },
-  DropdownMenuTrigger: ({ children }: { children: ReactNode; asChild?: boolean }) => (
-    <>{children}</>
+  DropdownMenuTrigger: ({ children, render }: { children?: ReactNode; render?: ReactNode }) => (
+    <>{render ?? children}</>
   ),
   DropdownMenuContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  DropdownMenuItem: ({ children, onSelect }: { children: ReactNode; onSelect?: () => void }) => (
-    <button type="button" onClick={() => onSelect?.()}>
+  DropdownMenuItem: ({
+    children,
+    onClick
+  }: {
+    children: ReactNode
+    onClick?: MouseEventHandler<HTMLButtonElement>
+  }) => (
+    <button type="button" onClick={onClick}>
       {children}
     </button>
   )
