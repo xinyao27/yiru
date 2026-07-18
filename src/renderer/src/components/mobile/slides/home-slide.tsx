@@ -1,34 +1,36 @@
 import { ClaudeIcon, OpenAIIcon } from '../../status-bar/icons'
 import { cn } from '../../../lib/class-names'
+import { mobileHomePreviewStyles } from '../mobile-home-preview-tailwind'
+import { mobilePageStyles } from '../mobile-page-tailwind'
 import { translate } from '@/i18n/i18n'
 
 export function HomeSlide({ tapping }: { tapping: boolean }): React.JSX.Element {
   return (
-    <div className="mp-device-screen">
-      <div className="mp-app-topbar">
-        <div className="mp-app-brand">
+    <div className={mobileHomePreviewStyles.deviceScreen}>
+      <div className={mobileHomePreviewStyles.topbar}>
+        <div className={mobileHomePreviewStyles.brand}>
           <YiruLogo />
-          <span className="mp-app-brand-name">
+          <span className={mobileHomePreviewStyles.brandName}>
             {translate('auto.components.mobile.slides.HomeSlide.5d94e8ddcc', 'Yiru')}
           </span>
         </div>
         <button
           type="button"
-          className="mp-icon-button"
+          className={mobileHomePreviewStyles.iconButton}
           aria-label={translate('auto.components.mobile.slides.HomeSlide.af761a0c0d', 'Settings')}
         >
           <SettingsIcon />
         </button>
       </div>
 
-      <div className="mp-scroll-region">
-        <div className="mp-greeting">
-          <div className="mp-greeting-title">
+      <div className={mobileHomePreviewStyles.scrollRegion}>
+        <div className={mobileHomePreviewStyles.greeting}>
+          <div className={mobileHomePreviewStyles.greetingTitle}>
             {translate('auto.components.mobile.slides.HomeSlide.c0e2e9dcd9', 'Welcome back')}
           </div>
         </div>
 
-        <div className="mp-stat-row">
+        <div className={mobileHomePreviewStyles.statRow}>
           <Stat
             value="1,284"
             label={translate(
@@ -46,19 +48,24 @@ export function HomeSlide({ tapping }: { tapping: boolean }): React.JSX.Element 
           />
         </div>
 
-        <div className="mp-section-label">
+        <div className={mobileHomePreviewStyles.sectionLabel}>
           {translate('auto.components.mobile.slides.HomeSlide.2f1a1d10c4', 'Desktops')}
         </div>
-        <div className={cn('mp-host-card', tapping && 'is-tapping')}>
-          <div className="mp-host-icon">
+        <div className={cn(mobileHomePreviewStyles.hostCard, tapping && mobilePageStyles.tapping)}>
+          <div className={mobileHomePreviewStyles.hostIcon}>
             <DesktopIcon />
           </div>
-          <div className="mp-host-main">
-            <div className="mp-host-name">
+          <div className={mobileHomePreviewStyles.hostMain}>
+            <div className={mobileHomePreviewStyles.hostName}>
               {translate('auto.components.mobile.slides.HomeSlide.19c212e25e', 'MacBook Pro')}
             </div>
-            <div className="mp-host-meta">
-              <span className="mp-status-dot is-green" />
+            <div className={mobileHomePreviewStyles.hostMeta}>
+              <span
+                className={cn(
+                  mobileHomePreviewStyles.statusDot,
+                  mobileHomePreviewStyles.statusGreen
+                )}
+              />
               <span>
                 {translate(
                   'auto.components.mobile.slides.HomeSlide.0bc1881bc4',
@@ -67,43 +74,52 @@ export function HomeSlide({ tapping }: { tapping: boolean }): React.JSX.Element 
               </span>
             </div>
           </div>
-          <div className="mp-chevron-right">
+          <div className={mobileHomePreviewStyles.chevron}>
             <ChevronIcon />
           </div>
         </div>
-        <div className="mp-host-card">
-          <div className="mp-host-icon is-dim">
+        <div className={mobileHomePreviewStyles.hostCard}>
+          <div
+            className={cn(mobileHomePreviewStyles.hostIcon, mobileHomePreviewStyles.hostIconDim)}
+          >
             <DesktopIcon />
           </div>
-          <div className="mp-host-main">
-            <div className="mp-host-name is-dim">
+          <div className={mobileHomePreviewStyles.hostMain}>
+            <div
+              className={cn(mobileHomePreviewStyles.hostName, mobileHomePreviewStyles.hostNameDim)}
+            >
               {translate('auto.components.mobile.slides.HomeSlide.091355da3d', 'M1 Mini · home')}
             </div>
-            <div className="mp-host-meta">
-              <span className="mp-status-dot is-muted" />
+            <div className={mobileHomePreviewStyles.hostMeta}>
+              <span
+                className={cn(
+                  mobileHomePreviewStyles.statusDot,
+                  mobileHomePreviewStyles.statusMuted
+                )}
+              />
               <span>
                 {translate('auto.components.mobile.slides.HomeSlide.cf3f98fa3f', 'Disconnected')}
               </span>
             </div>
           </div>
-          <div className="mp-chevron-right">
+          <div className={mobileHomePreviewStyles.chevron}>
             <ChevronIcon />
           </div>
         </div>
 
-        <div className="mp-section-label" style={{ marginTop: 14 }}>
+        <div className={`${mobileHomePreviewStyles.sectionLabel} mt-3.5`}>
           {translate('auto.components.mobile.slides.HomeSlide.c791677f2f', 'Resume')}
         </div>
-        <div className="mp-resume-card">
-          <div className="mp-resume-icon">
+        <div className={mobileHomePreviewStyles.resumeCard}>
+          <div className={mobileHomePreviewStyles.resumeIcon}>
             <ResumeIcon />
           </div>
-          <div className="mp-host-main">
-            <div className="mp-resume-title">
+          <div className={mobileHomePreviewStyles.hostMain}>
+            <div className={mobileHomePreviewStyles.resumeTitle}>
               {translate('auto.components.mobile.slides.HomeSlide.25d6e8a491', 'feat/mobile-page')}
             </div>
-            <div className="mp-resume-sub">
-              <span className="mp-repo-dot" style={{ background: '#3b82f6' }} />
+            <div className={mobileHomePreviewStyles.resumeSub}>
+              <span className={`${mobileHomePreviewStyles.repoDot} bg-blue-500`} />
               <span>
                 {translate(
                   'auto.components.mobile.slides.HomeSlide.d33d7a9c29',
@@ -112,71 +128,71 @@ export function HomeSlide({ tapping }: { tapping: boolean }): React.JSX.Element 
               </span>
             </div>
           </div>
-          <div className="mp-chevron-right">
+          <div className={mobileHomePreviewStyles.chevron}>
             <ChevronIcon />
           </div>
         </div>
 
-        <div className="mp-section-label" style={{ marginTop: 10 }}>
+        <div className={`${mobileHomePreviewStyles.sectionLabel} mt-2.5`}>
           {translate('auto.components.mobile.slides.HomeSlide.a4c3f7b7aa', 'Tasks')}
         </div>
-        <div className="mp-task-home-card">
-          <div className="mp-task-home-icon">
+        <div className={mobileHomePreviewStyles.taskCard}>
+          <div className={mobileHomePreviewStyles.taskIcon}>
             <ListTodoIcon />
           </div>
-          <div className="mp-host-main">
-            <div className="mp-task-home-title">
+          <div className={mobileHomePreviewStyles.hostMain}>
+            <div className={mobileHomePreviewStyles.taskTitle}>
               {translate('auto.components.mobile.slides.HomeSlide.a4c3f7b7aa', 'Tasks')}
             </div>
-            <div className="mp-task-home-subtitle">
+            <div className={mobileHomePreviewStyles.taskSubtitle}>
               {translate('auto.components.mobile.slides.HomeSlide.d047197480', 'GitHub · Linear')}
             </div>
           </div>
           <div
-            className="mp-task-home-providers"
+            className={mobileHomePreviewStyles.taskProviders}
             aria-label={translate(
               'auto.components.mobile.slides.HomeSlide.0bad5b07c8',
               'GitHub and Linear'
             )}
           >
-            <div className="mp-task-home-provider-button">
+            <div className={mobileHomePreviewStyles.taskProviderButton}>
               <GithubIcon />
             </div>
-            <div className="mp-task-home-provider-button">
+            <div className={mobileHomePreviewStyles.taskProviderButton}>
               <LinearIcon />
             </div>
           </div>
-          <div className="mp-chevron-right">
+          <div className={mobileHomePreviewStyles.chevron}>
             <ChevronIcon />
           </div>
         </div>
 
-        <div className="mp-section-label" style={{ marginTop: 14 }}>
+        <div className={`${mobileHomePreviewStyles.sectionLabel} mt-3.5`}>
           {translate('auto.components.mobile.slides.HomeSlide.0b00c98506', 'Quick Actions')}
         </div>
-        <div className="mp-quick-actions">
-          <div className="mp-quick-action">
-            <div className="mp-quick-action-icon">
+        <div className={mobileHomePreviewStyles.quickActions}>
+          <div className={mobileHomePreviewStyles.quickAction}>
+            <div className={mobileHomePreviewStyles.quickActionIcon}>
               <QrSmallIcon />
             </div>
-            <div className="mp-quick-action-label">
+            <div className={mobileHomePreviewStyles.quickActionLabel}>
               {translate('auto.components.mobile.slides.HomeSlide.4405f3c440', 'Pair Desktop')}
             </div>
           </div>
-          <div className="mp-quick-action">
-            <div className="mp-quick-action-icon">
+          <div className={mobileHomePreviewStyles.quickAction}>
+            <div className={mobileHomePreviewStyles.quickActionIcon}>
               <PlusIcon />
             </div>
-            <div className="mp-quick-action-label">
+            <div className={mobileHomePreviewStyles.quickActionLabel}>
               {translate('auto.components.mobile.slides.HomeSlide.e27fdaee51', 'New Workspace')}
             </div>
           </div>
         </div>
 
-        <div className="mp-section-label" style={{ marginTop: 14 }}>
+        <div className={`${mobileHomePreviewStyles.sectionLabel} mt-3.5`}>
           {translate('auto.components.mobile.slides.HomeSlide.8a350a4784', 'Account usage')}
         </div>
-        <div className="mp-accounts-card">
+        <div className={mobileHomePreviewStyles.accountsCard}>
           <AccountRow
             icon={<ClaudeIcon size={18} />}
             email="claude@yiru.ai"
@@ -197,9 +213,9 @@ export function HomeSlide({ tapping }: { tapping: boolean }): React.JSX.Element 
 
 function Stat({ value, label }: { value: string; label: string }): React.JSX.Element {
   return (
-    <div className="mp-stat-card">
-      <div className="mp-stat-value">{value}</div>
-      <div className="mp-stat-label">{label}</div>
+    <div className={mobileHomePreviewStyles.statCard}>
+      <div className={mobileHomePreviewStyles.statValue}>{value}</div>
+      <div className={mobileHomePreviewStyles.statLabel}>{label}</div>
     </div>
   )
 }
@@ -216,11 +232,11 @@ function AccountRow({
   weekPct: number
 }): React.JSX.Element {
   return (
-    <div className="mp-accounts-row">
-      <div className="mp-accounts-icon">{icon}</div>
-      <div className="mp-accounts-info">
-        <div className="mp-accounts-email">{email}</div>
-        <div className="mp-accounts-bars">
+    <div className={mobileHomePreviewStyles.accountsRow}>
+      <div className={mobileHomePreviewStyles.accountsIcon}>{icon}</div>
+      <div className={mobileHomePreviewStyles.accountsInfo}>
+        <div className={mobileHomePreviewStyles.accountsEmail}>{email}</div>
+        <div className={mobileHomePreviewStyles.accountsBars}>
           <UsageBar
             label={translate('auto.components.mobile.slides.HomeSlide.a3d5476811', '5h')}
             pct={sessionPct}
@@ -237,10 +253,10 @@ function AccountRow({
 
 function UsageBar({ label, pct }: { label: string; pct: number }): React.JSX.Element {
   return (
-    <div className="mp-usage-bar">
-      <div className="mp-usage-bar-label">{label}</div>
-      <div className="mp-usage-bar-track">
-        <div className="mp-usage-bar-fill" style={{ width: `${pct}%` }} />
+    <div className={mobileHomePreviewStyles.usageBar}>
+      <div className={mobileHomePreviewStyles.usageBarLabel}>{label}</div>
+      <div className={mobileHomePreviewStyles.usageBarTrack}>
+        <div className={mobileHomePreviewStyles.usageBarFill} style={{ width: `${pct}%` }} />
       </div>
     </div>
   )
@@ -248,7 +264,12 @@ function UsageBar({ label, pct }: { label: string; pct: number }): React.JSX.Ele
 
 function YiruLogo(): React.JSX.Element {
   return (
-    <svg className="mp-yiru-logo" viewBox="0 0 612 621" fill="currentColor" aria-hidden>
+    <svg
+      className={mobileHomePreviewStyles.logo}
+      viewBox="0 0 612 621"
+      fill="currentColor"
+      aria-hidden
+    >
       <path d="M0 0h118l188 192L494 0h118v62L374 304v317H241V304L0 62Z" />
     </svg>
   )

@@ -3,6 +3,7 @@
 import '@testing-library/jest-dom/vitest'
 
 import { cleanup, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 vi.mock('@/i18n/i18n', () => ({
@@ -22,6 +23,7 @@ vi.mock('./windows-firewall-notice', () => ({
 }))
 
 import { HeroFlow, type StepIndex } from './mobile-hero'
+import type { MobilePlatform } from './mobile-release-link'
 
 class MockResizeObserver {
   observe = vi.fn()
@@ -52,12 +54,18 @@ describe('HeroFlow height', () => {
     }
   })
 
-  function renderFlow(stepIdx: StepIndex) {
+  function renderFlow(
+    stepIdx: StepIndex,
+    platform: MobilePlatform = 'ios',
+    onPlatformChange = vi.fn()
+  ) {
     return render(
       <HeroFlow
         stepIdx={stepIdx}
+        platform={platform}
+        onPlatformChange={onPlatformChange}
         installQrUrl={null}
-        installCopy={{ ctaLabel: 'View mobile builds', url: 'https://example.com' }}
+        installCopy={{ ctaLabel: 'Open TestFlight', url: 'https://example.com' }}
         onOpenInstallUrl={vi.fn()}
         onCopyInstallUrl={vi.fn()}
         pairQrDataUrl={null}
@@ -78,14 +86,17 @@ describe('HeroFlow height', () => {
     )
   }
 
-  it('shows one neutral release link without fake platform or channel choices', () => {
-    renderFlow(0)
+  it('switches between the available mobile platforms', async () => {
+    const onPlatformChange = vi.fn()
+    const user = userEvent.setup()
+    renderFlow(0, 'ios', onPlatformChange)
 
-    expect(screen.getByRole('button', { name: 'View mobile builds' })).toBeVisible()
-    expect(screen.queryByRole('button', { name: 'iOS' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Android' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('radio', { name: 'Preview' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('radio', { name: 'Stable' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Open TestFlight' })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'iOS' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Android' })).toHaveAttribute('aria-pressed', 'false')
+
+    await user.click(screen.getByRole('button', { name: 'Android' }))
+    expect(onPlatformChange).toHaveBeenCalledWith('android')
   })
 
   it('marks the inactive step inert when navigation changes', () => {
@@ -95,8 +106,10 @@ describe('HeroFlow height', () => {
     rerender(
       <HeroFlow
         stepIdx={1}
+        platform="ios"
+        onPlatformChange={vi.fn()}
         installQrUrl={null}
-        installCopy={{ ctaLabel: 'View mobile builds', url: 'https://example.com' }}
+        installCopy={{ ctaLabel: 'Open TestFlight', url: 'https://example.com' }}
         onOpenInstallUrl={vi.fn()}
         onCopyInstallUrl={vi.fn()}
         pairQrDataUrl={null}

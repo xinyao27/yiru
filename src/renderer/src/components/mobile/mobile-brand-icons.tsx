@@ -1,3 +1,5 @@
+import { mobilePageStyles } from './mobile-page-tailwind'
+
 // Why: these are exact filled brand paths, not generic line approximations.
 type MobileBrandIconProps = {
   className?: string
@@ -6,7 +8,7 @@ type MobileBrandIconProps = {
 export function IosBrandIcon({ className }: MobileBrandIconProps = {}): React.JSX.Element {
   return (
     <svg
-      className={className ?? 'mp-platform-brand-icon'}
+      className={className ?? mobilePageStyles.brandIcon}
       viewBox="0 0 24 24"
       aria-hidden="true"
       focusable="false"
@@ -19,7 +21,7 @@ export function IosBrandIcon({ className }: MobileBrandIconProps = {}): React.JS
 export function AndroidLogo({ className }: MobileBrandIconProps = {}): React.JSX.Element {
   return (
     <svg
-      className={className ?? 'mp-platform-brand-icon'}
+      className={className ?? mobilePageStyles.brandIcon}
       viewBox="0 0 24 24"
       aria-hidden="true"
       focusable="false"

@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vite-plus/test'
 
 vi.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
-  TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({ render }: { render: ReactNode }) => <>{render}</>,
   TooltipContent: ({ children }: { children: ReactNode }) => <div>{children}</div>
 }))
 

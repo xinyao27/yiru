@@ -6129,12 +6129,14 @@
         },
         "MobileSettingsPane": {
           "9a3c280e49": "GitHub 发布",
-          "c8491c17ef": "扫描二维码即可通过手机控制 Yiru。移动端构建：",
+          "c8491c17ef": "扫描二维码即可通过手机控制 Yiru。移动端下载：",
           "e7a3ae8c4e": "移动端",
           "174f4a3c6d": "通过手机控制终端和智能体。",
           "1de96ec8a6": "显示 Yiru 手机端按钮",
           "682293cadf": "在左侧边栏顶部显示 Yiru 手机端按钮。",
-          "d4f2b65f30": "在边栏中显示 Yiru 手机端 快捷入口。"
+          "d4f2b65f30": "在边栏中显示 Yiru 手机端 快捷入口。",
+          "testFlight": "TestFlight",
+          "androidApk": "Android APK"
         },
         "NotificationsPane": {
           "906b4afebf": "发送测试通知",
@@ -9413,8 +9415,10 @@
         "MobileRelayBetaAvailability": {
           "about": "关于 Yiru Relay 测试版",
           "beta": "测试版",
-          "availability": "移动端构建：",
-          "githubReleases": "GitHub 发布"
+          "availability": "可用于",
+          "githubReleases": "GitHub 发布",
+          "testFlight": "TestFlight",
+          "androidApk": "Android APK"
         }
       },
       "right": {
@@ -10931,6 +10935,12 @@
             "copy": {
               "releases": {
                 "cta": "查看移动端构建"
+              },
+              "testflight": {
+                "cta": "打开 TestFlight"
+              },
+              "android": {
+                "cta": "下载 APK"
               }
             }
           }

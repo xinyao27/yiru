@@ -1,6 +1,7 @@
 import { cn } from '../../../lib/class-names'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
+import { mobileWorktreePreviewStyles } from '../mobile-worktree-preview-tailwind'
 
 type Indicator = 'spinner' | 'green' | 'muted' | 'red'
 
@@ -8,7 +9,7 @@ type WorktreeRowProps = {
   indicator: Indicator
   name: string
   pr?: string
-  repoColor: string
+  repoColorClass: string
   repo: string
   branch: string
   preview?: string
@@ -18,12 +19,12 @@ type WorktreeRowProps = {
 
 export function WorktreeListSlide({ tapping }: { tapping: boolean }): React.JSX.Element {
   return (
-    <div className="mp-device-screen">
-      <div className="mp-wl-chrome">
-        <div className="mp-wl-statusrow">
+    <div className={mobileWorktreePreviewStyles.deviceScreen}>
+      <div className={mobileWorktreePreviewStyles.chrome}>
+        <div className={mobileWorktreePreviewStyles.statusRow}>
           <button
             type="button"
-            className="mp-wl-back"
+            className={mobileWorktreePreviewStyles.back}
             aria-label={translate(
               'auto.components.mobile.slides.WorktreeListSlide.cefd048225',
               'Back'
@@ -31,9 +32,9 @@ export function WorktreeListSlide({ tapping }: { tapping: boolean }): React.JSX.
           >
             <ChevronLeftIcon />
           </button>
-          <div className="mp-wl-host">
-            <span className="mp-status-dot is-green" />
-            <span className="mp-wl-host-name">
+          <div className={mobileWorktreePreviewStyles.host}>
+            <span className={mobileWorktreePreviewStyles.statusDot} />
+            <span className={mobileWorktreePreviewStyles.hostName}>
               {translate(
                 'auto.components.mobile.slides.WorktreeListSlide.b4271864bd',
                 'MacBook Pro'
@@ -41,69 +42,69 @@ export function WorktreeListSlide({ tapping }: { tapping: boolean }): React.JSX.
             </span>
           </div>
         </div>
-        <div className="mp-wl-toolbar">
-          <button type="button" className="mp-wl-chip">
+        <div className={mobileWorktreePreviewStyles.toolbar}>
+          <button type="button" className={mobileWorktreePreviewStyles.chip}>
             <FilterIcon />
             {translate('auto.components.mobile.slides.WorktreeListSlide.0e3e809a4b', 'Filter')}
           </button>
-          <button type="button" className="mp-wl-button">
+          <button type="button" className={mobileWorktreePreviewStyles.button}>
             <SortIcon />
             {translate('auto.components.mobile.slides.WorktreeListSlide.17f9e0d226', 'Recent')}
           </button>
-          <button type="button" className="mp-wl-button">
+          <button type="button" className={mobileWorktreePreviewStyles.button}>
             <GroupIcon />
             {translate('auto.components.mobile.slides.WorktreeListSlide.22971156df', 'Repo')}
           </button>
-          <span className="mp-wl-spacer" />
-          <span className="mp-wl-icon">
+          <span className={mobileWorktreePreviewStyles.spacer} />
+          <span className={mobileWorktreePreviewStyles.icon}>
             <UserCircleIcon />
           </span>
-          <span className="mp-wl-icon">
+          <span className={mobileWorktreePreviewStyles.icon}>
             <PlusIcon />
           </span>
-          <span className="mp-wl-icon">
+          <span className={mobileWorktreePreviewStyles.icon}>
             <SearchIcon />
           </span>
         </div>
       </div>
 
-      <div className="mp-wl-section">
+      <div className={mobileWorktreePreviewStyles.section}>
         <CaretIcon />
         <PinIcon />
-        <span style={{ marginLeft: 4 }}>
+        <span className="ml-1">
           {translate('auto.components.mobile.slides.WorktreeListSlide.79a24ff530', 'Pinned')}
         </span>
-        <span style={{ marginLeft: 4, color: 'var(--m-text-muted)' }}>3</span>
+        <span className="ml-1 text-neutral-600">3</span>
       </div>
 
-      <div className="mp-wl-list">
+      <div className={mobileWorktreePreviewStyles.list}>
         <WorktreeRow
           indicator="spinner"
           name="feat/mobile-page"
           pr="#2491"
-          repoColor="#3b82f6"
+          repoColorClass="bg-blue-500"
           repo="yiru"
           branch="feat/mobile-page"
           preview="claude · refactoring v3 mock to use real screens…"
           tcount={2}
           tapping={tapping}
         />
-        <div className="mp-wl-sep" />
+        <div className={mobileWorktreePreviewStyles.separator} />
         <WorktreeRow
           indicator="green"
           name="runtime/web-pairing"
           pr="#2487"
-          repoColor="#22c55e"
+          repoColorClass="bg-green-500"
           repo="yiru"
           branch="feat/web-pairing"
           preview="$ pnpm test --filter web-runtime"
           tcount={1}
         />
-        <div className="mp-wl-sep" />
+        <div className={mobileWorktreePreviewStyles.separator} />
         <WorktreeRow
           indicator="red"
           name="infra/notifier"
-          repoColor="#f97316"
+          repoColorClass="bg-orange-500"
           repo="yiru"
           branch="main"
           preview="awaiting permission · sudo apt install"
@@ -111,65 +112,65 @@ export function WorktreeListSlide({ tapping }: { tapping: boolean }): React.JSX.
         />
       </div>
 
-      <div className="mp-wl-section">
+      <div className={mobileWorktreePreviewStyles.section}>
         <CaretIcon />
         <span>
           {translate('auto.components.mobile.slides.WorktreeListSlide.357a519567', 'Active')}
         </span>
-        <span style={{ marginLeft: 4, color: 'var(--m-text-muted)' }}>37</span>
+        <span className="ml-1 text-neutral-600">37</span>
       </div>
-      <div className="mp-wl-list">
+      <div className={mobileWorktreePreviewStyles.list}>
         <WorktreeRow
           indicator="green"
           name="docs/styleguide-update"
-          repoColor="#8b5cf6"
+          repoColorClass="bg-violet-500"
           repo="yiru"
           branch="feat/styleguide"
           preview="$ pnpm lint"
           tcount={1}
         />
-        <div className="mp-wl-sep" />
+        <div className={mobileWorktreePreviewStyles.separator} />
         <WorktreeRow
           indicator="muted"
           name="feat/runtime-perf"
-          repoColor="#3b82f6"
+          repoColorClass="bg-blue-500"
           repo="yiru"
           branch="feat/runtime-perf"
         />
-        <div className="mp-wl-sep" />
+        <div className={mobileWorktreePreviewStyles.separator} />
         <WorktreeRow
           indicator="spinner"
           name="fix/notifier-cooldown"
           pr="#2483"
-          repoColor="#f97316"
+          repoColorClass="bg-orange-500"
           repo="yiru"
           branch="feat/notifier-cooldown"
           preview="claude · investigating macOS notification queue…"
           tcount={1}
         />
-        <div className="mp-wl-sep" />
+        <div className={mobileWorktreePreviewStyles.separator} />
         <WorktreeRow
           indicator="muted"
           name="chore/deps-bump"
-          repoColor="#22c55e"
+          repoColorClass="bg-green-500"
           repo="yiru"
           branch="feat/deps-bump"
         />
-        <div className="mp-wl-sep" />
+        <div className={mobileWorktreePreviewStyles.separator} />
         <WorktreeRow
           indicator="green"
           name="experiment/ssh-multiplex"
-          repoColor="#3b82f6"
+          repoColorClass="bg-blue-500"
           repo="yiru"
           branch="feat/ssh-mux"
           preview="$ ssh -O check yiru-relay"
           tcount={2}
         />
-        <div className="mp-wl-sep" />
+        <div className={mobileWorktreePreviewStyles.separator} />
         <WorktreeRow
           indicator="muted"
           name="refactor/host-store"
-          repoColor="#8b5cf6"
+          repoColorClass="bg-violet-500"
           repo="yiru"
           branch="feat/host-store"
         />
@@ -182,7 +183,7 @@ function WorktreeRow({
   indicator,
   name,
   pr,
-  repoColor,
+  repoColorClass,
   repo,
   branch,
   preview,
@@ -190,32 +191,46 @@ function WorktreeRow({
   tapping
 }: WorktreeRowProps): React.JSX.Element {
   return (
-    <div className={cn('mp-wl-row', tapping && 'is-tapping')}>
-      <div className="mp-wl-indicator">
+    <div
+      className={cn(
+        mobileWorktreePreviewStyles.row,
+        tapping && mobileWorktreePreviewStyles.tapping
+      )}
+    >
+      <div className={mobileWorktreePreviewStyles.indicator}>
         {indicator === 'spinner' ? (
           <LoadingIndicator className="size-2 text-annotation-highlight" />
         ) : (
-          <div className={cn('mp-wl-dot', `is-${indicator}`)} />
+          <div
+            className={cn(
+              mobileWorktreePreviewStyles.dot,
+              indicator === 'green' && mobileWorktreePreviewStyles.dotGreen,
+              indicator === 'muted' && mobileWorktreePreviewStyles.dotMuted,
+              indicator === 'red' && mobileWorktreePreviewStyles.dotRed
+            )}
+          />
         )}
       </div>
-      <div className="mp-wl-main">
-        <div className="mp-wl-name-row">
-          <div className="mp-wl-name">{name}</div>
+      <div className={mobileWorktreePreviewStyles.main}>
+        <div className={mobileWorktreePreviewStyles.nameRow}>
+          <div className={mobileWorktreePreviewStyles.name}>{name}</div>
           {pr ? (
-            <div className="mp-wl-pr">
+            <div className={mobileWorktreePreviewStyles.pullRequest}>
               <PrIcon />
               {pr}
             </div>
           ) : null}
         </div>
-        <div className="mp-wl-meta-row">
-          <span className="mp-repo-dot" style={{ background: repoColor }} />
+        <div className={mobileWorktreePreviewStyles.metaRow}>
+          <span className={cn(mobileWorktreePreviewStyles.repoDot, repoColorClass)} />
           <span>{repo}</span>
-          <span className="mp-wl-branch">{branch}</span>
+          <span className={mobileWorktreePreviewStyles.branch}>{branch}</span>
         </div>
-        {preview ? <div className="mp-wl-preview">{preview}</div> : null}
+        {preview ? <div className={mobileWorktreePreviewStyles.preview}>{preview}</div> : null}
       </div>
-      {tcount !== undefined ? <div className="mp-wl-tcount">{tcount}</div> : null}
+      {tcount !== undefined ? (
+        <div className={mobileWorktreePreviewStyles.terminalCount}>{tcount}</div>
+      ) : null}
     </div>
   )
 }
@@ -300,7 +315,7 @@ function CaretIcon(): React.JSX.Element {
 
 function PinIcon(): React.JSX.Element {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ marginLeft: 2 }}>
+    <svg className="ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
       <path d="M12 17v5" />
       <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1Z" />
     </svg>

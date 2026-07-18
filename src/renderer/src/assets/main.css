@@ -6,7 +6,6 @@
 @import './markdown-preview.css';
 @import './terminal.css';
 @import './loading-indicator.css';
-@import './mobile-page.css';
 
 @font-face {
   font-family: 'Geist';

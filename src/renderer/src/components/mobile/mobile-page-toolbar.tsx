@@ -2,6 +2,7 @@ import { X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
+import { mobilePageStyles } from './mobile-page-tailwind'
 
 type MobilePageToolbarProps = {
   showMobileButton: boolean
@@ -28,15 +29,15 @@ export function MobilePageToolbar({
       )
 
   return (
-    <div className="mp-page-toolbar">
-      <div className="mp-page-toolbar-primary">
+    <div className={mobilePageStyles.toolbar}>
+      <div className={mobilePageStyles.toolbarPrimary}>
         <Tooltip>
           <TooltipTrigger
             render={
               <Button
                 variant={showMobileButton ? 'default' : 'secondary'}
                 size="sm"
-                className="mp-sidebar-toggle-btn"
+                className={mobilePageStyles.sidebarToggle}
                 onClick={onToggleMobileSidebarButton}
                 aria-label={sidebarToggleLabel}
               >
@@ -56,7 +57,7 @@ export function MobilePageToolbar({
             <Button
               variant="ghost"
               size="icon"
-              className="mp-page-toolbar-close size-7 shrink-0 rounded-full"
+              className={mobilePageStyles.toolbarClose}
               onClick={onClose}
               aria-label={translate(
                 'auto.components.mobile.MobilePageToolbar.9883b58693',

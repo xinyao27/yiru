@@ -5,12 +5,14 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
 import { NetworkInterfacePicker } from './network-interface-picker'
 import { MobilePairingConnectionOptions } from '../settings/mobile-pairing-connection-options'
-import type { MobileReleaseLink } from './mobile-release-link'
+import { AndroidLogo, IosBrandIcon } from './mobile-brand-icons'
+import type { MobilePlatform, MobileReleaseLink } from './mobile-release-link'
 import { WindowsFirewallNotice } from './windows-firewall-notice'
 import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pairing-connection-mode'
 export { HeroIntro } from './mobile-hero-intro'
 export { HeroPaired, type PairedDevice } from './mobile-hero-paired-devices'
 import { translate } from '@/i18n/i18n'
+import { mobilePageStyles } from './mobile-page-tailwind'
 
 export type StepIndex = 0 | 1
 
@@ -28,6 +30,8 @@ function getDeviceLabel(): string {
 
 type HeroFlowProps = {
   stepIdx: StepIndex
+  platform: MobilePlatform
+  onPlatformChange: (platform: MobilePlatform) => void
   installQrUrl: string | null
   installCopy: MobileReleaseLink
   onOpenInstallUrl: () => void
@@ -51,6 +55,8 @@ type HeroFlowProps = {
 
 export function HeroFlow({
   stepIdx,
+  platform,
+  onPlatformChange,
   installQrUrl,
   installCopy,
   onOpenInstallUrl,
@@ -93,48 +99,92 @@ export function HeroFlow({
   }, [stepIdx])
 
   return (
-    <div className="mp-flow-card">
+    <div className={mobilePageStyles.flowCard}>
       <div
-        className="mp-flow-viewport"
+        className={mobilePageStyles.flowViewport}
         style={viewportHeight === undefined ? undefined : { height: viewportHeight }}
       >
         <div
           ref={(element) => {
             screenRefs.current[0] = element
           }}
-          className={cn('mp-flow-screen', stepIdx === 0 ? 'is-active' : 'is-past')}
+          className={cn(
+            mobilePageStyles.flowScreen,
+            stepIdx === 0 ? mobilePageStyles.flowScreenActive : mobilePageStyles.flowScreenPast
+          )}
           aria-hidden={stepIdx !== 0}
           inert={stepIdx !== 0}
         >
-          <div className="mp-step2-layout">
-            <div className="mp-step2-copy">
-              <div className="mp-eyebrow-row">
-                <div className="mp-step-num">{stepIdx + 1}</div>
-                <span className="mp-eyebrow">
+          <div className={mobilePageStyles.stepLayout}>
+            <div className={mobilePageStyles.stepCopy}>
+              <div className={mobilePageStyles.eyebrowRow}>
+                <div className={mobilePageStyles.stepNumber}>{stepIdx + 1}</div>
+                <span className={mobilePageStyles.eyebrow}>
                   {translate('auto.components.mobile.MobileHero.92ddfdfa1f', 'Step 1 of 2')}
                 </span>
               </div>
-              <h2 className="mp-h2">
+              <h2 className={mobilePageStyles.stepHeading}>
                 {translate('auto.components.mobile.MobileHero.0d9b33299e', 'Get the app.')}
               </h2>
-              <p className="mp-lead-sm">
+              <p className={mobilePageStyles.leadSmall}>
                 {translate(
                   'auto.components.mobile.MobileHero.e75647ace0',
                   'Scan the QR with your phone or open the install link to grab Yiru Mobile.'
                 )}
               </p>
-              <div className="mp-inline-actions">
-                <button type="button" className="mp-ghost-action" onClick={onOpenInstallUrl}>
+              <div
+                className={mobilePageStyles.platformTabs}
+                role="group"
+                aria-label={translate(
+                  'auto.components.mobile.MobileHero.ec0607bf66',
+                  'Supported mobile platforms'
+                )}
+              >
+                <button
+                  type="button"
+                  className={cn(
+                    mobilePageStyles.platformTab,
+                    platform === 'ios' && mobilePageStyles.platformTabActive
+                  )}
+                  aria-pressed={platform === 'ios'}
+                  onClick={() => onPlatformChange('ios')}
+                >
+                  <IosBrandIcon />
+                  {translate('auto.components.mobile.MobileHero.711e6f4b47', 'iOS')}
+                </button>
+                <button
+                  type="button"
+                  className={cn(
+                    mobilePageStyles.platformTab,
+                    platform === 'android' && mobilePageStyles.platformTabActive
+                  )}
+                  aria-pressed={platform === 'android'}
+                  onClick={() => onPlatformChange('android')}
+                >
+                  <AndroidLogo />
+                  {translate('auto.components.mobile.MobileHero.ac1eb64952', 'Android')}
+                </button>
+              </div>
+              <div className={mobilePageStyles.inlineActions}>
+                <button
+                  type="button"
+                  className={mobilePageStyles.ghostAction}
+                  onClick={onOpenInstallUrl}
+                >
                   {installCopy.ctaLabel}
                 </button>
-                <button type="button" className="mp-text-link" onClick={onCopyInstallUrl}>
+                <button
+                  type="button"
+                  className={mobilePageStyles.textLink}
+                  onClick={onCopyInstallUrl}
+                >
                   <Copy className="size-3.5" />
                   {translate('auto.components.mobile.MobileHero.aa97420ba4', 'Copy install link')}
                 </button>
               </div>
             </div>
             <div
-              className="mp-qr mp-qr-large"
+              className={cn(mobilePageStyles.qr, mobilePageStyles.qrLarge, 'mt-[72px]')}
               aria-label={translate(
                 'auto.components.mobile.MobileHero.7af266b80d',
                 'Install QR code'
@@ -144,6 +194,7 @@ export function HeroFlow({
                 <img
                   src={installQrUrl}
                   alt={translate('auto.components.mobile.MobileHero.3241f3c26a', 'Install QR')}
+                  className={mobilePageStyles.qrImage}
                 />
               ) : null}
             </div>
@@ -154,23 +205,26 @@ export function HeroFlow({
           ref={(element) => {
             screenRefs.current[1] = element
           }}
-          className={cn('mp-flow-screen', stepIdx === 1 && 'is-active')}
+          className={cn(
+            mobilePageStyles.flowScreen,
+            stepIdx === 1 && mobilePageStyles.flowScreenActive
+          )}
           aria-hidden={stepIdx !== 1}
           inert={stepIdx !== 1}
         >
-          <div className="mp-pairing-layout">
-            <div className="mp-step2-copy mp-pairing-copy">
-              <div className="mp-eyebrow-row">
-                <div className="mp-step-num">2</div>
-                <span className="mp-eyebrow">
+          <div className={mobilePageStyles.pairingLayout}>
+            <div className={cn(mobilePageStyles.stepCopy, mobilePageStyles.pairingCopy)}>
+              <div className={mobilePageStyles.eyebrowRow}>
+                <div className={mobilePageStyles.stepNumber}>2</div>
+                <span className={mobilePageStyles.eyebrow}>
                   {translate('auto.components.mobile.MobileHero.3960f5c339', 'Step 2 of 2')}
                 </span>
               </div>
-              <h2 className="mp-h2">
+              <h2 className={mobilePageStyles.stepHeading}>
                 {translate('auto.components.mobile.MobileHero.901c98bb93', 'Pair this')}{' '}
                 {getDeviceLabel()}.
               </h2>
-              <p className="mp-lead-sm">
+              <p className={mobilePageStyles.leadSmall}>
                 {translate('auto.components.mobile.MobileHero.d1495e5e64', 'Open Yiru Mobile, tap')}{' '}
                 <strong>
                   {translate('auto.components.mobile.MobileHero.3aa7bb2d8b', 'Pair Desktop')}
@@ -178,16 +232,16 @@ export function HeroFlow({
                 {translate('auto.components.mobile.MobileHero.2f077ef4eb', ', and scan the code.')}
               </p>
             </div>
-            <div className="mp-pairing-relay">
+            <div className={mobilePageStyles.pairingRelay}>
               <MobilePairingConnectionOptions
                 value={connectionMode}
                 onChange={onConnectionModeChange}
                 compact
               />
             </div>
-            <div className="mp-qr-stack mp-pairing-qr">
+            <div className={cn(mobilePageStyles.qrStack, mobilePageStyles.pairingQr)}>
               <div
-                className="mp-qr mp-qr-large"
+                className={cn(mobilePageStyles.qr, mobilePageStyles.qrLarge)}
                 aria-label={translate(
                   'auto.components.mobile.MobileHero.bb0074ce11',
                   'Pairing QR code'
@@ -198,18 +252,21 @@ export function HeroFlow({
                   <img
                     src={pairQrDataUrl}
                     alt={translate('auto.components.mobile.MobileHero.27735e5f4e', 'Pairing QR')}
-                    className={cn(pairLoading && 'mp-qr-refreshing')}
+                    className={cn(
+                      mobilePageStyles.qrImage,
+                      pairLoading && mobilePageStyles.qrRefreshing
+                    )}
                   />
                 ) : null}
                 {pairLoading ? (
-                  <span className="mp-qr-loading">
+                  <span className={mobilePageStyles.qrLoading}>
                     {translate('auto.components.mobile.MobileHero.65b3f2e8bc', 'Generating…')}
                   </span>
                 ) : null}
               </div>
               <button
                 type="button"
-                className="mp-link-under"
+                className={mobilePageStyles.linkUnder}
                 onClick={onRegeneratePairing}
                 disabled={pairLoading}
               >
@@ -220,9 +277,9 @@ export function HeroFlow({
                     : translate('auto.components.mobile.MobileHero.a6cffbbb0b', 'Generate code')}
               </button>
             </div>
-            <div className="mp-pairing-controls">
-              <div className="mp-network-row">
-                <span className="mp-network-label">
+            <div className={mobilePageStyles.pairingControls}>
+              <div className={mobilePageStyles.networkRow}>
+                <span className={mobilePageStyles.networkLabel}>
                   {translate('auto.components.mobile.MobileHero.dfd2aa9d5d', 'Network')}
                 </span>
                 <NetworkInterfacePicker
@@ -232,11 +289,11 @@ export function HeroFlow({
                   // Why: direct-first and local-only pairing both advertise a
                   // local route; keeping it visible also prevents mode shifts.
                   disabled={false}
-                  className="mp-network-select"
+                  className={mobilePageStyles.networkSelect}
                 />
                 <button
                   type="button"
-                  className="mp-network-refresh"
+                  className={mobilePageStyles.networkRefresh}
                   onClick={onRefreshNetworkInterfaces}
                   disabled={refreshingNetworkInterfaces}
                   aria-label={translate(
@@ -256,13 +313,13 @@ export function HeroFlow({
                 </button>
               </div>
 
-              <div className="mp-inline-actions">
-                <span className="mp-action-divider">
+              <div className={mobilePageStyles.inlineActions}>
+                <span className={mobilePageStyles.actionDivider}>
                   {translate('auto.components.mobile.MobileHero.4c1df4eba7', "Can't scan?")}
                 </span>
                 <button
                   type="button"
-                  className="mp-text-link"
+                  className={mobilePageStyles.textLink}
                   onClick={onCopyPairingCode}
                   disabled={!pairingUrl || pairLoading}
                 >
@@ -280,8 +337,8 @@ export function HeroFlow({
         </div>
       </div>
 
-      <div className="mp-flow-actions">
-        <button type="button" className="mp-flow-back" onClick={onBack}>
+      <div className={mobilePageStyles.flowActions}>
+        <button type="button" className={mobilePageStyles.flowBack} onClick={onBack}>
           <ArrowLeft className="size-3" />
           {translate('auto.components.mobile.MobileHero.b622eba64d', 'Back')}
         </button>
@@ -289,7 +346,7 @@ export function HeroFlow({
           onDone ? (
             <button
               type="button"
-              className="mp-primary-action mp-flow-primary-action"
+              className={cn(mobilePageStyles.primaryAction, mobilePageStyles.flowPrimaryAction)}
               onClick={onDone}
             >
               {translate('auto.components.mobile.MobileHero.3f90dbd274', 'Done')}
@@ -301,7 +358,7 @@ export function HeroFlow({
         ) : (
           <button
             type="button"
-            className="mp-flow-continue mp-flow-primary-action"
+            className={cn(mobilePageStyles.flowContinue, mobilePageStyles.flowPrimaryAction)}
             onClick={onContinue}
           >
             {translate('auto.components.mobile.MobileHero.a8fb43cf1c', 'Continue')}
