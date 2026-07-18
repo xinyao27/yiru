@@ -1,8 +1,10 @@
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
 
-const SALT_LABEL = new TextEncoder().encode('yiru-mobile-e2ee/v2/salt\0')
-const INFO_LABEL = new TextEncoder().encode('yiru-mobile-e2ee/v2/session\0')
+// Why: cryptographic domain labels are versioned wire identifiers, not branding;
+// the legacy values preserve compatibility with already-released desktop builds.
+const SALT_LABEL = new TextEncoder().encode('orca-mobile-e2ee/v2/salt\0')
+const INFO_LABEL = new TextEncoder().encode('orca-mobile-e2ee/v2/session\0')
 
 export function deriveMobileE2EEV2KeySchedule(args: {
   sharedSecret: Uint8Array

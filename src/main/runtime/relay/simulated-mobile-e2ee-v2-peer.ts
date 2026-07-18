@@ -1,6 +1,7 @@
 import nacl from 'tweetnacl'
 import {
   encodeMobileE2EEV2Transcript,
+  MOBILE_E2EE_V2_PROTOCOL,
   validateMobileE2EEV2Handshake,
   type MobileE2EEPayloadKind,
   type MobileE2EEV2Hello
@@ -33,7 +34,7 @@ export class SimulatedMobileE2EEV2Peer {
       clientNonceB64: Buffer.from(clientNonce).toString('base64'),
       capabilities: { framing: [2], payloadKinds: ['text', 'binary'] },
       context: {
-        protocol: 'yiru-mobile-e2ee',
+        protocol: MOBILE_E2EE_V2_PROTOCOL,
         initiator: 'mobile',
         responder: 'desktop',
         transport: 'relay',

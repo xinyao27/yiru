@@ -1,7 +1,9 @@
 import { createHash, hkdfSync } from 'node:crypto'
 
-const SALT_LABEL = new TextEncoder().encode('yiru-mobile-e2ee/v2/salt\0')
-const INFO_LABEL = new TextEncoder().encode('yiru-mobile-e2ee/v2/session\0')
+// Why: cryptographic domain labels are versioned wire identifiers, not branding;
+// the legacy values preserve compatibility with already-released mobile builds.
+const SALT_LABEL = new TextEncoder().encode('orca-mobile-e2ee/v2/salt\0')
+const INFO_LABEL = new TextEncoder().encode('orca-mobile-e2ee/v2/session\0')
 
 export type MobileE2EEV2KeySchedule = {
   mobileToDesktopKey: Uint8Array
