@@ -1,4 +1,8 @@
-import type { MobileE2EEV2Hello, MobileE2EEV2Ready } from './mobile-e2ee-v2-contract'
+import {
+  MOBILE_E2EE_V2_PROTOCOL,
+  type MobileE2EEV2Hello,
+  type MobileE2EEV2Ready
+} from './mobile-e2ee-v2-contract'
 
 function repeatedByteBase64(byte: number): string {
   return btoa(String.fromCharCode(...new Uint8Array(32).fill(byte)))
@@ -10,12 +14,12 @@ export function createMobileE2EEV2Fixture(): {
   sharedSecret: Uint8Array
 } {
   const context = {
-    protocol: 'yiru-mobile-e2ee' as const,
+    protocol: MOBILE_E2EE_V2_PROTOCOL,
     initiator: 'mobile' as const,
     responder: 'desktop' as const,
     transport: 'relay' as const,
     relayHostId: 'AbCdEf0123_-xyZ9'
-  }
+  } as const
   return {
     hello: {
       type: 'e2ee_hello',
