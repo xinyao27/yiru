@@ -13,7 +13,7 @@ import type {
 import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { SpoolGitChangesList } from './SpoolGitChangesList'
 
 export type SpoolGitSidebarMode = 'changes' | 'history'

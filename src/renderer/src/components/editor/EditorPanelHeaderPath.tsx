@@ -15,6 +15,7 @@ import type { OpenFile } from '@/store/slices/editor'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '../tab-bar/SortableTab'
 import { useEditorHeaderFileRename } from './editor-header-file-rename'
 import { getEditorHeaderCopyState } from './editor-header'
+import { cn } from '@/lib/class-names'
 
 const isMac = navigator.userAgent.includes('Mac')
 const isLinux = navigator.userAgent.includes('Linux')
@@ -111,7 +112,10 @@ export function EditorPanelHeaderPath({
         ) : (
           <button
             type="button"
-            className={`editor-header-path${canCopyHeaderPath ? '' : ' editor-header-path--static'}`}
+            className={cn(
+              'editor-header-path',
+              canCopyHeaderPath ? '' : 'editor-header-path--static'
+            )}
             onClick={canCopyHeaderPath ? onCopyPath : undefined}
             disabled={!canCopyHeaderPath}
             title={headerCopyState.pathTitle}
@@ -120,7 +124,7 @@ export function EditorPanelHeaderPath({
           </button>
         )}
         <span
-          className={`editor-header-copy-toast${copiedPathVisible ? ' is-visible' : ''}`}
+          className={cn('editor-header-copy-toast', copiedPathVisible ? 'is-visible' : '')}
           aria-live="polite"
         >
           {headerCopyState.copyToastLabel}

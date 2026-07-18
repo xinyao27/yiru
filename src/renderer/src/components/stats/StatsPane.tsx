@@ -23,6 +23,7 @@ import {
 } from '../ui/dropdown-menu'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 export { getStatsPaneSearchEntries } from './stats-search'
 
 function formatDuration(ms: number): string {
@@ -188,9 +189,10 @@ export function StatsPane(): React.JSX.Element {
                     <span className="truncate">{option.label}</span>
                   </span>
                   <Check
-                    className={`ml-auto size-3.5 ${
+                    className={cn(
+                      'ml-auto size-3.5',
                       activeUsageTab === option.id ? 'opacity-100' : 'opacity-0'
-                    }`}
+                    )}
                     aria-hidden
                   />
                 </DropdownMenuItem>

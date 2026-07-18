@@ -5,7 +5,7 @@ import { Command as CommandPrimitive } from 'cmdk'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { MagnifyingGlass as SearchIcon } from '@phosphor-icons/react'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
   return (

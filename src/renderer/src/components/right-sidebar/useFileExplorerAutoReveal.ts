@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from 'react'
-import type { Virtualizer } from '@tanstack/react-virtual'
 import { useAppStore } from '@/store'
 import type { OpenFile } from '@/store/slices/editor'
 import type { FileExplorerRowProjection } from './file-explorer-row-projection'
@@ -12,7 +11,9 @@ type UseFileExplorerAutoRevealParams = {
   openFiles: OpenFile[]
   rowProjection: FileExplorerRowProjection
   setSelectedPath: (path: string | null) => void
-  virtualizer: Virtualizer<HTMLDivElement, Element>
+  virtualizer: {
+    scrollToIndex: (index: number, options: { align: 'center' | 'auto' }) => void
+  }
 }
 
 /**

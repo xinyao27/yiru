@@ -28,7 +28,7 @@ import GitHubItemDialog, { type GitHubItemDialogProjectOrigin } from '@/componen
 import { GhAuthErrorHelp } from '@/components/github-project/GhAuthErrorHelp'
 import { launchWorkItemDirect } from '@/lib/launch-work-item-direct'
 import { useRepoSlugIndex } from '@/lib/repo-slug-index'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
 import { useMountedRef } from '@/hooks/useMountedRef'

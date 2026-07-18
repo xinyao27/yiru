@@ -4,6 +4,7 @@ import {
   MIN_PANEL_WIDTH,
   type FloatingTerminalPanelBounds
 } from './floating-terminal-panel-bounds'
+import { cn } from '@/lib/class-names'
 
 const RESIZE_HANDLES = [
   ['n', 'top-0 left-2 right-2 h-2 cursor-n-resize'],
@@ -108,7 +109,7 @@ export function FloatingTerminalResizeHandles({
       {RESIZE_HANDLES.map(([edge, className]) => (
         <div
           key={edge}
-          className={`absolute z-10 ${className}`}
+          className={cn('absolute z-10', className)}
           data-floating-terminal-no-drag
           onPointerDown={handleResizeStart(edge)}
           onPointerMove={handleResizeMove}

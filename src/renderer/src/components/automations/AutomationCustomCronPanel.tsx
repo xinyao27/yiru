@@ -1,7 +1,7 @@
 import React from 'react'
 import { CheckCircle as CheckCircle2, WarningCircle as CircleAlert } from '@phosphor-icons/react'
 import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   formatAutomationSchedule,
   getAutomationCronExpressionFields

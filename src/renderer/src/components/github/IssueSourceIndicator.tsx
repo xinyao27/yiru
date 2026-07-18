@@ -1,7 +1,7 @@
 import React from 'react'
 import type { GitHubOwnerRepo } from '../../../../shared/types'
 import RepoBadgeLabel from '@/components/repo/RepoBadgeLabel'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export type IssueSourceIndicatorProps = {
   /** Resolved issue-source owner/repo. `null` means the source hasn't been

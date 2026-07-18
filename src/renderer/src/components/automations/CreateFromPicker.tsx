@@ -10,7 +10,7 @@ import {
   CommandList
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { Repo, Worktree } from '../../../../shared/types'
 import { useAppStore } from '@/store'
 import { getRuntimeEnvironmentIdForRepo } from '@/lib/repo-runtime-owner'

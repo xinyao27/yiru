@@ -28,6 +28,7 @@ import { ShareUsageButton } from './ShareUsageButton'
 import { StatCard } from './StatCard'
 import { formatCost, formatTokens, formatUpdatedAt } from './usage-formatters'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 const RANGE_OPTIONS: CodexUsageRange[] = ['7d', '30d', '90d', 'all']
 const SCOPE_OPTIONS: { value: CodexUsageScope; label: string }[] = [
@@ -222,7 +223,7 @@ export function CodexUsagePane(): React.JSX.Element {
                     )}
                   >
                     <RefreshCw
-                      className={`size-3.5 ${scanState.isScanning ? 'animate-spin' : ''}`}
+                      className={cn('size-3.5', scanState.isScanning ? 'animate-spin' : '')}
                     />
                   </Button>
                 }

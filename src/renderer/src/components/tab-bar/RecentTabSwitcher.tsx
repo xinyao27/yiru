@@ -20,6 +20,7 @@ import {
   type RecentTabSwitcherItem
 } from './recent-tab-switching'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 type SwitcherState = {
   items: RecentTabSwitcherItem[]
@@ -176,9 +177,10 @@ export default function RecentTabSwitcher(): React.JSX.Element | null {
                 key={item.key}
                 role="option"
                 aria-selected={selected}
-                className={`flex h-8 items-center gap-2 px-3 text-sm ${
+                className={cn(
+                  'flex h-8 items-center gap-2 px-3 text-sm',
                   selected ? 'bg-accent text-accent-foreground' : 'text-foreground'
-                }`}
+                )}
               >
                 <TabIcon item={item} />
                 <span className="min-w-0 flex-1 truncate">{item.label}</span>

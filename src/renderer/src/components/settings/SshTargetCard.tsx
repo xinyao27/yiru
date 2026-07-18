@@ -19,6 +19,7 @@ import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { isSshTargetConnecting, type SshTargetBusyAction } from './ssh-target-action-state'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 // ── Shared status helpers ────────────────────────────────────────────
 
@@ -305,7 +306,7 @@ export function SshTargetCard({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate text-sm font-medium">{target.label}</span>
-          <span className={`size-2 shrink-0 rounded-full ${statusColor(status)}`} />
+          <span className={cn('size-2 shrink-0 rounded-full', statusColor(status))} />
           <span className="text-[11px] text-muted-foreground">{STATUS_LABELS[status]}</span>
         </div>
         <p className="truncate text-xs text-muted-foreground">

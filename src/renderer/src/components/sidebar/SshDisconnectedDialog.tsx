@@ -18,6 +18,7 @@ import { useMountedRef } from '@/hooks/useMountedRef'
 import { statusColor } from '@/components/settings/SshTargetCard'
 import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 type SshDisconnectedDialogProps = {
   open: boolean
@@ -174,7 +175,7 @@ export function SshDisconnectedDialog({
           {isConnecting ? (
             <Loader2 className="size-3.5 shrink-0 text-yellow-500 animate-spin" />
           ) : (
-            <span className={`size-1.5 shrink-0 rounded-full ${statusColor(status)}`} />
+            <span className={cn('size-1.5 shrink-0 rounded-full', statusColor(status))} />
           )}
         </div>
 

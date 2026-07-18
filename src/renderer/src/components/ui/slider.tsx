@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Slider as SliderPrimitive } from '@base-ui/react/slider'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 function Slider({ className, ...props }: SliderPrimitive.Root.Props): React.ReactElement {
   return (

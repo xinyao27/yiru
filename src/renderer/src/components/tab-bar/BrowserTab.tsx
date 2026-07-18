@@ -36,6 +36,7 @@ import { TabWorkspaceLayoutMenuSection } from './TabWorkspaceLayoutMenuSection'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_ROOT_CLASSES } from './tab-root-classes'
 import { TabCloseButton } from './TabCloseButton'
+import { cn } from '@/lib/class-names'
 
 function formatBrowserTabUrlLabel(url: string): string {
   if (url === YIRU_BROWSER_BLANK_URL || url === 'about:blank') {
@@ -188,7 +189,12 @@ export default function BrowserTab({
       data-pinned={isPinned ? 'true' : 'false'}
       {...attributes}
       {...listeners}
-      className={`${TAB_ROOT_CLASSES} ${getTabDividerClasses(hasTabsToRight)} ${getDropIndicatorClasses(dropIndicator ?? null)} ${getTabRootStateClasses(isActive)}`}
+      className={cn(
+        TAB_ROOT_CLASSES,
+        getTabDividerClasses(hasTabsToRight),
+        getDropIndicatorClasses(dropIndicator ?? null),
+        getTabRootStateClasses(isActive)
+      )}
       onPointerDown={(e) => {
         onTabPointerDown(
           e,
@@ -222,11 +228,11 @@ export default function BrowserTab({
       <BrowserTabFavicon tabId={tab.id} faviconUrl={tab.faviconUrl} />
       {isPinned && <Pin className="mr-1 size-4 shrink-0 text-muted-foreground" aria-hidden />}
       {menuOpen ? (
-        <span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1`}>{tabLabel}</span>
+        <span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{tabLabel}</span>
       ) : (
         <Tooltip>
           <TooltipTrigger
-            render={<span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1`}>{tabLabel}</span>}
+            render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{tabLabel}</span>}
           />
           <TooltipContent
             side="bottom"

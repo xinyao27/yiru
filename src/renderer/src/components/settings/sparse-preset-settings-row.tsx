@@ -5,7 +5,7 @@ import {
   Trash as Trash2
 } from '@phosphor-icons/react'
 import type { SparsePreset } from '../../../../shared/types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { Button } from '../ui/button'
 import { formatSparsePresetUpdatedAt } from './sparse-preset-date'
 import { SparsePresetDirectoryPreview } from './sparse-preset-directory-preview'

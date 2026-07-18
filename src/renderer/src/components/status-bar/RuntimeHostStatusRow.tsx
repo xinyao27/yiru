@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
 import { useMountedRef } from '@/hooks/useMountedRef'
+import { cn } from '@/lib/class-names'
 
 export type RuntimeHostConnectionState = 'connected' | 'checking' | 'reconnecting' | 'disconnected'
 
@@ -89,7 +90,7 @@ export function RuntimeHostStatusRow({
 
   return (
     <div className="flex items-center gap-2.5 px-2 py-1.5">
-      <span className={`size-1.5 shrink-0 rounded-full ${runtimeDotColor(state)}`} />
+      <span className={cn('size-1.5 shrink-0 rounded-full', runtimeDotColor(state))} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-[12px] font-medium">{label}</div>
         <div className="flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
@@ -100,7 +101,7 @@ export function RuntimeHostStatusRow({
             )}
           </span>
           <span aria-hidden="true">·</span>
-          <span className={`inline-flex min-w-0 items-center gap-1 ${runtimeStatusTone(state)}`}>
+          <span className={cn('inline-flex min-w-0 items-center gap-1', runtimeStatusTone(state))}>
             {state === 'checking' || state === 'reconnecting' ? (
               <Loader2 className="size-2.5 shrink-0 animate-spin" />
             ) : null}

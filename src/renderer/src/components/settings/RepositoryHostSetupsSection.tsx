@@ -9,7 +9,7 @@ import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-ov
 import type { Repo } from '../../../../shared/types'
 import { useAppStore } from '../../store'
 import { getProjectHostSetupProjectionFromState } from '../../store/selectors'
-import { cn } from '../../lib/utils'
+import { cn } from '../../lib/class-names'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'

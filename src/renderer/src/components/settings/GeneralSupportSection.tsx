@@ -9,6 +9,7 @@ import { SearchableSetting } from './SearchableSetting'
 import { SettingsSubsectionHeader } from './SettingsFormControls'
 import { translate } from '@/i18n/i18n'
 import { YIRU_GITHUB_STARGAZERS_URL } from '../../../../shared/yiru-github-repository'
+import { cn } from '@/lib/class-names'
 
 type SupportState =
   | 'loading'
@@ -109,9 +110,10 @@ function SupportSection({
 
   return (
     <section
-      className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+      className={cn(
+        'grid transition-[grid-template-rows,opacity] duration-300 ease-out',
         collapsed ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'
-      }`}
+      )}
       aria-hidden={collapsed}
     >
       <div className="min-h-0 overflow-hidden">

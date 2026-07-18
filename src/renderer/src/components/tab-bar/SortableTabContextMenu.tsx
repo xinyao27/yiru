@@ -21,6 +21,7 @@ import { useAppStore } from '../../store'
 import { formatShortcutLabel, useOptionalShortcutLabel } from '@/hooks/useShortcutLabel'
 import { translate } from '@/i18n/i18n'
 import { TerminalTabSplitMenuSection } from './TerminalTabSplitMenuSection'
+import { cn } from '@/lib/class-names'
 
 const TAB_COLORS = [
   {
@@ -229,11 +230,11 @@ export function SortableTabContextMenu({
               return (
                 <DropdownMenuItem
                   key={color.label}
-                  className={`relative h-4 w-4 min-w-4 p-0 rounded-full border ${
-                    isSelected ? 'ring-1 ring-foreground/70 ring-offset-1 ring-offset-popover' : ''
-                  } ${
+                  className={cn(
+                    'relative h-4 w-4 min-w-4 p-0 rounded-full border',
+                    isSelected ? 'ring-1 ring-foreground/70 ring-offset-1 ring-offset-popover' : '',
                     color.value ? 'border-transparent' : 'border-muted-foreground/50 bg-transparent'
-                  }`}
+                  )}
                   style={color.value ? { backgroundColor: color.value } : undefined}
                   onClick={() => {
                     onSetTabColor(tab.id, color.value)

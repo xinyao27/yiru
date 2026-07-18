@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { LinearApiKeyDialog } from '@/components/linear-api-key-dialog'
 import { useAppStore } from '@/store'
 import { IntegrationStatusPill } from '@/components/integration-status-pill'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { OnboardingInlineCommandTerminal } from './OnboardingInlineCommandTerminal'
 import { translate } from '@/i18n/i18n'
 

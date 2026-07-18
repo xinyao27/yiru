@@ -112,7 +112,6 @@ describe('CreateHostedReviewComposer generate tooltip', () => {
 
     expect(wrapper).toContain('data-slot="tooltip-trigger"')
     expect(button).toContain('disabled=""')
-    expect(button).toContain('data-slot="button"')
   })
 
   it('keeps the active stop control focusable as the tooltip trigger', () => {

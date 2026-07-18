@@ -1,6 +1,6 @@
 import React from 'react'
 import type { KeybindingActionId, KeybindingInput } from '../../../../shared/keybindings'
-import { cn } from '../../lib/utils'
+import { cn } from '../../lib/class-names'
 import { ShortcutCommandBlock } from './ShortcutCommandBlock'
 import type { ShortcutRowsByGroup } from './ShortcutFilterRail'
 import { translate } from '@/i18n/i18n'

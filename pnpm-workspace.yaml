@@ -1,0 +1,27 @@
+overrides:
+  monaco-editor>dompurify: 3.4.11
+
+supportedArchitectures:
+  os:
+    - current
+    - darwin
+    - linux
+    - win32
+  cpu:
+    - current
+    - x64
+    - arm64
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - cpu-features
+  - esbuild
+  - node-pty
+  - sherpa-onnx
+
+patchedDependencies:
+  '@pierre/diffs@1.2.12': config/patches/@pierre__diffs@1.2.12.patch
+  '@xterm/addon-ligatures@0.11.0-beta.287': config/patches/@xterm__addon-ligatures@0.11.0-beta.287.patch
+  '@xterm/addon-serialize@0.15.0-beta.287': config/patches/@xterm__addon-serialize@0.15.0-beta.287.patch
+  '@xterm/addon-webgl@0.20.0-beta.286': config/patches/@xterm__addon-webgl@0.20.0-beta.286.patch
+  node-pty@1.1.0: config/patches/node-pty@1.1.0.patch

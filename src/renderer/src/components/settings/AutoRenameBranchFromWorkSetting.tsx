@@ -11,7 +11,7 @@ import {
   resolveSourceControlActionCommandTemplate,
   setSourceControlActionDefault
 } from '../../../../shared/source-control-ai-actions'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import { SourceControlActionVariableChips } from '../source-control/SourceControlActionVariableChips'
@@ -180,14 +180,16 @@ export function AutoRenameBranchFromWorkSetting({
               autoRenameBranchFromWork: !settings.autoRenameBranchFromWork
             })
           }
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors ${
+          className={cn(
+            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
             settings.autoRenameBranchFromWork ? 'bg-foreground' : 'bg-muted-foreground/30'
-          }`}
+          )}
         >
           <span
-            className={`pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform ${
+            className={cn(
+              'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
               settings.autoRenameBranchFromWork ? 'translate-x-4' : 'translate-x-0.5'
-            }`}
+            )}
           />
         </button>
       </div>

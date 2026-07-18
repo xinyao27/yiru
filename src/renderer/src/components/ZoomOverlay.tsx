@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import { ZOOM_LEVEL_CHANGED_EVENT } from '@/lib/zoom-events'
 import type { ZoomLevelChangedEventDetail } from '@/lib/zoom-events'
+import { cn } from '@/lib/class-names'
 
 // Why: the overlay must fully unmount after its fade-out completes so the
 // fixed-position container doesn't linger in the DOM and interfere with
@@ -52,14 +53,16 @@ export function ZoomOverlay(): React.JSX.Element | null {
 
   return (
     <div
-      className={`pointer-events-none fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${
+      className={cn(
+        'pointer-events-none fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300',
         visible ? 'opacity-100' : 'opacity-0'
-      }`}
+      )}
     >
       <div
-        className={`flex items-center gap-3 rounded-full bg-popover/95 px-5 py-2.5 text-popover-foreground shadow-2xl border border-border/50 backdrop-blur-md transition-transform duration-300 ease-out ${
+        className={cn(
+          'flex items-center gap-3 rounded-full bg-popover/95 px-5 py-2.5 text-popover-foreground shadow-2xl border border-border/50 backdrop-blur-md transition-transform duration-300 ease-out',
           visible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
-        }`}
+        )}
       >
         <Search className="size-4 text-muted-foreground" />
         <div className="flex items-baseline gap-2">

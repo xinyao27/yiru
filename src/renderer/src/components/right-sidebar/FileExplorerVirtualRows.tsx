@@ -1,7 +1,7 @@
 import React from 'react'
 import type { Virtualizer } from '@tanstack/react-virtual'
 import { dirname, normalizeRelativePath } from '@/lib/path'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { GitFileStatus } from '../../../../shared/types'
 import { FileExplorerRow, InlineInputRow, type InlineInput } from './FileExplorerRow'
 import { shouldShowIgnoredDecoration, STATUS_COLORS } from './status-display'

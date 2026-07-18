@@ -1,11 +1,17 @@
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu'
 import {
+  DropdownMenuItem,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger
+} from '@/components/ui/dropdown-menu'
+import {
+  getPreferredWorktreeOpenInEntry,
   getWorktreeOpenInEntries,
   getLocalFileManagerLabel,
   openOpenInAppsSettings,
   openWorktreePath,
+  WorktreeOpenInMenuContent,
   WorktreeOpenInSubMenu
 } from './WorktreeOpenInMenu'
 
@@ -81,6 +87,16 @@ function findByType(node: unknown, type: unknown): ReactElementLike {
   if (!found) {
     throw new Error('element not found')
   }
+  return found
+}
+
+function findAllByType(node: unknown, type: unknown): ReactElementLike[] {
+  const found: ReactElementLike[] = []
+  visit(node, (entry) => {
+    if (entry.type === type) {
+      found.push(entry)
+    }
+  })
   return found
 }
 
@@ -180,9 +196,47 @@ describe('WorktreeOpenInMenu', () => {
     ).toEqual(['VS Code', 'Cursor', 'Zed', 'File Manager'])
   })
 
+  it('falls back to the first available entry when the remembered target is gone', () => {
+    const entries = getWorktreeOpenInEntries(
+      [
+        { id: 'vscode', label: 'VS Code', command: 'code' },
+        { id: 'cursor', label: 'Cursor', command: 'cursor' }
+      ],
+      'Finder'
+    )
+
+    expect(getPreferredWorktreeOpenInEntry(entries, 'application:cursor')?.id).toBe('cursor')
+    expect(getPreferredWorktreeOpenInEntry(entries, 'application:removed-app')?.id).toBe('vscode')
+  })
+
   it('opens settings at the Open In Apps section', () => {
     openOpenInAppsSettings()
 
+    expect(openSettingsTargetMock).toHaveBeenCalledWith({
+      pane: 'general',
+      repoId: null,
+      sectionId: 'general-open-in-apps'
+    })
+    expect(openSettingsPageMock).toHaveBeenCalled()
+  })
+
+  it('opens settings when the Customize apps menu item is clicked', () => {
+    const tree = WorktreeOpenInMenuContent({
+      worktreePath: '/tmp/workspace',
+      connectionId: null
+    })
+    const items = findAllByType(tree, DropdownMenuItem)
+    const customizeItem = items.at(-1)
+    const stopPropagation = vi.fn()
+
+    if (!customizeItem) {
+      throw new Error('Customize apps menu item not found')
+    }
+    ;(customizeItem.props.onClick as (event: React.SyntheticEvent) => void)({
+      stopPropagation
+    } as unknown as React.SyntheticEvent)
+
+    expect(stopPropagation).toHaveBeenCalled()
     expect(openSettingsTargetMock).toHaveBeenCalledWith({
       pane: 'general',
       repoId: null,

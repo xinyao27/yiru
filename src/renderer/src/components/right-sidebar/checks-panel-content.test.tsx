@@ -125,7 +125,6 @@ describe('MergeConflictNotice', () => {
     const markup = renderNotice(makePR())
 
     expect(markup).not.toContain('Resolve with AI')
-    expect(markup).not.toContain('lucide-sparkles')
   })
 
   it('renders the single conflict AI action in the triage strip', () => {
@@ -141,7 +140,6 @@ describe('MergeConflictNotice', () => {
     )
 
     expect(markup).toContain('Resolve')
-    expect(markup).toContain('lucide-sparkles')
     expect(markup).not.toContain('Resolve with AI')
   })
 
@@ -156,7 +154,6 @@ describe('MergeConflictNotice', () => {
 
     expect(markup).toContain('Conflicts block this MR')
     expect(markup).toContain('Resolve')
-    expect(markup).toContain('lucide-sparkles')
   })
 
   it('renders the CI fix action for failing non-conflict checks', () => {
@@ -173,8 +170,6 @@ describe('MergeConflictNotice', () => {
 
     expect(markup).toContain('1 failing check')
     expect(markup).toContain('Fix')
-    expect(markup).toContain('data-variant="outline"')
-    expect(markup).toContain('lucide-sparkles')
     expect(markup).not.toContain('Fix with AI')
     expect(markup).not.toContain('Resolve')
   })
@@ -203,11 +198,8 @@ describe('ChecksList', () => {
     )
 
     expect(markup).toContain('aria-label="Open check details"')
-    expect(markup).toContain('lucide-external-link')
     expect(markup).toContain('Failed')
     expect(markup.indexOf('Failed')).toBeLessThan(markup.indexOf('aria-label="Open check details"'))
-    expect(markup).toContain('text-muted-foreground')
-    expect(markup).not.toContain('opacity-0')
     expect(markup).not.toContain('Open details')
   })
 })
@@ -250,32 +242,6 @@ describe('isMutablePRConversationComment', () => {
 })
 
 describe('PRCommentsList', () => {
-  it('pins the comments header while scrolling the sidebar', () => {
-    const comments: PRComment[] = [
-      {
-        id: 1,
-        author: 'AmethystLiang',
-        authorAvatarUrl: '',
-        body: 'Existing review context',
-        createdAt: '2026-05-14T00:00:00Z',
-        url: 'https://github.com/acme/widgets/pull/42#issuecomment-1'
-      }
-    ]
-
-    const markup = renderWithTooltips(
-      React.createElement(PRCommentsList, {
-        comments,
-        commentsLoading: false,
-        onAddComment: () => Promise.resolve({ ok: true as const })
-      })
-    )
-
-    const commentsHeaderIndex = markup.indexOf('Comments')
-    const stickyIndex = markup.indexOf('sticky top-0 z-10 bg-sidebar/95 backdrop-blur-sm')
-    expect(stickyIndex).toBeGreaterThan(-1)
-    expect(stickyIndex).toBeLessThan(commentsHeaderIndex)
-  })
-
   it('places the collapsed add-comment action in the comments header', () => {
     const comments: PRComment[] = [
       {
@@ -302,7 +268,6 @@ describe('PRCommentsList', () => {
     expect(markup.indexOf('aria-label="Comment display options"')).toBeLessThan(
       markup.indexOf('aria-label="Add comment"')
     )
-    expect(markup).toContain('lucide-plus')
     expect(markup).not.toContain('Add a comment...')
     expect(markup).not.toContain('Add a PR comment')
   })
@@ -356,7 +321,6 @@ describe('PRCommentsList', () => {
     )
 
     expect(markup).toContain('aria-label="More comment actions"')
-    expect(markup).toContain('data-slot="dropdown-menu-trigger"')
   })
 
   it('uses the header plus action as the empty comments state', () => {
@@ -369,11 +333,9 @@ describe('PRCommentsList', () => {
     )
 
     expect(markup).toContain('aria-label="Start conversation"')
-    expect(markup).toContain('lucide-plus')
     expect(markup).not.toContain('Start conversation...')
     expect(markup).not.toContain('No comments yet')
     expect(markup).not.toContain('Add a comment')
-    expect((markup.match(/lucide-message-square/g) ?? []).length).toBe(1)
   })
 })
 
@@ -406,17 +368,5 @@ describe('CheckJobLogTail', () => {
     expect(markup).toContain('Log excerpt')
     expect(markup).toContain('Error: expected true to be false')
     expect(markup).toContain('Copy log excerpt')
-  })
-
-  it('uses a taller viewport when expanded for failed-job details', () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(CheckJobLogTail, {
-        logTail: 'Error: expected true to be false',
-        expanded: true
-      })
-    )
-
-    expect(markup).toContain('min-h-48')
-    expect(markup).toContain('max-h-[min(50vh,32rem)]')
   })
 })

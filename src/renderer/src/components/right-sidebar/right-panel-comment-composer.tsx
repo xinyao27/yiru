@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { ShortcutKeyCombo } from '@/components/ShortcutKeyCombo'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   getCommentBodySubmitState,
   hasBoundedCommentBodyText

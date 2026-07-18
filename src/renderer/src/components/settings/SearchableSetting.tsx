@@ -1,5 +1,5 @@
 import type React from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '../../store'
 import { matchesSettingsSearch, type SettingsSearchEntry } from './settings-search'
 

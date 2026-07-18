@@ -17,7 +17,7 @@ import {
   getRenderedFontSuggestions,
   isSettingsFormOptionQueryTooLarge
 } from './settings-form-option-filter'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 
 type SettingsSwitchProps = {
@@ -712,8 +712,8 @@ export function FontAutocomplete({
     inputRef.current?.focus()
   }
   const popoverAvailableHeightStyle = {
-    // Why: tailwind-merge rewrites this arbitrary max-height class on the
-    // ScrollArea root, so keep the Radix available-height clamp as inline style.
+    // Why: cn's Tailwind conflict resolution rewrites this arbitrary max-height
+    // class on the ScrollArea root, so keep the Radix clamp as inline style.
     maxHeight: 'var(--radix-popover-content-available-height)'
   } as React.CSSProperties
 
@@ -878,11 +878,12 @@ export function FontAutocomplete({
                     onMouseDown={(e) => e.preventDefault()}
                     onMouseEnter={() => setHighlightedIndex(sourceIndex)}
                     onClick={() => commitValue(font)}
-                    className={`flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors ${
+                    className={cn(
+                      'flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors',
                       sourceIndex === highlightedIndex
                         ? 'bg-accent text-accent-foreground'
                         : 'hover:bg-muted/60'
-                    }`}
+                    )}
                   >
                     <span className="truncate">{font}</span>
                     {font === value ? <Check className="ml-3 size-4 shrink-0" /> : null}

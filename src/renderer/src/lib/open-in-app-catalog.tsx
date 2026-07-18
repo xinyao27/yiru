@@ -1,7 +1,7 @@
 import type React from 'react'
 import { AppWindow } from '@phosphor-icons/react'
 import type { OpenInApplication } from '../../../shared/types'
-import { cn } from './utils'
+import { cn } from './class-names'
 import { translate } from '@/i18n/i18n'
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 

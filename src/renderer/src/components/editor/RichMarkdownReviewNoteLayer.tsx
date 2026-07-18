@@ -9,6 +9,7 @@ import {
 } from '@/lib/markdown-review-notes'
 import type { RichMarkdownReviewNotePosition } from './rich-markdown-review-note-layout'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 function isRichMarkdownReviewNoteNavigationClick(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) {
@@ -60,9 +61,11 @@ export function RichMarkdownReviewNoteLayer({
         <div
           key={comment.id}
           data-rich-markdown-review-note-id={comment.id}
-          className={`rich-markdown-review-note-card ${
-            activeCommentId === comment.id ? 'is-active' : ''
-          } ${attentionCommentId === comment.id ? 'is-attention' : ''}`.trim()}
+          className={cn(
+            'rich-markdown-review-note-card',
+            activeCommentId === comment.id && 'is-active',
+            attentionCommentId === comment.id && 'is-attention'
+          )}
           style={{ top }}
           onMouseDown={(event) => event.stopPropagation()}
           onClick={(event) => {

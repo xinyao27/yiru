@@ -2916,6 +2916,10 @@
           },
           "TerminalTabLeadingIcon": {
             "7ab2964bea": "Unread agent completion"
+          },
+          "TabBarOpenInMenuButton": {
+            "3f5d946e01": "Open in {{value0}}",
+            "50ec9a165e": "Choose application"
           }
         }
       },
@@ -10577,6 +10581,9 @@
             "workspaceGone": "Couldn't open log — workspace is no longer available.",
             "notAuthorized": "Couldn't open log — path not authorized.",
             "alreadyEditable": "Log is already open for editing."
+          },
+          "PierreFileExplorerTree": {
+            "copied": "Copied"
           }
         }
       },
@@ -12354,6 +12361,11 @@
         },
         "richMarkdownSourceOwningCutFeedback": {
           "selectLessContent": "Select less content or use code mode to cut preserved HTML citations."
+        },
+        "PierreDiffViewer": {
+          "copy": "Copy",
+          "selectAll": "Select All",
+          "copyPath": "Copy Path"
         }
       },
       "diff": {

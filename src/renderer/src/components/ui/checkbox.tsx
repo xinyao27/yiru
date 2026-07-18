@@ -3,7 +3,7 @@
 import { Checkbox as CheckboxPrimitive } from '@base-ui/react/checkbox'
 import { CheckIcon } from '@phosphor-icons/react'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
   return (

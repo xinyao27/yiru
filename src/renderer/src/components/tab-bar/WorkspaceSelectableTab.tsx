@@ -2,6 +2,7 @@ import type React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getTabDividerClasses, getTabRootStateClasses } from './drop-indicator'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
+import { cn } from '@/lib/class-names'
 
 type WorkspaceSelectableTabProps = {
   id: string
@@ -33,7 +34,11 @@ export function WorkspaceSelectableTab({
         tabIndex={tabIndex}
         data-tab-id={id}
         data-active={active ? 'true' : 'false'}
-        className={`group relative flex h-full w-full cursor-pointer select-none items-center px-1.5 text-xs outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${getTabDividerClasses(hasTabsToRight)} ${getTabRootStateClasses(active)}`}
+        className={cn(
+          'group relative flex h-full w-full cursor-pointer select-none items-center px-1.5 text-xs outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
+          getTabDividerClasses(hasTabsToRight),
+          getTabRootStateClasses(active)
+        )}
         onClick={() => onSelect(id)}
       >
         <span className="mr-1.5 flex size-4 shrink-0 items-center justify-center" aria-hidden>
@@ -41,7 +46,7 @@ export function WorkspaceSelectableTab({
         </span>
         <Tooltip>
           <TooltipTrigger
-            render={<span className={`${TAB_LABEL_WIDTH_CLASSES} mr-1 text-left`}>{title}</span>}
+            render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1 text-left')}>{title}</span>}
           />
           <TooltipContent
             side="bottom"

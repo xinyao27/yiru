@@ -6,7 +6,7 @@ import {
   Ticket as TicketCheck,
   FlowArrow as Workflow
 } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type {
   OnboardingFeatureSetupId,
   OnboardingFeatureSetupSelection

@@ -13,7 +13,7 @@ import { isLocalPathOpenBlocked, showLocalPathOpenBlockedToast } from '@/lib/loc
 import { getLocalFileManagerLabel } from '@/lib/local-file-manager-label'
 import { OpenInApplicationIcon } from '@/lib/open-in-app-catalog'
 import type { ShellOpenLocalPathFailureReason } from '../../../../shared/shell-open-types'
-import type { OpenInApplication } from '../../../../shared/types'
+import type { OpenInApplication, OpenInTargetKey } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
 
 export { getLocalFileManagerLabel } from '@/lib/local-file-manager-label'
@@ -23,10 +23,12 @@ type WorktreeOpenInMenuItemsProps = {
   connectionId?: string | null
   disabled?: boolean
   labelPrefix?: string
+  onEntryOpen?: (entry: OpenInMenuEntry) => void
 }
 
-type OpenInMenuEntry = {
+export type OpenInMenuEntry = {
   id: string
+  preferenceKey: OpenInTargetKey
   label: string
   target: 'external-editor' | 'file-manager'
   command?: string
@@ -39,12 +41,25 @@ export function getWorktreeOpenInEntries(
   return [
     ...openInApplications.map((application) => ({
       id: application.id,
+      preferenceKey: `application:${application.id}` as const,
       label: application.label,
       target: 'external-editor' as const,
       command: application.command
     })),
-    { id: 'file-manager', label: fileManagerLabel, target: 'file-manager' }
+    {
+      id: 'file-manager',
+      preferenceKey: 'file-manager',
+      label: fileManagerLabel,
+      target: 'file-manager'
+    }
   ]
+}
+
+export function getPreferredWorktreeOpenInEntry(
+  entries: readonly OpenInMenuEntry[],
+  preferredKey: OpenInTargetKey | null | undefined
+): OpenInMenuEntry | null {
+  return entries.find((entry) => entry.preferenceKey === preferredKey) ?? entries[0] ?? null
 }
 
 function showOpenFailureToast(reason: ShellOpenLocalPathFailureReason): void {
@@ -143,7 +158,8 @@ export function WorktreeOpenInMenuItems({
   worktreePath,
   connectionId,
   disabled,
-  labelPrefix = ''
+  labelPrefix = '',
+  onEntryOpen
 }: WorktreeOpenInMenuItemsProps): React.JSX.Element {
   const openInWorktreePath = useOpenInWorktreePath({ worktreePath, connectionId })
   const openInApplications = useAppStore((s) => s.settings?.openInApplications ?? [])
@@ -154,9 +170,10 @@ export function WorktreeOpenInMenuItems({
     <>
       {entries.map((entry) => (
         <DropdownMenuItem
-          key={entry.id}
+          key={entry.preferenceKey}
           onClick={(event) => {
             stopMenuPropagation(event)
+            onEntryOpen?.(entry)
             void openInWorktreePath(entry.target, entry.command)
           }}
           disabled={disabled}
@@ -179,7 +196,8 @@ export function WorktreeOpenInMenuItems({
 export function WorktreeOpenInMenuContent({
   worktreePath,
   connectionId,
-  disabled
+  disabled,
+  onEntryOpen
 }: WorktreeOpenInMenuItemsProps): React.JSX.Element {
   return (
     <>
@@ -187,11 +205,14 @@ export function WorktreeOpenInMenuContent({
         worktreePath={worktreePath}
         connectionId={connectionId}
         disabled={disabled}
+        onEntryOpen={onEntryOpen}
       />
       <DropdownMenuSeparator />
       <DropdownMenuItem
-        onClick={stopMenuPropagation}
-        onSelect={openOpenInAppsSettings}
+        onClick={(event) => {
+          stopMenuPropagation(event)
+          openOpenInAppsSettings()
+        }}
         disabled={disabled}
       >
         {translate('auto.components.sidebar.WorktreeOpenInMenu.1417fd8380', 'Customize apps...')}

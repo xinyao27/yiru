@@ -1,6 +1,6 @@
 import type React from 'react'
 import { SpinnerGap as Loader2 } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export function AiVaultPanelSurface({
   children

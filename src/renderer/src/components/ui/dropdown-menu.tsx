@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Menu as DropdownMenuPrimitive } from '@base-ui/react/menu'
 import { CheckIcon, CaretRight as ChevronRightIcon, CircleIcon } from '@phosphor-icons/react'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 function DropdownMenu({ ...props }: DropdownMenuPrimitive.Root.Props) {
   return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />

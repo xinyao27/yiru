@@ -6,6 +6,7 @@ import { AgentStateDot } from '@/components/AgentStateDot'
 import { ClaudeIcon } from '../status-bar/icons'
 import { FeatureWallClickRing } from './FeatureWallClickRing'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 type Issue = {
   number: number
@@ -237,11 +238,11 @@ export function TasksAnimatedVisual(props: { reducedMotion: boolean }): JSX.Elem
               ref={(node) => {
                 rowRefs.current[i] = node
               }}
-              className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3.5 rounded-[10px] px-2.5 py-3 transition-[background,box-shadow] duration-300 ${
-                i > 0 ? 'mt-1.5' : ''
-              } ${
+              className={cn(
+                'grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3.5 rounded-[10px] px-2.5 py-3 transition-[background,box-shadow] duration-300',
+                i > 0 ? 'mt-1.5' : '',
                 isActive ? 'bg-foreground/[0.05] shadow-[inset_0_0_0_1px_rgba(24,24,27,0.06)]' : ''
-              }`}
+              )}
             >
               <span className="inline-flex items-center gap-1 rounded-md border border-border/70 bg-muted/50 px-1.5 py-px font-mono text-[11px] text-muted-foreground">
                 <CircleDot className="size-[11px]" aria-hidden />
@@ -268,9 +269,10 @@ export function TasksAnimatedVisual(props: { reducedMotion: boolean }): JSX.Elem
                     ref={(node) => {
                       buttonRefs.current[i] = node
                     }}
-                    className={`pointer-events-none inline-flex items-center gap-1.5 rounded-md bg-foreground px-2.5 py-1 text-[11px] font-semibold text-background transition-[transform,filter] duration-150 ${
+                    className={cn(
+                      'pointer-events-none inline-flex items-center gap-1.5 rounded-md bg-foreground px-2.5 py-1 text-[11px] font-semibold text-background transition-[transform,filter] duration-150',
                       isPressing ? 'scale-[0.94] brightness-[1.4]' : 'scale-100'
-                    }`}
+                    )}
                   >
                     {translate(
                       'auto.components.feature.wall.TasksAnimatedVisual.b68c92fbdc',
@@ -286,11 +288,12 @@ export function TasksAnimatedVisual(props: { reducedMotion: boolean }): JSX.Elem
       </div>
 
       <div
-        className={`overflow-hidden transition-all duration-[320ms] ease-out ${
+        className={cn(
+          'overflow-hidden transition-all duration-[320ms] ease-out',
           showDropdown
             ? 'mt-2.5 max-h-[200px] border-t border-border/80 pt-2.5 opacity-100'
             : 'mt-0 max-h-0 border-t border-transparent pt-0 opacity-0'
-        }`}
+        )}
       >
         <div className="flex items-center gap-1.5 px-1 pb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
           {workspaceCreating ? (
@@ -344,9 +347,10 @@ export function TasksAnimatedVisual(props: { reducedMotion: boolean }): JSX.Elem
 
       <div
         aria-hidden
-        className={`pointer-events-none absolute left-0 top-0 z-10 transition-[opacity,transform] duration-700 ease-[cubic-bezier(.45,.05,.2,1)] ${
+        className={cn(
+          'pointer-events-none absolute left-0 top-0 z-10 transition-[opacity,transform] duration-700 ease-[cubic-bezier(.45,.05,.2,1)]',
           cursor.visible ? 'opacity-100' : 'opacity-0'
-        }`}
+        )}
         style={{ transform: `translate(${cursor.x}px, ${cursor.y}px)` }}
       >
         <div className="relative">

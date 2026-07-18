@@ -25,6 +25,7 @@ import { matchesSettingsSearch } from './settings-search'
 import { translate } from '@/i18n/i18n'
 import { getRepositoryHookScriptTextareaRows } from '@/lib/script-textarea-rows'
 import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
+import { cn } from '@/lib/class-names'
 
 type RepositoryHooksSectionProps = {
   repo: Repo
@@ -369,7 +370,7 @@ function PolicyOptionGrid<P extends string>({
   columns: string
 }): React.JSX.Element {
   return (
-    <div className={`grid gap-2 ${columns}`}>
+    <div className={cn('grid gap-2', columns)}>
       {options.map(({ policy, label, description }) => {
         const active = selected === policy
         return (
@@ -377,17 +378,21 @@ function PolicyOptionGrid<P extends string>({
             type="button"
             key={policy}
             onClick={() => onSelect(policy)}
-            className={`rounded-xl border px-3 py-2.5 text-center transition-colors ${
+            className={cn(
+              'rounded-xl border px-3 py-2.5 text-center transition-colors',
               active
                 ? 'border-foreground/15 bg-accent text-accent-foreground'
                 : 'border-border/60 bg-background text-foreground hover:border-border hover:bg-muted/40'
-            }`}
+            )}
           >
-            <span className={`block text-sm ${active ? 'font-semibold' : 'font-medium'}`}>
+            <span className={cn('block text-sm', active ? 'font-semibold' : 'font-medium')}>
               {label}
             </span>
             <p
-              className={`mt-1 text-[11px] leading-4 ${active ? 'text-accent-foreground/80' : 'text-muted-foreground'}`}
+              className={cn(
+                'mt-1 text-[11px] leading-4',
+                active ? 'text-accent-foreground/80' : 'text-muted-foreground'
+              )}
             >
               {description}
             </p>
@@ -417,11 +422,12 @@ function SegmentedPolicyToggle<P extends string>({
             key={policy}
             onClick={() => onSelect(policy)}
             title={description}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+            className={cn(
+              'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
               active
                 ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
-            }`}
+            )}
           >
             {label}
           </button>
@@ -452,9 +458,10 @@ function ExampleTemplateCard({
           type="button"
           variant={copiedTemplate ? 'secondary' : 'ghost'}
           size="sm"
-          className={`absolute right-2 top-2 z-10 h-6 px-2 text-[11px] ${
+          className={cn(
+            'absolute right-2 top-2 z-10 h-6 px-2 text-[11px]',
             copiedTemplate ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-          }`}
+          )}
           onClick={onCopyTemplate}
         >
           {copiedTemplate
@@ -526,9 +533,10 @@ function SaveIndicator({ status }: { status: SaveStatus }): React.JSX.Element | 
       aria-live="polite"
     >
       <span
-        className={`size-1.5 rounded-full ${
+        className={cn(
+          'size-1.5 rounded-full',
           isSaving ? 'animate-pulse bg-amber-500' : 'bg-emerald-500'
-        }`}
+        )}
       />
       {isSaving
         ? translate('auto.components.settings.RepositoryHooksSection.81057d5f71', 'Saving...')
@@ -1333,11 +1341,16 @@ export function RepositoryHooksSection({
               />
             </div>
 
-            <div className={`space-y-3 rounded-xl border p-3 ${YAML_STATE_STYLES[yamlState].card}`}>
+            <div
+              className={cn('space-y-3 rounded-xl border p-3', YAML_STATE_STYLES[yamlState].card)}
+            >
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
                   <p
-                    className={`text-sm font-medium ${YAML_STATE_STYLES[yamlState].titleClassName}`}
+                    className={cn(
+                      'text-sm font-medium',
+                      YAML_STATE_STYLES[yamlState].titleClassName
+                    )}
                   >
                     {yamlStateCopy.heading}
                   </p>

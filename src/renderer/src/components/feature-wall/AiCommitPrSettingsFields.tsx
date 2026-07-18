@@ -9,7 +9,7 @@ import {
 } from '../../../../shared/commit-message-agent-spec'
 import type { CommitMessageAiSettings } from '../../../../shared/types'
 import { AgentIcon } from '@/lib/agent-catalog'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'

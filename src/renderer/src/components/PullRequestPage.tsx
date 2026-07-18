@@ -69,7 +69,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
 import { detectLanguage } from '@/lib/language-detect'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { setWithLRU } from '@/lib/scroll-cache'
 import { isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
 import { DiffSectionItem } from '@/components/editor/DiffSectionItem'

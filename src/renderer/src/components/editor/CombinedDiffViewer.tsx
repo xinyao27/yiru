@@ -92,6 +92,7 @@ import {
   type CombinedDiffScrollbarDragCleanup
 } from './combined-diff-scrollbar-drag'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 type CachedCombinedDiffViewState = {
   entrySignature: string
@@ -1906,11 +1907,12 @@ export default function CombinedDiffViewer({
                 : translate('auto.components.editor.CombinedDiffViewer.ec5053c7f5', 'Side by Side')}
             </button>
             <button
-              className={`inline-flex h-6 items-center gap-1 rounded border border-border px-2 text-xs transition-colors hover:text-foreground ${
+              className={cn(
+                'inline-flex h-6 items-center gap-1 rounded border border-border px-2 text-xs transition-colors hover:text-foreground',
                 settings?.diffWordWrap === true
                   ? 'bg-accent text-foreground'
                   : 'text-muted-foreground'
-              }`}
+              )}
               onClick={toggleDiffWordWrap}
               aria-pressed={settings?.diffWordWrap === true}
             >

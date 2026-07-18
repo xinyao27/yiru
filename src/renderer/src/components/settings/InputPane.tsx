@@ -3,6 +3,7 @@ import { Label } from '../ui/label'
 import { SearchableSetting } from './SearchableSetting'
 import { isDefaultPrimarySelectionMiddleClickPasteUserAgent } from '@/hooks/usePrimarySelectionPaste'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 export { getInputPaneSearchEntries } from './input-search'
 
 type InputPaneProps = {
@@ -64,14 +65,16 @@ export function InputPane({ settings, updateSettings }: InputPaneProps): React.J
               primarySelectionMiddleClickPaste: !enabled
             })
           }
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors ${
+          className={cn(
+            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
             enabled ? 'bg-foreground' : 'bg-muted-foreground/30'
-          }`}
+          )}
         >
           <span
-            className={`pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform ${
+            className={cn(
+              'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
               enabled ? 'translate-x-4' : 'translate-x-0.5'
-            }`}
+            )}
           />
         </button>
       </SearchableSetting>

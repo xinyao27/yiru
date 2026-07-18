@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   compactCommentMarkdownComponents,
   createCompactCommentMarkdownComponents,

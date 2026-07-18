@@ -3,6 +3,7 @@ import { Label } from '../ui/label'
 import { Separator } from '../ui/separator'
 import { useShortcutLabel } from '@/hooks/useShortcutLabel'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 type VoiceDictationSettingsSectionProps = {
   voiceSettings: VoiceSettings
@@ -44,14 +45,17 @@ export function VoiceDictationSettingsSection({
           aria-busy={permissionPending}
           disabled={permissionPending}
           onClick={() => void onToggleVoiceDictation()}
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors ${
-            voiceSettings.enabled ? 'bg-foreground' : 'bg-muted-foreground/30'
-          } ${permissionPending ? 'cursor-wait opacity-70' : ''}`}
+          className={cn(
+            'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
+            voiceSettings.enabled ? 'bg-foreground' : 'bg-muted-foreground/30',
+            permissionPending ? 'cursor-wait opacity-70' : ''
+          )}
         >
           <span
-            className={`pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform ${
+            className={cn(
+              'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
               voiceSettings.enabled ? 'translate-x-4' : 'translate-x-0.5'
-            }`}
+            )}
           />
         </button>
       </div>
@@ -79,11 +83,13 @@ export function VoiceDictationSettingsSection({
               key={mode}
               onClick={() => onUpdateVoiceSettings({ dictationMode: mode })}
               disabled={!voiceSettings.enabled}
-              className={`rounded-sm px-3 py-1 text-sm transition-colors ${
+              className={cn(
+                'rounded-sm px-3 py-1 text-sm transition-colors',
                 voiceSettings.dictationMode === mode
                   ? 'bg-accent font-medium text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              } ${!voiceSettings.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  : 'text-muted-foreground hover:text-foreground',
+                !voiceSettings.enabled ? 'opacity-50 cursor-not-allowed' : ''
+              )}
             >
               {mode === 'toggle'
                 ? translate('auto.components.settings.VoicePane.118b3c2dee', 'Toggle')

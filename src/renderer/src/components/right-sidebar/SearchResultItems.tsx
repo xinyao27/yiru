@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { CaretRight as ChevronRight, Copy } from '@phosphor-icons/react'
 import { basename, dirname } from '@/lib/path'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'

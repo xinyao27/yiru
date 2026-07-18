@@ -4,7 +4,7 @@ import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/di
 import { Button } from '@/components/ui/button'
 import { ShortcutKeyCombo } from '@/components/ShortcutKeyCombo'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { getAddRepoLocalStartActions } from './add-repo-local-start-actions'
 import { translate } from '@/i18n/i18n'
 

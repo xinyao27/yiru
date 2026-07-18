@@ -8,6 +8,7 @@ import { PRIVACY_URL, getConsentState, setOptIn as telemetrySetOptIn } from '../
 import { useAppStore } from '../../store'
 import { PrivacyDiagnosticsSection } from './PrivacyDiagnosticsSection'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 export type EnvBlockedReason = 'do_not_track' | 'yiru_disabled' | 'ci'
 export type BlockedReason = { kind: 'env'; reason: EnvBlockedReason }
@@ -121,14 +122,17 @@ export function PrivacyPane({ settings }: PrivacyPaneProps): React.JSX.Element {
           aria-describedby={blocked ? PRIVACY_PANE_BLOCKED_HELPER_ID : undefined}
           disabled={blocked !== null || inFlight}
           onClick={handleToggle}
-          className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors ${
-            toggleChecked ? 'bg-foreground' : 'bg-muted-foreground/30'
-          } ${blocked !== null || inFlight ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+          className={cn(
+            'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors',
+            toggleChecked ? 'bg-foreground' : 'bg-muted-foreground/30',
+            blocked !== null || inFlight ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+          )}
         >
           <span
-            className={`pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform ${
+            className={cn(
+              'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
               toggleChecked ? 'translate-x-4' : 'translate-x-0.5'
-            }`}
+            )}
           />
         </button>
       </div>

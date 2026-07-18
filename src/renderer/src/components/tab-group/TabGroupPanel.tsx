@@ -20,6 +20,7 @@ import { getTabPaneBodyDroppableId, type HoveredTabInsertion } from './useTabDra
 import { tabGroupBodyAnchorName } from './tab-group-body-anchor'
 import { translate } from '@/i18n/i18n'
 import { WorkspacePaneFrame } from './WorkspacePaneFrame'
+import { cn } from '@/lib/class-names'
 
 const EditorPanel = lazy(() => import('../editor/EditorPanel'))
 
@@ -187,17 +188,21 @@ export default function TabGroupPanel({
     'my-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent'
   // Why: focused-only — workspace actions and Close split pane stay with the
   // active pane so unfocused strips stay compact.
-  const focusedActionChromeClassName = `flex shrink-0 items-center gap-0.5 overflow-hidden transition-[opacity] duration-150 ${
+  const focusedActionChromeClassName = cn(
+    'flex shrink-0 items-center gap-0.5 overflow-hidden transition-[opacity] duration-150',
     isFocused ? 'ml-1.5 pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 w-0'
-  }`
+  )
   // Why: the split wrapper already paints edge-touching seams; duplicating them
   // inside a pane makes the sidebar boundary look two pixels wide.
   const splitFrameClassName = hasSplitGroups
-    ? `${touchesLeftEdge || suppressLeftBorder ? '' : 'border-l'} ${
-        touchesRightEdge || suppressRightBorder ? '' : 'border-r'
-      } ${touchesBottomEdge || suppressBottomBorder ? '' : 'border-b'} border-border ${
-        isFocused && !touchesBottomEdge && !suppressBottomBorder ? 'border-b-accent' : ''
-      } ${isFocused ? '' : 'opacity-95'}`
+    ? cn(
+        !(touchesLeftEdge || suppressLeftBorder) && 'border-l',
+        !(touchesRightEdge || suppressRightBorder) && 'border-r',
+        !(touchesBottomEdge || suppressBottomBorder) && 'border-b',
+        'border-border',
+        isFocused && !touchesBottomEdge && !suppressBottomBorder && 'border-b-accent',
+        !isFocused && 'opacity-95'
+      )
     : undefined
   return (
     <WorkspacePaneFrame

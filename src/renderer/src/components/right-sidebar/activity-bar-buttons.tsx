@@ -2,7 +2,8 @@ import React from 'react'
 import { DotsThree as MoreHorizontal } from '@phosphor-icons/react'
 import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 import type { CheckStatus } from '../../../../shared/types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME } from './right-sidebar-titlebar-drag-regions'
 import {
@@ -55,10 +56,12 @@ export function TopActivityOverflowMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             className={cn(
-              'relative my-auto flex h-7 w-8 shrink-0 items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+              'relative my-auto h-7',
               getTabRootStateClasses(false),
               RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
             )}
@@ -67,7 +70,7 @@ export function TopActivityOverflowMenu({
               'More sidebar tabs'
             )}
           >
-            <MoreHorizontal size={16} />
+            <MoreHorizontal />
             {hiddenChecksStatus && (
               <div
                 className={cn(
@@ -76,7 +79,7 @@ export function TopActivityOverflowMenu({
                 )}
               />
             )}
-          </button>
+          </Button>
         }
       />
       <DropdownMenuContent align="end" side="bottom" sideOffset={6}>
@@ -121,10 +124,12 @@ export function ActivityBarButton({
     <Tooltip>
       <TooltipTrigger
         render={
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size={isTop ? 'icon-sm' : 'icon-lg'}
             className={cn(
-              'relative flex shrink-0 items-center justify-center transition-colors',
+              'relative',
               RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME,
               isTop ? 'my-auto h-7 w-9' : 'w-10 h-10',
               isTop
@@ -136,7 +141,7 @@ export function ActivityBarButton({
             onClick={onClick}
             aria-label={item.shortcut ? `${item.title} (${item.shortcut})` : item.title}
           >
-            <Icon size={isTop ? 16 : 18} />
+            <Icon className={isTop ? 'size-4' : 'size-[18px]'} />
 
             {statusIndicator && statusIndicator !== 'neutral' && (
               <div
@@ -151,7 +156,7 @@ export function ActivityBarButton({
             {active && !isTop && (
               <div className="absolute right-0 top-[25%] bottom-[25%] w-[2px] bg-foreground rounded-l" />
             )}
-          </button>
+          </Button>
         }
       />
       <TooltipContent side={isTop ? 'bottom' : 'left'} sideOffset={6}>

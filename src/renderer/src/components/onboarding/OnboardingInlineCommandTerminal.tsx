@@ -6,6 +6,7 @@ import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
 import { brandEphemeralSetupTerminalWorktreeId } from '../../../../shared/ephemeral-setup-terminal-worktree-id'
+import { cn } from '@/lib/class-names'
 
 const ONBOARDING_INLINE_TERMINAL_WORKTREE_ID = 'onboarding-inline-terminal'
 const AUTO_INSERT_DELAY_MS = 250
@@ -277,7 +278,7 @@ export function OnboardingInlineCommandTerminal({
         className="min-h-0 overflow-hidden rounded-xl border border-border bg-card"
       >
         {description ? (
-          <div className={`border-b border-border ${descriptionPaddingClassName}`}>
+          <div className={cn('border-b border-border', descriptionPaddingClassName)}>
             <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>
           </div>
         ) : null}

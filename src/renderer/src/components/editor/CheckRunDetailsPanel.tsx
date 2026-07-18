@@ -13,6 +13,7 @@ import { translate } from '@/i18n/i18n'
 import { useCheckRunDetailsFixWithAI } from './check-run-details-fix-with-ai'
 import { CheckRunAnnotations } from './CheckRunAnnotations'
 import { CheckRunJobs } from './CheckRunJobs'
+import { cn } from '@/lib/class-names'
 
 function formatCheckTimestamp(value: string | null | undefined): string | null {
   if (!value) {
@@ -211,7 +212,7 @@ export function CheckRunDetailsPanel({
                 disabled={loading}
                 onClick={onRefresh}
               >
-                <RefreshCw className={`size-3.5${loading ? ' animate-spin' : ''}`} />
+                <RefreshCw className={cn('size-3.5', loading ? 'animate-spin' : '')} />
                 {translate('auto.components.editor.CheckRunDetailsPanel.b7f5e2c91a', 'Refresh')}
               </Button>
             )}

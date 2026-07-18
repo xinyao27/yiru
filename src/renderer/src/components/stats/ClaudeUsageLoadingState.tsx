@@ -1,4 +1,5 @@
 import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { cn } from '@/lib/class-names'
 
 type ClaudeUsageLoadingStateProps = {
   title?: string
@@ -28,7 +29,7 @@ export function ClaudeUsageLoadingState({
 
       <div className="h-3 w-48 animate-pulse rounded bg-muted/60" />
 
-      <div className={`grid gap-3 ${summaryGridClassName}`}>
+      <div className={cn('grid gap-3', summaryGridClassName)}>
         {Array.from({ length: summaryCardCount }, (_, index) => (
           <div key={index} className="space-y-3 rounded-lg border border-border/60 bg-card/40 p-4">
             <div className="h-3 w-24 animate-pulse rounded bg-muted/70" />

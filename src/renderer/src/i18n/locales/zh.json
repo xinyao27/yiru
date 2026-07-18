@@ -2893,6 +2893,10 @@
           },
           "TerminalTabLeadingIcon": {
             "7ab2964bea": "未读的代理完成"
+          },
+          "TabBarOpenInMenuButton": {
+            "3f5d946e01": "打开于 {{value0}}",
+            "50ec9a165e": "选择应用程序"
           }
         }
       },
@@ -10554,6 +10558,9 @@
             "workspaceGone": "无法打开日志 — 工作区已不可用。",
             "notAuthorized": "无法打开日志 — 路径未授权。",
             "alreadyEditable": "日志已处于编辑状态。"
+          },
+          "PierreFileExplorerTree": {
+            "copied": "已复制"
           }
         }
       },
@@ -12331,6 +12338,11 @@
         },
         "richMarkdownSourceOwningCutFeedback": {
           "selectLessContent": "请选择较少的内容，或使用代码模式剪切保留的 HTML 引用。"
+        },
+        "PierreDiffViewer": {
+          "copy": "复制",
+          "selectAll": "全选",
+          "copyPath": "复制路径"
         }
       },
       "diff": {

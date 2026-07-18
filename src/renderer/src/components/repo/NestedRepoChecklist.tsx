@@ -1,7 +1,7 @@
 import { useCallback, useMemo, type Dispatch, type SetStateAction } from 'react'
 import { GitBranch } from '@phosphor-icons/react'
 import type { NestedRepoScanResult } from '../../../../shared/types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { getRepoDisplayLabelKey, getRepoDisplayLabelsByPath } from '@/lib/repo-display-labels'
 import { translate } from '@/i18n/i18n'
 

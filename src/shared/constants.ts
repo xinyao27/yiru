@@ -288,6 +288,7 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     experimentalNativeChat: false,
     nativeChatSessionOptions: {},
     openInApplications: [...DEFAULT_OPEN_IN_APPLICATIONS],
+    lastOpenInTargetKey: 'application:vscode',
     rightSidebarOpenByDefault: true,
     showGitIgnoredFiles: true,
     sourceControlViewMode: 'list',

@@ -1,7 +1,7 @@
 import { X } from '@phosphor-icons/react'
 import type { CSSProperties, JSX } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { ImageViewerImageDimensions } from './image-viewer-zoom'
 import { translate } from '@/i18n/i18n'
 

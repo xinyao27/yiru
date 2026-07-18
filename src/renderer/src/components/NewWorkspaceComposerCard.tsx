@@ -27,7 +27,7 @@ import type RepoCombobox from '@/components/repo/RepoCombobox'
 import AgentCombobox from '@/components/agent/AgentCombobox'
 import { getAgentCatalog } from '@/lib/agent-catalog'
 import { useAppStore } from '@/store'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { WORKSPACE_FILE_PATH_MIME } from '@/lib/workspace-file-drag'
 import {
   TEXT_CONTROL_PASTE_DIRECT_MAX_BYTES,

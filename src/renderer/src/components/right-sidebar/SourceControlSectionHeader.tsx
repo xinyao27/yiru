@@ -1,7 +1,7 @@
 import type React from 'react'
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export function SourceControlSectionHeader({
   label,

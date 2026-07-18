@@ -6,6 +6,7 @@ import {
 } from '@/components/feature-wall/agents-orchestration/orchestration-types'
 import { usePrefersReducedMotion } from '@/components/feature-wall/feature-wall-modal-helpers'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 const CLI_AGENT_COMMANDS = [
   'yiru worktree create --name auth-pr-1',
@@ -76,7 +77,7 @@ export function CliFeatureTipVisual(): JSX.Element {
             return (
               <div
                 key={command}
-                className={`truncate ${isVisible ? 'animate-cli-tip-command-line' : 'invisible'}`}
+                className={cn('truncate', isVisible ? 'animate-cli-tip-command-line' : 'invisible')}
               >
                 <span className="text-foreground">
                   {translate('auto.components.feature.tips.CliFeatureTipVisual.badb4fc342', '>')}

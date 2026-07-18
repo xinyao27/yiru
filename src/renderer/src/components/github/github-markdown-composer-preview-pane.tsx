@@ -1,6 +1,7 @@
 import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
 import type { GitHubOwnerRepo } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 export function GitHubMarkdownComposerPreviewPane({
   value,
@@ -13,7 +14,10 @@ export function GitHubMarkdownComposerPreviewPane({
 }): React.JSX.Element {
   return (
     <div
-      className={`github-markdown-composer-preview scrollbar-sleek max-h-[360px] overflow-y-auto ${minHeightClassName}`}
+      className={cn(
+        'github-markdown-composer-preview scrollbar-sleek max-h-[360px] overflow-y-auto',
+        minHeightClassName
+      )}
     >
       {value.trim() ? (
         <CommentMarkdown

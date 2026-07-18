@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { getAgentAwakeDescription, getAgentAwakeTitle } from '../settings/agent-awake-copy'
 import type { GlobalSettings } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'

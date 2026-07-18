@@ -2,7 +2,7 @@ import { DEFAULT_REPO_BADGE_COLOR, REPO_COLORS } from '../../../../shared/consta
 import { normalizeRepoBadgeColor } from '../../../../shared/repo-badge-color'
 import { Label } from '../ui/label'
 import { ColorPicker } from '../ui/color-picker'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 
 type RepositoryIconColorSectionProps = {

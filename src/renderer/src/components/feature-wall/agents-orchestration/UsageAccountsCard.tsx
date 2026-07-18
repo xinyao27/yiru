@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import { ClaudeIcon, OpenAIIcon } from '@/components/status-bar/icons'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import type {
   ClaudeRateLimitAccountsState,

@@ -2,7 +2,7 @@ import type { RefObject } from 'react'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { WarningCircle as AlertCircle, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { DiffEditor, type DiffOnMount } from '@monaco-editor/react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { Button } from '@/components/ui/button'
 import { DiffCommentPopover } from '../diff-comments/DiffCommentPopover'
 import { combinedDiffSectionScrollbarOptions } from './diff-editor-scrollbar-options'
@@ -10,6 +10,8 @@ import type { DiffSection } from './diff-section-types'
 import { translate } from '@/i18n/i18n'
 import { LargeDiffFallback } from './LargeDiffFallback'
 import { buildDiffEditorWordWrapOptions } from './diff-editor-word-wrap-options'
+import { PierreDiffViewer } from './PierreDiffViewer'
+import type { PierreDiffSectionCommentProps } from './useDiffSectionCommentActions'
 
 const ImageDiffViewer = lazy(() => import('./ImageDiffViewer'))
 
@@ -42,6 +44,7 @@ type DiffSectionBodyProps = {
   onRetrySection: (index: number) => void
   onSaveLimitedDiff: () => void
   onMount: DiffOnMount
+  pierreCommentProps: PierreDiffSectionCommentProps
 }
 
 export function DiffSectionBody({
@@ -66,7 +69,8 @@ export function DiffSectionBody({
   onSubmitComment,
   onRetrySection,
   onSaveLimitedDiff,
-  onMount
+  onMount,
+  pierreCommentProps
 }: DiffSectionBodyProps): React.JSX.Element {
   const renderLimit = section.largeDiffRenderLimit?.limited ? section.largeDiffRenderLimit : null
 
@@ -169,6 +173,31 @@ export function DiffSectionBody({
                 }
               : undefined
           }
+        />
+      ) : !isEditable ? (
+        <PierreDiffViewer
+          modelKey={modelPathBase}
+          originalContent={section.originalContent}
+          modifiedContent={section.modifiedContent}
+          filePath={section.path}
+          relativePath={section.path}
+          language={language}
+          sideBySide={sideBySide}
+          isDark={isDark}
+          fontSize={diffEditorFontSize}
+          fontFamily={terminalFontFamily}
+          wordWrap={diffWordWrap}
+          worktreeId={pierreCommentProps.worktreeId}
+          comments={pierreCommentProps.comments}
+          commentableLineNumbers={pierreCommentProps.commentableLineNumbers}
+          addLineCommentLabel={addLineCommentLabel}
+          addLineCommentPlaceholder={addLineCommentPlaceholder}
+          onAddLineComment={pierreCommentProps.onAddLineComment}
+          onDeleteComment={pierreCommentProps.onDeleteComment}
+          onUpdateComment={pierreCommentProps.onUpdateComment}
+          pendingScrollCommentId={pierreCommentProps.pendingScrollCommentId}
+          onPendingScrollConsumed={pierreCommentProps.onPendingScrollCommentConsumed}
+          onHeightChange={pierreCommentProps.onHeightChange}
         />
       ) : (
         <DiffEditor

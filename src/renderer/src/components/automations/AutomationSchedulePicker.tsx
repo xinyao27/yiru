@@ -2,7 +2,7 @@ import React from 'react'
 import { CalendarDots as CalendarClock, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   Select,
   SelectContent,

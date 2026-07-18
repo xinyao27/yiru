@@ -5,7 +5,7 @@ import type { SpoolChecksReadResult } from '../../../../shared/spool/spool-opera
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
 import { parseSpoolChecksReadResult } from './spool-owner-result-validation'
 import { invokeSpoolWorkspaceRead, SpoolWorkspaceOperationError } from './spool-workspace-operation'

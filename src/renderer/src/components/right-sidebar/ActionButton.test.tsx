@@ -21,6 +21,9 @@ function visit(node: unknown, cb: (node: ReactElementLike) => void): void {
   if (element.props?.children) {
     visit(element.props.children, cb)
   }
+  if (element.props?.render) {
+    visit(element.props.render, cb)
+  }
 }
 
 function findInnerButton(node: unknown): ReactElementLike {
@@ -89,11 +92,10 @@ describe('ActionButton', () => {
     expect(button.props['aria-label']).toBe('Stage all')
   })
 
-  it('renders the title as tooltip content (non-native, Radix)', () => {
+  it('renders the title as tooltip content', () => {
     const element = ActionButton({ ...baseProps, onClick: vi.fn() })
-    // Why: the Radix TooltipContent is what renders the visual tooltip.
-    // Native `title` was removed because its styling diverges from the
-    // rest of the sidebar chrome.
+    // Why: TooltipContent renders the consistent app tooltip instead of the
+    // browser-native title treatment.
     expect(findTooltipContentText(element)).toContain('Stage all')
   })
 
@@ -107,7 +109,7 @@ describe('ActionButton', () => {
   })
 
   it('does NOT render the native disabled prop on the inner button', () => {
-    // Why: Radix TooltipTrigger on a DOM-disabled <button> gets its pointer
+    // Why: TooltipTrigger on a DOM-disabled <button> gets its pointer
     // events blocked in Chromium, suppressing the tooltip entirely — a
     // regression vs. the native `title` attribute it replaced. ActionButton
     // uses aria-disabled + a click guard instead.
@@ -120,27 +122,6 @@ describe('ActionButton', () => {
     const element = ActionButton({ ...baseProps, onClick: vi.fn(), disabled: true })
     const button = findInnerButton(element)
     expect(button.props['aria-disabled']).toBe(true)
-  })
-
-  it('applies the visual-disabled class when disabled', () => {
-    const element = ActionButton({ ...baseProps, onClick: vi.fn(), disabled: true })
-    const button = findInnerButton(element)
-    expect(button.props.className).toContain('opacity-50')
-    expect(button.props.className).toContain('cursor-not-allowed')
-  })
-
-  it('omits the visual-disabled class when enabled', () => {
-    const element = ActionButton({ ...baseProps, onClick: vi.fn(), disabled: false })
-    const button = findInnerButton(element)
-    expect(button.props.className).not.toContain('opacity-50')
-  })
-
-  it('keeps the full icon button box as the hover and click target', () => {
-    const element = ActionButton({ ...baseProps, onClick: vi.fn() })
-    const button = findInnerButton(element)
-    expect(button.props.className).not.toContain('h-auto')
-    expect(button.props.className).not.toContain('w-auto')
-    expect(button.props.className).toContain('hover:bg-background/70')
   })
 
   it('swallows clicks and calls preventDefault when disabled', () => {

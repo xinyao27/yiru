@@ -11,6 +11,7 @@ import {
 import { isRuntimeRepoRefSearchQueryWithinLimit } from '@/runtime/runtime-repo-search-bounds'
 import { translate } from '@/i18n/i18n'
 import { parseExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
+import { cn } from '@/lib/class-names'
 
 type BaseRefPickerProps = {
   repoId: string
@@ -256,11 +257,12 @@ export function BaseRefPicker({
                     setBaseRefResults([])
                     onSelect(ref)
                   }}
-                  className={`flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors hover:bg-muted/60 ${
+                  className={cn(
+                    'flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors hover:bg-muted/60',
                     effectiveBaseRef === ref
                       ? 'bg-accent text-accent-foreground'
                       : 'text-foreground'
-                  }`}
+                  )}
                 >
                   <span className="truncate">{ref}</span>
                   {effectiveBaseRef === ref ? (

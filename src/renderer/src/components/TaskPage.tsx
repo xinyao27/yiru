@@ -167,7 +167,7 @@ import {
   loadTaskPageJiraProjectStatusOrder
 } from '@/components/task-page-jira-status-order'
 import { JiraIcon } from '@/components/icons/JiraIcon'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   getLinkedWorkItemSuggestedName,
   getLinkedWorkItemWorkspaceName,
@@ -11952,9 +11952,10 @@ export default function TaskPage(): React.JSX.Element {
                         key={t.id}
                         type="button"
                         onClick={() => setNewLinearIssueTeamId(t.id)}
-                        className={`w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors ${
+                        className={cn(
+                          'w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors',
                           newLinearIssueTeamId === t.id ? 'bg-muted font-medium' : ''
-                        }`}
+                        )}
                       >
                         <span>
                           {t.key} — {t.name}
@@ -12054,11 +12055,12 @@ export default function TaskPage(): React.JSX.Element {
                           key={s.id}
                           type="button"
                           onClick={() => setNewLinearIssueStateId(s.id)}
-                          className={`w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors ${
+                          className={cn(
+                            'w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors',
                             newLinearIssueStateId === s.id
                               ? 'bg-muted font-medium text-foreground'
                               : 'text-foreground/80'
-                          }`}
+                          )}
                         >
                           <div className="flex items-center gap-2">
                             <span
@@ -12134,11 +12136,12 @@ export default function TaskPage(): React.JSX.Element {
                       <button
                         type="button"
                         onClick={() => setNewLinearIssueAssigneeId(null)}
-                        className={`w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors ${
+                        className={cn(
+                          'w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors',
                           newLinearIssueAssigneeId === null
                             ? 'bg-muted font-medium text-foreground'
                             : 'text-foreground/80'
-                        }`}
+                        )}
                       >
                         <div className="flex items-center gap-2">
                           <UserRound className="size-3.5 text-muted-foreground/50" />
@@ -12155,11 +12158,12 @@ export default function TaskPage(): React.JSX.Element {
                           key={m.id}
                           type="button"
                           onClick={() => setNewLinearIssueAssigneeId(m.id)}
-                          className={`w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors ${
+                          className={cn(
+                            'w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors',
                             newLinearIssueAssigneeId === m.id
                               ? 'bg-muted font-medium text-foreground'
                               : 'text-foreground/80'
-                          }`}
+                          )}
                         >
                           <div className="flex items-center gap-2 truncate">
                             {m.avatarUrl ? (
@@ -12226,11 +12230,12 @@ export default function TaskPage(): React.JSX.Element {
                       key={p.val}
                       type="button"
                       onClick={() => setNewLinearIssuePriority(p.val)}
-                      className={`w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors ${
+                      className={cn(
+                        'w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors',
                         newLinearIssuePriority === p.val
                           ? 'bg-muted font-medium text-foreground'
                           : 'text-foreground/80'
-                      }`}
+                      )}
                     >
                       <div className="flex items-center gap-2">
                         <LinearPriorityIcon priority={p.val} className="size-3.5" />
@@ -12279,11 +12284,12 @@ export default function TaskPage(): React.JSX.Element {
                       <button
                         type="button"
                         onClick={() => setNewLinearIssueProjectId(null)}
-                        className={`w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors ${
+                        className={cn(
+                          'w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors',
                           newLinearIssueProjectId === null
                             ? 'bg-muted font-medium text-foreground'
                             : 'text-foreground/80'
-                        }`}
+                        )}
                       >
                         <div className="flex items-center gap-2">
                           <FolderKanban className="size-3.5 text-muted-foreground/50" />
@@ -12300,11 +12306,12 @@ export default function TaskPage(): React.JSX.Element {
                           key={p.id}
                           type="button"
                           onClick={() => setNewLinearIssueProjectId(p.id)}
-                          className={`w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors ${
+                          className={cn(
+                            'w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors',
                             newLinearIssueProjectId === p.id
                               ? 'bg-muted font-medium text-foreground'
                               : 'text-foreground/80'
-                          }`}
+                          )}
                         >
                           <div className="flex items-center gap-2 truncate">
                             <FolderKanban className="size-3.5 text-muted-foreground/70 flex-shrink-0" />
@@ -12371,11 +12378,12 @@ export default function TaskPage(): React.JSX.Element {
                                 setNewLinearIssueLabelIds([...newLinearIssueLabelIds, l.id])
                               }
                             }}
-                            className={`w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors ${
+                            className={cn(
+                              'w-full flex items-center justify-between text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors',
                               isSelected
                                 ? 'bg-muted font-medium text-foreground'
                                 : 'text-foreground/80'
-                            }`}
+                            )}
                           >
                             <div className="flex items-center gap-2">
                               <span

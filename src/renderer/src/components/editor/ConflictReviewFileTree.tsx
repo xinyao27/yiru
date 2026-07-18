@@ -7,7 +7,7 @@ import {
 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   buildSourceControlTree,
   compactSourceControlTree,

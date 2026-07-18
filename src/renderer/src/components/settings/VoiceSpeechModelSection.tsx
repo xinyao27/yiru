@@ -19,6 +19,7 @@ import {
   Check
 } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 function describeSpeechModelDownloadError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error)
@@ -119,9 +120,10 @@ export function VoiceSpeechModelSection({
                     )
                   }
                 }}
-                className={`group flex items-center gap-2.5 py-2.5 ${
+                className={cn(
+                  'group flex items-center gap-2.5 py-2.5',
                   !isCloud && !isReady && !isDownloading ? 'opacity-50' : ''
-                }`}
+                )}
                 closeOnClick={false}
               >
                 <span className="flex size-4 shrink-0 items-center justify-center">

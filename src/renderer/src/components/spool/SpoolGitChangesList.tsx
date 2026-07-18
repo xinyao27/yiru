@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { SourceControlSectionHeader } from '@/components/right-sidebar/SourceControlSectionHeader'
 import { SourceControlVirtualFileList } from '@/components/right-sidebar/source-control-virtual-file-list'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { SpoolTruncatedPathLabel } from './SpoolTruncatedPathLabel'
 
 export function SpoolGitChangesList({

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { DiffLine } from './native-chat-diff'
 
 /** Inline coloured diff, used for Edit/Write tool calls and diff-style tool

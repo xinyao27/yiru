@@ -7,7 +7,7 @@ import type {
 } from '../../../../shared/spool/spool-catalog-contract'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon, getAgentLabel } from '@/lib/agent-catalog'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   AiVaultPanelNotice,
   AiVaultPanelSurface

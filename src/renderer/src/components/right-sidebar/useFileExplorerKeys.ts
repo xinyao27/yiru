@@ -51,6 +51,7 @@ export function useFileExplorerKeys(opts: {
   requestDeleteAll: (nodes: TreeNode[]) => void
   scrollToIndex: (index: number) => void
   activeWorktreeId: string | null
+  nativeTreeNavigation?: boolean
 }): void {
   const rightSidebarOpen = useAppStore((s) => s.rightSidebarOpen)
   const rightSidebarTab = useAppStore((s) => s.rightSidebarTab)
@@ -148,6 +149,18 @@ export function useFileExplorerKeys(opts: {
       if (inlineInputRef.current) {
         return
       }
+      if (
+        e
+          .composedPath()
+          .some(
+            (entry) =>
+              entry instanceof HTMLInputElement && entry.hasAttribute('data-item-rename-input')
+          )
+      ) {
+        // Why: keyboard events retarget to the Trees host when its native rename
+        // input lives in Shadow DOM; global shortcuts must not consume filename edits.
+        return
+      }
       if (shouldIgnoreFileExplorerKeyTarget(e.target)) {
         return
       }
@@ -182,6 +195,7 @@ export function useFileExplorerKeys(opts: {
       // ── Bare-key shortcuts: only when explorer has focus ──
       if (focusInExplorer()) {
         if (
+          !opts.nativeTreeNavigation &&
           applyFileExplorerNavigation(
             {
               rowProjection: rowProjectionRef.current,
@@ -204,7 +218,7 @@ export function useFileExplorerKeys(opts: {
         }
 
         // ── Space activates the focused row (open file / toggle folder). ──
-        if (e.key === ' ' && !e.shiftKey) {
+        if (!opts.nativeTreeNavigation && e.key === ' ' && !e.shiftKey) {
           const focused = findFocusedIndex()
           const node =
             (focused !== null ? rowProjectionRef.current.getRowAtIndex(focused) : null) ??
@@ -290,5 +304,12 @@ export function useFileExplorerKeys(opts: {
 
     window.addEventListener('keydown', onKeyDown, { capture: true })
     return () => window.removeEventListener('keydown', onKeyDown, { capture: true })
-  }, [keybindings, rightSidebarExplorerView, rightSidebarOpen, rightSidebarTab, opts.containerRef])
+  }, [
+    keybindings,
+    opts.containerRef,
+    opts.nativeTreeNavigation,
+    rightSidebarExplorerView,
+    rightSidebarOpen,
+    rightSidebarTab
+  ])
 }

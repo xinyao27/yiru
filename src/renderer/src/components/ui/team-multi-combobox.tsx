@@ -9,7 +9,7 @@ import {
   CommandList
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { LinearTeam } from '../../../../shared/types'
 import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'
 import { translate } from '@/i18n/i18n'

@@ -1,6 +1,6 @@
 import type React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export function SpoolTruncatedPathLabel({
   className,

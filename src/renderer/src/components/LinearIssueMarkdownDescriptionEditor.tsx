@@ -13,7 +13,7 @@ import {
 } from '@/components/editor/rich-markdown-source-transport'
 import { LinearIssueMarkdownToolbar } from '@/components/LinearIssueMarkdownToolbar'
 import { isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import {

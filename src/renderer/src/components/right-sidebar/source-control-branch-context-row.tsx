@@ -5,7 +5,7 @@ import {
   ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import type { GitBranchCompareSummary, GitUpstreamStatus } from '../../../../shared/types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { SourceControlHeaderIconButton } from './source-control-header-icon-button'

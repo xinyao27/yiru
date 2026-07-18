@@ -5,6 +5,7 @@ import { useAppStore } from '@/store'
 import { diffViewStateCache, setWithLRU } from '@/lib/scroll-cache'
 import { monaco } from '@/lib/monaco-setup'
 import { computeDiffEditorFontSize } from '@/lib/editor-font-zoom'
+import { resolveDocumentTheme } from '@/lib/document-theme'
 import { useContextualCopySetup } from './useContextualCopySetup'
 import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
 import { useDiffCommentDecorator } from '../diff-comments/useDiffCommentDecorator'
@@ -25,8 +26,9 @@ import { getDiffViewerLargeDiffSaveAction } from './diff-viewer-large-diff-save-
 import type { DiffViewerProps } from './diff-viewer-props'
 import { buildDiffEditorWordWrapOptions } from './diff-editor-word-wrap-options'
 import { useDiffEditorRegistration } from './diff-navigation-context'
+import { PierreReadonlyDiffViewer } from './PierreReadonlyDiffViewer'
 
-export default function DiffViewer({
+function MonacoDiffViewer({
   modelKey,
   originalModelKey,
   modifiedModelKey,
@@ -68,9 +70,7 @@ export default function DiffViewer({
     settings?.terminalFontSize ?? 13,
     editorFontZoomLevel
   )
-  const isDark =
-    settings?.theme === 'dark' ||
-    (settings?.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const isDark = resolveDocumentTheme(settings?.theme ?? 'system')
 
   const diffEditorRef = useRef<editor.IStandaloneDiffEditor | null>(null)
   const { registerDiffEditor, unregisterDiffEditor } = useDiffEditorRegistration()
@@ -482,4 +482,10 @@ export default function DiffViewer({
       {toastNode}
     </div>
   )
+}
+
+export default function DiffViewer(props: DiffViewerProps): React.JSX.Element {
+  // Why: @pierre/diffs is intentionally read-only. Keep Monaco only for the
+  // unstaged edit/save workflow while every read-only diff uses Pierre.
+  return props.editable ? <MonacoDiffViewer {...props} /> : <PierreReadonlyDiffViewer {...props} />
 }

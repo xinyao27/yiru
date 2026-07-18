@@ -32,6 +32,7 @@ type DetectedBrowserEntry = {
 }
 import { BROWSER_VIEWPORT_PRESETS } from '../../../../shared/browser-viewport-presets'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 type BrowserToolbarMenuDropdownProps = {
   menuOpen: boolean
@@ -90,7 +91,10 @@ export function BrowserToolbarMenuDropdown({
               onClick={() => onSwitchProfile(profile.id === 'default' ? null : profile.id)}
             >
               <Check
-                className={`mr-2 size-3.5 shrink-0 ${isSelectedProfile ? 'opacity-100' : 'opacity-0'}`}
+                className={cn(
+                  'mr-2 size-3.5 shrink-0',
+                  isSelectedProfile ? 'opacity-100' : 'opacity-0'
+                )}
               />
               <span className="truncate">{profile.label}</span>
               {profile.source?.browserFamily && (

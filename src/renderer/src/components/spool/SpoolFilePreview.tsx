@@ -7,7 +7,7 @@ import type {
   SpoolFileTreeEntry
 } from '../../../../shared/spool/spool-operation-contract'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { Button } from '@/components/ui/button'
 import { SpoolFilePreviewToolbar, type SpoolFilePreviewMode } from './SpoolFilePreviewToolbar'
 

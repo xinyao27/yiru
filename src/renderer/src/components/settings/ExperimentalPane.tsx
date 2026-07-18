@@ -14,6 +14,7 @@ import {
   MIN_AGENT_HIBERNATION_IDLE_MS,
   getEffectiveAgentHibernationIdleMs
 } from '@/lib/agent-hibernation-planner'
+import { cn } from '@/lib/class-names'
 
 export { getExperimentalPaneSearchEntries }
 
@@ -89,14 +90,16 @@ export function ExperimentalPane({
               onClick={() => {
                 updateSettings({ experimentalPet: !settings.experimentalPet })
               }}
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors ${
+              className={cn(
+                'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
                 settings.experimentalPet ? 'bg-foreground' : 'bg-muted-foreground/30'
-              }`}
+              )}
             >
               <span
-                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-background shadow-sm transition-transform ${
+                className={cn(
+                  'inline-block h-3.5 w-3.5 transform rounded-full bg-background shadow-sm transition-transform',
                   settings.experimentalPet ? 'translate-x-4' : 'translate-x-0.5'
-                }`}
+                )}
               />
             </button>
           </div>
@@ -134,14 +137,16 @@ export function ExperimentalPane({
                   experimentalActivity: !settings.experimentalActivity
                 })
               }
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors ${
+              className={cn(
+                'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
                 settings.experimentalActivity ? 'bg-foreground' : 'bg-muted-foreground/30'
-              }`}
+              )}
             >
               <span
-                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-background shadow-sm transition-transform ${
+                className={cn(
+                  'inline-block h-3.5 w-3.5 transform rounded-full bg-background shadow-sm transition-transform',
                   settings.experimentalActivity ? 'translate-x-4' : 'translate-x-0.5'
-                }`}
+                )}
               />
             </button>
           </div>
@@ -189,14 +194,16 @@ export function ExperimentalPane({
                   experimentalTerminalAttention: !settings.experimentalTerminalAttention
                 })
               }
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors ${
+              className={cn(
+                'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
                 settings.experimentalTerminalAttention ? 'bg-foreground' : 'bg-muted-foreground/30'
-              }`}
+              )}
             >
               <span
-                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-background shadow-sm transition-transform ${
+                className={cn(
+                  'inline-block h-3.5 w-3.5 transform rounded-full bg-background shadow-sm transition-transform',
                   settings.experimentalTerminalAttention ? 'translate-x-4' : 'translate-x-0.5'
-                }`}
+                )}
               />
             </button>
           </div>

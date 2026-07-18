@@ -1,5 +1,5 @@
 import React from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import { Field } from './automation-page-parts'
 import { AutomationPrecheckFields } from './AutomationPrecheckFields'

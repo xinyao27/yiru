@@ -33,6 +33,7 @@ import {
 } from './feature-tip-telemetry'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 const WAVEFORM_BAR_HEIGHTS = [30, 60, 90, 70, 100, 50, 80, 35, 65]
 
@@ -275,16 +276,18 @@ export default function FeatureTipsModal(): JSX.Element | null {
           showCloseButton={!skillTerminalOpen}
         >
           <div
-            className={`scrollbar-sleek flex min-h-0 min-w-0 flex-1 flex-col justify-between overflow-y-auto px-8 py-9 transition-[flex-basis] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:shrink-0 ${
+            className={cn(
+              'scrollbar-sleek flex min-h-0 min-w-0 flex-1 flex-col justify-between overflow-y-auto px-8 py-9 transition-[flex-basis] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:shrink-0',
               skillTerminalOpen ? 'basis-auto md:basis-full' : 'basis-auto md:basis-[47.5%]'
-            }`}
+            )}
           >
-            <DialogHeader className={`${skillTerminalOpen ? 'gap-2' : 'gap-4'} text-left`}>
+            <DialogHeader className={cn(skillTerminalOpen ? 'gap-2' : 'gap-4', 'text-left')}>
               <div>
                 <DialogTitle
-                  className={`text-3xl font-semibold leading-tight tracking-tight ${
+                  className={cn(
+                    'text-3xl font-semibold leading-tight tracking-tight',
                     skillTerminalOpen ? 'max-w-2xl' : 'max-w-[22rem]'
-                  }`}
+                  )}
                 >
                   {currentTip.title}
                 </DialogTitle>
@@ -293,11 +296,12 @@ export default function FeatureTipsModal(): JSX.Element | null {
                 </DialogDescription>
                 <div
                   aria-hidden={skillTerminalOpen}
-                  className={`max-w-sm space-y-2 overflow-hidden rounded-md border text-sm leading-relaxed text-muted-foreground transition-[max-height,opacity,transform,margin,padding,border-color] duration-300 ease-out motion-reduce:transition-none ${
+                  className={cn(
+                    'max-w-sm space-y-2 overflow-hidden rounded-md border text-sm leading-relaxed text-muted-foreground transition-[max-height,opacity,transform,margin,padding,border-color] duration-300 ease-out motion-reduce:transition-none',
                     skillTerminalOpen
                       ? 'pointer-events-none mt-0 max-h-0 -translate-y-2 border-transparent p-0 opacity-0'
                       : 'mt-3 max-h-64 translate-y-0 border-border/70 bg-muted/35 p-3 opacity-100'
-                  }`}
+                  )}
                 >
                   <p className="font-medium text-foreground">
                     {translate(
@@ -360,16 +364,18 @@ export default function FeatureTipsModal(): JSX.Element | null {
             </DialogFooter>
           </div>
           <div
-            className={`min-h-0 min-w-0 shrink-0 overflow-hidden transition-[flex-basis,max-height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+            className={cn(
+              'min-h-0 min-w-0 shrink-0 overflow-hidden transition-[flex-basis,max-height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
               skillTerminalOpen
                 ? 'pointer-events-none max-h-0 basis-0 md:max-h-none md:basis-0'
                 : 'max-h-[40rem] basis-auto md:basis-[52.5%]'
-            }`}
+            )}
           >
             <div
-              className={`h-full transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:w-[29.4rem] ${
+              className={cn(
+                'h-full transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:w-[29.4rem]',
                 skillTerminalOpen ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'
-              }`}
+              )}
             >
               {skillTerminalOpen ? null : <FeatureTipVisual tip={currentTip} />}
             </div>

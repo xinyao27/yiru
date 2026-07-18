@@ -89,7 +89,7 @@ vi.mock('./TabBarQuickCommandItem', () => ({
   TabBarQuickCommandItem: () => null
 }))
 
-vi.mock('@/lib/utils', () => ({
+vi.mock('@/lib/class-names', () => ({
   cn: (...args: string[]) => args.filter(Boolean).join(' ')
 }))
 

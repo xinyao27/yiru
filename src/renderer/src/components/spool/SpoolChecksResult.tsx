@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { ChecksList } from '@/components/right-sidebar/checks-panel-content'
 import { CHECK_COLOR, CHECK_ICON } from '@/components/right-sidebar/check-status-presentation'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 export function SpoolChecksResult({
   result

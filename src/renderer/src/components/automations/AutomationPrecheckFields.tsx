@@ -8,6 +8,7 @@ import {
 import { Field } from './automation-page-parts'
 import type { AutomationDraft } from './AutomationEditorDialog'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 type AutomationPrecheckFieldsProps = {
   draft: AutomationDraft
@@ -61,7 +62,7 @@ export function AutomationPrecheckFields({
             }
           }}
         >
-          <SelectTrigger className={`w-full ${pickerTriggerClassName}`}>
+          <SelectTrigger className={cn('w-full', pickerTriggerClassName)}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent alignItemWithTrigger={false} align="start" sideOffset={4}>

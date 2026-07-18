@@ -98,6 +98,7 @@ import { findWorktreeById } from '@/store/slices/worktree-helpers'
 import { dirname } from '@/lib/path'
 import { relativePathInsideRoot } from '../../../../shared/cross-platform-path'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 const EMPTY_MARKDOWN_DOCUMENTS: MarkdownDocument[] = []
 
@@ -1146,9 +1147,11 @@ export default function MarkdownPreview({
               <div
                 key={comment.id}
                 data-markdown-review-note-id={comment.id}
-                className={`markdown-annotation-card ${
-                  activeReviewCommentId === comment.id ? 'is-active' : ''
-                } ${attentionReviewCommentId === comment.id ? 'is-attention' : ''}`.trim()}
+                className={cn(
+                  'markdown-annotation-card',
+                  activeReviewCommentId === comment.id && 'is-active',
+                  attentionReviewCommentId === comment.id && 'is-attention'
+                )}
               >
                 <DiffCommentCard
                   lineNumber={comment.lineNumber}
@@ -1263,7 +1266,7 @@ export default function MarkdownPreview({
       const hasReviewNotes = getMarkdownCommentsForRange(range).length > 0
       return (
         <div
-          className={`markdown-annotation-block ${hasReviewNotes ? 'has-review-notes' : ''}`.trim()}
+          className={cn('markdown-annotation-block', hasReviewNotes && 'has-review-notes')}
           data-source-line={range.startLine}
           data-source-end-line={range.endLine}
           data-annotation-block-key={blockKey}
@@ -1300,9 +1303,10 @@ export default function MarkdownPreview({
             <a
               {...props}
               href={href}
-              className={`${className ?? ''} ${
+              className={cn(
+                className,
                 resolvedDocument ? 'markdown-doc-link' : 'markdown-doc-link-broken'
-              }`.trim()}
+              )}
               title={resolvedDocument ? undefined : title}
               onClick={handleDocLinkClick}
             >
@@ -1695,9 +1699,7 @@ export default function MarkdownPreview({
         return (
           <li {...props}>
             <div
-              className={`markdown-annotation-list-block ${
-                hasReviewNotes ? 'has-review-notes' : ''
-              }`.trim()}
+              className={cn('markdown-annotation-list-block', hasReviewNotes && 'has-review-notes')}
               data-source-line={range.startLine}
               data-source-end-line={range.endLine}
               // Why: only advertise the block to the add-review-note shortcut
@@ -1808,7 +1810,10 @@ export default function MarkdownPreview({
         ref={setRootRef}
         tabIndex={0}
         style={{ fontSize: `${editorFontSize}px` }}
-        className={`markdown-preview h-full min-h-0 overflow-auto scrollbar-editor ${isDark ? 'markdown-dark' : 'markdown-light'}`}
+        className={cn(
+          'markdown-preview h-full min-h-0 overflow-auto scrollbar-editor',
+          isDark ? 'markdown-dark' : 'markdown-light'
+        )}
       >
         {isSearchOpen ? (
           <div className="markdown-preview-search" onKeyDown={(event) => event.stopPropagation()}>

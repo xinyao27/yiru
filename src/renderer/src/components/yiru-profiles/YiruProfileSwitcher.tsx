@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 import type { YiruCloudOrgSummary, YiruProfileSummary } from '../../../../shared/yiru-profiles'
 import { YiruProfileAvatar } from './YiruProfileAvatar'
@@ -223,7 +223,7 @@ export function YiruProfileSwitcher({
                     variant="ghost"
                     size={sidebarPlacement ? 'icon-xs' : 'xs'}
                     className={cn(
-                      'text-muted-foreground titlebar-profile-switcher',
+                      'shrink-0 text-muted-foreground [-webkit-app-region:no-drag]',
                       sidebarPlacement ? 'px-0' : 'mr-2 max-w-[180px] gap-1.5 px-1.5'
                     )}
                     disabled={profileActionDisabled}

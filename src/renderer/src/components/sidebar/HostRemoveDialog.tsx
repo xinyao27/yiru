@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { CaretDown as ChevronDown, SpinnerGap as Loader2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   Dialog,
   DialogContent,

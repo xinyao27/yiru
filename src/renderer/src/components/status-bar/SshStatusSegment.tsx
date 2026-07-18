@@ -26,6 +26,7 @@ import { isUserManagedRuntimeEnvironment } from '../../../../shared/runtime-envi
 import { RuntimeHostStatusRow, type RuntimeHostConnectionState } from './RuntimeHostStatusRow'
 import { SshTargetStatusRow } from './SshTargetStatusRow'
 import type { RemoteRuntimeSharedConnectionDiagnostics } from '../../../../shared/remote-runtime-shared-control-types'
+import { cn } from '@/lib/class-names'
 
 function isConnecting(status: SshConnectionStatus): boolean {
   return ['connecting', 'deploying-relay', 'reconnecting'].includes(status)
@@ -304,9 +305,10 @@ export function SshStatusSegment({
             {iconOnly ? (
               <span className="inline-flex items-center gap-1">
                 <span
-                  className={`inline-block size-2 rounded-full ${
+                  className={cn(
+                    'inline-block size-2 rounded-full',
                     syncProblem ? 'bg-destructive' : overallDotColor(overall, connectedHostCount)
-                  }`}
+                  )}
                 />
                 {syncProblem ? (
                   <AlertTriangle className="size-3 text-destructive" />
@@ -340,9 +342,10 @@ export function SshStatusSegment({
                   </span>
                 )}
                 <span
-                  className={`inline-block size-1.5 rounded-full ${
+                  className={cn(
+                    'inline-block size-1.5 rounded-full',
                     syncProblem ? 'bg-destructive' : overallDotColor(overall, connectedHostCount)
-                  }`}
+                  )}
                 />
               </span>
             )}

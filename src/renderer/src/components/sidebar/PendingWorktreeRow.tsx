@@ -1,7 +1,7 @@
 import React from 'react'
 import { Warning as AlertTriangle, SpinnerGap as Loader2, X } from '@phosphor-icons/react'
 import { useAppStore } from '@/store'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import {
   getCreationProgressLabel,
   type PendingWorktreeCreation

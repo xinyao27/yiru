@@ -3,6 +3,7 @@ import { Plus, MagnifyingGlass as Search } from '@phosphor-icons/react'
 import { usePrefersReducedMotion } from '@/components/feature-wall/feature-wall-modal-helpers'
 import { formatShortcutKeyComboDetails, useShortcutKeyDetails } from '@/hooks/useShortcutLabel'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 const TYPED_QUERY = 'auth'
 // Why: the real palette lists recent worktrees on open; typing only narrows the
@@ -143,11 +144,12 @@ export function CmdJPaletteFeatureTipVisual(): JSX.Element {
                 </span>
               ) : null}
               <span
-                className={`inline-flex h-7 min-w-7 items-center justify-center rounded-md border border-border/80 px-2 text-xs font-semibold text-muted-foreground shadow-xs transition-[transform,background-color] duration-150 ease-out ${
+                className={cn(
+                  'inline-flex h-7 min-w-7 items-center justify-center rounded-md border border-border/80 px-2 text-xs font-semibold text-muted-foreground shadow-xs transition-[transform,background-color] duration-150 ease-out',
                   isPressed
                     ? 'translate-y-[1.5px] bg-foreground/[0.18]'
                     : 'translate-y-0 bg-foreground/[0.08]'
-                }`}
+                )}
                 style={isPressed ? { transitionDelay: `${index * 40}ms` } : undefined}
               >
                 {key}
@@ -158,13 +160,14 @@ export function CmdJPaletteFeatureTipVisual(): JSX.Element {
       ) : null}
 
       <div
-        className={`relative mt-3 h-[12.75rem] w-full max-w-[21rem] overflow-hidden rounded-xl border border-border bg-card text-left shadow-lg transition-opacity duration-300 ease-out ${
+        className={cn(
+          'relative mt-3 h-[12.75rem] w-full max-w-[21rem] overflow-hidden rounded-xl border border-border bg-card text-left shadow-lg transition-opacity duration-300 ease-out',
           !paletteMounted
             ? 'pointer-events-none invisible opacity-0'
             : paletteOpaque
               ? 'opacity-100'
               : 'opacity-0'
-        }`}
+        )}
       >
         {/* Why: search and results are absolutely positioned so row content
             changes during the demo never reflow the input bar mid-animation. */}
@@ -187,7 +190,10 @@ export function CmdJPaletteFeatureTipVisual(): JSX.Element {
             {renderWorktrees.map((result) => (
               <div
                 key={result.key}
-                className={`flex shrink-0 items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-1.5 ${resultEnterClass}`}
+                className={cn(
+                  'flex shrink-0 items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-1.5',
+                  resultEnterClass
+                )}
               >
                 <span className="flex w-4 shrink-0 items-center justify-center">
                   {result.status === 'done' ? (
@@ -210,7 +216,10 @@ export function CmdJPaletteFeatureTipVisual(): JSX.Element {
             ))}
             {renderShowCreate ? (
               <div
-                className={`mt-0.5 flex shrink-0 items-center gap-2.5 rounded-lg border border-dashed border-border/60 bg-muted/10 px-2.5 py-1.5 ${resultEnterClass}`}
+                className={cn(
+                  'mt-0.5 flex shrink-0 items-center gap-2.5 rounded-lg border border-dashed border-border/60 bg-muted/10 px-2.5 py-1.5',
+                  resultEnterClass
+                )}
               >
                 <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-dashed border-border/60 bg-muted/25 text-muted-foreground/70">
                   <Plus size={13} aria-hidden="true" />

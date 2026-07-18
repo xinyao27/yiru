@@ -1,3 +1,5 @@
+import { cn } from '@/lib/class-names'
+
 import type { PaneStyleOptions, ManagedPaneInternal } from './pane-manager-types'
 import { attachDividerDrag, disposeDividerDrag, type DividerCallbacks } from './pane-divider-drag'
 export { createDividerFlexFrameScheduler } from './pane-divider-drag'
@@ -19,7 +21,7 @@ export function createDivider(
   callbacks: DividerCallbacks
 ): HTMLElement {
   const divider = document.createElement('div')
-  divider.className = `pane-divider ${isVertical ? 'is-vertical' : 'is-horizontal'}`
+  divider.className = cn('pane-divider', isVertical ? 'is-vertical' : 'is-horizontal')
 
   // Ghostty-style: the element itself is a wide transparent hit area for easy
   // grabbing. The visible line is drawn by a CSS ::after pseudo-element

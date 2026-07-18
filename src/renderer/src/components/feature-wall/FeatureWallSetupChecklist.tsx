@@ -5,7 +5,7 @@ import type {
   FeatureWallSetupStepId
 } from '../../../../shared/feature-wall-setup-steps'
 import { getFeatureWallSetupStepsForSection } from '../../../../shared/feature-wall-setup-steps'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { FeatureWallSetupProgress } from './feature-wall-setup-progress'
 import { AgentCapabilitiesSetupAction } from './AgentCapabilitiesSetupAction'
 import {

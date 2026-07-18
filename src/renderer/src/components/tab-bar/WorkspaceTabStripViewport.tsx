@@ -1,7 +1,7 @@
 import type React from 'react'
 import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTabStripDragScrollHandlers } from './tab-strip-drag-scroll'
@@ -62,7 +62,7 @@ export function WorkspaceTabStripViewport({
           {...stripProps}
           ref={tabStripRef}
           className={cn(
-            'terminal-tab-strip flex h-full min-w-0 max-w-full flex-1 items-stretch overflow-x-auto overflow-y-hidden pl-1',
+            'terminal-tab-strip flex h-full min-w-0 max-w-full flex-1 items-stretch gap-0.5 overflow-x-auto overflow-y-hidden pl-1',
             getTabStripScrollMaskClassName(tabStripOverflowState),
             stripClassName
           )}

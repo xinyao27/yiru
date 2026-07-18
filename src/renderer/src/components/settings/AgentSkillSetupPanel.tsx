@@ -14,7 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { notifyInstalledAgentSkillsChanged } from '@/hooks/useInstalledAgentSkills'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { isYiruCliAvailableOnPath } from '@/lib/agent-skill-cli-prerequisite'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 
 type AgentSkillSetupPanelVariant = 'card' | 'inline'

@@ -1,6 +1,6 @@
 import React from 'react'
 import type { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { AutomationRun } from '../../../../shared/automations-types'
 
 export function formatAutomationDateTime(value: number | null | undefined): string {

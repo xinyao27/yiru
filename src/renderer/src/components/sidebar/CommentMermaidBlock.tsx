@@ -1,6 +1,6 @@
 import React from 'react'
 import MermaidBlock from '@/components/editor/MermaidBlock'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 
 // Why: comment markdown components are module-level constants without access to

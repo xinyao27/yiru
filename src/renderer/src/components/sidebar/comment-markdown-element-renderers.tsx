@@ -1,5 +1,6 @@
 import React from 'react'
 import type { Components } from 'react-markdown'
+import { cn } from '@/lib/class-names'
 import { isMermaidFence, isMermaidPre, renderMermaidFence } from './comment-mermaid-fence'
 import {
   GitHubUserAttachmentImage,
@@ -238,13 +239,11 @@ export function createDocumentCommentMarkdownComponents(
         // back to a text link when the image itself can't render.
         return <GitHubUserAttachmentImage src={src} alt={alt} />
       }
-      const imageClassName = [
+      const imageClassName = cn(
         'my-3 max-h-96 max-w-full rounded-md object-contain',
         'outline outline-1 outline-black/10 dark:outline-white/10',
-        onLinkClick ? 'cursor-pointer' : ''
-      ]
-        .filter(Boolean)
-        .join(' ')
+        onLinkClick && 'cursor-pointer'
+      )
 
       return (
         <img

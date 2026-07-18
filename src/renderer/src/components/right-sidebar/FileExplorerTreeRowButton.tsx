@@ -10,7 +10,7 @@ import {
 import type { GitFileStatus } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { TreeNode } from './file-explorer-types'
 import { STATUS_LABELS } from './status-display'
 
