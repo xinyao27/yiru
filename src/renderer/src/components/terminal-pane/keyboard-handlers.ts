@@ -323,7 +323,7 @@ export function useTerminalKeyboardShortcuts({
       // Cmd+G / Cmd+Shift+G navigates terminal search matches even when focus
       // is inside the search input itself, so this check must run before the
       // editable-target guard would otherwise bypass all terminal shortcuts.
-      // stopImmediatePropagation prevents App.tsx's Cmd+Shift+G (source-control sidebar) from also firing.
+      // stopImmediatePropagation prevents application-shell.tsx's Cmd+Shift+G (source-control sidebar) from also firing.
       const direction = matchSearchNavigate(e, isMac, searchOpenRef.current, searchStateRef.current)
       if (direction !== null) {
         if (e.repeat) {
@@ -565,7 +565,7 @@ export function useTerminalKeyboardShortcuts({
 
       // Cmd+W closes the active split pane (or the whole tab when only one
       // pane remains). Always intercepted here so the tab-level handler in
-      // Terminal.tsx never closes the entire tab directly — that would kill
+      // terminal-workspace.tsx never closes the entire tab directly — that would kill
       // every pane instead of just the focused one.
       if (action.type === 'closeActivePane') {
         e.preventDefault()

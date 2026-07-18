@@ -3,7 +3,7 @@ import type { ChildProcess } from 'node:child_process'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { gitSpawnMock } = vi.hoisted(() => ({
   gitSpawnMock: vi.fn()

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { createTerminalGitHubPRLinkDetector } from './terminal-github-pr-link-detector'
 
 const issue8126Url = 'https://github.com/owner/repo/pull/10'

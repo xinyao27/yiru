@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   WORKSPACE_BOARD_COLUMN_WIDTH_DEFAULT,
   WORKSPACE_BOARD_COLUMN_WIDTH_MAX,

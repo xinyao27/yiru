@@ -11,7 +11,7 @@
 // row filled exactly to the right margin leaves replay wrap-pending, and the
 // addon's RELATIVE cursor restore then lands one column short.
 import './xterm-env-polyfill'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { Terminal } from '@xterm/headless'
 import { SerializeAddon } from '@xterm/addon-serialize'
 import { HeadlessEmulator } from './headless-emulator'

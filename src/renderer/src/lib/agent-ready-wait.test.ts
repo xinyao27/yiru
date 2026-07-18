@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { waitForAgentReady } from './agent-ready-wait'
 import { useAppStore } from '@/store'
 import { inspectRuntimeTerminalProcess } from '@/runtime/runtime-terminal-inspection'

@@ -1,7 +1,7 @@
 import { createElement, type RefObject } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import type { TextInput } from 'react-native'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { TerminalLiveAccessoryInput } from './terminal-live-accessory-input'
 import type { TerminalLiveInputSender } from './terminal-live-input-sender'
 import {

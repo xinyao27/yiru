@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '../../../../shared/terminal-scrollback-limits'
 import type { TerminalLayoutSnapshot } from '../../../../shared/types'
 import { getUtf8ByteLength } from '../../../../shared/utf8-byte-limits'

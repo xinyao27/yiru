@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getTerminalPaneSearchEntries } from './terminal-search'
 import { getAppearancePaneSearchEntries, getSidebarEntries } from './appearance-search'
 import { getWorkspaceCardLayoutEntry } from './appearance-sidebar-search'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import fs from 'node:fs'
 import type { Repo } from '../../../../shared/types'
 import { reconcileFetchedRepos } from './repo-identity-reconcile'

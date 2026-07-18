@@ -39,8 +39,8 @@ export async function loadNimTextMateGrammar(scopeName: string): Promise<IRawGra
   }
 
   // Why: Nim highlighting uses the maintained VS Code TextMate grammar from
-  // nim-lang/vscode-nim (MIT; see textmate-grammars/nim-LICENSE.txt).
-  const grammarModule = await import('./textmate-grammars/nim.tmLanguage.json')
+  // nim-lang/vscode-nim (MIT; see textmate-grammars/nim-grammar-license.txt).
+  const grammarModule = await import('./textmate-grammars/nim-tm-language.json')
   return grammarModule.default as unknown as IRawGrammar
 }
 

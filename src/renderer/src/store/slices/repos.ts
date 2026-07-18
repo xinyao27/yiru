@@ -74,7 +74,7 @@ import { toRuntimeWorktreeSelector } from '../../runtime/runtime-worktree-select
 import { buildDismissedOnboardingFolderAgentStartup } from '@/lib/onboarding-folder-agent-startup'
 import { markOnboardingProjectAdded } from '@/lib/onboarding-project-checklist'
 import { filterSetupScriptPromptDismissalsToValidRepos } from '@/lib/setup-script-prompt'
-import { notifyInstalledAgentSkillsChanged } from '@/hooks/useInstalledAgentSkills'
+import { notifyInstalledAgentSkillsChanged } from '@/hooks/use-installed-agent-skills'
 import { translate } from '@/i18n/i18n'
 import {
   getRepoExecutionHostId,

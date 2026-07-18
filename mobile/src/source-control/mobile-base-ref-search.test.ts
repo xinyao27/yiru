@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { mapBaseRefResults } from './mobile-base-ref-search'
 
 describe('mapBaseRefResults', () => {

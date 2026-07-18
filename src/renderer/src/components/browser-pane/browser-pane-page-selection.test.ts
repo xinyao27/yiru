@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getBrowserPagesForWorkspace } from './browser-pane-page-selection'
 import type { BrowserPage } from '../../../../shared/types'
 

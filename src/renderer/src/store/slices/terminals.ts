@@ -970,7 +970,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
       // single terminal because paneKey is already baked into PTY env, but
       // the rest of the tab works normally. See docs/cli-terminal-hook-pane-key.md.
       // Why: only honor a hint that's a non-empty trimmed string. The IPC
-      // boundary at useIpcEvents.ts spreads `id` whenever `tabId !== undefined`,
+      // boundary at use-ipc-events.ts spreads `id` whenever `tabId !== undefined`,
       // so a stray `''` or whitespace-only value from a future producer would
       // otherwise be persisted as a real tab id and break paneKey routing
       // (`${tabId}:${leafId}` would inherit the bad tab segment).
@@ -1029,7 +1029,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         ...(createdShellOverride !== undefined ? { shellOverride: createdShellOverride } : {}),
         ...(startupCwd && startupCwd.length > 0 ? { startupCwd } : {}),
         ...(options?.launchAgent ? { launchAgent: options.launchAgent } : {}),
-        // Why: when Terminal.tsx's activation fallback auto-creates a tab for a
+        // Why: when terminal-workspace.tsx's activation fallback auto-creates a tab for a
         // first-visit worktree, the resulting PTY spawn is caused by the user
         // clicking the worktree, not by work happening in it. Tagging the tab
         // lets updateTabPtyId suppress the activity bump and sortEpoch bump.
@@ -1896,7 +1896,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
     // until interact"). A signal on the focused tab still sets the indicator;
     // real user interaction with the pane dismisses it. Keystroke/pointerdown
     // routes through clearTerminalTabUnread (see pty-connection.ts and
-    // TerminalPane.tsx); tab/group activation clears unreadTerminalTabs
+    // terminal-pane.tsx); tab/group activation clears unreadTerminalTabs
     // directly in activateTab/focusGroup as a pre-existing side-effect.
     set((s) => {
       if (s.unreadTerminalTabs[tabId]) {
@@ -3414,7 +3414,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         tabsByWorktree,
         worktreesByRepo,
         // Why: restore the per-worktree focus-recency map. Pruning of stale
-        // entries happens later (App.tsx calls pruneLastVisitedTimestamps
+        // entries happens later (application-shell.tsx calls pruneLastVisitedTimestamps
         // after hydration) — not here — because SSH worktrees may still be
         // appearing in worktreesByRepo at this moment.
         lastVisitedAtByWorktreeId: session.lastVisitedAtByWorktreeId ?? {},

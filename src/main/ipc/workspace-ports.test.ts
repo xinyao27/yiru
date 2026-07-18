@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { WorkspacePort, WorkspacePortScanResult } from '../../shared/workspace-ports'
 
 const handlers = new Map<string, (_event: unknown, args: unknown) => Promise<unknown> | unknown>()

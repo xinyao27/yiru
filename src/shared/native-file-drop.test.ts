@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   NATIVE_FILE_DROP_MAX_PATH_BYTES,
   NATIVE_FILE_DROP_MAX_PATHS,

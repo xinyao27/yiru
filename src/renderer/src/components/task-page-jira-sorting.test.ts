@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { JiraIssue, JiraPriority } from '../../../shared/types'
 import { getJiraPriorityWeight, sortJiraIssues } from './jira-issue-sorter'
 

@@ -3,7 +3,7 @@
  * reply parity through the runtime emulator, the per-chunk ownership matrix,
  * the main-side replay guard, and the ingestion-time capture race.
  */
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { YiruRuntimeService } from './yiru-runtime'
 import { HeadlessEmulator } from '../daemon/headless-emulator'
 import {

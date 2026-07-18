@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { buildMobileSourceControlActions } from './mobile-source-control-actions'
-import type { ActionSheetAction } from '../components/ActionSheetModal'
+import type { ActionSheetAction } from '../components/action-sheet-modal'
 import { SOURCE_CONTROL_ACTION_ICONS } from './mobile-source-control-screen-state'
 import type { MobileSourceControlState } from './use-mobile-source-control-state'
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { buildMobileFilePreviewSyntax } from './mobile-file-preview-syntax'
 
 describe('mobile-file-preview-syntax', () => {

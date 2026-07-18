@@ -5,7 +5,7 @@
 // rule families (labeled kv, URL userinfo, .env-line, attribute blocklist)
 // plus the server-side mode that drops install_id.
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import {
   redactString,
   redactAttributes,

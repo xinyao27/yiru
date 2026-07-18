@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { setCachedWorktrees, getCachedWorktrees } from './worktree-cache'
 
 // Why: AC #8498 guarantees a reconnect refetch writes through the

@@ -2,7 +2,7 @@
 // party needs them. These tests pin the dispatcher-side interest signal: every
 // subscribeToPtyData sidecar must surface a ref-counted delivery-interest hold
 // to main. Eager buffers are model-recoverable and must not defeat hidden gating.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 describe('pty dispatcher delivery interest', () => {
   const originalWindow = (globalThis as { window?: typeof window }).window

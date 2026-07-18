@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveTabAgentFromSignals } from './use-tab-agent'
 
 // Pi/OMP share a title-identity group: OMP wraps Pi and emits Pi-compatible

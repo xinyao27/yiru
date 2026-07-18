@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import type { ManagedPane } from './pane-manager-types'
 import { resolveLeafIdForManager, resolvePaneKeyForManager } from './pane-key-resolution'

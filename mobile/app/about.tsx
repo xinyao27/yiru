@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router'
 import { ChevronLeft, Globe } from 'lucide-react-native'
 import Svg, { Path } from 'react-native-svg'
 import Constants from 'expo-constants'
-import { YiruLogo } from '../src/components/YiruLogo'
+import { YiruLogo } from '../src/components/yiru-logo'
 import { colors, spacing, typography } from '../src/theme/mobile-theme'
 import {
   YIRU_GITHUB_REPOSITORY_SLUG,

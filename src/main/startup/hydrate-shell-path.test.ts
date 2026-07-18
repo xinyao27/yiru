@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { EventEmitter } from 'node:events'
 import { delimiter } from 'node:path'
 import type { ChildProcessWithoutNullStreams } from 'node:child_process'

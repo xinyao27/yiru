@@ -31,7 +31,7 @@
       "invariant": "Index-only Git activity below the common Git directory must not emit worktrees:changed, invalidate worktree caches, or trigger fetchWorktrees fanout; structural add/remove/HEAD/gitdir/locked/config.worktree changes must still refresh worktrees and nudge Source Control; external head moves (commit, amend, reset) must reach background worktree rows through spawn-free metadata reads, never through structural fanout.",
       "oracle": "Classify exact git-common paths as structural, status-only, or ignored; count notifications from debounced watcher events; force the Linux/Windows poll path to emit allowlisted leaf events, detect linked HEAD rewrites independent of entry-directory mtime, and surface in-place index rewrites via the backstop re-stat; diff head identities from metadata-file reads and notify only real head moves; assert Source Control subscribes to both structural and status-only signals with active-repo and visibility filters.",
       "commands": [
-        "pnpm exec vitest run --config config/vitest.config.ts src/main/ipc/worktree-base-directory-event-filter.test.ts src/main/ipc/worktree-base-directory-watcher.test.ts src/main/ipc/worktree-base-directory-poller.test.ts src/main/ipc/worktree-head-identity-reader.test.ts src/renderer/src/hooks/worktree-head-identity-apply.test.ts src/renderer/src/components/right-sidebar/git-status-push-signal-refresh.test.ts src/renderer/src/hooks/useIpcEvents.test.ts"
+        "pnpm exec vitest run --config config/vitest.config.ts src/main/ipc/worktree-base-directory-event-filter.test.ts src/main/ipc/worktree-base-directory-watcher.test.ts src/main/ipc/worktree-base-directory-poller.test.ts src/main/ipc/worktree-head-identity-reader.test.ts src/renderer/src/hooks/worktree-head-identity-apply.test.ts src/renderer/src/components/right-sidebar/git-status-push-signal-refresh.test.ts src/renderer/src/hooks/use-ipc-events.test.ts"
       ],
       "testFiles": [
         "src/main/ipc/worktree-base-directory-event-filter.test.ts",
@@ -40,7 +40,7 @@
         "src/main/ipc/worktree-head-identity-reader.test.ts",
         "src/renderer/src/hooks/worktree-head-identity-apply.test.ts",
         "src/renderer/src/components/right-sidebar/git-status-push-signal-refresh.test.ts",
-        "src/renderer/src/hooks/useIpcEvents.test.ts"
+        "src/renderer/src/hooks/use-ipc-events.test.ts"
       ],
       "assertionRefs": [
         {
@@ -94,7 +94,7 @@
           ]
         },
         {
-          "file": "src/renderer/src/hooks/useIpcEvents.test.ts",
+          "file": "src/renderer/src/hooks/use-ipc-events.test.ts",
           "assertions": [
             "renderer preload API fixtures include the status-metadata and head-identity subscription contracts"
           ]
@@ -105,7 +105,7 @@
           "date": "2026-07-12",
           "runner": "local",
           "platform": "macos",
-          "command": "pnpm exec vitest run --config config/vitest.config.ts src/main/ipc/worktree-base-directory-event-filter.test.ts src/main/ipc/worktree-base-directory-watcher.test.ts src/main/ipc/worktree-base-directory-poller.test.ts src/main/ipc/worktree-head-identity-reader.test.ts src/renderer/src/hooks/worktree-head-identity-apply.test.ts src/renderer/src/components/right-sidebar/git-status-push-signal-refresh.test.ts src/renderer/src/hooks/useIpcEvents.test.ts",
+          "command": "pnpm exec vitest run --config config/vitest.config.ts src/main/ipc/worktree-base-directory-event-filter.test.ts src/main/ipc/worktree-base-directory-watcher.test.ts src/main/ipc/worktree-base-directory-poller.test.ts src/main/ipc/worktree-head-identity-reader.test.ts src/renderer/src/hooks/worktree-head-identity-apply.test.ts src/renderer/src/components/right-sidebar/git-status-push-signal-refresh.test.ts src/renderer/src/hooks/use-ipc-events.test.ts",
           "result": "passed",
           "durationSeconds": 3.12,
           "summary": "7 files and 130 tests passed locally, adding head-identity emit-on-change without structural fanout, reflog status triggers, config.worktree structural classification, the in-place index backstop, and the spawn-free head reader with symref traversal rejection and hex-object-id output validation."
@@ -304,7 +304,7 @@
       "invariant": "Append-only external file growth changes only Monaco's model suffix, retaining the viewport, selection, Find state, and renderer liveness above the append point; read-only live tails do not create undo history, while editable external updates remain undoable and arbitrary rewrites continue to replace the model content.",
       "oracle": "Focused tests assert one post-mount content owner, actual outer lifecycle remount ordering across retained path models, exact end-of-model suffix edits with one model read, no-op equality, full replacement for non-appends, and real-Monaco undo behavior for read-only live tails versus editable files. With Node forced GC, real-Monaco benchmarks alternate 30 suffix and 30 replacement samples after five warmups on fresh equivalent models at 9 and 50 MiB, then compare exact Monaco undo-service and ArrayBuffer retention after five 10 MiB appends. The Electron scenario alternates an e2e-only legacy setValue red control and the fixed watcher append from restored equivalent model/geometry at the measured legacy-failure cadence, asserting that the control disrupts anchor state while the fixed path preserves visible ranges, selection, complete Find state, scroll offset, non-undoability, renderer survival, and forced-GC heap/native-memory budgets.",
       "commands": [
-        "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/editor/monaco-content-sync.test.ts src/renderer/src/components/editor/MonacoEditor.content-owner.test.tsx src/renderer/src/components/editor/EditorContent.monaco-lifecycle.test.tsx",
+        "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/editor/monaco-content-sync.test.ts src/renderer/src/components/editor/monaco-editor.content-owner.test.tsx src/renderer/src/components/editor/editor-content.monaco-lifecycle.test.tsx",
         "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/editor/monaco-content-sync.undo-history.test.ts",
         "node --expose-gc ./node_modules/vitest/vitest.mjs bench src/renderer/src/components/editor/monaco-content-sync.bench.ts --pool=threads",
         "node --expose-gc ./node_modules/vitest/vitest.mjs bench src/renderer/src/components/editor/monaco-content-sync.undo-retention.bench.ts --pool=threads",
@@ -313,8 +313,8 @@
       "testFiles": [
         "src/renderer/src/components/editor/monaco-content-sync.test.ts",
         "src/renderer/src/components/editor/monaco-content-sync.undo-history.test.ts",
-        "src/renderer/src/components/editor/MonacoEditor.content-owner.test.tsx",
-        "src/renderer/src/components/editor/EditorContent.monaco-lifecycle.test.tsx",
+        "src/renderer/src/components/editor/monaco-editor.content-owner.test.tsx",
+        "src/renderer/src/components/editor/editor-content.monaco-lifecycle.test.tsx",
         "src/renderer/src/components/editor/monaco-content-sync.bench.ts",
         "src/renderer/src/components/editor/monaco-content-sync.undo-retention.bench.ts",
         "tests/e2e/agent-session-log-tail-stability.spec.ts"
@@ -336,11 +336,11 @@
           ]
         },
         {
-          "file": "src/renderer/src/components/editor/MonacoEditor.content-owner.test.tsx",
+          "file": "src/renderer/src/components/editor/monaco-editor.content-owner.test.tsx",
           "assertions": ["the Monaco wrapper receives defaultValue and no controlled value prop"]
         },
         {
-          "file": "src/renderer/src/components/editor/EditorContent.monaco-lifecycle.test.tsx",
+          "file": "src/renderer/src/components/editor/editor-content.monaco-lifecycle.test.tsx",
           "assertions": [
             "a same-pane path switch unmounts the prior outer Monaco before real mount reconciliation refreshes the stale target; the prior retained model content and undo sentinel remain untouched"
           ]
@@ -373,7 +373,7 @@
           "date": "2026-07-12",
           "runner": "local",
           "platform": "macos",
-          "command": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/editor/monaco-content-sync.test.ts src/renderer/src/components/editor/MonacoEditor.content-owner.test.tsx src/renderer/src/components/editor/EditorContent.monaco-lifecycle.test.tsx",
+          "command": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/editor/monaco-content-sync.test.ts src/renderer/src/components/editor/monaco-editor.content-owner.test.tsx src/renderer/src/components/editor/editor-content.monaco-lifecycle.test.tsx",
           "result": "passed",
           "durationSeconds": 5,
           "summary": "Focused editor ownership, edit-shape, mount reconciliation, lifecycle-key, and actual same-pane retained-model remount tests passed."
@@ -546,11 +546,11 @@
       "invariant": "Every terminal surface confirmed in the invoking renderer is force-closed exactly once after daemon management settles, later-created surfaces and non-terminal tabs survive, and exact shutdown requests are limited to deduplicated current non-runtime PTY bindings of the confirmed surfaces.",
       "oracle": "Snapshot terminal entity IDs before the first await; mutate ownership, active selection, bindings, and tab presence while daemon management is pending and between bounded close batches; then assert only the immutable targets disappear from both terminal stores, active targets close last with valid editor/browser/deactivated post-state, every captured exact PTY promise settles before callbacks, and no provider inventory sweep or late-tab kill occurs.",
       "commands": [
-        "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/shared/kill-all-terminal-surfaces.test.ts src/renderer/src/components/shared/useDaemonActions.test.tsx src/renderer/src/components/terminal/terminal-tab-actions-kill-all.test.ts src/main/ipc/pty-management.test.ts"
+        "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/shared/kill-all-terminal-surfaces.test.ts src/renderer/src/components/shared/use-daemon-actions.test.tsx src/renderer/src/components/terminal/terminal-tab-actions-kill-all.test.ts src/main/ipc/pty-management.test.ts"
       ],
       "testFiles": [
         "src/renderer/src/components/shared/kill-all-terminal-surfaces.test.ts",
-        "src/renderer/src/components/shared/useDaemonActions.test.tsx",
+        "src/renderer/src/components/shared/use-daemon-actions.test.tsx",
         "src/renderer/src/components/terminal/terminal-tab-actions-kill-all.test.ts",
         "src/main/ipc/pty-management.test.ts"
       ],
@@ -567,7 +567,7 @@
           ]
         },
         {
-          "file": "src/renderer/src/components/shared/useDaemonActions.test.tsx",
+          "file": "src/renderer/src/components/shared/use-daemon-actions.test.tsx",
           "assertions": [
             "the hook snapshots before onKillAllStart and before coordinator work",
             "unmounting the invoking component does not revoke cleanup while React callbacks remain mount-gated",
@@ -596,7 +596,7 @@
           "date": "2026-07-09",
           "runner": "local",
           "platform": "macos",
-          "command": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/shared/kill-all-terminal-surfaces.test.ts src/renderer/src/components/shared/useDaemonActions.test.tsx src/renderer/src/components/terminal/terminal-tab-actions-kill-all.test.ts src/main/ipc/pty-management.test.ts",
+          "command": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/shared/kill-all-terminal-surfaces.test.ts src/renderer/src/components/shared/use-daemon-actions.test.tsx src/renderer/src/components/terminal/terminal-tab-actions-kill-all.test.ts src/main/ipc/pty-management.test.ts",
           "result": "passed",
           "durationSeconds": 1.31,
           "summary": "4 test files and 27 tests passed locally, including the existing daemon handler contract and a real 100-terminal Zustand cleanup fixture."
@@ -2634,7 +2634,7 @@
       "invariant": "A guarded note send writes only to the exact PTY binding checked by the guard and only while permission/wait evidence allows input; fresh hook state conflicting with an ordinary shell foreground requires fresh provider confirmation of a recognized agent in that PTY.",
       "oracle": "Fresh explicit state plus ordinary PowerShell plus confirmed recognized agent is sendable on the same PTY. Confirmed shell/non-agent, unavailable confirmation, PTY exit, handle rebind, or a callback PTY mismatch returns a refusal or not-writable result and writes zero bytes.",
       "commands": [
-        "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/yiru-runtime.test.ts src/main/runtime/rpc/terminal-send.test.ts src/main/ipc/pty.test.ts src/main/providers/agent-foreground-process.test.ts src/main/providers/local-pty-provider.test.ts src/main/providers/windows-conpty-process-membership.test.ts src/main/daemon/daemon-foreground-confirmation-protocol.test.ts src/main/daemon/pty-subprocess.test.ts src/renderer/src/lib/active-agent-note-send.test.ts src/renderer/src/components/browser-pane/BrowserAnnotationSendMenuContent.test.tsx"
+        "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/yiru-runtime.test.ts src/main/runtime/rpc/terminal-send.test.ts src/main/ipc/pty.test.ts src/main/providers/agent-foreground-process.test.ts src/main/providers/local-pty-provider.test.ts src/main/providers/windows-conpty-process-membership.test.ts src/main/daemon/daemon-foreground-confirmation-protocol.test.ts src/main/daemon/pty-subprocess.test.ts src/renderer/src/lib/active-agent-note-send.test.ts src/renderer/src/components/browser-pane/browser-annotation-send-menu-content.test.tsx"
       ],
       "testFiles": [
         "src/main/runtime/yiru-runtime.test.ts",
@@ -2646,7 +2646,7 @@
         "src/main/daemon/daemon-foreground-confirmation-protocol.test.ts",
         "src/main/daemon/pty-subprocess.test.ts",
         "src/renderer/src/lib/active-agent-note-send.test.ts",
-        "src/renderer/src/components/browser-pane/BrowserAnnotationSendMenuContent.test.tsx"
+        "src/renderer/src/components/browser-pane/browser-annotation-send-menu-content.test.tsx"
       ],
       "assertionRefs": [
         {
@@ -2708,7 +2708,7 @@
           "assertions": ["selected active-agent note sends retain guarded paste and submit routing"]
         },
         {
-          "file": "src/renderer/src/components/browser-pane/BrowserAnnotationSendMenuContent.test.tsx",
+          "file": "src/renderer/src/components/browser-pane/browser-annotation-send-menu-content.test.tsx",
           "assertions": [
             "browser annotation send content routes through review-notes send so existing agent sessions remain selectable",
             "both browser annotation send surfaces wire the shared menu content"
@@ -2720,7 +2720,7 @@
           "date": "2026-07-11",
           "runner": "local",
           "platform": "macos",
-          "command": "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/yiru-runtime.test.ts src/main/runtime/rpc/terminal-send.test.ts src/main/ipc/pty.test.ts src/main/providers/agent-foreground-process.test.ts src/main/providers/local-pty-provider.test.ts src/main/providers/windows-conpty-process-membership.test.ts src/main/daemon/daemon-foreground-confirmation-protocol.test.ts src/main/daemon/pty-subprocess.test.ts src/renderer/src/lib/active-agent-note-send.test.ts src/renderer/src/components/browser-pane/BrowserAnnotationSendMenuContent.test.tsx",
+          "command": "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/yiru-runtime.test.ts src/main/runtime/rpc/terminal-send.test.ts src/main/ipc/pty.test.ts src/main/providers/agent-foreground-process.test.ts src/main/providers/local-pty-provider.test.ts src/main/providers/windows-conpty-process-membership.test.ts src/main/daemon/daemon-foreground-confirmation-protocol.test.ts src/main/daemon/pty-subprocess.test.ts src/renderer/src/lib/active-agent-note-send.test.ts src/renderer/src/components/browser-pane/browser-annotation-send-menu-content.test.tsx",
           "result": "passed",
           "durationSeconds": 9.58,
           "summary": "Ten focused test files passed (1183 tests), covering runtime confirmation and PTY revalidation, guarded RPC zero-write behavior, PTY controller routing, local/daemon fresh scans, exact ConPTY membership, and unchanged renderer note routing."

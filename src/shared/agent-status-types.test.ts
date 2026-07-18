@@ -1,4 +1,4 @@
-import { afterEach, describe, it, expect, vi } from 'vitest'
+import { afterEach, describe, it, expect, vi } from 'vite-plus/test'
 import {
   agentSubagentsEqual,
   parseAgentStatusPayload,

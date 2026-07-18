@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: runtime file command tests share mocked fs,
    authorization, and watcher lifecycle fixtures; splitting would duplicate the
    setup that makes cross-command filesystem behavior comparable. */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { EventEmitter } from 'node:events'
 import { link, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'

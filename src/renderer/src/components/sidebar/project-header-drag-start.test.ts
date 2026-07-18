@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 
 import { createProjectHeaderDragSession } from './project-header-drag-start'
 import type { Repo } from '../../../../shared/types'

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { BrowserPageAnnotation } from '../../../../shared/browser-grab-types'
 import {
   BROWSER_ANNOTATION_INLINE_TEXT_MAX_LENGTH,

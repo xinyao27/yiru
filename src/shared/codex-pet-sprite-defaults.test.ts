@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   CODEX_PET_ANIMATIONS,
   CODEX_PET_DEFAULT_COLUMNS,

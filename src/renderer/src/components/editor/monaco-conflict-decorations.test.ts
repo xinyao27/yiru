@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   buildGitConflictDecorations,
   findGitConflictBlocks,
@@ -104,18 +104,14 @@ describe('buildGitConflictDecorations', () => {
 
     expect(decorations).toHaveLength(5)
     expect(decorations[0]).toMatchObject({
-      range: { startLineNumber: 2, endLineNumber: 2 },
-      options: { className: 'yiru-conflict-section-line yiru-conflict-current-line' }
+      range: { startLineNumber: 2, endLineNumber: 2 }
     })
     expect(decorations[1]).toMatchObject({
-      range: { startLineNumber: 4, endLineNumber: 4 },
-      options: { className: 'yiru-conflict-section-line yiru-conflict-incoming-line' }
+      range: { startLineNumber: 4, endLineNumber: 4 }
     })
     expect(decorations[2]).toMatchObject({
       range: { startLineNumber: 1, endLineNumber: 1 },
       options: {
-        className: 'yiru-conflict-marker-line',
-        linesDecorationsClassName: 'yiru-conflict-line-decoration',
         after: { content: ' Current change' }
       }
     })

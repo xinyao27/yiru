@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   NEW_WORKSPACE_PROJECT_OPTION_QUERY_MAX_BYTES,
   buildNewWorkspaceFolderSourceOptions,

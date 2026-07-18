@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { assertPluginSourceUnderByteCap, PLUGIN_SOURCE_MAX_BYTES } from './plugin-source-limit'
 
 describe('plugin source byte limit', () => {

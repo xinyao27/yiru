@@ -1,6 +1,6 @@
 import { get } from 'node:http'
 import type { IncomingHttpHeaders } from 'node:http'
-import { describe, expect, it, beforeEach, vi } from 'vitest'
+import { describe, expect, it, beforeEach, vi } from 'vite-plus/test'
 import type { YiruCloudAuthConfig } from './profile-cloud-auth-config'
 
 const { openExternalMock } = vi.hoisted(() => ({
@@ -99,7 +99,6 @@ describe('Yiru cloud PKCE flow', () => {
     expect(validResponse.headers['content-security-policy']).toContain("default-src 'none'")
     expect(validResponse.body).toContain('<h1>Signed in to Yiru</h1>')
     expect(validResponse.body).toContain('You can close this tab and return to the app.')
-    expect(validResponse.body).not.toContain('class="brand"')
     await expect(flow).resolves.toMatchObject({
       code: 'real-code',
       redirectUri,

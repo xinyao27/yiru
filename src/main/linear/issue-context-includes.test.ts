@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { LinearIssueContextResult, LinearIssueRequest } from '../../shared/linear-agent-access'
 import type { ResolvedIssue } from './issue-context-client'
 import {

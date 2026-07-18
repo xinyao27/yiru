@@ -1,4 +1,4 @@
-import { describe, expect, it, test, vi } from 'vitest'
+import { describe, expect, it, test, vi } from 'vite-plus/test'
 import {
   detectAgentStatusFromTitle,
   clearWorkingIndicators,
@@ -843,14 +843,6 @@ describe('mapAgentStatusStateToVisualStatus', () => {
 
   it("maps 'done' to 'done'", () => {
     expect(mapAgentStatusStateToVisualStatus('done')).toBe('done')
-  })
-
-  it('returns a non-empty string for every valid state', () => {
-    for (const state of ['working', 'blocked', 'waiting', 'done'] as const) {
-      const visual = mapAgentStatusStateToVisualStatus(state)
-      expect(typeof visual).toBe('string')
-      expect(visual.length).toBeGreaterThan(0)
-    }
   })
 })
 

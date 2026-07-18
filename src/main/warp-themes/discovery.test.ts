@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const platformMock = vi.hoisted(() => vi.fn())
 const homedirMock = vi.hoisted(() => vi.fn(() => '/Users/alice'))

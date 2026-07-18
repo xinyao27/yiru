@@ -11,7 +11,7 @@
  * at least one integration test that round-trips a hook event from a remote
  * PTY back to AgentStatus state."
  */
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'

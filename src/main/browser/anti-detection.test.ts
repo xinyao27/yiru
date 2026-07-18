@@ -1,5 +1,5 @@
 import { runInNewContext } from 'node:vm'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import { ANTI_DETECTION_SCRIPT } from './anti-detection'
 

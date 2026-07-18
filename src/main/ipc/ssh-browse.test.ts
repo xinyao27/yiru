@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { registerSshBrowseHandler } from './ssh-browse'
 
 const { handleMock, removeHandlerMock } = vi.hoisted(() => ({

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { SleepingAgentSessionRecord } from '../../../shared/agent-session-resume'
 import { makePaneKey } from '../../../shared/stable-pane-id'
 import { parseWorkspaceSession } from '../../../shared/workspace-session-schema'

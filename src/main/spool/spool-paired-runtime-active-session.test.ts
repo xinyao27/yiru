@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { SpoolPairedRuntimeLiveSessionSchema } from '../../shared/spool/spool-paired-runtime-session-contract'
 import { projectPairedRuntimeLiveSessions } from '../runtime/rpc/methods/spool-host-session-projection'
 import { projectPairedRuntimeLiveTab } from './spool-paired-runtime-session-projection'

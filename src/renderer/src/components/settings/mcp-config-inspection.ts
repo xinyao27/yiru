@@ -8,7 +8,7 @@ import {
 } from '../../../../shared/mcp-config'
 import { joinPath } from '../../lib/path'
 import { extractIpcErrorMessage } from '../../lib/ipc-error'
-import type { LoadedMcpConfigInspection } from './McpConfigFileRow'
+import type { LoadedMcpConfigInspection } from './mcp-config-file-row'
 
 function isMissingFileError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error)

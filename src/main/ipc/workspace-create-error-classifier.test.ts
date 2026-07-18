@@ -4,7 +4,7 @@
 // telemetry-events.ts. Add fixtures here when adding new buckets or when
 // a renamed throw site needs regression coverage.
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { classifyWorkspaceCreateError } from './workspace-create-error-classifier'
 
 describe('classifyWorkspaceCreateError', () => {

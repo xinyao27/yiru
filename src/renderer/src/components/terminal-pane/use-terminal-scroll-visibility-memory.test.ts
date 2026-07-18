@@ -1,5 +1,5 @@
 import type * as ReactModule from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { useTerminalScrollVisibilityMemory } from './use-terminal-scroll-visibility-memory'
 
 const mocks = vi.hoisted(() => ({

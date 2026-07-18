@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { isLinearProjectListResult } from './ssh-remote-linear-result-guards'
 import { runRemoteYiruCli } from './ssh-remote-yiru-cli'

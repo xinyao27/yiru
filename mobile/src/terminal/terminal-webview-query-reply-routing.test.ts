@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { TerminalWebView } from './TerminalWebView'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
+import { TerminalWebView } from './terminal-web-view'
 
 vi.mock('react-native', () => ({
   Platform: { OS: 'ios' },

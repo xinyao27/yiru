@@ -2,7 +2,7 @@ import type { GlobalSettings } from '../../../../shared/types'
 import type { ProjectExecutionRuntimeResolution } from '../../../../shared/project-execution-runtime'
 import type { SkillDiscoveryTarget } from '../../../../shared/skills'
 import { translate } from '@/i18n/i18n'
-import type { LocalAgentRuntime } from '../settings/CliSkillRuntimeSetup'
+import type { LocalAgentRuntime } from '../settings/cli-skill-runtime-setup'
 
 const LOCAL_DISMISS_STORAGE_KEY_PREFIX = 'yiru.linearTicketsSkill.setupDismissed'
 

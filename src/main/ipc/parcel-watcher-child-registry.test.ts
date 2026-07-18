@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   MAX_PHYSICAL_WATCHER_CHILDREN,
   onWatcherChildCapacityAvailable,

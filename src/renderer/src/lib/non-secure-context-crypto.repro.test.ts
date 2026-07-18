@@ -3,7 +3,7 @@
  * hides crypto.randomUUID and crypto.subtle (secure-context-only). This test
  * recreates that exact global shape and drives the real call sites.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test'
 
 const realCrypto = globalThis.crypto
 

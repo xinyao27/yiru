@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { GitBranchChangeEntry, GitStatusEntry } from '../../../../shared/types'
 import type { DiffSection } from './diff-section-types'
 import { combinedDiffSectionsMatchEntryMetadata } from './combined-diff-section-cache-match'

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const projectDir = resolve(import.meta.dirname, '../..')
 const skillPath = join(projectDir, 'skills', 'computer-use', 'SKILL.md')

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { extractGrokContentText } from './session-scanner-grok-parser'
 
 describe('AI Vault Grok session parser', () => {

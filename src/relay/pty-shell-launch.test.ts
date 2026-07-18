@@ -2,7 +2,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test'
 import { getRelayShellLaunchConfig } from './pty-shell-launch'
 
 const hasBash = process.platform !== 'win32' && spawnSync('bash', ['--version']).status === 0

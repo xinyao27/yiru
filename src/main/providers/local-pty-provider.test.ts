@@ -1,5 +1,5 @@
 /* oxlint-disable max-lines */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { delimiter } from 'node:path'
 
 const {

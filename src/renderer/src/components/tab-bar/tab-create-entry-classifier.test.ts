@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { QUICK_OPEN_QUERY_MAX_BYTES } from '../quick-open-search'
 import {
   classifyTabEntryQuery,

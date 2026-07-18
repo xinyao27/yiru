@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { hasSufficientWindowsFirewallRemoteScope } from './windows-firewall-remote-scope'
 
 type RuleScope = { remoteAddresses: unknown }

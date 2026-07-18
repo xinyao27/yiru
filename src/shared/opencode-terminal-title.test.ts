@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isMeaningfulOpenCodeTerminalTitle, isOpenCodeNativeTitle } from './opencode-terminal-title'
 
 describe('OpenCode terminal titles', () => {

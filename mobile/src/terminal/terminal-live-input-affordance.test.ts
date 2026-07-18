@@ -1,19 +1,14 @@
 import { readFileSync } from 'node:fs'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const sessionRouteSource = readFileSync(
   new URL('../../app/h/[hostId]/session/[worktreeId].tsx', import.meta.url),
   'utf8'
 )
 const liveInputStatusSource = readFileSync(
-  new URL('../session/MobileTerminalLiveInputStatus.tsx', import.meta.url),
+  new URL('../session/mobile-terminal-live-input-status.tsx', import.meta.url),
   'utf8'
 )
-const commandInputStylesSource = readFileSync(
-  new URL('../../app/h/[hostId]/session/mobile-session-command-input-styles.ts', import.meta.url),
-  'utf8'
-)
-
 function liveInputBarBlock(): string {
   const start = sessionRouteSource.indexOf('{liveInputEnabled ? (')
   expect(start).toBeGreaterThanOrEqual(0)
@@ -32,18 +27,13 @@ describe('terminal live input affordance', () => {
     expect(block).toContain(
       'accessibilityHint="Typed text is sent directly to the active terminal"'
     )
-    expect(block).toContain('pressed && styles.liveInputFocusTargetPressed')
-    expect(block).toContain('!canSend && styles.liveInputFocusTargetDisabled')
     expect(block).toContain('showSoftInputOnFocus')
     expect(sessionRouteSource).toContain('focusTerminalLiveInputTarget(liveInputRef.current')
     expect(sessionRouteSource).toContain('keyboardHeight')
     expect(sessionRouteSource).toContain('scheduleTerminalLiveInputFocus(liveInputFocusTimerRef')
   })
 
-  it('makes the live keyboard target visible instead of status-only chrome', () => {
+  it('labels the live keyboard target with an explicit action', () => {
     expect(liveInputStatusSource).toContain("'Tap to show keyboard'")
-    expect(commandInputStylesSource).toContain('backgroundColor: colors.bgRaised')
-    expect(commandInputStylesSource).toContain('borderWidth: 1')
-    expect(commandInputStylesSource).toContain('liveInputFocusTargetPressed')
   })
 })

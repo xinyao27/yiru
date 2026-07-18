@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import {
   LINEAR_BOARD_DRAG_ISSUE_ID_MAX_BYTES,

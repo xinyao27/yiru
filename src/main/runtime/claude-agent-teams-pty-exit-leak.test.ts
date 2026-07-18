@@ -10,7 +10,7 @@
  * `team-${randomUUID()}`, so when a leader shell exits on its own (agent finishes,
  * process dies, renderer reload) the team + nested panes Map leaked permanently.
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import { YiruRuntimeService } from './yiru-runtime'
 import type { ClaudeAgentTeamsService } from './claude-agent-teams-service'
 

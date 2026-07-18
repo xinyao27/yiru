@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import type { PRCheckDetail, PRComment, PRInfo } from '../../../src/shared/types'
 import type { PrSidebarState } from '../session/mobile-pr-sidebar-state'
 import { buildMobilePrChipSummary, countUnresolvedReviewThreads } from './mobile-pr-chip-summary'

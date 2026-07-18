@@ -13,7 +13,7 @@
  * skipped) are evicted first so an in-progress (in-flight/queued/paused) indicator
  * is never dropped except as a last-resort hard bound.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import { create } from 'zustand'
 import { createGitHubSlice } from './github'
 import { createHostedReviewSlice } from './hosted-review'

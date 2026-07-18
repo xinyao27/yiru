@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AgentStatusEntry } from '../../../src/shared/agent-status-types'
 import type { TuiAgent } from '../../../src/shared/types'
 import type { MobileSessionTab } from '../../app/h/[hostId]/session/mobile-session-route-types'

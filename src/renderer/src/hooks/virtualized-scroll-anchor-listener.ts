@@ -1,5 +1,5 @@
 import type { MutableRefObject } from 'react'
-import { shouldCancelVirtualizedScrollOffsetRestore } from './virtualizedScrollOffsetRestore'
+import { shouldCancelVirtualizedScrollOffsetRestore } from './virtualized-scroll-offset-restore'
 import type { ProgrammaticScrollMarks } from './programmatic-scroll-marks'
 
 type CreateVirtualizedScrollAnchorListenerArgs<TScrollElement extends Element> = {

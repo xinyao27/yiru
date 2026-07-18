@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isEventTargetInsideCurrentTarget } from './worktree-card-dom-events'
 
 describe('worktree card DOM events', () => {

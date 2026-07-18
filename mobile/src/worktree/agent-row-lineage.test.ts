@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { RuntimeWorktreeAgentRow } from '../../../src/shared/runtime-types'
 import { buildAgentRowLineageTree, flattenAgentRowLineage } from './agent-row-lineage'
 

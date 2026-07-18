@@ -13,7 +13,7 @@
  * grew monotonically. The single `removeWorktree` path already routes through
  * `purgeWorktreeTerminalState`; project removal did not.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import { createTestStore, makeWorktree } from './store-test-helpers'
 import type { Repo } from '../../../../shared/types'
 

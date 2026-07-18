@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { SkillFreshnessInstallation } from '../../../../shared/skill-freshness'
 import { groupSkillFreshness } from './skill-freshness-grouping'
 

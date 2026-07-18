@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const COMPONENT_ROOT = __dirname
 
@@ -18,7 +18,7 @@ function sourceBetween(source: string, startPattern: string, endPattern: string)
 
 describe('task drawer source boundaries', () => {
   it('threads GitHub task source context through detail mutations', () => {
-    const source = componentSource('GitHubItemDialog.tsx')
+    const source = componentSource('github-item-dialog.tsx')
     const issueUpdate = sourceBetween(
       source,
       'async function runIssueUpdate',
@@ -47,7 +47,7 @@ describe('task drawer source boundaries', () => {
   })
 
   it('threads GitLab task source context through the shared drawer selector', () => {
-    const source = componentSource('GitLabItemDialog.tsx')
+    const source = componentSource('gitlab-item-dialog.tsx')
     const selector = sourceBetween(
       source,
       'const repoSelector = useMemo',
@@ -65,7 +65,7 @@ describe('task drawer source boundaries', () => {
   })
 
   it('uses Linear task source context for drawer reads, mutations, and optimistic patches', () => {
-    const source = componentSource('LinearItemDrawer.tsx')
+    const source = componentSource('linear-item-drawer.tsx')
     const editSection = sourceBetween(
       source,
       'export function LinearIssueEditSection',
@@ -87,7 +87,7 @@ describe('task drawer source boundaries', () => {
   })
 
   it('uses Jira task source context for drawer reads, mutations, and optimistic patches', () => {
-    const source = componentSource('JiraIssueWorkspace.tsx')
+    const source = componentSource('jira-issue-workspace.tsx')
     const drawer = sourceBetween(source, 'export default function JiraIssueWorkspace', 'return (')
 
     expect(drawer).toContain('const providerSettings = sourceContext ?? settings')

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { DEFAULT_OPEN_IN_APPLICATIONS, normalizeOpenInApplications } from './open-in-applications'
 
 describe('normalizeOpenInApplications', () => {

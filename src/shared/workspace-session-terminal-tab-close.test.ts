@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getDefaultWorkspaceSession } from './constants'
 import type { Tab, TerminalTab, WorkspaceSessionState } from './types'
 import { closeTerminalTabInWorkspaceSession } from './workspace-session-terminal-tab-close'

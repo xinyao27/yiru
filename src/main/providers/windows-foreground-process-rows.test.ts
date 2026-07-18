@@ -3,7 +3,7 @@
 // process has no console, so a spawn without windowsHide pops a fresh conhost
 // window per scan that flashes and steals keyboard focus from the foreground app
 // (including Yiru's own terminal). Both probes MUST pass windowsHide: true.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { execFileMock } = vi.hoisted(() => ({ execFileMock: vi.fn() }))
 

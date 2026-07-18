@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolvePaneColumnEdgeZone, TAB_GROUP_TAB_STRIP_HEIGHT_PX } from './tab-drop-zone'
 
 describe('resolvePaneColumnEdgeZone', () => {

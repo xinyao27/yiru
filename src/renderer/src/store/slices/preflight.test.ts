@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { create } from 'zustand'
 import type { PreflightStatus } from '../../../../preload/api-types'
 import type { Repo, Worktree } from '../../../../shared/types'

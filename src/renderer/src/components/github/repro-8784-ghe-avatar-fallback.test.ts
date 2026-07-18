@@ -10,7 +10,7 @@
  *   pnpm exec vitest run --config config/vitest.config.ts \
  *     src/renderer/src/components/github/repro-8784-ghe-avatar-fallback.test.ts
  */
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { githubAvatarUrl } from './github-issue-comment-helpers'
@@ -41,13 +41,13 @@ describe('issue #8784 GHE avatar fallback (regression)', () => {
   })
 
   it('source routes PR author/reviewer avatars through GitHubUserAvatar + authorAvatarUrl', () => {
-    const prPage = readFileSync(join(__dirname, '../PullRequestPage.tsx'), 'utf8')
+    const prPage = readFileSync(join(__dirname, '../pull-request-page.tsx'), 'utf8')
     expect(prPage).toMatch(/GitHubUserAvatar/)
     expect(prPage).toMatch(/authorAvatarUrl/)
     // Why: author chip must not ignore API avatar_url and only pass login.
     expect(prPage).not.toMatch(/githubAvatarUrl\(workItem\.author\)/)
 
-    const taskPage = readFileSync(join(__dirname, '../TaskPage.tsx'), 'utf8')
+    const taskPage = readFileSync(join(__dirname, '../task-page.tsx'), 'utf8')
     expect(taskPage).toMatch(/GitHubUserAvatar/)
     // Why: list chip must not hardcode github.com/{login}.png.
     expect(taskPage).not.toMatch(/github\.com\/\$\{reviewer\.login\}\.png/)

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { BrowserPage, BrowserWorkspace, Worktree } from '../../../shared/types'
 import {
   BROWSER_PALETTE_QUERY_MAX_BYTES,

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { buildEditableContextMenuTemplate } from './editable-context-menu'
 import { richMarkdownContextMenuCommandChannel } from '../../shared/rich-markdown-context-menu'
 

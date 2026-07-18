@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { mergeWorktree } from './worktree-logic'
 
 describe('mergeWorktree creation agent metadata', () => {

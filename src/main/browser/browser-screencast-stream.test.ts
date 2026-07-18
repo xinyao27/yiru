@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer'
 import { EventEmitter } from 'node:events'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 
 import { decodeBrowserScreencastFrame } from '../../shared/browser-screencast-protocol'
 import { startBrowserScreencast } from './browser-screencast-stream'

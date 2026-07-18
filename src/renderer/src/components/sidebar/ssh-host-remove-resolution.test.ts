@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import { resolveSshHostRemoval } from './ssh-host-remove-resolution'
 import type { SshConnectionState } from '../../../../shared/ssh-types'
 

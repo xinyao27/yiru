@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { Globe, Gear as Settings } from '@phosphor-icons/react'
 import type { CmdJQuickAction } from './quick-actions'
 import {

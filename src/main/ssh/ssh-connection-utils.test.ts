@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest'
+import { afterEach, describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 import { join } from 'node:path'
 import { BaseAgent, utils, type ParsedKey } from 'ssh2'
 

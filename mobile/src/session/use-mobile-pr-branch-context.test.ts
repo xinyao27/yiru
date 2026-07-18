@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { MobileGitBranchCompareResult } from '../source-control/mobile-branch-compare'
 import type { MobileGitStatusResult } from '../source-control/mobile-git-status'
 import {

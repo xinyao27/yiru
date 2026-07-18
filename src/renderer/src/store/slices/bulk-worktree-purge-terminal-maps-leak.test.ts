@@ -15,7 +15,7 @@
  *   codexRestartNoticeByPtyId, migrationUnsupportedByPtyId,
  *   suppressedPtyExitIds, pendingCodexPaneRestartIds
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import type * as AgentStatusModule from '@/lib/agent-status'
 import type * as RuntimeTerminalStreamModule from '@/runtime/runtime-terminal-stream'
 

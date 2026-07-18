@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import {
   GITHUB_PROJECT_REF_INPUT_MAX_BYTES,

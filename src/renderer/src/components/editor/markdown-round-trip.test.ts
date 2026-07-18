@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { Editor } from '@tiptap/core'
 import { encodeRawMarkdownHtmlForRichEditor } from './raw-markdown-html'
 import { createRichMarkdownExtensions } from './rich-markdown-extensions'

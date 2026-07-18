@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { screenGetCursorScreenPointMock } = vi.hoisted(() => ({
   screenGetCursorScreenPointMock: vi.fn(() => ({ x: 0, y: 0 }))

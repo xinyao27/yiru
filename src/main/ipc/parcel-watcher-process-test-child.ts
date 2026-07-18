@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { vi } from 'vitest'
+import { vi } from 'vite-plus/test'
 
 type SentMessage = { op: string; id: number; dir?: string }
 

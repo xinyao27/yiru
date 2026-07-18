@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { ManagedPaneInternal } from './pane-manager-types'
 import { schedulePaneRevealPresent, schedulePaneRevealRepaint } from './pane-reveal-repaint'
 import { resetTerminalWebglSuggestion } from './pane-webgl-renderer'

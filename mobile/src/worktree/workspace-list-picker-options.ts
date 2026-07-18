@@ -1,4 +1,4 @@
-import type { PickerOption } from '../components/PickerModal'
+import type { PickerOption } from '../components/picker-modal'
 import type { MobileGroupMode, MobileSortMode } from './workspace-view-settings'
 
 export const WORKSPACE_SORT_OPTIONS: PickerOption<MobileSortMode>[] = [

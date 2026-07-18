@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import type { PersistedUIState, TerminalTab, WorkspaceSessionState } from '../../shared/types'
 import {
   migrateUiHostScopeSshTargetId,

@@ -20,7 +20,7 @@
  * Drives the real production pipeline (normalizeHookPayload) whose
  * `payload.subagents` snapshots the sidebar renders 1:1 as child rows.
  */
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vite-plus/test'
 import {
   createHookListenerState,
   normalizeHookPayload,

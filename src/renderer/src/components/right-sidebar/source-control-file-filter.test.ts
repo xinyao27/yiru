@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   SOURCE_CONTROL_FILE_FILTER_QUERY_MAX_BYTES,
   filterSourceControlGroupedPathEntries,

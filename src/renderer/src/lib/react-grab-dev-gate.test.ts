@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shouldEnableReactGrab } from './react-grab-dev-gate'
 
 describe('shouldEnableReactGrab', () => {

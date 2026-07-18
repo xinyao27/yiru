@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { extractWorkIdentifier, stripWorkIdentifierEcho } from './work-item-reference'
 
 describe('extractWorkIdentifier', () => {

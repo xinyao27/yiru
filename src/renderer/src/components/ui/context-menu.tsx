@@ -3,11 +3,22 @@ import { ContextMenu as ContextMenuPrimitive } from '@base-ui/react/context-menu
 import { CheckIcon, CaretRight as ChevronRightIcon, CircleIcon } from '@phosphor-icons/react'
 
 import { cn } from '@/lib/class-names'
+import {
+  floatingSurfaceClass,
+  floatingSurfaceMotionClass
+} from '@/components/ui/floating-surface-styles'
+import {
+  menuItemClass,
+  menuLabelClass,
+  menuSeparatorClass,
+  menuShortcutClass,
+  menuSubTriggerStateClass
+} from '@/components/ui/menu-item-styles'
 
 // FLAG: Base UI ContextMenu.Root has no `modal` prop (behavior is fixed), so the
 // previous `modal={false}` has no equivalent and was dropped.
 function ContextMenu({ ...props }: ContextMenuPrimitive.Root.Props) {
-  return <ContextMenuPrimitive.Root {...props} />
+  return <ContextMenuPrimitive.Root data-slot="context-menu" {...props} />
 }
 
 // FLAG: Base UI ContextMenu.Trigger renders a <div> and has no `disabled` prop.
@@ -43,14 +54,11 @@ function ContextMenuSubTrigger({
     <ContextMenuPrimitive.SubmenuTrigger
       data-slot="context-menu-sub-trigger"
       data-inset={inset}
-      className={cn(
-        "flex cursor-default items-center gap-2 rounded-[7px] px-2 py-1 text-[12px] leading-5 font-[450] outline-hidden select-none data-highlighted:bg-black/8 dark:data-highlighted:bg-white/14 data-highlighted:text-accent-foreground data-[inset]:pl-8 data-popup-open:bg-black/8 dark:data-popup-open:bg-white/14 data-popup-open:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 [&_svg:not([class*='text-'])]:text-muted-foreground",
-        className
-      )}
+      className={cn(menuItemClass, menuSubTriggerStateClass, 'px-2 data-[inset]:pl-7', className)}
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto" />
+      <ChevronRightIcon className="ml-auto size-4" />
     </ContextMenuPrimitive.SubmenuTrigger>
   )
 }
@@ -77,7 +85,9 @@ function ContextMenuSubContent({
         <ContextMenuPrimitive.Popup
           data-slot="context-menu-sub-content"
           className={cn(
-            'z-[70] min-w-[11rem] origin-(--transform-origin) overflow-hidden rounded-[11px] border border-black/14 bg-[rgba(255,255,255,0.10)] p-1 text-popover-foreground shadow-[0_16px_36px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl dark:border-white/14 dark:bg-[rgba(0,0,0,0.12)] dark:shadow-[0_20px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)] transition-[opacity,transform] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 data-[side=bottom]:data-starting-style:-translate-y-2 data-[side=top]:data-starting-style:translate-y-2 data-[side=left]:data-starting-style:translate-x-2 data-[side=right]:data-starting-style:-translate-x-2',
+            floatingSurfaceClass,
+            floatingSurfaceMotionClass,
+            'z-[70] min-w-[11rem] overflow-hidden p-1',
             className
           )}
           // Why: submenu content must portal out of the scrollable parent menu so
@@ -99,7 +109,9 @@ function ContextMenuContent({ className, style, ...props }: ContextMenuPrimitive
         <ContextMenuPrimitive.Popup
           data-slot="context-menu-content"
           className={cn(
-            'z-[70] max-h-(--available-height) min-w-[11rem] origin-(--transform-origin) overflow-x-hidden overflow-y-auto scrollbar-sleek rounded-[11px] border border-black/14 bg-[rgba(255,255,255,0.10)] p-1 text-popover-foreground shadow-[0_16px_36px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl dark:border-white/14 dark:bg-[rgba(0,0,0,0.12)] dark:shadow-[0_20px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)] transition-[opacity,transform] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 data-[side=bottom]:data-starting-style:-translate-y-2 data-[side=top]:data-starting-style:translate-y-2 data-[side=left]:data-starting-style:translate-x-2 data-[side=right]:data-starting-style:-translate-x-2',
+            floatingSurfaceClass,
+            floatingSurfaceMotionClass,
+            'z-[70] max-h-(--available-height) min-w-[11rem] overflow-x-hidden overflow-y-auto p-1 scrollbar-sleek',
             className
           )}
           // Why: same no-drag fix as DropdownMenuContent — titlebar drag regions
@@ -126,10 +138,7 @@ function ContextMenuItem({
       data-slot="context-menu-item"
       data-inset={inset}
       data-variant={variant}
-      className={cn(
-        "relative flex cursor-default items-center gap-2 rounded-[7px] px-2 py-1 text-[12px] leading-5 font-[450] outline-hidden select-none data-highlighted:bg-black/8 dark:data-highlighted:bg-white/14 data-highlighted:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:data-highlighted:bg-destructive/10 data-[variant=destructive]:data-highlighted:text-destructive dark:data-[variant=destructive]:data-highlighted:bg-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 [&_svg:not([class*='text-'])]:text-muted-foreground data-[variant=destructive]:*:[svg]:text-destructive!",
-        className
-      )}
+      className={cn(menuItemClass, 'px-2 data-[inset]:pl-7', className)}
       {...props}
     />
   )
@@ -144,10 +153,7 @@ function ContextMenuCheckboxItem({
   return (
     <ContextMenuPrimitive.CheckboxItem
       data-slot="context-menu-checkbox-item"
-      className={cn(
-        "relative flex cursor-default items-center gap-2 rounded-[7px] py-1 pr-2 pl-8 text-[12px] leading-5 font-[450] outline-hidden select-none data-highlighted:bg-black/8 dark:data-highlighted:bg-white/14 data-highlighted:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
-        className
-      )}
+      className={cn(menuItemClass, 'pr-2 pl-7', className)}
       checked={checked}
       {...props}
     >
@@ -169,10 +175,7 @@ function ContextMenuRadioItem({
   return (
     <ContextMenuPrimitive.RadioItem
       data-slot="context-menu-radio-item"
-      className={cn(
-        "relative flex cursor-default items-center gap-2 rounded-[7px] py-1 pr-2 pl-8 text-[12px] leading-5 font-[450] outline-hidden select-none data-highlighted:bg-black/8 dark:data-highlighted:bg-white/14 data-highlighted:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
-        className
-      )}
+      className={cn(menuItemClass, 'pr-2 pl-7', className)}
       {...props}
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
@@ -199,10 +202,7 @@ function ContextMenuLabel({
     <div
       data-slot="context-menu-label"
       data-inset={inset}
-      className={cn(
-        'px-2 py-1 text-[11px] font-semibold text-muted-foreground data-[inset]:pl-8',
-        className
-      )}
+      className={cn(menuLabelClass, 'data-[inset]:pl-7', className)}
       {...props}
     />
   )
@@ -212,7 +212,7 @@ function ContextMenuSeparator({ className, ...props }: ContextMenuPrimitive.Sepa
   return (
     <ContextMenuPrimitive.Separator
       data-slot="context-menu-separator"
-      className={cn('my-1 h-px bg-border/70', className)}
+      className={cn(menuSeparatorClass, className)}
       {...props}
     />
   )
@@ -222,10 +222,7 @@ function ContextMenuShortcut({ className, ...props }: React.ComponentProps<'span
   return (
     <span
       data-slot="context-menu-shortcut"
-      className={cn(
-        'ml-auto shrink-0 whitespace-nowrap text-[11px] tracking-normal text-muted-foreground/85',
-        className
-      )}
+      className={cn(menuShortcutClass, className)}
       {...props}
     />
   )

@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { Worktree } from './workspace-list-sections'
 import {
   CREATE_GRACE_MS,

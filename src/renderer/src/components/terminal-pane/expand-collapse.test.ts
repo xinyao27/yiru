@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { cancelPendingPaneSizeRefreshFrames, createExpandCollapseActions } from './expand-collapse'
 
 type ExpandCollapseStateForTest = Parameters<typeof createExpandCollapseActions>[0]

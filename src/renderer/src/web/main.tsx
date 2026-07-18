@@ -4,8 +4,8 @@ import { Suspense, useMemo, useState } from 'react'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import ReactDOM from 'react-dom/client'
 import { useTranslation } from 'react-i18next'
-import WebConnect from './WebConnect'
-import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/RecoverableRenderErrorBoundary'
+import WebConnect from './web-connect'
+import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/recoverable-render-error-boundary'
 import {
   clearPairingInputFromAddressBar,
   decideWebPairingStartup,
@@ -17,10 +17,10 @@ import {
   saveStoredWebRuntimeEnvironment
 } from './web-runtime-environment'
 import { installWebPreloadApi } from './web-preload-api'
-import { I18nProvider } from '../i18n/I18nProvider'
+import { I18nProvider } from '../i18n/i18n-provider'
 import { translate } from '../i18n/i18n'
 
-const App = lazy(() => import('../App'))
+const App = lazy(() => import('../application-shell'))
 
 function WebRoot(): React.JSX.Element {
   const initialPairingInput = useMemo(() => readPairingInputFromLocation(window.location), [])

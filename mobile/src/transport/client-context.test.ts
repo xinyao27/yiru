@@ -1,6 +1,6 @@
 import { createElement } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { ConnectionState } from './types'
 import type { RpcClient } from './rpc-client'
 

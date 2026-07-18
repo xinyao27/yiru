@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { MarkdownTocItem } from './markdown-table-of-contents'
 import { findRichMarkdownTocHeadingTarget } from './rich-markdown-toc-heading-target'
 

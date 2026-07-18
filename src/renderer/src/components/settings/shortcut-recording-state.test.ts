@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { KeybindingActionId } from '../../../../shared/keybindings'
 import { clearRecordingActionForShortcutMutation } from './shortcut-recording-state'
 

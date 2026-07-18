@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join, sep } from 'node:path'
 import { promisify } from 'node:util'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { buildAppImageCliWrapper } from './appimage-cli-wrapper'
 
 const require = createRequire(import.meta.url)

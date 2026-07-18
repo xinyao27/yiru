@@ -6,7 +6,7 @@
  * resumes output after adoption/reattach would reuse a stale (pre-prune,
  * possibly blocked) wait state and mis-stamp waitBlockedAt on its first chunk.
  */
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { YiruRuntimeService } from './yiru-runtime'
 import type { TerminalTailWaitState } from './yiru-runtime'
 

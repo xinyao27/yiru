@@ -1,8 +1,8 @@
 import { createElement, createRef } from 'react'
 import { Platform } from 'react-native'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { TerminalWebView } from './TerminalWebView'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
+import { TerminalWebView } from './terminal-web-view'
 import type { TerminalWebViewHandle } from './terminal-webview-contract'
 
 const nativeWebViewMethods = vi.hoisted(() => ({

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { normalizeDisabledTuiAgents, pickTuiAgent } from './tui-agent-selection'
 
 describe('pickTuiAgent', () => {

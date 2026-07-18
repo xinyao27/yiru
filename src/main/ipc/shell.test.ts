@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { normalize, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 

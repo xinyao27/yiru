@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { AGENT_STATUS_MAX_SUBAGENTS } from './agent-status-types'
 import {
   claudeRosterHasWorkingSubagent,

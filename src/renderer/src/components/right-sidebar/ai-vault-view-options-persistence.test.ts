@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { AI_VAULT_AGENTS } from '../../../../shared/ai-vault-types'
 import {
   AI_VAULT_VIEW_OPTIONS_STORAGE_KEY,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { Automation, AutomationRun } from '../../../../shared/automations-types'
 import {
   AUTOMATION_RERUN_PENDING_MIN_VISIBLE_MS,

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import {
   HUGE_REPO_WARNING_DISMISSAL_MAX_WORKTREES,
   beginHugeRepoWarningProbe,

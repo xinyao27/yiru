@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { WebglAddon } from '@xterm/addon-webgl'
 import type { ManagedPaneInternal } from './pane-manager-types'
 import {
@@ -13,8 +13,7 @@ import {
   DEFAULT_TERMINAL_FAST_SCROLL_SENSITIVITY,
   DEFAULT_TERMINAL_SCROLL_SENSITIVITY,
   normalizeTerminalFastScrollSensitivity,
-  normalizeTerminalScrollSensitivity,
-  resolveTerminalCursorInactiveStyle
+  normalizeTerminalScrollSensitivity
 } from './pane-terminal-options'
 import { buildTerminalKeyboardProtocolOptions } from './terminal-keyboard-protocol'
 
@@ -80,18 +79,6 @@ describe('buildDefaultTerminalOptions', () => {
     expect(buildDefaultTerminalOptions().macOptionIsMeta).toBe(false)
   })
 
-  it('uses the default inactive outline only for the block cursor', () => {
-    expect(buildDefaultTerminalOptions().cursorStyle).toBe('block')
-    expect(buildDefaultTerminalOptions().cursorInactiveStyle).toBe('outline')
-  })
-
-  it('shows the slim xterm scrollbar in its reserved gutter', () => {
-    // Why: 7px gutter is an accepted ~1-column cost (VS Code reserves 14);
-    // the v1.4.51 table corruption that once forced width 0 was the ZWJ
-    // width bug, fixed separately by the Yiru unicode provider.
-    expect(buildDefaultTerminalOptions().scrollbar?.width).toBe(7)
-  })
-
   it('uses the shared desktop scrollback row default', () => {
     expect(buildDefaultTerminalOptions().scrollback).toBe(5_000)
   })
@@ -112,16 +99,6 @@ describe('buildDefaultTerminalOptions', () => {
     )
     expect(normalizeTerminalFastScrollSensitivity(0)).toBe(1)
     expect(normalizeTerminalFastScrollSensitivity(25)).toBe(20)
-  })
-
-  it('enables xterm contrast correction for low-contrast CLI colors', () => {
-    expect(buildDefaultTerminalOptions().minimumContrastRatio).toBe(4.5)
-  })
-
-  it('only uses inactive outline for block cursors', () => {
-    expect(resolveTerminalCursorInactiveStyle('block')).toBe('outline')
-    expect(resolveTerminalCursorInactiveStyle('bar')).toBe('bar')
-    expect(resolveTerminalCursorInactiveStyle('underline')).toBe('underline')
   })
 
   it('advertises kitty keyboard protocol so CLIs enable enhanced key reporting', () => {

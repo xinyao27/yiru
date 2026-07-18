@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { computerProviderUnavailableMessage } from './computer-provider-unavailable-message'
 
 describe('computerProviderUnavailableMessage', () => {

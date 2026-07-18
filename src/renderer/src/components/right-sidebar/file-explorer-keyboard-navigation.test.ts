@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { TreeNode } from './file-explorer-types'
 import { createFileExplorerRowProjection } from './file-explorer-row-projection'
 import {

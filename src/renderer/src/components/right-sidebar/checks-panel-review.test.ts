@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { gitHubPRToChecksPanelReview, selectChecksPanelReview } from './checks-panel-review'
 import type { PRInfo } from '../../../../shared/types'
 import type { HostedReviewInfo } from '../../../../shared/hosted-review'

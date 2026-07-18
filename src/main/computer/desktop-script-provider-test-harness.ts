@@ -1,4 +1,4 @@
-import { expect, vi } from 'vitest'
+import { expect, vi } from 'vite-plus/test'
 
 const { execFileMock, operationFiles, mkdtempMock, rmMock, writeFileMock } = vi.hoisted(() => {
   const files = new Map<string, string>()

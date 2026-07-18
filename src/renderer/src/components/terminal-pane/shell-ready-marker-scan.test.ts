@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { createShellReadyMarkerScanState, scanForShellReadyMarker } from './shell-ready-marker-scan'
 
 describe('scanForShellReadyMarker', () => {

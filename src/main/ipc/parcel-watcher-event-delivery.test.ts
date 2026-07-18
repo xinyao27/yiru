@@ -1,5 +1,5 @@
 import { setImmediate } from 'node:timers/promises'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { statMock } = vi.hoisted(() => ({ statMock: vi.fn() }))
 

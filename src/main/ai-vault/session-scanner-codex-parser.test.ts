@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { parseCodexSessionFile } from './session-scanner-codex-parser'
 
 let tempRoots: string[] = []

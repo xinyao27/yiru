@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import type { NativeChatMessage } from '../../../../shared/native-chat-types'
 import { assembleNativeChatSession } from './native-chat-session-assembler'
 

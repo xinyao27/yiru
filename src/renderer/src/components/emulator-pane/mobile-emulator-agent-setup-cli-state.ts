@@ -1,5 +1,5 @@
 import type { CliInstallStatus } from '../../../../shared/cli-install-types'
-import type { StepState } from '../settings/BrowserUseStepBadge'
+import type { StepState } from '../settings/browser-use-step-badge'
 
 export function getMobileEmulatorCliPathNeedsAttention(status: CliInstallStatus | null): boolean {
   return status?.state === 'installed' && !status.pathConfigured

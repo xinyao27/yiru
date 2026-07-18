@@ -9,7 +9,7 @@
  * they accumulated one record per file/worktree for the lifetime of the
  * renderer session.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import type * as AgentStatusModule from '@/lib/agent-status'
 
 vi.mock('sonner', () => ({

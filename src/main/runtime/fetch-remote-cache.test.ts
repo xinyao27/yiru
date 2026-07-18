@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 // Why: these tests cover the §3.3 Lifecycle rules on
 // `YiruRuntimeService.fetchRemoteWithCache` — in particular that a rejected

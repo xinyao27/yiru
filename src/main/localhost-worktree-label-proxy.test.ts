@@ -1,6 +1,6 @@
 import http from 'node:http'
 import type { AddressInfo } from 'node:net'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { LocalhostWorktreeLabelProxy } from './localhost-worktree-label-proxy'
 
 const upstreamServers: http.Server[] = []

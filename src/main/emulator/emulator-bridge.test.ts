@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { EmulatorSessionInfo } from './emulator-types'
 import type { SimulatorDevice } from './simctl-simulator-devices'
 import type { ServeSimHelperProcess } from './serve-sim-helper-processes'

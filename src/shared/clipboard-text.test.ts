@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   CLIPBOARD_TEXT_MEASURE_YIELD_CODE_UNITS,
   CLIPBOARD_TEXT_TOO_LARGE_ERROR,

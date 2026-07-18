@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { Tab } from '../../../../shared/types'
 import {
   getCachedTerminalGroupIdForWorktree,

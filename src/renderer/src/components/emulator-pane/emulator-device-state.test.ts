@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { markSimulatorDeviceBooted, markSimulatorDeviceShutdown } from './emulator-device-state'
 import type { SimulatorDeviceRow } from './emulator-pane-types'
 

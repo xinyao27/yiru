@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 import { createTestStore } from './store-test-helpers'
 import type { Repo } from '../../../../shared/types'
 import { clearRuntimeCompatibilityCacheForTests } from '../../runtime/runtime-rpc-client'

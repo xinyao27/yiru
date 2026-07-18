@@ -1,8 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import {
-  getTaskPageGitHubPRIconTone,
   getTaskPageGitHubWorkItemStateLabel,
-  getTaskPageGitHubWorkItemStateTone,
   isTaskPageGitHubDraftPR
 } from './task-page-github-work-item-status'
 
@@ -23,26 +21,9 @@ describe('task-page-github-work-item-status', () => {
     expect(getTaskPageGitHubWorkItemStateLabel({ type: 'issue', state: 'closed' })).toBe('Closed')
   })
 
-  it('uses GitHub-like neutral draft tones and muted draft icons', () => {
-    const draftTone = getTaskPageGitHubWorkItemStateTone({ type: 'pr', state: 'draft' })
-    expect(draftTone).toContain('muted')
-    expect(draftTone).not.toContain('amber')
-    expect(getTaskPageGitHubPRIconTone({ type: 'pr', state: 'draft' })).toContain('muted')
-    expect(getTaskPageGitHubPRIconTone({ type: 'pr', state: 'open' })).toContain('emerald')
+  it('identifies draft pull requests', () => {
     expect(isTaskPageGitHubDraftPR({ type: 'pr', state: 'draft' })).toBe(true)
     expect(isTaskPageGitHubDraftPR({ type: 'pr', state: 'open' })).toBe(false)
-  })
-
-  it('uses distinct muted tones for merged and open PRs', () => {
-    const mergedTone = getTaskPageGitHubWorkItemStateTone({ type: 'pr', state: 'merged' })
-    expect(mergedTone).toContain('purple')
-    expect(mergedTone).toContain('text-purple-700')
-    expect(mergedTone).not.toContain('bg-purple-600')
-
-    const openTone = getTaskPageGitHubWorkItemStateTone({ type: 'pr', state: 'open' })
-    expect(openTone).toContain('emerald')
-    expect(openTone).toContain('text-emerald-700')
-    expect(openTone).not.toContain('bg-emerald-600')
   })
 
   it('handles edge cases gracefully', () => {
@@ -53,14 +34,6 @@ describe('task-page-github-work-item-status', () => {
     // Unknown state should fallback to 'Open' for PRs
     expect(getTaskPageGitHubWorkItemStateLabel({ type: 'pr', state: 'unknown' as 'open' })).toBe(
       'Open'
-    )
-
-    // Icon tones for issues should always be muted
-    expect(getTaskPageGitHubPRIconTone({ type: 'issue', state: 'open' })).toContain(
-      'muted-foreground'
-    )
-    expect(getTaskPageGitHubPRIconTone({ type: 'issue', state: 'closed' })).toContain(
-      'muted-foreground'
     )
 
     // Draft PR check

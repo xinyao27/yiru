@@ -47,9 +47,9 @@ export function useTerminalTabColdParking(args: {
   terminalTabs: readonly TerminalTab[]
   assignments: ReadonlyMap<string, TerminalOverlayTabAssignment>
   isWorktreeActive: boolean
-  /** Worktree-level park verdict from Terminal.tsx. */
+  /** Worktree-level park verdict from terminal-workspace.tsx. */
   coldParkTerminalPanes: boolean
-  /** Hidden-measuring startup probe from Terminal.tsx — the panes must stay
+  /** Hidden-measuring startup probe from terminal-workspace.tsx — the panes must stay
    *  mounted for their first xterm fit, mirroring the worktree-level guard. */
   shouldMeasureHiddenWorktree: boolean
   activityTerminalPortals: ActivityTerminalPortalTarget[]
@@ -194,7 +194,7 @@ export function useTerminalTabColdParking(args: {
   ])
 
   // Why: the rendered park verdict — worktree-level park (prop from
-  // Terminal.tsx) or per-tab cold park, never portal-hosted tabs. Render and
+  // terminal-workspace.tsx) or per-tab cold park, never portal-hosted tabs. Render and
   // the watcher-sync effect must share this exact set so watcher lifecycle
   // tracks the committed unmounts.
   const parkedTerminalTabIds = useMemo(() => {

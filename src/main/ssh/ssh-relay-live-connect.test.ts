@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it, vi } from 'vitest'
+import { afterAll, describe, expect, it, vi } from 'vite-plus/test'
 
 // Live end-to-end harness for ssh:connect against a real host. Skipped unless
 // YIRU_LIVE_SSH_HOST is set; never runs in normal CI or unit-test loops.

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { validateGitExecArgs } from './git-exec-validator'
 
 function expectAllowed(args: string[]): void {

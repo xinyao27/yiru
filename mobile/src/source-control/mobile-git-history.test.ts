@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { GitHistoryItem, GitHistoryResult } from '../../../src/shared/git-history-types'
 import { formatCommitTime, mapMobileCommitRows, toMobileCommitRow } from './mobile-git-history'
 

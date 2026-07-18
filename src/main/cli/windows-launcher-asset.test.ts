@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 describe('packaged Windows CLI launcher asset', () => {
   it('keeps the Yiru batch shim behind the newline-safe native launcher', () => {

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { FeatureWallSetupProgress } from '../feature-wall/feature-wall-setup-progress'
 import {
   FEATURE_WALL_SETUP_STEP_IDS,

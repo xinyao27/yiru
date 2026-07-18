@@ -3792,7 +3792,7 @@ const api = {
       ipcRenderer.send('ui:sync-traffic-lights', zoomFactor),
     // Why: one-way send (not invoke) so the main-process before-input-event
     // handler can read the mirrored flag synchronously without a round-trip.
-    // The carve-out in createMainWindow.ts uses this to skip Cmd+B interception
+    // The carve-out in create-main-window.ts uses this to skip Cmd+B interception
     // while the markdown editor owns focus, letting TipTap apply bold instead.
     setMarkdownEditorFocused: (focused: boolean): void => {
       ipcRenderer.send('ui:setMarkdownEditorFocused', focused)

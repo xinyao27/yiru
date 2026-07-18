@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const listRuntimes = vi.fn()
 const cleanup = vi.fn().mockResolvedValue({})

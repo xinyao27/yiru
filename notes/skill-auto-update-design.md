@@ -596,7 +596,7 @@ Renderer and UX:
   `src/shared/agent-feature-install-commands.ts` (CliSection, OrchestrationPane, BrowserUsePane,
   EphemeralVmsPane, ComputerUseSkillSetupPanel, the linear/emulator CTAs, and the feature-wall /
   feature-tip cards) become ledger-state rows with adoption/update actions.
-- `src/renderer/src/hooks/useInstalledAgentSkills.ts` — `notifyInstalledAgentSkillsChanged()` is
+- `src/renderer/src/hooks/use-installed-agent-skills.ts` — `notifyInstalledAgentSkillsChanged()` is
   the post-write refresh signal, already listened to on focus and on the install event.
 
 Build and CI:

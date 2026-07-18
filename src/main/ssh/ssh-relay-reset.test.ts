@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { createServer, type Server } from 'node:net'
 import { tmpdir } from 'node:os'
 import { delimiter, join } from 'node:path'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 vi.mock('./ssh-relay-deploy-helpers', () => ({
   execCommand: vi.fn().mockResolvedValue('')

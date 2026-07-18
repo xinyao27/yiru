@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   TERMINAL_INPUT_COALESCE_MAX_CODE_UNITS,
   createPtyInputWriteQueue

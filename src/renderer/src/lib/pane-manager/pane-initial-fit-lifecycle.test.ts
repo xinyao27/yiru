@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { ManagedPaneInternal } from './pane-manager-types'
 import { disposePane } from './pane-lifecycle'
 import { restoreScrollStateAfterFit } from './pane-scroll'

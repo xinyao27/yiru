@@ -18,7 +18,7 @@ import {
   getWorktreeOpenInEntries,
   openOpenInAppsSettings,
   openWorktreePath
-} from '@/components/sidebar/WorktreeOpenInMenu'
+} from '@/components/sidebar/worktree-open-in-menu'
 
 type SourceControlEntryContextMenuProps = {
   currentWorktreeId: string

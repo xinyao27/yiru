@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import type * as Os from 'node:os'
 import { join } from 'node:path'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const safeStorageMock = vi.hoisted(() => ({
   decryptString: vi.fn((value: Buffer) => value.toString('utf8')),

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AutomationRun } from './automations-types'
 import {
   MAX_AUTOMATION_RUNS_PER_AUTOMATION,

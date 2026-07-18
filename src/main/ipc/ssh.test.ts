@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: SSH IPC session lifecycle tests share a
 single mocked Electron/connection harness; splitting them would obscure active
 session state that the terminate/disconnect assertions depend on. */
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 
 const {
   handleMock,

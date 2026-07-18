@@ -8,7 +8,7 @@
 //   which the new node is to be inserted is not a child of this node.
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 import {
   applyMarkdownPreviewSearchHighlights,
@@ -47,11 +47,11 @@ describe('markdown preview search highlighting keeps react-owned DOM intact (cra
 
   function render(parts: readonly string[]): HTMLElement {
     act(() => root.render(<MarkdownBody parts={parts} />))
-    const body = container.querySelector<HTMLElement>('.markdown-body')
+    const body = container.firstElementChild
     if (!body) {
       throw new Error('missing markdown body')
     }
-    return body
+    return body as HTMLElement
   }
 
   it('applies highlights without mutating the react-owned subtree', () => {

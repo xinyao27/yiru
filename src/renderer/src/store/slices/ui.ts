@@ -1550,7 +1550,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
   clearSettingsTarget: () => set({ settingsNavigationTarget: null }),
   settingsProjectHostSelection: {},
   // Why: renderer-only, never persisted — no window.api.ui.set here and this
-  // field is intentionally absent from the debounced UI writer in App.tsx.
+  // field is intentionally absent from the debounced UI writer in application-shell.tsx.
   setSettingsProjectHostSelection: (projectId, hostId) =>
     set((s) =>
       s.settingsProjectHostSelection[projectId] === hostId
@@ -2024,7 +2024,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
   setSortBy: (s) => set({ sortBy: s }),
 
   // Why: like setSortBy, this is a bare set — it persists only via the
-  // debounced window.api.ui.set writer in App.tsx, not on its own.
+  // debounced window.api.ui.set writer in application-shell.tsx, not on its own.
   projectOrderBy: 'manual',
   setProjectOrderBy: (p) => set({ projectOrderBy: p }),
 

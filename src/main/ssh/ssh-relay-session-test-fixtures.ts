@@ -1,4 +1,4 @@
-import { vi, type Mock } from 'vitest'
+import { vi, type Mock } from 'vite-plus/test'
 import type { BrowserWindow } from 'electron'
 import type { SshConnection } from './ssh-connection'
 import type { Store } from '../persistence'

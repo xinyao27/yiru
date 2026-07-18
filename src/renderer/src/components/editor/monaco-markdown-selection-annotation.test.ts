@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { IRange } from 'monaco-editor'
 import { getMonacoMarkdownSelectionAnnotationTarget } from './monaco-markdown-selection-annotation'
 

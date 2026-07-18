@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- Why: preflight tests share expensive process/preload mocks across
    install, auth, agent detection, and refresh branches. */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const {
   handleMock,

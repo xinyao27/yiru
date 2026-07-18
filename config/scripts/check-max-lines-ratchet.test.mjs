@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import {
   collectMobileBumps,
@@ -66,16 +66,11 @@ describe('defaultLimitForPath', () => {
 
 describe('collectMobileBumps', () => {
   it('captures only overrides whose max exceeds the default for the glob', () => {
-    const cfg = JSON.stringify({
-      overrides: [
-        { files: ['app/h/*/tasks.tsx'], rules: { 'max-lines': ['error', { max: 14682 }] } }, // bump (>400)
-        {
-          files: ['src/terminal/TerminalWebView.tsx'],
-          rules: { 'max-lines': ['error', { max: 379 }] }
-        }, // stricter (<400), skip
-        { files: ['scripts/mock-server.ts'], rules: { 'max-lines': ['error', { max: 407 }] } } // bump (>300)
-      ]
-    })
+    const cfg = `
+      { files: ['app/h/*/tasks.tsx'], rules: { 'max-lines': createMaxLinesRule(14_682) } },
+      { files: ['src/terminal/terminal-web-view.tsx'], rules: { 'max-lines': createMaxLinesRule(379) } },
+      { files: ['scripts/mock-server.ts'], rules: { 'max-lines': createMaxLinesRule(407) } }
+    `
     expect(collectMobileBumps(cfg)).toEqual([
       'mobile-config app/h/*/tasks.tsx',
       'mobile-config scripts/mock-server.ts'
@@ -83,9 +78,7 @@ describe('collectMobileBumps', () => {
   })
 
   it('ignores overrides without a max-lines rule', () => {
-    const cfg = JSON.stringify({
-      overrides: [{ files: ['a.tsx'], rules: { 'no-console': 'off' } }]
-    })
+    const cfg = `{ files: ['a.tsx'], rules: { 'no-console': 'off' } }`
     expect(collectMobileBumps(cfg)).toEqual([])
   })
 })

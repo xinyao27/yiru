@@ -1,7 +1,7 @@
 import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { doctorEphemeralVmRecipe } from './ephemeral-vm-recipe-doctor'
 import type { YiruVmRecipe } from './types'
 

@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
 import type { RefObject } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { ConnectionState } from '../transport/types'
-import type { TerminalWebViewHandle } from './TerminalWebView'
+import type { TerminalWebViewHandle } from './terminal-web-view'
 import {
   TERMINAL_FOREGROUND_RECOVERY_DELAY_MS,
   recoverActiveTerminalAfterForeground,

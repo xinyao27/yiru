@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { buildConnectionDiagnosticsReport } from './connection-diagnostics-report'
 
 const NOW = Date.UTC(2026, 6, 9, 22, 0, 0)

@@ -2,7 +2,7 @@
 
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { toast } from 'sonner'
 import { EMULATOR_KEYBOARD_PASTE_MAX_BYTES } from './emulator-keyboard-paste'
 import { EmulatorDeviceFrame } from './emulator-device-frame'

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { ClaudeAgentTeamsService, type AgentTeamsTerminalApi } from './claude-agent-teams-service'
 
 function createServiceWithLeader(): {

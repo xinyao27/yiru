@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { AGENT_CATALOG } from '@/lib/agent-catalog'
 import { supportsTerminalAgentQuickCommand } from '../../../../shared/terminal-quick-commands'
 import { getTerminalQuickCommandAgentOptions } from './terminal-quick-command-agent-options'

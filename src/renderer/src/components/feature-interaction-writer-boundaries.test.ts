@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const COMPONENT_ROOT = __dirname
 
@@ -18,7 +18,7 @@ function sourceBetween(source: string, startPattern: string, endPattern: string)
 
 describe('feature interaction writer boundaries', () => {
   it('keeps Cmd+J feature writers in open/selection handlers, not query or navigation rendering', () => {
-    const source = componentSource('WorktreeJumpPalette.tsx')
+    const source = componentSource('worktree-jump-palette.tsx')
     const renderStart = source.lastIndexOf('  return (')
     expect(renderStart).toBeGreaterThan(0)
 
@@ -36,7 +36,7 @@ describe('feature interaction writer boundaries', () => {
   })
 
   it('keeps task-provider writers off filters, tab switches, query edits, refresh, and pagination', () => {
-    const source = componentSource('TaskPage.tsx')
+    const source = componentSource('task-page.tsx')
     const providerWriter = /recordFeatureInteraction\('(github|gitlab|linear)-tasks'\)/
 
     const passiveSections = [
@@ -51,7 +51,7 @@ describe('feature interaction writer boundaries', () => {
   })
 
   it('records GitHub provider-depth for inline item mutation success paths', () => {
-    const source = componentSource('TaskPage.tsx')
+    const source = componentSource('task-page.tsx')
     const githubWriter = "recordFeatureInteraction('github-tasks')"
     const mutationSections = [
       sourceBetween(source, 'function GHAssigneesCell', 'const triggerContent ='),
@@ -70,7 +70,7 @@ describe('feature interaction writer boundaries', () => {
   })
 
   it('threads GitHub task source context through inline task mutations', () => {
-    const source = componentSource('TaskPage.tsx')
+    const source = componentSource('task-page.tsx')
     const sections = [
       sourceBetween(source, 'function GHStatusCell', 'function GitHubAssigneeAvatar'),
       sourceBetween(source, 'function GHAssigneesCell', 'const triggerContent ='),
@@ -90,7 +90,7 @@ describe('feature interaction writer boundaries', () => {
   })
 
   it('suppresses Tasks surface telemetry for in-page provider switches and detail opens', () => {
-    const source = componentSource('TaskPage.tsx')
+    const source = componentSource('task-page.tsx')
     const suppression = 'recordTasksInteraction: false'
     const githubDetailSection = sourceBetween(
       source,
@@ -113,7 +113,7 @@ describe('feature interaction writer boundaries', () => {
   })
 
   it('records Cmd+J create-workspace as its own destination, not a generic quick action', () => {
-    const source = componentSource('WorktreeJumpPalette.tsx')
+    const source = componentSource('worktree-jump-palette.tsx')
     const section = sourceBetween(source, 'const handleSelectQuickAction', 'const handleSelectItem')
 
     expect(section).toContain("recordFeatureInteraction('cmd-j-create-workspace')")
@@ -131,8 +131,8 @@ describe('feature interaction writer boundaries', () => {
   })
 
   it('records GitLab provider-depth for detail opens, workspace use, and dialog mutations', () => {
-    const taskPageSource = componentSource('TaskPage.tsx')
-    const dialogSource = componentSource('GitLabItemDialog.tsx')
+    const taskPageSource = componentSource('task-page.tsx')
+    const dialogSource = componentSource('gitlab-item-dialog.tsx')
     const gitlabWriter = "recordFeatureInteraction('gitlab-tasks')"
 
     expect(
@@ -162,8 +162,8 @@ describe('feature interaction writer boundaries', () => {
   })
 
   it('records Linear provider-depth for inline edits, board drops, creation, and workspace use', () => {
-    const taskPageSource = componentSource('TaskPage.tsx')
-    const drawerSource = componentSource('LinearItemDrawer.tsx')
+    const taskPageSource = componentSource('task-page.tsx')
+    const drawerSource = componentSource('linear-item-drawer.tsx')
     const linearWriter = "recordFeatureInteraction('linear-tasks')"
 
     const taskPageSections = [
@@ -202,7 +202,7 @@ describe('feature interaction writer boundaries', () => {
   })
 
   it('records Jira provider-depth for workspace use', () => {
-    const taskPageSource = componentSource('TaskPage.tsx')
+    const taskPageSource = componentSource('task-page.tsx')
     const jiraWriter = "recordFeatureInteraction('jira-tasks')"
 
     // End boundary is the declaration after the handler: the Jira connect flow
@@ -214,7 +214,7 @@ describe('feature interaction writer boundaries', () => {
   })
 
   it('records browser annotation agent handoff only from the prompt-delivered callback', () => {
-    const source = componentSource('browser-pane/BrowserPane.tsx')
+    const source = componentSource('browser-pane/browser-pane.tsx')
     expect(
       source.match(/recordFeatureInteraction\('browser-annotations-sent-to-agent'\)/g)
     ).toHaveLength(1)
@@ -243,12 +243,12 @@ describe('feature interaction writer boundaries', () => {
 
   it('records floating workspace hide only from explicit disable or hide actions', () => {
     const allowedSources = [
-      componentSource('settings/FloatingWorkspacePane.tsx'),
-      componentSource('floating-terminal/FloatingTerminalIconContextMenu.tsx')
+      componentSource('settings/floating-workspace-pane.tsx'),
+      componentSource('floating-terminal/floating-terminal-icon-context-menu.tsx')
     ].join('\n')
     const passiveSources = [
-      componentSource('../App.tsx'),
-      componentSource('floating-terminal/FloatingTerminalPanel.tsx')
+      componentSource('../application-shell.tsx'),
+      componentSource('floating-terminal/floating-terminal-panel.tsx')
     ].join('\n')
 
     expect(

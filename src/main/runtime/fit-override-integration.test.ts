@@ -2,7 +2,7 @@
  * Integration test for the mobile-fit override flow.
  * Tests the full lifecycle: mobile-fit → restore → verify PTY resized.
  */
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type * as GitUsernameModule from '../git/git-username'
 import { YiruRuntimeService } from './yiru-runtime'
 

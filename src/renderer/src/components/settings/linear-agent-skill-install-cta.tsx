@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkillNames
-} from '@/hooks/useInstalledAgentSkills'
+} from '@/hooks/use-installed-agent-skills'
 import {
   LINEAR_AGENT_SKILL_NAMES,
   YIRU_LINEAR_SKILL_INSTALL_COMMAND,
@@ -22,7 +22,7 @@ import {
   getLinearPromptSkillDiscoveryTarget,
   type LinearAgentSkillPromptSettings
 } from '../sidebar/linear-agent-skill-runtime'
-import { buildSkillCommandForRuntime } from './CliSkillRuntimeSetup'
+import { buildSkillCommandForRuntime } from './cli-skill-runtime-setup'
 import {
   useIntegrationCommandRowClass,
   useIntegrationSubordinateRowClass

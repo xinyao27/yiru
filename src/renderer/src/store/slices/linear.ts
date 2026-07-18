@@ -20,7 +20,7 @@ import type {
 import type { CacheEntry } from './github'
 import { clampLinearIssueListLimit } from '../../../../shared/linear-issue-read-limits'
 import { isIntegrationCredentialDecryptionError } from '../../../../shared/integration-credential-errors'
-import { clearLinearMetadataCache } from '../../hooks/useIssueMetadata'
+import { clearLinearMetadataCache } from '../../hooks/use-issue-metadata'
 import {
   isLinearIssueAttributeFilterUnsupportedError,
   linearConnect,

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { browseRuntimeServerDirectory } from './runtime-server-directory-browser'
 import { clearRuntimeCompatibilityCacheForTests } from './runtime-rpc-client'
 import {

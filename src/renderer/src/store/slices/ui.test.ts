@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { createStore, type StoreApi } from 'zustand/vanilla'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { getDefaultUIState, getWorktreeCardModeProperties } from '../../../../shared/constants'
 import type {
   GitHubWorkItem,

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { getDefaultOnboardingState } from '../../../../shared/constants'
 import type { DetectedWorktreeListResult, Worktree } from '../../../../shared/types'
 import {

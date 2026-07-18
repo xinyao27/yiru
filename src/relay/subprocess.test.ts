@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it, afterEach } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, afterEach } from 'vite-plus/test'
 import {
   copyFileSync,
   existsSync,

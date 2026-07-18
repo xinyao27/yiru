@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   DESKTOP_TERMINAL_SCROLLBACK_ROW_PRESETS,
   DESKTOP_TERMINAL_SCROLLBACK_ROWS_DEFAULT,

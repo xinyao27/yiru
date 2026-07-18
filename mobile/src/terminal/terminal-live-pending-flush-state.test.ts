@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { sendTerminalLiveControlAfterPendingFlush } from './terminal-live-control-send-order'
 import {
   queueTerminalLiveMirrorSend,

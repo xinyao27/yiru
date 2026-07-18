@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { RuntimeTerminalWait } from '../../../shared/runtime-types'
 import type { YiruRuntimeService } from '../yiru-runtime'
 import type { RpcRequest } from './core'

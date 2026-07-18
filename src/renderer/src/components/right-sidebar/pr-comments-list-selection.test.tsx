@@ -4,7 +4,7 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
 import { act, StrictMode, Suspense, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 vi.mock('@/components/ui/dropdown-menu', () => ({

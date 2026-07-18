@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vite-plus/test'
 import type { GlobalSettings } from '../../shared/types'
 import { resolveConsent, _resetMisconfigWarnCacheForTests } from './consent'
 

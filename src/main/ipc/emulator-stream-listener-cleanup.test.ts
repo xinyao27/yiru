@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 // Capture the ipcMain handlers the modules register so tests can invoke them
 // directly with a fake WebContents owner.

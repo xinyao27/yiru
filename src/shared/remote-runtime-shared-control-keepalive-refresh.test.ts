@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { requestSharedControl } from './remote-runtime-shared-control-requests'
 import {
   refreshSharedControlPendingRequestTimeouts,

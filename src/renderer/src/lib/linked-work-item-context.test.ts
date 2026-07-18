@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { buildAgentPromptWithContext } from './new-workspace'
 import {
   buildContainedLinkedContextBlock,

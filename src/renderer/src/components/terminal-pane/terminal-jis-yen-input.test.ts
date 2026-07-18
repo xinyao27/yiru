@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveTerminalJisYenInput, type TerminalJisYenInputEvent } from './terminal-jis-yen-input'
 
 function event(overrides: Partial<TerminalJisYenInputEvent>): TerminalJisYenInputEvent {

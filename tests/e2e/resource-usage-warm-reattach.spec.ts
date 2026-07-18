@@ -23,7 +23,7 @@
  * What it does NOT try to cover:
  *   - Multi-worktree warm-reattach. The hydrator iterates all repos ×
  *     worktrees; one is sufficient to lock down the regression path.
- *   - SSH worktrees. Covered by unit tests in `mergeSnapshotAndSessions.test.ts`.
+ *   - SSH worktrees. Covered by unit tests in `merge-snapshot-and-sessions.test.ts`.
  */
 
 import { existsSync, readFileSync } from 'node:fs'

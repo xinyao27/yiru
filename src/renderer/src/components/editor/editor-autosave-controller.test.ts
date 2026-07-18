@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { createStore, type StoreApi } from 'zustand/vanilla'
 import { createEditorSlice } from '@/store/slices/editor'
 import type { AppState } from '@/store'

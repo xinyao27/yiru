@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { getDefaultOnboardingState, getDefaultSettings } from '../../../../shared/constants'
 import { createTestStore, makeWorktree } from './store-test-helpers'
 

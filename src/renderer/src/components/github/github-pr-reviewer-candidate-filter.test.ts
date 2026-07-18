@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { GitHubAssignableUser } from '../../../../shared/types'
 import {
   GITHUB_PR_REVIEWER_QUERY_MAX_BYTES,

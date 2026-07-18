@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { createRuntimeProjectRefreshScheduler } from './runtime-project-refresh-scheduler'
 
 describe('createRuntimeProjectRefreshScheduler', () => {

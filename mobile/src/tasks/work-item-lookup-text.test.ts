@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isWorkItemLookupText } from './work-item-lookup-text'
 
 describe('isWorkItemLookupText', () => {

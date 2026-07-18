@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   NESTED_REPO_TELEMETRY_MAX_REPO_COUNT,
   bucketNestedRepoTelemetryCount,

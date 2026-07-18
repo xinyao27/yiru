@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { SESSION_RELEVANT_FIELDS, type WorkspaceSessionSnapshot } from './workspace-session'
 
 describe('SESSION_RELEVANT_FIELDS', () => {

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as ParcelWatcherProcess from './parcel-watcher-process'
 
 const { handleMock } = vi.hoisted(() => ({

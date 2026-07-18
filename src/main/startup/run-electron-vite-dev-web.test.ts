@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync } 
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { spawn, type ChildProcess } from 'node:child_process'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 
 const processesToCleanUp = new Set<number>()
 

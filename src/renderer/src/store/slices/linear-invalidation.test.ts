@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { create } from 'zustand'
 import type { AppState } from '../types'
 import type { LinearConnectionStatus, LinearIssue, LinearTeam } from '../../../../shared/types'
@@ -25,7 +25,7 @@ vi.mock('@/runtime/runtime-linear-client', () => ({
   linearTestConnection: vi.fn()
 }))
 
-vi.mock('../../hooks/useIssueMetadata', () => ({
+vi.mock('../../hooks/use-issue-metadata', () => ({
   clearLinearMetadataCache: vi.fn()
 }))
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { MouseEvent as ReactMouseEvent } from 'react'
 import { preventMiddleButtonDefault } from './middle-button-default-guard'
 

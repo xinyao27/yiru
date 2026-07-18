@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   ALL_EXECUTION_HOSTS_SCOPE,
   LOCAL_EXECUTION_HOST_ID,

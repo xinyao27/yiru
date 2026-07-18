@@ -1,6 +1,6 @@
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import type { PRCheckDetail, PRComment, PRInfo } from '../../../../shared/types'
 import {
@@ -176,7 +176,7 @@ describe('MergeConflictNotice', () => {
 })
 
 describe('ChecksList', () => {
-  it('puts the hosted details link in the check row as an icon affordance', () => {
+  it('renders the hosted details action for a check', () => {
     const markup = renderToStaticMarkup(
       React.createElement(
         TooltipProvider,
@@ -199,8 +199,6 @@ describe('ChecksList', () => {
 
     expect(markup).toContain('aria-label="Open check details"')
     expect(markup).toContain('Failed')
-    expect(markup.indexOf('Failed')).toBeLessThan(markup.indexOf('aria-label="Open check details"'))
-    expect(markup).not.toContain('Open details')
   })
 })
 

@@ -7,7 +7,7 @@
  * archived generation, and always leaves the CURRENT log at relay.log so the
  * `tail -100 relay.log` diagnostics workflow keeps working.
  */
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vite-plus/test'
 import { mkdtempSync, mkdirSync, readFileSync, existsSync, statSync, writeFileSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import * as path from 'node:path'

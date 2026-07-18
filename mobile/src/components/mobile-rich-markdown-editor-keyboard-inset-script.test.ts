@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { normalizeMobileRichMarkdownKeyboardInset } from './mobile-rich-markdown-editor-keyboard-inset-script'
 
 describe('normalizeMobileRichMarkdownKeyboardInset', () => {

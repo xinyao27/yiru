@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AppState } from '@/store/types'
 import {
   EMPTY_WORKTREE_PALETTE_CACHE_INPUTS,

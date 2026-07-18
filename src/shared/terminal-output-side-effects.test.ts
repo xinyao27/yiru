@@ -2,7 +2,7 @@
 // command-finished and GitHub pr-link scanning to the shared tracker so main
 // emits those facts for local/SSH PTYs. These tests pin the chunk-boundary
 // carry, exit-code best-effort, dedupe, and synthetic-frame isolation rules.
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   createTerminalTitleTracker,
   type TerminalTitleTrackerCallbacks

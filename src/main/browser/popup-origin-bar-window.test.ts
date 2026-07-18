@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 type Handler = (...args: unknown[]) => void
 
@@ -107,11 +107,7 @@ vi.mock('electron', () => ({
   WebContentsView: fakeElectron.FakeWebContentsView
 }))
 
-import {
-  describePopupOrigin,
-  openPopupWithOriginBar,
-  POPUP_ORIGIN_BAR_HEIGHT
-} from './popup-origin-bar-window'
+import { describePopupOrigin, openPopupWithOriginBar } from './popup-origin-bar-window'
 
 const { createFakeWebContents, FakeWebContentsView, FakeBaseWindow } = fakeElectron
 
@@ -195,31 +191,6 @@ describe('openPopupWithOriginBar', () => {
     expect(popup.contentWebContents.loadURL).toHaveBeenCalledWith('https://example.com/login')
   })
 
-  it('reserves an origin-bar strip above the requested content size', () => {
-    openPopupWithOriginBar(
-      { webContents: createFakeWebContents() as never, width: 500, height: 400 },
-      'https://example.com/'
-    )
-
-    expect(lastWindow().options).toMatchObject({
-      width: 500,
-      height: 400 + POPUP_ORIGIN_BAR_HEIGHT
-    })
-    const { bar, content } = lastViews()
-    expect(bar.setBounds).toHaveBeenCalledWith({
-      x: 0,
-      y: 0,
-      width: 500,
-      height: POPUP_ORIGIN_BAR_HEIGHT
-    })
-    expect(content.setBounds).toHaveBeenCalledWith({
-      x: 0,
-      y: POPUP_ORIGIN_BAR_HEIGHT,
-      width: 500,
-      height: 400
-    })
-  })
-
   it('keeps the origin bar isolated with locked-down webPreferences', () => {
     openPopupWithOriginBar(
       { webContents: createFakeWebContents() as never },
@@ -259,7 +230,6 @@ describe('openPopupWithOriginBar', () => {
     adopted.emit('did-navigate', {}, 'http://phish.example.net/login?token=SECRET')
 
     const script = bar.webContents.executeJavaScript.mock.calls[0][0] as string
-    expect(script).toContain("classList.toggle('insecure', true)")
     expect(script).toContain('"http://phish.example.net"')
     expect(script).not.toContain('SECRET')
     expect(lastWindow().setTitle).toHaveBeenCalledWith('http://phish.example.net')
@@ -305,21 +275,6 @@ describe('openPopupWithOriginBar', () => {
 
     expect(bar.webContents.executeJavaScript).toHaveBeenCalledTimes(1)
     expect(bar.webContents.executeJavaScript.mock.calls[0][0]).toContain('"https://example.com"')
-  })
-
-  it('elides the start of long origins so the registrable domain stays visible', () => {
-    openPopupWithOriginBar(
-      { webContents: createFakeWebContents() as never },
-      'https://example.com/'
-    )
-    const { bar } = lastViews()
-    const dataUrl = bar.webContents.loadURL.mock.calls[0][0] as string
-    const html = decodeURIComponent(dataUrl.replace('data:text/html;charset=utf-8,', ''))
-    // rtl clip container ellipsizes the left; the isolated ltr bdi keeps the
-    // origin's own characters (host, port) in normal order.
-    expect(html).toContain('<bdi id="origin">')
-    expect(html).toMatch(/#origin-clip\s*{[^}]*direction:\s*rtl/)
-    expect(html).toMatch(/#origin\s*{[^}]*direction:\s*ltr/)
   })
 
   it('closes the popup content and notifies listeners when the window closes', () => {

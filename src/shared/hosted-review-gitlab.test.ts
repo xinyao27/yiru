@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { hostedReviewSummaryFromGitLabInfo } from './hosted-review-gitlab'
 import type { HostedReviewInfo } from './hosted-review'
 

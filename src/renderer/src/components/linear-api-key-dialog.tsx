@@ -8,7 +8,7 @@ import {
 } from '../../../shared/linear-links'
 import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 import { useAppStore } from '@/store'
-import { useMountedRef } from '@/hooks/useMountedRef'
+import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

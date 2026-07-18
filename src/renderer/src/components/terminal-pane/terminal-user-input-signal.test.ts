@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { Terminal } from '@xterm/xterm'
 import { subscribeToTerminalUserInput } from './terminal-user-input-signal'
 

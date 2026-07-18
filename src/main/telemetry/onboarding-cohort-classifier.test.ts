@@ -3,7 +3,7 @@
 // shape, fail-soft to `undefined` on any failure mode, at most one warn per
 // session. See docs/onboarding-telemetry-extensions.md §2.
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { ONBOARDING_FINAL_STEP } from '../../shared/constants'
 import type { GlobalSettings, OnboardingState } from '../../shared/types'
 import type { Store } from '../persistence'

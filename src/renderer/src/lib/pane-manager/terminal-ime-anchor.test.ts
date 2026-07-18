@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { IBuffer, IBufferCell, IBufferLine } from '@xterm/xterm'
 import { resolveCursorAgentImeAnchor } from './terminal-ime-anchor'
 

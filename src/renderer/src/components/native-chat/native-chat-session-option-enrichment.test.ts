@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { CatalogModel } from '../../../../shared/agent-session-option-catalog'
 import {
   clearNativeChatModelEnrichmentForTests,

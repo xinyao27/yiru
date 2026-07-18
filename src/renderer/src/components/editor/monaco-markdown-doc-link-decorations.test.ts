@@ -1,5 +1,5 @@
 import type { editor } from 'monaco-editor'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   createMarkdownDocLinkDecorationController,
   getMarkdownDocLinkDecorationRanges,

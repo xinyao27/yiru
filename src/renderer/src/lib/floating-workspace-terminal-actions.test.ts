@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import type { Tab, TerminalTab } from '../../../shared/types'
 import {

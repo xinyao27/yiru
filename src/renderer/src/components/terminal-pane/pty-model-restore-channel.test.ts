@@ -2,7 +2,7 @@
 // empty-chunk sentinel (ambiguous with chunks fully consumed by OSC-9999
 // stripping). These tests pin the channel routing: one channel subscription,
 // handlers keyed by PTY id, replace-on-reregister semantics.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 describe('pty model-restore channel routing', () => {
   const originalWindow = (globalThis as { window?: typeof window }).window

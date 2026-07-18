@@ -2,7 +2,7 @@
 
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { GitHubUserAvatar, resolveGitHubUserAvatarSrc } from './github-user-avatar'
 
 function render(node: React.JSX.Element): { root: Root; container: HTMLDivElement } {

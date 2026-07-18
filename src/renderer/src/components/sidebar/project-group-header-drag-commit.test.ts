@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 
 import { commitProjectGroupHeaderDragDrop } from './project-group-header-drag-commit'
 import type { ProjectGroupHeaderDragSession } from './project-group-header-drag-contract'

@@ -1,4 +1,4 @@
-import type { DashboardAgentRow } from './useDashboardData'
+import type { DashboardAgentRow } from './use-dashboard-data'
 
 export type AgentRowLineageTree<T extends DashboardAgentRow> = {
   rootRows: T[]

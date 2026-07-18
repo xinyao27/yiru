@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as SourceControlLaunchAgentSelectionModule from '@/lib/source-control-launch-agent-selection'
 
 const mocks = vi.hoisted(() => ({

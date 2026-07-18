@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { firstReviewParam } from '../session/mobile-diff-review-screen-model'
 import { buildMobileReviewFileRoute, type MobileReviewRouteArea } from './mobile-review-route'
 

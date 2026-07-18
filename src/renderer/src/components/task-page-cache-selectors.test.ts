@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shallow } from 'zustand/shallow'
 
 import { workItemsCacheKey, type CacheEntry } from '@/store/slices/github'

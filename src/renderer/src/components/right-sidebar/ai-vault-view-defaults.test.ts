@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { AI_VAULT_AGENTS } from '../../../../shared/ai-vault-types'
 import {
   countAiVaultViewAdjustments,

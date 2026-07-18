@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   SCRIPT_TEXTAREA_ROW_SCAN_CODE_UNITS,
   getDetectedSetupScriptTextareaRows,

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { WatcherProcessSubscription } from '../main/ipc/parcel-watcher-process-subscription'
 import type { PromiseSettlementWaiters } from '../shared/promise-settlement-waiters'
 import type { RelayDispatcher, RequestContext } from './dispatcher'

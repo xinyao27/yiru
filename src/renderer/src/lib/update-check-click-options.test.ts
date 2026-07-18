@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getUpdateCheckClickOptions, getUpdateCheckHint } from './update-check-click-options'
 
 function clickEvent(overrides: Partial<Pick<MouseEvent, 'ctrlKey' | 'metaKey' | 'shiftKey'>>) {

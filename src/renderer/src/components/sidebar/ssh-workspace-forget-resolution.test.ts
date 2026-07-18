@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import { resolveSshWorkspaceForget } from './ssh-workspace-forget-resolution'
 import type { SshConnectionState } from '../../../../shared/ssh-types'
 

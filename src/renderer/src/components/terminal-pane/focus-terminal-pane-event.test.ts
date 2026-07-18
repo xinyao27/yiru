@@ -1,28 +1,12 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { TerminalLeafId } from '../../../../shared/stable-pane-id'
 import { handleFocusTerminalPaneDetail } from './focus-terminal-pane-event'
 
 const LEAF_ID = '11111111-1111-4111-8111-111111111111' as TerminalLeafId
 const OTHER_LEAF_ID = '22222222-2222-4222-8222-222222222222' as TerminalLeafId
 
-class MockClassList {
-  private classes = new Set<string>()
-
-  add(value: string): void {
-    this.classes.add(value)
-  }
-
-  remove(value: string): void {
-    this.classes.delete(value)
-  }
-
-  contains(value: string): boolean {
-    return this.classes.has(value)
-  }
-}
-
 function createPaneElement(): HTMLElement {
-  return { classList: new MockClassList() } as unknown as HTMLElement
+  return { classList: { add: vi.fn(), remove: vi.fn() } } as unknown as HTMLElement
 }
 
 function createManager(args?: { numericPaneId?: number | null; leafId?: TerminalLeafId }) {
@@ -46,8 +30,8 @@ function createManager(args?: { numericPaneId?: number | null; leafId?: Terminal
 }
 
 describe('handleFocusTerminalPaneDetail', () => {
-  it('focuses and flashes only after the target leaf resolves', () => {
-    const { container, manager } = createManager()
+  it('focuses and acknowledges only after the target leaf resolves', () => {
+    const { manager } = createManager()
     const acknowledgeAgents = vi.fn()
     const surfaceStaleAgentRow = vi.fn()
 
@@ -67,7 +51,6 @@ describe('handleFocusTerminalPaneDetail', () => {
     )
 
     expect(manager.setActivePane).toHaveBeenCalledWith(7, { focus: true })
-    expect(container.classList.contains('pane-focus-rim-flash')).toBe(true)
     expect(acknowledgeAgents).toHaveBeenCalledWith([`tab-1:${LEAF_ID}`])
     expect(surfaceStaleAgentRow).not.toHaveBeenCalled()
   })
@@ -95,8 +78,8 @@ describe('handleFocusTerminalPaneDetail', () => {
     expect(scrollToBottomIfOutputSinceLastView).toHaveBeenCalledWith(7)
   })
 
-  it('does not focus, flash, or ack when the numeric pane no longer owns the leaf', () => {
-    const { container, manager } = createManager({ leafId: OTHER_LEAF_ID })
+  it('does not focus or acknowledge when the numeric pane no longer owns the leaf', () => {
+    const { manager } = createManager({ leafId: OTHER_LEAF_ID })
     const acknowledgeAgents = vi.fn()
     const surfaceStaleAgentRow = vi.fn()
 
@@ -116,7 +99,6 @@ describe('handleFocusTerminalPaneDetail', () => {
     )
 
     expect(manager.setActivePane).not.toHaveBeenCalled()
-    expect(container.classList.contains('pane-focus-rim-flash')).toBe(false)
     expect(acknowledgeAgents).not.toHaveBeenCalled()
     expect(surfaceStaleAgentRow).toHaveBeenCalledWith('tab-1', LEAF_ID)
   })

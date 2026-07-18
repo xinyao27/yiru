@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { clearCrashBreadcrumbsForTest, getCrashBreadcrumbSnapshot } from './crash-breadcrumb-store'
 import { recordDurableCrashBreadcrumb } from './durable-crash-breadcrumb'
 import { _resetTracerForTests, setActiveSink, type TracerSink } from '../observability/tracer'

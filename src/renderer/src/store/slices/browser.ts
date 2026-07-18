@@ -1579,7 +1579,7 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
     // Why: mirror closeBrowserTab's contract — reducers are pure, imperative
     // side effects bracket them. Compute dropped workspaces first, destroy
     // their webviews, then run the state reducer unchanged. hydrate is called
-    // once at boot (App.tsx) when the webview registry is empty, so this loop
+    // once at boot (application-shell.tsx) when the webview registry is empty, so this loop
     // is a no-op today; it's defense-in-depth for any future caller that
     // re-hydrates after webviews are live.
     const droppedWorkspaceIds: string[] = []

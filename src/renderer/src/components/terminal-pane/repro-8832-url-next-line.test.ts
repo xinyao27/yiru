@@ -11,7 +11,7 @@
  *     src/renderer/src/components/terminal-pane/repro-8832-url-next-line.test.ts
  */
 import type { IBufferLine } from '@xterm/xterm'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { registerHttpLinkStoreAccessor } from '@/lib/http-link-routing'
 import { buildCandidateLogicalLinesForBufferPosition } from './terminal-file-link-hit-testing'
 import {

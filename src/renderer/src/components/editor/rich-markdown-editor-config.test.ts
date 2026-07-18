@@ -1,8 +1,8 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
 import type { Editor } from '@tiptap/react'
 import type { DocLinkMenuState } from './rich-markdown-commands'
-import { describe, expect, it, vi } from 'vitest'
-import type { LinkBubbleState } from './RichMarkdownLinkBubble'
+import { describe, expect, it, vi } from 'vite-plus/test'
+import type { LinkBubbleState } from './rich-markdown-link-bubble'
 import {
   createRichMarkdownEditorConfig,
   type EditorConfigParams

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { handleTerminalBinaryFrame } from './rpc-client-terminal-binary-frame'
 import { encodeTerminalStreamFrame, TerminalStreamOpcode } from './terminal-stream-protocol'
 

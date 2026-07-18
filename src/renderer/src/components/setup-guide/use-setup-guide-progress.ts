@@ -15,8 +15,8 @@ import {
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
-} from '@/hooks/useInstalledAgentSkills'
-import { useActiveProjectSkillRuntime } from '@/hooks/useActiveProjectSkillRuntime'
+} from '@/hooks/use-installed-agent-skills'
+import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
 import {
   getFeatureWallSetupProgress,
   type FeatureWallSetupProgress

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveMarkdownLinkTarget } from './markdown-internal-links'
 
 // Tests run under happy-dom or similar; navigator.userAgent reflects the

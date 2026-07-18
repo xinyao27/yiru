@@ -1,4 +1,4 @@
-import type { MobileBrowserTab } from '../../../../src/browser/MobileBrowserPane'
+import type { MobileBrowserTab } from '../../../../src/browser/mobile-browser-pane'
 import type { MobileTerminalTheme } from '../../../../src/terminal/terminal-webview-contract'
 import type { MobileDiffLine } from '../../../../src/session/mobile-diff-lines'
 import type {

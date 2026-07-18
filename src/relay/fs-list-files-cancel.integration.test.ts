@@ -9,7 +9,7 @@
  *   - a scan for a different workspace supersedes the previous one,
  *   - identical concurrent requests coalesce into one scan.
  */
-import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vite-plus/test'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import * as path from 'node:path'

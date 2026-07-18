@@ -4,7 +4,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { promisify } from 'node:util'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test'
 import { _resetAzureDevOpsRepoRefCache } from '../azure-devops/repository-ref'
 import { getHostedReviewForBranch } from './hosted-review'
 

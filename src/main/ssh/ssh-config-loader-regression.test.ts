@@ -1,7 +1,7 @@
 import type * as FsModule from 'node:fs'
 import type * as OsModule from 'node:os'
 import { win32 } from 'node:path'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 
 afterEach(() => {
   vi.restoreAllMocks()

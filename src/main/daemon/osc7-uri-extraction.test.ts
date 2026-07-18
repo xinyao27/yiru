@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { extractLastOsc7Uri, extractOscScanTail } from './osc7-uri-extraction'
 
 afterEach(() => {

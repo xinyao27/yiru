@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import type { Tab, TabGroup } from '../../../../shared/types'
 import type * as AgentStatusModule from '@/lib/agent-status'
 import { FLOATING_TERMINAL_WORKTREE_ID, getDefaultUIState } from '../../../../shared/constants'

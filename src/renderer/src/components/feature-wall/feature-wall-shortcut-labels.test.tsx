@@ -1,9 +1,9 @@
 import { renderToStaticMarkup } from 'react-dom/server'
-import { afterEach, describe, expect, it } from 'vitest'
-import { BrowserAnimatedVisual } from './BrowserAnimatedVisual'
-import { EditorAnimatedVisual } from './EditorAnimatedVisual'
-import { ReviewPRViewAnimatedVisual } from './ReviewPRViewAnimatedVisual'
-import { WorkbenchAnimatedVisual } from './WorkbenchAnimatedVisual'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
+import { BrowserAnimatedVisual } from './browser-animated-visual'
+import { EditorAnimatedVisual } from './editor-animated-visual'
+import { ReviewPRViewAnimatedVisual } from './review-pr-view-animated-visual'
+import { WorkbenchAnimatedVisual } from './workbench-animated-visual'
 
 const originalUserAgent = navigator.userAgent
 

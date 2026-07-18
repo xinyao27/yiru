@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { WorktreeRuntimeOwnerState } from './worktree-runtime-owner'
 import { splitWorktreeSortOrderByHost } from './worktree-sort-order-host-split'
 

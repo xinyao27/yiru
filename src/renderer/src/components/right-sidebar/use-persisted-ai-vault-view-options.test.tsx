@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { act, renderHook } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { AI_VAULT_AGENTS } from '../../../../shared/ai-vault-types'
 import { AI_VAULT_VIEW_OPTIONS_STORAGE_KEY } from './ai-vault-view-options-persistence'
 import { usePersistedAiVaultViewOptions } from './use-persisted-ai-vault-view-options'

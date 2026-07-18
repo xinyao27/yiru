@@ -202,16 +202,35 @@ test.describe('Large diff freeze repro', () => {
           const startedAt = performance.now()
           store.getState().openAllDiffs(wId, repoPath, undefined, 'unstaged', staleUnstagedEntries)
 
-          let editorCount = 0
+          let sectionCount = 0
+          let pierreDiffCount = 0
           let fallbackCount = 0
+          let changedLineCount = 0
+          const readRenderedDiffState = (): void => {
+            sectionCount = document.querySelectorAll('[data-combined-diff-section-row]').length
+            const pierreDiffs = Array.from(document.querySelectorAll('diffs-container'))
+            pierreDiffCount = pierreDiffs.length
+            changedLineCount = pierreDiffs.reduce(
+              (count, diff) =>
+                count +
+                (diff.shadowRoot?.querySelectorAll(
+                  '[data-line-type="addition"], [data-line-type="deletion"], [data-line-type="change-addition"], [data-line-type="change-deletion"]'
+                ).length ?? 0),
+              0
+            )
+          }
           try {
             while (performance.now() - startedAt < 30_000) {
               await new Promise((resolve) => window.setTimeout(resolve, 50))
-              editorCount = document.querySelectorAll('.monaco-diff-editor').length
+              readRenderedDiffState()
               fallbackCount = document.querySelectorAll(
                 '[data-testid="large-diff-fallback"]'
               ).length
-              if (editorCount + fallbackCount >= Math.min(entries.length, 5)) {
+              if (
+                sectionCount >= Math.min(entries.length, 5) &&
+                (pierreDiffCount > 0 || fallbackCount > 0) &&
+                (changedLineCount > 0 || fallbackCount > 0)
+              ) {
                 await new Promise((resolve) => window.setTimeout(resolve, 1_000))
                 break
               }
@@ -220,15 +239,12 @@ test.describe('Large diff freeze repro', () => {
             window.clearInterval(timer)
           }
 
-          const classHits = Array.from(
-            document.querySelectorAll(
-              '.monaco-diff-editor .line-insert, .monaco-diff-editor .line-delete, .monaco-diff-editor .char-insert, .monaco-diff-editor .char-delete'
-            )
-          ).length
+          readRenderedDiffState()
           return {
-            editorCount,
+            sectionCount,
+            pierreDiffCount,
             fallbackCount,
-            classHits,
+            changedLineCount,
             maxLagMs,
             sampleCount: samples.length,
             p95LagMs: samples.length
@@ -240,8 +256,9 @@ test.describe('Large diff freeze repro', () => {
       )
 
       console.log(`stale unstaged combined diff measurement ${JSON.stringify(measurement)}`)
-      expect(measurement.editorCount + measurement.fallbackCount).toBeGreaterThanOrEqual(5)
-      expect(measurement.classHits).toBeGreaterThan(0)
+      expect(measurement.sectionCount).toBeGreaterThanOrEqual(5)
+      expect(measurement.pierreDiffCount + measurement.fallbackCount).toBeGreaterThan(0)
+      expect(measurement.changedLineCount + measurement.fallbackCount).toBeGreaterThan(0)
       expect(measurement.maxLagMs).toBeLessThan(1_000)
     } finally {
       rmSync(fixture.repoPath, { recursive: true, force: true })

@@ -17,7 +17,7 @@ import type { TuiAgent } from '../../../../shared/types'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
 import type { SourceControlAiWriteTarget } from '../../../../shared/source-control-ai-recipe-save'
 import { translate } from '@/i18n/i18n'
-import { SourceControlAgentActionDialog } from './SourceControlAgentActionDialog'
+import { SourceControlAgentActionDialog } from './source-control-agent-action-dialog'
 
 export type SourceControlFixSplitButtonProps = {
   label: string

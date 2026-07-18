@@ -13,7 +13,7 @@
  *
  * worktreeId and tabId are unbounded, ephemeral key spaces (fresh ids, never reused).
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vite-plus/test'
 import type * as AgentStatusModule from '@/lib/agent-status'
 import {
   getForegroundTerminalTabLastSeenAtById,

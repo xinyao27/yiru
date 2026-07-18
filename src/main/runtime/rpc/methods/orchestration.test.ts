@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- Why: orchestration tests share a mock runtime factory; splitting by method would duplicate 40 lines of setup per file without improving clarity. */
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { ORCHESTRATION_METHODS } from './orchestration'
 import { RpcDispatcher } from '../dispatcher'
 import { buildRegistry, type RpcContext, type RpcRequest } from '../core'

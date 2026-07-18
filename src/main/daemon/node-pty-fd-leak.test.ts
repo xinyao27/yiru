@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, renameSync } from 'node:fs'
 import { setTimeout as delay } from 'node:timers/promises'
 import * as pty from 'node-pty'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getNodePtySpawnHelperCandidates } from '../providers/local-pty-utils'
 
 function currentRevokedFdCount(): number {

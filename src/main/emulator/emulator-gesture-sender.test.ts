@@ -1,7 +1,7 @@
 import { once } from 'node:events'
 import type { AddressInfo } from 'node:net'
 import { WebSocketServer } from 'ws'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { sendEmulatorGestureSequence } from './emulator-gesture-sender'
 
 describe('sendEmulatorGestureSequence', () => {

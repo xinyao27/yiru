@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AgentType } from '../../../../shared/agent-status-types'
 import { resolvePaneRendererPolicy } from './terminal-renderer-policy'
 

@@ -8,7 +8,7 @@
 // spawn. Pre-fix the call site forked one `ps` per pane per tick; with the
 // shared snapshot cache the scans collapse to ~one per tick regardless of pane
 // count, while each pane still resolves the same foreground identity.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { execFileMock, psScanCount } = vi.hoisted(() => ({
   execFileMock: vi.fn(),

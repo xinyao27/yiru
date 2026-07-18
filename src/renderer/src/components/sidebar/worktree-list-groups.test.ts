@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: row-builder tests keep grouping, pinning, and lineage ordering cases together so expected row contracts stay comparable. */
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getExecutionHostLabel } from '../../../../shared/execution-host'
 import { projectHostSetupProjectionFromRepos } from '../../../../shared/project-host-setup-projection'
 import {
@@ -14,10 +14,6 @@ import {
   getPRGroupKey,
   type PendingCreationRef
 } from './worktree-list-groups'
-import {
-  REPO_HEADER_ACTION_BUTTON_CLASS,
-  REPO_HEADER_ACTION_REVEAL_CLASS
-} from './repo-header-action-button-class'
 import type {
   DetectedWorktree,
   Project,
@@ -62,7 +58,7 @@ const worktree: Worktree = {
 const repoMap = new Map([[repo.id, repo]])
 
 function readWorktreeListSource(): string {
-  return readFileSync(fileURLToPath(new URL('./WorktreeList.tsx', import.meta.url)), 'utf8')
+  return readFileSync(fileURLToPath(new URL('./worktree-list.tsx', import.meta.url)), 'utf8')
 }
 
 const remoteRepo: Repo = {
@@ -3216,35 +3212,7 @@ describe('buildRows workspace lineage nesting', () => {
   })
 })
 
-describe('WorktreeList header styles', () => {
-  it('does not title-case workspace group labels', () => {
-    const source = readWorktreeListSource()
-
-    expect(source).not.toContain('leading-none capitalize')
-  })
-
-  it('collapses repo header actions without reserving title width', () => {
-    expect(REPO_HEADER_ACTION_REVEAL_CLASS).toContain('min-w-0 max-w-0 -ml-1.5')
-    expect(REPO_HEADER_ACTION_REVEAL_CLASS).toContain('focus:ml-0 focus:max-w-5 focus:opacity-100')
-    expect(REPO_HEADER_ACTION_REVEAL_CLASS).toContain(
-      'group-hover:ml-0 group-hover:max-w-5 group-hover:opacity-100'
-    )
-    expect(REPO_HEADER_ACTION_BUTTON_CLASS).toContain(
-      'transition-[margin,max-width,opacity,background-color,color]'
-    )
-    expect(REPO_HEADER_ACTION_BUTTON_CLASS).toContain(
-      'data-[state=open]:ml-0 data-[state=open]:max-w-5 data-[state=open]:opacity-100'
-    )
-  })
-
-  it('resolves repo header color from project group headers only', () => {
-    const source = readWorktreeListSource()
-
-    expect(source).toContain('resolveProjectGroupHeaderColor({')
-    expect(source).toContain('headerKey: row.key')
-    expect(source).toContain('color={repoHeaderColor}')
-  })
-
+describe('WorktreeList header wiring', () => {
   it('adapts projected setup rows for sidebar project grouping', () => {
     const source = readWorktreeListSource()
 

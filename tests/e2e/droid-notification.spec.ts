@@ -14,6 +14,7 @@ import {
   emitGrokHookPayload,
   readHookEndpoint
 } from './helpers/agent-hook-endpoint'
+import { nodeTerminalCommand } from './terminal-node-command'
 
 type NotificationDispatch = {
   source?: string
@@ -33,8 +34,12 @@ type AgentStatusSummary = {
   lastAssistantMessage?: string
 }
 
-async function emitOscTitle(page: Page, ptyId: string, title: string) {
-  await sendToTerminal(page, ptyId, `printf '\\033]0;${title}\\007'\r`)
+async function emitOscTitle(page: Page, ptyId: string, title: string): Promise<void> {
+  const encodedTitleFrame = Buffer.from(`\u001b]0;${title}\u0007`).toString('base64')
+  // Why: putting the title literally in a shell command lets shell integration
+  // publish that command as a transient title before the OSC frame arrives.
+  const script = `process.stdout.write(Buffer.from('${encodedTitleFrame}','base64'))`
+  await sendToTerminal(page, ptyId, `${nodeTerminalCommand(['-e', script])}\r`)
 }
 
 async function installMainProcessNotificationDispatchSpy(app: ElectronApplication): Promise<void> {

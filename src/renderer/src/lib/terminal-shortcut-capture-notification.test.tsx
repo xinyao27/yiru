@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { toast } from 'sonner'
 import { showTerminalShortcutCaptureNotification } from './terminal-shortcut-capture-notification'
 
@@ -50,11 +50,6 @@ describe('showTerminalShortcutCaptureNotification', () => {
     expect(toast.message).toHaveBeenCalledWith(
       'Terminal shortcut handled',
       expect.objectContaining({
-        className: expect.stringContaining('!py-2'),
-        classNames: expect.objectContaining({
-          title: expect.stringContaining('truncate'),
-          description: expect.stringContaining('truncate')
-        }),
         duration: 20_000,
         dismissible: true,
         action: expect.objectContaining({ label: 'Open Shortcuts' })

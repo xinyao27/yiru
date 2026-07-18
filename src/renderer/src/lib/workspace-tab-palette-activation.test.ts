@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { WorkspaceTabPaletteSearchResult } from './workspace-tab-palette-search'
 
 const mocks = vi.hoisted(() => {

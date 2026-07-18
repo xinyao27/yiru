@@ -107,7 +107,7 @@ export function getGroupVisibleTabOrder(
  * in the order the user sees. Falls back to the legacy
  * `tabBarOrderByWorktree` path when no active group exists yet — this covers
  * sessions restored before the split-group model hydrated and the
- * pre-layout titlebar TabBar fallback rendered by Terminal.tsx. The fallback
+ * pre-layout titlebar TabBar fallback rendered by terminal-workspace.tsx. The fallback
  * still drifts for drag-reorders (the legacy store never learns about
  * them), but worktrees without a group cannot have split-aware drag in the
  * first place, so in practice only the active-group path matters once

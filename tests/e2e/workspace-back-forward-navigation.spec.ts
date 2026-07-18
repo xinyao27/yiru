@@ -255,7 +255,7 @@ test.describe('Workspace Back/Forward Navigation', () => {
     await seedVisit(yiruPage, secondaryId)
 
     // Enter settings. The back shortcut must not change the active worktree,
-    // matching the view-guard in App.tsx and useIpcEvents.ts.
+    // matching the view-guard in application-shell.tsx and use-ipc-events.ts.
     await yiruPage.evaluate(() => {
       window.__store!.getState().openSettingsPage()
     })

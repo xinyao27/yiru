@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import * as agentHookListener from '../../shared/agent-hook-listener'
 import { makePaneKey } from '../../shared/stable-pane-id'
 import { AgentHookServer } from './server'

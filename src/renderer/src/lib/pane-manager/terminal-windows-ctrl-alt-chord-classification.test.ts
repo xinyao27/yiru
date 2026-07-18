@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { Terminal } from '@xterm/xterm'
 import {
   installWindowsCtrlAltChordRepair,

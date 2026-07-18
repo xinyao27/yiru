@@ -1,7 +1,7 @@
 // Regression tests for the reconnect-gap resync of replayed paired-web file
 // watches: a replayed files.watch reports changes only from its own native
 // setup, so consumers must receive a conservative overflow once it is ready.
-import { describe, expect, it, vi, afterEach, beforeEach } from 'vitest'
+import { describe, expect, it, vi, afterEach, beforeEach } from 'vite-plus/test'
 import { WebRuntimeClient } from './web-runtime-client'
 import { encrypt } from '../../../shared/e2ee-crypto'
 

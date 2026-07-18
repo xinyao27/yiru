@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- Why: web preload parity tests share module-reset
 global setup across namespaces so browser API installation stays realistic. */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { PreloadApi } from '../../../preload/api-types'
 import type { FeatureInteractionState } from '../../../shared/feature-interactions'
 import type { RuntimeRpcResponse } from '../../../shared/runtime-rpc-envelope'

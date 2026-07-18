@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { installWorktreeVisibleRefreshVisibilityListener } from './WorktreeList'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
+import { installWorktreeVisibleRefreshVisibilityListener } from './worktree-list'
 
 describe('installWorktreeVisibleRefreshVisibilityListener', () => {
   beforeEach(() => {

@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: colocating the PR/issue cache, work-item
 envelope, and IssueSourceIndicator suppression tests in one file keeps the
 GitHub slice's cross-cutting invariants verifiable in one place. */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { create } from 'zustand'
 import {
   _clearGitHubPRRefreshStartedEntriesForTest,
@@ -6897,7 +6897,7 @@ describe('createGitHubSlice.fetchWorkItems source/error envelope', () => {
 describe('IssueSourceIndicator suppression', () => {
   it('hides when sources deep-equal, shows when they differ, hides when either is null', async () => {
     const { default: IssueSourceIndicator, sameGitHubOwnerRepo } =
-      await import('../../components/github/IssueSourceIndicator')
+      await import('../../components/github/issue-source-indicator')
     const React = await import('react')
     const { renderToStaticMarkup } = await import('react-dom/server')
 

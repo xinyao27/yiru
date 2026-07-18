@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { directoryCacheFromFileList, isMobileMethodUnavailableError } from './file-list-fallback'
 import { getDirectoryCacheState } from './file-tree'
 

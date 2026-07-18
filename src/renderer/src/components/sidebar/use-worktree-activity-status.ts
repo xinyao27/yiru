@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { useAppStore } from '@/store'
 import { resolveWorktreeStatus, type WorktreeStatus } from '@/lib/worktree-status'
-import { EMPTY_BROWSER_TABS, EMPTY_TABS } from './WorktreeCardHelpers'
+import { EMPTY_BROWSER_TABS, EMPTY_TABS } from './worktree-card-helpers'
 import {
   selectLivePtyIdsForWorktree,
   selectTerminalLayoutRootsForWorktree,

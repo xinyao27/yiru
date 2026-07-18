@@ -7,7 +7,7 @@
 // working state. Each OSC title in a chunk must reach onTitleChange in
 // order so the agent tracker and the store see the working→idle transition.
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const ESC = '\x1b'
 const BEL = '\x07'

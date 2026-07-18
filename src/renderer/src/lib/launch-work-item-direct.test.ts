@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { AppState } from '@/store'
 import type * as TuiAgentSelectionModule from '../../../shared/tui-agent-selection'
 import type * as TuiAgentStartupModule from '@/lib/tui-agent-startup'

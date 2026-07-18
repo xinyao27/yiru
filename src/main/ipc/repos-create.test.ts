@@ -9,7 +9,7 @@
  *   - Git repos get an empty initial commit; without it, HEAD has no branch.
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 import { join } from 'node:path'
 import { DEFAULT_REPO_BADGE_COLOR } from '../../shared/constants'
 

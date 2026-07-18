@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { getExecutionHostLabel } from '../../../../shared/execution-host'
 import { GitHubRateLimitPanel } from '@/components/github/github-rate-limit-display'
 import { GitLabRateLimitPanel } from '@/components/gitlab/gitlab-rate-limit-display'

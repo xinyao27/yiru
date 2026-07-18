@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- test suite covers Claude runtime auth refresh, identity guards, and snapshot restore cases */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   chmodSync,
   existsSync,

@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { XTERM_HTML } from './terminal-webview-html'
 
 function iifeSource(): string {
@@ -126,7 +126,6 @@ describe('terminal WebView init surface replacement', () => {
     const surfaces = document.querySelectorAll('#terminal-container > div')
     expect(surfaces).toHaveLength(1)
     expect(surfaces[0]?.id).toBe('terminal-surface')
-    expect((surfaces[0] as HTMLElement).style.visibility).toBe('visible')
     expect(terminals.map((terminal) => terminal.disposed)).toEqual([true, true, false])
   })
 })

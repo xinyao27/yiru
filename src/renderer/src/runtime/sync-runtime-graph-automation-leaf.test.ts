@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { RuntimeSyncWindowGraph } from '../../../shared/runtime-types'
 import type { AppState } from '../store/types'
 import type { TerminalTab } from '../../../shared/types'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { DiscoveredSkill } from '../../../shared/skills'
 import type { TuiAgent } from '../../../shared/types'
 import {

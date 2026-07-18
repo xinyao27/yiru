@@ -1,5 +1,5 @@
 import type { ILink } from '@xterm/xterm'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   clearRuntimeCompatibilityCacheForTests,
   markRuntimeEnvironmentCompatible

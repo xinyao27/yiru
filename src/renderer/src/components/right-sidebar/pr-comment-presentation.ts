@@ -163,7 +163,7 @@ export function getPRCommentPresentationClasses(
       commentHeaderPrimary: 'flex min-w-0 items-center gap-1.5',
       commentHeaderMeta: '',
       commentHeaderMetaWithSelection: '',
-      groupOpen: 'border-l-2 border-l-status-success',
+      groupOpen: 'border-l-2 border-l-green-700 dark:border-l-green-300',
       groupQueued: 'ring-1 ring-ring/50',
       groupResolved: ''
     }

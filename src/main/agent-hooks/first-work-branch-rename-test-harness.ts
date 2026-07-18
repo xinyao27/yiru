@@ -1,4 +1,4 @@
-import type { vi } from 'vitest'
+import type { vi } from 'vite-plus/test'
 import type { GlobalSettings, Repo } from '../../shared/types'
 import { WORKTREE_ID_SEPARATOR } from '../../shared/worktree-id'
 import type {

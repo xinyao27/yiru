@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isSshTargetConnecting, shouldClearPendingSshReset } from './ssh-target-action-state'
 
 describe('ssh target action state', () => {

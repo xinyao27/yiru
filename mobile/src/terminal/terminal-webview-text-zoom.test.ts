@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs'
 import { Script } from 'node:vm'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const terminalWebViewSource = readFileSync(
-  new URL('./TerminalWebView.tsx', import.meta.url),
+  new URL('./terminal-web-view.tsx', import.meta.url),
   'utf8'
 )
 const terminalHtmlSource = readFileSync(

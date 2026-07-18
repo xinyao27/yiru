@@ -7,7 +7,7 @@
 //     usernames/orgs),
 // (d) parseProjectPaste shorthand owner-only alphabet matches the renderer,
 // (e) project owner/capability caches stay bounded in long sessions.
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vite-plus/test'
 import {
   GITHUB_PROJECT_REF_INPUT_MAX_BYTES,
   GITHUB_PROJECT_REF_INPUT_TOO_LARGE_ERROR

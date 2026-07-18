@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import {
   AGENT_STATUS_STALE_AFTER_MS,
   type AgentStatusEntry

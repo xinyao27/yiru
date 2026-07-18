@@ -4,7 +4,7 @@
  * Why: the saved note card (DiffCommentCard) is rendered into a Monaco view
  * zone. Monaco routes mouse events to the editor by default, so the delete
  * button relies on `suppressMouseDown: false` plus per-element
- * stopPropagation handlers in `useDiffCommentDecorator.tsx`. A regression
+ * stopPropagation handlers in `use-diff-comment-decorator.tsx`. A regression
  * anywhere in that chain (e.g. flipping suppressMouseDown, adding an
  * overlay that eats pointer events, removing the always-visible styling)
  * would make the button uninteractive with no type-check or unit-test

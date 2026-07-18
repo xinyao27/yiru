@@ -3,7 +3,7 @@
  *
  * This demonstrates the pattern for future shell-ready tests.
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vite-plus/test'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { mkdtempSync, rmSync } from 'node:fs'

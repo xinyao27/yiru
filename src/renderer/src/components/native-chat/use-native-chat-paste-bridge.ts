@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react'
 import type { RefObject } from 'react'
 import { APP_MENU_PASTE_EVENT } from '@/lib/app-menu-paste'
 import { pasteTextIntoTextControl, TEXT_CONTROL_PASTE_MAX_BYTES } from '@/lib/text-control-paste'
-import type { NativeChatComposerHandle } from './NativeChatComposer'
+import type { NativeChatComposerHandle } from './native-chat-composer'
 
 type NativeChatPasteBridgeRefs = {
   rootRef: RefObject<HTMLDivElement | null>

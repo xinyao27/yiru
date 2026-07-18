@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 
 const createFromBitmapMock = vi.hoisted(() =>
   vi.fn((buffer: Buffer, options: { width: number; height: number }) => ({

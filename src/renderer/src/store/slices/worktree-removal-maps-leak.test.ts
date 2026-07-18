@@ -19,7 +19,7 @@
  * worktreeId, browser workspace id and browser page id are all unbounded, ephemeral
  * key spaces (fresh UUIDs / path-derived ids, never reused).
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import type * as AgentStatusModule from '@/lib/agent-status'
 import type { BrowserPage, BrowserWorkspace } from '../../../../shared/types'
 import {

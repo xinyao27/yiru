@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import type * as AgentStatusModule from '@/lib/agent-status'
 import type { BrowserTab, DetectedWorktreeListResult, Worktree } from '../../../../shared/types'
 import { isTerminalLeafId } from '../../../../shared/stable-pane-id'
@@ -1499,7 +1499,7 @@ describe('terminal slice behaviors', () => {
     expect(store.getState().tabsByWorktree[worktreeId][0].pendingActivationSpawn).toBeUndefined()
   })
 
-  // Why: first-visit worktrees (no tabs yet) trigger Terminal.tsx's activation
+  // Why: first-visit worktrees (no tabs yet) trigger terminal-workspace.tsx's activation
   // fallback which calls createTab(). That auto-created tab passes
   // pendingActivationSpawn: true so its PTY spawn is suppressed — otherwise
   // clicking a never-visited worktree in the sidebar would stamp lastActivityAt
@@ -1530,7 +1530,7 @@ describe('terminal slice behaviors', () => {
       activeWorktreeId: worktreeId
     })
 
-    // Simulate Terminal.tsx's auto-create effect: tag as activation-driven.
+    // Simulate terminal-workspace.tsx's auto-create effect: tag as activation-driven.
     const newTab = store
       .getState()
       .createTab(worktreeId, undefined, undefined, { pendingActivationSpawn: true })

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { MobileRelayEndpoint } from '../../../src/shared/mobile-relay-credential-contract'
 import { MobileRelayUpgradeHostRemovedError } from './host-store'
 import {

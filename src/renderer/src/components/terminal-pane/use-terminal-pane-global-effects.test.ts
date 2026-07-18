@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: these hook tests share a mocked React lifecycle harness with global event cases. */
 import type * as ReactModule from 'react'
 import type * as StoreModule from '@/store'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { PASTE_TERMINAL_TEXT_EVENT, SYNC_FIT_PANES_EVENT } from '@/constants/terminal'
 import {
   registerLivePaneManager,

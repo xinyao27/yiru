@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { ManagedPaneInternal, ScrollState } from './pane-manager-types'
 import type { TerminalLeafId } from '../../../../shared/stable-pane-id'
 

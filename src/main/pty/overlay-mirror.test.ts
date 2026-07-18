@@ -3,7 +3,7 @@ import { mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import type * as NodePath from 'node:path'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { safeRemoveOverlay } from './overlay-mirror'
 
 const tempRoots: string[] = []

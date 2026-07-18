@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { createTerminalCommandLifecycle } from './terminal-command-lifecycle'
 
 describe('createTerminalCommandLifecycle', () => {

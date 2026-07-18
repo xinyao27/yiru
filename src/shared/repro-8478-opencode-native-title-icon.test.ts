@@ -18,7 +18,7 @@
  *   pnpm exec vitest run --config config/vitest.config.ts \
  *     src/shared/repro-8478-opencode-native-title-icon.test.ts
  */
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getAgentLabel, isClaudeAgent } from './agent-detection'
 import {
   resolveExplicitTerminalTitleAgentType,

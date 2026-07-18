@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { subscribeRuntimeEnvironmentFromPreload } from './runtime-environment-subscriptions'
 
 function deferred<T>(): {

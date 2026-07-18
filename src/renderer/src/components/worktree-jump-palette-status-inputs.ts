@@ -15,7 +15,7 @@ export type PaletteStatusInputs = PaletteStatusInputsState
 // active. The two hottest maps here — agentStatusByPaneKey and
 // runtimePaneTitlesByTabId — get a new top-level identity on every agent-status
 // transition and every terminal pane-title write app-wide. The palette is always
-// mounted (App.tsx renders <CommandDialog open={visible}>) and stays mounted for
+// mounted (application-shell.tsx renders <CommandDialog open={visible}>) and stays mounted for
 // the whole session once opened, so subscribing to them while it's closed
 // re-rendered the whole palette — and recomputed its per-worktree live/working-dot
 // sort over every worktree — on unrelated terminal chatter. A useShallow

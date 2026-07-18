@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { addNodePtyRecoveryHint, parseNodePtyDiagnostic } from './node-pty-error-hints'
 
 const PTY_ALLOCATION_HINT = [

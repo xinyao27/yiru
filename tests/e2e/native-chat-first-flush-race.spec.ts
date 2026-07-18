@@ -42,7 +42,7 @@ async function seedClaudeProviderSession(
 
 // Why: toggleTabViewMode keys off the *unified* tab id, which can differ from
 // the terminal tab id embedded in paneKey — resolve it the same way
-// TerminalPane.tsx does before calling the store action a real toggle/shortcut
+// terminal-pane.tsx does before calling the store action a real toggle/shortcut
 // would use.
 async function toggleTerminalTabToChatView(
   page: Page,

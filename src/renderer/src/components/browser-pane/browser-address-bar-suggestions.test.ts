@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { BrowserHistoryEntry } from '../../../../shared/types'
 import {
   BROWSER_ADDRESS_BAR_QUERY_MAX_BYTES,

@@ -3,7 +3,7 @@ tests (addRemote, getBaseRefDefault envelope, searchBaseRefs SSH relay) so
 fixture setup and mock plumbing can be shared. Splitting by line count would
 duplicate the hoisted mocks and the `../git/repo` partial-real/partial-stub
 setup. */
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vite-plus/test'
 import { EventEmitter } from 'node:events'
 import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'

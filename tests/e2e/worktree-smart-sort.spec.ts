@@ -39,7 +39,7 @@ async function seedSmartSortScenario(page: Page): Promise<SmartSortScenario> {
     state.setActiveView('terminal')
     state.setSidebarOpen(true)
     state.setGroupBy('none')
-    state.setSortBy('smart')
+    state.setSortBy('name')
 
     const worktrees = Object.values(state.worktreesByRepo)
       .flat()
@@ -162,6 +162,9 @@ async function seedSmartSortScenario(page: Page): Promise<SmartSortScenario> {
       'codex',
       { updatedAt: now, stateStartedAt: now - 60_000 }
     )
+    // Why: selecting Smart after seeding statuses bypasses the intentional
+    // status-settle debounce while still exercising the real comparator.
+    store.getState().setSortBy('smart')
 
     return {
       blockedId: blocked.id,

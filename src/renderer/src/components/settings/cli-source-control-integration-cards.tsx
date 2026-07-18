@@ -12,7 +12,7 @@ import {
   useIntegrationSubordinateRowClass
 } from './integration-card-presentation'
 import { getProviderAccountScope } from './provider-account-scope'
-import { ProviderHostScopeControl } from './ProviderHostScopeControl'
+import { ProviderHostScopeControl } from './provider-host-scope-control'
 import { usePreflightCardStatuses } from './source-control-preflight-card-status'
 import { translate } from '@/i18n/i18n'
 

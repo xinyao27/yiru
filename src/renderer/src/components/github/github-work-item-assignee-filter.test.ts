@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { GITHUB_WORK_ITEM_OPTION_FILTER_QUERY_MAX_BYTES } from './github-work-item-option-filter-bounds'
 import { filterGitHubWorkItemAssignees } from './github-work-item-assignee-filter'
 

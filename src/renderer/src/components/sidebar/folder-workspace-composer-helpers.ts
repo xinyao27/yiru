@@ -25,7 +25,7 @@ import type {
   ProjectGroup,
   Repo
 } from '../../../../shared/types'
-import type { SmartWorkspaceNameSelection } from '@/components/new-workspace/SmartWorkspaceNameField'
+import type { SmartWorkspaceNameSelection } from '@/components/new-workspace/smart-workspace-name-field'
 import { translate } from '@/i18n/i18n'
 
 const EMPTY_REPOS: Repo[] = []

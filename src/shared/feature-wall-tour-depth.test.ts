@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AgentsStepId } from './agents-orchestration-steps'
 import type { FeatureWallWorkflowId } from './feature-wall-workflows'
 import type { ReviewStepId } from './review-steps'

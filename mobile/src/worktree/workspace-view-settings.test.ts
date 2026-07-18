@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from './mobile-workspace-statuses'
 import {
   applyDesktopViewSettings,

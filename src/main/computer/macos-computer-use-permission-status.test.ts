@@ -1,7 +1,7 @@
 import { execFileSync, spawn, spawnSync } from 'node:child_process'
 import { mkdtemp, readFile, rm, stat } from 'node:fs/promises'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const resolveHelperAppPathMock = vi.hoisted(() => vi.fn())
 const resolveHelperExecutablePathMock = vi.hoisted(() => vi.fn())

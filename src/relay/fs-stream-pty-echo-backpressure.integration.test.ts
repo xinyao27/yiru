@@ -14,7 +14,7 @@
  *    window bounds the in-flight backlog;
  *  - legacy clients that never ack still receive the full stream.
  */
-import { describe, expect, it, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, beforeEach, afterEach } from 'vite-plus/test'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import * as path from 'node:path'

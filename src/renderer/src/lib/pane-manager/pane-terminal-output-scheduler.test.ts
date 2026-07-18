@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- Why: the scheduler tests cover one queue state machine; keeping ordering and overflow cases together makes regressions easier to audit. */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 vi.mock('@/lib/e2e-config', () => ({
   e2eConfig: { exposeStore: true }

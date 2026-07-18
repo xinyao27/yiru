@@ -1,6 +1,6 @@
 import type { Store } from '../persistence'
 import type { GlobalSettings } from '../../shared/types'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { statMock, readFileMock } = vi.hoisted(() => ({
   statMock: vi.fn(),

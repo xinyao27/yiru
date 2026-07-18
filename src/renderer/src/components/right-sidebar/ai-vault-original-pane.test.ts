@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AiVaultSession } from '../../../../shared/ai-vault-types'
 import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
 import type { SleepingAgentSessionRecord } from '../../../../shared/agent-session-resume'

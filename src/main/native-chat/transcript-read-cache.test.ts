@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, rm, utimes, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as TranscriptReader from './transcript-reader'
 
 // Spy on the underlying reader so we can assert cache hits issue zero reads.

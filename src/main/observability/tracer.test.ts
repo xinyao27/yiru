@@ -2,7 +2,7 @@
 // integration. The sink is mocked so we can inspect the records that would
 // have been pushed.
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test'
 import {
   _resetTracerForTests,
   flushActiveSink,

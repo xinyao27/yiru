@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { create } from 'zustand'
 import type { AppState } from '../types'
 import type { JiraConnectionStatus, JiraIssue, JiraViewer } from '../../../../shared/types'

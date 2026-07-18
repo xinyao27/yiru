@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { vi } from 'vitest'
+import { vi } from 'vite-plus/test'
 import type { MethodHandler, RequestContext } from './dispatcher'
 import { AgentExecHandler } from './agent-exec-handler'
 

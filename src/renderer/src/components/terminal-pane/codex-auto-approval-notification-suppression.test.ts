@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { YOLO_TUI_AGENT_ARGS } from '../../../../shared/tui-agent-permissions'
 import { createTestStore, makeTab } from '../../store/slices/store-test-helpers'
 import type { AppState } from '../../store/types'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AiVaultSession } from '../../../../shared/ai-vault-types'
 import {
   AI_VAULT_SESSION_FILTER_QUERY_MAX_BYTES,

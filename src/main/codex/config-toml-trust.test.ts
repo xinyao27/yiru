@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- Why: this suite keeps the hash fixture, TOML edit edge cases, and trust-state parser regressions together so Codex compatibility failures are easy to audit. */
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test'
 import {
   existsSync,
   mkdirSync,

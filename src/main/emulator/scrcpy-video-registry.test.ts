@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { scrcpyVideoRegistry, type ScrcpyVideoEvent } from './scrcpy-video-registry'
 
 function frame(config: boolean): {

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { RelayDispatcher, RequestContext } from './dispatcher'
 import { GitResponseStreamRegistry } from './git-response-stream'
 import { GIT_RESPONSE_CHUNK_SIZE, STREAM_ACK_WINDOW_CHUNKS } from './protocol'

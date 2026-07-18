@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { spawn } from 'node:child_process'
 import { AndroidEmulatorBackend } from './android-emulator-backend'
 import type { AndroidCommandResult, AndroidCommandRunner } from '../android/android-command-runner'

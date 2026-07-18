@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { createWorktreeChangeRefreshQueue } from './worktree-change-refresh-queue'
 
 function deferred<T = void>(): {

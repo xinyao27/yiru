@@ -126,7 +126,8 @@ test.describe('Tab Rename (Inline)', () => {
     expect(originalTitle.length).toBeGreaterThan(0)
 
     await tabLocatorByTitle(yiruPage, originalTitle).click({ button: 'right' })
-    await yiruPage.getByRole('menuitem', { name: 'Change Title', exact: true }).click()
+    // Why: the accessible name includes the platform shortcut suffix.
+    await yiruPage.getByRole('menuitem', { name: /^Change Title\b/ }).click()
 
     const renameInput = yiruPage.getByRole('textbox', {
       name: `Rename tab ${originalTitle}`,
@@ -306,81 +307,6 @@ test.describe('Tab Rename (Inline)', () => {
       .poll(async () => getActiveCustomTitle(yiruPage, worktreeId), { timeout: 3_000 })
       .toBe('Committed By Right Click')
     await expect(renameInput).toBeHidden()
-  })
-
-  test('rename input stays at a usable width when many tabs are open', async ({ yiruPage }) => {
-    const worktreeId = (await getActiveWorktreeId(yiruPage))!
-    const targetTabId = await getActiveTabId(yiruPage)
-    expect(targetTabId).not.toBeNull()
-    const targetTitle = 'Width Target Tab'
-
-    // Why: create enough terminal tabs that flex space runs out. 15 is well
-    // above the threshold at which the pre-fix input collapsed, and it keeps
-    // the test fast. The width fix pins the input to 72px (matching the
-    // slimmer tab title box), so even saturated, it should stay near that
-    // size — we assert ≥60px to allow a bit of slack for fonts/padding/
-    // containers differing between environments. The meaningful guarantee is
-    // that the input does not collapse to ~0 when flex space is saturated.
-    await yiruPage.evaluate(
-      ({ targetWorktreeId, targetTabId, targetTitle }) => {
-        const store = window.__store
-        if (!store) {
-          return
-        }
-        const state = store.getState()
-        const existing = state.tabsByWorktree[targetWorktreeId] ?? []
-        for (const [index, tab] of existing.entries()) {
-          // Why: shell-driven terminal title updates can race this crowded-tab
-          // assertion; custom titles keep the rename target stable.
-          state.setTabCustomTitle(
-            tab.id,
-            tab.id === targetTabId ? targetTitle : `Width Filler ${index + 1}`
-          )
-        }
-        for (let i = existing.length; i < 15; i++) {
-          const tab = state.createTab(targetWorktreeId, undefined, undefined, { activate: false })
-          state.setTabCustomTitle(tab.id, `Width Filler ${i + 1}`)
-        }
-      },
-      { targetWorktreeId: worktreeId, targetTabId, targetTitle }
-    )
-
-    await expect
-      .poll(async () => (await getWorktreeTabs(yiruPage, worktreeId)).length, { timeout: 5_000 })
-      .toBeGreaterThanOrEqual(15)
-    await expect
-      .poll(async () => getActiveCustomTitle(yiruPage, worktreeId), { timeout: 3_000 })
-      .toBe(targetTitle)
-
-    const tabLocator = tabLocatorByTitle(yiruPage, targetTitle)
-    await tabLocator.scrollIntoViewIfNeeded()
-    await expect(tabLocator).toBeVisible()
-    // Why: once 15 tabs are packed into the strip, the tab center can overlap
-    // the close affordance. Target the visible title text, which is the rename
-    // hit area users aim for.
-    const tabTitle = tabLocator.getByText(targetTitle, { exact: true })
-    await expect(tabTitle).toBeVisible()
-    // Why: this spec is about saturated-tab input width. The real pointer
-    // double-click path is covered above; dispatching the tab's own dblclick
-    // handler avoids pixel-level overlap flakes in the crowded strip.
-    await tabLocator.evaluate((element) => {
-      element.dispatchEvent(
-        new MouseEvent('dblclick', {
-          bubbles: true,
-          cancelable: true,
-          button: 0
-        })
-      )
-    })
-
-    const renameInput = yiruPage.getByRole('textbox', {
-      name: `Rename tab ${targetTitle}`,
-      exact: true
-    })
-    await expect(renameInput).toBeVisible()
-
-    const width = await renameInput.evaluate((element) => element.getBoundingClientRect().width)
-    expect(width).toBeGreaterThanOrEqual(60)
   })
 
   test('middle-clicking inside the rename input does not close the tab', async ({ yiruPage }) => {

@@ -3,7 +3,7 @@
  * Tests handleMobileSubscribe, handleMobileUnsubscribe, applyMobileDisplayMode,
  * debounced restore, inline restore on timer cancel, and cleanup paths.
  */
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vite-plus/test'
 import type * as GitUsernameModule from '../git/git-username'
 import type { RuntimeMobileSessionTabsSnapshot } from '../../shared/runtime-types'
 import { YiruRuntimeService } from './yiru-runtime'

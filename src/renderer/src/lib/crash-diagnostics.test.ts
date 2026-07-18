@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as CrashDiagnostics from './crash-diagnostics'
 
 type DiagnosticsModule = typeof CrashDiagnostics

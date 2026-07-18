@@ -127,7 +127,7 @@ test.describe('Tabs', () => {
     const mod = isMac ? 'Meta' : 'Control'
     const tabsBefore = await countRenderedTabs(yiruPage)
 
-    // Why: focus body first so the window-level keydown handler on Terminal.tsx
+    // Why: focus body first so the window-level keydown handler on terminal-workspace.tsx
     // actually sees the event. Without focus the key may be eaten by an
     // unrelated input (e.g. a stale search field from a previous test).
     await yiruPage.evaluate(() => document.body.focus())

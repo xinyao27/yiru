@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vite-plus/test'
 import { FsHandler } from './fs-handler'
 import { RelayContext } from './context'
 import type { RelayDispatcher } from './dispatcher'

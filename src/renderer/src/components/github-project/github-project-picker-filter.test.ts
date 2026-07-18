@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { GitHubProjectSummary } from '../../../../shared/github-project-types'
 import {
   GITHUB_PROJECT_PICKER_QUERY_MAX_BYTES,

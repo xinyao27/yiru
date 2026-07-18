@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, type Mock } from 'vitest'
+import { describe, expect, it, vi, type Mock } from 'vite-plus/test'
 import type { GitPushTarget } from '../../shared/types'
 import type { GitRemoteExec } from './worktree-push-target-cleanup'
 import {

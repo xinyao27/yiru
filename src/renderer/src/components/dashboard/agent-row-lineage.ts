@@ -1,4 +1,4 @@
-import type { DashboardAgentRow } from './useDashboardData'
+import type { DashboardAgentRow } from './use-dashboard-data'
 import { buildAgentRowLineageTree } from './agent-row-lineage-model'
 
 export type AgentRowLineagePresentation = {

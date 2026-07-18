@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { GitRemoteIdentity } from '../shared/git-remote-identity'
 import type { Repo } from '../shared/types'
 import { detectGitRemoteIdentity } from './repo-git-remote-identity'

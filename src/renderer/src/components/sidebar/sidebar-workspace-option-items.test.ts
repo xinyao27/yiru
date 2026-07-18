@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { TASK_WORKTREE_CARD_PROPERTIES } from '../../../../shared/constants'
 import {
   WORKTREE_CARD_PROPERTY_OPTIONS,

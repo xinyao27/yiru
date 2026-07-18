@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   EPHEMERAL_SETUP_TERMINAL_WORKTREE_ID_PREFIX,
   brandEphemeralSetupTerminalWorktreeId,

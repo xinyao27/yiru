@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as pty from 'node-pty'
 import { spawnShellWithFallback, type WindowsShellSpawnAttempt } from './local-pty-utils'
 

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import * as monaco from 'monaco-editor'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { syncContentUpdate } from './monaco-content-sync'
 
 const models: monaco.editor.ITextModel[] = []

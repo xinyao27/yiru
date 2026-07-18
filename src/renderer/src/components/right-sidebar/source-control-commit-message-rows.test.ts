@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   COMMIT_MESSAGE_ROW_SCAN_CODE_UNITS,
   getCommitMessageTextareaRows

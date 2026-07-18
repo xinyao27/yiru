@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { Terminal } from '@xterm/headless'
 import {
   POST_REPLAY_LIVE_AGENT_REATTACH_RESET,

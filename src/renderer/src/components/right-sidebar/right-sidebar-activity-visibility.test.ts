@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { Files } from '@phosphor-icons/react'
 import type { ActivityBarItem } from './activity-bar-buttons'
 import { getVisibleRightSidebarActivityItems } from './right-sidebar-activity-visibility'

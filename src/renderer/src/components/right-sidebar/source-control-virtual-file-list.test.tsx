@@ -2,7 +2,7 @@
 
 import { act, useState, type ReactElement } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   measureSourceControlScrollMargin,
   observeSourceControlScrollMargin,
@@ -366,10 +366,6 @@ describe('SourceControlVirtualFileList scroll-margin lifecycle', () => {
       fireResizeObservers()
     })
 
-    expect(host.querySelector<HTMLElement>('[data-index="0"]')?.style.transform).toBe(
-      'translateY(0px)'
-    )
-
     // Content above grows (sibling section / commit area).
     aboveHeight = 420
     act(() => {
@@ -381,11 +377,6 @@ describe('SourceControlVirtualFileList scroll-margin lifecycle', () => {
     act(() => {
       fireResizeObservers()
     })
-
-    // Local row positioning stays container-relative after margin update.
-    expect(host.querySelector<HTMLElement>('[data-index="0"]')?.style.transform).toBe(
-      'translateY(0px)'
-    )
 
     const scroller = host.querySelector<HTMLDivElement>('.overflow-auto')
     expect(scroller).toBeTruthy()

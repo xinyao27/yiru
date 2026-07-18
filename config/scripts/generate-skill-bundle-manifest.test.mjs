@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { chmod, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import {
   assertReleasedHistoryPreserved,
   classifyFile,

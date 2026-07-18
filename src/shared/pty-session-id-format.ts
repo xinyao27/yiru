@@ -2,7 +2,7 @@
  * Shared helpers for the minted PTY session id format.
  *
  * Why split out of `src/main/daemon/pty-session-id.ts`: the renderer-side
- * merge in `mergeSnapshotAndSessions.ts` and the boot-time hydration in
+ * merge in `merge-snapshot-and-sessions.ts` and the boot-time hydration in
  * `attach-main-window-services.ts` both need to recover the owning
  * worktreeId from a session id. Three call sites silently re-implementing
  * the same parser (one of them looser than the others) was the seed of

@@ -5,7 +5,7 @@
 import { mkdtempSync, rmSync, statSync } from 'node:fs'
 import { posix } from 'node:path'
 import { tmpdir } from 'node:os'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test'
 
 import { registerWslHookFsHandlers } from './wsl-hook-fs-bridge'
 import type { MethodHandler, RelayDispatcher, RequestContext } from './dispatcher'

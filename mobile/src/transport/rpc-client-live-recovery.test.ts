@@ -8,7 +8,7 @@
 // parked-loop scenario ~8 minutes:
 //   YIRU_MOBILE_LIVE_REPRO=1 pnpm vitest run src/transport/rpc-client-live-recovery.test.ts
 //   YIRU_MOBILE_LIVE_REPRO_FULL=1 ... (adds the 8-minute parked-loop case)
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { randomBytes } from 'node:crypto'
 import type { AddressInfo } from 'node:net'
 import nacl from 'tweetnacl'

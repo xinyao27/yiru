@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { DaemonPtyRouter } from './daemon-pty-router'
 import type { DaemonPtyAdapter } from './daemon-pty-adapter'
 import type { PtyBackgroundStreamEvent, PtySpawnOptions, PtySpawnResult } from '../providers/types'

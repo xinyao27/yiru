@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
 import type { TuiAgent } from '../../../../shared/types'
 import { resolveNativeChatSession } from './native-chat-pane-resolution'

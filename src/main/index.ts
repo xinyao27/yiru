@@ -119,7 +119,7 @@ import {
   attachMainWindowServices,
   ensureAutoUpdaterConfigured
 } from './window/attach-main-window-services'
-import { createMainWindow, loadMainWindow } from './window/createMainWindow'
+import { createMainWindow, loadMainWindow } from './window/create-main-window'
 import {
   createSystemTray,
   destroySystemTray,

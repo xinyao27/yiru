@@ -2,7 +2,7 @@
 
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { getExecutionHostLabel } from '../../../../shared/execution-host'
 import { getProviderRuntimeContextKey } from '@/lib/provider-runtime-context'
 import { TooltipProvider } from '../ui/tooltip'

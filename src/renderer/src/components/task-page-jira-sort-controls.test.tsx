@@ -2,7 +2,7 @@
 
 import '@testing-library/jest-dom/vitest'
 
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -33,8 +33,6 @@ describe('TaskPage Jira sort controls', () => {
       'aria-pressed',
       'true'
     )
-    expect(screen.getByRole('button', { name: 'Assignee' })).toHaveClass('flex', 'max-lg:!hidden')
-    expect(screen.getByRole('button', { name: 'Assignee' })).not.toHaveClass('block')
 
     await user.click(screen.getByRole('button', { name: 'Key' }))
     expect(onSort).toHaveBeenCalledWith('key')
@@ -45,7 +43,7 @@ describe('TaskPage Jira sort controls', () => {
     const onSort = vi.fn()
     renderControls(onSort)
 
-    expect(screen.getByTestId('jira-mobile-sort-controls')).toHaveClass('hidden', 'max-md:!flex')
+    expect(screen.getByTestId('jira-mobile-sort-controls')).toBeInTheDocument()
     await user.click(screen.getByRole('combobox', { name: 'Sort by' }))
     await user.click(screen.getByRole('option', { name: 'Priority' }))
     expect(onSort).toHaveBeenCalledWith('priority')

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import type { NativeChatMessage } from '../../../../shared/native-chat-types'
 import { buildNativeChatRenderItems, orderNativeChatMessages } from './native-chat-message-grouping'
 import { NATIVE_CHAT_STREAMING_ID } from '../../../../shared/native-chat-streaming'

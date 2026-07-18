@@ -1,6 +1,6 @@
 import { createElement } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vite-plus/test'
 import { useThrottledLatestValue } from './use-throttled-latest-value'
 
 describe('useThrottledLatestValue', () => {

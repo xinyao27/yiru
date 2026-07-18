@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isLocalPathOpenBlocked } from './local-path-open-guard'
 
 describe('isLocalPathOpenBlocked', () => {

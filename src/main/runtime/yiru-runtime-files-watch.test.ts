@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { EventEmitter } from 'node:events'
 import type * as Fs from 'node:fs'
 import type * as FsPromises from 'node:fs/promises'

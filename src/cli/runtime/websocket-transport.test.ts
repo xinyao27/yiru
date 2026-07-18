@@ -2,7 +2,7 @@ import { createServer, type Server } from 'node:http'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { WebSocketServer } from 'ws'
 import { encodePairingOffer, type PairingOffer } from '../../shared/pairing'
 import {

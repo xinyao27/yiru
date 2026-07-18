@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { normalizeHostedReviewBaseRef, normalizeHostedReviewHeadRef } from './hosted-review-refs'
 
 describe('hosted review ref normalization', () => {

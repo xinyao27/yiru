@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { shouldFocusTerminalFromPanePointerDown } from './pane-pointer-focus'
 
 class FakeElement {

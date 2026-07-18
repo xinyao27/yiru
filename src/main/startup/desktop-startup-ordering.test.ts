@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 describe('startup ordering', () => {
   it('passes the startup barrier into PTY handlers without blocking window creation', () => {

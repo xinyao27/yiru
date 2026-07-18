@@ -11,7 +11,7 @@ import {
 import type { ConnectionLogEntry } from '../src/transport/types'
 import { useCloseHost } from '../src/transport/client-context'
 import { colors, spacing, radii, typography } from '../src/theme/mobile-theme'
-import { ConnectionLog } from '../src/components/ConnectionLog'
+import { ConnectionLog } from '../src/components/connection-log'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
 
 type Status = 'awaiting-confirm' | 'connecting' | 'error'

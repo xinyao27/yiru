@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { runYiruContextMenuPaste, type YiruContextMenuPasteDeps } from './monaco-context-menu-paste'
 
 const READ_ONLY_OPTION = 104

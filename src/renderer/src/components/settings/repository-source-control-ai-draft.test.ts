@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { RepoSourceControlAiOverrides } from '../../../../shared/source-control-ai-types'
 import { buildActionScopedRepoAiSave } from './repository-source-control-ai-draft'
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shouldFocusMobileDriverAction } from './mobile-driver-overlay-focus'
 
 function focusLike(args: {

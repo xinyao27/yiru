@@ -58,15 +58,8 @@ function buildSurfaceVariables(args: {
   const border = `color-mix(in srgb, ${foreground} 7%, ${background})`
   const ring = `color-mix(in srgb, ${foreground} 44%, ${background})`
   const vars: LeftSidebarStyleVariables = {
-    '--worktree-sidebar': background,
-    '--worktree-sidebar-foreground': foreground,
-    '--worktree-sidebar-accent': accent,
-    '--worktree-sidebar-accent-foreground': foreground,
-    '--worktree-sidebar-border': border,
-    '--worktree-sidebar-ring': ring,
-    // Why: older worktree-sidebar descendants still consume the shadcn sidebar
-    // token family; mirror it inside this scoped root so every left-sidebar
-    // surface follows the selected appearance.
+    // Why: appearance overrides stay scoped to the left rail while every child
+    // consumes the standard shadcn sidebar family.
     '--sidebar': background,
     '--sidebar-foreground': foreground,
     '--sidebar-accent': accent,

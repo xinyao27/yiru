@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { BackgroundTransientFactRelay } from './daemon-background-transient-facts'
 import type { DaemonTransientFact } from './types'
 

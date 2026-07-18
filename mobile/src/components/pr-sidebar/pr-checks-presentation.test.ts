@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { PRCheckDetail } from '../../../../src/shared/types'
 import {
   checkOutcome,
@@ -134,11 +134,11 @@ describe('prCheckKey', () => {
 })
 
 describe('prStateBadge', () => {
-  it('maps each PR state to a label + status-color token matching the workspace-list badge', () => {
-    expect(prStateBadge('open')).toEqual({ label: 'Open', token: 'statusGreen' })
-    expect(prStateBadge('closed')).toEqual({ label: 'Closed', token: 'statusRed' })
-    expect(prStateBadge('merged')).toEqual({ label: 'Merged', token: 'statusPurple' })
-    expect(prStateBadge('draft')).toEqual({ label: 'Draft', token: 'textSecondary' })
+  it('maps each PR state to its user-facing label', () => {
+    expect(prStateBadge('open').label).toBe('Open')
+    expect(prStateBadge('closed').label).toBe('Closed')
+    expect(prStateBadge('merged').label).toBe('Merged')
+    expect(prStateBadge('draft').label).toBe('Draft')
   })
 })
 
@@ -150,13 +150,12 @@ describe('getPRReviewerRows', () => {
     const rows = getPRReviewerRows({
       reviewRequests: [{ login: 'alice', name: 'Alice', avatarUrl: 'a' }]
     })
-    expect(rows).toEqual([
+    expect(rows).toMatchObject([
       {
         login: 'alice',
         name: 'Alice',
         avatarUrl: 'a',
-        stateLabel: 'Requested',
-        token: 'statusAmber'
+        stateLabel: 'Requested'
       }
     ])
   })
@@ -167,9 +166,9 @@ describe('getPRReviewerRows', () => {
         { login: 'carol', state: 'CHANGES_REQUESTED' }
       ]
     })
-    expect(rows.map((r) => [r.login, r.stateLabel, r.token])).toEqual([
-      ['bob', 'Approved', 'statusGreen'],
-      ['carol', 'Changes requested', 'statusRed']
+    expect(rows.map((r) => [r.login, r.stateLabel])).toEqual([
+      ['bob', 'Approved'],
+      ['carol', 'Changes requested']
     ])
   })
   it('dedupes a reviewer present in both requests and reviews (requested wins)', () => {

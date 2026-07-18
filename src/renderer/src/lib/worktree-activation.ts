@@ -582,7 +582,7 @@ export function ensureWorktreeHasInitialTerminal(
   // Why: this tab only exists because the user clicked/activated a worktree
   // that had no focusable surface yet. Tag it so the resulting PTY spawn
   // does not count as activity and reshuffle the Recent sort. Explicit
-  // "New Tab" actions (handleNewTab in Terminal.tsx) do not set the flag.
+  // "New Tab" actions (handleNewTab in terminal-workspace.tsx) do not set the flag.
   //
   // Why: the initial terminal can be seeded with a coding agent (new-workspace
   // flow, or reopening an empty worktree created with an agent). Stamp that on

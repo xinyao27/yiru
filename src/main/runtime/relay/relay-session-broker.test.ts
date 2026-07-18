@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import nacl from 'tweetnacl'
 import type { YiruCloudAuthConfig } from '../../yiru-profiles/profile-cloud-auth-config'
 import type { RelayHostHelloAckMessage } from './relay-control-protocol'

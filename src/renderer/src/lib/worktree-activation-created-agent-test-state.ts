@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { vi } from 'vitest'
+import { vi } from 'vite-plus/test'
 import type { Worktree } from '../../../shared/types'
 import { useAppStore } from '@/store'
 

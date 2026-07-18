@@ -11,7 +11,7 @@
  * entry per closed pane for the renderer session. The fix evicts on dispose only
  * when the pane is no longer live, preserving the cross-remount dedup.
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vite-plus/test'
 import {
   createAgentCompletionCoordinator,
   resetAgentCompletionCoordinatorIdentitiesForTest,

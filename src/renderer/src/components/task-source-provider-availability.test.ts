@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { PreflightStatus } from '../../../preload/api-types'
 import type { TaskSourceContext } from '../../../shared/task-source-context'
 import { getRepoBackedProviderAvailability } from './task-source-provider-availability'

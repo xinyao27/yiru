@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { ManagedPaneInternal, PaneManagerOptions } from './pane-manager-types'
 import { applyTerminalGpuAcceleration } from './pane-terminal-gpu-acceleration'
 

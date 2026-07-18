@@ -1,14 +1,14 @@
 import React, { useCallback } from 'react'
 import { CaretRight as ChevronRight } from '@phosphor-icons/react'
-import { AgentStateDot, agentStateLabel } from '@/components/AgentStateDot'
-import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/useDashboardData'
+import { AgentStateDot, agentStateLabel } from '@/components/agent-state-dot'
+import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { agentTypeToIconAgent, formatAgentTypeLabel } from '@/lib/agent-status'
 import { cn } from '@/lib/class-names'
 import { getAgentDotState } from './worktree-card-agent-summary'
 import { translate } from '@/i18n/i18n'
 import { getAgentRowPrimaryText } from '@/lib/agent-row-primary-text'
-import CacheTimer, { usePromptCacheCountdownForPane } from './CacheTimer'
+import CacheTimer, { usePromptCacheCountdownForPane } from './cache-timer'
 
 function formatShortTimeAgo(ts: number, now: number): string {
   const delta = now - ts
@@ -174,7 +174,7 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
       {hasChildDisclosure ? (
         <button
           type="button"
-          className="compact-agent-child-disclosure-button flex size-4 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-worktree-sidebar-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring"
+          className="compact-agent-child-disclosure-button flex size-4 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-sidebar-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring"
           aria-label={translate(
             'auto.components.sidebar.worktree.card.compact.agents.a128d7006b',
             '{{value0}} {{value1}} child {{value2}}',
@@ -252,7 +252,7 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
         hasChildDisclosure && 'worktree-agent-lineage-parent-row',
         isLineageChild && 'worktree-agent-lineage-child-row',
         'flex h-6 items-center gap-1',
-        isFocusedPane && 'bg-worktree-sidebar-accent',
+        isFocusedPane && 'bg-sidebar-accent',
         sendTargetStatus === 'sending' && 'cursor-progress opacity-75',
         sendTargetStatus === 'disabled' && 'cursor-default opacity-60'
       )}

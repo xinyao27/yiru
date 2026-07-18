@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { SshConnectionState } from '../../../shared/ssh-types'
 import { useAppStore } from '@/store'
 import {

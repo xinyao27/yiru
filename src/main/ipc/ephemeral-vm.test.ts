@@ -1,7 +1,7 @@
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { encodePairingOffer, PAIRING_OFFER_VERSION } from '../../shared/pairing'
 import { listEnvironments } from '../../shared/runtime-environment-store'
 

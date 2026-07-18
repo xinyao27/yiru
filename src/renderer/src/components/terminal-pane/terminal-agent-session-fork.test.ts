@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 

@@ -190,7 +190,7 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
     submenu: [
       {
         // Why: display-only shortcut hint — not a real accelerator. Cmd/Ctrl+B
-        // is intercepted in createMainWindow.ts's before-input-event handler
+        // is intercepted in create-main-window.ts's before-input-event handler
         // with a TipTap-bold carve-out for markdown editors. Binding the
         // accelerator here would steal the chord before that carve-out can
         // fire. Sidebar open/closed lives in the renderer store (non-persisted),

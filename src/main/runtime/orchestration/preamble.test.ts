@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { buildDispatchPreamble } from './preamble'
 
 function baseParams(overrides: Partial<Parameters<typeof buildDispatchPreamble>[0]> = {}) {

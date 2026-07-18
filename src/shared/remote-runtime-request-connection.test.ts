@@ -1,5 +1,5 @@
 import type { AddressInfo } from 'node:net'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { WebSocketServer, type WebSocket } from 'ws'
 import { encodePairingOffer, parsePairingCode, type PairingOffer } from './pairing'
 import {

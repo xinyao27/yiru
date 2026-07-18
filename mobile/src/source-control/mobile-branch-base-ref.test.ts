@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveMobileBranchCompareBaseRef } from './mobile-branch-base-ref'
 import type { RpcClient } from '../transport/rpc-client'
 

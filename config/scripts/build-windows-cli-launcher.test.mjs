@@ -2,7 +2,7 @@ import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const itCrossHost = process.platform === 'win32' ? it.skip : it
 const projectRoot = resolve(import.meta.dirname, '../..')

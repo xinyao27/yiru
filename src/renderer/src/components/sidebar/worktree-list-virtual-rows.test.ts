@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { VirtualItem } from '@tanstack/react-virtual'
 import {
   HOST_STICKY_PINNED_HEIGHT,

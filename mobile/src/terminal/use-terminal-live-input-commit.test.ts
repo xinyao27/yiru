@@ -1,7 +1,7 @@
 import { createElement, type RefObject } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import type { TextInput } from 'react-native'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { TerminalLiveInputSender } from './terminal-live-input-sender'
 import { TERMINAL_LIVE_HELD_SYLLABLE_COMMIT_DELAY_MS } from './terminal-live-hangul-mirror'
 import { useTerminalLiveInputCommit } from './use-terminal-live-input-commit'

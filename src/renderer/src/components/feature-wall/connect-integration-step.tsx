@@ -51,7 +51,7 @@ export function IntegrationStep(props: {
           className={cn(
             'flex size-7 shrink-0 items-center justify-center rounded-full border text-[13px] font-semibold leading-none',
             done
-              ? 'border-status-success-border bg-status-success-background text-status-success'
+              ? 'border-green-700/25 bg-green-700/10 text-green-700 dark:border-green-300/25 dark:bg-green-300/10 dark:text-green-300'
               : active
                 ? 'border-foreground bg-foreground text-background'
                 : 'border-border text-muted-foreground'

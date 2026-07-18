@@ -1,4 +1,4 @@
-import { vi, type Mock } from 'vitest'
+import { vi, type Mock } from 'vite-plus/test'
 import WebSocket from 'ws'
 
 type DebuggerListener = (...args: unknown[]) => void

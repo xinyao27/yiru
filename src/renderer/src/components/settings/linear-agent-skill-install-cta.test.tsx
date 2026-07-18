@@ -3,7 +3,7 @@
 import { act, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import type { DiscoveredSkill } from '../../../../shared/skills'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { TooltipProvider } from '../ui/tooltip'
 import { LinearAgentSkillInstallCta } from './linear-agent-skill-install-cta'
 
@@ -21,12 +21,12 @@ const mocks = vi.hoisted(() => ({
   toastError: vi.fn()
 }))
 
-vi.mock('@/hooks/useInstalledAgentSkills', async (importOriginal) => ({
+vi.mock('@/hooks/use-installed-agent-skills', async (importOriginal) => ({
   ...(await importOriginal()),
   useInstalledAgentSkillNames: mocks.useInstalledAgentSkillNames
 }))
 
-vi.mock('./CliSkillRuntimeSetup', () => ({
+vi.mock('./cli-skill-runtime-setup', () => ({
   buildSkillCommandForRuntime: (command: string) => command
 }))
 

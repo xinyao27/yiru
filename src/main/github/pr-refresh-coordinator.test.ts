@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- Why: coordinator tests cover queueing, coalescing,
 request timestamps, and follow-up scheduling against shared module state. */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { GitHubPRRefreshCandidate, PRInfo } from '../../shared/types'
 
 const {

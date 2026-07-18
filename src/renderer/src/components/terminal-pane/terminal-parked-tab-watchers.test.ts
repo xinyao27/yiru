@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { ParkedTerminalByteWatcherOptions } from './parked-terminal-byte-watcher'
 
 const WORKTREE_ID = 'repo::/worktree'
@@ -581,6 +581,37 @@ describe('terminal-parked-tab-watchers', () => {
       const options = closeTerminalTab.mock.calls[0]?.[1] as CloseTerminalTabOptions
       options.onClosed?.()
       expect(consumePreHandlerPtyState).toHaveBeenCalledWith(PTY_ID)
+    })
+
+    it('collapses a parked split leaf even when a retained primary observes its exit', () => {
+      capturePanes([
+        { ptyId: PTY_ID, paneId: 1, leafId: LEAF_ID, drivesTabTitle: true },
+        { ptyId: SECOND_PTY_ID, paneId: 2, leafId: SECOND_LEAF_ID, drivesTabTitle: false }
+      ])
+      syncParked()
+      mockStoreState.terminalLayoutsByTabId[TAB_ID] = {
+        root: {
+          type: 'split',
+          direction: 'vertical',
+          first: { type: 'leaf', leafId: LEAF_ID },
+          second: { type: 'leaf', leafId: SECOND_LEAF_ID }
+        },
+        activeLeafId: SECOND_LEAF_ID,
+        expandedLeafId: null,
+        ptyIdsByLeafId: { [LEAF_ID]: PTY_ID, [SECOND_LEAF_ID]: SECOND_PTY_ID }
+      }
+
+      exitSubscriptions
+        .find((entry) => entry.ptyId === SECOND_PTY_ID)
+        ?.callback(0, { hadPrimary: true })
+
+      expect(closeTerminalTab).not.toHaveBeenCalled()
+      expect(mockStoreState.setTabLayout).toHaveBeenCalledWith(TAB_ID, {
+        root: { type: 'leaf', leafId: LEAF_ID },
+        activeLeafId: LEAF_ID,
+        expandedLeafId: null,
+        ptyIdsByLeafId: { [LEAF_ID]: PTY_ID }
+      })
     })
 
     it('does not touch the layout when the last parked watcher exits (tab-level close owns it)', () => {

@@ -11,7 +11,7 @@
  * normally left its sessionId in `disabledSessions` forever — one leaked id per
  * such session for the daemon's lifetime.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { mkdtempSync, rmSync, chmodSync } from 'node:fs'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { ProjectHostSetup, Repo } from '../../../../shared/types'
 import { buildAutomationRunContextForRepo } from './automation-run-context'
 

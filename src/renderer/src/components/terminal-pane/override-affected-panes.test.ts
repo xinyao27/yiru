@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { ManagedPane } from '@/lib/pane-manager/pane-manager-types'
 import { getOverrideAffectedPanes, getPanesNeedingOverrideFit } from './override-affected-panes'
 

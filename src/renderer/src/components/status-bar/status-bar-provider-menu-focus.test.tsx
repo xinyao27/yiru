@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 
 const recordFeatureInteractionMock = vi.fn()
 const usagePercentageDisplayMock = 'used'
@@ -85,7 +85,7 @@ function findChildByType(node: unknown, typeName: string): ReactElementLike {
 }
 
 async function renderProviderDetailsMenu(): Promise<unknown> {
-  const { ProviderDetailsMenu } = await import('./StatusBar')
+  const { ProviderDetailsMenu } = await import('./status-bar')
   return ProviderDetailsMenu({
     provider: {
       provider: 'codex',

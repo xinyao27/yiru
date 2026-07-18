@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { commitWorkspaceStatusDocumentDrop } from './use-workspace-status-drop'
 
 describe('workspace status document drop', () => {

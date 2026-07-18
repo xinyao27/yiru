@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { WINDOWS_GIT_BASH_SHELL } from '../../../../shared/windows-terminal-shell'
 import {
   bucketWindowsTerminalShell,

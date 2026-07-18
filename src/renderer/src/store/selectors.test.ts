@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vite-plus/test'
 import type { Repo, TerminalTab, Worktree } from '../../../shared/types'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'
 import { toRuntimeExecutionHostId } from '../../../shared/execution-host'

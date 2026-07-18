@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveTerminalFileUrlTarget } from './terminal-file-url-target'
 
 describe('resolveTerminalFileUrlTarget', () => {

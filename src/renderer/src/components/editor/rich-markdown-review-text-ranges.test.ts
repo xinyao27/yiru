@@ -1,5 +1,5 @@
 import type { Editor } from '@tiptap/react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { findRichMarkdownSelectedTextRanges } from './rich-markdown-review-text-ranges'
 
 type FakeTextNode = {

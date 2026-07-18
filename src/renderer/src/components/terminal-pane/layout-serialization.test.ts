@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, vi } from 'vitest'
+import { describe, expect, it, beforeAll, vi } from 'vite-plus/test'
 import type { TerminalPaneLayoutNode } from '../../../../shared/types'
 
 // ---------------------------------------------------------------------------

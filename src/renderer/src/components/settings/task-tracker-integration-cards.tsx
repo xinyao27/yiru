@@ -5,17 +5,17 @@ import {
   LinkBreak as Unlink
 } from '@phosphor-icons/react'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { LinearIcon } from '@/components/icons/LinearIcon'
+import { LinearIcon } from '@/components/icons/linear-icon'
 import { LinearApiKeyDialog } from '@/components/linear-api-key-dialog'
 import { Button } from '@/components/ui/button'
-import { useMountedRef } from '@/hooks/useMountedRef'
+import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { getProviderRuntimeContextKey } from '@/lib/provider-runtime-context'
 import { useAppStore } from '@/store'
 import { IntegrationCardDetails, IntegrationCardShell } from './integration-card-shell'
 import { useIntegrationSubordinateRowClass } from './integration-card-presentation'
 import { LinearAgentSkillInstallCta } from './linear-agent-skill-install-cta'
 import { getProviderAccountScope } from './provider-account-scope'
-import { ProviderHostScopeControl } from './ProviderHostScopeControl'
+import { ProviderHostScopeControl } from './provider-host-scope-control'
 import { translate } from '@/i18n/i18n'
 
 type VerificationResult = { state: 'ok' | 'error'; error?: string }
@@ -134,7 +134,7 @@ export function LinearIntegrationCard(): React.JSX.Element {
                     </p>
                   </div>
                   {testResult?.state === 'ok' ? (
-                    <span className="flex shrink-0 items-center gap-1 text-xs text-status-success">
+                    <span className="flex shrink-0 items-center gap-1 text-xs text-green-700 dark:text-green-300">
                       <CheckCircle2 className="size-3.5" />
                       {translate(
                         'auto.components.settings.task.tracker.integration.cards.a2c0015fb8',

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { GitHubWorkItemDetails, PRCheckDetail, PRInfo } from '../../../src/shared/types'
 import type { HostedReviewInfo } from '../../../src/shared/hosted-review'
 import type { GitHubPrReadOutcome } from './github-pr-rpc'

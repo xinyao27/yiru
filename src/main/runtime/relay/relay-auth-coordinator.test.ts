@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { RelayAuthCoordinator, type RelayAuthContext } from './relay-auth-coordinator'
 
 function deferred<T>() {

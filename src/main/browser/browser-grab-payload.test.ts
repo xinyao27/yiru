@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { clampGrabPayload } from './browser-grab-payload'
 
 function makeRawPayload(overrides: Record<string, unknown> = {}): Record<string, unknown> {

@@ -6,7 +6,7 @@
 // through the renderer `createPtyOutputProcessor` and through main's
 // consumption shape (OSC 9999 strip → shared title tracker) and asserts the
 // event sequences match.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { createAgentStatusOscProcessor } from '../../../../shared/agent-status-osc'
 import { createCommandCodeOutputStatusDetector } from '../../../../shared/command-code-output-status'
 import { createTerminalGitHubPRLinkDetector } from '../../../../shared/terminal-github-pr-link-detector'

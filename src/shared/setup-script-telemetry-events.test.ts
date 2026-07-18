@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { eventSchemas, setupScriptImportProviderSchema } from './telemetry-events'
 
 describe('setup script prompt schemas', () => {

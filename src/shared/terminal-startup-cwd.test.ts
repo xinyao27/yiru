@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { FLOATING_TERMINAL_WORKTREE_ID } from './constants'
 import {
   resolveTerminalStartupCwd,

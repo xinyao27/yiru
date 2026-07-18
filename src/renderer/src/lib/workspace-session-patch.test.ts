@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { Repo } from '../../../shared/types'
 import type { WorkspaceSessionSnapshot } from './workspace-session'
 import { buildWorkspaceSessionPatch } from './workspace-session-patch'

@@ -2,7 +2,7 @@ import { mkdtempSync } from 'node:fs'
 import * as fs from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import * as path from 'node:path'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { checkIgnoredPathsMock } = vi.hoisted(() => ({
   checkIgnoredPathsMock: vi.fn<(worktreePath: string, paths: string[]) => Promise<string[]>>()

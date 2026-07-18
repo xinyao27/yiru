@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdtemp, realpath, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import * as path from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { listWorktrees, removeWorktree } from './worktree'
 
 const tempRoots: string[] = []

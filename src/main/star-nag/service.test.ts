@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: StarNagService tests share one mocked
 Electron/IPC harness; splitting the narrow service suite would duplicate setup
 and make the prompt-session edge cases harder to compare. */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { STAR_NAG_INITIAL_THRESHOLD } from '../../shared/constants'
 import type { PersistedUIState } from '../../shared/types'
 import type { Store } from '../persistence'

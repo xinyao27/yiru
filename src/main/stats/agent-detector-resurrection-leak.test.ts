@@ -9,7 +9,7 @@
  * handler) re-inserts a fresh 'unknown' record and re-seeds the scan-tail maps that
  * nothing will ever delete. ptyId is a fresh per-spawn UUID — unbounded over a session.
  */
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { AgentDetector } from './agent-detector'
 
 function oscTitle(title: string): string {

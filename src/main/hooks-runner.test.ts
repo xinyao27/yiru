@@ -1,6 +1,6 @@
 import type { Repo } from '../shared/types'
 
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 
 const { execFileSyncMock } = vi.hoisted(() => ({
   execFileSyncMock: vi.fn()

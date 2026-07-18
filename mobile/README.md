@@ -167,7 +167,7 @@ Do **not** bump for additive changes:
 
 Set `MIN_COMPATIBLE_MOBILE_VERSION` (kill-switch) when desktop ships a change that requires a minimum mobile version to function safely. Same for `MIN_COMPATIBLE_DESKTOP_VERSION` from the mobile side.
 
-When a verdict is `blocked`, `mobile/src/components/ProtocolBlockScreen.tsx` renders a screen pointing the user to GitHub Releases for the available desktop or mobile builds.
+When a verdict is `blocked`, `mobile/src/components/protocol-block-screen.tsx` renders a screen pointing the user to GitHub Releases for the available desktop or mobile builds.
 
 To exercise the block screen locally: set `MIN_COMPATIBLE_DESKTOP_VERSION = 999` in `mobile/src/transport/protocol-version.ts`, rebuild, pair to any desktop. Revert before merging.
 

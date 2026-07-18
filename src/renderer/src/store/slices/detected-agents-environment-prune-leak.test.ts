@@ -8,7 +8,7 @@
  * caller, so removed environments leaked their entries for the renderer session.
  * `setRuntimeEnvironments` now prunes them to the surviving environment set.
  */
-import { beforeEach, describe, it, expect, vi } from 'vitest'
+import { beforeEach, describe, it, expect, vi } from 'vite-plus/test'
 import type * as AgentStatusModule from '@/lib/agent-status'
 import type * as RuntimeRpcClientModule from '@/runtime/runtime-rpc-client'
 import type { PublicKnownRuntimeEnvironment } from '../../../../shared/runtime-environments'

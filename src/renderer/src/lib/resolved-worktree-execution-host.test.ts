@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getResolvedExecutionHostIdForWorktree } from './resolved-worktree-execution-host'
 import type { WorktreeRuntimeOwnerState } from './worktree-runtime-owner'
 

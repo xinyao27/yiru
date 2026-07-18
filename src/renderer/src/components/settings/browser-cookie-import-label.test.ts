@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vite-plus/test'
 
 import en from '@/i18n/locales/en.json'
 import { i18n, translate } from '@/i18n/i18n'

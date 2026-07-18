@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shouldShowWorktreeCreationSurface } from './worktree-creation-surface'
 
 describe('shouldShowWorktreeCreationSurface', () => {

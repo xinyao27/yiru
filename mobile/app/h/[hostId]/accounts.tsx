@@ -16,7 +16,7 @@ import { useHostClient } from '../../../src/transport/client-context'
 import type { RpcSuccess } from '../../../src/transport/types'
 import { colors, spacing } from '../../../src/theme/mobile-theme'
 import { styles } from './accounts-screen-styles'
-import { ClaudeIcon, OpenAIIcon } from '../../../src/components/AgentIcons'
+import { ClaudeIcon, OpenAIIcon } from '../../../src/components/agent-icons'
 import {
   type AccountsSnapshot,
   type ProviderKey,
@@ -26,7 +26,7 @@ import {
   getWindowResetLabel,
   hasActiveProviderUsage,
   UsageBar
-} from '../../../src/components/AccountUsage'
+} from '../../../src/components/account-usage'
 
 export default function AccountsScreen() {
   const router = useRouter()

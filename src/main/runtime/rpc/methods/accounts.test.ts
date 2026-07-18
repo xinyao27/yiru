@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { YiruRuntimeService } from '../../yiru-runtime'
 import { isStreamingMethod } from '../core'
 import { ACCOUNT_METHODS } from './accounts'

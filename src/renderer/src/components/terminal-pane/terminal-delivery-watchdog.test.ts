@@ -3,7 +3,7 @@
 // silent ticks against main's invoke-reported state, then heal exactly once
 // per cooldown: re-attach push listeners, request the write-off, and route
 // the pulled restore markers to pane handlers locally.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { PtyRendererDeliveryHealthReply } from '../../../../shared/pty-renderer-delivery-health'
 
 vi.mock('@/lib/e2e-config', () => ({ e2eConfig: { exposeStore: false } }))

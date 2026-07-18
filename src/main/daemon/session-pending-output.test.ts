@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { Session } from './session'
 
 // Coverage for the incremental-checkpoint record stream (issue #5096): every

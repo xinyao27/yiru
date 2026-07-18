@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import {
   FIRST_WINDOW_STARTUP_SERVICE_TIMEOUT_MS,
   LOCAL_PTY_STARTUP_FAIL_OPEN_TIMEOUT_MS,

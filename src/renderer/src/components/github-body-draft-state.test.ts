@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveGitHubBodyDraft, shouldSyncGitHubBodyDraft } from './github-body-draft-state'
 
 describe('GitHub body draft state', () => {

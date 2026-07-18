@@ -1,5 +1,5 @@
 import { createContext, Script } from 'node:vm'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { TappedFilePath } from './terminal-path-tap'
 import { TERMINAL_PATH_TAP_JS } from './terminal-path-tap-injected'
 import {

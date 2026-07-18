@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { PromiseSettlementWaiters } from '../shared/promise-settlement-waiters'
 import { awaitRelayWatcherSetup } from './relay-watcher-setup-wait'
 

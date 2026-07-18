@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const COMPONENT_ROOT = __dirname
 
@@ -18,7 +18,7 @@ function sourceBetween(source: string, startPattern: string, endPattern: string)
 
 describe('PullRequestPage host boundaries', () => {
   it('routes reviewer metadata and mutations through the PR repo owner host', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const section = sourceBetween(source, 'function PRReviewersPanel', 'function isPRFileViewed')
 
     expect(section).toContain('getTaskSourceRuntimeSettings(sourceContext)')
@@ -42,7 +42,7 @@ describe('PullRequestPage host boundaries', () => {
   })
 
   it('routes PR edit metadata through the same repo owner host as mutations', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const section = sourceBetween(source, 'function GHEditSection', 'function GHCommentComposer')
 
     expect(section).toContain('getSettingsForRepoRuntimeOwner(s, item.repoId ?? repoId ?? null)')
@@ -55,7 +55,7 @@ describe('PullRequestPage host boundaries', () => {
   })
 
   it('source-scopes full-page optimistic work item patches', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const prAssigneesSection = sourceBetween(
       source,
       'function PRAssigneesPanel',
@@ -87,7 +87,7 @@ describe('PullRequestPage host boundaries', () => {
   })
 
   it('routes PR mention metadata through the PR repo owner host', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const section = sourceBetween(source, 'function ConversationTab', 'const mentionOptions')
 
     expect(section).toContain('getSettingsForRepoRuntimeOwner(s, item.repoId ?? repoId ?? null)')
@@ -95,7 +95,7 @@ describe('PullRequestPage host boundaries', () => {
   })
 
   it('uses source-aware initial details routing and cache identity', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const propsSection = sourceBetween(
       source,
       'type PullRequestPageProps',
@@ -123,7 +123,7 @@ describe('PullRequestPage host boundaries', () => {
   })
 
   it('treats null details as unavailable while preserving empty detail payloads', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const loadedSection = sourceBetween(
       source,
       'const loading = !!cachedEntry?.pending && !cachedEntry?.details',
@@ -139,7 +139,7 @@ describe('PullRequestPage host boundaries', () => {
   })
 
   it('routes file viewed mutations through the PR source context', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const helperSection = sourceBetween(
       source,
       'function setPRFileViewedForRepo',
@@ -162,7 +162,7 @@ describe('PullRequestPage host boundaries', () => {
   })
 
   it('routes comment mutations through runtime source context when needed', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const helperSection = sourceBetween(
       source,
       'function addIssueCommentForRepo',
@@ -198,7 +198,7 @@ describe('PullRequestPage host boundaries', () => {
   })
 
   it('routes PR file contents and runtime viewed invalidations through the PR source context', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const fileContentsSection = sourceBetween(
       source,
       'function loadPRFileContents',
@@ -234,7 +234,7 @@ describe('PullRequestPage host boundaries', () => {
   })
 
   it('routes check actions through the PR source context', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const checksSection = sourceBetween(source, 'function ChecksTab', 'function MentionTextarea')
 
     expect(checksSection).toContain('sourceContext?: TaskSourceContext | null')
@@ -251,7 +251,7 @@ describe('PullRequestPage host boundaries', () => {
   })
 
   it('routes edit metadata and mutations through the PR source context', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const editHelperSection = sourceBetween(
       source,
       'function getGitHubMutationSettings',
@@ -282,7 +282,7 @@ describe('PullRequestPage host boundaries', () => {
   })
 
   it('routes merge actions through the repo owner host (#6957)', () => {
-    const source = componentSource('PullRequestPage.tsx')
+    const source = componentSource('pull-request-page.tsx')
     const actionsSection = sourceBetween(
       source,
       'function PRActionsPanel',

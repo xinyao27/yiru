@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { dispatchTerminalNotification } from './use-notification-dispatch'
 import {
   AGENT_STATUS_STALE_AFTER_MS,

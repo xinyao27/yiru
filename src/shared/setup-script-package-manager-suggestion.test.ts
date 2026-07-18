@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { inspectSetupScriptImportCandidates } from './setup-script-imports'
 
 function makeReader(files: Record<string, string>) {

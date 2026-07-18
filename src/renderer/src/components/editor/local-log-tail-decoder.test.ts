@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { LocalLogTailReadResult } from '../../../../shared/local-log-tail-types'
 import { LocalLogTailDecoder } from './local-log-tail-decoder'
 

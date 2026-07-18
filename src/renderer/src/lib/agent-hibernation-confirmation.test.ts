@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AgentHibernationCandidate } from './agent-hibernation-planner'
 import { confirmAgentHibernationCandidates } from './agent-hibernation-confirmation'
 

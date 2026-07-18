@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { PrActionsEngine, type PrActionMutations } from './pr-actions-engine'
 import type { GitHubPrMutationOutcome } from './github-pr-mutations'
 

@@ -2,7 +2,7 @@
 // document.visibilityState claims 'hidden' must latch the override and run
 // each pane's recovery exactly once, and a genuine visibilitychange must hand
 // authority back to the occlusion tracker.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as StaleDocumentVisibility from './stale-document-visibility'
 
 type Handler = () => void

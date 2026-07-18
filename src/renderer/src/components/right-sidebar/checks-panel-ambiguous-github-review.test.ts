@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { hasAmbiguousGitHubHostedReviewForChecksPanel } from './checks-panel-ambiguous-github-review'
 
 describe('hasAmbiguousGitHubHostedReviewForChecksPanel', () => {

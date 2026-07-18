@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { MarkdownHeadingSlugger, slugMarkdownHeading } from './markdown-heading-slug'
 
 describe('markdown heading slugger', () => {

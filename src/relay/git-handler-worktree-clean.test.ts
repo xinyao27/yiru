@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { GitExec } from './git-handler-ops'
 import { worktreeIsCleanOp } from './git-handler-worktree-ops'
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { TERMINAL_PASTE_DIRECT_MAX_BYTES } from './terminal-paste-coordinator'
 
 const mocks = vi.hoisted(() => ({

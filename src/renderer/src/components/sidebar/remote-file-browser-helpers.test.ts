@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   REMOTE_FILE_BROWSER_FILTER_QUERY_MAX_BYTES,
   decideEnterAction,

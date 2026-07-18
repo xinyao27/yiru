@@ -1,7 +1,7 @@
 // Regression tests for issue #7547: local @parcel/watcher subscriptions run
 // in a forked watcher process, and a native watcher crash must be contained —
 // respawn, resubscribe, notify interruption — instead of killing the app.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { WATCHER_PROCESS_CANCEL_TIMEOUT_MS } from './parcel-watcher-cancellation-tracker'
 import {
   terminateWatcherChild,

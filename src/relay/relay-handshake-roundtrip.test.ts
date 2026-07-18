@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vite-plus/test'
 import { createServer, connect, type Server, type Socket } from 'node:net'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'

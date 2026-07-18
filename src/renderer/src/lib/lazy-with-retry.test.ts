@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { ComponentType } from 'react'
 
 import { isLazyChunkLoadError, loadLazyWithRetry } from './lazy-with-retry'

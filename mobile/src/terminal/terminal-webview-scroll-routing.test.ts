@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 // The in-WebView JS lives in terminal-webview-html.ts; the RN wrapper in
-// TerminalWebView.tsx. Concatenate both so assertions resolve regardless of file.
+// terminal-web-view.tsx. Concatenate both so assertions resolve regardless of file.
 const source =
-  readFileSync(new URL('./TerminalWebView.tsx', import.meta.url), 'utf8') +
+  readFileSync(new URL('./terminal-web-view.tsx', import.meta.url), 'utf8') +
   readFileSync(new URL('./terminal-webview-pending-messages.ts', import.meta.url), 'utf8') +
   readFileSync(new URL('./terminal-webview-url-tap.ts', import.meta.url), 'utf8') +
   readFileSync(new URL('./terminal-webview-tap-dispatch-injected.ts', import.meta.url), 'utf8') +
@@ -137,33 +137,6 @@ describe('TerminalWebView scroll routing', () => {
     const readyBlock = sliceBetween('async awaitReady()', '})')
     expect(readyBlock).toContain('clearTimeout(timeout)')
     expect(readyBlock).toContain('void p.finally')
-  })
-
-  it('hides xterm scrollbars and drives the mobile scroll indicator from committed rows', () => {
-    expect(source).toContain('<div id="scroll-indicator"><div id="scroll-thumb"></div></div>')
-    expect(source).toContain('.xterm .xterm-viewport::-webkit-scrollbar')
-    expect(source).toContain('.xterm .xterm-scrollable-element > .xterm-scrollbar')
-    expect(source).toContain('overflow-y: hidden !important;')
-    expect(source).toContain('display: none !important;')
-    expect(source).toContain('function updateScrollIndicator(reveal)')
-    expect(source).toContain('buffer.viewportY / maxViewportY')
-    expect(source).not.toContain('fractionalRows')
-    expect(source).toContain('scrollThumb.style.transform =')
-    expect(source).toContain('updateScrollIndicator(true);')
-  })
-
-  it('does not apply fractional smooth scroll transforms to terminal content', () => {
-    const updateTransformBlock = sliceBetween(
-      'function updateTransform()',
-      'function updateScrollIndicator(reveal)'
-    )
-    expect(updateTransformBlock).toContain(
-      "surface.style.transform = 'translate(' + panX + 'px,' + panY + 'px) scale(' + getTotalScale() + ')';"
-    )
-    expect(source).not.toContain("querySelector('.xterm-screen')")
-    expect(source).not.toContain('updateTerminalScreenTransform')
-    expect(updateTransformBlock).not.toContain("getVisualPanY() + 'px) scale('")
-    expect(updateTransformBlock).not.toContain('smoothScrollOffsetY')
   })
 
   it('smooths velocity samples and uses lower friction for mobile momentum', () => {

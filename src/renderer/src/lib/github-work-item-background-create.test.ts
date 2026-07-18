@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { WorktreeCreationRequest } from '@/lib/pending-worktree-creation'
 import type { RuntimeStatus } from '../../../shared/runtime-types'
 import type { GitHubWorkItem, Repo } from '../../../shared/types'

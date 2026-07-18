@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { getDefaultSettings } from '../../../shared/constants'
 import type { Worktree } from '../../../shared/types'
 import { resetWebRuntimeWakeTerminalRespawnForTests } from '@/runtime/web-runtime-wake-terminal-respawn'

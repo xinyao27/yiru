@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isNativeChatTranscriptLocalReadable } from './native-chat-transcript-readability'
 
 describe('native chat transcript readability', () => {

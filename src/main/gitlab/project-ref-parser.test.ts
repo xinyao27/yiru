@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { parseGitLabProjectRef, parseRemoteProjectRefCandidate } from './project-ref-parser'
 
 describe('gitlab project ref parsing', () => {

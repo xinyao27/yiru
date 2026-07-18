@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
 import type * as RuntimeRpcClient from '@/runtime/runtime-rpc-client'
 import { lookupGitHubWorkItemDetailsForSource } from './github-work-item-source-lookup'

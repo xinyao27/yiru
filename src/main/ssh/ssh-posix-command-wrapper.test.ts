@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shellEscape, wrapRemoteCommandForPosixShell } from './ssh-connection-utils'
 
 describe('wrapRemoteCommandForPosixShell', () => {

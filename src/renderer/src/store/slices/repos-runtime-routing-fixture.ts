@@ -1,4 +1,4 @@
-import { beforeEach, vi, type Mock } from 'vitest'
+import { beforeEach, vi, type Mock } from 'vite-plus/test'
 import { toast } from 'sonner'
 import type { Repo } from '../../../../shared/types'
 import {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { Worktree } from '../../../shared/types'
 import { buildExcludePathPrefixes } from '../../../shared/quick-open-filter'
 import {

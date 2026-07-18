@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { Project } from '../../../shared/types'
 import { getProjectHostCloneUrl } from './project-host-clone-url'
 

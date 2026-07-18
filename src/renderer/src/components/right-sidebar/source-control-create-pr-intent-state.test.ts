@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveVisibleCreatePrHeaderAction } from './source-control-create-pr-intent-state'
 import type { PrimaryAction } from './source-control-primary-action-types'
 

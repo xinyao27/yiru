@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { GitPushTarget } from '../../../../shared/types'
 import { describeForkPushTarget } from './fork-push-target-label'
 

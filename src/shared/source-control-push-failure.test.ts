@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   PUSH_FAILURE_PROMPT_FILE_LIMIT,
   PUSH_FAILURE_SUMMARY_SCAN_CODE_UNITS,

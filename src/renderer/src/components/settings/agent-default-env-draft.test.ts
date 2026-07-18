@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   AGENT_DEFAULT_ENV_DRAFT_MAX_BYTES,
   parseAgentDefaultEnvDraft,

@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   __resetMacTailscaleDnsDiagnosticCacheForTests,
   parseMacTailscaleDnsDiagnostic,

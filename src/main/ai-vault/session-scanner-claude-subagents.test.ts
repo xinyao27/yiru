@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, rm, utimes, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { listClaudeSubagentSessions } from './session-scanner-claude-subagents'
 import { countSubagentTranscripts } from './session-scanner-subagent-transcripts'
 

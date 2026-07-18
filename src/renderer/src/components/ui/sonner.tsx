@@ -6,14 +6,11 @@ import {
 } from '@phosphor-icons/react'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
-import { useAppStore } from '@/store'
 
-const Toaster = ({ ...props }: ToasterProps) => {
-  const theme = useAppStore((s) => s.settings?.theme) || 'system'
-
+const Toaster = ({ theme = 'system', ...props }: ToasterProps) => {
   return (
     <Sonner
-      theme={theme as ToasterProps['theme']}
+      theme={theme}
       position="bottom-right"
       // Why: Yiru has persistent bottom chrome, so bottom-right toasts need
       // breathing room above the status bar instead of sitting on its edge.

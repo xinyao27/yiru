@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { createTestStore, makeWorktree } from './store-test-helpers'
 import { workItemsCacheKey } from './github'
 import type { Project, ProjectHostSetup } from '../../../../shared/types'

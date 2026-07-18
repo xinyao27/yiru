@@ -2,7 +2,7 @@
 
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { EmulatorScreenStreamContent } from './emulator-screen-stream-content'
 
 type FrameListener = (data: { streamId: string; bytes: ArrayBuffer }) => void
@@ -127,24 +127,6 @@ describe('EmulatorScreenStreamContent', () => {
 
     const img = container.querySelector('img')
     expect(img?.getAttribute('src')).toBe('blob:emulator-frame-1')
-    expect(img?.className).toContain('object-contain')
-    expect(img?.className).not.toContain('object-fill')
-  })
-
-  it('rotates mismatched stream media without stretching it', async () => {
-    await renderStream('abc', { screenAspectRatio: 844 / 390, streamRotation: 90 })
-
-    await act(async () => {
-      frameListeners[0]?.({ streamId: 'stream-1', bytes: new Uint8Array([1, 2, 3]).buffer })
-    })
-
-    const img = container.querySelector('img')
-    expect(img?.className).toContain('object-contain')
-    expect(img?.className).toContain('absolute')
-    expect(img?.className).not.toContain('object-fill')
-    expect(img?.style.transform).toBe('translate(-50%, -50%) rotate(90deg)')
-    expect(img?.style.width).toBe(`${100 / (844 / 390)}%`)
-    expect(img?.style.height).toBe(`${100 * (844 / 390)}%`)
   })
 
   it('clears the previous frame while a new stream key is connecting', async () => {

@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 
 import { Editor } from '@tiptap/core'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { createRichMarkdownExtensions } from './rich-markdown-extensions'
 import { createRichMarkdownEditorCodec } from './rich-markdown-source-transport'
-import { resetLocalImageSrcStateForTests } from './useLocalImageSrc'
+import { resetLocalImageSrcStateForTests } from './use-local-image-src'
 import { setRichMarkdownImageResolverContext } from './rich-markdown-image-context'
 
 async function flushPromises(): Promise<void> {

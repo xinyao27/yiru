@@ -254,7 +254,7 @@ test.describe('Terminal attention', () => {
     await expect(activeTabBell).toBeVisible()
 
     // A pointerdown inside the terminal container counts as interaction
-    // (matches the pointerdown handler added in TerminalPane.tsx). Drive it
+    // (matches the pointerdown handler added in terminal-pane.tsx). Drive it
     // via the DOM so we exercise the real listener path rather than bypassing
     // to the store action.
     await yiruPage.evaluate((tabId) => {

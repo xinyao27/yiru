@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { TUI_AGENT_AUTO_PICK_ORDER } from '../../../shared/tui-agent-selection'
 import { AGENT_CATALOG } from './agent-catalog'
 import {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { EMPTY_FORM } from './ssh-target-draft'
 import { buildSshTargetSavePayload } from './ssh-target-save-payload'
 

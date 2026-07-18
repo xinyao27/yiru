@@ -71,6 +71,11 @@ jobs:
       - name: Check styled scrollbars
         run: node config/scripts/check-styled-scrollbars.mjs
 
+      # Why: feature work must reuse the closed shadcn vocabulary instead of
+      # growing one-off color, state, or floating-surface tokens.
+      - name: Check design token budget
+        run: node config/scripts/check-design-token-budget.mjs
+
       - name: Check reliability gate manifest
         run: pnpm run check:reliability-gates
 

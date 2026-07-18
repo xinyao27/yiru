@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { DirEntry } from '../../shared/types'
 import type { FileReadResult, FileStat, IFilesystemProvider } from '../providers/types'
 import { getRemoteHostPlatform } from '../ssh/ssh-remote-platform'

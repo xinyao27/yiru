@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { Delayer } from 'monaco-editor/esm/vs/base/common/async.js'
 import { DisposableStore } from 'monaco-editor/esm/vs/base/common/lifecycle.js'
 import { installMonacoDelayerCancellationGuard } from './monaco-delayer-cancellation-guard'

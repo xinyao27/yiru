@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { TerminalThemeOption } from '@/lib/terminal-theme'
 import {
   FONT_SUGGESTION_RENDER_LIMIT,

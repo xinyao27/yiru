@@ -1,7 +1,7 @@
 import { dirname, join } from 'node:path'
 import { mkdtempSync, readFileSync, rmSync, writeSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   parseReportGateArgs,
   runTerminalScalePerfReportGate

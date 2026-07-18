@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { createFloatingWorkspaceTourInteractionSnapshot } from './floating-workspace-tour-interaction-snapshot'
 import type { FeatureInteractionState } from '../../../shared/feature-interactions'
 

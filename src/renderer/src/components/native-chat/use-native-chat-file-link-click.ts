@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import type { CommentMarkdownLinkClickHandler } from '@/components/sidebar/CommentMarkdown'
+import type { CommentMarkdownLinkClickHandler } from '@/components/sidebar/comment-markdown'
 import { openDetectedFilePath } from '@/components/terminal-pane/terminal-file-open-routing'
 import { resolveNativeChatFileLink, type NativeChatFileLinkContext } from './native-chat-file-link'
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getDefaultOnboardingState, getDefaultVoiceSettings } from '../../../../shared/constants'
 import type { CliInstallStatus } from '../../../../shared/cli-install-types'
 import type { GlobalSettings, OnboardingState } from '../../../../shared/types'

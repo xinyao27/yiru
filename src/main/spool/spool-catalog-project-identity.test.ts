@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { SPOOL_PROTOCOL_VERSION } from '../../shared/spool/spool-wire-contract'
 import { isSpoolDesktopCatalog } from './spool-catalog-wire-validation'
 import {

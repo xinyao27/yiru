@@ -12,6 +12,7 @@ import {
 } from './helpers/store'
 import { attachRepoAndOpenTerminal, createRestartSession } from './helpers/yiru-restart'
 import { RuntimeClient } from '../../src/cli/runtime/client'
+import { RuntimeClientError } from '../../src/cli/runtime/types'
 import type {
   RuntimeTerminalClose,
   RuntimeTerminalListResult,
@@ -56,11 +57,36 @@ test('durable whole-tab close removes a split tab across restart', async (// oxl
     expect(await getWorktreeTabs(firstLaunch.page, worktreeId)).toHaveLength(1)
 
     const client = new RuntimeClient(session.userDataDir, 30_000)
-    const active = await client.call<{ handle: string }>('terminal.resolveActive', {
-      worktree: `id:${worktreeId}`
-    })
+    let activeHandle: string | null = null
+    await expect
+      .poll(
+        async () => {
+          try {
+            const active = await client.call<{ handle: string }>('terminal.resolveActive', {
+              worktree: `id:${worktreeId}`
+            })
+            activeHandle = active.result.handle
+            return activeHandle
+          } catch (error) {
+            if (!(error instanceof RuntimeClientError) || error.code !== 'selector_not_found') {
+              throw error
+            }
+            // Why: repo attachment can briefly race the runtime's pre-add
+            // worktree cache even after the renderer has mounted its terminal.
+            return null
+          }
+        },
+        {
+          timeout: 30_000,
+          message: 'The runtime never resolved the renderer-mounted terminal'
+        }
+      )
+      .not.toBeNull()
+    if (!activeHandle) {
+      throw new Error('The runtime did not expose an active terminal handle')
+    }
     const split = await client.call<{ split: RuntimeTerminalSplit }>('terminal.split', {
-      terminal: active.result.handle,
+      terminal: activeHandle,
       direction: 'vertical'
     })
     expect(split.result.split.tabId).toBe(closedTabId)
@@ -96,10 +122,17 @@ test('durable whole-tab close removes a split tab across restart', async (// oxl
     const restoredWorktreeId = await attachRepoAndOpenTerminal(secondLaunch.page, repoPath)
     expect(restoredWorktreeId).toBe(worktreeId)
 
-    // Why: wait past initial worktree effects so this checks resurrection, not
-    // only the first hydrated frame before default-tab logic has run.
+    // Why: activation may create a fresh fallback terminal for an empty
+    // worktree; persistence is correct when the closed split tab stays gone.
     await secondLaunch.page.waitForTimeout(1_000)
-    expect(await getWorktreeTabs(secondLaunch.page, worktreeId)).toEqual([])
+    const restoredTabs = await getWorktreeTabs(secondLaunch.page, worktreeId)
+    expect(restoredTabs).toHaveLength(1)
+    expect(restoredTabs.map((tab) => tab.id)).not.toContain(closedTabId)
+    expect(
+      await secondLaunch.page.evaluate((closedTabId) => {
+        return window.__store?.getState().terminalLayoutsByTabId[closedTabId]
+      }, closedTabId)
+    ).toBeUndefined()
   } finally {
     if (firstApp) {
       await session.close(firstApp)

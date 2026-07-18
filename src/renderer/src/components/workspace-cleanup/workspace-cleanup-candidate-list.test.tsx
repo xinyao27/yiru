@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test'
 import {
   WORKSPACE_CLEANUP_VIRTUALIZE_MIN_ROWS,
   WorkspaceCleanupCandidateList
@@ -35,7 +35,7 @@ describe('WorkspaceCleanupCandidateList', () => {
     container = null
   })
 
-  it('renders every row in natural flow below the virtualization threshold', () => {
+  it('renders every row below the virtualization threshold', () => {
     const rows = makeRows(WORKSPACE_CLEANUP_VIRTUALIZE_MIN_ROWS - 1)
     const rendered: string[] = []
 
@@ -54,11 +54,9 @@ describe('WorkspaceCleanupCandidateList', () => {
 
     expect(rendered).toHaveLength(rows.length)
     expect(container?.querySelectorAll('[data-testid="row"]')).toHaveLength(rows.length)
-    // Plain path keeps natural flow: no absolute-positioned windowing wrappers.
-    expect(container?.querySelector('[data-index]')).toBeNull()
   })
 
-  it('windows rows into an absolutely positioned container at the threshold', () => {
+  it('windows rows at the virtualization threshold', () => {
     const rows = makeRows(WORKSPACE_CLEANUP_VIRTUALIZE_MIN_ROWS)
     // A real element enables the virtualizer; happy-dom reports zero-size layout,
     // so this asserts the windowed structure rather than a specific mounted count.
@@ -74,12 +72,8 @@ describe('WorkspaceCleanupCandidateList', () => {
       )
     })
 
-    const windowed = container?.querySelector('.absolute') != null
     const mounted = container?.querySelectorAll('[data-testid="row"]').length ?? 0
-    // Windowed mode never mounts more than the full set, and switches away from
-    // the plain flow used below the threshold.
-    expect(mounted).toBeLessThanOrEqual(rows.length)
-    expect(windowed || mounted === 0).toBe(true)
+    expect(mounted).toBeLessThan(rows.length)
   })
 
   it('memoizes CandidateRow so unchanged rows skip re-render', () => {

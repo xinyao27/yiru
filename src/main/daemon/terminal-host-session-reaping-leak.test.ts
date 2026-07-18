@@ -10,7 +10,7 @@
  * disposes the emulator and drops the entry from the map. These tests assert the
  * emulator is disposed when a subprocess exits (before the fix it never was).
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { TerminalHost } from './terminal-host'
 import type { SubprocessHandle } from './session'
 import { HeadlessEmulator } from './headless-emulator'

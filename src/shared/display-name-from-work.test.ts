@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { deriveWorkspaceDisplayName } from './display-name-from-work'
 
 // Identifier extraction itself is covered in work-item-reference.test.ts; these

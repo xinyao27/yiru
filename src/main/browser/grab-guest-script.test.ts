@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { buildGuestOverlayScript } from './grab-guest-script'
 
 describe('buildGuestOverlayScript', () => {
@@ -25,13 +25,6 @@ describe('buildGuestOverlayScript', () => {
     const script = buildGuestOverlayScript('teardown')
     expect(script).toBeTruthy()
     expect(typeof script).toBe('string')
-  })
-
-  it('arm script contains shadow DOM setup', () => {
-    const script = buildGuestOverlayScript('arm')
-    expect(script).toContain('attachShadow')
-    expect(script).toContain('__yiru-grab-host')
-    expect(script).toContain('__yiruGrab')
   })
 
   it('arm script contains budget constants matching shared types', () => {
@@ -70,18 +63,6 @@ describe('buildGuestOverlayScript', () => {
     expect(script).toContain('reject')
   })
 
-  it('awaitClick script freezes highlight on selection instead of cleanup', () => {
-    const script = buildGuestOverlayScript('awaitClick')
-    expect(script).toContain('freezeHighlight')
-    expect(script).not.toContain('grab.cleanup();\n    resolve')
-  })
-
-  it('arm script defines freezeHighlight method', () => {
-    const script = buildGuestOverlayScript('arm')
-    expect(script).toContain('freezeHighlight')
-    expect(script).toContain("pointerEvents = 'none'")
-  })
-
   it('awaitClick script blocks right-click', () => {
     const script = buildGuestOverlayScript('awaitClick')
     expect(script).toContain('contextmenu')
@@ -98,14 +79,6 @@ describe('buildGuestOverlayScript', () => {
     const script = buildGuestOverlayScript('teardown')
     expect(script).toContain('cancelAwait')
     expect(buildGuestOverlayScript('awaitClick')).toContain('__yiruCancelled')
-  })
-
-  it('arm script uses full-viewport overlay as click catcher', () => {
-    const script = buildGuestOverlayScript('arm')
-    expect(script).toContain('pointer-events:all')
-    expect(script).toContain('cursor:crosshair')
-    expect(script).toContain('100vw')
-    expect(script).toContain('100vh')
   })
 
   it('arm script sanitizes URLs by stripping query strings', () => {

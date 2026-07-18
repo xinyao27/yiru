@@ -1,7 +1,7 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { filterAiVaultSessions } from '../../shared/ai-vault-session-filters'
 import { AI_VAULT_AGENTS } from '../../shared/ai-vault-types'
 import { scanAiVaultSessions } from './session-scanner'

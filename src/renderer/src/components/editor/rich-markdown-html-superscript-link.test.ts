@@ -2,7 +2,7 @@
 
 import { Editor } from '@tiptap/core'
 import { NodeSelection, TextSelection } from '@tiptap/pm/state'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { marked } from 'marked'
 import { encodeRawMarkdownHtmlForRichEditor } from './raw-markdown-html'
 import { createRichMarkdownExtensions } from './rich-markdown-extensions'
@@ -26,7 +26,7 @@ import { getRichMarkdownVisibleText } from './rich-markdown-visible-text-map'
 import { handleRichMarkdownCut } from './rich-markdown-cut-handler'
 import { getSelectedHtmlSuperscriptLinkStatus } from './rich-markdown-selected-link-actions'
 import { handleRichMarkdownCitationKey } from './rich-markdown-citation-keyboard'
-import { resolveRichMarkdownWorktreeRoot } from './useRichMarkdownSuperscriptLinkSetup'
+import { resolveRichMarkdownWorktreeRoot } from './use-rich-markdown-superscript-link-setup'
 import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
 import type { AppState } from '@/store/types'
 import {

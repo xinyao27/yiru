@@ -3,7 +3,7 @@
 // by `.strict()`), unknown enum values fail, and any well-formed payload
 // round-trips without coercion.
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   addRepoSetupStepActionSchema,
   AGENT_KIND_VALUES,

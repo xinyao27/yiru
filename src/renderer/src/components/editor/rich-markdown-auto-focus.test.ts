@@ -1,5 +1,5 @@
 import type { Editor } from '@tiptap/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { autoFocusRichEditor } from './rich-markdown-auto-focus'
 
 function createEditor(focus = vi.fn()): Editor {

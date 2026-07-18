@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { startPairingConnectionAttempt } from './pairing-connection-attempt'
 
 describe('pairing connection attempt cleanup', () => {

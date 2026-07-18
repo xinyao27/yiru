@@ -1,4 +1,4 @@
-import { expect, vi } from 'vitest'
+import { expect, vi } from 'vite-plus/test'
 import type { RuntimeMobileMarkdownRequest } from '../../../shared/mobile-markdown-document'
 import { useAppStore } from '../store'
 

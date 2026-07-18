@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { runBatchDeletion, selectDeletionRoots } from './file-explorer-batch-deletion'
 import type { TreeNode } from './file-explorer-types'
 

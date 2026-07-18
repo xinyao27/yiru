@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { sha256 } from './sha256'
 
 function hex(bytes: Uint8Array): string {

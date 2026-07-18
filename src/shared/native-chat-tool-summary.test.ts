@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { NativeChatBlock } from './native-chat-types'
 import { briefToolArg, summarizeToolInput, summarizeToolRun } from './native-chat-tool-summary'
 

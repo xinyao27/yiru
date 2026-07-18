@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import {
   NATIVE_CHAT_COMPOSER_SCOPE_CACHE_MAX,
   setBoundedScopeCacheEntry

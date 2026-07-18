@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   STATUS_BAR_CONTEXT_MENU_EXEMPT_SELECTOR,
   shouldOpenStatusBarContextMenu

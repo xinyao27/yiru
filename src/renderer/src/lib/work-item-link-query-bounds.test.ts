@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import {
   WORK_ITEM_LINK_QUERY_MAX_BYTES,

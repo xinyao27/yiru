@@ -1,4 +1,4 @@
-import type { VirtualizedScrollAnchor } from './useVirtualizedScrollAnchor'
+import type { VirtualizedScrollAnchor } from './use-virtualized-scroll-anchor'
 
 type VirtualScrollItem = {
   end: number

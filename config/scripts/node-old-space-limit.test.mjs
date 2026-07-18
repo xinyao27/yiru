@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { appendBuildOldSpaceOption, getBuildOldSpaceSizeMb } from './node-old-space-limit.mjs'
 
 const gib = 1024 * 1024 * 1024

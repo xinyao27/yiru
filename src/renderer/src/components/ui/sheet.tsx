@@ -6,6 +6,12 @@ import { XIcon } from '@phosphor-icons/react'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/class-names'
+import { buttonVariants } from '@/components/ui/button'
+import {
+  modalBackdropClass,
+  modalBackdropMotionClass,
+  modalSurfaceClass
+} from '@/components/ui/floating-surface-styles'
 import { translate } from '@/i18n/i18n'
 
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
@@ -28,13 +34,7 @@ function SheetOverlay({ className, style, ...props }: SheetPrimitive.Backdrop.Pr
   return (
     <SheetPrimitive.Backdrop
       data-slot="sheet-overlay"
-      // Why: same fix as DialogOverlay — a flat bg-black/50 scrim disappears
-      // over the dark canvas. A deeper scrim + 2px backdrop blur lifts the
-      // canvas behind the sheet so its edge reads clearly.
-      className={cn(
-        'fixed inset-0 z-50 bg-black/55 backdrop-blur-[2px] transition-opacity data-starting-style:opacity-0 data-ending-style:opacity-0',
-        className
-      )}
+      className={cn(modalBackdropClass, modalBackdropMotionClass, 'fixed inset-0 z-50', className)}
       // Why: Electron's OS-level drag hit-test ignores z-index. Without
       // no-drag, the overlay is transparent to clicks in the titlebar's
       // drag strip, so clicking the sheet header buttons drags the window.
@@ -45,11 +45,10 @@ function SheetOverlay({ className, style, ...props }: SheetPrimitive.Backdrop.Pr
 }
 
 const sheetContentVariants = cva(
-  // Why: bg-background in dark mode equals the canvas color, and border-border/60
-  // is still ~4% white over that canvas. The translucent surface + solid 14%
-  // border + dual shadow + 2xl backdrop blur match the dropdown-menu / dialog
-  // recipe and give the sheet a clearly visible edge in both light and dark.
-  'fixed z-50 flex flex-col gap-0 bg-background/96 text-foreground shadow-[0_20px_60px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl outline-none transition ease-in-out duration-300 data-ending-style:duration-200 dark:bg-[rgba(23,23,23,0.96)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)]',
+  cn(
+    modalSurfaceClass,
+    'fixed z-50 flex flex-col gap-0 outline-none transition ease-in-out duration-300 data-ending-style:duration-200'
+  ),
   {
     variants: {
       // Why: Base UI drives enter/exit with data-starting-style/data-ending-style
@@ -57,11 +56,11 @@ const sheetContentVariants = cva(
       // off-screen translate keyed off the starting and ending states.
       side: {
         right:
-          'inset-y-0 right-0 h-full w-3/4 border-l border-black/14 dark:border-white/14 data-starting-style:translate-x-full data-ending-style:translate-x-full sm:max-w-[560px]',
-        left: 'inset-y-0 left-0 h-full w-3/4 border-r border-black/14 dark:border-white/14 data-starting-style:-translate-x-full data-ending-style:-translate-x-full sm:max-w-[560px]',
-        top: 'inset-x-0 top-0 h-auto border-b border-black/14 dark:border-white/14 data-starting-style:-translate-y-full data-ending-style:-translate-y-full',
+          'inset-y-0 right-0 h-full w-3/4 border-l data-starting-style:translate-x-full data-ending-style:translate-x-full sm:max-w-[560px]',
+        left: 'inset-y-0 left-0 h-full w-3/4 border-r data-starting-style:-translate-x-full data-ending-style:-translate-x-full sm:max-w-[560px]',
+        top: 'inset-x-0 top-0 h-auto border-b data-starting-style:-translate-y-full data-ending-style:-translate-y-full',
         bottom:
-          'inset-x-0 bottom-0 h-auto border-t border-black/14 dark:border-white/14 data-starting-style:translate-y-full data-ending-style:translate-y-full'
+          'inset-x-0 bottom-0 h-auto border-t data-starting-style:translate-y-full data-ending-style:translate-y-full'
       }
     },
     defaultVariants: {
@@ -100,7 +99,10 @@ function SheetContent({
         {showCloseButton && (
           <SheetPrimitive.Close
             data-slot="sheet-close"
-            className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+              'absolute top-3 right-3 text-muted-foreground hover:text-foreground'
+            )}
           >
             <XIcon />
             <span className="sr-only">

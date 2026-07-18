@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { Repo } from '../../../../shared/types'
 import { getSetupScriptPromptDismissalKey } from '../../lib/setup-script-prompt'
 import { createTestStore } from './store-test-helpers'

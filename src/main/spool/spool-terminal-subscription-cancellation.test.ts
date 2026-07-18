@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { AuthenticatedSpoolPrincipal } from '../../shared/rpc-principal'
 import type { SpoolPublicWorktreeInstance } from './spool-worktree-publication-state'
 import { SpoolExecutionGateway } from './spool-execution-gateway'

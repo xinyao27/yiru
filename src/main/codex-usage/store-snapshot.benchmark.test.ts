@@ -1,5 +1,5 @@
 import { performance } from 'node:perf_hooks'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { CodexUsagePersistedState } from './types'
 import { CodexUsageStore } from './store'
 

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { updateHostNameAndEndpoint } from './host-store'
 
 vi.mock('@react-native-async-storage/async-storage', () => ({

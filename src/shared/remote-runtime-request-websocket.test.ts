@@ -1,5 +1,5 @@
 import type { EventEmitter } from 'node:events'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { generateKeyPair, publicKeyToBase64 } from './e2ee-crypto'
 import { openRemoteRuntimeWebSocket } from './remote-runtime-request-websocket'
 

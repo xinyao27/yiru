@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { GitHubWorkItem, GitLabWorkItem, LinearIssue } from '../../../src/shared/types'
 import {
   buildGitHubLinkedWorkItem,

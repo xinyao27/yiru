@@ -1,12 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { WorkspaceStatusDefinition, Worktree } from '../../../../shared/types'
 import {
   buildWorkspaceKanbanSidebarDropUpdates,
-  clearWorkspaceKanbanSidebarDropTargetVisual,
   getWorkspaceKanbanSidebarDropGroups,
   getWorkspaceKanbanSidebarDropTarget,
-  isWorkspaceKanbanSidebarDropPointInBoard,
-  updateWorkspaceKanbanSidebarDropTargetVisual
+  isWorkspaceKanbanSidebarDropPointInBoard
 } from './workspace-kanban-sidebar-drop'
 
 const workspaceStatuses: WorkspaceStatusDefinition[] = [
@@ -21,11 +19,6 @@ class FakeNode {
 class FakeElement extends FakeNode {
   readonly children: FakeElement[] = []
   readonly dataset: Record<string, string> = {}
-  readonly style = {
-    setProperty: (name: string, value: string) => {
-      this.styleValues.set(name, value)
-    }
-  }
   offsetParent: FakeElement | null = null
   private readonly attributes = new Map<string, string>()
   private rect: Pick<DOMRect, 'left' | 'top' | 'right' | 'bottom' | 'width' | 'height'> = {
@@ -36,8 +29,6 @@ class FakeElement extends FakeNode {
     width: 0,
     height: 0
   }
-  private readonly styleValues = new Map<string, string>()
-
   append(...elements: FakeElement[]): void {
     for (const element of elements) {
       element.parentElement = this
@@ -219,7 +210,6 @@ function worktree(args: {
 }
 
 afterEach(() => {
-  clearWorkspaceKanbanSidebarDropTargetVisual()
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
@@ -245,25 +235,6 @@ describe('workspace kanban sidebar drop DOM bridge', () => {
     expect(getWorkspaceKanbanSidebarDropGroups()).toEqual([
       { key: 'doing', worktreeIds: ['doing-a', 'doing-b'] }
     ])
-  })
-
-  it('marks and clears the external board hover target', () => {
-    const { lane } = appendBoard()
-    setElementFromPoint(lane)
-
-    updateWorkspaceKanbanSidebarDropTargetVisual({
-      x: 24,
-      y: 60,
-      shouldShowDropIndicator: () => true
-    })
-
-    expect(lane.getAttribute('data-workspace-board-external-drag-target')).toBe('true')
-    expect(document.querySelector('[data-workspace-board-card-drop-indicator]')).not.toBeNull()
-
-    clearWorkspaceKanbanSidebarDropTargetVisual()
-
-    expect(lane.hasAttribute('data-workspace-board-external-drag-target')).toBe(false)
-    expect(document.querySelector('[data-workspace-board-card-drop-indicator]')).toBeNull()
   })
 
   it('detects pointer entry across the whole board sheet', () => {

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { vi } from 'vitest'
+import { vi } from 'vite-plus/test'
 import type { AppState } from '../types'
 import type { WorkspaceCleanupCandidate } from '../../../../shared/workspace-cleanup'
 import { createWorkspaceCleanupSlice } from './workspace-cleanup'

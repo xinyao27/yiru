@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { handleOsc52ClipboardRequest, parseOsc52 } from './osc52-clipboard'
 
 function b64(s: string): string {

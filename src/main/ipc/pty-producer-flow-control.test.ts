@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   PRODUCER_FLOW_HIGH_WATERMARK_CHARS,
   PRODUCER_FLOW_LOW_WATERMARK_CHARS,

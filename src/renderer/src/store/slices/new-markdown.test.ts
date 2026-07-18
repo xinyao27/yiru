@@ -1,5 +1,5 @@
 import { createStore, type StoreApi } from 'zustand/vanilla'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { createEditorSlice } from './editor'
 import type { AppState } from '../types'
 import type { BrowserTab, Tab, TabContentType, TabGroup } from '../../../../shared/types'

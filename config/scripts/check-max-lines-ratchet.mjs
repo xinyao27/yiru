@@ -8,13 +8,13 @@ import { pathToFileURL } from 'node:url'
 //
 // oxlint already fails any file that exceeds max-lines WITHOUT a suppression, so
 // the only way a file grows past the budget is by adding an `eslint/oxlint-disable
-// max-lines` comment or a per-file `max-lines` bump in mobile/.oxlintrc.json. This
+// max-lines` comment or a per-file bump in the mobile max-lines config. This
 // check freezes the set of files currently allowed to do that (the baseline) and
 // fails CI when a NEW bypass appears — the existing over-limit files are
 // grandfathered; new ones must split instead. The baseline may only shrink.
 
 const BASELINE_PATH = 'config/max-lines-baseline.txt'
-const MOBILE_CONFIG_PATH = 'mobile/.oxlintrc.json'
+const MOBILE_CONFIG_PATH = 'mobile/config/mobile-max-lines-ratchets.ts'
 // These two files legitimately contain the directive text as data (regex, fixtures),
 // so scanning them would self-flag. The ratchet does not police itself.
 const SELF_FILES = new Set([
@@ -22,7 +22,7 @@ const SELF_FILES = new Set([
   'config/scripts/check-max-lines-ratchet.test.mjs'
 ])
 
-// Default max-lines budgets from .oxlintrc.json (counted lines).
+// Default max-lines budgets from vite.config.ts (counted lines).
 export function defaultLimitForPath(p) {
   if (/\.(test|spec)\.(ts|tsx)$/.test(p)) {
     return 800
@@ -55,20 +55,18 @@ export function hasMaxLinesDisable(sourceText) {
   return false
 }
 
-// Per-file `max-lines` bumps in mobile/.oxlintrc.json whose `max` exceeds the
+// Per-file `max-lines` bumps in the typed mobile ratchet config whose `max` exceeds the
 // default for that glob (a lower `max` is stricter, not a bypass).
 export function collectMobileBumps(configText) {
-  const cfg = JSON.parse(configText)
   const bumps = []
-  for (const override of cfg.overrides ?? []) {
-    const rule = override.rules?.['max-lines']
-    if (!Array.isArray(rule) || typeof rule[1]?.max !== 'number') {
-      continue
-    }
-    for (const glob of override.files ?? []) {
-      if (rule[1].max > defaultLimitForPath(glob)) {
-        bumps.push(`mobile-config ${glob}`)
-      }
+  const overridePattern =
+    /files:\s*\[\s*['"]([^'"]+)['"]\s*\]\s*,\s*rules:\s*\{\s*['"]max-lines['"]:\s*createMaxLinesRule\(\s*([\d_]+)\s*\)\s*\}/g
+  let match
+  while ((match = overridePattern.exec(configText)) !== null) {
+    const glob = match[1]
+    const max = Number(match[2].replaceAll('_', ''))
+    if (max > defaultLimitForPath(glob)) {
+      bumps.push(`mobile-config ${glob}`)
     }
   }
   return bumps
@@ -140,7 +138,7 @@ function printAddedFailure(added) {
     const how =
       kind === 'inline'
         ? 'added an eslint/oxlint-disable max-lines comment'
-        : 'added a per-file max-lines bump in mobile/.oxlintrc.json'
+        : `added a per-file max-lines bump in ${MOBILE_CONFIG_PATH}`
     console.error(`    • ${target}\n        ↳ ${how}`)
   }
   console.error('')

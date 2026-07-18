@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { ExecutionHostRegistryEntry } from '../../../../shared/execution-host-registry'
 import {
   PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,

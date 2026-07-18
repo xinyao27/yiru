@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { encodeFrame, createFrameParser, FrameType, FRAME_HEADER_SIZE } from './binary-frame'
 
 describe('encodeFrame', () => {

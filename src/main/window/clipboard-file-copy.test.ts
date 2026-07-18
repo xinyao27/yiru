@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { writeFileToClipboard, type ClipboardFileDeps } from './clipboard-file-copy'
 
 function makeDeps(overrides: Partial<ClipboardFileDeps> = {}): ClipboardFileDeps {

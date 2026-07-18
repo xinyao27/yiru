@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { MobileRelayCredentialBundle } from './mobile-relay-credential-bundle'
 import type { MobileRelayPairingJournal } from './mobile-relay-pairing-journal'
 import { racePairingCandidates } from './pairing-candidate-race'

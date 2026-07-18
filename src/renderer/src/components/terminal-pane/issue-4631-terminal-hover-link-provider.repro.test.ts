@@ -1,7 +1,7 @@
 import { performance } from 'node:perf_hooks'
 import { Terminal } from '@xterm/headless'
 import type { IDisposable } from '@xterm/xterm'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { PaneManager } from '@/lib/pane-manager/pane-manager'
 import { extractTerminalFileLinks } from '@/lib/terminal-links'
 import { createFilePathLinkProvider, getTerminalFileOpenHint } from './terminal-link-handlers'

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const USER_DATA = '/user-data'
 const META_PATH = `${USER_DATA}/browser-session-meta.json`

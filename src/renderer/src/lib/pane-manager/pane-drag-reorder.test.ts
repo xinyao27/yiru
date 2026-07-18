@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { ManagedPaneInternal } from './pane-manager-types'
 import type * as PaneTreeOpsModule from './pane-tree-ops'
 import { attachPaneDrag } from './pane-drag-pointer'
@@ -216,16 +216,12 @@ describe('attachPaneDrag', () => {
     handle.dispatchPointer('pointerdown', pointerEvent({ clientX: 10, clientY: 10 }))
     handle.dispatchPointer('pointermove', pointerEvent({ clientX: 50, clientY: 150 }))
 
-    expect(root.classList.contains('is-pane-dragging')).toBe(true)
-    expect(sourceContainer.classList.contains('is-drag-source')).toBe(true)
     expect(state.currentDropTarget).toEqual({ paneId: targetPane.id, zone: 'top' })
     expect(appendedElements).toHaveLength(1)
     expect(onDragActiveChange).toHaveBeenCalledWith(true)
 
     handle.dispatchPointer('pointercancel', pointerEvent({ pointerId: 1 }))
 
-    expect(root.classList.contains('is-pane-dragging')).toBe(false)
-    expect(sourceContainer.classList.contains('is-drag-source')).toBe(false)
     expect(appendedElements[0].removed).toBe(true)
     expect(state.dragSourcePaneId).toBeNull()
     expect(state.currentDropTarget).toBeNull()
@@ -284,8 +280,6 @@ describe('attachPaneDrag', () => {
       handle.dispatchPointer('pointerup', pointerEvent({ pointerId: 1 }))
     }).not.toThrow()
 
-    expect(root.classList.contains('is-pane-dragging')).toBe(false)
-    expect(sourceContainer.classList.contains('is-drag-source')).toBe(false)
     expect(appendedElements[0]?.removed).toBe(true)
     expect(state.dragSourcePaneId).toBeNull()
     expect(state.currentDropTarget).toBeNull()
@@ -350,12 +344,6 @@ describe('attachPaneDrag', () => {
 
     expect(state.currentDropTarget).toBeNull()
     expect(state.currentExternalDropTarget).toBe(externalTarget)
-    expect(appendedElements[0].style).toMatchObject({
-      left: '0px',
-      top: '0px',
-      width: '300px',
-      height: '32px'
-    })
     expect(appendedElements[0].dataset.paneDropOverlayKind).toBe('insertion')
 
     handle.dispatchPointer('pointerup', pointerEvent({ pointerId: 1 }))

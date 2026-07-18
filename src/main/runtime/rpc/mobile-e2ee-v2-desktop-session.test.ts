@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import nacl from 'tweetnacl'
 import { deriveSharedKey } from './e2ee-crypto'
 import { deriveMobileE2EEV2KeySchedule } from './mobile-e2ee-v2-key-schedule'

@@ -13,7 +13,7 @@ import {
   Edit3,
   ListTodo
 } from 'lucide-react-native'
-import { ClaudeIcon, OpenAIIcon } from '../src/components/AgentIcons'
+import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import {
   type AccountsSnapshot,
   type ProviderKey,
@@ -22,7 +22,7 @@ import {
   hasActiveProviderUsage,
   hasRenderableUsage,
   UsageBar
-} from '../src/components/AccountUsage'
+} from '../src/components/account-usage'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { loadHosts } from '../src/transport/host-store'
 import { removeHostAndCloseClient } from '../src/transport/host-removal-lifecycle'
@@ -39,11 +39,11 @@ import { subscribeToDesktopNotifications } from '../src/notifications/mobile-not
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
 import type { ConnectionState, HostProfile } from '../src/transport/types'
 import { triggerMediumImpact } from '../src/platform/haptics'
-import { YiruLogo } from '../src/components/YiruLogo'
-import { MobileHostCard } from '../src/components/MobileHostCard'
-import { TaskProviderLogo } from '../src/components/TaskProviderLogo'
-import { ActionSheetModal, type ActionSheetAction } from '../src/components/ActionSheetModal'
-import { ConfirmModal } from '../src/components/ConfirmModal'
+import { YiruLogo } from '../src/components/yiru-logo'
+import { MobileHostCard } from '../src/components/mobile-host-card'
+import { TaskProviderLogo } from '../src/components/task-provider-logo'
+import { ActionSheetModal, type ActionSheetAction } from '../src/components/action-sheet-modal'
+import { ConfirmModal } from '../src/components/confirm-modal'
 import { setCachedWorktrees, getCachedWorktrees } from '../src/cache/worktree-cache'
 import { loadHomeSnapshot, saveHomeSnapshot } from '../src/cache/home-snapshot-cache'
 import { colors, spacing, radii } from '../src/theme/mobile-theme'

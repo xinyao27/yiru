@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, type RefObject } from 'react'
 import { AppState, Platform, useWindowDimensions, type AppStateStatus } from 'react-native'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
-import type { TerminalWebViewHandle } from './TerminalWebView'
+import type { TerminalWebViewHandle } from './terminal-web-view'
 import { shouldRecoverTerminalOnAppStateChange } from './terminal-foreground-recovery'
 import {
   isTerminalUpdateViewportApplied,

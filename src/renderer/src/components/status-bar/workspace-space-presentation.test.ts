@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { WorkspaceSpaceWorktree } from '../../../../shared/workspace-space-types'
 import {
   WORKSPACE_SPACE_FILTER_QUERY_MAX_BYTES,
@@ -16,7 +16,7 @@ import {
   resolveWorkspaceSpaceTreemapZoomWorktreeId,
   sortWorkspaceSpaceRows
 } from './workspace-space-presentation'
-import { getWorkspaceDecisionDetails } from './WorkspaceSpaceManagerPanel'
+import { getWorkspaceDecisionDetails } from './workspace-space-manager-panel'
 import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
 import type { Repo, Worktree } from '../../../../shared/types'
 

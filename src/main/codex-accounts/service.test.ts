@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- test suite covers config sync, login seeding, and fallback scenarios */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { EventEmitter } from 'node:events'
 import {
   existsSync,

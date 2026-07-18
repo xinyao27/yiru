@@ -3,7 +3,7 @@
 // with the correct agent label and a truncated error_message, and one
 // installer's failure must not stop the others (fail-open semantics).
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { trackMock } = vi.hoisted(() => ({ trackMock: vi.fn() }))
 

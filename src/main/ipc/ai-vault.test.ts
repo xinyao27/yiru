@@ -1,6 +1,6 @@
 import { homedir } from 'node:os'
 import { join, sep } from 'node:path'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { AiVaultListResult, AiVaultSession } from '../../shared/ai-vault-types'
 import type { IFilesystemProvider } from '../providers/types'
 import { getRemoteHostPlatform } from '../ssh/ssh-remote-platform'

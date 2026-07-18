@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { SpoolExecutionError } from './spool-execution-error'
 import { projectSpoolRpcErrorMessage } from './spool-rpc-error'
 

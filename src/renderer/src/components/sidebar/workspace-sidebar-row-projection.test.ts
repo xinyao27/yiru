@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { SpoolSidebarRow } from './spool-sidebar-rows'
 import type { RenderRow } from './worktree-list-virtual-rows'
 import {

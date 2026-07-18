@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { chmodSyncMock, existsSyncMock, paths, statSyncMock, state } = vi.hoisted(() => ({
   chmodSyncMock: vi.fn(),

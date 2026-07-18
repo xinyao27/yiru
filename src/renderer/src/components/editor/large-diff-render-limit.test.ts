@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   MAX_RENDERED_DIFF_COMBINED_CHARACTERS,
   MAX_RENDERED_DIFF_LINES_PER_SIDE,

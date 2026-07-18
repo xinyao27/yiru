@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { describe, expect, it, vi, afterEach } from 'vitest'
+import { describe, expect, it, vi, afterEach } from 'vite-plus/test'
 
 const { platformMock, homedirMock, statMock } = vi.hoisted(() => ({
   platformMock: vi.fn(),

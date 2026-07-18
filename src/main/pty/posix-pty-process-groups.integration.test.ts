@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import * as pty from 'node-pty'
-import { expect, it } from 'vitest'
+import { expect, it } from 'vite-plus/test'
 import { forceKillPosixPtyProcessGroups } from './posix-pty-process-groups'
 
 type TaggedProcess = { pid: number; pgid: number }

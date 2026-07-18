@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as React from 'react'
 import { YIRU_TERMINAL_COMMAND_FINISHED_EVENT } from '@/hooks/terminal-command-finished-event'
 

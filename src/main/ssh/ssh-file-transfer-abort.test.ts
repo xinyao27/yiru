@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { raceSftpFileTransferWithAbort } from './ssh-file-transfer-abort'
 
 describe('raceSftpFileTransferWithAbort', () => {

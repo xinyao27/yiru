@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
 import { registerSshFilesystemWatch, type WatchRegistration } from './ssh-filesystem-provider-watch'
 

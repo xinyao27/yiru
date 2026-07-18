@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { RpcResponse } from '../transport/types'
 import { PrActionsEngine, type PrActionMutations } from './pr-actions-engine'
 import {

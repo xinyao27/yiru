@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { SshConnectionStatus } from '../../../../shared/ssh-types'
 import type { Repo } from '../../../../shared/types'
 import { getRepoHeaderCreateState } from './repo-header-create-state'

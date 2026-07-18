@@ -1,5 +1,5 @@
 import { Eraser, Monitor, Smartphone } from 'lucide-react-native'
-import type { ActionSheetAction } from '../components/ActionSheetModal'
+import type { ActionSheetAction } from '../components/action-sheet-modal'
 import type { MobileNativeChatTab } from './mobile-native-chat-eligibility'
 import { getMobileNativeChatToggleActions } from './mobile-native-chat-toggle-action'
 

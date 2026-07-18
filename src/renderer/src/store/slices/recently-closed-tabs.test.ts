@@ -3,7 +3,7 @@
  * stacks, and the unified dispatcher pops the most recently closed tab of any
  * kind (terminal/browser/editor) in true cross-type MRU order.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import type * as AgentStatusModule from '@/lib/agent-status'
 import { getDefaultSettings } from '../../../../shared/constants'
 

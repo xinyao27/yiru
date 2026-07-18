@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { netConnectMock } = vi.hoisted(() => ({
   netConnectMock: vi.fn()

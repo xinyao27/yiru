@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import path from 'node:path'
 import type * as WarpThemeDiscovery from './discovery'
 

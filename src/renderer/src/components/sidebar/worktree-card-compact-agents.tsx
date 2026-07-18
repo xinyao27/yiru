@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from 'react'
 import { CaretDown as ChevronDown } from '@phosphor-icons/react'
-import { AgentStateDot } from '@/components/AgentStateDot'
-import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/useDashboardData'
+import { AgentStateDot } from '@/components/agent-state-dot'
+import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { agentTypeToIconAgent } from '@/lib/agent-status'
 import { cn } from '@/lib/class-names'
@@ -105,15 +105,15 @@ export function CompactAgentSummaryButton({
       className={cn(
         'compact-agent-summary-button group/agent-summary flex h-6 w-full min-w-0 items-center gap-1 rounded-sm',
         'px-1 text-left text-[11px] leading-none text-muted-foreground',
-        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-worktree-sidebar-ring',
-        // Why: worktree-sidebar-accent is near-white in light mode and dark in dark
+        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring',
+        // Why: the scoped sidebar accent is near-white in light mode and dark in dark
         // mode, so hover lightening needs a theme-specific token mix.
-        'hover:bg-worktree-sidebar-accent/55 dark:hover:bg-worktree-sidebar-foreground/[0.035]',
+        'hover:bg-sidebar-accent/55 dark:hover:bg-sidebar-foreground/[0.035]',
         // Why: expanded is a tree header inside the card, so only the
         // standalone collapsed pill gets a resting surface and border.
         expanded
           ? 'compact-agent-summary-button-expanded'
-          : 'border border-worktree-sidebar-border/70 bg-worktree-sidebar-accent/35'
+          : 'border border-sidebar-border/70 bg-sidebar-accent/35'
       )}
       aria-label={
         expanded
@@ -148,7 +148,7 @@ export function CompactAgentSummaryButton({
               return (
                 <span
                   key={group.state}
-                  className="inline-flex min-w-0 shrink-0 items-center gap-0.5 rounded-sm bg-worktree-sidebar/70 px-1 py-0.5"
+                  className="inline-flex min-w-0 shrink-0 items-center gap-0.5 rounded-sm bg-sidebar/70 px-1 py-0.5"
                 >
                   <AgentStateDot state={group.state} size="sm" />
                   {/* Why: same-state agent identities read as one status cluster;
@@ -157,7 +157,7 @@ export function CompactAgentSummaryButton({
                     {iconAgents.map((agent) => (
                       <span
                         key={agent.paneKey}
-                        className="inline-flex size-4 items-center justify-center rounded-full border border-worktree-sidebar-border/70 bg-worktree-sidebar"
+                        className="inline-flex size-4 items-center justify-center rounded-full border border-sidebar-border/70 bg-sidebar"
                       >
                         <AgentIcon agent={agentTypeToIconAgent(agent.agentType)} size={13} />
                       </span>

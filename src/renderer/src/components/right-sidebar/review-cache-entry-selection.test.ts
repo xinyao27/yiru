@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { selectReviewCacheData, selectReviewCacheEntry } from './review-cache-entry-selection'
 
 type Review = { id: string }

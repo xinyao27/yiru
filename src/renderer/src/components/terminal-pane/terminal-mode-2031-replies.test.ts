@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { pushMode2031SeedReply } from './terminal-mode-2031-replies'
 
 describe('pushMode2031SeedReply', () => {

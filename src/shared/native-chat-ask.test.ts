@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { NativeChatBlock, NativeChatMessage } from './native-chat-types'
 import { extractPendingAsk, parseAskFromStatus } from './native-chat-ask'
 

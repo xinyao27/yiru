@@ -1,7 +1,7 @@
 import { mkdtemp, mkdir, realpath, rm, symlink, unlink } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { GlobalSettings } from '../../shared/types'
 
 const { appGetPathMock, authorizeExternalPathMock } = vi.hoisted(() => ({

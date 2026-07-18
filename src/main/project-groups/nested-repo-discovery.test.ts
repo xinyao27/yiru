@@ -1,7 +1,7 @@
 import { mkdtemp, mkdir, writeFile, rm, symlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { scanNestedRepos } from './nested-repo-discovery'
 
 let tempDirs: string[] = []

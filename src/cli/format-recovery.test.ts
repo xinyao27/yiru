@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import { formatCliError } from './format'
 import { RuntimeClientError, RuntimeRpcFailureError } from './runtime-client'

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { WorkspaceSpaceAnalysis } from '../../../../shared/workspace-space-types'
 import type { AppState } from '../types'
 import { createWorkspaceSpaceSlice } from './workspace-space'

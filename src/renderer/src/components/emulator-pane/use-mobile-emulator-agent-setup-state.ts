@@ -9,8 +9,8 @@ import {
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
-} from '@/hooks/useInstalledAgentSkills'
-import { useMountedRef } from '@/hooks/useMountedRef'
+} from '@/hooks/use-installed-agent-skills'
+import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { getMobileEmulatorCliPathNeedsAttention } from './mobile-emulator-agent-setup-cli-state'
 import { translate } from '@/i18n/i18n'
 

@@ -1,5 +1,5 @@
-import type { AgentDotState } from '@/components/AgentStateDot'
-import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/useDashboardData'
+import type { AgentDotState } from '@/components/agent-state-dot'
+import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
 import { formatAgentTypeLabel } from '@/lib/agent-status'
 import type { AgentStatusState } from '../../../../shared/agent-status-types'
 

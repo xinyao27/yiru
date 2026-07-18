@@ -1,7 +1,7 @@
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it, afterEach, vi } from 'vitest'
+import { describe, expect, it, afterEach, vi } from 'vite-plus/test'
 import WebSocket from 'ws'
 import { WebSocketTransport } from './ws-transport'
 import { loadOrCreateTlsCertificate } from '../tls-certificate'

@@ -2,7 +2,7 @@
 // bounded and coalesce repeat events (a flood costs one slot per second, not
 // unbounded memory), and pty-id redaction must keep the correlatable suffix
 // while dropping the path-bearing worktree prefix.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   createPtyDeliveryBreadcrumbRing,
   redactPtyIdForDiagnostics

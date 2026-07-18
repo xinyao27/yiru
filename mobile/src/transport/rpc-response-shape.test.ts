@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isRpcResponse } from './rpc-response-shape'
 
 describe('isRpcResponse', () => {

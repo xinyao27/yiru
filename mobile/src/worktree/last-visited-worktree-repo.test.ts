@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { readLastVisitedWorktreeRepoId } from './last-visited-worktree-repo'
 
 describe('last visited worktree repo', () => {

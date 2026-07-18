@@ -2,7 +2,7 @@ import type { GitStatusEntry } from '../../../../shared/types'
 import { basename } from '@/lib/path'
 import type { SourceControlSectionArea } from './source-control-section-order'
 import type { SourceControlTreeNode } from './source-control-tree'
-import type { FlatEntry } from './useSourceControlSelection'
+import type { FlatEntry } from './use-source-control-selection'
 
 export type SubmoduleSectionTreeNode = SourceControlTreeNode<
   GitStatusEntry,

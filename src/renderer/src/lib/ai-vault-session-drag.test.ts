@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import {
   AI_VAULT_SESSION_DRAG_PAYLOAD_MAX_BYTES,
   AI_VAULT_SESSION_DRAG_TYPE,

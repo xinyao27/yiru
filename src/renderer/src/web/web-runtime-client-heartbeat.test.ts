@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, afterEach, beforeEach } from 'vitest'
+import { describe, expect, it, vi, afterEach, beforeEach } from 'vite-plus/test'
 import { WebRuntimeClient } from './web-runtime-client'
 
 // Why: a half-open browser WebSocket stays readyState===OPEN with no

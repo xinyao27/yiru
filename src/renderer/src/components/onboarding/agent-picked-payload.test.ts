@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { buildAgentPickedPayload } from './agent-picked-payload'
 
 // Why: this test guards the renderer-end attachment of `path_source` and

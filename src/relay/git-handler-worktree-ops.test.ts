@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import * as path from 'node:path'
 import { GitCapabilityCache } from '../shared/git-capability-cache'
 import type { GitExec } from './git-handler-ops'

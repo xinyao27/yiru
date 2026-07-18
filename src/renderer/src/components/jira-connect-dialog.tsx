@@ -2,7 +2,7 @@ import { useId, useLayoutEffect, useState } from 'react'
 import { Lock } from '@phosphor-icons/react'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '@/store'
-import { useMountedRef } from '@/hooks/useMountedRef'
+import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { GitHistoryExecutor } from './git-history'
 import {
   GIT_HISTORY_MAX_LIMIT,

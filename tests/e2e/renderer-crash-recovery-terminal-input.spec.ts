@@ -6,7 +6,7 @@
  * not grow while typing — i.e. keystrokes silently vanish somewhere between
  * xterm and the PTY. This spec forces the suspected trigger — renderer
  * process death followed by the automatic recovery reload
- * (createMainWindow.ts scheduleRendererRecovery) — then discriminates which
+ * (create-main-window.ts scheduleRendererRecovery) — then discriminates which
  * layer drops input via the probes in helpers/terminal-input-probes.ts.
  *
  * Post-crash phases are driven from the MAIN process: a crashed target

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import { createOptionAsAltProbe } from './option-as-alt-probe'
 import type { LayoutMapLike } from './detect-option-as-alt'
 

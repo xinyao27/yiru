@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { bench, expect } from 'vitest'
+import { bench, expect } from 'vite-plus/test'
 import * as monaco from 'monaco-editor'
 import { syncContentUpdate } from './monaco-content-sync'
 

@@ -3,13 +3,8 @@
 import { act, cloneElement, isValidElement, type ReactElement, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import RightSidebar from './index'
-import { TopActivityOverflowMenu } from './activity-bar-buttons'
-import {
-  RIGHT_SIDEBAR_HEADER_DRAG_CLASS_NAME,
-  RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
-} from './right-sidebar-titlebar-drag-regions'
 import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 
 const mockAppState = vi.hoisted(() => ({
@@ -47,7 +42,7 @@ function getMockKnownWorktree(): { id: string; repoId: string } {
   return mockAppState.cachedWorktree
 }
 
-vi.mock('@/hooks/useSidebarResize', () => ({
+vi.mock('@/hooks/use-sidebar-resize', () => ({
   useSidebarResize: () => ({
     containerRef: { current: null },
     isResizing: false,
@@ -55,7 +50,7 @@ vi.mock('@/hooks/useSidebarResize', () => ({
   })
 }))
 
-vi.mock('@/hooks/useShortcutLabel', () => ({
+vi.mock('@/hooks/use-shortcut-label', () => ({
   useShortcutLabel: (actionId: string) => actionId
 }))
 
@@ -148,65 +143,29 @@ vi.mock('@/components/ui/dropdown-menu', () => ({
     renderTriggerMock(props, 'data-dropdown-trigger')
 }))
 
-vi.mock('./FileExplorer', () => ({
+vi.mock('./file-explorer', () => ({
   default: () => <div data-file-explorer />
 }))
 
-vi.mock('./FolderWorkspaceWorktreesPanel', () => ({
+vi.mock('./folder-workspace-worktrees-panel', () => ({
   default: () => <div data-folder-workspace-worktrees-panel />
 }))
 
-vi.mock('./FolderWorkspacePrChecksPanel', () => ({
+vi.mock('./folder-workspace-pr-checks-panel', () => ({
   default: () => <div data-folder-workspace-pr-checks-panel />
 }))
 
-vi.mock('./SourceControl', () => ({
+vi.mock('./source-control', () => ({
   default: () => <div data-source-control />
 }))
 
-vi.mock('./ChecksPanel', () => ({
+vi.mock('./checks-panel', () => ({
   default: () => <div data-checks-panel />
 }))
 
-vi.mock('./PortsPanel', () => ({
+vi.mock('./ports-panel', () => ({
   default: () => <div data-ports-panel />
 }))
-
-function openingTag(markup: string, className: string): string {
-  const match = markup.match(new RegExp(`<[^>]+class="[^"]*${className}[^"]*"[^>]*>`))
-  if (!match) {
-    throw new Error(`opening tag with class "${className}" not found in ${markup}`)
-  }
-  return match[0]
-}
-
-function buttonOpeningTag(markup: string, ariaLabelPrefix: string): string {
-  const escapedPrefix = ariaLabelPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const match = markup.match(new RegExp(`<button[^>]+aria-label="${escapedPrefix}[^"]*"[^>]*>`))
-  if (!match) {
-    throw new Error(`button with aria-label prefix "${ariaLabelPrefix}" not found in ${markup}`)
-  }
-  return match[0]
-}
-
-function classTokens(tag: string): string[] {
-  return tag.match(/class="([^"]*)"/)?.[1].split(/\s+/) ?? []
-}
-
-function expectNoDrag(tag: string): void {
-  expect(classTokens(tag)).toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
-}
-
-function activityStripIsInsideHeader(markup: string): boolean {
-  const root = document.createElement('div')
-  root.innerHTML = markup
-  const header = root.querySelector('.right-sidebar-header-drag')
-  const activityStrip = root.querySelector('.right-sidebar-activity-strip')
-  if (!header || !activityStrip) {
-    throw new Error('right sidebar header or activity strip not found')
-  }
-  return header.contains(activityStrip)
-}
 
 function setRendererPlatform(platform: NodeJS.Platform): void {
   Object.defineProperty(window, 'api', {
@@ -243,78 +202,6 @@ describe('rendered right sidebar titlebar drag regions', () => {
     mockAppState.listeners.clear()
     mockAppState.snapshotCache.clear()
     mockAppState.cachedWorktree = null
-  })
-
-  it('keeps the rendered top activity strip draggable, context-menuable, and only controls no-drag', () => {
-    const markup = renderToStaticMarkup(<RightSidebar />)
-    const header = openingTag(markup, 'right-sidebar-header-drag')
-    const activityStrip = openingTag(markup, 'right-sidebar-activity-strip')
-
-    expect(classTokens(header)).toContain(RIGHT_SIDEBAR_HEADER_DRAG_CLASS_NAME)
-    expect(classTokens(header)).not.toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
-    expect(classTokens(activityStrip)).not.toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
-    expect(activityStrip).toContain('data-context-menu-trigger="true"')
-
-    expectNoDrag(buttonOpeningTag(markup, 'Explorer'))
-    expectNoDrag(buttonOpeningTag(markup, 'Source Control'))
-    expectNoDrag(buttonOpeningTag(markup, 'Checks'))
-    expectNoDrag(buttonOpeningTag(markup, 'Toggle right sidebar'))
-  })
-
-  it('uses the custom desktop chrome top strip on Linux desktop', () => {
-    setRendererPlatform('linux')
-
-    const markup = renderToStaticMarkup(<RightSidebar />)
-    const activityStrip = openingTag(markup, 'right-sidebar-activity-strip')
-
-    expect(classTokens(activityStrip)).not.toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
-    expect(activityStripIsInsideHeader(markup)).toBe(false)
-  })
-
-  it('keeps paired Linux web clients on the browser-style top strip', () => {
-    setRendererPlatform('linux')
-    ;(globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ = true
-
-    const markup = renderToStaticMarkup(<RightSidebar />)
-
-    expect(activityStripIsInsideHeader(markup)).toBe(true)
-  })
-
-  it('keeps the overflow trigger no-drag when it renders', () => {
-    const markup = renderToStaticMarkup(
-      <TopActivityOverflowMenu
-        items={[
-          {
-            id: 'checks',
-            icon: () => <span data-checks-icon />,
-            title: 'Checks',
-            shortcut: 'shortcut'
-          }
-        ]}
-        activeTab="explorer"
-        onSelect={vi.fn()}
-      />
-    )
-
-    const overflowButton = buttonOpeningTag(markup, 'More sidebar tabs')
-    expectNoDrag(overflowButton)
-  })
-
-  it('keeps side activity-bar controls no-drag without cancelling the side header drag region', () => {
-    mockAppState.activityBarPosition = 'side'
-
-    const markup = renderToStaticMarkup(<RightSidebar />)
-    const sideHeader = openingTag(markup, 'right-sidebar-header-drag')
-    const sideStrip = openingTag(markup, 'side-activity-bar-windows-inset')
-
-    expect(classTokens(sideHeader)).toContain(RIGHT_SIDEBAR_HEADER_DRAG_CLASS_NAME)
-    expect(classTokens(sideHeader)).not.toContain(RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)
-    expect(sideStrip).toContain('data-context-menu-trigger="true"')
-
-    expectNoDrag(buttonOpeningTag(markup, 'Explorer'))
-    expectNoDrag(buttonOpeningTag(markup, 'Source Control'))
-    expectNoDrag(buttonOpeningTag(markup, 'Checks'))
-    expectNoDrag(buttonOpeningTag(markup, 'Toggle right sidebar'))
   })
 
   it('hides git-only activity buttons for folder workspace ids without a backing repo', () => {

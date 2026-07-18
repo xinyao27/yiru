@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   PR_CHECK_LOG_TAIL_BYTES,
   PR_CHECK_LOG_TAIL_EARLIER_SEPARATOR,

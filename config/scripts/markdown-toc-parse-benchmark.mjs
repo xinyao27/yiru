@@ -2,7 +2,7 @@
 // Benchmark: cost of the rich-markdown Table-of-Contents parse that fires on
 // every debounced content change while typing.
 //
-// Before the fix (RichMarkdownEditor.tsx), buildMarkdownTableOfContents() ran a
+// Before the fix (rich-markdown-editor.tsx), buildMarkdownTableOfContents() ran a
 // full-document remark parse on EVERY content change even when the TOC panel was
 // closed (the default), then discarded the result. This benchmark mirrors that
 // parse workload across document sizes and reports the main-thread time spent

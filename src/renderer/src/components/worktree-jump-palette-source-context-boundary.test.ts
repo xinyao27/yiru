@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
-const source = readFileSync(join(__dirname, 'WorktreeJumpPalette.tsx'), 'utf8')
+const source = readFileSync(join(__dirname, 'worktree-jump-palette.tsx'), 'utf8')
 
 function sourceBetween(startPattern: string, endPattern: string): string {
   const start = source.indexOf(startPattern)

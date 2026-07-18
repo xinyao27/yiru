@@ -3,15 +3,15 @@ import './assets/main.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { useTranslation } from 'react-i18next'
-import App from './App'
-import { RecoverableRenderErrorBoundary } from './components/error-boundaries/RecoverableRenderErrorBoundary'
+import App from './application-shell'
+import { RecoverableRenderErrorBoundary } from './components/error-boundaries/recoverable-render-error-boundary'
 import {
   installRendererCrashDiagnostics,
   recordRendererCrashBreadcrumb
 } from './lib/crash-diagnostics'
 import { applyDocumentTheme } from './lib/document-theme'
 import { shouldEnableReactGrab } from './lib/react-grab-dev-gate'
-import { I18nProvider } from './i18n/I18nProvider'
+import { I18nProvider } from './i18n/i18n-provider'
 import { translate } from './i18n/i18n'
 
 recordRendererCrashBreadcrumb('renderer_bootstrap_started', { dev: import.meta.env.DEV })

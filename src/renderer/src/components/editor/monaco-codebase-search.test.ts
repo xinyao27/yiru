@@ -1,5 +1,5 @@
 import type { IPosition, IRange } from 'monaco-editor'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { getMonacoCodebaseSearchQuery } from './monaco-codebase-search'
 
 type FakeSelection = IRange & {

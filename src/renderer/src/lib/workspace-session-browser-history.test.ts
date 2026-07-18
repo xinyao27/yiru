@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { BrowserHistoryEntry } from '../../../shared/types'
 import { MAX_BROWSER_HISTORY_ENTRIES } from '../../../shared/workspace-session-browser-history'
 import { buildWorkspaceSessionPayload, type WorkspaceSessionSnapshot } from './workspace-session'

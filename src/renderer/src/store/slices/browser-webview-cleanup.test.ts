@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { BrowserPage, BrowserWorkspace } from '../../../../shared/types'
 
 vi.mock('../../components/browser-pane/webview-registry', () => ({

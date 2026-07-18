@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { buildSections, type Worktree } from './workspace-list-sections'
 import {
   applyDesktopViewSettings,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { createDraftPasteReadyScanner } from './draft-paste-ready-scanner'
 
 const DECSET_BRACKETED_PASTE = '\x1b[?2004h'

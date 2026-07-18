@@ -1,7 +1,7 @@
 import type { MutableRefObject } from 'react'
 import type { Virtualizer } from '@tanstack/react-virtual'
 import type { ProgrammaticScrollMarks } from './programmatic-scroll-marks'
-import type { VirtualizedScrollAnchor } from './useVirtualizedScrollAnchor'
+import type { VirtualizedScrollAnchor } from './use-virtualized-scroll-anchor'
 
 type RunVirtualizedScrollAnchorRestoreArgs<
   TScrollElement extends Element,

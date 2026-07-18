@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { DEFAULT_WARNING_DEDUPE_MAX_KEYS, shouldEmitBoundedWarning } from './bounded-warning-dedupe'
 
 describe('shouldEmitBoundedWarning', () => {

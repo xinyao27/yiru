@@ -1,7 +1,7 @@
 import type { AgentsStep } from '../../../../shared/agents-orchestration-steps'
 import type { ReviewStep } from '../../../../shared/review-steps'
 import type { WorkbenchStep } from '../../../../shared/workbench-steps'
-import type { FeatureWallActiveStepCopy } from './FeatureWallTourPanel'
+import type { FeatureWallActiveStepCopy } from './feature-wall-tour-panel'
 
 export function getFeatureWallActiveStepCopy(
   agentsActiveStep: AgentsStep | null,

@@ -2,7 +2,7 @@
 
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { useWorktreeCardDetailsHoverControl } from './worktree-card-details-hover-state'
 
 type HoverControlSnapshot = ReturnType<typeof useWorktreeCardDetailsHoverControl>

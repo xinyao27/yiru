@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { create } from 'zustand'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
 import { createCompatibleRuntimeStatusResponse } from '../../runtime/runtime-compatibility-test-fixture'

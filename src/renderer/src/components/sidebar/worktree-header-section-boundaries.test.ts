@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { Repo } from '../../../../shared/types'
 import type { SpoolWorktreeSidebarRow } from './spool-sidebar-rows'
 import { getRepoHeaderSectionEndByRepoId } from './worktree-header-section-boundaries'

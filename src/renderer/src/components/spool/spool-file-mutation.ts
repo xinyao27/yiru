@@ -1,6 +1,6 @@
 import type { SpoolFileTreeEntry } from '../../../../shared/spool/spool-operation-contract'
 import { basename, dirname, joinPath, normalizeRelativePath } from '@/lib/path'
-import type { SpoolFileAction } from './SpoolFileActionDialog'
+import type { SpoolFileAction } from './spool-file-action-dialog'
 import { parseSpoolMutationResult } from './spool-owner-result-validation'
 import type { SpoolWorktreeRoute } from './spool-worktree-route'
 import { invokeSpoolWorkspaceMutation } from './spool-workspace-operation'

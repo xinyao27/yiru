@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { RuntimeWatcherPendingAssignment } from './runtime-watcher-pending-assignment'
 
 describe('RuntimeWatcherPendingAssignment', () => {

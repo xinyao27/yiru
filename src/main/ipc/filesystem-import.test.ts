@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { constants } from 'node:fs'
 import { Readable, Writable } from 'node:stream'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const handlers = new Map<string, (_event: unknown, args: unknown) => Promise<unknown>>()
 const {

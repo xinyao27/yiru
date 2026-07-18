@@ -5,7 +5,7 @@ import { removeBrowserPageViewport } from './browser-page-viewport'
 // (React component) and store-layer cleanup helpers (shutdownWorktreeBrowsers,
 // subscriber diff). Keeping it in its own non-React module breaks the cycle
 // store/slices → components → @/store that would otherwise appear if
-// destroyPersistentWebview lived in BrowserPane.tsx.
+// destroyPersistentWebview lived in browser-pane.tsx.
 export const webviewRegistry = new Map<string, Electron.WebviewTag>()
 export const registeredWebContentsIds = new Map<string, number>()
 

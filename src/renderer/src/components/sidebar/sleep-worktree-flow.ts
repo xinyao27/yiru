@@ -1,7 +1,7 @@
 import { toast } from 'sonner'
 import { useAppStore } from '@/store'
 import { clearWorktreeSleepIntent, markWorktreeSleepIntent } from '@/lib/worktree-sleep-intent'
-import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/hooks/useVirtualizedScrollAnchor'
+import { VIRTUALIZED_SCROLL_ANCHOR_RECORD_EVENT } from '@/hooks/use-virtualized-scroll-anchor'
 import { translate } from '@/i18n/i18n'
 import { PINNED_GROUP_KEY } from './worktree-list-groups'
 

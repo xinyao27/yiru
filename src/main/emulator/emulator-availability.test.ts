@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { inspectEmulatorAvailability } from './emulator-availability'
 import type { EmulatorBridge } from './emulator-bridge'
 import type { SimulatorDevice } from './simctl-simulator-devices'

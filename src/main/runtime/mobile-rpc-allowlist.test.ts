@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { ALL_RPC_METHODS } from './rpc/methods'
 
 const MOBILE_DYNAMIC_RPC_METHODS = [

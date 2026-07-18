@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { OpenFile } from '@/store/slices/editor'
 import { RICH_MARKDOWN_MAX_SIZE_BYTES } from '../../../../shared/constants'
 import type { GitStatusEntry } from '../../../../shared/types'

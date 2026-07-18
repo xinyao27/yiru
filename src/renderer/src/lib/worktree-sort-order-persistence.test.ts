@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
 import type { WorktreeRuntimeOwnerState } from './worktree-runtime-owner'
 import { persistWorktreeSortOrderByHost } from './worktree-sort-order-persistence'

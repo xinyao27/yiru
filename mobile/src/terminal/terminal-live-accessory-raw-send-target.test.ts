@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getTerminalLiveAccessoryRawSendTarget } from './terminal-live-accessory-raw-send-target'
 
 describe('terminal live accessory raw send target', () => {

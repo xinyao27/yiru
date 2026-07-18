@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import type { FolderWorkspace, ProjectGroup, Repo } from '../../../../shared/types'
 import { useAppStore } from '@/store'
 import { folderWorkspaceKey } from '../../../../shared/workspace-scope'

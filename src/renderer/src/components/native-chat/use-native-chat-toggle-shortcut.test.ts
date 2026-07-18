@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isNativeChatTabWideFallbackSafe } from './native-chat-leaf-routing'
 import { resolveNativeChatToggleShortcutDetectedAgent } from './use-native-chat-toggle-shortcut'
 

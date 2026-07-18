@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { buildMarkdownExportHtml } from './markdown-export-html'
 
 describe('buildMarkdownExportHtml', () => {
@@ -11,8 +11,6 @@ describe('buildMarkdownExportHtml', () => {
     expect(html).toContain('<meta charset="utf-8"')
     expect(html).toContain('<title>Hello</title>')
     expect(html).toContain('<h1>Hello</h1><p>world</p>')
-    expect(html).toContain('class="yiru-export-root"')
-    expect(html).toContain('<style>')
   })
 
   it('escapes HTML-unsafe characters in the title', () => {

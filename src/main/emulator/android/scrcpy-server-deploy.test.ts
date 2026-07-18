@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   SCRCPY_DEVICE_JAR_PATH,
   SCRCPY_SERVER_VERSION,

@@ -1,7 +1,7 @@
 // Why: one regression fixture proves the managed hook timeout budget across every
 // managed agent (config entries, wrapper curl flags, and a real dead-endpoint
 // shell run) so the cross-agent coverage lives together rather than fragmenting.
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { spawn, spawnSync } from 'node:child_process'
 import { createServer, type Server, type Socket } from 'node:net'
 import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'

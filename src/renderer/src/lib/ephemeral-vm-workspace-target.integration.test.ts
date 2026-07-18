@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { prepareEphemeralVmWorkspaceTarget } from './ephemeral-vm-workspace-target'
 import { clearRuntimeCompatibilityCacheForTests } from '@/runtime/runtime-rpc-client'
 import { createCompatibleRuntimeStatusResponse } from '@/runtime/runtime-compatibility-test-fixture'

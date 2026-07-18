@@ -21,15 +21,10 @@ export default defineConfig({
   // healthy, so the per-test budget needs to cover startup plus assertions.
   timeout: 120_000,
   expect: { timeout: 10_000 },
-  // Why: the headless Electron specs launch isolated app instances and can
-  // safely fan out across workers, which cuts the default E2E runtime
-  // substantially. The few visible-window tests that still rely on real
-  // pointer interaction are marked serial in their spec file instead.
-  fullyParallel: true,
-  // Why: each CI worker launches a real Electron/Chromium process tree against
-  // a mutable seeded repo. Release runners showed two apps per VM can contend
-  // on Xvfb/git enough to create false E2E failures, so CI scales by shards.
-  workers: process.env.CI ? 1 : undefined,
+  // Why: isolated Electron profiles still share the mutable seeded Git repo.
+  // Concurrent specs cross-contaminate worktrees, daemon PIDs, and diff state.
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: 'list',

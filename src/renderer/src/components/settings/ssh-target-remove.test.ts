@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { SSH_TERMINATE_RECONNECT_REQUIRED } from '../../../../shared/constants'
 import { removeSshTargetWithBestEffortCleanup, type SshTargetRemoveApi } from './ssh-target-remove'
 

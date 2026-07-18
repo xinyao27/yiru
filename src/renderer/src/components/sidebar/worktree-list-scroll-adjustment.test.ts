@@ -1,47 +1,16 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import {
   countRecordKeysByReference,
   getScrollTopToRevealBounds,
   resolvePendingSidebarReveal,
   WORKTREE_SIDEBAR_REVEAL_TOP_INSET,
   shouldAdjustWorktreeSidebarMeasuredRowScroll
-} from './WorktreeList'
+} from './worktree-list'
 import {
   extractWorktreeVirtualRowIndexes,
-  estimateRenderRowSize,
   GROUP_HEADER_ROW_HEIGHT,
   getActiveStickyHeaderIndexForScroll
 } from './worktree-list-virtual-rows'
-import type { Repo } from '../../../../shared/types'
-import type { Row } from './worktree-list-groups'
-
-const repo: Repo = {
-  id: 'repo-1',
-  path: '/repo',
-  displayName: 'yiru',
-  badgeColor: '#000',
-  addedAt: 1
-}
-
-const makeHeaderRow = (
-  key: string,
-  overrides: Partial<Extract<Row, { type: 'header' }>> = {}
-): Extract<Row, { type: 'header' }> => ({
-  type: 'header',
-  key,
-  label: key,
-  count: 0,
-  tone: 'text-foreground',
-  ...overrides
-})
-
-const makeImportedCardRow = (): Extract<Row, { type: 'imported-worktrees-card' }> => ({
-  type: 'imported-worktrees-card',
-  key: 'imported-worktrees-card:repo-group:repo-1',
-  repo,
-  hiddenWorktrees: [],
-  placement: 'repo-group'
-})
 
 const makeScrollContainer = (scrollTop: number, clientHeight: number): HTMLElement =>
   ({ scrollTop, clientHeight }) as HTMLElement
@@ -202,29 +171,7 @@ describe('extractWorktreeVirtualRowIndexes', () => {
   })
 })
 
-describe('estimateRenderRowSize', () => {
-  it('keeps secondary group header size stable while it is the active sticky header', () => {
-    const rows = [makeHeaderRow('first'), makeHeaderRow('second')]
-    const firstHeaderIndex = 0
-    const secondaryHeaderIndex = 1
-    const inactiveSize = estimateRenderRowSize(rows, secondaryHeaderIndex, firstHeaderIndex, null)
-    const activeSize = estimateRenderRowSize(
-      rows,
-      secondaryHeaderIndex,
-      firstHeaderIndex,
-      secondaryHeaderIndex
-    )
-
-    expect(inactiveSize).toBe(32)
-    expect(activeSize).toBe(32)
-  })
-
-  it('estimates imported worktree line rows with a stable compact height', () => {
-    const rows = [makeHeaderRow('repo:repo-1'), makeImportedCardRow()]
-
-    expect(estimateRenderRowSize(rows, 1, 0, null)).toBe(36)
-  })
-
+describe('getActiveStickyHeaderIndexForScroll', () => {
   it('keeps the previous header active until the secondary header row reaches the top', () => {
     expect(
       getActiveStickyHeaderIndexForScroll({

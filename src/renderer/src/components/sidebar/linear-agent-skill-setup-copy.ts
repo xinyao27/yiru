@@ -1,4 +1,4 @@
-import type { LocalAgentRuntime } from '../settings/CliSkillRuntimeSetup'
+import type { LocalAgentRuntime } from '../settings/cli-skill-runtime-setup'
 import { translate } from '@/i18n/i18n'
 
 export function getLinearAgentSkillSetupMissingLabel(

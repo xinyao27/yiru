@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { formatResetCountdown, formatResetDuration } from '../../../shared/rate-limit-reset-format'
 import { formatRateLimitWindowChipLabel, formatWindowLabel } from './window-label-formatter'
 

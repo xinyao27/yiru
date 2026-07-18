@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { sourceKeyForPreview } from './mobile-file-preview-source'
 
 describe('mobile-file-preview-source', () => {

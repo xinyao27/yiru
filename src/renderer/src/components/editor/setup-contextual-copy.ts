@@ -1,5 +1,5 @@
 import type { editor } from 'monaco-editor'
-import { formatShortcutLabel } from '@/hooks/useShortcutLabel'
+import { formatShortcutLabel } from '@/hooks/use-shortcut-label'
 import { monaco } from '@/lib/monaco-setup'
 import { useAppStore } from '@/store'
 import { editorShortcutMatches } from './editor-shortcuts'

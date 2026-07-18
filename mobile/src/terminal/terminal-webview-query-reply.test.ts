@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { XTERM_WEBVIEW_SOURCE } from './terminal-webview-html'
 import { TERMINAL_QUERY_REPLY_JS } from './terminal-webview-query-reply-injected'
 

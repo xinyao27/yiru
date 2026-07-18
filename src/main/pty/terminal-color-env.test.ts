@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { removeInheritedNoColor } from './terminal-color-env'
 
 describe('terminal color env', () => {

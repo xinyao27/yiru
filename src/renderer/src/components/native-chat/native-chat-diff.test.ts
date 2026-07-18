@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import { diffFromText, diffFromToolCall } from './native-chat-diff'
 
 describe('diffFromToolCall', () => {

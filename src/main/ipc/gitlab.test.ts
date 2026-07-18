@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { Store } from '../persistence'
 import type { Repo } from '../../shared/types'
 import { toSshExecutionHostId } from '../../shared/execution-host'

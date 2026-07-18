@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { createAgentPaneAuthorityOwnership } from './agent-pane-authority-ownership'
 
 describe('agent pane authority ownership', () => {

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vite-plus/test'
 import { clearLiveBrowserUrl, getLiveBrowserUrl, rememberLiveBrowserUrl } from './browser-runtime'
 
 describe('browser runtime live URL cache', () => {

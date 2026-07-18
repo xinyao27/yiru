@@ -2,7 +2,7 @@
 stale-data handling, account-switch generation, and OpenCode config-change
 semantics covered in service.ts, which already carries the same pragma.
 Keeping them in one file makes the ordering contract reviewable as a unit. */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { EventEmitter } from 'node:events'
 import type { ProviderRateLimits } from '../../shared/rate-limit-types'
 import { RateLimitService } from './service'

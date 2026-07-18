@@ -4,7 +4,7 @@
    single describe block with shared mocks keeps setup in one place; splitting
    across files would duplicate the vi.hoisted boundary mocks with no cleaner
    ownership seam. */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { join } from 'node:path'
 import { PROTOCOL_VERSION } from './types'
 import { WEDGED_DAEMON_GRACE_RETRIES } from './daemon-init'

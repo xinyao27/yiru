@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- Why: SSH connection lifecycle tests share one ssh2 mock so auth, reconnect, and system-transport behavior stay consistent. */
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 import { Socket } from 'node:net'
 import { EventEmitter } from 'node:events'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'

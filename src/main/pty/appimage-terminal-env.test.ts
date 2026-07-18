@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { delimiter } from 'node:path'
 import { removeAppImageRuntimeEnv } from './appimage-terminal-env'
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getExecutionHostLabel } from '../../../../shared/execution-host'
 import { getProviderAccountScope, getProviderRateLimitScope } from './provider-account-scope'
 

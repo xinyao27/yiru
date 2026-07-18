@@ -12,7 +12,7 @@
  * project) orphaned one entry per agent pane for the lifetime of the renderer
  * session, plus a phantom unread dock badge.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
 import type { AppState } from '../types'
 import type * as AgentStatusModule from '@/lib/agent-status'

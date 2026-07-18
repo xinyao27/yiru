@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { win32 as pathWin32 } from 'node:path'
 import { buildWindowsPowerShellSpawnAttempts } from './windows-shell-fallback-chain'
 

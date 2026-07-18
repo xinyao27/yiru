@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   AUTOMATION_CRON_EXPRESSION_MAX_BYTES,
   buildAutomationCronSchedule,

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vite-plus/test'
 import { useAppStore } from '@/store'
 import { remapOpenEditorTabsForPathChange } from './remap-open-editor-tabs-for-path-change'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../shared/constants'

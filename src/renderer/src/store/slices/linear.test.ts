@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- Why: Linear cache and fallback tests share one
    mocked slice harness, keeping failure-mode coverage easy to compare. */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { create } from 'zustand'
 import type { AppState } from '../types'
 import type {
@@ -60,7 +60,7 @@ vi.mock('@/runtime/runtime-linear-client', async (importOriginal) => {
   }
 })
 
-vi.mock('../../hooks/useIssueMetadata', () => ({
+vi.mock('../../hooks/use-issue-metadata', () => ({
   clearLinearMetadataCache: vi.fn()
 }))
 

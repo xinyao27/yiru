@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useAppStore } from '@/store'
 import { parseGitHubIssueOrPRNumber } from '@/lib/github-links'
 import { issueCacheKey as getIssueCacheKey } from '@/store/slices/github'
-import { useMountedRef } from '@/hooks/useMountedRef'
+import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { parseExplicitGitHubIssueUrl } from './worktree-meta-updates'
 
 /** Resolves the "open linked issue" affordance for the worktree meta dialog:

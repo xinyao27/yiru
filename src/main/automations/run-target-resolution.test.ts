@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { Store } from '../persistence'
 import type { Automation } from '../../shared/automations-types'
 import type { WorkspaceRunContext } from '../../shared/task-source-context'

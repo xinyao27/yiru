@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, afterEach, beforeEach } from 'vitest'
+import { describe, expect, it, vi, afterEach, beforeEach } from 'vite-plus/test'
 import WebSocket, { WebSocketServer } from 'ws'
 import { WebRuntimeClient } from './web-runtime-client'
 import { encryptBytes } from './web-e2ee'

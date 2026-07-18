@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isRuntimeRepoRefSearchQueryWithinLimit } from './runtime-repo-search-bounds'
 
 describe('runtime repo ref search bounds', () => {

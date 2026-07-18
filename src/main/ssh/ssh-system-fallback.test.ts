@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { EventEmitter } from 'node:events'
 import { PassThrough } from 'node:stream'
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 
 const { existsSyncMock, spawnMock } = vi.hoisted(() => ({
   existsSyncMock: vi.fn(),

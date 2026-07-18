@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   COMPACT_WORKTREE_CARD_PROPERTIES,
   DEFAULT_WORKTREE_CARD_PROPERTIES,

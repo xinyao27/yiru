@@ -8,7 +8,7 @@ import {
 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { ShortcutKeyCombo } from '@/components/ShortcutKeyCombo'
+import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { cn } from '@/lib/class-names'
 import {
   getCommentBodySubmitState,

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { SparsePreset } from '../../../../shared/types'
 import type { AppState } from '../types'
 import { createSparsePresetsSlice } from './sparse-presets'

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   PROMPT_LOG_TAIL_LINES,
   PROMPT_LOG_TAIL_SCAN_CODE_UNITS,

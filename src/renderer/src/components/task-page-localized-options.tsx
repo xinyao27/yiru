@@ -6,7 +6,7 @@ import {
   List
 } from '@phosphor-icons/react'
 
-import { JiraIcon } from '@/components/icons/JiraIcon'
+import { JiraIcon } from '@/components/icons/jira-icon'
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 import { translate } from '@/i18n/i18n'
 import { getTaskPresetQuery } from '@/lib/new-workspace'

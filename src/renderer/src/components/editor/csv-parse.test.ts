@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { CSV_DELIMITER_SNIFF_SCAN_CODE_UNITS, detectCsvDelimiter, parseCsv } from './csv-parse'
 
 afterEach(() => {

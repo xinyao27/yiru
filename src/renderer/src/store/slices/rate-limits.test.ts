@@ -1,5 +1,5 @@
 import { createStore, type StoreApi } from 'zustand/vanilla'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { createRateLimitSlice } from './rate-limits'
 import type { AppState } from '../types'
 

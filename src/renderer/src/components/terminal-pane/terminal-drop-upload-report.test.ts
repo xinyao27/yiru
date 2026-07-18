@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { toast } from 'sonner'
 import { reportTerminalDropUploadSkipsAndFailures } from './terminal-drop-upload-report'
 

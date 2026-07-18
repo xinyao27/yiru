@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   IMMEDIATE_KILL_PHYSICAL_EXIT_TIMEOUT_MS,
   SESSION_FORCE_KILL_RETRY_MS,

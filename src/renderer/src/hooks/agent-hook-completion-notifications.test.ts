@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { ParsedAgentStatusPayload } from '../../../shared/agent-status-types'
 import { YOLO_TUI_AGENT_ARGS } from '../../../shared/tui-agent-permissions'
 import { createHookListenerState, normalizeHookPayload } from '../../../shared/agent-hook-listener'

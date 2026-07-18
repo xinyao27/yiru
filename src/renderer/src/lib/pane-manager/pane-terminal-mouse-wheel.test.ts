@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   TERMINAL_TUI_MOUSE_WHEEL_MULTIPLIER,
   attachTerminalMouseWheelMultiplier,

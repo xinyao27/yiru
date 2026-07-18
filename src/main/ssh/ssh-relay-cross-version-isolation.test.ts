@@ -7,7 +7,7 @@
 // collapses to a shared dir passes every other unit test and re-introduces
 // the original "stale daemon serves new client" bug.
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 vi.mock('electron', () => ({
   app: { getAppPath: () => '/mock/app' }

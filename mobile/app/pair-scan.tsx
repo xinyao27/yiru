@@ -20,8 +20,8 @@ import {
 import type { ConnectionLogEntry, PairingOffer } from '../src/transport/types'
 import { useCloseHost } from '../src/transport/client-context'
 import { colors, spacing, radii, typography } from '../src/theme/mobile-theme'
-import { TextInputModal } from '../src/components/TextInputModal'
-import { ConnectionLog } from '../src/components/ConnectionLog'
+import { TextInputModal } from '../src/components/text-input-modal'
+import { ConnectionLog } from '../src/components/connection-log'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
 
 // Why: see pair-confirm.tsx — cap initial-pair "Connecting…" so a broken

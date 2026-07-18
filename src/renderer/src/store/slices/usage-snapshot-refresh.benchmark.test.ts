@@ -1,6 +1,6 @@
 import { performance } from 'node:perf_hooks'
 import { create } from 'zustand'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { AppState } from '../types'
 import type {
   CodexUsageScanState,

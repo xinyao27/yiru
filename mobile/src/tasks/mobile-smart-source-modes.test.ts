@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   DEFAULT_MR_STATE_FILTER,
   MR_STATE_FILTER_OPTIONS,

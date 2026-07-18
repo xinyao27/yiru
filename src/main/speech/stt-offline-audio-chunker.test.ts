@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { OFFLINE_DECODE_CHUNK_SECONDS, OfflineAudioChunker } from './stt-offline-audio-chunker'
 
 // Why: a small rate keeps test arrays tiny while exercising the same

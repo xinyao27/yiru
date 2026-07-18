@@ -3,7 +3,7 @@ import { useAppStore } from '@/store'
 import { basename, dirname, joinPath } from '@/lib/path'
 import { getConnectionId } from '@/lib/connection-context'
 import { requestEditorSaveQuiesce } from '@/components/editor/editor-autosave'
-import { commitFileExplorerOp } from '@/components/right-sidebar/fileExplorerUndoRedo'
+import { commitFileExplorerOp } from '@/components/right-sidebar/file-explorer-undo-redo'
 import { renameRuntimePath } from '@/runtime/runtime-file-client'
 import { remapOpenEditorTabsForPathChange } from '@/lib/remap-open-editor-tabs-for-path-change'
 

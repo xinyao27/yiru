@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shallow } from 'zustand/shallow'
 import {
   EMPTY_PALETTE_STATUS_INPUTS,

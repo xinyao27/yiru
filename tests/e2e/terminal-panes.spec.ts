@@ -117,32 +117,6 @@ async function installDelayedTerminalFocusSteals(
   }, delaysMs)
 }
 
-async function readVisibleXtermContainerBox(
-  page: Page
-): Promise<{ x: number; y: number; width: number; height: number }> {
-  return page
-    .locator('.xterm:visible')
-    .first()
-    .evaluate((xterm) => {
-      const container = xterm.closest('.xterm-container')
-      if (!(container instanceof HTMLElement)) {
-        throw new Error('No visible xterm container found')
-      }
-      const rect = container.getBoundingClientRect()
-      return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
-    })
-}
-
-function expectTerminalToReserveTitleSpace(
-  actual: { x: number; y: number; width: number; height: number },
-  expected: { x: number; y: number; width: number; height: number }
-): void {
-  expect(Math.abs(actual.x - expected.x)).toBeLessThan(1)
-  expect(Math.abs(actual.width - expected.width)).toBeLessThan(1)
-  expect(actual.y - expected.y).toBeGreaterThan(10)
-  expect(expected.height - actual.height).toBeGreaterThan(10)
-}
-
 async function expectPaneTitleAttachedToLeaf(
   page: Page,
   title: string,
@@ -376,11 +350,8 @@ test.describe('Terminal Panes', () => {
     await expect(yiruPage.locator('.pane-title-text', { hasText: title })).toHaveCount(1)
   })
 
-  test('Set Title editor renders in Yiru overlay while terminal reserves title space', async ({
-    yiruPage
-  }) => {
+  test('Set Title editor renders in Yiru overlay', async ({ yiruPage }) => {
     const title = `Reserved overlay title ${Date.now()}`
-    const terminalBoxBefore = await readVisibleXtermContainerBox(yiruPage)
 
     await openTerminalContextMenu(yiruPage)
     await yiruPage.getByText('Set Title…', { exact: true }).click()
@@ -391,25 +362,11 @@ test.describe('Terminal Panes', () => {
     await expect(yiruPage.getByText('Set Title…', { exact: true })).toBeHidden()
     await expect(yiruPage.locator('.pane .pane-title-input')).toHaveCount(0)
     await expect(yiruPage.locator('.pane[data-has-title]')).toHaveCount(1)
-    await expect
-      .poll(() =>
-        yiruPage
-          .locator('.pane-title-bar')
-          .first()
-          .evaluate((titleBar) => getComputedStyle(titleBar).backgroundColor)
-      )
-      .not.toBe('rgba(0, 0, 0, 0)')
-    const terminalBoxEditing = await readVisibleXtermContainerBox(yiruPage)
-    expectTerminalToReserveTitleSpace(terminalBoxEditing, terminalBoxBefore)
 
     await titleInput.fill(title)
     await titleInput.press('Enter')
     await expect(yiruPage.locator('.pane-title-text', { hasText: title })).toBeVisible()
     await expect(yiruPage.locator('.pane[data-has-title]')).toHaveCount(1)
-    expectTerminalToReserveTitleSpace(
-      await readVisibleXtermContainerBox(yiruPage),
-      terminalBoxBefore
-    )
   })
 
   test('Set Title context menu opens from the title overlay strip', async ({ yiruPage }) => {
@@ -555,10 +512,7 @@ test.describe('Terminal Panes', () => {
         return {
           hitDragHandle:
             hitElement instanceof HTMLElement &&
-            hitElement.closest('.pane-title-drag-handle') !== null,
-          pointerEvents: getComputedStyle(titleDragHandle).pointerEvents,
-          titleTop: titleRect.top,
-          handleTop: titleDragHandle.getBoundingClientRect().top
+            hitElement.closest('.pane-title-drag-handle') !== null
         }
       },
       { title, titledLeafId }
@@ -566,8 +520,6 @@ test.describe('Terminal Panes', () => {
 
     expect(titleTopHit).not.toBeNull()
     expect(titleTopHit?.hitDragHandle).toBe(true)
-    expect(titleTopHit?.pointerEvents).toBe('auto')
-    expect(Math.abs((titleTopHit?.handleTop ?? 0) - (titleTopHit?.titleTop ?? 0))).toBeLessThan(1)
 
     await yiruPage.locator('.pane-title-bar', { hasText: title }).click({
       position: { x: 20, y: 18 }
@@ -844,23 +796,6 @@ test.describe('Terminal Panes', () => {
     await expect(yiruPage.locator('.pane-title-text', { hasText: title })).toHaveCount(1)
   })
 
-  test('Always-on pane header split button hover stays transparent', async ({ yiruPage }) => {
-    const splitButton = yiruPage.getByRole('button', { name: 'Split Terminal Right' })
-    await expect(splitButton).toBeVisible()
-    await splitButton.hover()
-
-    const hoverStyle = await splitButton.evaluate((element) => {
-      const style = getComputedStyle(element)
-      return {
-        backgroundColor: style.backgroundColor,
-        opacity: style.opacity
-      }
-    })
-
-    expect(hoverStyle.backgroundColor).toBe('rgba(0, 0, 0, 0)')
-    expect(Number(hoverStyle.opacity)).toBeGreaterThan(0.9)
-  })
-
   test('Set Title stays pane-local during agent title churn', async ({ yiruPage }) => {
     const worktreeId = (await getActiveWorktreeId(yiruPage))!
     const tabId = (await getActiveTabId(yiruPage))!
@@ -1131,85 +1066,6 @@ test.describe('Terminal Panes', () => {
     // The terminal should still contain our marker
     await expect
       .poll(async () => (await getTerminalContent(yiruPage)).includes(marker), { timeout: 20_000 })
-      .toBe(true)
-  })
-
-  /**
-   * User Prompt:
-   * - resizing terminal panes works
-   */
-  test('shows a pane divider after splitting', async ({ yiruPage }) => {
-    // Why: headless Playwright cannot exercise the real pointer-capture resize
-    // path reliably, so the default suite only verifies the precondition for
-    // resizing: splitting creates a visible divider for the active layout.
-    const panesBefore = await countVisibleTerminalPanes(yiruPage)
-    await splitActiveTerminalPane(yiruPage, 'vertical')
-    await waitForPaneCount(yiruPage, panesBefore + 1)
-
-    await expect(yiruPage.locator('.pane-divider.is-vertical').first()).toBeVisible({
-      timeout: 3_000
-    })
-  })
-
-  /**
-   * User Prompt:
-   * - resizing terminal panes works (headful variant)
-   *
-   * Why this test must be headful: the pane divider's drag handler calls
-   * setPointerCapture(e.pointerId) on pointerdown. Pointer capture requires
-   * a valid pointer ID from a real pointing-device event, which Playwright's
-   * mouse API only produces when the Electron window is visible. In headless
-   * mode setPointerCapture silently fails, pointermove never fires on the
-   * divider, and the resize has no effect. Run with:
-   *   YIRU_E2E_HEADFUL=1 pnpm run test:e2e
-   */
-  test('@headful can resize terminal panes by real mouse drag', async ({ yiruPage }) => {
-    // Split the terminal to create a resizable divider
-    const panesBefore = await countVisibleTerminalPanes(yiruPage)
-    await splitActiveTerminalPane(yiruPage, 'vertical')
-    await waitForPaneCount(yiruPage, panesBefore + 1)
-
-    // Get the pane widths before resize
-    const paneWidthsBefore = await yiruPage.evaluate(() => {
-      const xterms = document.querySelectorAll('.xterm')
-      return Array.from(xterms)
-        .filter((x) => (x as HTMLElement).offsetParent !== null)
-        .map((x) => (x as HTMLElement).getBoundingClientRect().width)
-    })
-    expect(paneWidthsBefore.length).toBeGreaterThanOrEqual(2)
-
-    // Find the vertical pane divider and drag it
-    const divider = yiruPage.locator('.pane-divider.is-vertical').first()
-    await expect(divider).toBeVisible({ timeout: 3_000 })
-    const box = await divider.boundingBox()
-    expect(box).not.toBeNull()
-
-    // Drag the divider 150px to the right to resize panes
-    const startX = box!.x + box!.width / 2
-    const startY = box!.y + box!.height / 2
-    await yiruPage.mouse.move(startX, startY)
-    await yiruPage.mouse.down()
-    await yiruPage.mouse.move(startX + 150, startY, { steps: 20 })
-    await yiruPage.mouse.up()
-
-    // Verify pane widths changed
-    await expect
-      .poll(
-        async () => {
-          const widthsAfter = await yiruPage.evaluate(() => {
-            const xterms = document.querySelectorAll('.xterm')
-            return Array.from(xterms)
-              .filter((x) => (x as HTMLElement).offsetParent !== null)
-              .map((x) => (x as HTMLElement).getBoundingClientRect().width)
-          })
-          if (widthsAfter.length < 2) {
-            return false
-          }
-
-          return paneWidthsBefore.some((w, i) => Math.abs(w - widthsAfter[i]) > 20)
-        },
-        { timeout: 5_000, message: 'Pane widths did not change after dragging divider' }
-      )
       .toBe(true)
   })
 

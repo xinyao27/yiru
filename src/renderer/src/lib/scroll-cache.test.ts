@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest'
+import { describe, expect, it, beforeEach } from 'vite-plus/test'
 import { cursorPositionCache, diffViewStateCache, setWithLRU, scrollTopCache } from './scroll-cache'
 
 beforeEach(() => {

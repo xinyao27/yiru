@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { openMobileTerminalFileTap } from './mobile-terminal-file-tap-open'
 
 function ok(result: unknown) {

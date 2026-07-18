@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getExecutionHostLabel } from '../../../../shared/execution-host'
 import { getPaletteHostBadge } from './palette-host-badge'
 import { buildSidebarHostOptions } from '../sidebar/sidebar-host-options'

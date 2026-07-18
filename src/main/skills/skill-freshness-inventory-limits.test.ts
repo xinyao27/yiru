@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   boundRepositorySkillRoots,
   MAXIMUM_REPOSITORY_SKILL_ROOTS

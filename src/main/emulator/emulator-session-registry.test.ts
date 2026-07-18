@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { EmulatorSessionRegistry } from './emulator-session-registry'
 
 describe('EmulatorSessionRegistry backend tagging', () => {

@@ -12,7 +12,7 @@
  *     A unsubscribes leaves the runtime cleanly idle without dim regressions
  *   - terminalDriverChanged notifications fire at the right transitions
  */
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vite-plus/test'
 import type * as GitUsernameModule from '../git/git-username'
 import { YiruRuntimeService } from './yiru-runtime'
 

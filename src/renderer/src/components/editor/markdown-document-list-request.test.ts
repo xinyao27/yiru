@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { MarkdownDocument } from '../../../../shared/types'
 import type { RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
 import {

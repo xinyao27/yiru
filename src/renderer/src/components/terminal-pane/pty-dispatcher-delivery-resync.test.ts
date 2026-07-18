@@ -1,7 +1,7 @@
 // Why: pins the renderer half of the delivery-resync protocol — the singleton
 // dispatcher must answer main's probe with the cumulative processed totals
 // that back its ACKs, and must drop a PTY's total once it exits.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 describe('pty dispatcher delivery resync', () => {
   const originalWindow = (globalThis as { window?: typeof window }).window

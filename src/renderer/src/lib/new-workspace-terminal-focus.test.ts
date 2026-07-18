@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const focusTerminalTabSurfaceMock = vi.hoisted(() => vi.fn())
 const focusRuntimeTerminalSurfaceMock = vi.hoisted(() => vi.fn())

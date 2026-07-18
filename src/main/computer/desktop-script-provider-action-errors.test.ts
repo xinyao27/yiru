@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import {
   CLIPBOARD_TEXT_WRITE_MAX_BYTES,
   CLIPBOARD_TEXT_WRITE_TOO_LARGE_ERROR

@@ -9,7 +9,7 @@ import {
   getMarkdownViewModes
 } from './markdown-preview-controls'
 import { getEditorHeaderOpenFileState } from './editor-header'
-import type { EditorToggleValue } from './EditorViewToggle'
+import type { EditorToggleValue } from './editor-view-toggle'
 import type { FileContent } from './editor-panel-content-types'
 import { canUseChangesModeForFile } from './editor-panel-file-mode'
 import { getMarkdownRenderMode } from './markdown-render-mode'

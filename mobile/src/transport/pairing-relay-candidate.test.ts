@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { PairingCandidateClient } from './mobile-relay-physical-client'
 import { RelayOuterError } from './mobile-relay-physical-client'
 import { createRecoveringPairingRelayCandidate } from './pairing-relay-candidate'

@@ -2,6 +2,7 @@ import { resolve } from 'node:path'
 import { defineConfig } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { createElectronViteRolldownOptionsBridge } from './build-plugins/electron-vite-rolldown-options-bridge'
 import { createPlainNodeEntryGuardPlugin } from './build-plugins/plain-node-entry-guard'
 
 // Why: the telemetry transport is gated by two compile-time constants that
@@ -153,7 +154,7 @@ function createStartupDiagnosticsBootstrapPlugin() {
     name: 'yiru-startup-diagnostics-bootstrap',
     generateBundle(_options, bundle) {
       const mainChunk = bundle['index.js']
-      if (!mainChunk || mainChunk.type !== 'chunk') {
+      if (mainChunk?.type !== 'chunk') {
         return
       }
 
@@ -167,6 +168,7 @@ function createStartupDiagnosticsBootstrapPlugin() {
 
 export default defineConfig({
   main: {
+    plugins: [createElectronViteRolldownOptionsBridge()],
     build: {
       // Why: daemon-entry.js is asar-unpacked so child_process.fork() can
       // execute it from disk. Node's module resolution from the unpacked
@@ -214,6 +216,7 @@ export default defineConfig({
     }
   },
   preload: {
+    plugins: [createElectronViteRolldownOptionsBridge()],
     build: {
       externalizeDeps: {
         exclude: ['@electron-toolkit/preload']

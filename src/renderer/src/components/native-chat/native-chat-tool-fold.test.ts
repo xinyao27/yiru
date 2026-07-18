@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import type { NativeChatMessage } from '../../../../shared/native-chat-types'
 import { foldToolMessages, splitNativeChatBlocks } from './native-chat-tool-fold'
 

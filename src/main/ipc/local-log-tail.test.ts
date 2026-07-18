@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { handlers, watchMock, resolveAuthorizedPathMock, readRangeMock } = vi.hoisted(() => ({
   handlers: new Map<string, (...args: any[]) => unknown>(),

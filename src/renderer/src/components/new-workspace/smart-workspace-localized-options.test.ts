@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vite-plus/test'
 
 import { i18n } from '@/i18n/i18n'
 import { getMrStateFilters, getSmartWorkspaceNameModes } from './smart-workspace-localized-options'

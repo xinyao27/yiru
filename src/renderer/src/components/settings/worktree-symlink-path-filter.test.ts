@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   WORKTREE_SYMLINK_PATH_QUERY_MAX_BYTES,
   getWorktreeSymlinkPathFilterState,

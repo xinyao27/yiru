@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { openTabEntryWithOperations, type TabEntryOperations } from './tab-create-entry-action'
 
 const readyFiles = (files: string[]) => ({ files, loading: false, loadError: null })

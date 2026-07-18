@@ -3,7 +3,7 @@ import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import type { TuiAgent } from '../../../../shared/types'
 import type { SourceControlAiWriteTarget } from '../../../../shared/source-control-ai-recipe-save'
 import { translate } from '@/i18n/i18n'
-import type { SourceControlAgentActionDeliveryPlanState } from './SourceControlAgentActionDialogForm'
+import type { SourceControlAgentActionDeliveryPlanState } from './source-control-agent-action-dialog-form'
 
 export function isSourceControlAgentDetectedAndEnabled(
   agent: TuiAgent | null,

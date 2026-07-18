@@ -3,7 +3,7 @@
 // the refill math, and the "exactly one warn per cap crossing per session"
 // rule.
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   _getBurstCapStateForTests,
   consumeBurstToken,

@@ -1165,14 +1165,14 @@ const onboardingAgentPickedSchema = z
   })
   .strict()
 
-// Mirrors the renderer's DiscoveryState taxonomy in ThemeStep.tsx. `failed`
+// Mirrors the renderer's DiscoveryState taxonomy in theme-step.tsx. `failed`
 // is intentionally NOT a discovery state — it is the outcome of an Import
 // attempt, reported by `onboarding_ghostty_import_failed`.
 const ghosttyDiscoveryStateSchema = z.enum(['found', 'absent', 'imported'])
 
 // Compile-time guard: every member of ghosttyDiscoveryStateSchema must be a
 // discovery `status` the renderer can actually emit. Adding a new
-// DiscoveryState member in ThemeStep.tsx without updating the schema (or
+// DiscoveryState member in theme-step.tsx without updating the schema (or
 // vice versa) breaks the build here rather than silently dropping telemetry.
 type _GhosttyDiscoveryStateSync =
   z.infer<typeof ghosttyDiscoveryStateSchema> extends DiscoveryStatusEmitted

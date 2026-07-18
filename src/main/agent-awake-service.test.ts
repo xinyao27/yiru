@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { AgentAwakeService, AGENT_AWAKE_STATUS_STALE_AFTER_MS } from './agent-awake-service'
 import type { AgentAwakeStatus } from './agent-awake-service'
 

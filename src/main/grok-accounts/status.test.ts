@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { getGrokAccountStatus } from './status'
 import { isGrokAccessTokenFresh, readGrokAuthSession } from '../rate-limits/grok-auth'
 

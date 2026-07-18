@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { GlobalSettings, Repo } from '../../shared/types'
 import { WORKTREE_ID_SEPARATOR } from '../../shared/worktree-id'
 

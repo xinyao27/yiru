@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import type * as OsModule from 'node:os'
 import { dirname, join } from 'node:path'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { loadUserSshConfig } from './ssh-config-parser'
 
 const { homedirMock, hostnameMock, userInfoMock } = vi.hoisted(() => ({

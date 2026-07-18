@@ -4,7 +4,7 @@
 // "⠋ Pi" — this file pins the integration between the singleton dispatcher
 // and the transport's per-pty handler.
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const ESC = '\x1b'
 const BEL = '\x07'

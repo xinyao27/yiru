@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { RpcClient } from '../transport/rpc-client'
 import { fanOutSmartSearch } from './smart-source-fan-out'
 

@@ -1,8 +1,8 @@
 // @vitest-environment happy-dom
 
 import { act, renderHook } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { TAB_DRAG_ACTIVATION_DISTANCE_PX } from '../tab-group/useTabDragSplit'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
+import { TAB_DRAG_ACTIVATION_DISTANCE_PX } from '../tab-group/use-tab-drag-split'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 
 function pointerDownEvent(clientX: number, clientY: number, button = 0): React.PointerEvent {

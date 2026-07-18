@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { resolveRelayPushTarget } from './git-handler-push-target'
 
 type GitArgs = string[]

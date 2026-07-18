@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { MOBILE_DICTATION_KEEP_AWAKE_STARTUP_BUDGET_MS } from './mobile-dictation-session-state'
 import { startMobileDictationDesktopSession } from './mobile-dictation-desktop-start'
 import type { MobileDictationKeepAwakeOwner } from './mobile-dictation-keep-awake'

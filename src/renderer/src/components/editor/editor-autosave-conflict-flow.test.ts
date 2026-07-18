@@ -2,7 +2,7 @@
 // echo-aware backstop marking, autosave suspension, and baseline settling —
 // in the headless autosave controller. Split from
 // editor-autosave-controller.test.ts to stay under max-lines.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { YIRU_EDITOR_EXTERNAL_FILE_CHANGE_EVENT, requestEditorFileSave } from './editor-autosave'
 import { attachEditorAutosaveController } from './editor-autosave-controller'
 import { __clearSelfWriteRegistryForTests, recordSelfWrite } from './editor-self-write-registry'

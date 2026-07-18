@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { startDiagnosticFetchTimeout } from './diagnostic-fetch-timeout'
 
 describe('diagnostic fetch timeout', () => {

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 // Mock the IO seam so the test stays pure: we only assert the write order and
 // the inter-write delay, not the local-vs-remote pty branching.

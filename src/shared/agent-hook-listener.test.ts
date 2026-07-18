@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: this fixture keeps cross-agent hook normalization and cache behavior together so regressions in shared listener state are visible. */
 import { EventEmitter } from 'node:events'
 import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'

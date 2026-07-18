@@ -3,7 +3,7 @@
 // printed http(s) URL must post an `open-url` message (which RN routes to the
 // in-app/phone browser). Regression guard for taps that jitter a few pixels —
 // those were being swallowed because the tap shared the long-press slop gate.
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vite-plus/test'
 import { XTERM_HTML } from './terminal-webview-html'
 
 function iifeSource(): string {

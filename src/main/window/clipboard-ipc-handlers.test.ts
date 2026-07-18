@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { join } from 'node:path'
 import {
   CLIPBOARD_IMAGE_MAX_BASE64_CHARS,

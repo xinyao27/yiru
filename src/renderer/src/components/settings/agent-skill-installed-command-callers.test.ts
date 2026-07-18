@@ -1,67 +1,67 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const repoRoot = path.resolve(fileURLToPath(new URL('../../../../../', import.meta.url)))
 const componentsRoot = path.join(repoRoot, 'src/renderer/src/components')
 
 const updateCapableCallers = new Map<string, readonly string[]>([
   [
-    'src/renderer/src/components/settings/OrchestrationPane.tsx',
+    'src/renderer/src/components/settings/orchestration-pane.tsx',
     ['ORCHESTRATION_SKILL_UPDATE_COMMAND', 'installedCommand={orchestrationUpdateCommand}']
   ],
   [
-    'src/renderer/src/components/settings/OrchestrationSetupCard.tsx',
+    'src/renderer/src/components/settings/orchestration-setup-card.tsx',
     ['ORCHESTRATION_SKILL_UPDATE_COMMAND', 'installedCommand={updateCommand}']
   ],
   [
-    'src/renderer/src/components/floating-terminal/FloatingTerminalOrchestrationDialog.tsx',
+    'src/renderer/src/components/floating-terminal/floating-terminal-orchestration-dialog.tsx',
     ['ORCHESTRATION_SKILL_UPDATE_COMMAND', 'installedCommand={updateCommand}']
   ],
   [
-    'src/renderer/src/components/settings/ComputerUseSkillSetupPanel.tsx',
+    'src/renderer/src/components/settings/computer-use-skill-setup-panel.tsx',
     ['COMPUTER_USE_SKILL_UPDATE_COMMAND', 'installedCommand={updateCommand}']
   ],
   [
-    'src/renderer/src/components/settings/EphemeralVmsPane.tsx',
+    'src/renderer/src/components/settings/ephemeral-vms-pane.tsx',
     ['EPHEMERAL_VMS_SKILL_UPDATE_COMMAND', 'installedCommand={updateCommand}']
   ],
   [
-    'src/renderer/src/components/settings/CliSection.tsx',
+    'src/renderer/src/components/settings/cli-section.tsx',
     ['YIRU_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={cliSkillUpdateCommand}']
   ],
   [
-    'src/renderer/src/components/settings/BrowserUsePane.tsx',
+    'src/renderer/src/components/settings/browser-use-pane.tsx',
     ['YIRU_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={browserUseUpdateCommand}']
   ],
   [
-    'src/renderer/src/components/settings/BrowserUseSkillStep.tsx',
+    'src/renderer/src/components/settings/browser-use-skill-step.tsx',
     ['installedCommand={installedCommand}']
   ],
   [
-    'src/renderer/src/components/feature-wall/BrowserUseSkillSetupCard.tsx',
+    'src/renderer/src/components/feature-wall/browser-use-skill-setup-card.tsx',
     ['YIRU_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={updateCommand}']
   ],
   [
     // Why: the single-skill update command selection moved into
     // getLinearAgentSkillUpdateCommand so the settings install CTA shares it.
-    'src/renderer/src/components/sidebar/LinearAgentSkillSetupPrompt.tsx',
+    'src/renderer/src/components/sidebar/linear-agent-skill-setup-prompt.tsx',
     ['getLinearAgentSkillUpdateCommand', 'installedCommand={installedCommand}']
   ],
   [
-    'src/renderer/src/components/sidebar/LinearAgentSkillSetupDialog.tsx',
+    'src/renderer/src/components/sidebar/linear-agent-skill-setup-dialog.tsx',
     ['installedCommand={installedCommand}']
   ],
   [
-    'src/renderer/src/components/settings/MobileEmulatorAgentControlRow.tsx',
+    'src/renderer/src/components/settings/mobile-emulator-agent-control-row.tsx',
     ['YIRU_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={cliSkillUpdateCommand}']
   ]
 ])
 
 const installOnlyCallers = new Map<string, readonly string[]>([
   [
-    'src/renderer/src/components/emulator-pane/MobileEmulatorAgentSetupGuideSteps.tsx',
+    'src/renderer/src/components/emulator-pane/mobile-emulator-agent-setup-guide-steps.tsx',
     ['showInstallWhenInstalled={!setup.cliSkillInstalled}']
   ]
 ])
@@ -71,8 +71,8 @@ const directPanelCallers = new Set([
   // components that forward installedCommand and are validated separately above.
   ...[...updateCapableCallers.keys()].filter(
     (relativePath) =>
-      relativePath !== 'src/renderer/src/components/settings/BrowserUsePane.tsx' &&
-      relativePath !== 'src/renderer/src/components/sidebar/LinearAgentSkillSetupPrompt.tsx'
+      relativePath !== 'src/renderer/src/components/settings/browser-use-pane.tsx' &&
+      relativePath !== 'src/renderer/src/components/sidebar/linear-agent-skill-setup-prompt.tsx'
   ),
   ...installOnlyCallers.keys()
 ])
@@ -116,7 +116,7 @@ describe('AgentSkillSetupPanel installed-command call sites', () => {
   })
 
   it('keeps orchestration installed updates on the primary panel only', () => {
-    const source = readRepoFile('src/renderer/src/components/settings/OrchestrationPane.tsx')
+    const source = readRepoFile('src/renderer/src/components/settings/orchestration-pane.tsx')
 
     expect(source).toContain('installedCommand={orchestrationUpdateCommand}')
     expect(source).not.toContain('Copy update command')

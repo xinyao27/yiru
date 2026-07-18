@@ -14,7 +14,7 @@
  *    at most ~1 chunk frame sits ahead of the echo;
  *  - both paths reassemble the identical git result.
  */
-import { describe, expect, it, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, beforeEach, afterEach } from 'vite-plus/test'
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'

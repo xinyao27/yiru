@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { createTestStore, makeWorktree, seedStore } from './store-test-helpers'
 
 const WORKTREE_ID = 'repo1::/path/wt1'

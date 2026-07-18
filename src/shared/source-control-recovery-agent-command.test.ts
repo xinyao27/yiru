@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import { buildCommitFailureAgentCommandInput } from './source-control-commit-failure-agent-command'
 import { buildPushFailureAgentCommandInput } from './source-control-push-failure-agent-command'

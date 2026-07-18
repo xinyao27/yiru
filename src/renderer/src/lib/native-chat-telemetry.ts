@@ -1,7 +1,7 @@
 // Native-chat adoption telemetry emit wrappers.
 //
 // Why a dedicated module: the toggle action (store, `tabs.ts`) and the
-// composer send path (`NativeChatComposer.tsx`, owned by another unit) both
+// composer send path (`native-chat-composer.tsx`, owned by another unit) both
 // need to fire native-chat events, but neither should hand-build the event
 // shape inline. Centralizing the `agent_kind` mapping and the
 // `track(...)`-name pairing here keeps both call sites in lockstep and gives
@@ -45,7 +45,7 @@ export function emitNativeChatToggled(args: {
  * composer into the running agent. `runtime` is `'unknown'` when the caller
  * cannot resolve whether the owning PTY is local or remote (SSH).
  *
- * The composer (`NativeChatComposer.tsx`, owned by another unit) is the
+ * The composer (`native-chat-composer.tsx`, owned by another unit) is the
  * intended caller — it owns the send path and the local/remote runtime
  * resolution. This unit only provides the wrapper.
  */

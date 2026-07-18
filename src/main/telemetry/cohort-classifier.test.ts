@@ -2,7 +2,7 @@
 // `store.getRepoCount()`, fail-soft to `undefined` on any failure mode,
 // at most one warn per session. See docs/onboarding-funnel-cohort-addendum.md.
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { Repo } from '../../shared/types'
 import type { Store } from '../persistence'
 import {

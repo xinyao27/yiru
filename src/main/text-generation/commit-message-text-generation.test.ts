@@ -4,7 +4,7 @@
 import { exec, spawn } from 'node:child_process'
 import type * as ChildProcess from 'node:child_process'
 import { EventEmitter } from 'node:events'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { getDefaultSettings } from '../../shared/constants'
 import { sourceControlAiSettingsFromLegacy } from '../../shared/source-control-ai'
 import type { GlobalSettings } from '../../shared/types'

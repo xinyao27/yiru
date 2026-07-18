@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { SshTarget, SshConnectionState, SshConnectionStatus } from './ssh-types'
 
 describe('SSH types', () => {

@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { Editor } from '@tiptap/core'
 import { TextSelection } from '@tiptap/pm/state'
 import type { EditorView } from '@tiptap/pm/view'
@@ -50,7 +50,7 @@ afterEach(() => {
 
 /**
  * Simulates the cut handler's depth walk to determine what node would be cut.
- * This mirrors the logic in RichMarkdownEditor.tsx handleDOMEvents.cut,
+ * This mirrors the logic in rich-markdown-editor.tsx handleDOMEvents.cut,
  * including the depth < 1 guard.
  */
 function simulateCut(

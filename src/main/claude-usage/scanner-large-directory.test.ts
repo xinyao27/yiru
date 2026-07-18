@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { Dirent } from 'node:fs'
 import type * as FsPromises from 'node:fs/promises'
 import type * as NodeOs from 'node:os'

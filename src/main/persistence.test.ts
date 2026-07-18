@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: this persistence suite keeps defaulting,
 migration, mutation, and flush behavior in one file so schema changes are
 reviewed against the full storage contract instead of being scattered. */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vite-plus/test'
 import {
   writeFileSync,
   readFileSync,

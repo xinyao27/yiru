@@ -1,6 +1,6 @@
 import { createElement } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { useMobileAttachmentInputLeaseGate } from './use-mobile-attachment-input-lease-gate'
 
 type Gate = (targetHandle: string) => Promise<boolean>

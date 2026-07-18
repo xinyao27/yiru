@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveWindowsShiftEnterEncodingForPane } from '@/components/terminal-pane/terminal-windows-shift-enter'
 import { createTestStore, makeTab, makeWorktree, seedStore } from './store-test-helpers'
 

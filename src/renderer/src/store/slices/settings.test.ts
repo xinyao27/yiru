@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 import { createTestStore, makeWorktree } from './store-test-helpers'
 import type { AppState } from '../types'
 import type { WorktreeLineage } from '../../../../shared/types'

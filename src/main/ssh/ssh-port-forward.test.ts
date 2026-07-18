@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events'
 import { createServer } from 'node:net'
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 import { SshPortForwardManager } from './ssh-port-forward'
 
 const { startSystemSshPortForwardProcessMock } = vi.hoisted(() => ({

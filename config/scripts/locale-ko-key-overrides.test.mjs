@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 describe('locale-ko-key-overrides', () => {
   it('keeps Korean key override data scoped to Korean values', () => {

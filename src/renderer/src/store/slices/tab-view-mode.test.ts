@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import type { AppState } from '../types'
 import { createTestStore, makeUnifiedTab, makeTabGroup } from './store-test-helpers'
 

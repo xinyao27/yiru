@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 // Why these tests exist: the conflict-summary derivation used to re-run a
 // network `git fetch` plus a four-subprocess chain on every PR refresh tick

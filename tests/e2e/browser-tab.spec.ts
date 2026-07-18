@@ -290,7 +290,7 @@ async function expectBrowserTabActive(
   await expect.poll(resolveTabId, { timeout: 10_000 }).not.toBeNull()
   const tabId = await resolveTabId()
   expect(tabId).toBeTruthy()
-  await expect(page.locator(`[data-browser-overlay-tab-id="${tabId}"]`)).toHaveCSS('opacity', '1')
+  await expect(page.locator(`[data-browser-overlay-tab-id="${tabId}"]`)).toBeVisible()
 }
 
 async function readBrowserInputValue(

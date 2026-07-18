@@ -1,6 +1,6 @@
 import type { Editor } from '@tiptap/react'
 import { NodeSelection } from '@tiptap/pm/state'
-import { getLinkBubblePosition, type LinkBubbleState } from './RichMarkdownLinkBubble'
+import { getLinkBubblePosition, type LinkBubbleState } from './rich-markdown-link-bubble'
 import { scrollToAnchorInEditor } from './markdown-anchor-scroll'
 import type { ActivateMarkdownLink } from './rich-markdown-editor-click-routing'
 import {

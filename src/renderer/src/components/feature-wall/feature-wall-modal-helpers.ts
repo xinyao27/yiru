@@ -1,5 +1,5 @@
 import type { FeatureWallOpenSourceTelemetry } from '../../../../shared/telemetry-events'
-export { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+export { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 
 export function getFeatureWallOpenSource(
   modalData: Record<string, unknown>

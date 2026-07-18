@@ -1,10 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { TerminalQuickCommand } from '../../../../shared/types'
 import {
   createTerminalQuickCommandDialogDraftMemory,
   switchTerminalQuickCommandDialogAction
 } from './terminal-quick-command-dialog-draft'
-import { getQuickCommandProjectScopeRepoId } from './TerminalQuickCommandScopeField'
+import { getQuickCommandProjectScopeRepoId } from './terminal-quick-command-scope-field'
 
 describe('terminal quick command dialog draft transitions', () => {
   it('keeps agent prompt blank when switching from a terminal command for the first time', () => {

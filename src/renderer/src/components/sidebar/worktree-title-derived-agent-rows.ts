@@ -1,4 +1,4 @@
-import type { DashboardAgentRow } from '@/components/dashboard/useDashboardData'
+import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
 import { isClaudeManagementTitle } from '@/lib/agent-status'
 import { classifyTitleActivity, resolveTitleActivityLabel } from '@/lib/pane-agent-evidence'
 import { tabHasLivePty } from '@/lib/tab-has-live-pty'

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { join, sep } from 'node:path'
 import type { GlobalSettings, Repo } from '../../shared/types'
 import type { WorktreeBasePollEvent } from './worktree-base-directory-poller'

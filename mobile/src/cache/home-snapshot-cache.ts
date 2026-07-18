@@ -4,7 +4,7 @@
 // this, Resume and Account-usage cards flash empty for ~1s while the
 // WebSocket reconnects and the first responses come back.
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import type { AccountsSnapshot } from '../components/AccountUsage'
+import type { AccountsSnapshot } from '../components/account-usage'
 
 const STORAGE_KEY = 'yiru:home-snapshot:v1'
 

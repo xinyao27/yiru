@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { parseScrcpyVideoFrames, parseScrcpyVideoMeta } from './scrcpy-video-frame-parser'
 
 const CONFIG = 1n << 63n

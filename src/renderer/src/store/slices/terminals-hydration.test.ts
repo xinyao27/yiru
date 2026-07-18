@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 vi.mock('sonner', () => ({ toast: { info: vi.fn(), success: vi.fn(), error: vi.fn() } }))
 vi.mock('@/runtime/sync-runtime-graph', () => ({
@@ -693,7 +693,7 @@ describe('hydrateWorkspaceSession', () => {
 
 describe('hydrationSucceeded flag (issue #1158)', () => {
   it('defaults to false so the session writer is gated off at startup', () => {
-    // Why: App.tsx only flips hydrationSucceeded=true after a clean load from
+    // Why: application-shell.tsx only flips hydrationSucceeded=true after a clean load from
     // yiru-data.json. If a startup error prevents that call, the flag stays
     // false and the debounced writer never fires — protecting the user's good
     // on-disk state from being overwritten with an empty in-memory snapshot.
@@ -711,7 +711,7 @@ describe('hydrationSucceeded flag (issue #1158)', () => {
 
   it('hydrateWorkspaceSession does not flip hydrationSucceeded on its own', () => {
     // Why: the hydration call can populate state partially and still throw
-    // downstream (e.g. reconnect fails). Leaving the flip to App.tsx — after
+    // downstream (e.g. reconnect fails). Leaving the flip to application-shell.tsx — after
     // hydrateWorkspaceSession has returned without throwing — keeps the gate
     // honest in those mid-flight failures.
     const store = createTestStore()

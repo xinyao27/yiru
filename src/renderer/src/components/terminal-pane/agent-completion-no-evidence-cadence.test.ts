@@ -6,7 +6,7 @@
 // 15s, and pane activity (output/title/hook) or agent evidence re-arms the hot
 // cadence so agent-start detection stays event-driven and agent-finish
 // detection is unchanged.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   createAgentCompletionCoordinator,
   resetAgentCompletionCoordinatorIdentitiesForTest

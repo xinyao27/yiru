@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: the runtime file client mirrors the file
 preload API plus remote fallbacks; keeping route coverage together makes local
 versus environment behavior easy to audit. */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   cancelRuntimeFileList,
   copyRuntimePath,

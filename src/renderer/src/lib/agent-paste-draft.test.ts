@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   AGENT_DRAFT_PASTE_CHUNK_MAX_BYTES,
   AGENT_DRAFT_PASTE_DIRECT_MAX_BYTES,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isRuntimeProviderSearchQueryWithinLimit } from './runtime-provider-search-bounds'
 
 describe('runtime provider search bounds', () => {

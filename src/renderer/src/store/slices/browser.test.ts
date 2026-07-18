@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- Why: browser slice behavior shares one mocked store harness; splitting only the tests would duplicate more setup than it saves. */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { create } from 'zustand'
 import { createBrowserSlice } from './browser'
 import type { AppState } from '../types'

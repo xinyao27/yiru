@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { REPO_SEARCH_QUERY_MAX_BYTES, isRepoSearchQueryTooLarge, searchRepos } from './repo-search'
 import type { Repo } from '../../../shared/types'
 

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { activateTabAndFocusPane } from './activate-tab-and-focus-pane'
 
 const setActiveTab = vi.hoisted(() => vi.fn())

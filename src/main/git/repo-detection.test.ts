@@ -10,7 +10,7 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import * as path from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test'
 import { getGitRepoRoot, isGitRepo, normalizeGitRepoRootForInputPath } from './repo'
 
 function git(cwd: string, args: string[]): string {

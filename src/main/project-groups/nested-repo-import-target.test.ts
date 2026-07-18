@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 import { join } from 'node:path'
 import type { GitWorktreeInfo } from '../../shared/types'
 import { listWorktreeGraph } from '../git/worktree'

@@ -4,7 +4,7 @@ import type * as NodeFs from 'node:fs'
 import { appendFile, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { watchers, watchCallbacks, watchMock } = vi.hoisted(() => ({
   watchers: [] as (EventEmitter & { close: ReturnType<typeof vi.fn> })[],

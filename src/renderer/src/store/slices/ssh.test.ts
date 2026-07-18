@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { toAppSshPtyId } from '../../../../shared/ssh-pty-id'
 import { createTestStore, makeTab, makeWorktree, TEST_REPO } from './store-test-helpers'
 

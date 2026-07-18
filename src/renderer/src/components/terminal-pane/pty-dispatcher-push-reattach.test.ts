@@ -2,7 +2,7 @@
 // vanish before the dispatcher sees them, so no handler runs and no ACK is
 // ever produced — plus the recovery seam: reattachPtyDispatcherPushListeners
 // must drop the stale subscriptions and bind fresh ones.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 vi.mock('@/lib/e2e-config', () => ({ e2eConfig: { exposeStore: true } }))
 

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { checkIgnoredPaths } from './check-ignored-paths'
 import { gitExecFileAsync } from './runner'
 import { GIT_CHECK_IGNORE_TIMEOUT_MS } from '../../shared/git-check-ignore-stdio'

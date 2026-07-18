@@ -2,7 +2,7 @@
 
 import { act, createElement } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import type { AppState } from '@/store/types'
 import type { AiVaultSessionResumeTargetState } from './ai-vault-session-resume'
 import {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { bootAvdArgs, emuKillArgs, listAvdsArgs, parseAvdList } from './avd-manager'
 
 describe('parseAvdList', () => {

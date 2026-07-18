@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { createPinnedTabCloseConfirmSlice } from './pinned-tab-close-confirm'
 import type { AppState } from '../types'
 

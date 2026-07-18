@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getWorkspaceComposerInitialFocusTarget } from './workspace-composer-initial-focus'
 
 describe('getWorkspaceComposerInitialFocusTarget', () => {

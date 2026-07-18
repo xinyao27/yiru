@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 // Why: main-i18n avoids bundling locale catalogs on the cold-start path.
 // English comes from translateMain() fallbacks; non-English catalogs load

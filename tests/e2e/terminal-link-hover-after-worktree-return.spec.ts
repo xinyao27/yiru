@@ -108,15 +108,6 @@ async function hoverAndReadActiveLinkText(page: Page, probe: HoverProbe): Promis
   }, probe)
 }
 
-async function readTerminalCursor(page: Page, tabId: string): Promise<string | null> {
-  return page.evaluate((tabId) => {
-    const manager = window.__paneManagers?.get(tabId)
-    const pane = manager?.getActivePane?.() ?? manager?.getPanes?.()[0] ?? null
-    const screen = pane?.terminal.element?.querySelector<HTMLElement>('.xterm-screen')
-    return screen ? getComputedStyle(screen).cursor : null
-  }, tabId)
-}
-
 async function isTerminalSurfaceVisible(page: Page, tabId: string): Promise<boolean> {
   return page.evaluate((tabId) => {
     const manager = window.__paneManagers?.get(tabId)
@@ -230,9 +221,6 @@ async function assertLinkRecoversAfterReturn(
     })
     .toContain(args.expectContains)
 
-  // The pointer cursor is the user-visible hover affordance; currentLink is
-  // also checked above because it is the backing state xterm requires to click.
-  await expect.poll(() => readTerminalCursor(page, probe.tabId)).toBe('pointer')
   return probe
 }
 

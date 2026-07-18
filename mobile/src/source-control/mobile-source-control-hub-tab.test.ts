@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import { parseSourceControlHubTab, SOURCE_CONTROL_HUB_TABS } from './mobile-source-control-hub-tab'
 
 describe('parseSourceControlHubTab', () => {

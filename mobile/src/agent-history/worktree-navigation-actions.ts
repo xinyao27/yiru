@@ -1,8 +1,8 @@
 import { GitBranch } from 'lucide-react-native'
-import type { ActionSheetAction } from '../components/ActionSheetModal'
+import type { ActionSheetAction } from '../components/action-sheet-modal'
 import { colors } from '../theme/mobile-theme'
 import { MOBILE_AI_VAULT_CAPABILITY } from './agent-history-capability'
-import { MobileAgentSessionHistoryIcon } from './MobileAgentSessionHistoryIcon'
+import { MobileAgentSessionHistoryIcon } from './mobile-agent-session-history-icon'
 
 type Args = {
   hostId: string

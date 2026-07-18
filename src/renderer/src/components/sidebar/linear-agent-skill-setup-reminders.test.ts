@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import {
   MAX_LINEAR_AGENT_SKILL_SETUP_REMINDER_RUNTIME_KEYS,
   createLinearAgentSkillSetupActivationId,

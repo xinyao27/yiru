@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { hashMobileRelayCredential } from './mobile-relay-credential-hash'
 
 describe('mobile relay credential hash', () => {

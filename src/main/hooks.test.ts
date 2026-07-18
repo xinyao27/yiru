@@ -3,7 +3,7 @@ import type { Repo } from '../shared/types'
 import type * as GitRunner from './git/runner'
 
 import { join } from 'node:path'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { getDefaultTabsLaunch, parseYiruYaml } from './hooks'
 
 // Mock fs and path used by loadHooks

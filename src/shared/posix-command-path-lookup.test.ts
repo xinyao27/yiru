@@ -12,7 +12,7 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, delimiter, dirname, isAbsolute, join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { buildPosixCommandPathLookupScript } from './posix-command-path-lookup'
 import { buildWslLoginShellCommand, escapeWslShCommandForWindows } from './wsl-login-shell-command'
 

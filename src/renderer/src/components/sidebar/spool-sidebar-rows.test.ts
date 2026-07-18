@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { SpoolRemoteDesktop } from '../../../../shared/spool/spool-catalog-contract'
 import { projectSpoolSidebarRows } from './spool-sidebar-rows'
 import { getSpoolWorktreeDisplayTitle } from './spool-worktree-display-title'

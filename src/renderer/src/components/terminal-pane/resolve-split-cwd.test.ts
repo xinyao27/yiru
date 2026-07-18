@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vite-plus/test'
 import { resolveSplitCwd, type PaneCwdMap } from './resolve-split-cwd'
 
 function installGetCwd(fn: (id: string) => Promise<string>): void {

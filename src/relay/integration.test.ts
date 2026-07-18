@@ -6,7 +6,7 @@
  * Validates the full JSON-RPC roundtrip: client request → framing →
  * relay decode → handler → response → framing → client decode → result.
  */
-import { describe, expect, it, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, beforeEach, afterEach } from 'vite-plus/test'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { rm, readFile, stat } from 'node:fs/promises'
 import * as path from 'node:path'

@@ -1,5 +1,5 @@
 /** STA-1840 regression: known blank-terminal handles request a bounded renderer mount. */
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { YiruRuntimeService } from './yiru-runtime'
 
 type HandleSeed = {

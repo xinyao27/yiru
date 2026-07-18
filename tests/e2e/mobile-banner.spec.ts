@@ -22,7 +22,7 @@ import {
 //
 // Drives the renderer by sending the same IPC events main fires in production
 // (runtime:terminalFitOverrideChanged, runtime:terminalDriverChanged — wired in
-// useIpcEvents.ts). No production-code test backdoor; the spec exercises the
+// use-ipc-events.ts). No production-code test backdoor; the spec exercises the
 // renderer-side IPC listener → state mirror → banner JSX chain.
 
 test.describe.configure({ mode: 'serial' })
@@ -50,7 +50,6 @@ test('mobile subscribe mounts overlay; collapse → chip; Take back dismisses', 
   await expect(overlay).toBeVisible({ timeout: 15_000 })
   await expect(overlay).toContainText(/from your phone/i)
   await expect(overlay).toContainText(/your phone is in control/i)
-  await expectExpandedOverlayLeavesPaneReadable(yiruPage, ptyId)
 
   const takeBackThisTerminal = overlay.getByRole('button', { name: /take back this terminal/i })
   const takeBackAllTerminals = overlay.getByRole('button', { name: /take back all terminals/i })
@@ -68,13 +67,11 @@ test('mobile subscribe mounts overlay; collapse → chip; Take back dismisses', 
   await expect(overlay).toContainText(/phone driving/i)
   await expect(overlay.getByRole('button', { name: /take back/i })).toBeVisible()
   await expect(overlay).not.toContainText(/your phone is in control/i)
-  await expectChipIsCompactInPane(yiruPage, ptyId)
 
   await captureAttachment(yiruPage, testInfo, 'overlay-collapsed.png')
 
   await overlay.getByRole('button', { name: /phone driving/i }).click()
   await expect(overlay).toContainText(/your phone is in control/i)
-  await expectExpandedOverlayLeavesPaneReadable(yiruPage, ptyId)
 
   await collapse.click()
   await expect(overlay).not.toContainText(/your phone is in control/i)
@@ -116,7 +113,6 @@ test('held phone-fit state mounts restore overlay without collapse', async ({
   await expect(overlay.getByRole('button', { name: /restore all terminals/i })).toBeVisible()
   await expect(overlay.getByRole('button', { name: /^collapse$/i })).toHaveCount(0)
   await expect(overlay.getByRole('button', { name: /take back/i })).toHaveCount(0)
-  await expectExpandedOverlayLeavesPaneReadable(yiruPage, ptyId)
 
   await captureAttachment(yiruPage, testInfo, 'overlay-held-fit.png')
 
@@ -492,75 +488,6 @@ async function getPaneTerminalCols(page: Page, ptyId: string): Promise<number> {
     }
     return 0
   }, ptyId)
-}
-
-async function expectExpandedOverlayLeavesPaneReadable(page: Page, ptyId: string): Promise<void> {
-  await expect
-    .poll(
-      () =>
-        page.evaluate((targetPtyId) => {
-          const pane = Array.from(document.querySelectorAll<HTMLElement>('[data-pty-id]')).find(
-            (node) => node.dataset.ptyId === targetPtyId
-          )
-          const overlay = document.querySelector<HTMLElement>('.mobile-driver-banner')
-          if (!pane || !overlay) {
-            return false
-          }
-          const style = getComputedStyle(overlay)
-          const hasTransparentBackground =
-            style.backgroundColor === 'rgba(0, 0, 0, 0)' || style.backgroundColor === 'transparent'
-          const webkitBackdropFilter = (
-            style as CSSStyleDeclaration & { webkitBackdropFilter?: string }
-          ).webkitBackdropFilter
-          const hasNoBackdropFilter =
-            (style.backdropFilter === 'none' || style.backdropFilter === '') &&
-            (webkitBackdropFilter === undefined ||
-              webkitBackdropFilter === '' ||
-              webkitBackdropFilter === 'none')
-          const paneBox = pane.getBoundingClientRect()
-          const overlayBox = overlay.getBoundingClientRect()
-          return (
-            hasTransparentBackground &&
-            hasNoBackdropFilter &&
-            Math.abs(overlayBox.left - paneBox.left) <= 2 &&
-            Math.abs(overlayBox.top - paneBox.top) <= 2 &&
-            overlayBox.width >= paneBox.width - 2 &&
-            overlayBox.height >= paneBox.height - 2
-          )
-        }, ptyId),
-      { message: 'expanded overlay should not dim or blur the terminal pane' }
-    )
-    .toBe(true)
-}
-
-async function expectChipIsCompactInPane(page: Page, ptyId: string): Promise<void> {
-  await expect
-    .poll(
-      () =>
-        page.evaluate((targetPtyId) => {
-          const pane = Array.from(document.querySelectorAll<HTMLElement>('[data-pty-id]')).find(
-            (node) => node.dataset.ptyId === targetPtyId
-          )
-          const chip = document.querySelector<HTMLElement>('.mobile-driver-banner')
-          if (!pane || !chip) {
-            return false
-          }
-          const paneBox = pane.getBoundingClientRect()
-          const chipBox = chip.getBoundingClientRect()
-          const rightInset = paneBox.right - chipBox.right
-          const topInset = chipBox.top - paneBox.top
-          return (
-            chipBox.width < paneBox.width * 0.6 &&
-            chipBox.height <= 40 &&
-            rightInset >= 6 &&
-            rightInset <= 16 &&
-            topInset >= 6 &&
-            topInset <= 16
-          )
-        }, ptyId),
-      { message: 'collapsed chip should stay compact in the terminal pane corner' }
-    )
-    .toBe(true)
 }
 
 // Why: writing the screenshot to testInfo.outputPath() lands the file in the

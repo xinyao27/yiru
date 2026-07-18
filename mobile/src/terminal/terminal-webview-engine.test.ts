@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { Script } from 'node:vm'
 import { parse } from 'acorn'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { XTERM_ENGINE_CSS, XTERM_ENGINE_JS } from './terminal-webview-engine.generated'
 import { XTERM_HTML } from './terminal-webview-html'
 import { TERMINAL_WEBGL_RECOVERY_JS } from './terminal-webview-webgl-recovery-injected'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { WORKSPACE_SORT_OPTIONS } from './workspace-list-picker-options'
 
 describe('WORKSPACE_SORT_OPTIONS', () => {

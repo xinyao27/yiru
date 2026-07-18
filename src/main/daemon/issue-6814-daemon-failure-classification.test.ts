@@ -9,7 +9,7 @@
 // This boundary is load-bearing: the degraded fallback only helps a daemon that
 // still answers protocol, so a regression that widened it to wedged daemons
 // would silently strand fresh terminals on a daemon that cannot serve them.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'

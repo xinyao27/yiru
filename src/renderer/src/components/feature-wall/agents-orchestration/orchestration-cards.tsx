@@ -1,6 +1,6 @@
 import type { JSX } from 'react'
 import { CheckCircle as CircleCheck } from '@phosphor-icons/react'
-import { AgentStateDot } from '@/components/AgentStateDot'
+import { AgentStateDot } from '@/components/agent-state-dot'
 import { cn } from '@/lib/class-names'
 import type { AgentKey, AgentRowState } from './orchestration-types'
 

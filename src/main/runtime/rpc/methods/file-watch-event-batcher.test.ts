@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { FsChangeEvent } from '../../../../shared/types'
 import { createFileWatchEventBatcher } from './file-watch-event-batcher'
 

@@ -20,7 +20,7 @@ export const CHECK_ICON: Record<string, React.ComponentType<{ className?: string
 }
 
 export const CHECK_COLOR: Record<string, string> = {
-  success: 'text-status-success',
+  success: 'text-green-700 dark:text-green-300',
   failure: 'text-destructive',
   pending: 'text-amber-500',
   neutral: 'text-muted-foreground',

@@ -4,7 +4,7 @@ import { getShortcutPlatform } from '@/lib/shortcut-platform'
 import { useAppStore } from '@/store'
 import { isMarkdownPreviewFindShortcut } from './markdown-preview-search'
 import { handleRichMarkdownAddReviewNoteShortcut } from './rich-markdown-annotation-shortcut'
-import type { LinkBubbleState } from './RichMarkdownLinkBubble'
+import type { LinkBubbleState } from './rich-markdown-link-bubble'
 import { commitRow, type DocLinkMenuRow, type DocLinkMenuState } from './rich-markdown-commands'
 import {
   runSlashCommand,

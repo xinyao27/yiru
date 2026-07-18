@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { WorkspaceSessionSnapshot } from './workspace-session'
 import { buildWorkspaceSessionPayload } from './workspace-session'
 

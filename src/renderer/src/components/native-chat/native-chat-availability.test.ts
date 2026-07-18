@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import { canToggleNativeChat } from './native-chat-availability'
 import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
 

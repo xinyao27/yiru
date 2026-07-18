@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest'
+import { afterEach, describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 
 const { spawnMock } = vi.hoisted(() => ({
   spawnMock: vi.fn()

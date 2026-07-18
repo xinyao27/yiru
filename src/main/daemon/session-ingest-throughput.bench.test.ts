@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { performance } from 'node:perf_hooks'
 import { Session, type SubprocessHandle } from './session'
 

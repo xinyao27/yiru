@@ -11,7 +11,7 @@
  * If an xterm upgrade breaks any assertion here, the live write path loses
  * its follow/pin semantics silently — fix the write path before bumping.
  */
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { Terminal } from '@xterm/headless'
 import packageJson from '../../../../../package.json'
 import { clearTerminalScrollbackAndFollowOutput } from './terminal-scrollback-clear'

@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { RuntimeMobileSessionTabsResult } from '../../../shared/runtime-types'
 import {
   activateWebRuntimeSessionWorktree,

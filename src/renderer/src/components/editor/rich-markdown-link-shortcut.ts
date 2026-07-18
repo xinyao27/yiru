@@ -1,6 +1,6 @@
 import type { Editor } from '@tiptap/react'
-import { getLinkBubblePosition } from './RichMarkdownLinkBubble'
-import type { LinkBubbleState } from './RichMarkdownLinkBubble'
+import { getLinkBubblePosition } from './rich-markdown-link-bubble'
+import type { LinkBubbleState } from './rich-markdown-link-bubble'
 import type { RichMarkdownHtmlSuperscriptLinkContext } from './rich-markdown-html-superscript-link-context'
 import {
   createEditableMarkdownLinkBubble,

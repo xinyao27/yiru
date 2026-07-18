@@ -1,4 +1,4 @@
-import { expect, it, vi } from 'vitest'
+import { expect, it, vi } from 'vite-plus/test'
 import { RpcDispatcher } from './dispatcher'
 import type { RpcRequest } from './core'
 import { TERMINAL_METHODS } from './methods/terminal'

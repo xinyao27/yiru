@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import { buildTerminalShortcutKey, TERMINAL_ACCESSORY_KEYS } from './terminal-accessory-keys'
 

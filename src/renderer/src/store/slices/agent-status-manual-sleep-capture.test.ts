@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { SleepingAgentSessionRecord } from '../../../../shared/agent-session-resume'
 import {
   AGENT_STATUS_STALE_AFTER_MS,

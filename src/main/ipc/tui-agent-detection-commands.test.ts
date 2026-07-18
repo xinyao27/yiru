@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   getTuiAgentDetectionProbeCommands,
   KNOWN_TUI_AGENT_DETECTION_COMMANDS,

@@ -8,7 +8,7 @@ import { useAppStore } from '@/store'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 import type { GetGitLabRateLimitResult, GitLabRateLimitSnapshot } from '../../../../shared/types'
 import { getProviderRateLimitScope } from '@/components/settings/provider-account-scope'
-import { ProviderHostScopeControl } from '@/components/settings/ProviderHostScopeControl'
+import { ProviderHostScopeControl } from '@/components/settings/provider-host-scope-control'
 import { translate } from '@/i18n/i18n'
 
 const REFRESH_INTERVAL_MS = 60_000

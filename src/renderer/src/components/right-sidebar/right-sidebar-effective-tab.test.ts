@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 import { resolveRightSidebarEffectiveTab } from './right-sidebar-effective-tab'
 

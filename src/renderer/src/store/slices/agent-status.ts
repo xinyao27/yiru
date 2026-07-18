@@ -2034,7 +2034,7 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
         // retention sync.
         //
         // Why gate on hasLive: the suppressor is a one-shot flag consumed by
-        // `collectRetainedAgentsOnDisappear` (useRetainedAgents.ts), which
+        // `collectRetainedAgentsOnDisappear` (use-retained-agents.ts), which
         // iterates the PREVIOUS render's LIVE agents to decide what to
         // retain. If we dismiss a retained-only row (no live entry at drop
         // time), no live→gone transition will ever fire for this paneKey, so
@@ -2696,7 +2696,7 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
         // paneKey has BOTH a retained entry AND a concurrent live entry, simply
         // removing the retained row leaves the live entry free to vanish
         // cleanly on its next disappearance — and because
-        // collectRetainedAgentsOnDisappear (useRetainedAgents.ts) only skips
+        // collectRetainedAgentsOnDisappear (use-retained-agents.ts) only skips
         // paneKeys that are currently in retainedAgentsByPaneKey, the
         // just-dismissed row would be resurrected by a new retention snapshot.
         // Plant a one-shot suppressor so the next live→gone transition for

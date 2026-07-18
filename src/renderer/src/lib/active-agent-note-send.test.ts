@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- Why: these note-send routing cases share one mocked app store and RPC harness. */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   activeAgentNotesSendFailureMessage,
   getActiveAgentNoteTarget,

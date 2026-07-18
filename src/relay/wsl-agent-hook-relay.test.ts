@@ -4,7 +4,7 @@ import { createServer } from 'node:net'
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 import { RelayAgentHookServer } from './agent-hook-server'
 import { makePaneKey } from '../shared/stable-pane-id'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { orderHostSectionOptions } from './host-section-order'
 import type { HostSectionOption } from './host-section-rows'
 

@@ -2,7 +2,7 @@
    handlers plus the addWorktree state machine (--no-track + push.autoSetupRemote
    probe/write across four flow branches). Splitting per-handler would scatter
    related coverage without a meaningful boundary. */
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vite-plus/test'
 import { GitHandler } from './git-handler'
 import { RelayContext } from './context'
 import * as fs from 'node:fs/promises'

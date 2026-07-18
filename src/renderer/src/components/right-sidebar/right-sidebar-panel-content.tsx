@@ -6,13 +6,13 @@ import {
   type RightSidebarPanelSource
 } from './right-sidebar-panel-source'
 
-const FileExplorer = lazy(() => import('./FileExplorer'))
-const SourceControl = lazy(() => import('./SourceControl'))
-const ChecksPanel = lazy(() => import('./ChecksPanel'))
-const PortsPanel = lazy(() => import('./PortsPanel'))
-const AiVaultPanel = lazy(() => import('./AiVaultPanel'))
-const FolderWorkspaceWorktreesPanel = lazy(() => import('./FolderWorkspaceWorktreesPanel'))
-const FolderWorkspacePrChecksPanel = lazy(() => import('./FolderWorkspacePrChecksPanel'))
+const FileExplorer = lazy(() => import('./file-explorer'))
+const SourceControl = lazy(() => import('./source-control'))
+const ChecksPanel = lazy(() => import('./checks-panel'))
+const PortsPanel = lazy(() => import('./ports-panel'))
+const AiVaultPanel = lazy(() => import('./ai-vault-panel'))
+const FolderWorkspaceWorktreesPanel = lazy(() => import('./folder-workspace-worktrees-panel'))
+const FolderWorkspacePrChecksPanel = lazy(() => import('./folder-workspace-pr-checks-panel'))
 
 type RightSidebarPanelContentProps = {
   effectiveTab: ActiveRightSidebarTab

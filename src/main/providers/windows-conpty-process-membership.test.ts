@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { readWindowsConptyProcessIds } from './windows-conpty-process-membership'
 
 function forkWith(event: 'message' | 'error' | 'none', value?: unknown) {

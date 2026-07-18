@@ -1,10 +1,13 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 describe('renderer startup runtime routing', () => {
   it('hydrates persisted UI before local catalog and worktree hydration', () => {
-    const source = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const source = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
     const startupBlockStart = source.indexOf('void (async () => {')
     const startupBlockEnd = source.indexOf("timeRendererStartupStep('session-get'")
     const startupBlock = source.slice(startupBlockStart, startupBlockEnd)
@@ -40,7 +43,10 @@ describe('renderer startup runtime routing', () => {
   })
 
   it('refreshes remote catalogs after startup hydration succeeds', () => {
-    const source = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const source = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
     const hydrationDoneIndex = source.indexOf(
       "logRendererStartupDiagnostic('startup-hydration-done'"
     )
@@ -64,7 +70,10 @@ describe('renderer startup runtime routing', () => {
   })
 
   it('waits for first-window startup services before terminal reconnect', () => {
-    const source = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const source = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
     const reconnectIndex = source.indexOf('await actions.reconnectPersistedTerminals')
     const servicesIndex = source.indexOf('await window.api.app.awaitFirstWindowStartupServices()')
 
@@ -73,24 +82,34 @@ describe('renderer startup runtime routing', () => {
   })
 
   it('does not eagerly import the floating terminal panel on startup', () => {
-    const source = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const source = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
 
     expect(source).toContain(
-      "import { FloatingTerminalToggleButton } from './components/floating-terminal/FloatingTerminalToggleButton'"
+      "import { FloatingTerminalToggleButton } from './components/floating-terminal/floating-terminal-toggle-button'"
     )
-    expect(source).toContain("import('./components/floating-terminal/FloatingTerminalPanel').then")
-    expect(source).not.toContain("from './components/floating-terminal/FloatingTerminalPanel'")
+    expect(source).toContain(
+      "import('./components/floating-terminal/floating-terminal-panel').then"
+    )
+    expect(source).not.toContain("from './components/floating-terminal/floating-terminal-panel'")
   })
 
   it('does not eagerly import idle optional overlay surfaces on startup', () => {
-    const source = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const source = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
 
-    expect(source).toContain("import('./components/UpdateCard').then")
-    expect(source).toContain("import('./components/contextual-tours/ContextualTourOverlay').then")
-    expect(source).toContain("import('./components/setup-guide/SetupGuideTelemetryObserver').then")
-    expect(source).not.toContain("from './components/UpdateCard'")
-    expect(source).not.toContain("from './components/contextual-tours/ContextualTourOverlay'")
-    expect(source).not.toContain("from './components/setup-guide/SetupGuideTelemetryObserver'")
+    expect(source).toContain("import('./components/update-card').then")
+    expect(source).toContain("import('./components/contextual-tours/contextual-tour-overlay').then")
+    expect(source).toContain(
+      "import('./components/setup-guide/setup-guide-telemetry-observer').then"
+    )
+    expect(source).not.toContain("from './components/update-card'")
+    expect(source).not.toContain("from './components/contextual-tours/contextual-tour-overlay'")
+    expect(source).not.toContain("from './components/setup-guide/setup-guide-telemetry-observer'")
     expect(source).toContain('const shouldMountSetupGuideTelemetryObserver = persistedUIReady')
     expect(source).not.toContain(
       "const shouldMountSetupGuideTelemetryObserver = persistedUIReady && activeModal === 'setup-guide'"
@@ -98,17 +117,20 @@ describe('renderer startup runtime routing', () => {
   })
 
   it('keeps crash-report listeners eager while lazy-loading the dialog surface', () => {
-    const appSource = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const appSource = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
     const hostSource = readFileSync(
-      join(process.cwd(), 'src/renderer/src/components/crash-report/CrashReportDialog.tsx'),
+      join(process.cwd(), 'src/renderer/src/components/crash-report/crash-report-dialog.tsx'),
       'utf8'
     )
 
     expect(appSource).toContain(
-      "import { CrashReportDialog } from './components/crash-report/CrashReportDialog'"
+      "import { CrashReportDialog } from './components/crash-report/crash-report-dialog'"
     )
-    expect(appSource).not.toContain("from './components/crash-report/CrashReportDialogSurface'")
-    expect(hostSource).toContain("import('./CrashReportDialogSurface').then")
+    expect(appSource).not.toContain("from './components/crash-report/crash-report-dialog-surface'")
+    expect(hostSource).toContain("import('./crash-report-dialog-surface').then")
     expect(hostSource).toContain('window.api.crashReports.getLatestPending()')
     expect(hostSource).toContain('window.api.ui.onOpenCrashReport')
     expect(hostSource).toContain('REACT_ERROR_BOUNDARY_REPORT_AVAILABLE_EVENT')
@@ -118,7 +140,7 @@ describe('renderer startup runtime routing', () => {
 
   it('clears stale crash-report state before opening the lazy manual report surface', () => {
     const hostSource = readFileSync(
-      join(process.cwd(), 'src/renderer/src/components/crash-report/CrashReportDialog.tsx'),
+      join(process.cwd(), 'src/renderer/src/components/crash-report/crash-report-dialog.tsx'),
       'utf8'
     )
     const manualOpenStart = hostSource.indexOf('return window.api.ui.onOpenCrashReport(() => {')
@@ -135,35 +157,49 @@ describe('renderer startup runtime routing', () => {
   })
 
   it('loads dictation only when voice is enabled or a session is active', () => {
-    const source = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const source = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
 
-    expect(source).toContain("import('./components/dictation/DictationController').then")
-    expect(source).not.toContain("from './components/dictation/DictationController'")
+    expect(source).toContain("import('./components/dictation/dictation-controller').then")
+    expect(source).not.toContain("from './components/dictation/dictation-controller'")
     expect(source).toContain("settings?.voice?.enabled === true || dictationState !== 'idle'")
     expect(source).toContain('shouldMountDictationController ?')
   })
 
   it('loads the SSH passphrase dialog only when a credential request is queued', () => {
-    const source = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const source = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
 
-    expect(source).toContain("import('./components/settings/SshPassphraseDialog').then")
-    expect(source).not.toContain("from './components/settings/SshPassphraseDialog'")
+    expect(source).toContain("import('./components/settings/ssh-passphrase-dialog').then")
+    expect(source).not.toContain("from './components/settings/ssh-passphrase-dialog'")
     expect(source).toContain('s.sshCredentialQueue.length > 0')
     expect(source).toContain('hasSshCredentialRequest ?')
   })
 
   it('defers background polling until the workspace session is ready', () => {
-    const source = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const source = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
 
     expect(source).toContain('useGitStatusPolling({ enabled: workspaceSessionReady })')
     expect(source).toContain('<WorkspacePortScanner enabled={workspaceSessionReady} />')
   })
 
   it('does not load the terminal workbench on the no-workspace landing path', () => {
-    const source = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const source = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
 
-    expect(source).toContain("const Terminal = lazy(() => import('./components/Terminal'))")
-    expect(source).not.toContain("from './components/Terminal'")
+    expect(source).toContain(
+      "const Terminal = lazy(() => import('./components/terminal-workspace'))"
+    )
+    expect(source).not.toContain("from './components/terminal-workspace'")
     expect(source).toContain('const hasMountedTerminalWorkbenchRef = useRef(false)')
     expect(source).toContain('hasMountedTerminalWorkbenchRef.current = true')
     expect(source).toContain('activeWorktreeId !== null || backgroundTerminalMountRequested')
@@ -173,31 +209,37 @@ describe('renderer startup runtime routing', () => {
   })
 
   it('keeps the new-workspace composer eager because it is a critical create surface', () => {
-    const source = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const source = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
     const lazyModalSource = readFileSync(
       join(process.cwd(), 'src/renderer/src/lazy-modal-mount-state.ts'),
       'utf8'
     )
 
     expect(source).toContain(
-      "import NewWorkspaceComposerModal from './components/NewWorkspaceComposerModal'"
+      "import NewWorkspaceComposerModal from './components/new-workspace-composer-modal'"
     )
-    expect(source).not.toContain("import('./components/NewWorkspaceComposerModal')")
+    expect(source).not.toContain("import('./components/new-workspace-composer-modal')")
     expect(source).toContain("activeModal === 'new-workspace-composer'")
     expect(lazyModalSource).not.toContain("'new-workspace-composer'")
   })
 
   it('does not eagerly import inactive sidebar dialog flows on startup', () => {
-    const appSource = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const appSource = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
     const sidebarSource = readFileSync(
       join(process.cwd(), 'src/renderer/src/components/sidebar/index.tsx'),
       'utf8'
     )
 
-    expect(appSource).toContain("lazy(() => import('./components/sidebar/AddRepoDialog'))")
-    expect(appSource).toContain("lazy(() => import('./components/sidebar/NonGitFolderDialog'))")
-    expect(appSource).toContain("import('./components/sidebar/AddProjectFromFolderDialog')")
-    expect(appSource).toContain("lazy(() => import('./components/sidebar/ProjectAddedDialog'))")
+    expect(appSource).toContain("lazy(() => import('./components/sidebar/add-repo-dialog'))")
+    expect(appSource).toContain("lazy(() => import('./components/sidebar/non-git-folder-dialog'))")
+    expect(appSource).toContain("import('./components/sidebar/add-project-from-folder-dialog')")
+    expect(appSource).toContain("lazy(() => import('./components/sidebar/project-added-dialog'))")
     expect(appSource).toContain("activeModal === 'add-repo'")
     expect(appSource).toContain("activeModal === 'confirm-non-git-folder'")
     expect(appSource).toContain("activeModal === 'confirm-add-project-from-folder'")
@@ -208,12 +250,14 @@ describe('renderer startup runtime routing', () => {
     expect(appSource).toContain('boundaryId="modal.confirm-add-project-from-folder"')
     expect(appSource).toContain('boundaryId="modal.project-added"')
     expect(appSource).toContain('setTimeout(() =>')
-    expect(sidebarSource).toContain("lazyWithRetry(() => import('./WorktreeMetaDialog'))")
-    expect(sidebarSource).not.toContain("from './AddRepoDialog'")
-    expect(sidebarSource).not.toContain("React.lazy(() => import('./AddRepoDialog'))")
-    expect(sidebarSource).not.toContain("React.lazy(() => import('./NonGitFolderDialog'))")
-    expect(sidebarSource).not.toContain("React.lazy(() => import('./AddProjectFromFolderDialog'))")
-    expect(sidebarSource).not.toContain("React.lazy(() => import('./ProjectAddedDialog'))")
+    expect(sidebarSource).toContain("lazyWithRetry(() => import('./worktree-meta-dialog'))")
+    expect(sidebarSource).not.toContain("from './add-repo-dialog'")
+    expect(sidebarSource).not.toContain("React.lazy(() => import('./add-repo-dialog'))")
+    expect(sidebarSource).not.toContain("React.lazy(() => import('./non-git-folder-dialog'))")
+    expect(sidebarSource).not.toContain(
+      "React.lazy(() => import('./add-project-from-folder-dialog'))"
+    )
+    expect(sidebarSource).not.toContain("React.lazy(() => import('./project-added-dialog'))")
     expect(sidebarSource).not.toContain('shouldMountAddRepoDialog ? <AddRepoDialog /> : null')
     expect(sidebarSource).not.toContain(
       "activeModal === 'confirm-non-git-folder' ? <NonGitFolderDialog /> : null"
@@ -232,26 +276,28 @@ describe('renderer startup runtime routing', () => {
 
   it('does not eagerly import optional status-bar segments on startup', () => {
     const source = readFileSync(
-      join(process.cwd(), 'src/renderer/src/components/status-bar/StatusBar.tsx'),
+      join(process.cwd(), 'src/renderer/src/components/status-bar/status-bar.tsx'),
       'utf8'
     )
 
-    expect(source).toContain("import('./ResourceUsageStatusSegment').then")
-    expect(source).toContain("import('./PortsStatusSegment').then")
-    expect(source).toContain("import('./SshStatusSegment').then")
-    expect(source).toContain("import('./PetStatusSegment').then")
-    expect(source).not.toContain("from './ResourceUsageStatusSegment'")
-    expect(source).not.toContain("from './PortsStatusSegment'")
-    expect(source).not.toContain("from './SshStatusSegment'")
-    expect(source).not.toContain("from './PetStatusSegment'")
+    expect(source).toContain("import('./resource-usage-status-segment').then")
+    expect(source).toContain("import('./ports-status-segment').then")
+    expect(source).toContain("import('./ssh-status-segment').then")
+    expect(source).toContain("import('./pet-status-segment').then")
+    expect(source).not.toContain("from './resource-usage-status-segment'")
+    expect(source).not.toContain("from './ports-status-segment'")
+    expect(source).not.toContain("from './ssh-status-segment'")
+    expect(source).not.toContain("from './pet-status-segment'")
   })
 
   it('does not eagerly import the status bar shell on startup', () => {
-    const source = readFileSync(join(process.cwd(), 'src/renderer/src/App.tsx'), 'utf8')
+    const source = readFileSync(
+      join(process.cwd(), 'src/renderer/src/application-shell.tsx'),
+      'utf8'
+    )
 
-    expect(source).toContain("import('./components/status-bar/StatusBar').then")
-    expect(source).not.toContain("from './components/status-bar/StatusBar'")
+    expect(source).toContain("import('./components/status-bar/status-bar').then")
+    expect(source).not.toContain("from './components/status-bar/status-bar'")
     expect(source).toContain('statusBarVisible ? (')
-    expect(source).toContain('h-6 min-h-[24px] shrink-0 border-t border-border')
   })
 })

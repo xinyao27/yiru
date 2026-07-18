@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { parseWorkspaceSession } from './workspace-session-schema'
 
 describe('parseWorkspaceSession terminal fields', () => {

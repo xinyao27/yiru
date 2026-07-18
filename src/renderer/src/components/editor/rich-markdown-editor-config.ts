@@ -15,7 +15,7 @@ import {
   type DocLinkMenuState
 } from './rich-markdown-commands'
 import { isSingleEmptyTopLevelOrderedList } from './rich-markdown-list-continuation'
-import type { LinkBubbleState } from './RichMarkdownLinkBubble'
+import type { LinkBubbleState } from './rich-markdown-link-bubble'
 import {
   handleRichMarkdownEditorClick,
   type ActivateMarkdownLink,

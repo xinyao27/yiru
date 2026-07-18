@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { parseHexAddress } from './port-scan-handler'
 import { parseWindowsNetstatOutput, parseWindowsPowerShellPortRows } from './windows-port-scan'
 

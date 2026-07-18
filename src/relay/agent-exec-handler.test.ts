@@ -1,5 +1,5 @@
 import { exec, spawn } from 'node:child_process'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as ChildProcess from 'node:child_process'
 import { createFakeChild, createHandlers, requestContext } from './agent-exec-handler-test-harness'
 import { TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV } from '../shared/terminal-git-credential-guard'

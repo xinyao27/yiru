@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   encodeMobileE2EEV2Transcript,
   validateMobileE2EEV2Handshake

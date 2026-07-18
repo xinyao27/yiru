@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isSafePtySessionId, mintPtySessionId, parsePtySessionId } from './pty-session-id'
 
 const USER_DATA = '/tmp/yiru-userdata'

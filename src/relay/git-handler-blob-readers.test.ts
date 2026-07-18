@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { readBlobAtIndex, readBlobAtOid, type GitBufferExec } from './git-handler-ops'
 
 describe('git blob readers', () => {

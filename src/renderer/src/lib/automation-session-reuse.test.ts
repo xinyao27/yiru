@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AgentStatusEntry } from '../../../shared/agent-status-types'
 import type { AutomationRun } from '../../../shared/automations-types'
 import { findReusableAutomationSession } from './automation-session-reuse'

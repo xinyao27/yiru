@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const projectDir = path.resolve(import.meta.dirname, '../..')
 const packageJson = JSON.parse(readFileSync(path.join(projectDir, 'package.json'), 'utf8'))

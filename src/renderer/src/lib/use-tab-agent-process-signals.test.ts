@@ -2,7 +2,7 @@
 
 import { act, createElement } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { useAppStore } from '@/store'
 import { makePaneKey } from '../../../shared/stable-pane-id'
 import type { PaneForegroundAgentEntry } from '@/store/slices/pane-foreground-agent'

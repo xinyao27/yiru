@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { ProviderRateLimits, RateLimitWindow } from '../../../../shared/rate-limit-types'
 
 vi.mock('@/i18n/i18n', () => ({
@@ -45,7 +45,7 @@ function grokMonthlyLimits(status: ProviderRateLimits['status']): ProviderRateLi
 
 describe('ProviderUsageSegment monthly window', () => {
   it('renders a monthly-only snapshot in the chip instead of a bare icon', async () => {
-    const { ProviderUsageSegment } = await import('./ProviderUsageSegment')
+    const { ProviderUsageSegment } = await import('./provider-usage-segment')
 
     const markup = renderToStaticMarkup(
       <ProviderUsageSegment limits={grokMonthlyLimits('ok')} compact={false} display="used" />
@@ -55,7 +55,7 @@ describe('ProviderUsageSegment monthly window', () => {
   })
 
   it('shows monthly data while fetching instead of the loading placeholder', async () => {
-    const { ProviderUsageSegment } = await import('./ProviderUsageSegment')
+    const { ProviderUsageSegment } = await import('./provider-usage-segment')
 
     const markup = renderToStaticMarkup(
       <ProviderUsageSegment limits={grokMonthlyLimits('fetching')} compact={false} display="used" />
@@ -68,7 +68,7 @@ describe('ProviderUsageSegment monthly window', () => {
   // Why: providers with session/weekly windows (OpenCode Go) keep monthly
   // tooltip-only so the chip stays uncluttered.
   it('keeps monthly out of the chip when session and weekly windows exist', async () => {
-    const { ProviderUsageSegment } = await import('./ProviderUsageSegment')
+    const { ProviderUsageSegment } = await import('./provider-usage-segment')
 
     const limits: ProviderRateLimits = {
       provider: 'opencode-go',
@@ -91,7 +91,7 @@ describe('ProviderUsageSegment monthly window', () => {
   // Why: #8378 — status-bar chip showed fixed window size ("5h") while the
   // usage popup showed remaining time for the same resetsAt.
   it('shows remaining session time on the chip when resetsAt is known (repro-8378)', async () => {
-    const { ProviderUsageSegment } = await import('./ProviderUsageSegment')
+    const { ProviderUsageSegment } = await import('./provider-usage-segment')
     const now = 1_700_000_000_000
     const dateNow = vi.spyOn(Date, 'now').mockReturnValue(now)
     const remainingMs = 2 * 60 * 60_000 + 33 * 60_000

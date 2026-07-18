@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 
 import { createStore, type StoreApi } from 'zustand/vanilla'
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vite-plus/test'
 import { createEditorSlice } from './editor'
 import { createTabsSlice } from './tabs'
 import type { AppState } from '../types'

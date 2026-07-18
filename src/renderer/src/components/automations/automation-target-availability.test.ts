@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { Automation } from '../../../../shared/automations-types'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
 import type { ProjectHostSetup, Repo, Worktree } from '../../../../shared/types'

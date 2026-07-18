@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { GitHistoryItem, GitHistoryItemRef } from './git-history'
 import {
   GIT_HISTORY_BASE_REF_COLOR,

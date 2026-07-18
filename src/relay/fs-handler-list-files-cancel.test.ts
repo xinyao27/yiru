@@ -3,7 +3,7 @@
  * scan must kill its child processes immediately and reject with a
  * cancellation error instead of streaming an abandoned tree to completion.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { spawnMock } = vi.hoisted(() => ({
   spawnMock: vi.fn()

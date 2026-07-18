@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { clipboardHasImage, handleRichMarkdownImagePaste } from './rich-markdown-paste-image'
 import { insertRichMarkdownImageFromPath } from './rich-markdown-image-insert'
 

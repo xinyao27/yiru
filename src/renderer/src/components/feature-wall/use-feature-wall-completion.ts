@@ -19,7 +19,7 @@ import {
 import { hasFeatureWallUsageTracking } from './feature-wall-usage-tracking'
 import { usePersistedFeatureWallCompletion } from './use-persisted-feature-wall-completion'
 import { useFeatureWallSessionDepth } from './use-feature-wall-session-depth'
-import { useMountedRef } from '@/hooks/useMountedRef'
+import { useMountedRef } from '@/hooks/use-mounted-ref'
 
 export type FeatureWallCompletionState = {
   workflowDone: Record<FeatureWallWorkflowId, boolean>

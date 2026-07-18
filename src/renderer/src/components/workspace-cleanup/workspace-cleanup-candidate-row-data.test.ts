@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getDirtyGitLabel, shouldShowGitMetadataChip } from './workspace-cleanup-candidate-row-data'
 import { makeCandidate } from './workspace-cleanup-presentation-fixtures'
 

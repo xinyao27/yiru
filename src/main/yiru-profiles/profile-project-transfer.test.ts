@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { getDefaultPersistedState } from '../../shared/constants'
 import {
   YIRU_PROFILE_INDEX_SCHEMA_VERSION,

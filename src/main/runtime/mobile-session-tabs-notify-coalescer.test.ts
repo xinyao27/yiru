@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { createMobileSessionTabsNotifyCoalescer } from './mobile-session-tabs-notify-coalescer'
 
 describe('createMobileSessionTabsNotifyCoalescer', () => {

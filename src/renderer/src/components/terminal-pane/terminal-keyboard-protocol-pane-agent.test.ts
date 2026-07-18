@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { buildTerminalKeyboardProtocolOptions } from '@/lib/pane-manager/terminal-keyboard-protocol'
 import { buildDefaultTerminalOptions } from '@/lib/pane-manager/pane-terminal-options'
 import { resolvePaneKeyboardProtocolAgent } from './terminal-keyboard-protocol-pane-agent'

@@ -9,7 +9,7 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { verifyPackageCliBin } from './verify-cli-bin.mjs'
 
 /** Builds a temporary Yiru-style project fixture with a compiled CLI entrypoint. */

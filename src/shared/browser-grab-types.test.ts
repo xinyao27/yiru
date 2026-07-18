@@ -1,9 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   GRAB_BUDGET,
   GRAB_SAFE_ATTRIBUTE_NAMES,
   GRAB_SECRET_PATTERNS,
-  GRAB_STYLE_PROPERTIES,
   isAriaAttribute
 } from './browser-grab-types'
 
@@ -69,19 +68,6 @@ describe('browser-grab-types', () => {
       expect(GRAB_SECRET_PATTERNS).not.toContain('state')
       expect(GRAB_SECRET_PATTERNS).not.toContain('auth')
       expect(GRAB_SECRET_PATTERNS).not.toContain('token')
-    })
-  })
-
-  describe('GRAB_STYLE_PROPERTIES', () => {
-    it('includes the curated subset of computed styles', () => {
-      expect(GRAB_STYLE_PROPERTIES).toContain('display')
-      expect(GRAB_STYLE_PROPERTIES).toContain('fontSize')
-      expect(GRAB_STYLE_PROPERTIES).toContain('backgroundColor')
-      expect(GRAB_STYLE_PROPERTIES).toContain('zIndex')
-    })
-
-    it('has exactly 16 properties matching the type', () => {
-      expect(GRAB_STYLE_PROPERTIES).toHaveLength(16)
     })
   })
 })

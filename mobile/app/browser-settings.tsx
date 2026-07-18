@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { ChevronLeft, ChevronRight, Globe } from 'lucide-react-native'
-import { PickerModal, type PickerOption } from '../src/components/PickerModal'
+import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import {
   loadTerminalLinkOpenMode,
   saveTerminalLinkOpenMode,

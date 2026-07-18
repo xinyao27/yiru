@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { z } from 'zod'
 import { RpcDispatcher } from './dispatcher'
 import { defineMethod, defineStreamingMethod, type RpcRequest } from './core'

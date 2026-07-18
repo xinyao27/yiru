@@ -3,7 +3,7 @@ export type ShutdownBufferCaptureOptions = {
 }
 
 /** Map of tabId → buffer-capture callback, one per mounted TerminalPane.
- *  The beforeunload handler in App.tsx invokes every callback to populate
+ *  The beforeunload handler in application-shell.tsx invokes every callback to populate
  *  Zustand with serialized buffers before flushing the session to disk.
  *  Sleep (shutdownWorktreeTerminals with keepIdentifiers: true) iterates
  *  only the entries whose tabId belongs to the worktree being slept, so
@@ -11,7 +11,7 @@ export type ShutdownBufferCaptureOptions = {
  *  remote PTY — see DESIGN_DOC_TERMINAL_HISTORY_FIX_V2.md §3.3.c.
  *
  *  Why this lives in its own module: the registry is shared between
- *  TerminalPane.tsx (registration site) and the terminals store slice
+ *  terminal-pane.tsx (registration site) and the terminals store slice
  *  (sleep-time iteration). Importing it directly from TerminalPane would
  *  create a cycle (slice → TerminalPane → store → slice) that breaks the
  *  Zustand store at module-init time. A leaf module with zero imports

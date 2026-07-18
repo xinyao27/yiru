@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { GlobalSettings, Repo, Worktree } from './types'
 import { buildKnownYiruWorkspaceLayouts, classifyWorktreeOwnership } from './worktree-ownership'
 

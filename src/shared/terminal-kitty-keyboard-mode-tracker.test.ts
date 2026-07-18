@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { TerminalKittyKeyboardModeTracker } from './terminal-kitty-keyboard-mode-tracker'
 
 describe('TerminalKittyKeyboardModeTracker', () => {

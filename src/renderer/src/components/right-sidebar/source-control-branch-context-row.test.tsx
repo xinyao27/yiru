@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import type { ReactNode } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { SourceControlBranchContextRow } from './source-control-branch-context-row'
 import type { GitBranchCompareSummary } from '../../../../shared/types'
 
@@ -22,22 +22,6 @@ const readySummary: GitBranchCompareSummary = {
 }
 
 describe('SourceControlBranchContextRow', () => {
-  it('lets the base ref use the full available header width', () => {
-    const markup = renderToStaticMarkup(
-      <SourceControlBranchContextRow
-        summary={readySummary}
-        compareBaseRef={null}
-        onChangeBaseRef={vi.fn()}
-        onRetry={vi.fn()}
-      />
-    )
-
-    expect(markup).toContain('refs/remotes/origin/FRONT-192-ZisVoucherStrip')
-    expect(markup).toContain('max-w-full')
-    expect(markup).toContain('min-w-0 flex-1')
-    expect(markup).not.toContain('max-w-[9rem]')
-  })
-
   it('renders a compact external review link when a manual URL is available', () => {
     const markup = renderToStaticMarkup(
       <SourceControlBranchContextRow

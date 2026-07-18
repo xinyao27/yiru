@@ -3,7 +3,7 @@ import { chmodSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync 
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import * as pty from 'node-pty'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { getPosixOmpShellWrapper } from './omp-shell-wrapper'
 
 const describePosix = process.platform === 'win32' ? describe.skip : describe

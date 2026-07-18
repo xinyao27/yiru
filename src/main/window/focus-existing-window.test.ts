@@ -1,5 +1,5 @@
 import type { App, BrowserWindow } from 'electron'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { focusExistingMainWindow } from './focus-existing-window'
 
 type FakeWindowOptions = {

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vite-plus/test'
 import { FsHandler } from './fs-handler'
 import { MAX_TEXT_FILE_SIZE } from './fs-handler-utils'
 import { RelayContext } from './context'

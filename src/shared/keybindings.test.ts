@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: shared keybinding tests cover the central
  * registry, parser, matcher, and conflict detector together so shortcut
  * semantics cannot drift across app surfaces. */
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   agentTabActionId,
   getKeybindingDefinition,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { mergeCapturedLeafState } from './merge-captured-leaf-state'
 
 describe('mergeCapturedLeafState', () => {

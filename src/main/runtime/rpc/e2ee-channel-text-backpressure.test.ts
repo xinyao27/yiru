@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { WebSocket } from 'ws'
 import { E2EEChannel, type E2EEChannelOptions } from './e2ee-channel'
 import { deriveSharedKey, decrypt, encrypt, generateKeyPair } from './e2ee-crypto'

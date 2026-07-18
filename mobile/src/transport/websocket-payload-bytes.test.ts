@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { websocketPayloadToUint8 } from './websocket-payload-bytes'
 
 describe('websocketPayloadToUint8', () => {

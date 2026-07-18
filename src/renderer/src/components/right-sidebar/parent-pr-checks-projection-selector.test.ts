@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { HostedReviewInfo } from '../../../../shared/hosted-review'
 import type { Repo, Worktree } from '../../../../shared/types'
 import { getHostedReviewCacheKey } from '@/store/slices/hosted-review'

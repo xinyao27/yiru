@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import type { Editor } from '@tiptap/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { toast } from 'sonner'
 import { handleRichMarkdownLargeTextPaste } from './rich-markdown-large-text-paste'
 

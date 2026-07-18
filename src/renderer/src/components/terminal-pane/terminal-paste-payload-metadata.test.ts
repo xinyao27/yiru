@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 
 import { PASTE_PAYLOAD_CORPUS } from '@/lib/paste-payload-corpus'
 import {

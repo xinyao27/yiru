@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const ipcState = vi.hoisted(() => ({
   handleHandlers: new Map<string, (event: unknown, ...args: unknown[]) => unknown>()

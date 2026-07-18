@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { TerminalHost } from './terminal-host'
 import { HeadlessEmulator } from './headless-emulator'
 import type { SubprocessHandle } from './session'

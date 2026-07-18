@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { parse } from 'yaml'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 describe('Git binary compatibility PR gate', () => {
   it('runs the real-binary contract at each compatibility boundary', () => {

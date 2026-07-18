@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   applyTerminalGitCredentialPromptGuard,
   TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV

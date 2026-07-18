@@ -5,7 +5,7 @@
 // returns `{ ok: false, reason }` — the client.ts wrapper then drops the
 // event instead of calling posthog.capture.
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { _resetValidatorWarnCacheForTests, validate } from './validator'
 
 describe('validate', () => {

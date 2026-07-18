@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shouldPollChromiumErrorPage } from './chromium-error-page-polling'
 
 describe('shouldPollChromiumErrorPage', () => {

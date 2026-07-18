@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { YIRU_BROWSER_BLANK_URL } from './constants'
 import {
   buildSearchUrl,
@@ -130,7 +130,7 @@ describe('browser-url helpers', () => {
 
   // Why: "Open Preview to the Side" on an HTML file loads the file via file://
   // in the browser pane. The guest webview is sandboxed (see
-  // createMainWindow.ts will-attach-webview), so rendering local HTML cannot
+  // create-main-window.ts will-attach-webview), so rendering local HTML cannot
   // escalate privileges beyond what the editor already grants.
   it('allows file:// URLs so local HTML can be previewed', () => {
     expect(normalizeBrowserNavigationUrl('file:///Users/me/site/index.html')).toBe(

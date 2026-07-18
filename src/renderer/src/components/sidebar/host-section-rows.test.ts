@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { FolderWorkspace, ProjectGroup, Repo, Worktree } from '../../../../shared/types'
 import { PINNED_GROUP_KEY, type Row } from './worktree-list-groups'
 import { addHostSectionRows, type HostSectionRow } from './host-section-rows'

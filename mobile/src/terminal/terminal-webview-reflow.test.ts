@@ -1,16 +1,16 @@
 import { readFileSync } from 'node:fs'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { XTERM_HTML } from './terminal-webview-html'
 
 // The reflow logic lives as injected in-WebView JS; the message dispatch and
-// handle wiring live in terminal-webview-html.ts / TerminalWebView.tsx. Assert
+// handle wiring live in terminal-webview-html.ts / terminal-web-view.tsx. Assert
 // the load-bearing invariants from source, mirroring the other tests here.
 const reflowSource = readFileSync(
   new URL('./terminal-webview-reflow-injected.ts', import.meta.url),
   'utf8'
 )
 const htmlSource = readFileSync(new URL('./terminal-webview-html.ts', import.meta.url), 'utf8')
-const handleSource = readFileSync(new URL('./TerminalWebView.tsx', import.meta.url), 'utf8')
+const handleSource = readFileSync(new URL('./terminal-web-view.tsx', import.meta.url), 'utf8')
 
 function reflowFnBody(): string {
   const start = reflowSource.indexOf('function reflow(cols, rows) {')

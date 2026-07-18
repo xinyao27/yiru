@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { Worktree } from '../../../shared/types'
 import { useAppStore } from '@/store'
 import { activateAndRevealWorktree } from './worktree-activation'

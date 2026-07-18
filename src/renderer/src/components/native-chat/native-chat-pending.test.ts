@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { NativeChatMessage } from '../../../../shared/native-chat-types'
 import {
   appendPendingSendCache,

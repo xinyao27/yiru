@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AiVaultSession } from '../../../src/shared/ai-vault-types'
 import type { Worktree } from '../worktree/workspace-list-types'
 import {

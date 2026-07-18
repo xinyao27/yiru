@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { applyMobileWorkspaceLineage } from './mobile-workspace-lineage'
 import type { Worktree } from './workspace-list-sections'
 

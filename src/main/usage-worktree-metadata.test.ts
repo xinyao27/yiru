@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { loadKnownUsageWorktreesByRepo } from './usage-worktree-metadata'
 
 describe('loadKnownUsageWorktreesByRepo', () => {

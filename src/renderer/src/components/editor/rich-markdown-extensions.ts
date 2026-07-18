@@ -14,7 +14,7 @@ import { TableRow } from '@tiptap/extension-table-row'
 import { BlockMath, InlineMath } from '@tiptap/extension-mathematics'
 import { Markdown } from '@tiptap/markdown'
 import { createLowlight, common } from 'lowlight'
-import { loadLocalImageSrc, onImageCacheInvalidated } from './useLocalImageSrc'
+import { loadLocalImageSrc, onImageCacheInvalidated } from './use-local-image-src'
 import type { RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
 import {
   createRawMarkdownHtmlBlock,
@@ -26,7 +26,7 @@ import {
   getRichMarkdownPlaceholder
 } from './rich-markdown-details-extension'
 import { createMarkdownDocLink } from './rich-markdown-doc-link'
-import { RichMarkdownCodeBlock } from './RichMarkdownCodeBlock'
+import { RichMarkdownCodeBlock } from './rich-markdown-code-block'
 import { safeReactNodeViewRenderer } from './safe-react-node-view-renderer'
 import { DragSelectionGuard } from './drag-selection-guard'
 import { createRichMarkdownAnnotationHighlightExtension } from './rich-markdown-annotation-highlight'

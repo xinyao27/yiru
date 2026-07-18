@@ -1,4 +1,4 @@
-import { expect, it, vi } from 'vitest'
+import { expect, it, vi } from 'vite-plus/test'
 import { WatcherProcessFailure } from '../../../ipc/parcel-watcher-process-failure'
 import type { YiruRuntimeService } from '../../yiru-runtime'
 import type { RpcRequest } from '../core'

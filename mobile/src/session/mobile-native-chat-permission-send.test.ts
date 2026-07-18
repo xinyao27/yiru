@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { RpcClient } from '../transport/rpc-client'
 import { sendMobileNativeChatPermissionResponse } from './mobile-native-chat-permission-send'
 

@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { callMock, remoteMock } = vi.hoisted(() => ({
   callMock: vi.fn(),

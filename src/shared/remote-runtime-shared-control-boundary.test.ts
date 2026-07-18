@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 // TypeScript 7 is a native CLI; AST tests still need the legacy JavaScript API.
 import ts from 'typescript-api'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const FORBIDDEN_REMOTE_SERVER_IMPORTS = [
   'remote-runtime-shared-control',

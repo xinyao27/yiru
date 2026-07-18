@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import {
   resetAgentPaneAuthorityAliasesForTests,

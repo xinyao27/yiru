@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const COMPONENT_ROOT = __dirname
 
@@ -18,7 +18,7 @@ function sourceBetween(source: string, startPattern: string, endPattern: string)
 
 describe('ProjectViewWrapper GitHub source context boundary', () => {
   it('passes the matched repo source context into the repo-backed GitHub dialog', () => {
-    const source = componentSource('ProjectViewWrapper.tsx')
+    const source = componentSource('project-view-wrapper.tsx')
     const contextSection = sourceBetween(
       source,
       'const resolvedDialogRepo = resolvedDialogRepoItem',

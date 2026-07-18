@@ -1,6 +1,14 @@
 const POINTER_DRAGGING_ATTR = 'data-worktree-sidebar-pointer-dragging'
 const POINTER_DRAG_PREVIEW_ATTR = 'data-worktree-sidebar-drag-preview'
 const POINTER_DRAG_COUNT_ATTR = 'data-worktree-sidebar-drag-count'
+const SIDEBAR_THEME_VARIABLES = [
+  '--sidebar',
+  '--sidebar-foreground',
+  '--sidebar-accent',
+  '--sidebar-accent-foreground',
+  '--sidebar-border',
+  '--sidebar-ring'
+] as const
 
 const INTERACTIVE_DRAG_BLOCKER_SELECTOR = [
   'button',
@@ -79,6 +87,13 @@ export function createSidebarDragPreview(args: {
   stripDuplicatePreviewAttributes(clone)
   preview.setAttribute(POINTER_DRAG_PREVIEW_ATTR, 'true')
   preview.setAttribute('aria-hidden', 'true')
+  preview.classList.add('worktree-sidebar-theme')
+  // Why: the preview portals to body and would otherwise lose scoped/tinted
+  // sidebar values even though its cloned card still consumes sidebar roles.
+  const sourceStyle = getComputedStyle(args.sourceRow)
+  for (const variable of SIDEBAR_THEME_VARIABLES) {
+    preview.style.setProperty(variable, sourceStyle.getPropertyValue(variable))
+  }
   preview.appendChild(clone)
 
   if (args.draggedCount > 1) {

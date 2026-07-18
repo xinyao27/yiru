@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router'
-import { MobileSourceControlPanel } from '../../../../src/source-control/MobileSourceControlPanel'
+import { MobileSourceControlPanel } from '../../../../src/source-control/mobile-source-control-panel'
 import { firstParam } from '../../../../src/source-control/mobile-source-control-screen-state'
 import { parseSourceControlHubTab } from '../../../../src/source-control/mobile-source-control-hub-tab'
 

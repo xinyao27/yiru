@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { YiruCloudAuthConfig } from './profile-cloud-auth-config'
 import type * as ProfileCloudClient from './profile-cloud-client'
 import type { ActiveYiruProfileState } from './profile-index-store'

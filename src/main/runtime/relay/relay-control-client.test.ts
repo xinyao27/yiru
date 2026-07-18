@@ -1,5 +1,5 @@
 import { createHash, createHmac, randomBytes } from 'node:crypto'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import nacl from 'tweetnacl'
 import { WebSocketServer, type WebSocket } from 'ws'
 import type { E2EEKeypair } from '../e2ee-keypair'

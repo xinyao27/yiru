@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vite-plus/test'
 import { buildPrintToPdfOptions, CdpPdfStreamStore } from './cdp-print-to-pdf'
 
 const DEFAULT_MARGIN_INCHES = 1 / 2.54

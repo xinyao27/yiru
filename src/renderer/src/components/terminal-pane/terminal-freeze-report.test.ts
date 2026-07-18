@@ -1,7 +1,7 @@
 // Why: pins the one-paste freeze report contract — a single console call must
 // return renderer state + main snapshot + breadcrumbs, and a dead/throwing
 // invoke channel must be captured as data instead of sinking the report.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 vi.mock('@/lib/e2e-config', () => ({ e2eConfig: { exposeStore: false } }))
 

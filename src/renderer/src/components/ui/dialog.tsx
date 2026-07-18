@@ -5,7 +5,13 @@ import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { XIcon } from '@phosphor-icons/react'
 
 import { cn } from '@/lib/class-names'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import {
+  modalBackdropClass,
+  modalBackdropMotionClass,
+  modalSurfaceClass,
+  modalSurfaceMotionClass
+} from '@/components/ui/floating-surface-styles'
 import { translate } from '@/i18n/i18n'
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
@@ -28,13 +34,7 @@ function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) 
   return (
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
-      // Why: in dark mode the canvas is already near-black, so a flat 50% black
-      // scrim disappears into the background. A deeper scrim + 2px backdrop
-      // blur lifts the canvas behind the dialog without needing per-mode colors.
-      className={cn(
-        'fixed inset-0 z-50 bg-black/55 backdrop-blur-[2px] transition-opacity data-starting-style:opacity-0 data-ending-style:opacity-0',
-        className
-      )}
+      className={cn(modalBackdropClass, modalBackdropMotionClass, 'fixed inset-0 z-50', className)}
       {...props}
     />
   )
@@ -55,13 +55,10 @@ function DialogContent({
       <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
-        // Why: bg-background in dark mode is the same color as the canvas, and
-        // border-border/50 is ~3.5% white over that canvas — both invisible.
-        // A translucent surface, solid 14% border, dual shadow, and 2xl backdrop
-        // blur match the dropdown-menu recipe (which already works) and read
-        // clearly in both light and dark mode.
         className={cn(
-          'fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border border-black/14 bg-background/96 p-6 text-foreground shadow-[0_20px_60px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl duration-200 outline-none dark:border-white/14 dark:bg-[rgba(23,23,23,0.96)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)] transition-[opacity,transform] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 sm:max-w-lg',
+          modalSurfaceClass,
+          modalSurfaceMotionClass,
+          'fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 border p-6 duration-200 outline-none sm:max-w-lg',
           className
         )}
         {...props}
@@ -70,7 +67,10 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-open:bg-accent data-open:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+              'absolute top-3 right-3 text-muted-foreground hover:text-foreground'
+            )}
           >
             <XIcon />
             <span className="sr-only">

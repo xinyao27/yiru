@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { formatPrCommentRelativeTime } from './pr-comment-time'
 
 const NOW = Date.parse('2026-06-21T20:00:00.000Z')

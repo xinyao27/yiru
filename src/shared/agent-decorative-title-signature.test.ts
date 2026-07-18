@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   DECORATIVE_AGENT_TITLE_SIGNATURE_SOURCE_SCAN_LIMIT,
   getDecorativeAgentTitleSignature,

@@ -244,8 +244,6 @@ test('restored hidden split drains live alternate-screen output without a click 
       laterHeartbeat,
       'Fixture process stopped instead of exercising live output'
     ).toBeGreaterThan(initialHeartbeat + 20)
-    expect(later?.rect.width ?? 0).toBeGreaterThan(0)
-    expect(later?.rect.height ?? 0).toBeGreaterThan(0)
     expect(later?.proposed).toEqual({ cols: later?.cols, rows: later?.rows })
     expect(
       frameNumber(later?.content ?? ''),

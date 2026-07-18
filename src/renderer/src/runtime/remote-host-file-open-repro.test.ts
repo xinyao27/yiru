@@ -20,7 +20,7 @@
  *   4. The editor's retry gate refuses to retry "access denied", so the error
  *      latches permanently even after the SSH repo finishes hydrating.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { Repo } from '../../../shared/types'
 import { useAppStore } from '@/store'
 import { getConnectionIdForFile, isWorktreeConnectionResolved } from '@/lib/connection-context'
@@ -29,7 +29,7 @@ import {
   WORKTREE_OWNER_NOT_READY_ERROR,
   WORKTREE_OWNER_UNREACHABLE_ERROR
 } from '@/components/editor/editor-panel-content-types'
-import { shouldRetryFileLoadError } from '@/components/editor/useEditorPanelFileLoadRetry'
+import { shouldRetryFileLoadError } from '@/components/editor/use-editor-panel-file-load-retry'
 import { readRuntimeFileContent } from './runtime-file-client'
 
 // Mirrors src/main/ipc/filesystem-auth.ts PATH_ACCESS_DENIED_MESSAGE.

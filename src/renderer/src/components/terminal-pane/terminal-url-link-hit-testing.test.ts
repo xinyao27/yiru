@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   extractTerminalHttpLinks,
   TERMINAL_HTTP_URL_MAX_LENGTH

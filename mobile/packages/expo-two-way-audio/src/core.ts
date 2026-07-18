@@ -1,5 +1,5 @@
 import type { PermissionResponse } from 'expo-modules-core'
-import ExpoTwoWayAudioModule from './ExpoTwoWayAudioModule'
+import ExpoTwoWayAudioModule from './expo-two-way-audio-module'
 
 export async function initialize() {
   return await ExpoTwoWayAudioModule.initialize()

@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { expect, it } from 'vitest'
+import { expect, it } from 'vite-plus/test'
 import { planHermesStartupQuery } from './hermes-startup-query'
 
 const windowsIt = process.platform === 'win32' ? it : it.skip

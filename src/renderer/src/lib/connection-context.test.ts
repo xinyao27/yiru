@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { FolderWorkspace, ProjectGroup, Repo, Worktree } from '../../../shared/types'
 import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'

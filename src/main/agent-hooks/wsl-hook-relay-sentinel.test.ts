@@ -3,7 +3,7 @@
 // flush, and failing (kill + reject) on overflow, close, timeout, and NUL noise.
 import { EventEmitter } from 'node:events'
 import type { ChildProcessWithoutNullStreams } from 'node:child_process'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 
 import { RELAY_SENTINEL, RELAY_SENTINEL_TIMEOUT_MS } from '../ssh/relay-protocol'
 import {

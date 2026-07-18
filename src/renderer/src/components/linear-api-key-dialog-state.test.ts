@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   CLOSED_LINEAR_API_KEY_DIALOG_STATE,
   resolveLinearApiKeyDialogState,

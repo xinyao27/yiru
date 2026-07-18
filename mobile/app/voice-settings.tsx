@@ -16,8 +16,8 @@ import { loadHosts } from '../src/transport/host-store'
 import type { HostProfile } from '../src/transport/types'
 import { useAllHostClients } from '../src/transport/client-context'
 import type { RpcClient } from '../src/transport/rpc-client'
-import { BottomDrawer } from '../src/components/BottomDrawer'
-import { VoiceModelList } from '../src/components/VoiceModelList'
+import { BottomDrawer } from '../src/components/bottom-drawer'
+import { VoiceModelList } from '../src/components/voice-model-list'
 import {
   deleteDictationModel,
   downloadDictationModel,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { DiffComment, Worktree } from '../../../shared/types'
 import type { AppState } from './types'
 import {

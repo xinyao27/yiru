@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getAgentLabel as getSharedAgentLabel } from './agent-title-identity'
 import { isOpenCodeNativeTitle } from './opencode-terminal-title'
 import {

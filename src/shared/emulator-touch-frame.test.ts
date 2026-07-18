@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { encodeServeSimTouchFrame, SERVE_SIM_TOUCH_MESSAGE_TAG } from './emulator-touch-frame'
 
 describe('encodeServeSimTouchFrame', () => {

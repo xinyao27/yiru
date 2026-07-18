@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { handleRichMarkdownImagePaste } from './rich-markdown-paste-image'
 import { handleRichMarkdownLargeTextPaste } from './rich-markdown-large-text-paste'
 import { handleRichMarkdownTerminalPathPaste } from './rich-markdown-terminal-path-paste'

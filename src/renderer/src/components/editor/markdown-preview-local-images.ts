@@ -3,7 +3,7 @@ import remarkGfm from 'remark-gfm'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import { resolveImageAbsolutePath } from './markdown-preview-links'
-import { getLocalImageCacheKey, loadLocalImageAbsolutePath } from './useLocalImageSrc'
+import { getLocalImageCacheKey, loadLocalImageAbsolutePath } from './use-local-image-src'
 import type { RuntimeFileOperationArgs } from '@/runtime/runtime-file-client'
 
 export const MARKDOWN_PREVIEW_LOCAL_IMAGE_PREWARM_LIMIT = 64

@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const {
   appMock,

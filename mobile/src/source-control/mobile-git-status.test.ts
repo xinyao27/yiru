@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from 'vitest'
+import { describe, expect, expectTypeOf, it } from 'vite-plus/test'
 import type { GitStatusResult } from '../../../src/shared/git-status-types'
 import {
   buildMobileSourceControlSections,

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { reconcileManagedWslCliRegistrations } from './wsl-cli-registration-reconciliation'
 import { runSerializedWslCliRegistrationOperation } from './wsl-cli-registration-operation'
 

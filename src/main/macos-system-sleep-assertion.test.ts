@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import {
   MACOS_SYSTEM_SLEEP_ASSERTION_RETRY_MS,
   MacosSystemSleepAssertion

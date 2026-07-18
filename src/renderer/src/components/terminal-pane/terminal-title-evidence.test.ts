@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolvePaneDisplayTitle, resolvePaneTitleDecision } from './terminal-title-evidence'
 
 describe('resolvePaneDisplayTitle', () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveTerminalTabIdForPtyId } from './terminal-tab-for-pty-id'
 import type { AppState } from '@/store/types'
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   SETTINGS_SEARCH_QUERY_MAX_BYTES,
   getSettingsSectionSearchEntries,

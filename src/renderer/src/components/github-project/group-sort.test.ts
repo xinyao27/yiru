@@ -1,7 +1,7 @@
 // Why: cover the bug fixes from the recent review — particularly the NaN
 // sort produced when two rows reference unknown single-select option IDs or
 // unknown iteration IDs, and the empty-group ordering invariant.
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type {
   GitHubProjectField,
   GitHubProjectRow,

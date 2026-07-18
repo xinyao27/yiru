@@ -1,5 +1,5 @@
 import { performance } from 'node:perf_hooks'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   TERMINAL_FILE_LINK_TAP_CONFORMANCE_CASES,
   columnForTerminalFileLinkTap

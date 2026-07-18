@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vite-plus/test'
 import type { GitHubProjectSummary } from '../../../../shared/github-project-types'
 import {
   PROJECT_PICKER_BROWSE_CACHE_MAX_ENTRIES,

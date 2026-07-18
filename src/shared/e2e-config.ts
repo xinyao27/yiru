@@ -6,6 +6,8 @@ export type E2EConfig = {
   /** Test-only override (YIRU_E2E_TERMINAL_PARKING_DELAY_MS) shrinking the
    *  terminal hidden-view parking delays. null means use production timing. */
   terminalParkingDelayMs: number | null
+  /** Test-only renderer platform used by cross-platform chrome E2E specs. */
+  rendererPlatformOverride: NodeJS.Platform | null
 }
 
 type E2EConfigInput = {
@@ -13,6 +15,7 @@ type E2EConfigInput = {
   exposeStore?: boolean
   userDataDir?: string | null
   terminalParkingDelayMs?: number | null
+  rendererPlatformOverride?: NodeJS.Platform | null
 }
 
 export function createE2EConfig(input: E2EConfigInput): E2EConfig {
@@ -25,12 +28,18 @@ export function createE2EConfig(input: E2EConfigInput): E2EConfig {
     input.terminalParkingDelayMs > 0
       ? input.terminalParkingDelayMs
       : null
+  const rendererPlatformOverride = ['darwin', 'linux', 'win32'].includes(
+    input.rendererPlatformOverride ?? ''
+  )
+    ? (input.rendererPlatformOverride ?? null)
+    : null
 
   return {
     enabled: headless || exposeStore || userDataDir !== null,
     headless,
     exposeStore,
     userDataDir,
-    terminalParkingDelayMs
+    terminalParkingDelayMs,
+    rendererPlatformOverride
   }
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { TAB_DRAG_ACTIVATION_DISTANCE_PX } from '../tab-group/useTabDragSplit'
+import { TAB_DRAG_ACTIVATION_DISTANCE_PX } from '../tab-group/use-tab-drag-split'
 import { beginTabStripPointerGesture } from './tab-strip-pointer-gesture'
 
 /**

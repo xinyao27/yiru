@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   MOBILE_DICTATION_MAX_PENDING_AUDIO_BYTES,
   MobileDictationPendingAudioBudget

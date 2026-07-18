@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { applyAgentRowLineage } from '@/components/dashboard/agent-row-lineage'
 import type { TerminalLayoutSnapshot, TerminalTab, TuiAgent } from '../../../../shared/types'
 import { makePaneKey } from '../../../../shared/stable-pane-id'

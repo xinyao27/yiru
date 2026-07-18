@@ -1,7 +1,7 @@
 // End-to-end behavior of the track() wrapper against a mock PostHog. These
 // tests pin capture payload drift, shutdown gating, burst caps, consent order,
 // and the per-session event ceiling.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { CommonProps } from '../../shared/telemetry-events'
 import type { Store } from '../persistence'
 import { _setShuttingDownForTests, track, trackAppOpenedOnce } from './client'

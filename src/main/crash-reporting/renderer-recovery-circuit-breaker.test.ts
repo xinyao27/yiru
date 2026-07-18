@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   DEFAULT_RENDERER_RECOVERY_MAX_RECOVERIES,
   DEFAULT_RENDERER_RECOVERY_WINDOW_MS,

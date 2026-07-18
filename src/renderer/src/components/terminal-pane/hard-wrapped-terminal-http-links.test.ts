@@ -1,5 +1,5 @@
 import type { IBufferLine } from '@xterm/xterm'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { buildHardWrappedHttpLogicalLineCandidates } from './hard-wrapped-terminal-http-links'
 import {
   TERMINAL_HTTP_URL_MAX_HARD_WRAPPED_ROWS,

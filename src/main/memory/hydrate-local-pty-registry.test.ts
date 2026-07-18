@@ -10,7 +10,7 @@
  *     clobber that with `pid: null` from a pre-publish daemon listSessions.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { Repo } from '../../shared/types'
 import type { SessionInfo } from '../daemon/types'
 import type { DaemonPtyAdapter } from '../daemon/daemon-pty-adapter'

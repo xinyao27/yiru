@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events'
 import { resolve } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { encodePairingOffer, PAIRING_OFFER_VERSION } from '../../shared/pairing'
 
 const { spawnMock } = vi.hoisted(() => ({

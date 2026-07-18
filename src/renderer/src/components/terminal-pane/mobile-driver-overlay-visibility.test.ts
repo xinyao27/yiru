@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shouldShowMobileDriverOverlay } from './mobile-driver-overlay-visibility'
 
 describe('shouldShowMobileDriverOverlay', () => {

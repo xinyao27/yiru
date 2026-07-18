@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { extractLinearIssueReadItems, type LinearMobileIssue } from './linear-mobile-issue-read'
 
 function issue(id: string): LinearMobileIssue {

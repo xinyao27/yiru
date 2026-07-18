@@ -1,5 +1,5 @@
 import { createStore, type StoreApi } from 'zustand/vanilla'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import type { AppState } from '../types'
 import type { GitHubWorkItem, JiraIssue, Worktree } from '../../../../shared/types'
 import type { GitLabWorkItem } from '../../../../shared/gitlab-types'

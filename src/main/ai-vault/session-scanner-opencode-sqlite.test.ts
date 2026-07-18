@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import Database from '../sqlite/sync-database'
 import { buildOpenCodeSqliteCandidatePath } from './session-scanner-opencode-sqlite-paths'
 import { listOpenCodeSqliteSessions } from './session-scanner-opencode-sqlite-discovery'

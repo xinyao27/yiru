@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { createConnectionLogStore } from './connection-log-buffer'
 import type { ConnectionLogEntry } from './types'
 

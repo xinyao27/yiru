@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { AgentBrowserBridge } from '../browser/agent-browser-bridge'
 import type { RuntimeBrowserCommandHost } from './yiru-runtime-browser'
 

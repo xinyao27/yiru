@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { _resetValidatorWarnCacheForTests, validate } from './validator'
 
 describe('onboarding feature setup telemetry validation', () => {

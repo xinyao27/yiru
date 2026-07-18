@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { GIT_CAPABILITY_RETRY_INTERVAL_MS, GitCapabilityCache } from './git-capability-cache'
 
 describe('GitCapabilityCache', () => {

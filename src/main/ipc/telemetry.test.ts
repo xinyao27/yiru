@@ -6,7 +6,7 @@
 // and the one path that must NOT emit (`acknowledgeBanner`) has its own
 // channel and handler rather than being a flag on `setOptIn`.
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { GlobalSettings } from '../../shared/types'
 import type { Store } from '../persistence'
 

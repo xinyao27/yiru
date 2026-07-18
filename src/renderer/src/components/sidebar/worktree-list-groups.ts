@@ -843,7 +843,7 @@ function sortProjectEntries(
 
 /**
  * Build the flat row list consumed by the virtualizer.
- * Extracted here to keep WorktreeList.tsx under the line-count lint limit.
+ * Extracted here to keep worktree-list.tsx under the line-count lint limit.
  */
 export function buildRows(
   groupBy: WorktreeGroupBy,

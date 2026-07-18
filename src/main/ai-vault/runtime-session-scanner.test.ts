@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { AiVaultListResult, AiVaultSession } from '../../shared/ai-vault-types'
 
 const mocks = vi.hoisted(() => ({

@@ -1,7 +1,7 @@
 // Why: shared rig for autosave-controller suites — the controller needs a
 // real editor store slice plus a window stub (event target, timers, fs
 // bridge), and duplicating that per test file bloats suites past max-lines.
-import { vi } from 'vitest'
+import { vi } from 'vite-plus/test'
 import { createStore, type StoreApi } from 'zustand/vanilla'
 import { createEditorSlice } from '@/store/slices/editor'
 import type { AppState } from '@/store'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { createProgrammaticScrollMarks } from './programmatic-scroll-marks'
 
 const scrollEvent = (): Event => new Event('scroll')

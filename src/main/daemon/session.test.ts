@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { PRODUCER_PAUSE_FAILSAFE_MS, SESSION_FORCE_KILL_RETRY_MS, Session } from './session'
 import type { SessionState, ShellReadyState } from './types'
 import type { TuiAgent } from '../../shared/types'

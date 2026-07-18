@@ -7,7 +7,7 @@
  * so orphaned entries accumulated for the renderer's whole session. repoIds are
  * random UUIDs (never reused), so re-adding a repo cannot reclaim the old keys.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import { createTestStore, makeWorktree } from './store-test-helpers'
 import type { Repo, SparsePreset } from '../../../../shared/types'
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveNativeChatLeafTitleAgent } from './native-chat-leaf-title-agent'
 
 const panes = [

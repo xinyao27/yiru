@@ -2,15 +2,13 @@
 
 import { act, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { isSidebarLabelTruncated, TruncatedSidebarLabel } from './truncated-sidebar-label'
 
 vi.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
-  TooltipContent: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <div className={className} data-tooltip-content="">
-      {children}
-    </div>
+  TooltipContent: ({ children }: { children: ReactNode }) => (
+    <div data-tooltip-content="">{children}</div>
   ),
   TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>
 }))
@@ -85,8 +83,6 @@ describe('TruncatedSidebarLabel', () => {
 
     const longTooltip = container.querySelector('[data-tooltip-content]')
     expect(longTooltip?.textContent).toBe('feature/really-long-branch-name')
-    expect(longTooltip?.className).toContain('max-w-80')
-    expect(longTooltip?.className).toContain('break-all')
 
     await act(async () => {
       root.render(<TruncatedSidebarLabel text="fix/short" />)

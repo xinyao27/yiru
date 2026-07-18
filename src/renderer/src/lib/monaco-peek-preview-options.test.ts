@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type * as Monaco from 'monaco-editor'
 import { installMonacoPeekReferencesPreviewOptions } from './monaco-peek-preview-options'
 

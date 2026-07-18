@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import { agentKindToTuiAgent, tuiAgentToAgentKind } from './agent-kind'
 import { AGENT_KIND_VALUES, agentKindSchema } from './telemetry-events'

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { recordCreatedTerminalPaneSplit } from './terminal-pane-split-completion'
 
 const mocks = vi.hoisted(() => ({

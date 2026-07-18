@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   MARKDOWN_PREVIEW_SEARCH_QUERY_MAX_BYTES,
   findTextMatchRanges,

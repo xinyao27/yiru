@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { gitLabPipelineJobsToPRChecks } from './gitlab-pipeline-checks'
 import type { GitLabPipelineJob } from './types'
 

@@ -369,9 +369,10 @@ if (!useStableElectronName && process.env.YIRU_SKIP_DEV_ELECTRON_APP_PREPARE !==
 const electronViteCli =
   process.env.YIRU_ELECTRON_VITE_CLI ||
   path.join(path.dirname(require.resolve('electron-vite/package.json')), 'bin', 'electron-vite.js')
-const viteCli =
+const vitePlusCli =
+  process.env.YIRU_VITE_PLUS_CLI ||
   process.env.YIRU_VITE_CLI ||
-  path.join(path.dirname(require.resolve('vite/package.json')), 'bin', 'vite.js')
+  path.join(path.dirname(require.resolve('vite-plus/package.json')), 'bin', 'vp')
 
 function getMtimeMs(filePath) {
   try {
@@ -441,7 +442,7 @@ function prepareDevWebClient() {
   console.error('[yiru-dev] Building web client for pairing...')
   execFileSync(
     process.execPath,
-    [viteCli, 'build', '--config', path.join(repoRoot, 'vite.web.config.ts')],
+    [vitePlusCli, 'build', '--config', path.join(repoRoot, 'vite.web.config.ts')],
     {
       cwd: repoRoot,
       stdio: 'inherit',

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { toast } from 'sonner'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
 import { openMobileEmulatorTab } from './open-mobile-emulator-tab'

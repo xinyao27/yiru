@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getWorktreePaletteSearchScope, searchWorktrees } from './worktree-palette-search'
 import {
   WORKTREE_PALETTE_QUERY_MAX_BYTES,

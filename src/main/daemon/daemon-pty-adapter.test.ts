@@ -1,5 +1,5 @@
 /* oxlint-disable max-lines */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { mkdtempSync, mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs'

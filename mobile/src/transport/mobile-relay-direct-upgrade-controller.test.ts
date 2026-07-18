@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { MobileRelayDirectUpgradeController } from './mobile-relay-direct-upgrade-controller'
 import type { MobileRelayDirectUpgradeResult } from './mobile-relay-direct-upgrade'
 import type { StableLogicalRpcClient } from './stable-logical-rpc-client'

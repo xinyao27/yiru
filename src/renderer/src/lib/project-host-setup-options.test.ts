@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getExecutionHostLabel, type ExecutionHostId } from '../../../shared/execution-host'
 import type { ExecutionHostRegistryEntry } from '../../../shared/execution-host-registry'
 import {

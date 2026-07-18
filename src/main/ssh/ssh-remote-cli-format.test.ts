@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { RpcResponse } from '../runtime/rpc/core'
 import { formatRemoteCli } from './ssh-remote-cli-format'
 

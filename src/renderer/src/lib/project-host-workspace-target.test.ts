@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { ExecutionHostId } from '../../../shared/execution-host'
 import type { Project, ProjectHostSetup, Repo } from '../../../shared/types'
 import {

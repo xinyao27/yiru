@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import * as path from 'node:path'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as GitRunner from './runner'
 
 // Why: spy on the git runner so we can count rev-parse invocations while still

@@ -1,5 +1,5 @@
 import { Script, createContext } from 'node:vm'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   TERMINAL_FILE_LINK_TAP_CONFORMANCE_CASES,
   columnForTerminalFileLinkTap

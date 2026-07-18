@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { SleepingAgentSessionRecord } from '../../../../shared/agent-session-resume'
 import type { TerminalTab } from '../../../../shared/types'
 import {

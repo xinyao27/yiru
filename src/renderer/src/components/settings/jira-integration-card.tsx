@@ -6,9 +6,9 @@ import {
 } from '@phosphor-icons/react'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { JiraConnectDialog } from '@/components/jira-connect-dialog'
-import { JiraIcon } from '@/components/icons/JiraIcon'
+import { JiraIcon } from '@/components/icons/jira-icon'
 import { Button } from '@/components/ui/button'
-import { useMountedRef } from '@/hooks/useMountedRef'
+import { useMountedRef } from '@/hooks/use-mounted-ref'
 import {
   getProviderRuntimeContextKey,
   hasRemoteProviderRuntime
@@ -17,7 +17,7 @@ import { useAppStore } from '@/store'
 import { IntegrationCardDetails, IntegrationCardShell } from './integration-card-shell'
 import { useIntegrationSubordinateRowClass } from './integration-card-presentation'
 import { getProviderAccountScope } from './provider-account-scope'
-import { ProviderHostScopeControl } from './ProviderHostScopeControl'
+import { ProviderHostScopeControl } from './provider-host-scope-control'
 import { translate } from '@/i18n/i18n'
 
 type VerificationResult = { state: 'ok' | 'error'; error?: string }
@@ -149,7 +149,7 @@ export function JiraIntegrationCard(): React.JSX.Element {
                     </p>
                   </div>
                   {testResult?.state === 'ok' ? (
-                    <span className="flex shrink-0 items-center gap-1 text-xs text-status-success">
+                    <span className="flex shrink-0 items-center gap-1 text-xs text-green-700 dark:text-green-300">
                       <CheckCircle2 className="size-3.5" />
                       {translate(
                         'auto.components.settings.task.tracker.integration.cards.a2c0015fb8',

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 describe('PTY startup barrier ordering', () => {
   it('waits for local startup before resolving the provider for runtime and renderer spawns', () => {

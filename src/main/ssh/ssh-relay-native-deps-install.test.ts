@@ -4,7 +4,7 @@
 // silent. Tests below pin the parts that, individually, would have caught
 // it.
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 vi.mock('electron', () => ({
   app: { getAppPath: () => '/mock/app' }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { HeadlessEmulator } from './headless-emulator'
 
 // Why these oracles: agent TUIs position the cursor assuming the widths the

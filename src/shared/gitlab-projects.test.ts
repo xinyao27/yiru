@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { computeNextGitLabRecents, GITLAB_RECENTS_MAX } from './gitlab-projects'
 
 describe('computeNextGitLabRecents', () => {

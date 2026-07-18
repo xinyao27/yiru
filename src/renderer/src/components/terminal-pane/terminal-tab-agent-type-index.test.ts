@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
 import { createTerminalTabAgentTypeSelector } from './terminal-tab-agent-type-index'
 

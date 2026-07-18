@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vite-plus/test'
 import type { Store } from '../persistence'
 import type { GlobalSettings } from '../../shared/types'
 import { generateInstallId, readInstallId } from './install-id'

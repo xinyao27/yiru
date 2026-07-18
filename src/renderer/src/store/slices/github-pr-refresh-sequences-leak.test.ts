@@ -8,7 +8,7 @@
  * session. The fix caps it to MAX_CACHE_ENTRIES, evicting the oldest-touched
  * keys (the writer moves each touched key to the most-recent position).
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import { create } from 'zustand'
 import { createGitHubSlice } from './github'
 import { createHostedReviewSlice } from './hosted-review'

@@ -23,5 +23,7 @@ export const preloadE2EConfig = createE2EConfig({
   userDataDir: process.env.YIRU_E2E_USER_DATA_DIR ?? null,
   // Why: Number('') is 0 and Number(undefined) is NaN; both coerce to null so
   // only a real positive override reaches the renderer parking policy.
-  terminalParkingDelayMs: Number(process.env.YIRU_E2E_TERMINAL_PARKING_DELAY_MS) || null
+  terminalParkingDelayMs: Number(process.env.YIRU_E2E_TERMINAL_PARKING_DELAY_MS) || null,
+  rendererPlatformOverride:
+    (process.env.YIRU_E2E_RENDERER_PLATFORM as NodeJS.Platform | undefined) ?? null
 })

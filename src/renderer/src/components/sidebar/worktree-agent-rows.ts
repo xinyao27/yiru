@@ -1,4 +1,4 @@
-import type { DashboardAgentRow } from '@/components/dashboard/useDashboardData'
+import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
 import { isExplicitAgentStatusFresh } from '@/lib/agent-status'
 import type { RetainedAgentEntry } from '@/store/slices/agent-status'
 import {

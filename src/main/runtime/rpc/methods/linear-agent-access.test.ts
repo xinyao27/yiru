@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { RpcDispatcher } from '../dispatcher'
 import type { RpcRequest } from '../core'
 import { YiruRuntimeService } from '../../yiru-runtime'

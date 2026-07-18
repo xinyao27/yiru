@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { pickResumeWorktree } from './resume-worktree'
 
 const wt = (id: string, extra: { isActive?: boolean; lastOutputAt?: number } = {}) => ({

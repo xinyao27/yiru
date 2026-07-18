@@ -1,4 +1,4 @@
-import type { DashboardAgentRow } from '@/components/dashboard/useDashboardData'
+import type { DashboardAgentRow } from '@/components/dashboard/use-dashboard-data'
 import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
 import type { TerminalTab } from '../../../../shared/types'
 

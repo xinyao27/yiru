@@ -1,0 +1,121 @@
+// @vitest-environment happy-dom
+
+import '@testing-library/jest-dom/vitest'
+
+import { cleanup, render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
+
+vi.mock('@/i18n/i18n', () => ({
+  translate: (_key: string, fallback: string) => fallback
+}))
+
+vi.mock('./network-interface-picker', () => ({
+  NetworkInterfacePicker: () => null
+}))
+
+vi.mock('../settings/mobile-pairing-connection-options', () => ({
+  MobilePairingConnectionOptions: () => null
+}))
+
+vi.mock('./windows-firewall-notice', () => ({
+  WindowsFirewallNotice: () => null
+}))
+
+import { HeroFlow, type StepIndex } from './mobile-hero'
+
+class MockResizeObserver {
+  observe = vi.fn()
+  disconnect = vi.fn()
+}
+
+describe('HeroFlow height', () => {
+  const originalScrollHeight = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    'scrollHeight'
+  )
+
+  beforeEach(() => {
+    vi.stubGlobal('ResizeObserver', MockResizeObserver)
+    Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
+      configurable: true,
+      get() {
+        return this.textContent?.includes('Step 1 of 2') ? 300 : 520
+      }
+    })
+  })
+
+  afterEach(() => {
+    cleanup()
+    vi.unstubAllGlobals()
+    if (originalScrollHeight) {
+      Object.defineProperty(HTMLElement.prototype, 'scrollHeight', originalScrollHeight)
+    }
+  })
+
+  function renderFlow(stepIdx: StepIndex) {
+    return render(
+      <HeroFlow
+        stepIdx={stepIdx}
+        installQrUrl={null}
+        installCopy={{ ctaLabel: 'View mobile builds', url: 'https://example.com' }}
+        onOpenInstallUrl={vi.fn()}
+        onCopyInstallUrl={vi.fn()}
+        pairQrDataUrl={null}
+        pairingUrl={null}
+        pairLoading={false}
+        connectionMode="automatic"
+        onConnectionModeChange={vi.fn()}
+        onRegeneratePairing={vi.fn()}
+        onCopyPairingCode={vi.fn()}
+        networkInterfaces={[]}
+        selectedAddress={undefined}
+        onSelectedAddressChange={vi.fn()}
+        onRefreshNetworkInterfaces={vi.fn()}
+        refreshingNetworkInterfaces={false}
+        onBack={vi.fn()}
+        onContinue={vi.fn()}
+      />
+    )
+  }
+
+  it('shows one neutral release link without fake platform or channel choices', () => {
+    renderFlow(0)
+
+    expect(screen.getByRole('button', { name: 'View mobile builds' })).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'iOS' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Android' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: 'Preview' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: 'Stable' })).not.toBeInTheDocument()
+  })
+
+  it('marks the inactive step inert when navigation changes', () => {
+    const { rerender } = renderFlow(0)
+    expect(screen.getByText('Step 2 of 2').closest('[aria-hidden]')).toHaveAttribute('inert')
+
+    rerender(
+      <HeroFlow
+        stepIdx={1}
+        installQrUrl={null}
+        installCopy={{ ctaLabel: 'View mobile builds', url: 'https://example.com' }}
+        onOpenInstallUrl={vi.fn()}
+        onCopyInstallUrl={vi.fn()}
+        pairQrDataUrl={null}
+        pairingUrl={null}
+        pairLoading={false}
+        connectionMode="automatic"
+        onConnectionModeChange={vi.fn()}
+        onRegeneratePairing={vi.fn()}
+        onCopyPairingCode={vi.fn()}
+        networkInterfaces={[]}
+        selectedAddress={undefined}
+        onSelectedAddressChange={vi.fn()}
+        onRefreshNetworkInterfaces={vi.fn()}
+        refreshingNetworkInterfaces={false}
+        onBack={vi.fn()}
+        onContinue={vi.fn()}
+      />
+    )
+
+    expect(screen.getByText('Step 1 of 2').closest('[aria-hidden]')).toHaveAttribute('inert')
+  })
+})

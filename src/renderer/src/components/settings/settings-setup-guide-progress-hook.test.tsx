@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { FeatureWallSetupProgress } from '../feature-wall/feature-wall-setup-progress'
 import { useSettingsSetupGuideProgress } from './settings-setup-guide-progress'
 

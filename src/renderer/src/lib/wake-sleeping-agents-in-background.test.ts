@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   BACKGROUND_MOUNT_TERMINAL_WORKTREE_EVENT,
   WAKE_HIBERNATED_AGENTS_WORKTREE_EVENT,

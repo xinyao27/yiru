@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { createTestStore } from './store-test-helpers'
 
 // Why: paneKeys are generated from `${tabId}:${paneId}`, and both ids are

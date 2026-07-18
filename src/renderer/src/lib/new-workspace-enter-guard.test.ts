@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, it, expect } from 'vitest'
+import { afterEach, beforeEach, describe, it, expect } from 'vite-plus/test'
 import {
   shouldAllowComposerEnterSubmitTarget,
   shouldSuppressEnterSubmit

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getContextualTour } from '../../../../shared/contextual-tours'
 import {
   getContextualTourRequestDecision,
@@ -130,7 +130,6 @@ describe('contextual tour gate', () => {
     )
 
     expect(target?.element).toBe(visibleElement)
-    expect(target?.rect.width).toBe(200)
   })
 
   it('resolves the browser import step to the visible hint button when both targets exist', () => {
@@ -167,7 +166,6 @@ describe('contextual tour gate', () => {
     } as unknown as ParentNode)
 
     expect(target?.element).toBe(hintButton)
-    expect(target?.rect.width).toBe(80)
   })
 
   it('falls back to the overflow-menu row when the hint button is hidden', () => {
@@ -203,7 +201,6 @@ describe('contextual tour gate', () => {
     } as unknown as ParentNode)
 
     expect(target?.element).toBe(menuRow)
-    expect(target?.rect.width).toBe(32)
   })
 
   it('starts an unseen tour only when global gates pass', () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isMacAppDataPath, shouldPollActiveGitStatus } from './passive-macos-app-data-access'
 import type { ActiveRightSidebarTab, OpenFile } from '@/store/slices/editor'
 

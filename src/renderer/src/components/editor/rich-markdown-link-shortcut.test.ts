@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { Editor } from '@tiptap/core'
 import { NodeSelection, TextSelection } from '@tiptap/pm/state'
 import { encodeRawMarkdownHtmlForRichEditor } from './raw-markdown-html'

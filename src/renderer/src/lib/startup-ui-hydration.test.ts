@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { getDefaultUIState } from '../../../shared/constants'
 import type { PersistedUIState } from '../../../shared/types'
 import {

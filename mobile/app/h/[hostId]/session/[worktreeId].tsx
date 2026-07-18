@@ -72,9 +72,9 @@ import {
   panelRouteDescriptor
 } from '../../../../src/session/session-panel-host'
 import { useMobilePrBranchContext } from '../../../../src/session/use-mobile-pr-branch-context'
-import { SessionDockColumn } from '../../../../src/session/SessionDockColumn'
-import { MobileSessionHeaderIconButton } from '../../../../src/session/MobileSessionHeaderIconButton'
-import { MobileSessionHeaderMoreActionsSheet } from '../../../../src/session/MobileSessionHeaderMoreActionsSheet'
+import { SessionDockColumn } from '../../../../src/session/session-dock-column'
+import { MobileSessionHeaderIconButton } from '../../../../src/session/mobile-session-header-icon-button'
+import { MobileSessionHeaderMoreActionsSheet } from '../../../../src/session/mobile-session-header-more-actions-sheet'
 import { MOBILE_AI_VAULT_CAPABILITY } from '../../../../src/agent-history/agent-history-capability'
 import type { ConnectionState, RpcFailure, RpcSuccess } from '../../../../src/transport/types'
 import { headlessActivationNeedsHostRenderer } from '../../../../src/worktree/worktree-activation-result'
@@ -126,21 +126,21 @@ import {
   recoverActiveTerminalAfterForeground,
   shouldRecoverTerminalOnAppStateChange
 } from '../../../../src/terminal/terminal-foreground-recovery'
-import { MobileBrowserPane } from '../../../../src/browser/MobileBrowserPane'
+import { MobileBrowserPane } from '../../../../src/browser/mobile-browser-pane'
 import { normalizeBrowserUrl } from '../../../../src/browser/browser-url'
-import { StatusDot } from '../../../../src/components/StatusDot'
-import { ActionSheetModal } from '../../../../src/components/ActionSheetModal'
-import { MobileAgentIcon } from '../../../../src/components/MobileAgentIcon'
-import { TextInputModal } from '../../../../src/components/TextInputModal'
-import { ConfirmModal } from '../../../../src/components/ConfirmModal'
-import { MobileRichMarkdownEditor } from '../../../../src/components/MobileRichMarkdownEditor'
-import { MobileSyntaxSegments } from '../../../../src/components/MobileSyntaxSegments'
+import { StatusDot } from '../../../../src/components/status-dot'
+import { ActionSheetModal } from '../../../../src/components/action-sheet-modal'
+import { MobileAgentIcon } from '../../../../src/components/mobile-agent-icon'
+import { TextInputModal } from '../../../../src/components/text-input-modal'
+import { ConfirmModal } from '../../../../src/components/confirm-modal'
+import { MobileRichMarkdownEditor } from '../../../../src/components/mobile-rich-markdown-editor'
+import { MobileSyntaxSegments } from '../../../../src/components/mobile-syntax-segments'
 import {
   CustomKeyModal,
   loadCustomKeys,
   saveCustomKeys,
   type CustomKey
-} from '../../../../src/components/CustomKeyModal'
+} from '../../../../src/components/custom-key-modal'
 import {
   addMobileDiffComment,
   formatDiffComments,
@@ -174,8 +174,8 @@ import { useMobileImageAttachment } from '../../../../src/session/use-mobile-ima
 import { useMobileAttachmentInputLeaseGate } from '../../../../src/session/use-mobile-attachment-input-lease-gate'
 import { useMobileTerminalPaste } from '../../../../src/session/use-mobile-terminal-paste'
 import { useTerminalLiveInputModePreference } from '../../../../src/session/use-terminal-live-input-mode-preference'
-import { MobileTerminalLiveInputStatus } from '../../../../src/session/MobileTerminalLiveInputStatus'
-import { MobileTerminalInputActions } from '../../../../src/session/MobileTerminalInputActions'
+import { MobileTerminalLiveInputStatus } from '../../../../src/session/mobile-terminal-live-input-status'
+import { MobileTerminalInputActions } from '../../../../src/session/mobile-terminal-input-actions'
 import { resolveMobileFileTabDoc } from '../../../../src/files/mobile-file-tab-doc'
 import { openMobileTerminalFileTap } from '../../../../src/session/mobile-terminal-file-tap-open'
 import { useLiveWorktreeName } from '../../../../src/session/use-live-worktree-name'
@@ -189,15 +189,15 @@ import {
   buildMarkdownDiskFallbackDoc,
   shouldReadMarkdownFromDiskAfterReadTabFailure
 } from '../../../../src/session/mobile-markdown-disk-fallback'
-import { MobileHtmlPreview } from '../../../../src/components/MobileHtmlPreview'
-import { MobileDictationSetupSheet } from '../../../../src/components/MobileDictationSetupSheet'
+import { MobileHtmlPreview } from '../../../../src/components/mobile-html-preview'
+import { MobileDictationSetupSheet } from '../../../../src/components/mobile-dictation-setup-sheet'
 import {
   fetchDictationSetup,
   isDictationSetupRequiredError
 } from '../../../../src/dictation/mobile-dictation-setup'
-import { TerminalPaneView } from '../../../../src/session/TerminalPaneView'
-import { MobileNativeChatOverlay } from '../../../../src/session/MobileNativeChatOverlay'
-import { MobileBrowserTabActionSheet } from '../../../../src/session/MobileBrowserTabActionSheet'
+import { TerminalPaneView } from '../../../../src/session/terminal-pane-view'
+import { MobileNativeChatOverlay } from '../../../../src/session/mobile-native-chat-overlay'
+import { MobileBrowserTabActionSheet } from '../../../../src/session/mobile-browser-tab-action-sheet'
 import { useMobileNativeChatController } from '../../../../src/session/use-mobile-native-chat-controller'
 import { useMobileNativeChatReadability } from '../../../../src/session/use-mobile-native-chat-readability'
 import { useMobileNativeChatInputLease } from '../../../../src/session/use-mobile-native-chat-input-lease'

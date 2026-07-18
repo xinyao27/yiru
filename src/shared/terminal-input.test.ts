@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   TERMINAL_INPUT_CHUNK_MAX_BYTES,
   TERMINAL_INPUT_TOO_LARGE_ERROR,

@@ -2,9 +2,9 @@
 
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { FileExplorerVirtualRows } from './FileExplorerVirtualRows'
-import { useFileExplorerHandlers } from './useFileExplorerHandlers'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
+import { FileExplorerVirtualRows } from './file-explorer-virtual-rows'
+import { useFileExplorerHandlers } from './use-file-explorer-handlers'
 import { createFileExplorerRowProjection } from './file-explorer-row-projection'
 import { FILE_EXPLORER_DRAGGABLE_SELECTOR } from './file-explorer-drag-scroll-marker'
 import type { TreeNode } from './file-explorer-types'

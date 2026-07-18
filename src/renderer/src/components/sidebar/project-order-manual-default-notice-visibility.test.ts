@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveProjectOrderManualDefaultNoticeDismissed } from '../../../../shared/project-order-manual-default-notice'
 import { shouldShowProjectOrderManualDefaultNotice } from './project-order-manual-default-notice-visibility'
 

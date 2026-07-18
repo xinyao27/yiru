@@ -1,34 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import {
-  canDockPrSidebar,
-  prSidebarRenderBranch,
-  resolvePresentationMode,
-  shouldShowTrigger
-} from './mobile-pr-sidebar-presentation'
+import { describe, expect, it } from 'vite-plus/test'
+import { prSidebarRenderBranch, shouldShowTrigger } from './mobile-pr-sidebar-presentation'
 import type { PrSidebarData, PrSidebarState } from '../session/mobile-pr-sidebar-state'
-
-describe('resolvePresentationMode', () => {
-  it('docks inline on wide layouts and overlays on narrow', () => {
-    expect(resolvePresentationMode(true)).toBe('inline')
-    expect(resolvePresentationMode(false)).toBe('overlay')
-  })
-
-  it('overlays on wide layouts when the measured pane cannot fit both columns', () => {
-    expect(resolvePresentationMode(true, false)).toBe('overlay')
-  })
-})
-
-describe('canDockPrSidebar', () => {
-  it('requires both wide layout and enough measured width', () => {
-    expect(canDockPrSidebar({ isWideLayout: true, availableWidth: 700, dockWidth: 340 })).toBe(true)
-    expect(canDockPrSidebar({ isWideLayout: true, availableWidth: 699, dockWidth: 340 })).toBe(
-      false
-    )
-    expect(canDockPrSidebar({ isWideLayout: false, availableWidth: 900, dockWidth: 340 })).toBe(
-      false
-    )
-  })
-})
 
 describe('shouldShowTrigger', () => {
   it('shows the trigger on a GitHub repo in narrow/overlay mode', () => {

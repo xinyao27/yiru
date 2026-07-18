@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import { parseWorkspaceSession } from './workspace-session-schema'
 import { MAX_BROWSER_HISTORY_ENTRIES } from './workspace-session-browser-history'
 

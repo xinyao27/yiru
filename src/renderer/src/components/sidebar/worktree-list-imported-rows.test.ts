@@ -1,10 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   canKeepImportedWorktreesHidden,
   getRenderRowKey,
   getWorktreeDragGroups,
   renderRowContainsWorktree
-} from './WorktreeList'
+} from './worktree-list'
 import type { Repo, Worktree } from '../../../../shared/types'
 import type { Row } from './worktree-list-groups'
 

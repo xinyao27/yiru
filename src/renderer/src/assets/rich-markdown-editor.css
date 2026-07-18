@@ -216,7 +216,7 @@
 
 .rich-markdown-annotation-selection {
   border-radius: 2px;
-  background: color-mix(in srgb, var(--annotation-highlight) 22%, transparent);
+  background: color-mix(in srgb, var(--color-amber-500) 22%, transparent);
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
@@ -227,17 +227,17 @@
 
 @keyframes rich-markdown-source-attention {
   0% {
-    background: color-mix(in srgb, var(--annotation-highlight) 44%, transparent);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--annotation-highlight) 16%, transparent);
+    background: color-mix(in srgb, var(--color-amber-500) 44%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-amber-500) 16%, transparent);
   }
 
   42% {
-    background: color-mix(in srgb, var(--annotation-highlight) 34%, transparent);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--annotation-highlight) 12%, transparent);
+    background: color-mix(in srgb, var(--color-amber-500) 34%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-amber-500) 12%, transparent);
   }
 
   100% {
-    background: color-mix(in srgb, var(--annotation-highlight) 22%, transparent);
+    background: color-mix(in srgb, var(--color-amber-500) 22%, transparent);
     box-shadow: none;
   }
 }
@@ -489,11 +489,11 @@
 .rich-markdown-search-match {
   padding: 0;
   border-radius: 2px;
-  background: color-mix(in srgb, #facc15 50%, transparent);
+  background: color-mix(in srgb, var(--color-yellow-400) 50%, transparent);
 }
 
 .rich-markdown-search-match[data-active='true'] {
-  background: color-mix(in srgb, #38bdf8 50%, transparent);
+  background: color-mix(in srgb, var(--color-orange-400) 60%, transparent);
 }
 
 .rich-markdown-editor {

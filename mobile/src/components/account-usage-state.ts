@@ -3,7 +3,7 @@
 // the mobile bundle must not pull in Electron-coupled type files.
 //
 // Pure state/selectors live here (no React Native imports) so they can be
-// unit-tested directly; AccountUsage.tsx re-exports them alongside the
+// unit-tested directly; account-usage.tsx re-exports them alongside the
 // UsageBar component.
 import { formatResetCountdown } from '../../../src/shared/rate-limit-reset-format'
 

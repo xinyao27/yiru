@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   MAX_TERMINAL_LINE_HEIGHT,
   MIN_TERMINAL_LINE_HEIGHT,

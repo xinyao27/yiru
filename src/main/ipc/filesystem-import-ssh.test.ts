@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { constants } from 'node:fs'
 import { Readable, Writable } from 'node:stream'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { FileUploadSession, IFilesystemProvider } from '../providers/types'
 
 const handlers = new Map<string, (_event: unknown, args: unknown) => Promise<unknown>>()

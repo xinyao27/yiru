@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { PaneManager } from '@/lib/pane-manager/pane-manager'
 import { fitAndFocusPanes, isWindowsUserAgent, shellEscapePath } from './pane-helpers'
 

@@ -1,5 +1,5 @@
 import { performance } from 'node:perf_hooks'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import { extractTerminalFileLinks, extractTerminalFileLinkCandidates } from './terminal-links'
 
 // Regression guard for #5970: a full-screen TUI (e.g. ngrok run through Windows

@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { TabGroup, TabGroupLayoutNode } from '../../../../shared/types'
-import type { TabDragItemData } from './useTabDragSplit'
+import type { TabDragItemData } from './use-tab-drag-split'
 import {
   captureTabGroupPanelGeometrySnapshot,
   findTabGroupPanelUnderPointer,

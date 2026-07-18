@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { createFileExplorerDirLoadTracker } from './file-explorer-dir-load-tracker'
 
 describe('createFileExplorerDirLoadTracker', () => {

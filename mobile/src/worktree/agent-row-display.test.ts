@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { RuntimeWorktreeAgentRow } from '../../../src/shared/runtime-types'
 import {
   AGENT_STATUS_STALE_AFTER_MS,

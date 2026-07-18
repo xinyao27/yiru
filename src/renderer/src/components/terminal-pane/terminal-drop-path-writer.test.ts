@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { wrapTerminalBracketedPasteText } from './terminal-bracketed-paste'
 import { writeTerminalDropPathsToCapturedTarget } from './terminal-drop-path-writer'
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { normalizeMatchQuery, scoreQueryTokens, tokenizeMatchValue } from './query-token-match'
 
 describe('query token match', () => {

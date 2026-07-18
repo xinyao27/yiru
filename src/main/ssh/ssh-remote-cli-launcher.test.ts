@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { createRemoteCliInstallPlan } from './ssh-remote-cli-launcher'
 import { getRemoteHostPlatform } from './ssh-remote-platform'
 

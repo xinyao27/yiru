@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { createPtySizeReassertion } from './pty-size-reassertion'
 
 async function flushAsyncTicks(count = 3): Promise<void> {

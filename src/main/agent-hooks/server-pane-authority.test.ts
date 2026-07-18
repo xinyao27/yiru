@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { makePaneKey } from '../../shared/stable-pane-id'
 import { AgentHookServer, PANE_KEY_ALIASES_MAX } from './server'
 

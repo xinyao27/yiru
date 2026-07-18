@@ -1,8 +1,8 @@
 import type { editor } from 'monaco-editor'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { setupContextualCopy } from './setup-contextual-copy'
 
-vi.mock('@/hooks/useShortcutLabel', () => ({
+vi.mock('@/hooks/use-shortcut-label', () => ({
   formatShortcutLabel: () => 'Copy Context'
 }))
 

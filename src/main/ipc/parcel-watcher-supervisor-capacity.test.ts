@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { WATCHER_PROCESS_EXIT_DEADLINE_MS } from './parcel-watcher-child-termination'
 import {
   MAX_PHYSICAL_WATCHER_CHILDREN,

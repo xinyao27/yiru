@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
@@ -10,7 +10,7 @@ import {
   getStatusBarPreferredWslDistro,
   resolveClaudeStatusAccountState,
   resolveCodexStatusAccountState
-} from './StatusBar'
+} from './status-bar'
 
 const hostLabel = navigator.userAgent.includes('Windows') ? 'Windows' : 'This device'
 

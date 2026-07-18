@@ -14,8 +14,8 @@ import { loadHosts } from '../src/transport/host-store'
 import type { HostProfile } from '../src/transport/types'
 import { useAllHostClients } from '../src/transport/client-context'
 import type { RpcClient } from '../src/transport/rpc-client'
-import { PickerModal, type PickerOption } from '../src/components/PickerModal'
-import { TerminalShortcutSettings } from '../src/components/TerminalShortcutSettings'
+import { PickerModal, type PickerOption } from '../src/components/picker-modal'
+import { TerminalShortcutSettings } from '../src/components/terminal-shortcut-settings'
 import { setTerminalAutoRestoreFitMsForHost } from '../src/terminal/terminal-auto-restore-fit-state'
 import {
   loadTerminalAutocompleteEnabled,

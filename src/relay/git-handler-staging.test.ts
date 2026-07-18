@@ -3,7 +3,7 @@
  *
  * Why: split from git-handler.test.ts to stay under the oxlint max-lines (300) limit.
  */
-import { describe, expect, it, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, beforeEach, afterEach } from 'vite-plus/test'
 import * as path from 'node:path'
 import * as fs from 'node:fs/promises'
 import { mkdtempSync, writeFileSync } from 'node:fs'

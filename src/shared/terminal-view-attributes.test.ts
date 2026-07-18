@@ -4,7 +4,7 @@
  * main's replies for hidden PTYs must be byte-identical to a visible
  * renderer xterm's.
  */
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   formatXColorRgbSpec,
   parseXColorSpec,

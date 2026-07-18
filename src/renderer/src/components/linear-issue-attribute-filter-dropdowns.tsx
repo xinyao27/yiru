@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Funnel as ListFilter, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useTeamLabels, useTeamMembers, useTeamStates } from '@/hooks/useIssueMetadata'
+import { useTeamLabels, useTeamMembers, useTeamStates } from '@/hooks/use-issue-metadata'
 import type { RuntimeLinearSettings } from '@/runtime/runtime-linear-client'
 import { translate } from '@/i18n/i18n'
 import {

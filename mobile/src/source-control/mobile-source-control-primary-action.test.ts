@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { resolveSourceControlCommitAreaPrimaryActionDecision } from '../../../src/shared/source-control-primary-action-decision'
 import {
   resolveMobileSourceControlCommitAreaPrimaryActionDecision,

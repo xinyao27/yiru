@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import {
   WORKSPACE_STATUS_DRAG_ID_MAX_COUNT,
   WORKSPACE_STATUS_DRAG_IDS_TYPE,

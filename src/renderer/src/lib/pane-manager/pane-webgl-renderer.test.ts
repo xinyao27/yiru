@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { WebglAddon } from '@xterm/addon-webgl'
 import type { ManagedPaneInternal } from './pane-manager-types'
 import {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { TerminalTab, Worktree } from '../../../shared/types'
 import { getUnreadBadgeCount } from './unread-badge-count'
 

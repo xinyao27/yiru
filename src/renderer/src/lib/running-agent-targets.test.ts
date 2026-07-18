@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AppState } from '@/store/types'
 import type { AgentStatusEntry, AgentStatusState } from '../../../shared/agent-status-types'
 import type { TerminalTab } from '../../../shared/types'

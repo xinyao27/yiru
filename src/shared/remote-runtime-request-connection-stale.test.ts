@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import WebSocket from 'ws'
 import type { PairingOffer } from './pairing'
 import { decrypt, encrypt } from './e2ee-crypto'

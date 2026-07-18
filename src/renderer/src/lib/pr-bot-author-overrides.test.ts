@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { applyPRBotAuthorOverride } from '../../../shared/pr-bot-author-overrides'
 
 const store = vi.hoisted(() => ({

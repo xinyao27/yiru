@@ -8,7 +8,7 @@
  * space is unbounded over a long multi-agent/SSH session. The only shrink path was the
  * test-only clear. (The sibling `breadcrumbs` array is already bounded to 30.)
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   recordCoalescedCrashBreadcrumb,
   clearCrashBreadcrumbsForTest,

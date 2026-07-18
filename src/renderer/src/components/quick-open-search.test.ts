@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   QUICK_OPEN_QUERY_MAX_BYTES,
   QUICK_OPEN_RESULT_LIMIT,
@@ -84,7 +84,7 @@ describe('quick-open-search', () => {
 
   it('indexes normalized relative paths without changing path semantics', () => {
     const files = [
-      'src/renderer/src/components/QuickOpen.tsx',
+      'src/renderer/src/components/quick-open.tsx',
       'packages/windows-origin/src/App.tsx',
       'single-file.ts',
       'legacy\\provider\\raw-path.ts'
@@ -92,9 +92,9 @@ describe('quick-open-search', () => {
 
     expect(prepareQuickOpenFiles(files)).toEqual([
       {
-        path: 'src/renderer/src/components/QuickOpen.tsx',
-        lowerPath: 'src/renderer/src/components/quickopen.tsx',
-        lowerFilename: 'quickopen.tsx',
+        path: 'src/renderer/src/components/quick-open.tsx',
+        lowerPath: 'src/renderer/src/components/quick-open.tsx',
+        lowerFilename: 'quick-open.tsx',
         inputIndex: 0
       },
       {

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 // Benchmark harness for the terminal performance initiative: measures the
 // scheduler-imposed drain ceiling in isolation. A mock terminal parses

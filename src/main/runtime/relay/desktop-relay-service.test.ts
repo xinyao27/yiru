@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { MobilePairingConnectionContext } from '../runtime-rpc'
 import { DesktopRelayService, pairingAuthorizationForContext } from './desktop-relay-service'
 

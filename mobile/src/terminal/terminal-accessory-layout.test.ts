@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 import {
   TERMINAL_ACCESSORY_LAYOUT_STORAGE_KEY,

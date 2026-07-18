@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { createNewIssueDraftSlice } from './new-issue-draft'
 import type { AppState } from '../types'
 import type { GitHubAssignableUser } from '../../../../shared/types'

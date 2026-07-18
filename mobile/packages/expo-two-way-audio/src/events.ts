@@ -1,4 +1,4 @@
-import ExpoTwoWayAudioModule from './ExpoTwoWayAudioModule'
+import ExpoTwoWayAudioModule from './expo-two-way-audio-module'
 
 export interface MicrophoneDataEvent {
   data: Uint8Array

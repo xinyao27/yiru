@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
 import { resolveNativeChatSession } from './native-chat-pane-resolution'
 import { findTabAgentEntry } from './native-chat-tab-agent-entry'

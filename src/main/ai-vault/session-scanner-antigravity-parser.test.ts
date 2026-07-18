@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { parseAntigravitySessionContent } from './session-scanner-antigravity-parser'
 import type { FileWithMtime } from './session-scanner-types'
 import { jsonLines } from './session-scanner-test-fixtures'

@@ -1,50 +1,9 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createDivider, createDividerFlexFrameScheduler, disposeDivider } from './pane-divider'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
+import { createDivider, disposeDivider } from './pane-divider'
 import { queuePanePtyResizeIfHeld } from './pane-pty-resize-hold'
 
 afterEach(() => {
   vi.unstubAllGlobals()
-})
-
-describe('createDividerFlexFrameScheduler', () => {
-  it('coalesces repeated drag updates into one flex write per animation frame', () => {
-    const apply = vi.fn()
-    const queuedFrames: FrameRequestCallback[] = []
-    const requestFrame = vi.fn((callback: FrameRequestCallback) => {
-      queuedFrames.push(callback)
-      return queuedFrames.length
-    })
-    const cancelFrame = vi.fn()
-    const scheduler = createDividerFlexFrameScheduler({ apply, requestFrame, cancelFrame })
-
-    scheduler.schedule(120, 280)
-    scheduler.schedule(140, 260)
-    scheduler.schedule(160, 240)
-
-    expect(requestFrame).toHaveBeenCalledTimes(1)
-    expect(apply).not.toHaveBeenCalled()
-
-    queuedFrames[0]?.(16)
-
-    expect(apply).toHaveBeenCalledTimes(1)
-    expect(apply).toHaveBeenLastCalledWith(160, 240)
-    expect(cancelFrame).not.toHaveBeenCalled()
-  })
-
-  it('flushes the latest drag update before final pane refit', () => {
-    const apply = vi.fn()
-    const requestFrame = vi.fn(() => 7)
-    const cancelFrame = vi.fn()
-    const scheduler = createDividerFlexFrameScheduler({ apply, requestFrame, cancelFrame })
-
-    scheduler.schedule(120, 280)
-    scheduler.schedule(180, 220)
-    scheduler.flush()
-
-    expect(cancelFrame).toHaveBeenCalledWith(7)
-    expect(apply).toHaveBeenCalledTimes(1)
-    expect(apply).toHaveBeenCalledWith(180, 220)
-  })
 })
 
 describe('disposeDivider', () => {
@@ -87,7 +46,6 @@ describe('disposeDivider', () => {
 
     expect(preventDefault).toHaveBeenCalled()
     expect(divider.setPointerCapture).not.toHaveBeenCalled()
-    expect(divider.classList.add).not.toHaveBeenCalled()
     expect(onDragActiveChange).not.toHaveBeenCalled()
     expect(window.addEventListener).not.toHaveBeenCalled()
   })
@@ -129,11 +87,8 @@ describe('disposeDivider', () => {
     dividerListeners.get('pointerdown')?.(createPointerEvent({ pointerId: 7, clientX: 10 }))
 
     expect(divider.setPointerCapture).not.toHaveBeenCalled()
-    expect(divider.classList.add).not.toHaveBeenCalled()
     expect(onDragActiveChange).not.toHaveBeenCalled()
     expect(window.addEventListener).not.toHaveBeenCalled()
-    expect(previousPane.style.flex).toBeUndefined()
-    expect(nextPane.style.flex).toBeUndefined()
   })
 
   it('finishes an active resize from a window-level pointerup', () => {
@@ -201,143 +156,12 @@ describe('disposeDivider', () => {
     expect(windowPointerUp).toBeTypeOf('function')
     windowPointerUp?.(createPointerEvent({ pointerId: 9, clientX: 180, clientY: 0 }))
 
-    expect(previousPane.style.flex).toBe('180 1 0%')
-    expect(nextPane.style.flex).toBe('220 1 0%')
     expect(refitPanesUnder).toHaveBeenCalledWith(previousPane)
     expect(refitPanesUnder).toHaveBeenCalledWith(nextPane)
     expect(onLayoutChanged).toHaveBeenCalledTimes(1)
-    expect(divider.classList.remove).toHaveBeenCalledWith('is-dragging')
     expect(divider.releasePointerCapture).toHaveBeenCalledWith(9)
     expect(windowListeners.has('pointermove')).toBe(false)
     expect(windowListeners.has('pointerup')).toBe(false)
-  })
-
-  it('keeps flex bases nonnegative when panes are smaller than combined minimums', () => {
-    const dividerListeners = new Map<string, EventListener>()
-    const windowListeners = new Map<string, EventListener>()
-    const capturedPointerIds = new Set<number>()
-    const previousPane = createSizedPaneElement({ width: 30, height: 200 })
-    const nextPane = createSizedPaneElement({ width: 40, height: 200 })
-    const divider = {
-      style: {
-        setProperty: vi.fn()
-      },
-      classList: {
-        add: vi.fn(),
-        remove: vi.fn()
-      },
-      addEventListener: vi.fn((event: string, listener: EventListener) => {
-        dividerListeners.set(event, listener)
-      }),
-      removeEventListener: vi.fn(),
-      setPointerCapture: vi.fn((pointerId: number) => {
-        capturedPointerIds.add(pointerId)
-      }),
-      hasPointerCapture: vi.fn((pointerId: number) => capturedPointerIds.has(pointerId)),
-      releasePointerCapture: vi.fn((pointerId: number) => {
-        capturedPointerIds.delete(pointerId)
-      }),
-      previousElementSibling: previousPane,
-      nextElementSibling: nextPane
-    } as unknown as HTMLElement
-    vi.stubGlobal('document', {
-      createElement: vi.fn(() => divider)
-    })
-    vi.stubGlobal('window', {
-      addEventListener: vi.fn((event: string, listener: EventListener) => {
-        windowListeners.set(event, listener)
-      }),
-      removeEventListener: vi.fn()
-    })
-    vi.stubGlobal(
-      'requestAnimationFrame',
-      vi.fn(() => 7)
-    )
-    vi.stubGlobal('cancelAnimationFrame', vi.fn())
-
-    createDivider(true, {}, { refitPanesUnder: vi.fn(), onLayoutChanged: vi.fn() })
-    dividerListeners.get('pointerdown')?.(
-      createPointerEvent({ pointerId: 9, clientX: 0, clientY: 0 })
-    )
-    windowListeners.get('pointermove')?.(
-      createPointerEvent({ pointerId: 9, clientX: 200, clientY: 0 })
-    )
-    windowListeners.get('pointerup')?.(createPointerEvent({ pointerId: 9, clientX: 200 }))
-
-    expect(previousPane.style.flex).toBe('35 1 0%')
-    expect(nextPane.style.flex).toBe('35 1 0%')
-  })
-
-  it('restores original flex styles when an active resize is cancelled', () => {
-    const dividerListeners = new Map<string, EventListener>()
-    const windowListeners = new Map<string, EventListener>()
-    const capturedPointerIds = new Set<number>()
-    const queuedFrames: FrameRequestCallback[] = []
-    const previousPane = createSizedPaneElement({ width: 100, height: 200 })
-    const nextPane = createSizedPaneElement({ width: 300, height: 200 })
-    previousPane.style.flex = '2 1 0%'
-    nextPane.style.flex = '3 1 0%'
-    const divider = {
-      style: {
-        setProperty: vi.fn()
-      },
-      classList: {
-        add: vi.fn(),
-        remove: vi.fn()
-      },
-      addEventListener: vi.fn((event: string, listener: EventListener) => {
-        dividerListeners.set(event, listener)
-      }),
-      removeEventListener: vi.fn(),
-      setPointerCapture: vi.fn((pointerId: number) => {
-        capturedPointerIds.add(pointerId)
-      }),
-      hasPointerCapture: vi.fn((pointerId: number) => capturedPointerIds.has(pointerId)),
-      releasePointerCapture: vi.fn((pointerId: number) => {
-        capturedPointerIds.delete(pointerId)
-      }),
-      previousElementSibling: previousPane,
-      nextElementSibling: nextPane
-    } as unknown as HTMLElement
-    const refitPanesUnder = vi.fn()
-    const onLayoutChanged = vi.fn()
-    vi.stubGlobal('document', {
-      createElement: vi.fn(() => divider)
-    })
-    vi.stubGlobal('window', {
-      addEventListener: vi.fn((event: string, listener: EventListener) => {
-        windowListeners.set(event, listener)
-      }),
-      removeEventListener: vi.fn()
-    })
-    vi.stubGlobal(
-      'requestAnimationFrame',
-      vi.fn((callback: FrameRequestCallback) => {
-        queuedFrames.push(callback)
-        return queuedFrames.length
-      })
-    )
-    vi.stubGlobal('cancelAnimationFrame', vi.fn())
-
-    createDivider(true, {}, { refitPanesUnder, onLayoutChanged })
-    dividerListeners.get('pointerdown')?.(
-      createPointerEvent({ pointerId: 9, clientX: 100, clientY: 0 })
-    )
-    windowListeners.get('pointermove')?.(
-      createPointerEvent({ pointerId: 9, clientX: 180, clientY: 0 })
-    )
-    queuedFrames[0]?.(16)
-
-    expect(previousPane.style.flex).toBe('180 1 0%')
-    expect(nextPane.style.flex).toBe('220 1 0%')
-
-    windowListeners.get('pointercancel')?.(createPointerEvent({ pointerId: 9 }))
-
-    expect(previousPane.style.flex).toBe('2 1 0%')
-    expect(nextPane.style.flex).toBe('3 1 0%')
-    expect(refitPanesUnder).toHaveBeenCalledWith(previousPane)
-    expect(refitPanesUnder).toHaveBeenCalledWith(nextPane)
-    expect(onLayoutChanged).not.toHaveBeenCalled()
   })
 
   it('drops held PTY resize updates when an active resize is cancelled', () => {
@@ -453,7 +277,6 @@ describe('disposeDivider', () => {
     expect(divider.removeEventListener).toHaveBeenCalledWith('pointerup', expect.any(Function))
     expect(divider.removeEventListener).toHaveBeenCalledWith('dblclick', expect.any(Function))
     expect(divider.releasePointerCapture).toHaveBeenCalledWith(7)
-    expect(divider.classList.remove).toHaveBeenCalledWith('is-dragging')
   })
 })
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { normalizeRightSidebarRoute } from './right-sidebar-route'
 
 describe('normalizeRightSidebarRoute', () => {

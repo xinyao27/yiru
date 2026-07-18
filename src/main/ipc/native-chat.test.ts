@@ -1,7 +1,7 @@
 import { appendFile, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { handlers, listeners } = vi.hoisted(() => ({
   handlers: new Map<string, (_event: unknown, args?: unknown) => unknown>(),

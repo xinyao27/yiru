@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   MAX_PR_BOT_AUTHOR_OVERRIDES,
   MAX_PR_COMMENT_AUTHOR_LOGIN_LENGTH,

@@ -4,6 +4,10 @@ import * as React from 'react'
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 
 import { cn } from '@/lib/class-names'
+import {
+  floatingSurfaceClass,
+  floatingSurfaceMotionClass
+} from '@/components/ui/floating-surface-styles'
 import { updatePopoverContentRef } from './popover-content-ref'
 
 function mergeRefs<T>(...refs: (React.Ref<T> | undefined)[]): React.RefCallback<T> {
@@ -152,12 +156,10 @@ function PopoverContent({
       >
         <PopoverPrimitive.Popup
           data-slot="popover-content"
-          // Why: matches the dropdown-menu recipe — translucent surface, solid
-          // 14% border, dual shadow, and 2xl backdrop blur. bg-popover equals
-          // the canvas in dark mode (#171717 vs #0a0a0a) and border-border/50
-          // is too faint to read, so the popover blended into the background.
           className={cn(
-            'z-[60] overflow-hidden rounded-md border border-black/14 bg-[rgba(255,255,255,0.82)] text-popover-foreground shadow-[0_16px_36px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl outline-none dark:border-white/14 dark:bg-[rgba(0,0,0,0.72)] dark:shadow-[0_20px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)] transition-[opacity,transform,scale] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 data-[side=bottom]:data-starting-style:-translate-y-2 data-[side=left]:data-starting-style:translate-x-2 data-[side=right]:data-starting-style:-translate-x-2 data-[side=top]:data-starting-style:translate-y-2',
+            floatingSurfaceClass,
+            floatingSurfaceMotionClass,
+            'z-[60] overflow-hidden outline-none',
             className
           )}
           ref={setContentRef}

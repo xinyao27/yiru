@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { sendTerminalLiveControlAfterPendingFlush } from './terminal-live-control-send-order'
 
 describe('terminal live control send order', () => {

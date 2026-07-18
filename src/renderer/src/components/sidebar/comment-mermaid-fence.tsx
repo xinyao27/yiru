@@ -1,5 +1,5 @@
 import React from 'react'
-import CommentMermaidBlock from './CommentMermaidBlock'
+import CommentMermaidBlock from './comment-mermaid-block'
 
 // Why: react-markdown sets className="language-mermaid" on the <code> inside a
 // fenced ```mermaid block. Detecting it lets us render a real diagram instead of

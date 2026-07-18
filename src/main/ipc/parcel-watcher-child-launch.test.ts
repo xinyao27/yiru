@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as WatcherChildRegistry from './parcel-watcher-child-registry'
 
 const { forkMock, releaseReservationMock, signalPhysicalExitMock, writeFileSyncMock } = vi.hoisted(

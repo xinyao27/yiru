@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { LinearTeam } from '../../../shared/types'
 import { reconcileLinearTeamSelection } from './task-page-linear-team-selection'
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getLocalExecutionHostLabel } from '../../../../shared/execution-host'
 import type { TaskSourceContext } from '../../../../shared/task-source-context'
 import { getAutomationSourceDisplay } from './automation-source-display'

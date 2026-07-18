@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { getDefaultVoiceSettings } from '../../shared/constants'
 import type { VoiceSettings } from '../../shared/speech-types'
 import type { GlobalSettings } from '../../shared/types'

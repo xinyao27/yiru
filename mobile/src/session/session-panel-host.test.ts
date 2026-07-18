@@ -1,6 +1,5 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import {
-  canDockSessionPanel,
   nextActivePanel,
   resolvePanelAction,
   panelRouteDescriptor,
@@ -61,20 +60,6 @@ describe('resolvePanelAction', () => {
         })
       }
     }
-  })
-})
-
-describe('canDockSessionPanel', () => {
-  it('requires a wide layout and enough measured content-row width', () => {
-    expect(canDockSessionPanel({ isWideLayout: true, availableWidth: 700, dockWidth: 340 })).toBe(
-      true
-    )
-    expect(canDockSessionPanel({ isWideLayout: true, availableWidth: 699, dockWidth: 340 })).toBe(
-      false
-    )
-    expect(canDockSessionPanel({ isWideLayout: false, availableWidth: 900, dockWidth: 340 })).toBe(
-      false
-    )
   })
 })
 

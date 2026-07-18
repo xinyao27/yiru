@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { decodeTranscriptStream } from './transcript-stream-lines'
 
 const decode = (line: string, id: string) => ({

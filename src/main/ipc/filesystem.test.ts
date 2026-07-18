@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- Why: filesystem authorization and git/file IPC invariants are exercised end-to-end here, so the scenarios stay together to keep the security boundary readable. */
 import path from 'node:path'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const handlers = new Map<string, (_event: unknown, args: unknown) => Promise<unknown> | unknown>()
 const {

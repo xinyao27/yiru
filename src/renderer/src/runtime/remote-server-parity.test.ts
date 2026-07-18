@@ -12,7 +12,7 @@
  * sidebar rendering, live screencast, mobile) are covered by the live checklist,
  * not here.
  */
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vite-plus/test'
 import type { RuntimeMobileSessionTabsResult } from '../../../shared/runtime-types'
 import { toWebTerminalSurfaceTabId } from '../../../shared/terminal-surface-id'
 import type { Tab } from '../../../shared/types'

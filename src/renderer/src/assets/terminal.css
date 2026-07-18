@@ -233,25 +233,27 @@
 
 /* ── Pane title bar ──────────────────────────────────── */
 
-:root {
+[data-pane-title-surface] {
+  /* Why: title contrast follows the terminal surface, not the app theme, so
+     these values stay local to terminal chrome instead of becoming theme tokens. */
   --yiru-pane-title-height: 24px;
-  --yiru-pane-title-fg: var(--terminal-pane-title-on-dark-fg);
-  --yiru-pane-title-input-fg: var(--terminal-pane-title-on-dark-input-fg);
-  --yiru-pane-title-placeholder: var(--terminal-pane-title-on-dark-placeholder);
-  --yiru-pane-title-button-fg: var(--terminal-pane-title-on-dark-button-fg);
-  --yiru-pane-title-button-hover-fg: var(--terminal-pane-title-on-dark-button-hover-fg);
-  --yiru-pane-title-input-bg: var(--terminal-pane-title-on-dark-input-bg);
-  --yiru-pane-title-separator: var(--terminal-pane-title-on-dark-separator);
+  --yiru-pane-title-fg: rgb(255 255 255 / 0.52);
+  --yiru-pane-title-input-fg: rgb(255 255 255 / 0.7);
+  --yiru-pane-title-placeholder: rgb(255 255 255 / 0.38);
+  --yiru-pane-title-button-fg: rgb(255 255 255);
+  --yiru-pane-title-button-hover-fg: rgb(255 255 255);
+  --yiru-pane-title-input-bg: rgb(255 255 255 / 0.04);
+  --yiru-pane-title-separator: rgb(255 255 255 / 0.06);
 }
 
 [data-pane-title-surface='light'] {
-  --yiru-pane-title-fg: var(--terminal-pane-title-on-light-fg);
-  --yiru-pane-title-input-fg: var(--terminal-pane-title-on-light-input-fg);
-  --yiru-pane-title-placeholder: var(--terminal-pane-title-on-light-placeholder);
-  --yiru-pane-title-button-fg: var(--terminal-pane-title-on-light-button-fg);
-  --yiru-pane-title-button-hover-fg: var(--terminal-pane-title-on-light-button-hover-fg);
-  --yiru-pane-title-input-bg: var(--terminal-pane-title-on-light-input-bg);
-  --yiru-pane-title-separator: var(--terminal-pane-title-on-light-separator);
+  --yiru-pane-title-fg: rgb(24 24 27 / 0.64);
+  --yiru-pane-title-input-fg: rgb(24 24 27 / 0.82);
+  --yiru-pane-title-placeholder: rgb(24 24 27 / 0.48);
+  --yiru-pane-title-button-fg: rgb(24 24 27);
+  --yiru-pane-title-button-hover-fg: rgb(24 24 27);
+  --yiru-pane-title-input-bg: rgb(24 24 27 / 0.05);
+  --yiru-pane-title-separator: rgb(24 24 27 / 0.1);
 }
 
 /* Floating title overlay. The title owns the top strip of the pane, while titled

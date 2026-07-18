@@ -11,7 +11,7 @@ import {
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { BellRing } from 'lucide-react-native'
-import { YiruLogo } from '../src/components/YiruLogo'
+import { YiruLogo } from '../src/components/yiru-logo'
 import { ensureNotificationPermissions } from '../src/notifications/mobile-notifications'
 import { savePushNotificationsEnabled } from '../src/storage/preferences'
 import { colors, radii, spacing, typography } from '../src/theme/mobile-theme'

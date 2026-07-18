@@ -1,9 +1,9 @@
 import { createRequire } from 'node:module'
 import { readFile } from 'node:fs/promises'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { createOnigScanner, createOnigString, loadWASM } from 'vscode-oniguruma'
 import type { IOnigLib, IRawGrammar } from 'vscode-textmate'
-import nimGrammar from './textmate-grammars/nim.tmLanguage.json'
+import nimGrammar from './textmate-grammars/nim-tm-language.json'
 import { createTextMateTokensProvider } from './textmate-token-provider'
 
 const require = createRequire(import.meta.url)

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { extractLinearInlineMedia } from './linear-inline-media'
 
 describe('Linear inline media extraction', () => {

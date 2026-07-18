@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- Why: GitLab MR operation tests share one hoisted
    gl-utils mock; splitting the file would duplicate brittle mock setup. */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as GlUtils from './gl-utils'
 
 const {

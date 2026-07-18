@@ -2,7 +2,7 @@
 
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import type { PRCheckDetail, PRCheckRunDetails } from '../../../../shared/types'
 import { ChecksList } from './checks-panel-content'

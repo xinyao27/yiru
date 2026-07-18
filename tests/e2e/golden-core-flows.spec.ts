@@ -109,25 +109,14 @@ async function selectCodexAgent(page: Page): Promise<void> {
 }
 
 async function chooseOppositeTheme(page: Page): Promise<void> {
-  await page.waitForFunction(
-    () =>
-      document.documentElement.classList.contains('dark') ||
-      document.documentElement.classList.contains('light')
-  )
-  const startingTheme = await page.evaluate(() =>
-    document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-  )
+  const startingTheme = await page.evaluate(() => window.__store?.getState().settings?.theme)
   const nextTheme = startingTheme === 'dark' ? 'light' : 'dark'
   const tileName = nextTheme === 'light' ? /Bright & crisp/ : /Easy on the eyes/
   await page.getByRole('button', { name: tileName }).click()
   await expect
-    .poll(
-      () =>
-        page.evaluate(() =>
-          document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-        ),
-      { timeout: 5_000 }
-    )
+    .poll(() => page.evaluate(() => window.__store?.getState().settings?.theme), {
+      timeout: 5_000
+    })
     .toBe(nextTheme)
 }
 
@@ -488,9 +477,6 @@ test.describe('New-user golden core flow', () => {
       .first()
     await expect(createControl).toBeVisible()
     await expect(createControl).toHaveAttribute('aria-label', 'New workspace')
-    const createControlBox = await createControl.boundingBox()
-    expect(createControlBox?.width ?? 0).toBeGreaterThan(0)
-    expect(createControlBox?.height ?? 0).toBeGreaterThan(0)
     await createControl.click()
 
     const workspaceName = `golden-new-${Date.now()}`

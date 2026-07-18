@@ -1,10 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   resolveTabIndicatorEdges,
   resolveTabInsertion,
   type HoveredTabInsertion
 } from './tab-insertion'
-import type { TabDragItemData } from './useTabDragSplit'
+import type { TabDragItemData } from './use-tab-drag-split'
 
 // ---------------------------------------------------------------------------
 // Helpers for building minimal dnd-kit-shaped event stubs

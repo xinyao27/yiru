@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { createGiteaPullRequest, isGiteaReviewCreationAuthenticated } from './pull-request-creation'
 import { _resetGiteaRepoRefCache } from './repository-ref'
 

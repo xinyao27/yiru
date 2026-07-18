@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { PASTE_PAYLOAD_CORPUS } from './paste-payload-corpus'
 import { TEXT_CONTROL_PASTE_DIRECT_MAX_BYTES } from './text-control-paste'
 import {

@@ -11,7 +11,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { ShortcutKeyCombo } from '@/components/ShortcutKeyCombo'
+import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
 

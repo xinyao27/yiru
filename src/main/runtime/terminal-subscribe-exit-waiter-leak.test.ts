@@ -7,7 +7,7 @@
  * captures). The subscribe paths now pass a signal — this pins that a signalled
  * exit-waiter is released when the signal aborts, and an unsignalled one is not.
  */
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { YiruRuntimeService } from './yiru-runtime'
 import type { RuntimeTerminalWait } from '../../shared/runtime-types'
 

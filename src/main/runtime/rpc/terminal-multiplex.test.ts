@@ -1,5 +1,5 @@
 /* oxlint-disable max-lines -- Why: multiplex transport tests share a live dispatcher harness; splitting it would duplicate stream setup and weaken race coverage. */
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { RpcDispatcher } from './dispatcher'
 import type { RpcRequest } from './core'
 import type { YiruRuntimeService } from '../yiru-runtime'

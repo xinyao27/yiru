@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import { parseOsc7 } from './parse-osc7'
 
 describe('parseOsc7', () => {

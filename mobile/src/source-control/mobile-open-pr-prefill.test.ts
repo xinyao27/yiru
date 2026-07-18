@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { getMobilePrEligibilityReadiness, readFreshGitStatus } from './mobile-open-pr-prefill'
 import type { MobileGitStatusResult } from './mobile-git-status'
 

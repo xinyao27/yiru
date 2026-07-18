@@ -5,7 +5,7 @@
  * This module exports the mock dispatcher factory and git helpers
  * so multiple test files can reuse them without duplication.
  */
-import { vi } from 'vitest'
+import { vi } from 'vite-plus/test'
 import { execFileSync } from 'node:child_process'
 import type { RelayDispatcher } from './dispatcher'
 

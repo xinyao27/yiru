@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 import type * as AgentHookServerModule from '../agent-hooks/server'
 import { makePaneKey } from '../../shared/stable-pane-id'

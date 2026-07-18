@@ -1,4 +1,4 @@
-import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
+import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import type { GitHubOwnerRepo } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

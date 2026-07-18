@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { getDefaultWorkspaceSession } from '../../../shared/constants'
 import type { WorkspaceSessionState } from '../../../shared/types'
 import { folderWorkspaceKey, worktreeWorkspaceKey } from '../../../shared/workspace-scope'

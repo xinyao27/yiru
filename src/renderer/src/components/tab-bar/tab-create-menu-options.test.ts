@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   TAB_CREATE_MENU_QUERY_MAX_BYTES,
   buildTabCreateMenuOptions,

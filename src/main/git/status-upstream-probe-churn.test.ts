@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 // Repro command:
 //   pnpm exec vitest run --config config/vitest.config.ts src/main/git/status-upstream-probe-churn.test.ts -t "missing-upstream polling churn"

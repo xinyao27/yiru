@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type * as NodeFs from 'node:fs'
 
 const { beforeCopyMock } = vi.hoisted(() => ({ beforeCopyMock: vi.fn() }))

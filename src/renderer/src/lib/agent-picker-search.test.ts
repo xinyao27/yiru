@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   AGENT_PICKER_QUERY_MAX_BYTES,
   agentPickerBlankTerminalMatches,

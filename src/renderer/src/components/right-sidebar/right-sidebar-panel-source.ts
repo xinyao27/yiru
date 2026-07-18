@@ -3,7 +3,7 @@ import type {
   SpoolSessionCatalogPageState
 } from '../../../../shared/spool/spool-catalog-contract'
 import type { SpoolWorkspaceRoute } from '@/store/slices/spool-sharing-types'
-import type { SpoolChecksReadState } from '@/components/spool/SpoolChecksPane'
+import type { SpoolChecksReadState } from '@/components/spool/spool-checks-pane'
 
 export type RightSidebarPanelSource =
   | { kind: 'local' }

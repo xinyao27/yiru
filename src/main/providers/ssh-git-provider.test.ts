@@ -1,5 +1,5 @@
 /* eslint-disable max-lines -- Why: this suite covers the SSH git provider's one-RPC-per-method contract; splitting it would duplicate the shared mux fixture. */
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 import { SshGitProvider } from './ssh-git-provider'
 
 type MockMultiplexer = {

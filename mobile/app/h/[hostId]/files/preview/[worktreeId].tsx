@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router'
-import { MobileFilePreviewScreen } from '../../../../../src/files/MobileFilePreviewScreen'
+import { MobileFilePreviewScreen } from '../../../../../src/files/mobile-file-preview-screen'
 import { normalizeMobileFilePreviewRouteParams } from '../../../../../src/files/mobile-file-preview-route'
 
 export default function MobileFilePreviewRoute() {

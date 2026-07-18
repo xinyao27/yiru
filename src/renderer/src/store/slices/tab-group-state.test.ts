@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import type { Tab, TabGroup } from '../../../../shared/types'
 import {
   findTabAndWorktree,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { presentGitHubPRMergeState, type GitHubPRMergeStateInput } from './github-pr-merge-state'
 
 function pr(overrides: Partial<GitHubPRMergeStateInput> = {}): GitHubPRMergeStateInput {

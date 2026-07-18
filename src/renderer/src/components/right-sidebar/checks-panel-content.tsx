@@ -52,7 +52,7 @@ import {
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
 import { cn } from '@/lib/class-names'
-import CommentMarkdown from '@/components/sidebar/CommentMarkdown'
+import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import {
   filterPRCommentsByAudience,
   getPRCommentAudienceCounts,

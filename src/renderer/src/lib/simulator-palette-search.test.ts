@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { Tab, TabGroup, Worktree } from '../../../shared/types'
 import {
   SIMULATOR_PALETTE_QUERY_MAX_BYTES,

@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { act, renderHook } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { useNativeChatSendLifecycle } from './use-native-chat-send-lifecycle'
 
 function handle(settleAfterMs = 500) {

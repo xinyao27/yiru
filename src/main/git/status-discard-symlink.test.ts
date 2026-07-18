@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { execFileSync } from 'node:child_process'
 import { mkdtemp, mkdir, rm, symlink, writeFile, access, readFile } from 'node:fs/promises'
 import * as path from 'node:path'

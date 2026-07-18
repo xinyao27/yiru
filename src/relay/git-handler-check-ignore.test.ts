@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { GitExec } from './git-handler-ops'
 import { checkIgnoredPathsOp } from './git-handler-check-ignore'
 import { GIT_CHECK_IGNORE_TIMEOUT_MS } from '../shared/git-check-ignore-stdio'

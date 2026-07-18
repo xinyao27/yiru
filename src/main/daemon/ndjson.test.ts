@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { encodeNdjson, createNdjsonParser, NDJSON_MAX_LINE_BYTES } from './ndjson'
 
 describe('encodeNdjson', () => {

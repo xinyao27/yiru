@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { createMemorySlice } from './memory'
 import type { AppState } from '../types'
 import type { MemorySnapshot } from '../../../../shared/types'

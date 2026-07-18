@@ -1,7 +1,7 @@
 // Why: PR context generation depends on command order across remote-state
 // variants; keeping the table of git command mocks together makes regressions
 // easier to audit than splitting the suite by helper.
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { getPullRequestDraftContext } from './pull-request-context'
 
 type GitExec = Parameters<typeof getPullRequestDraftContext>[0]

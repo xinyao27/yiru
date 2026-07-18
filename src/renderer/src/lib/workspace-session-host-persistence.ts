@@ -207,7 +207,7 @@ function nonLocalEntries(slices: HostSessionSlices): [ExecutionHostId, Workspace
 
 /** Patch path of the debounced session writer: split the partial patch by owner
  *  host and patch each partition. Returns the promise for the local write so
- *  App.tsx can keep chaining the SSH remote-workspace upload off it. */
+ *  application-shell.tsx can keep chaining the SSH remote-workspace upload off it. */
 export function patchWorkspaceSessionByHost(
   api: SessionApi,
   patch: WorkspaceSessionPatch,

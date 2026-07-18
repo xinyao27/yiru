@@ -1,6 +1,6 @@
 import { createServer, type Server } from 'node:http'
 import type { AddressInfo } from 'node:net'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { WebSocket as NodeWebSocket, WebSocketServer } from 'ws'
 import type { PairingRelay } from '../../../src/shared/mobile-relay-pairing-offer'
 import {

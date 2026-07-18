@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { areWorktreePathsEqual, dedupeWorktreesByPath } from './worktree-path-comparison'
 
 function dedupeWithComparator<T extends { path: string }>(

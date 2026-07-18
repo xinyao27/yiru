@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shouldStartWorkspaceKanbanCardPointerDrag } from './use-workspace-kanban-card-pointer-drag'
 
 function pointerEvent(overrides: Partial<PointerEvent> = {}): PointerEvent {

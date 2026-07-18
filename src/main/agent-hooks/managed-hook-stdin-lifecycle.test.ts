@@ -1,6 +1,6 @@
 // Why: stdin ownership is a cross-agent process contract; one executable
 // matrix catches an unread early exit without duplicating template assertions.
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { spawn } from 'node:child_process'
 import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'

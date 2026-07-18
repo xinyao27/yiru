@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { RpcResponse } from '../transport/types'
 import { resolveMobileFileTabDoc } from './mobile-file-tab-doc'
 

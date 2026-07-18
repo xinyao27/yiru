@@ -8,6 +8,10 @@ import {
 } from '@phosphor-icons/react'
 
 import { cn } from '@/lib/class-names'
+import {
+  floatingSurfaceClass,
+  floatingSurfaceMotionClass
+} from '@/components/ui/floating-surface-styles'
 
 // Bare re-export: SelectPrimitive.Root.Props is generic <Value, Multiple>, which
 // a wrapper function / ComponentProps cannot express without erasing the generic.
@@ -67,12 +71,10 @@ function SelectContent({
       >
         <SelectPrimitive.Popup
           data-slot="select-content"
-          // Why: matches the dropdown-menu recipe — translucent surface, solid
-          // 14% border, dual shadow, and 2xl backdrop blur. The previous
-          // border-border/50 + bg-popover made the option list blend into the
-          // dark canvas (#171717 vs #0a0a0a) with a near-invisible border.
           className={cn(
-            'relative isolate z-[70] max-h-(--available-height) min-w-[8rem] origin-(--transform-origin) overflow-x-hidden overflow-y-auto scrollbar-sleek rounded-md border border-black/14 bg-[rgba(255,255,255,0.82)] text-popover-foreground shadow-[0_16px_36px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl dark:border-white/14 dark:bg-[rgba(0,0,0,0.72)] dark:shadow-[0_20px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)] transition-[opacity,transform] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 data-[side=bottom]:data-starting-style:-translate-y-2 data-[side=top]:data-starting-style:translate-y-2 data-[side=left]:data-starting-style:translate-x-2 data-[side=right]:data-starting-style:-translate-x-2',
+            floatingSurfaceClass,
+            floatingSurfaceMotionClass,
+            'relative isolate z-[70] max-h-(--available-height) min-w-[8rem] overflow-x-hidden overflow-y-auto scrollbar-sleek',
             className
           )}
           {...props}

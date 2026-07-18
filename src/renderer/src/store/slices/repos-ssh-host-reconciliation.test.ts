@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { Project, ProjectHostSetup, Repo, Worktree } from '../../../../shared/types'
 import { createTestStore } from './store-test-helpers'
 

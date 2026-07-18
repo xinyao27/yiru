@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { migrationUnsupportedToAgentStatusEntry } from './migration-unsupported-agent-entry'
 import type { MigrationUnsupportedPtyEntry } from '../../../shared/agent-status-types'
 

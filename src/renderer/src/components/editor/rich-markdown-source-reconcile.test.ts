@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { reconcileSerializedMarkdown } from './rich-markdown-source-reconcile'
 import { serializeRichMarkdownForReconcile } from './rich-markdown-reconcile-serializer'
 import { createRichMarkdownHtmlSuperscriptLinkContext } from './rich-markdown-html-superscript-link-context'

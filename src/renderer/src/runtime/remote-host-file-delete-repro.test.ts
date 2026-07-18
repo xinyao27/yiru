@@ -1,11 +1,11 @@
 // @vitest-environment happy-dom
 
 import { act, renderHook } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { FolderWorkspace, ProjectGroup, Repo } from '../../../shared/types'
 import { useAppStore } from '@/store'
 import { folderWorkspaceKey } from '../../../shared/workspace-scope'
-import { useFileDeletion } from '@/components/right-sidebar/useFileDeletion'
+import { useFileDeletion } from '@/components/right-sidebar/use-file-deletion'
 import { getFileExplorerOperationOwner } from '@/components/right-sidebar/file-explorer-operation-owner'
 import type { TreeNode } from '@/components/right-sidebar/file-explorer-types'
 import { createCompatibleRuntimeStatusResponseIfNeeded } from '@/runtime/runtime-compatibility-test-fixture'
@@ -21,12 +21,12 @@ const runtimeEnvironmentCall = vi.fn()
 vi.mock('@/components/confirmation-dialog', () => ({
   useConfirmationDialog: () => confirm
 }))
-vi.mock('@/hooks/useShortcutLabel', () => ({ useShortcutLabel: () => 'Delete' }))
+vi.mock('@/hooks/use-shortcut-label', () => ({ useShortcutLabel: () => 'Delete' }))
 vi.mock('@/components/editor/editor-autosave', () => ({
   requestEditorFileSave: vi.fn().mockResolvedValue(undefined),
   requestEditorSaveQuiesce: vi.fn().mockResolvedValue(undefined)
 }))
-vi.mock('@/components/right-sidebar/fileExplorerUndoRedo', () => ({
+vi.mock('@/components/right-sidebar/file-explorer-undo-redo', () => ({
   commitFileExplorerOp: vi.fn()
 }))
 vi.mock('@/i18n/i18n', () => ({ translate: (_key: string, fallback: string) => fallback }))

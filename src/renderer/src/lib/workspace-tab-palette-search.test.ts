@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { RetainedAgentEntry } from '@/store/slices/agent-status'
 import type { OpenFile } from '@/store/slices/editor'
 import type { AgentStatusEntry } from '../../../shared/agent-status-types'

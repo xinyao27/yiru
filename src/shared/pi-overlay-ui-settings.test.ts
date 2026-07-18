@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { mergePiOverlayUiSettings } from './pi-overlay-ui-settings'
 
 describe('mergePiOverlayUiSettings', () => {

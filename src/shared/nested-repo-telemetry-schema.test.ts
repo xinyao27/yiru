@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { eventSchemas } from './telemetry-events'
 
 const attemptId = '2fbac1e3-5094-45b4-80a6-90281e6e9e09'

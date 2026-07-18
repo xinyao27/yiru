@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { AgentStatusEntry } from '../../../../shared/agent-status-types'
 import type { TerminalTab } from '../../../../shared/types'
-import type { DashboardAgentRow } from './useDashboardData'
+import type { DashboardAgentRow } from './use-dashboard-data'
 import { buildAgentRowLineageTree } from './agent-row-lineage-model'
 
 function makeTab(id: string): TerminalTab {

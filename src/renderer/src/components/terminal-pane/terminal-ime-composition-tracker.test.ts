@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   installTerminalImeCompositionTracker,
   TERMINAL_IME_CANDIDATE_GUARD_POST_COMPOSITION_MS,

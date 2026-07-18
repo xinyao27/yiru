@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { createWsOutboundBackpressureQueue } from './ws-outbound-backpressure-queue'
 
 // Deterministic harness: bufferedAmount and the drain timer are both injected,

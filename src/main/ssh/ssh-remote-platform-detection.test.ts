@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { SshConnection } from './ssh-connection'
 
 const execCommandMock = vi.hoisted(() => vi.fn())

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   hashMarkdownContent,
   MOBILE_MARKDOWN_EDIT_MAX_BYTES

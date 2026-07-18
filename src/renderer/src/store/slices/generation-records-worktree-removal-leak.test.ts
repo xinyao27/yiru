@@ -10,7 +10,7 @@
  * records accumulated one entry per worktree for the renderer session.
  * `removeWorktree` now prunes both maps to the surviving worktree set.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import type * as AgentStatusModule from '@/lib/agent-status'
 
 vi.mock('sonner', () => ({

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   IPYNB_CODE_CELL_EDITOR_HEIGHT_SCAN_CODE_UNITS,
   IPYNB_CODE_CELL_PREVIEW_LINE_MAX_CODE_UNITS,

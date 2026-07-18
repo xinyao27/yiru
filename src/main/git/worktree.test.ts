@@ -2,7 +2,7 @@
    owner reset safety, dirty worktree, diverged branch, custom remote) that each
    need dedicated test coverage. Splitting into separate files would scatter related tests
    without a meaningful boundary. */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const { gitExecFileAsyncMock, gitExecFileSyncMock, translateWslOutputPathsMock } = vi.hoisted(
   () => ({

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { AppState } from '@/store/types'
 import { planMobileTerminalTabMount } from './mobile-terminal-tab-mount'
 

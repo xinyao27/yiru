@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { MobileRelayCredentialBundle } from './mobile-relay-credential-bundle'
 import { RelayOuterError } from './mobile-relay-e2ee-link'
 import type { MobileRelayRpcSession } from './mobile-relay-rpc-session'

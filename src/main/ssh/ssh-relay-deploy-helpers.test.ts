@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { ClientChannel } from 'ssh2'
 import { execCommand, waitForSentinel } from './ssh-relay-deploy-helpers'
 import { shouldProbeBuildToolchainAfterNativeDepsFailure } from './ssh-relay-build-toolchain'

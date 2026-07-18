@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { formatBase64PayloadByteCount } from './base64-payload-byte-count'
 
 describe('formatBase64PayloadByteCount', () => {

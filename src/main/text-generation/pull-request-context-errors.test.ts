@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { getPullRequestDraftContext } from './pull-request-context'
 
 type GitExec = Parameters<typeof getPullRequestDraftContext>[0]

@@ -2,7 +2,7 @@
  * Why: this slice test keeps the worktree store scenarios in one file so the
  * shared mock store setup stays consistent across closely related behaviors.
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { create } from 'zustand'
 import type { AppState } from '../types'
 import type {

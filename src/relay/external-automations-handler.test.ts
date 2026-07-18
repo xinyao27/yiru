@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { ExternalAutomationsHandler } from './external-automations-handler'
 import type { RelayDispatcher } from './dispatcher'
 

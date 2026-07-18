@@ -1,28 +1,28 @@
 import React, { useEffect, useMemo } from 'react'
 import { useAppStore } from '@/store'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { useSidebarResize } from '@/hooks/useSidebarResize'
-import SidebarHeader from './SidebarHeader'
-import SidebarNav from './SidebarNav'
-import SetupScriptPromptCard from './SetupScriptPromptCard'
-import WorktreeList from './WorktreeList'
-import SidebarToolbar from './SidebarToolbar'
-import WorkspaceKanbanDrawer from './WorkspaceKanbanDrawer'
-import type { VirtualizedScrollAnchor } from '@/hooks/useVirtualizedScrollAnchor'
+import { useSidebarResize } from '@/hooks/use-sidebar-resize'
+import SidebarHeader from './sidebar-header'
+import SidebarNav from './sidebar-nav'
+import SetupScriptPromptCard from './setup-script-prompt-card'
+import WorktreeList from './worktree-list'
+import SidebarToolbar from './sidebar-toolbar'
+import WorkspaceKanbanDrawer from './workspace-kanban-drawer'
+import type { VirtualizedScrollAnchor } from '@/hooks/use-virtualized-scroll-anchor'
 import { cn } from '@/lib/class-names'
 import { FolderPlus } from '@phosphor-icons/react'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { useSidebarProjectDrop } from './useSidebarProjectDrop'
-import { useWorkspaceBoardPanel } from './useWorkspaceBoardPanel'
+import { useSidebarProjectDrop } from './use-sidebar-project-drop'
+import { useWorkspaceBoardPanel } from './use-workspace-board-panel'
 import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
 import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-prefers-dark'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
 
-const WorktreeMetaDialog = lazyWithRetry(() => import('./WorktreeMetaDialog'))
-const RemoveFolderDialog = lazyWithRetry(() => import('./RemoveFolderDialog'))
-const WorktreeVisibilityDialog = lazyWithRetry(() => import('./WorktreeVisibilityDialog'))
-const YiruYamlTrustDialog = lazyWithRetry(() => import('./YiruYamlTrustDialog'))
-const ForgetSshWorkspaceDialog = lazyWithRetry(() => import('./ForgetSshWorkspaceDialog'))
+const WorktreeMetaDialog = lazyWithRetry(() => import('./worktree-meta-dialog'))
+const RemoveFolderDialog = lazyWithRetry(() => import('./remove-folder-dialog'))
+const WorktreeVisibilityDialog = lazyWithRetry(() => import('./worktree-visibility-dialog'))
+const YiruYamlTrustDialog = lazyWithRetry(() => import('./yiru-yaml-trust-dialog'))
+const ForgetSshWorkspaceDialog = lazyWithRetry(() => import('./forget-ssh-workspace-dialog'))
 
 const MIN_WIDTH = 220
 const MAX_WIDTH = 500
@@ -136,7 +136,7 @@ function Sidebar({
       <div
         ref={containerRef}
         data-native-file-drop-target={sidebarOpen ? nativeDropTarget : undefined}
-        className="relative min-h-0 flex-shrink-0 bg-worktree-sidebar flex flex-col overflow-hidden scrollbar-sleek-parent"
+        className="worktree-sidebar-theme relative flex min-h-0 flex-shrink-0 flex-col overflow-hidden bg-sidebar scrollbar-sleek-parent"
         style={leftSidebarStyle}
         {...dropHandlers}
       >
@@ -169,10 +169,8 @@ function Sidebar({
         {sidebarOpen && affordance.visible ? (
           <div
             className={cn(
-              'pointer-events-none absolute inset-2 z-20 flex flex-col items-center justify-center gap-1.5 rounded-md border bg-worktree-sidebar-accent/95 px-4 text-center text-worktree-sidebar-accent-foreground shadow-xs',
-              affordance.tone === 'blocked'
-                ? 'border-destructive/70'
-                : 'border-worktree-sidebar-ring/70'
+              'pointer-events-none absolute inset-2 z-20 flex flex-col items-center justify-center gap-1.5 rounded-md border bg-sidebar-accent/95 px-4 text-center text-sidebar-accent-foreground shadow-xs',
+              affordance.tone === 'blocked' ? 'border-destructive/70' : 'border-sidebar-ring/70'
             )}
           >
             {affordance.tone === 'busy' ? (

@@ -1,7 +1,7 @@
 // Why: covers two recent classifier fixes — Retry-After honoring on 429
 // (transient detection must propagate, not silently retry on 250ms cadence)
 // and stderr extraction from execFile rejections (err.message is unreliable).
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   appendGitConfigEnv,
   extractExecError,

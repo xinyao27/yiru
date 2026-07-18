@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { RelayPhoneHelloSchema } from './mobile-relay-phone-protocol'
 
 describe('relay phone outer protocol', () => {

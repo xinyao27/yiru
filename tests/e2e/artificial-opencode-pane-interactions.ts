@@ -52,6 +52,35 @@ export async function focusPane(page: Page, paneKey: string): Promise<void> {
   )
 }
 
+async function focusLargestTerminalPane(
+  page: Page,
+  tabId: string
+): Promise<'vertical' | 'horizontal'> {
+  return page.evaluate((tabId) => {
+    const manager = window.__paneManagers?.get(tabId)
+    const panes = manager?.getPanes?.() ?? []
+    const pane = panes.reduce<(typeof panes)[number] | null>((largest, candidate) => {
+      if (!largest) {
+        return candidate
+      }
+      const largestRect = largest.container.getBoundingClientRect()
+      const candidateRect = candidate.container.getBoundingClientRect()
+      return candidateRect.width * candidateRect.height > largestRect.width * largestRect.height
+        ? candidate
+        : largest
+    }, null)
+    if (!manager || !pane) {
+      throw new Error(`Unable to select a terminal pane in tab ${tabId}`)
+    }
+
+    // Why: repeatedly splitting the newest pane shrinks it exponentially and
+    // can crash headless Chromium before high-pane pressure is applied.
+    manager.setActivePane?.(pane.id, { focus: false })
+    const rect = pane.container.getBoundingClientRect()
+    return rect.width >= rect.height ? 'vertical' : 'horizontal'
+  }, tabId)
+}
+
 export async function ensureActiveWorktreePaneLoad(
   page: Page,
   paneCount: number
@@ -60,7 +89,8 @@ export async function ensureActiveWorktreePaneLoad(
   await waitForActiveTerminalManager(page, 30_000)
   let snapshot = await waitForPaneIdentitySnapshot(page, 1)
   while (snapshot.panes.length < paneCount) {
-    await splitActiveTerminalPane(page, snapshot.panes.length % 2 === 0 ? 'horizontal' : 'vertical')
+    const direction = await focusLargestTerminalPane(page, snapshot.tabId)
+    await splitActiveTerminalPane(page, direction)
     snapshot = await waitForPaneIdentitySnapshot(page, snapshot.panes.length + 1)
   }
   return snapshot.panes.slice(0, paneCount).map((pane) => ({

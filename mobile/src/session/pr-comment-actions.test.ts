@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { PRComment } from '../../../src/shared/types'
 import {
   buildAddRootCommentParams,

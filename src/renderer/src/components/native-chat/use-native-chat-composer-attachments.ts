@@ -6,7 +6,7 @@ import {
   nativeChatComposerTargetIsRemote,
   type NativeChatResolvedTarget
 } from './native-chat-composer-target'
-import type { NativeChatComposerImageAttachment } from './NativeChatComposerField'
+import type { NativeChatComposerImageAttachment } from './native-chat-composer-field'
 import { setBoundedScopeCacheEntry } from './native-chat-composer-scope-cache'
 
 export type UseNativeChatComposerAttachmentsArgs = {

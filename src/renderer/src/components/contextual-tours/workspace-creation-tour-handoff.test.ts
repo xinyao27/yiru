@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { useAppStore } from '@/store'
 import { openWorkspaceCreationComposerWithTourHandoff } from './workspace-creation-tour-handoff'
 import { requestContextualTourWhenReady } from './request-contextual-tour-when-ready'

@@ -1,7 +1,7 @@
 import { existsSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   createRuntimeTransportMetadata,
   RUNTIME_SOCKET_NAME_REGEX,

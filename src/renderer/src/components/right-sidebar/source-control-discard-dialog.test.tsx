@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { GitStatusEntry } from '../../../../shared/types'
 
 type CapturedButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

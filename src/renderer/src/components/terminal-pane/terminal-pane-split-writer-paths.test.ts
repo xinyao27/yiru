@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { recordKeyboardCreatedTerminalPaneSplit } from './keyboard-handlers'
 import { recordContextMenuCreatedTerminalPaneSplit } from './use-terminal-pane-context-menu'
 import { recordRuntimeCreatedTerminalPaneSplit } from './use-terminal-pane-lifecycle'

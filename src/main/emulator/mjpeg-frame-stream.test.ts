@@ -1,5 +1,5 @@
 import { createServer, type Server } from 'node:http'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { MjpegFrameStream } from './mjpeg-frame-stream'
 
 const JPEG = Buffer.from([0xff, 0xd8, 0x01, 0x02, 0xff, 0xd9])

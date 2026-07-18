@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { selectMarkdownTableOfContents } from './markdown-toc-visibility-gate'
 
 const SAMPLE = '# Intro\n\n## Setup\n\n### Install\n\n## Usage'

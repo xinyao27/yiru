@@ -16,7 +16,7 @@
  * field reports describe. @xterm/headless shares the same WriteBuffer as
  * @xterm/xterm at the same pinned version.
  */
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { Terminal } from '@xterm/headless'
 
 describe('xterm WriteBuffer stall (vendored 6.1.0-beta.287)', () => {

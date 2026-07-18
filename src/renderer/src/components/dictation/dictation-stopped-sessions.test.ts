@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { recordStoppedSession, waitForStoppedSession } from './dictation-stopped-sessions'
 
 function refs() {

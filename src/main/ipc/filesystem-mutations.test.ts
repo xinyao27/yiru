@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 const handlers = new Map<string, (_event: unknown, args: unknown) => Promise<unknown>>()
 const { handleMock, copyFileMock, lstatMock, mkdirMock, renameMock, writeFileMock, realpathMock } =

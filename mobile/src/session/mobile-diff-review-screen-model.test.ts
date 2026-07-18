@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { MobileDiffReviewQueueItem } from './mobile-diff-review-queue'
 import { nextReviewIndexAfterMarkReviewed } from './mobile-diff-review-screen-model'
 

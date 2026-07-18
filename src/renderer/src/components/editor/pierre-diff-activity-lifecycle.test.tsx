@@ -1,9 +1,9 @@
 // @vitest-environment happy-dom
 import { cleanup, render, renderHook } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { parseDiffFromFile } from '@pierre/diffs'
 import { useFileDiffInstance } from '@pierre/diffs/react'
-import { PierreDiffViewer } from './PierreDiffViewer'
+import { PierreDiffViewer } from './pierre-diff-viewer'
 
 afterEach(cleanup)
 

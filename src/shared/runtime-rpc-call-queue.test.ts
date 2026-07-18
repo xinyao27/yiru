@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { isBackgroundRuntimeMethod, RuntimeRpcCallQueuePool } from './runtime-rpc-call-queue'
 
 describe('runtime RPC call queue', () => {

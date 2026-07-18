@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shouldCopySyntheticTitleFrameToPtyData } from './synthetic-title-frame-routing'
 
 describe('shouldCopySyntheticTitleFrameToPtyData', () => {

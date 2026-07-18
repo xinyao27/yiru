@@ -5,7 +5,7 @@
 // retry slowly no matter how often readers poll getForegroundProcess; PTY
 // output re-arms the fast retry so agent starts still resolve promptly, and
 // sessions with a cached agent identity keep the 1s refresh unrelaxed.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'

@@ -32,7 +32,7 @@
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 const REPO_ROOT = join(__dirname, '..', '..', '..')
 const TELEMETRY_DIR = join(REPO_ROOT, 'src', 'main', 'telemetry')

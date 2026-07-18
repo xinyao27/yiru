@@ -2,7 +2,7 @@
 
 ## Design System
 
-All UI work — layout, color, typography, spacing, component selection, UX behavior — must follow [`docs/STYLEGUIDE.md`](./docs/STYLEGUIDE.md). Use the tokens defined in `src/renderer/src/assets/main.css` (the canonical source) and the shadcn primitives in `src/renderer/src/components/ui/`. Don't invent new color values, font sizes, or shadow tiers when a documented one already covers the role. When STYLEGUIDE.md is silent, follow the resolution order in its final section.
+All UI work — layout, color, typography, spacing, component selection, UX behavior — must follow [`docs/style-guide.md`](./docs/style-guide.md). Use the tokens defined in `src/renderer/src/assets/main.css` (the canonical source) and the shadcn primitives in `src/renderer/src/components/ui/`. Don't invent new color values, font sizes, or shadow tiers when a documented one already covers the role. When `style-guide.md` is silent, follow the resolution order in its final section.
 
 ## Code Comments: Document the "Why", Briefly
 
@@ -19,6 +19,8 @@ Add or modify tests only after carefully judging their value; do not write tests
 Never add a `max-lines` disable (`eslint-disable max-lines`, `oxlint-disable max-lines`, or line-specific variants), and never add a per-file `max-lines` bump in `mobile/.oxlintrc.json`.
 
 ## File and Module Naming
+
+Use lowercase kebab-case for project-owned filenames (for example, `worktree-card.tsx` and `git-capability-cache.ts`). Preserve conventional role suffixes such as `.test.ts` and `.config.ts`; tool-discovery names, framework-defined route parameters, generated artifact conventions, and native-language conventions are exempt.
 
 Never use vague names like `helpers`, `utils`, `common`, `misc`, or `shared-stuff` for files, folders, or modules. They carry zero info and tend to become dumping grounds. Name files after what they _actually_ contain — prefer the concrete domain concept (e.g. `tab-group-state.ts`, `terminal-orphan-cleanup.ts`) over the generic role (`tabs-helpers.ts`, `terminal-utils.ts`). If you find yourself reaching for `helpers`, the file probably has more than one responsibility and should be split, or there's a better name hiding in the code that describes what the functions operate on.
 

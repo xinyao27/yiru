@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
 import { createNativeChatMerger, replaceList } from './mobile-native-chat-merge'
 import { applyMobileNativeChatStreamFrame } from './mobile-native-chat-stream-frame'

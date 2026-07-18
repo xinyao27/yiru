@@ -1,7 +1,7 @@
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { BUNDLED_SKILL_GUIDES } from '../../src/cli/bundled-skill-guides'
 import {
   CANONICAL_GUIDE_NAMES,

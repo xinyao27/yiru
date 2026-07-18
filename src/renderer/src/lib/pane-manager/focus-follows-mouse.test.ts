@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shouldFollowMouseFocus, type FocusFollowsMouseInput } from './focus-follows-mouse'
 
 describe('shouldFollowMouseFocus', () => {

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { SleepingAgentSessionRecord } from '../../../../shared/agent-session-resume'
 
 const mockKill = vi.fn().mockResolvedValue(undefined)

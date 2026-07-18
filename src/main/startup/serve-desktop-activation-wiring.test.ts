@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 describe('serve desktop activation wiring', () => {
   const source = readFileSync(join(process.cwd(), 'src/main/index.ts'), 'utf8')

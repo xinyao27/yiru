@@ -6,6 +6,12 @@ import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { MagnifyingGlass as SearchIcon } from '@phosphor-icons/react'
 
 import { cn } from '@/lib/class-names'
+import {
+  modalBackdropClass,
+  modalBackdropMotionClass,
+  modalSurfaceClass,
+  modalSurfaceMotionClass
+} from '@/components/ui/floating-surface-styles'
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
   return (
@@ -70,22 +76,20 @@ function CommandDialog({
     <DialogPrimitive.Root {...props}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Backdrop
-          // Why: matches the DialogOverlay recipe — deeper scrim + 2px backdrop
-          // blur so the dark canvas lifts off the command palette. A flat
-          // bg-black/50 disappears in dark mode.
+          data-slot="command-dialog-overlay"
           className={cn(
-            'fixed inset-0 z-50 bg-black/55 backdrop-blur-[2px] transition-opacity data-starting-style:opacity-0 data-ending-style:opacity-0',
+            modalBackdropClass,
+            modalBackdropMotionClass,
+            'fixed inset-0 z-50',
             overlayClassName
           )}
         />
         <DialogPrimitive.Popup
-          // Why: matches the DialogContent recipe — translucent surface, solid
-          // 14% border, dual shadow, and 2xl backdrop blur. bg-popover equals
-          // the canvas in dark mode (#171717 vs #0a0a0a) and the previous
-          // border-border + shadow-lg was barely visible against the dark
-          // canvas.
+          data-slot="command-dialog-content"
           className={cn(
-            'fixed top-[20%] left-[50%] z-50 w-[660px] max-w-[90vw] translate-x-[-50%] rounded-lg border border-black/14 bg-background/96 text-foreground shadow-[0_20px_60px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl outline-none dark:border-white/14 dark:bg-[rgba(23,23,23,0.96)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)] transition-[opacity,transform] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95',
+            modalSurfaceClass,
+            modalSurfaceMotionClass,
+            'fixed top-[20%] left-[50%] z-50 w-[660px] max-w-[90vw] translate-x-[-50%] border outline-none',
             contentClassName
           )}
           initialFocus={initialFocus}

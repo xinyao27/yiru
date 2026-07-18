@@ -1,6 +1,6 @@
 /* oxlint-disable max-lines */
 import type * as React from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { Terminal } from '@xterm/headless'
 import {
   POST_REPLAY_LIVE_AGENT_REATTACH_RESET,
@@ -14724,7 +14724,7 @@ describe('connectPanePty', () => {
   // onBell handler that raises the worktree unread dot, the tab-level
   // indicator, the pane marker, and an OS notification. The unread flags
   // clear when the user actually interacts with the pane — keystroke via
-  // xterm onData or pointerdown on the container (see TerminalPane.tsx). This test
+  // xterm onData or pointerdown on the container (see terminal-pane.tsx). This test
   // locks in the mark wiring; separate tests below cover the clear path.
   it('wires onBell to raise worktree unread, tab unread, and OS notification', async () => {
     const { connectPanePty } = await import('./pty-connection')

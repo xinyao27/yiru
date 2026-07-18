@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { DegradedDaemonPtyProvider } from './degraded-daemon-pty-provider'
 import type { DaemonPtyAdapter } from './daemon-pty-adapter'
 import type { IPtyProvider, PtySpawnOptions, PtySpawnResult } from '../providers/types'

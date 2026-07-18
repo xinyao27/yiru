@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isSshSessionLimitError } from './ssh-session-limit-error'
 
 describe('isSshSessionLimitError', () => {

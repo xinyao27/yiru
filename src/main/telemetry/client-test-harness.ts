@@ -1,5 +1,5 @@
 import type { PostHog } from 'posthog-node'
-import { vi } from 'vitest'
+import { vi } from 'vite-plus/test'
 import type { CommonProps } from '../../shared/telemetry-events'
 import type { GlobalSettings } from '../../shared/types'
 import type { Store } from '../persistence'

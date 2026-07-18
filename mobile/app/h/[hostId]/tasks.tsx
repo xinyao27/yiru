@@ -40,17 +40,17 @@ import {
   useReconnectAttempt
 } from '../../../src/transport/client-context-connection-metrics'
 import { classifyConnection } from '../../../src/transport/connection-health'
-import { StatusDot } from '../../../src/components/StatusDot'
-import { ActionSheetModal } from '../../../src/components/ActionSheetModal'
-import { BottomDrawer } from '../../../src/components/BottomDrawer'
-import { ConfirmModal } from '../../../src/components/ConfirmModal'
-import { MobileMarkdown } from '../../../src/components/MobileMarkdown'
-import { MobileAgentIcon } from '../../../src/components/MobileAgentIcon'
-import { MobileWorkspaceNameInput } from '../../../src/components/MobileWorkspaceNameInput'
-import { MobileSearchField } from '../../../src/components/MobileSearchField'
-import { MobileSyntaxSegments } from '../../../src/components/MobileSyntaxSegments'
-import { PickerModal, type PickerOption } from '../../../src/components/PickerModal'
-import { TaskProviderLogo } from '../../../src/components/TaskProviderLogo'
+import { StatusDot } from '../../../src/components/status-dot'
+import { ActionSheetModal } from '../../../src/components/action-sheet-modal'
+import { BottomDrawer } from '../../../src/components/bottom-drawer'
+import { ConfirmModal } from '../../../src/components/confirm-modal'
+import { MobileMarkdown } from '../../../src/components/mobile-markdown'
+import { MobileAgentIcon } from '../../../src/components/mobile-agent-icon'
+import { MobileWorkspaceNameInput } from '../../../src/components/mobile-workspace-name-input'
+import { MobileSearchField } from '../../../src/components/mobile-search-field'
+import { MobileSyntaxSegments } from '../../../src/components/mobile-syntax-segments'
+import { PickerModal, type PickerOption } from '../../../src/components/picker-modal'
+import { TaskProviderLogo } from '../../../src/components/task-provider-logo'
 import {
   buildGitHubPrFileDiffPreview,
   type GitHubPrFileDiffLine

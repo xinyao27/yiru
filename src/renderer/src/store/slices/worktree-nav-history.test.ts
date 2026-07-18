@@ -1,5 +1,5 @@
 import { createStore, type StoreApi } from 'zustand/vanilla'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import type { AppState } from '../types'
 import type { FolderWorkspace, Worktree } from '../../../../shared/types'
 import { folderWorkspaceKey } from '../../../../shared/workspace-scope'

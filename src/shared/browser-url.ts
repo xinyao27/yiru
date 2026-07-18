@@ -287,7 +287,7 @@ export function normalizeBrowserNavigationUrl(
     // user already has access to via the editor (e.g. "Open Preview to the
     // Side" on an HTML file). The guest webview is still sandboxed
     // (nodeIntegration off, contextIsolation on, webSecurity on; see
-    // createMainWindow.ts will-attach-webview), so the loaded page cannot
+    // create-main-window.ts will-attach-webview), so the loaded page cannot
     // escalate privileges. Other non-web schemes (javascript:, arbitrary
     // data: URIs) remain rejected.
     return parsed.protocol === 'http:' ||

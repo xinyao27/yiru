@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { ClaudeUsageDailyPoint } from '../../../../shared/claude-usage-types'
 import type { CodexUsageDailyPoint } from '../../../../shared/codex-usage-types'
-import { ClaudeUsageDailyChart } from './ClaudeUsageDailyChart'
-import { CodexUsageDailyChart } from './CodexUsageDailyChart'
+import { ClaudeUsageDailyChart } from './claude-usage-daily-chart'
+import { CodexUsageDailyChart } from './codex-usage-daily-chart'
 
 function makeDay(index: number): string {
   return new Date(Date.UTC(2026, 0, 1 + index)).toISOString().slice(0, 10)

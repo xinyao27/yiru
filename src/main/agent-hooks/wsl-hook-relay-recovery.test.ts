@@ -1,7 +1,7 @@
 // Restart-timer policy: recovery must re-ensure a running distro, must NOT
 // boot a stopped one (wsl -d starts stopped distros), and must respect state
 // currency and disposal.
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 
 import { WslRelayRecovery, type WslRelayRecoveryState } from './wsl-hook-relay-recovery'
 

@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { WATCHER_PROCESS_CANCEL_TIMEOUT_MS } from './parcel-watcher-cancellation-tracker'
 import { WATCHER_PROCESS_EXIT_DEADLINE_MS } from './parcel-watcher-child-termination'
 

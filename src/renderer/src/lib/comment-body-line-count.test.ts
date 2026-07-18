@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   COMMENT_BODY_LAYOUT_MAX_LINES,
   COMMENT_BODY_LINE_COUNT_SCAN_CODE_UNITS,

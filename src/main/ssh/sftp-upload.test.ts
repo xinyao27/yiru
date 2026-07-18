@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, realpath, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Writable } from 'node:stream'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { SFTPWrapper } from 'ssh2'
 import { removeDirectorySftp, uploadBuffer, uploadDirectory, uploadFile } from './sftp-upload'
 

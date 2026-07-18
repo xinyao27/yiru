@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { toast } from 'sonner'
 import { insertRichMarkdownImageFromPath } from './rich-markdown-image-insert'
 import { importExternalPathsToRuntime } from '@/runtime/runtime-file-client'

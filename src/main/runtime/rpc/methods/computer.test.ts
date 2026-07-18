@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { buildRegistry } from '../core'
 import { CLIPBOARD_TEXT_WRITE_MAX_BYTES } from '../../../../shared/clipboard-text'
 

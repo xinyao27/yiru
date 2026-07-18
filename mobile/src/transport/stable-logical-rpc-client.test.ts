@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import type { ConnectionState, RpcResponse } from './types'
 import type { RpcClient } from './rpc-client'
 import {

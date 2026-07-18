@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vite-plus/test'
 import type { Repo } from '../../../../shared/types'
 import { settingsForProjectRowOwner } from './github-project-row-owner'
 import { lookupReposBySlugFromCache } from '@/lib/repo-slug-cache'

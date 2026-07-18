@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { copyTerminalHandleForPane } from './terminal-handle-copy'
 
 const LEAF_ID = '11111111-1111-4111-8111-111111111111'

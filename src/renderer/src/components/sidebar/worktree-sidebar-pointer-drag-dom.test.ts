@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isSidebarPointerDragBlocked } from './worktree-sidebar-pointer-drag-dom'
 
 describe('worktree sidebar pointer drag DOM guards', () => {

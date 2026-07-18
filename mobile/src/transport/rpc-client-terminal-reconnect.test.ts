@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { connect } from './rpc-client'
 import { encodeTerminalStreamFrame, TerminalStreamOpcode } from './terminal-stream-protocol'
 

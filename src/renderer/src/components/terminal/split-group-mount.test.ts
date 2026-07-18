@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { getEffectiveLayoutForWorktree, anyMountedWorktreeHasLayout } from './split-group-mount'
 import type { TabGroup, TabGroupLayoutNode } from '../../../../shared/types'
 

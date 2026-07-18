@@ -306,7 +306,7 @@ test.describe('Activity Agent Pane Isolation', () => {
     await splitActiveTerminalPane(yiruPage, 'vertical')
     await waitForPaneCount(yiruPage, 2)
     const snapshot = await waitForPaneIdentitySnapshot(yiruPage, 2)
-    // Why: useAutoAckViewedAgent (App.tsx) auto-acknowledges the agent on the
+    // Why: useAutoAckViewedAgent (application-shell.tsx) auto-acknowledges the agent on the
     // store's *active* visible terminal leaf the instant its status lands, which
     // clears the unread badge before we can assert it (flaky on focused xvfb CI
     // windows). Seed on the non-active split pane — auto-ack only ever targets the

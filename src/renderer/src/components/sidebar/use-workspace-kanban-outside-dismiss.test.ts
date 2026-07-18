@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { isWorkspaceBoardKeepOpenTarget } from './use-workspace-kanban-outside-dismiss'
 
 class FakeNode {

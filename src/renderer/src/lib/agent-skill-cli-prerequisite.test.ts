@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { toast } from 'sonner'
 import type { CliInstallStatus } from '../../../shared/cli-install-types'
 import {
