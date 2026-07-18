@@ -72,6 +72,22 @@ For diff status, file-tree decorations, and the changes view, use the git decora
 
 Use these _only_ for git status. Don't reuse them for unrelated state colors — that breaks the convention.
 
+### Editor diff colors
+
+Monaco and Pierre diffs share Cursor's diff palette through the `--editor-diff-*` variables. These are separate from git status decorations because Cursor deliberately uses different colors for resource status, gutters, full changed lines, and changed text within a line.
+
+| Token                                      | Diff role                    |
+| ------------------------------------------ | ---------------------------- |
+| `--editor-diff-inserted-line-background`   | Full inserted-line fill      |
+| `--editor-diff-inserted-text-background`   | Inserted word/character fill |
+| `--editor-diff-removed-line-background`    | Full removed-line fill       |
+| `--editor-diff-removed-text-background`    | Removed word/character fill  |
+| `--editor-diff-added-gutter`                | Added gutter indicator       |
+| `--editor-diff-modified-gutter`             | Modified gutter indicator    |
+| `--editor-diff-deleted-gutter`              | Deleted gutter indicator     |
+
+Use these only inside editor/diff surfaces. File status labels and trees continue to use `--git-decoration-*`.
+
 ### List rows: hover, selected, current
 
 A common point of drift. Use these conventions for any list-style row (worktrees, command palette items, settings nav):

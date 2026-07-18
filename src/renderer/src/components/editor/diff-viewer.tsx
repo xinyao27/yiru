@@ -3,7 +3,7 @@ import { DiffEditor, type DiffOnMount } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { useAppStore } from '@/store'
 import { diffViewStateCache, setWithLRU } from '@/lib/scroll-cache'
-import { monaco } from '@/lib/monaco-setup'
+import { monaco, resolveCursorThemeName } from '@/lib/monaco-setup'
 import { computeDiffEditorFontSize } from '@/lib/editor-font-zoom'
 import { resolveDocumentTheme } from '@/lib/document-theme'
 import { useContextualCopySetup } from './use-contextual-copy-setup'
@@ -443,7 +443,7 @@ function MonacoDiffViewer({
             language={language}
             original={originalContent}
             modified={modifiedContent}
-            theme={isDark ? 'vs-dark' : 'vs'}
+            theme={resolveCursorThemeName(isDark)}
             onMount={handleMount}
             // Why: A single file can have multiple live diff tabs at once
             // (staged, unstaged, branch compare versions). The kept Monaco models

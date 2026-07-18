@@ -139,6 +139,13 @@
   --git-decoration-untracked: #176c74;
   --git-decoration-copied: #2778c1;
   --git-decoration-ignored: color-mix(in srgb, var(--foreground) 36%, transparent);
+  --editor-diff-inserted-line-background: #00af6624;
+  --editor-diff-inserted-text-background: #00b06838;
+  --editor-diff-removed-line-background: #ff617b38;
+  --editor-diff-removed-text-background: #ff617b57;
+  --editor-diff-added-gutter: #007041;
+  --editor-diff-modified-gutter: #a46700;
+  --editor-diff-deleted-gutter: #be1744;
   --git-graph-ref: #2778c1;
   --git-graph-remote-ref: #7565cc;
   --git-graph-base-ref: #cd4500;
@@ -199,6 +206,13 @@
   --git-decoration-untracked: #88c0d0;
   --git-decoration-copied: #7bafe9;
   --git-decoration-ignored: color-mix(in srgb, var(--foreground) 36%, transparent);
+  --editor-diff-inserted-line-background: #3fa26633;
+  --editor-diff-inserted-text-background: #3fa26622;
+  --editor-diff-removed-line-background: #b8004933;
+  --editor-diff-removed-text-background: #b8004922;
+  --editor-diff-added-gutter: #3fa266;
+  --editor-diff-modified-gutter: #d2943e;
+  --editor-diff-deleted-gutter: #e34671;
   --git-graph-ref: #7bafe9;
   --git-graph-remote-ref: #9386f2;
   --git-graph-base-ref: #d08770;
