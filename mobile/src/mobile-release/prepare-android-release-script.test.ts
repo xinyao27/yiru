@@ -38,10 +38,10 @@ describe('prepare Android release script', () => {
     tempDirs = []
   })
 
-  it('keeps the new mobile package identity on its unreleased 0.0.0 baseline', () => {
+  it('keeps the new mobile package identity on its first release version', () => {
     const committedConfig = JSON.parse(readFileSync(committedAppConfigPath, 'utf8'))
 
-    expect(committedConfig.expo.version).toBe('0.0.0')
+    expect(committedConfig.expo.version).toBe('0.0.1')
     expect(committedConfig.expo.ios).toMatchObject({
       buildNumber: '1',
       bundleIdentifier: 'com.xinyao27.yiru.mobile'
