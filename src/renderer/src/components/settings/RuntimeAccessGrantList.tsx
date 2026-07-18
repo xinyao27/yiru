@@ -56,7 +56,7 @@ export function RuntimeAccessGrantList({
                   'Refresh shared access'
                 )}
               >
-                <RefreshCw className={isLoading ? 'animate-spin' : undefined} />
+                {isLoading ? <LoadingIndicator /> : <RefreshCw />}
               </Button>
             }
           />

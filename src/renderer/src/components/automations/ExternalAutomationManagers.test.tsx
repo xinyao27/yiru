@@ -174,12 +174,12 @@ describe('ExternalAutomationManagers toggle', () => {
     expect(getSwitch().disabled).toBe(true)
   })
 
-  it('shows the sibling spinner only while a pause/resume targets this row', () => {
+  it('shows the sibling loading indicator only while pause/resume targets this row', () => {
     const manager = makeManager({ jobs: [makeJob({ id: 'job-1', enabled: true })] })
-    // Keyed for the resume action even though the job is enabled — the spinner
+    // Keyed for the resume action even though the job is enabled — the indicator
     // must match either pause or resume so it does not vanish when enabled flips.
     renderManagers([manager], { runningActionKey: 'manager-1:job-1:resume' })
-    expect(container.querySelector('.animate-spin')).not.toBeNull()
+    expect(container.querySelector('[data-slot="loading-indicator"]')).not.toBeNull()
   })
 
   it('keeps the Run/Edit/Delete actions and removes the pause/resume button on hermes', () => {

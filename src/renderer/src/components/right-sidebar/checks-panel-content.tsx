@@ -16,7 +16,6 @@ import {
   Sidebar as PanelRight,
   PaperPlaneTilt as SendHorizontal,
   Sparkle as Sparkles,
-  ArrowClockwise as RefreshCw,
   Warning as AlertTriangle,
   Robot as Bot,
   DotsThree as MoreHorizontal,
@@ -371,7 +370,7 @@ export function PRTriageStrip({
             onClick={onFixChecksWithAI}
           >
             {isFixingChecksWithAI ? (
-              <RefreshCw className="size-3 animate-spin" />
+              <LoadingIndicator className="size-3" />
             ) : (
               <Sparkles className="size-3" />
             )}
@@ -473,7 +472,7 @@ export function ConflictTriageStrip({
           onClick={onResolveConflictsWithAI}
         >
           {isResolvingConflictsWithAI ? (
-            <RefreshCw className="size-3 animate-spin" />
+            <LoadingIndicator className="size-3" />
           ) : (
             <Sparkles className="size-3" />
           )}
@@ -1233,13 +1232,7 @@ export function ChecksList({
                         expanded && 'rotate-90'
                       )}
                     />
-                    <Icon
-                      className={cn(
-                        'size-3.5 shrink-0',
-                        color,
-                        conclusion === 'pending' && 'animate-spin'
-                      )}
-                    />
+                    <Icon className={cn('size-3.5 shrink-0', color)} />
                     <span className="flex-1 truncate text-[12px] text-foreground">
                       {check.name}
                     </span>

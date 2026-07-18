@@ -17,14 +17,12 @@ function renderDotClassNames(state: AgentDotState): string[] {
 }
 
 describe('AgentStateDot', () => {
-  it('renders working as a yellow spinner', () => {
+  it('renders working with the configured loading indicator', () => {
     const markup = renderMarkup('working')
 
-    expect(markup).toContain('border-yellow-500')
-    expect(markup).toContain('border-t-transparent')
-    expect(markup).toContain('[animation:spin_1s_steps(12,end)_infinite]')
-    expect(markup).toContain('motion-reduce:animate-none')
-    expect(markup).not.toContain('animate-spin')
+    expect(markup).toContain('data-slot="loading-indicator"')
+    expect(markup).toContain('data-loader-style="drawing"')
+    expect(markup).toContain('text-yellow-500')
   })
 
   it('renders done as an emerald check icon', () => {

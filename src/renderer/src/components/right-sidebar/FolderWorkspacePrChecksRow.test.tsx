@@ -174,7 +174,7 @@ describe('FolderWorkspacePrChecksRow', () => {
     )
   })
 
-  it('spins pending summary status like regular pending check rows', () => {
+  it('renders pending summary status with the canonical pending icon', () => {
     renderRow(
       makeRow({
         status: 'pending',
@@ -186,10 +186,12 @@ describe('FolderWorkspacePrChecksRow', () => {
 
     expect(iconNames()).toEqual(['review', 'pending'])
     expect(container.querySelector('[data-icon="pending"]')?.className).toContain('pending-color')
-    expect(container.querySelector('[data-icon="pending"]')?.className).toContain('animate-spin')
+    expect(container.querySelector('[data-icon="pending"]')?.className).not.toContain(
+      'animate-spin'
+    )
   })
 
-  it('spins loading summary status because it uses the pending check icon', () => {
+  it('renders loading summary status with the canonical pending icon', () => {
     renderRow(
       makeRow({
         status: 'loading',
@@ -204,7 +206,9 @@ describe('FolderWorkspacePrChecksRow', () => {
     )
 
     expect(iconNames()).toEqual(['review', 'pending'])
-    expect(container.querySelector('[data-icon="pending"]')?.className).toContain('animate-spin')
+    expect(container.querySelector('[data-icon="pending"]')?.className).not.toContain(
+      'animate-spin'
+    )
   })
 
   it('does not render a dashed neutral status glyph for rows without a known check state', () => {

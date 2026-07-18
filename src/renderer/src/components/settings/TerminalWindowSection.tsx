@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { ArrowClockwise as RotateCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { GlobalSettings } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
@@ -165,7 +166,11 @@ export function TerminalWindowSection({
                 disabled={relaunchingBlur}
                 onClick={() => void handleRelaunch()}
               >
-                <RotateCw className={cn('size-3', relaunchingBlur ? 'animate-spin' : '')} />
+                {relaunchingBlur ? (
+                  <LoadingIndicator className="size-3" />
+                ) : (
+                  <RotateCw className="size-3" />
+                )}
                 {relaunchingBlur
                   ? translate(
                       'auto.components.settings.TerminalWindowSection.907131d741',

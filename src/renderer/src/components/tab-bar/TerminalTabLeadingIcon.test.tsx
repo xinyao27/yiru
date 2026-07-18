@@ -17,13 +17,13 @@ function renderStatus(status: TerminalTabActivityStatus): string {
 }
 
 describe('TerminalTabLeadingIcon', () => {
-  it('shows a working spinner beside the provider icon', () => {
+  it('shows the configured working indicator beside the provider icon', () => {
     const markup = renderStatus('working')
 
     expect(markup).toContain('data-testid="tab-agent-activity-indicator"')
     expect(markup).toContain('data-agent-activity-status="working"')
     expect(markup).toContain('aria-label="Working"')
-    expect(markup).toContain('[animation:spin_1s_steps(12,end)_infinite]')
+    expect(markup).toContain('data-slot="loading-indicator"')
     expect(markup).toContain('data-agent-icon="codex"')
   })
 

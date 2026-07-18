@@ -2023,10 +2023,11 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                     'Refresh rate limits'
                   )}
                 >
-                  <RefreshCw
-                    size={11}
-                    className={isRefreshing || anyFetching ? 'animate-spin' : ''}
-                  />
+                  {isRefreshing || anyFetching ? (
+                    <LoadingIndicator size={11} />
+                  ) : (
+                    <RefreshCw size={11} />
+                  )}
                 </button>
               }
             />

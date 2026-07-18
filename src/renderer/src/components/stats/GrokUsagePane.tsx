@@ -5,13 +5,13 @@ import {
   ArrowClockwise as RefreshCw,
   Sparkle as Sparkles
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '../../store'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { StatCard } from './StatCard'
 import { formatUpdatedAt } from './usage-formatters'
-import { cn } from '@/lib/class-names'
 
 export function GrokUsagePane(): React.JSX.Element {
   const grok = useAppStore((s) => s.rateLimits.grok)
@@ -110,7 +110,11 @@ export function GrokUsagePane(): React.JSX.Element {
                       'Refresh Grok usage'
                     )}
                   >
-                    <RefreshCw className={cn('size-3.5', isFetching ? 'animate-spin' : '')} />
+                    {isFetching ? (
+                      <LoadingIndicator className="size-3.5" />
+                    ) : (
+                      <RefreshCw className="size-3.5" />
+                    )}
                   </Button>
                 }
               />

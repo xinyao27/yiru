@@ -4865,7 +4865,11 @@ function ChecksTab({
             onClick={() => void handleRefresh()}
             aria-label={translate('auto.components.PullRequestPage.5d0f42766d', 'Refresh checks')}
           >
-            <RefreshCw className={cn('size-3.5', refreshing && 'animate-spin')} />
+            {refreshing ? (
+              <LoadingIndicator className="size-3.5" />
+            ) : (
+              <RefreshCw className="size-3.5" />
+            )}
           </Button>
         }
       />
@@ -4962,13 +4966,7 @@ function ChecksTab({
     <div className="border-b border-border/50 px-3 py-2">
       <div className="flex min-w-0 items-start gap-2">
         <div className="flex min-w-0 flex-1 items-start gap-2">
-          <SummaryIcon
-            className={cn(
-              'mt-0.5 size-3.5 shrink-0',
-              summaryColor,
-              counts.pending > 0 && counts.failing === 0 && 'animate-spin'
-            )}
-          />
+          <SummaryIcon className={cn('mt-0.5 size-3.5 shrink-0', summaryColor)} />
           <div className="min-w-0 flex-1">
             <div className="text-[13px] font-medium leading-5 text-foreground">
               {translate('auto.components.PullRequestPage.94d95cf1f7', 'Checks')}
@@ -5020,9 +5018,7 @@ function ChecksTab({
               !expanded && '-rotate-90'
             )}
           />
-          <Icon
-            className={cn('size-3.5 shrink-0', color, conclusion === 'pending' && 'animate-spin')}
-          />
+          <Icon className={cn('size-3.5 shrink-0', color)} />
           <span className="min-w-0 flex-1 truncate text-[12px] text-foreground">{check.name}</span>
           <span className="shrink-0 text-[11px] text-muted-foreground">{statusLabel}</span>
         </button>
@@ -5361,13 +5357,7 @@ function ChecksTab({
       <>
         <div className="flex flex-col gap-3 px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
-            <SummaryIcon
-              className={cn(
-                'size-4 shrink-0',
-                summaryColor,
-                counts.pending > 0 && counts.failing === 0 && 'animate-spin'
-              )}
-            />
+            <SummaryIcon className={cn('size-4 shrink-0', summaryColor)} />
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <span className="truncate text-[13px] font-medium text-foreground">
                 {summaryLabel}

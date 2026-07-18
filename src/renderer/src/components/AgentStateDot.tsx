@@ -1,5 +1,6 @@
 import React from 'react'
 import { CheckCircle as CircleCheck } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { cn } from '@/lib/class-names'
 
 // Why: shared state-indicator primitive so the dashboard and the sidebar's
@@ -74,14 +75,9 @@ export const AgentStateDot = React.memo(function AgentStateDot({
         className={cn('inline-flex shrink-0 items-center justify-center', box, className)}
         aria-label={agentStateLabel(state)}
       >
-        <span
-          className={cn(
-            // Why: match the sidebar worktree spinner's stepped cadence so
-            // long-running visible agents do not keep a full-frame-rate loop.
-            'block rounded-full border-2 border-yellow-500 border-t-transparent [animation:spin_1s_steps(12,end)_infinite] motion-reduce:animate-none',
-            inner
-          )}
-        />
+        {/* Why: working is a loading state, so it follows the same user-selected
+            indicator as every other in-flight surface. */}
+        <LoadingIndicator className={cn('text-yellow-500', inner)} />
       </span>
     )
   }

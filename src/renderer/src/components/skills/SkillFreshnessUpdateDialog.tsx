@@ -362,7 +362,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
             disabled={state.loading}
             onClick={() => void state.refresh()}
           >
-            <RefreshCw className={state.loading ? 'animate-spin' : undefined} />
+            {state.loading ? <LoadingIndicator /> : <RefreshCw />}
             {translate('auto.components.skills.SkillFreshnessUpdateDialog.checkNow', 'Re-check')}
           </Button>
           <Button type="button" variant="outline" size="sm" onClick={() => handleOpenChange(false)}>

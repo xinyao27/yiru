@@ -2,10 +2,10 @@ import {
   CaretDown as ChevronDown,
   GitMerge,
   GitPullRequest as GitPullRequestArrow,
-  ArrowClockwise as RefreshCw,
   Sparkle as Sparkles,
   Square
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
@@ -173,7 +173,7 @@ export function CreateHostedReviewComposer({
       className="text-[11px] text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
       aria-label={stopGeneratingDetailsLabel}
     >
-      <RefreshCw className="size-3 animate-spin" />
+      <LoadingIndicator className="size-3" />
       <span>
         {translate('auto.components.right.sidebar.SourceControl.e868cec4e1', 'Generating…')}
       </span>
@@ -268,7 +268,7 @@ export function CreateHostedReviewComposer({
             title={createDisabledReason ?? primaryAction.title}
           >
             {isCreating ? (
-              <RefreshCw className="size-3.5 animate-spin" />
+              <LoadingIndicator className="size-3.5" />
             ) : (
               <ReviewIcon className="size-3.5" />
             )}

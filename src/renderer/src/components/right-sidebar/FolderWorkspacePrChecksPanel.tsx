@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import type { PRCheckDetail, PRCheckRunDetails } from '../../../../shared/types'
 import { getAttachedWorktreesForFolderWorkspace } from './folder-workspace-attached-worktrees'
@@ -229,7 +229,11 @@ export default function FolderWorkspacePrChecksPanel({
                     'Refresh PR checks'
                   )}
                 >
-                  <RefreshCw className={cn('size-3.5', isRefreshing && 'animate-spin')} />
+                  {isRefreshing ? (
+                    <LoadingIndicator className="size-3.5" />
+                  ) : (
+                    <RefreshCw className="size-3.5" />
+                  )}
                 </Button>
               }
             />

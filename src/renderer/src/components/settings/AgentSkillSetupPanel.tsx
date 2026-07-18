@@ -226,7 +226,7 @@ export function AgentSkillSetupPanel({
           }}
           disabled={loading}
         >
-          <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
+          {loading ? <LoadingIndicator className="size-3.5" /> : <RefreshCw className="size-3.5" />}
           {translate('auto.components.settings.AgentSkillSetupPanel.c689392435', 'Re-check')}
         </Button>
       ) : null}

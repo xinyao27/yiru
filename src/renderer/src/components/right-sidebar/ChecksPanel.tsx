@@ -264,7 +264,11 @@ export function ChecksPanelReviewHeader({
         onClick={onRefresh}
         disabled={isRefreshing}
       >
-        <RefreshCw className={cn('size-3.5', isRefreshing && 'animate-spin')} />
+        {isRefreshing ? (
+          <LoadingIndicator className="size-3.5" />
+        ) : (
+          <RefreshCw className="size-3.5" />
+        )}
       </button>
       {showPullRequestMenu && (
         <DropdownMenu>

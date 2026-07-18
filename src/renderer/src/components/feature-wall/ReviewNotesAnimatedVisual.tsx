@@ -13,6 +13,7 @@ import {
 import { ReviewNotesVisualStyles } from './review-animated-visual-notes-styles'
 import { ReviewDiffRows } from './review-notes-diff-rows'
 import { resetTerminal, runTerminalPhase } from './review-notes-terminal-phase'
+import { ReviewNotesTerminalTail } from './review-notes-terminal-tail'
 import { translate } from '@/i18n/i18n'
 
 // Why: this visual mirrors the imperative-DOM pattern used by
@@ -373,7 +374,7 @@ export function ReviewNotesAnimatedVisual(props: { reducedMotion: boolean }): JS
             <div className="ravs-term-line" data-term-line-loaded />
             <div className="ravs-term-line" data-term-line-ack-0 />
             <div className="ravs-term-line" data-term-line-ack-1 />
-            <div className="ravs-term-line" data-term-line-tail />
+            <ReviewNotesTerminalTail />
           </div>
         </div>
         <button className="ravs-add-note-btn" data-add-note-btn aria-hidden type="button">

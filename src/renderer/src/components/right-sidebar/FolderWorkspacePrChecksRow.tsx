@@ -35,7 +35,6 @@ export function FolderWorkspacePrChecksRow({
   // Why: match the regular PR checks header; the review identity leads,
   // while aggregate check state stays with the summary metadata.
   const showStatusIcon = row.checkTone !== 'neutral'
-  const animateStatusIcon = row.checkTone === 'pending'
   const reviewProviderLabel = row.provider === 'gitlab' ? 'MR' : 'PR'
   const toggleDetailsLabel = expanded
     ? translate(
@@ -87,13 +86,7 @@ export function FolderWorkspacePrChecksRow({
           <div className="mt-1 truncate text-[12px] text-foreground/90">{row.title}</div>
           <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
             {showStatusIcon ? (
-              <StatusIcon
-                className={cn(
-                  'size-3 shrink-0',
-                  CHECK_COLOR[row.checkTone],
-                  animateStatusIcon && 'animate-spin'
-                )}
-              />
+              <StatusIcon className={cn('size-3 shrink-0', CHECK_COLOR[row.checkTone])} />
             ) : null}
             <span className="truncate">{row.summary}</span>
             {row.repo ? <span className="shrink-0">· {row.repo.displayName}</span> : null}

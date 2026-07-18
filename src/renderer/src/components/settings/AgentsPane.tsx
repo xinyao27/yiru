@@ -11,6 +11,7 @@ import {
   Terminal
 } from '@phosphor-icons/react'
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { getAgentCatalog, AgentIcon } from '@/lib/agent-catalog'
 import { useDetectedAgents } from '@/hooks/useDetectedAgents'
 import { useAppStore } from '@/store'
@@ -873,7 +874,11 @@ export function AgentsPane({
                 )}
                 className="h-7 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
               >
-                <RefreshCw className={cn('size-3', isRefreshing && 'animate-spin')} />
+                {isRefreshing ? (
+                  <LoadingIndicator className="size-3" />
+                ) : (
+                  <RefreshCw className="size-3" />
+                )}
                 {isRefreshing
                   ? translate('auto.components.settings.AgentsPane.c9b33eb5c0', 'Refreshing…')
                   : translate('auto.components.settings.AgentsPane.0d9e293a02', 'Refresh')}

@@ -137,7 +137,7 @@ export function RuntimePairingGeneratorForm({
                     )}
                     className="text-muted-foreground"
                   >
-                    <RefreshCw className={refreshingNetworkInterfaces ? 'animate-spin' : ''} />
+                    {refreshingNetworkInterfaces ? <LoadingIndicator /> : <RefreshCw />}
                   </Button>
                 }
               />

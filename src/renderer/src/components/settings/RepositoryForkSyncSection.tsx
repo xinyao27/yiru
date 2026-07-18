@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import type { ForkSyncMode, GitForkSyncResult, Repo } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { SearchableSetting } from './SearchableSetting'
@@ -218,7 +219,7 @@ export function RepositoryForkSyncSection({
           disabled={syncing}
           className="shrink-0"
         >
-          <RefreshCw className={syncing ? 'size-3.5 animate-spin' : 'size-3.5'} />
+          {syncing ? <LoadingIndicator className="size-3.5" /> : <RefreshCw className="size-3.5" />}
           {syncing
             ? translate('auto.components.settings.RepositoryForkSyncSection.syncing', 'Syncing')
             : translate('auto.components.settings.RepositoryForkSyncSection.syncNow', 'Sync Now')}

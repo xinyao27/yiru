@@ -1475,12 +1475,7 @@ export default function SmartWorkspaceNameField({
                 </div>
               ) : (
                 <>
-                  <ActiveInputIcon
-                    className={cn(
-                      'pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground',
-                      loading && mode !== 'text' && 'animate-spin'
-                    )}
-                  />
+                  <ActiveInputIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     ref={setInputNode}
                     data-workspace-name-input="true"

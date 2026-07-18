@@ -1,10 +1,6 @@
 import React, { useState } from 'react'
-import {
-  CaretDown as ChevronDown,
-  ArrowClockwise as RefreshCw,
-  SlidersHorizontal,
-  Sparkle
-} from '@phosphor-icons/react'
+import { CaretDown as ChevronDown, SlidersHorizontal, Sparkle } from '@phosphor-icons/react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -111,7 +107,7 @@ export function SourceControlFixSplitButton({
             onClick={() => void onFixWithDefaultAgent()}
           >
             {isLaunching ? (
-              <RefreshCw className={cn(iconClassName, 'animate-spin')} />
+              <LoadingIndicator className={iconClassName} />
             ) : (
               <Sparkle className={iconClassName} />
             )}

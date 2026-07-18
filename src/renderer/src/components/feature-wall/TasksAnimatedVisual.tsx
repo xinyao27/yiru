@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
 import { ArrowRight, Circle as CircleDot } from '@phosphor-icons/react'
 import { AgentStateDot } from '@/components/AgentStateDot'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { ClaudeIcon } from '../status-bar/icons'
 import { FeatureWallClickRing } from './FeatureWallClickRing'
 import { translate } from '@/i18n/i18n'
@@ -297,7 +298,7 @@ export function TasksAnimatedVisual(props: { reducedMotion: boolean }): JSX.Elem
       >
         <div className="flex items-center gap-1.5 px-1 pb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
           {workspaceCreating ? (
-            <span className="inline-block size-[9px] animate-spin rounded-full border-[1.5px] border-yellow-500 border-t-transparent" />
+            <LoadingIndicator className="size-[9px] text-yellow-500" />
           ) : (
             <span className="inline-block size-[9px] rounded-full bg-emerald-500" />
           )}

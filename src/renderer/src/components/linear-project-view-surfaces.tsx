@@ -650,7 +650,11 @@ export function LinearProjectOverview({
             disabled={loading}
             className="gap-1 border-border/50 bg-background/70"
           >
-            <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
+            {loading ? (
+              <LoadingIndicator className="size-3.5" />
+            ) : (
+              <RefreshCw className="size-3.5" />
+            )}
             {translate('auto.components.linear.project.view.surfaces.a9785c7158', 'Refresh')}
           </Button>
           {project ? (

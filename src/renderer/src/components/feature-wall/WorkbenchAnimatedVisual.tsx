@@ -2,6 +2,7 @@
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: this visual is a timed storyboard; typed text, cursor, and phase state intentionally advance from animation effects. */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { cn } from '@/lib/class-names'
 import { ClaudeIcon } from '../status-bar/icons'
 import { useShortcutLabel } from '@/hooks/useShortcutLabel'
@@ -448,11 +449,7 @@ export function WorkbenchAnimatedVisual(props: {
       >
         {/* Left pane: source work that remains visible after the split. */}
         <div ref={leftPaneRef} className="relative flex min-w-0 flex-col gap-1.5 px-3 py-2.5">
-          {isTwoAgentsChecklist ? (
-            <ClaudeChecklistPane reducedMotion={reducedMotion} />
-          ) : (
-            <PlaywrightPane running={running} reducedMotion={reducedMotion} />
-          )}
+          {isTwoAgentsChecklist ? <ClaudeChecklistPane /> : <PlaywrightPane running={running} />}
 
           {/* Right-click context menu — theme card, skeleton bars for the
               other items, real labels only for the two split actions. */}
@@ -531,10 +528,7 @@ export function WorkbenchAnimatedVisual(props: {
   )
 }
 
-function PlaywrightPane(props: {
-  running: (typeof RUN_QUEUE)[number]
-  reducedMotion: boolean
-}): JSX.Element {
+function PlaywrightPane(props: { running: (typeof RUN_QUEUE)[number] }): JSX.Element {
   return (
     <>
       <TermLine>
@@ -589,7 +583,7 @@ function PlaywrightPane(props: {
         </PwDur>
       </TermLine>
       <TermLine>
-        <RunSpinner reducedMotion={props.reducedMotion} />
+        <RunSpinner />
         <PwIdx>3</PwIdx>
         {props.running.name}
         <PwName> {props.running.desc}</PwName>
@@ -598,7 +592,7 @@ function PlaywrightPane(props: {
   )
 }
 
-function ClaudeChecklistPane(props: { reducedMotion: boolean }): JSX.Element {
+function ClaudeChecklistPane(): JSX.Element {
   return (
     <>
       <TermLine>
@@ -650,7 +644,7 @@ function ClaudeChecklistPane(props: { reducedMotion: boolean }): JSX.Element {
         </span>
       </TermLine>
       <TermLine>
-        <RunSpinner reducedMotion={props.reducedMotion} />
+        <RunSpinner />
         <span className="text-foreground">
           {translate('auto.components.feature.wall.WorkbenchAnimatedVisual.99f5224f1e', 'Edit')}
         </span>
@@ -707,15 +701,8 @@ function PwDur(props: { children: React.ReactNode }): JSX.Element {
   return <span className="ml-2 text-muted-foreground">{props.children}</span>
 }
 
-function RunSpinner(props: { reducedMotion?: boolean }): JSX.Element {
-  return (
-    <span
-      className={cn(
-        'mr-1.5 inline-block size-2 rounded-full border-[1.5px] border-foreground/20 align-[-1px]',
-        props.reducedMotion ? 'border-t-foreground/20' : 'animate-spin border-t-foreground'
-      )}
-    />
-  )
+function RunSpinner(): JSX.Element {
+  return <LoadingIndicator className="mr-1.5 size-2 align-[-1px] text-foreground" />
 }
 
 function ContextMenu(props: {

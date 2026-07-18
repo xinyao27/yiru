@@ -222,7 +222,7 @@ describe('CommitArea', () => {
 
     expect(button).toBeDefined()
     expect(button).toContain('disabled=""')
-    expect(button).toContain('animate-spin')
+    expect(button).toContain('data-slot="loading-indicator"')
   })
 
   it('hides commit failure AI actions when Source Control AI actions are hidden', () => {
@@ -355,10 +355,10 @@ describe('CommitArea', () => {
         isRemoteOperationActive: true
       })
     )
-    expect(firstButton(markup)).not.toContain('animate-spin')
+    expect(firstButton(markup)).not.toContain('data-slot="loading-indicator"')
   })
 
-  it('shows a spinner on a Commit primary while the commit itself is in flight', () => {
+  it('shows a loader on a Commit primary while the commit itself is in flight', () => {
     const props = baseProps({
       stagedCount: 1,
       hasMessage: true,
@@ -366,7 +366,7 @@ describe('CommitArea', () => {
       isCommitting: true
     })
     expect(firstButton(renderCommitArea({ ...props, isCommitting: true }))).toContain(
-      'animate-spin'
+      'data-slot="loading-indicator"'
     )
   })
 
@@ -380,7 +380,7 @@ describe('CommitArea', () => {
         inFlightRemoteOpKind: 'push'
       })
     )
-    expect(firstButton(markup)).toContain('animate-spin')
+    expect(firstButton(markup)).toContain('data-slot="loading-indicator"')
   })
 
   it('mirrors a dropdown-triggered Sync on the primary button while it runs', () => {
@@ -395,7 +395,7 @@ describe('CommitArea', () => {
     )
     expect(firstButton(markup)).toContain('Sync')
     expect(firstButton(markup)).not.toContain('Push')
-    expect(firstButton(markup)).toContain('animate-spin')
+    expect(firstButton(markup)).toContain('data-slot="loading-indicator"')
   })
 
   it('does not spin or relabel the primary when a dropdown Fetch is in flight', () => {
@@ -410,7 +410,7 @@ describe('CommitArea', () => {
     )
     expect(firstButton(markup)).toContain('Push')
     expect(hasDisabledAttribute(firstButton(markup))).toBe(true)
-    expect(firstButton(markup)).not.toContain('animate-spin')
+    expect(firstButton(markup)).not.toContain('data-slot="loading-indicator"')
   })
 
   it('renders a leading checkmark on a Commit primary', () => {
@@ -428,10 +428,10 @@ describe('CommitArea', () => {
     expect(firstButton(markup)).not.toContain('lucide-check')
   })
 
-  it('replaces the checkmark with a spinner while the commit is in flight', () => {
+  it('replaces the checkmark with a loader while the commit is in flight', () => {
     const props = baseProps({ isCommitting: true })
     const button = firstButton(renderCommitArea({ ...props, isCommitting: true }))
-    expect(button).toContain('animate-spin')
+    expect(button).toContain('data-slot="loading-indicator"')
     expect(button).not.toContain('lucide-check')
   })
 
@@ -509,7 +509,7 @@ describe('CommitArea', () => {
     })
 
     expect(markup).not.toContain('lucide-sparkles')
-    expect(markup).not.toContain('animate-spin')
+    expect(markup).not.toContain('data-slot="loading-indicator"')
     expect(markup).toContain('Generating commit message…')
   })
 

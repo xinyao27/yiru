@@ -8,6 +8,7 @@ import {
   MagnifyingGlass as Search
 } from '@phosphor-icons/react'
 import { useShortcutLabel } from '@/hooks/useShortcutLabel'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { ReviewPRViewVisualStyles } from './review-animated-visual-pr-view-styles'
 import { CheckTinyIcon, ChevDownIcon, CursorIcon } from './review-animated-visual-shared'
 import { useReviewPrViewAnimation } from './review-pr-view-animation'
@@ -98,7 +99,7 @@ function SidebarTabs(props: { active: SidebarTabId; interactiveChecks?: boolean 
 function StatusCell(): JSX.Element {
   return (
     <span>
-      <span className="ravpr-ring" />
+      <LoadingIndicator className="ravpr-ring size-3.5 text-amber-500" />
       <span className="ravpr-check">
         <CheckTinyIcon />
       </span>

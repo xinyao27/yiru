@@ -60,7 +60,7 @@ export function ManageSessionsTable({
             )}
             className="text-muted-foreground"
           >
-            <RefreshCw className={isRefreshing ? 'animate-spin' : ''} />
+            {isRefreshing ? <LoadingIndicator /> : <RefreshCw />}
           </Button>
         </div>
         <div className="flex items-center gap-1">

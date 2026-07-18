@@ -49,9 +49,7 @@ export function SpoolSessionContinuationNotice({
       <div className="flex max-w-sm flex-col items-center gap-2 text-center">
         <Icon
           aria-hidden="true"
-          className={
-            loading ? 'size-4 animate-spin text-muted-foreground' : 'size-5 text-muted-foreground'
-          }
+          className={loading ? 'size-4 text-muted-foreground' : 'size-5 text-muted-foreground'}
         />
         <p className="text-xs leading-5 text-muted-foreground">{message}</p>
         {phase === 'closed' && canControl ? (

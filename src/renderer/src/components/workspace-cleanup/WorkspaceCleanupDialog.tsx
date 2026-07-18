@@ -707,7 +707,11 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
                           onClick={refresh}
                           disabled={loading}
                         >
-                          <RefreshCcw className={cn('size-3.5', loading && 'animate-spin')} />
+                          {loading ? (
+                            <LoadingIndicator className="size-3.5" />
+                          ) : (
+                            <RefreshCcw className="size-3.5" />
+                          )}
                         </Button>
                       }
                     />
