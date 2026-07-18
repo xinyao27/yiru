@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, type JSX, type ReactNode } from 'react'
 import { cn } from '@/lib/class-names'
 import { ClaudeIcon } from '@/components/status-bar/icons'
+import { floatingSurfaceClass } from '@/components/ui/floating-surface-styles'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { FeatureWallClickRing } from './feature-wall-click-ring'
 import { translate } from '@/i18n/i18n'
@@ -14,10 +15,9 @@ import { translate } from '@/i18n/i18n'
 
 const PROMPT_TEXT = 'Make Starter card stand out'
 
-// Why: these hand-rolled tour popovers need the same dark-mode separation as
-// Yiru's dropdown/popover primitives while staying inside the storyboard DOM.
-const TOUR_FLOATING_SURFACE_CLASS =
-  'border border-black/14 bg-[rgba(255,255,255,0.82)] text-popover-foreground shadow-[0_16px_36px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl dark:border-white/14 dark:bg-[rgba(0,0,0,0.72)] dark:shadow-[0_20px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)]'
+// Why: hand-rolled tour popovers must obey the same opaque surface contract as
+// live dropdowns even though they stay inside the storyboard DOM.
+const TOUR_FLOATING_SURFACE_CLASS = floatingSurfaceClass
 
 const PRE_INTRO_MS = 600
 const NEWTAB_APPROACH_MS = 700

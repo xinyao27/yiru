@@ -1199,7 +1199,7 @@ function ThreadAgentStateIndicator({ thread }: { thread: AgentPaneThread }): Rea
 
 function ActivityStatusGroupHeader({ group }: { group: ActivityThreadGroup }): React.JSX.Element {
   return (
-    <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background/95 px-3 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background px-3 py-1.5">
       {group.state ? (
         <span className="inline-flex size-4 shrink-0 items-center justify-center">
           <AgentStateDot state={group.state} size="sm" />
@@ -2073,7 +2073,7 @@ export default function ActivityPrototypePage(): React.JSX.Element {
                         aria-hidden="true"
                       >
                         {visiblePortalUnavailable ? (
-                          <div className="ml-3 mt-3 inline-flex items-center gap-2 rounded-md border border-border bg-background/85 px-2 py-1 text-xs text-muted-foreground shadow-xs">
+                          <div className="ml-3 mt-3 inline-flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1 text-xs text-muted-foreground shadow-xs">
                             <span className="h-3 w-1.5 rounded-sm bg-muted-foreground/70" />
                             <span>
                               {translate(
@@ -2083,7 +2083,7 @@ export default function ActivityPrototypePage(): React.JSX.Element {
                             </span>
                           </div>
                         ) : showTerminalLoadingLabel ? (
-                          <div className="ml-3 mt-3 inline-flex items-center gap-2 rounded-md border border-border bg-background/85 px-2 py-1 text-xs text-muted-foreground shadow-xs">
+                          <div className="ml-3 mt-3 inline-flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1 text-xs text-muted-foreground shadow-xs">
                             <span className="h-3 w-1.5 animate-pulse rounded-sm bg-muted-foreground/70" />
                             <span>
                               {translate(

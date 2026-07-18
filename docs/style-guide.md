@@ -54,7 +54,7 @@ Tokens come in pairs: a **surface** and a **foreground** that meets contrast on 
 | `sidebar` (+ variants)                   | Secondary panel chrome, including the right sidebar         | Main canvas and floating surfaces                   |
 | `editor-surface`                         | Background of Monaco / markdown editor panes                | App chrome                                          |
 
-The standard `sidebar` family expands into `--sidebar`, `--sidebar-foreground`, `--sidebar-primary`, `--sidebar-primary-foreground`, `--sidebar-accent`, `--sidebar-accent-foreground`, `--sidebar-border`, and `--sidebar-ring`. The left workspace rail scopes different values for this same family through `.worktree-sidebar-theme`; it does not maintain a second token family. `editor-surface` is an intentional product-domain exception because Monaco and markdown panes need a stable host surface distinct from app chrome. In JSX use `bg-[var(--editor-surface)]`; do not promote the exception into the general Tailwind theme.
+The standard `sidebar` family expands into `--sidebar`, `--sidebar-foreground`, `--sidebar-primary`, `--sidebar-primary-foreground`, `--sidebar-accent`, `--sidebar-accent-foreground`, `--sidebar-border`, and `--sidebar-ring`. The left workspace rail uses `.worktree-sidebar-theme` as the scope for user appearance overrides while consuming this same family; it does not maintain a second token family. `editor-surface` is an intentional product-domain exception because Monaco and markdown panes need a stable host surface distinct from app chrome. In JSX use `bg-[var(--editor-surface)]`; do not promote the exception into the general Tailwind theme.
 
 ### Git decoration colors
 
@@ -107,6 +107,17 @@ This keeps light/dark parity automatic.
 
 Yiru is fully rectilinear: `--radius: 0`, and every rendered element is held to `border-radius: 0`. This global rule intentionally covers legacy `rounded-*` utilities, arbitrary and inline values, pseudo-elements, and third-party components that do not use the token. New code must not introduce corner rounding; badges, status markers, avatars, buttons, inputs, cards, floating surfaces, and scrollbars all stay square.
 
+## Native chat geometry
+
+Native chat borrows Cursor's transcript hierarchy while remaining fully rectilinear:
+
+- Transcript, composer, question, and approval surfaces share one centered 840px maximum-width column.
+- Conversation rows use a 12px vertical gap and 14px text at 1.5 line-height.
+- Assistant prose stays unboxed. User turns and expanded tool output use `card` plus a hairline `border`.
+- The composer overlays the transcript bottom; a measured scroll inset and background fade keep the final turn readable as its editor grows from 36px up to 200px.
+- Tool activity starts as compact disclosure lines. Only output, diffs, questions, and approvals become bounded surfaces.
+- These surfaces remain square. Do not reintroduce Cursor's pills, squircles, or rounded message cards.
+
 ## Elevation & shadows
 
 Yiru uses only Tailwind/shadcn shadow tiers:
@@ -123,6 +134,8 @@ Floating primitives share the recipes in `components/ui/floating-surface-styles.
 
 - **Popover, menu, hover card, select:** `bg-popover text-popover-foreground border shadow-md`.
 - **Dialog, command dialog, sheet:** `bg-background text-foreground border shadow-lg` with `bg-black/50` backdrop.
+
+Foreground floating surfaces are always opaque while visible. Their base must not use `/NN` background alpha, translucent `rgba`, `color-mix(..., transparent)`, resting element opacity below 1, or backdrop blur. Enter/exit opacity motion is allowed; transparency also remains valid for modal backdrops, transcript fade masks, drag/selection affordances, and hover-state tints because those intentionally reveal context rather than carry foreground content.
 
 Keep placement and z-index in each headless wrapper. Shared color, elevation, and enter/exit recipes stay in the style module so sibling surfaces cannot drift; a wrapper keeps only motion that is genuinely different (for example, sheet direction).
 

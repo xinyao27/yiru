@@ -3,6 +3,7 @@ import { Check, Pencil, X } from '@phosphor-icons/react'
 import { cn } from '@/lib/class-names'
 import { translate } from '@/i18n/i18n'
 import type { AskAnswerSelection, AskPrompt } from './native-chat-interactive-prompt'
+import { NATIVE_CHAT_CONTENT_WIDTH_CLASS } from './native-chat-layout'
 
 export type NativeChatQuestionCardProps = {
   prompt: AskPrompt
@@ -123,118 +124,120 @@ export function NativeChatQuestionCard({
     // Part of the composer: docked in the bottom input region, matching the
     // composer's width and padding, rendered as the "ask" dialog card directly
     // above the text input. Its free-text row is the answer input.
-    <div className="shrink-0 bg-background" aria-busy={isSubmitting}>
-      <div className="mx-auto w-full max-w-4xl px-3 pt-2 pb-4 sm:px-4">
-        {total > 1 ? (
-          <div className="mb-2 flex gap-1 overflow-x-auto pb-1 scrollbar-sleek">
-            {prompt.questions.map((qq, i) => (
-              <button
-                key={i}
-                type="button"
-                disabled={isSubmitting}
-                onClick={() => setIndex(i)}
-                className={cn(
-                  'flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium disabled:pointer-events-none',
-                  i === index
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
+    <div className="shrink-0" aria-busy={isSubmitting}>
+      <div className="px-3 pt-2 pb-4 sm:px-4">
+        <div className={cn('pointer-events-auto mx-auto w-full', NATIVE_CHAT_CONTENT_WIDTH_CLASS)}>
+          {total > 1 ? (
+            <div className="mb-2 flex gap-1 overflow-x-auto pb-1 scrollbar-sleek">
+              {prompt.questions.map((qq, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => setIndex(i)}
+                  className={cn(
+                    'flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium disabled:pointer-events-none',
+                    i === index
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  <span className="max-w-[10rem] truncate">
+                    {qq.header ||
+                      translate('components.native-chat.question.step', 'Step {{value0}}', {
+                        value0: i + 1
+                      })}
+                  </span>
+                  {answerFor(i).length > 0 ? (
+                    <Check className="size-3 text-primary" strokeWidth={3} />
+                  ) : null}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="overflow-hidden border border-input bg-card shadow-xs">
+            <div className="flex items-center justify-between gap-2 px-3.5 py-2.5">
+              <p
+                className="min-w-0 truncate text-sm font-semibold text-foreground"
+                title={q.question}
               >
-                <span className="max-w-[10rem] truncate">
-                  {qq.header ||
-                    translate('components.native-chat.question.step', 'Step {{value0}}', {
-                      value0: i + 1
-                    })}
-                </span>
-                {answerFor(i).length > 0 ? (
-                  <Check className="size-3 text-primary" strokeWidth={3} />
-                ) : null}
-              </button>
-            ))}
-          </div>
-        ) : null}
-
-        <div className="overflow-hidden rounded-lg border border-input bg-card shadow-xs">
-          <div className="flex items-center justify-between gap-2 px-3.5 py-2.5">
-            <p
-              className="min-w-0 truncate text-sm font-semibold text-foreground"
-              title={q.question}
-            >
-              {q.question}
-            </p>
-            <button
-              type="button"
-              onClick={onCancel}
-              aria-label={translate('components.native-chat.question.cancel', 'Cancel')}
-              className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-
-          {/* Scroll only kicks in on long option lists; the sleek scrollbar rides
-              the card's right edge instead of crowding the choices. */}
-          <div className="max-h-[50vh] divide-y divide-border/60 overflow-y-auto border-t border-border scrollbar-sleek">
-            {q.options.map((opt, i) => (
-              <OptionRow
-                key={`${i}:${opt.label}`}
-                badge={String(i + 1)}
-                label={opt.label}
-                description={opt.description}
-                selected={(selections[index] ?? []).includes(i)}
-                disabled={isSubmitting}
-                onSelect={() => pickOption(i)}
-              />
-            ))}
-            <div className="flex items-center gap-3 px-3.5 py-2.5">
-              <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                <Pencil className="size-3.5" />
-              </span>
-              <input
-                ref={answerInputRef}
-                disabled={isSubmitting}
-                value={otherText[index]}
-                onChange={(e) => setOther(index, e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    confirm(true)
-                  }
-                }}
-                placeholder={translate(
-                  'components.native-chat.question.otherPlaceholder',
-                  'Type your answer'
-                )}
-                className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/60 disabled:cursor-default disabled:opacity-50"
-              />
+                {q.question}
+              </p>
               <button
                 type="button"
-                disabled={isSubmitting}
-                onClick={() => confirm()}
-                className={cn(
-                  'w-24 shrink-0 rounded-md px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:opacity-50',
-                  currentAnswered
-                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                )}
+                onClick={onCancel}
+                aria-label={translate('components.native-chat.question.cancel', 'Cancel')}
+                className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {isSubmitting
-                  ? translate('components.native-chat.question.sending', 'Sending…')
-                  : currentAnswered
-                    ? isLast
-                      ? translate('components.native-chat.question.send', 'Send answer')
-                      : translate('components.native-chat.question.next', 'Next')
-                    : translate('components.native-chat.question.skip', 'Skip')}
+                <X className="size-4" />
               </button>
             </div>
-          </div>
-        </div>
 
-        {total > 1 ? (
-          <p className="mt-2 text-right text-xs text-muted-foreground">
-            {index + 1}/{total}
-          </p>
-        ) : null}
+            {/* Scroll only kicks in on long option lists; the sleek scrollbar rides
+              the card's right edge instead of crowding the choices. */}
+            <div className="max-h-[50vh] divide-y divide-border/60 overflow-y-auto border-t border-border scrollbar-sleek">
+              {q.options.map((opt, i) => (
+                <OptionRow
+                  key={`${i}:${opt.label}`}
+                  badge={String(i + 1)}
+                  label={opt.label}
+                  description={opt.description}
+                  selected={(selections[index] ?? []).includes(i)}
+                  disabled={isSubmitting}
+                  onSelect={() => pickOption(i)}
+                />
+              ))}
+              <div className="flex items-center gap-3 px-3.5 py-2.5">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                  <Pencil className="size-3.5" />
+                </span>
+                <input
+                  ref={answerInputRef}
+                  disabled={isSubmitting}
+                  value={otherText[index]}
+                  onChange={(e) => setOther(index, e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      confirm(true)
+                    }
+                  }}
+                  placeholder={translate(
+                    'components.native-chat.question.otherPlaceholder',
+                    'Type your answer'
+                  )}
+                  className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/60 disabled:cursor-default disabled:opacity-50"
+                />
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => confirm()}
+                  className={cn(
+                    'w-24 shrink-0 rounded-md px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:opacity-50',
+                    currentAnswered
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  )}
+                >
+                  {isSubmitting
+                    ? translate('components.native-chat.question.sending', 'Sending…')
+                    : currentAnswered
+                      ? isLast
+                        ? translate('components.native-chat.question.send', 'Send answer')
+                        : translate('components.native-chat.question.next', 'Next')
+                      : translate('components.native-chat.question.skip', 'Skip')}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {total > 1 ? (
+            <p className="mt-2 text-right text-xs text-muted-foreground">
+              {index + 1}/{total}
+            </p>
+          ) : null}
+        </div>
       </div>
     </div>
   )

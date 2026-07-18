@@ -880,7 +880,7 @@ export default function IpynbViewer({
       onKeyDownCapture={handleNotebookKeyDownCapture}
       onPointerDownCapture={handleNotebookPointerDownCapture}
     >
-      <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border/60 bg-background/95 px-4 py-2 text-xs text-muted-foreground backdrop-blur">
+      <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border/60 bg-background px-4 py-2 text-xs text-muted-foreground">
         <span className="font-medium text-foreground">{filePath.split(/[/\\]/).pop()}</span>
         <span>
           {notebook.cells.length}{' '}

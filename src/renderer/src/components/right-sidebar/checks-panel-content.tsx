@@ -589,7 +589,7 @@ export function getFailedChecksForDetails(checks: PRCheckDetail[]): PRCheckDetai
 type CheckDetailsStickySurface = 'sidebar' | 'card'
 
 function getCheckDetailsStickySurfaceClass(surface: CheckDetailsStickySurface): string {
-  return surface === 'card' ? 'bg-card/95' : 'bg-sidebar/95'
+  return surface === 'card' ? 'bg-card' : 'bg-sidebar'
 }
 
 function ViewFullCheckDetailsButton({
@@ -679,7 +679,7 @@ function CheckRunDetails({
         // visible while scrolling through annotations and job output.
         <div
           className={cn(
-            'sticky top-0 z-10 -ml-3 flex min-w-0 items-center gap-2 border-b border-border/60 py-1 pl-3 backdrop-blur-sm',
+            'sticky top-0 z-10 -ml-3 flex min-w-0 items-center gap-2 border-b border-border/60 py-1 pl-3',
             getCheckDetailsStickySurfaceClass(detailsStickySurface)
           )}
         >
@@ -2392,7 +2392,7 @@ export function PRCommentsList({
           presentation.sectionHeader,
           // Why: the checks sidebar scrolls as one column; pinning this header keeps
           // filter and add-comment actions reachable while reading long threads.
-          'sticky top-0 z-10 bg-sidebar/95 backdrop-blur-sm'
+          'sticky top-0 z-10 bg-sidebar'
         )}
       >
         <div className="flex min-w-0 items-center gap-2">

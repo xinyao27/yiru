@@ -820,7 +820,7 @@ function WorkspaceTreemap({
             variant="outline"
             size="xs"
             onClick={() => onZoomChange(null)}
-            className="absolute right-2 top-2 gap-1.5 bg-background/90 px-2.5 backdrop-blur"
+            className="absolute right-2 top-2 gap-1.5 bg-background px-2.5"
           >
             <ZoomOut className="size-3" />
             {translate('auto.components.status.bar.WorkspaceSpaceManagerPanel.ef890d31b9', 'All')}
@@ -852,14 +852,14 @@ function WorkspaceTreemap({
       <div className="absolute right-2 top-2 z-10 flex max-w-[calc(100%-1rem)] items-center gap-2">
         {zoomedWorktree ? (
           <>
-            <div className="max-w-56 truncate rounded-md border border-border/70 bg-background/90 px-2 py-1 text-[11px] font-medium shadow-xs backdrop-blur">
+            <div className="max-w-56 truncate rounded-md border border-border/70 bg-background px-2 py-1 text-[11px] font-medium shadow-xs">
               {zoomedWorktree.displayName}
             </div>
             <Button
               variant="outline"
               size="xs"
               onClick={() => onZoomChange(null)}
-              className="gap-1.5 bg-background/90 px-2.5 backdrop-blur"
+              className="gap-1.5 bg-background px-2.5"
             >
               <ZoomOut className="size-3" />
               {translate('auto.components.status.bar.WorkspaceSpaceManagerPanel.ef890d31b9', 'All')}
@@ -870,7 +870,7 @@ function WorkspaceTreemap({
             variant="outline"
             size="xs"
             onClick={() => onZoomChange(selectedWorktree.worktreeId)}
-            className="gap-1.5 bg-background/90 px-2.5 backdrop-blur"
+            className="gap-1.5 bg-background px-2.5"
           >
             <ZoomIn className="size-3" />
             {translate('auto.components.status.bar.WorkspaceSpaceManagerPanel.d3f9c69ddc', 'Zoom')}
@@ -1791,7 +1791,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
       ) : null}
 
       {hasRows ? (
-        <div className="sticky top-0 z-10 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-md border border-border/70 bg-background/95 px-3 py-2 shadow-xs backdrop-blur">
+        <div className="sticky top-0 z-10 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-md border border-border/70 bg-background px-3 py-2 shadow-xs">
           <div className="min-w-0 text-xs text-muted-foreground">
             <span className="font-medium text-foreground">
               {selectedDeletableIds.length}{' '}

@@ -6319,7 +6319,7 @@ function SourceControlInner(): React.JSX.Element {
             // Why: the graph is reference context for the whole panel, so when
             // file sections are short it should occupy the bottom, and when the
             // pane scrolls it should remain docked as branch context.
-            <div className="sticky bottom-0 z-10 mt-auto shrink-0 border-t border-border bg-sidebar/95 backdrop-blur-sm">
+            <div className="sticky bottom-0 z-10 mt-auto shrink-0 border-t border-border bg-sidebar">
               <GitHistoryPanel
                 state={gitHistoryState}
                 collapsed={collapsedSections.has('history')}

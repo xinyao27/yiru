@@ -247,7 +247,7 @@ export function SpoolTerminalPane({
       {mutationUncertain ? (
         <div
           role="status"
-          className="absolute left-3 right-3 top-2 flex items-center justify-between gap-3 rounded-md border border-border bg-card/95 px-3 py-2 text-xs text-card-foreground shadow-xs"
+          className="absolute left-3 right-3 top-2 flex items-center justify-between gap-3 rounded-md border border-border bg-card px-3 py-2 text-xs text-card-foreground shadow-xs"
         >
           <span className="text-muted-foreground">
             {translate(
@@ -269,7 +269,7 @@ export function SpoolTerminalPane({
           </Button>
         </div>
       ) : status !== 'live' ? (
-        <div className="pointer-events-none absolute right-3 top-2 rounded-md border border-border bg-card/90 px-2 py-1 text-[11px] text-card-foreground shadow-xs">
+        <div className="pointer-events-none absolute right-3 top-2 rounded-md border border-border bg-card px-2 py-1 text-[11px] text-card-foreground shadow-xs">
           <span className="text-muted-foreground">{getSpoolTerminalStatusLabel(status)}</span>
         </div>
       ) : null}

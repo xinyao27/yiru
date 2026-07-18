@@ -78,7 +78,7 @@ function ToolLine({ block }: { block: NativeChatBlock }): React.JSX.Element | nu
           // shown (pointing down) when expanded — mirrors Codex's disclosure affordance.
           <ChevronRight
             className={cn(
-              'size-3.5 shrink-0 text-muted-foreground transition-all',
+              'ml-auto size-3.5 shrink-0 text-muted-foreground transition-all',
               expanded ? 'rotate-90 opacity-100' : 'opacity-0 group-hover:opacity-100'
             )}
           />
@@ -90,7 +90,7 @@ function ToolLine({ block }: { block: NativeChatBlock }): React.JSX.Element | nu
           {!diff && body ? (
             <pre
               className={cn(
-                'max-h-64 overflow-auto whitespace-pre-wrap break-words rounded bg-accent p-2 font-mono text-[11px] scrollbar-sleek',
+                'max-h-64 overflow-auto whitespace-pre-wrap break-words border border-border bg-card p-2 font-mono text-[11px] leading-[18px] scrollbar-sleek',
                 body.isError ? 'text-destructive' : 'text-foreground/80'
               )}
             >
@@ -100,7 +100,7 @@ function ToolLine({ block }: { block: NativeChatBlock }): React.JSX.Element | nu
             </pre>
           ) : null}
           {!diff && !body && detail ? (
-            <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words rounded bg-accent p-2 font-mono text-[11px] text-foreground/80 scrollbar-sleek">
+            <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words border border-border bg-card p-2 font-mono text-[11px] leading-[18px] text-foreground/80 scrollbar-sleek">
               {detail.length > MAX_TOOL_RESULT_CHARS
                 ? `${detail.slice(0, MAX_TOOL_RESULT_CHARS)}…`
                 : detail}
@@ -138,7 +138,7 @@ export function NativeChatToolRun({
   return (
     // Extra top margin sets the tool run apart from the assistant prose above it
     // so the turn's activity doesn't crowd the message text.
-    <div className="mt-3">
+    <div className="mt-2">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -154,7 +154,7 @@ export function NativeChatToolRun({
             down when open — matches Codex's tool-run disclosure. */}
         <ChevronRight
           className={cn(
-            'size-3.5 shrink-0 text-muted-foreground transition-all',
+            'ml-auto size-3.5 shrink-0 text-muted-foreground transition-all',
             open ? 'rotate-90 opacity-100' : 'opacity-0 group-hover:opacity-100'
           )}
         />

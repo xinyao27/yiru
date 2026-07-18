@@ -18,6 +18,7 @@ import type {
   SessionOptionDescriptor,
   SessionOptionsSurface
 } from '../../../../shared/native-chat-session-options'
+import { NATIVE_CHAT_CONTENT_WIDTH_CLASS } from './native-chat-layout'
 
 export type NativeChatComposerFieldProps = {
   textareaRef: RefObject<HTMLTextAreaElement | null>
@@ -92,10 +93,15 @@ export function NativeChatComposerField({
   sessionOptionsSnapshot
 }: NativeChatComposerFieldProps): React.JSX.Element {
   return (
-    <div className="shrink-0 bg-background">
+    <div className="shrink-0">
       {/* Extra bottom padding keeps the input box off the window rim. */}
       <div className="px-3 pt-2 pb-4 sm:px-4">
-        <div className="relative mx-auto w-full max-w-4xl">
+        <div
+          className={cn(
+            'pointer-events-auto relative mx-auto w-full',
+            NATIVE_CHAT_CONTENT_WIDTH_CLASS
+          )}
+        >
           {autocomplete.mode === 'slash' && autocomplete.suggestions.length > 0 ? (
             <NativeChatSlashMenu
               suggestions={autocomplete.suggestions}
@@ -122,7 +128,7 @@ export function NativeChatComposerField({
           <div
             data-native-file-drop-target={NATIVE_FILE_DROP_TARGET.composer}
             className={cn(
-              'rounded-lg border border-input bg-card p-1.5 shadow-xs transition-colors',
+              'border border-input bg-card p-1.5 shadow-xs transition-colors',
               'focus-within:border-ring dark:bg-input/30'
             )}
           >
@@ -162,17 +168,17 @@ export function NativeChatComposerField({
               ref={textareaRef}
               value={draft}
               disabled={disabled}
-              rows={2}
+              rows={1}
               onChange={(e) => onDraftChange(e.target.value, e.currentTarget)}
               onKeyDown={onKeyDown}
               onPaste={onPaste}
               onSelect={(e) => onTextareaSelect(e.currentTarget)}
               placeholder={nativeChatComposerPlaceholder(hasPty, canSend)}
-              // Why: coarse-pointer min-height follows the app's touch target convention.
-              // scrollbar-sleek keeps the overflow gutter from showing the heavy
-              // native scrollbar once the draft exceeds max-height.
+              // Why: field-sizing lets Chromium grow the editor without a JS
+              // reflow loop; max-height then hands long drafts to the scrollbar.
+              // Coarse pointers retain the app's larger touch target.
               className={cn(
-                'scrollbar-sleek min-h-12 max-h-28 w-full resize-none bg-transparent px-2 py-1 text-sm outline-none pointer-coarse:min-h-14',
+                'scrollbar-sleek min-h-9 max-h-[200px] w-full resize-none bg-transparent px-2 py-2 text-sm leading-5 outline-none [field-sizing:content] pointer-coarse:min-h-14',
                 'placeholder:text-muted-foreground/60 disabled:cursor-not-allowed disabled:opacity-50'
               )}
             />

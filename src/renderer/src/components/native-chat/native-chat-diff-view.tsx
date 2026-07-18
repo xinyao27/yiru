@@ -6,7 +6,7 @@ import type { DiffLine } from './native-chat-diff'
  *  matching the terminal's diff palette (no invented colors). */
 export function NativeChatDiffView({ lines }: { lines: DiffLine[] }): React.JSX.Element {
   return (
-    <div className="overflow-hidden rounded bg-accent py-1 font-mono text-[11px] leading-relaxed">
+    <div className="overflow-hidden border border-border bg-card py-1 font-mono text-[11px] leading-[18px]">
       {lines.map((line, i) => (
         <div
           key={i}

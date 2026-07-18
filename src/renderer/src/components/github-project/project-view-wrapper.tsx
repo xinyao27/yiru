@@ -1374,7 +1374,7 @@ function ProjectTableSkeleton(): React.JSX.Element {
       )}
       className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
     >
-      <div className="grid items-center gap-3 border-b border-border/60 bg-background/95 px-3 py-2">
+      <div className="grid items-center gap-3 border-b border-border/60 bg-background px-3 py-2">
         <div
           className="grid items-center gap-3"
           style={{

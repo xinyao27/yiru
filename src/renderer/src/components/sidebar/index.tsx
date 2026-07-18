@@ -169,7 +169,7 @@ function Sidebar({
         {sidebarOpen && affordance.visible ? (
           <div
             className={cn(
-              'pointer-events-none absolute inset-2 z-20 flex flex-col items-center justify-center gap-1.5 rounded-md border bg-sidebar-accent/95 px-4 text-center text-sidebar-accent-foreground shadow-xs',
+              'pointer-events-none absolute inset-2 z-20 flex flex-col items-center justify-center gap-1.5 rounded-md border bg-sidebar-accent px-4 text-center text-sidebar-accent-foreground shadow-xs',
               affordance.tone === 'blocked' ? 'border-destructive/70' : 'border-sidebar-ring/70'
             )}
           >

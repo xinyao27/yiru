@@ -7502,7 +7502,7 @@ export default function GitHubItemDialog({
           </div>
         </>
       ) : (
-        <div className="flex-none border-b border-border/60 bg-card/80 px-4 py-3 shadow-xs backdrop-blur supports-[backdrop-filter]:bg-card/70">
+        <div className="flex-none border-b border-border/60 bg-card px-4 py-3 shadow-xs">
           <div className="flex items-start gap-3">
             <Button
               type="button"

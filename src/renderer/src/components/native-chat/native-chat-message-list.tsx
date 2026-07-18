@@ -20,6 +20,7 @@ import { isNativeChatPastedImagePath } from './native-chat-image-paste'
 import { NativeChatToolRun } from './native-chat-tool-run'
 import { NativeChatCopyButton } from './native-chat-copy-button'
 import { NATIVE_CHAT_STREAMING_ID } from '../../../../shared/native-chat-streaming'
+import { NATIVE_CHAT_CONTENT_WIDTH_CLASS } from './native-chat-layout'
 
 function geometryOf(el: HTMLElement): ScrollGeometry {
   return { scrollTop: el.scrollTop, scrollHeight: el.scrollHeight, clientHeight: el.clientHeight }
@@ -166,17 +167,17 @@ function MessageRow({
     // stays. (A distinct "queued" treatment flickered normal→queued→normal as the
     // transcript caught up.)
     return (
-      <div ref={rowRef} className="flex flex-col items-end gap-0.5">
-        {/* User turns get a distinct muted fill (not the card/canvas color) so
-            the prompt reads apart from the assistant's body copy. */}
-        <div className="max-w-[85%] rounded-lg rounded-tr-sm bg-muted px-3.5 py-2.5 text-sm text-foreground">
+      <div ref={rowRef} className="flex flex-col items-end gap-1">
+        {/* User turns are the bounded surface; assistant prose stays unboxed so
+            the transcript hierarchy comes from role rather than nested cards. */}
+        <div className="max-w-[85%] border border-border bg-card px-3 py-2 text-sm leading-[1.5] text-foreground shadow-xs">
           {markdown ? (
             <>
               <ImageAttachmentRefs blocks={prose} />
               <CommentMarkdown
                 content={markdown}
                 variant="document"
-                className="text-sm"
+                className="text-sm leading-[1.5]"
                 onLinkClick={onLinkClick}
                 allowFileUriLinks={allowFileUriLinks}
               />
@@ -205,7 +206,7 @@ function MessageRow({
     <div
       ref={rowRef}
       className={cn(
-        'group relative max-w-full text-sm leading-relaxed text-foreground',
+        'group relative max-w-full text-sm leading-[1.5] text-foreground',
         // Reasoning is the agent thinking aloud — quieter, italic, like an aside.
         isReasoning && 'border-l-2 border-border/60 pl-3 italic text-muted-foreground',
         isSystem && 'text-xs text-muted-foreground'
@@ -223,7 +224,7 @@ function MessageRow({
         <CommentMarkdown
           content={markdown}
           variant="document"
-          className="text-sm"
+          className="text-sm leading-[1.5]"
           onLinkClick={onLinkClick}
           allowFileUriLinks={allowFileUriLinks}
         />
@@ -240,7 +241,8 @@ export function NativeChatMessageList({
   fontScale,
   onLinkClick,
   allowFileUriLinks = false,
-  failedDeliveryMessageIds
+  failedDeliveryMessageIds,
+  bottomInset
 }: {
   session: NativeChatLiveSession
   isWorking: boolean
@@ -251,6 +253,8 @@ export function NativeChatMessageList({
   onLinkClick?: CommentMarkdownLinkClickHandler
   allowFileUriLinks?: boolean
   failedDeliveryMessageIds?: ReadonlySet<string>
+  /** Measured overlay height; keeps the final turn and jump control unobscured. */
+  bottomInset: number
 }): React.JSX.Element {
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const contentRef = useRef<HTMLDivElement | null>(null)
@@ -324,8 +328,8 @@ export function NativeChatMessageList({
     container.scrollTo({ top: container.scrollTop + delta, behavior: 'smooth' })
   }, [])
 
-  // Re-pin to the bottom when new content arrives, but only if the user hasn't
-  // scrolled up. Layout effect so the jump happens before paint (no flicker).
+  // Re-pin when content arrives or the overlay grows, but only if the user
+  // hasn't scrolled up. Layout effect keeps the adjustment before paint.
   // When an older page just prepended, restore the prior position instead.
   useLayoutEffect(() => {
     const el = scrollRef.current
@@ -340,7 +344,7 @@ export function NativeChatMessageList({
     if (stuckToBottomRef.current) {
       scrollToBottom()
     }
-  }, [messages.length, isWorking, showTypingIndicator, scrollToBottom])
+  }, [messages.length, isWorking, showTypingIndicator, bottomInset, scrollToBottom])
 
   // Content growing without a message-count change (a streaming assistant turn
   // extends its own message in place) never re-fires the layout effect above.
@@ -373,11 +377,12 @@ export function NativeChatMessageList({
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="scrollbar-sleek h-full overflow-y-auto px-3 pt-10 pb-4 sm:px-4"
+        className="scrollbar-sleek h-full overflow-y-auto px-4 pt-6"
+        style={{ paddingBottom: bottomInset + 16 }}
       >
         <div
           ref={contentRef}
-          className="mx-auto flex w-full max-w-4xl flex-col gap-5"
+          className={cn('mx-auto flex w-full flex-col gap-3', NATIVE_CHAT_CONTENT_WIDTH_CLASS)}
           // Why: `zoom` scales the chat transcript's text and layout together,
           // scoped to this container so the rest of the app is untouched. It's
           // the desktop analog of the mobile pinch-zoom (Chromium/Electron only).
@@ -416,7 +421,8 @@ export function NativeChatMessageList({
           type="button"
           onClick={scrollToBottom}
           aria-label={translate('components.native-chat.jumpToLatest', 'Jump to latest')}
-          className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-card/90 px-3 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="absolute left-1/2 flex -translate-x-1/2 items-center gap-1.5 border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          style={{ bottom: bottomInset + 12 }}
         >
           <ArrowDown className="size-3.5" />
           <span>{translate('components.native-chat.jumpToLatest', 'Jump to latest')}</span>

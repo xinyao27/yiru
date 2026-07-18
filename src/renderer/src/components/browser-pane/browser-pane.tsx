@@ -46,6 +46,7 @@ import {
 } from '@phosphor-icons/react'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
+import { floatingSurfaceClass } from '@/components/ui/floating-surface-styles'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { BrowserAnnotationSendMenuContent } from './browser-annotation-send-menu-content'
 import {
@@ -240,6 +241,10 @@ const BROWSER_ANNOTATION_INTENT_OPTIONS = [
 // compatibility, but the annotation UI no longer exposes urgency choices.
 const DEFAULT_BROWSER_ANNOTATION_PRIORITY: BrowserAnnotationPriority = 'important'
 const BROWSER_PAGE_ZOOM_FEEDBACK_MS = 1400
+const BROWSER_CONTEXT_MENU_CLASS = cn(
+  floatingSurfaceClass,
+  'fixed z-50 min-w-[13rem] overflow-hidden p-1'
+)
 
 type BrowserOverlayViewport = {
   scrollX: number
@@ -2422,7 +2427,7 @@ function RemoteBrowserPagePane({
                 role="menu"
                 data-testid="remote-browser-context-menu"
                 style={{ left: contextMenu.x, top: contextMenu.y }}
-                className="fixed z-50 min-w-[13rem] overflow-hidden rounded-[11px] border border-black/14 bg-[rgba(255,255,255,0.82)] p-1 text-black shadow-[0_16px_36px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl dark:border-white/14 dark:bg-[rgba(0,0,0,0.72)] dark:text-white dark:shadow-[0_20px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)]"
+                className={BROWSER_CONTEXT_MENU_CLASS}
               >
                 {contextMenu.linkUrl ? (
                   <>
@@ -2554,7 +2559,7 @@ function RemoteBrowserPagePane({
           )
         : null}
       <div
-        className="relative z-10 flex items-center gap-2 border-b border-border/70 bg-background/95 px-3 py-1.5"
+        className="relative z-10 flex items-center gap-2 border-b border-border/70 bg-background px-3 py-1.5"
         data-contextual-tour-target="browser-toolbar"
       >
         <Button
@@ -4918,7 +4923,7 @@ function BrowserPagePane({
                 role="menu"
                 data-testid="browser-context-menu"
                 style={{ left: contextMenu.x, top: contextMenu.y }}
-                className="fixed z-50 min-w-[13rem] overflow-hidden rounded-[11px] border border-black/14 bg-[rgba(255,255,255,0.82)] p-1 text-black shadow-[0_16px_36px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl dark:border-white/14 dark:bg-[rgba(0,0,0,0.72)] dark:text-white dark:shadow-[0_20px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)]"
+                className={BROWSER_CONTEXT_MENU_CLASS}
               >
                 {contextMenu.linkUrl ? (
                   <>
@@ -5065,7 +5070,7 @@ function BrowserPagePane({
 
       <div ref={chromeHeaderRef} className="pointer-events-auto shrink-0">
         <div
-          className="relative z-10 flex items-center gap-2 border-b border-border/70 bg-background/95 px-3 py-1.5"
+          className="relative z-10 flex items-center gap-2 border-b border-border/70 bg-background px-3 py-1.5"
           data-contextual-tour-target="browser-toolbar"
         >
           <Button
@@ -5555,7 +5560,7 @@ function BrowserPagePane({
                 aria-live="polite"
                 aria-hidden={browserZoomIndicatorState.ariaHidden}
                 className={cn(
-                  'pointer-events-none absolute top-3 right-3 z-30 rounded-md border border-border bg-popover/95 px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-xs transition-opacity duration-300 ease-out',
+                  'pointer-events-none absolute top-3 right-3 z-30 rounded-md border border-border bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-xs transition-opacity duration-300 ease-out',
                   browserZoomIndicatorState.opacityClassName
                 )}
               >

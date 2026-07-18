@@ -60,7 +60,7 @@ export function ZoomOverlay(): React.JSX.Element | null {
     >
       <div
         className={cn(
-          'flex items-center gap-3 rounded-full bg-popover/95 px-5 py-2.5 text-popover-foreground shadow-2xl border border-border/50 backdrop-blur-md transition-transform duration-300 ease-out',
+          'flex items-center gap-3 rounded-full border border-border/50 bg-popover px-5 py-2.5 text-popover-foreground shadow-2xl transition-transform duration-300 ease-out',
           visible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
         )}
       >
