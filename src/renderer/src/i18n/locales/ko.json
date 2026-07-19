@@ -585,6 +585,11 @@
       },
       "MonacoLanguageServerSession": {
         "restarting": "Restarting language server…"
+      },
+      "MonacoLanguageServerEditFeatures": {
+        "renameTitle": "Rename symbol to “{{value0}}”",
+        "commandDisabled": "Language server commands are not allowed.",
+        "noRenameEdits": "The language server returned no rename edits."
       }
     },
     "hooks": {
@@ -10955,6 +10960,15 @@
           "copy": "복사",
           "selectAll": "모두 선택",
           "copyPath": "경로 복사"
+        },
+        "LanguageServerWorkspaceEditDialog": {
+          "summary": "Review {{value0}} edits across {{value1}} files. {{value2}} closed files will be written to disk.",
+          "editCount": "{{value0}} edits",
+          "unsaved": " · unsaved buffer",
+          "undoHint": "Open-buffer edits use the editor’s normal save and undo behavior.",
+          "cancel": "Cancel",
+          "apply": "Apply changes",
+          "loading": "Loading preview…"
         }
       },
       "diff": {

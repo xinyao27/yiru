@@ -10,6 +10,7 @@ import {
 } from './monaco-language-server-conversions'
 import { toMonacoCompletionList, toMonacoSignatureHelp } from './monaco-language-server-suggestions'
 import { toMonacoDocumentSymbols } from './monaco-language-server-symbols'
+import { MonacoLanguageServerEditFeatures } from './monaco-language-server-edit-features'
 
 const MAX_LOCATIONS = 1_000
 
@@ -22,13 +23,20 @@ type LanguageRegistration = {
   completionTriggers: Set<string>
   signatureTriggers: Set<string>
   signatureRetriggers: Set<string>
+  codeActionKinds: Set<string>
   disposables: Disposable[]
 }
 
 export class MonacoLanguageServerFeatures {
   private readonly registrations = new Map<string, LanguageRegistration>()
+  private readonly editFeatures: MonacoLanguageServerEditFeatures
 
-  constructor(private readonly getRoute: (model: monaco.editor.ITextModel) => ModelRoute | null) {}
+  constructor(private readonly getRoute: (model: monaco.editor.ITextModel) => ModelRoute | null) {
+    this.editFeatures = new MonacoLanguageServerEditFeatures((model) => {
+      const route = this.getRoute(model)
+      return route ? { session: route.session, documentUri: route.uri } : null
+    })
+  }
 
   ensureLanguage(languageId: string, session: MonacoLanguageServerSession): void {
     const registration = this.registrations.get(languageId) ?? createLanguageRegistration()
@@ -39,6 +47,7 @@ export class MonacoLanguageServerFeatures {
     )
     changed = addAll(registration.signatureTriggers, signatureTriggers.trigger) || changed
     changed = addAll(registration.signatureRetriggers, signatureTriggers.retrigger) || changed
+    changed = addAll(registration.codeActionKinds, session.features.getCodeActionKinds()) || changed
     if (!this.registrations.has(languageId) || changed) {
       for (const disposable of registration.disposables.splice(0)) {
         disposable.dispose()
@@ -185,7 +194,8 @@ export class MonacoLanguageServerFeatures {
             return []
           }
         }
-      })
+      }),
+      ...this.editFeatures.register(languageId, [...registration.codeActionKinds])
     ]
   }
 }
@@ -217,6 +227,7 @@ function createLanguageRegistration(): LanguageRegistration {
     completionTriggers: new Set(),
     signatureTriggers: new Set(),
     signatureRetriggers: new Set(),
+    codeActionKinds: new Set(),
     disposables: []
   }
 }

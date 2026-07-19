@@ -13,6 +13,7 @@ type DocumentRegistryOptions = {
   resolveUri: (filePath: string) => Promise<string>
   notify: (method: string, params: unknown) => Promise<void>
   getCapabilities: () => LspServerCapabilities
+  onClose?: (uri: string) => void
 }
 
 export class MonacoLanguageServerDocuments {
@@ -60,6 +61,10 @@ export class MonacoLanguageServerDocuments {
       }
     }
     return null
+  }
+
+  getModels(): monaco.editor.ITextModel[] {
+    return [...this.documents.keys()]
   }
 
   async reopen(): Promise<void> {
@@ -166,6 +171,7 @@ export class MonacoLanguageServerDocuments {
       subscription.dispose()
     }
     if (state.uri) {
+      this.options.onClose?.(state.uri)
       void this.options
         .notify('textDocument/didClose', {
           textDocument: { uri: state.uri }

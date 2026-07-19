@@ -174,6 +174,16 @@ The renderer adapter now maps push diagnostics, completion, signature help, refe
 
 A server crash now clears stale markers, retains the prior stderr log, and reopens current dirty models after bounded restarts at 500 ms and 2 seconds. The budget resets only after a minute of stable service, preventing tight spawn loops while allowing later recovery. A production smoke test against Apple clangd 21.0.0 rendered an error diagnostic, returned completion and signature help, exposed references and two document symbols, restored diagnostics after each of two permitted restarts, and remained visibly failed after a third forced crash exhausted the budget.
 
+### Stage 3 controlled edits
+
+**Recorded implementation, 2026-07-19**
+
+Rename, code actions, document/range formatting, and text-only workspace edits now map onto Monaco. Rename preparation is capability-gated, formatting remains an explicit single-buffer undoable operation, and code actions that require server-side command execution remain disabled. Apple clangd's `clangd.applyFix` is narrowly supported by extracting its single `WorkspaceEdit` argument into the same preview pipeline without executing the command. Yiru still rejects unsolicited `workspace/applyEdit` requests; edits are accepted only as the direct result of the user's Rename or Code Action request.
+
+Multi-file edits first resolve every server URI through the host's canonical workspace authorization. The renderer then rejects resource operations, stale document versions, overlapping or invalid ranges, binary/oversized files, unsynchronized open tabs, external-mutation conflicts, and edits beyond 50 files, 1,000 ranges, or 5 MB of preview content. A modal shows a per-file diff before applying. Open-buffer changes use Monaco's undo stack and normal save/autosave flow; closed files are written with pre-apply content checks, and a partial write failure rolls back files only when their contents still match Yiru's write, avoiding overwriting a racing third-party change. This remains a native-host-only feature until execution-host parity is implemented.
+
+A real-app smoke test against Apple clangd 21.0.0 formatted an intentionally compressed C function, previewed and applied the `#include <stdio.h>` quick fix, and previewed a three-file rename with two closed-file writes. Changing a closed file while the preview was open rejected the whole plan without touching the other files. Making the second closed target unwritable forced a mid-transaction failure and restored the first file before surfacing the write error.
+
 ### Protocol lifecycle and editor mapping
 
 **Sourced protocol requirements**
@@ -220,7 +230,7 @@ Electron also recommends validating IPC message senders and limiting exposed cap
 | 0 — protocol spike (complete) | Compared both client libraries with disposable fixture harnesses and Apple clangd 21.0.0; tested multiple Monaco models, disposal, framing, cancellation, and bundle impact. | Selected a thin replaceable Yiru adapter; recorded evidence above. |
 | 1 — local, read-only intelligence (complete) | Native host process service; user-configured server; initialize/sync/shutdown; source-edit models only; Hover and Definition. | No writes/commands; status and logs; correct dirty-buffer synchronization. |
 | 2 — diagnostics and completion (complete) | Diagnostics, completion, signature help, references, symbols, cancellation, bounded restart. | Stale results do not overwrite newer models; built-in diagnostics remain isolated from LSP marker ownership. |
-| 3 — controlled edits | Rename, code actions, formatting, and workspace edits through runtime file APIs with previews/confirmation where needed. | Multi-file dirty/conflict/remote ownership behavior is safe and recoverable. |
+| 3 — controlled edits (complete) | Rename, code actions, formatting, and text-only workspace edits with a per-file preview and confirmation. | Stale/invalid/out-of-workspace edits fail closed; dirty/conflicted buffers are guarded; partial closed-file writes use race-aware rollback. |
 | 4 — execution-host parity | WSL, SSH, and remote-runtime process/stream implementations plus host-qualified URI mapping. | Same workspace cannot cross-wire sessions across hosts; disconnect/reconnect is bounded and visible. |
 | 5 — curated languages | Explicit-consent, checksummed host-scoped installation for a small demand-driven language set; semantic tokens/inlay hints where useful. | Support matrix names tested server versions, hosts, features, limits, and uninstall path. |
 

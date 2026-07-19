@@ -62,6 +62,53 @@ export type LspCompletionItem = {
   commitCharacters?: string[]
 }
 
+export type LspVersionedTextDocumentIdentifier = {
+  uri: string
+  version: number | null
+}
+
+export type LspTextDocumentEdit = {
+  textDocument: LspVersionedTextDocumentIdentifier
+  edits: LspTextEdit[]
+}
+
+export type LspResourceOperation = {
+  kind: 'create' | 'rename' | 'delete'
+  uri?: string
+  oldUri?: string
+  newUri?: string
+}
+
+export type LspWorkspaceEdit = {
+  changes?: Record<string, LspTextEdit[]>
+  documentChanges?: (LspTextDocumentEdit | LspResourceOperation)[]
+}
+
+export type LspCommand = {
+  title: string
+  command: string
+  arguments?: unknown[]
+}
+
+export type LspCodeAction = {
+  title: string
+  kind?: string
+  diagnostics?: LspDiagnostic[]
+  isPreferred?: boolean
+  disabled?: { reason: string }
+  edit?: LspWorkspaceEdit
+  command?: LspCommand
+  data?: unknown
+}
+
+export type LspCodeActionResult = (LspCodeAction | LspCommand)[] | null
+
+export type LspPrepareRenameResult =
+  | LspRange
+  | { range: LspRange; placeholder?: string }
+  | { defaultBehavior: true }
+  | null
+
 export type LspCompletionList = {
   isIncomplete: boolean
   items: LspCompletionItem[]
@@ -95,6 +142,7 @@ export type LspDiagnostic = {
   source?: string
   message: string
   tags?: number[]
+  data?: unknown
 }
 
 export type LspPublishDiagnosticsParams = {
@@ -138,6 +186,15 @@ export type LspSignatureHelpOptions = {
   retriggerCharacters?: string[]
 }
 
+export type LspRenameOptions = {
+  prepareProvider?: boolean
+}
+
+export type LspCodeActionOptions = {
+  codeActionKinds?: string[]
+  resolveProvider?: boolean
+}
+
 export type LspServerCapabilities = {
   textDocumentSync?: number | LspTextDocumentSyncOptions
   hoverProvider?: boolean | Record<string, unknown>
@@ -146,6 +203,10 @@ export type LspServerCapabilities = {
   signatureHelpProvider?: boolean | LspSignatureHelpOptions
   referencesProvider?: boolean | Record<string, unknown>
   documentSymbolProvider?: boolean | Record<string, unknown>
+  renameProvider?: boolean | LspRenameOptions
+  codeActionProvider?: boolean | LspCodeActionOptions
+  documentFormattingProvider?: boolean | Record<string, unknown>
+  documentRangeFormattingProvider?: boolean | Record<string, unknown>
 }
 
 export type LspInitializeResult = {

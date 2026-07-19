@@ -6,6 +6,7 @@ import {
   type Disposable,
   type MessageConnection
 } from 'vscode-jsonrpc/browser'
+import { normalizeRuntimePathForComparison } from '../../../shared/cross-platform-path'
 import type {
   LanguageServerLocationResult,
   LanguageServerSessionStatus,
@@ -17,10 +18,11 @@ import { LanguageServerRequestRouter } from './language-server-request-router'
 import { LanguageServerFeatureRequests } from './language-server-feature-requests'
 import {
   getLanguageServerWorkspaceName,
-  stageTwoClientCapabilities,
+  stageThreeClientCapabilities,
   validateSynchronizationCapability
 } from './language-server-client-capabilities'
 import type {
+  LspDiagnostic,
   LspInitializeResult,
   LspLogMessageParams,
   LspPublishDiagnosticsParams,
@@ -43,6 +45,10 @@ export class MonacoLanguageServerSession {
   private readonly documents: MonacoLanguageServerDocuments
   private readonly protocolLogs: string[] = []
   private readonly archivedHostLogs: string[] = []
+  private readonly publishedDiagnostics = new Map<
+    string,
+    { version: number | undefined; diagnostics: LspDiagnostic[] }
+  >()
   private readonly requests = new LanguageServerRequestRouter(() => this.connection)
   readonly features = new LanguageServerFeatureRequests(() => this.capabilities, this.requests)
   private disposed = false
@@ -57,7 +63,8 @@ export class MonacoLanguageServerSession {
     this.documents = new MonacoLanguageServerDocuments({
       resolveUri: (filePath) => this.resolveDocumentUri(filePath),
       notify: (method, params) => this.sendNotification(method, params),
-      getCapabilities: () => this.capabilities
+      getCapabilities: () => this.capabilities,
+      onClose: (uri) => this.publishedDiagnostics.delete(uri)
     })
   }
 
@@ -74,6 +81,7 @@ export class MonacoLanguageServerSession {
     this.connection = null
     await this.stopHostSession()
     this.capabilities = {}
+    this.publishedDiagnostics.clear()
     await this.initialize(true)
   }
 
@@ -105,7 +113,7 @@ export class MonacoLanguageServerSession {
         'initialize',
         {
           processId: null,
-          clientInfo: { name: 'Yiru', version: 'stage-2' },
+          clientInfo: { name: 'Yiru', version: 'stage-3' },
           rootUri: this.startResult.workspaceUri,
           workspaceFolders: [
             {
@@ -113,7 +121,7 @@ export class MonacoLanguageServerSession {
               name: getLanguageServerWorkspaceName(this.startResult.workspacePath)
             }
           ],
-          capabilities: stageTwoClientCapabilities()
+          capabilities: stageThreeClientCapabilities()
         },
         INITIALIZE_TIMEOUT_MS
       )
@@ -134,6 +142,10 @@ export class MonacoLanguageServerSession {
     }
   }
 
+  getWorktreeId(): string {
+    return this.worktreeId
+  }
+
   attachDocument(model: monaco.editor.ITextModel, filePath: string): Promise<Disposable> {
     return this.documents.attach(model, filePath)
   }
@@ -142,8 +154,29 @@ export class MonacoLanguageServerSession {
     return this.documents.getUri(model)
   }
 
-  getDocumentModel(uri: string): monaco.editor.ITextModel | null {
-    return this.documents.getModel(uri)
+  getDocumentModel(uri: string, canonicalFilePath?: string): monaco.editor.ITextModel | null {
+    const exact = this.documents.getModel(uri)
+    if (exact || !canonicalFilePath) {
+      return exact
+    }
+    const target = normalizeRuntimePathForComparison(canonicalFilePath)
+    return (
+      this.documents
+        .getModels()
+        .find(
+          (model) =>
+            model.uri.scheme === 'file' &&
+            normalizeRuntimePathForComparison(model.uri.fsPath) === target
+        ) ?? null
+    )
+  }
+
+  getPublishedDiagnostics(uri: string, modelVersion: number): LspDiagnostic[] {
+    const published = this.publishedDiagnostics.get(uri)
+    if (!published || (published.version !== undefined && published.version !== modelVersion)) {
+      return []
+    }
+    return published.diagnostics
   }
 
   resolveLocation(uri: string): Promise<LanguageServerLocationResult> {
@@ -176,6 +209,7 @@ export class MonacoLanguageServerSession {
     }
     this.disposed = true
     this.documents.dispose()
+    this.publishedDiagnostics.clear()
     if (this.connection) {
       try {
         await this.requests.withTimeout('shutdown', null, SHUTDOWN_TIMEOUT_MS)
@@ -216,7 +250,13 @@ export class MonacoLanguageServerSession {
     connection.onRequest('window/showMessageRequest', () => null)
     connection.onNotification(
       'textDocument/publishDiagnostics',
-      (params: LspPublishDiagnosticsParams) => this.onDiagnostics(params)
+      (params: LspPublishDiagnosticsParams) => {
+        this.publishedDiagnostics.set(params.uri, {
+          version: params.version,
+          diagnostics: params.diagnostics
+        })
+        this.onDiagnostics(params)
+      }
     )
     connection.onNotification('window/logMessage', (params: LspLogMessageParams) => {
       if (params?.message) {
@@ -228,9 +268,11 @@ export class MonacoLanguageServerSession {
 
   private handleProcessStatus(status: LanguageServerSessionStatus, message?: string): void {
     if (status === 'failed') {
+      this.publishedDiagnostics.clear()
       this.onStatus({ state: 'failed', message })
     }
     if (status === 'stopped') {
+      this.publishedDiagnostics.clear()
       this.onStatus({ state: 'stopped' })
     }
   }

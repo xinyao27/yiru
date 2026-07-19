@@ -14,9 +14,17 @@ export function getLanguageServerWorkspaceName(workspacePath: string): string {
   return getRuntimePathBasename(workspacePath) || workspacePath
 }
 
-export function stageTwoClientCapabilities(): Record<string, unknown> {
+export function stageThreeClientCapabilities(): Record<string, unknown> {
   return {
-    workspace: { applyEdit: false, configuration: false, workspaceFolders: true },
+    workspace: {
+      applyEdit: false,
+      configuration: false,
+      workspaceFolders: true,
+      workspaceEdit: {
+        documentChanges: true,
+        failureHandling: 'textOnlyTransactional'
+      }
+    },
     textDocument: {
       synchronization: { dynamicRegistration: false, didSave: false, willSave: false },
       hover: { dynamicRegistration: false, contentFormat: ['markdown', 'plaintext'] },
@@ -44,6 +52,34 @@ export function stageTwoClientCapabilities(): Record<string, unknown> {
         }
       },
       references: { dynamicRegistration: false },
+      rename: {
+        dynamicRegistration: false,
+        prepareSupport: true,
+        prepareSupportDefaultBehavior: 1
+      },
+      codeAction: {
+        dynamicRegistration: false,
+        isPreferredSupport: true,
+        disabledSupport: true,
+        dataSupport: false,
+        codeActionLiteralSupport: {
+          codeActionKind: {
+            valueSet: [
+              '',
+              'quickfix',
+              'refactor',
+              'refactor.extract',
+              'refactor.inline',
+              'refactor.rewrite',
+              'source',
+              'source.organizeImports',
+              'source.fixAll'
+            ]
+          }
+        }
+      },
+      formatting: { dynamicRegistration: false },
+      rangeFormatting: { dynamicRegistration: false },
       documentSymbol: {
         dynamicRegistration: false,
         hierarchicalDocumentSymbolSupport: true,
