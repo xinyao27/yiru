@@ -1,0 +1,99 @@
+import { FolderPlus, Plus } from '@phosphor-icons/react'
+import React from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { useShortcutLabel } from '@/hooks/use-shortcut-label'
+import { translate } from '@/i18n/i18n'
+import { useAppStore } from '@/store'
+
+import { openWorkspaceCreationComposerWithTourHandoff } from '../contextual-tours/workspace-creation-tour-handoff'
+import SidebarWorkspaceOptionsMenu from './sidebar-workspace-options-menu'
+
+const SidebarHeader = React.memo(function SidebarHeader() {
+  const openModal = useAppStore((s) => s.openModal)
+  const newWorktreeShortcutLabel = useShortcutLabel('workspace.create')
+  const groupBy = useAppStore((s) => s.groupBy)
+  const canCreateWorkspace = useAppStore((s) => s.repos.length > 0)
+  const sidebarTitle = groupBy === 'repo' ? 'Projects' : 'Workspaces'
+
+  return (
+    <div className="mt-2 flex h-8 items-center justify-between gap-2 px-2">
+      <div className="flex min-w-0 items-center gap-1">
+        <span
+          className="text-muted-foreground/80 pr-0.5 pl-2 text-xs font-semibold select-none"
+          data-sidebar-section-title={groupBy === 'repo' ? 'projects' : 'workspaces'}
+        >
+          {sidebarTitle}
+        </span>
+      </div>
+      <div className="flex shrink-0 items-center gap-1.5">
+        <SidebarWorkspaceOptionsMenu />
+
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                className="bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent"
+                aria-label={translate(
+                  'auto.components.sidebar.SidebarHeader.25a95899c9',
+                  'Add Project'
+                )}
+                onClick={() => openModal('add-repo')}
+              >
+                <FolderPlus className="size-3.5" strokeWidth={2.25} />
+              </Button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={6}>
+            {translate('auto.components.sidebar.SidebarHeader.25a95899c9', 'Add Project')}
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                className="bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent"
+                onClick={() => {
+                  if (!canCreateWorkspace) {
+                    return
+                  }
+                  // Why: the parallel-work tour must click the real sidebar
+                  // control so it can hand off to the workspace-creation tour.
+                  openWorkspaceCreationComposerWithTourHandoff()
+                }}
+                aria-label={translate(
+                  'auto.components.sidebar.SidebarHeader.92154beb7e',
+                  'New workspace'
+                )}
+                disabled={!canCreateWorkspace}
+                data-contextual-tour-target="workspace-create-control"
+              >
+                <Plus className="size-3.5" strokeWidth={2.25} />
+              </Button>
+            }
+          />
+          <TooltipContent side="right" sideOffset={6}>
+            {canCreateWorkspace
+              ? translate(
+                  'auto.components.sidebar.SidebarHeader.ca6f729da2',
+                  'New workspace ({{value0}})',
+                  { value0: newWorktreeShortcutLabel }
+                )
+              : translate(
+                  'auto.components.sidebar.SidebarHeader.5c9c7c16aa',
+                  'Add a project to create workspaces'
+                )}
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </div>
+  )
+})
+
+export default SidebarHeader

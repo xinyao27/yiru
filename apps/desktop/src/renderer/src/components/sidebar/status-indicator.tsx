@@ -1,0 +1,68 @@
+import React from 'react'
+
+import { LoadingIndicator } from '@/components/loading-indicator'
+import { cn } from '@/lib/class-names'
+import { getWorktreeStatusLabel, type WorktreeStatus } from '@/lib/worktree-status'
+
+// Why: re-export WorktreeStatus under the existing `Status` alias so the
+// sidebar component and the canonical lib share one source of truth — the
+// previous local union could silently drift if one side added a new state
+// (e.g., 'error') and the other didn't.
+export type Status = WorktreeStatus
+
+type StatusIndicatorProps = React.ComponentProps<'span'> & {
+  status: Status
+}
+
+const StatusIndicator = React.memo(function StatusIndicator({
+  status,
+  className,
+  title,
+  ...rest
+}: StatusIndicatorProps) {
+  // Why: surface the status label as a native tooltip so hovering the dot
+  // reveals the state — matters especially for 'active' vs 'done', which
+  // share the same emerald dot. Callers pass aria-hidden="true" alongside
+  // an sr-only label, so the `title` attribute is ignored by AT and only
+  // serves sighted users on hover. Callers can override by passing their
+  // own `title`.
+  const resolvedTitle = title ?? getWorktreeStatusLabel(status)
+
+  if (status === 'working') {
+    return (
+      <span
+        className={cn('inline-flex h-3 w-3 shrink-0 items-center justify-center', className)}
+        title={resolvedTitle}
+        {...rest}
+      >
+        {/* Why: worktree activity must follow the same user-selected indicator
+            as other loading states instead of maintaining a parallel spinner. */}
+        <LoadingIndicator className="size-2 text-yellow-500" />
+      </span>
+    )
+  }
+
+  return (
+    <span
+      className={cn('inline-flex h-3 w-3 shrink-0 items-center justify-center', className)}
+      title={resolvedTitle}
+      {...rest}
+    >
+      <span
+        className={cn(
+          'block size-2 rounded-full',
+          status === 'permission'
+            ? 'bg-amber-500'
+            : status === 'done' || status === 'active'
+              ? // Green dot for both hook-reported 'done' and the heuristic
+                // 'active' (terminal open, quiet). Working uses a yellow
+                // ring above; 'inactive' stays grey.
+                'bg-emerald-500'
+              : 'bg-neutral-500/40'
+        )}
+      />
+    </span>
+  )
+})
+
+export default StatusIndicator

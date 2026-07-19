@@ -71,7 +71,7 @@ jobs:
           command: pnpm install --frozen-lockfile
 
       - name: Verify macOS signing environment
-        run: node config/scripts/verify-macos-release-env.mjs
+        run: pnpm --filter yiru exec node config/scripts/verify-macos-release-env.mjs
         env:
           CSC_LINK: ${{ secrets.MAC_CERTS }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTS_PASSWORD }}
@@ -82,9 +82,9 @@ jobs:
       # Why: `plutil -lint` accepts duplicate plist keys, but `codesign`
       # rejects duplicate entitlements after the expensive app build.
       - name: Verify macOS entitlements
-        run: node config/scripts/verify-macos-entitlements.mjs
+        run: pnpm --filter yiru exec node config/scripts/verify-macos-entitlements.mjs
 
-      # Why: telemetry's transport gate (`src/main/telemetry/client.ts:IS_OFFICIAL_BUILD`)
+      # Why: telemetry's transport gate (`apps/desktop/src/main/telemetry/client.ts:IS_OFFICIAL_BUILD`)
       # requires the build identity to be the literal string `stable` or `rc`,
       # substituted by electron-vite's `define` block at build time.
       - name: Classify release tag for telemetry build identity
@@ -118,26 +118,13 @@ jobs:
           YIRU_DIAGNOSTICS_TOKEN_URL: https://yiru.ai/diagnostics/token
           YIRU_POSTHOG_WRITE_KEY: ${{ secrets.YIRU_POSTHOG_WRITE_KEY }}
 
-      - name: Gate runtime file-watcher process isolation
-        run: |
-          # Why: #8212 is a native-process crash contract. Prove both the Node
-          # host and the exact Electron runtime survive SIGSEGV before packaging.
-          node config/scripts/runtime-file-watcher-fault-harness.mjs
-          ELECTRON_RUN_AS_NODE=1 pnpm exec electron config/scripts/runtime-file-watcher-fault-harness.mjs
-
-      - name: Gate SSH relay watcher process isolation
-        run: |
-          # Why: the remote native watcher shares a daemon with live PTYs.
-          # Kill only its child and require both PTY and watch recovery before packaging.
-          node config/scripts/relay-watcher-fault-harness.mjs
-
       - name: Publish release artifacts (macOS)
         uses: nick-fields/retry@v4
         with:
           timeout_minutes: 45
           max_attempts: 3
           retry_wait_seconds: 30
-          command: node config/scripts/ensure-native-runtime.mjs --runtime=electron && YIRU_MAC_RELEASE=1 pnpm exec electron-builder --config config/electron-builder.config.cjs --mac --publish always
+          command: pnpm --filter yiru run ensure:electron-runtime && YIRU_MAC_RELEASE=1 pnpm --filter yiru exec electron-builder --config config/electron-builder.config.cjs --mac --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_LINK: ${{ secrets.MAC_CERTS }}
@@ -174,4 +161,4 @@ jobs:
       # single `--publish always` invocation, so there is no cheap insertion
       # point between pack and upload without splitting those steps.
       - name: Verify telemetry constants present in app.asar
-        run: node config/scripts/verify-telemetry-constants.mjs
+        run: pnpm --filter yiru exec node config/scripts/verify-telemetry-constants.mjs

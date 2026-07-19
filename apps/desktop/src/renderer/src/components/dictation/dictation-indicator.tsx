@@ -1,0 +1,31 @@
+import { Microphone as Mic } from '@phosphor-icons/react'
+
+import { cn } from '@/lib/class-names'
+import { useAppStore } from '@/store'
+
+export function DictationIndicator() {
+  const dictationState = useAppStore((s) => s.dictationState)
+  const partialTranscript = useAppStore((s) => s.partialTranscript)
+
+  if (
+    dictationState !== 'listening' &&
+    dictationState !== 'starting' &&
+    dictationState !== 'stopping'
+  ) {
+    return null
+  }
+
+  const label =
+    dictationState === 'starting'
+      ? 'Starting...'
+      : dictationState === 'stopping'
+        ? 'Processing...'
+        : partialTranscript || 'Listening...'
+
+  return (
+    <div className="bg-foreground/90 text-background fixed bottom-12 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg px-3 py-1.5 text-sm shadow-lg">
+      <Mic className={cn('h-4 w-4', dictationState === 'listening' ? 'animate-pulse' : '')} />
+      <span>{label}</span>
+    </div>
+  )
+}

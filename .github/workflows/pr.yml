@@ -64,23 +64,23 @@ jobs:
         # path, then verify package metadata stayed unchanged.
         run: |
           pnpm install --no-frozen-lockfile --prefer-frozen-lockfile=false
-          git diff --exit-code package.json pnpm-lock.yaml
+          git diff --exit-code package.json apps/desktop/package.json apps/mobile/package.json packages/expo-two-way-audio/package.json pnpm-workspace.yaml pnpm-lock.yaml
 
       - name: Lint
         run: pnpm exec vp lint --format github
 
       - name: Check styled scrollbars
-        run: node config/scripts/check-styled-scrollbars.mjs
+        run: pnpm --filter yiru exec node config/scripts/check-styled-scrollbars.mjs
 
       # Why: feature work must reuse the closed shadcn vocabulary instead of
       # growing one-off color, state, or floating-surface tokens.
       - name: Check design token budget
-        run: node config/scripts/check-design-token-budget.mjs
+        run: pnpm --filter yiru exec node config/scripts/check-design-token-budget.mjs
 
       # Why: oxlint fails any file over max-lines that is NOT suppressed, so this
       # ratchet forbids ADDING a new suppression (inline disable or mobile max
       # bump). Existing oversized files are grandfathered in
-      # config/max-lines-baseline.txt, which may only shrink — new bypasses fail
+      # apps/desktop/config/max-lines-baseline.txt, which may only shrink — new bypasses fail
       # here with a clear message instead of silently growing the debt.
       - name: Enforce max-lines ratchet (no new bypasses)
         run: pnpm run check:max-lines-ratchet
@@ -113,7 +113,7 @@ jobs:
       # past typecheck. See docs/preload-typecheck-hole.md.
       - name: Guard against project-owned .d.ts in preload/shared
         run: |
-          matches=$(find src/preload src/shared -name '*.d.ts' 2>/dev/null || true)
+          matches=$(find apps/desktop/src/preload apps/desktop/src/shared -name '*.d.ts' 2>/dev/null || true)
           if [ -n "$matches" ]; then
             echo "::error::Project-owned .d.ts files are not allowed under src/preload or src/shared."
             echo "Move type declarations into a .ts file so skipLibCheck does not hide errors."
@@ -124,10 +124,10 @@ jobs:
           fi
 
       - name: Check feature wall asset budget
-        run: node config/scripts/check-feature-wall-assets.mjs
+        run: pnpm --filter yiru exec node config/scripts/check-feature-wall-assets.mjs
 
       - name: Verify macOS entitlements
-        run: node config/scripts/verify-macos-entitlements.mjs
+        run: pnpm --filter yiru exec node config/scripts/verify-macos-entitlements.mjs
 
       - name: Typecheck
         run: pnpm typecheck

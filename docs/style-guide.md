@@ -1,6 +1,6 @@
 # Yiru UI Style Guide
 
-This is the **UI/visual design** doc for Yiru — color tokens, typography, component selection, and UX rules. It is _not_ an architecture doc; for system-level design see code and inline comments. Token values live in `src/renderer/src/assets/main.css` (canonical); this file documents the _roles and rules_ for using them.
+This is the **UI/visual design** doc for Yiru — color tokens, typography, component selection, and UX rules. It is _not_ an architecture doc; for system-level design see code and inline comments. Token values live in `apps/desktop/src/renderer/src/assets/main.css` (canonical); this file documents the _roles and rules_ for using them.
 
 ## Overview
 
@@ -16,10 +16,10 @@ When in doubt:
 
 | Concern                                       | Canonical location                                    |
 | --------------------------------------------- | ----------------------------------------------------- |
-| Color tokens                                  | `src/renderer/src/assets/main.css` (`:root`, `.dark`) |
+| Color tokens                                  | `apps/desktop/src/renderer/src/assets/main.css` (`:root`, `.dark`) |
 | Tailwind theme bindings                       | Same file, `@theme inline { … }` block                |
-| Component primitives                          | `src/renderer/src/components/ui/` (shadcn-style)      |
-| Component catalog and ownership                | [`components/ui/README.md`](../src/renderer/src/components/ui/README.md) |
+| Component primitives                          | `apps/desktop/src/renderer/src/components/ui/` (shadcn-style)      |
+| Component catalog and ownership                | [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md) |
 | App typography / scrollbars / titlebar chrome | Same `main.css`                                       |
 
 ### Token budget
@@ -158,7 +158,7 @@ Keep placement and z-index in each headless wrapper. Shared color, elevation, an
 
 ## Components
 
-Use the shadcn primitives in `src/renderer/src/components/ui/` before writing anything custom. The shadcn-style wrappers in this folder follow a consistent pattern:
+Use the shadcn primitives in `apps/desktop/src/renderer/src/components/ui/` before writing anything custom. The shadcn-style wrappers in this folder follow a consistent pattern:
 
 - Shadcn-style primitive parts carry `data-slot="<name>"` for CSS targeting — do not strip it. Third-party wrappers such as Sonner keep their library-owned data attributes.
 - Use `cn()` for class merging. Pass user `className` last so callers can override.
@@ -181,7 +181,7 @@ Sizes: `default` (36px), `sm` (32px), `xs` (24px), `lg` (40px), plus `icon`, `ic
 
 ### Other primitives in this repo
 
-See [`components/ui/README.md`](../src/renderer/src/components/ui/README.md) for the categorized inventory. Interactive headless behavior uses Base UI; `command` wraps `cmdk`, `sonner` wraps Sonner, and visual-only modules such as `badge`, `card`, `input`, and `textarea` apply shadcn roles directly. Never reimplement headless behavior; extend the existing wrapper.
+See [`components/ui/README.md`](../apps/desktop/src/renderer/src/components/ui/README.md) for the categorized inventory. Interactive headless behavior uses Base UI; `command` wraps `cmdk`, `sonner` wraps Sonner, and visual-only modules such as `badge`, `card`, `input`, and `textarea` apply shadcn roles directly. Never reimplement headless behavior; extend the existing wrapper.
 
 ### Picking the right primitive
 
@@ -243,7 +243,7 @@ Icons come from **`@phosphor-icons/react`**. Don't import a second icon library.
 
 ### Keyboard shortcut chips
 
-Use **`<ShortcutKeyCombo />`** from `src/renderer/src/components/shortcut-key-combo.tsx`. It renders a consistent key-cap style and inserts a `+` separator on Windows/Linux (Mac shows adjacent glyphs, no separator). It does **not** transform key strings — the _caller_ picks the platform-appropriate labels and passes them in:
+Use **`<ShortcutKeyCombo />`** from `apps/desktop/src/renderer/src/components/shortcut-key-combo.tsx`. It renders a consistent key-cap style and inserts a `+` separator on Windows/Linux (Mac shows adjacent glyphs, no separator). It does **not** transform key strings — the _caller_ picks the platform-appropriate labels and passes them in:
 
 ```tsx
 const isMac = navigator.userAgent.includes('Mac')
@@ -252,7 +252,7 @@ const shift = isMac ? '⇧' : 'Shift'
 <ShortcutKeyCombo keys={[mod, shift, 'N']} />
 ```
 
-See `src/renderer/src/components/landing-page.tsx` for the canonical pattern. Don't roll a one-off `<kbd>` — kbd chips drift in shape and color across the app fast if everyone styles their own.
+See `apps/desktop/src/renderer/src/components/landing-page.tsx` for the canonical pattern. Don't roll a one-off `<kbd>` — kbd chips drift in shape and color across the app fast if everyone styles their own.
 
 **Where shortcuts surface in the UI:**
 
@@ -264,7 +264,7 @@ See `src/renderer/src/components/landing-page.tsx` for the canonical pattern. Do
 
 ### Form anatomy
 
-The pattern in `src/renderer/src/components/settings/settings-form-controls.tsx` is the house style for any label + control + helper text. Match it for new forms:
+The pattern in `apps/desktop/src/renderer/src/components/settings/settings-form-controls.tsx` is the house style for any label + control + helper text. Match it for new forms:
 
 - **Outer stack:** `space-y-3` for full-section forms (`ThemePicker`); `space-y-2` for compact single-control fields (`ColorField`, `NumberField`). Pick by density, not preference.
 - **Label group:** `space-y-1` containing `<Label>` and a description in `text-xs text-muted-foreground`.
@@ -361,7 +361,7 @@ Yiru runs on macOS, Linux, and Windows. Every UI change must hold up on all thre
 
 If you have a UI question this doc doesn't answer:
 
-1. Look at adjacent code in `src/renderer/src/components/` for the closest sibling, and follow its lead.
-2. Check `src/renderer/src/components/ui/` for a primitive that already encodes the pattern.
+1. Look at adjacent code in `apps/desktop/src/renderer/src/components/` for the closest sibling, and follow its lead.
+2. Check `apps/desktop/src/renderer/src/components/ui/` for a primitive that already encodes the pattern.
 3. If it's a token question, stay inside the default shadcn roles or Tailwind palette; check `main.css` only for an existing product-domain exception.
 4. If none of those resolve it, ask before adding a token or inventing a visual rule.

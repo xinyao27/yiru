@@ -1,0 +1,144 @@
+import {
+  Check,
+  Globe as Globe2,
+  Monitor as MonitorCog,
+  FlowArrow as Workflow
+} from '@phosphor-icons/react'
+import type { ReactNode } from 'react'
+
+import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
+
+import type {
+  OnboardingFeatureSetupId,
+  OnboardingFeatureSetupSelection
+} from './onboarding-feature-setup'
+
+type FeatureSetupChecklistProps = {
+  value: OnboardingFeatureSetupSelection
+  onChange: (value: OnboardingFeatureSetupSelection) => void
+}
+
+type FeatureSetupRow = {
+  id: OnboardingFeatureSetupId
+  title: string
+  description: string
+  setupSummary: string
+  icon: ReactNode
+}
+
+const FEATURE_SETUP_ROWS: readonly FeatureSetupRow[] = [
+  {
+    id: 'browserUse',
+    get title() {
+      return translate(
+        'auto.components.onboarding.FeatureSetupChecklist.ea85d9e628',
+        'Agent Browser Use'
+      )
+    },
+    get description() {
+      return translate(
+        'auto.components.onboarding.FeatureSetupChecklist.01426f3a23',
+        'Agents can navigate sites, inspect pages, and work through browser tasks.'
+      )
+    },
+    setupSummary: 'Enables browser use, prepares yiru-cli, and leaves cookies for Settings.',
+    icon: <Globe2 className="size-4" />
+  },
+  {
+    id: 'computerUse',
+    get title() {
+      return translate(
+        'auto.components.onboarding.FeatureSetupChecklist.1ecfb490ac',
+        'Computer Use'
+      )
+    },
+    get description() {
+      return translate(
+        'auto.components.onboarding.FeatureSetupChecklist.c5292c409d',
+        'Agents can inspect app windows and operate local apps when you ask.'
+      )
+    },
+    setupSummary: 'Registers the Yiru CLI, opens permissions, and prepares the skill.',
+    icon: <MonitorCog className="size-4" />
+  },
+  {
+    id: 'orchestration',
+    get title() {
+      return translate(
+        'auto.components.onboarding.FeatureSetupChecklist.399cf885c0',
+        'Agent Orchestration'
+      )
+    },
+    get description() {
+      return translate(
+        'auto.components.onboarding.FeatureSetupChecklist.77f74946f5',
+        'Agents can message each other, take tasks, and coordinate handoffs.'
+      )
+    },
+    setupSummary: 'Registers the Yiru CLI, enables orchestration, and prepares the skill.',
+    icon: <Workflow className="size-4" />
+  }
+]
+
+export function FeatureSetupChecklist({
+  value,
+  onChange
+}: FeatureSetupChecklistProps): React.JSX.Element {
+  return (
+    <section className="mt-6">
+      <div className="grid gap-3 md:grid-cols-3">
+        {FEATURE_SETUP_ROWS.map((row) => {
+          const selected = value[row.id]
+          return (
+            <button
+              key={row.id}
+              type="button"
+              role="checkbox"
+              aria-checked={selected}
+              className={cn(
+                'flex min-h-40 flex-col rounded-lg border px-4 py-3 text-left transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                selected
+                  ? 'border-ring bg-accent text-foreground ring-2 ring-ring/25'
+                  : 'border-border bg-muted/20 text-muted-foreground hover:bg-muted/40'
+              )}
+              onClick={() => onChange({ ...value, [row.id]: !selected })}
+            >
+              <span className="flex items-start justify-between gap-3">
+                <span
+                  className={cn(
+                    'flex size-8 items-center justify-center rounded-lg border',
+                    selected
+                      ? 'border-border bg-muted text-foreground'
+                      : 'border-border bg-muted/40'
+                  )}
+                >
+                  {row.icon}
+                </span>
+                <span
+                  aria-hidden
+                  className={cn(
+                    'flex size-5 items-center justify-center rounded-full border transition-colors',
+                    selected
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-border bg-background'
+                  )}
+                >
+                  {selected ? <Check className="size-3" strokeWidth={3} /> : null}
+                </span>
+              </span>
+              <span className="text-foreground mt-3 text-sm font-medium">{row.title}</span>
+              <span className="text-muted-foreground mt-1 text-xs leading-relaxed">
+                {row.description}
+              </span>
+              <span className="text-muted-foreground mt-auto pt-3 text-[11px] leading-relaxed">
+                {row.setupSummary}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
+}

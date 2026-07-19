@@ -1,0 +1,72 @@
+import type React from 'react'
+
+import { SpoolWindowsFirewallNotice } from '@/components/spool/spool-windows-firewall-notice'
+import { useAppStore } from '@/store'
+
+import { SpoolRemoteDesktopStatusRow } from './spool-remote-desktop-status-row'
+import { SpoolRemoteWorktreesHeader } from './spool-remote-worktrees-header'
+import { SpoolSessionRow } from './spool-session-row'
+import { SpoolWorktreeRow } from './spool-worktree-row'
+import type { WorkspaceSidebarProjectedRow } from './workspace-sidebar-row-projection'
+
+type SpoolProjectedRow = Exclude<WorkspaceSidebarProjectedRow, { kind: 'local' }>
+
+export function SpoolSidebarProjectedRow({
+  projected,
+  onToggleRemoteWorktrees
+}: {
+  projected: SpoolProjectedRow
+  onToggleRemoteWorktrees: () => void
+}): React.JSX.Element {
+  const setWorktreeExpanded = useAppStore((state) => state.setSpoolWorktreeExpanded)
+  const setRoute = useAppStore((state) => state.setActiveSpoolWorkspaceRoute)
+  const setActiveView = useAppStore((state) => state.setActiveView)
+
+  if (projected.kind === 'spool-windows-firewall') {
+    return <SpoolWindowsFirewallNotice />
+  }
+  if (projected.kind === 'spool-remote-worktrees-header') {
+    return (
+      <SpoolRemoteWorktreesHeader
+        expanded={!projected.collapsed}
+        onToggle={onToggleRemoteWorktrees}
+      />
+    )
+  }
+
+  const row = projected.row
+  switch (row.type) {
+    case 'spool-desktop-status':
+      return <SpoolRemoteDesktopStatusRow row={row} />
+    case 'spool-worktree':
+      return (
+        <SpoolWorktreeRow
+          row={row}
+          onToggle={() => setWorktreeExpanded(row.desktopRef, row.worktreeRef, !row.expanded)}
+          onSelect={() => {
+            setRoute({
+              desktopRef: row.desktopRef,
+              worktreeRef: row.worktreeRef,
+              connectionEpoch: row.connectionEpoch
+            })
+            setActiveView('terminal')
+          }}
+        />
+      )
+    case 'spool-session':
+      return (
+        <SpoolSessionRow
+          row={row}
+          onSelect={() => {
+            setRoute({
+              desktopRef: row.desktopRef,
+              worktreeRef: row.worktreeRef,
+              sessionRef: row.sessionRef,
+              connectionEpoch: row.connectionEpoch
+            })
+            setActiveView('terminal')
+          }}
+        />
+      )
+  }
+}

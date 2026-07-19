@@ -1,0 +1,60 @@
+{
+  "name": "@yiru/expo-two-way-audio",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Native module for two way audio streaming",
+  "keywords": [
+    "ExpoTwoWayAudio",
+    "expo",
+    "expo-two-way-audio",
+    "react-native"
+  ],
+  "homepage": "https://github.com/xinyao27/yiru/tree/main/packages/expo-two-way-audio",
+  "bugs": {
+    "url": "https://github.com/xinyao27/yiru/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "xinyao",
+    "email": "hi@xinyao.me"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinyao27/yiru.git",
+    "directory": "packages/expo-two-way-audio"
+  },
+  "funding": "https://github.com/sponsors/xinyao27",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "clean": "expo-module clean",
+    "dev": "expo-module build",
+    "lint": "pnpm --workspace-root exec vp lint packages/expo-two-way-audio --fix",
+    "fmt": "pnpm --workspace-root exec vp fmt packages/expo-two-way-audio",
+    "check": "pnpm run lint && pnpm run fmt && pnpm run typecheck",
+    "test": "pnpm --workspace-root exec vp test packages/expo-two-way-audio",
+    "up": "taze major -Ir",
+    "prepare": "vp config",
+    "typecheck": "tsc --noEmit",
+    "expo-module": "expo-module"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:mobile",
+    "expo": "catalog:mobile",
+    "expo-module-scripts": "catalog:mobile",
+    "expo-modules-core": "catalog:mobile",
+    "react": "catalog:mobile",
+    "react-native": "catalog:mobile",
+    "taze": "catalog:",
+    "typescript": "catalog:mobile",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "expo": "catalog:expo-module",
+    "react": "catalog:expo-module",
+    "react-native": "catalog:expo-module"
+  },
+  "packageManager": "pnpm@11.15.0"
+}

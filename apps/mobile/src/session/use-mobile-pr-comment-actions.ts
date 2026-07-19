@@ -1,0 +1,179 @@
+import { useCallback, useMemo, useRef, useState } from 'react'
+
+import type { PRComment } from '../../../desktop/src/shared/types'
+import { triggerError, triggerSuccess } from '../platform/haptics'
+import type { RpcClient } from '../transport/rpc-client'
+import type { ConnectionState } from '../transport/types'
+import {
+  fetchAddPRComment,
+  fetchAddPRReviewCommentReply,
+  fetchResolveReviewThread,
+  type GitHubPrMutationOutcome
+} from './github-pr-mutations'
+import type { GitHubPrRepoSlug } from './github-pr-rpc'
+import {
+  buildAddRootCommentParams,
+  buildReplyParams,
+  buildResolveParams
+} from './pr-comment-actions'
+
+type PrCommentMutations = {
+  reply: (args: {
+    prNumber: number
+    commentId: number
+    body: string
+    threadId?: string
+    path?: string
+    line?: number
+    prRepo?: GitHubPrRepoSlug | null
+  }) => Promise<GitHubPrMutationOutcome>
+  resolveThread: (args: { threadId: string; resolve: boolean }) => Promise<GitHubPrMutationOutcome>
+  addRootComment: (args: {
+    prNumber: number
+    body: string
+    prRepo?: GitHubPrRepoSlug | null
+  }) => Promise<GitHubPrMutationOutcome>
+}
+
+export type PrCommentActionsInput = {
+  client: RpcClient | null
+  connState: ConnectionState
+  worktreeId: string
+  prNumber: number
+  prRepo?: GitHubPrRepoSlug | null
+  // Re-fetches the authoritative comment timeline after a successful mutation so
+  // the new reply/comment and toggled resolve state appear (desktop merges the
+  // returned comment; mobile keeps it simple with a full refetch).
+  refetch: () => void | Promise<void>
+}
+
+function realMutations(
+  client: Pick<RpcClient, 'sendRequest'>,
+  worktreeId: string
+): PrCommentMutations {
+  return {
+    reply: (args) => fetchAddPRReviewCommentReply(client, worktreeId, args),
+    resolveThread: (args) => fetchResolveReviewThread(client, worktreeId, args),
+    addRootComment: (args) => fetchAddPRComment(client, worktreeId, args)
+  }
+}
+
+// Stable busy keys: 'root' for the root composer; otherwise per-comment so one
+// reply/resolve in flight doesn't disable every other card.
+function replyKey(commentId: number): string {
+  return `reply:${commentId}`
+}
+function resolveKey(threadId: string): string {
+  return `resolve:${threadId}`
+}
+const ROOT_KEY = 'root'
+
+// React adapter for the three interactive comment actions. Tracks per-action
+// in-flight keys + a single error message, fires haptics, and refetches on success.
+export function useMobilePrCommentActions(input: PrCommentActionsInput) {
+  const { client, connState, worktreeId, prNumber, prRepo, refetch } = input
+  const [busyKeys, setBusyKeys] = useState<ReadonlySet<string>>(() => new Set())
+  const [error, setError] = useState<string | null>(null)
+  // Guard against overlapping fires of the same key (double-tap before refetch).
+  const inFlightRef = useRef<Set<string>>(new Set())
+
+  const mutations = useMemo(
+    () => (client ? realMutations(client, worktreeId) : null),
+    [client, worktreeId]
+  )
+  const ready = mutations !== null && connState === 'connected'
+
+  const setBusy = useCallback((key: string, busy: boolean) => {
+    setBusyKeys((prev) => {
+      const next = new Set(prev)
+      if (busy) {
+        next.add(key)
+      } else {
+        next.delete(key)
+      }
+      return next
+    })
+  }, [])
+
+  const run = useCallback(
+    async (key: string, mutate: () => Promise<GitHubPrMutationOutcome>): Promise<boolean> => {
+      if (!ready || inFlightRef.current.has(key)) {
+        return false
+      }
+      inFlightRef.current.add(key)
+      setBusy(key, true)
+      setError(null)
+      try {
+        const outcome = await mutate()
+        if (outcome.ok) {
+          triggerSuccess()
+          await refetch()
+          return true
+        }
+        triggerError()
+        setError(outcome.error)
+        return false
+      } catch (err) {
+        // Why: if a mutation (or the refetch) throws, still honor the boolean
+        // contract — error haptic + message, return false — rather than rejecting.
+        triggerError()
+        setError(err instanceof Error ? err.message : 'Comment action failed')
+        return false
+      } finally {
+        inFlightRef.current.delete(key)
+        setBusy(key, false)
+      }
+    },
+    [ready, refetch, setBusy]
+  )
+
+  const reply = useCallback(
+    (comment: PRComment, body: string) => {
+      if (!mutations) {
+        return Promise.resolve(false)
+      }
+      const params = buildReplyParams(prNumber, comment, body)
+      return run(replyKey(comment.id), () => mutations.reply({ ...params, prRepo }))
+    },
+    [mutations, prNumber, prRepo, run]
+  )
+
+  const toggleResolve = useCallback(
+    (comment: PRComment) => {
+      const params = buildResolveParams(comment)
+      if (!mutations || !params) {
+        return Promise.resolve(false)
+      }
+      return run(resolveKey(params.threadId), () => mutations.resolveThread(params))
+    },
+    [mutations, run]
+  )
+
+  const addRootComment = useCallback(
+    (body: string) => {
+      if (!mutations) {
+        return Promise.resolve(false)
+      }
+      const params = buildAddRootCommentParams(prNumber, body)
+      return run(ROOT_KEY, () => mutations.addRootComment({ ...params, prRepo }))
+    },
+    [mutations, prNumber, prRepo, run]
+  )
+
+  return {
+    ready,
+    error,
+    clearError: useCallback(() => setError(null), []),
+    isReplyBusy: useCallback((commentId: number) => busyKeys.has(replyKey(commentId)), [busyKeys]),
+    isResolveBusy: useCallback(
+      (threadId: string) => busyKeys.has(resolveKey(threadId)),
+      [busyKeys]
+    ),
+    isRootBusy: busyKeys.has(ROOT_KEY),
+    reply,
+    toggleResolve,
+    addRootComment
+  }
+}
+
+export type MobilePrCommentActions = ReturnType<typeof useMobilePrCommentActions>

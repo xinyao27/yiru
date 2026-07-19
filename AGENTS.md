@@ -2,7 +2,7 @@
 
 ## Design System
 
-All UI work — layout, color, typography, spacing, component selection, UX behavior — must follow [`docs/style-guide.md`](./docs/style-guide.md). Use the tokens defined in `src/renderer/src/assets/main.css` (the canonical source) and the shadcn primitives in `src/renderer/src/components/ui/`. Don't invent new color values, font sizes, or shadow tiers when a documented one already covers the role. When `style-guide.md` is silent, follow the resolution order in its final section.
+All UI work — layout, color, typography, spacing, component selection, UX behavior — must follow [`docs/style-guide.md`](./docs/style-guide.md). Use the tokens defined in `apps/desktop/src/renderer/src/assets/main.css` (the canonical source) and the shadcn primitives in `apps/desktop/src/renderer/src/components/ui/`. Don't invent new color values, font sizes, or shadow tiers when a documented one already covers the role. When `style-guide.md` is silent, follow the resolution order in its final section.
 
 ## Code Comments: Document the "Why", Briefly
 
@@ -16,7 +16,7 @@ Add or modify tests only after carefully judging their value; do not write tests
 
 ## Lint Rules: Do Not Disable Max Lines
 
-Never add a `max-lines` disable (`eslint-disable max-lines`, `oxlint-disable max-lines`, or line-specific variants), and never add a per-file `max-lines` bump in `mobile/.oxlintrc.json`.
+Never add a `max-lines` disable (`eslint-disable max-lines`, `oxlint-disable max-lines`, or line-specific variants), and never add a per-file `max-lines` bump in `apps/mobile/.oxlintrc.json`.
 
 ## File and Module Naming
 

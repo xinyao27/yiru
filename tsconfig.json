@@ -1,13 +1,25 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./config/tsconfig.node.json" },
-    { "path": "./config/tsconfig.web.json" },
-    { "path": "./config/tsconfig.relay.json" }
-  ],
   "compilerOptions": {
+    "target": "ES2023",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["vite/client", "node"],
+    "skipLibCheck": true,
     "paths": {
-      "@/*": ["./src/renderer/src/*"]
-    }
-  }
+      "@/*": ["./apps/desktop/src/renderer/src/*"]
+    },
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["vite.config.ts", "apps/*/vite.config.ts", "packages/*/vite.config.ts"]
 }

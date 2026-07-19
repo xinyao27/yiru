@@ -1,0 +1,14 @@
+diff --git a/package.json b/package.json
+index 56d22a7a25461405e36e0f3cad88f3698992ac46..8fb53d10d2e1738dc26bd64928911ad837896c50 100644
+--- a/package.json
++++ b/package.json
+@@ -15,6 +15,9 @@
+     "url": "git+https://github.com/voidzero-dev/vite-plus.git",
+     "directory": "packages/test"
+   },
++  "bin": {
++    "vitest": "./dist/cli.js"
++  },
+   "files": [
+     "*.cjs",
+     "*.cts",

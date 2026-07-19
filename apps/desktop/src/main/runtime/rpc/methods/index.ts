@@ -1,0 +1,79 @@
+import type { RpcAnyMethod } from '../core'
+import { ACCOUNT_METHODS } from './accounts'
+import { AI_VAULT_METHODS } from './ai-vault'
+import { AUTOMATION_METHODS } from './automations'
+import { BROWSER_CORE_METHODS } from './browser-core'
+import { BROWSER_EXTRA_METHODS } from './browser-extras'
+import { BROWSER_SCREENCAST_METHODS } from './browser-screencast'
+import { CLIENT_EVENT_METHODS } from './client-events'
+import { CLIENT_UI_METHODS } from './client-ui'
+import { CLIPBOARD_METHODS } from './clipboard'
+import { COMPUTER_METHODS } from './computer'
+import { DIAGNOSTICS_METHODS } from './diagnostics'
+import { EMULATOR_METHODS } from './emulator'
+import { FILE_METHODS } from './files'
+import { GIT_METHODS } from './git'
+import { GITHUB_METHODS } from './github'
+import { GITLAB_METHODS } from './gitlab'
+import { HOST_CAPABILITY_METHODS } from './host-capabilities'
+import { HOSTED_REVIEW_METHODS } from './hosted-review'
+import { LANGUAGE_SERVER_METHODS } from './language-servers'
+import { NATIVE_CHAT_METHODS } from './native-chat'
+import { NOTIFICATION_METHODS } from './notifications'
+import { ORCHESTRATION_METHODS } from './orchestration'
+import { PAIRING_METHODS } from './pairing'
+import { PREFLIGHT_METHODS } from './preflight'
+import { REPO_METHODS } from './repo'
+import { SESSION_TAB_METHODS } from './session-tabs'
+import { SKILL_METHODS } from './skills'
+import { SPEECH_METHODS } from './speech'
+import { SPOOL_HOST_METHODS } from './spool-host'
+import { SSH_METHODS } from './ssh'
+import { STATS_METHODS } from './stats'
+import { STATUS_METHODS } from './status'
+import { TERMINAL_METHODS } from './terminal'
+import { WORKSPACE_METHODS } from './workspace'
+import { WORKSPACE_PORT_METHODS } from './workspace-ports'
+import { WORKTREE_METHODS } from './worktree'
+
+// Why: a flat manifest keeps registration order explicit and provides one
+// grep-point for "what methods does the RPC server expose?" — useful when
+// auditing the security boundary or wiring new CLI commands.
+export const ALL_RPC_METHODS: readonly RpcAnyMethod[] = [
+  ...STATUS_METHODS,
+  ...AI_VAULT_METHODS,
+  ...AUTOMATION_METHODS,
+  ...REPO_METHODS,
+  ...WORKSPACE_METHODS,
+  ...WORKTREE_METHODS,
+  ...TERMINAL_METHODS,
+  ...BROWSER_CORE_METHODS,
+  ...BROWSER_SCREENCAST_METHODS,
+  ...BROWSER_EXTRA_METHODS,
+  ...ORCHESTRATION_METHODS,
+  ...NOTIFICATION_METHODS,
+  ...STATS_METHODS,
+  ...DIAGNOSTICS_METHODS,
+  ...ACCOUNT_METHODS,
+  ...PREFLIGHT_METHODS,
+  ...COMPUTER_METHODS,
+  ...SESSION_TAB_METHODS,
+  ...NATIVE_CHAT_METHODS,
+  ...FILE_METHODS,
+  ...GIT_METHODS,
+  ...GITHUB_METHODS,
+  ...GITLAB_METHODS,
+  ...HOSTED_REVIEW_METHODS,
+  ...SSH_METHODS,
+  ...SPEECH_METHODS,
+  ...WORKSPACE_PORT_METHODS,
+  ...SKILL_METHODS,
+  ...CLIPBOARD_METHODS,
+  ...HOST_CAPABILITY_METHODS,
+  ...CLIENT_EVENT_METHODS,
+  ...CLIENT_UI_METHODS,
+  ...EMULATOR_METHODS,
+  ...PAIRING_METHODS,
+  ...SPOOL_HOST_METHODS,
+  ...LANGUAGE_SERVER_METHODS
+]

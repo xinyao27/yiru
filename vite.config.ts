@@ -1,13 +1,21 @@
 import { resolve } from 'node:path'
+
 import { defineConfig } from 'vite-plus'
 
+import { mobileMaxLinesRatchets } from './apps/mobile/config/mobile-max-lines-ratchets.ts'
+
 const lintProfile = process.env.YIRU_LINT_PROFILE
+const desktopRoot = resolve(import.meta.dirname, 'apps/desktop')
+const mobileMaxLinesOverrides = mobileMaxLinesRatchets.map((override) => ({
+  ...override,
+  files: override.files.map((file) => `apps/mobile/${file}`)
+}))
 
 const yiruRootToolingConfig = defineConfig({
   staged: {
     '*.{ts,tsx,js,jsx,mjs,mts,cts}': [
       'vp lint',
-      'node config/scripts/run-vite-plus-lint-profile.mjs react-doctor',
+      'node apps/desktop/config/scripts/run-vite-plus-lint-profile.mjs react-doctor',
       'vp fmt --write'
     ],
     '*.{json,css}': ['vp fmt --write']
@@ -15,11 +23,14 @@ const yiruRootToolingConfig = defineConfig({
   fmt: {
     // Why: Markdown includes generated skill guides whose formatting is part of
     // their authored content; toolchain migration must not rewrite that prose.
-    ignorePatterns: ['**/*.md'],
+    ignorePatterns: ['**/*.md', '**/build'],
     singleQuote: true,
     semi: false,
     printWidth: 100,
-    trailingComma: 'none'
+    trailingComma: 'none',
+    sortImports: {},
+    sortPackageJson: true,
+    sortTailwindcss: {}
   },
   lint:
     lintProfile === 'switch-exhaustiveness'
@@ -40,7 +51,7 @@ const yiruRootToolingConfig = defineConfig({
               { allowDefaultCaseForExhaustiveSwitch: false }
             ]
           },
-          ignorePatterns: ['**/node_modules', '**/dist', '**/out', 'mobile/**'],
+          ignorePatterns: ['**/node_modules', '**/build', '**/dist', '**/out', 'apps/mobile/**'],
           options: { typeAware: true, typeCheck: false }
         }
       : lintProfile === 'react-doctor'
@@ -60,7 +71,7 @@ const yiruRootToolingConfig = defineConfig({
               'react-doctor/no-derived-state-effect': 'warn',
               'react-doctor/no-initialize-state': 'warn'
             },
-            ignorePatterns: ['**/node_modules', '**/dist', '**/out', 'mobile/**'],
+            ignorePatterns: ['**/node_modules', '**/build', '**/dist', '**/out', 'apps/mobile/**'],
             options: { typeAware: false, typeCheck: false },
             jsPlugins: [{ name: 'react-doctor', specifier: 'oxlint-plugin-react-doctor' }]
           }
@@ -200,11 +211,39 @@ const yiruRootToolingConfig = defineConfig({
                     }
                   ]
                 }
-              }
+              },
+              {
+                // Why: React Native and Expo retain framework-specific source
+                // conventions that are intentionally outside the desktop policy.
+                files: ['apps/mobile/**/*.{ts,tsx}'],
+                rules: {
+                  'react/exhaustive-deps': 'off',
+                  'react/no-unescaped-entities': 'off',
+                  'typescript/array-type': 'off',
+                  'typescript/consistent-type-definitions': 'off',
+                  'typescript/consistent-type-imports': 'off',
+                  'prefer-template': 'off',
+                  'no-useless-return': 'off',
+                  'unicorn/prefer-at': 'off',
+                  'unicorn/prefer-ternary': 'off',
+                  'unicorn/prefer-node-protocol': 'off'
+                }
+              },
+              {
+                // Why: Expo derives route parameter names from bracketed files,
+                // so camelCase parameters must remain stable across deep links.
+                files: ['apps/mobile/app/**/[[]*[]].tsx'],
+                rules: { 'unicorn/filename-case': 'off' }
+              },
+              ...mobileMaxLinesOverrides
             ],
-            // Why: mobile is an independent pnpm/Vite+ workspace with React Native
-            // exceptions and its own type-checking contract.
-            ignorePatterns: ['**/node_modules', '**/dist', '**/out', 'mobile/**'],
+            ignorePatterns: [
+              '**/node_modules',
+              '**/build',
+              '**/dist',
+              '**/out',
+              'apps/mobile/src/terminal/terminal-webview-engine.generated.ts'
+            ],
             options: {
               // Why: Yiru type-checks three explicit tsc projects and enables only the
               // switch exhaustiveness type-aware rule in a separate narrow lint pass.
@@ -223,9 +262,14 @@ const yiruRootToolingConfig = defineConfig({
   },
   resolve: {
     alias: {
-      '@renderer': resolve('src/renderer/src'),
-      '@': resolve('src/renderer/src')
+      '@renderer': resolve(desktopRoot, 'src/renderer/src'),
+      '@': resolve(desktopRoot, 'src/renderer/src'),
+      '@yiru/expo-two-way-audio': resolve(import.meta.dirname, 'packages/expo-two-way-audio/src')
     }
+  },
+  test: {
+    include: ['apps/**/*.{test,spec}.{ts,tsx}', 'packages/**/*.{test,spec}.{ts,tsx}'],
+    passWithNoTests: true
   }
 })
 
