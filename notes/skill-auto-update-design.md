@@ -11,8 +11,8 @@ text-normalized package-identity rule); Linux confirmed verbatim-LF installs and
 
 ## Problem
 
-Yiru ships agent skills in `skills/` (yiru-cli, orchestration, computer-use, yiru-linear,
-linear-tickets, yiru-per-workspace-env, yiru-emulator, yiru-emulator-android). Users install
+Yiru ships agent skills in `skills/` (yiru-cli, orchestration, computer-use,
+yiru-per-workspace-env, yiru-emulator, yiru-emulator-android). Users install
 them with the skills CLI:
 
 ```sh
@@ -594,7 +594,7 @@ Renderer and UX:
 
 - The ~13 setting/feature surfaces that today print raw `npx skills ...` strings from
   `src/shared/agent-feature-install-commands.ts` (CliSection, OrchestrationPane, BrowserUsePane,
-  EphemeralVmsPane, ComputerUseSkillSetupPanel, the linear/emulator CTAs, and the feature-wall /
+  EphemeralVmsPane, ComputerUseSkillSetupPanel, the emulator CTAs, and the feature-wall /
   feature-tip cards) become ledger-state rows with adoption/update actions.
 - `src/renderer/src/hooks/use-installed-agent-skills.ts` — `notifyInstalledAgentSkillsChanged()` is
   the post-write refresh signal, already listened to on focus and on the install event.

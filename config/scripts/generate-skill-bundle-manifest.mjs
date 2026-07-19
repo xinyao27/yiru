@@ -19,9 +19,6 @@ const CURRENT_MANIFEST_PATH = path.join(OUTPUT_ROOT, 'current-manifest.json')
 const SNAPSHOT_REGISTRY_PATH = path.join(OUTPUT_ROOT, 'snapshot-registry.json')
 const RELEASE_MAPPING_PATH = path.join(OUTPUT_ROOT, 'release-mapping.json')
 const PRODUCT_SKILL_PREFIX = 'yiru-'
-// Why: release-tag history still contains removed integrations; exclude them so
-// regeneration cannot silently restore retired packages to shipped artifacts.
-const RETIRED_SKILL_NAMES = new Set(['linear-tickets', 'orca-linear', 'yiru-linear'])
 
 function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex')
@@ -334,7 +331,7 @@ function normalizeReleasedSkillName(name, currentSkillNames) {
   return currentSkillNames.has(renamedCandidate) ? renamedCandidate : name
 }
 
-function buildReleasedHistory(currentSkillNames = new Set()) {
+function buildReleasedHistory(currentSkillNames = new Set(), retainedSkillNames = null) {
   const registry = { schemaVersion: SNAPSHOT_REGISTRY_SCHEMA_VERSION, skills: {} }
   const mapping = { schemaVersion: RELEASE_MAPPING_SCHEMA_VERSION, releases: [] }
   const tags = releaseTags()
@@ -362,7 +359,9 @@ function buildReleasedHistory(currentSkillNames = new Set()) {
     }
     for (const sourceName of [...packages.keys()].sort(compareCodeUnits)) {
       const name = normalizeReleasedSkillName(sourceName, currentSkillNames)
-      if (RETIRED_SKILL_NAMES.has(sourceName) || RETIRED_SKILL_NAMES.has(name)) {
+      // Why: old tags contain deliberately purged packages; only current or
+      // registry-preserved names may contribute to generated artifacts.
+      if (retainedSkillNames && !retainedSkillNames.has(name)) {
         continue
       }
       if (Object.hasOwn(revisions, name)) {
@@ -398,12 +397,18 @@ function buildReleasedHistory(currentSkillNames = new Set()) {
 // Why: the artifacts must be pure functions of skills/ bytes and release-tag
 // history. Stamping the app version made every release cut invalidate the
 // committed output on all open branches and drag skill CI onto unrelated PRs.
-async function buildArtifacts() {
+async function buildArtifacts(committedRegistry) {
   const skillDirectories = (await readdir(SKILLS_ROOT, { withFileTypes: true }))
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort(compareCodeUnits)
-  const { registry, mapping } = buildReleasedHistory(new Set(skillDirectories))
+  const preservedRegistry = committedRegistry ?? (await readCommittedRegistry())
+  const currentSkillNames = new Set(skillDirectories)
+  const retainedSkillNames = new Set([
+    ...currentSkillNames,
+    ...Object.keys(preservedRegistry?.skills ?? {})
+  ])
+  const { registry, mapping } = buildReleasedHistory(currentSkillNames, retainedSkillNames)
   const releasedSnapshotCounts = Object.fromEntries(
     Object.entries(registry.skills).map(([name, snapshots]) => [name, snapshots.length])
   )
@@ -453,9 +458,6 @@ function assertReleasedHistoryPreserved(committedRegistry, artifacts) {
     return
   }
   for (const [name, committedSnapshots] of Object.entries(committedRegistry.skills ?? {})) {
-    if (RETIRED_SKILL_NAMES.has(name)) {
-      continue
-    }
     const releasedCount = artifacts.releasedSnapshotCounts[name] ?? 0
     const regenerated = artifacts.snapshotRegistry.skills[name] ?? []
     if (releasedCount < Math.max(0, committedSnapshots.length - 1)) {
@@ -559,8 +561,9 @@ async function verifyArtifacts(artifacts) {
 }
 
 async function main() {
-  const artifacts = await buildArtifacts()
-  assertReleasedHistoryPreserved(await readCommittedRegistry(), artifacts)
+  const committedRegistry = await readCommittedRegistry()
+  const artifacts = await buildArtifacts(committedRegistry)
+  assertReleasedHistoryPreserved(committedRegistry, artifacts)
   await (process.argv.includes('--write') ? writeArtifacts : verifyArtifacts)(artifacts)
 }
 
