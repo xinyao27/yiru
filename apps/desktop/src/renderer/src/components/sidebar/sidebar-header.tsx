@@ -34,7 +34,7 @@ const SidebarHeader = React.memo(function SidebarHeader() {
           <TooltipTrigger
             render={
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon-xs"
                 className="bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent"
                 aria-label={translate(
@@ -56,7 +56,7 @@ const SidebarHeader = React.memo(function SidebarHeader() {
           <TooltipTrigger
             render={
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon-xs"
                 className="bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent"
                 onClick={() => {

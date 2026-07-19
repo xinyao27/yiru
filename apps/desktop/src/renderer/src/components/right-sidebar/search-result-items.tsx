@@ -35,7 +35,7 @@ export function ToggleButton({
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="ghost"
       size="icon-xs"
       className={cn(
         'h-auto w-auto rounded-sm p-0.5 flex-shrink-0',

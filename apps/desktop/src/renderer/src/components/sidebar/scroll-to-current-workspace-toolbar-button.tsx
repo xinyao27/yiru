@@ -12,7 +12,7 @@ export function ScrollToCurrentWorkspaceToolbarButton(): React.JSX.Element {
       <TooltipTrigger
         render={
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon-xs"
             type="button"
             aria-label={translate(
