@@ -49,7 +49,10 @@ import { parseGitLabMergeRequestLink } from '@/lib/gitlab-links'
 import { getLocalPreflightContext, localPreflightContextKey } from '@/lib/local-preflight-context'
 import { getRepoOwnerRoutedSettings } from '@/lib/repo-runtime-owner'
 import { cn } from '@/lib/class-names'
-import { searchRuntimeRepoBaseRefDetails } from '@/runtime/runtime-repo-client'
+import {
+  getRuntimeRepoBaseRefDefault,
+  searchRuntimeRepoBaseRefDetails
+} from '@/runtime/runtime-repo-client'
 import {
   buildSmartWorkspaceSourceRows,
   getBranchSearchRequest,
@@ -72,7 +75,11 @@ import {
   buildProjectSourceContextFromRepo,
   type ProjectSourceContext
 } from '../../../../shared/project-source-context'
-import { parseExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
+import {
+  getRepoExecutionHostId,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '../../../../shared/execution-host'
 
 type RepoOption = ReturnType<typeof useAppStore.getState>['repos'][number]
 const EMPTY_REPO_SEARCH_REPOS: readonly RepoOption[] = []
@@ -204,6 +211,7 @@ export default function SmartWorkspaceNameField({
     () => getRepoOwnerRoutedSettings(settings, selectedRepo),
     [selectedRepo, settings]
   )
+  const selectedRepoHostId = selectedRepo ? getRepoExecutionHostId(selectedRepo) : undefined
   const githubSourceContext = useMemo(() => {
     if (githubSourceContextOverride?.provider === 'github') {
       return githubSourceContextOverride
@@ -262,6 +270,7 @@ export default function SmartWorkspaceNameField({
   const [githubItems, setGithubItems] = useState<GitHubWorkItem[]>([])
   const [gitlabItems, setGitlabItems] = useState<GitLabWorkItem[]>([])
   const [branches, setBranches] = useState<BaseRefSearchResult[]>([])
+  const [branchDefaultBaseRef, setBranchDefaultBaseRef] = useState<string | null>(null)
   const [branchResultsSource, setBranchResultsSource] = useState<{
     repoId: string
     query: string
@@ -328,6 +337,7 @@ export default function SmartWorkspaceNameField({
     setGithubItems([])
     setGitlabItems([])
     setBranches([])
+    setBranchDefaultBaseRef(null)
     setGithubLoading(false)
     setGitlabLoading(false)
     setBranchesLoading(false)
@@ -754,23 +764,38 @@ export default function SmartWorkspaceNameField({
   useEffect(() => {
     if (!branchSearchRequest) {
       setBranches([])
+      setBranchDefaultBaseRef(null)
       setBranchResultsSource(null)
       setBranchesLoading(false)
       return
     }
     let stale = false
     setBranches([])
+    setBranchDefaultBaseRef(null)
     setBranchResultsSource(null)
     setBranchesLoading(true)
-    void searchRuntimeRepoBaseRefDetails(
-      selectedRepoOwnerSettings,
-      branchSearchRequest.repoId,
-      branchSearchRequest.query,
-      branchSearchRequest.limit
-    )
-      .then((results) => {
+    const defaultBaseRefRequest =
+      branchSearchRequest.query.length === 0
+        ? getRuntimeRepoBaseRefDefault(
+            selectedRepoOwnerSettings,
+            branchSearchRequest.repoId,
+            selectedRepoHostId
+          ).then(({ defaultBaseRef }) => defaultBaseRef)
+        : Promise.resolve(null)
+    void Promise.all([
+      searchRuntimeRepoBaseRefDetails(
+        selectedRepoOwnerSettings,
+        branchSearchRequest.repoId,
+        branchSearchRequest.query,
+        branchSearchRequest.limit,
+        selectedRepoHostId
+      ),
+      defaultBaseRefRequest.catch(() => null)
+    ])
+      .then(([results, defaultBaseRef]) => {
         if (!stale) {
           setBranches(results)
+          setBranchDefaultBaseRef(defaultBaseRef)
           setBranchResultsSource({
             repoId: branchSearchRequest.repoId,
             query: branchSearchRequest.query
@@ -780,6 +805,7 @@ export default function SmartWorkspaceNameField({
       .catch(() => {
         if (!stale) {
           setBranches([])
+          setBranchDefaultBaseRef(null)
           setBranchResultsSource(null)
         }
       })
@@ -791,7 +817,7 @@ export default function SmartWorkspaceNameField({
     return () => {
       stale = true
     }
-  }, [branchSearchRequest, selectedRepoOwnerSettings])
+  }, [branchSearchRequest, selectedRepoHostId, selectedRepoOwnerSettings])
 
   // Why: GitLab paste-URL flow. Watches the debounced query for a GitLab
   // issue/MR URL (parseGitLabMergeRequestLink already filters non-GitLab URLs
@@ -946,6 +972,7 @@ export default function SmartWorkspaceNameField({
       buildSmartWorkspaceSourceRows({
         branches: getVisibleBranchResults({
           branches,
+          defaultBaseRef: branchDefaultBaseRef,
           mode,
           resultRepoId: branchResultsSource?.repoId ?? null,
           resultQuery: branchResultsSource?.query ?? null,
@@ -961,6 +988,7 @@ export default function SmartWorkspaceNameField({
       }),
     [
       branches,
+      branchDefaultBaseRef,
       branchResultsSource,
       githubItems,
       gitlabSourceAvailable,

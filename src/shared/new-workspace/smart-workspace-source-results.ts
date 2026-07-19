@@ -1,4 +1,5 @@
 import type { BaseRefSearchResult, GitHubWorkItem, GitLabWorkItem } from '../types'
+import { legacyBaseRefSearchResult } from '../base-ref-search-result'
 import { isClipboardTextByteLengthOverLimit } from '../clipboard-text'
 
 export type SmartNameMode = 'smart' | 'github' | 'gitlab' | 'branches' | 'text'
@@ -67,6 +68,7 @@ export function getBranchSearchRequest({
 
 export function getVisibleBranchResults({
   branches,
+  defaultBaseRef,
   mode,
   resultRepoId,
   resultQuery,
@@ -74,6 +76,7 @@ export function getVisibleBranchResults({
   value
 }: {
   branches: BaseRefSearchResult[]
+  defaultBaseRef: string | null
   mode: SmartNameMode
   resultRepoId: string | null
   resultQuery: string | null
@@ -90,7 +93,26 @@ export function getVisibleBranchResults({
   if (!selectedRepoId || resultRepoId !== selectedRepoId || resultQuery !== currentQuery) {
     return []
   }
-  return branches
+  if (currentQuery.length > 0) {
+    return branches
+  }
+  const normalizedDefaultBaseRef = defaultBaseRef?.trim()
+  const existingConventionalBranch =
+    branches.find(({ refName }) => refName === 'origin/main') ??
+    branches.find(({ refName }) => refName === 'main')
+  const resolvedConventionalRef =
+    normalizedDefaultBaseRef === 'origin/main' || normalizedDefaultBaseRef === 'main'
+      ? normalizedDefaultBaseRef
+      : null
+  const preferredBranch =
+    existingConventionalBranch ??
+    (resolvedConventionalRef ? legacyBaseRefSearchResult(resolvedConventionalRef) : null)
+  if (!preferredBranch || branches[0]?.refName === preferredBranch.refName) {
+    return branches
+  }
+  // Why: empty branch mode starts from origin/main or main even when default
+  // detection fails, while typed queries preserve Git's relevance order.
+  return [preferredBranch, ...branches.filter(({ refName }) => refName !== preferredBranch.refName)]
 }
 
 export function buildSmartWorkspaceSourceRows({

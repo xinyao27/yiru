@@ -211,10 +211,10 @@ export default function TabGroupPanel({
       tabBar={tabBar}
       trailingActions={
         <div className={focusedActionChromeClassName}>
-          {isFocused ? <TabBarOpenInMenuButton worktreeId={worktreeId} /> : null}
           {isFocused ? (
             <TabBarQuickCommandsButton worktreeId={worktreeId} groupId={groupId} />
           ) : null}
+          {isFocused ? <TabBarOpenInMenuButton worktreeId={worktreeId} /> : null}
           {isFocused && hasSplitGroups ? (
             <Tooltip>
               <DropdownMenu modal={false}>
