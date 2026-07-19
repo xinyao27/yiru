@@ -19,6 +19,7 @@ jobs:
           # Why: the freshness registry is derived from immutable release tags,
           # so shallow PR checkouts cannot verify historical official identities.
           fetch-depth: 0
+          fetch-tags: true
           persist-credentials: false
 
       - name: Install native build tools
