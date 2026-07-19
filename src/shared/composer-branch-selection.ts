@@ -29,6 +29,17 @@ export function resolveComposerBranchSelection(args: {
       lastAutoName: undefined
     }
   }
+  if (args.refName !== args.localBranchName) {
+    // Why: a remote row is a checkout start point, not a request to recreate
+    // its local leaf name. Leaving Branch name blank keeps the random-name flow.
+    return {
+      baseBranch: args.refName,
+      branchNameOverride: undefined,
+      branchAutoName: '',
+      name: '',
+      lastAutoName: ''
+    }
+  }
   return {
     baseBranch: args.refName,
     branchNameOverride: args.localBranchName,
@@ -89,10 +100,10 @@ export function resolveComposerBranchReuse(args: {
 }
 
 /**
- * Issue #5181: the branch-name override to apply for a picked branch. A branch
- * already checked out in another worktree can't be reused or recreated under
- * the same local name, even when the selected row is remote-backed. Pinning it
- * would collide and silently produce a numbered sibling.
+ * Issue #5181: the branch-name override to apply for a picked branch. Only a
+ * reusable local row may pin its existing branch. Remote rows are start points,
+ * and busy local rows cannot be reused; pinning either local leaf would collide
+ * and silently produce a numbered sibling.
  */
 export function resolveComposerReuseOverride(args: {
   refName: string
@@ -100,7 +111,7 @@ export function resolveComposerReuseOverride(args: {
   branchNameOverride: string | undefined
   branchCheckedOutElsewhere: boolean
 }): string | undefined {
-  if (args.branchCheckedOutElsewhere) {
+  if (args.branchCheckedOutElsewhere || args.refName !== args.localBranchName) {
     return undefined
   }
   return args.branchNameOverride
@@ -152,12 +163,11 @@ export function resolveComposerBranchPick(args: {
 /**
  * The branch-name override to apply when creating a worktree from the composer.
  *
- * With no resolver-provided override, branch mode (#6721) keeps a
- * slash-containing typed name as the git branch — validated downstream by
- * `git check-ref-format` — while the worktree folder name is sanitized
- * separately; every other mode leaves the branch to be derived from the
- * sanitized name. With an override, keep it verbatim when the workspace name is
- * user-edited (`preserveWorkspaceNameEdits`) or still matches the auto-name.
+ * With no resolver-provided override, branch mode keeps a slash-containing
+ * typed name as an explicit git branch. Other blank Branch name paths use the
+ * composer's random workspace seed. With an override, keep it verbatim when
+ * the workspace name is user-edited (`preserveWorkspaceNameEdits`) or still
+ * matches the auto-name.
  */
 export function resolveComposerBranchNameOverrideForCreate(args: {
   branchNameOverride: string | undefined

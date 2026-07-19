@@ -449,8 +449,9 @@ export const COMMIT_MESSAGE_AGENT_SPECS: Partial<Record<TuiAgent, CommitMessageA
       '--no-context-files',
       '--mode',
       'text',
-      '--model',
-      model,
+      // Why: without an explicit Source Control AI choice, Pi should use its own
+      // authenticated default provider instead of Yiru forcing a provider login.
+      ...(model ? ['--model', model] : []),
       ...(thinkingLevel ? ['--thinking', thinkingLevel] : [])
     ],
     modelSource: 'dynamic',

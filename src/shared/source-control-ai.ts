@@ -939,16 +939,15 @@ function getDiscoveredModels(
   )
 }
 
-function selectPersistedModelId(args: {
+function selectConfiguredModelId(args: {
   source: SourceControlAiSettings
   legacy: CommitMessageAiSettings | null | undefined
   repoOverrides: RepoSourceControlAiOverrides | null | undefined
   operation: SourceControlAiOperation
   hostKey: string
   agentId: TuiAgent
-  defaultModelId: string
-}): string {
-  const { source, legacy, repoOverrides, operation, hostKey, agentId, defaultModelId } = args
+}): string | undefined {
+  const { source, legacy, repoOverrides, operation, hostKey, agentId } = args
   return (
     readSourceControlAiModelChoiceForHost(
       repoOverrides?.modelOverridesByOperation?.[operation],
@@ -964,8 +963,7 @@ function selectPersistedModelId(args: {
     legacy?.selectedModelByAgentByHost?.[hostKey]?.[agentId] ??
     (hostKey === LOCAL_COMMIT_MESSAGE_HOST_KEY
       ? legacy?.selectedModelByAgent?.[agentId]
-      : undefined) ??
-    defaultModelId
+      : undefined)
   )
 }
 
@@ -1283,31 +1281,36 @@ export function resolveSourceControlAiForOperation(
   }
 
   const hostKey = input.discoveryHostKey ?? LOCAL_COMMIT_MESSAGE_HOST_KEY
-  const persistedModelId = selectPersistedModelId({
+  const configuredModelId = selectConfiguredModelId({
     source,
     legacy,
     repoOverrides,
     operation: input.operation,
     hostKey,
-    agentId: resolvedActionAgentId,
-    defaultModelId: spec.defaultModelId
+    agentId: resolvedActionAgentId
   })
+  const selectedModelId = configuredModelId ?? spec.defaultModelId
   const discoveredModels = getDiscoveredModels(source, legacy, hostKey, resolvedActionAgentId)
   const model =
-    spec.models.find((candidate) => candidate.id === persistedModelId) ??
-    discoveredModels.find((candidate) => candidate.id === persistedModelId) ??
+    spec.models.find((candidate) => candidate.id === selectedModelId) ??
+    discoveredModels.find((candidate) => candidate.id === selectedModelId) ??
     getCommitMessageModel(resolvedActionAgentId, spec.defaultModelId)
   if (!model) {
     return { ok: false, error: `No model is available for ${spec.label}.` }
   }
 
-  const thinkingLevel = resolveThinkingLevel({
-    model,
-    source,
-    legacy,
-    repoOverrides,
-    operation: input.operation
-  })
+  // Why: Pi spans providers with independent auth. When the user did not pick a
+  // model, omitting --model lets Pi use the provider already configured in Pi.
+  const usePiConfiguredDefault = resolvedActionAgentId === 'pi' && !configuredModelId
+  const thinkingLevel = usePiConfiguredDefault
+    ? undefined
+    : resolveThinkingLevel({
+        model,
+        source,
+        legacy,
+        repoOverrides,
+        operation: input.operation
+      })
   const agentCommandOverride = input.settings.agentCmdOverrides?.[resolvedActionAgentId]?.trim()
   return {
     ok: true,
@@ -1315,7 +1318,7 @@ export function resolveSourceControlAiForOperation(
       enabled: true,
       params: {
         agentId: resolvedActionAgentId,
-        model: model.id,
+        model: usePiConfiguredDefault ? '' : model.id,
         thinkingLevel,
         customPrompt: resolveInstructionsFromNormalized(
           source,
