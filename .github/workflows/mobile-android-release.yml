@@ -112,3 +112,40 @@ jobs:
               --generate-notes \
               android/app/build/outputs/apk/release/*.apk
           fi
+
+      - name: Update rolling Android download
+        if: steps.release.outputs.publish_release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          latest_tag="mobile-android-latest"
+          apk_paths=(android/app/build/outputs/apk/release/*.apk)
+
+          if [[ ${#apk_paths[@]} -ne 1 || ! -f "${apk_paths[0]}" ]]; then
+            echo "Expected exactly one release APK, found ${#apk_paths[@]}" >&2
+            exit 1
+          fi
+
+          # Why: the guide's permanent URL depends on this stable asset name,
+          # even if Gradle changes the generated filename later.
+          rolling_apk="$RUNNER_TEMP/app-release.apk"
+          cp "${apk_paths[0]}" "$rolling_apk"
+
+          # Why: GitHub has only one repo-wide latest release, which belongs to
+          # desktop; this rolling tag gives mobile installs a permanent URL.
+          if gh release view "$latest_tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$latest_tag" \
+              --repo "$GITHUB_REPOSITORY" \
+              --clobber \
+              "$rolling_apk"
+          else
+            gh release create "$latest_tag" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "Yiru Mobile Android (Latest APK)" \
+              --notes "Rolling download for the latest Yiru Mobile Android APK. Versioned releases remain available in the release history." \
+              --prerelease \
+              --latest=false \
+              "$rolling_apk"
+          fi

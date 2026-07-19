@@ -31,7 +31,7 @@ import {
   Trash as Trash2
 } from '@phosphor-icons/react'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { monaco } from '@/lib/monaco-setup'
+import { monaco, resolveCursorThemeName } from '@/lib/monaco-setup'
 import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { getConnectionId } from '@/lib/connection-context'
 import { resolveDocumentTheme } from '@/lib/document-theme'
@@ -372,7 +372,7 @@ function CodeCell({
   }, [])
 
   useEffect(() => {
-    monaco.editor.setTheme(isDark ? 'vs-dark' : 'vs')
+    monaco.editor.setTheme(resolveCursorThemeName(isDark))
   }, [isDark])
 
   if (!active) {
@@ -405,7 +405,7 @@ function CodeCell({
         height={editorHeight}
         defaultLanguage={cell.language}
         language={cell.language}
-        theme={isDark ? 'vs-dark' : 'vs'}
+        theme={resolveCursorThemeName(isDark)}
         value={source}
         onMount={handleMount}
         onChange={(value) => onChange(value ?? '')}

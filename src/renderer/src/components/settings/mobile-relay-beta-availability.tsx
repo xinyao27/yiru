@@ -1,5 +1,8 @@
 import { translate } from '@/i18n/i18n'
-import { YIRU_GITHUB_RELEASES_URL } from '../../../../shared/yiru-github-repository'
+import {
+  YIRU_ANDROID_LATEST_APK_URL,
+  YIRU_IOS_TESTFLIGHT_URL
+} from '../../../../shared/yiru-mobile-downloads'
 
 export function MobileRelayBetaAvailability(): React.JSX.Element {
   return (
@@ -11,17 +14,25 @@ export function MobileRelayBetaAvailability(): React.JSX.Element {
       <span>
         {translate(
           'auto.components.settings.MobileRelayBetaAvailability.availability',
-          'Mobile builds:'
+          'Available on'
         )}
       </span>
       <button
         type="button"
-        className="rounded-sm font-medium text-foreground underline decoration-border underline-offset-2 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        onClick={() => void window.api.shell.openUrl(YIRU_GITHUB_RELEASES_URL)}
+        className="font-medium text-foreground underline decoration-border underline-offset-2 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        onClick={() => void window.api.shell.openUrl(YIRU_IOS_TESTFLIGHT_URL)}
+      >
+        {translate('auto.components.settings.MobileRelayBetaAvailability.testFlight', 'TestFlight')}
+      </button>
+      <span aria-hidden="true">/</span>
+      <button
+        type="button"
+        className="font-medium text-foreground underline decoration-border underline-offset-2 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        onClick={() => void window.api.shell.openUrl(YIRU_ANDROID_LATEST_APK_URL)}
       >
         {translate(
-          'auto.components.settings.MobileRelayBetaAvailability.githubReleases',
-          'GitHub Releases'
+          'auto.components.settings.MobileRelayBetaAvailability.androidApk',
+          'Android APK'
         )}
       </button>
     </span>

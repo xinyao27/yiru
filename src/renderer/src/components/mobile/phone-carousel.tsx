@@ -4,6 +4,7 @@ import { HomeSlide } from './slides/home-slide'
 import { WorktreeListSlide } from './slides/worktree-list-slide'
 import { TerminalSlide } from './slides/terminal-slide'
 import { translate } from '@/i18n/i18n'
+import { mobilePageStyles } from './mobile-page-tailwind'
 
 const DWELL_MS = 4500
 const TAP_BEFORE_PUSH_MS = 240
@@ -90,7 +91,7 @@ export function PhoneCarousel(): React.JSX.Element {
 
   // Why: while the slide reset is in progress we want all slides to snap
   // back to their off-stage positions with no transition; the next render
-  // tick removes is-reset so the subsequent push animates again.
+  // tick restores transitions for the subsequent push.
   useEffect(() => {
     if (phase !== 'reset') {
       return
@@ -105,15 +106,15 @@ export function PhoneCarousel(): React.JSX.Element {
 
   const slideClass = (idx: number): string =>
     cn(
-      'mp-screen-slide',
-      phase === 'reset' && 'is-reset',
-      idx === activeIdx && 'is-active',
-      idx < activeIdx && 'is-past'
+      mobilePageStyles.screenSlide,
+      phase === 'reset' && mobilePageStyles.screenSlideReset,
+      idx === activeIdx && mobilePageStyles.screenSlideActive,
+      idx < activeIdx && mobilePageStyles.screenSlidePast
     )
 
   return (
-    <div className="mp-phone-frame">
-      <div className="mp-phone-screen" ref={containerRef}>
+    <div className={mobilePageStyles.phoneFrame}>
+      <div className={mobilePageStyles.phoneScreen} ref={containerRef}>
         <div
           className={slideClass(0)}
           role="img"

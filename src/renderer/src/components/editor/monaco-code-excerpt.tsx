@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { monaco } from '@/lib/monaco-setup'
+import { monaco, resolveCursorThemeName } from '@/lib/monaco-setup'
 import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { resolveDocumentTheme } from '@/lib/document-theme'
 import { useAppStore } from '@/store'
@@ -57,7 +57,7 @@ export default function MonacoCodeExcerpt({
   const [htmlLines, setHtmlLines] = useState<string[]>(() => lines.map(() => ''))
 
   useEffect(() => {
-    monaco.editor.setTheme(isDark ? 'vs-dark' : 'vs')
+    monaco.editor.setTheme(resolveCursorThemeName(isDark))
   }, [isDark])
 
   useEffect(() => {

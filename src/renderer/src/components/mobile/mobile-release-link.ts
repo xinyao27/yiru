@@ -1,16 +1,25 @@
 import { translate } from '@/i18n/i18n'
-import { YIRU_GITHUB_RELEASES_URL } from '../../../../shared/yiru-github-repository'
+import {
+  YIRU_ANDROID_LATEST_APK_URL,
+  YIRU_IOS_TESTFLIGHT_URL
+} from '../../../../shared/yiru-mobile-downloads'
 
+export type MobilePlatform = 'ios' | 'android'
 export type MobileReleaseLink = { ctaLabel: string; url: string }
 
-// Why: until platform-specific builds are published, one neutral release link
-// avoids advertising install channels that do not yet have distinct assets.
-export function getMobileReleaseLink(): MobileReleaseLink {
+export function getMobileReleaseLink(platform: MobilePlatform): MobileReleaseLink {
+  if (platform === 'ios') {
+    return {
+      ctaLabel: translate(
+        'auto.components.mobile.mobile.platform.copy.testflight.cta',
+        'Open TestFlight'
+      ),
+      url: YIRU_IOS_TESTFLIGHT_URL
+    }
+  }
+
   return {
-    ctaLabel: translate(
-      'auto.components.mobile.mobile.platform.copy.releases.cta',
-      'View mobile builds'
-    ),
-    url: YIRU_GITHUB_RELEASES_URL
+    ctaLabel: translate('auto.components.mobile.mobile.platform.copy.android.cta', 'Download APK'),
+    url: YIRU_ANDROID_LATEST_APK_URL
   }
 }

@@ -15,6 +15,7 @@ import { registerVueLanguage } from './monaco-languages/register-vue'
 import { installMonacoDelayerCancellationGuard } from './monaco-delayer-cancellation-guard'
 import { installMonacoDiffEditorDisposalGuard } from './monaco-diff-editor-disposal'
 import { installMonacoPeekReferencesPreviewOptions } from './monaco-peek-preview-options'
+import { registerCursorMonacoThemes } from './cursor-monaco-theme'
 import { installMonacoContextMenuPaste } from '@/components/editor/install-monaco-context-menu-paste'
 
 globalThis.MonacoEnvironment = {
@@ -89,6 +90,8 @@ installMonacoContextMenuPaste(monaco)
 
 // Configure Monaco to use the locally bundled editor instead of CDN
 loader.config({ monaco })
+registerCursorMonacoThemes(monaco.editor)
 
 // Re-export for convenience
 export { monaco }
+export { resolveCursorThemeName } from './cursor-theme-source'

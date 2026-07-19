@@ -4923,7 +4923,9 @@
           "174f4a3c6d": "Controla terminales y agentes desde tu teléfono.",
           "1de96ec8a6": "Mostrar botón de Yiru Mobile",
           "682293cadf": "Mostrar el botón de Yiru Mobile en la parte superior de la barra lateral izquierda.",
-          "d4f2b65f30": "Mostrar el acceso directo de Yiru Mobile en la barra lateral."
+          "d4f2b65f30": "Mostrar el acceso directo de Yiru Mobile en la barra lateral.",
+          "testFlight": "TestFlight",
+          "androidApk": "Android APK"
         },
         "NotificationsPane": {
           "906b4afebf": "Enviar notificación de prueba",
@@ -8056,7 +8058,9 @@
           "about": "Acerca de la beta de Yiru Relay",
           "beta": "Beta",
           "availability": "Compilaciones móviles:",
-          "githubReleases": "GitHub Releases"
+          "githubReleases": "GitHub Releases",
+          "testFlight": "TestFlight",
+          "androidApk": "Android APK"
         }
       },
       "right": {
@@ -9558,6 +9562,12 @@
             "copy": {
               "releases": {
                 "cta": "Ver compilaciones móviles"
+              },
+              "testflight": {
+                "cta": "Open TestFlight"
+              },
+              "android": {
+                "cta": "Download APK"
               }
             }
           }

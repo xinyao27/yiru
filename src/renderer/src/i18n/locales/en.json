@@ -4978,12 +4978,14 @@
         },
         "MobileSettingsPane": {
           "9a3c280e49": "GitHub Releases",
-          "c8491c17ef": "Control Yiru from your phone by scanning a QR code. Mobile builds:",
+          "c8491c17ef": "Control Yiru from your phone by scanning a QR code. Mobile downloads:",
           "e7a3ae8c4e": "Mobile",
           "174f4a3c6d": "Control terminals and agents from your phone.",
           "1de96ec8a6": "Show Yiru Mobile Button",
           "682293cadf": "Show the Yiru Mobile button at the top of the left sidebar.",
-          "d4f2b65f30": "Show the Yiru Mobile shortcut in the sidebar."
+          "d4f2b65f30": "Show the Yiru Mobile shortcut in the sidebar.",
+          "testFlight": "TestFlight",
+          "androidApk": "Android APK"
         },
         "NotificationsPane": {
           "906b4afebf": "Send Test Notification",
@@ -8078,8 +8080,10 @@
         "MobileRelayBetaAvailability": {
           "about": "About the Yiru Relay beta",
           "beta": "Beta",
-          "availability": "Mobile builds:",
-          "githubReleases": "GitHub Releases"
+          "availability": "Available on",
+          "githubReleases": "GitHub Releases",
+          "testFlight": "TestFlight",
+          "androidApk": "Android APK"
         }
       },
       "right": {
@@ -9581,6 +9585,12 @@
             "copy": {
               "releases": {
                 "cta": "View mobile builds"
+              },
+              "testflight": {
+                "cta": "Open TestFlight"
+              },
+              "android": {
+                "cta": "Download APK"
               }
             }
           }

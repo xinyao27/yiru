@@ -209,7 +209,8 @@ Works with **any CLI agent** — if it runs in a terminal, it runs in Yiru.
 
 Pair with your desktop app to monitor and steer your agents from your phone.
 
-New mobile builds will be announced on [GitHub Releases](https://github.com/xinyao27/yiru/releases) when available.
+- **iOS:** [Join the TestFlight beta](https://testflight.apple.com/join/67PVx1Se)
+- **Android:** [Download the latest APK](https://github.com/xinyao27/yiru/releases/download/mobile-android-latest/app-release.apk)
 
 ---
 
