@@ -1,10 +1,17 @@
 import { detectLanguage } from '@/lib/language-detect'
 import { useAppStore } from '@/store'
-import type { LanguageServerNavigationTarget } from '@/lib/monaco-language-server-manager'
 
-export function openLanguageServerDefinition(
+export type EditorNavigationTarget = {
+  filePath: string
+  relativePath: string
+  line: number
+  column: number
+}
+
+export function openEditorNavigationTarget(
   worktreeId: string,
-  target: LanguageServerNavigationTarget
+  runtimeEnvironmentId: string | null | undefined,
+  target: EditorNavigationTarget
 ): void {
   const store = useAppStore.getState()
   store.openFile({
@@ -13,11 +20,11 @@ export function openLanguageServerDefinition(
     worktreeId,
     language: detectLanguage(target.relativePath),
     mode: 'edit',
-    runtimeEnvironmentId: null
+    runtimeEnvironmentId: runtimeEnvironmentId?.trim() || null
   })
   store.setPendingEditorReveal(null)
 
-  // Why: opening a definition may replace the visible model; wait for the same
+  // Why: opening a target may replace the visible model; wait for the same
   // two layout frames used by search navigation before publishing the reveal.
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {

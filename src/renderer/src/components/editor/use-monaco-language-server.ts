@@ -6,7 +6,7 @@ import { monacoLanguageServerManager } from '@/lib/monaco-language-server-manage
 import { getConnectionIdForFileFromState } from '@/lib/connection-owner-resolution'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
-import { openLanguageServerDefinition } from './open-language-server-definition'
+import { openEditorNavigationTarget } from './open-editor-navigation-target'
 
 type MonacoLanguageServerOptions = {
   editorInstance: monaco.editor.IStandaloneCodeEditor | null
@@ -67,7 +67,7 @@ export function useMonacoLanguageServer({
             request.token
           )
           if (target && !request.token.isCancellationRequested) {
-            openLanguageServerDefinition(worktreeId, target)
+            openEditorNavigationTarget(worktreeId, runtimeEnvironmentId, target)
           }
         } catch (error) {
           if (!request.token.isCancellationRequested) {
@@ -90,7 +90,7 @@ export function useMonacoLanguageServer({
       }
       action.dispose()
     }
-  }, [editorInstance, worktreeId])
+  }, [editorInstance, runtimeEnvironmentId, worktreeId])
 
   useEffect(() => {
     const model = editorInstance?.getModel()

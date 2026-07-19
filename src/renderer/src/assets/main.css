@@ -1458,6 +1458,13 @@
   text-underline-offset: 2px;
 }
 
+.monaco-editor .monaco-import-navigation-link {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+  text-underline-offset: 2px;
+}
+
 /* Why: Monaco's faded scrollbar uses the class `invisible`, which collides with
    Tailwind's `.invisible` utility (visibility: hidden) — so also restore visibility. */
 .monaco-editor
