@@ -287,7 +287,7 @@ export default function BrowserAddressBar({
   }, [dismissSuggestions, open, suggestions.length, inputRef])
 
   // Why: Electron <webview> guests run in a separate process, so clicking the
-  // page never dispatches pointerdown on the renderer document and Radix cannot
+  // page never dispatches pointerdown on the renderer document and Base UI cannot
   // detect an outside dismiss. Window blur and focus moves into the guest (the
   // host <webview> tag) close the dropdown the same way BrowserImportHintButton
   // does for its popover.
@@ -342,7 +342,7 @@ export default function BrowserAddressBar({
       modal={false}
       open={open}
       onOpenChange={(next) => {
-        // Why: Radix fires onOpenChange(false) when it detects an outside
+        // Why: Base UI fires onOpenChange(false) when it detects an outside
         // interaction, but during the focus-retry loop the input may still
         // hold focus. Only allow programmatic closes (setOpen(false) from
         // our handlers) or genuine outside dismissals.
@@ -403,7 +403,7 @@ export default function BrowserAddressBar({
         <PopoverContent
           align="start"
           sideOffset={4}
-          className="w-[var(--radix-popover-trigger-width)] p-0"
+          className="w-[var(--anchor-width)] p-0"
           // Why: prevent the popover from stealing focus away from the
           // address bar input. The user is still typing; the popover is
           // an overlay of suggestions, not a focus target.

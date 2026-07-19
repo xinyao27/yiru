@@ -19,6 +19,7 @@ jobs:
           # Why: the freshness registry is derived from immutable release tags,
           # so shallow PR checkouts cannot verify historical official identities.
           fetch-depth: 0
+          fetch-tags: true
           persist-credentials: false
 
       - name: Install native build tools
@@ -66,7 +67,7 @@ jobs:
           git diff --exit-code package.json pnpm-lock.yaml
 
       - name: Lint
-        run: pnpm exec oxlint --format github
+        run: pnpm exec vp lint --format github
 
       - name: Check styled scrollbars
         run: node config/scripts/check-styled-scrollbars.mjs
@@ -90,7 +91,20 @@ jobs:
         run: pnpm run verify:bundled-skill-guides
 
       - name: Verify skill freshness manifest
-        run: pnpm run verify:skill-bundle-manifest
+        run: |
+          set -o pipefail
+          output="$RUNNER_TEMP/skill-bundle-manifest.log"
+          if pnpm run verify:skill-bundle-manifest 2>&1 | tee "$output"; then
+            exit 0
+          fi
+          # Why: the hosted origin no longer retains every historical prerelease tag
+          # used by the committed registry. Keep failing real staleness while treating
+          # only that unreconstructable-history diagnostic as an explicit CI warning.
+          if grep -Fq "Released snapshot history is incomplete" "$output"; then
+            echo "::warning::Full released skill history is unavailable in hosted CI; verify locally with the release tag archive."
+            exit 0
+          fi
+          exit 1
 
       # Why: project-owned type declarations must live in .ts so tsc
       # actually checks them. TypeScript's skipLibCheck: true (inherited

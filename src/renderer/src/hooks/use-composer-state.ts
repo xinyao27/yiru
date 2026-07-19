@@ -118,6 +118,10 @@ import {
 } from '@/components/sidebar/folder-workspace-composer-helpers'
 import { useFolderWorkspaceComposerPathStatus } from '@/components/sidebar/folder-workspace-composer-path-status'
 import { submitFolderWorkspaceCreate } from '@/components/sidebar/folder-workspace-composer-submit'
+import {
+  createComposerSubmissionGuard,
+  shouldPreserveComposerSubmissionOnUnmount
+} from '@/hooks/composer-submission-guard'
 import { buildExecutionHostRegistry } from '../../../shared/execution-host-registry'
 import {
   normalizeExecutionHostId,
@@ -424,6 +428,36 @@ export function isExplicitWorkspaceNameInput({
   return Boolean(name.trim()) && name !== lastAutoName && !isWorkItemLookupText(name)
 }
 
+export function resolveBlankBranchCreateNames({
+  workspaceName,
+  displayName,
+  fallbackWorkspaceName,
+  enteredWorkspaceName,
+  nameIsAutoManaged,
+  branchNameOverride,
+  branchNameFieldVisible
+}: {
+  workspaceName: string
+  displayName: string | undefined
+  fallbackWorkspaceName: string
+  enteredWorkspaceName: string
+  nameIsAutoManaged: boolean
+  branchNameOverride: string | undefined
+  branchNameFieldVisible: boolean
+}): { workspaceName: string; displayName: string | undefined } {
+  if (!branchNameFieldVisible || branchNameOverride?.trim()) {
+    return { workspaceName, displayName }
+  }
+
+  // Why: Name is only a user-facing label when Branch name is blank. Reusing it
+  // as the git/path seed resurrects collision names such as `main-7`.
+  return {
+    workspaceName: fallbackWorkspaceName,
+    displayName:
+      displayName ?? (!nameIsAutoManaged ? enteredWorkspaceName.trim() || undefined : undefined)
+  }
+}
+
 export function resolveSmartGitHubCreateNames({
   resolutionKind,
   smartWorkspaceName,
@@ -485,6 +519,9 @@ export function getInitialAutoManagedWorkspaceName({
 // closes.
 const composerDropStack: symbol[] = []
 const EMPTY_SPARSE_PRESETS: SparsePreset[] = []
+// Why: a new composer instance must invalidate preflight retained by an older
+// instance; hook-trust handoffs intentionally keep using the same submission.
+const composerSubmissionGuard = createComposerSubmissionGuard()
 
 export function useComposerState(options: UseComposerStateOptions): UseComposerStateResult {
   const {
@@ -504,6 +541,20 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     createGateMode = 'full',
     initialProjectGroupId
   } = options
+
+  const submissionGuard = composerSubmissionGuard
+  useEffect(
+    () => () => {
+      const activeModal = useAppStore.getState().activeModal
+      if (shouldPreserveComposerSubmissionOnUnmount(activeModal)) {
+        return
+      }
+      // Why: user-dismissed preflight must not create after the composer closes,
+      // while the hook-trust modal still needs its awaiting submission to resume.
+      submissionGuard.cancel()
+    },
+    [submissionGuard]
+  )
 
   // Why: each `useAppStore(s => s.someAction)` registers its own equality
   // check that React has to re-run on every store mutation. Consolidating
@@ -3005,6 +3056,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       if (!selectedProjectGroup?.parentPath || folderCreateDisabled) {
         return
       }
+      const submissionId = submissionGuard.begin()
       setCreateError(null)
       setCreating(true)
       try {
@@ -3014,6 +3066,9 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
         const smartGitHubResolution = shouldResolveSmartGitHubSubmit
           ? await resolvePendingSmartGitHubSubmit()
           : ({ kind: 'none' } as const)
+        if (!submissionGuard.isCurrent(submissionId)) {
+          return
+        }
         const smartGitHubMetadata =
           smartGitHubResolution.kind === 'none' ? null : smartGitHubResolution
         const agent =
@@ -3053,6 +3108,9 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
             }
           }
         })
+        if (!submissionGuard.isCurrent(submissionId)) {
+          return
+        }
         if (!folderWorkspaceCreated) {
           setCreateError({
             title: translate(
@@ -3066,11 +3124,16 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
           })
         }
       } catch (error) {
+        if (!submissionGuard.isCurrent(submissionId)) {
+          return
+        }
         const formattedError = formatWorkspaceCreateError(error)
         setCreateError(formattedError)
         toast.error(getWorkspaceCreateErrorToastMessage(formattedError))
       } finally {
-        setCreating(false)
+        if (submissionGuard.isCurrent(submissionId)) {
+          setCreating(false)
+        }
       }
     },
     [
@@ -3094,6 +3157,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       settings?.autoRenameBranchFromWork,
       settings?.nativeChatSessionOptions,
       settings?.terminalWindowsShell,
+      submissionGuard,
       telemetrySource
     ]
   )
@@ -3127,10 +3191,14 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       return
     }
 
+    const submissionId = submissionGuard.begin()
     setCreateError(null)
     setCreating(true)
     try {
       const smartGitHubResolution = await resolvePendingSmartGitHubSubmit()
+      if (!submissionGuard.isCurrent(submissionId)) {
+        return
+      }
       const submitLinkedWorkItem =
         smartGitHubResolution.kind === 'none'
           ? linkedWorkItem
@@ -3154,7 +3222,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
               fallbackWorkspaceName: workspaceSeedName,
               nameIsAutoManaged
             })
-      const workspaceName =
+      let workspaceName =
         smartGitHubResolution.kind === 'none'
           ? nameIsAutoManaged && submitTitleName
             ? submitTitleName.seedName
@@ -3213,12 +3281,24 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
         createBranchFromWorkspaceName:
           smartGitHubResolution.kind === 'none' && smartNameMode === 'branches'
       })
-      const createDisplayName =
-        smartGitHubResolution.kind === 'none'
-          ? nameIsAutoManaged
-            ? submitTitleName?.displayName
-            : undefined
-          : smartGitHubCreateNames.displayName
+      const resolvedCreateNames = resolveBlankBranchCreateNames({
+        workspaceName,
+        displayName:
+          smartGitHubResolution.kind === 'none'
+            ? nameIsAutoManaged
+              ? submitTitleName?.displayName
+              : undefined
+            : smartGitHubCreateNames.displayName,
+        fallbackWorkspaceName: fallbackCreatureName,
+        enteredWorkspaceName: name,
+        nameIsAutoManaged,
+        branchNameOverride: effectiveBranchNameOverride,
+        branchNameFieldVisible:
+          smartGitHubResolution.kind === 'none' &&
+          (!smartNameSelection || smartNameSelection.kind === 'branch')
+      })
+      workspaceName = resolvedCreateNames.workspaceName
+      const createDisplayName = resolvedCreateNames.displayName
       // Why: the first-work hook only renames blank, auto-generated git workspaces
       // that actually launch an agent. Persist that known-pending state for the card.
       const pendingFirstAgentMessageRename =
@@ -3266,7 +3346,11 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
               telemetry: composerTelemetry
             }
           : undefined
-      if (!(await persistSetupAgentStartupPolicy())) {
+      const startupPolicySaved = await persistSetupAgentStartupPolicy()
+      if (!submissionGuard.isCurrent(submissionId)) {
+        return
+      }
+      if (!startupPolicySaved) {
         throw new Error(
           translate(
             'auto.hooks.useComposerState.setupAgentStartupPolicySaveFailed',
@@ -3364,11 +3448,16 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       onCreated?.()
       queueNewWorkspaceTerminalFocus(worktree.id, activation)
     } catch (error) {
+      if (!submissionGuard.isCurrent(submissionId)) {
+        return
+      }
       const formattedError = formatWorkspaceCreateError(error)
       setCreateError(formattedError)
       toast.error(getWorkspaceCreateErrorToastMessage(formattedError))
     } finally {
-      setCreating(false)
+      if (submissionGuard.isCurrent(submissionId)) {
+        setCreating(false)
+      }
     }
   }, [
     agentPrompt,
@@ -3408,12 +3497,15 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     settings?.autoRenameBranchFromWork,
     settings?.nativeChatSessionOptions,
     smartNameMode,
+    smartNameSelection,
     setSidebarOpen,
     setupDecision,
     sparseEnabled,
     sparseError,
     effectivePresetId,
+    submissionGuard,
     telemetrySource,
+    fallbackCreatureName,
     fallbackDefaultAgent,
     disabledTuiAgents,
     tuiAgent,
@@ -3477,10 +3569,14 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
         return
       }
 
+      const submissionId = submissionGuard.begin()
       setCreateError(null)
       setCreating(true)
       try {
         const smartGitHubResolution = await resolvePendingSmartGitHubSubmit()
+        if (!submissionGuard.isCurrent(submissionId)) {
+          return
+        }
         const submitLinkedWorkItem =
           smartGitHubResolution.kind === 'none'
             ? linkedWorkItem
@@ -3508,7 +3604,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
                 fallbackWorkspaceName: workspaceNameSeed,
                 nameIsAutoManaged
               })
-        const workspaceName =
+        let workspaceName =
           smartGitHubResolution.kind === 'none'
             ? nameIsAutoManaged && submitTitleName
               ? submitTitleName.seedName
@@ -3586,17 +3682,29 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
           createBranchFromWorkspaceName:
             smartGitHubResolution.kind === 'none' && smartNameMode === 'branches'
         })
+        const resolvedCreateNames = resolveBlankBranchCreateNames({
+          workspaceName,
+          displayName:
+            smartGitHubResolution.kind === 'none'
+              ? nameIsAutoManaged
+                ? submitTitleName?.displayName
+                : undefined
+              : smartGitHubCreateNames.displayName,
+          fallbackWorkspaceName: fallbackCreatureName,
+          enteredWorkspaceName: name,
+          nameIsAutoManaged,
+          branchNameOverride: effectiveBranchNameOverride,
+          branchNameFieldVisible:
+            smartGitHubResolution.kind === 'none' &&
+            (!smartNameSelection || smartNameSelection.kind === 'branch')
+        })
+        workspaceName = resolvedCreateNames.workspaceName
         const submitBaseBranch = selectedRepoIsGit
           ? await resolveWorktreeCreateBaseBranch({
               explicitBaseBranch: smartSubmitBaseBranch
             })
           : undefined
-        const createDisplayName =
-          smartGitHubResolution.kind === 'none'
-            ? nameIsAutoManaged
-              ? submitTitleName?.displayName
-              : undefined
-            : smartGitHubCreateNames.displayName
+        const createDisplayName = resolvedCreateNames.displayName
         // Why: quick create uses the same blank-name creature branch flow; the card
         // needs an explicit marker rather than guessing from the generated title.
         const pendingFirstAgentMessageRename =
@@ -3690,7 +3798,11 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
                 ...(quickTelemetry ? { telemetry: quickTelemetry } : {})
               }
             : undefined
-        if (!(await persistSetupAgentStartupPolicy())) {
+        const startupPolicySaved = await persistSetupAgentStartupPolicy()
+        if (!submissionGuard.isCurrent(submissionId)) {
+          return
+        }
+        if (!startupPolicySaved) {
           throw new Error(
             translate(
               'auto.hooks.useComposerState.setupAgentStartupPolicySaveFailed',
@@ -3727,6 +3839,9 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
           }
         }
 
+        if (!submissionGuard.isCurrent(submissionId)) {
+          return
+        }
         const request: WorktreeCreationRequest = {
           repoId,
           ...(ephemeralVmRecipe ? { ephemeralVmRecipe } : {}),
@@ -3791,11 +3906,16 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
           onCreated?.()
         }
       } catch (error) {
+        if (!submissionGuard.isCurrent(submissionId)) {
+          return
+        }
         const formattedError = formatWorkspaceCreateError(error)
         setCreateError(formattedError)
         toast.error(getWorkspaceCreateErrorToastMessage(formattedError))
       } finally {
-        setCreating(false)
+        if (submissionGuard.isCurrent(submissionId)) {
+          setCreating(false)
+        }
       }
     },
     [
@@ -3838,6 +3958,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       settings?.autoRenameBranchFromWork,
       settings?.nativeChatSessionOptions,
       smartNameMode,
+      smartNameSelection,
       disabledTuiAgents,
       setupDecision,
       sparseEnabled,
@@ -3850,6 +3971,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       loadHookCheckForRepo,
       setupConfig,
       setupPolicy,
+      submissionGuard,
       isProjectGroupTarget,
       submitFolderTarget,
       createMultiple,

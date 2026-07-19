@@ -199,17 +199,21 @@ export function planCommitMessageGeneration(
     return { ok: false, error: `Agent "${input.agentId}" does not support AI commit messages.` }
   }
   const model = getCommitMessageModel(input.agentId, input.model)
-  if (!model) {
+  const usesDynamicAgentDefault = input.agentId === 'pi' && input.model.trim().length === 0
+  if (!model && !usesDynamicAgentDefault) {
     return { ok: false, error: `Model "${input.model}" is not available for ${spec.label}.` }
   }
   if (input.thinkingLevel) {
-    if (!model.thinkingLevels && spec.modelSource !== 'dynamic') {
+    if (!model?.thinkingLevels && spec.modelSource !== 'dynamic') {
       return {
         ok: false,
-        error: `Model "${model.label}" does not support a thinking effort level.`
+        error: `Model "${model?.label ?? input.model}" does not support a thinking effort level.`
       }
     }
-    if (model.thinkingLevels && !model.thinkingLevels.some((l) => l.id === input.thinkingLevel)) {
+    if (
+      model?.thinkingLevels &&
+      !model.thinkingLevels.some((level) => level.id === input.thinkingLevel)
+    ) {
       return {
         ok: false,
         error: `Thinking level "${input.thinkingLevel}" is not valid for ${model.label}.`
