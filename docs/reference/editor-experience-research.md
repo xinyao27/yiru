@@ -16,7 +16,7 @@ Yiru should ship directory opening before LSP. The CLI change is comparatively c
 | Local scope | First activate an existing managed workspace; next add an unregistered Git directory or plain folder through the same operation. |
 | Remote scope | First support the current managed WSL/SSH workspace using authenticated terminal context. Defer arbitrary unregistered remote directories until the execution-host identity and remote path operations can travel end to end. |
 | LSP product direction | Build a host-side language-server process service and a renderer-side Monaco adapter. Share one server session per execution host, workspace root, and server configuration. |
-| LSP library | Spike TypeFox's `monaco-languageclient` and Microsoft's new alpha `monaco-lsp-client`; keep process supervision and host transport Yiru-owned so the renderer adapter remains replaceable. |
+| LSP library | Stage 0 selected a thin Yiru Monaco adapter over a maintained JSON-RPC primitive. TypeFox's stable client requires replacing Yiru's Monaco runtime with its VS Code compatibility stack; Microsoft's direct client is not lifecycle-safe at its current alpha. Keep process supervision and host transport Yiru-owned. |
 | LSP rollout | Begin with read-only intelligence for one user-configured server, then diagnostics/navigation, completion/hover, safe workspace edits, remote hosts, and only later curated installation. |
 
 ## 1. `yiru .` and `yiru <directory>`
@@ -140,6 +140,32 @@ Running the language server beside the workspace is both the practical way to gi
 
 Whichever adapter wins, do not let it own server installation or process transport. A Yiru-owned host service makes the security boundary explicit and allows changing renderer libraries without rebuilding remote execution.
 
+### Stage 0 spike result
+
+**Recorded decision, 2026-07-19**
+
+Use a thin Yiru-owned Monaco adapter for the deliberately narrow Stage 1 surface: static capability negotiation, incremental document synchronization, Hover, Go to Definition, request cancellation, and clean shutdown. Use a maintained JSON-RPC implementation for request routing and cancellation rather than maintaining that generic layer. Keep the adapter behind a session interface so it can be replaced if Microsoft's client matures.
+
+This decision is based on disposable Electron/Vite harnesses against Yiru's Monaco version, not API-shape review alone:
+
+| Candidate | Runtime result | Integration and bundle result |
+| --- | --- | --- |
+| TypeFox `monaco-languageclient` 10.7.0 | Its classic client synchronized two documents, propagated cancellation, sent `shutdown`/`exit`, stopped synchronization after disposal, and handled model close. | Correct synchronization required initializing the `@codingame/monaco-vscode-*` services and opening documents through `EditorApp` model references; raw models from Yiru's existing `monaco-editor` runtime were not observed. The runnable classic harness emitted a 7.62 MB main chunk, about 344 kB of CSS, an extension-host worker, editor worker, service worker, themes, and other VS Code assets (13 MB total output). Adopting it would be an editor-runtime migration, not an LSP add-on. |
+| Microsoft `@vscode/monaco-lsp-client` 0.1.0 alpha, source commit `13f0c872` | It synchronized multiple models and translated Hover when forced onto one Monaco singleton. It exposed no `dispose`; a second client caused the first client to keep sending `didOpen`, and canceling a Hover emitted no `$/cancelRequest`. Static boolean Hover/Definition capabilities are also passed to code that expects registration-option arrays. | The adapter-only build was 90.53 kB (17.41 kB gzip), but it peers on `monaco-editor-core`, while Yiru uses `monaco-editor`; the spike needed explicit deduplication to avoid separate model/provider registries. Its lifecycle and capability defects rule it out despite the smaller dependency graph. |
+| Thin Yiru adapter | A 7.32 kB (2.46 kB gzip, Monaco external) prototype connected through JSON-RPC to the user's installed Apple clangd 21.0.0, synchronized multiple dirty models, returned real Hover Markdown, and resolved Go to Definition to line 1 of the source file. | It used Yiru's existing `monaco-editor` singleton directly and needed no VS Code compatibility runtime. This validates the seam, not a license to implement the whole protocol: unsupported dynamic registrations and server-to-client operations must remain explicit and fail closed. |
+
+The spike also exposed a required URI rule: clangd canonicalized `/tmp` to macOS's `/private/tmp` in a definition response. Production navigation must compare and authorize canonical host paths rather than assuming returned URI strings exactly match the originally opened model URI.
+
+The TypeFox client remains the reference for lifecycle behavior, and Microsoft's alpha remains worth rechecking. Neither should own Yiru's host process or transport boundary.
+
+### Stage 1 local implementation
+
+**Recorded implementation, 2026-07-19**
+
+The local read-only slice now runs one explicitly configured server per local worktree and configuration. Main owns no-shell process launch, bounded stdio framing, process-group cleanup, canonical workspace authorization, stderr logs, and WebContents session ownership. Preload exposes only session transport and canonical URI/location resolution; renderer owns initialization, static capability checks, incremental model synchronization, cancellation, Hover, Definition, and graceful shutdown. Server-requested edits are rejected, unsupported requests receive JSON-RPC method errors, and remote runtime models do not attach.
+
+A production UI smoke test against Apple clangd 21.0.0 reached Ready, rendered real Hover content, navigated F12 to the definition, and observed an unsaved `didChange` edit before navigation. Terminating clangd moved the status to Error while retaining its stderr log, and closing the owning window terminated the replacement server process. This completes the Stage 1 native-host slice; WSL and SSH remain later host-service work rather than renderer exceptions.
+
 ### Protocol lifecycle and editor mapping
 
 **Sourced protocol requirements**
@@ -183,14 +209,14 @@ Electron also recommends validating IPC message senders and limiting exposed cap
 
 | Stage | Product slice | Exit criterion |
 | --- | --- | --- |
-| 0 — protocol spike | Compare the two client libraries with an in-repo fixture server and one user-installed real server; test multiple Monaco models, disposal, framing, cancellation, and bundle impact. | Recorded library decision; no production promise. |
-| 1 — local, read-only intelligence | Native host process service; user-configured server; initialize/sync/shutdown; source-edit models only; hover and definition. | No writes/commands; status and logs; correct dirty-buffer synchronization. |
+| 0 — protocol spike (complete) | Compared both client libraries with disposable fixture harnesses and Apple clangd 21.0.0; tested multiple Monaco models, disposal, framing, cancellation, and bundle impact. | Selected a thin replaceable Yiru adapter; recorded evidence above. |
+| 1 — local, read-only intelligence (complete) | Native host process service; user-configured server; initialize/sync/shutdown; source-edit models only; Hover and Definition. | No writes/commands; status and logs; correct dirty-buffer synchronization. |
 | 2 — diagnostics and completion | Diagnostics, completion, signature help, references, symbols, cancellation, bounded restart. | Stale results do not overwrite newer models; disabled built-in TS diagnostics remain isolated from LSP models. |
 | 3 — controlled edits | Rename, code actions, formatting, and workspace edits through runtime file APIs with previews/confirmation where needed. | Multi-file dirty/conflict/remote ownership behavior is safe and recoverable. |
 | 4 — execution-host parity | WSL, SSH, and remote-runtime process/stream implementations plus host-qualified URI mapping. | Same workspace cannot cross-wire sessions across hosts; disconnect/reconnect is bounded and visible. |
 | 5 — curated languages | Explicit-consent, checksummed host-scoped installation for a small demand-driven language set; semantic tokens/inlay hints where useful. | Support matrix names tested server versions, hosts, features, limits, and uninstall path. |
 
-## Decisions to make before implementation
+## Decisions before broader rollout
 
 1. Confirm single-window reuse as the initial directory-open contract and keep file/line/new-window/wait behavior out of scope.
 2. Decide whether an unregistered path inside a Git worktree should open the Git root (recommended for Yiru's repo/worktree model) or create a distinct plain-folder workspace at the literal directory.

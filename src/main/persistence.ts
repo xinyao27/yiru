@@ -212,6 +212,7 @@ import { normalizeTerminalCursorStyleDefault } from '../shared/terminal-cursor-s
 import { normalizeTerminalLineHeight } from '../shared/terminal-line-height-settings'
 import { normalizeUiLanguage } from '../shared/ui-language'
 import { normalizeBrowserPageZoomLevel } from '../shared/browser-page-zoom'
+import { normalizeLanguageServerSettings } from '../shared/language-server'
 import { persistedUIValuesEqual } from '../shared/persisted-ui-equality'
 import {
   normalizeFolderWorkspaceName,
@@ -3254,6 +3255,7 @@ export class Store {
             ),
             appIcon: normalizeAppIconId(parsed.settings?.appIcon),
             loaderStyle: normalizeLoaderStyle(parsed.settings?.loaderStyle),
+            languageServer: normalizeLanguageServerSettings(parsed.settings?.languageServer),
             appFontFamily: migratedAppFontFamily,
             terminalFontSize: migratedTerminalFontSize,
             systemTypographyDefaultsMigrated: true,
@@ -5455,6 +5457,9 @@ export class Store {
     }
     if ('loaderStyle' in updates) {
       sanitizedUpdates.loaderStyle = normalizeLoaderStyle(updates.loaderStyle)
+    }
+    if ('languageServer' in updates) {
+      sanitizedUpdates.languageServer = normalizeLanguageServerSettings(updates.languageServer)
     }
     if ('uiLanguage' in updates) {
       sanitizedUpdates.uiLanguage = normalizeUiLanguage(updates.uiLanguage)

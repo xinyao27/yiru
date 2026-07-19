@@ -2150,6 +2150,20 @@
             "dismiss": "Dismiss",
             "openSettings": "Open Settings",
             "gotIt": "Got it"
+          },
+          "LanguageServerStatusSegment": {
+            "aria": "Language server: {{value0}}",
+            "tooltip": "Language server — {{value0}}",
+            "title": "Language Server",
+            "configure": "Configure",
+            "idle": "Open a configured local source file to start the server.",
+            "loadingLogs": "Loading logs…",
+            "noLogs": "No server log output.",
+            "starting": "Starting",
+            "ready": "Ready",
+            "error": "Error",
+            "idleLabel": "Idle",
+            "compactLabel": "LSP: {{value0}}"
           }
         }
       },
@@ -6749,7 +6763,9 @@
             "d2d2d929c0": "Rich Markdown Spellcheck",
             "4497e2e2bb": "Show browser spelling underlines and suggestions while editing rich Markdown.",
             "e61157e926": "편집기 자동 줄 바꿈",
-            "005be5c699": "가로 스크롤 대신 파일 편집기에서 긴 줄을 자동으로 줄 바꿈합니다."
+            "005be5c699": "가로 스크롤 대신 파일 편집기에서 긴 줄을 자동으로 줄 바꿈합니다.",
+            "languageServer": "Language Server (Experimental)",
+            "languageServerDescription": "Configure one local language server for Hover and Go to Definition."
           }
         },
         "git": {
@@ -8061,6 +8077,23 @@
           "githubReleases": "GitHub 릴리스",
           "testFlight": "TestFlight",
           "androidApk": "Android APK"
+        },
+        "LanguageServerSetting": {
+          "title": "Language Server (Experimental)",
+          "description": "Configure one local language server for Hover and Go to Definition.",
+          "enable": "Enable Language Server",
+          "enableDescription": "Run the configured executable when a matching local source file is open.",
+          "command": "Executable",
+          "commandDescription": "A command on the local PATH or an absolute executable path. Yiru does not invoke a shell.",
+          "commandRequired": "Enter an executable before opening a matching source file.",
+          "arguments": "Arguments",
+          "argumentsDescription": "One argument per line. Include the server’s stdio flag when it requires one.",
+          "languages": "Monaco Language IDs",
+          "languagesDescription": "Comma-separated IDs such as c, cpp. Only matching local edit models are shared.",
+          "localOnly": "Stage 1 is local-only and read-only: server-requested edits and commands are rejected.",
+          "commandPlaceholder": "clangd",
+          "argumentsPlaceholder": "--stdio\n--background-index",
+          "languagesPlaceholder": "c, cpp"
         }
       },
       "right": {
@@ -10560,7 +10593,8 @@
         "MonacoEditor": {
           "68cb83f4a7": "선택한 텍스트에 메모 추가",
           "fd68ae03b3": "파일에서 검색",
-          "largePasteTooLarge": "붙여넣기 내용이 너무 큽니다."
+          "largePasteTooLarge": "붙여넣기 내용이 너무 큽니다.",
+          "goToDefinition": "Go to Definition"
         },
         "MonacoGutterContextMenu": {
           "7b57b1b468": "원격 URL 복사",

@@ -67,6 +67,7 @@ import {
   isMonacoAutoHeightCapped
 } from './monaco-auto-height'
 import { installMonacoE2EProbe } from './monaco-e2e-probe'
+import { useMonacoLanguageServer } from './use-monaco-language-server'
 
 type MonacoEditorProps = {
   fileId: string
@@ -82,6 +83,7 @@ type MonacoEditorProps = {
   revealMatchLength?: number
   markdownDocuments?: MarkdownDocument[]
   worktreeId?: string
+  runtimeEnvironmentId?: string | null
   markdownAnnotationsEnabled?: boolean
   conflictDecorationsEnabled?: boolean
   readOnly?: boolean
@@ -107,6 +109,7 @@ export default function MonacoEditor({
   revealMatchLength,
   markdownDocuments,
   worktreeId,
+  runtimeEnvironmentId,
   markdownAnnotationsEnabled = false,
   conflictDecorationsEnabled = false,
   readOnly = false,
@@ -162,6 +165,14 @@ export default function MonacoEditor({
   )
   const editorFontFamily = settings?.terminalFontFamily || 'monospace'
   const editorWordWrap = settings?.editorWordWrap
+  useMonacoLanguageServer({
+    editorInstance: mountedEditor,
+    filePath,
+    worktreeId,
+    runtimeEnvironmentId,
+    readOnly,
+    settings: settings?.languageServer
+  })
   const estimatedAutoHeight = useMemo(() => {
     if (!autoHeight) {
       return null

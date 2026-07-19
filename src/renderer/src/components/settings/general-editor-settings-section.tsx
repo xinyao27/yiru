@@ -18,6 +18,7 @@ import {
 import { translate } from '@/i18n/i18n'
 import { RichMarkdownSpellcheckSetting } from './rich-markdown-spellcheck-setting'
 import { EditorWordWrapSetting } from './editor-word-wrap-setting'
+import { LanguageServerSetting } from './language-server-setting'
 
 export type AutoSaveDelayDraftState = {
   sourceDelayMs: number
@@ -410,6 +411,8 @@ export function GeneralEditorSettingsSection({
           }
         />
       </SearchableSetting>
+
+      <LanguageServerSetting settings={settings} updateSettings={updateSettings} />
     </section>
   )
 }
