@@ -7,7 +7,7 @@
 ## TL;DR
 
 - **发布通道的代码已经存在**:iOS 走 fastlane → TestFlight(`.github/workflows/mobile-ios-release.yml`),Android 走 Gradle APK → GitHub Release(`.github/workflows/mobile-android-release.yml`)。**没有 EAS、没有 Google Play 集成**;Android 当前只是 GitHub Releases APK 旁加载。
-- **E2EE 发布阻塞已在本分支修复**:品牌重命名不再改变已发布的 `orca-mobile-e2ee` cryptographic wire domain;mobile 完整 suite 283/283 文件通过(2013 passed,2 skipped),桌面 E2EE focused suite 也通过。发布 workflow 仍应补 preflight,避免未来绕过红灯。
+- **E2EE v2 已切换到 Yiru wire domain**:桌面端与移动端必须同步升级，旧版本客户端无法与新版完成认证握手;mobile 完整 suite 283/283 文件通过(2013 passed,2 skipped),桌面 E2EE focused suite 也通过。发布 workflow 仍应补 preflight,避免未来绕过红灯。
 - **iOS 平台配置已于 2026-07-18 完成**:6 个 GitHub Secrets、App ID/Push、ASC app/API key、有效 Distribution identity、`Yiru Internal` 自动分发组和 1 名测试员均已验证。本分支同时完成代码绿灯和 0.0.1;现在只缺 PR 合入后的第一次 workflow 演练。
 - **Android 构建链可用但分发身份不合格**:本地 `assembleRelease` 已成功产出 120 MB APK,但它由公开的 `Android Debug` key 签名。最小范围旁加载测试可用;公开/可信分发或未来上 Play 前必须配置专用 release/upload key。本分支已准备 0.0.1/versionCode 1。
 - **两个发布工作流在本仓库从未运行过**(`gh run list` 均为空;`mobile-*-v0.0.27` 等 tag 来自迁移前历史)。迁移后的凭据、签名和上传路径尚无一次端到端证据。
@@ -49,7 +49,7 @@
 - 桌面 E2EE/relay focused suite:通过;`pnpm typecheck:node` 通过。
 - Android release resolver 输出 `Yiru Mobile Android 0.0.1 (1)`和 tag `mobile-android-v0.0.1`。
 
-根因是品牌重命名把已发布的 E2EE transcript/HKDF domain 从 `orca-mobile-e2ee` 改成 `yiru-mobile-e2ee`。这些值是经过认证的 wire identifiers,不是可改品牌文案;本分支恢复 legacy domain 并用既有 normative vectors 锁定兼容性。PR #1 曾在 Mobile Checks/PR Checks 失败后仍被合并,且 `main` 没有 required status checks,所以 release workflow 增加或依赖 preflight 仍是后续增强项。
+E2EE transcript/HKDF wire domain 现已明确切换为 Yiru 协议域，并用新的 normative vectors 锁定桌面端与移动端的一致性。由于该值参与认证和密钥派生，此切换不向后兼容，两个客户端必须同步发布。PR #1 曾在 Mobile Checks/PR Checks 失败后仍被合并,且 `main` 没有 required status checks,所以 release workflow 增加或依赖 preflight 仍是后续增强项。
 
 ## 后端:relay / test 环境辨析
 

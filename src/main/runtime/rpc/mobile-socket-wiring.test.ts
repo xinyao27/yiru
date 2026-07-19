@@ -3,6 +3,7 @@ import nacl from 'tweetnacl'
 import type { WebSocket } from 'ws'
 import {
   encodeMobileE2EEV2Transcript,
+  MOBILE_E2EE_V2_PROTOCOL,
   validateMobileE2EEV2Handshake,
   type MobileE2EEV2Hello,
   type MobileE2EEV2Ready
@@ -170,7 +171,7 @@ describe('MobileSocketWiring', () => {
       clientNonceB64: Buffer.from(new Uint8Array(32).fill(3)).toString('base64'),
       capabilities: { framing: [2], payloadKinds: ['text', 'binary'] },
       context: {
-        protocol: 'orca-mobile-e2ee',
+        protocol: MOBILE_E2EE_V2_PROTOCOL,
         initiator: 'mobile',
         responder: 'desktop',
         transport: 'relay',

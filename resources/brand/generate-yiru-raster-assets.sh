@@ -9,14 +9,22 @@ WARM_ICON_SOURCE="$SCRIPT_DIR/yiru-warm-app-icon.svg"
 GRAPHITE_ICON_SOURCE="$SCRIPT_DIR/yiru-graphite-app-icon.svg"
 SPLASH_ICON_SOURCE="$SCRIPT_DIR/yiru-splash-icon.svg"
 DEV_ICON_SOURCE="$SCRIPT_DIR/yiru-dev-icon.svg"
+MENU_BAR_ICON_SOURCE="$SCRIPT_DIR/yiru-menu-bar-template.svg"
+TRANSPARENT_SVG_RENDERER="$SCRIPT_DIR/render-transparent-svg.swift"
 README_HERO_SOURCE="$PROJECT_DIR/docs/assets/yiru-hero.svg"
 MOBILE_ASSETS_DIR="$PROJECT_DIR/mobile/assets"
 APP_ICONS_DIR="$PROJECT_DIR/resources/app-icons"
+TRAY_ASSETS_DIR="$PROJECT_DIR/resources/tray"
 ONBOARDING_ASSETS_DIR="$PROJECT_DIR/resources/onboarding/feature-wall"
 
 QLMANAGE_BIN=$(command -v qlmanage || true)
+SWIFT_BIN=$(command -v swift || true)
 if [ -z "$QLMANAGE_BIN" ]; then
   echo "Error: macOS Quick Look is required to render Yiru raster assets." >&2
+  exit 1
+fi
+if [ -z "$SWIFT_BIN" ]; then
+  echo "Error: Swift is required to render transparent Yiru raster assets." >&2
   exit 1
 fi
 
@@ -33,7 +41,16 @@ render_svg() {
   mv "$rendered" "$output"
 }
 
-mkdir -p "$MOBILE_ASSETS_DIR" "$APP_ICONS_DIR"
+render_transparent_svg() {
+  local source="$1"
+  local width="$2"
+  local height="$3"
+  local output="$4"
+
+  "$SWIFT_BIN" "$TRANSPARENT_SVG_RENDERER" "$source" "$width" "$height" "$output"
+}
+
+mkdir -p "$MOBILE_ASSETS_DIR" "$APP_ICONS_DIR" "$TRAY_ASSETS_DIR"
 
 render_svg "$APP_ICON_SOURCE" 1024 "$MOBILE_ASSETS_DIR/icon.png"
 render_svg "$MARK_SOURCE" 1024 "$MOBILE_ASSETS_DIR/adaptive-icon.png"
@@ -44,6 +61,12 @@ render_svg "$APP_ICON_SOURCE" 48 "$MOBILE_ASSETS_DIR/favicon.png"
 render_svg "$WARM_ICON_SOURCE" 1024 "$APP_ICONS_DIR/yiru-warm.png"
 render_svg "$GRAPHITE_ICON_SOURCE" 1024 "$APP_ICONS_DIR/yiru-graphite.png"
 render_svg "$DEV_ICON_SOURCE" 256 "$PROJECT_DIR/resources/icon-dev.png"
+# Why: Quick Look flattens SVG transparency against white, but macOS template
+# images need alpha-only backgrounds so the system can tint them correctly.
+render_transparent_svg \
+  "$MENU_BAR_ICON_SOURCE" 22 14 "$TRAY_ASSETS_DIR/yiru-menu-barTemplate.png"
+render_transparent_svg \
+  "$MENU_BAR_ICON_SOURCE" 44 28 "$TRAY_ASSETS_DIR/yiru-menu-barTemplate@2x.png"
 
 # Why: these recordings exposed the previous brand in pixels. Keep packaged
 # onboarding honest until each workflow is recorded again under Yiru.
@@ -57,4 +80,4 @@ for tile in 06 07 09 10 12; do
     --out "$ONBOARDING_ASSETS_DIR/tile-$tile.gif" >/dev/null
 done
 
-echo "Generated Yiru app, mobile, onboarding, favicon, splash, and development assets."
+echo "Generated Yiru app, mobile, menu bar, onboarding, favicon, splash, and development assets."
