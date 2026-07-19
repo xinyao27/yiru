@@ -109,7 +109,8 @@
   --secondary-foreground: #141414;
   --muted: color-mix(in srgb, var(--foreground) 6%, transparent);
   --muted-foreground: color-mix(in srgb, var(--foreground) 60%, transparent);
-  --accent: color-mix(in srgb, var(--foreground) 14%, transparent);
+  /* Why: accent surfaces stay opaque in both themes; overlays opt into transparency locally. */
+  --accent: color-mix(in srgb, var(--foreground) 14%, var(--background));
   --accent-foreground: #141414;
   --destructive: #be1744;
   --destructive-foreground: #fcfcfc;
@@ -176,7 +177,7 @@
   --secondary-foreground: #f0f0f0;
   --muted: color-mix(in srgb, var(--foreground) 6%, transparent);
   --muted-foreground: color-mix(in srgb, var(--foreground) 60%, transparent);
-  --accent: color-mix(in srgb, var(--foreground) 14%, transparent);
+  --accent: color-mix(in srgb, var(--foreground) 14%, var(--background));
   --accent-foreground: #f0f0f0;
   --destructive: #e34671;
   --destructive-foreground: #141414;

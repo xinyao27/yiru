@@ -413,9 +413,11 @@ export default function SortableTab({
             <Minimize2 className="size-4" />
           </button>
         )}
+      {/* Why: terminal tabs keep trailing close chrome compact beside activity controls. */}
       {!isEditing && !isPinned && (
         <TabCloseButton
-          className="right-1"
+          className="right-1 size-5"
+          iconClassName="size-3.5"
           ariaLabel={translate(
             'auto.components.tab.bar.SortableTab.6df69d9388',
             'Close tab {{value0}}',

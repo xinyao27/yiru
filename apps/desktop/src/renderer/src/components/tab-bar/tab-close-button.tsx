@@ -12,10 +12,12 @@ import { TAB_CLOSE_BUTTON_CLASSES } from './tab-close-button-classes'
 export function TabCloseButton({
   ariaLabel,
   className,
+  iconClassName,
   onClose
 }: {
   ariaLabel: string
   className?: string
+  iconClassName?: string
   onClose: () => void
 }): React.JSX.Element {
   const closeShortcut = useShortcutKeyDetails('tab.close')
@@ -46,7 +48,7 @@ export function TabCloseButton({
               onClose()
             }}
           >
-            <X className="size-4" />
+            <X className={cn('size-4', iconClassName)} />
           </Button>
         }
       />
