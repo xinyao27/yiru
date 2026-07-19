@@ -22,7 +22,3 @@ export function writeNativeChatDraftCache(scopeKey: string, draft: string): void
   // LRU-bounded so unsent drafts for permanently-removed panes can't accumulate.
   setBoundedScopeCacheEntry(draftCache, scopeKey, draft)
 }
-
-export function clearNativeChatDraftCacheForTests(): void {
-  draftCache.clear()
-}

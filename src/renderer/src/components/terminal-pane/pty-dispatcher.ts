@@ -9,7 +9,6 @@ import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '../../../../share
 import {
   clearProcessedPtyCharTotal,
   deliverPtyDataWithDeferredAck,
-  exposeE2eTerminalPtyAckGate,
   getProcessedPtyCharTotals
 } from './terminal-pty-ack-gate'
 import { clampUtf8Tail, type EagerBufferChunk } from './pty-eager-buffer-clamp'
@@ -22,7 +21,6 @@ import {
 import { deliverPtyExitToHandlers } from './pty-exit-delivery'
 import {
   clearReceivedPtyCharTotal,
-  isPtyPushDeliveryBlackholed,
   recordPtyDataReceived,
   startTerminalDeliveryWatchdog
 } from './terminal-delivery-watchdog'
@@ -141,7 +139,6 @@ export function ensurePtyDispatcher(): void {
     return
   }
   ptyDispatcherAttached = true
-  exposeE2eTerminalPtyAckGate()
   installTerminalFreezeReport()
   attachPtyPushListeners()
   startTerminalDeliveryWatchdog({
@@ -154,11 +151,6 @@ function attachPtyPushListeners(): void {
   const unsubscribes = pushListenerUnsubscribes
   unsubscribes.push(
     window.api.pty.onData((payload) => {
-      // Why: e2e-only wedge simulation — the chunk vanishes exactly as in the
-      // field failure: no receive count, no ACK credit, no handler dispatch.
-      if (isPtyPushDeliveryBlackholed()) {
-        return
-      }
       handleDispatchedPtyData(payload)
     })
   )

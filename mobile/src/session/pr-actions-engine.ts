@@ -7,7 +7,7 @@ import type { GitHubPrRepoSlug } from './github-pr-rpc'
 // Pure (React-free) engine for the PR mutation actions: owns optimistic fields,
 // busy/error/blocked state, and the success/transient/permanent routing. The hook
 // is a thin adapter that subscribes to `onChange` and exposes these methods. Kept
-// React-free so the U6 action logic is unit-testable with injected fakes.
+// React-free so the U6 action logic stays independent of rendering state.
 
 export type PrActionMutations = {
   mergePR: (args: {

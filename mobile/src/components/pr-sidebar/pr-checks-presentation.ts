@@ -1,9 +1,8 @@
 import type { PRCheckDetail, PRState } from '../../../../src/shared/types'
 import { prStateToken } from '../pr-state-token'
 
-// Pure presentation logic for the PR sidebar's checks + state badge. No React /
-// native imports so it is unit-testable under the node Vitest config (KTD5).
-// Ports the LOGIC of the desktop presenters (github-pr-merge-state.ts,
+// Pure presentation logic for the PR sidebar's checks and state badge.
+// Ports the logic of the desktop presenters (github-pr-merge-state.ts,
 // github-pr-reviewer-display.ts), not their components.
 
 // The mobile-theme color tokens this logic maps to. Section components resolve

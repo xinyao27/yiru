@@ -29,7 +29,6 @@
     "lint": "vp lint --fix",
     "check": "vp check --fix && pnpm run typecheck",
     "format:check": "vp fmt --check",
-    "mock-server": "npx tsx scripts/mock-server.ts",
     "start:emulator": "node scripts/start-emulator.mjs"
   },
   "dependencies": {

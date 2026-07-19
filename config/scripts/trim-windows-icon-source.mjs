@@ -180,8 +180,8 @@ export function encodeIco(frames) {
 }
 
 // Trim the safe-area inset from a 1024px source render and produce a filled
-// multi-size ICO buffer. Exported so the regression test can drive it directly.
-export function buildWindowsIcoFromPng(sourcePngBuffer, sizes = ICO_FRAME_SIZES) {
+// multi-size ICO buffer.
+function buildWindowsIcoFromPng(sourcePngBuffer, sizes = ICO_FRAME_SIZES) {
   const source = decodePng(sourcePngBuffer)
   const bounds = findOpaqueBounds(source)
   if (!bounds) {

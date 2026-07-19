@@ -68,14 +68,6 @@ export function kimiPrimaryAgentWirePath(
 // because host/WSL/runtime roots can change during one main-process lifetime.
 const workDirCacheByIndexPath = new KimiSessionIndexCache()
 
-export function clearKimiSessionIndexCache(): void {
-  workDirCacheByIndexPath.clear()
-}
-
-export function hasKimiSessionIndexCacheEntryForTests(indexPath: string): boolean {
-  return workDirCacheByIndexPath.has(indexPath)
-}
-
 export async function readKimiWorkDirBySessionId(indexPath: string): Promise<Map<string, string>> {
   const generation = workDirCacheByIndexPath.beginRead()
   let identity: Awaited<ReturnType<typeof stat>>

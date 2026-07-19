@@ -96,11 +96,3 @@ export function hasRecentSelfWrite(
 ): boolean {
   return getRecentSelfWrite(absolutePath, runtimeEnvironmentId) !== null
 }
-
-export function __clearSelfWriteRegistryForTests(): void {
-  stamps.clear()
-}
-
-export function __getSelfWriteRegistrySizeForTests(): number {
-  return stamps.size
-}

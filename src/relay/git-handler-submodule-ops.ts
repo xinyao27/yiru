@@ -18,8 +18,8 @@ import { readBlobAtOid, type GitBufferExec, type GitExec } from './git-handler-o
  * handler (src/main/git/status.ts) so a burst of diff clicks on a worktree
  * doesn't re-read `.gitmodules` over the (possibly high-latency) SSH link.
  */
-export const SUBMODULE_PATHS_CACHE_TTL_MS = 5_000
-export const MAX_SUBMODULE_PATHS_CACHE_ENTRIES = 512
+const SUBMODULE_PATHS_CACHE_TTL_MS = 5_000
+const MAX_SUBMODULE_PATHS_CACHE_ENTRIES = 512
 type SubmodulePathsCacheEntry = { paths: string[]; expiresAt: number }
 export type SubmodulePathsCache = {
   entries: Map<string, SubmodulePathsCacheEntry>
@@ -35,10 +35,6 @@ export function clearSubmodulePathsCache(cache: SubmodulePathsCache): void {
   // Why: a pre-mutation SSH read must not restore stale .gitmodules paths
   // after the mutation invalidated them.
   cache.generation += 1
-}
-
-export function getSubmodulePathsCacheCount(cache: SubmodulePathsCache): number {
-  return cache.entries.size
 }
 
 function getCachedSubmodulePaths(

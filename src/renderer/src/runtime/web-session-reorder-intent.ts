@@ -93,7 +93,3 @@ export function resolveWebSessionReorderedOrder(
 export function clearWebSessionReorderIntentsForWorktree(worktreeId: string): void {
   pendingReorderByWorktree.delete(worktreeId)
 }
-
-export function resetWebSessionReorderIntentForTests(): void {
-  pendingReorderByWorktree.clear()
-}

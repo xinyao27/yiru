@@ -94,14 +94,3 @@ export function notePRRefreshValidationDenial(
   recordValidationBreadcrumb(identity.reason, 'recorded', token)
   return 'validation-denied'
 }
-
-export function clearPRRefreshValidationBackoffForTests(): void {
-  validationBackoff.clear()
-  counters.recorded = 0
-  counters.skipped = 0
-  counters.expired = 0
-}
-
-export function getPRRefreshValidationBackoffCountForTests(): number {
-  return validationBackoff.size
-}

@@ -113,18 +113,3 @@ export function useWorktreeAgentExpansionState(worktreeId: string): WorktreeAgen
     toggleCompactRootList
   }
 }
-
-export function clearWorktreeAgentExpansionStateForTests(): void {
-  expansionByWorktreeId.clear()
-}
-
-export function getWorktreeAgentExpansionCountForTests(): number {
-  return expansionByWorktreeId.size
-}
-
-export function seedWorktreeAgentExpansionStateForTests(
-  worktreeId: string,
-  state: WorktreeAgentExpansionState
-): void {
-  persistExpansionState(worktreeId, state)
-}

@@ -153,7 +153,6 @@ export class CodexRuntimeHomeService {
     // Why: historical Codex sessions can be large; bridge them after launch
     // setup so starting a fresh Codex TUI never waits on a full tree walk.
     void startSystemCodexSessionBridgeInBackground(
-      {},
       resolveHostCodexSessionSourceHome(this.store.getSettings())
     )
     return this.getRuntimeHomePath()

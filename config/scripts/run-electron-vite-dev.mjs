@@ -364,15 +364,12 @@ if (!useStableElectronName && process.env.YIRU_SKIP_DEV_ELECTRON_APP_PREPARE !==
   prepareMacDevElectronApp()
 }
 
-// Why: tests inject a tiny fake CLI here so they can verify Ctrl+C tears down
-// the full child tree without depending on a real electron-vite install.
-const electronViteCli =
-  process.env.YIRU_ELECTRON_VITE_CLI ||
-  path.join(path.dirname(require.resolve('electron-vite/package.json')), 'bin', 'electron-vite.js')
-const vitePlusCli =
-  process.env.YIRU_VITE_PLUS_CLI ||
-  process.env.YIRU_VITE_CLI ||
-  path.join(path.dirname(require.resolve('vite-plus/package.json')), 'bin', 'vp')
+const electronViteCli = path.join(
+  path.dirname(require.resolve('electron-vite/package.json')),
+  'bin',
+  'electron-vite.js'
+)
+const vitePlusCli = path.join(path.dirname(require.resolve('vite-plus/package.json')), 'bin', 'vp')
 
 function getMtimeMs(filePath) {
   try {

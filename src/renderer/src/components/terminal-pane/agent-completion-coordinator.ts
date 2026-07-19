@@ -983,11 +983,3 @@ export function createAgentCompletionCoordinator(
     dispose
   }
 }
-
-export function resetAgentCompletionCoordinatorIdentitiesForTest(): void {
-  lastCompletionIdentityByPaneKey.clear()
-}
-
-export function getAgentCompletionCoordinatorIdentityCountForTest(): number {
-  return lastCompletionIdentityByPaneKey.size
-}

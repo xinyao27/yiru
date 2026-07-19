@@ -381,12 +381,3 @@ export class AmpHookService {
 }
 
 export const ampHookService = new AmpHookService()
-
-export const _internals = {
-  AMP_PLUGIN_FILE,
-  AMP_PLUGIN_MARKER,
-  getAmpPluginSource,
-  getPluginPath,
-  getRemotePluginPath,
-  isManagedPlugin
-}

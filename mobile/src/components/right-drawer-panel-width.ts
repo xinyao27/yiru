@@ -1,5 +1,4 @@
-// Pure X-axis panel-width resolution for RightDrawer, kept native-import-free so
-// it is unit-testable under the node Vitest config (no RN render harness exists).
+// Pure X-axis panel-width resolution for RightDrawer, kept independent of native rendering.
 
 // Why: cap the panel on wide canvases so it doesn't stretch across a tablet.
 export const WIDE_PANEL_MAX_WIDTH = 420

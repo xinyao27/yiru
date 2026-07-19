@@ -8,14 +8,11 @@ const EMPTY_MARKDOWN_TOC: MarkdownTocItem[] = []
 /**
  * Why: building the table of contents runs a full-document remark parse on
  * every content change. The result is only consumed when the TOC panel is open,
- * so gate the parse on visibility. Factored out so a vitest can prove the parse
- * is skipped while closed — the failure mode (silent wasted CPU on every
- * keystroke-debounced content change) is otherwise invisible.
+ * so gate the parse on visibility.
  */
 export function selectMarkdownTableOfContents(
   showTableOfContents: boolean,
-  content: string,
-  build: (markdown: string) => MarkdownTocItem[] = buildMarkdownTableOfContents
+  content: string
 ): MarkdownTocItem[] {
-  return showTableOfContents ? build(content) : EMPTY_MARKDOWN_TOC
+  return showTableOfContents ? buildMarkdownTableOfContents(content) : EMPTY_MARKDOWN_TOC
 }

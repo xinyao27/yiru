@@ -85,11 +85,6 @@ export async function callComputerSidecarAction(
   )
 }
 
-export function resetComputerSidecarForTest(): void {
-  sidecar?.shutdown()
-  sidecar = null
-}
-
 function getComputerSidecar(): ComputerSidecarProcess {
   if (!sidecar) {
     sidecar = new ComputerSidecarProcess(getComputerSidecarEntryPath())

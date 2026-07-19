@@ -21,10 +21,6 @@ function consumeForcedRescanBudget(): boolean {
   return true
 }
 
-export function resetAiVaultForcedRescanThrottleForTest(): void {
-  lastForcedRescanAt = 0
-}
-
 type AiVaultRefreshArgs = { force?: boolean; background?: boolean }
 
 export function useAiVaultSessionRefresh(

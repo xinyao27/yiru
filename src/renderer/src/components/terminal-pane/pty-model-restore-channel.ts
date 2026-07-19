@@ -59,8 +59,3 @@ export function deliverPulledPtyModelRestoreMarkers(
     dispatchPtyModelRestoreNeeded(event)
   }
 }
-
-/** Test seam: deliver a marker as if it arrived on the channel. */
-export function _dispatchPtyModelRestoreNeededForTest(event: PtyModelRestoreNeededEvent): void {
-  dispatchPtyModelRestoreNeeded(event)
-}

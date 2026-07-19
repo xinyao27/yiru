@@ -240,8 +240,3 @@ export function generateBundleSubmissionId(): string {
     .replace(/\//g, '_')
     .replace(/=+$/, '')
 }
-
-// Test-only export.
-export const _internalsForTests = {
-  MAX_BUNDLE_BYTES
-}

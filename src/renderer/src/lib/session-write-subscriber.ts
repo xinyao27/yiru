@@ -147,20 +147,16 @@ export type SessionWriteSubscriberDeps = {
   }
   persist: (payload: WorkspaceSessionWrite) => void
   shouldSchedulePersist?: () => boolean
-  debounceMs?: number
 }
 
 /**
- * Why: factored out so a vitest can drive the real Zustand store and assert
- * which mutations cause a session write — the gate against unrelated updates
- * (agent status, usage, runtime title ticks) is load-bearing for setTimeout
- * violation budgets and the failure mode is silent.
+ * The gate against unrelated updates (agent status, usage, runtime title ticks)
+ * is load-bearing for setTimeout violation budgets.
  */
 export function createSessionWriteSubscriber({
   store,
   persist,
-  shouldSchedulePersist,
-  debounceMs = 150
+  shouldSchedulePersist
 }: SessionWriteSubscriberDeps): () => void {
   let timer: ReturnType<typeof setTimeout> | null = null
   // Why: the subscriber fires on every store update (agent status, usage
@@ -235,7 +231,7 @@ export function createSessionWriteSubscriber({
         return
       }
       persist({ patch })
-    }, debounceMs)
+    }, 150)
   })
 
   return () => {

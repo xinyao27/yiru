@@ -216,24 +216,6 @@ async function recordRendererErrorReport(
   return { ok: true, report, deduped: false }
 }
 
-export function _resetRendererErrorReportDedupeForTests(): void {
-  recentRendererErrorReportKeys.clear()
-  submittedReportIds.clear()
-  inFlightSubmissions.clear()
-}
-
-export function _getCrashReportingStateSizesForTests(): {
-  submittedReportIds: number
-  inFlightSubmissions: number
-  recentRendererErrorReportKeys: number
-} {
-  return {
-    submittedReportIds: submittedReportIds.size,
-    inFlightSubmissions: inFlightSubmissions.size,
-    recentRendererErrorReportKeys: recentRendererErrorReportKeys.size
-  }
-}
-
 async function getLatestPendingReport(
   store: CrashReportStore
 ): Promise<Awaited<ReturnType<CrashReportStore['getLatestPending']>>> {

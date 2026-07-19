@@ -33,11 +33,6 @@ export function clearRepoSlugCacheEntry(repoId: string): void {
   }
 }
 
-/** Clear the entire slug cache. Useful for tests or full repo-list resets. */
-export function clearRepoSlugCache(): void {
-  slugByRepoId.clear()
-}
-
 async function resolveRepoSlug(
   repo: Repo,
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined

@@ -73,11 +73,6 @@ function boundScheduledNotifications(): void {
   }
 }
 
-/** Test-only: override the cap (pass no arg to restore the default). */
-export function setScheduledNotificationsMaxForTests(max?: number): void {
-  maxScheduledNotifications = max ?? MAX_SCHEDULED_NOTIFICATIONS
-}
-
 export type NotificationPermissionState = {
   granted: boolean
   status: string

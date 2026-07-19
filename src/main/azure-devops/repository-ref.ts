@@ -18,16 +18,6 @@ type LocalGitExecOptions = {
 const REPO_REF_CACHE_MAX_ENTRIES = 512
 const repoRefCache = new Map<string, AzureDevOpsRepoRef | null>()
 
-/** @internal - exposed for tests only */
-export function _resetAzureDevOpsRepoRefCache(): void {
-  repoRefCache.clear()
-}
-
-/** @internal - exposed for tests only */
-export function _getAzureDevOpsRepoRefCacheSize(): number {
-  return repoRefCache.size
-}
-
 function rememberRepoRefCacheEntry(cacheKey: string, value: AzureDevOpsRepoRef | null): void {
   repoRefCache.set(cacheKey, value)
   while (repoRefCache.size > REPO_REF_CACHE_MAX_ENTRIES) {

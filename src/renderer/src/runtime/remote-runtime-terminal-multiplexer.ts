@@ -9,7 +9,6 @@ import {
   encodeTerminalStreamJson,
   encodeTerminalStreamText
 } from '../../../shared/terminal-stream-protocol'
-import { e2eConfig } from '@/lib/e2e-config'
 import { unwrapRuntimeRpcResult } from './runtime-rpc-client'
 
 type RuntimeEnvironmentSubscriptionHandle = {
@@ -73,7 +72,6 @@ type RemoteRuntimeMultiplexedTerminalState = {
   terminal: string
   callbacks: RemoteRuntimeMultiplexedTerminalCallbacks
   acknowledgeOutput: boolean
-  heldAckBytes: number
   snapshotChunks: Uint8Array<ArrayBufferLike>[]
   snapshotBytes: number
   snapshotOverflowed: boolean
@@ -127,73 +125,6 @@ const REMOTE_TERMINAL_SNAPSHOT_REQUEST_TIMEOUT_MS = 10_000
 export const REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE =
   'Remote terminal snapshot exceeded the 2 MiB replay limit; live output will continue.'
 
-type E2eRemoteTerminalMultiplexAckGateSnapshot = {
-  heldTerminalCount: number
-  heldStreamCount: number
-  heldAckChars: number
-  releasedAckChars: number
-}
-
-type E2eRemoteTerminalMultiplexAckGateApi = {
-  hold: (terminals: string[]) => void
-  release: () => void
-  snapshot: () => E2eRemoteTerminalMultiplexAckGateSnapshot
-}
-
-type E2eRemoteTerminalMultiplexAckGateWindow = Window & {
-  __remoteTerminalMultiplexAckGate?: E2eRemoteTerminalMultiplexAckGateApi
-}
-
-const e2eHeldRemoteAckTerminals = new Set<string>()
-let e2eReleasedRemoteAckChars = 0
-
-function shouldHoldE2eRemoteTerminalAck(terminal: string): boolean {
-  return e2eConfig.exposeStore && e2eHeldRemoteAckTerminals.has(terminal)
-}
-
-function getE2eRemoteAckSnapshot(): E2eRemoteTerminalMultiplexAckGateSnapshot {
-  let heldStreamCount = 0
-  let heldAckChars = 0
-  for (const multiplexer of multiplexers.values()) {
-    for (const stream of multiplexer.getStreamsForE2e()) {
-      if (stream.heldAckBytes > 0) {
-        heldStreamCount += 1
-        heldAckChars += stream.heldAckBytes
-      }
-    }
-  }
-  return {
-    heldTerminalCount: e2eHeldRemoteAckTerminals.size,
-    heldStreamCount,
-    heldAckChars,
-    releasedAckChars: e2eReleasedRemoteAckChars
-  }
-}
-
-function releaseE2eRemoteTerminalAcks(): void {
-  for (const multiplexer of multiplexers.values()) {
-    e2eReleasedRemoteAckChars += multiplexer.releaseHeldAcksForE2e()
-  }
-  e2eHeldRemoteAckTerminals.clear()
-}
-
-function exposeE2eRemoteTerminalMultiplexAckGate(): void {
-  if (!e2eConfig.exposeStore || typeof window === 'undefined') {
-    return
-  }
-  const target = window as E2eRemoteTerminalMultiplexAckGateWindow
-  target.__remoteTerminalMultiplexAckGate ??= {
-    hold: (terminals) => {
-      releaseE2eRemoteTerminalAcks()
-      for (const terminal of terminals) {
-        e2eHeldRemoteAckTerminals.add(terminal)
-      }
-    },
-    release: releaseE2eRemoteTerminalAcks,
-    snapshot: getE2eRemoteAckSnapshot
-  }
-}
-
 class RemoteRuntimeTerminalMultiplexer {
   private readonly streams = new Map<number, RemoteRuntimeMultiplexedTerminalState>()
   private subscription: RuntimeEnvironmentSubscriptionHandle | null = null
@@ -224,7 +155,6 @@ class RemoteRuntimeTerminalMultiplexer {
       terminal: args.terminal,
       callbacks: args.callbacks,
       acknowledgeOutput: args.client.type === 'desktop',
-      heldAckBytes: 0,
       snapshotChunks: [],
       snapshotBytes: 0,
       snapshotOverflowed: false,
@@ -457,11 +387,7 @@ class RemoteRuntimeTerminalMultiplexer {
         stream.callbacks.onData(data, { seq, rawLength })
       } finally {
         if (stream.acknowledgeOutput) {
-          if (shouldHoldE2eRemoteTerminalAck(stream.terminal)) {
-            stream.heldAckBytes += frame.payload.byteLength
-          } else {
-            this.acknowledgeOutput(stream, frame.payload.byteLength)
-          }
+          this.acknowledgeOutput(stream, frame.payload.byteLength)
         }
       }
       return
@@ -683,25 +609,6 @@ class RemoteRuntimeTerminalMultiplexer {
     )
   }
 
-  getStreamsForE2e(): Iterable<RemoteRuntimeMultiplexedTerminalState> {
-    return this.streams.values()
-  }
-
-  releaseHeldAcksForE2e(): number {
-    let released = 0
-    for (const stream of this.streams.values()) {
-      if (stream.heldAckBytes <= 0) {
-        continue
-      }
-      const bytes = stream.heldAckBytes
-      stream.heldAckBytes = 0
-      if (this.acknowledgeOutput(stream, bytes)) {
-        released += bytes
-      }
-    }
-    return released
-  }
-
   private sendFrame(
     streamId: number,
     opcode: TerminalStreamOpcode,
@@ -784,7 +691,6 @@ function releaseRemoteRuntimeTerminalMultiplexer(
 export function getRemoteRuntimeTerminalMultiplexer(
   environmentId: string
 ): RemoteRuntimeTerminalMultiplexer {
-  exposeE2eRemoteTerminalMultiplexAckGate()
   let multiplexer = multiplexers.get(environmentId)
   if (!multiplexer) {
     multiplexer = new RemoteRuntimeTerminalMultiplexer(
@@ -794,16 +700,6 @@ export function getRemoteRuntimeTerminalMultiplexer(
     multiplexers.set(environmentId, multiplexer)
   }
   return multiplexer
-}
-
-export function _getRemoteRuntimeTerminalMultiplexerCountForTest(): number {
-  return multiplexers.size
-}
-
-export function resetRemoteRuntimeTerminalMultiplexersForTests(): void {
-  multiplexers.clear()
-  e2eHeldRemoteAckTerminals.clear()
-  e2eReleasedRemoteAckChars = 0
 }
 
 function concatBytes(chunks: Uint8Array<ArrayBufferLike>[]): Uint8Array<ArrayBufferLike> {

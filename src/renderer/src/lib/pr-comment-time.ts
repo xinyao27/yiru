@@ -1,5 +1,5 @@
-// Relative timestamp for PR comments (ISO string in, "Xm/Xh/Xd" out). Pure and
-// unit-testable; nowMs is passed in so tests stay deterministic.
+// Relative timestamp for PR comments (ISO string in, "Xm/Xh/Xd" out). The
+// caller supplies one render timestamp so all rows use the same reference time.
 export function formatPrCommentRelativeTime(iso: string, nowMs: number): string {
   const ts = Date.parse(iso)
   if (Number.isNaN(ts)) {

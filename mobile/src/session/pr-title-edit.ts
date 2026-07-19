@@ -1,8 +1,7 @@
 import type { PRState } from '../../../src/shared/types'
 
-// Pure helpers for the inline PR-title edit affordance. Kept free of React/native
-// imports so they unit-test under the node Vitest config, mirroring the other
-// mobile PR sidebar state modules.
+// Pure helpers for the inline PR-title edit affordance, independent of React
+// and native rendering concerns.
 
 // The title is editable only on an active hosted review (open/draft). A
 // closed/merged review is no longer an editable surface (desktop parity). Kept

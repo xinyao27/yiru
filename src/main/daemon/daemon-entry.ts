@@ -13,14 +13,14 @@ import { warmPwshAvailabilityCache } from '../pwsh'
 import { createDaemonFileLog, createNoopDaemonFileLog } from './daemon-file-log'
 import { PROTOCOL_VERSION } from './types'
 
-export type ParsedDaemonArgs = {
+type ParsedDaemonArgs = {
   socketPath: string
   tokenPath: string
-  /** Optional — absent for adopted old daemons and tests, which log nothing. */
+  /** Optional — adopted daemons from older releases do not provide a log path. */
   logFilePath?: string
 }
 
-export function parseArgs(argv: string[]): ParsedDaemonArgs {
+function parseArgs(argv: string[]): ParsedDaemonArgs {
   let socketPath = ''
   let tokenPath = ''
   let logFilePath = ''
@@ -140,11 +140,7 @@ async function main(): Promise<void> {
   warmWindowsConptyOnce()
 }
 
-// Only auto-run when executed directly (not imported for testing)
-const isDirectExecution = !process.env.VITEST
-if (isDirectExecution) {
-  main().catch((err) => {
-    console.error('[daemon] Fatal:', err)
-    process.exit(1)
-  })
-}
+main().catch((err) => {
+  console.error('[daemon] Fatal:', err)
+  process.exit(1)
+})

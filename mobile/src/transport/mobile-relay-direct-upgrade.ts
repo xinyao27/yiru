@@ -41,7 +41,6 @@ type Dependencies = {
 export async function upgradeDirectMobileRelay(args: {
   client: RpcClient
   host: HostProfile
-  dependencies?: Partial<Dependencies>
 }): Promise<MobileRelayDirectUpgradeResult | null> {
   if (args.host.relay) {
     return null
@@ -53,8 +52,7 @@ export async function upgradeDirectMobileRelay(args: {
     writeBundle: writeMobileRelayCredentialBundle,
     saveHost: saveExistingHostRelayUpgrade,
     deleteBundle: deleteMobileRelayCredentialBundle,
-    randomBytes: ExpoCrypto.getRandomBytes,
-    ...args.dependencies
+    randomBytes: ExpoCrypto.getRandomBytes
   }
   let journal = await dependencies.readJournal(args.host.id)
   if (!journal) {

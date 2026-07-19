@@ -1,6 +1,5 @@
-// Pure last-intent-wins guard for optimistic mutations (KTD6/R6). No React or
-// react-native imports so it stays unit-testable under the node Vitest config —
-// the hook holds the ref and the field via useRef/useState.
+// Pure last-intent-wins guard for optimistic mutations (KTD6/R6). The hook
+// owns the ref and field through useRef/useState.
 
 export type OptimisticSeqRef = { current: number }
 

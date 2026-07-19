@@ -8,8 +8,6 @@ export const execFileAsync = promisify(execFile)
 export { ghExecFileAsync, gitExecFileAsync, extractExecError }
 export { classifyGhError } from './gh-error-classification'
 export {
-  _getOwnerRepoCacheSize,
-  _resetOwnerRepoCache,
   getIssueOwnerRepo,
   getOwnerRepo,
   getOwnerRepoForRemote,

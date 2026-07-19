@@ -102,8 +102,3 @@ export function closeAllLocalLogTailWatchers(): void {
   }
   senderCleanupRegistered.clear()
 }
-
-/** Test-only: verifies tab/window teardown does not retain native watchers. */
-export function getActiveLocalLogTailWatcherCount(): number {
-  return tailWatches.size
-}

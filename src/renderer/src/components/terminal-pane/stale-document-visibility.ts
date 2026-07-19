@@ -101,9 +101,3 @@ export function registerStaleDocumentVisibilityRecovery(
     }
   }
 }
-
-export function resetStaleDocumentVisibilityForTesting(): void {
-  visibilityProvenStale = false
-  recoveryListeners.clear()
-  removeGlobalListeners()
-}

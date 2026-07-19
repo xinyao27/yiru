@@ -18,7 +18,6 @@ import {
   selectColdParkedTerminalTabs,
   type TerminalTabColdParkCandidate
 } from './terminal-hidden-view-parking'
-import { getTerminalParkingPolicyOverrides } from './terminal-parking-e2e-overrides'
 import {
   canWatcherCoverParkedTerminalTab,
   disposeParkedTerminalWatchersForWorktree,
@@ -99,7 +98,6 @@ export function useTerminalTabColdParking(args: {
     timers.clear()
 
     const nowMs = Date.now()
-    const overrides = getTerminalParkingPolicyOverrides()
     const currentTerminalTabIds = new Set(terminalTabs.map((tab) => tab.id))
     const portalTabIds = new Set(
       activityTerminalPortals
@@ -138,8 +136,7 @@ export function useTerminalTabColdParking(args: {
       terminalTabs: candidates,
       pendingStartupByTabId,
       parkingEnabled: terminalParkingEnabled,
-      nowMs,
-      ...overrides
+      nowMs
     })
     // Why: a tab the byte watchers cannot cover (no capture, no layout
     // snapshot, legacy leaf ids) must never park — it would go silent for
@@ -169,8 +166,7 @@ export function useTerminalTabColdParking(args: {
       const delayMs = getTerminalTabColdParkRecheckDelayMs({
         parkingEnabled: terminalParkingEnabled,
         hiddenSinceMs: candidate.hiddenSinceMs,
-        nowMs,
-        ...overrides
+        nowMs
       })
       if (delayMs !== null && delayMs > 0) {
         const tabId = candidate.id

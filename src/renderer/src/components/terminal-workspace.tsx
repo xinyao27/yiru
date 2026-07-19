@@ -82,7 +82,6 @@ import {
   selectColdParkedTerminalWorktrees,
   type TerminalWorktreeColdParkCandidate
 } from './terminal-pane/terminal-hidden-view-parking'
-import { getTerminalParkingPolicyOverrides } from './terminal-pane/terminal-parking-e2e-overrides'
 import {
   canWatcherCoverParkedTerminalTab,
   disposeAllParkedTerminalWatchers,
@@ -891,7 +890,6 @@ function Terminal(): React.JSX.Element | null {
     parkingTimers.clear()
 
     const nowMs = Date.now()
-    const overrides = getTerminalParkingPolicyOverrides()
     const portalWorktreeIds = new Set(activityTerminalPortals.map((portal) => portal.worktreeId))
     const currentWorktreeIds = new Set(workspaceSurfaces.map((workspace) => workspace.id))
     for (const worktreeId of Array.from(terminalWorktreeHiddenSinceRef.current.keys())) {
@@ -931,8 +929,7 @@ function Terminal(): React.JSX.Element | null {
       worktrees: retentionCandidates,
       pendingStartupByTabId,
       parkingEnabled: terminalParkingEnabled,
-      nowMs,
-      ...overrides
+      nowMs
     })
     // Why: a worktree with any tab the byte watchers cannot cover (no
     // capture, no layout snapshot, legacy leaf ids) must never park — it
@@ -962,8 +959,7 @@ function Terminal(): React.JSX.Element | null {
       const delayMs = getTerminalWorktreeColdParkRecheckDelayMs({
         parkingEnabled: terminalParkingEnabled,
         hiddenSinceMs: candidate.hiddenSinceMs,
-        nowMs,
-        ...overrides
+        nowMs
       })
       if (delayMs !== null && delayMs > 0) {
         const worktreeId = candidate.worktreeId

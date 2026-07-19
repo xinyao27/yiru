@@ -19,8 +19,7 @@
  *   ~/projects/ghostty/macos/Sources/Helpers/KeyboardLayout.swift (Carbon probe)
  */
 
-/** Minimal shape of the `KeyboardLayoutMap` we consume, so callers can stub
- *  without importing DOM types into non-browser test environments. */
+/** Minimal `KeyboardLayoutMap` shape consumed by the layout classifier. */
 export type LayoutMapLike = {
   get: (code: string) => string | undefined
   size: number

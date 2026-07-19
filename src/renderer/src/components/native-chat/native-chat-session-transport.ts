@@ -19,8 +19,7 @@ export type NativeChatSessionTransport = Pick<NativeChatApi, 'readSession' | 'su
 const RUNTIME_TOO_OLD =
   'This remote runtime is too old to show agent chat history. Update the remote runtime to view it.'
 
-/** Backoff before re-opening a dropped runtime chat stream. Exported for tests. */
-export const RUNTIME_NATIVE_CHAT_RECONNECT_MS = 2_000
+const RUNTIME_NATIVE_CHAT_RECONNECT_MS = 2_000
 
 /** Map a runtime read failure to the message the read-error state renders. A
  *  version block (old runtime lacking the method, or the protocol-compat gate)

@@ -1,8 +1,7 @@
 import type { PRInfo } from '../../../../src/shared/types'
 
-// Pure presentation logic for the PR sidebar's conflicting-files section. No
-// React/native imports so it is unit-testable under the node Vitest config (KTD5).
-// Ports the LOGIC of the desktop ConflictingFilesSection / MergeConflictNotice,
+// Pure presentation logic for the PR sidebar's conflicting-files section.
+// Ports the logic of the desktop ConflictingFilesSection / MergeConflictNotice,
 // not their components.
 
 export type ConflictDisplay = {

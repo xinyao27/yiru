@@ -227,16 +227,3 @@ export function registerTerminalSideEffectFactConsumer(
     }
   }
 }
-
-/** Test seam: deliver a batch as if it arrived on the channel. */
-export function _dispatchTerminalSideEffectBatchForTest(batch: TerminalSideEffectBatch): void {
-  handleSideEffectBatch(batch)
-}
-
-/** Test seam: reset module state between tests. */
-export function _resetTerminalSideEffectFactConsumersForTest(): void {
-  consumersByPtyId.clear()
-  channelUnsubscribe?.()
-  channelUnsubscribe = null
-  persistedAuthorityFlagCache = undefined
-}

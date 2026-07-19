@@ -25,12 +25,6 @@ export type SubscribeNativeChatTranscriptArgs = ResolveSessionFileOptions & {
   ) => void
   onReplace?: (messages: NativeChatMessage[], hasMore: boolean, beforeOffset: number) => void
   initialLimit?: number
-  filePath?: string
-  debounceMs?: number
-  /** Overrides the resolve-poll interval (see subscribeViaResolvePoll) so tests
-   *  don't wait out the production backoff. Production ignores this and backs
-   *  off from 500ms to a 5s cap. */
-  resolvePollIntervalMs?: number
 }
 
 export type NativeChatTranscriptSubscription = {
@@ -41,12 +35,6 @@ export type NativeChatTranscriptSubscription = {
 const DEFAULT_DEBOUNCE_MS = 40
 const ROTATION_RETRY_MS = 25
 const MAX_ROTATION_RETRY_MS = 2_000
-let activeWatcherCount = 0
-
-export function getActiveNativeChatWatcherCount(): number {
-  return activeWatcherCount
-}
-
 async function fileVersion(filePath: string): Promise<{ identity: string; size: number }> {
   const value = await stat(filePath)
   return { identity: `${value.dev}:${value.ino}`, size: value.size }
@@ -86,7 +74,7 @@ export async function installTranscriptWatcher(
   } catch {
     return null
   }
-  const { onAppend, onInitialSnapshot, onReplace, initialLimit, debounceMs } = args
+  const { onAppend, onInitialSnapshot, onReplace, initialLimit } = args
 
   const state: IncrementalTranscriptState = {
     offset: 0,
@@ -119,7 +107,7 @@ export async function installTranscriptWatcher(
     debounceTimer = setTimeout(() => {
       debounceTimer = null
       void drain()
-    }, debounceMs ?? DEFAULT_DEBOUNCE_MS)
+    }, DEFAULT_DEBOUNCE_MS)
   }
 
   function scheduleRotationRetry(): void {
@@ -288,7 +276,6 @@ export async function installTranscriptWatcher(
     // File vanished between resolve and watch.
     return null
   }
-  activeWatcherCount++
   scheduleDrain()
 
   return {
@@ -304,7 +291,6 @@ export async function installTranscriptWatcher(
       }
       watcher?.close()
       watcher = null
-      activeWatcherCount--
     }
   }
 }

@@ -52,7 +52,6 @@ import {
 } from '../../../shared/yiru-profiles'
 import { legacyBaseRefSearchResult } from '../../../shared/base-ref-search-result'
 import { EMPTY_PTY_MAIN_DELIVERY_DIAGNOSTICS } from '../../../shared/pty-delivery-diagnostics'
-import { createE2EConfig } from '../../../shared/e2e-config'
 import { relativePathInsideRoot } from '../../../shared/cross-platform-path'
 import {
   applyPRBotAuthorOverride,
@@ -491,9 +490,6 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       orgInviteRevoke: async () => ({ status: 'unconfigured' }),
       orgMemberChangeRole: async () => ({ status: 'unconfigured' }),
       orgMemberRemove: async () => ({ status: 'unconfigured' })
-    },
-    e2e: {
-      getConfig: () => createE2EConfig({})
     },
     settings: {
       get: async () => getRuntimeBackedStoredSettings(),
@@ -2772,7 +2768,6 @@ function createPtyApi(): NonNullable<Partial<PreloadApi>['pty']> {
         rendererPtyDispatcherReady: false,
         rendererDispatcherReadyForcedCount: 0
       }),
-    resetRendererDeliveryDebug: () => Promise.resolve(),
     onData: () => noopUnsubscribe,
     onReplay: () => noopUnsubscribe,
     onModelRestoreNeeded: () => noopUnsubscribe,

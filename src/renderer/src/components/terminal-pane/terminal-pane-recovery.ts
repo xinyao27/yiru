@@ -231,7 +231,7 @@ export async function requestTerminalPaneRecovery(request: RecoveryRequest): Pro
   } catch {
     // Why: recovery fires from timer and write-callback contexts (stall watch,
     // replay guard, onData) — it is best-effort by contract and must never
-    // surface a throw there (partial store surfaces in tests, teardown races).
+    // surface a throw during teardown races.
     // The breadcrumb is the only trace of a production failure loop here: the
     // budget was not consumed, so the detector will retry each cooldown.
     // recordRendererCrashBreadcrumb is itself guarded and cannot throw.
@@ -269,15 +269,4 @@ export async function requestTerminalPaneRecovery(request: RecoveryRequest): Pro
     reason: request.reason
   })
   return true
-}
-
-export function _resetTerminalPaneRecoveryForTests(): void {
-  recoveryTimestampsByTabId.clear()
-  recoveryGenerationByTabId.clear()
-  activeTerminalRecoveryInstanceIds.clear()
-  nextTerminalRecoveryInstanceId = 0
-  for (const pendingRetry of pendingRetryByTabId.values()) {
-    clearTimeout(pendingRetry.timer)
-  }
-  pendingRetryByTabId.clear()
 }

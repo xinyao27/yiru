@@ -14,7 +14,6 @@ export class WatcherChildCapacityError extends Error {
 let reservedChildren = 0
 const capacityListeners = new Set<() => Promise<void>>()
 let capacityNotificationsInProgress = 0
-let capacityNotificationGeneration = 0
 
 export function reserveWatcherChild(): (() => void) | null {
   if (reservedChildren >= MAX_PHYSICAL_WATCHER_CHILDREN) {
@@ -61,25 +60,14 @@ function notifyCapacityListeners(): void {
     if (!listener) {
       return
     }
-    const generation = capacityNotificationGeneration
     capacityNotificationsInProgress++
     void listener()
       .catch((error: unknown) => {
         console.error('[parcel-watcher-child-registry] capacity listener failed:', error)
       })
       .finally(() => {
-        if (generation !== capacityNotificationGeneration) {
-          return
-        }
         capacityNotificationsInProgress--
         notifyCapacityListeners()
       })
   }
-}
-
-export function resetWatcherChildRegistryForTest(): void {
-  reservedChildren = 0
-  capacityListeners.clear()
-  capacityNotificationsInProgress = 0
-  capacityNotificationGeneration++
 }

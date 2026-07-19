@@ -29,12 +29,11 @@ export type CoordinatorRuntime = {
     behind: number
     recentSubjects: string[]
   } | null>
-  // Why: optional so lightweight runtime fakes keep compiling; when present,
-  // dispatch records the remint-stable pane identity of the assignee.
-  getTerminalPaneKey?(handle: string): string | null
+  // Dispatch records the remint-stable pane identity of the assignee.
+  getTerminalPaneKey(handle: string): string | null
   // Why: Windows can host native and WSL workers concurrently, so the
   // worker pane—not the coordinator process—selects the packaged CLI name.
-  getTerminalOrchestrationCliCommand?(handle: string): 'yiru'
+  getTerminalOrchestrationCliCommand(handle: string): 'yiru'
 }
 
 // Why (§3.1): single threshold, no warn/refuse split. Coordinator picked 20
@@ -470,7 +469,7 @@ export class Coordinator {
     const dispatch = this.db.createDispatchContext(
       task.id,
       targetHandle,
-      this.runtime.getTerminalPaneKey?.(targetHandle) ?? undefined
+      this.runtime.getTerminalPaneKey(targetHandle) ?? undefined
     )
 
     // Why: agents dispatched by the coordinator must use yiru-dev in dev mode
@@ -489,9 +488,7 @@ export class Coordinator {
       coordinatorHandle: this.opts.coordinatorHandle,
       workerHandle: targetHandle,
       devMode: process.env.YIRU_USER_DATA_PATH?.includes('yiru-dev'),
-      ...(this.runtime.getTerminalOrchestrationCliCommand
-        ? { cliCommand: this.runtime.getTerminalOrchestrationCliCommand(targetHandle) }
-        : {}),
+      cliCommand: this.runtime.getTerminalOrchestrationCliCommand(targetHandle),
       // Why (§3.2): drift section fires only when behind > 0. The preamble
       // builder gates on this itself; passing the object unconditionally lets
       // the coordinator stay dumb about the display rule.

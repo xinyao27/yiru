@@ -2,8 +2,6 @@ import { spawn as nodeSpawn } from 'node:child_process'
 
 export const LINUX_LID_SLEEP_ASSERTION_RETRY_MS = 30_000
 
-type Logger = Pick<Console, 'debug' | 'warn'>
-
 type SystemdInhibitErrorListener = (error: Error & { code?: string }) => void
 type SystemdInhibitExitListener = (code: number | null, signal: NodeJS.Signals | null) => void
 
@@ -16,26 +14,8 @@ type SystemdInhibitProcess = {
   pid?: number
 }
 
-type SystemdInhibitSpawn = (
-  command: string,
-  args: string[],
-  options: { stdio: 'ignore'; windowsHide: true; shell?: false }
-) => SystemdInhibitProcess
-
-type LinuxLidSleepAssertionOptions = {
-  logger?: Logger
-  now?: () => number
-  onUnexpectedFailure?: (reason: string) => void
-  platform?: NodeJS.Platform
-  spawn?: SystemdInhibitSpawn
-}
-
 export class LinuxLidSleepAssertion {
-  private readonly logger: Logger
-  private readonly now: () => number
   private readonly onUnexpectedFailure: (reason: string) => void
-  private readonly platform: NodeJS.Platform
-  private readonly spawn: SystemdInhibitSpawn
   private child: SystemdInhibitProcess | null = null
   private retryNotBefore: number | null = null
   private retryTimer: ReturnType<typeof setTimeout> | null = null
@@ -46,19 +26,15 @@ export class LinuxLidSleepAssertion {
   private readonly reportedFailures = new WeakSet<SystemdInhibitProcess>()
   private readonly childCleanups = new WeakMap<SystemdInhibitProcess, () => void>()
 
-  constructor(options: LinuxLidSleepAssertionOptions = {}) {
-    this.logger = options.logger ?? console
-    this.now = options.now ?? Date.now
-    this.onUnexpectedFailure = options.onUnexpectedFailure ?? (() => {})
-    this.platform = options.platform ?? process.platform
-    this.spawn = options.spawn ?? nodeSpawn
+  constructor(onUnexpectedFailure: (reason: string) => void) {
+    this.onUnexpectedFailure = onUnexpectedFailure
   }
 
   start(reason: string): void {
-    if (this.platform !== 'linux' || this.child || this.systemdInhibitUnavailable) {
+    if (process.platform !== 'linux' || this.child || this.systemdInhibitUnavailable) {
       return
     }
-    if (this.retryNotBefore !== null && this.now() < this.retryNotBefore) {
+    if (this.retryNotBefore !== null && Date.now() < this.retryNotBefore) {
       this.scheduleRetry()
       return
     }
@@ -67,7 +43,7 @@ export class LinuxLidSleepAssertion {
     try {
       // logind's lid switch handling ignores ordinary sleep inhibitors on many systems,
       // so Linux needs both a sleep lock and a handle-lid-switch lock.
-      child = this.spawn(
+      child = nodeSpawn(
         'systemd-inhibit',
         [
           '--what=sleep:handle-lid-switch',
@@ -127,7 +103,7 @@ export class LinuxLidSleepAssertion {
       child.kill()
     } catch (error) {
       if (!isEsrchError(error)) {
-        this.logger.warn('[agent-awake] failed to stop Linux lid sleep assertion', { error })
+        console.warn('[agent-awake] failed to stop Linux lid sleep assertion', { error })
       }
     }
   }
@@ -180,7 +156,7 @@ export class LinuxLidSleepAssertion {
       return
     }
     this.logFailure(failureKey, reason, details, failureType)
-    this.retryNotBefore = this.now() + LINUX_LID_SLEEP_ASSERTION_RETRY_MS
+    this.retryNotBefore = Date.now() + LINUX_LID_SLEEP_ASSERTION_RETRY_MS
     this.scheduleRetry()
     this.onUnexpectedFailure('linux-lid-assertion-failure')
   }
@@ -197,12 +173,12 @@ export class LinuxLidSleepAssertion {
       details
     }
     if (this.lastFailureKey === failureKey && this.warnedForLastFailure) {
-      this.logger.debug('[agent-awake] Linux lid sleep assertion failed repeatedly', payload)
+      console.debug('[agent-awake] Linux lid sleep assertion failed repeatedly', payload)
       return
     }
     this.lastFailureKey = failureKey
     this.warnedForLastFailure = true
-    this.logger.warn('[agent-awake] Linux lid sleep assertion failed', payload)
+    console.warn('[agent-awake] Linux lid sleep assertion failed', payload)
   }
 
   private resetFailureStreak(): void {
@@ -214,7 +190,7 @@ export class LinuxLidSleepAssertion {
     if (this.retryNotBefore === null || this.retryTimer) {
       return
     }
-    const retryDelay = Math.max(0, this.retryNotBefore - this.now())
+    const retryDelay = Math.max(0, this.retryNotBefore - Date.now())
     this.retryTimer = setTimeout(() => {
       this.retryTimer = null
       this.onUnexpectedFailure('linux-lid-assertion-retry')

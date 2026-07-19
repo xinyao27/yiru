@@ -72,10 +72,6 @@ export async function scanWorkspacePorts(
   }
 }
 
-export function resetWorkspacePortScanTimeoutBackoffForTests(): void {
-  commandTimeoutBackoff.reset()
-}
-
 function makeUnavailableScan(reason: string): WorkspacePortScanResult {
   return {
     platform: process.platform,

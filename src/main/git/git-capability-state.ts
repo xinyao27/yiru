@@ -37,8 +37,3 @@ export function getSshGitCapabilityCache(provider: object): GitCapabilityCache {
   }
   return cache
 }
-
-export function clearGitCapabilityStateForTests(): void {
-  localCapabilitiesByExecutionHost.clear()
-  sshCapabilitiesByProvider = new WeakMap()
-}

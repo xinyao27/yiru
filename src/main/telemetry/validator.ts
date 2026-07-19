@@ -92,15 +92,6 @@ export function validate<N extends EventName>(name: N, props: unknown): Validati
   return { ok: true, props: parsed.data as EventProps<N> }
 }
 
-/** Test-only reset of the warn-rate-limit cache. */
-export function _resetValidatorWarnCacheForTests(): void {
-  lastWarnAt.clear()
-}
-
-export function _getValidatorWarnCacheSizeForTests(): number {
-  return lastWarnAt.size
-}
-
 // Re-exported so `client.ts` can re-validate the merged outgoing payload
 // without reaching into `src/shared/telemetry-events.ts` directly. Keeps the
 // validator as the single surface the client depends on.

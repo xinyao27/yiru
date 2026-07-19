@@ -215,7 +215,7 @@ export class RuntimeBrowserCommands {
         try {
           await this.ensureBrowserWorktreeActive(undefined)
         } catch {
-          // Window may not exist yet (e.g. during startup or in tests)
+          // The window may not exist yet during startup.
         }
       }
       return undefined

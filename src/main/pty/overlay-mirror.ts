@@ -68,8 +68,8 @@ export function mirrorWritableFileEntry(sourcePath: string, targetPath: string):
   symlinkSync(sourcePath, targetPath, 'file')
 }
 
-// Exported for tests. A "descend candidate" is an entry whose children we
-// should recurse into when tearing down the overlay. Anything that is a
+// A "descend candidate" is an entry whose children we should recurse into
+// when tearing down the overlay. Anything that is a
 // symlink (including a Windows directory junction) must NOT be a candidate
 // even if it also reports isDirectory() -- following it would walk into the
 // link target and delete user data, which is the bug in #1083.

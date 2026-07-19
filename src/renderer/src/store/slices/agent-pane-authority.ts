@@ -80,7 +80,3 @@ export function retireAgentPaneAuthorityAliasesByOwnerTab(tabId: string): string
   }
   return [...retiredPaneKeys]
 }
-
-export function resetAgentPaneAuthorityAliasesForTests(): void {
-  aliasesByPhysicalPaneKey.clear()
-}

@@ -483,8 +483,7 @@ if (startupDiagnosticsEnabled) {
     packaged: app.isPackaged,
     platform: process.platform,
     osRelease: os.release(),
-    userData: app.getPath('userData'),
-    e2eUserData: Boolean(process.env.YIRU_E2E_USER_DATA_DIR)
+    userData: app.getPath('userData')
   })
   startEventLoopStallProbe()
 }
@@ -2118,8 +2117,8 @@ app.whenReady().then(async () => {
     onOpenFeatureTour: (targetWindow) => {
       recordCrashBreadcrumb('feature_tour_opened')
       // Why: menu clicks provide the BrowserWindow that invoked the item. Use it
-      // first so hidden/headless E2E windows and future multi-window flows route
-      // the tour to the correct renderer instead of relying on global focus.
+      // first so future multi-window flows route the tour to the correct renderer
+      // instead of relying on global focus.
       const targetBrowserWindow = targetWindow instanceof BrowserWindow ? targetWindow : null
       sendOpenFeatureTour(targetBrowserWindow)
     },
@@ -2168,11 +2167,7 @@ app.whenReady().then(async () => {
     },
     getKeybindings: () => keybindings?.getOverrides()
   })
-  // Why: E2E tests launch parallel Electron instances that would all race to
-  // bind the default fixed port, crashing on EADDRINUSE. Port 0 lets the OS
-  // assign a random available port per instance while still exercising the
-  // full WebSocket startup path.
-  const isE2E = Boolean(process.env.YIRU_E2E_USER_DATA_DIR)
+  const hasIsolatedUserData = Boolean(process.env.YIRU_APP_USER_DATA_PATH)
   // Why: a developer running `pnpm dev` while the packaged Yiru is also open
   // would otherwise race the packaged app for 6768 and silently fall back to
   // a random OS-assigned port — breaking deterministic mobile pairing/repro
@@ -2181,7 +2176,7 @@ app.whenReady().then(async () => {
   // ws-transport's EADDRINUSE handler. Note: once an instance has ever fallen
   // back, the persisted fallback port is re-bound in preference to 6769
   // (STA-1511) until mobile-ws-fallback-port.json is removed from userData.
-  const devWsPort = is.dev && !isE2E ? 6769 : undefined
+  const devWsPort = is.dev && !hasIsolatedUserData ? 6769 : undefined
   let serveOptions: ServeOptions | null = null
   try {
     serveOptions = isServeMode ? getServeOptions() : null
@@ -2202,7 +2197,7 @@ app.whenReady().then(async () => {
     // across restarts/updates. See persistence.ts:getCanonicalUserDataPath.
     userDataPath: getCanonicalUserDataPath(),
     enableWebSocket: true,
-    ...(isE2E ? { wsPort: 0 } : {}),
+    ...(hasIsolatedUserData ? { wsPort: 0 } : {}),
     ...(devWsPort !== undefined ? { wsPort: devWsPort } : {}),
     ...(serveOptions?.wsPort !== undefined
       ? {

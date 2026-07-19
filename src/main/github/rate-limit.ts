@@ -61,12 +61,6 @@ function parseBucket(
   }
 }
 
-/** @internal — test-only */
-export function _resetRateLimitCache(): void {
-  cached = null
-  probeFailure = null
-}
-
 // Why: hard-stop thresholds for the circuit breaker. We refuse to issue a new
 // gh request when the cached snapshot says the relevant bucket is below this
 // floor. Numbers chosen as "enough budget for one user-initiated flow":

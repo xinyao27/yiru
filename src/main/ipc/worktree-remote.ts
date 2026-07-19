@@ -502,13 +502,6 @@ async function fetchRemoteForWorktreeCreate(
   )
 }
 
-export function __resetSshWorktreeCreateFetchCacheForTests(): void {
-  sshWorktreeCreateFetchInflight.clear()
-  sshWorktreeCreateFetchCompletedAt.clear()
-  sshWorktreeCreateFetchQueueTail.clear()
-  sshWorktreeCreateBasePlanInflight.clear()
-}
-
 async function unsetRemoteWorktreeCreationBase(
   provider: SshGitProvider,
   worktreePath: string,

@@ -2,10 +2,7 @@ import { scanAiVaultSessions } from './session-scanner'
 import { getWslHomeAsync, listWslDistrosAsync } from '../wsl'
 import type { AiVaultListArgs, AiVaultListResult } from '../../shared/ai-vault-types'
 import { LOCAL_EXECUTION_HOST_ID } from '../../shared/execution-host'
-import {
-  getConfiguredAiVaultAdditionalCodexSessionsDirs,
-  resetAiVaultSessionRootConfigurationForTests
-} from './session-root-configuration'
+import { getConfiguredAiVaultAdditionalCodexSessionsDirs } from './session-root-configuration'
 
 // Why: ONE module owns the scan cache so the desktop IPC handler AND the runtime
 // RPC method share a single cache instance — opening the desktop panel and the
@@ -85,12 +82,4 @@ export async function getAiVaultWslHomeDirs(): Promise<string[]> {
     (await listWslDistrosAsync()).map((distro) => getWslHomeAsync(distro))
   )
   return homes.filter((homeDir): homeDir is string => Boolean(homeDir))
-}
-
-// Why: tests reset module-level cache/source state between cases.
-export function resetAiVaultSessionListCacheForTests(): void {
-  cachedList = null
-  inflightList = null
-  inflightKey = null
-  resetAiVaultSessionRootConfigurationForTests()
 }

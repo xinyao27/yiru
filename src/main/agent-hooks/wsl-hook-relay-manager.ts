@@ -6,7 +6,7 @@ import type { ChildProcessWithoutNullStreams } from 'node:child_process'
 import { installWslGuestHooks } from './wsl-hook-fs-adapter'
 import { buildWslRelaySpawnEnv, launchWslRelayWithInstall } from './wsl-hook-relay-launch'
 import {
-  defaultWslHookRelayDeps,
+  wslHookRelayDeps,
   FAILURE_COOLDOWN_BASE_MS,
   FAILURE_COOLDOWN_MAX_MS,
   NO_NODE_COOLDOWN_MS,
@@ -47,15 +47,14 @@ function distroKey(distro: string): string {
 }
 
 export class WslHookRelayManager {
-  private deps: WslHookRelayManagerDeps
+  private readonly deps: WslHookRelayManagerDeps = wslHookRelayDeps
   private recovery: WslRelayRecovery
   private states = new Map<string, DistroState>()
   private defaultDistro: string | null = null
   private disposed = false
   private warnedBundleMissing = false
 
-  constructor(deps: Partial<WslHookRelayManagerDeps> = {}) {
-    this.deps = { ...defaultWslHookRelayDeps, ...deps }
+  constructor() {
     this.recovery = new WslRelayRecovery({
       isDistroRunning: (distro) => this.deps.isDistroRunning(distro),
       warn: (message) => this.deps.warn(message),

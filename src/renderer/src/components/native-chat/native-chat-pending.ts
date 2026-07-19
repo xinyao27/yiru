@@ -80,11 +80,6 @@ export function appendPendingSendCache(
   return writePendingSendCache(scope, [...existing, next])
 }
 
-export function clearPendingSendCacheForTests(): void {
-  pendingSendCache.clear()
-  pendingSendCounter = 0
-}
-
 function messagesAfterPendingBoundary(
   messages: readonly NativeChatMessage[],
   pending: NativeChatPendingSend
@@ -295,11 +290,6 @@ export function appendCommandMarkerCache(
   // the key count (mirrors the #7566 draft/attachment caches in this folder).
   setBoundedScopeCacheEntry(commandMarkerCache, key, next)
   return [...next]
-}
-
-export function clearCommandMarkerCacheForTests(): void {
-  commandMarkerCache.clear()
-  commandMarkerCounter = 0
 }
 
 function isClearCommand(command: string): boolean {

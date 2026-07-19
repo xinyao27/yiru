@@ -57,11 +57,6 @@ const GROK_EVENTS = [
   { eventName: 'Notification', definition: { hooks: [{ type: 'command', command: '' }] } }
 ] as const
 
-/** Test seam: the matcher string written for Pre/Post tool lifecycle hooks. */
-export function getGrokToolEventMatcherForTests(): string {
-  return GROK_TOOL_EVENT_MATCHER
-}
-
 function getConfigPath(): string {
   // Why: Grok loads trusted global hook files from $GROK_HOME/hooks/*.json
   // (or ~/.grok when unset). Honor GROK_HOME so install/status match the same

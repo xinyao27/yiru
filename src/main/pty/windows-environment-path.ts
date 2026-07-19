@@ -107,10 +107,6 @@ export function readPersistedWindowsPathSegments(options: ReadWindowsPathOptions
   return segments
 }
 
-export function __resetPersistedWindowsPathCacheForTests(): void {
-  persistedWindowsPathCache = undefined
-}
-
 export function mergePersistedWindowsPath(
   env: NodeJS.ProcessEnv,
   options: ReadWindowsPathOptions = {}

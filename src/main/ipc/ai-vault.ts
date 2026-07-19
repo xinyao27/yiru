@@ -4,7 +4,6 @@ import {
   configureAiVaultSessionSources,
   getAiVaultWslHomeDirs,
   listAiVaultSessions as listCachedLocalAiVaultSessions,
-  resetAiVaultSessionListCacheForTests,
   type AiVaultSessionSources
 } from '../ai-vault/cached-session-list'
 import { scanRemoteAiVaultSessions } from '../ai-vault/remote-session-scanner'
@@ -327,20 +326,4 @@ async function listAiVaultSubagentSessions(
     return { sessions: [], issues: [] }
   }
   return listClaudeSubagentSessions({ parentFilePath })
-}
-
-function resetAiVaultCacheForTests(): void {
-  cachedList = null
-  inflightList = null
-  inflightKey = null
-  handlerOptions = {}
-  // The local leg delegates to the shared cache module; reset it too so tests
-  // never see a scan cached by an earlier case.
-  resetAiVaultSessionListCacheForTests()
-}
-
-export const _internals = {
-  listAiVaultSessions,
-  listAiVaultSubagentSessions,
-  resetAiVaultCacheForTests
 }

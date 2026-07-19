@@ -1,6 +1,5 @@
-// DI seam for WslHookRelayManager: the full dependency contract plus the
-// production wiring. Tests construct the manager with fakes for everything
-// that spawns wsl.exe or touches the live agentHookServer.
+// Runtime dependencies for WslHookRelayManager, centralized so process and
+// hook-server boundaries stay explicit.
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 
@@ -17,8 +16,7 @@ import { listWslDistrosAsync } from '../wsl'
 import { isRemoteAgentHooksEnabled } from '../../shared/agent-hook-relay'
 
 // Why: fresh WSL intermittently throws "Catastrophic failure (E_UNEXPECTED)"
-// under concurrent wsl.exe spawn load; the retry pause is a dep so tests can
-// collapse it.
+// under concurrent wsl.exe spawn load, so retry after a short pause.
 export const WSL_RELAY_TRANSIENT_RETRY_DELAY_MS = 2_000
 
 // Restart/cooldown policy for the manager's state machine.
@@ -61,7 +59,7 @@ export type WslHookRelayManagerDeps = {
   transientRetryDelayMs: number
 }
 
-export const defaultWslHookRelayDeps: WslHookRelayManagerDeps = {
+export const wslHookRelayDeps: WslHookRelayManagerDeps = {
   platform: () => process.platform,
   remoteHooksEnabled: () => isRemoteAgentHooksEnabled(),
   hookCoordsEnv: () => agentHookServer.buildPtyEnv(),

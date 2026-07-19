@@ -272,11 +272,3 @@ function formatError(err: Error): string {
   const head = `${err.name}: ${err.message}`
   return err.stack ? `${head}\n${err.stack}` : head
 }
-
-// ── Test-only ────────────────────────────────────────────────────────────
-
-export function _resetTracerForTests(): void {
-  activeSink = null
-  // No way to clear the AsyncLocalStorage without a fresh one; tests that
-  // assert on context should run inside their own `withSpan` block.
-}

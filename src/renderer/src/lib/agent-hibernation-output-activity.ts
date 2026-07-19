@@ -38,7 +38,3 @@ export function getAgentHibernationOutputSignature(paneKeys: readonly string[]):
     .map((paneKey) => `${paneKey}:${getAgentHibernationPaneOutputEpoch(paneKey)}`)
     .join('|')
 }
-
-export function resetAgentHibernationOutputActivityForTests(): void {
-  outputEpochByPaneKey.clear()
-}

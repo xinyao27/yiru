@@ -9,10 +9,9 @@ import {
 import { nativeChatLineDecoderForAgent } from './transcript-tail-reader'
 
 export { readNativeChatTranscriptTail } from './transcript-tail-reader'
-export {
-  getActiveNativeChatWatcherCount,
-  type NativeChatTranscriptSubscription,
-  type SubscribeNativeChatTranscriptArgs
+export type {
+  NativeChatTranscriptSubscription,
+  SubscribeNativeChatTranscriptArgs
 } from './transcript-watch-engine'
 
 /** One resolve+install attempt. Returns null when the file isn't resolvable
@@ -20,9 +19,10 @@ export {
  *  the resolve-poll rather than treated as a hard failure. */
 async function attemptInstall(
   args: SubscribeNativeChatTranscriptArgs,
-  decode: (line: string, fallbackId: string) => NativeChatMessage | null
+  decode: (line: string, fallbackId: string) => NativeChatMessage | null,
+  knownFilePath?: string
 ): Promise<NativeChatTranscriptSubscription | null> {
-  const filePath = args.filePath ?? (await resolveSessionFilePath(args.agent, args.sessionId, args))
+  const filePath = knownFilePath ?? (await resolveSessionFilePath(args.agent, args.sessionId, args))
   if (!filePath) {
     return null
   }
@@ -58,7 +58,7 @@ function subscribeViaResolvePoll(
   let closed = false
   let installed: NativeChatTranscriptSubscription | null = null
   let pollTimer: ReturnType<typeof setTimeout> | null = null
-  let delay = args.resolvePollIntervalMs ?? INITIAL_RESOLVE_POLL_MS
+  let delay = INITIAL_RESOLVE_POLL_MS
   let lastFallbackResolveAt = Date.now()
   const exactPath = exactTranscriptPath(args)
 
@@ -79,11 +79,7 @@ function subscribeViaResolvePoll(
     // Why: never hold the event loop open (headless `yiru serve` shutdown) for
     // a session that may genuinely never resolve.
     pollTimer.unref?.()
-    // Only back off in production; a test-supplied interval stays fixed so
-    // tests resolve in bounded, predictable time.
-    if (args.resolvePollIntervalMs === undefined) {
-      delay = Math.min(delay * 2, MAX_RESOLVE_POLL_MS)
-    }
+    delay = Math.min(delay * 2, MAX_RESOLVE_POLL_MS)
   }
 
   async function runAttempt(): Promise<void> {
@@ -92,7 +88,7 @@ function subscribeViaResolvePoll(
     }
     let result: NativeChatTranscriptSubscription | null
     try {
-      result = exactPath ? await attemptInstall({ ...args, filePath: exactPath }, decode) : null
+      result = exactPath ? await attemptInstall(args, decode, exactPath) : null
       if (
         !result &&
         (!exactPath || Date.now() - lastFallbackResolveAt >= FALLBACK_RESOLVE_POLL_MS)
@@ -158,9 +154,9 @@ export async function subscribeNativeChatTranscript(
     // unsubscribe without null-checks.
     return { unsubscribe: () => {}, watching: false }
   }
-  // Why: a blank session id (and no explicit file) can never resolve — bail out
-  // instead of resolve-polling an unresolvable target forever.
-  if (!args.filePath && !args.sessionId.trim()) {
+  // Why: a blank session id can never resolve — bail out instead of
+  // resolve-polling an unresolvable target forever.
+  if (!args.sessionId.trim()) {
     return { unsubscribe: () => {}, watching: false }
   }
 

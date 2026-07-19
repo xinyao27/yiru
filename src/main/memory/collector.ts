@@ -200,8 +200,7 @@ async function enumerateUnix(): Promise<ProcRow[]> {
   }
 }
 
-/** Exported for tests: parses `ps -eo pid=,ppid=,pcpu=,rss=` output. */
-export function parsePsOutput(stdout: string): ProcRow[] {
+function parsePsOutput(stdout: string): ProcRow[] {
   const rows: ProcRow[] = []
   for (const line of iterateProcessOutputLines(stdout)) {
     const fields = getProcessOutputFields(line, 4)
@@ -242,8 +241,7 @@ async function enumerateWindows(): Promise<ProcRow[]> {
   }
 }
 
-/** Exported for tests: parses `wmic /format:value` stanza output. */
-export function parseWmicOutput(stdout: string): ProcRow[] {
+function parseWmicOutput(stdout: string): ProcRow[] {
   // wmic /format:value emits stanzas of `Key=Value` lines separated by blank
   // lines. We accumulate a record until a blank line, then flush.
   const rows: ProcRow[] = []
@@ -289,8 +287,7 @@ export function parseWmicOutput(stdout: string): ProcRow[] {
   return rows
 }
 
-/** Walk every descendant PID of `root`, inclusive. Exported for tests. */
-export function collectSubtree(index: ProcIndex, root: number): number[] {
+function collectSubtree(index: ProcIndex, root: number): number[] {
   const result: number[] = []
   const seen = new Set<number>()
   const queue = [root]

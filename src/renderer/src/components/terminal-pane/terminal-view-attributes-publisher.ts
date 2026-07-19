@@ -244,8 +244,3 @@ export function publishTerminalViewAttributes(
   lastPublishedSnapshot = serialized
   return true
 }
-
-/** Test seam: reset the dedupe state between tests. */
-export function _resetTerminalViewAttributesPublisherForTest(): void {
-  lastPublishedSnapshot = null
-}

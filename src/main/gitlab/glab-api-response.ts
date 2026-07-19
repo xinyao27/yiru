@@ -3,7 +3,6 @@ export type GlabApiResponse = {
   headers: Record<string, string>
 }
 
-/** @internal - exported for tests through gl-utils. */
 export function parseGlabApiResponse(stdout: string): GlabApiResponse {
   // Why: response is HTTP status, headers, blank line, then body.
   // Find the first blank line (CRLF or LF) as the boundary.

@@ -10,7 +10,6 @@ import {
   buildAgentFeatureSkillInstallCommand
 } from '@/lib/agent-feature-install-commands'
 import { BROWSER_USE_ENABLED_STORAGE_KEY } from '@/lib/browser-use-setup-state'
-import { e2eConfig } from '@/lib/e2e-config'
 import { showYiruCliRegistrationPromptToast } from '@/lib/agent-skill-cli-prerequisite'
 import {
   ORCHESTRATION_ENABLED_STORAGE_KEY,
@@ -150,11 +149,6 @@ export function onboardingFeatureSetupRunTelemetry(
 }
 
 export function createOnboardingFeatureSetupDeps(): OnboardingFeatureSetupDeps {
-  const e2eDeps = getE2EOnboardingFeatureSetupDeps()
-  if (e2eDeps) {
-    return e2eDeps
-  }
-
   return {
     getCliStatus: () => window.api.cli.getInstallStatus(),
     showCliRegistrationPrompt: showYiruCliRegistrationPromptToast,
@@ -166,16 +160,6 @@ export function createOnboardingFeatureSetupDeps(): OnboardingFeatureSetupDeps {
     removeStorageItem: (key) => localStorage.removeItem(key),
     notifyOrchestrationStateChanged: notifyOrchestrationSetupStateChanged
   }
-}
-
-function getE2EOnboardingFeatureSetupDeps(): OnboardingFeatureSetupDeps | null {
-  if (!e2eConfig.enabled || typeof window === 'undefined') {
-    return null
-  }
-  return (
-    (window as unknown as { __onboardingFeatureSetupDeps?: OnboardingFeatureSetupDeps })
-      .__onboardingFeatureSetupDeps ?? null
-  )
 }
 
 export async function runOnboardingFeatureSetup(

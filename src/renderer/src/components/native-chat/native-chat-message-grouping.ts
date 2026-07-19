@@ -1,9 +1,7 @@
-// Pure grouping logic for the native chat message list. Kept out of the .tsx so
-// the pairing/ordering rules are unit-testable without rendering. Two jobs:
+// Pure grouping logic for the native chat message list. Two jobs:
 //   1. Order messages stably (timestamp then id; null timestamps sort first as
 //      the shared model documents) — the assembler already sorts, but the list
-//      re-sorts defensively so a caller passing unordered fixtures still reads
-//      correctly.
+//      re-sorts defensively so unordered caller data still reads correctly.
 //   2. Within an assistant turn, pair each tool-call block with the tool-result
 //      that answers it so the view can render one collapsible step instead of
 //      two disconnected rows.

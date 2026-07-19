@@ -46,8 +46,7 @@ type Mode2031HandlerDeps = {
 // Why split out from the lifecycle hook: the CSI handlers are the defense
 // against a restored xterm buffer pushing `\x1b[?997;1n` into the fresh zsh
 // on cold restore (the "random characters on restart" bug). Keeping them in
-// a pure function lets the tests drive a real xterm parser end-to-end so we
-// catch regressions in the parser-path guard, not just a mock.
+// a focused function keeps parser-path guarding separate from lifecycle wiring.
 export function installMode2031Handlers(deps: Mode2031HandlerDeps): IDisposable[] {
   const hasMode2031 = (params: (number | number[])[]): boolean =>
     params.some((p) => (Array.isArray(p) ? p.includes(2031) : p === 2031))

@@ -227,7 +227,6 @@ mobile-config app/index.tsx
 mobile-config app/pair-scan.tsx
 mobile-config app/terminal-settings.tsx
 mobile-config app/troubleshoot.tsx
-mobile-config scripts/mock-server.ts
 mobile-config src/browser/mobile-browser-pane.tsx
 mobile-config src/components/custom-key-modal.tsx
 mobile-config src/components/mobile-rich-markdown-editor-html.ts

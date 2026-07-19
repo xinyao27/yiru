@@ -752,18 +752,6 @@ function pruneWorktreeScanGeneration(repoPath: string): void {
   }
 }
 
-export function _getWorktreeScanCacheSizesForTests(): { inFlight: number; generations: number } {
-  return {
-    inFlight: inFlightWorktreeScans.size,
-    generations: worktreeScanGenerations.size
-  }
-}
-
-export function _resetWorktreeScanCacheForTests(): void {
-  inFlightWorktreeScans.clear()
-  worktreeScanGenerations.clear()
-}
-
 /**
  * List all worktrees for a git repo at the given path. Concurrent calls for
  * the same repo share one scan (unless the caller passes an AbortSignal,

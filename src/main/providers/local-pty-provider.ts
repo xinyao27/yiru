@@ -1334,10 +1334,3 @@ export class LocalPtyProvider implements IPtyProvider {
     }
   }
 }
-
-export function _resetLocalPtyProviderStateForTest(): void {
-  for (const id of ptyProcesses.keys()) {
-    clearPtyState(id)
-  }
-  loadGeneration = 0
-}

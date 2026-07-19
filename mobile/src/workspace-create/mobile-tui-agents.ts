@@ -1,8 +1,7 @@
 import type { TuiAgent } from '../../../src/shared/types'
 
-// Why: mobile tests run from the mobile package only, so runtime imports of
-// desktop shared modules can break Vitest transforms in CI. Keep this list
-// mirrored with src/shared/tui-agent-selection.ts and assert parity in tests.
+// Why: Metro runs from the mobile package and cannot consume this desktop
+// runtime module. Keep the order mirrored with src/shared/tui-agent-selection.ts.
 export const MOBILE_TUI_AGENT_AUTO_PICK_ORDER = [
   'claude',
   'claude-agent-teams',

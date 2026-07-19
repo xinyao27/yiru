@@ -55,21 +55,8 @@ const TELEMETRY_ENABLED = true
 // so `IS_OFFICIAL_BUILD` evaluates `false` at module load. There is no
 // runtime env-var fallback.
 //
-// The `globalThis` dance exists for the vitest harness. `declare const`
-// lets TypeScript type-check against the substituted symbols, but vitest
-// does not run electron-vite's `define` pass, so the identifiers are
-// undefined at test-runtime. Routing the read through `globalThis` gives
-// us the compile-time substitution in production and a safe `undefined`
-// in tests — both of which resolve to `IS_OFFICIAL_BUILD === false`, which
-// is the fail-closed default we want anywhere outside an official CI build.
-const BUILD_IDENTITY: 'stable' | 'rc' | null =
-  typeof YIRU_BUILD_IDENTITY !== 'undefined'
-    ? YIRU_BUILD_IDENTITY
-    : ((globalThis as { YIRU_BUILD_IDENTITY?: 'stable' | 'rc' | null }).YIRU_BUILD_IDENTITY ?? null)
-const WRITE_KEY: string | null =
-  typeof YIRU_POSTHOG_WRITE_KEY !== 'undefined'
-    ? YIRU_POSTHOG_WRITE_KEY
-    : ((globalThis as { YIRU_POSTHOG_WRITE_KEY?: string | null }).YIRU_POSTHOG_WRITE_KEY ?? null)
+const BUILD_IDENTITY: 'stable' | 'rc' | null = YIRU_BUILD_IDENTITY
+const WRITE_KEY: string | null = YIRU_POSTHOG_WRITE_KEY
 const IS_OFFICIAL_BUILD: boolean =
   (BUILD_IDENTITY === 'stable' || BUILD_IDENTITY === 'rc') &&
   typeof WRITE_KEY === 'string' &&
@@ -85,13 +72,6 @@ let shuttingDown = false
 let storeRef: Store | null = null
 
 const OPT_OUT_CAPTURE_ENQUEUE_TIMEOUT_MS = 1_000
-
-// Test-only override for the transport gate. Set by `_enableTransportForTests`
-// so the client.test.ts suite can exercise the full pipeline (burst cap,
-// consent, validator, capture) without waiting on a real CI build. Left
-// `false` in production; an accidental call from non-test code would still
-// be bounded by `resolveConsent` + the validator.
-let testTransportEnabled = false
 
 // First-launch `app_opened` session gate. The existing-user banner contract is:
 // no events transmit until the notice resolves. Keep "mark" and "emit"
@@ -208,10 +188,8 @@ export function initTelemetry(store: Store): void {
  * (`resolveConsent() !== 'enabled'`) still drops every other event while
  * the cohort is `pending_banner`, so there is no risk of stray transmission
  * during the pre-banner window.
- *
- * Exported for tests; production has exactly one call site above.
  */
-export function shouldOptOutSdkAtInit(consent: ConsentState): boolean {
+function shouldOptOutSdkAtInit(consent: ConsentState): boolean {
   return consent.effective === 'disabled'
 }
 
@@ -255,7 +233,7 @@ function waitForCaptureEnqueue(client: PostHog, event: EventName, uuid: string):
 // official stable/rc builds where CI injects `YIRU_BUILD_IDENTITY` and
 // `YIRU_POSTHOG_WRITE_KEY`.
 export function track<N extends EventName>(name: N, props: EventProps<N>): void {
-  if (!testTransportEnabled && (!IS_OFFICIAL_BUILD || !TELEMETRY_ENABLED)) {
+  if (!IS_OFFICIAL_BUILD || !TELEMETRY_ENABLED) {
     return
   }
 
@@ -459,38 +437,4 @@ export async function shutdownTelemetry(): Promise<void> {
     // Telemetry must never crash the app on quit. Swallow.
     console.warn('[telemetry] shutdown error (ignored):', err)
   }
-}
-
-// ── Test-only introspection ─────────────────────────────────────────────
-//
-// The test suite needs to inject a fake PostHog and observe capture calls
-// without touching the network. Kept under a `_`-prefixed name so it is
-// obvious in code review that this is not a runtime API.
-
-export function _setPostHogClientForTests(client: PostHog | null): void {
-  posthog = client
-}
-
-export function _setCommonPropsForTests(props: CommonProps | null): void {
-  commonProps = props
-}
-
-export function _setStoreForTests(store: Store | null): void {
-  storeRef = store
-}
-
-export function _setShuttingDownForTests(value: boolean): void {
-  shuttingDown = value
-}
-
-export function _getSessionIdForTests(): string | null {
-  return sessionId
-}
-
-export function _enableTransportForTests(enabled: boolean): void {
-  testTransportEnabled = enabled
-}
-
-export function _resetFirstAppOpenedFiredForTests(): void {
-  appOpenedTrackedThisSession = false
 }

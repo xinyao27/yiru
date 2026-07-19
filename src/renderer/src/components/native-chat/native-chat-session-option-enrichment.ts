@@ -81,7 +81,3 @@ export function ensureNativeChatModelEnrichment(args: {
       entry.state = 'settled'
     })
 }
-
-export function clearNativeChatModelEnrichmentForTests(): void {
-  enrichmentByAgentHost.clear()
-}

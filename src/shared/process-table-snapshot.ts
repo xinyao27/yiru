@@ -55,14 +55,12 @@ type Snapshot<T> = { value: T; capturedAtMs: number }
 type ProcessTableSnapshotReaderDeps<T> = {
   runPs: () => Promise<T>
   now: () => number
-  ttlMs?: number
 }
 
 /**
  * Build a process-table snapshot reader that deduplicates concurrent and
  * near-simultaneous scans behind a single in-flight promise + short TTL.
- * Exposed as a factory so tests can inject the scan and clock; production code
- * uses the shared `getProcessTableSnapshot` instance below. Generic over the
+ * Shared by the POSIX and Windows process readers. Generic over the
  * scan result so both the POSIX and Windows readers cache already-parsed rows,
  * letting a burst of panes share one parse per TTL window.
  */
@@ -71,9 +69,8 @@ export function createProcessTableSnapshotReader<T = string>(
 ): {
   getSnapshot: () => Promise<T>
   getFreshSnapshot: () => Promise<T>
-  reset: () => void
 } {
-  const ttlMs = deps.ttlMs ?? DEFAULT_SNAPSHOT_TTL_MS
+  const ttlMs = DEFAULT_SNAPSHOT_TTL_MS
   let cached: Snapshot<T> | null = null
   let inFlight: Promise<T> | null = null
   let sequence = 0
@@ -153,15 +150,7 @@ export function createProcessTableSnapshotReader<T = string>(
 
   return {
     getSnapshot,
-    getFreshSnapshot,
-    // Why: lets tests that mock `ps` per case clear the cross-call cache so one
-    // case's snapshot can't satisfy the next within the TTL window.
-    reset: () => {
-      cached = null
-      inFlight = null
-      sequence = 0
-      freshQueued = null
-    }
+    getFreshSnapshot
   }
 }
 
@@ -191,12 +180,4 @@ export function getProcessTableSnapshot(): Promise<ProcessTableRow[]> {
 /** Capture process rows from a scan that starts after this request. */
 export function getFreshProcessTableSnapshot(): Promise<ProcessTableRow[]> {
   return defaultReader.getFreshSnapshot()
-}
-
-/**
- * Test-only: clear the shared snapshot cache so suites that mock `ps` between
- * cases don't have one case's snapshot served to the next within the TTL.
- */
-export function resetProcessTableSnapshotForTests(): void {
-  defaultReader.reset()
 }

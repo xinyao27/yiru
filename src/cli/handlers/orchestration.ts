@@ -19,22 +19,6 @@ function getLifecycleGroupRecipientError(type: 'worker_done' | 'heartbeat'): str
   return `${type} messages must be sent to a concrete coordinator terminal handle, not a group address.`
 }
 
-// Why: test-only escape hatch so subprocess tests can verify the feature in
-// under 10 s rather than needing a full 15 s silence window. Production users
-// should never set this — there is no surface documentation. A bogus value
-// falls back to the default rather than disabling the keepalive.
-function resolveKeepaliveIntervalMs(): number {
-  const raw = process.env.YIRU_KEEPALIVE_INTERVAL_MS ?? process.env.YIRU_HEARTBEAT_INTERVAL_MS
-  if (!raw) {
-    return DEFAULT_KEEPALIVE_INTERVAL_MS
-  }
-  const parsed = Number(raw)
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return DEFAULT_KEEPALIVE_INTERVAL_MS
-  }
-  return parsed
-}
-
 function startCheckKeepalive(deadlineMs: number | undefined): () => void {
   const startedAt = Date.now()
   const interval = setInterval(() => {
@@ -51,7 +35,7 @@ function startCheckKeepalive(deadlineMs: number | undefined): () => void {
     // silently defeat the whole point of the ping. Subprocess test asserts
     // this by reading stderr incrementally. See §3.4.
     process.stderr.write(`${JSON.stringify(payload)}\n`)
-  }, resolveKeepaliveIntervalMs())
+  }, DEFAULT_KEEPALIVE_INTERVAL_MS)
   if (typeof interval.unref === 'function') {
     interval.unref()
   }

@@ -133,16 +133,6 @@ When a verdict is `blocked`, `mobile/src/components/protocol-block-screen.tsx` p
 
 To exercise the block screen locally: set `MIN_COMPATIBLE_DESKTOP_VERSION = 999` in `mobile/src/transport/protocol-version.ts`, rebuild, pair to any desktop. Revert before merging.
 
-## Mock Server
-
-Develop the mobile app without a running Yiru desktop instance:
-
-```bash
-pnpm mock-server           # starts mock WebSocket server on port 6768
-```
-
-Connect from the app using endpoint `ws://localhost:6768` and token `mock-device-token`.
-
 ## Connecting to Real Yiru
 
 1. Start Yiru desktop with WebSocket transport enabled
@@ -160,7 +150,5 @@ mobile/
 ├── src/
 │   ├── terminal/          # Terminal WebView and xterm bridge
 │   └── transport/         # WebSocket RPC client
-├── scripts/
-│   └── mock-server.ts     # Standalone mock WebSocket server
 └── assets/                # App icons and splash screen
 ```

@@ -1,8 +1,5 @@
-// Why: this file mirrors src/shared/protocol-compat.ts (which is
-// covered by CI vitest). Metro can't resolve out of mobile/, so the
-// pure function is duplicated here. Keep the two files in sync — when
-// you change the evaluator's logic, update both. The src/shared/ copy
-// is the tested canonical version.
+// Why: Metro cannot resolve the desktop runtime module, so the protocol
+// evaluator is duplicated here. Keep it in sync with src/shared/protocol-compat.ts.
 import { MIN_COMPATIBLE_DESKTOP_VERSION, MOBILE_PROTOCOL_VERSION } from './protocol-version'
 
 export type CompatVerdict =

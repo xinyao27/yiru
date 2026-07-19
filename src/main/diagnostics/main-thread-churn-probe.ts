@@ -1,6 +1,6 @@
 import { writeStartupDiagnosticLine } from '../startup/startup-diagnostics'
 
-export const MAIN_THREAD_DIAGNOSTICS_ENV = 'YIRU_MAIN_THREAD_DIAGNOSTICS'
+const MAIN_THREAD_DIAGNOSTICS_ENV = 'YIRU_MAIN_THREAD_DIAGNOSTICS'
 
 // Why: 25ms mirrors event-loop-stall-probe — a timer that fires late by N ms
 // proves the main thread was blocked for N ms, which is the direct in-process
@@ -9,8 +9,8 @@ export const MAIN_THREAD_DIAGNOSTICS_ENV = 'YIRU_MAIN_THREAD_DIAGNOSTICS'
 const TICK_MS = 25
 const REPORT_EVERY_MS = 5_000
 
-export function isMainThreadDiagnosticsEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  return env[MAIN_THREAD_DIAGNOSTICS_ENV] === '1'
+function isMainThreadDiagnosticsEnabled(): boolean {
+  return process.env[MAIN_THREAD_DIAGNOSTICS_ENV] === '1'
 }
 
 // Git global options that precede the subcommand. Value-taking flags must be
@@ -27,14 +27,13 @@ const SUBCOMMAND_BINARIES = new Set(['git', 'gh', 'glab'])
  * "gh api". Handles WSL wrapping (`wsl.exe -d <distro> -- git …`), absolute
  * binary paths, `.exe` suffixes, and git global flags before the subcommand.
  */
-// Split on both separators so Windows-style paths classify correctly even
-// when the classifier itself runs in a posix test environment.
+// Split on both separators because commands can contain Windows-style paths.
 function binaryName(command: string): string {
   const leaf = command.split(/[\\/]/).pop() ?? command
   return leaf.replace(/\.exe$/i, '').toLowerCase()
 }
 
-export function classifySubprocessCommand(command: string, args: readonly string[]): string {
+function classifySubprocessCommand(command: string, args: readonly string[]): string {
   let binary = binaryName(command)
   const rest = [...args]
   if (binary === 'wsl') {
@@ -72,7 +71,7 @@ export function classifySubprocessCommand(command: string, args: readonly string
   return `${binary} ${subcommand.slice(0, 40)}`
 }
 
-export type SubprocessSpawnStats = {
+type SubprocessSpawnStats = {
   count: number
   // Cumulative and worst synchronous cost of initiating the spawn (the
   // uv_spawn → posix_spawn call runs on the main thread before returning).
@@ -106,7 +105,7 @@ export function recordSubprocessSpawn(
   }
 }
 
-export function drainSubprocessSpawnStats(): Record<string, SubprocessSpawnStats> {
+function drainSubprocessSpawnStats(): Record<string, SubprocessSpawnStats> {
   const drained: Record<string, SubprocessSpawnStats> = {}
   for (const [key, stats] of spawnStatsByCommand) {
     drained[key] = {

@@ -52,7 +52,6 @@ import { getFitOverrideForPty, bindPanePtyId } from '@/lib/pane-manager/mobile-f
 import { isPtyLocked } from '@/lib/pane-manager/mobile-driver-state'
 import { reconcilePtySizeAcrossFrames, type PtySizeReconcileHandle } from './pty-size-reconcile'
 import { shouldClaimRemoteDesktopViewport } from './remote-desktop-viewport-claim'
-import { getAppliedSizeReadE2eDelayMs } from './pty-applied-size-read-e2e-delay'
 import { createPtySizeReassertion } from './pty-size-reassertion'
 import {
   isPaneReplaying,
@@ -150,7 +149,6 @@ import { createPaneForegroundAgentTracker } from './pane-foreground-agent-tracke
 import { parseAppSshPtyId } from '../../../../shared/ssh-pty-id'
 import { resolveSshPaneConnectGate } from './ssh-pane-connect-gate'
 import { dispatchTerminalCommandFinishedEvent } from '@/hooks/terminal-command-finished-event'
-import { e2eConfig } from '@/lib/e2e-config'
 import {
   isFreshNonDoneAgentStatus,
   type AgentStatusEntry,
@@ -270,7 +268,6 @@ import { isRendererHiddenPtyDeliveryGateEnabled } from './terminal-hidden-delive
 const pendingSpawnByPaneKey = new Map<string, Promise<string | null>>()
 const SSH_SESSION_EXPIRED_ERROR = 'SSH_SESSION_EXPIRED'
 const REMOTE_PTY_ID_PREFIX = 'remote:'
-const PTY_CONNECT_DIAG_LIMIT = 200
 const COMMAND_CODE_OUTPUT_DONE_SETTLE_MS = 1500
 const SSH_SHELL_READY_STARTUP_FALLBACK_MS = 1500
 const MANUAL_AGENT_COMMAND_MAX_CHARS = 4096
@@ -326,10 +323,6 @@ const FOREGROUND_GRID_DRIFT_CHECK_MIN_MS = 250
 // terminal state is unavailable, so the user has an explicit loss signal.
 const HIDDEN_OUTPUT_RESTORE_UNAVAILABLE_WARNING =
   '\x18\x1b[0m\r\n[Yiru skipped hidden terminal output because main recovery was unavailable.]\r\n'
-type E2eTerminalPtyDataInjectionApi = {
-  inject: (paneKey: string, data: string, meta?: PtyDataMeta) => boolean
-  keys: () => string[]
-}
 
 type TerminalWithFocusMode = {
   textarea?: HTMLTextAreaElement | null
@@ -428,44 +421,6 @@ function hasCursorAgentReattachPayloadScreenSignal(data: string): boolean {
   return screenTail.includes(`${CURSOR_AGENT_REATTACH_INPUT_MARKER} `)
 }
 
-type E2eTerminalPtyDataInjectionWindow = Window & {
-  __terminalPtyDataInjection?: E2eTerminalPtyDataInjectionApi
-  __terminalHiddenSnapshotOverride?: E2eTerminalHiddenSnapshotOverrideApi
-}
-
-const e2eTerminalPtyDataInjectors = new Map<string, (data: string, meta?: PtyDataMeta) => void>()
-
-type E2eTerminalHiddenSnapshotOverrideApi = {
-  setPending: (ptyId: string, snapshot: PtyBufferSnapshot) => void
-  resolve: (ptyId: string) => void
-  clear: (ptyId: string) => void
-}
-
-type E2eTerminalHiddenSnapshotOverride = {
-  promise: Promise<PtyBufferSnapshot | null>
-  resolve: () => void
-}
-
-const e2eTerminalHiddenSnapshotOverrides = new Map<string, E2eTerminalHiddenSnapshotOverride>()
-
-// Why: the per-chunk hidden-skip grammar is deleted (Phase 6) — hidden bytes
-// either never reach the renderer (delivery gate) or ride the background
-// scheduler queue. Only the mode-2031 fact-reply counter still has a producer.
-type E2eTerminalPtyOutputDebugSnapshot = {
-  hiddenRendererSkipCount: number
-  hiddenRendererSkippedChars: number
-  hiddenRendererMode2031ReplyCount: number
-}
-
-type E2eTerminalPtyOutputDebugApi = {
-  reset: () => void
-  snapshot: () => E2eTerminalPtyOutputDebugSnapshot
-}
-
-type E2eTerminalPtyOutputDebugWindow = Window & {
-  __terminalPtyOutputDebug?: E2eTerminalPtyOutputDebugApi
-}
-
 type PendingStartupCommand = {
   command: string
   env?: Record<string, string>
@@ -482,117 +437,6 @@ type ColdRestoreAgentResumeStartup = PendingStartupCommand & {
   useLiveEntry: boolean
   hasSleepingRecord: boolean
   sleepingRecordEntry: { paneKey: string; record: SleepingAgentSessionRecord } | null
-}
-
-const e2eTerminalPtyOutputDebugState: E2eTerminalPtyOutputDebugSnapshot = {
-  hiddenRendererSkipCount: 0,
-  hiddenRendererSkippedChars: 0,
-  hiddenRendererMode2031ReplyCount: 0
-}
-
-function resetE2eTerminalPtyOutputDebug(): void {
-  e2eTerminalPtyOutputDebugState.hiddenRendererSkipCount = 0
-  e2eTerminalPtyOutputDebugState.hiddenRendererSkippedChars = 0
-  e2eTerminalPtyOutputDebugState.hiddenRendererMode2031ReplyCount = 0
-}
-
-function exposeE2eTerminalPtyOutputDebug(): void {
-  if (!e2eConfig.exposeStore || typeof window === 'undefined') {
-    return
-  }
-  const target = window as E2eTerminalPtyOutputDebugWindow
-  target.__terminalPtyOutputDebug ??= {
-    reset: resetE2eTerminalPtyOutputDebug,
-    snapshot: () => ({ ...e2eTerminalPtyOutputDebugState })
-  }
-}
-
-function recordHiddenRendererSkip(chars: number): void {
-  if (!e2eConfig.exposeStore) {
-    return
-  }
-  exposeE2eTerminalPtyOutputDebug()
-  e2eTerminalPtyOutputDebugState.hiddenRendererSkipCount += 1
-  e2eTerminalPtyOutputDebugState.hiddenRendererSkippedChars += chars
-}
-
-function recordHiddenMode2031Reply(): void {
-  if (!e2eConfig.exposeStore) {
-    return
-  }
-  exposeE2eTerminalPtyOutputDebug()
-  e2eTerminalPtyOutputDebugState.hiddenRendererMode2031ReplyCount += 1
-}
-
-function exposeE2eTerminalPtyDataInjection(): void {
-  if (!e2eConfig.exposeStore || typeof window === 'undefined') {
-    return
-  }
-  // Why: a real PTY can coalesce tiny TUI redraws before E2E sees them. This
-  // e2e-only seam lets tests replay the renderer-side data callback exactly.
-  const target = window as E2eTerminalPtyDataInjectionWindow
-  target.__terminalPtyDataInjection ??= {
-    inject: (paneKey, data, meta) => {
-      const inject = e2eTerminalPtyDataInjectors.get(paneKey)
-      if (!inject) {
-        return false
-      }
-      inject(data, meta)
-      return true
-    },
-    keys: () => [...e2eTerminalPtyDataInjectors.keys()]
-  }
-  target.__terminalHiddenSnapshotOverride ??= {
-    setPending: (ptyId, snapshot) => {
-      let resolve = (): void => {}
-      const wait = new Promise<void>((nextResolve) => {
-        resolve = nextResolve
-      })
-      e2eTerminalHiddenSnapshotOverrides.set(ptyId, {
-        promise: wait.then(() => snapshot),
-        resolve
-      })
-    },
-    resolve: (ptyId) => {
-      e2eTerminalHiddenSnapshotOverrides.get(ptyId)?.resolve()
-    },
-    clear: (ptyId) => {
-      e2eTerminalHiddenSnapshotOverrides.delete(ptyId)
-    }
-  }
-}
-
-function registerE2eTerminalPtyDataInjection(
-  paneKey: string,
-  inject: (data: string, meta?: PtyDataMeta) => void
-): () => void {
-  if (!e2eConfig.exposeStore) {
-    return () => {}
-  }
-  exposeE2eTerminalPtyDataInjection()
-  e2eTerminalPtyDataInjectors.set(paneKey, inject)
-  return () => {
-    if (e2eTerminalPtyDataInjectors.get(paneKey) === inject) {
-      e2eTerminalPtyDataInjectors.delete(paneKey)
-    }
-  }
-}
-
-function readE2eHiddenSnapshotOverride(ptyId: string): Promise<PtyBufferSnapshot | null> | null {
-  if (!e2eConfig.exposeStore) {
-    return null
-  }
-  const override = e2eTerminalHiddenSnapshotOverrides.get(ptyId)
-  if (!override) {
-    return null
-  }
-  // Why: visual E2E needs to hold a hidden restore snapshot in flight so a
-  // newer live TUI frame can race it deterministically.
-  return override.promise.finally(() => {
-    if (e2eTerminalHiddenSnapshotOverrides.get(ptyId) === override) {
-      e2eTerminalHiddenSnapshotOverrides.delete(ptyId)
-    }
-  })
 }
 
 function shouldKeepHiddenStartupRendererQueriesLive(
@@ -689,19 +533,6 @@ function subscribeAgentTaskCompleteTrackingEnabled(listener: () => void): () => 
       agentTaskCompleteTrackingSettingsUnsubscribe = null
       agentTaskCompleteTrackingSettingsSnapshot = null
     }
-  }
-}
-
-function recordPtyConnectDiagnostic(message: string): void {
-  if (!e2eConfig.exposeStore) {
-    return
-  }
-  console.log(`[pty-connect] ${message}`)
-  const target = globalThis as Record<string, unknown>
-  const diag = (target.__ptyConnectDiag ??= [] as string[]) as string[]
-  diag.push(message)
-  if (diag.length > PTY_CONNECT_DIAG_LIMIT) {
-    diag.splice(0, diag.length - PTY_CONNECT_DIAG_LIMIT)
   }
 }
 
@@ -977,7 +808,6 @@ export function connectPanePty(
   // settles after remount must not remount its already-replaced successor.
   const terminalRecoveryGeneration = captureTerminalPaneRecoveryGeneration(deps.tabId)
   const terminalRecoveryInstance = registerTerminalPaneRecoveryInstance(deps.tabId)
-  exposeE2eTerminalPtyOutputDebug()
   let disposed = false
   const structuralReplayCoordinator = createTerminalStructuralReplayCoordinator(pane.terminal)
   let connectFrame: number | null = null
@@ -996,7 +826,6 @@ export function connectPanePty(
   let cleanupHiddenOutputRestoreFloodRepaint = (): void => {}
   let resetRendererOrderedSeqForPtyExit: (exitedPtyId: string) => void = () => {}
   let cleanupStartupDraftPasteTimers = (): void => {}
-  let unregisterE2ePtyDataInjection = (): void => {}
   let startupInjectTimer: ReturnType<typeof setTimeout> | null = null
   let sshShellReadyFallbackTimer: ReturnType<typeof setTimeout> | null = null
   let agentTaskCompleteNotificationGraceTimer: ReturnType<typeof setTimeout> | null = null
@@ -3396,7 +3225,6 @@ export function connectPanePty(
     // would — without the registry entry, later theme flips never push the
     // CSI 997 update and the TUI keeps a stale theme after reveal.
     deps.recordPaneMode2031Subscription?.(pane.id, mode)
-    recordHiddenMode2031Reply()
   }
   deps.paneTransportsRef.current.set(pane.id, transport)
   const terminalCapabilityRepliesDisposable = installTerminalCapabilityReplyHandlers({
@@ -3691,15 +3519,7 @@ export function connectPanePty(
     shouldSuppressDesktopResize: () => shouldSuppressDesktopPtyResize(),
     fitAndRun: (continuation) => safeFitAndThen(pane, 'pty-size-reassertion', continuation),
     getTerminalDimensions: () => ({ cols: pane.terminal.cols, rows: pane.terminal.rows }),
-    getAppliedSize: async (ptyId) => {
-      // Why: e2e seam — delays the read past the reveal fit to reproduce the
-      // busy-daemon/SSH ordering; returns 0 outside e2e builds.
-      const delayMs = getAppliedSizeReadE2eDelayMs()
-      if (delayMs > 0) {
-        await new Promise((resolve) => setTimeout(resolve, delayMs))
-      }
-      return window.api.pty.getSize(ptyId)
-    },
+    getAppliedSize: (ptyId) => window.api.pty.getSize(ptyId),
     forwardResize: forwardPtyResize
   })
   let pendingForegroundGridDriftCheckRaf: number | null = null
@@ -5266,10 +5086,6 @@ export function connectPanePty(
       ptyId: string,
       opts: { scrollbackRows?: number }
     ): Promise<PtyBufferSnapshot | null> {
-      const e2eSnapshot = readE2eHiddenSnapshotOverride(ptyId)
-      if (e2eSnapshot) {
-        return e2eSnapshot
-      }
       if (canUseMainBufferSnapshot(ptyId)) {
         return window.api.pty.getMainBufferSnapshot(ptyId, opts)
       }
@@ -5596,7 +5412,6 @@ export function connectPanePty(
       deps.paneMode2031Ref.current.set(pane.id, true)
       sendDesktopQueryReplyImmediate(mode2031SequenceFor(mode))
       deps.paneLastThemeModeRef.current.set(pane.id, mode)
-      recordHiddenMode2031Reply()
     }
 
     function writePtyOutputToXterm(
@@ -5869,7 +5684,6 @@ export function connectPanePty(
       if (hiddenOutputRestoreInFlight) {
         hiddenOutputRestoreFreshSnapshotNeeded = true
       }
-      recordHiddenRendererSkip(data.length)
     }
 
     // Why: discarding queued flood bytes must never swallow terminal queries —
@@ -6406,7 +6220,6 @@ export function connectPanePty(
       respondToSkippedMode2031Subscribe(data)
       resetSkippedHiddenRendererRiskState()
       hiddenRendererStateDirty = true
-      recordHiddenRendererSkip(data.length)
       const ptyId = transport.getPtyId()
       if (!ptyId || alternateScreenBackgroundRepaintTimer !== null) {
         return
@@ -7080,12 +6893,6 @@ export function connectPanePty(
 
       schedulePendingStartupCommandDelivery()
     }
-    unregisterE2ePtyDataInjection = registerE2eTerminalPtyDataInjection(cacheKey, (data, meta) => {
-      if (!disposed) {
-        dataCallback(data, meta)
-      }
-    })
-
     const beginReattachLiveDataDeferral = (ownerGeneration = transportStreamGeneration): void => {
       reattachLiveDataDeferralDepth += 1
       if (reattachLiveDataDeferralDepth === 1) {
@@ -7811,13 +7618,9 @@ export function connectPanePty(
       isSessionOwnedByWorktree(candidateReattachSessionId, deps.worktreeId)
         ? candidateReattachSessionId
         : null
-    recordPtyConnectDiagnostic(
-      `pane=${pane.id} tab=${deps.tabId} restored=${restoredPtyId} existing=${existingPtyId} detached=${detachedRemoteLeafPtyId ?? detachedLivePtyId} reattach=${deferredReattachSessionId} hasTransport=${hadExistingPaneTransportAtConnect} pendingKey=${pendingSpawnKey}`
-    )
 
     if (deferredReattachSessionId) {
       allowInitialIdleCacheSeed = true
-      recordPtyConnectDiagnostic(`pane=${pane.id} -> REATTACH ${deferredReattachSessionId}`)
 
       // Why: reattach also pre-signals so the cooperation gate suppresses
       // the daemon seed for this paneKey. Reattach paths register their
@@ -7955,7 +7758,6 @@ export function connectPanePty(
       // agent) whose restored id may not equal the tab ptyId yet still has a
       // live eager buffer to adopt.
       const attachPtyId = detachedRemoteLeafPtyId ?? detachedLivePtyId ?? eagerLivePtyId!
-      recordPtyConnectDiagnostic(`pane=${pane.id} -> ATTACH detached=${attachPtyId}`)
       allowInitialIdleCacheSeed = false
       // Why: surface synchronous attach failures (e.g., the PTY died between
       // mount and remount, so window.api.pty.resize rejects) through
@@ -7993,7 +7795,6 @@ export function connectPanePty(
       allowInitialIdleCacheSeed = false
       const pendingSpawn = pendingSpawnByPaneKey.get(pendingSpawnKey)
       if (pendingSpawn) {
-        recordPtyConnectDiagnostic(`pane=${pane.id} -> PENDING SPAWN`)
         void pendingSpawn
           .then((spawnedPtyId) => {
             if (disposed) {
@@ -8041,7 +7842,6 @@ export function connectPanePty(
             reportError(err instanceof Error ? err.message : String(err))
           })
       } else {
-        recordPtyConnectDiagnostic(`pane=${pane.id} -> FRESH SPAWN`)
         if (sleptRemoteColdRestoreStartup || hasSleepingAgentSession) {
           startFreshColdRestoreAgentResume(sleptRemoteColdRestoreStartup ?? undefined)
         } else {
@@ -8291,7 +8091,6 @@ export function connectPanePty(
       dropSideEffectFactConsumer()
       clearPanePtyFitBinding()
       discardTerminalOutput(pane.terminal)
-      unregisterE2ePtyDataInjection()
       if (agentTaskCompleteSettingsUnsubscribe !== null) {
         agentTaskCompleteSettingsUnsubscribe()
         agentTaskCompleteSettingsUnsubscribe = null

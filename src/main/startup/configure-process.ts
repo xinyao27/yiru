@@ -2,7 +2,6 @@ import { app } from 'electron'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { getVersionManagerBinPaths } from '../codex-cli/command'
-import { getMainE2EConfig } from '../e2e-config'
 
 const DEV_PARENT_SHUTDOWN_GRACE_MS = 3000
 const HTTP1_COMPATIBILITY_ENV_VAR = 'YIRU_DISABLE_HTTP2'
@@ -90,10 +89,6 @@ export function isDevParentShutdownRequested(): boolean {
   return devParentShutdownRequested
 }
 
-export function resetDevParentShutdownRequestForTests(): void {
-  devParentShutdownRequested = false
-}
-
 export function installUncaughtPipeErrorGuard(): void {
   const onUncaughtException = (error: unknown): void => {
     if (
@@ -177,13 +172,11 @@ export function patchPackagedProcessPath(): void {
 }
 
 export function configureDevUserDataPath(isDev: boolean): void {
-  const e2eConfig = getMainE2EConfig()
-  if (e2eConfig.userDataDir) {
-    // Why: the E2E suite launches a fresh Electron app for each spec. A
-    // dedicated userData path per launch prevents persisted repos, worktrees,
-    // and session state from leaking between tests through the shared dev
-    // profile while still leaving the user's real packaged profile untouched.
-    app.setPath('userData', e2eConfig.userDataDir)
+  const isolatedUserDataPath = process.env.YIRU_APP_USER_DATA_PATH
+  if (isolatedUserDataPath) {
+    // Why: the mobile emulator starts a temporary pairing runtime that must not
+    // read or overwrite the user's normal desktop profile.
+    app.setPath('userData', isolatedUserDataPath)
     return
   }
 
@@ -297,16 +290,6 @@ export function installDevParentSignalQuit(isDev: boolean): void {
 }
 
 export function enableMainProcessGpuFeatures(): void {
-  if (process.platform === 'linux' && getMainE2EConfig().userDataDir) {
-    // Why: Ubuntu/Xvfb runners can fail Electron startup with
-    // "GPU process isn't usable" before Playwright sees the first window.
-    // E2E coverage does not depend on GPU compositing, so keep CI on the
-    // software path instead of retrying around a crashed app process.
-    app.disableHardwareAcceleration()
-    app.commandLine.appendSwitch('disable-gpu')
-    return
-  }
-
   // Why: Blink force-loses the oldest WebGL context past 16 per renderer, and
   // each attached terminal pane holds one — a busy worktree (tabs × splits)
   // can exceed that, silently downgrading evicted panes to the DOM renderer.

@@ -142,9 +142,3 @@ export async function reportReactErrorBoundaryCrash(
     console.warn('[react-error-boundary] Crash reporting IPC failed:', error)
   }
 }
-
-export function clearReactErrorBoundaryReportingForTest(): void {
-  reportedRendererErrorKeys.length = 0
-  reportedRendererErrorKeySet.clear()
-  pendingReactErrorBoundaryReport = null
-}

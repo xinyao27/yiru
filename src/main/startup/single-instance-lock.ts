@@ -4,7 +4,6 @@ import { writeStartupDiagnosticLine, type StartupDiagnosticSink } from './startu
 export const SINGLE_INSTANCE_LOCK_FAILURE_MESSAGE =
   '[single-instance] Another Yiru instance is already running for this userData profile; exiting this launch after requesting the existing window. If no Yiru process is running, this may be an Electron/macOS single-instance lock failure.'
 export const SINGLE_INSTANCE_LOCK_BYPASS_ENV = 'YIRU_BYPASS_SINGLE_INSTANCE_LOCK'
-export const SINGLE_INSTANCE_LOCK_E2E_ENFORCE_ENV = 'YIRU_E2E_ENFORCE_SINGLE_INSTANCE_LOCK'
 export const SINGLE_INSTANCE_LOCK_BYPASS_MESSAGE =
   '[single-instance] YIRU_BYPASS_SINGLE_INSTANCE_LOCK=1 is set; bypassing the packaged macOS single-instance lock for diagnostics. Do not use this with another Yiru instance running for the same profile.'
 
@@ -17,9 +16,8 @@ export const SINGLE_INSTANCE_LOCK_BYPASS_MESSAGE =
  * instance quits, metadata points at a dead pid and `yiru status` reports
  * `stale_bootstrap` even though the original process is still running.
  *
- * This helper centralises the lock gate so it is testable in isolation and
- * so `src/main/index.ts` has one clean call site rather than two spread-out
- * Electron calls.
+ * This helper centralises the lock gate so `src/main/index.ts` has one clean
+ * call site rather than two spread-out Electron calls.
  *
  * Electron derives the lock identity from the current `userData` path, so
  * callers MUST invoke this AFTER `configureDevUserDataPath(is.dev)` — that
@@ -51,12 +49,10 @@ export function shouldBypassSingleInstanceLock(options: {
 }
 
 export function shouldSkipSingleInstanceLock(options: {
-  env?: NodeJS.ProcessEnv
   isDev: boolean
   isServeMode: boolean
 }): boolean {
-  const env = options.env ?? process.env
-  return options.isDev && !options.isServeMode && env[SINGLE_INSTANCE_LOCK_E2E_ENFORCE_ENV] !== '1'
+  return options.isDev && !options.isServeMode
 }
 
 export function logSingleInstanceLockFailure(write?: StartupDiagnosticSink): void {

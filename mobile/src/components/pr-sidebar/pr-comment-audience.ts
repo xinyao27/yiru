@@ -7,9 +7,8 @@ import {
 export { createBotAuthorOverrideSet }
 
 // Audience filtering for the PR comment timeline, ported from the desktop helper
-// (src/renderer/src/lib/pr-comment-audience.ts) minus its i18n wrapper so it stays
-// pure + unit-testable under the node Vitest config. Classification must match the
-// desktop so the same comment reads as human/bot on both surfaces.
+// without its i18n wrapper. Classification must match so the same comment reads
+// as human or bot on both surfaces.
 export type PRCommentAudienceFilter = 'all' | 'human' | 'bot'
 
 export const PR_COMMENT_AUDIENCE_FILTERS: { value: PRCommentAudienceFilter; label: string }[] = [

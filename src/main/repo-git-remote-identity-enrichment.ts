@@ -96,12 +96,3 @@ export function enrichMissingRepoGitRemoteIdentities(
     console.error('[repo-identity] Failed to enrich git remote identities:', error)
   })
 }
-
-export async function flushRepoGitRemoteIdentityEnrichmentForTests(): Promise<void> {
-  await Promise.all(inFlightProbesByLocation.values())
-}
-
-export function resetRepoGitRemoteIdentityEnrichmentForTests(): void {
-  inFlightProbesByLocation.clear()
-  noIdentityRetryAfterByLocation.clear()
-}
