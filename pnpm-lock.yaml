@@ -187,8 +187,8 @@ catalogs:
       specifier: ^3.3.1
       version: 3.3.1
     katex:
-      specifier: ^0.16.47
-      version: 0.16.47
+      specifier: ^0.18.0
+      version: 0.18.0
     lowlight:
       specifier: ^3.3.0
       version: 3.3.0
@@ -259,7 +259,7 @@ catalogs:
       specifier: ^11.0.0
       version: 11.0.0
     rolldown:
-      specifier: ^1.1.4
+      specifier: ^1.2.0
       version: 1.2.0
     serve-sim:
       specifier: ~0.1.45
@@ -669,7 +669,7 @@ importers:
         version: 3.28.0(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0)
       '@tiptap/extension-mathematics':
         specifier: 'catalog:'
-        version: 3.22.5(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0)(katex@0.16.47)
+        version: 3.22.5(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0)(katex@0.18.0)
       '@tiptap/extension-placeholder':
         specifier: 'catalog:'
         version: 3.28.0(@tiptap/extensions@3.28.0(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0))
@@ -774,7 +774,7 @@ importers:
         version: 1.11.13
       katex:
         specifier: 'catalog:'
-        version: 0.16.47
+        version: 0.18.0
       lowlight:
         specifier: 'catalog:'
         version: 3.3.0
@@ -8141,6 +8141,10 @@ packages:
     resolution: {integrity: sha512-Eeo8Ys1doU1z+x8AZsPpQu+p/QcZBI5PeOo7QGQdy2x2m0MU/hYagBbGOmXwr5KVbEfVuWv9LpnQWeehogurjg==}
     hasBin: true
 
+  katex@0.18.0:
+    resolution: {integrity: sha512-rZ4Sw94Oja12Ib4+ee7inAr//yxj0G8RaAlh+ZpzfFhwTifGeJbqJ7D0FStcv6EV8DeNNU9Y8rPeg6vPUizlqg==}
+    hasBin: true
+
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
@@ -14977,11 +14981,11 @@ snapshots:
       '@tiptap/core': 3.28.0(@tiptap/pm@3.28.0)
       '@tiptap/pm': 3.28.0
 
-  '@tiptap/extension-mathematics@3.22.5(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0)(katex@0.16.47)':
+  '@tiptap/extension-mathematics@3.22.5(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0)(katex@0.18.0)':
     dependencies:
       '@tiptap/core': 3.28.0(@tiptap/pm@3.28.0)
       '@tiptap/pm': 3.28.0
-      katex: 0.16.47
+      katex: 0.18.0
 
   '@tiptap/extension-ordered-list@3.28.0(@tiptap/extension-list@3.28.0(@tiptap/core@3.28.0(@tiptap/pm@3.28.0))(@tiptap/pm@3.28.0))':
     dependencies:
@@ -19871,6 +19875,10 @@ snapshots:
       object.values: 1.2.1
 
   katex@0.16.47:
+    dependencies:
+      commander: 8.3.0
+
+  katex@0.18.0:
     dependencies:
       commander: 8.3.0
 

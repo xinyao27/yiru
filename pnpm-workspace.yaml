@@ -85,7 +85,7 @@ catalog:
   html-to-image: ^1.11.13
   i18next: ^26.3.6
   jsonc-parser: ^3.3.1
-  katex: ^0.16.47
+  katex: ^0.18.0
   lowlight: ^3.3.0
   lucide-react-native: ^1.25.0
   marked: ^17.0.6
@@ -118,7 +118,7 @@ catalog:
   remark-gfm: ^4.0.1
   remark-math: ^6.0.0
   remark-parse: ^11.0.0
-  rolldown: ^1.1.4
+  rolldown: ^1.2.0
   serve-sim: ~0.1.45
   shadcn: ^4.13.1
   sherpa-onnx: 1.12.37
