@@ -59,6 +59,7 @@ import {
 import type { PortForwardEntry, EnrichedDetectedPort } from '../../../../shared/ssh-types'
 import type { WorkspacePort } from '../../../../shared/workspace-ports'
 import { translate } from '@/i18n/i18n'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 
 export {
   killWorkspacePortForTarget,
@@ -341,9 +342,9 @@ function LocalWorkspacePortsPanel({ isVisible }: { isVisible: boolean }): React.
             render={
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="icon-xs"
-                className="text-muted-foreground hover:text-foreground"
+                className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
                 onClick={() => void refresh()}
                 disabled={refreshing}
                 aria-label={translate(

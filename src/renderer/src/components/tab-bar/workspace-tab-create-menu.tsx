@@ -10,6 +10,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
+import { Button } from '@/components/ui/button'
 
 type WorkspaceTabCreateMenuProps = {
   open: boolean
@@ -30,11 +31,13 @@ export function WorkspaceTabCreateMenu({
 }: WorkspaceTabCreateMenuProps): React.JSX.Element {
   const label = translate('auto.components.tab.bar.TabBar.b1a132357f', 'New tab')
   const triggerButton = (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="icon-xs"
       className={cn(
-        'ml-1 my-auto flex h-7 w-6 shrink-0 items-center justify-center text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground',
-        disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent hover:text-muted-foreground'
+        'ml-1 my-auto h-7 w-6 shrink-0 text-muted-foreground hover:text-accent-foreground',
+        disabled && 'cursor-not-allowed opacity-50 hover:bg-background hover:text-muted-foreground'
       )}
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       // Why: the shared accessible name keeps both local and remote create
@@ -58,7 +61,7 @@ export function WorkspaceTabCreateMenu({
       }}
     >
       <Plus className="size-4" />
-    </button>
+    </Button>
   )
   const trigger = <TooltipTrigger render={<DropdownMenuTrigger render={triggerButton} />} />
 

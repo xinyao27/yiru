@@ -206,7 +206,7 @@ const TITLEBAR_CLASS_NAME =
 const TITLEBAR_LEFT_CLASS_NAME =
   'worktree-sidebar-theme flex h-9 min-h-9 shrink-0 flex-row items-center overflow-hidden bg-sidebar shadow-[inset_0_-1px_0_var(--border)] select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
 const WINDOW_CONTROL_BUTTON_CLASS_NAME =
-  'h-9 w-[46px] bg-transparent text-muted-foreground transition-[background,color] duration-100 hover:bg-accent hover:text-foreground'
+  'h-9 w-[46px] bg-[var(--bg-titlebar,var(--card))] text-muted-foreground transition-[background,color] duration-100 hover:bg-accent hover:text-foreground'
 
 async function listRuntimeSessionHostIdsForStartup(): Promise<ExecutionHostId[]> {
   try {
@@ -310,7 +310,7 @@ function WindowControls(): React.JSX.Element {
         size="icon-sm"
         className={cn(
           WINDOW_CONTROL_BUTTON_CLASS_NAME,
-          'hover:bg-destructive hover:text-white dark:hover:bg-destructive/60 dark:hover:text-white'
+          'hover:bg-destructive hover:text-white dark:hover:bg-destructive dark:hover:text-white'
         )}
         aria-label={translate('auto.App.e960d18540', 'Close')}
         // Why: IPC to main so the BrowserWindow 'close' event fires, which
@@ -2061,7 +2061,10 @@ function App(): React.JSX.Element {
                     type="button"
                     variant="ghost"
                     size="icon-xs"
-                    className={cn('mr-2 text-muted-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
+                    className={cn(
+                      'mr-2 bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
+                      TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
+                    )}
                     aria-label={translate('auto.App.8b0b8eb54f', 'Application menu')}
                     onClick={() => window.api.ui.popupMenu()}
                   >
@@ -2085,7 +2088,10 @@ function App(): React.JSX.Element {
                   type="button"
                   variant="ghost"
                   size="icon-sm"
-                  className={cn('text-muted-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
+                  className={cn(
+                    'bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
+                    TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
+                  )}
                   onClick={actions.toggleSidebar}
                   aria-label={translate('auto.App.e4b9e7dff7', 'Toggle sidebar')}
                 >
@@ -2115,7 +2121,10 @@ function App(): React.JSX.Element {
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className={cn('text-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
+                  className={cn(
+                    'bg-sidebar text-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
+                    TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
+                  )}
                   onClick={() => useAppStore.getState().goBackWorktree()}
                   disabled={!canGoBackWorktree}
                   aria-label={translate('auto.App.064bd07810', 'Go back')}
@@ -2137,7 +2146,10 @@ function App(): React.JSX.Element {
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className={cn('text-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
+                  className={cn(
+                    'bg-sidebar text-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
+                    TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
+                  )}
                   onClick={() => useAppStore.getState().goForwardWorktree()}
                   disabled={!canGoForwardWorktree}
                   aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
@@ -2165,7 +2177,10 @@ function App(): React.JSX.Element {
             type="button"
             variant="ghost"
             size="icon-sm"
-            className={cn('mr-2 text-muted-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
+            className={cn(
+              'mr-2 bg-[var(--bg-titlebar,var(--card))] text-muted-foreground dark:bg-[var(--bg-titlebar,var(--card))] dark:hover:bg-accent',
+              TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
+            )}
             onClick={actions.toggleRightSidebar}
             aria-label={translate('auto.App.9e0b441a91', 'Toggle right sidebar')}
           >
@@ -2203,7 +2218,10 @@ function App(): React.JSX.Element {
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                className={cn('mr-2 text-muted-foreground', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
+                className={cn(
+                  'mr-2 bg-[var(--bg-titlebar,var(--card))] text-muted-foreground dark:bg-[var(--bg-titlebar,var(--card))] dark:hover:bg-accent',
+                  TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
+                )}
                 onClick={handleToggleExpand}
                 aria-label={translate('auto.App.c1cf0b0e4a', 'Collapse pane')}
                 disabled={!activeTabCanExpand}

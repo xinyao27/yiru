@@ -905,7 +905,7 @@ export function ActivityThreadOptionsMenu({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="size-8 shrink-0 border-input bg-transparent p-0 text-muted-foreground shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground"
+                    className="size-8 shrink-0 p-0 text-muted-foreground hover:text-accent-foreground"
                     aria-label={translate(
                       'auto.components.activity.ActivityPrototypePage.db8a1878b5',
                       'Thread list options'

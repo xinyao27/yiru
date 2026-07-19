@@ -189,7 +189,7 @@ export function HostSectionHeaderMenu({ row }: { row: HostHeaderRow }): React.JS
                   variant="ghost"
                   size="icon-xs"
                   type="button"
-                  className="size-5 shrink-0 text-muted-foreground can-hover:opacity-0 transition-opacity focus-visible:opacity-100 group-hover/host-header:opacity-100 data-[state=open]:opacity-100"
+                  className="size-5 shrink-0 bg-sidebar text-muted-foreground transition-opacity can-hover:opacity-0 hover:bg-sidebar-accent focus-visible:opacity-100 group-hover/host-header:opacity-100 data-[state=open]:opacity-100 dark:bg-sidebar dark:hover:bg-sidebar-accent"
                   aria-label={translate(
                     'auto.components.sidebar.HostSectionHeaderMenu.4f2c8a9b10',
                     'Host actions for {{value0}}',

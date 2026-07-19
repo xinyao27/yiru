@@ -32,9 +32,9 @@ const SidebarHeader = React.memo(function SidebarHeader() {
           <TooltipTrigger
             render={
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon-xs"
-                className="text-muted-foreground"
+                className="bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent"
                 aria-label={translate(
                   'auto.components.sidebar.SidebarHeader.25a95899c9',
                   'Add Project'
@@ -54,8 +54,9 @@ const SidebarHeader = React.memo(function SidebarHeader() {
           <TooltipTrigger
             render={
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon-xs"
+                className="bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent"
                 onClick={() => {
                   if (!canCreateWorkspace) {
                     return

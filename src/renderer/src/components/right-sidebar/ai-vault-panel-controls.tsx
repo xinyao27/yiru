@@ -36,6 +36,7 @@ import { getExecutionHostLabel, type ExecutionHostScope } from '../../../../shar
 import { agentLabel, type AiVaultSessionGroup } from './ai-vault-session-filters'
 import { translate } from '@/i18n/i18n'
 import type { AiVaultHostScopeOption } from './ai-vault-host-scope'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 
 const VAULT_HEADER_CONTROL_CLASS = 'size-6 shrink-0'
 
@@ -44,7 +45,7 @@ const VAULT_SCOPE_SELECTED_EDGE_CLASS =
   'data-[spacing=0]:data-[variant=outline]:aria-[checked=true]:border-l data-[spacing=0]:data-[variant=outline]:data-[state=on]:border-l'
 
 const VAULT_SCOPE_TOGGLE_ITEM_CLASS = cn(
-  'h-7 min-h-7 min-w-0 flex-1 basis-0 shrink border border-transparent bg-transparent px-2.5 text-[11px] font-medium leading-none text-foreground shadow-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-[checked=true]:border-foreground/20 aria-[checked=true]:bg-foreground/10 aria-[checked=true]:text-foreground aria-[checked=true]:shadow-xs aria-[checked=true]:hover:bg-foreground/15 aria-[checked=true]:hover:text-foreground data-[state=on]:border-foreground/20 data-[state=on]:bg-foreground/10 data-[state=on]:text-foreground data-[state=on]:shadow-xs data-[state=on]:hover:bg-foreground/15 data-[state=on]:hover:text-foreground',
+  'h-7 min-h-7 min-w-0 flex-1 basis-0 shrink border border-transparent bg-sidebar px-2.5 text-[11px] font-medium leading-none text-foreground shadow-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-[checked=true]:border-foreground/20 aria-[checked=true]:bg-sidebar-accent aria-[checked=true]:text-sidebar-accent-foreground aria-[checked=true]:shadow-xs aria-[checked=true]:hover:bg-sidebar-accent data-[state=on]:border-foreground/20 data-[state=on]:bg-sidebar-accent data-[state=on]:text-sidebar-accent-foreground data-[state=on]:shadow-xs data-[state=on]:hover:bg-sidebar-accent',
   VAULT_SCOPE_SELECTED_EDGE_CLASS,
   '@max-[300px]/ai-vault:px-1.5'
 )
@@ -138,7 +139,7 @@ export function VaultScopeSwitch({
         }
       }}
       variant="outline"
-      className="h-7 w-full rounded-md border border-sidebar-border bg-sidebar-accent/35 shadow-xs"
+      className="h-7 w-full rounded-md border border-sidebar-border bg-sidebar shadow-xs"
       aria-label={translate(
         'auto.components.right.sidebar.AiVaultPanelControls.scopeAriaLabel',
         'Session History scope: {{value0}}',
@@ -200,9 +201,12 @@ export function VaultHostScopeMenu({
         render={
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="h-6 max-w-24 shrink-0 gap-1 px-1.5 text-[11px] font-medium text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground @max-[340px]/ai-vault:w-6 @max-[340px]/ai-vault:px-0"
+            className={cn(
+              RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
+              'h-6 max-w-24 shrink-0 gap-1 px-1.5 text-[11px] font-medium text-foreground @max-[340px]/ai-vault:w-6 @max-[340px]/ai-vault:px-0'
+            )}
             aria-label={translate(
               'auto.components.right.sidebar.AiVaultPanelControls.hostScopeAriaLabel',
               'Session History host: {{value0}}',
@@ -262,11 +266,12 @@ export function VaultViewMenu({
         render={
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="icon-xs"
             className={cn(
+              RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
               VAULT_HEADER_CONTROL_CLASS,
-              'relative text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+              'relative text-foreground'
             )}
             aria-label={translate(
               'auto.components.right.sidebar.AiVaultPanelControls.viewOptionsAriaLabel',

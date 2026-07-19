@@ -19,6 +19,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { SpoolTooltipIconButton } from './spool-tooltip-icon-button'
 import { SpoolTruncatedPathLabel } from './spool-truncated-path-label'
+import { cn } from '@/lib/class-names'
 
 export type SpoolFilePreviewMode = 'content' | 'working-diff' | 'staged-diff'
 
@@ -65,6 +66,7 @@ export function SpoolFilePreviewToolbar({
       <div className="flex h-9 min-w-0 items-center gap-1 px-1.5">
         <SpoolTooltipIconButton
           label={translate('auto.components.spool.SpoolFilePreview.back', 'Back to files')}
+          variant="ghost"
           onClick={onBack}
         >
           <ChevronLeft aria-hidden="true" />
@@ -101,7 +103,8 @@ export function SpoolFilePreviewToolbar({
                     <Button
                       type="button"
                       size="icon-xs"
-                      variant="ghost"
+                      variant="outline"
+                      className="bg-sidebar text-muted-foreground hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent"
                       aria-label={translate(
                         'auto.components.spool.SpoolFilePreview.fileActions',
                         'File actions'
@@ -133,8 +136,12 @@ export function SpoolFilePreviewToolbar({
           <Button
             type="button"
             size="xs"
-            variant={mode === 'content' ? 'secondary' : 'ghost'}
-            className="min-w-0 px-1.5"
+            variant="ghost"
+            className={cn(
+              'min-w-0 bg-sidebar px-1.5 hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
+              mode === 'content' &&
+                'bg-sidebar-accent text-sidebar-accent-foreground dark:bg-sidebar-accent'
+            )}
             onClick={() => onModeChange('content')}
           >
             {translate('auto.components.spool.SpoolFilePreview.content', 'Content')}
@@ -142,8 +149,12 @@ export function SpoolFilePreviewToolbar({
           <Button
             type="button"
             size="xs"
-            variant={mode === 'working-diff' ? 'secondary' : 'ghost'}
-            className="min-w-0 px-1.5"
+            variant="ghost"
+            className={cn(
+              'min-w-0 bg-sidebar px-1.5 hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
+              mode === 'working-diff' &&
+                'bg-sidebar-accent text-sidebar-accent-foreground dark:bg-sidebar-accent'
+            )}
             onClick={() => onModeChange('working-diff')}
           >
             {translate('auto.components.spool.SpoolFilePreview.workingCompact', 'Working')}
@@ -151,8 +162,12 @@ export function SpoolFilePreviewToolbar({
           <Button
             type="button"
             size="xs"
-            variant={mode === 'staged-diff' ? 'secondary' : 'ghost'}
-            className="min-w-0 px-1.5"
+            variant="ghost"
+            className={cn(
+              'min-w-0 bg-sidebar px-1.5 hover:bg-sidebar-accent dark:bg-sidebar dark:hover:bg-sidebar-accent',
+              mode === 'staged-diff' &&
+                'bg-sidebar-accent text-sidebar-accent-foreground dark:bg-sidebar-accent'
+            )}
             onClick={() => onModeChange('staged-diff')}
           >
             {translate('auto.components.spool.SpoolFilePreview.stagedCompact', 'Staged')}

@@ -38,6 +38,7 @@ import {
   computeMaxRightSidebarPanelWidth
 } from './right-sidebar-width'
 import { useMeasuredWidth } from './right-sidebar-measured-width'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 
 const ACTIVITY_BAR_SIDE_WIDTH = 40
 
@@ -101,7 +102,11 @@ export function RightSidebarFrame({
             type="button"
             variant="ghost"
             size="icon-sm"
-            className={cn('mr-1 text-muted-foreground', RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)}
+            className={cn(
+              RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
+              'mr-1',
+              RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
+            )}
             onClick={onToggle}
             aria-label={translate(
               'auto.components.right.sidebar.index.e8e2e4ce74',

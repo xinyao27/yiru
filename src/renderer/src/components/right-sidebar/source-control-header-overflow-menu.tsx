@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 
 export function SourceControlHeaderOverflowMenu({
   sourceControlViewMode,
@@ -53,9 +54,9 @@ export function SourceControlHeaderOverflowMenu({
                 render={
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="icon-xs"
-                    className="size-7 text-muted-foreground hover:text-foreground"
+                    className={`${RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME} size-7`}
                     aria-label={translate(
                       'auto.components.right.sidebar.SourceControl.f71c4a8d90',
                       'More source control actions'

@@ -17,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { WorktreeOpenInMenuItems } from '@/components/sidebar/worktree-open-in-menu'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 
 type FileExplorerToolbarProps = {
   repoName: string
@@ -67,9 +68,10 @@ export function FileExplorerToolbar({
           render={
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="icon-xs"
               className={cn(
+                RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
                 'text-muted-foreground hover:text-foreground',
                 !canCollapseAll && 'cursor-not-allowed opacity-50'
               )}
@@ -103,9 +105,10 @@ export function FileExplorerToolbar({
           render={
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="icon-xs"
               className={cn(
+                RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
                 'text-muted-foreground hover:text-foreground',
                 !canRefresh && 'cursor-not-allowed opacity-50'
               )}
@@ -146,9 +149,9 @@ export function FileExplorerToolbar({
                 render={
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="icon-xs"
-                    className="text-muted-foreground hover:text-foreground"
+                    className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
                     aria-label={translate(
                       'auto.components.right.sidebar.FileExplorerToolbar.31b4c3195d',
                       'More Explorer Actions'

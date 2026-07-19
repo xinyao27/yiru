@@ -109,9 +109,9 @@ function TabStripScrollButton({
       <TooltipTrigger
         render={
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon-xs"
-            className="mx-0.5 my-auto h-6 w-5 text-muted-foreground hover:bg-accent/50 hover:text-foreground disabled:opacity-35"
+            className="mx-0.5 my-auto h-6 w-5 text-muted-foreground hover:text-foreground disabled:opacity-35"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             aria-label={label}
             aria-disabled={!canScroll}

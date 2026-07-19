@@ -2,6 +2,7 @@ import { ArrowClockwise as RefreshCw, MagnifyingGlass as Search, X } from '@phos
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 import type {
   AiVaultAgent,
   AiVaultGroup,
@@ -11,6 +12,10 @@ import type {
 import type { ExecutionHostScope } from '../../../../shared/execution-host'
 import { VaultHostScopeMenu, VaultScopeSwitch, VaultViewMenu } from './ai-vault-panel-controls'
 import type { AiVaultHostScopeOption } from './ai-vault-host-scope'
+import {
+  RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
+  RIGHT_SIDEBAR_INPUT_BUTTON_SURFACE_CLASS_NAME
+} from './right-sidebar-button-styles'
 
 type AiVaultPanelHeaderProps = {
   query: string
@@ -127,7 +132,7 @@ export function AiVaultPanelHeader({
           />
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="icon-xs"
             aria-label={translate(
               'auto.components.right.sidebar.AiVaultPanel.refreshSessionHistory',
@@ -136,7 +141,7 @@ export function AiVaultPanelHeader({
             onClick={onRefresh}
             disabled={loading}
             aria-busy={loading}
-            className="size-6"
+            className={cn(RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME, 'size-6')}
           >
             {loading ? <LoadingIndicator className="size-3" /> : <RefreshCw className="size-3" />}
           </Button>
@@ -170,7 +175,7 @@ export function AiVaultPanelHeader({
             type="button"
             variant="ghost"
             size="icon-xs"
-            className="size-5 rounded-sm text-muted-foreground hover:text-foreground"
+            className={cn(RIGHT_SIDEBAR_INPUT_BUTTON_SURFACE_CLASS_NAME, 'size-5 rounded-sm')}
             onClick={() => onQueryChange('')}
             aria-label={translate(
               'auto.components.right.sidebar.AiVaultPanel.clearSearch',

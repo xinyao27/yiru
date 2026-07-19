@@ -245,7 +245,7 @@ export default function TerminalPaneHeaderOverlay({
                         render={
                           <Button
                             type="button"
-                            variant="ghost"
+                            variant="outline"
                             size="icon-xs"
                             // Same class as split so it shares the hover/active reveal
                             // and sits as a peer in the [chat][split][×] cluster.
@@ -288,7 +288,7 @@ export default function TerminalPaneHeaderOverlay({
                         render={
                           <Button
                             type="button"
-                            variant="ghost"
+                            variant="outline"
                             size="icon-xs"
                             className="pane-title-split-trigger"
                             data-contextual-tour-target={

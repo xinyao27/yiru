@@ -118,7 +118,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   render={
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="outline"
                       size="icon-sm"
                       aria-label={translate(
                         'auto.components.browser-pane.markup.style',
@@ -167,7 +167,9 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   onClick={() => onWidthChange(option)}
                   className={cn(
                     'flex h-6 flex-1 items-center justify-center rounded-sm border',
-                    width === option ? 'border-ring bg-accent' : 'border-border hover:bg-accent/50'
+                    width === option
+                      ? 'border-ring bg-accent'
+                      : 'border-border bg-background hover:bg-accent'
                   )}
                 >
                   <span
@@ -188,7 +190,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   render={
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       className="h-8 gap-1 px-2"
                       aria-label={translate(
@@ -221,7 +223,9 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   onClick={() => onFontSizeChange(size)}
                   className={cn(
                     'flex h-6 min-w-7 items-center justify-center rounded-sm border px-1 text-[11px] tabular-nums',
-                    fontSize === size ? 'border-ring bg-accent' : 'border-border hover:bg-accent/50'
+                    fontSize === size
+                      ? 'border-ring bg-accent'
+                      : 'border-border bg-background hover:bg-accent'
                   )}
                 >
                   {size}

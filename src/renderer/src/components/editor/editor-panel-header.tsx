@@ -26,6 +26,7 @@ import { useDiffNavigation } from './diff-navigation-context'
 import { useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { cn } from '@/lib/class-names'
+import { Button } from '@/components/ui/button'
 
 type EditorPanelHeaderProps = {
   activeFile: OpenFile
@@ -123,9 +124,11 @@ export function EditorPanelHeader({
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
+                <Button
                   type="button"
-                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                  variant="outline"
+                  size="icon-xs"
+                  className="size-6 shrink-0 text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
                   onClick={onOpenPreviewToSide}
                   aria-label={translate(
                     'auto.components.editor.EditorPanelHeader.fb8331694e',
@@ -133,7 +136,7 @@ export function EditorPanelHeader({
                   )}
                 >
                   <Eye size={14} />
-                </button>
+                </Button>
               }
             />
             <TooltipContent side="bottom" sideOffset={4}>
@@ -150,9 +153,11 @@ export function EditorPanelHeader({
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
+                <Button
                   type="button"
-                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                  variant="outline"
+                  size="icon-xs"
+                  className="size-6 shrink-0 text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
                   onClick={() => onOpenDiffTargetFile(isMarkdown ? 'rich' : undefined)}
                   aria-label={translate(
                     'auto.components.editor.EditorPanelHeader.a10d9b8337',
@@ -161,7 +166,7 @@ export function EditorPanelHeader({
                   disabled={!openFileState.canOpen}
                 >
                   <FileText size={14} />
-                </button>
+                </Button>
               }
             />
             <TooltipContent side="bottom" sideOffset={4}>
@@ -192,7 +197,7 @@ export function EditorPanelHeader({
           showFileScope
           triggerLabel="AI notes"
           triggerCount={fileDiffComments.length}
-          triggerClassName="h-6 shrink-0 gap-1 rounded-full border border-border/70 bg-muted/40 px-2 text-[11px] font-medium leading-none text-foreground/80 hover:bg-accent hover:text-foreground"
+          triggerClassName="h-6 shrink-0 gap-1 rounded-full border border-border bg-muted px-2 text-[11px] font-medium leading-none text-foreground/80 hover:bg-accent hover:text-foreground"
           iconClassName="size-3"
         />
       )}
@@ -203,13 +208,15 @@ export function EditorPanelHeader({
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
+                <Button
                   type="button"
-                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                  variant="outline"
+                  size="icon-xs"
+                  className="size-6 shrink-0 text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
                   onClick={onToggleSideBySide}
                 >
                   {sideBySide ? <Rows2 size={14} /> : <Columns2 size={14} />}
-                </button>
+                </Button>
               }
             />
             <TooltipContent side="bottom" sideOffset={4}>
@@ -227,9 +234,11 @@ export function EditorPanelHeader({
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
+                <Button
                   type="button"
-                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                  variant="outline"
+                  size="icon-xs"
+                  className="size-6 shrink-0 text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
                   onClick={goToPreviousDiff}
                   aria-label={translate(
                     'auto.components.editor.EditorPanelHeader.2076ecfc9c',
@@ -238,7 +247,7 @@ export function EditorPanelHeader({
                   disabled={changeCount === 0}
                 >
                   <ArrowUp size={14} />
-                </button>
+                </Button>
               }
             />
             <TooltipContent side="bottom" sideOffset={4}>
@@ -255,9 +264,11 @@ export function EditorPanelHeader({
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
+                <Button
                   type="button"
-                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                  variant="outline"
+                  size="icon-xs"
+                  className="size-6 shrink-0 text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
                   onClick={goToNextDiff}
                   aria-label={translate(
                     'auto.components.editor.EditorPanelHeader.631dab0df3',
@@ -266,7 +277,7 @@ export function EditorPanelHeader({
                   disabled={changeCount === 0}
                 >
                   <ArrowDown size={14} />
-                </button>
+                </Button>
               }
             />
             <TooltipContent side="bottom" sideOffset={4}>
@@ -297,10 +308,12 @@ export function EditorPanelHeader({
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
+                <Button
                   type="button"
+                  variant="outline"
+                  size="icon-xs"
                   className={cn(
-                    'p-1 rounded hover:bg-accent hover:text-foreground transition-colors flex-shrink-0 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted-foreground',
+                    'size-6 shrink-0 hover:text-foreground [&_svg]:size-3.5',
                     showMarkdownTableOfContents && !isMarkdownTableOfContentsDisabled
                       ? 'bg-accent text-foreground'
                       : 'text-muted-foreground'
@@ -314,7 +327,7 @@ export function EditorPanelHeader({
                   aria-pressed={showMarkdownTableOfContents}
                 >
                   <ListTree size={14} />
-                </button>
+                </Button>
               }
             />
             <TooltipContent side="bottom" sideOffset={4}>

@@ -403,7 +403,7 @@
   flex-shrink: 0;
   margin-left: auto;
   color: var(--yiru-pane-title-button-fg, rgb(255 255 255 / 0.3));
-  background: transparent;
+  background: var(--yiru-pane-title-bg, var(--background));
   opacity: 0;
   transition:
     opacity 120ms ease,
@@ -417,6 +417,7 @@
 
 .pane-title-split-trigger {
   color: var(--yiru-pane-title-button-fg, rgb(255 255 255 / 0.3));
+  background: var(--yiru-pane-title-bg, var(--background));
   opacity: 0;
   transition: opacity 120ms ease;
 }
@@ -450,7 +451,7 @@
 .pane-title-split-trigger:active,
 .pane-title-split-trigger[data-state='delayed-open'],
 .pane-title-split-trigger[data-state='instant-open'] {
-  background: transparent;
+  background: var(--accent);
   color: var(--yiru-pane-title-button-hover-fg, rgb(255 255 255 / 0.8));
 }
 

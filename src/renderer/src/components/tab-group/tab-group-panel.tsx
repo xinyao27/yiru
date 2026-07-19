@@ -21,6 +21,7 @@ import { tabGroupBodyAnchorName } from './tab-group-body-anchor'
 import { translate } from '@/i18n/i18n'
 import { WorkspacePaneFrame } from './workspace-pane-frame'
 import { cn } from '@/lib/class-names'
+import { Button } from '@/components/ui/button'
 
 const EditorPanel = lazy(() => import('../editor/editor-panel'))
 
@@ -184,8 +185,7 @@ export default function TabGroupPanel({
     />
   )
 
-  const menuButtonClassName =
-    'my-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent'
+  const menuButtonClassName = 'my-auto h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground'
   // Why: focused-only — workspace actions and Close split pane stay with the
   // active pane so unfocused strips stay compact.
   const focusedActionChromeClassName = cn(
@@ -211,10 +211,10 @@ export default function TabGroupPanel({
       tabBar={tabBar}
       trailingActions={
         <div className={focusedActionChromeClassName}>
-          {isFocused ? <TabBarOpenInMenuButton worktreeId={worktreeId} /> : null}
           {isFocused ? (
             <TabBarQuickCommandsButton worktreeId={worktreeId} groupId={groupId} />
           ) : null}
+          {isFocused ? <TabBarOpenInMenuButton worktreeId={worktreeId} /> : null}
           {isFocused && hasSplitGroups ? (
             <Tooltip>
               <DropdownMenu modal={false}>
@@ -222,8 +222,10 @@ export default function TabGroupPanel({
                   render={
                     <DropdownMenuTrigger
                       render={
-                        <button
+                        <Button
                           type="button"
+                          variant="outline"
+                          size="icon-xs"
                           aria-label={translate(
                             'auto.components.tab.group.TabGroupPanel.9acaf92093',
                             'Pane Actions'
@@ -234,7 +236,7 @@ export default function TabGroupPanel({
                           className={menuButtonClassName}
                         >
                           <Ellipsis className="size-4" />
-                        </button>
+                        </Button>
                       }
                     />
                   }

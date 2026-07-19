@@ -59,10 +59,10 @@ export function MarkupDrawButton({
   const button = (
     <Button
       size="icon"
-      variant={active ? 'default' : 'ghost'}
+      variant={active ? 'default' : 'outline'}
       className={cn(
         className ?? 'h-8 w-8',
-        active && 'bg-foreground/80 text-background hover:bg-foreground/90',
+        active && 'bg-foreground text-background hover:bg-foreground',
         // Why: soft ring while the discovery callout is open — points at the
         // control without the harsh solid highlight of a force-open tooltip.
         showHint && 'ring-2 ring-ring/45 ring-offset-1 ring-offset-background'

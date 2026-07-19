@@ -41,6 +41,7 @@ import { getGitHubPRCacheKey } from '@/store/slices/github-cache-key'
 import { detectLanguage } from '@/lib/language-detect'
 import { basename, dirname, joinPath } from '@/lib/path'
 import { cn } from '@/lib/class-names'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 import { WORKSPACE_FILE_PATH_MIME } from '@/lib/workspace-file-drag'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
@@ -7238,9 +7239,9 @@ export function CompareSummaryToolbarButton({
         render={
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="icon-xs"
-            className="text-muted-foreground hover:text-foreground"
+            className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
             aria-label={label}
             onClick={onClick}
           >
@@ -7751,6 +7752,7 @@ function SourceControlTreeDirectoryRow({
         <div className={SOURCE_CONTROL_ROW_ACTION_OVERLAY_CLASS}>
           {canDiscard && (
             <ActionButton
+              surface="row"
               icon={node.area === 'untracked' ? Trash : Undo2}
               title={
                 node.area === 'untracked'
@@ -7772,6 +7774,7 @@ function SourceControlTreeDirectoryRow({
           )}
           {canStage && (
             <ActionButton
+              surface="row"
               icon={Plus}
               title={translate(
                 'auto.components.right.sidebar.SourceControl.bfe9011a0e',
@@ -7786,6 +7789,7 @@ function SourceControlTreeDirectoryRow({
           )}
           {canUnstage && (
             <ActionButton
+              surface="row"
               icon={Minus}
               title={translate(
                 'auto.components.right.sidebar.SourceControl.ab31221779',
@@ -8090,6 +8094,7 @@ const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
         <div className={SOURCE_CONTROL_ROW_ACTION_OVERLAY_CLASS}>
           {canDiscard && (
             <ActionButton
+              surface="row"
               icon={entry.area === 'untracked' ? Trash : Undo2}
               title={
                 entry.area === 'untracked'
@@ -8115,6 +8120,7 @@ const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
           )}
           {canStage && (
             <ActionButton
+              surface="row"
               icon={Plus}
               title={translate('auto.components.right.sidebar.SourceControl.8cde1a2fb0', 'Stage')}
               onClick={(event) => {
@@ -8125,6 +8131,7 @@ const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
           )}
           {canUnstage && (
             <ActionButton
+              surface="row"
               icon={Minus}
               title={translate('auto.components.right.sidebar.SourceControl.df5040e3c3', 'Unstage')}
               onClick={(event) => {
@@ -8294,12 +8301,14 @@ export function ActionButton({
   icon: Icon,
   title,
   onClick,
-  disabled
+  disabled,
+  surface = 'header'
 }: {
   icon: React.ComponentType<{ className?: string }>
   title: string
   onClick: (event: React.MouseEvent) => void
   disabled?: boolean
+  surface?: 'header' | 'row'
 }): React.JSX.Element {
   // Why: use the Radix Tooltip instead of the native `title` attribute so the
   // label matches the rest of the sidebar chrome (consistent styling, no OS
@@ -8323,10 +8332,12 @@ export function ActionButton({
         render={
           <Button
             type="button"
-            variant="ghost"
+            variant={surface === 'row' ? 'ghost' : 'outline'}
             size="icon-xs"
             className={cn(
-              'text-muted-foreground hover:bg-background/70 hover:text-foreground',
+              surface === 'row'
+                ? 'bg-accent text-muted-foreground hover:bg-accent hover:text-foreground dark:bg-accent dark:hover:bg-accent'
+                : RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
               disabled && 'opacity-50 cursor-not-allowed'
             )}
             aria-label={title}

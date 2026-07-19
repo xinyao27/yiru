@@ -27,6 +27,7 @@ export function ActivityTitlebarControls(): React.JSX.Element {
                 type="button"
                 variant="ghost"
                 size="icon-xs"
+                className="bg-[var(--bg-titlebar,var(--card))] dark:bg-[var(--bg-titlebar,var(--card))] dark:hover:bg-accent"
                 onClick={closeActivityPage}
                 aria-label={translate(
                   'auto.components.activity.ActivityTitlebarControls.dc708f3eff',

@@ -57,7 +57,7 @@ export function MobilePageToolbar({
             <Button
               variant="ghost"
               size="icon"
-              className={mobilePageStyles.toolbarClose}
+              className={`${mobilePageStyles.toolbarClose} bg-background dark:bg-background dark:hover:bg-accent`}
               onClick={onClose}
               aria-label={translate(
                 'auto.components.mobile.MobilePageToolbar.9883b58693',
