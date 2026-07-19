@@ -1,6 +1,10 @@
 import { spawn } from 'node:child_process'
+import { normalize } from 'node:path'
+import type { RuntimeWorkspaceOpenPathResult } from '../../shared/runtime-types'
 import type { CommandHandler } from '../dispatch'
+import { getOptionalStringFlag } from '../flags'
 import { formatCliStatus, formatStatus, printResult } from '../format'
+import { resolveRepoPathArgument } from '../repo-path-arguments'
 import { RuntimeClientError, serveYiruApp } from '../runtime-client'
 import { stripElectronRunAsNode } from '../runtime/launch'
 
@@ -40,6 +44,46 @@ async function runClaudeAgentTeams(env: Record<string, string>, args: string[]):
       resolve(signal ? 1 : 0)
     })
   })
+}
+
+function getOpenDirectory(flags: Map<string, string | boolean>): string | undefined {
+  if (!flags.has('path')) {
+    return undefined
+  }
+  const path = getOptionalStringFlag(flags, 'path')
+  if (!path) {
+    throw new RuntimeClientError('invalid_argument', 'Missing value for --path.')
+  }
+  return path
+}
+
+function isCurrentDirectoryShorthand(path: string): boolean {
+  return normalize(path) === '.'
+}
+
+function getSshContextWorktree(path: string, clientIsRemote: boolean): string | undefined {
+  if (
+    clientIsRemote ||
+    process.env.YIRU_CLI_EXECUTION_HOST_KIND !== 'ssh' ||
+    !isCurrentDirectoryShorthand(path)
+  ) {
+    return undefined
+  }
+  const worktreeId = process.env.YIRU_WORKTREE_ID
+  if (!worktreeId) {
+    throw new RuntimeClientError(
+      'invalid_argument',
+      '`yiru .` over SSH currently requires a Yiru-managed workspace terminal.'
+    )
+  }
+  return worktreeId.startsWith('id:') ? worktreeId : `id:${worktreeId}`
+}
+
+function formatWorkspaceOpen(result: RuntimeWorkspaceOpenPathResult): string {
+  const target = result.kind === 'folder' ? 'folder workspace' : 'workspace'
+  return result.disposition === 'added'
+    ? `Added and opened ${target}: ${result.resolvedPath}`
+    : `Opened ${target}: ${result.resolvedPath}`
 }
 
 function getOptionalServePort(flags: Map<string, string | boolean>): string | null {
@@ -87,9 +131,37 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
       rawArgs ?? []
     )
   },
-  open: async ({ client, json }) => {
-    const result = await client.openYiru()
-    printResult(result, json, formatCliStatus)
+  open: async ({ client, json, flags, cwd }) => {
+    const directory = getOpenDirectory(flags)
+    if (!directory) {
+      const result = await client.openYiru()
+      printResult(result, json, formatCliStatus)
+      return
+    }
+
+    const contextWorktree = getSshContextWorktree(directory, client.isRemote)
+    if (
+      process.env.YIRU_CLI_EXECUTION_HOST_KIND === 'ssh' &&
+      !client.isRemote &&
+      !contextWorktree
+    ) {
+      // Why: the host CLI cannot safely interpret an arbitrary SSH path as a
+      // local path; managed `yiru .` uses the validated worktree context instead.
+      throw new RuntimeClientError(
+        'unsupported_remote_path',
+        'Opening arbitrary SSH directories is not supported yet. Run `yiru .` inside a Yiru-managed workspace.'
+      )
+    }
+
+    const targetPath = contextWorktree
+      ? cwd
+      : resolveRepoPathArgument(directory, cwd, client.isRemote, 'Remote workspace path')
+    await client.openYiru()
+    const result = await client.call<RuntimeWorkspaceOpenPathResult>('workspace.openPath', {
+      path: targetPath,
+      ...(contextWorktree ? { contextWorktree } : {})
+    })
+    printResult(result, json, formatWorkspaceOpen)
   },
   serve: async ({ flags, json }) => {
     if (flags.get('no-pairing') === true && flags.get('mobile-pairing') === true) {

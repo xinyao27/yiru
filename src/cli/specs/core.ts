@@ -5,10 +5,15 @@ import { SERVE_COMMAND_SPECS } from './serve'
 export const CORE_COMMAND_SPECS: CommandSpec[] = [
   {
     path: ['open'],
-    summary: 'Launch Yiru and wait for the runtime to be reachable',
-    usage: 'yiru open [--json]',
-    allowedFlags: [...GLOBAL_FLAGS],
-    examples: ['yiru open', 'yiru open --json']
+    summary: 'Open Yiru or open a directory as a workspace',
+    usage: 'yiru open [directory] [--json]',
+    allowedFlags: [...GLOBAL_FLAGS, 'path'],
+    positionalArgs: ['path'],
+    notes: [
+      'With a directory, Yiru activates its existing workspace or registers the Git root/plain folder before opening it.',
+      'A single bare directory is shorthand, so `yiru .` behaves like `yiru open .`.'
+    ],
+    examples: ['yiru open', 'yiru open .', 'yiru .', 'yiru open ../project --json']
   },
   ...SERVE_COMMAND_SPECS,
   {

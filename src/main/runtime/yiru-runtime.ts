@@ -220,6 +220,7 @@ import {
   worktreeWorkspaceKey
 } from '../../shared/workspace-scope'
 import { folderWorkspaceToWorktree } from '../../shared/folder-workspace-worktree'
+import { mergeExternalWorktreeInboxPaths } from '../../shared/external-worktree-inbox'
 import type {
   FolderWorkspacePathStatus,
   FolderWorkspacePathStatusRequest
@@ -307,6 +308,7 @@ import type {
   RuntimeTerminalDriverState,
   RuntimeSyncWindowGraph,
   RuntimeWorktreeListResult,
+  RuntimeWorkspaceOpenPathResult,
   BrowserTabInfo,
   BrowserScreencastResult
 } from '../../shared/runtime-types'
@@ -320,6 +322,11 @@ import {
 import { RuntimeEmulatorCommands, setEmulatorBridge } from './yiru-runtime-emulator'
 import type { EmulatorBridge } from '../emulator/emulator-bridge'
 import { RuntimeFileCommands } from './yiru-runtime-files'
+import {
+  findWorkspaceOpenWorktree,
+  resolveWorkspaceOpenDirectoryPath,
+  WorkspacePathOpenError
+} from '../workspace-path-opening'
 import { RuntimeGitCommands } from './yiru-runtime-git'
 import type { PtyProviderBufferSnapshot } from '../providers/types'
 import { ClaudeAgentTeamsService } from './claude-agent-teams-service'
@@ -445,6 +452,7 @@ import {
   getBaseRefDefault,
   getDefaultRemote,
   getBranchConflictKind,
+  getGitRepoRoot,
   isGitRepo,
   getRepoName,
   searchBaseRefDetails,
@@ -1999,6 +2007,9 @@ export class YiruRuntimeService {
   private resolvedWorktreeInFlight: ResolvedWorktreeInFlight | null = null
   private resolvedWorktreeGeneration = 0
   private cloneInFlightByPath = new Map<string, Promise<void>>()
+  // Why: two simultaneous `yiru .` requests must share the second request's
+  // post-registration lookup instead of racing duplicate repo records into disk.
+  private workspacePathOpenTail: Promise<void> = Promise.resolve()
   private agentDetector: AgentDetector | null = null
   private ptyForegroundAgentRefreshes = new Map<string, PtyForegroundAgentRefresh>()
   private ptyDelayedForegroundSnapshotTitleObservations = new Map<string, number>()
@@ -12464,6 +12475,107 @@ export class YiruRuntimeService {
       createdAt: existing?.createdAt ?? now,
       updatedAt: now
     })
+  }
+
+  async openWorkspacePath(
+    path: string,
+    contextWorktree?: string
+  ): Promise<RuntimeWorkspaceOpenPathResult> {
+    const previous = this.workspacePathOpenTail
+    let release!: () => void
+    this.workspacePathOpenTail = new Promise((resolveTail) => {
+      release = resolveTail
+    })
+    await previous
+    try {
+      return await this.openWorkspacePathNow(path, contextWorktree)
+    } finally {
+      release()
+    }
+  }
+
+  private async openWorkspacePathNow(
+    path: string,
+    contextWorktree?: string
+  ): Promise<RuntimeWorkspaceOpenPathResult> {
+    this.assertGraphReady()
+    if (contextWorktree) {
+      const worktree = await this.resolveWorktreeSelector(contextWorktree)
+      if (!isPathInsideOrEqual(worktree.path, path)) {
+        // Why: SSH `yiru .` is authorized by its managed-worktree context; a
+        // shell that cd'd elsewhere must not reinterpret that remote path locally.
+        throw new WorkspacePathOpenError(
+          'context_path_mismatch',
+          path,
+          'The current directory is outside the Yiru-managed SSH workspace. Opening arbitrary SSH directories is not supported yet.'
+        )
+      }
+      return await this.activateWorkspacePathTarget(path, worktree, 'activated')
+    }
+
+    const targetPath = await resolveWorkspaceOpenDirectoryPath(path)
+    const existingWorktree = await findWorkspaceOpenWorktree(
+      await this.listResolvedWorktrees(),
+      targetPath
+    )
+    if (existingWorktree) {
+      return await this.activateWorkspacePathTarget(path, existingWorktree, 'activated')
+    }
+
+    const kind = isGitRepo(targetPath) ? 'git' : 'folder'
+    const repoPath = kind === 'git' ? getGitRepoRoot(targetPath) : targetPath
+    const store = this.requireStore()
+    const repoIdsBeforeOpen = new Set(store.getRepos().map((repo) => repo.id))
+    const repo = await this.addRepo(repoPath, kind)
+    const worktree = await findWorkspaceOpenWorktree(
+      (await this.listResolvedWorktrees()).filter((candidate) => candidate.repoId === repo.id),
+      targetPath
+    )
+    if (!worktree) {
+      throw new Error(`Workspace was registered but could not be resolved: ${repoPath}`)
+    }
+    return await this.activateWorkspacePathTarget(
+      path,
+      worktree,
+      repoIdsBeforeOpen.has(repo.id) ? 'activated' : 'added'
+    )
+  }
+
+  private async activateWorkspacePathTarget(
+    requestedPath: string,
+    worktree: ResolvedWorktree,
+    disposition: RuntimeWorkspaceOpenPathResult['disposition']
+  ): Promise<RuntimeWorkspaceOpenPathResult> {
+    const store = this.requireStore()
+    let repo = store.getRepo(worktree.repoId)
+    if (!repo) {
+      throw new Error('repo_not_found')
+    }
+
+    if (!this.toRuntimeDetectedWorktree(repo, worktree).visible) {
+      const importedExternalWorktreePaths = mergeExternalWorktreeInboxPaths(
+        repo.importedExternalWorktreePaths,
+        [worktree.path]
+      )
+      const updated = store.updateRepo(repo.id, { importedExternalWorktreePaths })
+      if (!updated) {
+        throw new Error('repo_not_found')
+      }
+      repo = updated
+      this.invalidateResolvedWorktreeCache()
+      this.notifyReposChanged()
+      this.notifyWorktreesChanged(repo.id)
+    }
+
+    await this.activateManagedWorktree(`id:${worktree.id}`)
+    return {
+      requestedPath,
+      resolvedPath: worktree.path,
+      repoId: repo.id,
+      worktreeId: worktree.id,
+      kind: isFolderRepo(repo) ? 'folder' : 'git',
+      disposition
+    }
   }
 
   async addRepo(

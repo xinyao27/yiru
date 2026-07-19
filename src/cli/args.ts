@@ -140,6 +140,22 @@ export function parseArgs(argv: string[], commandPaths?: readonly string[][]): P
   return { commandPath, flags }
 }
 
+export function normalizeBareOpenPath(specs: CommandSpec[], parsed: ParsedArgs): ParsedArgs {
+  if (parsed.commandPath.length !== 1) {
+    return parsed
+  }
+  const candidate = parsed.commandPath[0]
+  const isReservedCommand =
+    candidate === 'help' ||
+    specs.some((spec) => specPaths(spec).some((path) => path[0] === candidate))
+  if (isReservedCommand) {
+    return parsed
+  }
+  // Why: registered command names retain priority, while one otherwise-bare
+  // positional gets the `code .`-style directory-opening shorthand.
+  return { ...parsed, commandPath: ['open', candidate] }
+}
+
 export function resolveHelpPath(parsed: ParsedArgs): string[] | null {
   if (parsed.commandPath[0] === 'help') {
     return parsed.commandPath.slice(1)

@@ -99,6 +99,9 @@ export function buildHostCliEnv(args: {
   // subprocess cwd cannot be chdir'd there; YIRU_CLI_CWD carries it for
   // cwd-based selectors like `--worktree active`.
   env.YIRU_CLI_CWD = args.remoteCwd
+  // Why: the host CLI must never resolve an SSH path against the desktop
+  // filesystem; directory opening may use only validated managed context.
+  env.YIRU_CLI_EXECUTION_HOST_KIND = 'ssh'
   // Why: same node-mode hygiene as the shipped CLI launchers — stash and clear
   // NODE_OPTIONS so Electron's node bootstrap does not inherit them.
   env.YIRU_NODE_OPTIONS = args.hostEnv.NODE_OPTIONS ?? ''

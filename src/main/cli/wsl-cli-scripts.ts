@@ -52,6 +52,9 @@ try {
   } else {
     $env:YIRU_CLI_CWD = $WslCwd
   }
+  # Why: unlike SSH passthrough, WSL paths arrive as Windows paths and are
+  # safe for the desktop runtime to resolve through the selected distro.
+  $env:YIRU_CLI_EXECUTION_HOST_KIND = 'wsl'
   Push-Location -LiteralPath (Split-Path -Parent $YiruLauncher)
   & $YiruLauncher @ForwardArgs
   if ($null -eq $LASTEXITCODE) {

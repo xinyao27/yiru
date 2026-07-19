@@ -721,6 +721,15 @@ export type RuntimeWorktreeListResult = {
   truncated: boolean
 }
 
+export type RuntimeWorkspaceOpenPathResult = {
+  requestedPath: string
+  resolvedPath: string
+  repoId: string
+  worktreeId: string
+  kind: 'git' | 'folder'
+  disposition: 'activated' | 'added'
+}
+
 // ── Browser automation types ──
 
 export type BrowserSnapshotRef = {
