@@ -6,6 +6,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  realpathSync,
   readdirSync,
   readFileSync,
   renameSync,
@@ -18,7 +19,9 @@ import { join, resolve } from 'node:path'
 
 const projectDir = resolve(import.meta.dirname, '../..')
 const electronPackageDir = resolve(projectDir, 'node_modules/electron')
-const electronRequire = createRequire(resolve(electronPackageDir, 'package.json'))
+// Why: pnpm need not hoist Electron's transitive dependencies, so resolve
+// @electron/get from Electron's real virtual-store location, not its symlink.
+const electronRequire = createRequire(realpathSync(resolve(electronPackageDir, 'package.json')))
 const { version: electronVersion } = electronRequire('./package.json')
 const { downloadArtifact } = electronRequire('@electron/get')
 const targetPlatform = getElectronTargetPlatform()
