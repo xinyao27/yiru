@@ -32,7 +32,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: mobile
+        working-directory: apps/mobile
 
     steps:
       - name: Checkout
@@ -74,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: yiru-mobile-apk
-          path: mobile/android/app/build/outputs/apk/release/*.apk
+          path: apps/mobile/android/app/build/outputs/apk/release/*.apk
 
       - name: Ensure GitHub release tag
         if: steps.release.outputs.publish_release == 'true' && !startsWith(github.ref, 'refs/tags/mobile-android-v')

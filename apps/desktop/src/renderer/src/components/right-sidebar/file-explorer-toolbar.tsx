@@ -1,0 +1,207 @@
+import {
+  DotsThree as Ellipsis,
+  ListDashes as ListCollapse,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
+import React from 'react'
+
+import { LoadingIndicator } from '@/components/loading-indicator'
+import { WorktreeOpenInMenuItems } from '@/components/sidebar/worktree-open-in-menu'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
+
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
+
+type FileExplorerToolbarProps = {
+  repoName: string
+  worktreePath?: string
+  connectionId?: string | null
+  mutationActions?: React.ReactNode
+  refresh: {
+    isRefreshing: boolean
+    showRefreshSpinner: boolean
+    handleRefresh: () => void
+  }
+  canRefresh: boolean
+  canCollapseAll: boolean
+  onCollapseAll: () => void
+  showGitIgnoredFilesToggle: boolean
+  showGitIgnoredFiles: boolean
+  onToggleGitIgnoredFiles: () => void
+  showDotfiles: boolean
+  onToggleDotfiles: () => void
+}
+
+export function FileExplorerToolbar({
+  repoName,
+  worktreePath,
+  connectionId,
+  mutationActions,
+  refresh,
+  canRefresh,
+  canCollapseAll,
+  onCollapseAll,
+  showGitIgnoredFilesToggle,
+  showGitIgnoredFiles,
+  onToggleGitIgnoredFiles,
+  showDotfiles,
+  onToggleDotfiles
+}: FileExplorerToolbarProps): React.JSX.Element {
+  return (
+    <div className="border-border flex h-8 min-h-8 items-center gap-2 border-b px-2">
+      <span
+        className="text-foreground min-w-0 flex-1 truncate text-xs font-medium"
+        title={repoName}
+      >
+        {repoName}
+      </span>
+      {mutationActions}
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-xs"
+              className={cn(
+                RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
+                'text-muted-foreground hover:text-foreground',
+                !canCollapseAll && 'cursor-not-allowed opacity-50'
+              )}
+              aria-label={translate(
+                'auto.components.right.sidebar.FileExplorerToolbar.6026b16950',
+                'Collapse All'
+              )}
+              aria-disabled={!canCollapseAll}
+              // Why: native disabled buttons suppress Radix tooltip triggers in Chromium.
+              onClick={(event) => {
+                if (!canCollapseAll) {
+                  event.preventDefault()
+                  return
+                }
+                onCollapseAll()
+              }}
+            >
+              <ListCollapse className="size-3" />
+            </Button>
+          }
+        />
+        <TooltipContent side="bottom" sideOffset={4}>
+          {translate(
+            'auto.components.right.sidebar.FileExplorerToolbar.6026b16950',
+            'Collapse All'
+          )}
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-xs"
+              className={cn(
+                RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
+                'text-muted-foreground hover:text-foreground',
+                !canRefresh && 'cursor-not-allowed opacity-50'
+              )}
+              aria-label={translate(
+                'auto.components.right.sidebar.FileExplorerToolbar.d95e30fe28',
+                'Refresh Explorer'
+              )}
+              aria-disabled={!canRefresh || refresh.isRefreshing}
+              disabled={refresh.isRefreshing}
+              onClick={(event) => {
+                if (!canRefresh) {
+                  event.preventDefault()
+                  return
+                }
+                refresh.handleRefresh()
+              }}
+            >
+              {refresh.showRefreshSpinner ? (
+                <LoadingIndicator className="size-3" />
+              ) : (
+                <RefreshCw className="size-3" />
+              )}
+            </Button>
+          }
+        />
+        <TooltipContent side="bottom" sideOffset={4}>
+          {translate(
+            'auto.components.right.sidebar.FileExplorerToolbar.d95e30fe28',
+            'Refresh Explorer'
+          )}
+        </TooltipContent>
+      </Tooltip>
+      <DropdownMenu>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-xs"
+                    className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
+                    aria-label={translate(
+                      'auto.components.right.sidebar.FileExplorerToolbar.31b4c3195d',
+                      'More Explorer Actions'
+                    )}
+                  >
+                    <Ellipsis className="size-3" />
+                  </Button>
+                }
+              />
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={4}>
+            {translate(
+              'auto.components.right.sidebar.FileExplorerToolbar.31b4c3195d',
+              'More Explorer Actions'
+            )}
+          </TooltipContent>
+        </Tooltip>
+        <DropdownMenuContent align="end" className="min-w-[12rem]">
+          <DropdownMenuCheckboxItem checked={showDotfiles} onCheckedChange={onToggleDotfiles}>
+            {translate(
+              'auto.components.right.sidebar.FileExplorerToolbar.78f133232c',
+              'Show Dotfiles'
+            )}
+          </DropdownMenuCheckboxItem>
+          {showGitIgnoredFilesToggle ? (
+            <DropdownMenuCheckboxItem
+              checked={showGitIgnoredFiles}
+              onCheckedChange={onToggleGitIgnoredFiles}
+            >
+              {translate(
+                'auto.components.right.sidebar.FileExplorerToolbar.d238264654',
+                'Show Git Ignored Files'
+              )}
+            </DropdownMenuCheckboxItem>
+          ) : null}
+          {worktreePath ? (
+            <>
+              <DropdownMenuSeparator />
+              <WorktreeOpenInMenuItems
+                worktreePath={worktreePath}
+                connectionId={connectionId}
+                labelPrefix="Open in "
+              />
+            </>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
+}

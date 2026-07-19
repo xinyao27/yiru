@@ -8,7 +8,7 @@ on:
       - reopened
       - ready_for_review
     paths:
-      - 'mobile/**'
+      - 'apps/mobile/**'
 
 jobs:
   verify:
@@ -16,7 +16,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: mobile
+        working-directory: apps/mobile
 
     steps:
       - name: Checkout
@@ -32,19 +32,9 @@ jobs:
         with:
           run_install: false
 
-      # Why: the mobile typecheck imports shared types from ../src/shared, and
-      # some of those files import runtime deps (tweetnacl, ws) resolved from
-      # the repo-root node_modules. Without a root install, tsc fails with
-      # "Cannot find module 'tweetnacl'/'ws'". Mobile is a separate pnpm project
-      # (not in the root workspace), so this is a distinct install.
-      # --ignore-scripts skips the root postinstall (Electron native-module
-      # rebuild) which is irrelevant to a type-only check and would only add
-      # time and failure surface on this ubuntu mobile runner.
-      - name: Install root dependencies
-        working-directory: .
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
       - name: Install dependencies
+        # Why: pnpm discovers the repository workspace from this app directory,
+        # so one frozen install now covers mobile and its shared source contracts.
         run: pnpm install --frozen-lockfile
 
       - name: Typecheck

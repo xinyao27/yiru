@@ -40,7 +40,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: mobile
+        working-directory: apps/mobile
 
     steps:
       - name: Checkout
@@ -82,7 +82,7 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
-          working-directory: mobile
+          working-directory: apps/mobile
 
       - name: Resolve release version and build number
         env:
@@ -150,5 +150,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: yiru-mobile-ipa
-          path: mobile/build/*.ipa
+          path: apps/mobile/build/*.ipa
           if-no-files-found: ignore

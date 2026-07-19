@@ -49,7 +49,7 @@ If your change affects UI or interaction behavior, verify it manually on the pla
 
 Project-owned type declarations belong in `.ts` files. `.d.ts` is reserved for ambient shims (e.g., `env.d.ts`, `vite/client.d.ts`). TypeScript's `skipLibCheck: true` setting applies globally, including to our own `.d.ts` files, which means any unresolved type reference in a `.d.ts` silently becomes `any` at its call sites. Write your types in `.ts` files so the compiler actually checks them.
 
-CI enforces this for `src/preload/` and `src/shared/` — see `docs/preload-typecheck-hole.md`.
+CI enforces this for `apps/desktop/src/preload/` and `apps/desktop/src/shared/` — see `docs/preload-typecheck-hole.md`.
 
 ## Pull Requests
 
