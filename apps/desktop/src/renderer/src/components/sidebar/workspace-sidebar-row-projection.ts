@@ -1,10 +1,5 @@
 import { defaultRangeExtractor, type Range } from '@tanstack/react-virtual'
 
-import {
-  projectSpoolAvailabilityDiagnostic,
-  type SpoolAvailabilityDiagnostic
-} from '@/components/spool/spool-availability-diagnostic'
-
 import type { SpoolSidebarRow } from './spool-sidebar-rows'
 import type { RenderRow } from './worktree-list-virtual-rows'
 import {
@@ -22,11 +17,6 @@ export type WorkspaceSidebarProjectedRow =
   | {
       kind: 'spool-windows-firewall'
       key: 'spool:windows-firewall'
-    }
-  | {
-      kind: 'spool-availability'
-      key: 'spool:availability'
-      diagnostic: SpoolAvailabilityDiagnostic
     }
   | {
       kind: 'spool-remote-worktrees-header'
@@ -130,13 +120,6 @@ export function shouldShowSpoolWindowsFirewallDiagnostic(
   return status === 'unavailable' && diagnostic === 'spool_windows_firewall_unavailable'
 }
 
-export function shouldShowSpoolAvailabilityDiagnostic(
-  status: 'starting' | 'ready' | 'unavailable',
-  diagnostic: string | null
-): boolean {
-  return projectSpoolAvailabilityDiagnostic(status, diagnostic) !== null
-}
-
 export function projectWorkspaceSidebarRows(args: {
   localRows: readonly RenderRow[]
   spoolRows: readonly SpoolSidebarRow[]
@@ -192,21 +175,11 @@ export function projectWorkspaceSidebarRows(args: {
     args.spoolStatus,
     args.spoolDiagnostic
   )
-  const availabilityDiagnostic = projectSpoolAvailabilityDiagnostic(
-    args.spoolStatus,
-    args.spoolDiagnostic
-  )
-  if (args.spoolRows.length === 0 && !showWindowsFirewall && !availabilityDiagnostic) {
+  if (args.spoolRows.length === 0 && !showWindowsFirewall) {
     return rows
   }
   if (showWindowsFirewall) {
     rows.push({ kind: 'spool-windows-firewall', key: 'spool:windows-firewall' })
-  } else if (availabilityDiagnostic) {
-    rows.push({
-      kind: 'spool-availability',
-      key: 'spool:availability',
-      diagnostic: availabilityDiagnostic
-    })
   }
   const unmatchedWorktreeCount = unmatched.filter((row) => row.type === 'spool-worktree').length
   if (unmatchedWorktreeCount > 0) {
@@ -257,9 +230,6 @@ export function estimateWorkspaceSidebarRowSize(args: {
   }
   if (projected.kind === 'spool-windows-firewall') {
     return 154
-  }
-  if (projected.kind === 'spool-availability') {
-    return 144
   }
   if (projected.kind === 'spool-remote-worktrees-header') {
     return 32

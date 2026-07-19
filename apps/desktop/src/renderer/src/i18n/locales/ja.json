@@ -3580,7 +3580,7 @@
         }
       },
       "spool": {
-        "SpoolAvailabilityNotice": {
+        "SpoolAvailabilityStatusSegment": {
           "title": "Spool を利用できません",
           "checkAgain": "もう一度確認",
           "checking": "確認中…",

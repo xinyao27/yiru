@@ -187,7 +187,6 @@ import {
   getWorkspaceSidebarRowKey,
   projectWorkspaceSidebarRows,
   SPOOL_REMOTE_WORKTREES_HEADER_KEY,
-  shouldShowSpoolAvailabilityDiagnostic,
   shouldShowSpoolWindowsFirewallDiagnostic,
   type WorkspaceSidebarProjectedRow,
   workspaceIndexForLocalRowIndex,
@@ -5260,10 +5259,6 @@ const WorktreeList = React.memo(function WorktreeList({
   )
   const hasSpoolSidebarContent =
     spoolRows.length > 0 ||
-    shouldShowSpoolAvailabilityDiagnostic(
-      spoolSidebarProjectionInput.status,
-      spoolSidebarProjectionInput.diagnostic
-    ) ||
     shouldShowSpoolWindowsFirewallDiagnostic(
       spoolSidebarProjectionInput.status,
       spoolSidebarProjectionInput.diagnostic

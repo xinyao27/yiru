@@ -72,6 +72,7 @@ import { selectFloatingWorkspaceHasUnread } from '../../store/selectors'
 import { summarizeCodexRestartStatus } from './codex-restart-status-summary'
 import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon } from './icons'
 import { ProviderUsageSegment } from './provider-usage-segment'
+import { SpoolAvailabilityStatusSegment } from './spool-availability-status-segment'
 import { isStatusBarItemAvailable } from './status-bar-agent-gating'
 import { shouldOpenStatusBarContextMenu } from './status-bar-context-menu-policy'
 import { getVisibleUsageProvider, isUsageEmptyState } from './status-bar-provider-visibility'
@@ -2060,6 +2061,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
           {showPorts ? <PortsStatusSegment compact={compact} iconOnly={iconOnly} /> : null}
           {showSsh ? <SshStatusSegment compact={compact} iconOnly={iconOnly} /> : null}
         </React.Suspense>
+        <SpoolAvailabilityStatusSegment />
         {showFloatingTerminalToggle && (
           <FloatingTerminalIconContextMenu currentLocation="status-bar" className="relative">
             <Tooltip>

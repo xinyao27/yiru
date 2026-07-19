@@ -3603,7 +3603,7 @@
         }
       },
       "spool": {
-        "SpoolAvailabilityNotice": {
+        "SpoolAvailabilityStatusSegment": {
           "title": "Spool is unavailable",
           "checkAgain": "Check again",
           "checking": "Checking…",

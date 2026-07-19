@@ -3580,7 +3580,7 @@
         }
       },
       "spool": {
-        "SpoolAvailabilityNotice": {
+        "SpoolAvailabilityStatusSegment": {
           "title": "Spool을 사용할 수 없음",
           "checkAgain": "다시 확인",
           "checking": "확인 중…",

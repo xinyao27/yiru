@@ -1,6 +1,5 @@
 import type React from 'react'
 
-import { SpoolAvailabilityNotice } from '@/components/spool/spool-availability-notice'
 import { SpoolWindowsFirewallNotice } from '@/components/spool/spool-windows-firewall-notice'
 import { useAppStore } from '@/store'
 
@@ -25,9 +24,6 @@ export function SpoolSidebarProjectedRow({
 
   if (projected.kind === 'spool-windows-firewall') {
     return <SpoolWindowsFirewallNotice />
-  }
-  if (projected.kind === 'spool-availability') {
-    return <SpoolAvailabilityNotice diagnostic={projected.diagnostic} />
   }
   if (projected.kind === 'spool-remote-worktrees-header') {
     return (

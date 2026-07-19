@@ -3580,7 +3580,7 @@
         }
       },
       "spool": {
-        "SpoolAvailabilityNotice": {
+        "SpoolAvailabilityStatusSegment": {
           "title": "Spool no está disponible",
           "checkAgain": "Comprobar de nuevo",
           "checking": "Comprobando…",
