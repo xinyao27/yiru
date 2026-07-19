@@ -46,8 +46,10 @@ const VAULT_HEADER_CONTROL_CLASS = 'size-6 shrink-0'
 const VAULT_SCOPE_SELECTED_EDGE_CLASS =
   'data-[spacing=0]:data-[variant=outline]:aria-[checked=true]:border-l data-[spacing=0]:data-[variant=outline]:data-[state=on]:border-l'
 
+// Why: the group owns the 28px outer border, so items must fit its 26px content box
+// instead of painting over the horizontal edges.
 const VAULT_SCOPE_TOGGLE_ITEM_CLASS = cn(
-  'h-7 min-h-7 min-w-0 flex-1 basis-0 shrink border border-transparent bg-sidebar px-2.5 text-[11px] font-medium leading-none text-foreground shadow-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-[checked=true]:border-foreground/20 aria-[checked=true]:bg-sidebar-accent aria-[checked=true]:text-sidebar-accent-foreground aria-[checked=true]:shadow-xs aria-[checked=true]:hover:bg-sidebar-accent data-[state=on]:border-foreground/20 data-[state=on]:bg-sidebar-accent data-[state=on]:text-sidebar-accent-foreground data-[state=on]:shadow-xs data-[state=on]:hover:bg-sidebar-accent',
+  'h-full min-h-0 min-w-0 flex-1 basis-0 shrink border border-transparent bg-sidebar px-2.5 text-[11px] font-medium leading-none text-foreground shadow-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-[checked=true]:border-foreground/20 aria-[checked=true]:bg-sidebar-accent aria-[checked=true]:text-sidebar-accent-foreground aria-[checked=true]:shadow-xs aria-[checked=true]:hover:bg-sidebar-accent data-[state=on]:border-foreground/20 data-[state=on]:bg-sidebar-accent data-[state=on]:text-sidebar-accent-foreground data-[state=on]:shadow-xs data-[state=on]:hover:bg-sidebar-accent',
   VAULT_SCOPE_SELECTED_EDGE_CLASS,
   '@max-[300px]/ai-vault:px-1.5'
 )
