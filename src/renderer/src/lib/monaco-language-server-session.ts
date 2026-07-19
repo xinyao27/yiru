@@ -1,11 +1,11 @@
 import type * as monaco from 'monaco-editor'
+import { translate } from '@/i18n/i18n'
 import {
   NullLogger,
   createMessageConnection,
   type Disposable,
   type MessageConnection
 } from 'vscode-jsonrpc/browser'
-import { getRuntimePathBasename } from '../../../shared/cross-platform-path'
 import type {
   LanguageServerLocationResult,
   LanguageServerSessionStatus,
@@ -14,17 +14,20 @@ import type {
 import { LanguageServerIpcReader, LanguageServerIpcWriter } from './language-server-ipc-transport'
 import { MonacoLanguageServerDocuments } from './monaco-language-server-documents'
 import { LanguageServerRequestRouter } from './language-server-request-router'
+import { LanguageServerFeatureRequests } from './language-server-feature-requests'
+import {
+  getLanguageServerWorkspaceName,
+  stageTwoClientCapabilities,
+  validateSynchronizationCapability
+} from './language-server-client-capabilities'
 import type {
-  LspDefinition,
-  LspHover,
   LspInitializeResult,
   LspLogMessageParams,
-  LspPosition,
+  LspPublishDiagnosticsParams,
   LspServerCapabilities
 } from './language-server-protocol'
 
 const INITIALIZE_TIMEOUT_MS = 10_000
-const REQUEST_TIMEOUT_MS = 10_000
 const SHUTDOWN_TIMEOUT_MS = 2_000
 
 export type LanguageServerSessionStatusUpdate = {
@@ -39,14 +42,17 @@ export class MonacoLanguageServerSession {
   private capabilities: LspServerCapabilities = {}
   private readonly documents: MonacoLanguageServerDocuments
   private readonly protocolLogs: string[] = []
+  private readonly archivedHostLogs: string[] = []
   private readonly requests = new LanguageServerRequestRouter(() => this.connection)
+  readonly features = new LanguageServerFeatureRequests(() => this.capabilities, this.requests)
   private disposed = false
 
   constructor(
     readonly key: string,
     private readonly worktreeId: string,
     private readonly initialLanguageId: string,
-    private readonly onStatus: (update: LanguageServerSessionStatusUpdate) => void
+    private readonly onStatus: (update: LanguageServerSessionStatusUpdate) => void,
+    private readonly onDiagnostics: (params: LspPublishDiagnosticsParams) => void
   ) {
     this.documents = new MonacoLanguageServerDocuments({
       resolveUri: (filePath) => this.resolveDocumentUri(filePath),
@@ -55,8 +61,34 @@ export class MonacoLanguageServerSession {
     })
   }
 
-  async start(): Promise<void> {
-    this.onStatus({ state: 'starting' })
+  start(): Promise<void> {
+    return this.initialize(false)
+  }
+
+  async restart(): Promise<void> {
+    if (this.disposed) {
+      throw new Error('Language server session is disposed.')
+    }
+    await this.archiveCurrentHostLogs()
+    this.connection?.dispose()
+    this.connection = null
+    await this.stopHostSession()
+    this.capabilities = {}
+    await this.initialize(true)
+  }
+
+  private async initialize(reopenDocuments: boolean): Promise<void> {
+    this.onStatus({
+      state: 'starting',
+      ...(reopenDocuments
+        ? {
+            message: translate(
+              'auto.lib.MonacoLanguageServerSession.restarting',
+              'Restarting language server…'
+            )
+          }
+        : {})
+    })
     try {
       this.startResult = await window.api.languageServers.start({
         worktreeId: this.worktreeId,
@@ -73,21 +105,24 @@ export class MonacoLanguageServerSession {
         'initialize',
         {
           processId: null,
-          clientInfo: { name: 'Yiru', version: 'stage-1' },
+          clientInfo: { name: 'Yiru', version: 'stage-2' },
           rootUri: this.startResult.workspaceUri,
           workspaceFolders: [
             {
               uri: this.startResult.workspaceUri,
-              name: workspaceName(this.startResult.workspacePath)
+              name: getLanguageServerWorkspaceName(this.startResult.workspacePath)
             }
           ],
-          capabilities: stageOneClientCapabilities()
+          capabilities: stageTwoClientCapabilities()
         },
         INITIALIZE_TIMEOUT_MS
       )
       this.capabilities = result.capabilities ?? {}
       validateSynchronizationCapability(this.capabilities)
       await this.connection.sendNotification('initialized', {})
+      if (reopenDocuments) {
+        await this.documents.reopen()
+      }
       this.onStatus({ state: 'ready', serverName: result.serverInfo?.name })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
@@ -99,46 +134,16 @@ export class MonacoLanguageServerSession {
     }
   }
 
-  supportsHover(): boolean {
-    return Boolean(this.capabilities.hoverProvider)
-  }
-
-  supportsDefinition(): boolean {
-    return Boolean(this.capabilities.definitionProvider)
-  }
-
   attachDocument(model: monaco.editor.ITextModel, filePath: string): Promise<Disposable> {
     return this.documents.attach(model, filePath)
   }
 
-  async hover(
-    uri: string,
-    position: LspPosition,
-    token: monaco.CancellationToken
-  ): Promise<LspHover | null> {
-    return this.requests.withCancellation<LspHover | null>(
-      'textDocument/hover',
-      { textDocument: { uri }, position },
-      token,
-      REQUEST_TIMEOUT_MS
-    )
-  }
-
-  async definition(
-    uri: string,
-    position: LspPosition,
-    token: monaco.CancellationToken
-  ): Promise<LspDefinition | LspDefinition[] | null> {
-    return this.requests.withCancellation<LspDefinition | LspDefinition[] | null>(
-      'textDocument/definition',
-      { textDocument: { uri }, position },
-      token,
-      REQUEST_TIMEOUT_MS
-    )
-  }
-
   getDocumentUri(model: monaco.editor.ITextModel): string | null {
     return this.documents.getUri(model)
+  }
+
+  getDocumentModel(uri: string): monaco.editor.ITextModel | null {
+    return this.documents.getModel(uri)
   }
 
   resolveLocation(uri: string): Promise<LanguageServerLocationResult> {
@@ -153,12 +158,12 @@ export class MonacoLanguageServerSession {
 
   async getLogs(): Promise<string[]> {
     if (!this.startResult) {
-      return [...this.protocolLogs]
+      return [...this.archivedHostLogs, ...this.protocolLogs].slice(-100)
     }
     const hostLogs = await window.api.languageServers
       .getLogs({ sessionId: this.startResult.sessionId })
       .catch(() => ({ lines: [] }))
-    return [...hostLogs.lines, ...this.protocolLogs].slice(-100)
+    return [...this.archivedHostLogs, ...hostLogs.lines, ...this.protocolLogs].slice(-100)
   }
 
   hasDocuments(): boolean {
@@ -206,9 +211,13 @@ export class MonacoLanguageServerSession {
   private registerServerMessages(connection: MessageConnection): void {
     connection.onRequest('workspace/applyEdit', () => ({
       applied: false,
-      failureReason: 'Yiru Stage 1 language intelligence is read-only.'
+      failureReason: 'Yiru does not apply language-server workspace edits.'
     }))
     connection.onRequest('window/showMessageRequest', () => null)
+    connection.onNotification(
+      'textDocument/publishDiagnostics',
+      (params: LspPublishDiagnosticsParams) => this.onDiagnostics(params)
+    )
     connection.onNotification('window/logMessage', (params: LspLogMessageParams) => {
       if (params?.message) {
         this.protocolLogs.push(params.message.slice(0, 2_000))
@@ -226,6 +235,17 @@ export class MonacoLanguageServerSession {
     }
   }
 
+  private async archiveCurrentHostLogs(): Promise<void> {
+    if (!this.startResult) {
+      return
+    }
+    const result = await window.api.languageServers
+      .getLogs({ sessionId: this.startResult.sessionId })
+      .catch(() => ({ lines: [] }))
+    this.archivedHostLogs.push(...result.lines.map((line) => `[previous server] ${line}`))
+    this.archivedHostLogs.splice(0, Math.max(0, this.archivedHostLogs.length - 100))
+  }
+
   private async stopHostSession(): Promise<void> {
     if (!this.startResult) {
       return
@@ -233,30 +253,5 @@ export class MonacoLanguageServerSession {
     const { sessionId } = this.startResult
     this.startResult = null
     await window.api.languageServers.stop({ sessionId }).catch(() => {})
-  }
-}
-
-function validateSynchronizationCapability(capabilities: LspServerCapabilities): void {
-  const sync = capabilities.textDocumentSync
-  const syncKind = typeof sync === 'number' ? sync : sync?.change
-  const supportsOpenClose = typeof sync === 'number' || sync?.openClose === true
-  if (!supportsOpenClose || (syncKind !== 1 && syncKind !== 2)) {
-    throw new Error('Language server does not support synchronized open documents.')
-  }
-}
-
-function workspaceName(workspacePath: string): string {
-  return getRuntimePathBasename(workspacePath) || workspacePath
-}
-
-function stageOneClientCapabilities(): Record<string, unknown> {
-  return {
-    workspace: { applyEdit: false, configuration: false, workspaceFolders: true },
-    textDocument: {
-      synchronization: { dynamicRegistration: false, didSave: false, willSave: false },
-      hover: { dynamicRegistration: false, contentFormat: ['markdown', 'plaintext'] },
-      definition: { dynamicRegistration: false, linkSupport: true }
-    },
-    window: { workDoneProgress: false }
   }
 }

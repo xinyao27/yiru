@@ -49,7 +49,7 @@ export function LanguageServerSetting({
         )}
         description={translate(
           'auto.components.settings.LanguageServerSetting.description',
-          'Configure one local language server for Hover and Go to Definition.'
+          'Configure one local language server for diagnostics, completion, and code navigation.'
         )}
       />
       <SearchableSetting
@@ -59,9 +59,19 @@ export function LanguageServerSetting({
         )}
         description={translate(
           'auto.components.settings.LanguageServerSetting.description',
-          'Configure one local language server for Hover and Go to Definition.'
+          'Configure one local language server for diagnostics, completion, and code navigation.'
         )}
-        keywords={['lsp', 'language server', 'hover', 'definition', 'clangd']}
+        keywords={[
+          'lsp',
+          'language server',
+          'hover',
+          'definition',
+          'diagnostics',
+          'completion',
+          'references',
+          'symbols',
+          'clangd'
+        ]}
       >
         <div className="space-y-4">
           <SettingsSwitchRow
@@ -184,7 +194,7 @@ export function LanguageServerSetting({
             <p className="text-[11px] text-muted-foreground">
               {translate(
                 'auto.components.settings.LanguageServerSetting.localOnly',
-                'Stage 1 is local-only and read-only: server-requested edits and commands are rejected.'
+                'Local only: server-requested workspace edits and commands are rejected.'
               )}
             </p>
           </div>

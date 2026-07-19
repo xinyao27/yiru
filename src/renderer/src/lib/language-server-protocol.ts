@@ -14,6 +14,7 @@ export type LspMarkupContent = {
 }
 
 export type LspMarkedString = string | { language: string; value: string }
+export type LspDocumentation = string | LspMarkupContent
 
 export type LspHover = {
   contents: LspMarkupContent | LspMarkedString | LspMarkedString[]
@@ -33,15 +34,118 @@ export type LspLocationLink = {
 
 export type LspDefinition = LspLocation | LspLocationLink
 
+export type LspTextEdit = {
+  range: LspRange
+  newText: string
+}
+
+export type LspInsertReplaceEdit = {
+  insert: LspRange
+  replace: LspRange
+  newText: string
+}
+
+export type LspCompletionItem = {
+  label: string
+  labelDetails?: { detail?: string; description?: string }
+  kind?: number
+  tags?: number[]
+  detail?: string
+  documentation?: LspDocumentation
+  deprecated?: boolean
+  preselect?: boolean
+  sortText?: string
+  filterText?: string
+  insertText?: string
+  insertTextFormat?: number
+  textEdit?: LspTextEdit | LspInsertReplaceEdit
+  commitCharacters?: string[]
+}
+
+export type LspCompletionList = {
+  isIncomplete: boolean
+  items: LspCompletionItem[]
+}
+
+export type LspCompletionResult = LspCompletionItem[] | LspCompletionList | null
+
+export type LspParameterInformation = {
+  label: string | [number, number]
+  documentation?: LspDocumentation
+}
+
+export type LspSignatureInformation = {
+  label: string
+  documentation?: LspDocumentation
+  parameters?: LspParameterInformation[]
+  activeParameter?: number
+}
+
+export type LspSignatureHelp = {
+  signatures: LspSignatureInformation[]
+  activeSignature?: number
+  activeParameter?: number
+}
+
+export type LspDiagnostic = {
+  range: LspRange
+  severity?: number
+  code?: string | number
+  codeDescription?: { href: string }
+  source?: string
+  message: string
+  tags?: number[]
+}
+
+export type LspPublishDiagnosticsParams = {
+  uri: string
+  version?: number
+  diagnostics: LspDiagnostic[]
+}
+
+export type LspDocumentSymbol = {
+  name: string
+  detail?: string
+  kind: number
+  tags?: number[]
+  deprecated?: boolean
+  range: LspRange
+  selectionRange: LspRange
+  children?: LspDocumentSymbol[]
+}
+
+export type LspSymbolInformation = {
+  name: string
+  kind: number
+  tags?: number[]
+  deprecated?: boolean
+  location: LspLocation
+  containerName?: string
+}
+
 export type LspTextDocumentSyncOptions = {
   openClose?: boolean
   change?: number
+}
+
+export type LspCompletionOptions = {
+  triggerCharacters?: string[]
+  resolveProvider?: boolean
+}
+
+export type LspSignatureHelpOptions = {
+  triggerCharacters?: string[]
+  retriggerCharacters?: string[]
 }
 
 export type LspServerCapabilities = {
   textDocumentSync?: number | LspTextDocumentSyncOptions
   hoverProvider?: boolean | Record<string, unknown>
   definitionProvider?: boolean | Record<string, unknown>
+  completionProvider?: boolean | LspCompletionOptions
+  signatureHelpProvider?: boolean | LspSignatureHelpOptions
+  referencesProvider?: boolean | Record<string, unknown>
+  documentSymbolProvider?: boolean | Record<string, unknown>
 }
 
 export type LspInitializeResult = {

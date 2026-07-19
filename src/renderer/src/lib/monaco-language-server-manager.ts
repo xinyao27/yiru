@@ -1,26 +1,34 @@
-import * as monaco from 'monaco-editor'
+import type * as monaco from 'monaco-editor'
 import type { Disposable } from 'vscode-jsonrpc/browser'
 import {
   normalizeLanguageServerSettings,
   type LanguageServerSettings
 } from '../../../shared/language-server'
+import { MonacoLanguageServerDiagnostics } from './monaco-language-server-diagnostics'
+import { MonacoLanguageServerFeatures } from './monaco-language-server-features'
 import {
   MonacoLanguageServerSession,
   type LanguageServerSessionStatusUpdate
 } from './monaco-language-server-session'
-import {
-  normalizeDefinitions,
-  toLspPosition,
-  toMonacoHover,
-  toMonacoRange
-} from './monaco-language-server-conversions'
+import { normalizeDefinitions, toLspPosition } from './monaco-language-server-conversions'
 
 const SESSION_IDLE_MS = 5_000
+// Why: restarts have a per-session lifetime budget so a broken user binary
+// becomes visibly failed instead of entering a silent process-spawn loop.
+const RESTART_DELAYS_MS = [500, 2_000] as const
+const RESTART_BUDGET_RESET_MS = 60_000
 
 type SessionRecord = {
   session: MonacoLanguageServerSession
+  worktreeId: string
+  languageId: string
   startPromise: Promise<void>
   idleTimer: ReturnType<typeof setTimeout> | null
+  restartTimer: ReturnType<typeof setTimeout> | null
+  restartAttempts: number
+  restartInFlight: boolean
+  readyAt: number
+  pendingAttachments: number
 }
 
 type DocumentRoute = {
@@ -61,7 +69,8 @@ export type LanguageServerNavigationTarget = {
 class MonacoLanguageServerManager {
   private readonly sessions = new Map<string, SessionRecord>()
   private readonly documents = new Map<monaco.editor.ITextModel, DocumentRoute>()
-  private readonly providers = new Map<string, Disposable[]>()
+  private readonly diagnostics = new MonacoLanguageServerDiagnostics()
+  private readonly features = new MonacoLanguageServerFeatures((model) => this.getModelRoute(model))
   private readonly statuses = new Map<string, LanguageServerManagerStatus>()
   private readonly listeners = new Set<() => void>()
   private snapshot: LanguageServerManagerSnapshot = { sessions: [] }
@@ -84,33 +93,36 @@ class MonacoLanguageServerManager {
     ) {
       return null
     }
-    this.ensureProviders(options.model.getLanguageId())
-    const key = sessionKey(options.worktreeId, settings)
+    const key = `${options.worktreeId}\0${JSON.stringify(settings)}`
     const record = this.ensureSession(key, options.worktreeId, options.model.getLanguageId())
-    await record.startPromise
-    let sessionAttachment: Disposable
+    record.pendingAttachments++
     try {
-      sessionAttachment = await record.session.attachDocument(options.model, options.filePath)
+      await record.startPromise
+      this.features.ensureLanguage(options.model.getLanguageId(), record.session)
+      const sessionAttachment = await record.session.attachDocument(options.model, options.filePath)
+      const route = this.documents.get(options.model)
+      if (route && route.session === record.session) {
+        route.refs++
+      } else {
+        this.documents.set(options.model, { session: record.session, refs: 1 })
+      }
+      return {
+        dispose: () => {
+          sessionAttachment.dispose()
+          this.releaseRoute(options.model, record)
+        }
+      }
     } catch (error) {
       this.scheduleIdleDisposal(record)
       throw error
-    }
-    const route = this.documents.get(options.model)
-    if (route && route.session === record.session) {
-      route.refs++
-    } else {
-      this.documents.set(options.model, { session: record.session, refs: 1 })
-    }
-    return {
-      dispose: () => {
-        sessionAttachment.dispose()
-        this.releaseRoute(options.model, record)
-      }
+    } finally {
+      record.pendingAttachments--
+      this.scheduleIdleDisposal(record)
     }
   }
 
   supportsDefinition(model: monaco.editor.ITextModel): boolean {
-    return this.documents.get(model)?.session.supportsDefinition() === true
+    return this.documents.get(model)?.session.features.supportsDefinition() === true
   }
 
   async findDefinition(
@@ -118,24 +130,26 @@ class MonacoLanguageServerManager {
     position: monaco.Position,
     token: monaco.CancellationToken
   ): Promise<LanguageServerNavigationTarget | null> {
-    const route = this.documents.get(model)
-    const uri = route?.session.getDocumentUri(model)
-    if (!route || !uri || !route.session.supportsDefinition()) {
+    const route = this.getModelRoute(model)
+    if (!route?.session.features.supportsDefinition()) {
       return null
     }
     const definitions = normalizeDefinitions(
-      await route.session.definition(uri, toLspPosition(position), token)
+      await route.session.features.definition(route.uri, toLspPosition(position), token)
     )
-    const first = definitions[0]
-    if (!first) {
-      return null
+    for (const definition of definitions) {
+      try {
+        const location = await route.session.resolveLocation(definition.uri)
+        return {
+          ...location,
+          line: definition.range.start.line + 1,
+          column: definition.range.start.character + 1
+        }
+      } catch {
+        // Definitions outside the authorized workspace are skipped, not opened.
+      }
     }
-    const location = await route.session.resolveLocation(first.uri)
-    return {
-      ...location,
-      line: first.range.start.line + 1,
-      column: first.range.start.character + 1
-    }
+    return null
   }
 
   async getLogs(key: string): Promise<string[]> {
@@ -151,71 +165,106 @@ class MonacoLanguageServerManager {
       }
       return existing
     }
-    this.updateStatus(key, worktreeId, { state: 'starting' })
-    const session = new MonacoLanguageServerSession(key, worktreeId, languageId, (update) =>
-      this.updateStatus(key, worktreeId, update)
+    let record: SessionRecord
+    let session: MonacoLanguageServerSession
+    session = new MonacoLanguageServerSession(
+      key,
+      worktreeId,
+      languageId,
+      (update) => this.handleSessionStatus(record, update),
+      (params) => {
+        if (this.sessions.get(key) === record) {
+          this.diagnostics.publish(session, params)
+        }
+      }
     )
-    const record: SessionRecord = {
+    record = {
       session,
+      worktreeId,
+      languageId,
       startPromise: Promise.resolve(),
-      idleTimer: null
+      idleTimer: null,
+      restartTimer: null,
+      restartAttempts: 0,
+      restartInFlight: false,
+      readyAt: 0,
+      pendingAttachments: 0
     }
     this.sessions.set(key, record)
-    record.startPromise = session.start().catch((error) => {
-      if (this.sessions.get(key) === record) {
-        this.sessions.delete(key)
-      }
-      throw error
-    })
+    record.startPromise = session.start()
+    void record.startPromise.catch(() => {})
     return record
   }
 
-  private ensureProviders(languageId: string): void {
-    if (this.providers.has(languageId)) {
+  private handleSessionStatus(
+    record: SessionRecord,
+    update: LanguageServerSessionStatusUpdate
+  ): void {
+    if (this.sessions.get(record.session.key) !== record) {
       return
     }
-    this.providers.set(languageId, [
-      monaco.languages.registerHoverProvider(languageId, {
-        provideHover: async (model, position, token) => {
-          const route = this.documents.get(model)
-          const uri = route?.session.getDocumentUri(model)
-          if (!route || !uri || !route.session.supportsHover()) {
-            return null
+    this.updateStatus(record.session.key, record.worktreeId, update)
+    if (update.state === 'ready') {
+      record.readyAt = Date.now()
+      this.features.ensureLanguage(record.languageId, record.session)
+      return
+    }
+    if (update.state === 'failed' || update.state === 'stopped') {
+      this.diagnostics.clearSession(record.session)
+    }
+    if (update.state === 'failed') {
+      if (record.readyAt > 0 && Date.now() - record.readyAt >= RESTART_BUDGET_RESET_MS) {
+        record.restartAttempts = 0
+      }
+      this.scheduleRestart(record)
+    }
+  }
+
+  private scheduleRestart(record: SessionRecord): void {
+    const delay = RESTART_DELAYS_MS[record.restartAttempts]
+    if (
+      delay === undefined ||
+      record.restartTimer ||
+      record.restartInFlight ||
+      this.sessions.get(record.session.key) !== record ||
+      (!record.session.hasDocuments() && record.pendingAttachments === 0)
+    ) {
+      return
+    }
+    record.restartAttempts++
+    let resolveRestart = (): void => {}
+    let rejectRestart = (_error: unknown): void => {}
+    record.startPromise = new Promise<void>((resolve, reject) => {
+      resolveRestart = resolve
+      rejectRestart = reject
+    })
+    void record.startPromise.catch(() => {})
+    record.restartTimer = setTimeout(() => {
+      record.restartTimer = null
+      if (
+        this.sessions.get(record.session.key) !== record ||
+        (!record.session.hasDocuments() && record.pendingAttachments === 0)
+      ) {
+        resolveRestart()
+        return
+      }
+      record.restartInFlight = true
+      void record.session
+        .restart()
+        .then(resolveRestart, rejectRestart)
+        .finally(() => {
+          record.restartInFlight = false
+          if (this.statuses.get(record.session.key)?.state === 'failed') {
+            this.scheduleRestart(record)
           }
-          try {
-            return toMonacoHover(await route.session.hover(uri, toLspPosition(position), token))
-          } catch {
-            return null
-          }
-        }
-      }),
-      monaco.languages.registerDefinitionProvider(languageId, {
-        provideDefinition: async (model, position, token) => {
-          const route = this.documents.get(model)
-          const uri = route?.session.getDocumentUri(model)
-          if (!route || !uri || !route.session.supportsDefinition()) {
-            return null
-          }
-          try {
-            const definitions = normalizeDefinitions(
-              await route.session.definition(uri, toLspPosition(position), token)
-            )
-            const locations = await Promise.all(
-              definitions.map(async (definition) => ({
-                location: await route.session.resolveLocation(definition.uri),
-                range: definition.range
-              }))
-            )
-            return locations.map(({ location, range }) => ({
-              uri: monaco.Uri.file(location.filePath),
-              range: toMonacoRange(range)
-            }))
-          } catch {
-            return null
-          }
-        }
-      })
-    ])
+        })
+    }, delay)
+  }
+
+  private getModelRoute(model: monaco.editor.ITextModel) {
+    const route = this.documents.get(model)
+    const uri = route?.session.getDocumentUri(model)
+    return route && uri ? { session: route.session, uri } : null
   }
 
   private releaseRoute(model: monaco.editor.ITextModel, record: SessionRecord): void {
@@ -224,21 +273,31 @@ class MonacoLanguageServerManager {
       route.refs--
       if (route.refs <= 0) {
         this.documents.delete(model)
+        this.diagnostics.clearModel(record.session, model)
       }
     }
     this.scheduleIdleDisposal(record)
   }
 
   private scheduleIdleDisposal(record: SessionRecord): void {
-    if (record.session.hasDocuments() || record.idleTimer) {
+    if (record.session.hasDocuments() || record.pendingAttachments > 0 || record.idleTimer) {
       return
     }
     record.idleTimer = setTimeout(() => {
       record.idleTimer = null
-      if (record.session.hasDocuments() || this.sessions.get(record.session.key) !== record) {
+      if (
+        record.session.hasDocuments() ||
+        record.pendingAttachments > 0 ||
+        this.sessions.get(record.session.key) !== record
+      ) {
         return
       }
+      if (record.restartTimer) {
+        clearTimeout(record.restartTimer)
+      }
       this.sessions.delete(record.session.key)
+      this.diagnostics.clearSession(record.session)
+      this.updateStatus(record.session.key, record.worktreeId, { state: 'stopped' })
       void record.session.dispose()
     }, SESSION_IDLE_MS)
   }
@@ -260,10 +319,6 @@ class MonacoLanguageServerManager {
       listener()
     }
   }
-}
-
-function sessionKey(worktreeId: string, settings: LanguageServerSettings): string {
-  return `${worktreeId}\0${JSON.stringify(settings)}`
 }
 
 export const monacoLanguageServerManager = new MonacoLanguageServerManager()

@@ -53,6 +53,23 @@ export class MonacoLanguageServerDocuments {
     return this.documents.get(model)?.uri ?? null
   }
 
+  getModel(uri: string): monaco.editor.ITextModel | null {
+    for (const [model, state] of this.documents) {
+      if (state.uri === uri) {
+        return model
+      }
+    }
+    return null
+  }
+
+  async reopen(): Promise<void> {
+    for (const [model, state] of this.documents) {
+      if (state.uri && state.refs > 0 && !model.isDisposed()) {
+        await this.notifyOpen(model, state.uri)
+      }
+    }
+  }
+
   hasDocuments(): boolean {
     return this.documents.size > 0
   }
@@ -79,14 +96,7 @@ export class MonacoLanguageServerDocuments {
       return
     }
     state.uri = uri
-    await this.options.notify('textDocument/didOpen', {
-      textDocument: {
-        uri,
-        languageId: model.getLanguageId(),
-        version: model.getVersionId(),
-        text: model.getValue()
-      }
-    })
+    await this.notifyOpen(model, uri)
     state.subscriptions.push(
       model.onDidChangeContent((event) => this.sendChange(model, state, event)),
       model.onWillDispose(() => {
@@ -94,6 +104,17 @@ export class MonacoLanguageServerDocuments {
         this.release(model)
       })
     )
+  }
+
+  private notifyOpen(model: monaco.editor.ITextModel, uri: string): Promise<void> {
+    return this.options.notify('textDocument/didOpen', {
+      textDocument: {
+        uri,
+        languageId: model.getLanguageId(),
+        version: model.getVersionId(),
+        text: model.getValue()
+      }
+    })
   }
 
   private sendChange(

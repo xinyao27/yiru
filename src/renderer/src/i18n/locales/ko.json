@@ -582,6 +582,9 @@
             "de50bef680": "macOS가 Yiru 알림을 차단하고 있습니다"
           }
         }
+      },
+      "MonacoLanguageServerSession": {
+        "restarting": "Restarting language server…"
       }
     },
     "hooks": {
@@ -6765,7 +6768,7 @@
             "e61157e926": "편집기 자동 줄 바꿈",
             "005be5c699": "가로 스크롤 대신 파일 편집기에서 긴 줄을 자동으로 줄 바꿈합니다.",
             "languageServer": "Language Server (Experimental)",
-            "languageServerDescription": "Configure one local language server for Hover and Go to Definition."
+            "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
           }
         },
         "git": {
@@ -8080,7 +8083,7 @@
         },
         "LanguageServerSetting": {
           "title": "Language Server (Experimental)",
-          "description": "Configure one local language server for Hover and Go to Definition.",
+          "description": "Configure one local language server for diagnostics, completion, and code navigation.",
           "enable": "Enable Language Server",
           "enableDescription": "Run the configured executable when a matching local source file is open.",
           "command": "Executable",
@@ -8090,7 +8093,7 @@
           "argumentsDescription": "One argument per line. Include the server’s stdio flag when it requires one.",
           "languages": "Monaco Language IDs",
           "languagesDescription": "Comma-separated IDs such as c, cpp. Only matching local edit models are shared.",
-          "localOnly": "Stage 1 is local-only and read-only: server-requested edits and commands are rejected.",
+          "localOnly": "Local only: server-requested workspace edits and commands are rejected.",
           "commandPlaceholder": "clangd",
           "argumentsPlaceholder": "--stdio\n--background-index",
           "languagesPlaceholder": "c, cpp"

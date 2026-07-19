@@ -166,6 +166,14 @@ The local read-only slice now runs one explicitly configured server per local wo
 
 A production UI smoke test against Apple clangd 21.0.0 reached Ready, rendered real Hover content, navigated F12 to the definition, and observed an unsaved `didChange` edit before navigation. Terminating clangd moved the status to Error while retaining its stderr log, and closing the owning window terminated the replacement server process. This completes the Stage 1 native-host slice; WSL and SSH remain later host-service work rather than renderer exceptions.
 
+### Stage 2 language intelligence
+
+**Recorded implementation, 2026-07-19**
+
+The renderer adapter now maps push diagnostics, completion, signature help, references, and document symbols onto the existing Monaco singleton. Diagnostic marker ownership is isolated per server session, explicit document versions must match the current dirty model, and markers are cleared on close, failure, or disposal. Completion accepts only the user-selected primary edit; additional edits, commands, and lazy resolution remain deferred to the controlled-edits stage. Returned reference locations still pass through the same host canonicalization and workspace authorization as Definition.
+
+A server crash now clears stale markers, retains the prior stderr log, and reopens current dirty models after bounded restarts at 500 ms and 2 seconds. The budget resets only after a minute of stable service, preventing tight spawn loops while allowing later recovery. A production smoke test against Apple clangd 21.0.0 rendered an error diagnostic, returned completion and signature help, exposed references and two document symbols, restored diagnostics after each of two permitted restarts, and remained visibly failed after a third forced crash exhausted the budget.
+
 ### Protocol lifecycle and editor mapping
 
 **Sourced protocol requirements**
@@ -211,7 +219,7 @@ Electron also recommends validating IPC message senders and limiting exposed cap
 | --- | --- | --- |
 | 0 — protocol spike (complete) | Compared both client libraries with disposable fixture harnesses and Apple clangd 21.0.0; tested multiple Monaco models, disposal, framing, cancellation, and bundle impact. | Selected a thin replaceable Yiru adapter; recorded evidence above. |
 | 1 — local, read-only intelligence (complete) | Native host process service; user-configured server; initialize/sync/shutdown; source-edit models only; Hover and Definition. | No writes/commands; status and logs; correct dirty-buffer synchronization. |
-| 2 — diagnostics and completion | Diagnostics, completion, signature help, references, symbols, cancellation, bounded restart. | Stale results do not overwrite newer models; disabled built-in TS diagnostics remain isolated from LSP models. |
+| 2 — diagnostics and completion (complete) | Diagnostics, completion, signature help, references, symbols, cancellation, bounded restart. | Stale results do not overwrite newer models; built-in diagnostics remain isolated from LSP marker ownership. |
 | 3 — controlled edits | Rename, code actions, formatting, and workspace edits through runtime file APIs with previews/confirmation where needed. | Multi-file dirty/conflict/remote ownership behavior is safe and recoverable. |
 | 4 — execution-host parity | WSL, SSH, and remote-runtime process/stream implementations plus host-qualified URI mapping. | Same workspace cannot cross-wire sessions across hosts; disconnect/reconnect is bounded and visible. |
 | 5 — curated languages | Explicit-consent, checksummed host-scoped installation for a small demand-driven language set; semantic tokens/inlay hints where useful. | Support matrix names tested server versions, hosts, features, limits, and uninstall path. |

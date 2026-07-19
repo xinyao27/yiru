@@ -120,7 +120,7 @@ export const getGeneralEditorSearchEntries = createLocalizedCatalog(() => [
     ),
     description: translate(
       'auto.components.settings.general.search.languageServerDescription',
-      'Configure one local language server for Hover and Go to Definition.'
+      'Configure one local language server for diagnostics, completion, and code navigation.'
     ),
     keywords: [
       ...translateSearchKeyword('auto.components.settings.general.search.lsp', 'lsp'),
@@ -130,6 +130,12 @@ export const getGeneralEditorSearchEntries = createLocalizedCatalog(() => [
       ),
       ...translateSearchKeyword('auto.components.settings.general.search.hover', 'hover'),
       ...translateSearchKeyword('auto.components.settings.general.search.definition', 'definition'),
+      ...translateSearchKeyword(
+        'auto.components.settings.general.search.diagnostics',
+        'diagnostics'
+      ),
+      ...translateSearchKeyword('auto.components.settings.general.search.completion', 'completion'),
+      ...translateSearchKeyword('auto.components.settings.general.search.references', 'references'),
       ...translateSearchKeyword('auto.components.settings.general.search.clangd', 'clangd')
     ]
   },

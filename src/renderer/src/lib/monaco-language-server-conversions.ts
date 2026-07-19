@@ -6,6 +6,7 @@ import type {
   LspLocationLink,
   LspMarkedString,
   LspMarkupContent,
+  LspDocumentation,
   LspPosition,
   LspRange
 } from './language-server-protocol'
@@ -46,6 +47,15 @@ export function normalizeDefinitions(
       ? { uri: entry.targetUri, range: entry.targetSelectionRange ?? entry.targetRange }
       : { uri: entry.uri, range: entry.range }
   )
+}
+
+export function toMonacoDocumentation(
+  content: LspDocumentation | undefined
+): string | monaco.IMarkdownString | undefined {
+  if (content === undefined || typeof content === 'string') {
+    return content
+  }
+  return content.kind === 'markdown' ? { value: content.value } : content.value
 }
 
 function toMarkdownString(content: LspMarkedString | LspMarkupContent): monaco.IMarkdownString {
