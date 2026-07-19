@@ -72,6 +72,7 @@ function ManualReviewLinkButton({
   return (
     <SourceControlHeaderIconButton
       icon={ExternalLink}
+      variant="ghost"
       label={translate(
         'auto.components.right.sidebar.SourceControl.4b4a7de138',
         'Open review page in browser'

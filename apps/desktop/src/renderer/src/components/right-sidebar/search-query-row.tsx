@@ -10,9 +10,7 @@ import React from 'react'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/class-names'
 
-import { RIGHT_SIDEBAR_INPUT_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 import { ToggleButton } from './search-result-items'
 
 export type SearchQueryRowProps = {
@@ -70,10 +68,7 @@ export function SearchQueryRow({
           type="button"
           variant="ghost"
           size="icon-xs"
-          className={cn(
-            RIGHT_SIDEBAR_INPUT_BUTTON_SURFACE_CLASS_NAME,
-            'h-auto w-auto rounded-sm p-0.5'
-          )}
+          className="text-muted-foreground hover:bg-muted hover:text-foreground h-auto w-auto rounded-sm p-0.5"
           aria-label={translate(
             'auto.components.right.sidebar.SearchQueryRow.clearLabel',
             'Clear search'

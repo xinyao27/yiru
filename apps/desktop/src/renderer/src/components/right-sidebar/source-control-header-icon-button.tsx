@@ -10,12 +10,14 @@ export function SourceControlHeaderIconButton({
   icon: Icon,
   label,
   onClick,
-  disabled
+  disabled,
+  variant = 'outline'
 }: {
   icon: PhosphorIcon
   label: string
   onClick: () => void
   disabled?: boolean
+  variant?: 'ghost' | 'outline'
 }): React.JSX.Element {
   return (
     <Tooltip>
@@ -23,7 +25,7 @@ export function SourceControlHeaderIconButton({
         render={
           <Button
             type="button"
-            variant="outline"
+            variant={variant}
             size="icon-xs"
             className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
             aria-label={label}
