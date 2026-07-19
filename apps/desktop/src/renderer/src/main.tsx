@@ -24,8 +24,9 @@ if (
     enableFlag: import.meta.env.VITE_ENABLE_REACT_GRAB
   })
 ) {
+  // Why: React Grab injects styles into its own host; its global Tailwind bundle
+  // would otherwise override Yiru utilities loaded earlier in the document.
   void import('react-grab').then(({ init }) => init())
-  void import('react-grab/styles.css')
 }
 
 applyDocumentTheme('system', { disableTransitions: false })
