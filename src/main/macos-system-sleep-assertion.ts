@@ -2,8 +2,6 @@ import { spawn as nodeSpawn } from 'node:child_process'
 
 export const MACOS_SYSTEM_SLEEP_ASSERTION_RETRY_MS = 30_000
 
-type Logger = Pick<Console, 'debug' | 'warn'>
-
 type CaffeinateErrorListener = (error: Error) => void
 type CaffeinateExitListener = (code: number | null, signal: NodeJS.Signals | null) => void
 
@@ -16,26 +14,8 @@ type CaffeinateProcess = {
   pid?: number
 }
 
-type CaffeinateSpawn = (
-  command: string,
-  args: string[],
-  options: { stdio: 'ignore'; windowsHide: true; shell?: false }
-) => CaffeinateProcess
-
-type MacosSystemSleepAssertionOptions = {
-  logger?: Logger
-  now?: () => number
-  onUnexpectedFailure?: (reason: string) => void
-  platform?: NodeJS.Platform
-  spawn?: CaffeinateSpawn
-}
-
 export class MacosSystemSleepAssertion {
-  private readonly logger: Logger
-  private readonly now: () => number
   private readonly onUnexpectedFailure: (reason: string) => void
-  private readonly platform: NodeJS.Platform
-  private readonly spawn: CaffeinateSpawn
   private child: CaffeinateProcess | null = null
   private retryNotBefore: number | null = null
   private retryTimer: ReturnType<typeof setTimeout> | null = null
@@ -45,26 +25,22 @@ export class MacosSystemSleepAssertion {
   private readonly reportedFailures = new WeakSet<CaffeinateProcess>()
   private readonly childCleanups = new WeakMap<CaffeinateProcess, () => void>()
 
-  constructor(options: MacosSystemSleepAssertionOptions = {}) {
-    this.logger = options.logger ?? console
-    this.now = options.now ?? Date.now
-    this.onUnexpectedFailure = options.onUnexpectedFailure ?? (() => {})
-    this.platform = options.platform ?? process.platform
-    this.spawn = options.spawn ?? nodeSpawn
+  constructor(onUnexpectedFailure: (reason: string) => void) {
+    this.onUnexpectedFailure = onUnexpectedFailure
   }
 
   start(reason: string): void {
-    if (this.platform !== 'darwin' || this.child) {
+    if (process.platform !== 'darwin' || this.child) {
       return
     }
-    if (this.retryNotBefore !== null && this.now() < this.retryNotBefore) {
+    if (this.retryNotBefore !== null && Date.now() < this.retryNotBefore) {
       this.scheduleRetry()
       return
     }
 
     let child: CaffeinateProcess
     try {
-      child = this.spawn('/usr/bin/caffeinate', ['-i', '-s'], {
+      child = nodeSpawn('/usr/bin/caffeinate', ['-i', '-s'], {
         stdio: 'ignore',
         windowsHide: true
       })
@@ -107,7 +83,7 @@ export class MacosSystemSleepAssertion {
       child.kill()
     } catch (error) {
       if (!isEsrchError(error)) {
-        this.logger.warn('[agent-awake] failed to stop macOS system sleep assertion', {
+        console.warn('[agent-awake] failed to stop macOS system sleep assertion', {
           error
         })
       }
@@ -156,7 +132,7 @@ export class MacosSystemSleepAssertion {
     failureType: 'error' | 'exit' | 'spawn-error' = 'spawn-error'
   ): void {
     this.logFailure(failureKey, reason, details, failureType)
-    this.retryNotBefore = this.now() + MACOS_SYSTEM_SLEEP_ASSERTION_RETRY_MS
+    this.retryNotBefore = Date.now() + MACOS_SYSTEM_SLEEP_ASSERTION_RETRY_MS
     this.scheduleRetry()
     this.onUnexpectedFailure('macos-assertion-failure')
   }
@@ -173,19 +149,19 @@ export class MacosSystemSleepAssertion {
       details
     }
     if (this.lastFailureKey === failureKey && this.warnedForLastFailure) {
-      this.logger.debug('[agent-awake] macOS system sleep assertion failed repeatedly', payload)
+      console.debug('[agent-awake] macOS system sleep assertion failed repeatedly', payload)
       return
     }
     this.lastFailureKey = failureKey
     this.warnedForLastFailure = true
-    this.logger.warn('[agent-awake] macOS system sleep assertion failed', payload)
+    console.warn('[agent-awake] macOS system sleep assertion failed', payload)
   }
 
   private scheduleRetry(): void {
     if (this.retryNotBefore === null || this.retryTimer) {
       return
     }
-    const retryDelay = Math.max(0, this.retryNotBefore - this.now())
+    const retryDelay = Math.max(0, this.retryNotBefore - Date.now())
     this.retryTimer = setTimeout(() => {
       this.retryTimer = null
       this.onUnexpectedFailure('macos-assertion-retry')

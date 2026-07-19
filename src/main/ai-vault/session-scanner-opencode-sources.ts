@@ -44,9 +44,6 @@ async function opencodeDbPathsForSource(
   storageDir: string,
   sourceIndex: number
 ): Promise<readonly string[]> {
-  if (options.opencodeDbPaths) {
-    return sourceIndex === 0 ? options.opencodeDbPaths : []
-  }
   // Why: custom OpenCode storage roots still keep SQLite DBs in the parent data dir.
   if (sourceIndex === 0 && options.opencodeStorageDir) {
     return listOpenCodeDatabasesInDirectory(dirname(storageDir))

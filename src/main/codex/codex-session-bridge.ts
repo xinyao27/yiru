@@ -15,10 +15,6 @@ import {
   listCodexSessionJsonlFiles,
   listCodexSessionJsonlFilesIncrementally
 } from './codex-session-file-listing'
-import type { CodexSessionBridgeIncrementalOptions } from './codex-session-file-listing'
-
-export type { CodexSessionBridgeIncrementalOptions } from './codex-session-file-listing'
-
 type LegacyCopiedSessionMarker = {
   sourcePath: string
   sourceSize: number
@@ -31,11 +27,6 @@ export type LegacyCopiedCodexSessionBridgeScanPreference = {
   sourcePath: string
   preferManagedCopy: boolean
   sourceSkipBytes: number | null
-}
-
-export type CodexSessionBridgeSummary = {
-  scannedFiles: number
-  linkedFiles: number
 }
 
 let backgroundSessionBridgeTask: Promise<void> | null = null
@@ -65,13 +56,12 @@ export function syncSystemCodexSessionsIntoManagedHome(sourceCodexHomePath?: str
  * background bridging without starting duplicate directory walks.
  */
 export function startSystemCodexSessionBridgeInBackground(
-  options: CodexSessionBridgeIncrementalOptions = {},
   sourceCodexHomePath?: string
 ): Promise<void> {
   if (backgroundSessionBridgeTask) {
     return backgroundSessionBridgeTask
   }
-  const task = syncSystemCodexSessionsIntoManagedHomeIncrementally(options, sourceCodexHomePath)
+  const task = syncSystemCodexSessionsIntoManagedHomeIncrementally(sourceCodexHomePath)
     .catch((error: unknown) => {
       console.warn('[codex-session-bridge] Background session bridge failed:', error)
     })
@@ -85,35 +75,21 @@ export function startSystemCodexSessionBridgeInBackground(
   return task
 }
 
-/**
- * Incrementally mirrors system session files into the managed runtime home.
- *
- * Returns scan/link counts for tests and diagnostics while keeping each file
- * bridge operation equivalent to the synchronous path.
- */
-export async function syncSystemCodexSessionsIntoManagedHomeIncrementally(
-  options: CodexSessionBridgeIncrementalOptions = {},
+/** Incrementally mirrors system session files into the managed runtime home. */
+async function syncSystemCodexSessionsIntoManagedHomeIncrementally(
   sourceCodexHomePath?: string
-): Promise<CodexSessionBridgeSummary> {
+): Promise<void> {
   const systemSessionsRoot = join(sourceCodexHomePath || getSystemCodexHomePath(), 'sessions')
   if (!existsSync(systemSessionsRoot)) {
-    return { scannedFiles: 0, linkedFiles: 0 }
+    return
   }
 
   const managedSessionsRoot = join(getYiruManagedCodexHomePath(), 'sessions')
-  const summary: CodexSessionBridgeSummary = { scannedFiles: 0, linkedFiles: 0 }
   for await (const systemSessionFilePath of listCodexSessionJsonlFilesIncrementally(
-    systemSessionsRoot,
-    options
+    systemSessionsRoot
   )) {
-    summary.scannedFiles += 1
-    if (
-      bridgeSystemCodexSessionFile(systemSessionsRoot, managedSessionsRoot, systemSessionFilePath)
-    ) {
-      summary.linkedFiles += 1
-    }
+    bridgeSystemCodexSessionFile(systemSessionsRoot, managedSessionsRoot, systemSessionFilePath)
   }
-  return summary
 }
 
 /**

@@ -21,7 +21,7 @@ export function resolveWatcherProcessEntryPath(
   const basePath = isPackaged ? appPath.replace('app.asar', 'app.asar.unpacked') : appPath
   const adjacentBuildEntry = join(basePath, 'parcel-watcher-process-entry.js')
   // Why: electron-vite's unpackaged appPath is already out/main. Appending
-  // out/main again silently disables crash isolation in dev and E2E builds.
+  // out/main again silently disables crash isolation in development builds.
   if (!isPackaged && pathExists(adjacentBuildEntry)) {
     return adjacentBuildEntry
   }

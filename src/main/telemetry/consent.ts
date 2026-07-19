@@ -67,12 +67,6 @@ function isEnvVarTruthy(name: string): boolean {
   return false
 }
 
-// Exposed for tests only — resets the one-shot warning dedupe so separate
-// tests can each exercise the misconfiguration path independently.
-export function _resetMisconfigWarnCacheForTests(): void {
-  warnedMisconfigured.clear()
-}
-
 export function resolveConsent(settings: GlobalSettings): ConsentState {
   // Precedence 1: community standard kill switch. Always wins.
   if (isEnvVarTruthy('DO_NOT_TRACK')) {

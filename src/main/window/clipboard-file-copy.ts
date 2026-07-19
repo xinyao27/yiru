@@ -3,8 +3,8 @@ import { pathToFileURL } from 'node:url'
 
 export type ClipboardFileResult = { ok: boolean; reason?: string }
 
-// Injected so the platform branching is unit-testable without the real OS
-// clipboard or spawning processes.
+// Keep OS operations explicit so remote-file materialization and local
+// clipboard writes share one cross-platform implementation.
 export type ClipboardFileDeps = {
   platform: NodeJS.Platform
   // Linux only: the active desktop ($XDG_CURRENT_DESKTOP). KDE and GNOME-family

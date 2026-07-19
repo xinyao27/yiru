@@ -1,10 +1,9 @@
 // Pure auto-scroll logic for the native chat message list. The component owns
 // the DOM ref and the imperative scroll; this module owns only the decisions —
-// "are we near the bottom?", "should we stick on new content?", "show the jump
-// affordance?" — so they can be unit-tested without a scroll container.
+// "are we near the bottom?", "should we stick on new content?", and "show the
+// jump affordance?".
 
-/** A scroll container's geometry. Mirrors the three DOM props we read so tests
- *  can pass plain numbers instead of a fake element. */
+/** The three scroll-container geometry values used by the policy. */
 export type ScrollGeometry = {
   scrollTop: number
   scrollHeight: number
@@ -23,22 +22,18 @@ export function distanceFromBottom(geometry: ScrollGeometry): number {
 
 /** True when the viewport is close enough to the bottom that new content should
  *  keep it pinned (auto-scroll "attached"). */
-export function isNearBottom(
-  geometry: ScrollGeometry,
-  threshold: number = NATIVE_CHAT_BOTTOM_THRESHOLD_PX
-): boolean {
-  return distanceFromBottom(geometry) <= threshold
+export function isNearBottom(geometry: ScrollGeometry): boolean {
+  return distanceFromBottom(geometry) <= NATIVE_CHAT_BOTTOM_THRESHOLD_PX
 }
 
 /** Whether the "jump to latest" affordance should show: only when the user has
  *  detached (scrolled up) and there is actually scrollable content below. */
 export function shouldShowJumpToLatest(
   isStuckToBottom: boolean,
-  geometry: ScrollGeometry,
-  threshold: number = NATIVE_CHAT_BOTTOM_THRESHOLD_PX
+  geometry: ScrollGeometry
 ): boolean {
   if (isStuckToBottom) {
     return false
   }
-  return distanceFromBottom(geometry) > threshold
+  return distanceFromBottom(geometry) > NATIVE_CHAT_BOTTOM_THRESHOLD_PX
 }

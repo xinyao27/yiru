@@ -235,10 +235,3 @@ export function stopAgentHibernationCoordinator(): void {
 export function isAgentHibernationCoordinatorRunning(): boolean {
   return coordinator.interval !== null
 }
-
-export function resetAgentHibernationCoordinatorForTests(): void {
-  stopAgentHibernationCoordinator()
-  coordinator.shuttingDownCandidateIds.clear()
-  coordinator.tickInFlight = false
-  coordinator.now = () => Date.now()
-}

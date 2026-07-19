@@ -1561,11 +1561,3 @@ export class CodexHookService {
 }
 
 export const codexHookService = new CodexHookService()
-
-export const _internals = {
-  getManagedScript,
-  installManagedHooksIntoWslRuntime,
-  refreshWslRuntimeUserHooks,
-  removeStaleWslRuntimeManagedHookTrustEntries,
-  getWslHookReconciliationAction
-}

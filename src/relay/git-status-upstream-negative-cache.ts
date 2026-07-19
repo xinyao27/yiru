@@ -175,11 +175,3 @@ function retireNoEffectiveUpstreamProbe(cacheKey: string): void {
     })
     .catch(() => undefined)
 }
-
-export function getNoEffectiveUpstreamStatusCacheCountForTests(): number {
-  return noEffectiveUpstreamByIdentity.size
-}
-
-export function getNoEffectiveUpstreamStatusGenerationCountForTests(): number {
-  return noEffectiveUpstreamWriteGeneration.size
-}

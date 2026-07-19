@@ -34,10 +34,6 @@ async function setSessionProxy(
   await proxySession.closeAllConnections?.()
 }
 
-export function resetProxyApplicationForTests(): void {
-  lastAppliedProxyConfig = null
-}
-
 export async function ensureElectronProxyFromEnvironment(
   options: {
     proxySession?: ProxySession

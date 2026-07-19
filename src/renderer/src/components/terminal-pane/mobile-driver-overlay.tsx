@@ -15,7 +15,7 @@ type Props = {
   hasFitOverride: boolean
   onAction: () => void | Promise<void>
   onAllAction?: () => void | Promise<void>
-  /** Identifier class on the rendered root, used by e2e selectors. */
+  /** Optional class applied to the rendered root. */
   rootClassName?: string
 }
 

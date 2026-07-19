@@ -97,11 +97,3 @@ function warnOnce(reason: string): void {
   warnedThisSession = true
   console.warn('[telemetry-onboarding-cohort] classifier returned undefined', { reason })
 }
-
-export function _setStoreForTests(store: Store | null): void {
-  storeRef = store
-}
-
-export function _resetSessionWarnFlagForTests(): void {
-  warnedThisSession = false
-}

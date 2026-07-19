@@ -626,8 +626,3 @@ export class OpenCodeHookService {
 }
 
 export const openCodeHookService = new OpenCodeHookService()
-export const _internals = {
-  getOpenCodePluginSource,
-  isUsableId,
-  toSafeDirName
-}

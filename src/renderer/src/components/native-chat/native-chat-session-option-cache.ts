@@ -78,7 +78,3 @@ export function seedNativeChatAppliedSessionOptions(
   record.valuesByModel[modelId] = modelValues
   writeNativeChatSessionOptionCache(scopeKey, record)
 }
-
-export function clearNativeChatSessionOptionCacheForTests(): void {
-  sessionOptionCache.clear()
-}

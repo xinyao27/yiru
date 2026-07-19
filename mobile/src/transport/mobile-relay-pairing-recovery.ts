@@ -43,7 +43,7 @@ type RecoveryDependencies = {
   platform: string
 }
 
-const defaultDependencies: RecoveryDependencies = {
+const dependencies: RecoveryDependencies = {
   loadJournal: loadMobileRelayPairingJournal,
   updateJournal: updateMobileRelayPairingJournal,
   clearJournal: clearMobileRelayPairingJournal,
@@ -59,13 +59,10 @@ const defaultDependencies: RecoveryDependencies = {
 
 let recoveryPromise: Promise<MobileRelayPairingRecoveryResult> | null = null
 
-export function recoverMobileRelayPairing(
-  overrides: Partial<RecoveryDependencies> = {}
-): Promise<MobileRelayPairingRecoveryResult> {
+export function recoverMobileRelayPairing(): Promise<MobileRelayPairingRecoveryResult> {
   if (recoveryPromise) {
     return recoveryPromise
   }
-  const dependencies = { ...defaultDependencies, ...overrides }
   recoveryPromise = runRecovery(dependencies).finally(() => {
     recoveryPromise = null
   })
@@ -288,9 +285,4 @@ function assertCommitted(
   ) {
     throw new Error('relay pairing recovery install was not authoritatively committed')
   }
-}
-
-/** Test-only: clear the startup single-flight between cases. */
-export function resetMobileRelayPairingRecoveryForTests(): void {
-  recoveryPromise = null
 }

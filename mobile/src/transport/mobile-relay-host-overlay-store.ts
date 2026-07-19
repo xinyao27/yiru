@@ -107,8 +107,3 @@ export function removeMobileRelayHostOverlays(hostIds: readonly string[]): Promi
     return removed ? next : overlays
   })
 }
-
-/** Test-only: drain the module mutation chain between cases. */
-export function resetMobileRelayHostOverlayStoreForTests(): void {
-  overlayMutation = Promise.resolve()
-}

@@ -32,7 +32,7 @@ export async function startHeadlessPairingRuntime({
       cwd,
       env: {
         ...process.env,
-        YIRU_E2E_USER_DATA_DIR: userData
+        YIRU_APP_USER_DATA_PATH: userData
       },
       stdio: ['ignore', 'pipe', 'pipe']
     }

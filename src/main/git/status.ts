@@ -70,7 +70,7 @@ type EffectiveUpstreamStatusCacheEntry = {
 }
 
 const SUBMODULE_PATHS_CACHE_TTL_MS = 5_000
-export const MAX_SUBMODULE_PATHS_CACHE_ENTRIES = 512
+const MAX_SUBMODULE_PATHS_CACHE_ENTRIES = 512
 type SubmodulePathsCacheEntry = { paths: string[]; expiresAt: number }
 const submodulePathsCache = new Map<string, SubmodulePathsCacheEntry>()
 let submodulePathsCacheGeneration = 0
@@ -119,19 +119,11 @@ export async function runWithGitReadCacheInvalidation<T>(run: () => Promise<T>):
   }
 }
 
-export function clearSubmodulePathsCacheForTests(): void {
-  clearSubmodulePathsCache()
-}
-
 function clearSubmodulePathsCache(): void {
   submodulePathsCache.clear()
   // Why: a pre-mutation .gitmodules read must not repopulate the cache after
   // the mutation invalidated it.
   submodulePathsCacheGeneration += 1
-}
-
-export function getSubmodulePathsCacheCountForTests(): number {
-  return submodulePathsCache.size
 }
 
 function gitRuntimeOptionsKey(options: GitRuntimeOptions): readonly unknown[] {
@@ -180,24 +172,6 @@ function rememberSubmodulePaths(cacheKey: string, paths: string[], now: number):
   submodulePathsCache.delete(cacheKey)
   submodulePathsCache.set(cacheKey, { paths, expiresAt: now + SUBMODULE_PATHS_CACHE_TTL_MS })
   trimSubmodulePathsCache()
-}
-
-// Why: status tests reuse this reset hook, so every cross-call memoization layer
-// must reset together even though the historical name mentions upstream only.
-export function clearEffectiveUpstreamStatusCacheForTests(): void {
-  effectiveUpstreamStatusCache.clear()
-  effectiveUpstreamStatusInFlight.clear()
-  retiredEffectiveUpstreamStatusInFlight.clear()
-  effectiveUpstreamStatusWriteGeneration.clear()
-  invalidateGitReadCaches()
-}
-
-export function getEffectiveUpstreamStatusCacheCountForTests(): number {
-  return effectiveUpstreamStatusCache.size
-}
-
-export function getEffectiveUpstreamStatusGenerationCountForTests(): number {
-  return effectiveUpstreamStatusWriteGeneration.size
 }
 
 export type GetStatusOptions = GitRuntimeOptions & {

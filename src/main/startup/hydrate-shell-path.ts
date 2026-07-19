@@ -35,11 +35,6 @@ export type HydrationResult =
 
 let cached: Promise<HydrationResult> | null = null
 
-/** @internal - tests need a clean hydration cache between cases. */
-export function _resetHydrateShellPathCache(): void {
-  cached = null
-}
-
 function pickShell(): string | null {
   if (process.platform === 'win32') {
     return null
@@ -153,30 +148,25 @@ function spawnShellAndReadPath(shell: string): Promise<HydrationResult> {
 
 type HydrateOptions = {
   force?: boolean
-  /** Override for tests — defaults to running `spawn` against the real shell. */
-  spawner?: (shell: string) => Promise<HydrationResult>
-  /** Override for tests — defaults to `pickShell()`. */
-  shellOverride?: string | null
 }
 
 /**
  * Spawn the user's login shell once and return the PATH it would export.
- * Caches the promise for the lifetime of the process — call
- * `_resetHydrateShellPathCache()` in tests or `hydrateShellPath({ force: true })`
- * when the user asks to re-probe (e.g. after installing a new CLI).
+ * Caches the promise for the lifetime of the process. Pass `force: true` when
+ * the user asks to re-probe, such as after installing a new CLI.
  */
 export function hydrateShellPath(options: HydrateOptions = {}): Promise<HydrationResult> {
   if (cached && !options.force) {
     return cached
   }
-  const shell = options.shellOverride !== undefined ? options.shellOverride : pickShell()
+  const shell = pickShell()
   if (!shell) {
     // Windows uses cmd/PowerShell rather than a POSIX login shell — the
     // `patchPackagedProcessPath` static list is sufficient there.
     cached = Promise.resolve({ segments: [], ok: false, failureReason: 'no_shell' })
     return cached
   }
-  cached = (options.spawner ?? spawnShellAndReadPath)(shell)
+  cached = spawnShellAndReadPath(shell)
   return cached
 }
 

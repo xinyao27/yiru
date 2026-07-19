@@ -613,38 +613,17 @@ function stripRetiredGlobalSettings(
     experimentalNewWorktreeCardStyle: _retiredCardStyle,
     compactWorktreeCards: _retiredCompactCards,
     experimentalCompactWorktreeCards: _retiredExperimentalCompactCards,
-    showTasksButton: _retiredShowTasksButton,
-    defaultTaskViewPreset: _retiredDefaultTaskViewPreset,
-    defaultTaskSource: _retiredDefaultTaskSource,
-    visibleTaskProviders: _retiredVisibleTaskProviders,
-    visibleTaskProvidersDefaultedForJira: _retiredVisibleTaskProvidersMigration,
-    defaultRepoSelection: _retiredDefaultRepoSelection,
-    defaultLinearTeamSelection: _retiredDefaultLinearTeamSelection,
     ...rest
   } = (settings ?? {}) as Partial<GlobalSettings> & {
     terminalScrollbackBytes?: unknown
     experimentalNewWorktreeCardStyle?: unknown
     compactWorktreeCards?: unknown
     experimentalCompactWorktreeCards?: unknown
-    showTasksButton?: unknown
-    defaultTaskViewPreset?: unknown
-    defaultTaskSource?: unknown
-    visibleTaskProviders?: unknown
-    visibleTaskProvidersDefaultedForJira?: unknown
-    defaultRepoSelection?: unknown
-    defaultLinearTeamSelection?: unknown
   }
   void _legacyScrollbackBytes
   void _retiredCardStyle
   void _retiredCompactCards
   void _retiredExperimentalCompactCards
-  void _retiredShowTasksButton
-  void _retiredDefaultTaskViewPreset
-  void _retiredDefaultTaskSource
-  void _retiredVisibleTaskProviders
-  void _retiredVisibleTaskProvidersMigration
-  void _retiredDefaultRepoSelection
-  void _retiredDefaultLinearTeamSelection
   return rest
 }
 
@@ -3707,13 +3686,6 @@ export class Store {
         })
       this.pendingWrite = next
     }, delay)
-  }
-
-  /** Wait for any in-flight async disk write to complete. Used in tests. */
-  async waitForPendingWrite(): Promise<void> {
-    if (this.pendingWrite) {
-      await this.pendingWrite
-    }
   }
 
   // Why githubCache is omitted: it is memory-only during the session (see

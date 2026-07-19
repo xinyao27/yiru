@@ -18,10 +18,6 @@ export function registerHiddenRateLimitPty(term: HiddenPty): Disposable {
   }
 }
 
-export function getActiveHiddenRateLimitPtyCount(): number {
-  return activeHiddenRateLimitPtys.size
-}
-
 export function cleanupHiddenRateLimitPty(
   term: HiddenPty,
   disposables: Disposable[],

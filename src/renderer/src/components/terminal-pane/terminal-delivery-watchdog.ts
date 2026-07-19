@@ -14,7 +14,6 @@
  * data hot path (one Map upsert per received chunk; a tick does no IPC while
  * output flows or while no PTY delivery is expected).
  */
-import { e2eConfig } from '@/lib/e2e-config'
 import type { PtyRendererDeliveryHealthReply } from '../../../../shared/pty-renderer-delivery-health'
 import { redactPtyIdForDiagnostics } from '../../../../shared/pty-delivery-diagnostics'
 import { deliverPulledPtyModelRestoreMarkers } from './pty-model-restore-channel'
@@ -30,12 +29,6 @@ const WATCHDOG_STALL_TICKS_TO_HEAL = 2
 // pull-restores repeat at most once per cooldown while the wedge persists.
 const WATCHDOG_HEAL_COOLDOWN_MS = 60_000
 
-type TerminalDeliveryWatchdogConfig = {
-  intervalMs: number
-  stallTicksToHeal: number
-  healCooldownMs: number
-}
-
 type TerminalDeliveryWatchdogDeps = {
   /** Detach and re-subscribe the dispatcher's push-channel listeners. */
   reattachPushListeners: () => void
@@ -45,15 +38,9 @@ type TerminalDeliveryWatchdogDeps = {
 
 const receivedPtyCharTotals = new Map<string, number>()
 let receivedPtyDataEventCount = 0
-let blackholePtyPushDelivery = false
 
 let watchdogDeps: TerminalDeliveryWatchdogDeps | null = null
 let watchdogTimer: ReturnType<typeof setInterval> | null = null
-let watchdogConfig: TerminalDeliveryWatchdogConfig = {
-  intervalMs: WATCHDOG_INTERVAL_MS,
-  stallTicksToHeal: WATCHDOG_STALL_TICKS_TO_HEAL,
-  healCooldownMs: WATCHDOG_HEAL_COOLDOWN_MS
-}
 let eventCountAtLastTick = 0
 let stallStreakTicks = 0
 let lastHealAtMs: number | null = null
@@ -72,19 +59,13 @@ export function clearReceivedPtyCharTotal(ptyId: string): void {
   receivedPtyCharTotals.delete(ptyId)
 }
 
-/** E2e blackhole: simulates the field wedge (push events vanish before the
- *  dispatcher sees them, no receive count, no ACK). Never true in prod. */
-export function isPtyPushDeliveryBlackholed(): boolean {
-  return blackholePtyPushDelivery
-}
-
 function isMainDeliveryStalled(health: PtyRendererDeliveryHealthReply): boolean {
   // Why msSinceLastAck may be null: a wedged-from-first-byte session (the
   // field case's brand-new terminal) never ACKs; in-flight debt alone is the
   // signal then. A recent ACK means some pty still round-trips — not a wedge.
   return (
     health.inFlightTotalChars > 0 &&
-    (health.msSinceLastAck === null || health.msSinceLastAck >= watchdogConfig.intervalMs)
+    (health.msSinceLastAck === null || health.msSinceLastAck >= WATCHDOG_INTERVAL_MS)
   )
 }
 
@@ -118,10 +99,10 @@ async function runWatchdogTick(): Promise<void> {
     inFlightTotalChars: health.inFlightTotalChars,
     msSinceLastAck: health.msSinceLastAck
   })
-  if (stallStreakTicks < watchdogConfig.stallTicksToHeal) {
+  if (stallStreakTicks < WATCHDOG_STALL_TICKS_TO_HEAL) {
     return
   }
-  if (lastHealAtMs !== null && Date.now() - lastHealAtMs < watchdogConfig.healCooldownMs) {
+  if (lastHealAtMs !== null && Date.now() - lastHealAtMs < WATCHDOG_HEAL_COOLDOWN_MS) {
     return
   }
   await healDeadPushDelivery(deps, report, health)
@@ -186,15 +167,15 @@ function scheduleWatchdogTimer(): void {
     void runWatchdogTick().finally(() => {
       tickInFlight = false
     })
-  }, watchdogConfig.intervalMs)
+  }, WATCHDOG_INTERVAL_MS)
 }
 
 export function startTerminalDeliveryWatchdog(deps: TerminalDeliveryWatchdogDeps): void {
   if (watchdogDeps) {
     return
   }
-  // Why gated on the invoke fn: the web remote client and unit tests expose a
-  // partial pty API; without the report lane the watchdog has no safe heal
+  // Why gated on the invoke fn: the web remote client exposes a partial pty
+  // API; without the report lane the watchdog has no safe heal
   // path and must stay off.
   if (typeof window.api?.pty?.reportRendererDeliveryState !== 'function') {
     return
@@ -202,7 +183,6 @@ export function startTerminalDeliveryWatchdog(deps: TerminalDeliveryWatchdogDeps
   watchdogDeps = deps
   eventCountAtLastTick = receivedPtyDataEventCount
   scheduleWatchdogTimer()
-  exposeE2eTerminalDeliveryWatchdog()
 }
 
 export function stopTerminalDeliveryWatchdog(): void {
@@ -233,46 +213,5 @@ export function getTerminalDeliveryWatchdogDiagnostics(): {
     stallStreakTicks,
     healCount,
     msSinceLastHeal: lastHealAtMs === null ? null : Date.now() - lastHealAtMs
-  }
-}
-
-// ─── E2e control surface ─────────────────────────────────────────────
-
-type E2eTerminalDeliveryWatchdogApi = {
-  blackhole: (on: boolean) => void
-  configure: (config: Partial<TerminalDeliveryWatchdogConfig>) => void
-  snapshot: () => {
-    receivedPtyDataEventCount: number
-    stallStreakTicks: number
-    healCount: number
-    blackholed: boolean
-  }
-}
-
-type E2eTerminalDeliveryWatchdogWindow = Window & {
-  __terminalDeliveryWatchdog?: E2eTerminalDeliveryWatchdogApi
-}
-
-function exposeE2eTerminalDeliveryWatchdog(): void {
-  if (!e2eConfig.exposeStore || typeof window === 'undefined') {
-    return
-  }
-  const target = window as E2eTerminalDeliveryWatchdogWindow
-  target.__terminalDeliveryWatchdog ??= {
-    blackhole: (on) => {
-      blackholePtyPushDelivery = on
-    },
-    configure: (config) => {
-      watchdogConfig = { ...watchdogConfig, ...config }
-      if (watchdogDeps) {
-        scheduleWatchdogTimer()
-      }
-    },
-    snapshot: () => ({
-      receivedPtyDataEventCount,
-      stallStreakTicks,
-      healCount,
-      blackholed: blackholePtyPushDelivery
-    })
   }
 }

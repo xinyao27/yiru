@@ -227,14 +227,12 @@ function diffGitCommon(
 export async function startGitCommonPolling(
   commonDirPath: string,
   onEvents: (events: WorktreeBasePollEvent[]) => void,
-  pollIntervalMs: number,
-  onFullScan?: () => void,
-  includePrimary = true
+  pollIntervalMs: number
 ): Promise<WorktreeBaseSubscription> {
   let disposed = false
   let ticking = false
   let tickCount = 0
-  let snapshot = await snapshotGitCommon(commonDirPath, undefined, includePrimary)
+  let snapshot = await snapshotGitCommon(commonDirPath, undefined, true)
 
   const timer = setInterval(() => {
     if (disposed || ticking) {
@@ -243,8 +241,7 @@ export async function startGitCommonPolling(
     ticking = true
     tickCount++
     const forceIndexRead = tickCount % INDEX_BACKSTOP_TICKS === 0
-    onFullScan?.()
-    void snapshotGitCommon(commonDirPath, snapshot, includePrimary, forceIndexRead)
+    void snapshotGitCommon(commonDirPath, snapshot, true, forceIndexRead)
       .then((next) => {
         if (disposed) {
           return

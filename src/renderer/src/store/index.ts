@@ -36,7 +36,6 @@ import { createPinnedTabCloseConfirmSlice } from './slices/pinned-tab-close-conf
 import { createRecentlyClosedTabsSlice } from './slices/recently-closed-tabs'
 import { createYiruProfilesSlice } from './slices/yiru-profiles'
 import { createSpoolSharingSlice } from './slices/spool-sharing'
-import { e2eConfig } from '@/lib/e2e-config'
 import { registerHttpLinkStoreAccessor } from '@/lib/http-link-routing'
 
 export const useAppStore = create<AppState>()((...a) => ({
@@ -82,10 +81,7 @@ registerHttpLinkStoreAccessor(() => useAppStore.getState())
 
 export type { AppState } from './types'
 
-// Why: exposes the Zustand store on window for console debugging (dev) and
-// E2E tests (VITE_EXPOSE_STORE). The E2E suite reads store state directly
-// to avoid fragile DOM scraping. Harmless — the store is already reachable
-// via React DevTools in any environment.
-if ((import.meta.env.DEV || e2eConfig.exposeStore) && typeof window !== 'undefined') {
+// Why: expose the store for interactive development diagnostics.
+if (import.meta.env.DEV && typeof window !== 'undefined') {
   ;(window as unknown as Record<string, unknown>).__store = useAppStore
 }

@@ -18,8 +18,8 @@
 //   2. Buffered batches with a flush threshold. Batches of up to
 //      `FLUSH_BUFFER_THRESHOLD` lines are coalesced into one syscall to
 //      keep the per-span cost low; a periodic interval flushes the partial
-//      batch every `batchWindowMs` so a sparse-trace session still ends up
-//      on disk. Both knobs are configurable for tests.
+//      batch every `DEFAULT_BATCH_WINDOW_MS` so a sparse-trace session still
+//      ends up on disk.
 
 import {
   chmodSync,
@@ -45,10 +45,6 @@ const PRIVATE_FILE_MODE = 0o600
 
 export type LocalFileSinkOptions = {
   readonly filePath: string
-  readonly maxBytes?: number
-  readonly maxFiles?: number
-  readonly batchWindowMs?: number
-  readonly flushBufferThreshold?: number
 }
 
 export type LocalFileSink = {
@@ -79,10 +75,10 @@ function tightenTraceFamilyPermissions(filePath: string, maxFiles: number): void
 
 export function createLocalFileSink(opts: LocalFileSinkOptions): LocalFileSink {
   const filePath = opts.filePath
-  const maxBytes = opts.maxBytes ?? DEFAULT_MAX_BYTES
-  const maxFiles = opts.maxFiles ?? DEFAULT_MAX_FILES
-  const batchWindowMs = opts.batchWindowMs ?? DEFAULT_BATCH_WINDOW_MS
-  const flushThreshold = opts.flushBufferThreshold ?? DEFAULT_FLUSH_BUFFER_THRESHOLD
+  const maxBytes = DEFAULT_MAX_BYTES
+  const maxFiles = DEFAULT_MAX_FILES
+  const batchWindowMs = DEFAULT_BATCH_WINDOW_MS
+  const flushThreshold = DEFAULT_FLUSH_BUFFER_THRESHOLD
 
   // Local traces can contain paths and crash context; keep them readable only
   // by the current user even on systems with permissive default umasks.

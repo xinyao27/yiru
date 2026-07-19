@@ -19,36 +19,6 @@ type CodexSessionIndexTitleCacheEntry = {
 
 const codexSessionIndexTitleCache = new Map<string, Promise<CodexSessionIndexTitleCacheEntry>>()
 
-export function resetCodexSessionIndexTitleCacheForTests(): void {
-  codexSessionIndexTitleCache.clear()
-}
-
-export function _getCodexSessionIndexTitleCacheSizeForTest(): number {
-  return codexSessionIndexTitleCache.size
-}
-
-export function _hasCodexSessionIndexTitleCacheEntryForTest(codexHome: string): boolean {
-  return codexSessionIndexTitleCache.has(codexHome)
-}
-
-export function _storeCodexSessionIndexTitleCacheEntryForTest(
-  codexHome: string,
-  signature: string,
-  titles: Promise<Map<string, string>>
-): void {
-  storeCodexSessionIndexTitleCacheEntry(
-    codexHome,
-    titles.then((resolvedTitles) => ({ signature, titles: resolvedTitles }))
-  )
-}
-
-export function _readCachedCodexSessionIndexTitlesForTest(
-  codexHome: string,
-  signature: string
-): Promise<Map<string, string> | undefined> {
-  return readCachedCodexSessionIndexTitles(codexHome, signature)
-}
-
 export async function readCodexSessionIndexTitle(
   sessionFilePath: string,
   codexHome: string | null,

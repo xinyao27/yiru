@@ -4,7 +4,7 @@ import { hydrateShellPath, mergePathSegments } from '../startup/hydrate-shell-pa
 import { getAzureDevOpsAuthStatus } from '../azure-devops/client'
 import { getBitbucketAuthStatus } from '../bitbucket/client'
 import { getGiteaAuthStatus } from '../gitea/client'
-import { _resetKnownHostsCache } from '../gitlab/gl-utils'
+import { clearKnownHostsCache } from '../gitlab/gl-utils'
 import { getActiveMultiplexer } from './ssh'
 import { detectWslCommandsOnPath, type WslPreflightTarget } from './preflight-wsl-agent-detection'
 import { detectCommandsInInstallDirs } from './local-agent-install-dir-detection'
@@ -58,11 +58,6 @@ export type { RemoteWindowsTerminalCapabilities }
 // Why: cache the result so repeated Landing mounts don't re-spawn processes.
 // The check only runs once per app session — relaunch to re-check.
 let cached: PreflightStatus | null = null
-
-/** @internal - tests need a clean preflight cache between cases. */
-export function _resetPreflightCache(): void {
-  cached = null
-}
 
 function uniqueAgentIds(ids: Iterable<string>): string[] {
   return [...new Set(ids)]
@@ -240,7 +235,7 @@ export async function runPreflightCheck(
     // otherwise see "No GitLab project found" until app relaunch. The Re-check
     // path in IntegrationsPane forces preflight, so piggyback on that signal
     // to refresh the host list too.
-    _resetKnownHostsCache()
+    clearKnownHostsCache()
   }
 
   const [gitProbe, ghProbe, glabProbe] = await Promise.all([

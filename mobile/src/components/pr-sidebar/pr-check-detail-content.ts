@@ -6,8 +6,7 @@ import type {
 } from '../../../../src/shared/types'
 
 // Pure mapping from the github.prCheckDetails payload to the rows the mobile
-// expanded check detail renders. No React/native imports so it stays unit-testable
-// under the node Vitest config (KTD5). Ports the desktop CheckDetailExpanded logic
+// expanded check detail renders. Ports the desktop CheckDetailExpanded logic
 // (conclusion/title/summary + annotations + failed-job/step summary), not its JSX.
 
 // Desktop caps the inline lists so a noisy check can't break the layout; match it.

@@ -157,14 +157,6 @@ function addGitAttributes(span: ActiveSpan, meta: GitSpanArgs): void {
   }
 }
 
-export function _resetGitSpanSamplingForTests(): void {
-  gitSamplingBuckets.clear()
-}
-
-export function _gitSpanSamplingBucketCountForTests(): number {
-  return gitSamplingBuckets.size
-}
-
 export type GitSpanArgs = {
   readonly args: readonly string[]
   readonly cwd?: string

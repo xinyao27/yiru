@@ -30,7 +30,6 @@ import {
   MAX_PANE_KEY_LEN,
   movePaneCacheState,
   normalizeHookPayload,
-  parseFormEncodedBody,
   readRequestBody,
   resolveHookSource,
   preparePendingGrokResultDiscovery,
@@ -471,14 +470,12 @@ export class AgentHookServer {
   private onPaneStatusCleared: PaneStatusClearListener | null = null
   private statusChangeListeners = new Set<StatusChangeListener>()
   // Why: directory that holds the on-disk endpoint file. Set via start()'s
-  // `userDataPath` option so the class has no direct Electron dependency
-  // (keeps it mockable in the vitest node environment).
+  // `userDataPath` option so the listener stays independent of Electron.
   private endpointDir: string | null = null
   private endpointFilePathCache: string | null = null
   private endpointFileWritten = false
-  // Why: per-instance caches (warn-once Sets, lastPrompt/lastTool/lastStatus
-  // by paneKey). Held on the instance instead of as module-level Maps so
-  // tests can spin up multiple servers without state cross-contamination.
+  // Why: per-instance caches keep listener lifetimes isolated when hook
+  // servers are replaced or restarted.
   private state: HookListenerState = createHookListenerState()
   // Why: hydrated last-status rows are useful UI continuity, but they are not
   // evidence of live agent work in this main-process runtime.
@@ -1911,35 +1908,6 @@ export class AgentHookServer {
       }
     }
   }
-
-  /** Test-only accessor for the per-instance listener state. The `_internals`
-   *  shim needs to reach this without exposing `state` on the public surface
-   *  to renderer/main callers. AGENTS.md disallows `as unknown as X` escapes,
-   *  so we expose a narrow getter rather than casting the private field. */
-  _getStateForTests(): HookListenerState {
-    return this.state
-  }
-
-  _resetPromptSentDedupeForTests(): void {
-    this.promptSentDedupeByPaneKey.clear()
-  }
 }
 
 export const agentHookServer = new AgentHookServer()
-
-// Why: exported for test coverage of the per-agent field extractors.
-export const _internals = {
-  // Why: bind the test-helper to the singleton's state so existing tests keep
-  // exercising the same caches the live server uses.
-  normalizeHookPayload: (
-    source: AgentHookSource,
-    body: unknown,
-    expectedEnv: string
-  ): AgentHookEventPayload | null =>
-    normalizeHookPayload(agentHookServer._getStateForTests(), source, body, expectedEnv),
-  parseFormEncodedBody,
-  resetCachesForTests: (): void => {
-    clearAllListenerCaches(agentHookServer._getStateForTests())
-    agentHookServer._resetPromptSentDedupeForTests()
-  }
-}

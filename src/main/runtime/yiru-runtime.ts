@@ -721,13 +721,12 @@ type RuntimeStore = {
     terminalHiddenDeliveryGate?: GlobalSettings['terminalHiddenDeliveryGate']
     terminalModelQueryAuthority?: GlobalSettings['terminalModelQueryAuthority']
   }
-  // Why: narrow to `unknown` return so test mocks can return void without
-  // a cast. The runtime never reads the return value — the persisted value
-  // is read back via getSettings() on the next access.
+  // The runtime never reads the return value; it reads persisted settings on
+  // the next access.
   updateSettings?: (
     updates: Partial<GlobalSettings>,
     options?: { notifyListeners?: boolean; originWebContentsId?: number }
-  ) => unknown
+  ) => GlobalSettings
 }
 
 export type RuntimeAutomationCreateInput = Omit<
@@ -10210,13 +10209,6 @@ export class YiruRuntimeService {
       this.remoteDesktopHostReclaimTargets.set(ptyId, { cols, rows })
     }
     this.refreshRendererGeometry(ptyId, cols, rows)
-  }
-
-  // Why: test seam — exposes lastRendererSizes for assertions about
-  // pty:reportGeometry / onExternalPtyResize side effects without making
-  // the underlying Map writable from the outside.
-  getLastRendererSize(ptyId: string): { cols: number; rows: number } | null {
-    return this.lastRendererSizes.get(ptyId) ?? null
   }
 
   private refreshRendererGeometry(ptyId: string, cols: number, rows: number): void {

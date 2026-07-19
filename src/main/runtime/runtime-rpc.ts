@@ -62,12 +62,6 @@ type YiruRuntimeRpcServerOptions = {
   // order can prefer the pin over a stale STA-1511 fallback (issue #8535).
   preferPinnedWsPort?: boolean
   webClientRoot?: string
-  // Why: test-only overrides for the two time-bound constants below.
-  // Production callers must not pass these — defaults are set by the design
-  // doc (§3.1) and changing them in production would weaken the admission
-  // fence or flood the socket with keepalive frames.
-  keepaliveIntervalMs?: number
-  longPollCap?: number
 }
 
 type MobileRelayPairingProvider = {
@@ -91,15 +85,6 @@ export type MobilePairingConnectionContext = Readonly<{
   connectionId: string
   transport: MobileSocketTransportMetadata
 }>
-
-// Why: after 10 s of a pending dispatch we emit a tiny `{"_keepalive":true}`
-// frame every 10 s until the handler resolves. Each write resets both the
-// server's own socket idle timer (30 s) and — once §3.1 ships on the client —
-// the client's idle timer, because any byte counts as socket activity. This
-// is the transport-layer fix for feedback #1: long-poll RPCs (i.e.
-// orchestration.check --wait) can now run past the 30 s/60 s idle caps
-// without either end tearing the socket down. See design doc §3.1.
-const KEEPALIVE_INTERVAL_MS = 10_000
 
 // Why: long-poll slot cap. With keepalives a `check --wait --timeout-ms
 // 600000` can hold a connection for up to 10 minutes; unbounded that would
@@ -409,8 +394,6 @@ export class YiruRuntimeRpcServer {
   private readonly preferPinnedWsPort: boolean
   private readonly webClientRoot: string | undefined
   private readonly authToken = randomBytes(24).toString('hex')
-  private readonly keepaliveIntervalMs: number
-  private readonly longPollCap: number
   private readonly relayRevokeOutbox: RelayRevokeOutbox
   private deviceRegistry: DeviceRegistry | null = null
   private e2eeKeypair: E2EEKeypair | null = null
@@ -444,9 +427,7 @@ export class YiruRuntimeRpcServer {
     enableWebSocket = false,
     wsPort = DEFAULT_WS_PORT,
     preferPinnedWsPort = false,
-    webClientRoot,
-    keepaliveIntervalMs = KEEPALIVE_INTERVAL_MS,
-    longPollCap = LONG_POLL_CAP
+    webClientRoot
   }: YiruRuntimeRpcServerOptions) {
     this.runtime = runtime
     this.dispatcher = new RpcDispatcher({ runtime })
@@ -457,8 +438,6 @@ export class YiruRuntimeRpcServer {
     this.wsPort = wsPort
     this.preferPinnedWsPort = preferPinnedWsPort
     this.webClientRoot = webClientRoot
-    this.keepaliveIntervalMs = keepaliveIntervalMs
-    this.longPollCap = longPollCap
     this.relayRevokeOutbox = new RelayRevokeOutbox(userDataPath)
   }
 
@@ -786,8 +765,7 @@ export class YiruRuntimeRpcServer {
 
     const socketTransport = new UnixSocketTransport({
       endpoint: transportMeta.endpoint,
-      kind: transportMeta.kind as 'unix' | 'named-pipe',
-      keepaliveIntervalMs: this.keepaliveIntervalMs
+      kind: transportMeta.kind as 'unix' | 'named-pipe'
     })
 
     // Why: Unix socket transport uses the shared runtime auth token. This is
@@ -843,8 +821,8 @@ export class YiruRuntimeRpcServer {
           // Why: keep the fallback port stable across restarts so paired
           // devices' stored endpoints stay valid (STA-1511) — the transport
           // binds a persisted fallback before the preferred port unless the
-          // caller explicitly pinned a port (serve --port). wsPort 0 means
-          // the caller wants a random port (E2E) — don't pin it.
+          // caller explicitly pinned a port (serve --port). Port 0 requests an
+          // ephemeral port for an isolated temporary runtime, so don't pin it.
           ...(this.wsPort !== 0 ? { fallbackPort: readWsFallbackPort(this.userDataPath) } : {}),
           ...(this.preferPinnedWsPort ? { preferPinnedPort: true } : {})
         })
@@ -960,7 +938,7 @@ export class YiruRuntimeRpcServer {
     // Why: long-poll admission fence. Short RPCs bypass the counter entirely
     // — it only guards handlers that can block for minutes. See §7 risk #2.
     const longPoll = isLongPollRequest(request)
-    if (longPoll && this.activeLongPolls >= this.longPollCap) {
+    if (longPoll && this.activeLongPolls >= LONG_POLL_CAP) {
       return this.buildError(
         request.id,
         'runtime_busy',
@@ -1102,7 +1080,7 @@ export class YiruRuntimeRpcServer {
     }
 
     const longPoll = isLongPollRequest(request)
-    if (longPoll && this.activeLongPolls >= this.longPollCap) {
+    if (longPoll && this.activeLongPolls >= LONG_POLL_CAP) {
       reply(
         JSON.stringify(
           this.buildError(
@@ -1202,10 +1180,10 @@ export class YiruRuntimeRpcServer {
  * Why: the regex MUST stay in lockstep with createRuntimeTransportMetadata()
  * below, which emits `o-${pid}-${endpointSuffix}.sock` where endpointSuffix
  * is `[A-Za-z0-9_-]{1,4}` (derived from a sanitised runtimeId prefix, or
- * `'rt'` as the fallback). The invariant is covered by a unit test so any
- * future change to the transport-name shape trips CI.
+ * `'rt'` as the fallback). Update both sides together when the transport-name
+ * shape changes.
  */
-export const RUNTIME_SOCKET_NAME_REGEX = /^o-(\d+)-[A-Za-z0-9_-]+\.sock$/
+const RUNTIME_SOCKET_NAME_REGEX = /^o-(\d+)-[A-Za-z0-9_-]+\.sock$/
 
 export function sweepOrphanedRuntimeSockets(userDataPath: string, ownPid: number): void {
   let entries: string[]

@@ -36,7 +36,7 @@ import { parseDaemonPidFile, startTimeMatches } from './daemon-health'
  * install-dir host — the pre-relocation behavior, byte-identical off win32.
  */
 
-export type RelocatedDaemonHost = {
+type RelocatedDaemonHost = {
   /** The relocated host exe to fork the daemon from (run as node). */
   execPath: string
   /** The copied daemon-entry.js, mirrored under the relocated resources tree. */
@@ -90,8 +90,7 @@ type MaterializeMarker = {
 }
 
 // Uses win32 path semantics so Windows layout paths (drive letters, `\`)
-// decompose correctly regardless of host OS — needed for cross-platform unit
-// tests; production runs this on win32 only.
+// decompose correctly regardless of the process host.
 function toPosixRelative(fromDir: string, absPath: string): string {
   return winPath.relative(fromDir, absPath).split(winPath.sep).join('/')
 }
@@ -153,10 +152,9 @@ function isRuntimeNodePtyPath(sourcePath: string): boolean {
 /**
  * The ordered copy plan. Every destRel mirrors the source's win-unpacked
  * relative path so require() and node-pty's native loader resolve the mirror
- * identically to the packaged app. Pure over its inputs so tests can assert the
- * layout without a real build.
+ * identically to the packaged app.
  */
-export function buildDaemonHostManifest(sources: DaemonHostSources): CopyOp[] {
+function buildDaemonHostManifest(sources: DaemonHostSources): CopyOp[] {
   const { appDir, execPath, resourcesPath, entrySourcePath, entryRelPath } = sources
   const ops: CopyOp[] = []
 
@@ -261,7 +259,7 @@ function hostRootDir(): string {
  * Valid only when the marker matches this version AND the exe + entry exist, so
  * a partial or stale copy never reports ready.
  */
-export function getRelocatedDaemonHost(): RelocatedDaemonHost | null {
+function getRelocatedDaemonHost(): RelocatedDaemonHost | null {
   const sources = collectDaemonHostSources()
   if (!sources) {
     return null

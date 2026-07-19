@@ -204,9 +204,3 @@ export const CLIPBOARD_METHODS: RpcMethod[] = [
     }
   })
 ]
-
-export function resetClipboardImageUploadsForTest(): void {
-  for (const uploadId of clipboardImageUploads.keys()) {
-    deleteUpload(uploadId)
-  }
-}

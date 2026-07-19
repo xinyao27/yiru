@@ -1,7 +1,6 @@
 /* oxlint-disable max-lines -- Why: output ordering, foreground settle, queue
-state, and e2e diagnostics share one state machine; splitting it would make the
+state, and recovery diagnostics share one state machine; splitting it would make
 backlog/resume guarantees harder to audit. */
-import { e2eConfig } from '@/lib/e2e-config'
 import {
   discardForegroundRenderSettle,
   writeForegroundTerminalChunk,
@@ -154,21 +153,14 @@ let drainTimerDelayMs: number | null = null
 // clamp. Cancellation is by generation: posts carry the generation they
 // were armed with and no-op when it has moved on.
 let drainImmediatePending = false
-let drainImmediateGeneration = 0
-let useMessageChannelDrain = typeof MessageChannel !== 'undefined' && !isVitestEnv()
+const useMessageChannelDrain = typeof MessageChannel !== 'undefined'
 let drainChannel: MessageChannel | null = null
-
-function isVitestEnv(): boolean {
-  // Why: vitest fake timers cannot advance MessageChannel macrotasks; the
-  // timer path keeps the existing suites' virtual clock authoritative.
-  return typeof process !== 'undefined' && process.env?.VITEST === 'true'
-}
 
 function getDrainChannel(): MessageChannel {
   if (drainChannel === null) {
     drainChannel = new MessageChannel()
-    drainChannel.port1.onmessage = (event: MessageEvent) => {
-      if (event.data !== drainImmediateGeneration || !drainImmediatePending) {
+    drainChannel.port1.onmessage = () => {
+      if (!drainImmediatePending) {
         return
       }
       drainImmediatePending = false
@@ -176,134 +168,6 @@ function getDrainChannel(): MessageChannel {
     }
   }
   return drainChannel
-}
-
-function cancelImmediateDrain(): void {
-  drainImmediateGeneration++
-  drainImmediatePending = false
-}
-
-export function setUseMessageChannelDrainForTesting(value: boolean | null): void {
-  cancelImmediateDrain()
-  useMessageChannelDrain = value ?? (typeof MessageChannel !== 'undefined' && !isVitestEnv())
-}
-const debugEnabled = e2eConfig.exposeStore
-
-// Why the cap is lossy: a hidden/backgrounded Chromium document can throttle
-// timers while PTYs keep writing. Preserving unlimited hidden scrollback would
-// let renderer memory grow until the app stalls or crashes.
-
-type TerminalOutputSchedulerDebugSnapshot = {
-  backgroundEnqueueCount: number
-  deferredForegroundEnqueueCount: number
-  foregroundWriteCount: number
-  backgroundWriteCount: number
-  deferredForegroundWriteCount: number
-  flushWriteCount: number
-  scheduledDrainCount: number
-  queuedTerminalCount: number
-  queuedChars: number
-  peakQueuedTerminalCount: number
-  peakQueuedChars: number
-  peakQueuedCharsByTerminal: number
-  droppedBacklogCount: number
-  drainWrites: number[]
-}
-
-type TerminalOutputSchedulerDebugApi = {
-  reset: () => void
-  snapshot: () => TerminalOutputSchedulerDebugSnapshot
-}
-
-const debugState: TerminalOutputSchedulerDebugSnapshot = {
-  backgroundEnqueueCount: 0,
-  deferredForegroundEnqueueCount: 0,
-  foregroundWriteCount: 0,
-  backgroundWriteCount: 0,
-  deferredForegroundWriteCount: 0,
-  flushWriteCount: 0,
-  scheduledDrainCount: 0,
-  queuedTerminalCount: 0,
-  queuedChars: 0,
-  peakQueuedTerminalCount: 0,
-  peakQueuedChars: 0,
-  peakQueuedCharsByTerminal: 0,
-  droppedBacklogCount: 0,
-  drainWrites: []
-}
-
-function resetDebugState(): void {
-  debugState.backgroundEnqueueCount = 0
-  debugState.deferredForegroundEnqueueCount = 0
-  debugState.foregroundWriteCount = 0
-  debugState.backgroundWriteCount = 0
-  debugState.deferredForegroundWriteCount = 0
-  debugState.flushWriteCount = 0
-  debugState.scheduledDrainCount = 0
-  debugState.queuedTerminalCount = 0
-  debugState.queuedChars = 0
-  debugState.peakQueuedTerminalCount = 0
-  debugState.peakQueuedChars = 0
-  debugState.peakQueuedCharsByTerminal = 0
-  debugState.droppedBacklogCount = 0
-  debugState.drainWrites = []
-}
-
-function readQueueDebugSnapshot(): {
-  queuedTerminalCount: number
-  queuedChars: number
-  queuedCharsByTerminal: number
-} {
-  let queuedChars = 0
-  let queuedCharsByTerminal = 0
-  for (const entry of queuedByTerminal.values()) {
-    queuedChars += entry.queuedChars
-    queuedCharsByTerminal = Math.max(queuedCharsByTerminal, entry.queuedChars)
-  }
-  return {
-    queuedTerminalCount: queuedByTerminal.size,
-    queuedChars,
-    queuedCharsByTerminal
-  }
-}
-
-function recordQueueDebugPressure(): void {
-  if (!debugEnabled) {
-    return
-  }
-  const current = readQueueDebugSnapshot()
-  debugState.queuedTerminalCount = current.queuedTerminalCount
-  debugState.queuedChars = current.queuedChars
-  debugState.peakQueuedTerminalCount = Math.max(
-    debugState.peakQueuedTerminalCount,
-    current.queuedTerminalCount
-  )
-  debugState.peakQueuedChars = Math.max(debugState.peakQueuedChars, current.queuedChars)
-  debugState.peakQueuedCharsByTerminal = Math.max(
-    debugState.peakQueuedCharsByTerminal,
-    current.queuedCharsByTerminal
-  )
-}
-
-function exposeDebugApi(): void {
-  if (!debugEnabled || typeof window === 'undefined') {
-    return
-  }
-  // Why: the e2e repro needs to prove background output used the shared drain,
-  // but production must not accumulate diagnostic counters indefinitely.
-  const target = window as unknown as {
-    __terminalOutputSchedulerDebug?: TerminalOutputSchedulerDebugApi
-  }
-  target.__terminalOutputSchedulerDebug ??= {
-    reset: resetDebugState,
-    snapshot: () => {
-      recordQueueDebugPressure()
-      return {
-        ...debugState,
-        drainWrites: [...debugState.drainWrites]
-      }
-    }
-  }
 }
 
 function scheduleDrain(delayMs: number): void {
@@ -322,12 +186,9 @@ function scheduleDrain(delayMs: number): void {
   if (queuedByTerminal.size === 0) {
     return
   }
-  if (debugEnabled) {
-    debugState.scheduledDrainCount++
-  }
   if (delayMs === 0 && useMessageChannelDrain) {
     drainImmediatePending = true
-    getDrainChannel().port2.postMessage(drainImmediateGeneration)
+    getDrainChannel().port2.postMessage(null)
     return
   }
   drainTimer = setTimeout(drainQueuedOutput, delayMs)
@@ -646,7 +507,6 @@ function takeQueuedChunk(entry: QueueEntry, limit: number): QueuedWrite | null {
   if (entry.queuedChars < 0) {
     entry.queuedChars = 0
   }
-  recordQueueDebugPressure()
   return data
     ? {
         data,
@@ -724,7 +584,6 @@ function enqueueChunk(
     ackCredit: options?.ackCredit
   })
   entry.queuedChars += data.length
-  recordQueueDebugPressure()
 }
 
 // Fires the delivery ACK credits of every not-yet-consumed queued chunk.
@@ -793,11 +652,7 @@ function replaceBacklogWithWarning(
   entry.backgroundBacklogDropped = true
   entry.highPriority = true
   entry.foregroundHold = false
-  if (debugEnabled && shouldNotify) {
-    debugState.droppedBacklogCount++
-  }
   clearForegroundCoalesce(entry)
-  recordQueueDebugPressure()
   if (shouldNotify) {
     entry.onBackgroundBacklogDropped?.()
   }
@@ -1004,7 +859,6 @@ function writeQueuedChunk(entry: QueueEntry): 'foreground' | 'background' | null
       entry.queuedChars = 0
       clearForegroundHoldSafety(entry)
       clearForegroundCoalesce(entry)
-      recordQueueDebugPressure()
       return null
     }
   } catch {
@@ -1018,7 +872,6 @@ function writeQueuedChunk(entry: QueueEntry): 'foreground' | 'background' | null
     entry.queuedChars = 0
     clearForegroundHoldSafety(entry)
     clearForegroundCoalesce(entry)
-    recordQueueDebugPressure()
     return null
   }
   return queuedWrite.foreground ? 'foreground' : 'background'
@@ -1049,13 +902,6 @@ function drainQueuedOutput(): void {
     const writeKind = writeQueuedChunk(entry)
     if (writeKind) {
       writes++
-      if (debugEnabled) {
-        if (writeKind === 'foreground') {
-          debugState.deferredForegroundWriteCount++
-        } else {
-          debugState.backgroundWriteCount++
-        }
-      }
     }
     if (hasQueuedChunks(entry)) {
       queuedByTerminal.set(entry.terminal, entry)
@@ -1071,16 +917,12 @@ function drainQueuedOutput(): void {
     }
   }
 
-  if (debugEnabled && writes > 0) {
-    debugState.drainWrites.push(writes)
-  }
-  recordQueueDebugPressure()
   if (queuedByTerminal.size > 0 && hasDrainableBacklog()) {
     // Why 0 on the channel path: the 4ms high-priority interval existed to
     // yield between ticks, but a posted message already yields — Chromium
     // services input and paint between macrotasks. The explicit sleep only
-    // deepened the standing queue (~4ms per 128KB tick). Timer path keeps
-    // the interval so fake-timer tests retain stepwise drain semantics.
+    // deepened the standing queue (~4ms per 128KB tick). The timer fallback
+    // keeps its interval because it does not have channel task boundaries.
     scheduleDrain(
       hasHighPriorityBacklog()
         ? useMessageChannelDrain
@@ -1096,7 +938,6 @@ export function writeTerminalOutput(
   data: string,
   options: WriteTerminalOutputOptions
 ): void {
-  exposeDebugApi()
   // Why: recovery may be budget-delayed while PTY output keeps flowing. Main
   // owns the authoritative buffer; credit delivery without waking dead xterm.
   if (isTerminalWritePipelineCertifiedDead(terminal)) {
@@ -1127,10 +968,6 @@ export function writeTerminalOutput(
         onParsed: options.onParsed,
         ackCredit: options.ackCredit
       })
-      if (debugEnabled) {
-        debugState.foregroundWriteCount++
-        debugState.deferredForegroundEnqueueCount++
-      }
       // Why: a visible pane's queue was previously uncapped — a flood the
       // drain can't keep up with ballooned renderer memory without bound.
       if (queueCapExceeded(queued)) {
@@ -1203,10 +1040,6 @@ export function writeTerminalOutput(
         onParsed: options.onParsed,
         ackCredit: options.ackCredit
       })
-      if (debugEnabled) {
-        debugState.foregroundWriteCount++
-        debugState.deferredForegroundEnqueueCount++
-      }
       if (queueCapExceeded(entry)) {
         replaceBacklogWithWarning(entry, FOREGROUND_BACKLOG_WARNING)
       }
@@ -1235,10 +1068,6 @@ export function writeTerminalOutput(
         onParsed: options.onParsed,
         ackCredit: options.ackCredit
       })
-      if (debugEnabled) {
-        debugState.foregroundWriteCount++
-        debugState.deferredForegroundEnqueueCount++
-      }
       if (queueCapExceeded(queued)) {
         replaceBacklogWithWarning(queued, FOREGROUND_BACKLOG_WARNING)
       }
@@ -1249,9 +1078,6 @@ export function writeTerminalOutput(
       return
     }
     flushTerminalOutput(terminal)
-    if (debugEnabled) {
-      debugState.foregroundWriteCount++
-    }
     const ackCreditsParsed = registerTerminalOutputAckCredits(
       terminal,
       options.ackCredit ? [options.ackCredit] : []
@@ -1299,9 +1125,6 @@ export function writeTerminalOutput(
   if (queueCapExceeded(entry)) {
     replaceBacklogWithWarning(entry)
   }
-  if (debugEnabled) {
-    debugState.backgroundEnqueueCount++
-  }
   // Why: non-focused panes can produce output continuously. Letting every
   // pane call xterm.write immediately schedules one xterm WriteBuffer timer
   // per pane, which starves the focused terminal on the shared renderer thread.
@@ -1314,7 +1137,6 @@ export function flushTerminalOutput(
   terminal: TerminalOutputTarget,
   options?: { maxChars?: number }
 ): void {
-  exposeDebugApi()
   const entry = queuedByTerminal.get(terminal)
   if (!entry) {
     return
@@ -1337,7 +1159,6 @@ export function flushTerminalOutput(
     entry.highPriority = false
     clearForegroundHoldSafety(entry)
     clearForegroundCoalesce(entry)
-    recordQueueDebugPressure()
     return
   }
 
@@ -1345,9 +1166,6 @@ export function flushTerminalOutput(
   let queuedWrite = takeQueuedChunk(entry, BACKGROUND_CHUNK_CHARS)
   while (queuedWrite) {
     flushedChars += queuedWrite.data.length
-    if (debugEnabled) {
-      debugState.flushWriteCount++
-    }
     const ackCreditsParsed = registerTerminalOutputAckCredits(terminal, queuedWrite.ackCredits)
     armTerminalWriteStallWatch(terminal, {
       onCertifiedDead: () => discardTerminalOutput(terminal)
@@ -1383,7 +1201,6 @@ export function flushTerminalOutput(
         fireQueuedAckCredits(entry)
         clearForegroundHoldSafety(entry)
         clearForegroundCoalesce(entry)
-        recordQueueDebugPressure()
         return
       }
     } catch {
@@ -1394,7 +1211,6 @@ export function flushTerminalOutput(
       fireQueuedAckCredits(entry)
       clearForegroundHoldSafety(entry)
       clearForegroundCoalesce(entry)
-      recordQueueDebugPressure()
       return
     }
     if (options?.maxChars !== undefined && flushedChars >= options.maxChars) {
@@ -1411,7 +1227,6 @@ export function flushTerminalOutput(
     clearForegroundCoalesce(entry)
     clearForegroundHoldSafety(entry)
   }
-  recordQueueDebugPressure()
 }
 
 function requestRegisteredTerminalBacklogRecovery(terminal: TerminalOutputTarget): boolean {
@@ -1423,7 +1238,6 @@ function requestRegisteredTerminalBacklogRecovery(terminal: TerminalOutputTarget
 }
 
 export function requestTerminalBacklogRecovery(terminal: TerminalOutputTarget): void {
-  exposeDebugApi()
   requestRegisteredTerminalBacklogRecovery(terminal)
 }
 
@@ -1479,7 +1293,6 @@ export function waitForTerminalOutputParsed(terminal: TerminalOutputTarget): Pro
 }
 
 export function discardTerminalOutput(terminal: TerminalOutputTarget): void {
-  exposeDebugApi()
   const entry = queuedByTerminal.get(terminal)
   if (entry) {
     // Why: discarded queued chunks still consumed their deliveries — credit
@@ -1492,7 +1305,4 @@ export function discardTerminalOutput(terminal: TerminalOutputTarget): void {
   // Why: cleanup must cancel the watch without masquerading as parse progress;
   // replay guards use real completions to distinguish slow from wedged.
   cancelTerminalWriteStallWatch(terminal)
-  recordQueueDebugPressure()
 }
-
-exposeDebugApi()

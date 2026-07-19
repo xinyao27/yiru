@@ -25,17 +25,8 @@ export type WsOutboundBackpressureQueueOptions<TFrame> = {
    * replay an authoritative snapshot. The queue drops its backlog afterward.
    */
   onOverflow: () => void
-  /** Soft cap: stop draining onto the wire while bufferedAmount is above this. */
-  softCapBytes?: number
-  /** Hard cap on bytes held in this queue before onOverflow fires. */
-  maxQueuedBytes?: number
   /** Optional hard cap on queued bytes attributed to one caller-defined group. */
   maxQueuedBytesPerGroup?: number
-  /** Poll interval used to re-check bufferedAmount while parked. */
-  drainPollMs?: number
-  /** Injectable scheduler for deterministic tests. */
-  setTimer?: (cb: () => void, ms: number) => ReturnType<typeof setTimeout>
-  clearTimer?: (timer: ReturnType<typeof setTimeout>) => void
 }
 
 export type WsOutboundBackpressureQueue<TFrame> = {
@@ -56,19 +47,11 @@ const DEFAULT_DRAIN_POLL_MS = 25
 export function createWsOutboundBackpressureQueue<TFrame>(
   options: WsOutboundBackpressureQueueOptions<TFrame>
 ): WsOutboundBackpressureQueue<TFrame> {
-  const softCapBytes = options.softCapBytes ?? DEFAULT_SOFT_CAP_BYTES
-  const maxQueuedBytes = options.maxQueuedBytes ?? DEFAULT_MAX_QUEUED_BYTES
+  const softCapBytes = DEFAULT_SOFT_CAP_BYTES
+  const maxQueuedBytes = DEFAULT_MAX_QUEUED_BYTES
   const maxQueuedBytesPerGroup = options.maxQueuedBytesPerGroup
-  const drainPollMs = options.drainPollMs ?? DEFAULT_DRAIN_POLL_MS
-  const setTimer = options.setTimer ?? ((cb, ms) => setTimeout(cb, ms))
-  const clearTimer = options.clearTimer ?? ((timer) => clearTimeout(timer))
 
-  // Why: a ws without a numeric bufferedAmount (some mocks/transports) must not
-  // strand frames in the queue forever; treat unknown backpressure as "clear".
-  const bufferedAmount = (): number => {
-    const value = options.getBufferedAmount()
-    return Number.isFinite(value) ? value : 0
-  }
+  const bufferedAmount = (): number => options.getBufferedAmount()
 
   const queue: { frame: TFrame; bytes: number; groupKey?: string }[] = []
   const queuedBytesByGroup = new Map<string, number>()
@@ -80,7 +63,7 @@ export function createWsOutboundBackpressureQueue<TFrame>(
 
   const stopTimer = (): void => {
     if (timer !== null) {
-      clearTimer(timer)
+      clearTimeout(timer)
       timer = null
     }
   }
@@ -124,7 +107,7 @@ export function createWsOutboundBackpressureQueue<TFrame>(
       options.send(entry.frame)
     }
     if (queueHead < queue.length) {
-      timer = setTimer(drain, drainPollMs)
+      timer = setTimeout(drain, DEFAULT_DRAIN_POLL_MS)
     } else {
       // Why: resetting the drained array keeps enqueue/drain O(1) per frame;
       // repeated Array.shift() would make recovery from a large backlog O(n²).
@@ -158,7 +141,7 @@ export function createWsOutboundBackpressureQueue<TFrame>(
         return
       }
       if (timer === null) {
-        timer = setTimer(drain, drainPollMs)
+        timer = setTimeout(drain, DEFAULT_DRAIN_POLL_MS)
       }
     },
     queuedBytes: () => queued,

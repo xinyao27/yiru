@@ -48,17 +48,6 @@ export type OptionAsAltProbe = {
    *  category change. */
   getCurrent: () => DetectedLayoutCategory
   subscribe: (listener: Listener) => () => void
-  /** Force a re-probe. Safe to call from tests or debug tooling. */
-  refresh: () => Promise<void>
-  /** Detach all window listeners. Tests only. */
-  dispose: () => void
-}
-
-type CreateProbeOptions = {
-  /** Injectable reader for the macOS input source ID. Defaults to the
-   *  preload `window.api.app.getKeyboardInputSourceId` when available.
-   *  Tests pass a stub to exercise the compose override deterministically. */
-  readInputSourceId?: InputSourceIdReader
 }
 
 function defaultInputSourceIdReader(): InputSourceIdReader {
@@ -83,14 +72,11 @@ function defaultInputSourceIdReader(): InputSourceIdReader {
   }
 }
 
-export function createOptionAsAltProbe(
-  win: Window = window,
-  options: CreateProbeOptions = {}
-): OptionAsAltProbe {
+function createOptionAsAltProbe(): OptionAsAltProbe {
+  const win = window
   let current: DetectedLayoutCategory = 'unknown'
   const listeners = new Set<Listener>()
-  let disposed = false
-  const readInputSourceId = options.readInputSourceId ?? defaultInputSourceIdReader()
+  const readInputSourceId = defaultInputSourceIdReader()
 
   const notify = (next: DetectedLayoutCategory): void => {
     if (next === current) {
@@ -107,9 +93,6 @@ export function createOptionAsAltProbe(
   }
 
   const probe = async (): Promise<void> => {
-    if (disposed) {
-      return
-    }
     const nav = win.navigator as NavigatorWithKeyboard
     const keyboard = nav?.keyboard
 
@@ -122,10 +105,6 @@ export function createOptionAsAltProbe(
     } catch {
       // Treat errors as no signal — the fingerprint still runs below.
       inputSourceId = null
-    }
-
-    if (disposed) {
-      return
     }
 
     // Why: when macOS returns a concrete input source ID, it's authoritative.
@@ -154,9 +133,6 @@ export function createOptionAsAltProbe(
     }
     try {
       const map = await keyboard.getLayoutMap()
-      if (disposed) {
-        return
-      }
       notify(detectOptionAsAltFromLayoutMap(map))
     } catch (err) {
       // getLayoutMap can reject in some Chromium corner cases (unavailable
@@ -183,19 +159,11 @@ export function createOptionAsAltProbe(
       return () => {
         listeners.delete(listener)
       }
-    },
-    refresh: probe,
-    dispose: () => {
-      disposed = true
-      win.removeEventListener('focus', onFocus)
-      listeners.clear()
     }
   }
 }
 
-/** Singleton probe for the app. Initialized lazily on first getter call so
- *  test environments without a `window` don't trigger side effects at
- *  import time. */
+/** Singleton probe for the renderer, initialized lazily on first use. */
 let _singleton: OptionAsAltProbe | null = null
 
 export function getOptionAsAltProbe(): OptionAsAltProbe {
@@ -203,10 +171,4 @@ export function getOptionAsAltProbe(): OptionAsAltProbe {
     _singleton = createOptionAsAltProbe()
   }
   return _singleton
-}
-
-/** Test-only: reset the singleton. */
-export function _resetOptionAsAltProbeForTests(): void {
-  _singleton?.dispose()
-  _singleton = null
 }

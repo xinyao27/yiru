@@ -36,11 +36,6 @@ function runtimeCacheKey(connectionId?: string | null, wslDistro?: string): stri
   return connectionId ?? `local:${wslDistro ?? 'host'}`
 }
 
-/** @internal - exposed for tests only */
-export function _resetGitHubHostAuthCache(): void {
-  hostAuthCache.clear()
-}
-
 // Only gh's own stdout/stderr — not the Error.message — counts as an
 // authoritative answer. A spawn failure (gh missing, ENOENT) carries just a
 // message and no command output, and must stay indeterminate rather than be

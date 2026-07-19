@@ -34,7 +34,6 @@ import {
 export type DaemonServerOptions = {
   socketPath: string
   tokenPath: string
-  ptySpawnHealthCheck?: () => Promise<void>
   log?: DaemonFileLog
   spawnSubprocess: (opts: {
     sessionId: string
@@ -110,7 +109,7 @@ export class DaemonServer {
     this.tokenPath = opts.tokenPath
     this.token = randomUUID()
     this.host = new TerminalHost({ spawnSubprocess: opts.spawnSubprocess })
-    this.ptySpawnHealthCheck = opts.ptySpawnHealthCheck ?? checkPtySpawnHealth
+    this.ptySpawnHealthCheck = checkPtySpawnHealth
     this.stopStreamBacklogProbe = startDaemonStreamBacklogProbe(() => ({
       clients: Array.from(this.clients.values(), (client) => ({
         clientId: client.clientId,

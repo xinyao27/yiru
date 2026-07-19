@@ -49,7 +49,7 @@ type Dependencies = {
   platform: string
 }
 
-const defaultDependencies: Dependencies = {
+const dependencies: Dependencies = {
   connectDirect: connect,
   connectRelay: connectMobileRelayForPairing,
   resolveInviteDirector: resolvePairingInviteThroughDirector,
@@ -67,9 +67,7 @@ export function startPreProfilePairing(args: {
   offer: PairingOffer
   timeoutMs: number
   connectOptions?: ConnectOptions
-  dependencies?: Partial<Dependencies>
 }): PreProfilePairingAttempt {
-  const dependencies = { ...defaultDependencies, ...args.dependencies }
   const clients = new Set<PairingCandidateClient>()
   let disposed = false
   let timedOut = false

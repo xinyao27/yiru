@@ -39,25 +39,10 @@ import {
 import type { AndroidPermissionOp } from '../android/android-permissions'
 import { bootAndroidDevice } from '../android/android-avd-boot'
 import { ensureScrcpyServerJar } from '../android/scrcpy-server-download'
-import {
-  startAndroidStreamSession,
-  type StartAndroidStream
-} from '../android/android-stream-session-starter'
+import { startAndroidStreamSession } from '../android/android-stream-session-starter'
 import { AndroidStreamController } from '../android/android-stream-controller'
 import { scrcpyVideoRegistry } from '../scrcpy-video-registry'
 import type { EmulatorGesturePoint } from '../emulator-gesture-sender'
-
-export type AndroidEmulatorBackendOptions = {
-  runner?: AndroidCommandRunner
-  // Inject discovered SDK paths (tests); undefined means auto-discover, null means "no SDK".
-  sdk?: AndroidSdkPaths | null
-  bootTimeoutMs?: number
-  pollIntervalMs?: number
-  sleep?: (ms: number) => Promise<void>
-  ensureJar?: () => Promise<string>
-  startStreamSession?: StartAndroidStream
-  streamMaxSize?: number
-}
 
 const DEFAULT_BOOT_TIMEOUT_MS = 180_000
 const DEFAULT_POLL_INTERVAL_MS = 2_000
@@ -76,34 +61,16 @@ export class AndroidEmulatorBackend implements EmulatorBackend {
     logcat: true
   }
 
-  private readonly runner: AndroidCommandRunner
-  private readonly sdkState: AndroidSdkState
-  private readonly bootTimeoutMs: number
-  private readonly pollIntervalMs: number
-  private readonly sleep: (ms: number) => Promise<void>
-  private readonly ensureJar: () => Promise<string>
-  private readonly startStreamSession: StartAndroidStream
-  private readonly streamMaxSize: number
+  private readonly runner: AndroidCommandRunner = execFileAndroidCommandRunner
+  private readonly sdkState = new AndroidSdkState()
   private readonly screenSizes = new Map<string, DeviceScreenSize>()
-  private readonly streams: AndroidStreamController
-
-  constructor(options: AndroidEmulatorBackendOptions = {}) {
-    this.runner = options.runner ?? execFileAndroidCommandRunner
-    this.sdkState = new AndroidSdkState(options.sdk !== undefined, options.sdk ?? null)
-    this.bootTimeoutMs = options.bootTimeoutMs ?? DEFAULT_BOOT_TIMEOUT_MS
-    this.pollIntervalMs = options.pollIntervalMs ?? DEFAULT_POLL_INTERVAL_MS
-    this.sleep = options.sleep ?? defaultSleep
-    this.ensureJar = options.ensureJar ?? ensureScrcpyServerJar
-    this.startStreamSession = options.startStreamSession ?? startAndroidStreamSession
-    this.streamMaxSize = options.streamMaxSize ?? 1280
-    this.streams = new AndroidStreamController({
-      runner: this.runner,
-      sdk: () => this.requireSdk(),
-      ensureJar: this.ensureJar,
-      startStreamSession: this.startStreamSession,
-      maxSize: this.streamMaxSize
-    })
-  }
+  private readonly streams = new AndroidStreamController({
+    runner: this.runner,
+    sdk: () => this.requireSdk(),
+    ensureJar: ensureScrcpyServerJar,
+    startStreamSession: startAndroidStreamSession,
+    maxSize: 1280
+  })
 
   isSupportedOnHost(): boolean {
     return this.sdkState.resolve() !== null
@@ -305,9 +272,9 @@ export class AndroidEmulatorBackend implements EmulatorBackend {
   // Boots an AVD (by name) when not running and waits for boot; returns the serial.
   async ensureBooted(deviceOrName: string): Promise<string> {
     return bootAndroidDevice(this.runner, this.requireSdk(), deviceOrName, {
-      bootTimeoutMs: this.bootTimeoutMs,
-      pollIntervalMs: this.pollIntervalMs,
-      sleep: this.sleep
+      bootTimeoutMs: DEFAULT_BOOT_TIMEOUT_MS,
+      pollIntervalMs: DEFAULT_POLL_INTERVAL_MS,
+      sleep: defaultSleep
     })
   }
 

@@ -14,16 +14,12 @@ function resolveActiveLeafId(
 }
 
 /**
- * Pure helper used by the hook below — exported so the regression test for
- * the codex-row-stays-bold race (docs/codex-agent-row-bold-stuck.md) can
- * exercise the decision against a real test store without needing a DOM.
- *
  * Returns the list of paneKeys that should be acked given the active tab and
  * exact active leaf. Split tabs can host multiple agent panes, so equality on
  * `${tabId}:${leafId}` is required; tab-prefix matching would mark siblings
  * read without ever displaying them.
  */
-export function computeAutoAckTargets(
+function computeAutoAckTargets(
   state: {
     agentStatusByPaneKey: Record<string, AgentStatusEntry>
     retainedAgentsByPaneKey: Record<string, RetainedAgentEntry>

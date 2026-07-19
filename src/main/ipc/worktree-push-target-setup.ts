@@ -1,8 +1,7 @@
 // Why: preparing a fork-PR push target means adding (or reusing) the contributor's
 // fork as a git remote, fetching the head, and wiring the new branch's upstream.
-// The git-driven core lives here behind an injectable `execGit` seam so the
-// remote-reuse / unique-naming / fetch behavior is unit-testable without a real
-// repo. The store-aware ownership decision stays with the caller via a predicate.
+// The git-driven core accepts the host-specific `execGit` boundary. The
+// store-aware ownership decision stays with the caller via a predicate.
 
 import type { GitPushTarget } from '../../shared/types'
 import { parseGitHubOwnerRepo } from '../github/gh-utils'
@@ -69,9 +68,8 @@ export async function ensureUniqueRemoteName(
   throw new Error(`Could not find an available remote name for ${preferred}.`)
 }
 
-// Exported for unit tests: the `execGit` seam drives the remote add/reuse/fetch
-// behavior without a real repo. `isRemoteCreatedByKnownWorktree` lets the caller
-// inject the store-aware ownership decision for the reuse case.
+// `isRemoteCreatedByKnownWorktree` supplies the store-aware ownership decision
+// needed when reusing an existing remote.
 export async function prepareWorktreePushTargetWithExec(
   execGit: GitRemoteExec,
   repoPath: string,

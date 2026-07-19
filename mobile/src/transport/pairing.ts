@@ -1,9 +1,7 @@
 import { PairingOfferSchema, type PairingOffer } from './types'
 
-// Why: this file mirrors src/shared/pairing.ts (which is covered by CI
-// vitest) but uses atob/btoa because Metro/Hermes don't ship Node's
-// Buffer. Keep the parsing semantics in sync — when one changes, update
-// the other.
+// Why: this file mirrors src/shared/pairing.ts but uses atob/btoa because
+// Metro/Hermes do not ship Node's Buffer. Keep both parsing paths in sync.
 
 export function decodePairingUrl(url: string): PairingOffer | null {
   try {

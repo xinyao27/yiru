@@ -31,7 +31,3 @@ export function shouldIgnoreMonacoContentChange(args: {
   // pane sees the echoed change event and must treat it as programmatic.
   return isApplyingProgrammaticContent || isProgrammaticContentSyncInFlight(filePath)
 }
-
-export function resetProgrammaticContentSyncForTests(): void {
-  programmaticContentSyncDepthByFilePath.clear()
-}

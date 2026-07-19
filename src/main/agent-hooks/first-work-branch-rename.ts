@@ -84,12 +84,6 @@ const inFlightWorktreeIds = new Set<string>()
 const settledWorktreeIds = new Set<string>()
 export const FIRST_WORK_BRANCH_RENAME_SETTLED_CACHE_LIMIT = 500
 
-/** Test seam: clear the per-process dedupe sets. */
-export function resetFirstWorkBranchRenameState(): void {
-  inFlightWorktreeIds.clear()
-  settledWorktreeIds.clear()
-}
-
 function rememberSettledWorktreeId(worktreeId: string): void {
   // Why: the app can see unbounded worktree ids over a long session; evicting
   // oldest entries trades a rare re-probe for bounded process memory.

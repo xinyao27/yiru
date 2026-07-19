@@ -74,8 +74,8 @@ function markChunkReloadAttempted(): boolean {
 
 function recordReloadBreadcrumb(reloadKey: string, message: string): void {
   // Inlined rather than importing crash-diagnostics so this low-level recovery
-  // primitive stays free of the renderer/webview module graph (keeps it SSR- and
-  // unit-test-friendly). Mirrors crash-diagnostics' best-effort breadcrumb call.
+  // primitive stays free of the renderer/webview module graph and remains SSR-safe.
+  // Mirrors crash-diagnostics' best-effort breadcrumb call.
   try {
     const api = (window as Window & { api?: Window['api'] }).api
     api?.crashReports.recordBreadcrumb({ name: 'lazy_chunk_reload', data: { reloadKey, message } })

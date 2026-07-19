@@ -2,16 +2,12 @@ import { lstatSync } from 'node:fs'
 import { lstat, opendir } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
-import {
-  GrokSessionPathLookupQueue,
-  type GrokSessionPathScanner
-} from './grok-session-path-lookup-queue'
+import { GrokSessionPathLookupQueue } from './grok-session-path-lookup-queue'
 
 export {
   GROK_SESSION_PATH_CACHE_MAX_ENTRIES,
   GROK_SESSION_SCAN_ACTIVE_ROOT_MAX,
-  GROK_SESSION_SCAN_QUEUE_MAX_ENTRIES,
-  type GrokSessionPathScanner
+  GROK_SESSION_SCAN_QUEUE_MAX_ENTRIES
 } from './grok-session-path-lookup-queue'
 
 export const GROK_CHAT_HISTORY_FILE = 'chat_history.jsonl'
@@ -205,27 +201,11 @@ async function scanGrokChatHistoryBySessionId(
   }
 }
 
-/** Test isolation for the module-level inflight/success caches. */
-export function clearGrokSessionPathLookupCacheForTests(): void {
-  sessionPathLookupQueue.clearForTests()
-  sessionDirectoryOpener = defaultSessionDirectoryOpener
-}
-
 function normalizeGroupEntryLimit(requestedMax: number): number {
   return Math.min(
     GROK_SESSION_GROUP_SCAN_MAX_ENTRIES,
     Math.max(0, Math.floor(Number.isFinite(requestedMax) ? requestedMax : 0))
   )
-}
-
-/** Replace directory IO for bounded-iterator tests. */
-export function setGrokSessionDirectoryOpenerForTests(opener: GrokSessionDirectoryOpener): void {
-  sessionDirectoryOpener = opener
-}
-
-/** Replace scan IO for queue/concurrency tests. */
-export function setGrokSessionPathScannerForTests(scanner: GrokSessionPathScanner): void {
-  sessionPathLookupQueue.setScannerForTests(scanner)
 }
 
 function isPathWithin(root: string, candidate: string): boolean {

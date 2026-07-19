@@ -143,8 +143,3 @@ function requireNativeSecretStore(): void {
     throw new Error('Yiru Relay pairing requires a native secret store')
   }
 }
-
-/** Test-only: drain the module mutation chain between cases. */
-export function resetMobileRelayPairingJournalStoreForTests(): void {
-  journalMutation = Promise.resolve()
-}

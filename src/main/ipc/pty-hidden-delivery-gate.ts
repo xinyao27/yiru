@@ -139,16 +139,3 @@ export function getHiddenRendererPtyDeliveryDebug(): HiddenRendererPtyDeliveryDe
     hiddenDeliveryDroppedChunks: droppedHiddenDeliveryChunks
   }
 }
-
-export function resetHiddenRendererPtyDeliveryDebugCounters(): void {
-  droppedHiddenDeliveryChars = 0
-  droppedHiddenDeliveryChunks = 0
-}
-
-/** Test seam: reset all module state between tests. */
-export function _resetHiddenRendererPtyDeliveryGateForTest(): void {
-  hiddenRendererPtys.clear()
-  deliveryInterestRendererPtys.clear()
-  droppedSinceHiddenPtys.clear()
-  resetHiddenRendererPtyDeliveryDebugCounters()
-}

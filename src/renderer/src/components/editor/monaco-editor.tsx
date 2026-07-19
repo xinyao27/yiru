@@ -66,7 +66,6 @@ import {
   getMonacoAutoHeightForContent,
   isMonacoAutoHeightCapped
 } from './monaco-auto-height'
-import { installMonacoE2EProbe } from './monaco-e2e-probe'
 import { useMonacoLanguageServer } from './use-monaco-language-server'
 import { createMonacoImportNavigationController } from './monaco-import-navigation'
 import { openEditorNavigationTarget } from './open-editor-navigation-target'
@@ -378,7 +377,6 @@ export default function MonacoEditor({
     (editorInstance, monaco) => {
       editorRef.current = editorInstance
       setMountedEditor(editorInstance)
-      const uninstallE2EProbe = installMonacoE2EProbe(editorInstance, filePath)
       let autoHeightSub: { dispose: () => void } | null = null
       let autoHeightFrame: number | null = null
       const updateAutoHeight = (): void => {
@@ -585,8 +583,7 @@ export default function MonacoEditor({
         }
         conflictDecorationsRef.current?.clear()
         conflictDecorationsRef.current = null
-        importNavigation?.dispose()
-        uninstallE2EProbe()
+        importNavigation.dispose()
         editorRef.current = null
         setMountedEditor(null)
         setCommentPopover(null)

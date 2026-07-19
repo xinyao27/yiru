@@ -16,11 +16,6 @@ const DEFAULT_KEEPALIVE_INTERVAL_MS = 10_000
 export type UnixSocketTransportOptions = {
   endpoint: string
   kind: 'unix' | 'named-pipe'
-  // Why: how often to write `{"_keepalive":true}\n` frames while a dispatch
-  // is pending. Each write resets both the server-side idle timer and, once
-  // the client honours them, the client-side idle timer. Tests override this
-  // to avoid waiting 10 s for a frame.
-  keepaliveIntervalMs?: number
 }
 
 type MessageHandler = (
@@ -32,15 +27,13 @@ type MessageHandler = (
 export class UnixSocketTransport implements RpcTransport {
   private readonly endpoint: string
   private readonly kind: 'unix' | 'named-pipe'
-  private readonly keepaliveIntervalMs: number
   private server: Server | null = null
   private messageHandler: MessageHandler | null = null
   private readonly activeSockets = new Set<Socket>()
 
-  constructor({ endpoint, kind, keepaliveIntervalMs }: UnixSocketTransportOptions) {
+  constructor({ endpoint, kind }: UnixSocketTransportOptions) {
     this.endpoint = endpoint
     this.kind = kind
-    this.keepaliveIntervalMs = keepaliveIntervalMs ?? DEFAULT_KEEPALIVE_INTERVAL_MS
   }
 
   onMessage(handler: MessageHandler): void {
@@ -206,7 +199,7 @@ export class UnixSocketTransport implements RpcTransport {
           return
         }
         socket.write('{"_keepalive":true}\n')
-      }, this.keepaliveIntervalMs)
+      }, DEFAULT_KEEPALIVE_INTERVAL_MS)
       // Why: don't hold the process open solely on the keepalive interval.
       if (typeof keepaliveTimer.unref === 'function') {
         keepaliveTimer.unref()

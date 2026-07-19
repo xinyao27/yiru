@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- Why: this dropdown state machine keeps every action row in one table so priority and disabled-state regressions stay visible in tests. */
+/* eslint-disable max-lines -- Why: this dropdown state machine keeps every action row in one table so priority and disabled-state ordering stays visible. */
 // Why: split from source-control-primary-action because the primary and dropdown are independent derivations with different priority ladders; together they exceed the max-lines budget and tangle unrelated concerns.
 
 import type { PrimaryActionInputs } from './source-control-primary-action'

@@ -170,16 +170,6 @@ function parseGitLabRateLimitSnapshot(
   }
 }
 
-/** @internal — test-only */
-export function _resetGitLabRateLimitCache(): void {
-  gitLabRateLimitCache.clear()
-}
-
-/** @internal — test-only */
-export function _getGitLabRateLimitCacheSize(): number {
-  return gitLabRateLimitCache.size
-}
-
 function pruneGitLabRateLimitCache(now = Date.now()): void {
   for (const [cacheKey, snapshot] of gitLabRateLimitCache) {
     if (now - snapshot.fetchedAt >= GITLAB_RATE_LIMIT_CACHE_TTL_MS) {
@@ -1306,8 +1296,6 @@ export async function listAssignableUsers(
     release()
   }
 }
-
-export { _resetProjectRefCache } from './gl-utils'
 
 // Why: surface the remote-aware project-ref helper so callers that need the
 // resolved project (e.g. the paste-URL UI) don't

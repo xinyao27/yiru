@@ -87,7 +87,3 @@ export function withMacTailscaleDnsHintForDiagnostic(
 export function withMacTailscaleDnsHint(message: string, detail?: string | null): string {
   return withMacTailscaleDnsHintForDiagnostic(message, detail, readMacTailscaleDnsDiagnostic())
 }
-
-export function __resetMacTailscaleDnsDiagnosticCacheForTests(): void {
-  cache = null
-}

@@ -24,11 +24,7 @@ export class GrokSessionPathLookupQueue {
   private readonly inflight = new Map<string, Promise<string | null>>()
   private readonly activeRoots = new Set<string>()
   private readonly pending: PendingLookup[] = []
-  private scanner: GrokSessionPathScanner
-
-  constructor(private readonly defaultScanner: GrokSessionPathScanner) {
-    this.scanner = defaultScanner
-  }
+  constructor(private readonly scanner: GrokSessionPathScanner) {}
 
   getCached(sessionsDir: string, sessionId: string): string | null {
     const key = this.lookupKey(sessionsDir, sessionId)
@@ -76,20 +72,6 @@ export class GrokSessionPathLookupQueue {
     this.inflight.set(key, lookup)
     this.start(pending)
     return lookup
-  }
-
-  clearForTests(): void {
-    this.successfulPaths.clear()
-    this.inflight.clear()
-    this.activeRoots.clear()
-    for (const pending of this.pending.splice(0)) {
-      pending.resolve(null)
-    }
-    this.scanner = this.defaultScanner
-  }
-
-  setScannerForTests(scanner: GrokSessionPathScanner): void {
-    this.scanner = scanner
   }
 
   private rootKey(sessionsDir: string): string {

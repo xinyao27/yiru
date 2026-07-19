@@ -3,7 +3,6 @@ import { existsSync } from 'node:fs'
 import { sendToWatcherChild } from './parcel-watcher-child-messaging'
 import { createHostWatcherSubscription } from './parcel-watcher-host-subscriptions'
 import type { PendingWatcherUnsubscribe } from './parcel-watcher-host-subscriptions'
-import { subscribeWithInProcessWatcher } from './parcel-watcher-in-process-fallback'
 import {
   installPendingSubscribeControls,
   resetPendingSubscribeAttempt
@@ -27,7 +26,6 @@ type WatcherSupervisorSubscribeOptions = {
   hooks: WatcherProcessHooks
   shutdownRequested: boolean
   entryPath: string
-  useInProcessVitestFallback: boolean
   allocateId: () => number
   records: Map<number, WatcherProcessSubscriptionRecord>
   pendingUnsubscribes: Map<number, PendingWatcherUnsubscribe>
@@ -65,7 +63,6 @@ export function subscribeThroughWatcherSupervisor({
   hooks,
   shutdownRequested,
   entryPath,
-  useInProcessVitestFallback,
   allocateId,
   records,
   pendingUnsubscribes,
@@ -95,11 +92,6 @@ export function subscribeThroughWatcherSupervisor({
         'subscribe_aborted'
       )
     )
-  }
-  // Why: under Vitest we cannot fork a real watcher child, so exercise the
-  // subscription path in-process (against mocked @parcel/watcher) instead.
-  if (process.env.VITEST && useInProcessVitestFallback) {
-    return subscribeWithInProcessWatcher(dir, callback, opts, hooks)
   }
   if (!existsSync(entryPath)) {
     return Promise.reject(

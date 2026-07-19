@@ -242,16 +242,9 @@ export default function SortableTab({
   const tabRoot = (
     <div
       ref={setNodeRef}
-      data-testid="sortable-tab"
       data-tab-id={tab.id}
       data-tab-title={tabTitle}
       data-pinned={isPinned ? 'true' : 'false'}
-      // Why: expose the active/inactive flag as a DOM attribute so E2E specs
-      // can assert on user-observable selection state without reading the
-      // Zustand store. A store-only "is this tab active?" round-trip would
-      // pass even if the tab-bar render path had silently broken (the same
-      // tautology that let PR #1186's render crash ship past E2E in #1193).
-      data-active={isActive ? 'true' : 'false'}
       data-agent-activity-status={activityStatus}
       {...attributes}
       {...dragListeners}

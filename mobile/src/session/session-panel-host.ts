@@ -1,6 +1,5 @@
-// Pure master-detail panel-host logic for the mobile session screen. No React/native
-// imports so the dock-vs-push decision and the active-panel state machine are
-// unit-testable under node Vitest (KTD3/R8).
+// Pure master-detail panel-host logic for the mobile session screen. The
+// dock-vs-push decision and active-panel state stay outside React components.
 
 export type ActivePanel = 'sourceControl' | 'files' | 'pr' | null
 

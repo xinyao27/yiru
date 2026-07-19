@@ -68,14 +68,6 @@ export async function queryWindowsProcessDescendants(
   return collectDescendants(rows, rootPid).sort((a, b) => b.depth - a.depth)
 }
 
-/**
- * Test-only: clear the shared Windows process-table snapshot so suites that mock
- * execFile between cases don't get one case's rows served to the next within TTL.
- */
-export function resetWindowsProcessRowsSnapshotForTests(): void {
-  windowsProcessRowsReader.reset()
-}
-
 function parseWindowsProcessValueRows(stdout: string): WindowsProcessRow[] {
   const rows: WindowsProcessRow[] = []
   let command = ''

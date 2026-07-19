@@ -40,10 +40,6 @@ const MAX_CACHE_ENTRIES = 50
 // recent entry (see setCached) so an active transcript is never re-parsed on
 // every read, which caps the regression to extra re-parses only past this budget.
 const MAX_CACHE_BYTES = 128 * 1024 * 1024
-// Overridable only from tests so the byte-eviction path can be exercised without
-// writing hundreds of MB of fixtures; production always uses MAX_CACHE_BYTES.
-let maxCacheBytes = MAX_CACHE_BYTES
-
 function setCached(key: string, value: CachedTranscript): void {
   // Re-insert moves the key to the most-recent position for LRU eviction.
   cache.delete(key)
@@ -55,7 +51,7 @@ function setCached(key: string, value: CachedTranscript): void {
   // Evict oldest until within BOTH caps, but never drop the most-recent entry
   // (cache.size > 1): a single active transcript larger than the whole budget
   // must stay cached or every read would re-parse the full file.
-  while (cache.size > 1 && (cache.size > MAX_CACHE_ENTRIES || totalBytes > maxCacheBytes)) {
+  while (cache.size > 1 && (cache.size > MAX_CACHE_ENTRIES || totalBytes > MAX_CACHE_BYTES)) {
     const oldest = cache.keys().next().value
     if (oldest === undefined) {
       break
@@ -110,14 +106,4 @@ export async function readNativeChatTranscriptCached(
     setCached(key, { result, mtimeMs, bytes })
   }
   return result
-}
-
-/** Test-only: drop the transcript parse cache between runs. */
-export function clearNativeChatTranscriptCache(): void {
-  cache.clear()
-}
-
-/** Test-only: override the byte budget (pass no arg to restore the default). */
-export function setNativeChatTranscriptCacheMaxBytesForTests(bytes?: number): void {
-  maxCacheBytes = bytes ?? MAX_CACHE_BYTES
 }

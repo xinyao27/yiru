@@ -193,8 +193,3 @@ export function getMacNativeTextInputSourceTracker(): MacNativeTextInputSourceTr
   singleton ??= createMacNativeTextInputSourceTracker()
   return singleton
 }
-
-export function _resetMacNativeTextInputSourceTrackerForTests(): void {
-  singleton?.dispose()
-  singleton = null
-}

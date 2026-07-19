@@ -91,10 +91,3 @@ export function beginStrictUpstreamRefresh(worktreeId: string): void {
   )
   trimRefreshOrderingState()
 }
-
-export function clearGitStatusRefreshOrderingStateForTests(): void {
-  strictUpstreamRefreshGenerationByWorktree.clear()
-  automaticRefreshGenerationByWorktree.clear()
-  lastAppliedAutomaticGenerationByWorktree.clear()
-  automaticUpstreamRefreshInFlightByWorktree.clear()
-}

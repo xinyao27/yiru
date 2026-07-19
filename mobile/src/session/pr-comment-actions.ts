@@ -1,8 +1,7 @@
 import type { PRComment, PRState } from '../../../src/shared/types'
 
 // Pure helpers for the interactive PR comment timeline (reply / resolve / add
-// root comment). Kept free of React/native imports so they unit-test under the
-// node Vitest config, mirroring the other mobile PR sidebar state modules.
+// root comment), kept independent of React and native rendering concerns.
 
 // A review thread can be resolved only when GitHub gave it a thread node id;
 // top-level PR conversation comments have no thread to toggle.

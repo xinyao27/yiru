@@ -34,8 +34,7 @@ function stripUnsupportedControlCharacters(value: string): string {
   return result
 }
 
-/** Strip ANSI/OSC escapes and normalize newlines so the raw scrollback reads as
- *  plain text. Pure; safe to reuse in tests. */
+/** Strip ANSI/OSC escapes and normalize newlines so raw scrollback reads as plain text. */
 export function stripScrollbackAnsi(value: string): string {
   return stripUnsupportedControlCharacters(
     value

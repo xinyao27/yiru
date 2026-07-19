@@ -76,8 +76,3 @@ export async function rememberGhCwdResolutionFailure(
     entries.delete(oldest.value)
   }
 }
-
-/** @internal — test-only */
-export function _resetGhCwdRepoNegativeCache(): void {
-  entries.clear()
-}

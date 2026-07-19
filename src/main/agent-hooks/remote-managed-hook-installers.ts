@@ -65,12 +65,6 @@ const REMOTE_MANAGED_HOOK_INSTALLERS: readonly RemoteManagedHookInstaller[] = [
   ['kimi', (sftp, remoteHome) => kimiHookService.installRemote(sftp, remoteHome)]
 ]
 
-/** Agents wired into the remote (SSH) hook installer. Exported so an invariant
- *  test can assert every locally-managed agent that implements `installRemote`
- *  is registered here — the omission that hid Droid/Copilot status over SSH. */
-export const REMOTE_MANAGED_HOOK_INSTALLER_AGENTS: readonly AgentHookInstallStatus['agent'][] =
-  REMOTE_MANAGED_HOOK_INSTALLERS.map(([agent]) => agent)
-
 export async function installRemoteManagedAgentHooks(
   sftp: SFTPWrapper,
   remoteHome: string,

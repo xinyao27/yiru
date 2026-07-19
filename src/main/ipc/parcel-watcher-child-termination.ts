@@ -47,10 +47,6 @@ export class WatcherTerminationQueue {
     ignoreWatcherTermination(tracked)
     return tracked
   }
-
-  resetForTest(): void {
-    this.current = null
-  }
 }
 
 export function terminateWatcherChild(child: ChildProcess): Promise<boolean> {

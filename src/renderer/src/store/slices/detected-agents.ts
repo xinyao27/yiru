@@ -55,14 +55,6 @@ let localDetectionGeneration = 0
 const remoteDetectPromises = new Map<string, Promise<TuiAgent[]>>()
 const runtimeDetectPromises = new Map<string, Promise<TuiAgent[]>>()
 
-export function _getRemoteDetectPromiseCountForTest(): number {
-  return remoteDetectPromises.size
-}
-
-export function _getRuntimeDetectPromiseCountForTest(): number {
-  return runtimeDetectPromises.size
-}
-
 export const createDetectedAgentsSlice: StateCreator<AppState, [], [], DetectedAgentsSlice> = (
   set,
   get

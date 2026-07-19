@@ -4,8 +4,7 @@ import {
   callComputerSidecarCapabilities,
   callComputerSidecarListApps,
   callComputerSidecarListWindows,
-  callComputerSidecarSnapshot,
-  resetComputerSidecarForTest
+  callComputerSidecarSnapshot
 } from '../../../computer/sidecar-client'
 import { defineMethod, type RpcMethod } from '../core'
 import {
@@ -23,10 +22,6 @@ import {
   SetValue,
   TypeText
 } from './computer-schemas'
-
-export function resetComputerSessionsForTest(): void {
-  resetComputerSidecarForTest()
-}
 
 export const COMPUTER_METHODS: RpcMethod[] = [
   defineMethod({

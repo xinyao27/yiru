@@ -857,22 +857,6 @@ export function reportVisiblePRRefreshCandidates(
   }
 }
 
-export function _getVisiblePRRefreshWindowCountForTests(): number {
-  return visibleByWindow.size
-}
-
-export function _getPRRefreshErrorBackoffCountForTests(): number {
-  return errorBackoff.size
-}
-
-export function _getPRRefreshQueueSizeForTests(): number {
-  return queue.size
-}
-
-export function _getPRRefreshAliasCountForTests(key: string): number {
-  return queue.get(key)?.aliases.size ?? 0
-}
-
 export async function refreshPRNow(candidate: GitHubPRRefreshCandidate): Promise<PRRefreshOutcome> {
   const alias = aliasFromCandidate(candidate)
   const key = refreshKey(candidate)

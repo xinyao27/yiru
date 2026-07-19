@@ -28,7 +28,3 @@ setTerminalWebglDiagnosticRecorder((kind, detail) =>
 export function getTerminalFreezeBreadcrumbs(): PtyDeliveryBreadcrumb[] {
   return rendererDeliveryBreadcrumbs.snapshot()
 }
-
-export function resetTerminalFreezeBreadcrumbsForTesting(): void {
-  rendererDeliveryBreadcrumbs.reset()
-}

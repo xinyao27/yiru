@@ -258,13 +258,6 @@ function shouldReplace(existing: AdvertisedUrl, candidate: AdvertisedUrl): boole
   return candidate.lastSeenAt >= existing.lastSeenAt
 }
 
-export type AdvertisedUrlWatcherOptions = {
-  /** Override the clock; useful for tests. */
-  now?: () => number
-  /** Override the max cache entries (default 256). */
-  maxCacheEntries?: number
-}
-
 export class AdvertisedUrlWatcher {
   private readonly buffers = new Map<string, PtyBuffer>()
   private readonly ptyToWorktree = new Map<string, string>()
@@ -274,14 +267,6 @@ export class AdvertisedUrlWatcher {
   private readonly validationBaselines = new Map<CacheKey, ListenerScanState>()
   private readonly startupAbsentAllowances = new Set<CacheKey>()
   private readonly listeners = new Set<(event: AdvertisedUrlChangeEvent) => void>()
-  private readonly now: () => number
-  private readonly maxCacheEntries: number
-
-  constructor(options: AdvertisedUrlWatcherOptions = {}) {
-    this.now = options.now ?? Date.now
-    this.maxCacheEntries = options.maxCacheEntries ?? MAX_CACHE_ENTRIES
-  }
-
   onDidChange(listener: (event: AdvertisedUrlChangeEvent) => void): () => void {
     this.listeners.add(listener)
     return () => {
@@ -385,7 +370,7 @@ export class AdvertisedUrlWatcher {
     if (!finalized) {
       return
     }
-    const timestamp = now ?? this.now()
+    const timestamp = now ?? Date.now()
     for (const url of extractUrlCandidates(finalized)) {
       this.consider(url, ptyId, worktreeId, timestamp)
     }
@@ -467,14 +452,14 @@ export class AdvertisedUrlWatcher {
   }
 
   private enforceCacheLimit(): AdvertisedUrlChangeEvent[] {
-    if (this.cache.size <= this.maxCacheEntries) {
+    if (this.cache.size <= MAX_CACHE_ENTRIES) {
       return []
     }
     // Drop oldest by lastSeenAt until we are back at the cap.
     const entries = Array.from(this.cache.entries()).sort(
       (a, b) => a[1].lastSeenAt - b[1].lastSeenAt
     )
-    const overflow = this.cache.size - this.maxCacheEntries
+    const overflow = this.cache.size - MAX_CACHE_ENTRIES
     const removedEvents: AdvertisedUrlChangeEvent[] = []
     for (let i = 0; i < overflow; i++) {
       const [key, entry] = entries[i]

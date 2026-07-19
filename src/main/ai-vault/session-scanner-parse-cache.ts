@@ -93,10 +93,6 @@ export function createSessionParseStats(): SessionParseStats {
 
 const cache = new Map<string, SessionParseCacheEntry>()
 
-export function resetSessionParseCacheForTests(): void {
-  cache.clear()
-}
-
 function storeEntry(path: string, entry: SessionParseCacheEntry): void {
   cache.delete(path)
   cache.set(path, entry)

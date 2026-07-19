@@ -105,11 +105,3 @@ export function getRecentSelfWrite(
 export function hasRecentSelfWrite(absolutePath: string, executionHostId?: string | null): boolean {
   return getRecentSelfWrite(absolutePath, executionHostId) !== null
 }
-
-export function __clearSelfWriteRegistryForTests(): void {
-  stamps.clear()
-}
-
-export function __getSelfWriteRegistrySizeForTests(): number {
-  return stamps.size
-}

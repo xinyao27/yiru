@@ -1769,18 +1769,11 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
         // through to mkdir and returning a misleading "Failed to create
         // directory" message.
         //
-        // Why the message fallback: fs.promises.access always attaches a
-        // NodeJS.ErrnoException code in production, but plain Error objects
-        // thrown in tests / non-Node contexts won't — treat a message that
-        // reads like ENOENT as one so we don't over-reject.
         const code =
           err && typeof err === 'object' && 'code' in err
             ? (err as NodeJS.ErrnoException).code
             : undefined
-        const looksLikeEnoent =
-          code === 'ENOENT' ||
-          (code === undefined && err instanceof Error && /ENOENT/.test(err.message))
-        if (!looksLikeEnoent) {
+        if (code !== 'ENOENT') {
           const message = err instanceof Error ? err.message : String(err)
           return { error: `Cannot access target path: ${message}` }
         }

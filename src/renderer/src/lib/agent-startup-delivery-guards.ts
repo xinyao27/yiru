@@ -25,10 +25,6 @@ export function releaseAgentStartupDeliveryConsumed(key: string): void {
   consumedAgentStartupDeliveries.delete(key)
 }
 
-export function clearConsumedAgentStartupDeliveriesForTests(): void {
-  consumedAgentStartupDeliveries.clear()
-}
-
 // Why: one consumed guard is recorded per launch that reached delivery and is
 // never released on the happy path, so guards for removed tabs/worktrees would
 // accumulate for the renderer's whole session. Drop them when the owning tab is

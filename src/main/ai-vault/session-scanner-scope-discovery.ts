@@ -22,10 +22,6 @@ const CLAUDE_EXTENSIONS = new Set(['.jsonl'])
 const PROJECT_DIR_CWD_CACHE_MAX = 2048
 const projectDirCwdCache = new Map<string, string>()
 
-export function resetProjectDirCwdCacheForTests(): void {
-  projectDirCwdCache.clear()
-}
-
 async function cachedProjectDirCwd(projectDir: string): Promise<string | null> {
   const cached = projectDirCwdCache.get(projectDir)
   if (cached !== undefined) {

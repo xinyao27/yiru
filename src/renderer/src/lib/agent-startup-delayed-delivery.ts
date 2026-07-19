@@ -3,7 +3,6 @@ import type { AgentStartupPlan } from '@/lib/tui-agent-startup'
 import { parsePaneKey } from '../../../shared/stable-pane-id'
 import {
   agentStartupDeliveryKey as deliveryKey,
-  clearConsumedAgentStartupDeliveriesForTests,
   isAgentStartupDeliveryConsumed,
   markAgentStartupDeliveryConsumed,
   releaseAgentStartupDeliveryConsumed
@@ -137,17 +136,6 @@ export function queuePendingAgentStartupDelivery(delivery: PendingAgentStartupDe
   pendingAgentStartupDeliveries.set(key, delivery)
   ensurePendingAgentStartupSubscription()
   flushPendingAgentStartupDeliveries()
-}
-
-export function resetAgentStartupDelayedDeliveryForTests(): void {
-  pendingAgentStartupDeliveries.clear()
-  clearConsumedAgentStartupDeliveriesForTests()
-  for (const timer of staleStartupRecheckTimers.values()) {
-    globalThis.clearTimeout(timer)
-  }
-  staleStartupRecheckTimers.clear()
-  unsubscribePendingAgentStartupDeliveries?.()
-  unsubscribePendingAgentStartupDeliveries = null
 }
 
 export function beginAgentStartupDeliveryAttempt(args: {

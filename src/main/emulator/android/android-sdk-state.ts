@@ -4,18 +4,11 @@ import type { AndroidSdkPaths } from './android-sdk-discovery'
 
 const SDK_MISSING = 'Android SDK not found. Install Android Studio and set ANDROID_HOME.'
 
-// Resolves the backend's Android SDK. An injected SDK (tests, or an explicit
-// null) is fixed; for the real host it re-runs discovery on every call so a
-// newly-installed SDK or a changed configured path takes effect without a
-// restart. Host discovery is only a few existsSync probes, so this is cheap.
+// Re-run discovery on every call so a newly-installed SDK or changed configured
+// path takes effect without a restart. Discovery is only a few existsSync probes.
 export class AndroidSdkState {
-  constructor(
-    private readonly injected: boolean,
-    private readonly injectedSdk: AndroidSdkPaths | null
-  ) {}
-
   resolve(): AndroidSdkPaths | null {
-    return this.injected ? this.injectedSdk : discoverAndroidSdkFromHost()
+    return discoverAndroidSdkFromHost()
   }
 
   require(): AndroidSdkPaths {

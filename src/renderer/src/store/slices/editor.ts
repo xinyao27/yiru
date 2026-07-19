@@ -1730,9 +1730,8 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       // If opening as preview, replace the existing preview tab.
       // Why: preview replacement is scoped to `worktreeId + targetGroupId` so
       // link clicks in group B do not silently evict previews from group A.
-      // Falls back to worktree-wide when group plumbing is unavailable (e.g.
-      // in tests that don't populate unifiedTabsByWorktree), matching the
-      // prior behavior.
+      // Falls back to worktree-wide when group plumbing is unavailable,
+      // matching the prior behavior.
       let newFiles = s.openFiles
       if (isPreview) {
         const replaceablePreviewId = getReplaceablePreviewFileId(s, worktreeId, targetGroupId)

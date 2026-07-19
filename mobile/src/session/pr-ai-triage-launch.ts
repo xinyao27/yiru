@@ -8,8 +8,7 @@ import {
 // conflicts with AI"). Reuses the same two RPCs the diff-review send flow uses —
 // session.tabs.createTerminal then terminal.send — so the prompt is dropped into a
 // fresh agent terminal in the worktree. There is no higher-level agent-composer RPC
-// on mobile, so this createTerminal+send pair is the launch mechanism. Kept free of
-// react-native imports so it stays unit-testable in the node test environment.
+// on mobile, so this createTerminal+send pair is the launch mechanism.
 export async function createTerminalAndSendPrompt(
   client: Pick<RpcClient, 'sendRequest'>,
   worktreeId: string,

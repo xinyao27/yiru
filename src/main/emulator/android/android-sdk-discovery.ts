@@ -14,8 +14,7 @@ export type DiscoverAndroidSdkOptions = {
   exists: (path: string) => boolean
 }
 
-// Pure/dependency-injected: every external input (env, platform, homedir, fs probe)
-// is a parameter so the resolver is unit-testable; Phase B wires the real I/O.
+// Keep platform-specific SDK candidate resolution separate from host discovery.
 export function discoverAndroidSdk(options: DiscoverAndroidSdkOptions): AndroidSdkPaths | null {
   const { env, platform, homedir, exists } = options
   const win32 = platform === 'win32'

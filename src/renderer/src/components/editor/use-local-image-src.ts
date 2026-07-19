@@ -312,26 +312,6 @@ export function loadLocalImageAbsolutePath(
   return loadPromise
 }
 
-export function resetLocalImageSrcStateForTests(): void {
-  if (pendingBlobUrlRevocationTimer !== null) {
-    clearTimeout(pendingBlobUrlRevocationTimer)
-    pendingBlobUrlRevocationTimer = null
-  }
-  revokePendingBlobUrls()
-  for (const url of blobUrlCache.values()) {
-    URL.revokeObjectURL(url)
-  }
-  blobUrlCache.clear()
-  inFlightBlobUrlLoads.clear()
-  cacheGeneration = 0
-  pendingBlobUrlRevocations.clear()
-  cacheListeners.clear()
-}
-
-export function invalidateLocalImageSrcCacheForTests(): void {
-  invalidateImageCache()
-}
-
 function readImagePreview(
   absolutePath: string,
   connectionId?: string | null,

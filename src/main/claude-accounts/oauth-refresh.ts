@@ -38,7 +38,7 @@ type TokenEndpointResponse = {
  * Parse the `claudeAiOauth` object from a credentials JSON string.
  * Returns null when the string is not parseable or lacks the OAuth block.
  */
-export function parseClaudeOauthBlob(credentialsJson: string): ClaudeOauthBlob | null {
+function parseClaudeOauthBlob(credentialsJson: string): ClaudeOauthBlob | null {
   try {
     const parsed = JSON.parse(credentialsJson) as ClaudeCredentials
     const oauth = parsed?.claudeAiOauth
@@ -49,7 +49,7 @@ export function parseClaudeOauthBlob(credentialsJson: string): ClaudeOauthBlob |
 }
 
 /** Read a stored refresh token, or null when absent/blank. */
-export function readRefreshToken(credentialsJson: string): string | null {
+function readRefreshToken(credentialsJson: string): string | null {
   const oauth = parseClaudeOauthBlob(credentialsJson)
   const token = oauth?.refreshToken
   return typeof token === 'string' && token.trim() !== '' ? token.trim() : null
@@ -60,9 +60,9 @@ export function readRefreshToken(credentialsJson: string): string | null {
  *
  * A missing/non-numeric `expiresAt` is treated as "needs refresh" so a blob
  * with no usable expiry metadata still gets a proactive refresh attempt rather
- * than being trusted indefinitely. `now` is injectable for tests.
+ * than being trusted indefinitely.
  */
-export function isOauthTokenExpiring(credentialsJson: string, now: number = Date.now()): boolean {
+export function isOauthTokenExpiring(credentialsJson: string): boolean {
   const oauth = parseClaudeOauthBlob(credentialsJson)
   if (!oauth) {
     return false
@@ -71,7 +71,7 @@ export function isOauthTokenExpiring(credentialsJson: string, now: number = Date
   if (typeof expiresAt !== 'number' || !Number.isFinite(expiresAt)) {
     return true
   }
-  return now + OAUTH_EXPIRY_BUFFER_MS >= expiresAt
+  return Date.now() + OAUTH_EXPIRY_BUFFER_MS >= expiresAt
 }
 
 /**
@@ -80,10 +80,9 @@ export function isOauthTokenExpiring(credentialsJson: string, now: number = Date
  * (including the refresh token when the server does not rotate it) and only
  * overwrites what the response provides. Returns null on malformed input.
  */
-export function applyRefreshedToken(
+function applyRefreshedToken(
   credentialsJson: string,
-  response: TokenEndpointResponse,
-  now: number = Date.now()
+  response: TokenEndpointResponse
 ): string | null {
   let parsed: ClaudeCredentials
   try {
@@ -98,7 +97,7 @@ export function applyRefreshedToken(
   const oauth: ClaudeOauthBlob = { ...parsed.claudeAiOauth }
   oauth.accessToken = accessToken
   if (typeof response.expires_in === 'number' && Number.isFinite(response.expires_in)) {
-    oauth.expiresAt = now + response.expires_in * 1000
+    oauth.expiresAt = Date.now() + response.expires_in * 1000
   }
   // Rotation: keep the existing refresh token unless the server issued a new
   // one. Single-use refresh tokens make persisting the rotated value the whole
@@ -122,8 +121,7 @@ export function applyRefreshedToken(
  * is never worse than today's behavior.
  */
 export async function refreshClaudeOauthCredentials(
-  credentialsJson: string,
-  now: number = Date.now()
+  credentialsJson: string
 ): Promise<string | null> {
   const refreshToken = readRefreshToken(credentialsJson)
   if (!refreshToken) {
@@ -159,7 +157,7 @@ export async function refreshClaudeOauthCredentials(
       return null
     }
     const data = (await res.json()) as TokenEndpointResponse
-    return applyRefreshedToken(credentialsJson, data, now)
+    return applyRefreshedToken(credentialsJson, data)
   } catch (error) {
     console.warn(
       '[claude-oauth-refresh] token refresh request failed:',

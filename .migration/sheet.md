@@ -16,5 +16,5 @@
 - Same dismiss/focus model change as dialog.
 
 ## Verify by hand
-- Open issue drawers (Jira/Linear/GitLab/GitHub project): slides in from the right
+- Open source-host issue drawers: slides in from the right
   side, has an (sr-only) title, no focus steal where autofocus was prevented.

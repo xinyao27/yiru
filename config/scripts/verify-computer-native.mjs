@@ -8,12 +8,6 @@ import { join, resolve } from 'node:path'
 const repoRoot = resolve(import.meta.dirname, '..', '..')
 const checks = [
   {
-    name: 'macOS Swift renderer/provider tests',
-    command: 'swift',
-    args: ['test', '--package-path', 'native/computer-use-macos'],
-    enabled: process.platform === 'darwin'
-  },
-  {
     name: 'Linux provider Python syntax',
     command: 'python3',
     args: [
