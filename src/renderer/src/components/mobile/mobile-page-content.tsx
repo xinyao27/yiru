@@ -2,11 +2,12 @@ import { translate } from '@/i18n/i18n'
 import type { MobileNetworkInterface } from '../settings/mobile-network-interface-selection'
 import { HeroFlow, HeroIntro, HeroPaired, type PairedDevice } from './mobile-hero'
 import type { StepIndex } from './mobile-hero'
-import { getMobileReleaseLink } from './mobile-release-link'
+import { getMobileReleaseLink, type MobilePlatform } from './mobile-release-link'
 import type { MobilePageStage } from './mobile-page-stage'
 import { MobilePageToolbar } from './mobile-page-toolbar'
 import { PhoneCarousel } from './phone-carousel'
 import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pairing-connection-mode'
+import { mobilePageStyles } from './mobile-page-tailwind'
 
 type MobilePageContentProps = {
   closeMobilePage: () => void
@@ -28,10 +29,12 @@ type MobilePageContentProps = {
   handleConnectionModeChange: (mode: MobilePairingConnectionMode) => void
   pairQrDataUrl: string | null
   pairingUrl: string | null
+  platform: MobilePlatform
   refreshingNetworkInterfaces: boolean
   revokeDevice: (id: string) => void
   revokingDeviceIds: string[]
   selectedAddress: string | undefined
+  onPlatformChange: (platform: MobilePlatform) => void
   showMobileButton: boolean
   showPairedDevices: (deviceCount: number) => void
   stage: MobilePageStage | null
@@ -59,10 +62,12 @@ export function MobilePageContent({
   handleConnectionModeChange,
   pairQrDataUrl,
   pairingUrl,
+  platform,
   refreshingNetworkInterfaces,
   revokeDevice,
   revokingDeviceIds,
   selectedAddress,
+  onPlatformChange,
   showMobileButton,
   showPairedDevices,
   stage,
@@ -70,14 +75,14 @@ export function MobilePageContent({
   toggleMobileSidebarButton
 }: MobilePageContentProps): React.JSX.Element {
   return (
-    <div className="mobile-page-root">
+    <div className={mobilePageStyles.root}>
       <MobilePageToolbar
         showMobileButton={showMobileButton}
         onClose={closeMobilePage}
         onToggleMobileSidebarButton={toggleMobileSidebarButton}
       />
-      <section className="mp-hero">
-        <div className="mp-hero-copy">
+      <section className={mobilePageStyles.hero}>
+        <div className={mobilePageStyles.heroCopy}>
           {stage === null ? null : stage === 'intro' ? (
             <HeroIntro onStart={enterFlow} />
           ) : stage === 'paired' ? (
@@ -90,8 +95,10 @@ export function MobilePageContent({
           ) : (
             <HeroFlow
               stepIdx={stepIdx}
+              platform={platform}
+              onPlatformChange={onPlatformChange}
               installQrUrl={installQrUrl}
-              installCopy={getMobileReleaseLink()}
+              installCopy={getMobileReleaseLink(platform)}
               onOpenInstallUrl={openInstallUrl}
               onCopyInstallUrl={copyInstallUrl}
               pairQrDataUrl={pairQrDataUrl}
@@ -114,7 +121,7 @@ export function MobilePageContent({
         </div>
 
         <div
-          className="mp-stage"
+          className={mobilePageStyles.stage}
           aria-label={translate('auto.components.mobile.MobilePage.e17393c6a3', 'Phone preview')}
         >
           <PhoneCarousel />

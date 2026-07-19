@@ -6134,7 +6134,9 @@
           "174f4a3c6d": "휴대폰에서 terminals과 agents를 제어하세요.",
           "1de96ec8a6": "Yiru Mobile 버튼 표시",
           "682293cadf": "왼쪽 사이드바 상단에 Yiru Mobile 버튼을 표시합니다.",
-          "d4f2b65f30": "사이드바에 Yiru Mobile 바로가기를 표시합니다."
+          "d4f2b65f30": "사이드바에 Yiru Mobile 바로가기를 표시합니다.",
+          "testFlight": "TestFlight",
+          "androidApk": "Android APK"
         },
         "NotificationsPane": {
           "906b4afebf": "테스트 알림 보내기",
@@ -9414,7 +9416,9 @@
           "about": "Yiru Relay 베타 정보",
           "beta": "베타",
           "availability": "모바일 빌드:",
-          "githubReleases": "GitHub 릴리스"
+          "githubReleases": "GitHub 릴리스",
+          "testFlight": "TestFlight",
+          "androidApk": "Android APK"
         }
       },
       "right": {
@@ -10931,6 +10935,12 @@
             "copy": {
               "releases": {
                 "cta": "모바일 빌드 보기"
+              },
+              "testflight": {
+                "cta": "Open TestFlight"
+              },
+              "android": {
+                "cta": "Download APK"
               }
             }
           }

@@ -18,17 +18,18 @@ import { MobilePageContent } from './mobile-page-content'
 import { useMobileInstallQr } from './use-mobile-install-qr'
 import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pairing-connection-mode'
 import { useMobileInstallActions } from './use-mobile-install-actions'
+import type { MobilePlatform } from './mobile-release-link'
 
 export default function MobilePage(): React.JSX.Element {
   const [stage, setStage] = useState<FlowStage | null>(null)
   const [stepIdx, setStepIdx] = useState<StepIndex>(0)
+  const [platform, setPlatform] = useState<MobilePlatform>('ios')
 
   const [pairQrDataUrl, setPairQrDataUrl] = useState<string | null>(null)
   const [pairingUrl, setPairingUrl] = useState<string | null>(null)
   const [pairLoading, setPairLoading] = useState(false)
   const signedIn = useAppStore((state) => state.yiruProfileAuthStatus?.state === 'connected')
-  // Why: Relay remains opt-in while current mobile builds are distributed
-  // through the neutral GitHub Releases entry point.
+  // Why: Relay remains opt-in while compatible mobile builds are still beta distributions.
   const [connectionMode, setConnectionMode] = useState<MobilePairingConnectionMode>('local-only')
   const [networkInterfaces, setNetworkInterfaces] = useState<MobileNetworkInterface[]>([])
   const [selectedAddress, setSelectedAddress] = useState<string | undefined>(undefined)
@@ -49,8 +50,8 @@ export default function MobilePage(): React.JSX.Element {
   const closeMobilePage = useAppStore((s) => s.closeMobilePage)
   const showMobileButton = useAppStore((s) => s.settings?.showMobileButton !== false)
   const updateSettings = useAppStore((s) => s.updateSettings)
-  const installQrUrl = useMobileInstallQr(stage)
-  const { copyInstallUrl, openInstallUrl } = useMobileInstallActions()
+  const installQrUrl = useMobileInstallQr(stage, platform)
+  const { copyInstallUrl, openInstallUrl } = useMobileInstallActions(platform)
 
   const setPairingDeviceBaseline = useCallback(
     (count: number | null): void => {
@@ -438,10 +439,12 @@ export default function MobilePage(): React.JSX.Element {
       handleConnectionModeChange={handleConnectionModeChange}
       pairQrDataUrl={pairQrDataUrl}
       pairingUrl={pairingUrl}
+      platform={platform}
       refreshingNetworkInterfaces={refreshingNetworkInterfaces}
       revokeDevice={(id) => void revokeDevice(id)}
       revokingDeviceIds={revokingDeviceIds}
       selectedAddress={selectedAddress}
+      onPlatformChange={setPlatform}
       showMobileButton={showMobileButton}
       showPairedDevices={showPairedDevices}
       stage={stage}

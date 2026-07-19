@@ -1,8 +1,12 @@
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { colors, radii, spacing, typography } from '../theme/mobile-theme'
 import type { CompatVerdict } from '../transport/protocol-compat'
 import { YIRU_GITHUB_RELEASES_URL } from '../../../src/shared/yiru-github-repository'
+import {
+  YIRU_ANDROID_LATEST_APK_URL,
+  YIRU_IOS_TESTFLIGHT_URL
+} from '../../../src/shared/yiru-mobile-downloads'
 
 type Props = {
   verdict: Extract<CompatVerdict, { kind: 'blocked' }>
@@ -10,14 +14,17 @@ type Props = {
 
 export function ProtocolBlockScreen({ verdict }: Props) {
   const isMobileTooOld = verdict.reason === 'mobile-too-old'
-  const primaryAction = {
-    label: isMobileTooOld ? 'View mobile builds' : 'Open GitHub Releases',
-    url: YIRU_GITHUB_RELEASES_URL
-  }
+  const mobileUpdateTarget =
+    Platform.OS === 'ios'
+      ? { label: 'Open TestFlight', url: YIRU_IOS_TESTFLIGHT_URL }
+      : { label: 'Download APK', url: YIRU_ANDROID_LATEST_APK_URL }
+  const primaryAction = isMobileTooOld
+    ? mobileUpdateTarget
+    : { label: 'Open GitHub Releases', url: YIRU_GITHUB_RELEASES_URL }
 
   const title = isMobileTooOld ? 'Update Yiru Mobile' : 'Update Yiru on your computer'
   const body = isMobileTooOld
-    ? 'This desktop needs a newer Yiru Mobile app. View available mobile builds on GitHub Releases, then try this host again.'
+    ? 'This desktop needs a newer Yiru Mobile app. Install the latest mobile build, then try this host again.'
     : 'This paired desktop app is too old for your current Yiru Mobile app. Update Yiru on your computer, then try this host again.'
   const recoveryNote =
     'Already updated? Go back to Hosts and refresh the connection. If this message stays, remove this host and pair it again.'
@@ -27,8 +34,8 @@ export function ProtocolBlockScreen({ verdict }: Props) {
       <View style={styles.card}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.body}>{body}</Text>
-        {/* Why: GitHub Releases is the distribution source of truth while the
-            replacement mobile store listings are not yet established. */}
+        {/* Why: mobile update channels differ by platform, while desktop
+            updates continue to use the repository release page. */}
         <Pressable
           style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
           onPress={() => {

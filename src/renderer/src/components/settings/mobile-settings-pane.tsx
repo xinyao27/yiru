@@ -8,7 +8,10 @@ import {
 } from './mobile-settings-search'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import { YIRU_GITHUB_RELEASES_URL } from '../../../../shared/yiru-github-repository'
+import {
+  YIRU_ANDROID_LATEST_APK_URL,
+  YIRU_IOS_TESTFLIGHT_URL
+} from '../../../../shared/yiru-mobile-downloads'
 export { getMobileSettingsPaneSearchEntries }
 
 export function MobileSettingsPane(): React.JSX.Element {
@@ -29,14 +32,22 @@ export function MobileSettingsPane(): React.JSX.Element {
         <p className="text-xs text-muted-foreground">
           {translate(
             'auto.components.settings.MobileSettingsPane.c8491c17ef',
-            'Control Yiru from your phone by scanning a QR code. Mobile builds:'
+            'Control Yiru from your phone by scanning a QR code. Mobile downloads:'
           )}{' '}
           <button
             type="button"
-            onClick={() => void window.api.shell.openUrl(YIRU_GITHUB_RELEASES_URL)}
+            onClick={() => void window.api.shell.openUrl(YIRU_IOS_TESTFLIGHT_URL)}
             className="cursor-pointer underline underline-offset-2 hover:text-foreground"
           >
-            {translate('auto.components.settings.MobileSettingsPane.9a3c280e49', 'GitHub Releases')}
+            {translate('auto.components.settings.MobileSettingsPane.testFlight', 'TestFlight')}
+          </button>{' '}
+          <span aria-hidden="true">/</span>{' '}
+          <button
+            type="button"
+            onClick={() => void window.api.shell.openUrl(YIRU_ANDROID_LATEST_APK_URL)}
+            className="cursor-pointer underline underline-offset-2 hover:text-foreground"
+          >
+            {translate('auto.components.settings.MobileSettingsPane.androidApk', 'Android APK')}
           </button>
           .
         </p>

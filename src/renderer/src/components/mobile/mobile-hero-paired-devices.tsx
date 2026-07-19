@@ -1,5 +1,6 @@
 import { DeviceMobile as Smartphone, Trash as Trash2 } from '@phosphor-icons/react'
 import { translate } from '@/i18n/i18n'
+import { mobilePageStyles } from './mobile-page-tailwind'
 
 export type PairedDevice = {
   deviceId: string
@@ -23,40 +24,40 @@ export function HeroPaired({
 }: HeroPairedProps): React.JSX.Element {
   return (
     <div>
-      <div className="mp-eyebrow-row">
-        <span className="mp-eyebrow">
+      <div className={mobilePageStyles.eyebrowRow}>
+        <span className={mobilePageStyles.eyebrow}>
           {translate('auto.components.mobile.MobileHero.5410d55d79', 'Yiru Mobile')}
         </span>
       </div>
-      <h1 className="mp-h1">
+      <h1 className={mobilePageStyles.heading}>
         {devices.length === 1
           ? translate('auto.components.mobile.MobileHero.051978a785', 'Your phone is paired.')
           : translate('auto.components.mobile.MobileHero.d0b52871ce', 'Your phones are paired.')}
       </h1>
-      <p className="mp-lead-sm">
+      <p className={mobilePageStyles.leadSmall}>
         {translate(
           'auto.components.mobile.MobileHero.266c18c105',
           'Open Yiru Mobile to pick up where you left off, or pair another device.'
         )}
       </p>
-      <ul className="mp-paired-list">
+      <ul className={mobilePageStyles.pairedList}>
         {devices.map((device) => {
           const revoking = revokingDeviceIds.includes(device.deviceId)
           return (
-            <li key={device.deviceId} className="mp-paired-row">
-              <div className="mp-paired-icon">
+            <li key={device.deviceId} className={mobilePageStyles.pairedRow}>
+              <div className={mobilePageStyles.pairedIcon}>
                 <Smartphone className="size-4" />
               </div>
-              <div className="mp-paired-main">
-                <div className="mp-paired-name">{device.name}</div>
-                <div className="mp-paired-meta">
+              <div className={mobilePageStyles.pairedMain}>
+                <div className={mobilePageStyles.pairedName}>{device.name}</div>
+                <div className={mobilePageStyles.pairedMeta}>
                   {translate('auto.components.mobile.MobileHero.94829abdb1', 'Paired')}{' '}
                   {new Date(device.pairedAt).toLocaleDateString()}
                 </div>
               </div>
               <button
                 type="button"
-                className="mp-paired-revoke"
+                className={mobilePageStyles.pairedRevoke}
                 onClick={() => onRevoke(device.deviceId)}
                 disabled={revoking}
                 aria-label={translate(
@@ -72,8 +73,8 @@ export function HeroPaired({
           )
         })}
       </ul>
-      <div className="mp-flow-actions">
-        <button type="button" className="mp-secondary-action" onClick={onPairAnother}>
+      <div className={mobilePageStyles.flowActions}>
+        <button type="button" className={mobilePageStyles.secondaryAction} onClick={onPairAnother}>
           <Smartphone className="size-3.5" />
           {translate('auto.components.mobile.MobileHero.ff48d9d520', 'Pair another device')}
         </button>

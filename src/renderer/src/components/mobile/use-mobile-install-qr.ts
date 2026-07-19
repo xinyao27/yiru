@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import QRCodeBrowser from 'qrcode/lib/browser'
-import { getMobileReleaseLink } from './mobile-release-link'
+import { getMobileReleaseLink, type MobilePlatform } from './mobile-release-link'
 import type { MobilePageStage } from './mobile-page-stage'
 
 async function renderQrDataUrl(text: string): Promise<string> {
@@ -11,10 +11,14 @@ async function renderQrDataUrl(text: string): Promise<string> {
   })
 }
 
-export function useMobileInstallQr(stage: MobilePageStage | null): string | null {
+export function useMobileInstallQr(
+  stage: MobilePageStage | null,
+  platform: MobilePlatform
+): string | null {
   const [installQrUrl, setInstallQrUrl] = useState<string | null>(null)
 
-  // Why: render the external release QR only after the user enters the flow.
+  // Why: render install QRs lazily and clear the old platform's QR while the
+  // replacement is generated so users cannot scan a stale destination.
   useEffect(() => {
     if (stage !== 'flow') {
       return
@@ -23,7 +27,7 @@ export function useMobileInstallQr(stage: MobilePageStage | null): string | null
     let cancelled = false
     void (async () => {
       try {
-        const dataUrl = await renderQrDataUrl(getMobileReleaseLink().url)
+        const dataUrl = await renderQrDataUrl(getMobileReleaseLink(platform).url)
         if (!cancelled) {
           setInstallQrUrl(dataUrl)
         }
@@ -36,7 +40,7 @@ export function useMobileInstallQr(stage: MobilePageStage | null): string | null
     return () => {
       cancelled = true
     }
-  }, [stage])
+  }, [platform, stage])
 
   return installQrUrl
 }

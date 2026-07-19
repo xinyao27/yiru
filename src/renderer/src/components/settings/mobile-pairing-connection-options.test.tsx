@@ -7,7 +7,10 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import type { MobileRelayStatus } from '../../../../shared/mobile-relay-status'
 import type { YiruProfileAuthStatus } from '../../../../shared/yiru-profiles'
-import { YIRU_GITHUB_RELEASES_URL } from '../../../../shared/yiru-github-repository'
+import {
+  YIRU_ANDROID_LATEST_APK_URL,
+  YIRU_IOS_TESTFLIGHT_URL
+} from '../../../../shared/yiru-mobile-downloads'
 import { MobilePairingConnectionOptions } from './mobile-pairing-connection-options'
 
 type MobileRelayStoreState = {
@@ -95,17 +98,18 @@ describe('MobilePairingConnectionOptions', () => {
     await waitFor(() => expect(screen.getByText('Available')).toBeVisible())
   })
 
-  it('shows the Relay beta availability inline and opens the neutral mobile builds page', async () => {
+  it('opens both compatible mobile builds from the Relay beta availability', async () => {
     const user = userEvent.setup()
     render(<MobilePairingConnectionOptions value="local-only" onChange={vi.fn()} />)
 
     expect(screen.getByText('Beta')).toBeVisible()
-    expect(screen.getByText('Mobile builds:')).toBeVisible()
-    expect(screen.queryByRole('button', { name: 'TestFlight' })).toBeNull()
-    expect(screen.queryByRole('button', { name: 'Android APK' })).toBeNull()
+    expect(screen.getByText('Available on')).toBeVisible()
 
-    await user.click(screen.getByRole('button', { name: 'GitHub Releases' }))
-    expect(window.api.shell.openUrl).toHaveBeenCalledWith(YIRU_GITHUB_RELEASES_URL)
+    await user.click(screen.getByRole('button', { name: 'TestFlight' }))
+    expect(window.api.shell.openUrl).toHaveBeenCalledWith(YIRU_IOS_TESTFLIGHT_URL)
+
+    await user.click(screen.getByRole('button', { name: 'Android APK' }))
+    expect(window.api.shell.openUrl).toHaveBeenCalledWith(YIRU_ANDROID_LATEST_APK_URL)
   })
 
   it('keeps the compact onboarding choices structurally stable across modes', async () => {
