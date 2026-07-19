@@ -1,6 +1,6 @@
 {
   "name": "@yiru/workspace",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
   "description": "Yiru monorepo workspace",
   "homepage": "https://github.com/xinyao27/yiru#readme",
