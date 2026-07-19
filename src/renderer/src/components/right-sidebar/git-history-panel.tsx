@@ -23,6 +23,7 @@ import {
 } from './git-history-commit-context-menu'
 import type { SourceControlRowOpenEvent } from './source-control-split-open'
 import { translate } from '@/i18n/i18n'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 
 export type GitHistoryPanelState =
   | { status: 'idle' | 'loading'; result?: GitHistoryResult; error?: string }
@@ -259,9 +260,12 @@ export function GitHistoryPanel({
               render={
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="icon-xs"
-                  className="my-auto h-auto w-auto p-0.5 text-muted-foreground hover:bg-transparent hover:text-muted-foreground dark:hover:bg-transparent [&_svg]:size-3"
+                  className={cn(
+                    RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
+                    'my-auto size-5 p-0.5 [&_svg]:size-3'
+                  )}
                   aria-label={translate(
                     'auto.components.right.sidebar.GitHistoryPanel.9289ba0cb9',
                     'What are refs?'
@@ -286,9 +290,12 @@ export function GitHistoryPanel({
               render={
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="icon-xs"
-                  className="my-auto h-auto w-auto p-0.5 text-muted-foreground hover:bg-transparent hover:text-muted-foreground dark:hover:bg-transparent [&_svg]:size-3"
+                  className={cn(
+                    RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
+                    'my-auto size-5 p-0.5 [&_svg]:size-3'
+                  )}
                   onClick={(event) => {
                     event.stopPropagation()
                     if (collapsed) {

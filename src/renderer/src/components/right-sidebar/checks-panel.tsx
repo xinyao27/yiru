@@ -25,8 +25,10 @@ import { getGitHubPRCacheKey, getGitHubRepoCacheKey } from '@/store/slices/githu
 import { useActiveWorktree, useRepoById } from '@/store/selectors'
 import { useChecksPanelTerminalWorktree } from './use-checks-panel-terminal-worktree'
 import { cn } from '@/lib/class-names'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 import { openHttpLink } from '@/lib/http-link-routing'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DetachedHeadBadge } from '@/components/detached-head-badge'
 import {
   getTerminalUrlSystemBrowserHint,
@@ -259,25 +261,40 @@ export function ChecksPanelReviewHeader({
         {review.state}
       </span>
       <div className="flex-1" />
-      <button
-        className="cursor-pointer rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-50"
-        title={translate('auto.components.right.sidebar.ChecksPanel.7f4489f370', 'Refresh')}
-        onClick={onRefresh}
-        disabled={isRefreshing}
-      >
-        {isRefreshing ? (
-          <LoadingIndicator className="size-3.5" />
-        ) : (
-          <RefreshCw className="size-3.5" />
-        )}
-      </button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-xs"
+              className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
+              aria-label={translate(
+                'auto.components.right.sidebar.ChecksPanel.7f4489f370',
+                'Refresh'
+              )}
+              onClick={onRefresh}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? (
+                <LoadingIndicator className="size-3.5" />
+              ) : (
+                <RefreshCw className="size-3.5" />
+              )}
+            </Button>
+          }
+        />
+        <TooltipContent side="bottom" sideOffset={4}>
+          {translate('auto.components.right.sidebar.ChecksPanel.7f4489f370', 'Refresh')}
+        </TooltipContent>
+      </Tooltip>
       {showPullRequestMenu && (
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="icon-xs"
                 aria-label={translate(
                   'auto.components.right.sidebar.ChecksPanel.653c105ecc',
@@ -287,7 +304,7 @@ export function ChecksPanelReviewHeader({
                   'auto.components.right.sidebar.ChecksPanel.653c105ecc',
                   'More PR actions'
                 )}
-                className="text-muted-foreground hover:text-foreground"
+                className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
               >
                 <Ellipsis className="size-3.5" />
               </Button>

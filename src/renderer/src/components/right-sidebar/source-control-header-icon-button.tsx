@@ -2,6 +2,7 @@ import React from 'react'
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 
 export function SourceControlHeaderIconButton({
   icon: Icon,
@@ -20,9 +21,9 @@ export function SourceControlHeaderIconButton({
         render={
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="icon-xs"
-            className="text-muted-foreground hover:text-foreground"
+            className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
             aria-label={label}
             title={label}
             onClick={onClick}

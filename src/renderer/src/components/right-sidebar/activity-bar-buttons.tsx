@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
 import { getTabRootStateClasses } from '../tab-bar/drop-indicator'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 
 export type ActivityBarItem = {
   id: ActiveRightSidebarTab
@@ -58,11 +59,11 @@ export function TopActivityOverflowMenu({
         render={
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="icon-sm"
             className={cn(
               'relative my-auto h-7',
-              getTabRootStateClasses(false),
+              RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
               RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME
             )}
             aria-label={translate(

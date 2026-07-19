@@ -5,6 +5,7 @@ import { useAppStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 import type { PRCheckDetail, PRCheckRunDetails } from '../../../../shared/types'
 import { getAttachedWorktreesForFolderWorkspace } from './folder-workspace-attached-worktrees'
 import { FolderWorkspacePrChecksRow } from './folder-workspace-pr-checks-row'
@@ -220,8 +221,9 @@ export default function FolderWorkspacePrChecksPanel({
               render={
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="icon-xs"
+                  className={RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME}
                   onClick={() => setManualRefreshGeneration((generation) => generation + 1)}
                   disabled={childWorktrees.length === 0 || isRefreshing}
                   aria-label={translate(

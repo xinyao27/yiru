@@ -56,14 +56,14 @@ export function FileExplorerViewSwitch({
           'auto.components.right.sidebar.FileExplorerViewSwitch.f8a2c4d1e0',
           'Explorer search mode'
         )}
-        className="w-full border border-sidebar-border bg-sidebar-accent/35 p-0.5 shadow-xs group-data-[orientation=horizontal]/tabs:h-7"
+        className="w-full border border-sidebar-border bg-sidebar p-0.5 shadow-xs group-data-[orientation=horizontal]/tabs:h-7"
       >
         {options.map((option) => (
           <TabsTrigger
             key={option.view}
             value={option.view}
             aria-label={option.ariaLabel}
-            className="min-w-0 text-[11px]"
+            className="min-w-0 bg-sidebar text-[11px] data-active:bg-sidebar-accent dark:data-active:bg-sidebar-accent"
           >
             {option.label}
           </TabsTrigger>

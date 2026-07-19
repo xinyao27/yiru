@@ -127,7 +127,7 @@ export function ShareUsageButton(props: ShareUsageButtonProps): React.JSX.Elemen
                 render={
                   <Button
                     ref={setShareButtonRef}
-                    variant="ghost"
+                    variant="outline"
                     size="icon-xs"
                     aria-label={translate(
                       'auto.components.stats.ShareUsageButton.bce08eccb9',

@@ -17,6 +17,7 @@ import type { TerminalQuickCommand } from '../../../../shared/types'
 import { useConfirmationDialog } from '@/components/confirmation-dialog'
 import { translate } from '@/i18n/i18n'
 import { TabBarQuickCommandsMenu } from './tab-bar-quick-commands-menu'
+import { Button } from '@/components/ui/button'
 
 type TabBarQuickCommandsButtonProps = {
   worktreeId: string
@@ -143,10 +144,12 @@ export function TabBarQuickCommandsButton({
         <Tooltip>
           <TooltipTrigger
             render={
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="xs"
                 onClick={addRepoCommand}
-                className="my-auto flex h-7 shrink-0 items-center gap-1 rounded-md px-1.5 text-muted-foreground hover:bg-accent/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="my-auto h-7 shrink-0 px-1.5 text-muted-foreground hover:text-foreground"
                 aria-label={translate(
                   'auto.components.tab.bar.TabBarQuickCommandsButton.8f1e971966',
                   'Add quick command'
@@ -159,7 +162,7 @@ export function TabBarQuickCommandsButton({
                     'Command'
                   )}
                 </span>
-              </button>
+              </Button>
             }
           />
           <TooltipContent side="bottom" sideOffset={6}>

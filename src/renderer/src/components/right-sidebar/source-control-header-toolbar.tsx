@@ -22,6 +22,7 @@ import {
   SourceControlBranchContextRow
 } from './source-control-branch-context-row'
 import { SourceControlHeaderOverflowMenu } from './source-control-header-overflow-menu'
+import { RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 
 type SourceControlHeaderToolbarProps = {
   filterQuery: string
@@ -222,11 +223,14 @@ export function SourceControlHeaderToolbar({
               // Why: keep filter/overflow pinned right without stretching Create PR.
               <span className="min-w-0 flex-1" aria-hidden="true" />
             ) : null}
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon-xs"
               data-testid="source-control-filter-toggle"
               className={cn(
-                'relative inline-flex size-7 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground',
+                RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
+                'relative size-7 shrink-0 rounded-sm',
                 normalizedFilter && 'bg-muted text-foreground'
               )}
               onClick={expandFilter}
@@ -238,7 +242,7 @@ export function SourceControlHeaderToolbar({
               {normalizedFilter ? (
                 <span className="absolute right-1 top-1 size-1.5 rounded-full bg-foreground" />
               ) : null}
-            </button>
+            </Button>
             {renderOverflowMenu(overflowProps)}
           </>
         ) : (
@@ -274,7 +278,7 @@ export function SourceControlHeaderToolbar({
               type="button"
               variant="ghost"
               size="icon-xs"
-              className="size-7 shrink-0 text-muted-foreground hover:text-foreground"
+              className={cn(RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME, 'size-7 shrink-0')}
               aria-label={translate(
                 'auto.components.right.sidebar.SourceControl.d4f8c2a901',
                 'Clear and close filter'

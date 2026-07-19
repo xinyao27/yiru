@@ -71,7 +71,7 @@ export function BrowserToolbarMenuDropdown({
         render={
           <Button
             size="icon"
-            variant="ghost"
+            variant="outline"
             className="h-8 w-8"
             title={translate(
               'auto.components.browser.pane.BrowserToolbarMenu.7b838540c7',

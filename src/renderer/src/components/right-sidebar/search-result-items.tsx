@@ -14,6 +14,7 @@ import {
 import { normalizeSearchFileMatchCount } from '../../../../shared/search-match-count'
 import type { SearchFileResult, SearchMatch } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
+import { RIGHT_SIDEBAR_INPUT_BUTTON_SURFACE_CLASS_NAME } from './right-sidebar-button-styles'
 
 // ─── Toggle Button ────────────────────────────────────────
 export function ToggleButton({
@@ -32,10 +33,11 @@ export function ToggleButton({
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant="outline"
       size="icon-xs"
       className={cn(
         'h-auto w-auto rounded-sm p-0.5 flex-shrink-0',
+        RIGHT_SIDEBAR_INPUT_BUTTON_SURFACE_CLASS_NAME,
         active
           ? 'bg-accent text-accent-foreground'
           : 'text-muted-foreground hover:text-foreground hover:bg-muted'
