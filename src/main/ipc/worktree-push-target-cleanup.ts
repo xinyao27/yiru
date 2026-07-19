@@ -1,7 +1,6 @@
 // Why: fork-PR worktrees can add a contributor's fork as a git remote. When such
 // a worktree is deleted we prune that remote, but only when it's truly unused.
-// This module holds that decision logic behind an injectable `execGit` boundary so
-// the multi-fork cleanup matrix is unit-testable without a real repo.
+// This module accepts the host-specific `execGit` boundary used by remote cleanup.
 
 import type { Store } from '../persistence'
 import type { GitPushTarget } from '../../shared/types'
@@ -103,8 +102,7 @@ function isBranchConfigSeparator(code: number): boolean {
   return code === 32 || (code >= 9 && code <= 13)
 }
 
-// Exported for unit tests: the `execGit` seam lets tests drive the multi-fork
-// cleanup matrix without touching a real repo.
+// Keep Git execution supplied by the caller so local and remote cleanup share this policy.
 export async function cleanupUnusedWorktreePushTargetRemoteWithExec(
   repoPath: string,
   removedWorktreeId: string,

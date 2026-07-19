@@ -1,16 +1,11 @@
 import { ipcMain, type IpcMainEvent, type WebContents } from 'electron'
 import type { AgentType, NativeChatMessage } from '../../shared/native-chat-types'
-import { clearNativeChatTranscriptCache } from '../native-chat/transcript-read-cache'
 import type { ReadTranscriptResult } from '../native-chat/transcript-reader'
 import {
   subscribeNativeChatTranscript,
   readNativeChatTranscriptTail,
   type NativeChatTranscriptSubscription
 } from '../native-chat/transcript-watch'
-
-// Re-export so existing test imports of `clearNativeChatTranscriptCache` from
-// this module keep working after the cache moved to transcript-read-cache.ts.
-export { clearNativeChatTranscriptCache }
 
 export type NativeChatReadSessionArgs = {
   agent: AgentType
@@ -215,28 +210,6 @@ async function handleSubscribe(event: IpcMainEvent, args: NativeChatSubscribeArg
     }
     sender.send('nativeChat:appended', payload)
   }
-}
-
-/** Test-only: drop all live and pending transcript subscriptions between runs. */
-export function clearNativeChatSubscriptions(): void {
-  const senderIds = new Set([...liveSubscriptions.keys(), ...pendingSubscriptions.keys()])
-  for (const senderId of senderIds) {
-    teardownAllForSender(senderId)
-  }
-  pendingSubscriptions.clear()
-  senderCleanupRegistered.clear()
-}
-
-export function _getNativeChatSenderCleanupCountForTest(): number {
-  return senderCleanupRegistered.size
-}
-
-export function _getNativeChatPendingSubscriptionCountForTest(): number {
-  let count = 0
-  for (const bySubId of pendingSubscriptions.values()) {
-    count += bySubId.size
-  }
-  return count
 }
 
 export function registerNativeChatHandlers(): void {

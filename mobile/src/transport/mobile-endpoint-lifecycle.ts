@@ -47,12 +47,7 @@ export function startMobileEndpointLifecycle(
     void owner.start()
   } else {
     owner = new MobileRelayDirectUpgradeController(logical, initialHost, {
-      upgrade: (client, host) =>
-        upgradeDirectMobileRelay({
-          client,
-          host,
-          dependencies: { randomBytes: ExpoCrypto.getRandomBytes }
-        }),
+      upgrade: (client, host) => upgradeDirectMobileRelay({ client, host }),
       onUpgraded: ({ host }) => startSupervisor(host)
     })
     void owner.start()

@@ -62,17 +62,6 @@ type OwnerRepoCacheEntry = {
 const ownerRepoCache = new Map<string, OwnerRepoCacheEntry>()
 const ownerRepoInFlight = new Map<string, Promise<OwnerRepo | null>>()
 
-/** @internal - exposed for tests only */
-export function _resetOwnerRepoCache(): void {
-  ownerRepoCache.clear()
-  ownerRepoInFlight.clear()
-}
-
-/** @internal - exposed for tests only */
-export function _getOwnerRepoCacheSize(): number {
-  return ownerRepoCache.size
-}
-
 function pruneOwnerRepoCache(now: number): void {
   for (const [key, entry] of ownerRepoCache) {
     if (entry.expiresAt <= now) {

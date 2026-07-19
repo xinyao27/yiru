@@ -453,7 +453,7 @@ export class WebRuntimeClient {
       // Why: any inbound frame (RPC reply, subscription push, keepalive, probe
       // echo) proves the socket is alive — reset the liveness watchdog and clear
       // any outstanding probe.
-      this.lastInboundFrameAt = this.now()
+      this.lastInboundFrameAt = Date.now()
       this.heartbeatProbeSentAt = null
       void this.handleSocketMessage(event.data, ws)
     }
@@ -787,19 +787,9 @@ export class WebRuntimeClient {
     }
   }
 
-  // Why: overridable seams so a test can drive deterministic time + visibility
-  // without faking globals across the whole crypto/transport fixture.
-  protected now(): number {
-    return Date.now()
-  }
-
-  protected isDocumentVisible(): boolean {
-    return typeof document === 'undefined' || document.visibilityState !== 'hidden'
-  }
-
   private startHeartbeat(): void {
     this.clearHeartbeatTimer()
-    const now = this.now()
+    const now = Date.now()
     this.lastInboundFrameAt = now
     this.lastHeartbeatTickAt = now
     this.heartbeatProbeSentAt = null
@@ -815,7 +805,7 @@ export class WebRuntimeClient {
   }
 
   private runHeartbeatTick(): void {
-    const now = this.now()
+    const now = Date.now()
     // Why: if this tick lands far later than scheduled, the loop was suspended
     // (backgrounded/frozen tab) — that gap is NOT evidence the socket died, so
     // re-baseline the liveness clocks and drop any stale probe before judging.
@@ -827,7 +817,7 @@ export class WebRuntimeClient {
     }
     // Why: a backgrounded tab shows no live data and the user can't see
     // staleness, so don't spend battery probing; the next visible tick re-checks.
-    if (!this.isDocumentVisible()) {
+    if (document.visibilityState === 'hidden') {
       return
     }
     const ws = this.ws

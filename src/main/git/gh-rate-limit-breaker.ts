@@ -158,9 +158,3 @@ export function createGhRateLimitBlockedError(
     ghRateLimitBlocked: true as const
   })
 }
-
-/** @internal — test-only */
-export function _resetGhRateLimitBreaker(): void {
-  blockedUntilMsByBucket.clear()
-  resetProbe = null
-}

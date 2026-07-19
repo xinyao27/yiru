@@ -262,11 +262,3 @@ export function useWindowsTerminalCapabilities(
 
   return selectWindowsTerminalCapabilitiesForOwner(state, enabled, resolvedOwnerKey)
 }
-
-export function resetWindowsTerminalCapabilitiesForTests(): void {
-  cachedCapabilitiesByOwnerKey.clear()
-  pendingCapabilitiesByOwnerKey.clear()
-  nextCapabilityRequestId = 0
-  latestCapabilityRequestIdByOwnerKey.clear()
-  subscribersByOwnerKey.clear()
-}

@@ -45,7 +45,6 @@ import {
   type KeybindingMatchOptions,
   type KeybindingOverrides
 } from '../../shared/keybindings'
-import { getMainE2EConfig } from '../e2e-config'
 import { buildEditableContextMenuTemplate } from './editable-context-menu'
 import { clearTrustedUIRendererWebContentsId, setTrustedUIRendererWebContentsId } from '../ipc/ui'
 import { resolveWindowCloseAction } from './window-close-decision'
@@ -366,13 +365,6 @@ export function createMainWindow(
     handledInitialReadyToShow = true
     clearInitialRevealFallbackTimer()
 
-    // Why: in E2E headless mode, the window stays hidden to avoid stealing
-    // focus and screen real estate during test runs. Playwright interacts
-    // with the renderer via CDP, which works without a visible window.
-    const e2eConfig = getMainE2EConfig()
-    if (e2eConfig.headless) {
-      return
-    }
     if (savedMaximized) {
       mainWindow.maximize()
     }

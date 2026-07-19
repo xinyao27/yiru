@@ -26,7 +26,3 @@ export function peekWebSessionFocusIntent(worktreeId: string): string | null {
 export function clearWebSessionFocusIntent(worktreeId: string): void {
   pendingFocusByWorktree.delete(worktreeId)
 }
-
-export function resetWebSessionFocusIntentForTests(): void {
-  pendingFocusByWorktree.clear()
-}

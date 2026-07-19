@@ -16,7 +16,7 @@ import { TerminalSessionTeardown } from './terminal-session-teardown'
 
 export type { CreateOrAttachOptions, CreateOrAttachResult } from './terminal-host-create-contract'
 
-const DEFAULT_MAX_TOMBSTONES = 1000
+const MAX_TOMBSTONES = 1000
 
 export type TerminalHostOptions = {
   spawnSubprocess: (opts: {
@@ -40,9 +40,6 @@ export type TerminalHostOptions = {
     snapshot: TerminalSnapshot,
     records: TakePendingOutputResult['records']
   ) => void
-  // Why: production keeps a large cap, but tests need a small deterministic cap
-  // without spawning thousands of full terminal sessions.
-  maxTombstones?: number
 }
 
 export class TerminalHost {
@@ -51,14 +48,12 @@ export class TerminalHost {
   private killedTombstones = new Map<string, number>()
   private spawnSubprocess: TerminalHostOptions['spawnSubprocess']
   private onFinalCheckpoint: TerminalHostOptions['onFinalCheckpoint']
-  private maxTombstones: number
   private creationFenced = false
   private disposePromise: Promise<void> | null = null
 
   constructor(opts: TerminalHostOptions) {
     this.spawnSubprocess = opts.spawnSubprocess
     this.onFinalCheckpoint = opts.onFinalCheckpoint
-    this.maxTombstones = opts.maxTombstones ?? DEFAULT_MAX_TOMBSTONES
   }
 
   /**
@@ -392,7 +387,7 @@ export class TerminalHost {
     this.killedTombstones.delete(sessionId)
     this.killedTombstones.set(sessionId, Date.now())
 
-    if (this.killedTombstones.size > this.maxTombstones) {
+    if (this.killedTombstones.size > MAX_TOMBSTONES) {
       const oldest = this.killedTombstones.keys().next().value
       if (oldest) {
         this.killedTombstones.delete(oldest)

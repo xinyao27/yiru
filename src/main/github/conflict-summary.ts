@@ -4,12 +4,8 @@ import {
   isUnsupportedMergeTreeWriteTreeError
 } from '../../shared/git-merge-tree-capability'
 import { gitExecFileAsync } from '../git/runner'
+import { getLocalGitCapabilityCache } from '../git/git-capability-state'
 import {
-  clearGitCapabilityStateForTests,
-  getLocalGitCapabilityCache
-} from '../git/git-capability-state'
-import {
-  __resetPRConflictSummaryDerivationCachesForTests,
   buildConflictSummaryCacheKey,
   dedupeBaseOidResolve,
   dedupeSummaryDerivation,
@@ -23,11 +19,6 @@ import {
 
 type LocalGitExecOptions = {
   wslDistro?: string
-}
-
-export function __resetPRConflictSummaryCachesForTests(): void {
-  clearGitCapabilityStateForTests()
-  __resetPRConflictSummaryDerivationCachesForTests()
 }
 
 export async function getPRConflictSummary(

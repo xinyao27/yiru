@@ -17,18 +17,14 @@ export function shouldSuppressDevEducation(args: {
   env?: NodeJS.ProcessEnv
 }): boolean {
   const env = args.env ?? process.env
-  return (
-    args.isDev &&
-    env.YIRU_E2E_USER_DATA_DIR === undefined &&
-    env[DEV_SHOW_FIRST_RUN_EDUCATION_ENV] !== '1'
-  )
+  return args.isDev && env[DEV_SHOW_FIRST_RUN_EDUCATION_ENV] !== '1'
 }
 
 export function suppressDevEducationForStore(store: DevEducationStore, now = Date.now()): void {
   const onboarding = store.getOnboarding()
   if (onboarding.closedAt === null) {
     // Why: default dev launches should behave like an already-productive
-    // profile, while the env escape hatch keeps first-run surfaces testable.
+    // profile, while the env escape hatch allows manual first-run work.
     store.updateOnboarding({
       flowVersion: ONBOARDING_FLOW_VERSION,
       closedAt: now,

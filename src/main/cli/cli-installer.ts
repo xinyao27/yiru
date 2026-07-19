@@ -37,8 +37,6 @@ type CliInstallerOptions = {
   localAppDataPath?: string
   processPathEnv?: string | null
   commandPathOverride?: string | null
-  /** Feeds into the /usr/local/bin existence check at construction time; used in tests to simulate absent /usr/local/bin on arm64 without relying on real filesystem state. */
-  defaultMacCommandPath?: string
   privilegedRunner?: (command: string) => Promise<void>
   userPathReader?: () => Promise<string | null>
   userPathWriter?: (value: string) => Promise<void>
@@ -96,9 +94,7 @@ export class CliInstaller {
     // Silicon Macs (Homebrew moved to /opt/homebrew); fall back to ~/.local/bin
     // which is user-writable, requires no elevated permissions, and is the
     // XDG-standard user bin dir already on PATH via shell init on arm64.
-    // defaultMacCommandPath is a test seam: it feeds into the existence check
-    // so tests can simulate arm64 without relying on the real /usr/local/bin.
-    const candidateMacPath = options.defaultMacCommandPath ?? DEFAULT_MAC_COMMAND_PATH
+    const candidateMacPath = DEFAULT_MAC_COMMAND_PATH
     this.macCommandPath = existsSync(dirname(candidateMacPath))
       ? candidateMacPath
       : join(this.homePath, '.local', 'bin', 'yiru')

@@ -104,21 +104,3 @@ export function forgetHugeRepoWarningDismissalsForWorktrees(
     hugeRepoWarningStateByWorktreeId.delete(worktreeId)
   }
 }
-
-export function clearHugeRepoWarningDismissalsForTests(): void {
-  hugeRepoWarningStateByWorktreeId.clear()
-}
-
-export function getHugeRepoWarningStateCountForTests(): number {
-  return hugeRepoWarningStateByWorktreeId.size
-}
-
-export function getHugeRepoWarningDismissalCountForTests(): number {
-  let count = 0
-  for (const state of hugeRepoWarningStateByWorktreeId.values()) {
-    if (state.dismissed) {
-      count += 1
-    }
-  }
-  return count
-}

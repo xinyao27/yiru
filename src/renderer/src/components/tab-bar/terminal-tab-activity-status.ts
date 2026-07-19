@@ -167,8 +167,3 @@ export function hasUnreadAgentCompletionForTerminalTab(
   }
   return false
 }
-
-/** Test-only: clear the memoized per-tab flag cache between cases. */
-export function resetTerminalTabActivityFlagsCacheForTest(): void {
-  flagsCache = null
-}

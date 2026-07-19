@@ -23,16 +23,6 @@ export type RemoteYiruCliResult = {
   exitCode: number
 }
 
-export type HostCliPassthroughOptions = {
-  execPath?: string
-  cliEntryPath?: string
-  userDataPath?: string
-  hostEnv?: NodeJS.ProcessEnv
-  spawn?: typeof nodeSpawn
-  entryExists?: (path: string) => boolean
-  killTimeoutMs?: number
-}
-
 /** Thrown when the host CLI entry cannot be launched at all; callers fall back
  * to the legacy in-process command switch so previously-working commands keep
  * working even on broken installs. */
@@ -110,26 +100,21 @@ export function buildHostCliEnv(args: {
 }
 
 export async function runHostYiruCliPassthrough(
-  request: RemoteYiruCliRequest,
-  options: HostCliPassthroughOptions = {}
+  request: RemoteYiruCliRequest
 ): Promise<RemoteYiruCliResult> {
-  // Why: per-field lazy defaults keep the module testable — tests inject all
-  // three, so no Electron API is touched outside the production path.
-  const execPath = options.execPath ?? process.execPath
+  const execPath = process.execPath
   let cliEntryPath: string
   let userDataPath: string
   try {
-    cliEntryPath =
-      options.cliEntryPath ??
-      resolveHostCliEntryPath({
-        isPackaged: app.isPackaged,
-        resourcesPath: process.resourcesPath,
-        appPath: app.getAppPath()
-      })
+    cliEntryPath = resolveHostCliEntryPath({
+      isPackaged: app.isPackaged,
+      resourcesPath: process.resourcesPath,
+      appPath: app.getAppPath()
+    })
     // Why: must match the userData dir the runtime RPC server writes metadata
     // to (see index.ts YiruRuntimeRpcServer wiring), or the CLI subprocess
     // reports "Yiru is not running" against a healthy app.
-    userDataPath = options.userDataPath ?? getCanonicalUserDataPath()
+    userDataPath = getCanonicalUserDataPath()
   } catch (err) {
     // Why: no Electron app context (or broken install paths) — degrade to the
     // caller's legacy in-process fallback instead of failing the command.
@@ -137,17 +122,14 @@ export async function runHostYiruCliPassthrough(
       `Host CLI environment unavailable: ${err instanceof Error ? err.message : String(err)}`
     )
   }
-  const hostEnv = options.hostEnv ?? process.env
-  const spawn = options.spawn ?? nodeSpawn
-  const entryExists = options.entryExists ?? existsSync
-  const killTimeoutMs = options.killTimeoutMs ?? resolveHostCliKillTimeoutMs(request.argv)
+  const killTimeoutMs = resolveHostCliKillTimeoutMs(request.argv)
 
-  if (!entryExists(cliEntryPath)) {
+  if (!existsSync(cliEntryPath)) {
     throw new HostCliUnavailableError(`Yiru CLI entry not found at ${cliEntryPath}`)
   }
 
   const env = buildHostCliEnv({
-    hostEnv,
+    hostEnv: process.env,
     remoteEnv: request.env,
     userDataPath,
     remoteCwd: request.cwd
@@ -155,7 +137,7 @@ export async function runHostYiruCliPassthrough(
 
   return await new Promise<RemoteYiruCliResult>((resolve, reject) => {
     let settled = false
-    const child = spawn(execPath, [cliEntryPath, ...request.argv], {
+    const child = nodeSpawn(execPath, [cliEntryPath, ...request.argv], {
       env,
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true

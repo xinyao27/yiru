@@ -21,13 +21,6 @@ import {
 
 export { localPreflightContextKey } from './local-preflight-context-key'
 export type { LocalPreflightContext } from './local-preflight-context-cache'
-export {
-  _getProjectRuntimePreflightContextCacheSizeForTest,
-  _getWslPreflightContextCacheSizeForTest,
-  _hasProjectRuntimePreflightContextCacheEntryForTest,
-  _hasWslPreflightContextCacheEntryForTest,
-  resetLocalPreflightContextCachesForTests
-} from './local-preflight-context-cache'
 
 type LocalProjectRuntimeState = Pick<
   AppState,

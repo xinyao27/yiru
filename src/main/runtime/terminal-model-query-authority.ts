@@ -103,9 +103,3 @@ export function isNativeWindowsConptyPty(id: string): boolean {
 export function clearNativeWindowsConptyPty(id: string): void {
   nativeWindowsConptyPtys.delete(id)
 }
-
-/** Test seam: reset module state between tests. */
-export function _resetTerminalModelQueryAuthorityForTest(): void {
-  nativeWindowsConptyPtys.clear()
-  conptyDa1OverrideInstallers.clear()
-}

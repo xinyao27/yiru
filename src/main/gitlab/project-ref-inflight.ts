@@ -2,10 +2,6 @@ import type { ProjectRef } from './gl-utils'
 
 const projectRefInFlight = new Map<string, Promise<ProjectRef | null>>()
 
-export function clearProjectRefInFlight(): void {
-  projectRefInFlight.clear()
-}
-
 export async function runProjectRefProbeOnce(
   cacheKey: string,
   createProbe: () => Promise<ProjectRef | null>

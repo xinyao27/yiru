@@ -1534,10 +1534,8 @@ type GlabExecOptions = Omit<GitExecOptions, 'cwd'> & {
  * `--hostname host:port` pair into `GITLAB_HOST` so every call site (`api`,
  * `auth status`, …) works against ported self-hosted instances. Port-less
  * `--hostname` values are left untouched.
- *
- * @internal exported for tests.
  */
-export function redirectPortedHostnameToEnv(
+function redirectPortedHostnameToEnv(
   args: string[],
   options: GlabExecOptions
 ): { args: string[]; options: GlabExecOptions } {

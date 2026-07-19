@@ -57,36 +57,6 @@ function getCachedRemoteWorkspaceSnapshot(targetId: string): RemoteWorkspaceSnap
   return snapshot
 }
 
-export function _resetRemoteWorkspaceCachesForTests(): void {
-  latestSnapshotByTargetId.clear()
-  remoteWorkspacePatchTailByTargetId.clear()
-}
-
-export function _getRemoteWorkspaceCacheSizesForTests(): {
-  snapshots: number
-  patchTails: number
-} {
-  return {
-    snapshots: latestSnapshotByTargetId.size,
-    patchTails: remoteWorkspacePatchTailByTargetId.size
-  }
-}
-
-/** @internal - exposed for cache-bound tests only. */
-export function _rememberRemoteWorkspaceSnapshotForTests(
-  targetId: string,
-  snapshot: RemoteWorkspaceSnapshot
-): void {
-  rememberRemoteWorkspaceSnapshot(targetId, snapshot)
-}
-
-/** @internal - exposed for cache-bound tests only. */
-export function _getRemoteWorkspaceSnapshotForTests(
-  targetId: string
-): RemoteWorkspaceSnapshot | undefined {
-  return getCachedRemoteWorkspaceSnapshot(targetId)
-}
-
 function emptyRemoteSession(): RemoteWorkspaceSession {
   return {
     activeWorktreePath: null,

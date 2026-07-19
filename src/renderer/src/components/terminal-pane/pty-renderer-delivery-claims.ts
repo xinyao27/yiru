@@ -113,10 +113,3 @@ export function releaseRendererPtyVisibilityClaim(owner: object): void {
     sendVisibility(previous.ptyId, false)
   }
 }
-
-/** Test seam: renderer reload naturally clears these module-scoped claims. */
-export function _resetPtyRendererDeliveryClaimsForTest(): void {
-  hiddenClaimCounts.clear()
-  visibilityClaimsByOwner.clear()
-  visibleClaimCounts.clear()
-}

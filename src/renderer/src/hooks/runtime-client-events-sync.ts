@@ -14,11 +14,6 @@ export type RuntimeClientEventsSyncDeps = {
     onError: (error: unknown) => void
   ) => Promise<RuntimeClientEventSubscriptionHandle>
   onEvent: (environmentId: string, event: RuntimeClientEvent) => void
-  /** Base retry delay; doubles per consecutive failure up to retryMaxDelayMs. */
-  retryDelayMs?: number
-  retryMaxDelayMs?: number
-  /** Injectable randomness for deterministic backoff-jitter tests. */
-  random?: () => number
 }
 
 export type RuntimeClientEventsSync = {
@@ -32,8 +27,7 @@ export type RuntimeClientEventsSync = {
 /**
  * Manages runtime-client-event subscriptions, one per desired environment.
  *
- * Extracted from useIpcEvents so the async reconciliation — and in particular
- * the overwrite-orphan race below — is unit-testable.
+ * Extracted from useIpcEvents to keep asynchronous reconciliation in one owner.
  *
  * The race: a subscribe is async. If an environment id is removed from the
  * desired set while its subscribe promise is in flight (and another live
@@ -51,9 +45,9 @@ export function createRuntimeClientEventsSync(
   const pending = new Set<string>()
   const retryTimers = new Map<string, ReturnType<typeof setTimeout>>()
   const consecutiveFailures = new Map<string, number>()
-  const retryDelayMs = deps.retryDelayMs ?? 1_000
-  const retryMaxDelayMs = deps.retryMaxDelayMs ?? 30_000
-  const random = deps.random ?? Math.random
+  const retryDelayMs = 1_000
+  const retryMaxDelayMs = 30_000
+  const random = Math.random
   let generation = 0
 
   const clearRetryTimer = (environmentId: string): void => {

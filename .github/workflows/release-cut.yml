@@ -834,8 +834,7 @@ jobs:
       # existing installer signing request below. Every step in this chain is
       # fail-open (continue-on-error + outcome gating): any failure ships the
       # original installer with unsigned inner binaries, exactly like releases
-      # did before this chain existed. Rehearsed end to end in run 28988432001
-      # (.github/workflows/windows-signing-rehearsal.yml).
+      # did before this chain existed.
 
       # Why: only unsigned PE files go to SignPath. Files that already carry a
       # valid signature (Microsoft's OpenConsole.exe) must keep their signer.

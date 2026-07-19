@@ -391,21 +391,6 @@ const prRefreshStartedHostedReviewEntries = new Map<
 >()
 const PR_REFRESH_STARTED_HOSTED_REVIEW_ENTRY_MAX = 128
 
-/** @internal - exposed for leak-regression tests only */
-export function _getGitHubPRRequestGenerationCountForTest(): number {
-  return prRequestGenerations.size
-}
-
-/** @internal - exposed for leak-regression tests only */
-export function _getGitHubPRRefreshStartedEntryCountForTest(): number {
-  return prRefreshStartedHostedReviewEntries.size
-}
-
-/** @internal - exposed for leak-regression tests only */
-export function _clearGitHubPRRefreshStartedEntriesForTest(): void {
-  prRefreshStartedHostedReviewEntries.clear()
-}
-
 // Why: cap in-flight cross-repo fan-out and hover-prefetches at the renderer
 // boundary — the main-side gate is behind the IPC queue, so it can't see a
 // stampede until the calls are already mid-flight. 8 balances responsiveness

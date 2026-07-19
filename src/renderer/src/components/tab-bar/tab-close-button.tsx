@@ -27,9 +27,6 @@ export function TabCloseButton({
             variant="ghost"
             size="icon-xs"
             type="button"
-            // Why: one stable affordance lets E2E exercise the same hover-close
-            // path users take across terminal, browser, editor, and simulator tabs.
-            data-tab-close-button="true"
             aria-label={ariaLabel}
             onPointerDown={(event) => {
               if (event.button === 0) {

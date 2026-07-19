@@ -52,25 +52,10 @@ export function subscribeViaRuntimeWatcherProcess(
 
 /** Kill shared desktop and runtime watcher children at app/runtime shutdown. */
 export function disposeWatcherProcess(): void {
-  // Why: Vitest reuses this module singleton after closeAllWatchers(), while
-  // production shutdown must remain final and reject any later subscription.
-  if (process.env.VITEST) {
-    sharedWatcherProcessSupervisor.resetForTest()
-    runtimeWatcherProcessPool.resetForTest()
-  } else {
-    sharedWatcherProcessSupervisor.dispose()
-    // Why: the runtime pool owns independent children that otherwise outlive a
-    // shutdown sequence that does not immediately exit the main process.
-    runtimeWatcherProcessPool.dispose()
-  }
-}
-
-export function resetWatcherProcessForTest(): void {
-  sharedWatcherProcessSupervisor.resetForTest()
-}
-
-export function resetRuntimeWatcherProcessForTest(): void {
-  runtimeWatcherProcessPool.resetForTest()
+  sharedWatcherProcessSupervisor.dispose()
+  // Why: the runtime pool owns independent children that otherwise outlive a
+  // shutdown sequence that does not immediately exit the main process.
+  runtimeWatcherProcessPool.dispose()
 }
 
 export function forgetRuntimeWatcherProcessRoot(rootPath: string): void {

@@ -1522,33 +1522,6 @@ function migrateHostedReviewLinkMutationGeneration(
   }
 }
 
-export function getHostedReviewLinkMutationGenerationForTests(worktreeId: string): number {
-  return getHostedReviewLinkMutationGeneration(worktreeId)
-}
-
-export function getHostedReviewLinkWorktreeAliasCountForTests(): number {
-  return hostedReviewLinkWorktreeIdAliases.size
-}
-
-export function resetHostedReviewLinkMutationGenerationForTests(): void {
-  hostedReviewLinkMutationGenerationByWorktreeId.clear()
-  hostedReviewLinkClearTombstonesByWorktreeId.clear()
-  hostedReviewLinkWorktreeIdAliases.clear()
-}
-
-export function setDetachedHeadAutoDerivedDisplayNameForTests(
-  worktreeId: string,
-  displayName: string
-): void {
-  detachedHeadAutoDerivedDisplayNames.set(worktreeId, displayName)
-}
-
-export function getDetachedHeadAutoDerivedDisplayNameForTests(
-  worktreeId: string
-): string | undefined {
-  return detachedHeadAutoDerivedDisplayNames.get(worktreeId)
-}
-
 function hostedReviewLinksAreCleared(worktree: Worktree): boolean {
   return HOSTED_REVIEW_LINK_KEYS.every((key) => worktree[key] == null) && !worktree.pushTarget
 }
@@ -3339,7 +3312,7 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
           })
         } catch (error) {
           // Why: preserving automation history labels is best-effort; a stale
-          // preload/test harness must not block worktree removal cleanup.
+          // stale preload bridge must not block worktree removal cleanup.
           console.warn('Failed to snapshot automation workspace name:', error)
         }
       }

@@ -29,10 +29,6 @@ function rememberTerminalThemeTarget(target: TerminalThemeTarget): void {
   lastEditedTerminalThemeTarget = target
 }
 
-export function resetTerminalThemeTargetMemoryForTests(): void {
-  lastEditedTerminalThemeTarget = null
-}
-
 function isCustomizedTheme(themeName: string, defaultThemeName: string): boolean {
   const trimmed = themeName.trim()
   return trimmed.length > 0 && trimmed !== defaultThemeName

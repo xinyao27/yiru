@@ -8,9 +8,6 @@ export function createRecoveringPairingRelayCandidate(args: {
   resolveDirector: (relay: PairingRelay) => Promise<PairingRelay>
   persistMove: (relay: PairingRelay) => Promise<void>
   now: () => number
-  random?: () => number
-  sleep?: (delayMs: number) => Promise<void>
-  maxRecoveryAttempts?: number
 }): PairingCandidateClient {
   let relay = pairingRelayFromJournal(args.journal)
   let client = args.connect(relay)
@@ -39,10 +36,7 @@ export function createRecoveringPairingRelayCandidate(args: {
   }
 
   async function recoverThroughDirector(method: string, params: unknown, initialError: unknown) {
-    const maxAttempts = args.maxRecoveryAttempts ?? 3
-    const random = args.random ?? Math.random
-    const sleep =
-      args.sleep ?? ((delayMs) => new Promise((resolve) => setTimeout(resolve, delayMs)))
+    const maxAttempts = 3
     let lastError = initialError
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       if (closed || relay.inviteExpiresAt <= args.now()) {
@@ -56,7 +50,9 @@ export function createRecoveringPairingRelayCandidate(args: {
         client.close()
         relay = moved
         const capMs = Math.min(2_000, 100 * 2 ** attempt)
-        await sleep(Math.floor(random() * (capMs + 1)))
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, Math.floor(Math.random() * (capMs + 1)))
+        )
         if (closed) {
           throw new Error('relay pairing client closed')
         }
@@ -68,7 +64,9 @@ export function createRecoveringPairingRelayCandidate(args: {
           throw error
         }
         const capMs = Math.min(2_000, 100 * 2 ** attempt)
-        await sleep(Math.floor(random() * (capMs + 1)))
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, Math.floor(Math.random() * (capMs + 1)))
+        )
       }
     }
     throw lastError

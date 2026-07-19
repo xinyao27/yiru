@@ -35,10 +35,6 @@ export async function readLocalGitConfigSignature(
   }
 }
 
-export function __resetLocalGitConfigSignatureCacheForTests(): void {
-  localGitConfigSignatureInFlight.clear()
-}
-
 async function readUncachedLocalGitConfigSignature(repoPath: string): Promise<string | undefined> {
   const configPaths = await resolveLocalGitConfigPaths(repoPath)
   if (!configPaths) {

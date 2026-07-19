@@ -33,8 +33,7 @@ function parseRendererHeapOverrideMb(value: string | undefined): HeapOverride {
   if (normalized === '') {
     return undefined
   }
-  // Why: give operators an explicit opt-out (and E2E a way to pin the default)
-  // without editing the RAM tiers.
+  // Why: give operators an explicit opt-out without editing the RAM tiers.
   if (normalized === 'default' || normalized === 'off' || normalized === 'none') {
     return 'disable'
   }
@@ -55,10 +54,9 @@ function parseRendererHeapOverrideMb(value: string | undefined): HeapOverride {
 
 /**
  * Renderer V8 old-space ceiling (MB) to request via --max-old-space-size, or
- * null to keep Chromium's physical-memory default. Pure so the RAM tiers and
- * the env override are unit-testable without spawning Electron.
+ * null to keep Chromium's physical-memory default.
  */
-export function computeRendererHeapCeilingMb(
+function computeRendererHeapCeilingMb(
   totalMemoryBytes: number,
   envOverride?: string
 ): number | null {
@@ -80,11 +78,9 @@ export function computeRendererHeapCeilingMb(
   return Math.min(RENDERER_HEAP_CAP_MB, Math.max(RENDERER_HEAP_FLOOR_MB, targetMb))
 }
 
-export function enableRendererHeapHeadroom(
-  options: { totalMemoryBytes?: number; env?: NodeJS.ProcessEnv } = {}
-): void {
-  const totalMemoryBytes = options.totalMemoryBytes ?? totalmem()
-  const envOverride = (options.env ?? process.env)[RENDERER_HEAP_ENV_VAR]
+export function enableRendererHeapHeadroom(): void {
+  const totalMemoryBytes = totalmem()
+  const envOverride = process.env[RENDERER_HEAP_ENV_VAR]
   const ceilingMb = computeRendererHeapCeilingMb(totalMemoryBytes, envOverride)
   if (ceilingMb === null) {
     return

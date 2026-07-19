@@ -65,7 +65,6 @@ import {
 } from '../source-control/hosted-review-git-options'
 import { readLocalGitConfigSignature } from './local-git-config-signature'
 import { getEnterpriseGitHubRepoSlug } from './github-enterprise-repository'
-export { _resetOwnerRepoCache } from './gh-utils'
 export {
   addPullRequestComment,
   listPullRequestLabels,
@@ -128,14 +127,6 @@ const repositoryMergeMetadataCache = new Map<
   string,
   { value: GitHubRepositoryMergeMetadata; expiresAt: number }
 >()
-
-export function _resetMergeQueueCacheForTests(): void {
-  repositoryMergeMetadataCache.clear()
-}
-
-export function _getMergeQueueCacheSizeForTests(): number {
-  return repositoryMergeMetadataCache.size
-}
 
 function pruneRepositoryMergeMetadataCache(now = Date.now()): void {
   for (const [cacheKey, cached] of repositoryMergeMetadataCache) {
@@ -1730,24 +1721,6 @@ function pruneTrackedUpstreamSnapshotCache(now: number): void {
     }
     trackedUpstreamSnapshotCache.delete(oldestKey)
   }
-}
-
-export function _getTrackedUpstreamBranchCacheSizesForTests(): {
-  snapshots: number
-  inFlight: number
-  generations: number
-} {
-  return {
-    snapshots: trackedUpstreamSnapshotCache.size,
-    inFlight: trackedUpstreamSnapshotInFlight.size,
-    generations: trackedUpstreamSnapshotGenerations.size
-  }
-}
-
-export function __resetTrackedUpstreamBranchCacheForTests(): void {
-  trackedUpstreamSnapshotCache.clear()
-  trackedUpstreamSnapshotInFlight.clear()
-  trackedUpstreamSnapshotGenerations.clear()
 }
 
 function parseTrackedUpstreamBranch(upstreamRef: string): TrackedUpstreamBranch | null {

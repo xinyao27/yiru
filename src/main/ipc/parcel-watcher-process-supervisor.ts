@@ -11,7 +11,6 @@ import {
   recoverWatcherRecordsAfterChildGone,
   terminateDisconnectedWatcherChild
 } from './parcel-watcher-child-recovery'
-import { resetWatcherChildRegistryForTest } from './parcel-watcher-child-registry'
 import { WatcherSupervisorCapacityWait } from './parcel-watcher-supervisor-capacity-wait'
 import { WatcherProcessCrashFuse } from './parcel-watcher-crash-fuse'
 import { cancelInterruptedWatcherSubscribe } from './parcel-watcher-interrupted-cancellation'
@@ -73,7 +72,6 @@ export class WatcherProcessSupervisor {
         hooks,
         shutdownRequested: this.shutdownRequested,
         entryPath: this.options.entryPath ?? getWatcherProcessEntryPath(),
-        useInProcessVitestFallback: this.options.useInProcessVitestFallback ?? true,
         allocateId: () => this.nextSubscriptionId++,
         records: this.records,
         pendingUnsubscribes: this.pendingUnsubscribes,
@@ -103,15 +101,6 @@ export class WatcherProcessSupervisor {
       this.cancelledSubscribes,
       this.canaryDir
     )
-  }
-
-  resetForTest(): void {
-    this.dispose()
-    this.shutdownRequested = false
-    this.terminatingChild = null
-    this.terminationQueue.resetForTest()
-    this.crashFuse.reset()
-    resetWatcherChildRegistryForTest()
   }
 
   private ensureWatcherProcess(

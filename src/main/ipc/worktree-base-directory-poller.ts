@@ -11,13 +11,6 @@ export type WorktreeBasePollEvent = { type: 'create' | 'update' | 'delete'; path
 
 export type WorktreeBaseSubscription = { unsubscribe: () => Promise<void> }
 
-export type WorktreeBasePollerOptions = {
-  pollIntervalMs?: number
-  platform?: NodeJS.Platform
-  /** Test hook: called whenever a full snapshot scan runs (vs. a gated skip). */
-  onFullScan?: () => void
-}
-
 // Why: these targets used to be recursive FSEvents subscriptions spanning the
 // entire workspace root (every worktree's full tree) and the repo's whole
 // common .git (objects included), forcing fseventsd to deliver all of that
@@ -143,9 +136,7 @@ function diffBase(prev: BaseSnapshot, next: BaseSnapshot): WorktreeBasePollEvent
 async function startBasePoller(
   target: WorktreeBaseWatchTarget,
   getRepos: () => ReadonlyMap<string, WorktreeBaseRepoWatchConfig>,
-  onEvents: (events: WorktreeBasePollEvent[]) => void,
-  pollIntervalMs: number,
-  onFullScan?: () => void
+  onEvents: (events: WorktreeBasePollEvent[]) => void
 ): Promise<WorktreeBaseSubscription> {
   let disposed = false
   let ticking = false
@@ -161,7 +152,6 @@ async function startBasePoller(
   }
 
   const fullScan = async (): Promise<void> => {
-    onFullScan?.()
     const next = await snapshotBase(target.path, getRepos())
     const nextSignatures = await Promise.all(next.gateDirs.map(dirSignature))
     if (disposed) {
@@ -234,7 +224,7 @@ async function startBasePoller(
       .finally(() => {
         ticking = false
       })
-  }, pollIntervalMs)
+  }, WORKTREE_BASE_POLL_INTERVAL_MS)
   timer.unref?.()
 
   return {
@@ -251,13 +241,10 @@ async function startBasePoller(
 export async function startWorktreeBaseDirectoryPoller(
   target: WorktreeBaseWatchTarget,
   getRepos: () => ReadonlyMap<string, WorktreeBaseRepoWatchConfig>,
-  onEvents: (events: WorktreeBasePollEvent[]) => void,
-  options: WorktreeBasePollerOptions = {}
+  onEvents: (events: WorktreeBasePollEvent[]) => void
 ): Promise<WorktreeBaseSubscription> {
-  const pollIntervalMs = options.pollIntervalMs ?? WORKTREE_BASE_POLL_INTERVAL_MS
-  const platform = options.platform ?? process.platform
   if (target.kind === 'git-common') {
-    return startGitCommonWatch(target, onEvents, pollIntervalMs, platform, options.onFullScan)
+    return startGitCommonWatch(target, onEvents, WORKTREE_BASE_POLL_INTERVAL_MS)
   }
-  return startBasePoller(target, getRepos, onEvents, pollIntervalMs, options.onFullScan)
+  return startBasePoller(target, getRepos, onEvents)
 }

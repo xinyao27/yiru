@@ -13,18 +13,9 @@ import {
 } from './prefill-extension-source'
 export { YIRU_OMP_PREFILL_ENV_VAR, YIRU_PI_PREFILL_ENV_VAR } from './prefill-extension-source'
 import { YIRU_PI_EXTENSION_FILE, getPiTitlebarExtensionSource } from './titlebar-extension-source'
-import {
-  isSafeDescendCandidate as sharedIsSafeDescendCandidate,
-  safeRemoveOverlay
-} from '../pty/overlay-mirror'
+import { safeRemoveOverlay } from '../pty/overlay-mirror'
 import { migrateLegacyOmpOverlayState } from './legacy-omp-overlay-migration'
 import type { PiAgentKind } from '../../shared/pi-agent-kind'
-
-// Why: the Pi test suite imports `isSafeDescendCandidate` from this module's
-// public surface to lock in the Windows-junction ordering invariant against
-// future refactors. Re-export the shared implementation so the test contract
-// keeps holding after the helper moved to src/main/pty/overlay-mirror.ts.
-export const isSafeDescendCandidate = sharedIsSafeDescendCandidate
 
 const PI_AGENT_SUBDIR = 'agent'
 const YIRU_MANAGED_EXTENSION_MARKER = '@yiru-managed-pi-extension'

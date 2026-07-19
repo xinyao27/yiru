@@ -37,7 +37,3 @@ export function guardParserHandler<HandlerArgs extends unknown[]>(
     }
   }
 }
-
-export function _resetParserHandlerReportsForTests(): void {
-  reportCountsByHandler.clear()
-}

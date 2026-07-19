@@ -14,16 +14,6 @@ type LocalGitExecOptions = {
 const REPO_REF_CACHE_MAX_ENTRIES = 512
 const repoRefCache = new Map<string, BitbucketRepoRef | null>()
 
-/** @internal - exposed for tests only */
-export function _resetBitbucketRepoRefCache(): void {
-  repoRefCache.clear()
-}
-
-/** @internal - exposed for tests only */
-export function _getBitbucketRepoRefCacheSize(): number {
-  return repoRefCache.size
-}
-
 function rememberRepoRefCacheEntry(cacheKey: string, value: BitbucketRepoRef | null): void {
   repoRefCache.set(cacheKey, value)
   while (repoRefCache.size > REPO_REF_CACHE_MAX_ENTRIES) {

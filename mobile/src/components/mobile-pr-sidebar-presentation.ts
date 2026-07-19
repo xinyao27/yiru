@@ -1,7 +1,6 @@
 import type { PrSidebarState } from '../session/mobile-pr-sidebar-state'
 
-// Pure presentation helpers for the mobile PR sidebar. No React/native imports so
-// the responsive + render-branch decisions are unit-testable under node Vitest.
+// Pure presentation helpers for the mobile PR sidebar's responsive branches.
 
 export type PrSidebarPresentationMode = 'inline' | 'overlay'
 

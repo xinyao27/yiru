@@ -1,7 +1,6 @@
 import type { FsChangeEvent } from '../../shared/types'
 import {
   forgetRuntimeWatcherProcessRoot,
-  resetRuntimeWatcherProcessForTest,
   subscribeViaRuntimeWatcherProcess,
   type WatcherProcessEvent,
   type WatcherProcessSubscription
@@ -319,20 +318,4 @@ function waitForRuntimeRootStart(
 
 function createRuntimeRootAbortError(): Error {
   return new Error('file watcher subscription aborted')
-}
-
-export function resetRuntimeRootWatchersForTest(): void {
-  for (const root of runtimeRootWatches.values()) {
-    root.closed = true
-    root.generation++
-    root.abortController.abort()
-    root.subscribers.clear()
-    void root.subscription?.unsubscribe()
-  }
-  runtimeRootWatches.clear()
-  resetRuntimeWatcherProcessForTest()
-}
-
-export function getRuntimeRootWatchWaiterCountForTest(rootPath: string): number {
-  return runtimeRootWatches.get(rootPath)?.startWaiters.waiterCount ?? 0
 }

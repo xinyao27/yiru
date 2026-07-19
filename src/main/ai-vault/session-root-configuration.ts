@@ -26,10 +26,6 @@ export async function getConfiguredAiVaultClaudeProjectsDirs(
   return resolved ? uniquePaths(resolved) : null
 }
 
-export function resetAiVaultSessionRootConfigurationForTests(): void {
-  sources = {}
-}
-
 function uniquePaths(paths: readonly string[]): string[] {
   const seen = new Set<string>()
   const unique: string[] = []

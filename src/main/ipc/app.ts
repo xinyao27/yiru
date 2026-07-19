@@ -108,8 +108,8 @@ function resolveDevFeatureWallAssetDir(): string {
     path.join(process.cwd(), relativeDir)
   ]
 
-  // Why: E2E launches out/main/index.js, so app.getAppPath() can point at
-  // out/main even though development resources still live at the repo root.
+  // Why: compiled development launches can resolve app.getAppPath() under
+  // out/main even though resources still live at the repository root.
   return candidates.find((candidate) => existsSync(candidate)) ?? candidates[0]
 }
 

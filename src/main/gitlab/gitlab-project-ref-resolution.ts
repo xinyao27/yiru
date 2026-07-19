@@ -1,7 +1,7 @@
 import { gitExecFileAsync, glabExecFileAsync } from '../git/runner'
 import type { ForgeRemotePreference } from '../../shared/types'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
-import { clearProjectRefInFlight, runProjectRefProbeOnce } from './project-ref-inflight'
+import { runProjectRefProbeOnce } from './project-ref-inflight'
 import {
   DEFAULT_GITLAB_HOSTS,
   normalizeGitLabHost,
@@ -34,19 +34,7 @@ function connectionCacheKey(connectionId?: string | null): string {
   return connectionId ?? LOCAL_CONNECTION_KEY
 }
 
-/** @internal - exposed for tests only */
-export function _resetProjectRefCache(): void {
-  projectRefCache.clear()
-  clearProjectRefInFlight()
-}
-
-/** @internal - exposed for tests only */
-export function _getProjectRefCacheSize(): number {
-  return projectRefCache.size
-}
-
-/** @internal - exposed for tests only */
-export function _resetKnownHostsCache(): void {
+export function clearKnownHostsCache(): void {
   knownHostsCacheByConnection.clear()
 }
 

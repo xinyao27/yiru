@@ -1,8 +1,4 @@
-import {
-  resolveSetupRunnerCommand,
-  type SetupRunnerCommandPlatform,
-  type SetupRunnerCommandShell
-} from './setup-runner-command'
+import { resolveSetupRunnerCommand, type SetupRunnerCommandPlatform } from './setup-runner-command'
 
 const DEFAULT_WAIT_TIMEOUT_SECONDS = 2 * 60 * 60
 export const SETUP_AGENT_SEQUENCE_STARTUP_COMMAND_ENV = 'YIRU_SEQUENCED_STARTUP_COMMAND'
@@ -247,11 +243,4 @@ function quoteWindowsArg(value: string): string {
 
 function escapeCmdSetValue(value: string): string {
   return value.replace(/"/g, '""').replace(/[%!^]/g, (char) => `^${char}`)
-}
-
-export function getSetupAgentSequenceShellForTests(
-  runnerScriptPath: string,
-  platform: SetupRunnerCommandPlatform
-): SetupRunnerCommandShell {
-  return resolveSetupRunnerCommand(runnerScriptPath, platform).shell
 }

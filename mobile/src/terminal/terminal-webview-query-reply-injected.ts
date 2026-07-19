@@ -1,5 +1,5 @@
-// Kept as one injectable unit so tests execute the same replay/generation gate
-// that the WebView document runs, rather than a TypeScript reimplementation.
+// Kept as one injected unit so the WebView document receives the complete
+// replay/generation gate without duplicating the script in its HTML template.
 export const TERMINAL_QUERY_REPLY_JS = `
   var terminalDataRepliesEnabled = false;
 

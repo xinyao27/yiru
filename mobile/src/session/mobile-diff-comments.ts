@@ -24,9 +24,8 @@ function normalizeScope(value: unknown): DiffReviewScope | undefined {
   return value === 'unstaged' || value === 'staged' || value === 'branch' ? value : undefined
 }
 
-// Why: mobile Vitest/Metro run from the mobile package and cannot transform
-// runtime imports from root src/shared. Keep this byte-for-byte compatible with
-// the desktop shared formatter contract.
+// Why: Metro runs from the mobile package and does not resolve this desktop
+// runtime module. Keep this byte-for-byte compatible with its formatter contract.
 export function formatDiffComment(c: DiffComment): string {
   const escaped = c.body
     .replace(/\\/g, '\\\\')

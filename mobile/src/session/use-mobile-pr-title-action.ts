@@ -6,7 +6,7 @@ import { fetchUpdatePRTitle, type GitHubPrMutationOutcome } from './github-pr-mu
 import { triggerError, triggerSuccess } from '../platform/haptics'
 import { buildUpdatePRTitleParams } from './pr-title-edit'
 
-export type PrTitleMutations = {
+type PrTitleMutations = {
   updateTitle: (args: {
     prNumber: number
     title: string
@@ -23,8 +23,6 @@ export type PrTitleActionInput = {
   // Re-fetches authoritative PR data after a successful title edit so the new
   // title appears (mobile keeps it simple with a full refetch, like the other actions).
   refetch: () => void | Promise<void>
-  // Test seam: inject fake mutations; defaults to the real github.* wrapper.
-  mutations?: PrTitleMutations
 }
 
 function realMutations(
@@ -46,10 +44,10 @@ export function useMobilePrTitleAction(input: PrTitleActionInput) {
   const inFlightRef = useRef(false)
 
   const mutations = useMemo(
-    () => input.mutations ?? (client ? realMutations(client, worktreeId) : null),
-    [input.mutations, client, worktreeId]
+    () => (client ? realMutations(client, worktreeId) : null),
+    [client, worktreeId]
   )
-  const ready = mutations !== null && (input.mutations !== undefined || connState === 'connected')
+  const ready = mutations !== null && connState === 'connected'
 
   const setTitle = useCallback(
     async (draft: string, current: string): Promise<boolean> => {

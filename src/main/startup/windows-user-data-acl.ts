@@ -49,10 +49,6 @@ export type WindowsAclGrantResult =
 
 type EnsureOptions = {
   onDone?: (result: WindowsAclGrantResult) => void
-  /** Test seam — defaults to node:child_process spawn. */
-  spawnFn?: typeof spawn
-  /** Test seam — defaults to the real current-user identity. */
-  identity?: string | null
 }
 
 function readMarker(userDataPath: string): WindowsAclGrantMarker | null {
@@ -82,7 +78,6 @@ function writeMarker(userDataPath: string, identity: string): void {
 }
 
 function runIcaclsGrant(
-  spawnFn: typeof spawn,
   target: string,
   identity: string
 ): Promise<{ ok: boolean; reason?: string }> {
@@ -90,14 +85,10 @@ function runIcaclsGrant(
     // /C continues past per-entry errors (e.g. files locked by another
     // process); a partial grant is still strictly better than none and the
     // per-write EPERM backstop covers stragglers.
-    const child = spawnFn(
-      getIcaclsExePath(),
-      [target, '/grant:r', `${identity}:(OI)(CI)(F)`, '/C'],
-      {
-        stdio: 'ignore',
-        windowsHide: true
-      }
-    )
+    const child = spawn(getIcaclsExePath(), [target, '/grant:r', `${identity}:(OI)(CI)(F)`, '/C'], {
+      stdio: 'ignore',
+      windowsHide: true
+    })
     let settled = false
     const settle = (ok: boolean, reason?: string): void => {
       if (settled) {
@@ -127,8 +118,7 @@ export function ensureWindowsUserDataAclGrant(
   options: EnsureOptions = {}
 ): void {
   const onDone = options.onDone ?? ((): void => undefined)
-  const identity =
-    options.identity !== undefined ? options.identity : resolveCurrentWindowsIdentity()
+  const identity = resolveCurrentWindowsIdentity()
   if (!identity) {
     onDone({ mode: 'no-identity' })
     return
@@ -138,14 +128,13 @@ export function ensureWindowsUserDataAclGrant(
     onDone({ mode: 'marker-hit' })
     return
   }
-  const spawnFn = options.spawnFn ?? spawn
   void (async () => {
     // Immediate children first: those explicit ACEs are the durable fix
     // (Chromium replaces the root DACL on every BrowserWindow construction,
     // but never strips explicit ACEs from children). Root second so writes
     // directly under userData succeed before Chromium's first reset.
-    const children = await runIcaclsGrant(spawnFn, join(userDataPath, '*'), identity)
-    const root = await runIcaclsGrant(spawnFn, userDataPath, identity)
+    const children = await runIcaclsGrant(join(userDataPath, '*'), identity)
+    const root = await runIcaclsGrant(userDataPath, identity)
     if (children.ok && root.ok) {
       try {
         writeMarker(userDataPath, identity)

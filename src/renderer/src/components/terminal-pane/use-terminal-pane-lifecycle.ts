@@ -113,7 +113,6 @@ import { markTerminalPinnedViewport } from '@/lib/pane-manager/terminal-scroll-i
 import { syncTerminalScrollIntentSoon } from '@/lib/pane-manager/terminal-scroll-intent-settle'
 import { registerRuntimeTerminalTab, scheduleRuntimeGraphSync } from '@/runtime/sync-runtime-graph'
 import { captureParkedTerminalPaneCandidates } from './terminal-parked-tab-watchers'
-import { e2eConfig } from '@/lib/e2e-config'
 import {
   PRIMARY_SELECTION_MAX_LENGTH,
   isPrimarySelectionEnabled,
@@ -465,7 +464,7 @@ export function splitPaneWithOneShotStartup<TPane>(
   }
 }
 
-export function shouldDetachPaneTransportOnUnmount(args: {
+function shouldDetachPaneTransportOnUnmount(args: {
   tabStillExists: boolean
   tabId: string
   ptyId: string | null
@@ -480,10 +479,8 @@ export function shouldDetachPaneTransportOnUnmount(args: {
  * Self-gating dead-session reconcile pass scheduled from the isVisible effect.
  * Why self-gate: the effect fires on BOTH isVisible true and false, but we only
  * reconcile on resume (hidden to visible), never on hide or initial mount.
- * Returns true when the pass was scheduled so the resume-unit test can assert
- * the gate.
  */
-export function isTerminalPaneVisibilityResume(args: {
+function isTerminalPaneVisibilityResume(args: {
   previousIsVisible: boolean | null
   isVisible: boolean
 }): boolean {
@@ -496,7 +493,7 @@ type TerminalPaneVisibilitySnapshot = {
   isVisible: boolean
 }
 
-export function getPreviousVisibleForTerminalPane(args: {
+function getPreviousVisibleForTerminalPane(args: {
   previous: TerminalPaneVisibilitySnapshot | null
   tabId: string
   cwd: string | null | undefined
@@ -1521,13 +1518,6 @@ export function useTerminalPaneLifecycle({
     })
 
     managerRef.current = manager
-    // Why: E2E tests need to read terminal buffer content, but xterm.js renders
-    // to canvas and the accessibility addon is not loaded. Exposing the manager
-    // lets tests call serializeAddon.serialize() to read the buffer reliably.
-    if (e2eConfig.exposeStore) {
-      window.__paneManagers = window.__paneManagers ?? new Map()
-      window.__paneManagers.set(tabId, manager)
-    }
     const restoredPaneByLeafId = replayTerminalLayout(manager, initialLayoutRef.current, isActive)
 
     const restoredBuffers = initialLayoutRef.current.buffersByLeafId
@@ -1792,13 +1782,6 @@ export function useTerminalPaneLifecycle({
       releaseWebviewDragPassthrough?.()
       releaseWebviewDragPassthrough = null
       managerRef.current = null
-      if (e2eConfig.exposeStore) {
-        // Why: a replacement mount can register before this effect cleans up.
-        // Preserve the successor so E2E and recovery probes see the live pane.
-        if (window.__paneManagers?.get(tabId) === manager) {
-          window.__paneManagers.delete(tabId)
-        }
-      }
       setTabPaneExpanded(tabId, false)
       setTabCanExpandPane(tabId, false)
     }

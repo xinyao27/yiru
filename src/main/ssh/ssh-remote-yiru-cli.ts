@@ -6,7 +6,6 @@ import { formatRemoteCli } from './ssh-remote-cli-format'
 import {
   HostCliUnavailableError,
   runHostYiruCliPassthrough,
-  type HostCliPassthroughOptions,
   type RemoteYiruCliRequest,
   type RemoteYiruCliResult
 } from './ssh-remote-cli-host-passthrough'
@@ -52,8 +51,7 @@ const REPEATABLE_REMOTE_STRING_FLAGS = new Set(['label'])
 
 export async function runRemoteYiruCli(
   runtime: YiruRuntimeService,
-  request: RemoteYiruCliRequest,
-  passthroughOptions?: HostCliPassthroughOptions
+  request: RemoteYiruCliRequest
 ): Promise<RemoteYiruCliResult> {
   const parsed = parseRemoteCliArgs(request.argv)
   const json = parsed.flags.has('json')
@@ -72,7 +70,7 @@ export async function runRemoteYiruCli(
 
   let passthroughFailure: HostCliUnavailableError | null = null
   try {
-    return await runHostYiruCliPassthrough(request, passthroughOptions)
+    return await runHostYiruCliPassthrough(request)
   } catch (err) {
     if (!(err instanceof HostCliUnavailableError)) {
       throw err

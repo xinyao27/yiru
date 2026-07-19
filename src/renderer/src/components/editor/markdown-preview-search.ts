@@ -183,7 +183,7 @@ type HighlightRegistryLike = {
 }
 
 // Accessed via globalThis so the code degrades to a no-op where the API is
-// absent (older Chromium, jsdom/happy-dom in tests) — match counting and
+// absent in older Chromium — match counting and
 // navigation still work off the returned Ranges; only the paint is skipped.
 function getHighlightApi(): {
   registry: HighlightRegistryLike

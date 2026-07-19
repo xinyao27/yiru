@@ -163,16 +163,3 @@ export function invalidateGiteaPullRequestScan(repoKey: string): void {
     scanGenerations.delete(repoKey)
   }
 }
-
-export function _resetGiteaPullRequestScanCache(): void {
-  for (const repoKey of scanCache.keys()) {
-    removeScanCacheEntry(repoKey)
-  }
-  inFlightScans.clear()
-  scanGenerations.clear()
-  activeScanCounts.clear()
-}
-
-export function _getGiteaPullRequestScanCacheSize(): number {
-  return scanCache.size
-}

@@ -2,8 +2,7 @@ import type { GitHubWorkItemDetails, PRCheckDetail, PRInfo } from '../../../src/
 import type { GitHubPrReadOutcome, GitHubPrRepoSlug } from './github-pr-rpc'
 import { resolveLinkedPrNumber } from './mobile-pr-sidebar-resolve'
 
-// Pure state machine for the mobile PR sidebar. Kept free of React/native imports
-// so the transitions are unit-testable under the node Vitest config (KTD5).
+// Pure state machine for the mobile PR sidebar, independent of React and native rendering.
 
 export type PrSidebarData = {
   pr: PRInfo

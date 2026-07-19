@@ -49,9 +49,3 @@ export function setTerminalViewAttributes(attributes: TerminalViewAttributes): v
 export function getTerminalViewAttributes(): TerminalViewAttributes | null {
   return currentAttributes
 }
-
-/** Test seam: reset module state between tests. */
-export function _resetTerminalViewAttributesForTest(): void {
-  currentAttributes = null
-  pushAppliers.clear()
-}

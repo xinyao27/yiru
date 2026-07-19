@@ -744,13 +744,12 @@ function getReachableRuntimeEnvironmentIds(): string[] {
   return ids
 }
 
-export function buildRuntimeClientEventEnvironmentKey(environmentIds: string[]): string {
+function buildRuntimeClientEventEnvironmentKey(environmentIds: string[]): string {
   return [...new Set(environmentIds)].sort().join('\u0000')
 }
 
-/** Ids in `next` not in `previous` — runtime environments that just became
- *  connected. Exported to unit-test the on-connect discovery trigger. */
-export function getNewlyConnectedRuntimeEnvironmentIds(
+/** Ids in `next` not in `previous` — runtime environments that just became connected. */
+function getNewlyConnectedRuntimeEnvironmentIds(
   previous: readonly string[],
   next: readonly string[]
 ): string[] {
@@ -760,7 +759,7 @@ export function getNewlyConnectedRuntimeEnvironmentIds(
 
 /** Ids in `previous` not in `next` — runtime environments whose transport was
  *  just observed down. Their mirrored SSH buckets get downgraded to unknown. */
-export function getNewlyDisconnectedRuntimeEnvironmentIds(
+function getNewlyDisconnectedRuntimeEnvironmentIds(
   previous: readonly string[],
   next: readonly string[]
 ): string[] {
@@ -2207,8 +2206,8 @@ export function useIpcEvents(): void {
       })
     )
 
-    // Why: emulator IPC is additive. Older paired clients and partial test
-    // preload mocks should not crash the whole event hook when it is absent.
+    // Why: emulator IPC is additive. Older clients should not crash the event
+    // hook when this preload method is absent.
     const unsubscribeNewSimulatorTab = window.api.ui.onNewSimulatorTab?.(() => {
       if (isRuntimeEnvironmentActive()) {
         return

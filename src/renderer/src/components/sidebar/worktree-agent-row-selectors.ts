@@ -12,8 +12,8 @@ const EMPTY_LIVE_ENTRIES: AgentStatusEntry[] = []
 const EMPTY_MIGRATION_UNSUPPORTED_ENTRIES: MigrationUnsupportedPtyEntry[] = []
 const EMPTY_RETAINED: RetainedAgentEntry[] = []
 const EMPTY_RUNTIME_AGENT_ORCHESTRATION: Record<string, AgentStatusOrchestrationContext> = {}
-// Why: selector unit tests often pass partial store mocks; production state
-// owns these maps, but missing mock maps should behave like empty slices.
+// Why: state restored from older versions may omit newer maps; treat missing
+// maps as empty slices during migration.
 const EMPTY_RECORD = {}
 
 type WorktreeAgentRowsState = Pick<

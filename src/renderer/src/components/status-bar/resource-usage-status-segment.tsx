@@ -359,9 +359,7 @@ function sortProjectGroups(groups: UnifiedProjectGroup[], sort: SortOption): Uni
 
 // ─── Session row ────────────────────────────────────────────────────
 
-// Exported (with WorktreeRow) for row-level regression tests pinning the kill
-// affordance and remote-chip presentation for SSH/orphan rows.
-export function SessionRow({
+function SessionRow({
   session,
   worktreeId,
   onNavigate,

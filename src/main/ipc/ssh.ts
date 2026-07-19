@@ -1280,41 +1280,6 @@ export function getSshConnectionManager(): SshConnectionManager | null {
   return connectionManager
 }
 
-export async function resetSshHandlerStateForTests(): Promise<void> {
-  advertisedUrlWatcherUnsubscribe?.()
-  advertisedUrlWatcherUnsubscribe = null
-  powerMonitorUnsubscribe?.()
-  powerMonitorUnsubscribe = null
-  for (const ch of SSH_IPC_CHANNELS) {
-    ipcMain.removeHandler(ch)
-  }
-  ipcMain.removeHandler('ssh:submitCredential')
-
-  for (const session of activeSessions.values()) {
-    session.dispose()
-  }
-  activeSessions.clear()
-  for (const targetId of relayLostBackoff.keys()) {
-    clearRelayLostBackoff(targetId)
-  }
-  relayStateOverrides.clear()
-  connectInFlight.clear()
-  resetRelayInFlight.clear()
-  testingTargets.clear()
-  credentialRequestedForTarget.clear()
-
-  await connectionManager?.disconnectAll()
-  portForwardManager?.dispose()
-  connectionManager = null
-  portForwardManager = null
-  sshStore = null
-  persistedStore = null
-  registeredConnectSshTarget = null
-  registeredGetSshState = null
-  currentGetMainWindow = () => null
-  currentRuntime = undefined
-}
-
 export function getSshConnectionStore(): SshConnectionStore | null {
   return sshStore
 }

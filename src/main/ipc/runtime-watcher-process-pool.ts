@@ -119,7 +119,7 @@ export class RuntimeWatcherProcessPool {
     }
   }
 
-  /** Kill every pooled watcher child (production shutdown or test reset). */
+  /** Kill every pooled watcher child during shutdown. */
   dispose(): void {
     this.lifecycle.dispose()
     // disposeSlot deletes the current slot from allSlots; deleting the
@@ -138,11 +138,6 @@ export class RuntimeWatcherProcessPool {
     this.assignments.clear()
     this.pendingAssignments.clear()
     this.predecessorBarriers.clear()
-  }
-
-  resetForTest(): void {
-    this.dispose()
-    this.lifecycle.reset()
   }
 
   forgetRoot(dir: string): void {

@@ -379,12 +379,3 @@ function getWindowsSystemToolPath(relativeSystem32Path: string): string {
 function parseCsvLine(line: string): string[] {
   return line.split(/","/).map((part) => part.replace(/^"/, '').replace(/"$/, ''))
 }
-
-export function __resetSecureFileWindowsUserSidForTests(): void {
-  cachedWindowsUserSid = undefined
-}
-
-export function __resetSecureFileHardenedPathsForTests(): void {
-  hardenedPathsThisProcess.clear()
-  hardenedDirectoryPathsThisProcess.clear()
-}

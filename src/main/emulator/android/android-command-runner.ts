@@ -33,7 +33,7 @@ export const execFileAndroidCommandRunner: AndroidCommandRunner = (binary, args,
           stderr: stderr?.toString() ?? '',
           code: exitCode
         }
-        // PROBE: every adb/emulator command + outcome, for test diagnostics.
+        // Record each SDK command outcome for emulator troubleshooting.
         if (exitCode === 0) {
           emulatorProbe('cmd', { bin: basename(binary), args })
         } else {

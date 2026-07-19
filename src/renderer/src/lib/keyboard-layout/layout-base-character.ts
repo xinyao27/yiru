@@ -51,8 +51,8 @@ export function prefetchLayoutBaseCharacters(): void {
 
 /** A layout map entry is usable as a kitty base key only if it is a single
  *  printable codepoint (dead keys report names like 'Dead'; some entries are
- *  empty). Exposed for tests. */
-export function normalizeLayoutBaseCharacter(value: string | undefined): string | undefined {
+ *  empty). */
+function normalizeLayoutBaseCharacter(value: string | undefined): string | undefined {
   if (!value) {
     return undefined
   }
@@ -70,9 +70,4 @@ export function normalizeLayoutBaseCharacter(value: string | undefined): string 
  *  base character (callers fall back to the US table). */
 export function getLayoutBaseCharacterForCode(code: string): string | undefined {
   return normalizeLayoutBaseCharacter(cachedLayoutMap?.get(code))
-}
-
-/** Test-only: replace or clear the cached layout map. */
-export function _setLayoutMapForTests(map: LayoutMapLike | null): void {
-  cachedLayoutMap = map
 }

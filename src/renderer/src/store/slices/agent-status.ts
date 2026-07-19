@@ -2089,11 +2089,7 @@ export const createAgentStatusSlice: StateCreator<AppState, [], [], AgentStatusS
       // on-disk last-status file evicts this paneKey on the next debounced
       // write. Without this, the main process would re-hydrate the dismissed
       // entry on the next launch and the row would re-appear. Fire-and-forget.
-      // Why: the typeof window guard keeps the slice usable from the
-      // node test environment, where window is undefined.
-      if (typeof window !== 'undefined') {
-        window.api?.agentStatus?.drop?.(paneKey)
-      }
+      window.api?.agentStatus?.drop?.(paneKey)
     },
 
     dropAgentStatusByTabPrefix: (tabIdPrefix, opts) => {

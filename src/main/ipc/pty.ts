@@ -128,7 +128,6 @@ import {
   isHiddenRendererPty,
   markHiddenRendererPty,
   recordHiddenRendererPtyDataDrop,
-  resetHiddenRendererPtyDeliveryDebugCounters,
   resetRendererScopedHiddenPtyDeliveryState,
   setRendererPtyDeliveryInterest,
   shouldDropHiddenRendererPtyData,
@@ -1181,7 +1180,7 @@ export function getSshPtyProvider(connectionId: string): IPtyProvider | undefine
   return sshProviders.get(connectionId)
 }
 
-/** Get the installed PTY provider (for direct access in tests/runtime).
+/** Get the installed PTY provider for runtime services.
  *
  * Returns the installed PTY provider — after `setLocalPtyProvider()` runs
  * during daemon init this may be the routed adapter (specifically either
@@ -1450,7 +1449,6 @@ const EMPTY_PTY_RENDERER_DELIVERY_DEBUG_SNAPSHOT: PtyRendererDeliveryDebugSnapsh
 let readPtyRendererDeliveryDebugSnapshot = (): PtyRendererDeliveryDebugSnapshot => ({
   ...EMPTY_PTY_RENDERER_DELIVERY_DEBUG_SNAPSHOT
 })
-let resetPtyRendererDeliveryDebugSnapshot = (): void => {}
 // Bridged into the registerPtyHandlers closure (like readPtyRendererDeliveryDebugSnapshot)
 // so the module-scope lifecycle-reset handler can zero the closure-owned delivery
 // accounting on a renderer reload/crash.
@@ -1461,10 +1459,6 @@ let clearRendererDispatcherReadyWatchdog = (): void => {}
 
 export function getPtyRendererDeliveryDebugSnapshot(): PtyRendererDeliveryDebugSnapshot {
   return readPtyRendererDeliveryDebugSnapshot()
-}
-
-export function resetPtyRendererDeliveryDebug(): void {
-  resetPtyRendererDeliveryDebugSnapshot()
 }
 
 function clearDidFinishLoadHandler(): void {
@@ -2038,16 +2032,6 @@ export function registerPtyHandlers(
   }
 
   readPtyRendererDeliveryDebugSnapshot = readCurrentPtyRendererDeliveryDebugSnapshot
-  resetPtyRendererDeliveryDebugSnapshot = () => {
-    peakPendingChars = 0
-    peakMaxPendingCharsByPty = 0
-    peakRendererInFlightChars = 0
-    peakMaxRendererInFlightCharsByPty = 0
-    ackGatedFlushSkipCount = 0
-    pendingDroppedChars = 0
-    resetHiddenRendererPtyDeliveryDebugCounters()
-    recordPtyRendererDeliveryPressure()
-  }
   resetRendererDeliveryAccountingForLifecycleReset = () => {
     // Why: clearing pendingData is lossless — its bytes were only ever bound for
     // the dead page, and the replacement page repaints each pane from main's
@@ -3753,10 +3737,6 @@ export function registerPtyHandlers(
   ipcMain.handle('pty:getRendererDeliveryDebugSnapshot', (): PtyRendererDeliveryDebugSnapshot => {
     return getPtyRendererDeliveryDebugSnapshot()
   })
-  ipcMain.handle('pty:resetRendererDeliveryDebug', (): void => {
-    resetPtyRendererDeliveryDebug()
-  })
-
   ipcMain.handle(
     'pty:spawn',
     async (

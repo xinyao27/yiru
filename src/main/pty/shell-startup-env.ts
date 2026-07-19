@@ -182,12 +182,3 @@ export function readShellStartupEnvVar(
   cache.set(cacheKey, lastMatch)
   return lastMatch
 }
-
-/**
- * Test-only helper to reset the per-process cache between cases.
- * Why: production callers never invalidate (rc files don't change at
- * runtime), but tests need clean state per case.
- */
-export function __resetShellStartupEnvCache(): void {
-  cache.clear()
-}

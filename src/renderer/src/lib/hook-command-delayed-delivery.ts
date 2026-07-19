@@ -23,12 +23,6 @@ export function queueHookCommandsForFirstWorktreeTab(
   flushPendingHookCommandDeliveries()
 }
 
-export function resetHookCommandDelayedDeliveryForTests(): void {
-  pendingHookCommandDeliveries.clear()
-  unsubscribePendingHookCommandDeliveries?.()
-  unsubscribePendingHookCommandDeliveries = null
-}
-
 function ensurePendingHookCommandSubscription(): void {
   if (unsubscribePendingHookCommandDeliveries) {
     return

@@ -219,8 +219,8 @@ function startParkedTabWatchers(
       disposeWatcher()
     })
   }
-  // Why: tracked even with zero watchers so parked-state introspection
-  // (window.__terminalParkingDebug) reflects every parked tab.
+  // Why: track zero-watcher tabs too so later tab/worktree cleanup can remove
+  // every parked registration through the same registry.
   parkedWatchersByTabId.set(tab.id, {
     worktreeId,
     tabPtyId: tab.ptyId,

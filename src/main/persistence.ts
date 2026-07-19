@@ -3707,13 +3707,6 @@ export class Store {
     }, delay)
   }
 
-  /** Wait for any in-flight async disk write to complete. Used in tests. */
-  async waitForPendingWrite(): Promise<void> {
-    if (this.pendingWrite) {
-      await this.pendingWrite
-    }
-  }
-
   // Why githubCache is omitted: it is memory-only during the session (see
   // getGithubCacheFile) — excluding it from both the payload and the hash
   // keeps cache refreshes from ever touching the durable file.

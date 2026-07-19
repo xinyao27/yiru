@@ -187,11 +187,3 @@ export function createCodexWslRuntimeHookInstallPlan(
     trustConfigPath: `${linuxRuntimeHome}/hooks.json`
   }
 }
-
-export const _internals = {
-  canonicalizeWslLinuxPath,
-  resetWslCanonicalPathCache(): void {
-    canonicalWslPathCache.clear()
-    inFlightWslCanonicalizations.clear()
-  }
-}

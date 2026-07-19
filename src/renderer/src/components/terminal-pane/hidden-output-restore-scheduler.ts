@@ -60,8 +60,3 @@ export function cancelScheduledHiddenOutputRestore(target: object): void {
     clearInactiveRestoreTimer()
   }
 }
-
-export function resetHiddenOutputRestoreSchedulerForTests(): void {
-  inactiveRestoreQueue.clear()
-  clearInactiveRestoreTimer()
-}

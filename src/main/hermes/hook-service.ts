@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- Why: install/status/remove must share the exact Hermes plugin source, YAML enablement logic, and status classification. Splitting would make the managed plugin bytes drift from the installer tests that verify them against the real Hermes CLI. */
+/* eslint-disable max-lines -- Why: install/status/remove must share the exact Hermes plugin source, YAML enablement logic, and status classification so managed bytes cannot drift. */
 import { randomUUID } from 'node:crypto'
 import {
   copyFileSync,
@@ -539,15 +539,3 @@ export class HermesHookService {
 }
 
 export const hermesHookService = new HermesHookService()
-
-export const _internals = {
-  HERMES_PLUGIN_NAME,
-  HERMES_EVENTS,
-  getHermesHome,
-  getPluginManifest,
-  getPluginInitSource,
-  parseHermesConfig,
-  enablePlugin,
-  disablePlugin,
-  updateConfigContent
-}

@@ -77,12 +77,3 @@ export function getCrashBreadcrumbSnapshot(): CrashReportBreadcrumb[] {
     ...(breadcrumb.data ? { data: { ...breadcrumb.data } } : {})
   }))
 }
-
-export function clearCrashBreadcrumbsForTest(): void {
-  breadcrumbs = []
-  coalescedBreadcrumbs = new Map()
-}
-
-export function getCoalescedKeyCountForTest(): number {
-  return coalescedBreadcrumbs.size
-}

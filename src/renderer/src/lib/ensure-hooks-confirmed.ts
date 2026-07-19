@@ -21,10 +21,6 @@ function enqueueTrustPrompt<T>(task: () => Promise<T>): Promise<T> {
   return next
 }
 
-export function __resetTrustPromptChainForTests(): void {
-  trustPromptChain = Promise.resolve()
-}
-
 function getSetupTrustContent(yamlHooks: YiruHooks | null): string {
   const defaultTabCommands = (yamlHooks?.defaultTabs ?? [])
     .map((tab, index) => {

@@ -1,6 +1,6 @@
 /**
  * Pure decision logic for the focus-follows-mouse feature. Kept free of
- * DOM/event dependencies so it can be unit-tested under vitest's node env.
+ * DOM/event dependencies so the policy remains independent of event wiring.
  *
  * See docs/focus-follows-mouse-design.md for rationale behind each gate.
  */

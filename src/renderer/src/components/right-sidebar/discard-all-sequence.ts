@@ -68,7 +68,7 @@ export type DiscardAllDeps = {
   bulkUnstage: (paths: string[]) => Promise<void>
   /**
    * Discard the given paths in one IPC round-trip. Callers may omit this to
-   * keep the legacy per-file sequence in tests or older surfaces.
+   * keep the legacy per-file sequence for older runtime surfaces.
    */
   discardMany?: (paths: string[]) => Promise<void>
   /** Discard a single path (restore working-tree to HEAD, or rm if untracked). */

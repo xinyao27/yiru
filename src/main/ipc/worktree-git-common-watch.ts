@@ -68,8 +68,7 @@ function diffMtimeMap(
 async function startSnapshotDiffPoller(
   takeSnapshot: () => Promise<Map<string, number>>,
   onEvents: (events: WorktreeBasePollEvent[]) => void,
-  pollIntervalMs: number,
-  onFullScan?: () => void
+  pollIntervalMs: number
 ): Promise<WorktreeBaseSubscription> {
   let disposed = false
   let ticking = false
@@ -80,7 +79,6 @@ async function startSnapshotDiffPoller(
       return
     }
     ticking = true
-    onFullScan?.()
     void takeSnapshot()
       .then((next) => {
         if (disposed) {
@@ -244,18 +242,15 @@ async function startGitCommonNarrowWatch(
 export async function startGitCommonWatch(
   target: WorktreeBaseWatchTarget,
   onEvents: (events: WorktreeBasePollEvent[]) => void,
-  pollIntervalMs: number,
-  platform: NodeJS.Platform,
-  onFullScan?: () => void
+  pollIntervalMs: number
 ): Promise<WorktreeBaseSubscription> {
-  if (platform === 'darwin') {
+  if (process.platform === 'darwin') {
     const [narrowWatch, primaryMetadataPoll] = await Promise.all([
       startGitCommonNarrowWatch(target, onEvents, pollIntervalMs),
       startSnapshotDiffPoller(
         () => snapshotPrimaryCheckoutMetadata(target.path),
         onEvents,
-        pollIntervalMs,
-        onFullScan
+        pollIntervalMs
       )
     ])
     return {
@@ -264,5 +259,5 @@ export async function startGitCommonWatch(
       }
     }
   }
-  return startGitCommonPolling(target.path, onEvents, pollIntervalMs, onFullScan)
+  return startGitCommonPolling(target.path, onEvents, pollIntervalMs)
 }

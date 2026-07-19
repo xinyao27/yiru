@@ -16,7 +16,7 @@ import {
   buildResolveParams
 } from './pr-comment-actions'
 
-export type PrCommentMutations = {
+type PrCommentMutations = {
   reply: (args: {
     prNumber: number
     commentId: number
@@ -44,8 +44,6 @@ export type PrCommentActionsInput = {
   // the new reply/comment and toggled resolve state appear (desktop merges the
   // returned comment; mobile keeps it simple with a full refetch).
   refetch: () => void | Promise<void>
-  // Test seam: inject fake mutations; defaults to the real github.* wrappers.
-  mutations?: PrCommentMutations
 }
 
 function realMutations(
@@ -79,10 +77,10 @@ export function useMobilePrCommentActions(input: PrCommentActionsInput) {
   const inFlightRef = useRef<Set<string>>(new Set())
 
   const mutations = useMemo(
-    () => input.mutations ?? (client ? realMutations(client, worktreeId) : null),
-    [input.mutations, client, worktreeId]
+    () => (client ? realMutations(client, worktreeId) : null),
+    [client, worktreeId]
   )
-  const ready = mutations !== null && (input.mutations !== undefined || connState === 'connected')
+  const ready = mutations !== null && connState === 'connected'
 
   const setBusy = useCallback((key: string, busy: boolean) => {
     setBusyKeys((prev) => {

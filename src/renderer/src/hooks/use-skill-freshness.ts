@@ -160,19 +160,3 @@ export function useSkillFreshness(): SkillFreshnessState {
 
   return { ...current, refresh: refreshSkillFreshness }
 }
-
-export const _skillFreshnessCacheForTests = {
-  reset(): void {
-    cachedInventory = null
-    pendingInventory = null
-    invalidationRevision = 0
-    completedRevision = -1
-    lastCompletedScanAt = 0
-    refreshSequence = 0
-    if (scheduledFocusRescan !== null) {
-      window.clearTimeout(scheduledFocusRescan)
-      scheduledFocusRescan = null
-    }
-    snapshot = { inventory: null, loading: false, error: null }
-  }
-}

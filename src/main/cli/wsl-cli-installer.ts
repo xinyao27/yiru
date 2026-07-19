@@ -459,11 +459,3 @@ function buildEncodedWslBashCommand(command: string): string {
   const encoded = Buffer.from(command, 'utf8').toString('base64')
   return `set -o pipefail; printf %s ${quoteShell(encoded)} | base64 -d | bash`
 }
-
-export const _internals = {
-  buildEncodedWslBashCommand,
-  buildWslBridgeScript,
-  buildWslLauncher,
-  getBridgePathFromCommandPath,
-  parseManagedLauncherTarget
-}

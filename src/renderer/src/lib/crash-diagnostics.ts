@@ -17,9 +17,8 @@ type BrowserPerformanceMemory = {
 let rendererCrashDiagnosticsInstalled = false
 let rendererMemoryInterval: number | null = null
 
-// Why re-exported from a leaf module: terminal modules and their e2e-visible
-// import chains need breadcrumb recording without this file's import.meta /
-// webview-registry baggage. See crash-breadcrumb-recorder.ts.
+// Why re-exported from a leaf module: terminal hot paths need breadcrumb
+// recording without this file's import.meta / webview-registry baggage.
 export { recordRendererCrashBreadcrumb } from './crash-breadcrumb-recorder'
 
 export function installRendererCrashDiagnostics(): void {
@@ -38,10 +37,6 @@ export function installRendererCrashDiagnostics(): void {
       RENDERER_MEMORY_SAMPLE_INTERVAL_MS
     )
   }
-}
-
-export function _disposeRendererCrashDiagnosticsForTests(): void {
-  disposeRendererCrashDiagnostics()
 }
 
 function disposeRendererCrashDiagnostics(): void {

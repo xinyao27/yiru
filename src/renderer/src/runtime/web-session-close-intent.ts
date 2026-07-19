@@ -86,7 +86,3 @@ export function reconcileWebSessionCloseIntents(
     pendingCloseByWorktree.delete(worktreeId)
   }
 }
-
-export function resetWebSessionCloseIntentForTests(): void {
-  pendingCloseByWorktree.clear()
-}

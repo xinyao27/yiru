@@ -102,10 +102,6 @@ export function selectFloatingVisibleTabCount(state: FloatingVisibleTabCountStat
   return count
 }
 
-export function resetFloatingVisibleTabCountSelectorCacheForTest(): void {
-  floatingVisibleTabCountCache = null
-}
-
 type FloatingWorkspaceUnreadState = Pick<
   AppState,
   'tabsByWorktree' | 'unreadTerminalTabs' | 'unreadAgentCompletionPanes'

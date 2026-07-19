@@ -24,16 +24,6 @@ const KNOWN_NON_GITEA_HOSTS = new Set([
 const REPO_REF_CACHE_MAX_ENTRIES = 512
 const repoRefCache = new Map<string, GiteaRepoRef | null>()
 
-/** @internal - exposed for tests only */
-export function _resetGiteaRepoRefCache(): void {
-  repoRefCache.clear()
-}
-
-/** @internal - exposed for tests only */
-export function _getGiteaRepoRefCacheSize(): number {
-  return repoRefCache.size
-}
-
 function rememberRepoRefCacheEntry(cacheKey: string, value: GiteaRepoRef | null): void {
   repoRefCache.set(cacheKey, value)
   while (repoRefCache.size > REPO_REF_CACHE_MAX_ENTRIES) {

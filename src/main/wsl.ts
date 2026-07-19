@@ -290,21 +290,6 @@ export function getCachedWslAvailability(): boolean | null {
   return wslAvailableCache
 }
 
-export function _resetWslCachesForTests(): void {
-  wslHomeCache.clear()
-  wslDistroCache = null
-  wslDistroListFailedUntilMs = 0
-  wslAvailableCache = null
-}
-
-export function _setWslCachesForTests(args: {
-  available?: boolean | null
-  distros?: string[] | null
-}): void {
-  wslAvailableCache = args.available ?? null
-  wslDistroCache = args.distros ?? null
-}
-
 function execFileUtf8(command: string, args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile(command, args, { encoding: 'utf-8', timeout: 5000 }, (error, stdout) => {

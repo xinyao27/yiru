@@ -60,10 +60,6 @@ export const mobileMaxLinesRatchets = [
     rules: { 'max-lines': createMaxLinesRule(514) }
   },
   {
-    files: ['scripts/mock-server.ts'],
-    rules: { 'max-lines': createMaxLinesRule(407) }
-  },
-  {
     files: ['src/terminal/terminal-accessory-keys.ts'],
     rules: { 'max-lines': createMaxLinesRule(388) }
   },

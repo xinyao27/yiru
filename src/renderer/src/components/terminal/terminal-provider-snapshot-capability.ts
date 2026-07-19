@@ -14,9 +14,7 @@ function refreshEarliestUnknownCapabilityRetry(): void {
 }
 
 export function synchronizeTerminalProviderSnapshotCapabilities(
-  livePtyIds: readonly string[],
-  resolveCapabilities?: (ids: string[]) => SnapshotCapability[],
-  observedAtMs?: number
+  livePtyIds: readonly string[]
 ): void {
   // Why: Terminal can re-render for unrelated UI state. A stable binding list
   // must add no repeated all-PTY scan or IPC work to that render path.
@@ -26,7 +24,7 @@ export function synchronizeTerminalProviderSnapshotCapabilities(
   ) {
     return
   }
-  const nowMs = observedAtMs ?? Date.now()
+  const nowMs = Date.now()
   if (livePtyIds === lastSynchronizedLivePtyIds && nowMs < earliestUnknownCapabilityRetryAtMs) {
     return
   }
@@ -48,7 +46,7 @@ export function synchronizeTerminalProviderSnapshotCapabilities(
       !authoritativeSnapshotByPtyId.has(id) &&
       (unknownCapabilityRetryAtByPtyId.get(id) ?? 0) <= nowMs
   )
-  const resolve = resolveCapabilities ?? window.api.pty.getAuthoritativeBufferSnapshotCapabilities
+  const resolve = window.api.pty.getAuthoritativeBufferSnapshotCapabilities
   if (!resolve) {
     for (const id of missing) {
       unknownCapabilityRetryAtByPtyId.set(id, nowMs + UNKNOWN_CAPABILITY_RETRY_MS)
@@ -85,11 +83,4 @@ export function synchronizeTerminalProviderSnapshotCapabilities(
 
 export function terminalProviderHasAuthoritativeSnapshot(ptyId: string): boolean {
   return authoritativeSnapshotByPtyId.get(ptyId) === true
-}
-
-export function clearTerminalProviderSnapshotCapabilities(): void {
-  authoritativeSnapshotByPtyId.clear()
-  unknownCapabilityRetryAtByPtyId.clear()
-  lastSynchronizedLivePtyIds = null
-  earliestUnknownCapabilityRetryAtMs = Number.POSITIVE_INFINITY
 }

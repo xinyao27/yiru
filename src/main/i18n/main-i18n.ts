@@ -92,8 +92,8 @@ export async function setMainUiLanguage(language: UiLanguage): Promise<Supported
 }
 
 export function translateMain(key: string, fallback: string, options?: TOptions): string {
-  // Why: menu registration can run before async init finishes in tests; fall back
-  // to the English default instead of returning undefined from an uninitialized i18n.
+  // Why: menu registration can race async startup initialization; use the
+  // English default instead of returning undefined.
   const raw = initialized ? mainI18n.t(key, { defaultValue: fallback, ...options }) : fallback
   const value = typeof raw === 'string' && raw.length > 0 ? raw : fallback
   return isPseudoLocalizationLocale(mainI18n.language) ? pseudoLocalizeString(value) : value

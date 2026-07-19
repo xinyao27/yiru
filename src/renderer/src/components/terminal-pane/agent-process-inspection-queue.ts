@@ -68,13 +68,3 @@ export function enqueueAgentProcessInspection(task: InspectionTask): void {
   inspectionQueue.push(task)
   pumpInspectionQueue()
 }
-
-export function resetAgentProcessInspectionQueueForTests(): void {
-  if (inspectionPumpTimer !== null) {
-    clearTimeout(inspectionPumpTimer)
-    inspectionPumpTimer = null
-  }
-  activeInspections = 0
-  inspectionStarts.length = 0
-  inspectionQueue.length = 0
-}

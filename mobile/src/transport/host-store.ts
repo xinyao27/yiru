@@ -373,10 +373,3 @@ export async function updateLastConnected(hostId: string): Promise<void> {
     // unhandled promise rejection.
   }
 }
-
-/** Test-only: drain module mutation chain between cases. */
-export function resetHostStoreForTests(): void {
-  hostListMutation = Promise.resolve()
-  tokenCache.clear()
-  inflightLoad = null
-}

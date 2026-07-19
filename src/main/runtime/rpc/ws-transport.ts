@@ -41,10 +41,6 @@ export type WebSocketTransportOptions = {
   port: number
   tlsCert?: string
   tlsKey?: string
-  // Why: test-only override. Production uses HEARTBEAT_INTERVAL_MS.
-  heartbeatIntervalMs?: number
-  // Why: test-only override. Production uses PRE_AUTH_TIMEOUT_MS.
-  preAuthTimeoutMs?: number
   // Why: the pairing server can also serve the browser client, so users do
   // not need a second dev/static server once the web bundle is built.
   staticRoot?: string
@@ -66,8 +62,6 @@ export class WebSocketTransport implements RpcTransport {
   private readonly port: number
   private readonly tlsCert: string | undefined
   private readonly tlsKey: string | undefined
-  private readonly heartbeatIntervalMs: number
-  private readonly preAuthTimeoutMs: number
   private readonly staticRoot: string | undefined
   private readonly fallbackPort: number | undefined
   private readonly preferPinnedPort: boolean
@@ -92,8 +86,6 @@ export class WebSocketTransport implements RpcTransport {
     port,
     tlsCert,
     tlsKey,
-    heartbeatIntervalMs,
-    preAuthTimeoutMs,
     staticRoot,
     fallbackPort,
     preferPinnedPort
@@ -102,8 +94,6 @@ export class WebSocketTransport implements RpcTransport {
     this.port = port
     this.tlsCert = tlsCert
     this.tlsKey = tlsKey
-    this.heartbeatIntervalMs = heartbeatIntervalMs ?? HEARTBEAT_INTERVAL_MS
-    this.preAuthTimeoutMs = preAuthTimeoutMs ?? PRE_AUTH_TIMEOUT_MS
     this.staticRoot = staticRoot
     this.fallbackPort = fallbackPort
     this.preferPinnedPort = preferPinnedPort === true
@@ -271,7 +261,7 @@ export class WebSocketTransport implements RpcTransport {
           // close handler will run regardless, so swallow the throw.
         }
       }
-    }, this.heartbeatIntervalMs)
+    }, HEARTBEAT_INTERVAL_MS)
     if (typeof this.heartbeatTimer.unref === 'function') {
       this.heartbeatTimer.unref()
     }
@@ -376,7 +366,7 @@ export class WebSocketTransport implements RpcTransport {
         // the E2EE handshake.
         ws.terminate()
       }
-    }, this.preAuthTimeoutMs)
+    }, PRE_AUTH_TIMEOUT_MS)
     if (typeof preAuthTimer.unref === 'function') {
       preAuthTimer.unref()
     }

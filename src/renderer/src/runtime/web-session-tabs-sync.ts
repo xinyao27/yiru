@@ -296,22 +296,6 @@ export function shouldSyncAllRuntimeSessionTabs(args: {
   return Boolean(environmentId && args.workspaceSessionReady)
 }
 
-export function resetWebSessionTabsSnapshotFreshnessForTests(): void {
-  latestSessionTabsSnapshotByWorktree.clear()
-  lastHostTerminalTabCountByWorktree.clear()
-  hostSessionTabIdByLocalKey.clear()
-}
-
-export function _getWebSessionTabsTrackingCountsForTest(): {
-  freshness: number
-  hostMappings: number
-} {
-  return {
-    freshness: latestSessionTabsSnapshotByWorktree.size,
-    hostMappings: hostSessionTabIdByLocalKey.size
-  }
-}
-
 function clearWebSessionTabsTrackingForWorktree(environmentId: string, worktreeId: string): void {
   const key = sessionTabsFreshnessKey(environmentId, worktreeId)
   latestSessionTabsSnapshotByWorktree.delete(key)

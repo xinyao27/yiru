@@ -8,18 +8,9 @@ export type FreshnessSchedulerDeps = {
 
 export type FreshnessScheduler = {
   schedule: () => void
-  /**
-   * Cancel any pending freshness timer. Intended for tests that create a
-   * fresh store per case — production callers do not need this because the
-   * zustand store is a module-level singleton that lives until process exit.
-   */
-  dispose: () => void
 }
 
 export function createFreshnessScheduler(deps: FreshnessSchedulerDeps): FreshnessScheduler {
-  // Why: tests that trigger scheduling must use vi.useFakeTimers() or call
-  // `dispose()` in teardown — otherwise a real 30-minute setTimeout leaks
-  // into the test process.
   let timer: ReturnType<typeof setTimeout> | null = null
 
   const clear = (): void => {
@@ -66,5 +57,5 @@ export function createFreshnessScheduler(deps: FreshnessSchedulerDeps): Freshnes
     }, delayMs)
   }
 
-  return { schedule, dispose: clear }
+  return { schedule }
 }

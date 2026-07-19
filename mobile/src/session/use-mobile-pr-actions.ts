@@ -12,7 +12,7 @@ import {
 import type { GitHubPrRepoSlug } from './github-pr-rpc'
 import { PrActionsEngine, type PrActionMutations, type PrActionBusyKey } from './pr-actions-engine'
 
-export type { PrActionBusyKey, PrActionMutations } from './pr-actions-engine'
+export type { PrActionBusyKey } from './pr-actions-engine'
 
 export type PrActionsInput = {
   client: RpcClient | null
@@ -22,8 +22,6 @@ export type PrActionsInput = {
   headSha?: string | null
   prRepo?: GitHubPrRepoSlug | null
   refetch: () => void | Promise<void>
-  // Test seam: inject fake mutations; defaults to the real github.* wrappers.
-  mutations?: PrActionMutations
 }
 
 function realMutations(
@@ -51,7 +49,7 @@ export function useMobilePrActions(input: PrActionsInput) {
   const engineRef = useRef<PrActionsEngine | null>(null)
   if (engineRef.current === null) {
     engineRef.current = new PrActionsEngine({
-      mutations: input.mutations ?? (client ? realMutations(client, worktreeId) : noopMutations()),
+      mutations: client ? realMutations(client, worktreeId) : noopMutations(),
       prNumber,
       headSha,
       prRepo,
@@ -64,16 +62,16 @@ export function useMobilePrActions(input: PrActionsInput) {
   // Keep engine config in sync without recreating it (preserves in-flight guards).
   useEffect(() => {
     engine.updateConfig({
-      mutations: input.mutations ?? (client ? realMutations(client, worktreeId) : noopMutations()),
+      mutations: client ? realMutations(client, worktreeId) : noopMutations(),
       prNumber,
       headSha,
       prRepo,
       refetch,
       onChange: forceRender
     })
-  }, [engine, input.mutations, client, worktreeId, prNumber, headSha, prRepo, refetch])
+  }, [engine, client, worktreeId, prNumber, headSha, prRepo, refetch])
 
-  const ready = input.mutations !== undefined || (client !== null && connState === 'connected')
+  const ready = client !== null && connState === 'connected'
 
   return {
     busy: engine.busy,

@@ -164,7 +164,7 @@ export function registerTelemetryHandlers(store: Store): void {
       return
     }
     // Check storeRef BEFORE consuming a consent-mutation token. If the store
-    // isn't ready (pre-registration race, test harness misuse, a future
+    // isn't ready (pre-registration race or a future
     // refactor), consuming a token here would burn budget for a no-op and
     // eventually block legitimate mutations from the same session.
     if (!storeRef) {
@@ -241,11 +241,4 @@ export function registerTelemetryHandlers(store: Store): void {
     }
     return persistBannerAcknowledgeWithoutEmitting()
   })
-}
-
-// Test-only reset for the module-level store reference. Tests can
-// re-register handlers against a fresh mock store without leaking state
-// between describes.
-export function _resetStoreForTests(): void {
-  storeRef = null
 }

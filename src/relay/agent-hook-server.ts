@@ -284,7 +284,7 @@ export class RelayAgentHookServer {
     return env
   }
 
-  /** Test-only / diagnostics accessor. */
+  /** Coordinates exposed to the WSL relay bootstrap. */
   getCoordinates(): { port: number; token: string; endpointFilePath: string } {
     return { port: this.port, token: this.token, endpointFilePath: this.endpointFilePath }
   }

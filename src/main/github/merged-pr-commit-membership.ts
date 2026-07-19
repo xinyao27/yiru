@@ -36,10 +36,6 @@ function pruneMergedPRCommitMembershipCache(now = Date.now()): void {
   }
 }
 
-export function resetMergedPRCommitMembershipCacheForTest(): void {
-  membershipCache.clear()
-}
-
 /**
  * Whether `commitOid` is part of pull request `prNumber` on GitHub — i.e. the
  * commit belongs to that PR's history rather than merely sharing a branch name.

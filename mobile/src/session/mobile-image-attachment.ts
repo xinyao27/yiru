@@ -11,7 +11,7 @@ export type AttachMobileImageDeps = {
   readonly terminal: string
   readonly deviceToken: string | null
   readonly getConnectionId: () => Promise<string | null>
-  // Injected so this module stays free of expo/react-native imports (and unit-testable).
+  // Supplied by the view so this transport module stays free of Expo/native imports.
   readonly pickImage: (source: MobileImageSource) => Promise<PickedMobileImage | null>
   // Fired once the user has picked an image and the host upload is about to
   // start — lets the UI show a sending spinner only for the transfer, not the

@@ -23,21 +23,19 @@ const MAX_RECENT_CLOSED_TERMINAL_TABS = 10
 // full per-type stack; kind entries whose snapshot aged out are skipped on pop.
 const MAX_RECENT_CLOSED_TAB_KINDS = 30
 
-// Why: the map params tolerate undefined because several test harnesses build
-// partial stores (single-slice spreads) that lack this slice's state.
 export function pushClosedTerminalTabSnapshot(
-  map: Record<string, ClosedTerminalTabSnapshot[]> | undefined,
+  map: Record<string, ClosedTerminalTabSnapshot[]>,
   worktreeId: string,
   snapshot: ClosedTerminalTabSnapshot
 ): Record<string, ClosedTerminalTabSnapshot[]> {
   return {
     ...map,
-    [worktreeId]: [snapshot, ...(map?.[worktreeId] ?? [])].slice(0, MAX_RECENT_CLOSED_TERMINAL_TABS)
+    [worktreeId]: [snapshot, ...(map[worktreeId] ?? [])].slice(0, MAX_RECENT_CLOSED_TERMINAL_TABS)
   }
 }
 
 export function pushRecentlyClosedTabKind(
-  map: Record<string, RecentlyClosedTabKind[]> | undefined,
+  map: Record<string, RecentlyClosedTabKind[]>,
   worktreeId: string,
   kind: RecentlyClosedTabKind,
   count = 1
@@ -45,7 +43,7 @@ export function pushRecentlyClosedTabKind(
   // Why: preserve the original reference on no-op pushes so unrelated
   // subscribers don't re-evaluate (mirrors the closeTab unread-map pattern).
   if (count <= 0) {
-    return map ?? {}
+    return map
   }
   // Why: close-all may contain thousands of editor tabs, but entries beyond
   // the retained history cap can never affect reopen ordering.
@@ -54,7 +52,7 @@ export function pushRecentlyClosedTabKind(
     ...map,
     [worktreeId]: [
       ...(Array(retainedCount).fill(kind) as RecentlyClosedTabKind[]),
-      ...(map?.[worktreeId] ?? [])
+      ...(map[worktreeId] ?? [])
     ].slice(0, MAX_RECENT_CLOSED_TAB_KINDS)
   }
 }
