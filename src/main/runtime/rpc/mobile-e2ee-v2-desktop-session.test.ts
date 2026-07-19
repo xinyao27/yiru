@@ -4,6 +4,7 @@ import { deriveSharedKey } from './e2ee-crypto'
 import { deriveMobileE2EEV2KeySchedule } from './mobile-e2ee-v2-key-schedule'
 import {
   encodeMobileE2EEV2Transcript,
+  MOBILE_E2EE_V2_PROTOCOL,
   validateMobileE2EEV2Handshake,
   type MobileE2EEV2Hello
 } from '../../../shared/mobile-e2ee-v2-contract'
@@ -21,7 +22,7 @@ function hello(): MobileE2EEV2Hello {
     clientNonceB64: Buffer.from(new Uint8Array(32).fill(3)).toString('base64'),
     capabilities: { framing: [2], payloadKinds: ['text', 'binary'] },
     context: {
-      protocol: 'orca-mobile-e2ee',
+      protocol: MOBILE_E2EE_V2_PROTOCOL,
       initiator: 'mobile',
       responder: 'desktop',
       transport: 'relay',

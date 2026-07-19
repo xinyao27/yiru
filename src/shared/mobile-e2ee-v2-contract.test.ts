@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { describe, expect, it } from 'vite-plus/test'
 import {
   encodeMobileE2EEV2Transcript,
+  MOBILE_E2EE_V2_PROTOCOL,
   validateMobileE2EEV2Handshake
 } from './mobile-e2ee-v2-contract'
 import { createMobileE2EEV2Fixture, MOBILE_E2EE_V2_VECTOR } from './mobile-e2ee-v2-fixtures'
@@ -52,7 +53,7 @@ describe('mobile E2EE v2 contract', () => {
     expect(validateMobileE2EEV2Handshake({ ...hello, context: relayWithoutId }, ready)).toBeNull()
 
     const directContext = {
-      protocol: 'orca-mobile-e2ee' as const,
+      protocol: MOBILE_E2EE_V2_PROTOCOL,
       initiator: 'mobile' as const,
       responder: 'desktop' as const,
       transport: 'direct' as const

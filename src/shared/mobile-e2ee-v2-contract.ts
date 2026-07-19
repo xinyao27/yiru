@@ -1,7 +1,8 @@
-// Why: this wire domain shipped before the Yiru rename; changing it alters the
-// authenticated transcript and HKDF output, breaking already-released clients.
-export const MOBILE_E2EE_V2_PROTOCOL = 'orca-mobile-e2ee'
-export const MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN = 'orca-mobile-e2ee/v2/transcript'
+// Why: transcript and HKDF domains derive from one protocol root so desktop and
+// mobile cannot silently drift to different keys during future protocol changes.
+export const MOBILE_E2EE_V2_PROTOCOL = 'yiru-mobile-e2ee'
+export const MOBILE_E2EE_V2_KDF_DOMAIN = `${MOBILE_E2EE_V2_PROTOCOL}/v2`
+export const MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN = `${MOBILE_E2EE_V2_KDF_DOMAIN}/transcript`
 
 export type MobileE2EETransport = 'direct' | 'relay'
 export type MobileE2EEPayloadKind = 'text' | 'binary'

@@ -260,7 +260,6 @@ export const MARINE_CREATURES = [
   'Wolffish',
   'Wreckfish',
   'Horseshoe',
-  'Orca',
   'Cachalot',
   'Rorqual',
   'Grampus',
