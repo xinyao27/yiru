@@ -16,6 +16,7 @@ import {
 } from '@/components/editor/editor-autosave'
 import {
   clearSelfWrite,
+  getEditorSelfWriteHostId,
   getRecentSelfWrite,
   type RecentSelfWrite
 } from '@/components/editor/editor-self-write-registry'
@@ -665,7 +666,10 @@ export function createExternalWatchEventHandler(
         // reload below; every notification consumer skips dirty files.
       }
       const absolutePath = joinPath(notification.worktreePath, notification.relativePath)
-      const recentSelfWrite = getRecentSelfWrite(absolutePath, target.runtimeEnvironmentId)
+      const recentSelfWrite = getRecentSelfWrite(
+        absolutePath,
+        getEditorSelfWriteHostId(target.runtimeEnvironmentId, target.connectionId)
+      )
       if (recentSelfWrite) {
         scheduleSelfWriteAwareExternalReload(target, notification, matching[0], recentSelfWrite)
         continue
@@ -743,7 +747,10 @@ function scheduleChangedOnDiskMark(
     return
   }
   const absolutePath = joinPath(notification.worktreePath, notification.relativePath)
-  const recentSelfWrite = getRecentSelfWrite(absolutePath, target.runtimeEnvironmentId)
+  const recentSelfWrite = getRecentSelfWrite(
+    absolutePath,
+    getEditorSelfWriteHostId(target.runtimeEnvironmentId, target.connectionId)
+  )
   // Why: the fs event may be the echo of Yiru's own save racing keystrokes
   // typed during the write. Marking on the echo would show a false "changed
   // on disk" banner, so verify disk really differs from our last write.
@@ -797,13 +804,19 @@ function scheduleSelfWriteAwareExternalReload(
         (result.isBinary || result.content !== recentSelfWrite.content) &&
         hasCleanExternalReloadTarget(notification)
       ) {
-        clearSelfWrite(file.filePath, runtimeEnvironmentId)
+        clearSelfWrite(
+          file.filePath,
+          getEditorSelfWriteHostId(runtimeEnvironmentId, target.connectionId)
+        )
         scheduleDebouncedExternalReload(notification)
       }
     })
     .catch(() => {
       if (hasCleanExternalReloadTarget(notification)) {
-        clearSelfWrite(file.filePath, runtimeEnvironmentId)
+        clearSelfWrite(
+          file.filePath,
+          getEditorSelfWriteHostId(runtimeEnvironmentId, target.connectionId)
+        )
         scheduleDebouncedExternalReload(notification)
       }
     })

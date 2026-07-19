@@ -114,6 +114,32 @@ export const getGeneralEditorSearchEntries = createLocalizedCatalog(() => [
     ]
   },
   {
+    title: translate(
+      'auto.components.settings.general.search.languageServer',
+      'Language Server (Experimental)'
+    ),
+    description: translate(
+      'auto.components.settings.general.search.languageServerDescription',
+      'Configure one local language server for diagnostics, completion, and code navigation.'
+    ),
+    keywords: [
+      ...translateSearchKeyword('auto.components.settings.general.search.lsp', 'lsp'),
+      ...translateSearchKeyword(
+        'auto.components.settings.general.search.languageServerKeyword',
+        'language server'
+      ),
+      ...translateSearchKeyword('auto.components.settings.general.search.hover', 'hover'),
+      ...translateSearchKeyword('auto.components.settings.general.search.definition', 'definition'),
+      ...translateSearchKeyword(
+        'auto.components.settings.general.search.diagnostics',
+        'diagnostics'
+      ),
+      ...translateSearchKeyword('auto.components.settings.general.search.completion', 'completion'),
+      ...translateSearchKeyword('auto.components.settings.general.search.references', 'references'),
+      ...translateSearchKeyword('auto.components.settings.general.search.clangd', 'clangd')
+    ]
+  },
+  {
     title: translate('auto.components.settings.general.search.128bc09325', 'Markdown Review Notes'),
     description: translate(
       'auto.components.settings.general.search.694613d47f',

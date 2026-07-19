@@ -247,7 +247,8 @@ function shouldUseSharedControlSubscription(method: string): boolean {
     method === 'session.tabs.subscribeAll' ||
     method === 'accounts.subscribe' ||
     method === 'notifications.subscribe' ||
-    method === 'files.watch'
+    method === 'files.watch' ||
+    method === 'languageServers.events.subscribe'
   )
 }
 

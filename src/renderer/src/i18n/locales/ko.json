@@ -582,6 +582,14 @@
             "de50bef680": "macOS가 Yiru 알림을 차단하고 있습니다"
           }
         }
+      },
+      "MonacoLanguageServerSession": {
+        "restarting": "Restarting language server…"
+      },
+      "MonacoLanguageServerEditFeatures": {
+        "renameTitle": "Rename symbol to “{{value0}}”",
+        "commandDisabled": "Language server commands are not allowed.",
+        "noRenameEdits": "The language server returned no rename edits."
       }
     },
     "hooks": {
@@ -2150,6 +2158,20 @@
             "dismiss": "Dismiss",
             "openSettings": "Open Settings",
             "gotIt": "Got it"
+          },
+          "LanguageServerStatusSegment": {
+            "aria": "Language server: {{value0}}",
+            "tooltip": "Language server — {{value0}}",
+            "title": "Language Server",
+            "configure": "Configure",
+            "idle": "Open a configured source file to start the server on its execution host.",
+            "loadingLogs": "Loading logs…",
+            "noLogs": "No server log output.",
+            "starting": "Starting",
+            "ready": "Ready",
+            "error": "Error",
+            "idleLabel": "Idle",
+            "compactLabel": "LSP: {{value0}}"
           }
         }
       },
@@ -6749,7 +6771,9 @@
             "d2d2d929c0": "Rich Markdown Spellcheck",
             "4497e2e2bb": "Show browser spelling underlines and suggestions while editing rich Markdown.",
             "e61157e926": "편집기 자동 줄 바꿈",
-            "005be5c699": "가로 스크롤 대신 파일 편집기에서 긴 줄을 자동으로 줄 바꿈합니다."
+            "005be5c699": "가로 스크롤 대신 파일 편집기에서 긴 줄을 자동으로 줄 바꿈합니다.",
+            "languageServer": "Language Server (Experimental)",
+            "languageServerDescription": "Configure one local language server for diagnostics, completion, and code navigation."
           }
         },
         "git": {
@@ -8061,6 +8085,23 @@
           "githubReleases": "GitHub 릴리스",
           "testFlight": "TestFlight",
           "androidApk": "Android APK"
+        },
+        "LanguageServerSetting": {
+          "title": "Language Server (Experimental)",
+          "description": "Run one language server on the native, WSL, SSH, or runtime host that owns the code.",
+          "enable": "Enable Language Server",
+          "enableDescription": "Run the configured executable on the code’s execution host when a matching file is open.",
+          "command": "Executable",
+          "commandDescription": "A PATH command available on each execution host, or an absolute host-specific executable path.",
+          "commandRequired": "Enter an executable before opening a matching source file.",
+          "arguments": "Arguments",
+          "argumentsDescription": "One argument per line. Include the server’s stdio flag when it requires one.",
+          "languages": "Monaco Language IDs",
+          "languagesDescription": "Comma-separated IDs such as c, cpp. Only matching editable models are shared.",
+          "localOnly": "Rename and code-action edits require preview; unsolicited edits, file operations, and commands are rejected.",
+          "commandPlaceholder": "clangd",
+          "argumentsPlaceholder": "--stdio\n--background-index",
+          "languagesPlaceholder": "c, cpp"
         }
       },
       "right": {
@@ -10560,7 +10601,8 @@
         "MonacoEditor": {
           "68cb83f4a7": "선택한 텍스트에 메모 추가",
           "fd68ae03b3": "파일에서 검색",
-          "largePasteTooLarge": "붙여넣기 내용이 너무 큽니다."
+          "largePasteTooLarge": "붙여넣기 내용이 너무 큽니다.",
+          "goToDefinition": "Go to Definition"
         },
         "MonacoGutterContextMenu": {
           "7b57b1b468": "원격 URL 복사",
@@ -10918,6 +10960,15 @@
           "copy": "복사",
           "selectAll": "모두 선택",
           "copyPath": "경로 복사"
+        },
+        "LanguageServerWorkspaceEditDialog": {
+          "summary": "Review {{value0}} edits across {{value1}} files. {{value2}} closed files will be written to disk.",
+          "editCount": "{{value0}} edits",
+          "unsaved": " · unsaved buffer",
+          "undoHint": "Open-buffer edits use the editor’s normal save and undo behavior.",
+          "cancel": "Cancel",
+          "apply": "Apply changes",
+          "loading": "Loading preview…"
         }
       },
       "diff": {

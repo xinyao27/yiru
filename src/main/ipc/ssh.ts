@@ -5,6 +5,7 @@ import type { Store } from '../persistence'
 import { SshConnectionStore } from '../ssh/ssh-connection-store'
 import { SshConnectionManager, type SshConnectionCallbacks } from '../ssh/ssh-connection'
 import type { SshChannelMultiplexer } from '../ssh/ssh-channel-multiplexer'
+import type { RemoteHostPlatform } from '../ssh/ssh-remote-platform'
 import { SshRelaySession, type SshRelayAiVaultHostInfo } from '../ssh/ssh-relay-session'
 import { SshPortForwardManager } from '../ssh/ssh-port-forward'
 import type {
@@ -1286,4 +1287,8 @@ export function getSshConnectionStore(): SshConnectionStore | null {
 
 export function getActiveMultiplexer(connectionId: string): SshChannelMultiplexer | undefined {
   return activeSessions.get(connectionId)?.getMux() ?? undefined
+}
+
+export function getActiveSshHostPlatform(connectionId: string): RemoteHostPlatform | null {
+  return activeSessions.get(connectionId)?.getHostPlatform() ?? null
 }

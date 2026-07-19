@@ -66,6 +66,9 @@ import {
   getMonacoAutoHeightForContent,
   isMonacoAutoHeightCapped
 } from './monaco-auto-height'
+import { useMonacoLanguageServer } from './use-monaco-language-server'
+import { createMonacoImportNavigationController } from './monaco-import-navigation'
+import { openEditorNavigationTarget } from './open-editor-navigation-target'
 
 type MonacoEditorProps = {
   fileId: string
@@ -81,6 +84,7 @@ type MonacoEditorProps = {
   revealMatchLength?: number
   markdownDocuments?: MarkdownDocument[]
   worktreeId?: string
+  runtimeEnvironmentId?: string | null
   markdownAnnotationsEnabled?: boolean
   conflictDecorationsEnabled?: boolean
   readOnly?: boolean
@@ -106,6 +110,7 @@ export default function MonacoEditor({
   revealMatchLength,
   markdownDocuments,
   worktreeId,
+  runtimeEnvironmentId,
   markdownAnnotationsEnabled = false,
   conflictDecorationsEnabled = false,
   readOnly = false,
@@ -132,12 +137,28 @@ export default function MonacoEditor({
   // scroll position on unmount. Without this, a pending timer could fire after
   // cleanup and overwrite the correct value with a stale one.
   const scrollThrottleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const propsRef = useRef({ relativePath, language, onSave, onContentChange })
+  const propsRef = useRef({
+    filePath,
+    relativePath,
+    language,
+    worktreeId,
+    runtimeEnvironmentId,
+    onSave,
+    onContentChange
+  })
   // Why: assigning during render keeps the ref current before any event handler
   // or effect reads it, avoiding the one-render stale window that a useEffect
   // would introduce. Refs are mutable and don't trigger re-renders, so this is
   // safe to do unconditionally every render.
-  propsRef.current = { relativePath, language, onSave, onContentChange }
+  propsRef.current = {
+    filePath,
+    relativePath,
+    language,
+    worktreeId,
+    runtimeEnvironmentId,
+    onSave,
+    onContentChange
+  }
   const readOnlyRef = useRef(readOnly)
   readOnlyRef.current = readOnly
   const contentSyncModeRef = useRef<MonacoContentSyncMode>('undoable')
@@ -161,6 +182,14 @@ export default function MonacoEditor({
   )
   const editorFontFamily = settings?.terminalFontFamily || 'monospace'
   const editorWordWrap = settings?.editorWordWrap
+  useMonacoLanguageServer({
+    editorInstance: mountedEditor,
+    filePath,
+    worktreeId,
+    runtimeEnvironmentId,
+    readOnly,
+    settings: settings?.languageServer
+  })
   const estimatedAutoHeight = useMemo(() => {
     if (!autoHeight) {
       return null
@@ -377,6 +406,20 @@ export default function MonacoEditor({
       )
       ensureMarkdownDocCompletionProvider(monaco)
       updateMarkdownCompletionDocuments()
+      const importNavigation = createMonacoImportNavigationController(editorInstance, () => {
+        const current = propsRef.current
+        const ownerWorktreeId = current.worktreeId
+        if (!ownerWorktreeId) {
+          return null
+        }
+        return {
+          filePath: current.filePath,
+          worktreeId: ownerWorktreeId,
+          runtimeEnvironmentId: current.runtimeEnvironmentId,
+          openTarget: (target) =>
+            openEditorNavigationTarget(ownerWorktreeId, current.runtimeEnvironmentId, target)
+        }
+      })
 
       // Why: see comment on contentRef — reconcile the retained model against
       // the current prop before any user interaction so external changes that
@@ -540,6 +583,7 @@ export default function MonacoEditor({
         }
         conflictDecorationsRef.current?.clear()
         conflictDecorationsRef.current = null
+        importNavigation.dispose()
         editorRef.current = null
         setMountedEditor(null)
         setCommentPopover(null)

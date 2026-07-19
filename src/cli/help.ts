@@ -8,7 +8,7 @@ const ROOT_HELP_TEXT = `yiru
 Usage: yiru <command> [options]
 
 Startup:
-  open                      Launch Yiru and wait for the runtime to be reachable
+  open [directory]          Open Yiru or open a directory as a workspace
   serve                     Start a headless Yiru runtime server
   status                    Show app/runtime/graph readiness
 
@@ -193,7 +193,8 @@ Browser Automation:
   exec                      Run any agent-browser command (--command "...")
 
 Common Commands:
-  yiru open [--json]
+  yiru open [directory] [--json]
+  yiru .
   yiru serve [--port <port>] [--pairing-address <host>] [--mobile-pairing] [--no-pairing] [--project-root <path>] [--recipe-json] [--json]
   yiru status [--json]
   yiru diagnostics memory [--json]
@@ -259,6 +260,7 @@ Output Options:
 
 Behavior:
   Most commands require a running Yiru runtime. If Yiru is not open yet, run \`yiru open\` first.
+  A single bare directory is shorthand for open, so \`yiru .\` opens the current directory.
   Remote runtime access can also be supplied with YIRU_PAIRING_CODE or YIRU_ENVIRONMENT.
   Use selectors for discovery and handles for repeated live terminal operations.
 
@@ -302,6 +304,8 @@ Browser Options:
 
 Examples:
   $ yiru open
+  $ yiru .
+  $ yiru open ../another-project
   $ yiru status --json
   $ yiru diagnostics memory --json
   $ yiru repo list

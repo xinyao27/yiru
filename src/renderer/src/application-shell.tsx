@@ -83,6 +83,7 @@ import { CrashReportDialog } from './components/crash-report/crash-report-dialog
 import NewWorkspaceComposerModal from './components/new-workspace-composer-modal'
 import { RecoverableRenderErrorBoundary } from './components/error-boundaries/recoverable-render-error-boundary'
 import { ConfirmationDialogProvider } from './components/confirmation-dialog'
+import { LanguageServerWorkspaceEditDialog } from './components/editor/language-server-workspace-edit-dialog'
 import { LinkRoutingPreferenceDialogProvider } from './components/link-routing-preference-dialog'
 import RecentTabSwitcher from './components/tab-bar/recent-tab-switcher'
 import { useGitStatusPolling } from './components/right-sidebar/use-git-status-polling'
@@ -2290,6 +2291,7 @@ function App(): React.JSX.Element {
           <LinkRoutingPreferenceDialogProvider>
             <WorkspacePortScanner enabled={workspaceSessionReady} />
             <SpoolControlRequestDialog />
+            <LanguageServerWorkspaceEditDialog />
             {/* Why: leaf-mounted retention sync keeps agent-status retention
             subscriptions from re-rendering the App tree. */}
             <RetainedAgentsSyncGate />

@@ -175,27 +175,25 @@ export class RuntimeClient {
 
   async openYiru(timeoutMs = 15_000): Promise<RuntimeRpcSuccess<CliStatusResult>> {
     const initial = await this.getCliStatus()
-    if (this.remotePairing) {
-      return initial
+    if (!this.remotePairing) {
+      // Why: a blocked runtime can't open a window, so spawning the app would
+      // only hit the single-instance lock and exit — bail before launching.
+      if (initial.result.app.desktopWindowStatus === 'blocked') {
+        throwDesktopActivationBlocked()
+      }
+      launchYiruApp()
     }
-
-    // Why: a blocked runtime can't open a window, so spawning the app would
-    // only hit the single-instance lock and exit — bail before launching.
-    if (initial.result.app.desktopWindowStatus === 'blocked') {
-      throwDesktopActivationBlocked()
-    }
-    launchYiruApp()
-    if (initial.result.app.desktopWindowStatus === 'available') {
+    if (isOpenYiruReady(initial, this.remotePairing !== null)) {
       return initial
     }
 
     const startedAt = Date.now()
     while (Date.now() - startedAt < timeoutMs) {
       const status = await this.getCliStatus()
-      if (status.result.app.desktopWindowStatus === 'blocked') {
+      if (!this.remotePairing && status.result.app.desktopWindowStatus === 'blocked') {
         throwDesktopActivationBlocked()
       }
-      if (status.result.app.desktopWindowStatus === 'available') {
+      if (isOpenYiruReady(status, this.remotePairing !== null)) {
         return status
       }
       await delay(250)
@@ -203,9 +201,20 @@ export class RuntimeClient {
 
     throw new RuntimeClientError(
       'runtime_open_timeout',
-      'Timed out waiting for a Yiru desktop window. The runtime may still be running headlessly.'
+      this.remotePairing
+        ? 'Timed out waiting for the remote Yiru runtime to become ready.'
+        : 'Timed out waiting for a ready Yiru desktop window. The runtime may still be running headlessly.'
     )
   }
+}
+
+function isOpenYiruReady(status: RuntimeRpcSuccess<CliStatusResult>, remote: boolean): boolean {
+  // Why: desktop availability can precede renderer graph/store attachment on a
+  // cold launch; follow-up workspace RPCs are safe only once both are ready.
+  return (
+    status.result.graph.state === 'ready' &&
+    (remote || status.result.app.desktopWindowStatus === 'available')
+  )
 }
 
 function throwDesktopActivationBlocked(): never {

@@ -8,6 +8,7 @@ import type { AppIdentity } from '../shared/app-identity'
 import type { CliInstallStatus } from '../shared/cli-install-types'
 import type { AgentHookInstallStatus } from '../shared/agent-hook-types'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
+import type { LanguageServerEvent } from '../shared/language-server'
 import type { ProjectExecutionRuntimeResolution } from '../shared/project-execution-runtime'
 import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
 import type { SleepingAgentLaunchConfig } from '../shared/agent-session-resume'
@@ -1562,6 +1563,21 @@ const api = {
       return () => ipcRenderer.removeListener('settings:changed', listener)
     }
   },
+
+  languageServers: {
+    start: (args) => ipcRenderer.invoke('languageServers:start', args),
+    send: (args) => ipcRenderer.invoke('languageServers:send', args),
+    stop: (args) => ipcRenderer.invoke('languageServers:stop', args),
+    resolveDocumentUri: (args) => ipcRenderer.invoke('languageServers:resolveDocumentUri', args),
+    resolveLocation: (args) => ipcRenderer.invoke('languageServers:resolveLocation', args),
+    getLogs: (args) => ipcRenderer.invoke('languageServers:getLogs', args),
+    onEvent: (callback: (event: LanguageServerEvent) => void): (() => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, payload: LanguageServerEvent): void =>
+        callback(payload)
+      ipcRenderer.on('languageServers:event', listener)
+      return () => ipcRenderer.removeListener('languageServers:event', listener)
+    }
+  } satisfies PreloadApi['languageServers'],
 
   localhostWorktreeLabels: {
     register: (args: LocalhostWorktreeLabelRoute): Promise<LocalhostWorktreeLabelResult> =>

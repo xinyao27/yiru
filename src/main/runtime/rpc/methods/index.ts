@@ -3,6 +3,7 @@ import { STATUS_METHODS } from './status'
 import { AI_VAULT_METHODS } from './ai-vault'
 import { AUTOMATION_METHODS } from './automations'
 import { REPO_METHODS } from './repo'
+import { WORKSPACE_METHODS } from './workspace'
 import { WORKTREE_METHODS } from './worktree'
 import { TERMINAL_METHODS } from './terminal'
 import { BROWSER_CORE_METHODS } from './browser-core'
@@ -33,6 +34,7 @@ import { HOST_CAPABILITY_METHODS } from './host-capabilities'
 import { EMULATOR_METHODS } from './emulator'
 import { PAIRING_METHODS } from './pairing'
 import { SPOOL_HOST_METHODS } from './spool-host'
+import { LANGUAGE_SERVER_METHODS } from './language-servers'
 
 // Why: a flat manifest keeps registration order explicit and provides one
 // grep-point for "what methods does the RPC server expose?" — useful when
@@ -42,6 +44,7 @@ export const ALL_RPC_METHODS: readonly RpcAnyMethod[] = [
   ...AI_VAULT_METHODS,
   ...AUTOMATION_METHODS,
   ...REPO_METHODS,
+  ...WORKSPACE_METHODS,
   ...WORKTREE_METHODS,
   ...TERMINAL_METHODS,
   ...BROWSER_CORE_METHODS,
@@ -71,5 +74,6 @@ export const ALL_RPC_METHODS: readonly RpcAnyMethod[] = [
   ...CLIENT_UI_METHODS,
   ...EMULATOR_METHODS,
   ...PAIRING_METHODS,
-  ...SPOOL_HOST_METHODS
+  ...SPOOL_HOST_METHODS,
+  ...LANGUAGE_SERVER_METHODS
 ]
