@@ -94,6 +94,7 @@
     "@dnd-kit/core": "catalog:",
     "@dnd-kit/sortable": "catalog:",
     "@electron-toolkit/tsconfig": "catalog:",
+    "@electron/asar": "catalog:",
     "@electron/rebuild": "catalog:",
     "@monaco-editor/react": "catalog:",
     "@pierre/diffs": "catalog:",

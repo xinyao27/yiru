@@ -24,6 +24,9 @@ catalogs:
     '@electron-toolkit/utils':
       specifier: ^4.0.0
       version: 4.0.0
+    '@electron/asar':
+      specifier: ^3.4.1
+      version: 3.4.1
     '@electron/rebuild':
       specifier: ^4.2.0
       version: 4.2.0
@@ -628,6 +631,9 @@ importers:
       '@electron-toolkit/tsconfig':
         specifier: 'catalog:'
         version: 2.0.0(@types/node@26.1.1)
+      '@electron/asar':
+        specifier: 'catalog:'
+        version: 3.4.1
       '@electron/rebuild':
         specifier: 'catalog:'
         version: 4.2.0(supports-color@8.1.1)

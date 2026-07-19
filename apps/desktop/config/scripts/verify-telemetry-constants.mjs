@@ -33,11 +33,8 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 
-// Why @electron/asar: canonical replacement for the deprecated `asar` package.
-// It's transitively available via electron-builder (and pnpm's
-// `shamefully-hoist=true` in `.npmrc` flattens it into the root
-// `node_modules`). If electron-builder ever drops it, promote this to a
-// direct devDependency in package.json.
+// Why: release verification must resolve @electron/asar under isolated pnpm
+// layouts, so the desktop package declares it directly instead of relying on hoisting.
 import { extractFile, listPackage } from '@electron/asar'
 
 // Why resolve from import.meta.url instead of cwd: a release runner (or a
