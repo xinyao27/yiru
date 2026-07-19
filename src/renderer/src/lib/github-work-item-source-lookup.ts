@@ -1,5 +1,5 @@
 import type { GitHubWorkItem, GitHubWorkItemDetails } from '../../../shared/types'
-import type { TaskSourceContext } from '../../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../../shared/project-source-context'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
 import {
   getGitHubRuntimeRepoId,
@@ -10,23 +10,23 @@ import {
 type GitHubWorkItemLookupArgs = {
   repoPath: string
   repoId: string
-  sourceContext?: TaskSourceContext | null
+  sourceContext?: ProjectSourceContext | null
   number: number
-  type?: 'issue' | 'pr'
+  type?: 'pr'
 }
 
 type GitHubWorkItemByOwnerRepoLookupArgs = GitHubWorkItemLookupArgs & {
   owner: string
   repo: string
-  type: 'issue' | 'pr'
+  type: 'pr'
 }
 
 type GitHubWorkItemDetailsLookupArgs = {
   repoPath: string
   repoId: string
-  sourceContext?: TaskSourceContext | null
+  sourceContext?: ProjectSourceContext | null
   number: number
-  type: 'issue' | 'pr'
+  type: 'pr'
 }
 
 function runtimeRepoId(args: Pick<GitHubWorkItemLookupArgs, 'repoId' | 'sourceContext'>): string {
@@ -107,7 +107,6 @@ export function lookupGitHubWorkItemDetailsForSource(
   return window.api.gh.workItemDetails({
     repoPath: args.repoPath,
     repoId: args.repoId,
-    sourceContext,
     number: args.number,
     type: args.type
   })

@@ -78,7 +78,6 @@ import {
 } from '@/lib/floating-workspace-terminal-actions'
 import { createFloatingWorkspaceTourInteractionSnapshot } from '@/lib/floating-workspace-tour-interaction-snapshot'
 import { requestScrollToCurrentWorkspaceRevealAndRename } from '@/lib/scroll-to-current-workspace-status'
-import { OPEN_WORKSPACE_BOARD_EVENT } from './components/sidebar/use-workspace-board-panel'
 import { WorkspacePortScanner } from './components/ports/workspace-port-scanner'
 import { CrashReportDialog } from './components/crash-report/crash-report-dialog'
 import NewWorkspaceComposerModal from './components/new-workspace-composer-modal'
@@ -174,7 +173,6 @@ import {
   ModifierDoubleTapDetector,
   toModifierDoubleTapEvent
 } from '../../shared/modifier-double-tap-detector'
-import { isGitRepoKind } from '../../shared/repo-kind'
 import { showTerminalShortcutCaptureNotification } from '@/lib/terminal-shortcut-capture-notification'
 import { resolveMountedLazyModalIds, type LazyModalId } from './lazy-modal-mount-state'
 import { translate } from '@/i18n/i18n'
@@ -333,7 +331,6 @@ const Landing = lazy(() => import('./components/landing-page'))
 const WorktreeCreationPanel = lazy(
   () => import('./components/worktree-creation/worktree-creation-panel')
 )
-const TaskPage = lazy(() => import('./components/task-page'))
 const AutomationsPage = lazy(() => import('./components/automations/automations-page'))
 const ActivityPrototypePage = lazy(() => import('./components/activity/activity-prototype-page'))
 const Settings = lazy(() => import('./components/settings/settings-page'))
@@ -1483,9 +1480,8 @@ function App(): React.JSX.Element {
         hideAutomationGeneratedWorkspaces,
         showDotfilesByWorktree,
         filterRepoIds,
-        // Why: persist the active view so a reload restores it. openTaskPage etc.
-        // mutate activeView directly (not via setActiveView), so the value-keyed
-        // writer is what catches every transition.
+        // Why: persist the active view so a reload restores transitions made by
+        // feature-specific actions that do not call setActiveView directly.
         activeView,
         // Why: rides the same debounced save so dashboard auto-acks (which fire
         // on focus/visibility) and the in-memory ack cleanup paths in
@@ -1575,7 +1571,7 @@ function App(): React.JSX.Element {
     activeView !== 'activity' &&
     activeView !== 'space' &&
     activeView !== 'skills'
-  // Why: Tasks/Landing keep the full titlebar only when the sidebar is
+  // Why: Landing keep the full titlebar only when the sidebar is
   // collapsed; with it open, mirror workspace view so titlebar-left sits flush
   // above nav. Creation layout suppresses the full-width titlebar.
   const stackedSidebarOpen =
@@ -1862,32 +1858,11 @@ function App(): React.JSX.Element {
         return
       }
 
-      if (matchShortcut('workspace.openBoard') && activeView !== 'settings') {
-        input.preventDefault()
-        notifyTerminalCapture('workspace.openBoard')
-        const store = useAppStore.getState()
-        store.setSidebarOpen(true)
-        window.dispatchEvent(new CustomEvent(OPEN_WORKSPACE_BOARD_EVENT))
-        return
-      }
-
       // Why: Cmd/Ctrl+N is handled via the main-process before-input-event
       // allowlist (see window-shortcut-policy.ts / use-ipc-events.ts) so it works
       // globally — including when focus lives inside the markdown rich editor
       // (contentEditable) or a browser guest webContents, both of which bypass
       // this renderer-side window keydown listener.
-
-      // Why: full-page navigation surfaces should not reveal the right sidebar;
-      // they are designed as distraction-free content areas.
-      if (matchShortcut('view.tasks') && activeView !== 'settings') {
-        const store = useAppStore.getState()
-        if (store.repos.some((repo) => isGitRepoKind(repo))) {
-          input.preventDefault()
-          notifyTerminalCapture('view.tasks')
-          store.openTaskPage()
-        }
-        return
-      }
 
       if (!canRevealRightSidebar) {
         return
@@ -2486,7 +2461,6 @@ function App(): React.JSX.Element {
                             >
                               {activeView === 'settings' ? <Settings /> : null}
                               {activeView === 'skills' ? <SkillsPage /> : null}
-                              {activeView === 'tasks' ? <TaskPage /> : null}
                               {activeView === 'automations' ? <AutomationsPage /> : null}
                               {activeView === 'activity' ? <ActivityPrototypePage /> : null}
                               {activeView === 'space' ? <WorkspaceSpacePage /> : null}

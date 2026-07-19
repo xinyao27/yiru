@@ -10,6 +10,5 @@
       "zod": ["./node_modules/zod"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["**/*.test.ts", "**/*.test.tsx"]
+  "include": ["**/*.ts", "**/*.tsx"]
 }

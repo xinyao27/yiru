@@ -1,6 +1,6 @@
 import { sha256 } from './sha256'
 
-export type YiruHookScriptKind = 'setup' | 'archive' | 'issueCommand' | 'vmRecipe'
+export type YiruHookScriptKind = 'setup' | 'archive' | 'vmRecipe'
 
 export async function hashYiruHookScript(content: string): Promise<string> {
   const normalized = content.trim()

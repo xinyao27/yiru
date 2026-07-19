@@ -317,8 +317,8 @@ const DashboardAgentRow = React.memo(function DashboardAgentRow({
         />
         {/* Why: state indicator lives in the leading gutter so the user's
             eye can sweep one column and know which rows are working,
-            waiting, or done at a glance — the list-view convention (Linear,
-            GitHub issues, JetBrains TODO). Replaces the earlier left accent
+            waiting, or done at a glance — the common list-view convention (
+            notification inboxes and IDE TODO lists). Replaces the earlier left accent
             bar + right-side dot combo, which double-encoded state. Size md
             gives the glyph enough presence for the leading slot without
             overpowering the prompt text. */}

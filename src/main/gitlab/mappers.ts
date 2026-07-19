@@ -1,10 +1,4 @@
-import type {
-  CheckStatus,
-  GitLabIssueInfo,
-  GitLabWorkItem,
-  MRInfo,
-  MRState
-} from '../../shared/types'
+import type { CheckStatus, GitLabWorkItem, MRInfo, MRState } from '../../shared/types'
 import {
   mapGitLabPipelineJobStatusToCheckStatus,
   mapGitLabPipelineJobStatusToConclusion
@@ -41,42 +35,6 @@ export function mapMRState(state: string, isDraft?: boolean, title?: string): MR
     return 'draft'
   }
   return 'opened'
-}
-
-// ── Issue mapping ────────────────────────────────────────────────────
-// glab issue view returns: { iid, title, state, web_url, labels: [{name}] | string[] }
-// `state` is already lowercase 'opened' | 'closed' so the mapping is
-// mostly a normalization shim.
-
-export function mapGitLabIssueInfo(data: {
-  iid?: number
-  number?: number
-  title: string
-  state: string
-  web_url?: string
-  url?: string
-  labels?: { name: string }[] | string[]
-  updated_at?: string
-  description?: string | null
-  author?: { username?: string | null; avatar_url?: string | null } | null
-}): GitLabIssueInfo {
-  // Why: glab CLI flips between exposing `iid` and `number` depending on
-  // command + --output flag combination. Accept both.
-  const number = data.iid ?? data.number ?? 0
-  const labels = (data.labels ?? []).map((l) => (typeof l === 'string' ? l : l.name))
-  return {
-    number,
-    title: data.title,
-    state: data.state?.toLowerCase() === 'opened' ? 'opened' : 'closed',
-    url: data.web_url ?? data.url ?? '',
-    labels,
-    ...(data.updated_at ? { updatedAt: data.updated_at } : {}),
-    // Why: same description / author optional plumbing as mapMRInfo —
-    // list payloads strip these so callers can tell "absent" from "blank".
-    ...(typeof data.description === 'string' ? { description: data.description } : {}),
-    ...(data.author?.username ? { author: data.author.username } : {}),
-    ...(data.author?.avatar_url ? { authorAvatarUrl: data.author.avatar_url } : {})
-  }
 }
 
 // ── MR info mapping ──────────────────────────────────────────────────
@@ -241,58 +199,21 @@ export function mapMRToWorkItem(
   }
 }
 
-type GitLabIssueRawForWorkItem = {
-  id?: number
-  iid?: number
-  title: string
-  state: string
-  web_url?: string
-  url?: string
-  updated_at?: string
-  author?: { username?: string | null } | null
-  labels?: ({ name: string } | string)[]
-}
-
-export function mapIssueToWorkItem(
-  data: GitLabIssueRawForWorkItem,
-  repoId: string,
-  projectRef?: GitLabWorkItem['projectRef']
-): GitLabWorkItem {
-  const labels = (data.labels ?? []).map((l) => (typeof l === 'string' ? l : l.name))
-  const number = data.iid ?? 0
-  // Issues only ever resolve to 'opened' or 'closed' (issue state space is
-  // narrower than MRs); coerce defensively without inventing values.
-  const state = data.state?.toLowerCase() === 'opened' ? 'opened' : 'closed'
-  return {
-    id: `gitlab-issue-${data.id ?? `${repoId}-${number}`}`,
-    type: 'issue',
-    number,
-    title: data.title,
-    state,
-    url: data.web_url ?? data.url ?? '',
-    labels,
-    updatedAt: data.updated_at ?? '',
-    author: data.author?.username ?? null,
-    repoId,
-    ...(projectRef ? { projectRef } : {})
-  }
-}
-
 function classifyPipelineString(status: string): CheckStatus {
-  const s = status.toLowerCase()
-  if (s === 'success') {
+  const normalized = status.toLowerCase()
+  if (normalized === 'success') {
     return 'success'
   }
-  if (s === 'failed') {
+  if (normalized === 'failed') {
     return 'failure'
   }
   if (
-    s === 'created' ||
-    s === 'pending' ||
-    s === 'running' ||
-    s === 'waiting_for_resource' ||
-    s === 'preparing' ||
-    s === 'scheduled'
+    normalized === 'created' ||
+    normalized === 'pending' ||
+    normalized === 'running' ||
+    normalized === 'waiting_for_resource' ||
+    normalized === 'preparing' ||
+    normalized === 'scheduled'
   ) {
     return 'pending'
   }

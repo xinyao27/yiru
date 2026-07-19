@@ -3,7 +3,6 @@ import { getConnectionId } from '@/lib/connection-context'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
 import { findGithubPrWorkspaceAttachment } from '@/lib/github-work-item-workspace-attachment'
 import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
-import { launchWorkItemDirect } from '@/lib/launch-work-item-direct'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
 import { CLIENT_PLATFORM } from '@/lib/new-workspace'
 import { planAgentCliArgsSuffix } from '@/lib/tui-agent-startup'
@@ -39,11 +38,6 @@ type StartFixChecksAgentArgs = {
   openModalFallback?: () => void
 }
 
-type SavedAgentOverrideResult =
-  | { kind: 'agent'; agent: TuiAgent }
-  | { kind: 'launch-default' }
-  | { kind: 'blocked' }
-
 async function detectAgentsForConnection(
   connectionId: string | null | undefined
 ): Promise<TuiAgent[]> {
@@ -58,26 +52,6 @@ function isAgentAvailable(agent: TuiAgent, detectedAgents: TuiAgent[]): boolean 
     detectedAgents.includes(agent) &&
     isTuiAgentEnabled(agent, useAppStore.getState().settings?.disabledTuiAgents)
   )
-}
-
-async function resolveSavedAgentOverride(
-  savedAgent: TuiAgent | null | undefined,
-  connectionId: string | null | undefined
-): Promise<SavedAgentOverrideResult> {
-  if (!savedAgent) {
-    return { kind: 'launch-default' }
-  }
-  const detectedAgents = await detectAgentsForConnection(connectionId)
-  if (!isAgentAvailable(savedAgent, detectedAgents)) {
-    toast.error(
-      translate(
-        'auto.lib.fix.checks.agent.launch.4c7f783a7a',
-        'Saved checks agent is not available on this workspace host.'
-      )
-    )
-    return { kind: 'blocked' }
-  }
-  return { kind: 'agent', agent: savedAgent }
 }
 
 async function pickExistingWorktreeAgent(
@@ -232,19 +206,8 @@ export async function startFixChecksAgent(args: StartFixChecksAgentArgs): Promis
     return false
   }
 
-  const agentOverride = await resolveSavedAgentOverride(savedAgentId, repo?.connectionId)
-  if (agentOverride.kind === 'blocked') {
-    return false
-  }
-
-  return await launchWorkItemDirect({
-    item: { ...args.item, pasteContent: commandInput },
-    repoId: args.repoId,
-    launchSource: args.launchSource,
-    telemetrySource: args.telemetrySource,
-    promptDelivery: 'submit-after-ready',
-    agentArgs: recipe.agentArgs,
-    ...(agentOverride.kind === 'agent' ? { agentOverride: agentOverride.agent } : {}),
-    openModalFallback: args.openModalFallback
-  })
+  // Why: without an attached workspace, let the PR-aware composer resolve the
+  // review start point instead of maintaining a second task-launch pipeline.
+  args.openModalFallback()
+  return true
 }

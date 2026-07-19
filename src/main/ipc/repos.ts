@@ -762,15 +762,13 @@ const ProjectHostSetupDeleteIpcArgs = z.object({
   setupId: z.string().min(1)
 })
 
-const FolderWorkspaceLinkedTaskArgs = z
+const FolderWorkspaceLinkedReviewArgs = z
   .object({
-    provider: z.enum(['github', 'gitlab', 'linear', 'jira']),
-    type: z.enum(['issue', 'pr', 'mr']),
+    provider: z.enum(['github', 'gitlab']),
+    type: z.enum(['pr', 'mr']),
     number: z.number().finite(),
     title: z.string().min(1),
     url: z.string().min(1),
-    linearIdentifier: z.string().min(1).optional(),
-    jiraIdentifier: z.string().min(1).optional(),
     repoId: z.string().min(1).optional()
   })
   .nullable()
@@ -780,7 +778,7 @@ const FolderWorkspaceCreateArgs = z.object({
   name: z.string().optional(),
   folderPath: z.string().nullable().optional(),
   connectionId: z.string().nullable().optional(),
-  linkedTask: FolderWorkspaceLinkedTaskArgs.optional(),
+  linkedReview: FolderWorkspaceLinkedReviewArgs.optional(),
   createdWithAgent: z.string().refine(isTuiAgent).optional(),
   pendingFirstAgentMessageRename: z.boolean().optional()
 })
@@ -790,7 +788,7 @@ const FolderWorkspaceUpdateArgs = z.object({
   updates: z.object({
     name: z.string().optional(),
     folderPath: z.string().optional(),
-    linkedTask: FolderWorkspaceLinkedTaskArgs.optional(),
+    linkedReview: FolderWorkspaceLinkedReviewArgs.optional(),
     comment: z.string().optional(),
     isArchived: z.boolean().optional(),
     isUnread: z.boolean().optional(),
@@ -1989,7 +1987,7 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
             | 'worktreeBasePath'
             | 'kind'
             | 'symlinkPaths'
-            | 'issueSourcePreference'
+            | 'forgeRemotePreference'
             | 'forkSyncMode'
             | 'externalWorktreeVisibility'
             | 'externalWorktreeVisibilityPromptDismissedAt'
@@ -2009,18 +2007,18 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
       // Why: validate the persisted preference string at the IPC boundary
       // — the TypeScript signature is erased at runtime, and a preload
       // version skew or renderer bug could otherwise persist a garbage
-      // string that silently collapses to 'auto' in `resolveIssueSource`
-      // (see gh-utils.ts#resolveIssueSource). Strip rather than throw so
+      // string that silently collapses to 'auto' in remote selection.
+      // Strip rather than throw so
       // other valid fields in the same call still persist.
       const updates = { ...args.updates }
       if (
-        'issueSourcePreference' in updates &&
-        updates.issueSourcePreference !== undefined &&
-        updates.issueSourcePreference !== 'upstream' &&
-        updates.issueSourcePreference !== 'origin' &&
-        updates.issueSourcePreference !== 'auto'
+        'forgeRemotePreference' in updates &&
+        updates.forgeRemotePreference !== undefined &&
+        updates.forgeRemotePreference !== 'upstream' &&
+        updates.forgeRemotePreference !== 'origin' &&
+        updates.forgeRemotePreference !== 'auto'
       ) {
-        delete updates.issueSourcePreference
+        delete updates.forgeRemotePreference
       }
       if (
         'forkSyncMode' in updates &&
@@ -2036,7 +2034,7 @@ export function registerRepoHandlers(mainWindow: BrowserWindow, store: Store): v
       // that persists a non-`string[]` value (e.g. `[42, null]`, a bare
       // string) would throw inside the worktree-create path with no UI
       // signal. Strip invalid shapes at the boundary the same way
-      // `issueSourcePreference` is validated above.
+      // `forgeRemotePreference` is validated above.
       if ('symlinkPaths' in updates && updates.symlinkPaths !== undefined) {
         const v = updates.symlinkPaths as unknown
         if (!Array.isArray(v) || !v.every((e) => typeof e === 'string')) {

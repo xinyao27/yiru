@@ -4,7 +4,7 @@ import {
   isMobileTuiAgent,
   MOBILE_TUI_AGENT_AUTO_PICK_ORDER,
   MOBILE_TUI_AGENT_LABELS
-} from '../tasks/mobile-tui-agents'
+} from '../workspace-create/mobile-tui-agents'
 
 export type MobileNewTabAgentSettings = {
   defaultTuiAgent?: TuiAgent | 'blank' | null

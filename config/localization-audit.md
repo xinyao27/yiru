@@ -88,7 +88,7 @@ Recommended migration order:
 2. Settings shell, Settings search metadata, and Appearance.
 3. App shell, sidebars, titlebar, status bar, command surfaces, and global
    dialogs/toasts.
-4. Task pages, source control, hosted review, and provider-specific UI.
+4. Source control, hosted review, and provider-specific UI.
 5. Terminal chrome, onboarding, feature tips, mobile, browser, and remaining
    secondary surfaces.
 

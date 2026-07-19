@@ -9,17 +9,11 @@ import {
   normalizeTuiAgentEnvRecord
 } from '../../../../shared/tui-agent-launch-defaults'
 import { isTuiAgent } from '../../../../shared/tui-agent-config'
-import { isTaskProvider } from '../../../../shared/task-providers'
 import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent-selection'
 import { normalizePRBotAuthorOverrides } from '../../../../shared/pr-bot-author-overrides'
 import { normalizeWorktreeCardProperties } from '../../../../shared/worktree-card-properties'
-import type { TaskProvider } from '../../../../shared/types'
-
 const NullableString = z.string().nullable()
 const StringArray = z.array(z.string())
-const TaskProviderParam = z.custom<TaskProvider>(isTaskProvider, {
-  message: 'Unknown task provider'
-})
 const FeatureTipIds = z.array(z.custom(isFeatureTipId, { message: 'Unknown feature tip id' }))
 const UnknownRecord = z.record(z.string(), z.unknown())
 const UnknownRecordArray = z.array(UnknownRecord)
@@ -27,8 +21,6 @@ const WorktreeCardPropertyParam = z.enum([
   'status',
   'unread',
   'branch',
-  'issue',
-  'linear-issue',
   'automation',
   'comment',
   'ports',
@@ -57,16 +49,6 @@ const WorkspaceStatusDefinition = z.object({
   color: z.string().optional(),
   icon: z.string().optional()
 })
-const TaskResumeState = z
-  .object({
-    githubMode: z.enum(['items', 'project']).optional(),
-    githubItemsPreset: z.string().nullable().optional(),
-    githubItemsQuery: z.string().optional(),
-    githubProjectHiddenFieldIdsByView: z.record(z.string(), z.array(z.string())).optional(),
-    linearPreset: z.enum(['assigned', 'created', 'all', 'completed']).optional(),
-    linearQuery: z.string().optional()
-  })
-  .strict()
 const WorkspaceCleanupDismissal = z
   .object({
     worktreeId: z.string(),
@@ -105,26 +87,6 @@ export const FeatureInteractionIdParam = z.custom<FeatureInteractionId>(isFeatur
 export const PRBotAuthorOverrideUpdate = z
   .object({ author: z.string(), isBot: z.boolean() })
   .strict()
-const GitHubProjectRef = z
-  .object({
-    owner: z.string(),
-    ownerType: z.enum(['organization', 'user']),
-    number: z.number().int()
-  })
-  .strict()
-const GitHubProjectSettings = z
-  .object({
-    pinned: z.array(GitHubProjectRef),
-    recent: z.array(
-      GitHubProjectRef.extend({
-        lastOpenedAt: z.string()
-      }).strict()
-    ),
-    lastViewByProject: z.record(z.string(), z.object({ viewId: z.string() }).strict()),
-    activeProject: GitHubProjectRef.nullable()
-  })
-  .strict()
-
 export const SettingsUpdate = z
   .object({
     defaultTuiAgent: z
@@ -145,17 +107,9 @@ export const SettingsUpdate = z
       .unknown()
       .transform((value) => normalizeTuiAgentEnvRecord(value))
       .optional(),
-    defaultTaskSource: TaskProviderParam.optional(),
-    visibleTaskProviders: z.array(TaskProviderParam).optional(),
-    defaultTaskViewPreset: z
-      .enum(['issues', 'my-issues', 'prs', 'my-prs', 'review', 'all'])
-      .optional(),
     agentStatusHooksEnabled: z.boolean().optional(),
-    defaultRepoSelection: z.array(z.string()).nullable().optional(),
-    defaultLinearTeamSelection: z.array(z.string()).nullable().optional(),
     minimaxGroupId: z.string().optional(),
     minimaxUsageModels: z.string().optional(),
-    githubProjects: GitHubProjectSettings.optional(),
     prBotAuthorOverrides: z
       .unknown()
       .transform((value) => normalizePRBotAuthorOverrides(value))
@@ -199,9 +153,6 @@ export const UiUpdate = z
     worktreeCardProperties: WorktreeCardProperties.optional(),
     agentActivityDisplayMode: AgentActivityDisplayMode.optional(),
     workspaceStatuses: z.array(WorkspaceStatusDefinition).optional(),
-    workspaceBoardOpacity: z.number().finite().optional(),
-    workspaceBoardColumnWidth: z.number().finite().optional(),
-    syncTaskStatusFromWorkspaceBoard: z.boolean().optional(),
     _workspaceStatusesDefaultOrderMigrated: z.boolean().optional(),
     _workspaceStatusesReorderedDefaultRepaired: z.boolean().optional(),
     _workspaceStatusesDefaultWorkflowMigrated: z.boolean().optional(),
@@ -254,7 +205,6 @@ export const UiUpdate = z
     sidekickId: z.string().optional(),
     customSidekicks: UnknownRecordArray.optional(),
     sidekickSize: z.number().finite().optional(),
-    taskResumeState: TaskResumeState.optional(),
     workspaceCleanup: WorkspaceCleanup.optional(),
     featureTipsSeenIds: FeatureTipIds.optional(),
     featureInteractions: FeatureInteractions.optional(),

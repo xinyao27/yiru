@@ -4,9 +4,7 @@ import { useAppStore } from '@/store'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
 import { hasFeatureInteraction } from '../../../../shared/feature-interactions'
 import { checkRuntimeHooks } from '@/runtime/runtime-hooks-client'
-import { getLocalPreflightContext, localPreflightContextKey } from '@/lib/local-preflight-context'
 import { hasEffectiveSetupCommand } from '@/lib/setup-script-status'
-import { getProviderRuntimeContextKey } from '@/lib/provider-runtime-context'
 import {
   COMPUTER_USE_SKILL_NAME,
   YIRU_CLI_SKILL_NAME,
@@ -21,7 +19,6 @@ import {
   getFeatureWallSetupProgress,
   type FeatureWallSetupProgress
 } from '../feature-wall/feature-wall-setup-progress'
-import { deriveIntegrationConnectionStatus } from '../feature-wall/use-integration-connection-status'
 import { useSetupGuideBrowserMilestoneProgress } from './setup-guide-browser-milestone-progress'
 import {
   getComputerUsePermissionSetupState,
@@ -45,26 +42,9 @@ export function useSetupGuideProgress(
   const settings = useAppStore((s) => s.settings)
   const featureInteractions = useAppStore((s) => s.featureInteractions)
   const worktreesByRepo = useAppStore((s) => s.worktreesByRepo)
-  const preflightStatus = useAppStore((s) => s.preflightStatus)
-  const preflightStatusChecked = useAppStore((s) => s.preflightStatusChecked)
-  const preflightStatusContextKey = useAppStore((s) => s.preflightStatusContextKey)
-  const preflightStatusError = useAppStore((s) => s.preflightStatusError)
-  const preflightStatusLoading = useAppStore((s) => s.preflightStatusLoading)
-  const refreshPreflightStatus = useAppStore((s) => s.refreshPreflightStatus)
-  const activeSkillRuntime = useActiveProjectSkillRuntime()
-  const linearStatus = useAppStore((s) => s.linearStatus)
-  const linearStatusChecked = useAppStore((s) => s.linearStatusChecked)
-  const linearStatusContextKey = useAppStore((s) => s.linearStatusContextKey)
-  const checkLinearConnection = useAppStore((s) => s.checkLinearConnection)
-  const jiraStatus = useAppStore((s) => s.jiraStatus)
-  const jiraStatusChecked = useAppStore((s) => s.jiraStatusChecked)
-  const jiraStatusContextKey = useAppStore((s) => s.jiraStatusContextKey)
-  const checkJiraConnection = useAppStore((s) => s.checkJiraConnection)
   const repos = useAppStore((s) => s.repos)
   const activeRepoId = useAppStore((s) => s.activeRepoId)
-  const expectedPreflightContextKey = useAppStore((s) =>
-    localPreflightContextKey(getLocalPreflightContext(s))
-  )
+  const activeSkillRuntime = useActiveProjectSkillRuntime()
   const setupScriptProbe = useSyncExternalStore(
     subscribeSetupScriptProbeCache,
     readSetupScriptProbeCache,
@@ -94,42 +74,6 @@ export function useSetupGuideProgress(
     discoveryTarget: activeSkillRuntime.discoveryTarget,
     sourceKinds: GLOBAL_AGENT_SKILL_SOURCE_KINDS
   })
-  const providerRuntimeContextKey = getProviderRuntimeContextKey(settings)
-  const linearStatusCurrent = linearStatusContextKey === providerRuntimeContextKey
-  const jiraStatusCurrent = jiraStatusContextKey === providerRuntimeContextKey
-  const preflightStatusCurrent = preflightStatusContextKey === expectedPreflightContextKey
-
-  useEffect(() => {
-    if (!shouldRefreshCoreState) {
-      return
-    }
-    if (!preflightStatusCurrent || !preflightStatusChecked) {
-      void refreshPreflightStatus()
-    }
-    if (!linearStatusCurrent || !linearStatusChecked) {
-      void checkLinearConnection()
-    }
-    if (!jiraStatusCurrent || !jiraStatusChecked) {
-      void checkJiraConnection()
-    }
-  }, [
-    checkJiraConnection,
-    checkLinearConnection,
-    jiraStatusCurrent,
-    jiraStatusChecked,
-    jiraStatusContextKey,
-    linearStatusCurrent,
-    linearStatusChecked,
-    linearStatusContextKey,
-    expectedPreflightContextKey,
-    preflightStatusContextKey,
-    preflightStatusCurrent,
-    preflightStatusChecked,
-    providerRuntimeContextKey,
-    refreshPreflightStatus,
-    shouldRefreshCoreState
-  ])
-
   const orderedGitRepos = useMemo(() => {
     const gitRepos = repos.filter(isGitRepoKind)
     const activeRepo = activeRepoId
@@ -235,22 +179,6 @@ export function useSetupGuideProgress(
     }
   }, [computerUseSkillInstalled, readComputerUsePermissions, shouldRefreshCoreState])
 
-  const taskSourceStatus = deriveIntegrationConnectionStatus({
-    preflightStatus,
-    preflightStatusChecked,
-    preflightStatusContextKey,
-    preflightStatusError,
-    preflightStatusLoading,
-    expectedPreflightContextKey,
-    linearStatus,
-    linearStatusChecked,
-    linearStatusContextKey,
-    jiraStatus,
-    jiraStatusChecked,
-    jiraStatusContextKey,
-    providerRuntimeContextKey
-  })
-  const hasConnectedTaskSource = taskSourceStatus.trackerConnected
   const gitRepoCount = orderedGitRepos.length
   const currentSetupScriptProbe = getCurrentSetupScriptProbeState(
     setupScriptProbe,
@@ -265,11 +193,7 @@ export function useSetupGuideProgress(
   const ready = getSetupGuideProgressReady({
     refreshEnabled: shouldRefreshCoreState,
     settingsLoaded: settings !== null,
-    // Why: task-source readiness is a capability group. Once any provider is
-    // usable, unrelated stale provider checks should not hide setup progress.
-    preflightStatusChecked: !taskSourceStatus.checking,
-    linearStatusChecked: true,
-    jiraStatusChecked: true,
+    preflightStatusChecked: true,
     browserUseSkillDiscoveryLoading: detectedBrowserUseSkillLoading,
     computerUseSkillDiscoveryLoading: computerUseSkillLoading,
     orchestrationSkillDiscoveryLoading: detectedOrchestrationSkillLoading,
@@ -284,7 +208,6 @@ export function useSetupGuideProgress(
         ready,
         settings,
         featureInteractions,
-        hasConnectedTaskSource,
         browserUseSkillInstalled: browserUseSkillInstalled || detectedBrowserUseSkillInstalled,
         computerUseSkillInstalled,
         computerUsePermissionsReady: currentComputerUsePermissionsReady,
@@ -305,7 +228,6 @@ export function useSetupGuideProgress(
       detectedOrchestrationSkillInstalled,
       featureInteractions,
       gitRepoCount,
-      hasConnectedTaskSource,
       currentSetupScriptProbe.hasSetupScript,
       orchestrationSkillInstalled,
       settings,

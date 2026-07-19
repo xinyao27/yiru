@@ -3,7 +3,7 @@
  *
  * Why: a primary rate-limit 403 means every further request in that bucket
  * will fail until GitHub's reset time. Without shared state, a 90-repo
- * Tasks-page fan-out keeps spawning gh subprocesses that each take a fresh
+ * Pull-request search fan-out keeps spawning gh subprocesses that each take a fresh
  * 403 — burning main-thread spawn time and log noise while returning nothing
  * (the Discord "countWorkItems failed ×90" storm). This module holds
  * blocked-until state consulted by the runner before every gh spawn.

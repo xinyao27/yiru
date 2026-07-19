@@ -3,15 +3,13 @@ import { defineMethod, type RpcMethod } from '../core'
 import { OptionalFiniteNumber, OptionalString, requiredString } from '../schemas'
 import { isTuiAgent } from '../../../../shared/tui-agent-config'
 
-const FolderWorkspaceLinkedTask = z
+const FolderWorkspaceLinkedReview = z
   .object({
-    provider: z.enum(['github', 'gitlab', 'linear', 'jira']),
-    type: z.enum(['issue', 'pr', 'mr']),
+    provider: z.enum(['github', 'gitlab']),
+    type: z.enum(['pr', 'mr']),
     number: z.number().finite(),
-    title: requiredString('Missing linked task title'),
-    url: requiredString('Missing linked task URL'),
-    linearIdentifier: OptionalString,
-    jiraIdentifier: OptionalString,
+    title: requiredString('Missing linked review title'),
+    url: requiredString('Missing linked review URL'),
     repoId: OptionalString
   })
   .nullable()
@@ -21,7 +19,7 @@ const FolderWorkspaceCreate = z.object({
   name: OptionalString,
   folderPath: OptionalString.nullable().optional(),
   connectionId: OptionalString.nullable().optional(),
-  linkedTask: FolderWorkspaceLinkedTask.optional(),
+  linkedReview: FolderWorkspaceLinkedReview.optional(),
   createdWithAgent: z.string().refine(isTuiAgent).optional(),
   pendingFirstAgentMessageRename: z.boolean().optional()
 })
@@ -31,7 +29,7 @@ const FolderWorkspaceUpdate = z.object({
   updates: z.object({
     name: OptionalString,
     folderPath: OptionalString,
-    linkedTask: FolderWorkspaceLinkedTask.optional(),
+    linkedReview: FolderWorkspaceLinkedReview.optional(),
     comment: z.string().optional(),
     isArchived: z.boolean().optional(),
     isUnread: z.boolean().optional(),

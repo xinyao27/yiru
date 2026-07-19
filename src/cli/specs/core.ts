@@ -86,7 +86,7 @@ export const CORE_COMMAND_SPECS: CommandSpec[] = [
     path: ['worktree', 'create'],
     summary: 'Create a new Yiru-managed worktree',
     usage:
-      'yiru worktree create --name <name> [--repo <selector>|--project <id> [--host <host-id>]|--project-host-setup <id>] [--agent <id>] [--prompt <text>] [--setup run|skip|inherit] [--base-branch <ref>] [--issue <number>] [--linear-issue <identifier-or-url>] [--comment <text>] [--parent-worktree <selector>] [--no-parent] [--run-hooks] [--activate] [--json]',
+      'yiru worktree create --name <name> [--repo <selector>|--project <id> [--host <host-id>]|--project-host-setup <id>] [--agent <id>] [--prompt <text>] [--setup run|skip|inherit] [--base-branch <ref>] [--comment <text>] [--parent-worktree <selector>] [--no-parent] [--run-hooks] [--activate] [--json]',
     allowedFlags: [
       ...GLOBAL_FLAGS,
       'repo',
@@ -97,8 +97,6 @@ export const CORE_COMMAND_SPECS: CommandSpec[] = [
       'agent',
       'prompt',
       'base-branch',
-      'issue',
-      'linear-issue',
       'comment',
       'setup',
       'parent-worktree',
@@ -125,7 +123,6 @@ export const CORE_COMMAND_SPECS: CommandSpec[] = [
       'yiru worktree create --name agent-task --agent codex --prompt "hi" --json',
       'yiru worktree create --repo id:<repoId> --name related-task --json',
       'yiru worktree create --project github:xinyao27/yiru --host runtime:gpu --name benchmark --json',
-      'yiru worktree create --repo id:<repoId> --name linear-task --linear-issue https://linear.app/stably/issue/STA-335/test-issue --json',
       'yiru worktree create --repo id:<repoId> --name agent-task --agent codex --prompt "hi" --json',
       'yiru worktree create --repo id:<repoId> --name folder-child --parent-worktree folder:<folderId> --json',
       'yiru worktree create --repo id:<repoId> --name related-task --parent-worktree active --json',
@@ -136,25 +133,22 @@ export const CORE_COMMAND_SPECS: CommandSpec[] = [
     path: ['worktree', 'set'],
     summary: 'Update Yiru metadata for a worktree',
     usage:
-      'yiru worktree set --worktree <selector> [--display-name <name>] [--issue <number|null>] [--linear-issue <identifier-or-url|null>] [--comment <text>] [--workspace-status <id>] [--parent-worktree <selector>|--no-parent] [--json]',
+      'yiru worktree set --worktree <selector> [--display-name <name>] [--comment <text>] [--workspace-status <id>] [--parent-worktree <selector>|--no-parent] [--json]',
     allowedFlags: [
       ...GLOBAL_FLAGS,
       'worktree',
       'display-name',
-      'issue',
-      'linear-issue',
       'comment',
       'workspace-status',
       'parent-worktree',
       'no-parent'
     ],
     notes: [
-      'Workspace status ids match the board columns (defaults: todo, in-progress, in-review, completed); custom statuses use their configured id.',
-      'Pass --linear-issue null to clear the Linear issue link.'
+      'Workspace status ids match the sidebar groups (defaults: todo, in-progress, in-review, completed); custom statuses use their configured id.'
     ],
     examples: [
-      'yiru worktree set --worktree active --linear-issue STA-335 --json',
-      'yiru worktree set --worktree active --linear-issue null --json'
+      'yiru worktree set --worktree active --comment "waiting on review" --json',
+      'yiru worktree set --worktree active --workspace-status in-review --json'
     ]
   },
   {

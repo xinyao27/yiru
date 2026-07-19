@@ -180,7 +180,6 @@ export function supportsBrowserPageFlag(commandPath: string[]): boolean {
       'emulator',
       'note',
       'diagnostics',
-      'linear',
       'skills',
       'agent-context'
     ].includes(commandPath[0])
@@ -236,7 +235,6 @@ export function isCommandGroup(commandPath: string[]): boolean {
         'agent',
         'environment',
         'diagnostics',
-        'linear',
         'skills',
         'vm'
       ].includes(commandPath[0])) ||

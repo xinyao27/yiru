@@ -1109,7 +1109,6 @@ export function buildPtyHostEnv(
     delete baseEnv.YIRU_ENABLE_GIT_ATTRIBUTION
     delete baseEnv.YIRU_GIT_COMMIT_TRAILER
     delete baseEnv.YIRU_GH_PR_FOOTER
-    delete baseEnv.YIRU_GH_ISSUE_FOOTER
     delete baseEnv.YIRU_ATTRIBUTION_SHIM_DIR
   }
   applyTerminalAttributionEnv(baseEnv, {

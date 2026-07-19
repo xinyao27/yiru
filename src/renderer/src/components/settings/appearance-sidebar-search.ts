@@ -37,22 +37,6 @@ export const getLeftSidebarAppearanceEntry = createLocalizedCatalog(
 
 export const getSidebarEntries = createLocalizedCatalog((): SettingsSearchEntry[] => [
   {
-    title: translate('auto.components.settings.appearance.search.155a1e7438', 'Show Tasks Button'),
-    description: translate(
-      'auto.components.settings.appearance.search.9a248333c7',
-      'Show the Tasks button at the top of the left sidebar.'
-    ),
-    keywords: [
-      ...translateSearchKeyword('auto.components.settings.appearance.search.0d5a74b606', 'tasks'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.5bff6a2ef0', 'sidebar'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.6cf5f54ce1', 'button'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.648eeada79', 'hide'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.ac79fe4a04', 'show'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.2ee4810f38', 'github'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.6b846424cc', 'linear')
-    ]
-  },
-  {
     title: translate(
       'auto.components.settings.appearance.search.caa27e1a8e',
       'Show Automations Button'

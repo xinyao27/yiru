@@ -10,9 +10,7 @@ import { createSettingsSlice } from './slices/settings'
 import { createKeybindingsSlice } from './slices/keybindings'
 import { createGitHubSlice } from './slices/github'
 import { createHostedReviewSlice } from './slices/hosted-review'
-import { createLinearSlice } from './slices/linear'
 import { createPreflightSlice } from './slices/preflight'
-import { createJiraSlice } from './slices/jira'
 import { createEditorSlice } from './slices/editor'
 import { createStatsSlice } from './slices/stats'
 import { createMemorySlice } from './slices/memory'
@@ -37,7 +35,6 @@ import { createCommitMessageGenerationSlice } from './slices/commit-message-gene
 import { createPinnedTabCloseConfirmSlice } from './slices/pinned-tab-close-confirm'
 import { createRecentlyClosedTabsSlice } from './slices/recently-closed-tabs'
 import { createYiruProfilesSlice } from './slices/yiru-profiles'
-import { createNewIssueDraftSlice } from './slices/new-issue-draft'
 import { createSpoolSharingSlice } from './slices/spool-sharing'
 import { e2eConfig } from '@/lib/e2e-config'
 import { registerHttpLinkStoreAccessor } from '@/lib/http-link-routing'
@@ -53,9 +50,7 @@ export const useAppStore = create<AppState>()((...a) => ({
   ...createKeybindingsSlice(...a),
   ...createGitHubSlice(...a),
   ...createHostedReviewSlice(...a),
-  ...createLinearSlice(...a),
   ...createPreflightSlice(...a),
-  ...createJiraSlice(...a),
   ...createEditorSlice(...a),
   ...createStatsSlice(...a),
   ...createMemorySlice(...a),
@@ -80,7 +75,6 @@ export const useAppStore = create<AppState>()((...a) => ({
   ...createPinnedTabCloseConfirmSlice(...a),
   ...createRecentlyClosedTabsSlice(...a),
   ...createYiruProfilesSlice(...a),
-  ...createNewIssueDraftSlice(...a),
   ...createSpoolSharingSlice(...a)
 }))
 

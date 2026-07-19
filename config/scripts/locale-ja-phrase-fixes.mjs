@@ -10,9 +10,7 @@ export const JA_PHRASE_FIXES = [
   { pattern: /広報/g, replacement: 'PR', whenEnIncludes: 'PR' },
   { pattern: /端末/g, replacement: 'ターミナル', whenEnIncludes: 'erminal' },
   { pattern: /シャチ:\/\//g, replacement: 'yiru://', whenEnIncludes: 'yiru://' },
-  { pattern: /線形/g, replacement: 'Linear', whenEnIncludes: 'Linear' },
   { pattern: /グラフQL/g, replacement: 'GraphQL', whenEnIncludes: 'GraphQL' },
-  { pattern: /不和/g, replacement: 'Discord', whenEnIncludes: 'Discord' },
   { pattern: /爽やか/g, replacement: '更新中', whenEnIncludes: 'Refreshing' },
   { pattern: /殺害/g, replacement: '終了中', whenEnIncludes: 'Killing' },
   { pattern: /殺す/g, replacement: '強制終了', whenEnIncludes: 'Kill' },
@@ -66,11 +64,6 @@ export const JA_PHRASE_FIXES = [
   { pattern: /指示/g, replacement: 'コマンド', whenEnIncludes: 'Command' },
   { pattern: /弦/g, replacement: '文字列', whenEnIncludes: 'string' },
   { pattern: /新しい/g, replacement: '新規', whenEnIncludes: 'New' },
-  {
-    pattern: /Open Linearタスク/g,
-    replacement: 'Linear タスクを開く',
-    whenEnIncludes: 'Open Linear tasks'
-  },
   { pattern: /小切手/g, replacement: 'チェック', whenEnIncludes: 'checks' },
   { pattern: /査読者/g, replacement: 'レビュアー', whenEnIncludes: 'reviewer' },
   { pattern: /レビュー担当者/g, replacement: 'レビュアー', whenEnIncludes: 'reviewer' },
@@ -96,19 +89,12 @@ export const JA_PHRASE_FIXES = [
     replacement: '実験的機能',
     whenEnIncludes: 'experimental'
   },
-  { pattern: /ジラ/g, replacement: 'Jira', whenEnIncludes: 'Jira' },
-  { pattern: /ジラ/g, replacement: 'Jira', whenEnIncludes: 'jira' },
-  { pattern: /Linear問題/g, replacement: 'Linear イシュー', whenEnIncludes: 'Linear issue' },
-  { pattern: /Linearの問題/g, replacement: 'Linear イシュー', whenEnIncludes: 'Linear issue' },
-  { pattern: /Jira の問題/g, replacement: 'Jira イシュー', whenEnIncludes: 'Jira issue' },
   {
     pattern: /一般的なアクション/g,
     replacement: 'よく使うアクション',
     whenEnIncludes: 'common actions'
   },
-  { pattern: /Jira 課題/g, replacement: 'Jira イシュー', whenEnIncludes: 'issue' },
   { pattern: /GitHub の課題/g, replacement: 'GitHub イシュー', whenEnIncludes: 'issue' },
-  { pattern: /サブ課題/g, replacement: 'サブイシュー', whenEnIncludes: 'sub-issue' },
   { pattern: /課題タイプ/g, replacement: 'イシュータイプ', whenEnIncludes: 'issue' },
   { pattern: /課題セット/g, replacement: 'イシューセット', whenEnIncludes: 'issue' },
   { pattern: /課題から/g, replacement: 'イシューから', whenEnIncludes: 'issue' },
@@ -132,11 +118,9 @@ export const JA_PHRASE_FIXES = [
   { pattern: /問題ソース/g, replacement: 'イシューソース', whenEnIncludes: 'issue' },
   { pattern: /問題自動化/g, replacement: 'イシュー自動化', whenEnIncludes: 'issue' },
   { pattern: /問題コマンド/g, replacement: 'イシューコマンド', whenEnIncludes: 'issue' },
-  { pattern: /サブ問題/g, replacement: 'サブイシュー', whenEnIncludes: 'sub-issue' },
   { pattern: /新規問題/g, replacement: '新規イシュー', whenEnIncludes: 'issue' },
   { pattern: /GH問題/g, replacement: 'GH イシュー', whenEnIncludes: 'issue' },
   { pattern: /問題 #/g, replacement: 'イシュー #', whenEnIncludes: 'issue' },
-  { pattern: /問題を表示/g, replacement: 'イシューを表示', whenEnIncludes: 'view issues' },
   { pattern: /問題を検索/g, replacement: 'イシューを検索', whenEnIncludes: 'issue' },
   { pattern: /問題を編集/g, replacement: 'イシューを編集', whenEnIncludes: 'issue' },
   { pattern: /問題を提出/g, replacement: 'イシューを登録', whenEnIncludes: 'file an issue' },
@@ -152,42 +136,13 @@ export const JA_PHRASE_FIXES = [
     replacement: 'イシューを表示しています',
     whenEnIncludes: 'issue'
   },
-  {
-    pattern: /選択した問題を/g,
-    replacement: '選択したイシューを',
-    whenEnIncludes: 'selected issue'
-  },
-  {
-    pattern: /プロジェクトの問題/g,
-    replacement: 'プロジェクトのイシュー',
-    whenEnIncludes: 'project issues'
-  },
-  {
-    pattern: /フェッチされた問題/g,
-    replacement: '取得済みイシュー',
-    whenEnIncludes: 'fetched issues'
-  },
-  {
-    pattern: /割り当てられた問題/g,
-    replacement: '割り当てられたイシュー',
-    whenEnIncludes: 'assigned issues'
-  },
-  { pattern: /一致する問題/g, replacement: '一致するイシュー', whenEnIncludes: 'issues match' },
-  {
-    pattern: /範囲が限定された問題/g,
-    replacement: 'スコープされたイシュー',
-    whenEnIncludes: 'scoped issues'
-  },
   { pattern: /GitHubの問題/g, replacement: 'GitHub イシュー', whenEnIncludes: 'GitHub issues' },
-  { pattern: /ドラフト_問題/g, replacement: 'DRAFT_ISSUE', whenEnIncludes: 'DRAFT_ISSUE' },
   { pattern: /、問題、/g, replacement: '、イシュー、', whenEnIncludes: 'issues' },
   { pattern: /PR、問題/g, replacement: 'PR、イシュー', whenEnIncludes: 'issues' },
   { pattern: /GitHub 発行/g, replacement: 'GitHub イシュー', whenEnIncludes: 'issue' },
   { pattern: /github発行/g, replacement: 'github イシュー', whenEnIncludes: 'issue' },
   { pattern: /発行コマンド/g, replacement: 'イシューコマンド', whenEnIncludes: 'issue' },
   { pattern: /発行自動化/g, replacement: 'イシュー自動化', whenEnIncludes: 'issue' },
-  { pattern: /サブ発行/g, replacement: 'サブイシュー', whenEnIncludes: 'sub-issue' },
-  { pattern: /発行元/g, replacement: 'イシューソース', whenEnIncludes: 'Issue source' },
   { pattern: /、発行、/g, replacement: '、イシュー、', whenEnIncludes: 'issues' },
   { pattern: /プルリクエスト/g, replacement: 'PR', whenEnIncludes: 'pull request' },
   { pattern: /プル リクエスト/g, replacement: 'PR', whenEnIncludes: 'pull request' },

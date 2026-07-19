@@ -3,7 +3,7 @@ import {
   ActivityIcon as Activity,
   Coins,
   Database as DatabaseZap,
-  FolderSimple as FolderKanban,
+  FolderSimple as FolderUsage,
   Gauge,
   ArrowClockwise as RefreshCw,
   SlidersHorizontal,
@@ -315,7 +315,7 @@ export function ClaudeUsagePane(): React.JSX.Element {
                 'Sessions / Turns'
               )}
               value={`${(summary?.sessions ?? 0).toLocaleString()} / ${(summary?.turns ?? 0).toLocaleString()}`}
-              icon={<FolderKanban className="size-4" />}
+              icon={<FolderUsage className="size-4" />}
             />
             <StatCard
               label={translate(

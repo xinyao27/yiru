@@ -23,7 +23,7 @@ import {
   Pencil,
   PushPin as Pin,
   PushPinSlash as PinOff,
-  Kanban,
+  Tag,
   Trash as Trash2,
   LinkBreak as Unlink,
   FlowArrow as Workflow,
@@ -524,19 +524,11 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
     openModal('edit-meta', {
       worktreeId: worktree.id,
       currentDisplayName: worktree.displayName,
-      currentIssue: worktree.linkedIssue,
       currentPR: worktree.linkedPR,
       currentComment: worktree.comment,
       focus: 'displayName'
     })
-  }, [
-    worktree.id,
-    worktree.displayName,
-    worktree.linkedIssue,
-    worktree.linkedPR,
-    worktree.comment,
-    openModal
-  ])
+  }, [worktree.id, worktree.displayName, worktree.linkedPR, worktree.comment, openModal])
 
   const handleCloseTerminals = useCallback(() => {
     const worktreeIds = sleepableWorktrees.map((item) => item.id)
@@ -734,7 +726,7 @@ const WorktreeContextMenu = React.memo(function WorktreeContextMenu({
           )}
           <DropdownMenuSub>
             <DropdownMenuSubTrigger disabled={deletingContext}>
-              <Kanban className="size-3.5" />
+              <Tag className="size-3.5" />
               {isMultiContext
                 ? translate(
                     'auto.components.sidebar.WorktreeContextMenu.56cde9e8e6',

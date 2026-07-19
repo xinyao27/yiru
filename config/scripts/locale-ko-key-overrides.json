@@ -146,45 +146,6 @@
   "auto.components.GitLabItemDialog.ffdd9a78e1": {
     "ko": "인라인 댓글에는 MR diff 참조를 사용할 수 없습니다."
   },
-  "auto.components.JiraIssueWorkspace.2a829a2f00": {
-    "ko": "우선순위"
-  },
-  "auto.components.JiraIssueWorkspace.666cfdd835": {
-    "ko": "알 수 없음"
-  },
-  "auto.components.JiraIssueWorkspace.693be070d0": {
-    "ko": "전환"
-  },
-  "auto.components.LinearIssueMarkdownDescriptionEditor.28fd951b83": {
-    "ko": "취소선"
-  },
-  "auto.components.LinearIssueMarkdownDescriptionEditor.5666b4493d": {
-    "ko": "기울임"
-  },
-  "auto.components.LinearIssueMarkdownDescriptionEditor.caa88f50d0": {
-    "ko": "굵게"
-  },
-  "auto.components.LinearIssueWorkspace.8a33c85e9c": {
-    "ko": "누군가"
-  },
-  "auto.components.LinearIssueWorkspace.c23e79e5c0": {
-    "ko": "작업"
-  },
-  "auto.components.LinearIssueWorkspace.ca8778c124": {
-    "ko": "알 수 없음"
-  },
-  "auto.components.LinearItemDrawer.48e17e8cbd": {
-    "ko": "알 수 없음"
-  },
-  "auto.components.LinearItemDrawer.59b6cd3706": {
-    "ko": "상태 로드 중"
-  },
-  "auto.components.LinearItemDrawer.780ea6ed89": {
-    "ko": "상태를 찾을 수 없습니다."
-  },
-  "auto.components.LinearItemDrawer.fbb90300e2": {
-    "ko": "사용자 지정 추정치"
-  },
   "auto.components.NewWorkspaceComposerCard.cloneHostSetup": {
     "ko": "클론"
   },
@@ -352,141 +313,6 @@
   },
   "auto.components.ShortcutKeyCombo.07eb4985a1": {
     "ko": "{{value0}} 두 번 누르기"
-  },
-  "auto.components.TaskPage.0c11ca0b6d": {
-    "ko": "새 Jira 이슈"
-  },
-  "auto.components.TaskPage.1301d376f1": {
-    "ko": "할당됨"
-  },
-  "auto.components.TaskPage.171b7739d8": {
-    "ko": "MR"
-  },
-  "auto.components.TaskPage.297a805b64": {
-    "ko": "이전"
-  },
-  "auto.components.TaskPage.345b169f1f": {
-    "ko": "높음"
-  },
-  "auto.components.TaskPage.34d97ca682": {
-    "ko": "무슨 일이 있나요?"
-  },
-  "auto.components.TaskPage.34da8ac06c": {
-    "ko": "리드"
-  },
-  "auto.components.TaskPage.3659f9792a": {
-    "ko": "보드"
-  },
-  "auto.components.TaskPage.3b11c8e8fc": {
-    "ko": "배열"
-  },
-  "auto.components.TaskPage.3cb855080f": {
-    "ko": "보기"
-  },
-  "auto.components.TaskPage.3f9604efc7": {
-    "ko": "이슈 #{{value0}}을 열었습니다"
-  },
-  "auto.components.TaskPage.3feb524d42": {
-    "ko": "새 Linear 이슈"
-  },
-  "auto.components.TaskPage.4b6e40e42c": {
-    "ko": "열린 항목 모두"
-  },
-  "auto.components.TaskPage.524f095d55": {
-    "ko": "리뷰 필요"
-  },
-  "auto.components.TaskPage.5d2d835467": {
-    "ko": "정렬 순서"
-  },
-  "auto.components.TaskPage.606a85c774": {
-    "ko": "열기"
-  },
-  "auto.components.TaskPage.6430594b18": {
-    "ko": "알 수 없는 작성자"
-  },
-  "auto.components.TaskPage.69591944e7": {
-    "ko": "낮음"
-  },
-  "auto.components.TaskPage.6d56559467": {
-    "ko": "Linear 계정 연결"
-  },
-  "auto.components.TaskPage.733b8f2421": {
-    "ko": "Linear / 보기"
-  },
-  "auto.components.TaskPage.7698af5263": {
-    "ko": "내 항목"
-  },
-  "auto.components.TaskPage.7719d8daa9": {
-    "ko": "{{value0}} 멤버{{value1}}"
-  },
-  "auto.components.TaskPage.7762f4b03a": {
-    "ko": "/"
-  },
-  "auto.components.TaskPage.8a07f21e76": {
-    "ko": "건강도"
-  },
-  "auto.components.TaskPage.8f06dbb9e5": {
-    "ko": "리뷰어가 요청됨"
-  },
-  "auto.components.TaskPage.903c7af49f": {
-    "ko": "Linear 이슈를 찾을 수 없습니다."
-  },
-  "auto.components.TaskPage.937b29fa35": {
-    "ko": "항목"
-  },
-  "auto.components.TaskPage.995dd6af9b": {
-    "ko": "PR 체크 열기"
-  },
-  "auto.components.TaskPage.9cd11ba218": {
-    "ko": "Jira"
-  },
-  "auto.components.TaskPage.9f2b4c03a6": {
-    "ko": "등록 위치: "
-  },
-  "auto.components.TaskPage.a04fe7ba73": {
-    "ko": "공개 범위"
-  },
-  "auto.components.TaskPage.a0544fb653": {
-    "ko": "MR !{{value0}}"
-  },
-  "auto.components.TaskPage.afc68824ff": {
-    "ko": "상태를 찾을 수 없습니다."
-  },
-  "auto.components.TaskPage.c8d5bec5f7": {
-    "ko": "우선순위"
-  },
-  "auto.components.TaskPage.cc13109b5d": {
-    "ko": "상태 로드 중"
-  },
-  "auto.components.TaskPage.cfaadb6b22": {
-    "ko": "리드 없음"
-  },
-  "auto.components.TaskPage.d1132848f8": {
-    "ko": "GitHub에서 열 GitHub 프로젝트 하나를 선택하세요."
-  },
-  "auto.components.TaskPage.d3d0998b7d": {
-    "ko": "새 GitHub 이슈"
-  },
-  "auto.components.TaskPage.d6cda23ef1": {
-    "ko": "멤버"
-  },
-  "auto.components.TaskPage.d747aed72f": {
-    "ko": "보드"
-  },
-  "auto.components.TaskPage.e224d76876": {
-    "ko": "MR"
-  },
-  "auto.components.TaskPage.e65757a338": {
-    "ko": "페이지네이션"
-  },
-  "auto.components.TaskPage.f373ab1a4f": {
-    "ko": "긴급"
-  },
-  "auto.components.TaskPage.f4374519ae": {
-    "ko": "선호하는 이슈 소스(upstream)가 더 이상 {{value0}}에 구성되어 있지 않습니다. origin을 사용합니다."
-  },
-  "auto.components.TaskPage.fe28c9821f": {
-    "ko": "보기"
   },
   "auto.components.Terminal.5b2c1a9e44": {
     "ko": "agent CLI를 찾지 못했습니다. 하나를 설치하거나 설정에서 기본 agent를 선택하세요."
@@ -1016,9 +842,6 @@
   "auto.components.feature.wall.ConnectIntegrationsList.code_host_tasks_caption": {
     "ko": "코드 호스트의 이슈도 작업으로 사용할 수 있습니다."
   },
-  "auto.components.feature.wall.ConnectIntegrationsList.code_host_tasks_summary": {
-    "ko": "이슈를 작업으로 사용할 수 있음 · 팀이 Linear 또는 Jira에서 작업을 계획한다면 추가하세요"
-  },
   "auto.components.feature.wall.ConnectIntegrationsList.list_end": {
     "ko": ", 그리고 "
   },
@@ -1066,9 +889,6 @@
   },
   "auto.components.feature.wall.FeatureTourPreview.70aa182266": {
     "ko": "목표를 넘겨두고 자리를 비우세요. 코디네이터 agent가 작업을 나누어 병렬 PR을 만듭니다."
-  },
-  "auto.components.feature.wall.FeatureTourPreview.f10c14dd9d": {
-    "ko": "탭을 오갈 필요 없이 GitHub 또는 Linear 백로그에서 선택하고 한 번의 클릭으로 워크스페이스를 시작하세요."
   },
   "auto.components.feature.wall.FeatureTourWorkspaceCard.9220794f6a": {
     "ko": "작업 중"
@@ -1169,33 +989,6 @@
   "auto.components.github.CloseReasonDropdown.e1f2a3b4c5": {
     "ko": "닫기 사유 선택"
   },
-  "auto.components.github.GitHubIssueCommentComposer.082515176a": {
-    "ko": "댓글을 추가하지 못했습니다"
-  },
-  "auto.components.github.GitHubIssueCommentComposer.0a73f59e85": {
-    "ko": "댓글 보내기"
-  },
-  "auto.components.github.GitHubIssueCommentComposer.9f88657c4e": {
-    "ko": "이슈가 닫혔습니다"
-  },
-  "auto.components.github.GitHubIssueCommentComposer.a1b2c3d4e5": {
-    "ko": "댓글 추가"
-  },
-  "auto.components.github.GitHubIssueCommentComposer.b1c2d3e4f5": {
-    "ko": "이슈 다시 열기"
-  },
-  "auto.components.github.GitHubIssueCommentComposer.bd3b4492a0": {
-    "ko": "이슈가 다시 열렸습니다"
-  },
-  "auto.components.github.GitHubIssueCommentComposer.c5c117270e": {
-    "ko": "댓글을 입력하세요. 서로 배려해 주세요."
-  },
-  "auto.components.github.GitHubIssueCommentComposer.e9b7cb7d17": {
-    "ko": "이슈를 닫지 못했습니다"
-  },
-  "auto.components.github.GitHubIssueCommentComposer.f2a8c1d903": {
-    "ko": "이슈를 다시 열지 못했습니다"
-  },
   "auto.components.github.GitHubMarkdownComposer.8f1c2d4e6a": {
     "ko": "미리 볼 내용이 없습니다"
   },
@@ -1231,15 +1024,6 @@
   },
   "auto.components.github.GitHubWorkItemLabelPopoverContent.de26e2eb06": {
     "ko": "라벨 없음"
-  },
-  "auto.components.github.IssueSourceSelector.51d1608920": {
-    "ko": "origin"
-  },
-  "auto.components.github.IssueSourceSelector.643d7e9496": {
-    "ko": "upstream"
-  },
-  "auto.components.github.IssueSourceSelector.cdc9bd64fa": {
-    "ko": "간결하게"
   },
   "auto.components.github.PRFilterDropdowns.01f3f3d161": {
     "ko": "작성자"
@@ -1286,21 +1070,6 @@
   "auto.components.github.github.rate.limit.display.f42790d150": {
     "ko": "/"
   },
-  "auto.components.github.githubIssueCloseReasons.completed.description": {
-    "ko": "완료, 닫힘, 수정됨, 해결됨"
-  },
-  "auto.components.github.githubIssueCloseReasons.duplicate.description": {
-    "ko": "다른 이슈와 중복"
-  },
-  "auto.components.github.githubIssueCloseReasons.duplicate.label": {
-    "ko": "중복으로 닫기"
-  },
-  "auto.components.github.githubIssueCloseReasons.notPlanned.description": {
-    "ko": "수정하지 않음, 재현 불가, 오래됨"
-  },
-  "auto.components.github.githubIssueCloseReasons.notPlanned.label": {
-    "ko": "계획 없음으로 닫기"
-  },
   "auto.components.github.pr.merge.state.039c072f94": {
     "ko": "뒤처짐"
   },
@@ -1325,33 +1094,6 @@
   "auto.components.github.pr.merge.state.fbd4f57f0a": {
     "ko": "체크를 통과했습니다. 병합 전에 병합 가능 여부를 다시 확인합니다."
   },
-  "auto.components.github.project.ProjectCell.54cac64427": {
-    "ko": "행에 repo 슬러그가 없습니다."
-  },
-  "auto.components.github.project.ProjectCell.8d669084f6": {
-    "ko": "제한됨"
-  },
-  "auto.components.github.project.ProjectCell.af5d8c912a": {
-    "ko": "제한된 항목"
-  },
-  "auto.components.github.project.ProjectPicker.9b36829267": {
-    "ko": "보기를 찾을 수 없습니다."
-  },
-  "auto.components.github.project.ProjectPicker.b3044b7a25": {
-    "ko": "최근"
-  },
-  "auto.components.github.project.ProjectViewWrapper.067119985c": {
-    "ko": "GitHub 검색, 예: assignee:@me is:open"
-  },
-  "auto.components.github.project.ProjectViewWrapper.1850fceac8": {
-    "ko": "{{value0}}/{{value1}}이(가) Yiru에 추가되어 있지 않습니다. 작업을 시작하려면 추가하거나 GitHub에서 여세요."
-  },
-  "auto.components.github.project.ProjectViewWrapper.1aa7c952b9": {
-    "ko": "프로젝트 보기"
-  },
-  "auto.components.github.project.ProjectViewWrapper.4d2a77a119": {
-    "ko": "기능 요청 제출"
-  },
   "auto.components.gitlab.gitlab.rate.limit.display.3e2c982cfa": {
     "ko": "남음, 재설정까지"
   },
@@ -1361,81 +1103,6 @@
   "auto.components.gitlab.gitlab.rate.limit.display.ea8ad0bae8": {
     "ko": "/"
   },
-  "auto.components.jira.connect.dialog.2849ddb295": {
-    "ko": "Atlassian 이메일"
-  },
-  "auto.components.jira.connect.dialog.3d81bf3ab3": {
-    "ko": "API 토큰"
-  },
-  "auto.components.jira.connect.dialog.4a2ab52781": {
-    "ko": "확인 중…"
-  },
-  "auto.components.jira.connect.dialog.7b3967c12f": {
-    "ko": "Atlassian API 토큰"
-  },
-  "auto.components.jira.connect.dialog.8090504a3e": {
-    "ko": "다음에서 토큰 생성:"
-  },
-  "auto.components.jira.connect.dialog.8388bdea2b": {
-    "ko": "Jira 사이트 연결"
-  },
-  "auto.components.jira.connect.dialog.d785c42b8b": {
-    "ko": "Jira Cloud 사이트 URL, Atlassian 이메일, API 토큰을 사용해 이슈를 탐색합니다."
-  },
-  "auto.components.jira.connect.dialog.e176f9d0c5": {
-    "ko": "Jira Cloud 사이트 URL"
-  },
-  "auto.components.jira.connect.dialog.fdd26d81cc": {
-    "ko": "Atlassian 계정 설정"
-  },
-  "auto.components.linear.api.key.dialog.57a66522c8": {
-    "ko": "연결 중"
-  },
-  "auto.components.linear.api.key.dialog.edec49dfae": {
-    "ko": "lin_api_..."
-  },
-  "auto.components.linear.priority.icon.c43d3e065b": {
-    "ko": "우선순위:"
-  },
-  "auto.components.linear.project.view.surfaces.06b887d622": {
-    "ko": "처음 표시"
-  },
-  "auto.components.linear.project.view.surfaces.111bef9aa8": {
-    "ko": "리드"
-  },
-  "auto.components.linear.project.view.surfaces.20b9d09b7d": {
-    "ko": "알 수 없음"
-  },
-  "auto.components.linear.project.view.surfaces.3ad562bdf4": {
-    "ko": "범위 내 이슈"
-  },
-  "auto.components.linear.project.view.surfaces.3be47aed6f": {
-    "ko": "우선순위"
-  },
-  "auto.components.linear.project.view.surfaces.563501f191": {
-    "ko": "진행률"
-  },
-  "auto.components.linear.project.view.surfaces.65bda65159": {
-    "ko": "멤버"
-  },
-  "auto.components.linear.project.view.surfaces.7616c986c6": {
-    "ko": "열린 이슈 {{value0}}개"
-  },
-  "auto.components.linear.project.view.surfaces.c8db98b73b": {
-    "ko": "리소스"
-  },
-  "auto.components.linear.project.view.surfaces.ef90b21366": {
-    "ko": "보기를 찾을 수 없습니다."
-  },
-  "auto.components.linear.project.view.surfaces.f059181bd9": {
-    "ko": "비공개"
-  },
-  "auto.components.linear.project.view.surfaces.f5ef24cf46": {
-    "ko": "건강도"
-  },
-  "auto.components.linear.scope.selector.89f6580dbf": {
-    "ko": "팀 검색..."
-  },
   "auto.components.mobile.MobilePage.1b4509a8a1": {
     "ko": "페어링됨"
   },
@@ -1444,9 +1111,6 @@
   },
   "auto.components.mobile.PhoneCarousel.93217b41c1": {
     "ko": "워크트리 목록"
-  },
-  "auto.components.mobile.slides.HomeSlide.0bad5b07c8": {
-    "ko": "GitHub 및 Linear"
   },
   "auto.components.mobile.slides.HomeSlide.0bc1881bc4": {
     "ko": "연결됨 · 워크트리 40개 · 활성 5개"
@@ -2738,9 +2402,6 @@
   "auto.components.settings.SshTargetForm.f42d844544": {
     "ko": "예: cloudflared access ssh --hostname %h"
   },
-  "auto.components.settings.TasksPane.6b23a34f6d": {
-    "ko": "Jira"
-  },
   "auto.components.settings.TerminalAppearanceSection.16c471ee03": {
     "ko": "켜짐"
   },
@@ -3389,9 +3050,6 @@
   "auto.components.settings.integrations.search.581844769a": {
     "ko": "MR"
   },
-  "auto.components.settings.integrations.search.617603509b": {
-    "ko": "Jira 연동"
-  },
   "auto.components.settings.integrations.search.67a2a0e868": {
     "ko": "Bitbucket 연동"
   },
@@ -3400,9 +3058,6 @@
   },
   "auto.components.settings.integrations.search.af6611fa6e": {
     "ko": "Azure DevOps 연동"
-  },
-  "auto.components.settings.integrations.search.b027b4b318": {
-    "ko": "Linear 연동"
   },
   "auto.components.settings.integrations.search.b40cbe5de4": {
     "ko": "glab"
@@ -3416,20 +3071,8 @@
   "auto.components.settings.integrations.search.c450244ad7": {
     "ko": "연동"
   },
-  "auto.components.settings.integrations.search.e1263dd748": {
-    "ko": "Jira"
-  },
   "auto.components.settings.integrations.search.f16e41cc72": {
     "ko": "GitHub 연동"
-  },
-  "auto.components.settings.jira.integration.card.09742875cd": {
-    "ko": "Jira"
-  },
-  "auto.components.settings.jira.integration.card.3df81cb0ac": {
-    "ko": "확인"
-  },
-  "auto.components.settings.jira.integration.card.fb854902d9": {
-    "ko": "연결 중"
   },
   "auto.components.settings.mobile.emulator.search.25d7bfbcd4": {
     "ko": "udid"
@@ -3697,63 +3340,6 @@
   },
   "auto.components.settings.ssh.search.f9493b80c0": {
     "ko": "서버"
-  },
-  "auto.components.settings.task.tracker.integration.cards.1a12e33fe5": {
-    "ko": "Linear 액세스 추가"
-  },
-  "auto.components.settings.task.tracker.integration.cards.3e7c10d286": {
-    "ko": "테스트 중..."
-  },
-  "auto.components.settings.task.tracker.integration.cards.60996beda6": {
-    "ko": "Jira 사이트 추가"
-  },
-  "auto.components.settings.task.tracker.integration.cards.6224fe9d34": {
-    "ko": "연결된 각 Linear 워크스페이스에는 활성 런타임에 저장되는 키가 하나씩 있습니다. 전체 액세스 키는 키 소유자가 접근할 수 있는 모든 팀에 적용될 수 있으며, 제한된 키는 언제든 교체할 수 있습니다."
-  },
-  "auto.components.settings.task.tracker.integration.cards.622c224082": {
-    "ko": "워크스페이스 액세스 추가"
-  },
-  "auto.components.settings.task.tracker.integration.cards.7ca5ffffdb": {
-    "ko": "Jira Cloud 이슈를 탐색하고 생성하며, 이슈에서 작업을 시작합니다."
-  },
-  "auto.components.settings.task.tracker.integration.cards.8b2408a8e5": {
-    "ko": "이 런타임에 Jira가 연결되어 있습니다. 연결된 사이트 목록이 오래된 것 같으면 다시 확인하세요."
-  },
-  "auto.components.settings.task.tracker.integration.cards.8c20e76308": {
-    "ko": "연결된 각 Jira 사이트에는 활성 런타임이 저장한 토큰이 하나씩 있습니다."
-  },
-  "auto.components.settings.task.tracker.integration.cards.9fa04a032e": {
-    "ko": "{{value0}}개 사이트{{value1}} 연결됨"
-  },
-  "auto.components.settings.task.tracker.integration.cards.a1093a06c7": {
-    "ko": "설정 작업을 표시하기 전에 Jira 액세스를 확인하는 중입니다."
-  },
-  "auto.components.settings.task.tracker.integration.cards.a2c0015fb8": {
-    "ko": "확인됨"
-  },
-  "auto.components.settings.task.tracker.integration.cards.account_scope_prefix": {
-    "ko": "계정 범위"
-  },
-  "auto.components.settings.task.tracker.integration.cards.c90f2ef419": {
-    "ko": "다시 확인"
-  },
-  "auto.components.settings.task.tracker.integration.cards.cef18762a2": {
-    "ko": "Linear 설정의 개인 API 키로 액세스를 추가합니다. 전체 액세스 키는 키 소유자가 접근할 수 있는 모든 팀을 볼 수 있습니다."
-  },
-  "auto.components.settings.task.tracker.integration.cards.dd3529015d": {
-    "ko": "{{value0}} 연결 해제"
-  },
-  "auto.components.settings.task.tracker.integration.cards.e1f5e6424c": {
-    "ko": "{{value0}}개 워크스페이스{{value1}} 연결됨"
-  },
-  "auto.components.settings.task.tracker.integration.cards.e2ff968276": {
-    "ko": "Jira 연결"
-  },
-  "auto.components.settings.task.tracker.integration.cards.fe9231215b": {
-    "ko": "설정 작업을 표시하기 전에 Linear 액세스를 확인하는 중입니다."
-  },
-  "auto.components.settings.tasks.search.3d81c26d78": {
-    "ko": "소스"
   },
   "auto.components.settings.terminal.clipboard.search.2061d8db1a": {
     "ko": "neovim"
@@ -4316,9 +3902,6 @@
   "auto.components.sidebar.SshDisconnectedDialog.reconnectionFailed": {
     "ko": "원격 호스트에 다시 연결하지 못했습니다."
   },
-  "auto.components.sidebar.WorkspaceKanbanStatusLane.8ad104642b": {
-    "ko": "비어 있음"
-  },
   "auto.components.sidebar.WorkspaceStatusAppearancePopover.8be427206b": {
     "ko": "아이콘"
   },
@@ -4817,57 +4400,6 @@
   "auto.components.tab.group.TabGroupPanel.4df2a06d36": {
     "ko": "아래로 분할"
   },
-  "auto.components.task.project.source.combobox.allProjects": {
-    "ko": "모든 프로젝트"
-  },
-  "auto.components.task.project.source.combobox.hostCount": {
-    "ko": "호스트 {{value0}}개"
-  },
-  "auto.components.task.project.source.combobox.noMatches": {
-    "ko": "검색과 일치하는 프로젝트가 없습니다."
-  },
-  "auto.components.task.project.source.combobox.noProjects": {
-    "ko": "프로젝트 없음"
-  },
-  "auto.components.task.project.source.combobox.searchProjects": {
-    "ko": "프로젝트 검색..."
-  },
-  "auto.components.taskPageEmptyState.changeQueryDescription": {
-    "ko": "쿼리를 변경하거나 지우세요."
-  },
-  "auto.components.taskPageEmptyState.noGitLabIssuesTitle": {
-    "ko": "GitLab 이슈 없음"
-  },
-  "auto.components.taskPageEmptyState.noGitLabMrsDescription": {
-    "ko": "이 필터와 일치하는 GitLab MR이 없습니다."
-  },
-  "auto.components.taskPageEmptyState.noGitLabMrsTitle": {
-    "ko": "GitLab MR 없음"
-  },
-  "auto.components.taskPageEmptyState.noGitLabWorkDescription": {
-    "ko": "이 필터와 일치하는 GitLab 작업이 없습니다."
-  },
-  "auto.components.taskPageEmptyState.noGitLabWorkTitle": {
-    "ko": "GitLab 작업 없음"
-  },
-  "auto.components.taskPageEmptyState.noMatchingGitHubWorkTitle": {
-    "ko": "일치하는 GitHub 작업 없음"
-  },
-  "auto.components.taskPageEmptyState.noProjectSourcesDescription": {
-    "ko": "Yiru가 어느 호스트/계정에서 작업을 가져올지 알 수 있도록 프로젝트 소스를 하나 이상 선택하세요."
-  },
-  "auto.components.taskPageEmptyState.noProjectSourcesTitle": {
-    "ko": "선택한 프로젝트 소스 없음"
-  },
-  "auto.components.taskSourceContextSummary.reconnectOrUpdateTitle": {
-    "ko": "이 소스를 불러오려면 {{value0}}을(를) 다시 연결하거나 업데이트하세요."
-  },
-  "auto.components.taskSourceContextSummary.someSourceHostsUnavailable": {
-    "ko": "일부 {{value0}} 소스 호스트를 사용할 수 없음: {{value1}}"
-  },
-  "auto.components.taskSourceContextSummary.sourceUnavailable": {
-    "ko": "{{value0}} 소스를 사용할 수 없음: {{value1}}"
-  },
   "auto.components.terminal.pane.CloseTerminalDialog.dont_ask_again": {
     "ko": "실행 중인 terminals에 대해 다시 묻지 않기"
   },
@@ -4993,12 +4525,6 @@
   },
   "auto.store.slices.editor.checkRunDetailsUnavailable": {
     "ko": "이 체크에 사용할 수 있는 세부 정보가 없습니다."
-  },
-  "auto.store.slices.jira.856083302c": {
-    "ko": "더 새로운 요청이 있어 Jira 연결 요청을 건너뛰었습니다."
-  },
-  "auto.store.slices.linear.37d36984d0": {
-    "ko": "더 새로운 요청이 있어 Linear 연결 요청을 건너뛰었습니다."
   },
   "auto.store.slices.repos.e649269645": {
     "ko": "선택한 호스트에 경로를 입력하려면 프로젝트 추가를 사용하세요."

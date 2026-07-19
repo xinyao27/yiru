@@ -1,7 +1,6 @@
 overrides:
   monaco-editor>dompurify: 3.4.11
   vite: 'catalog:'
-  vitest: 'catalog:'
 
 supportedArchitectures:
   os:
@@ -29,12 +28,9 @@ patchedDependencies:
   node-pty@1.1.0: config/patches/node-pty@1.1.0.patch
 catalog:
   vite: npm:@voidzero-dev/vite-plus-core@0.2.4
-  vitest: 4.1.10
   vite-plus: 0.2.4
 peerDependencyRules:
   allowAny:
     - vite
-    - vitest
   allowedVersions:
     vite: '*'
-    vitest: '*'

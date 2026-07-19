@@ -49,10 +49,7 @@ function areWorktreesEqual(left: Worktree, right: Worktree): boolean {
     (left.lastOutputAt ?? null) === (right.lastOutputAt ?? null) &&
     left.isPinned === right.isPinned &&
     (left.isActive ?? false) === (right.isActive ?? false) &&
-    (left.linkedIssue ?? null) === (right.linkedIssue ?? null) &&
-    (left.linkedLinearIssue ?? null) === (right.linkedLinearIssue ?? null) &&
     (left.linkedGitLabMR ?? null) === (right.linkedGitLabMR ?? null) &&
-    (left.linkedGitLabIssue ?? null) === (right.linkedGitLabIssue ?? null) &&
     (left.comment ?? '') === (right.comment ?? '') &&
     (left.status ?? null) === (right.status ?? null) &&
     arePullRequestsEqual(left.linkedPR, right.linkedPR) &&

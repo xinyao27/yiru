@@ -1,10 +1,10 @@
-import type { TaskSourceContext } from '../../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../../shared/project-source-context'
 
 export type GitHubWorkItemDetailsCacheMutation = {
   repoPath: string
   repoId?: string
-  sourceContext?: TaskSourceContext | null
-  type: 'issue' | 'pr'
+  sourceContext?: ProjectSourceContext | null
+  type: 'pr'
   number: number
 }
 

@@ -29,10 +29,7 @@ export type WorktreeListRowItem = {
   unread: boolean
   isActive?: boolean
   linkedPR: { number: number; state: string } | null
-  linkedIssue?: number | null
-  linkedLinearIssue?: string | null
   linkedGitLabMR?: number | null
-  linkedGitLabIssue?: number | null
   comment?: string
   lineageDepth?: number
   lineageChildCount?: number
@@ -134,10 +131,8 @@ export function WorktreeListRow<T extends WorktreeListRowItem>({
           )}
           <WorktreeMetaGlyphs
             comment={item.comment}
-            linkedLinearIssue={item.linkedLinearIssue}
+            linkedPR={item.linkedPR?.number}
             linkedGitLabMR={item.linkedGitLabMR}
-            linkedIssue={item.linkedIssue}
-            linkedGitLabIssue={item.linkedGitLabIssue}
           />
         </View>
         <View style={styles.worktreeMetaRow}>

@@ -2,7 +2,6 @@
 import React, { useEffect, useCallback, useState } from 'react'
 import { useAppStore } from '@/store'
 import { getHostedReviewCacheKey } from '@/store/slices/hosted-review'
-import { issueCacheKey as getIssueCacheKey } from '@/store/slices/github'
 import { getGitHubPRCacheKey } from '@/store/slices/github-cache-key'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -22,7 +21,6 @@ import CacheTimer, { usePromptCacheCountdownStartedAt } from './cache-timer'
 import WorktreeContextMenu from './worktree-context-menu'
 import { SshDisconnectedDialog } from './ssh-disconnected-dialog'
 import { AutoRenameFailedDialog } from './auto-rename-failed-dialog'
-import { LinearAgentSkillSetupPrompt } from './linear-agent-skill-setup-prompt'
 import WorktreeCardAgents from './worktree-card-agents'
 import { useWorktreeAgentRows } from './use-worktree-agent-rows'
 import { WorktreeCardStatusSlot } from './worktree-card-status-slot'
@@ -31,19 +29,12 @@ import { activateWorktreeFromSidebar } from '@/lib/sidebar-worktree-activation'
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import type { HostedReviewInfo } from '../../../../shared/hosted-review'
 import { hostedReviewInfoFromGitHubPRInfo } from '../../../../shared/hosted-review-github'
-import type {
-  GitHubWorkItem,
-  Worktree,
-  Repo,
-  IssueInfo,
-  LinearIssue
-} from '../../../../shared/types'
+import type { Worktree, Repo } from '../../../../shared/types'
 import { CONFLICT_OPERATION_LABELS } from './worktree-card-helpers'
 import {
   WorktreeCardDetailsHover,
   hasWorktreeCardDetails,
-  WorktreeCardMetaBadges,
-  type WorktreeCardIssueDisplay
+  WorktreeCardMetaBadges
 } from './worktree-card-meta'
 import { WorktreeCardPortsDetails, WorktreeCardPortsTrigger } from './worktree-card-ports'
 import { writeWorkspaceDragData } from './workspace-status'
@@ -58,7 +49,7 @@ import { isEventTargetInsideCurrentTarget } from './worktree-card-dom-events'
 import { getWorkspacePortsByWorktreeId } from '@/lib/workspace-port-groups'
 import { RepoIconGlyph } from '@/components/repo/repo-icon'
 import { resolveRepoHeaderColor } from './project-header-color'
-import { installWindowVisibilityInterval, isWindowVisible } from '@/lib/window-visibility-interval'
+import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'
 import { isMacAppDataPath } from '@/lib/passive-macos-app-data-access'
 import { runWorktreeDelete } from './delete-worktree-flow'
 import { WorktreeTitleInlineRename } from './worktree-title-inline-rename'
@@ -228,7 +219,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
   onRevokeSpoolControlGrant
 }: WorktreeCardProps) {
   const openModal = useAppStore((s) => s.openModal)
-  const openTaskPage = useAppStore((s) => s.openTaskPage)
   const openAutomationsPage = useAppStore((s) => s.openAutomationsPage)
   const setPendingAutomationRunNavigation = useAppStore((s) => s.setPendingAutomationRunNavigation)
   const updateWorktreeMeta = useAppStore((s) => s.updateWorktreeMeta)
@@ -238,34 +228,16 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const setRenamingWorktreeId = useAppStore((s) => s.setRenamingWorktreeId)
   const fetchHostedReviewForBranch = useAppStore((s) => s.fetchHostedReviewForBranch)
   const settings = useAppStore((s) => s.settings)
-  const fetchIssue = useAppStore((s) => s.fetchIssue)
-  const fetchLinearIssue = useAppStore((s) => s.fetchLinearIssue)
   const cardProps = useAppStore((s) => s.worktreeCardProperties)
   const agentActivityDisplayMode =
     useAppStore((s) => s.agentActivityDisplayMode) ?? DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE
   const projectGroups = useAppStore((s) => s.projectGroups)
-  const handleEditIssue = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation()
-      openModal('edit-meta', {
-        worktreeId: worktree.id,
-        currentDisplayName: worktree.displayName,
-        currentIssue: worktree.linkedIssue,
-        currentPR: worktree.linkedPR,
-        currentComment: worktree.comment,
-        focus: 'issue'
-      })
-    },
-    [worktree, openModal]
-  )
-
   const handleEditComment = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
       openModal('edit-meta', {
         worktreeId: worktree.id,
         currentDisplayName: worktree.displayName,
-        currentIssue: worktree.linkedIssue,
         currentPR: worktree.linkedPR,
         currentComment: worktree.comment,
         focus: 'comment'
@@ -414,34 +386,11 @@ const WorktreeCard = React.memo(function WorktreeCard({
           true
         )
       : ''
-  const issueCacheKey =
-    repo && worktree.linkedIssue
-      ? getIssueCacheKey(
-          repo.path,
-          repo.id,
-          worktree.linkedIssue,
-          settings,
-          repo.connectionId,
-          repo.executionHostId,
-          true
-        )
-      : ''
-  // Why: use 'all' to fetch from all Linear workspaces. The issue might belong
-  // to a different workspace than the currently selected one.
-  const linearIssueCacheKey = worktree.linkedLinearIssue ? `all::${worktree.linkedLinearIssue}` : ''
-
   // Subscribe to ONLY the specific cache entry, not entire review/issue caches.
   const hostedReviewEntry = useAppStore((s) =>
     hostedReviewCacheKey ? s.hostedReviewCache[hostedReviewCacheKey] : undefined
   )
   const prCacheEntry = useAppStore((s) => (prCacheKey ? s.prCache?.[prCacheKey] : undefined))
-  const issueEntry = useAppStore((s) => (issueCacheKey ? s.issueCache[issueCacheKey] : undefined))
-  const linearIssueEntry = useAppStore((s) =>
-    linearIssueCacheKey ? s.linearIssueCache[linearIssueCacheKey] : undefined
-  )
-  const linearIssueFallbackEntry = useAppStore((s) =>
-    worktree.linkedLinearIssue ? s.linearIssueCache[worktree.linkedLinearIssue] : undefined
-  )
 
   const hostedReview: HostedReviewInfo | null | undefined =
     hostedReviewEntry !== undefined ? hostedReviewEntry.data : undefined
@@ -514,90 +463,9 @@ const WorktreeCard = React.memo(function WorktreeCard({
           : hostedReviewEntry?.linkedReviewHintKey
     }
   )
-  const issue: IssueInfo | null | undefined = worktree.linkedIssue
-    ? issueEntry !== undefined
-      ? issueEntry.data
-      : undefined
-    : null
-  const issueDisplay: WorktreeCardIssueDisplay | null =
-    issue ??
-    (worktree.linkedIssue
-      ? {
-          number: worktree.linkedIssue,
-          // Why: linked metadata is persisted immediately, but GitHub details
-          // arrive asynchronously. Show the durable link number instead of
-          // making the worktree look unlinked while the cache warms.
-          title: issue === null ? 'Issue details unavailable' : 'Loading issue...'
-        }
-      : null)
-  const linearStatus = useAppStore((s) => s.linearStatus)
-  const linearIssue: LinearIssue | null | undefined = worktree.linkedLinearIssue
-    ? (linearIssueEntry?.data ?? linearIssueFallbackEntry?.data)
-    : null
-
-  // Why: construct a Linear URL from the organizationUrlKey and identifier
-  // when the API hasn't returned the full issue data yet, so the user can
-  // still navigate to the issue even while it's loading.
-  // Use the issue's workspaceId if available to get the correct organizationUrlKey,
-  // otherwise fall back to the currently selected workspace.
-  const linearOrgUrlKey = linearStatus?.viewer?.organizationUrlKey
-  const linearWorkspaceUrlKeys = linearStatus?.workspaces?.map((ws) => ({
-    id: ws.id,
-    organizationUrlKey: ws.organizationUrlKey
-  }))
-  const linearIssueUrlFallback = React.useMemo(() => {
-    if (!worktree.linkedLinearIssue || linearIssue?.url) {
-      return undefined
-    }
-
-    // Try to get the orgUrlKey from the issue's workspace if we have workspaceId
-    let orgUrlKey: string | undefined
-    if (linearIssue?.workspaceId && linearWorkspaceUrlKeys) {
-      const issueWorkspace = linearWorkspaceUrlKeys.find((ws) => ws.id === linearIssue.workspaceId)
-      orgUrlKey = issueWorkspace?.organizationUrlKey
-    }
-
-    // Fall back to current viewer's org if no workspace match
-    if (!orgUrlKey) {
-      orgUrlKey = linearOrgUrlKey
-    }
-
-    if (!orgUrlKey) {
-      return undefined
-    }
-
-    return `https://linear.app/${encodeURIComponent(orgUrlKey)}/issue/${encodeURIComponent(worktree.linkedLinearIssue)}`
-  }, [
-    worktree.linkedLinearIssue,
-    linearIssue?.url,
-    linearIssue?.workspaceId,
-    linearOrgUrlKey,
-    linearWorkspaceUrlKeys
-  ])
-
-  const linearIssueDisplay = worktree.linkedLinearIssue
-    ? linearIssue
-      ? {
-          identifier: linearIssue.identifier,
-          title: linearIssue.title,
-          url: linearIssue.url,
-          stateName: linearIssue.state?.name,
-          labels: linearIssue.labels
-        }
-      : {
-          identifier: worktree.linkedLinearIssue,
-          title:
-            linearIssueEntry || linearIssueFallbackEntry
-              ? 'Linear issue details unavailable'
-              : 'Loading Linear issue...',
-          url: linearIssueUrlFallback
-        }
-    : null
   const cardTitleDisplay = getWorktreeCardTitleDisplay({
     storedDisplayName: worktree.displayName,
     branchName: branch,
-    linearIssueTitle: linearIssueDisplay?.title,
-    issueTitle: issueDisplay?.title,
     reviewTitle: prDisplay?.title
   })
   const visibleCardTitle = cardTitleDisplay
@@ -609,8 +477,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const deleteModifierPressed = useWorkspaceDeleteModifierPressed()
 
   const showStatus = cardProps.includes('status')
-  const showIssue = cardProps.includes('issue')
-  const showLinearIssue = cardProps.includes('linear-issue')
   const showAutomation = cardProps.includes('automation')
   const showComment = cardProps.includes('comment')
   const showPorts = cardProps.includes('ports')
@@ -723,76 +589,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
     hostedReviewCacheKey
   ])
 
-  // Same rationale for issues: once that surface is hidden, polling only burns
-  // GitHub calls and keeps stale-but-invisible data warm for no user benefit.
-  useEffect(() => {
-    // Why: paired web startup can render hundreds of visible workspace cards.
-    // The host is authoritative for repo metadata; issuing decoration lookups
-    // from the browser floods the runtime RPC path and delays live surfaces.
-    if (
-      isWebClient() ||
-      !repo ||
-      isFolder ||
-      !worktree.linkedIssue ||
-      !issueCacheKey ||
-      !showIssue
-    ) {
-      return
-    }
-
-    const issueNumber = worktree.linkedIssue
-
-    // Background poll as fallback (activity triggers handle the fast path).
-    // The interval itself is stopped while hidden so issue cards do not keep
-    // long-lived workspaces waking just to skip their fetch.
-    return installWindowVisibilityInterval({
-      run: () => void fetchIssue(repo.path, issueNumber, { repoId: repo.id }),
-      intervalMs: 5 * 60_000
-    })
-  }, [repo, isFolder, worktree.linkedIssue, fetchIssue, issueCacheKey, showIssue])
-
-  useEffect(() => {
-    if (
-      !hoverDetailsOpen ||
-      showIssue ||
-      isWebClient() ||
-      !repo ||
-      isFolder ||
-      !worktree.linkedIssue ||
-      !issueCacheKey
-    ) {
-      return
-    }
-    void fetchIssue(repo.path, worktree.linkedIssue, { repoId: repo.id })
-  }, [hoverDetailsOpen, showIssue, repo, isFolder, worktree.linkedIssue, fetchIssue, issueCacheKey])
-
-  useEffect(() => {
-    if (!worktree.linkedLinearIssue || !showLinearIssue) {
-      return
-    }
-    const linearIssueId = worktree.linkedLinearIssue
-    const refreshLinearIssueIfVisible = (): void => {
-      if (!isWindowVisible()) {
-        return
-      }
-      void fetchLinearIssue(linearIssueId, 'all')
-    }
-    refreshLinearIssueIfVisible()
-    window.addEventListener('focus', refreshLinearIssueIfVisible)
-    document.addEventListener('visibilitychange', refreshLinearIssueIfVisible)
-    return () => {
-      window.removeEventListener('focus', refreshLinearIssueIfVisible)
-      document.removeEventListener('visibilitychange', refreshLinearIssueIfVisible)
-    }
-  }, [worktree.linkedLinearIssue, fetchLinearIssue, showLinearIssue])
-
-  useEffect(() => {
-    if (!hoverDetailsOpen || showLinearIssue || !worktree.linkedLinearIssue) {
-      return
-    }
-    void fetchLinearIssue(worktree.linkedLinearIssue, 'all')
-  }, [hoverDetailsOpen, showLinearIssue, worktree.linkedLinearIssue, fetchLinearIssue])
-
   // Stable click handler – ignore clicks that are really text selections.
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
@@ -881,7 +677,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
       openModal('edit-meta', {
         worktreeId: worktree.id,
         currentDisplayName: worktree.displayName,
-        currentIssue: worktree.linkedIssue,
         currentPR: worktree.linkedPR,
         currentComment: worktree.comment
       })
@@ -892,7 +687,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
       worktree.comment,
       worktree.displayName,
       worktree.id,
-      worktree.linkedIssue,
       worktree.linkedPR
     ]
   )
@@ -1006,8 +800,8 @@ const WorktreeCard = React.memo(function WorktreeCard({
 
   const stopQuickActionPointerPropagation = useCallback(
     (event: React.PointerEvent<HTMLButtonElement>) => {
-      // Why: the Kanban board is dismissed by document-level pointer handling.
-      // Quick card actions mutate metadata, but must not count as card activation.
+      // Why: quick card actions mutate metadata but must not activate the card
+      // through document-level pointer handling.
       event.stopPropagation()
     },
     []
@@ -1017,13 +811,9 @@ const WorktreeCard = React.memo(function WorktreeCard({
   // owns both the dot/PR slot and unread emphasis. The persisted
   // `worktree.isUnread` flag is unchanged; only the rendering changes.
   const showUnreadEmphasis = showStatus && worktree.isUnread
-  const hoverIssue = issueDisplay
-  const hoverLinearIssue = linearIssueDisplay
   const hoverReview = prDisplay
   const statusLaneReview = statusPrDisplay ?? hoverReview
   const hoverComment = worktree.comment
-  const metaIssue = showIssue ? hoverIssue : null
-  const metaLinearIssue = showLinearIssue ? hoverLinearIssue : null
   const metaAutomationProvenance = showAutomation ? worktree.automationProvenance : null
   const metaComment = showComment ? hoverComment : null
   const showInlineAgentList = cardProps.includes('inline-agents')
@@ -1036,52 +826,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
     agentActivityDisplayMode === 'compact' &&
     compactInlineAgentRows.length > 0
   const showAggregateCacheTimer = !compactInlineAgentRowsVisible
-  const handleOpenGitHubIssueInYiru = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation()
-      const issueUrl = hoverIssue && 'url' in hoverIssue ? hoverIssue.url : undefined
-      if (!repo || !hoverIssue || !issueUrl) {
-        return
-      }
-      const item: GitHubWorkItem = {
-        id: issueUrl,
-        type: 'issue',
-        number: hoverIssue.number,
-        title: hoverIssue.title,
-        state: 'state' in hoverIssue ? (hoverIssue.state ?? 'open') : 'open',
-        url: issueUrl,
-        labels: 'labels' in hoverIssue ? (hoverIssue.labels ?? []) : [],
-        updatedAt: new Date().toISOString(),
-        author: null,
-        repoId: repo.id
-      }
-      openTaskPage({ taskSource: 'github', preselectedRepoId: repo.id, openGitHubWorkItem: item })
-    },
-    [hoverIssue, openTaskPage, repo]
-  )
-  const handleOpenReviewInYiru = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation()
-      if (!repo || !hoverReview?.url || hoverReview.provider !== 'github') {
-        return
-      }
-      const item: GitHubWorkItem = {
-        id: hoverReview.url,
-        type: 'pr',
-        number: hoverReview.number,
-        title: hoverReview.title,
-        state: hoverReview.state ?? 'open',
-        url: hoverReview.url,
-        labels: [],
-        updatedAt: 'updatedAt' in hoverReview ? hoverReview.updatedAt : new Date().toISOString(),
-        author: null,
-        headSha: 'headSha' in hoverReview ? hoverReview.headSha : undefined,
-        repoId: repo.id
-      }
-      openTaskPage({ taskSource: 'github', preselectedRepoId: repo.id, openGitHubWorkItem: item })
-    },
-    [hoverReview, openTaskPage, repo]
-  )
   const hasExplicitLinkedReview =
     (hoverReview?.provider === 'github' && worktree.linkedPR !== null) ||
     (hoverReview?.provider === 'gitlab' && linkedGitLabMR !== null) ||
@@ -1110,19 +854,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
         break
     }
   }, [hoverReview?.provider, updateWorktreeMeta, worktree.id])
-  const handleOpenLinearIssueInYiru = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation()
-      if (!linearIssue) {
-        return
-      }
-      openTaskPage({ taskSource: 'linear', openLinearIssue: linearIssue })
-    },
-    [linearIssue, openTaskPage]
-  )
   const hasDetails = hasWorktreeCardDetails({
-    issue: metaIssue,
-    linearIssue: metaLinearIssue,
     review: null,
     comment: metaComment,
     automationProvenance: metaAutomationProvenance
@@ -1167,8 +899,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const hasHoverIdentity = Boolean(hoverWorkspaceTitle || hoverBranchName)
   const hasHoverDetails =
     hasWorktreeCardDetails({
-      issue: hoverIssue,
-      linearIssue: hoverLinearIssue,
       review: hoverReview,
       comment: hoverComment,
       automationProvenance: metaAutomationProvenance
@@ -1199,8 +929,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
         {hasPorts && <WorktreeCardPortsTrigger ports={workspacePorts} />}
         {hasDetails && (
           <WorktreeCardMetaBadges
-            issue={metaIssue}
-            linearIssue={metaLinearIssue}
             review={null}
             comment={metaComment}
             automationProvenance={metaAutomationProvenance}
@@ -1457,7 +1185,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
                     render={
                       <button
                         type="button"
-                        data-workspace-board-preserve-open=""
                         onPointerDown={stopQuickActionPointerPropagation}
                         onClick={handleWorkspaceQuickAction}
                         className={cn(
@@ -1554,15 +1281,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
           />
         ) : null}
 
-        {isActive && worktree.linkedLinearIssue ? (
-          <LinearAgentSkillSetupPrompt
-            linked
-            remote={Boolean(repo?.connectionId || settings?.activeRuntimeEnvironmentId?.trim())}
-            surface="modal"
-            settings={settings}
-          />
-        ) : null}
-
         {/* Why: inline agent list. Gated on the 'inline-agents' card
              property so users can hide it. Layout coupling: this block
              grows the card height dynamically — WorktreeList uses
@@ -1637,8 +1355,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const parentCardBodyWithHoverDetails =
     hasHoverDetails && !titleRenaming ? (
       <WorktreeCardDetailsHover
-        issue={hoverIssue}
-        linearIssue={hoverLinearIssue}
         review={hoverReview}
         comment={hoverComment}
         automationProvenance={metaAutomationProvenance}
@@ -1652,17 +1368,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
         openDelay={100}
         hoverControl={detailsHoverControl}
         onRenameWorkspaceTitle={affiliateListMode ? undefined : handleRenameTitle}
-        onEditIssue={affiliateListMode ? undefined : handleEditIssue}
         onEditComment={affiliateListMode ? undefined : handleEditComment}
-        onOpenGitHubIssueInYiru={
-          hoverIssue && 'url' in hoverIssue && hoverIssue.url
-            ? handleOpenGitHubIssueInYiru
-            : undefined
-        }
-        onOpenLinearIssueInYiru={linearIssue?.url ? handleOpenLinearIssueInYiru : undefined}
-        onOpenReviewInYiru={
-          hoverReview?.url && hoverReview.provider === 'github' ? handleOpenReviewInYiru : undefined
-        }
         onOpenAutomation={affiliateListMode ? undefined : handleOpenAutomation}
         onOpenAutomationRun={affiliateListMode ? undefined : handleOpenAutomationRun}
         // Why: branch lookup can show a review without persisted metadata. Only

@@ -35,7 +35,7 @@ const SETTINGS_ALIASES: Record<string, string[]> = {
   agents: ['ai agents'],
   'quick-commands': ['quick commands', 'quick command'],
   repo: ['repository settings', 'project settings'],
-  integrations: ['gitlab', 'github', 'linear'],
+  integrations: ['gitlab', 'github'],
   notifications: ['notification settings'],
   mobile: ['phone'],
   voice: ['dictation'],

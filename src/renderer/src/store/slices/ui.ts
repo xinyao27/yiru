@@ -2,23 +2,14 @@
 import type { StateCreator } from 'zustand'
 import type { AppState } from '../types'
 import { normalizeRightSidebarRoute } from '../right-sidebar-route'
-import {
-  findPrevLiveNonTaskStackHistoryIndex,
-  findPrevLiveWorktreeHistoryIndex
-} from './worktree-nav-history'
+import { findPrevLiveWorktreeHistoryIndex } from './worktree-nav-history'
 import type {
   ChangelogData,
   CustomPet,
-  GitHubWorkItem,
-  JiraIssue,
-  LinearIssue,
   ManualRepoOrderEntry,
   PersistedTrustedYiruHooks,
   PersistedUIState,
   StatusBarItem,
-  TaskProvider,
-  TaskResumeState,
-  TaskViewPresetId,
   TuiAgent,
   UpdateStatus,
   WorkspaceStatusDefinition,
@@ -39,9 +30,8 @@ import {
   DEFAULT_USAGE_PERCENTAGE_DISPLAY,
   normalizeUsagePercentageDisplay
 } from '../../../../shared/usage-percentage-display'
-import type { GitLabWorkItem } from '../../../../shared/gitlab-types'
 import type { LaunchSource } from '../../../../shared/telemetry-events'
-import type { TaskSourceContext } from '../../../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../../../shared/project-source-context'
 import { PET_SIZE_DEFAULT, PET_SIZE_MAX, PET_SIZE_MIN } from '../../../../shared/types'
 import {
   WORKSPACE_CLEANUP_CLASSIFIER_VERSION,
@@ -59,12 +49,6 @@ import {
   normalizeContextualTourIds,
   type ContextualTourId
 } from '../../../../shared/contextual-tours'
-import { PER_REPO_FETCH_LIMIT } from '../../../../shared/work-items'
-import {
-  normalizeVisibleTaskProviders,
-  restoreAvailableDefaultTaskProvider,
-  resolveVisibleTaskProvider
-} from '../../../../shared/task-providers'
 import {
   DEFAULT_HIDE_SLEEPING_WORKSPACES,
   DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE,
@@ -86,9 +70,6 @@ import {
   type ExecutionHostId
 } from '../../../../shared/execution-host'
 import {
-  WORKSPACE_BOARD_COLUMN_WIDTH_DEFAULT,
-  clampWorkspaceBoardColumnWidth,
-  clampWorkspaceBoardOpacity,
   cloneDefaultWorkspaceStatuses,
   normalizeWorkspaceStatuses
 } from '../../../../shared/workspace-statuses'
@@ -103,7 +84,6 @@ import {
 } from '../../lib/setup-script-prompt'
 import { DEFAULT_PET_ID, isBundledPetId } from '../../components/pet/pet-models'
 import { revokeCustomPetBlobUrl } from '../../components/pet/pet-blob-cache'
-import { isGitRepoKind } from '../../../../shared/repo-kind'
 import type { WorkspacePortScanResult } from '../../../../shared/workspace-ports'
 import {
   getContextualTourRequestDecision,
@@ -234,27 +214,6 @@ function clampPetSize(size: number): number {
   return Math.max(PET_SIZE_MIN, Math.min(PET_SIZE_MAX, Math.round(size)))
 }
 
-// Why: mirrors the preset→query mapping used by TaskPage's preset buttons.
-// Keeping a local copy here avoids a store ↔ lib circular import while letting
-// openTaskPage warm exactly the cache key the page will read on mount.
-function presetToQuery(presetId: TaskViewPresetId | null): string {
-  switch (presetId) {
-    case 'all':
-    case 'issues':
-      return 'is:issue is:open'
-    case 'my-issues':
-      return 'assignee:@me is:issue is:open'
-    case 'prs':
-      return 'is:pr is:open'
-    case 'review':
-      return 'review-requested:@me is:pr is:open'
-    case 'my-prs':
-      return 'author:@me is:pr is:open'
-    case null:
-      return 'is:issue is:open'
-  }
-}
-
 // Why: persisted UI state pre-dated the consolidation of `memory` + `sessions`
 // into a single `resource-usage` entry. Rewrite legacy ids in place and
 // de-duplicate. We leave unknown ids alone so a downgrade→upgrade cycle
@@ -293,39 +252,12 @@ const MAX_LEFT_SIDEBAR_WIDTH = 500
 // cap on wide displays. Use a large hard ceiling purely as a safety net for
 // corrupted/manually-edited values rather than as a product limit.
 const MAX_RIGHT_SIDEBAR_WIDTH = 4000
-const LINEAR_TASK_PREFETCH_LIMIT = 36
 // Why: bound disk growth for acknowledgedAgentsByPaneKey across hard quits —
 // in-session cleanup (agent-status.ts) prunes on pane lifecycle, but crash/
 // forced-kill paths leave entries pinned. Mirrors HYDRATE_MAX_AGE_MS in
 // src/main/agent-hooks/server.ts for parallel reasoning with the sibling
 // hook-status entries these acks pair with.
 const HYDRATE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
-const VALID_TASK_PRESETS = new Set<TaskViewPresetId>([
-  'all',
-  'issues',
-  'review',
-  'my-issues',
-  'my-prs',
-  'prs'
-])
-const VALID_LINEAR_PRESETS = new Set<NonNullable<TaskResumeState['linearPreset']>>([
-  'assigned',
-  'created',
-  'all',
-  'completed'
-])
-const VALID_LINEAR_MODES = new Set<NonNullable<TaskResumeState['linearMode']>>([
-  'issues',
-  'projects',
-  'views'
-])
-const VALID_JIRA_PRESETS = new Set<NonNullable<TaskResumeState['jiraPreset']>>([
-  'assigned',
-  'reported',
-  'all',
-  'done'
-])
-
 function resolvePaneKeyWorktreeIdFromTabs(state: AppState, paneKey: string): string | null {
   const parsed = parsePaneKey(paneKey)
   if (!parsed) {
@@ -505,7 +437,6 @@ function hydratedUIPartialMatchesState(state: AppState, hydrated: Partial<UISlic
 const TOP_LEVEL_VIEW_LOOKUP: Record<TopLevelView, true> = {
   terminal: true,
   settings: true,
-  tasks: true,
   activity: true,
   automations: true,
   space: true,
@@ -539,72 +470,6 @@ function createAgentSendTargetModeInstanceId(): string {
   return `${Date.now()}:${agentSendTargetModeInstanceCounter}`
 }
 
-function sanitizeTaskResumeState(value: unknown): TaskResumeState | undefined {
-  if (!value || typeof value !== 'object') {
-    return undefined
-  }
-  const input = value as Record<string, unknown>
-  const next: TaskResumeState = {}
-
-  if (input.githubMode === 'items' || input.githubMode === 'project') {
-    next.githubMode = input.githubMode
-  }
-  if (input.githubItemsPreset === null) {
-    next.githubItemsPreset = null
-  } else if (typeof input.githubItemsPreset === 'string') {
-    if (VALID_TASK_PRESETS.has(input.githubItemsPreset as TaskViewPresetId)) {
-      next.githubItemsPreset = input.githubItemsPreset as TaskViewPresetId
-    }
-  }
-  if (typeof input.githubItemsQuery === 'string') {
-    next.githubItemsQuery = input.githubItemsQuery
-  }
-  if (
-    typeof input.linearPreset === 'string' &&
-    VALID_LINEAR_PRESETS.has(input.linearPreset as NonNullable<TaskResumeState['linearPreset']>)
-  ) {
-    next.linearPreset = input.linearPreset as NonNullable<TaskResumeState['linearPreset']>
-  }
-  if (
-    typeof input.linearMode === 'string' &&
-    VALID_LINEAR_MODES.has(input.linearMode as NonNullable<TaskResumeState['linearMode']>)
-  ) {
-    next.linearMode = input.linearMode as NonNullable<TaskResumeState['linearMode']>
-  }
-  if (typeof input.linearQuery === 'string') {
-    next.linearQuery = input.linearQuery
-  }
-  if (input.linearContext && typeof input.linearContext === 'object') {
-    const context = input.linearContext as Record<string, unknown>
-    if (
-      (context.kind === 'project' || context.kind === 'view') &&
-      typeof context.id === 'string' &&
-      context.id.trim() &&
-      typeof context.workspaceId === 'string' &&
-      context.workspaceId.trim() &&
-      context.workspaceId !== 'all'
-    ) {
-      next.linearContext = {
-        kind: context.kind,
-        id: context.id,
-        workspaceId: context.workspaceId,
-        model: context.model === 'issue' || context.model === 'project' ? context.model : undefined
-      }
-    }
-  }
-  if (
-    typeof input.jiraPreset === 'string' &&
-    VALID_JIRA_PRESETS.has(input.jiraPreset as NonNullable<TaskResumeState['jiraPreset']>)
-  ) {
-    next.jiraPreset = input.jiraPreset as NonNullable<TaskResumeState['jiraPreset']>
-  }
-  if (typeof input.jiraQuery === 'string') {
-    next.jiraQuery = input.jiraQuery
-  }
-
-  return Object.keys(next).length > 0 ? next : undefined
-}
-
 export type UISlice = {
   sidebarOpen: boolean
   sidebarWidth: number
@@ -626,17 +491,8 @@ export type UISlice = {
   acknowledgeAgents: (paneKeys: string[]) => void
   unacknowledgeAgents: (paneKeys: string[]) => void
   activeView: TopLevelView
-  previousViewBeforeTasks:
-    | 'terminal'
-    | 'settings'
-    | 'activity'
-    | 'automations'
-    | 'space'
-    | 'skills'
-    | 'mobile'
   previousViewBeforeSettings:
     | 'terminal'
-    | 'tasks'
     | 'activity'
     | 'automations'
     | 'space'
@@ -645,7 +501,6 @@ export type UISlice = {
   previousViewBeforeActivity:
     | 'terminal'
     | 'settings'
-    | 'tasks'
     | 'automations'
     | 'space'
     | 'skills'
@@ -653,7 +508,6 @@ export type UISlice = {
   previousViewBeforeAutomations:
     | 'terminal'
     | 'settings'
-    | 'tasks'
     | 'activity'
     | 'space'
     | 'skills'
@@ -661,7 +515,6 @@ export type UISlice = {
   previousViewBeforeSpace:
     | 'terminal'
     | 'settings'
-    | 'tasks'
     | 'activity'
     | 'automations'
     | 'skills'
@@ -669,7 +522,6 @@ export type UISlice = {
   previousViewBeforeSkills:
     | 'terminal'
     | 'settings'
-    | 'tasks'
     | 'activity'
     | 'automations'
     | 'space'
@@ -677,30 +529,11 @@ export type UISlice = {
   previousViewBeforeMobile:
     | 'terminal'
     | 'settings'
-    | 'tasks'
     | 'activity'
     | 'automations'
     | 'space'
     | 'skills'
   setActiveView: (view: UISlice['activeView']) => void
-  taskPageData: {
-    preselectedRepoId?: string
-    prefilledName?: string
-    taskSource?: TaskProvider
-    openGitHubWorkItem?: GitHubWorkItem
-    openGitHubSourceContext?: TaskSourceContext | null
-    openGitHubInitialTab?: 'conversation' | 'checks' | 'files'
-    openGitLabWorkItem?: GitLabWorkItem
-    openGitLabSourceContext?: TaskSourceContext | null
-    openLinearIssue?: LinearIssue
-    openLinearSourceContext?: TaskSourceContext | null
-    openJiraIssue?: JiraIssue
-    openJiraSourceContext?: TaskSourceContext | null
-  }
-  taskResumeState: TaskResumeState | undefined
-  setTaskResumeState: (updates: Partial<TaskResumeState>) => void
-  githubTaskDrawerWorkItem: GitHubWorkItem | null
-  setGithubTaskDrawerWorkItem: (item: GitHubWorkItem | null) => void
   newWorkspaceDraft: {
     repoId: string | null
     // Why: project-first workspace creation resolves through these when present,
@@ -714,22 +547,15 @@ export type UISlice = {
     note: string
     attachments: string[]
     linkedWorkItem: {
-      type: 'issue' | 'pr' | 'mr'
+      type: 'pr' | 'mr'
       number: number
       title: string
       url: string
-      linearIdentifier?: string
-      linearBranchName?: string
     } | null
-    /** Why: starting from a task must preserve where provider data came from
-     *  separately from the host selected to run the workspace. */
-    taskSourceContext?: TaskSourceContext | null
+    /** Review context stays separate from the host selected to run the workspace. */
+    projectSourceContext?: ProjectSourceContext | null
     agent: TuiAgent
-    linkedIssue: string
     linkedPR: number | null
-    /** GitLab parallels — number for an issue, iid for an MR. Optional so
-     *  drafts saved before GitLab support keep loading without migration. */
-    linkedGitLabIssue?: number | null
     linkedGitLabMR?: number | null
     // Why: repo-scoped start ref selected via the "Start from" picker.
     // Absent means "use the repo's effective base ref".
@@ -738,11 +564,6 @@ export type UISlice = {
     // Control must compare against the provider target branch.
     compareBaseRef?: string
   } | null
-  openTaskPage: (
-    data?: UISlice['taskPageData'],
-    options?: { recordTasksInteraction?: boolean }
-  ) => void
-  closeTaskPage: () => void
   openActivityPage: () => void
   closeActivityPage: () => void
   selectedAutomationId: string | null
@@ -910,12 +731,6 @@ export type UISlice = {
   agentActivityDisplayMode: AgentActivityDisplayMode
   workspaceStatuses: WorkspaceStatusDefinition[]
   setWorkspaceStatuses: (statuses: WorkspaceStatusDefinition[]) => void
-  workspaceBoardOpacity: number
-  setWorkspaceBoardOpacity: (opacity: number) => void
-  workspaceBoardColumnWidth: number
-  setWorkspaceBoardColumnWidth: (width: number) => void
-  syncTaskStatusFromWorkspaceBoard: boolean
-  setSyncTaskStatusFromWorkspaceBoard: (enabled: boolean) => void
   statusBarItems: StatusBarItem[]
   toggleStatusBarItem: (item: StatusBarItem) => void
   statusBarVisible: boolean
@@ -1231,7 +1046,6 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
     }),
 
   activeView: 'terminal',
-  previousViewBeforeTasks: 'terminal',
   previousViewBeforeSettings: 'terminal',
   previousViewBeforeActivity: 'terminal',
   previousViewBeforeAutomations: 'terminal',
@@ -1239,208 +1053,6 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
   previousViewBeforeSkills: 'terminal',
   previousViewBeforeMobile: 'terminal',
   setActiveView: (view) => set({ activeView: view }),
-  taskPageData: {},
-  taskResumeState: undefined,
-  githubTaskDrawerWorkItem: null,
-  newWorkspaceDraft: null,
-  openTaskPage: (data = {}, options = {}) => {
-    if (options.recordTasksInteraction !== false) {
-      const wasTasksPreviouslyInteracted = hasFeatureInteraction(get().featureInteractions, 'tasks')
-      set((state) => ({
-        contextualTourNavigationInteractionSnapshot: {
-          ...state.contextualTourNavigationInteractionSnapshot,
-          tasks: wasTasksPreviouslyInteracted
-        }
-      }))
-      get().recordFeatureInteraction?.('tasks')
-    }
-    if (data.openGitHubWorkItem) {
-      get().recordFeatureInteraction?.('github-tasks')
-    }
-    if (data.openGitLabWorkItem) {
-      get().recordFeatureInteraction?.('gitlab-tasks')
-    }
-    if (data.openLinearIssue) {
-      get().recordFeatureInteraction?.('linear-tasks')
-    }
-    if (data.openJiraIssue) {
-      get().recordFeatureInteraction?.('jira-tasks')
-    }
-    // Why: record a Tasks visit in the shared back/forward history so the
-    // titlebar Back/Forward buttons can return to Tasks. All task-source
-    // variants (github/linear presets) collapse to a single 'tasks' entry;
-    // the slice's adjacent-entry dedupe drops re-opens. No isNavigatingHistory
-    // guard needed — back-to-Tasks routes through setActiveView('tasks') and
-    // never re-enters openTaskPage.
-    const detailEntry = data.openGitHubWorkItem
-      ? ({
-          kind: 'task-detail',
-          source: 'github',
-          workItem: data.openGitHubWorkItem,
-          sourceContext: data.openGitHubSourceContext,
-          initialTab: data.openGitHubInitialTab
-        } as const)
-      : data.openGitLabWorkItem
-        ? ({
-            kind: 'task-detail',
-            source: 'gitlab',
-            workItem: data.openGitLabWorkItem,
-            sourceContext: data.openGitLabSourceContext
-          } as const)
-        : data.openLinearIssue
-          ? ({
-              kind: 'task-detail',
-              source: 'linear',
-              issue: data.openLinearIssue,
-              sourceContext: data.openLinearSourceContext
-            } as const)
-          : data.openJiraIssue
-            ? ({
-                kind: 'task-detail',
-                source: 'jira',
-                issue: data.openJiraIssue,
-                sourceContext: data.openJiraSourceContext
-              } as const)
-            : null
-    const currentEntry = get().worktreeNavHistory[get().worktreeNavHistoryIndex]
-    const currentIsTaskStack =
-      currentEntry === 'tasks' ||
-      (typeof currentEntry === 'object' && currentEntry.kind === 'task-detail')
-    if (!detailEntry || !currentIsTaskStack) {
-      get().recordViewVisit('tasks')
-    }
-    if (detailEntry) {
-      get().recordViewVisit(detailEntry)
-    }
-    set((state) => ({
-      activeView: 'tasks',
-      previousViewBeforeTasks:
-        state.activeView === 'tasks' ? state.previousViewBeforeTasks : state.activeView,
-      taskPageData: data
-    }))
-    // Why: prefetch the GitHub work-item list in parallel with React's first
-    // render of the TaskPage — by the time the page's own effect runs, the SWR
-    // cache is either already populated or the request is in-flight and will
-    // be deduped. This removes ~300–800ms of perceived latency on initial
-    // page load.
-    const state = get()
-    const preferredVisibleTaskProviders = normalizeVisibleTaskProviders(
-      state.settings?.visibleTaskProviders
-    )
-    const visibleTaskProviders = restoreAvailableDefaultTaskProvider(
-      preferredVisibleTaskProviders,
-      {
-        gitlabInstalled: state.preflightStatus?.glab?.installed === true,
-        linearConnected: state.linearStatus?.connected === true
-      },
-      state.settings?.defaultTaskSource
-    )
-    const resolvedSource = resolveVisibleTaskProvider(
-      data.taskSource ?? state.settings?.defaultTaskSource,
-      visibleTaskProviders
-    )
-    const resolvedMode = state.taskResumeState?.githubMode ?? 'items'
-    if (resolvedSource === 'github' && resolvedMode === 'items') {
-      const eligibleRepos = state.repos.filter((repo) => isGitRepoKind(repo) && repo.path)
-      const selectedRepos = (() => {
-        const preferred = data.preselectedRepoId
-        if (preferred) {
-          const repo = eligibleRepos.find((r) => r.id === preferred)
-          return repo ? [repo] : []
-        }
-        const persisted = state.settings?.defaultRepoSelection
-        if (Array.isArray(persisted)) {
-          const selected = eligibleRepos.filter((repo) => persisted.includes(repo.id))
-          if (selected.length > 0) {
-            return selected
-          }
-        }
-        return eligibleRepos
-      })()
-
-      const resume = state.taskResumeState
-      const defaultPreset = state.settings?.defaultTaskViewPreset ?? 'all'
-      // Why: must match the exact query TaskPage's resume effect mounts with,
-      // otherwise the warm cache key (e.g. 'is:issue is:open') misses the
-      // page's actual fetch key and the prefetch is wasted. When the user has
-      // an explicit custom search (preset === null), preserve it so both sides
-      // agree.
-      const query =
-        resume?.githubItemsPreset === null
-          ? (resume.githubItemsQuery ?? '').trim()
-          : presetToQuery(resume?.githubItemsPreset ?? defaultPreset)
-      for (const repo of selectedRepos) {
-        state.prefetchWorkItems(repo.id, repo.path, PER_REPO_FETCH_LIMIT, query, {
-          sourceContext:
-            data.openGitHubSourceContext?.provider === 'github' &&
-            data.openGitHubSourceContext.repoId === repo.id
-              ? data.openGitHubSourceContext
-              : null
-        })
-      }
-    }
-    if (resolvedSource === 'linear' && typeof state.prefetchLinearIssues === 'function') {
-      const resume = state.taskResumeState
-      const query = (resume?.linearQuery ?? '').trim()
-      const sourceContext =
-        data.openLinearSourceContext?.provider === 'linear' ? data.openLinearSourceContext : null
-      if (query) {
-        state.prefetchLinearIssues(
-          { kind: 'search', query, limit: LINEAR_TASK_PREFETCH_LIMIT },
-          { sourceContext }
-        )
-      } else {
-        // Why: TaskPage no longer exposes Linear preset filters; keep warm
-        // prefetch aligned with the default unsearched issue list.
-        state.prefetchLinearIssues(
-          {
-            kind: 'list',
-            filter: 'all',
-            limit: LINEAR_TASK_PREFETCH_LIMIT
-          },
-          { sourceContext }
-        )
-      }
-    }
-  },
-  setTaskResumeState: (updates) =>
-    set((s) => {
-      const next = { ...s.taskResumeState, ...updates }
-      window.api.ui.set({ taskResumeState: next }).catch(console.error)
-      return { taskResumeState: next }
-    }),
-  setGithubTaskDrawerWorkItem: (item) => set({ githubTaskDrawerWorkItem: item }),
-  closeTaskPage: () =>
-    set((state) => {
-      // Why: Esc-close from Tasks must rewind the history index if we're
-      // currently parked on a 'tasks' entry. Without this, A → Tasks → Esc
-      // leaves the index at the 'tasks' entry, making Back a visual no-op
-      // (activator re-activates A) and Forward re-opens Tasks. If there is no
-      // earlier live entry (e.g. history is just ['tasks']), leave the index
-      // at 0 — setting it to -1 would lose the only forward target, while the
-      // resulting Back visual no-op self-heals as soon as a real visit records
-      // a new entry. closeTaskPage never runs from the history-nav path, so no
-      // isNavigatingHistory guard is needed.
-      const currentEntry = state.worktreeNavHistory[state.worktreeNavHistoryIndex]
-      let nextHistoryIndex = state.worktreeNavHistoryIndex
-      if (
-        currentEntry === 'tasks' ||
-        (typeof currentEntry === 'object' && currentEntry.kind === 'task-detail')
-      ) {
-        const prev = findPrevLiveNonTaskStackHistoryIndex(state)
-        if (prev !== null) {
-          nextHistoryIndex = prev
-        } else if (typeof currentEntry === 'object' && state.worktreeNavHistory[0] === 'tasks') {
-          nextHistoryIndex = 0
-        }
-      }
-      return {
-        activeView: state.previousViewBeforeTasks,
-        taskPageData: {},
-        githubTaskDrawerWorkItem: null,
-        worktreeNavHistoryIndex: nextHistoryIndex
-      }
-    }),
   openActivityPage: () => {
     if (get().settings?.experimentalActivity !== true) {
       return
@@ -1455,6 +1067,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
     set((state) => ({
       activeView: state.previousViewBeforeActivity
     })),
+  newWorkspaceDraft: null,
   selectedAutomationId: null,
   setSelectedAutomationId: (id) => set({ selectedAutomationId: id }),
   pendingAutomationRunNavigation: null,
@@ -1524,7 +1137,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
     set((state) => ({
       activeView: 'settings',
       // Why: Settings is a temporary detour from either terminal or the
-      // full-page tasks view. Preserve the originating view so the Settings
+      // another full-page view. Preserve the originating view so the Settings
       // back action restores an in-progress workspace draft instead of always
       // dumping the user into terminal.
       previousViewBeforeSettings:
@@ -2134,26 +1747,6 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
     set({ workspaceStatuses: normalized })
   },
 
-  workspaceBoardOpacity: 1,
-  setWorkspaceBoardOpacity: (opacity) => {
-    const clamped = clampWorkspaceBoardOpacity(opacity)
-    window.api.ui.set({ workspaceBoardOpacity: clamped }).catch(console.error)
-    set({ workspaceBoardOpacity: clamped })
-  },
-
-  workspaceBoardColumnWidth: WORKSPACE_BOARD_COLUMN_WIDTH_DEFAULT,
-  setWorkspaceBoardColumnWidth: (width) => {
-    const clamped = clampWorkspaceBoardColumnWidth(width)
-    window.api.ui.set({ workspaceBoardColumnWidth: clamped }).catch(console.error)
-    set({ workspaceBoardColumnWidth: clamped })
-  },
-
-  syncTaskStatusFromWorkspaceBoard: false,
-  setSyncTaskStatusFromWorkspaceBoard: (enabled) => {
-    window.api.ui.set({ syncTaskStatusFromWorkspaceBoard: enabled }).catch(console.error)
-    set({ syncTaskStatusFromWorkspaceBoard: enabled })
-  },
-
   statusBarItems: [...DEFAULT_STATUS_BAR_ITEMS],
   toggleStatusBarItem: (item) =>
     set((s) => {
@@ -2474,9 +2067,6 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
         worktreeCardProperties: normalizeWorktreeCardProperties(ui.worktreeCardProperties),
         agentActivityDisplayMode: normalizeAgentActivityDisplayMode(ui.agentActivityDisplayMode),
         workspaceStatuses: normalizeWorkspaceStatuses(ui.workspaceStatuses),
-        workspaceBoardOpacity: clampWorkspaceBoardOpacity(ui.workspaceBoardOpacity),
-        workspaceBoardColumnWidth: clampWorkspaceBoardColumnWidth(ui.workspaceBoardColumnWidth),
-        syncTaskStatusFromWorkspaceBoard: ui.syncTaskStatusFromWorkspaceBoard === true,
         statusBarItems: statusBarItemsWithGrok,
         statusBarVisible: ui.statusBarVisible ?? true,
         usagePercentageDisplay: normalizeUsagePercentageDisplay(ui.usagePercentageDisplay),
@@ -2508,7 +2098,6 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
         browserDefaultSearchEngine: ui.browserDefaultSearchEngine ?? null,
         browserDefaultZoomLevel: normalizeBrowserPageZoomLevel(ui.browserDefaultZoomLevel),
         browserKagiSessionLink: normalizeKagiSessionLink(ui.browserKagiSessionLink ?? ''),
-        taskResumeState: sanitizeTaskResumeState(ui.taskResumeState),
         featureTipsSeenIds: normalizeFeatureTipIds(ui.featureTipsSeenIds),
         featureInteractions: normalizeFeatureInteractions(ui.featureInteractions),
         contextualToursSeenIds: normalizeContextualTourIds(ui.contextualToursSeenIds),

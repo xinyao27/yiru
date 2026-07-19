@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { CaseSensitive, GitBranch, Sparkles } from 'lucide-react-native'
 import type { SmartWorkspaceSourceRow as SourceRow } from '../../../src/shared/new-workspace/smart-workspace-source-results'
 import { colors, radii, spacing, typography } from '../theme/mobile-theme'
-import { TaskProviderLogo } from './task-provider-logo'
+import { SourceProviderLogo } from './source-provider-logo'
 
 type Props = {
   row: SourceRow
@@ -32,16 +32,16 @@ function resolveRowContent(row: SourceRow): RowContent {
       }
     case 'github':
       return {
-        icon: <TaskProviderLogo provider="github" size={16} color={colors.textSecondary} />,
+        icon: <SourceProviderLogo provider="github" size={16} color={colors.textSecondary} />,
         title: row.item.title,
-        subtitle: `${row.item.type === 'pr' ? 'PR #' : 'Issue #'}${row.item.number}`,
+        subtitle: `PR #${row.item.number}`,
         status: row.item.state
       }
     case 'gitlab':
       return {
-        icon: <TaskProviderLogo provider="gitlab" size={16} color={colors.textSecondary} />,
+        icon: <SourceProviderLogo provider="gitlab" size={16} color={colors.textSecondary} />,
         title: row.item.title,
-        subtitle: `${row.item.type === 'mr' ? 'MR !' : 'Issue #'}${row.item.number}`,
+        subtitle: `MR !${row.item.number}`,
         status: row.item.state
       }
     case 'branch':
@@ -49,13 +49,6 @@ function resolveRowContent(row: SourceRow): RowContent {
         icon: <GitBranch size={16} color={colors.textSecondary} />,
         title: row.localBranchName || row.refName,
         subtitle: row.refName
-      }
-    case 'linear':
-      return {
-        icon: <TaskProviderLogo provider="linear" size={16} color={colors.textSecondary} />,
-        title: row.issue.title,
-        subtitle: `${row.issue.identifier} · ${row.issue.team?.key ?? 'Linear'}`,
-        status: row.issue.state?.name
       }
     default:
       return { icon: <CaseSensitive size={16} color={colors.textSecondary} />, title: '' }

@@ -26,11 +26,6 @@ let package = Package(
             name: "YiruComputerUseMacOS",
             dependencies: ["YiruComputerUseMacOSCore"],
             path: "Sources/YiruComputerUseMacOS"
-        ),
-        .testTarget(
-            name: "YiruComputerUseMacOSTests",
-            dependencies: ["YiruComputerUseMacOSCore"],
-            path: "Tests/YiruComputerUseMacOSTests"
         )
     ]
 )

@@ -3,7 +3,6 @@ import type { ExecutionHostId } from './execution-host'
 import type { RemovedSshTargetTombstone, SshRemotePtyLease, SshTarget } from './ssh-types'
 import type { Automation, AutomationExecutionTargetType, AutomationRun } from './automations-types'
 import type { WorkspaceSource } from './workspace-source'
-import type { GitHubProjectSettings } from './github-project-types'
 import type {
   AgentStatusState,
   AgentType,
@@ -12,8 +11,6 @@ import type {
 import type { VoiceSettings } from './speech-types'
 import type { WorkspaceCleanupUIState } from './workspace-cleanup'
 import type { LargeDiffRenderLimit } from './large-diff-render-limit'
-import type { GitLabProjectSettings } from './gitlab-types'
-import type { TaskProvider } from './task-providers'
 import type { FeatureTipId } from './feature-tips'
 import type { ContextualTourId } from './contextual-tours'
 import type {
@@ -47,7 +44,6 @@ import type { PersistedNativeChatSessionOptions } from './native-chat-session-op
 // Re-exported for backward compat with renderer call sites that import
 // `WorkspaceCreateTelemetrySource` from '../../../shared/types'.
 export type { WorkspaceSource as WorkspaceCreateTelemetrySource } from './workspace-source'
-export type { TaskProvider } from './task-providers'
 export type {
   GitBranchChangeStatus,
   GitConflictKind,
@@ -81,22 +77,8 @@ export type PathSource = 'shell_hydrate' | 'sync_seed_only'
 // ─── Repo ────────────────────────────────────────────────────────────
 export type RepoKind = 'git' | 'folder'
 
-/**
- * Per-repo user choice for where issues are fetched and filed.
- *
- * Why three states, not two: storage must distinguish "user explicitly chose
- * upstream" from "heuristic happens to resolve to upstream right now." Collapsing
- * the two would let a remote-topology change (someone removes `upstream`, or
- * adds one later) silently move the effective source — the exact silent-source-
- * switch class the upstream-issue-source design rejects.
- *
- * - `'auto'` (or undefined): honor the heuristic in `getIssueOwnerRepo`
- *   (upstream-if-exists, else origin). Initial state for every repo.
- * - `'upstream'`: explicit upstream. Wins over heuristic and future topology
- *   changes. Falls back to origin if `upstream` remote vanishes, with a toast.
- * - `'origin'`: explicit origin. Same precedence.
- */
-export type IssueSourcePreference = 'upstream' | 'origin' | 'auto'
+/** Per-repo remote preference for hosted forge metadata. */
+export type ForgeRemotePreference = 'upstream' | 'origin' | 'auto'
 export type { ForkSyncMode, GitForkSyncExpectedUpstream, GitForkSyncResult } from './git-fork-sync'
 export type ExternalWorktreeVisibility = 'hide' | 'show'
 
@@ -257,7 +239,7 @@ export type Repo = {
   /** Per-repo override for issue-source resolution. `undefined` is treated
    *  identically to `'auto'`; writers leave it undefined on creation so
    *  existing persisted records stay forward-compatible. */
-  issueSourcePreference?: IssueSourcePreference
+  forgeRemotePreference?: ForgeRemotePreference
   /** Controls Yiru's fork-default-branch sync offer for repos with upstream metadata. */
   forkSyncMode?: ForkSyncMode
   /** Canonical identity for the repo remote Yiru should use for provider-level grouping. */
@@ -320,7 +302,7 @@ export type FolderWorkspace = {
   folderPath: string
   /** SSH target ID for folder workspaces whose folder path lives remotely. */
   connectionId?: string | null
-  linkedTask: FolderWorkspaceLinkedTask | null
+  linkedReview: FolderWorkspaceLinkedReview | null
   comment: string
   isArchived: boolean
   isUnread: boolean
@@ -337,14 +319,12 @@ export type FolderWorkspace = {
   updatedAt: number
 }
 
-export type FolderWorkspaceLinkedTask = {
-  provider: 'github' | 'gitlab' | 'linear' | 'jira'
-  type: 'issue' | 'pr' | 'mr'
+export type FolderWorkspaceLinkedReview = {
+  provider: 'github' | 'gitlab'
+  type: 'pr' | 'mr'
   number: number
   title: string
   url: string
-  linearIdentifier?: string
-  jiraIdentifier?: string
   repoId?: string
 }
 
@@ -473,21 +453,8 @@ export type Worktree = {
   projectHostSetupId?: string
   displayName: string
   comment: string
-  linkedIssue: number | null
   linkedPR: number | null
-  linkedLinearIssue: string | null
-  linkedLinearIssueWorkspaceId?: string | null
-  linkedLinearIssueOrganizationUrlKey?: string | null
-  // Why: parallel slots for non-GitHub work-item references. Kept as separate
-  // fields (rather than reusing linkedIssue / linkedPR with a provider
-  // discriminator) so the persistence layer is unambiguous when a user
-  // has remotes from several providers on the same repo, and so the
-  // existing GitHub renderer code keeps reading linkedPR / linkedIssue
-  // unchanged. Optional on the type so existing test fixtures and
-  // persisted older worktrees that never carried these fields continue
-  // to typecheck and load without migration.
   linkedGitLabMR?: number | null
-  linkedGitLabIssue?: number | null
   linkedBitbucketPR?: number | null
   linkedAzureDevOpsPR?: number | null
   linkedGiteaPR?: number | null
@@ -589,15 +556,9 @@ export type WorktreeMeta = {
   projectHostSetupId?: string
   displayName: string
   comment: string
-  linkedIssue: number | null
   linkedPR: number | null
-  linkedLinearIssue: string | null
-  linkedLinearIssueWorkspaceId?: string | null
-  linkedLinearIssueOrganizationUrlKey?: string | null
   /** Optional for backward compatibility — see Worktree.linkedGitLabMR. */
   linkedGitLabMR?: number | null
-  /** Optional for backward compatibility — see Worktree.linkedGitLabIssue. */
-  linkedGitLabIssue?: number | null
   /** Optional for backward compatibility — see Worktree.linkedBitbucketPR. */
   linkedBitbucketPR?: number | null
   /** Optional for backward compatibility — see Worktree.linkedAzureDevOpsPR. */
@@ -633,7 +594,7 @@ export type WorktreeMeta = {
   yiruCreationSource?: 'desktop' | 'runtime' | 'cli' | 'ssh'
   /** Workspace layout active when Yiru created the worktree. */
   yiruCreationWorkspaceLayout?: YiruWorkspaceLayout
-  /** User-assigned workspace board status for manual sidebar organization. */
+  /** User-assigned workspace status for manual sidebar organization. */
   workspaceStatus?: WorkspaceStatus
   diffComments?: DiffComment[]
   /** Path-derived worktree ids this worktree had before its folder was renamed
@@ -1147,7 +1108,6 @@ export type WorkspaceSessionPatch = Partial<WorkspaceSessionState>
 
 // ─── GitHub ──────────────────────────────────────────────────────────
 export type PRState = 'open' | 'closed' | 'merged' | 'draft'
-export type IssueState = 'open' | 'closed'
 export type CheckStatus = 'pending' | 'success' | 'failure' | 'neutral'
 
 export type PRMergeableState = 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN'
@@ -1421,45 +1381,7 @@ export type PRComment = {
   isBot?: boolean
 }
 
-export type GitHubIssueTimelineTarget = {
-  type: 'issue' | 'pr'
-  number: number
-  title: string
-  url: string
-  repository?: string
-}
-
-export type GitHubIssueTimelineItem = {
-  id: string
-  event:
-    | 'assigned'
-    | 'unassigned'
-    | 'mentioned'
-    | 'cross-referenced'
-    | 'closed'
-    | 'reopened'
-    | 'moved_columns_in_project'
-  actor: string
-  actorAvatarUrl: string
-  createdAt: string
-  assignee?: string
-  source?: GitHubIssueTimelineTarget
-  closer?: GitHubIssueTimelineTarget
-  stateReason?: string | null
-  previousColumnName?: string | null
-  columnName?: string | null
-  projectName?: string | null
-}
-
 export type GitHubCommentResult = { ok: true; comment: PRComment } | { ok: false; error: string }
-
-export type IssueInfo = {
-  number: number
-  title: string
-  state: IssueState
-  url: string
-  labels: string[]
-}
 
 export type GitHubViewer = {
   login: string
@@ -1490,7 +1412,7 @@ export type GitHubPRFileViewedState = 'DISMISSED' | 'VIEWED' | 'UNVIEWED'
 
 export type GitHubWorkItem = {
   id: string
-  type: 'issue' | 'pr'
+  type: 'pr'
   number: number
   title: string
   state: 'open' | 'closed' | 'merged' | 'draft'
@@ -1505,7 +1427,7 @@ export type GitHubWorkItem = {
   authorAvatarUrl?: string
   branchName?: string
   baseRefName?: string
-  // Why: PR checks are keyed by head commit; carrying this lets task rows use
+  // Why: PR checks are keyed by head commit; carrying this lets review rows use
   // the cached check-runs endpoint instead of one `gh pr checks` call per row.
   headSha?: string
   prRepo?: GitHubRepositoryIdentity
@@ -1574,8 +1496,6 @@ export type GitHubWorkItemDetails = {
   item: Omit<GitHubWorkItem, 'repoId'>
   body: string
   comments: PRComment[]
-  /** Issue-only provider activity such as assignment, references, project moves, and state changes. */
-  timelineItems?: GitHubIssueTimelineItem[]
   /** Only set for PRs. Head/base SHAs used by the Files tab to fetch per-file content. */
   headSha?: string
   baseSha?: string
@@ -1587,261 +1507,18 @@ export type GitHubWorkItemDetails = {
    *  unresolved remote) rather than the PR genuinely having no changed files. */
   filesUnavailable?: boolean
   participants?: GitHubAssignableUser[]
-  /** Logins of current assignees. Only set for issues. */
+  /** Logins of current pull-request assignees. */
   assignees?: string[]
-}
-
-// ─── Linear ─────────────────────────────────────────────────────────
-export type LinearViewer = {
-  displayName: string
-  email: string | null
-  organizationId?: string
-  organizationName: string
-  organizationUrlKey?: string
-}
-
-export type LinearWorkspace = LinearViewer & {
-  id: string
-  organizationId: string
-  isLegacy?: true
-  credentialRevision?: number
-}
-
-export type LinearWorkspaceSelection = string | 'all'
-export type LinearWorkspaceSelector = LinearWorkspaceSelection | undefined
-export type LinearConcreteWorkspaceId = string
-
-export type LinearWorkspaceError = {
-  workspaceId: string
-  workspaceName?: string
-  type: 'auth' | 'rate_limited' | 'network' | 'unknown'
-  message: string
-}
-
-export type LinearCollectionResult<T> = {
-  items: T[]
-  errors?: LinearWorkspaceError[]
-  hasMore?: boolean
-}
-
-export type LinearConnectionStatus = {
-  connected: boolean
-  viewer: LinearViewer | null
-  workspaces?: LinearWorkspace[]
-  activeWorkspaceId?: string | null
-  selectedWorkspaceId?: LinearWorkspaceSelection | null
-  // Set when a stored token file exists but could not be decrypted, so the
-  // UI can explain reads failing while the connection still looks saved.
-  credentialError?: string
-}
-
-export type LinearIssue = {
-  id: string
-  workspaceId?: string
-  workspaceName?: string
-  identifier: string
-  title: string
-  branchName?: string
-  description?: string
-  url: string
-  state: {
-    name: string
-    type: string
-    color: string
-  }
-  team: {
-    id: string
-    name: string
-    key: string
-  }
-  project?: LinearProjectSummary
-  subIssues?: LinearIssueChildSummary[]
-  labels: string[]
-  labelIds: string[]
-  assignee?: {
-    id: string
-    displayName: string
-    avatarUrl?: string
-  }
-  estimate?: number | null
-  priority: number
-  dueDate?: string | null
-  updatedAt: string
-}
-
-export type LinearProjectSummary = {
-  id: string
-  workspaceId?: string
-  workspaceName?: string
-  name: string
-  url?: string
-  color?: string
-  icon?: string
-  description?: string
-  content?: string
-  status?: LinearProjectStatusSummary
-  health?: string | null
-  priority?: number | null
-  priorityLabel?: string | null
-  lead?: LinearProjectMemberSummary
-  members?: LinearProjectMemberSummary[]
-  teams?: {
-    id: string
-    name: string
-    key?: string
-  }[]
-  labels?: {
-    id: string
-    name: string
-    color?: string
-  }[]
-  startDate?: string | null
-  targetDate?: string | null
-  createdAt?: string
-  updatedAt?: string
-  completedAt?: string | null
-  canceledAt?: string | null
-  startedAt?: string | null
-  progress?: number | null
-  scope?: number | null
-  issueCount?: number
-  completedIssueCount?: number
-}
-
-export type LinearProjectStatusSummary = {
-  id: string
-  name: string
-  type?: string
-  color?: string
-}
-
-export type LinearProjectMemberSummary = {
-  id: string
-  displayName: string
-  avatarUrl?: string
-}
-
-export type LinearProjectMilestoneSummary = {
-  id: string
-  name: string
-  status?: string
-  targetDate?: string | null
-  progress?: number | null
-}
-
-export type LinearProjectResourceSummary = {
-  id: string
-  title: string
-  url: string
-  type?: string
-}
-
-export type LinearProjectUpdateSummary = {
-  id: string
-  body?: string
-  health?: string | null
-  url?: string
-  createdAt?: string
-  updatedAt?: string
-  user?: LinearProjectMemberSummary
-}
-
-export type LinearProjectDetail = LinearProjectSummary & {
-  milestones?: LinearProjectMilestoneSummary[]
-  resources?: LinearProjectResourceSummary[]
-  latestUpdate?: LinearProjectUpdateSummary
-}
-
-export type LinearCustomViewModel = 'issue' | 'project'
-
-export type LinearCustomViewSummary = {
-  id: string
-  workspaceId?: string
-  workspaceName?: string
-  name: string
-  description?: string
-  model: LinearCustomViewModel
-  url?: string
-  color?: string
-  icon?: string
-  shared?: boolean
-  team?: {
-    id: string
-    name?: string
-    key?: string
-  }
-  owner?: LinearProjectMemberSummary
-  creator?: LinearProjectMemberSummary
-  createdAt?: string
-  updatedAt?: string
-}
-
-export type LinearIssueChildSummary = {
-  id: string
-  identifier: string
-  title: string
-  url: string
-}
-
-export type LinearComment = {
-  id: string
-  body: string
-  createdAt: string
-  user?: {
-    displayName: string
-    avatarUrl?: string
-  }
-}
-
-// ─── Issue Mutations ────────────────────────────────────────────────
-
-export type GitHubCreateIssueFields = {
-  labels?: string[]
-  assignees?: string[]
-}
-
-export type GitHubCreateIssueResult =
-  | { ok: true; number: number; url: string; bodySaveWarning?: string }
-  | { ok: false; error: string }
-
-export type GitHubIssueCloseReason = 'completed' | 'not_planned' | 'duplicate'
-
-export type GitHubIssueUpdate = {
-  state?: 'open' | 'closed'
-  stateReason?: GitHubIssueCloseReason
-  duplicateOf?: number
-  title?: string
-  // Why: body writes use the REST issue endpoint instead of `gh issue edit`
-  // because that command does not consistently cover every body-edit case the
-  // dialog needs.
-  body?: string
-  addLabels?: string[]
-  removeLabels?: string[]
-  addAssignees?: string[]
-  removeAssignees?: string[]
 }
 
 export type GitHubPullRequestStateUpdate = {
   state: 'open' | 'closed'
 }
 
-export type LinearIssueUpdate = {
-  stateId?: string
-  title?: string
-  description?: string
-  assigneeId?: string | null
-  estimate?: number | null
-  priority?: number
-  dueDate?: string | null
-  labelIds?: string[]
-  projectId?: string | null
-}
-
 export type ClassifiedError = {
   type:
     | 'permission_denied'
     | 'not_found'
-    | 'issues_disabled'
     | 'validation_error'
     | 'rate_limited'
     | 'network_error'
@@ -1864,9 +1541,6 @@ export type {
   GitLabAuthDiagnostic,
   GitLabCommentResult,
   GitLabDiscussionResolveResult,
-  GitLabIssueInfo,
-  GitLabIssueState,
-  GitLabIssueUpdate,
   GitLabJobTraceResult,
   GitLabRateLimitBucket,
   GitLabRateLimitSnapshot,
@@ -1879,11 +1553,8 @@ export type {
   GitLabPagedResult,
   GitLabPipelineJob,
   GitLabProjectRef,
-  GitLabProjectSettings,
   GitLabRetryJobResult,
   GitLabReaction,
-  GitLabTodo,
-  GitLabTodoTargetType,
   GitLabViewer,
   GitLabWorkItem,
   GitLabWorkItemDetails,
@@ -1897,38 +1568,9 @@ export type {
   MRState
 } from './gitlab-types'
 
-export type {
-  JiraAuthType,
-  JiraComment,
-  JiraConnectArgs,
-  JiraConnectionStatus,
-  JiraCreateField,
-  JiraCreateFieldAllowedValue,
-  JiraCreateIssueArgs,
-  JiraCreateIssueResult,
-  JiraIssue,
-  JiraIssueFilter,
-  JiraIssueType,
-  JiraIssueUpdate,
-  JiraMutationResult,
-  JiraPriority,
-  JiraProject,
-  JiraProjectStatusOrder,
-  JiraSite,
-  JiraSiteSelection,
-  JiraStatus,
-  JiraTransition,
-  JiraUser,
-  JiraViewer
-} from './jira-types'
-
 /**
- * GitHub API rate-limit buckets surfaced in the TaskPage header so users can
- * see remaining budget before they hit the wall. `core` = REST (5000/hr),
- * `search` = Search API (30/min — hit by countWorkItems), `graphql` =
- * GraphQL (5000 points/hr — hit by project-view + discovery). All three are
- * the buckets this app actually stresses; other buckets (e.g. code_search)
- * are not surfaced because we don't touch them.
+ * GitHub API rate-limit buckets used to guard pull-request refreshes. `core`
+ * covers REST, `search` covers PR lookup, and `graphql` covers review data.
  */
 export type GitHubRateLimitBucket = {
   remaining: number
@@ -1949,77 +1591,9 @@ export type GetRateLimitResult =
   | { ok: true; snapshot: GitHubRateLimitSnapshot }
   | { ok: false; error: string }
 
-/**
- * Envelope for `gh:listWorkItems`. Carries resolved issue/PR sources so the
- * renderer can render the "Issues from owner/repo" indicator without an
- * extra IPC round-trip, and per-source classified errors so the UI can show
- * a retryable banner when (e.g.) a private upstream 403s.
- *
- * Why piggyback instead of adding `gh:resolveWorkItemSources`: the renderer
- * already round-trips this endpoint on every Tasks refresh, and the source
- * data is a 2-field-per-side metadata add — cheaper than another IPC call.
- *
- * Invariant: `items` always contains whatever succeeded; `errors.issues` indicates
- * the issues-side fetch failed, but any PR-side items that succeeded are still
- * present in `items`. Consumers should render `items` alongside the error banner.
- */
 export type ListWorkItemsResult<T> = {
   items: T[]
-  sources: {
-    issues: GitHubOwnerRepo | null
-    prs: GitHubOwnerRepo | null
-    /** Raw `origin` remote resolved for this repo, independent of the
-     *  user's preference. Required-nullable so the renderer can compare raw
-     *  remote candidates without inferring origin from the effective PR
-     *  source. */
-    originCandidate: GitHubOwnerRepo | null
-    /** Raw `upstream` remote resolved for this repo, independent of the
-     *  user's preference. Present so the renderer's issue-source selector
-     *  can always decide whether to render (upstream exists & differs from
-     *  origin) and show both slugs in its tooltips, even when the user has
-     *  picked 'origin' and `sources.issues` has collapsed onto origin. */
-    upstreamCandidate: GitHubOwnerRepo | null
-  }
-  errors?: {
-    issues?: ClassifiedError
-  }
-  /** True when the user's per-repo preference was `'upstream'` but no upstream
-   *  remote is configured, so the resolver fell back to origin. Renderer uses
-   *  this to surface a one-time-per-session toast. Omitted when absent so
-   *  existing consumers and test fixtures don't care about it.
-   *  Typed as `?: true` (not `?: boolean`) to encode the invariant "present
-   *  iff fell-back" — an explicit `false` write would be a bug, so make it a
-   *  compile error. */
-  issueSourceFellBack?: true
-}
-
-export type LinearWorkflowState = {
-  id: string
-  name: string
-  type: string
-  color: string
-  position: number
-}
-
-export type LinearLabel = {
-  id: string
-  name: string
-  color: string
-}
-
-export type LinearMember = {
-  id: string
-  displayName: string
-  avatarUrl?: string
-}
-
-export type LinearTeam = {
-  id: string
-  workspaceId?: string
-  workspaceName?: string
-  name: string
-  key: string
-  url?: string
+  source: GitHubOwnerRepo | null
 }
 
 // ─── Hooks (yiru.yaml) ──────────────────────────────────────────────
@@ -2028,7 +1602,6 @@ export type YiruHooks = {
     setup?: string // Runs after worktree is created
     archive?: string // Runs before worktree is archived
   }
-  issueCommand?: string // Shared default command for linked GitHub issues
   defaultTabs?: YiruDefaultTabTemplate[] // Terminal tabs to create once for a new worktree
   environmentRecipes?: YiruVmRecipe[] // Project-scoped per-workspace environment recipes
   environmentRecipeDiagnostics?: YiruVmRecipeDiagnostic[] // Non-fatal validation issues from environmentRecipes
@@ -2126,9 +1699,7 @@ export type SparsePreset = {
 export type CreateWorktreeArgs = {
   repoId: string
   name: string
-  /** Optional user-facing label to persist separately from the git-safe
-   *  branch/path seed. Used when a workspace is created from a GitHub or
-   *  Linear artifact whose title should remain readable in the sidebar. */
+  /** Optional user-facing label to persist separately from the git-safe branch/path seed. */
   displayName?: string
   baseBranch?: string
   /** Source Control compare target when it differs from the checkout start point. */
@@ -2139,12 +1710,7 @@ export type CreateWorktreeArgs = {
   branchNameOverride?: string
   setupDecision?: SetupDecision
   sparseCheckout?: CreateSparseCheckoutRequest
-  linkedIssue?: number
   linkedPR?: number
-  linkedLinearIssue?: string
-  linkedLinearIssueWorkspaceId?: string | null
-  linkedLinearIssueOrganizationUrlKey?: string | null
-  linkedGitLabIssue?: number
   linkedGitLabMR?: number
   linkedBitbucketPR?: number | null
   linkedAzureDevOpsPR?: number | null
@@ -2436,8 +2002,6 @@ export type TuiAgent =
   | 'grok' // xAI Grok CLI
   | 'devin' // Devin CLI
   | 'ante' // Ante (Antigma Labs)
-
-export type TaskViewPresetId = 'all' | 'issues' | 'review' | 'my-issues' | 'my-prs' | 'prs'
 
 /** Where the repo setup script runs when a worktree is created.
  *  - 'new-tab': open a background tab titled "Setup" and leave focus on the first tab (default).
@@ -2742,10 +2306,6 @@ export type GlobalSettings = {
   sourceControlCompareAgainstUpstream: boolean
   /** Deprecated: retained so older persisted settings remain readable. */
   showTitlebarAppName: boolean
-  /** Why: some users do not use the Tasks feature and prefer to keep the
-   *  left sidebar free of its button entirely. Hiding the button here also
-   *  removes it from keyboard navigation. */
-  showTasksButton: boolean
   /** Why: Automations can be restored from Settings or the View menu, so this
    *  only controls whether the top-level sidebar shortcut is shown. */
   showAutomationsButton?: boolean
@@ -2865,29 +2425,6 @@ export type GlobalSettings = {
    *  affect the signed-in account, so keep the skip preference explicit and
    *  separate from local destructive-action confirmations. */
   skipCodexRateLimitResetConfirm: boolean
-  /** Default preset in the new-workspace GitHub task view. */
-  defaultTaskViewPreset: TaskViewPresetId
-  /** Why: persists the user's last-used task source so the Tasks page
-   *  reopens to the same provider instead of always defaulting to GitHub. */
-  defaultTaskSource: TaskProvider
-  /** Why: users may only work from one hosted task system. Persisting this
-   *  list hides unused providers from Tasks chrome and sidebar shortcuts while
-   *  leaving the chosen default source stable when it is still visible. */
-  visibleTaskProviders: TaskProvider[]
-  /** Why: one-shot migration guard so Jira becomes visible for existing
-   *  profiles once, without re-adding it after a later deliberate opt-out. */
-  visibleTaskProvidersDefaultedForJira: boolean
-  /** Why: persists the user's repo selection in the cross-repo tasks view.
-   *  `null` means sticky-all — every eligible repo is selected, including
-   *  repos added in future sessions, so the "All repos" label stays
-   *  truthful. An explicit array freezes the curated subset; ids no longer
-   *  eligible are silently dropped on load. An empty array after that drop
-   *  is treated as `null`. */
-  defaultRepoSelection: string[] | null
-  /** Why: persists the user's Linear team selection in the tasks view.
-   *  Same nullable-array pattern as `defaultRepoSelection`: `null` = sticky-all,
-   *  `string[]` = frozen subset of team IDs. */
-  defaultLinearTeamSelection: string[] | null
   /** Session cookie for OpenCode Go rate-limit fetching. Stored encrypted. */
   opencodeSessionCookie: string
   /** Optional workspace ID override for OpenCode Go. When set, skips the
@@ -3000,21 +2537,12 @@ export type GlobalSettings = {
   /** Active non-local runtime environment for client-routed RPC. `null`
    *  preserves the current local desktop behavior. */
   activeRuntimeEnvironmentId?: string | null
-  /** GitHub Project mode state — pinned/recent/active project, last selected
-   *  view per project. Optional because profiles created before this feature
-   *  landed won't have the key; `getDefaultSettings()` hydrates the empty
-   *  default via the persistence merge. */
-  githubProjects?: GitHubProjectSettings
   /** AI-generated commit messages: agent + model + per-model thinking +
    *  user-customizable prompt suffix. Optional so existing profiles do not
    *  require a migration step before this feature lands. */
   commitMessageAi?: CommitMessageAiSettings
   /** Source-control AI generation settings for commit messages and hosted-review drafts. */
   sourceControlAi?: SourceControlAiSettings
-  /** GitLab project preferences — pinned + recent project paths.
-   *  Optional for backward compatibility with profiles saved before
-   *  GitLab support; the persistence merge fills the empty default. */
-  gitlabProjects?: GitLabProjectSettings
   /** Anonymous product-telemetry state. Optional because the one-shot
    *  migration in `Store.load()` is what populates it on first boot of the
    *  telemetry release; before migration runs, the field is absent. After
@@ -3228,9 +2756,6 @@ export type WorktreeCardProperty =
   | 'status'
   | 'unread'
   | 'branch'
-  // Task metadata stays provider-specific so each fetch path can remain narrow.
-  | 'issue'
-  | 'linear-issue'
   | 'automation'
   | 'comment'
   | 'ports'
@@ -3253,24 +2778,6 @@ export type StatusBarItem =
   | 'resource-usage'
   | 'ports'
 export type FloatingTerminalTriggerLocation = 'floating-button' | 'status-bar'
-
-export type TaskResumeState = {
-  githubMode?: 'items' | 'project'
-  githubItemsPreset?: TaskViewPresetId | null
-  githubItemsQuery?: string
-  githubProjectHiddenFieldIdsByView?: Record<string, string[]>
-  linearMode?: 'issues' | 'projects' | 'views'
-  linearPreset?: 'assigned' | 'created' | 'all' | 'completed'
-  linearQuery?: string
-  linearContext?: {
-    kind: 'project' | 'view'
-    id: string
-    workspaceId: LinearConcreteWorkspaceId
-    model?: LinearCustomViewModel
-  }
-  jiraPreset?: 'assigned' | 'reported' | 'all' | 'done'
-  jiraQuery?: string
-}
 
 export type RightSidebarTab =
   | 'explorer'
@@ -3297,7 +2804,6 @@ export type ManualRepoOrderEntry = {
 export type TopLevelView =
   | 'terminal'
   | 'settings'
-  | 'tasks'
   | 'activity'
   | 'automations'
   | 'space'
@@ -3362,9 +2868,6 @@ export type PersistedUIState = {
   worktreeCardProperties: WorktreeCardProperty[]
   agentActivityDisplayMode?: AgentActivityDisplayMode
   workspaceStatuses?: WorkspaceStatusDefinition[]
-  workspaceBoardOpacity?: number
-  workspaceBoardColumnWidth?: number
-  syncTaskStatusFromWorkspaceBoard?: boolean
   /** One-shot migration flag for a short-lived build that persisted the
    *  default workspace statuses in reverse workflow order. Once stamped,
    *  user-authored status ordering is never inferred from IDs/labels again. */
@@ -3481,7 +2984,7 @@ export type PersistedUIState = {
   _inlineAgentsDefaultedForAllUsers?: boolean
   /** One-shot migration flag for card properties that were split out after
    *  the original metadata toggles shipped. Set once so later deliberate
-   *  unchecks of Linear issue and Ports stick across restarts. */
+   *  later property choices stick across restarts. */
   _expandedWorktreeCardPropertiesDefaulted?: boolean
   /** Snapshot of totalAgentsSpawned captured the first time we see the current
    *  app version. Why: the nag threshold counts agents spawned *since the
@@ -3531,10 +3034,6 @@ export type PersistedUIState = {
   sidekickId?: string
   customSidekicks?: CustomPet[]
   sidekickSize?: number
-  /** Page-position state for Tasks. Source/repo/team/project selections keep
-   *  using their existing settings paths; this only restores transient tabs
-   *  and applied searches. */
-  taskResumeState?: TaskResumeState
   workspaceCleanup?: WorkspaceCleanupUIState
   /** Feature tips already surfaced to the user. Startup only opens the tips
    *  modal when this list is missing one of the current tip ids. */
@@ -3611,7 +3110,6 @@ export type PersistedTrustedYiruHookRepo = {
   }
   setup?: PersistedTrustedYiruHookEntry
   archive?: PersistedTrustedYiruHookEntry
-  issueCommand?: PersistedTrustedYiruHookEntry
   vmRecipe?: PersistedTrustedYiruHookEntry
 }
 
@@ -3645,7 +3143,6 @@ export type PersistedState = {
   ui: PersistedUIState
   githubCache: {
     pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
-    issue: Record<string, { data: IssueInfo | null; fetchedAt: number }>
   }
   /** Legacy single-blob session. Retained as the canonical 'local' execution
    *  host partition so an app downgrade still reads its workspace. Non-local

@@ -54,8 +54,7 @@ export function readProfileState(profileId: string, userDataPath: string): Trans
     ui: isRecord(parsed.ui) ? { ...defaults.ui, ...parsed.ui } : defaults.ui,
     githubCache: isRecord(parsed.githubCache)
       ? {
-          pr: recordOrEmpty((parsed.githubCache as PersistedState['githubCache']).pr),
-          issue: recordOrEmpty((parsed.githubCache as PersistedState['githubCache']).issue)
+          pr: recordOrEmpty((parsed.githubCache as PersistedState['githubCache']).pr)
         }
       : defaults.githubCache,
     workspaceSession: isRecord(parsed.workspaceSession)

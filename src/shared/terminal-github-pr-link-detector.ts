@@ -9,7 +9,7 @@
  * chunks would resolve differently per authority mode.
  */
 import type { RepoSlug } from './github-links'
-import { parseGitHubIssueOrPRLink } from './github-links'
+import { parseGitHubPullRequestLink } from './github-links'
 
 const GITHUB_PR_PATH_MARKER = '/pull/'
 const TERMINAL_SGR_PATTERN = /\x1b\[[0-?]*[ -/]*m/g
@@ -35,7 +35,7 @@ function parseTerminalGitHubPRUrl(candidate: string): TerminalGitHubPRLink | nul
     return null
   }
   const url = trimTerminalUrl(candidate)
-  const parsed = parseGitHubIssueOrPRLink(url)
+  const parsed = parseGitHubPullRequestLink(url)
   if (!parsed || parsed.type !== 'pr') {
     return null
   }

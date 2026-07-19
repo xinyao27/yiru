@@ -22,7 +22,6 @@ import {
 import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
 import { usePrefersReducedMotion } from './feature-wall-modal-helpers'
 import { toFeatureWallAssetUrl, useFeatureWallAssetBaseUrl } from './feature-wall-assets'
-import { useFeatureWallTaskSourcePresentation } from './use-feature-wall-task-source-presentation'
 import { useFeatureWallCompletion } from './use-feature-wall-completion'
 import { useFeatureWallTourTelemetry } from './use-feature-wall-tour-telemetry'
 import { FeatureWallContinueButton } from './feature-wall-continue-button'
@@ -82,8 +81,7 @@ export function FeatureWallTourSurface({
     [selectedId]
   )
   const selected = FEATURE_WALL_WORKFLOWS[selectedIndex]
-  const taskSourcePresentation = useFeatureWallTaskSourcePresentation(isOpen, selected)
-  const selectedPresentation = taskSourcePresentation.workflow
+  const selectedPresentation = selected
   const agentsSteps = useMemo(() => getAgentsSteps(), [])
   const workbenchSteps = useMemo(() => getWorkbenchSteps(), [])
   const reviewSteps = useMemo(() => getReviewSteps(), [])
@@ -121,8 +119,6 @@ export function FeatureWallTourSurface({
   })
   const completion = useFeatureWallCompletion(
     isOpen,
-    taskSourcePresentation.hasConnectedTaskSource,
-    taskSourcePresentation.isCheckingTaskSources,
     orchestrationSkill.installed,
     browserUseSkill.installed,
     { onTourDepthSummaryChange }

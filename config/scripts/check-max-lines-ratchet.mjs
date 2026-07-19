@@ -15,18 +15,12 @@ import { pathToFileURL } from 'node:url'
 
 const BASELINE_PATH = 'config/max-lines-baseline.txt'
 const MOBILE_CONFIG_PATH = 'mobile/config/mobile-max-lines-ratchets.ts'
-// These two files legitimately contain the directive text as data (regex, fixtures),
-// so scanning them would self-flag. The ratchet does not police itself.
-const SELF_FILES = new Set([
-  'config/scripts/check-max-lines-ratchet.mjs',
-  'config/scripts/check-max-lines-ratchet.test.mjs'
-])
+// This file contains the directive text as regex data, so scanning it would
+// self-flag. The ratchet does not police itself.
+const SELF_FILES = new Set(['config/scripts/check-max-lines-ratchet.mjs'])
 
 // Default max-lines budgets from vite.config.ts (counted lines).
 export function defaultLimitForPath(p) {
-  if (/\.(test|spec)\.(ts|tsx)$/.test(p)) {
-    return 800
-  }
   if (p.endsWith('.tsx')) {
     return 400
   }

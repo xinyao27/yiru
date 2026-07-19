@@ -16,7 +16,6 @@ type SidebarHostScopeMenuSectionProps = {
   hostOptionsCount: number
   hostVisibilityLabel: string
   hostOptions: readonly SidebarHostOption[]
-  preserveWorkspaceBoardOpen: boolean
   setWorkspaceHostScope: (scope: WorkspaceHostScope) => void
   visibleWorkspaceHostIds: VisibleWorkspaceHostIds
   setVisibleWorkspaceHostIds: (ids: VisibleWorkspaceHostIds) => void
@@ -57,7 +56,6 @@ export function SidebarHostScopeMenuSection({
   hostOptionsCount,
   hostVisibilityLabel,
   hostOptions,
-  preserveWorkspaceBoardOpen,
   setWorkspaceHostScope,
   visibleWorkspaceHostIds,
   setVisibleWorkspaceHostIds
@@ -107,10 +105,7 @@ export function SidebarHostScopeMenuSection({
             </span>
           </span>
         </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent
-          className="w-56"
-          data-workspace-board-preserve-open={preserveWorkspaceBoardOpen ? '' : undefined}
-        >
+        <DropdownMenuSubContent className="w-56">
           <DropdownMenuCheckboxItem
             checked={allVisible}
             onCheckedChange={toggleAllHosts}

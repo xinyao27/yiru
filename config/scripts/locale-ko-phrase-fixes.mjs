@@ -14,12 +14,6 @@ export const KO_PHRASE_FIXES_ROUND4 = [
   { pattern: /Git AI 작성자/g, replacement: 'Git AI Author', whenEnIncludes: 'Git AI Author' },
   { pattern: /지테아/g, replacement: 'Gitea', whenEnIncludes: 'Gitea' },
   { pattern: /기테아/g, replacement: 'Gitea', whenEnIncludes: 'gitea' },
-  {
-    pattern: /보고된 확인이/g,
-    replacement: '보고된 체크가',
-    whenEnIncludes: 'reported checks'
-  },
-  { pattern: /보고된 확인/g, replacement: '보고된 체크', whenEnIncludes: 'reported checks' },
   { pattern: /에이전트 기술/g, replacement: '에이전트 스킬', whenEnIncludes: 'agent skill' },
   { pattern: /오케스트레이션 기술/g, replacement: '오케스트레이션 스킬', whenEnIncludes: 'skill' },
   { pattern: /컴퓨터 사용 기술/g, replacement: 'Computer Use 스킬', whenEnIncludes: 'skill' },
@@ -51,7 +45,6 @@ export const KO_PHRASE_FIXES_ROUND4 = [
   { pattern: /일하다/g, replacement: '작업', whenEnIncludes: 'Work' },
   { pattern: /표시하다/g, replacement: '표시', whenEnIncludes: 'Show' },
   { pattern: /통과하다/g, replacement: '통과', whenEnIncludes: 'Pass' },
-  { pattern: /유지하다/g, replacement: '유지', whenEnIncludes: 'Maintain' },
   { pattern: /승인하다/g, replacement: '승인', whenEnIncludes: 'Approve' },
   { pattern: /지원하다/g, replacement: '지원', whenEnIncludes: 'Support' },
   { pattern: /추적하다/g, replacement: '추적', whenEnIncludes: 'Track' },
@@ -60,8 +53,6 @@ export const KO_PHRASE_FIXES_ROUND4 = [
   { pattern: /재인증하다/g, replacement: '재인증', whenEnIncludes: 'Re-authenticate' },
   { pattern: /설립하다/g, replacement: '발견됨', whenEnIncludes: 'Found' },
   { pattern: /밀어서 말하다/g, replacement: '누르고 말하기', whenEnIncludes: 'push to talk' },
-  { pattern: /검토 필요/g, replacement: '리뷰 필요', whenEnIncludes: 'Review needed' },
-  { pattern: /검토가 필요하다/g, replacement: '리뷰가 필요함', whenEnIncludes: 'Review needed' },
   {
     pattern: /다음과 같은 기술/g,
     replacement: '다음과 같은 스킬',

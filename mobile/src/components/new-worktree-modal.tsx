@@ -19,19 +19,22 @@ import { BottomDrawerModalHost } from './bottom-drawer-modal-host'
 import { PickerListDrawer } from './picker-list-drawer'
 import { MobileAgentIcon } from './mobile-agent-icon'
 import { getSuggestedCreatureName } from './worktree-name-suggestion'
-import { deriveWorkspaceSshGate, workspaceSshStatusLabel } from '../tasks/workspace-ssh-gate'
+import {
+  deriveWorkspaceSshGate,
+  workspaceSshStatusLabel
+} from '../workspace-create/workspace-ssh-gate'
 import {
   isSetupHookTrusted,
   normalizeSetupHookTrust,
   persistSetupHookTrustApproval,
   wasSetupHookPreviouslyApproved,
   type SetupHookTrust
-} from '../tasks/setup-hook-trust'
+} from '../workspace-create/setup-hook-trust'
 import {
   isMobileTuiAgent,
   isMobileTuiAgentEnabled,
   MOBILE_TUI_AGENT_LAUNCH_COMMANDS
-} from '../tasks/mobile-tui-agents'
+} from '../workspace-create/mobile-tui-agents'
 import type { PersistedTrustedYiruHooks, TuiAgent } from '../../../src/shared/types'
 import type { SshConnectionState } from '../../../src/shared/ssh-types'
 import {
@@ -48,18 +51,15 @@ import {
   refreshMobileNewWorkspaceDialogSelectedRepo,
   resolveMobileNewWorkspaceDialogRepoId
 } from '../worktree/new-workspace-dialog-repo-selection'
-import { createBlankWorkspace } from '../tasks/blank-workspace-create'
-import { createWorkspaceFromComposerSource } from '../tasks/source-workspace-create'
-import { MOBILE_TASKS_CAPABILITY } from '../tasks/mobile-tasks-capability'
-import { normalizeWorkspaceAgent } from '../tasks/workspace-agent-selection'
+import { createBlankWorkspace } from '../workspace-create/blank-workspace-create'
+import { createWorkspaceFromComposerSource } from '../workspace-create/source-workspace-create'
+import { normalizeWorkspaceAgent } from '../workspace-create/workspace-agent-selection'
+import { useMobileComposerSource } from '../workspace-create/use-mobile-composer-source'
+import type { SmartModeAvailabilityInput } from '../workspace-create/mobile-smart-source-modes'
 import {
-  filterAvailableTaskProviders,
-  normalizeVisibleTaskProviders,
-  type TaskProvider
-} from '../tasks/mobile-task-providers'
-import { useMobileComposerSource } from '../tasks/use-mobile-composer-source'
-import type { SmartModeAvailabilityInput } from '../tasks/mobile-smart-source-modes'
-import { deriveRepoSlug, type PasteRepoCandidate } from '../tasks/smart-source-paste-intent'
+  deriveRepoSlug,
+  type PasteRepoCandidate
+} from '../workspace-create/smart-source-paste-intent'
 import { shouldPreserveWorkspaceSourceOnRepoChange } from '../../../src/shared/new-workspace/workspace-source'
 import { getComposerRepoWorktreeBranches } from '../../../src/shared/composer-branch-selection'
 import { SmartWorkspaceSourceField } from './smart-workspace-source-field'
@@ -209,8 +209,7 @@ function NewWorktreeModalContent({
   const [sshState, setSshState] = useState<SshConnectionState | null>(null)
   const [sshConnectingTargetId, setSshConnectingTargetId] = useState<string | null>(null)
   const [note, setNote] = useState('')
-  const [availableProviders, setAvailableProviders] = useState<TaskProvider[]>([])
-  const [tasksSupported, setTasksSupported] = useState(false)
+  const [gitlabAvailable, setGitLabAvailable] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [setupHookDetails, setSetupHookDetails] = useState<SetupHookDetails | null>(null)
   const [trustedYiruHooks, setTrustedYiruHooks] = useState<PersistedTrustedYiruHooks>({})
@@ -297,11 +296,9 @@ function NewWorktreeModalContent({
   const selectedRepoIsGit = selectedRepo ? selectedRepo.kind !== 'folder' : true
   const sourceAvailability: SmartModeAvailabilityInput = {
     textOnly: selectedRepo != null && !selectedRepoIsGit,
-    tasksSupported,
     hasRepo: selectedRepo != null,
-    githubAvailable: availableProviders.includes('github'),
-    gitlabAvailable: availableProviders.includes('gitlab'),
-    linearAvailable: availableProviders.includes('linear')
+    githubAvailable: true,
+    gitlabAvailable
   }
   const pasteRepos = useMemo<PasteRepoCandidate[]>(
     () =>
@@ -369,67 +366,29 @@ function NewWorktreeModalContent({
       })
 
     void (async () => {
-      // Why: settle each RPC independently so a flaky availability probe (e.g. a
-      // linear.status timeout, which rejects rather than resolving {ok:false})
-      // can't discard the already-resolved critical settings/ui results.
-      const probes = Promise.allSettled([
-        client.sendRequest('status.get'),
-        client.sendRequest('preflight.check'),
-        client.sendRequest('linear.status')
-      ])
       const okResult = (entry: PromiseSettledResult<RpcResponse>): RpcSuccess | null =>
         entry.status === 'fulfilled' && entry.value.ok ? (entry.value as RpcSuccess) : null
-      // Why: hydrate settings/trust the moment their own RPCs settle — gating them
-      // on the probes (a first-open preflight.check can take seconds) widens the
-      // window where an already-trusted setup hook spuriously re-prompts on create.
-      const [settingsRes, uiRes] = await Promise.allSettled([
+      const [settingsRes, uiRes, preflightRes] = await Promise.allSettled([
         client.sendRequest('settings.get'),
-        client.sendRequest('ui.get')
+        client.sendRequest('ui.get'),
+        client.sendRequest('preflight.check')
       ])
       if (stale) {
         return
       }
 
       const settingsResult = okResult(settingsRes)
-      const settingsValue = settingsResult
-        ? (
-            settingsResult.result as {
-              settings: RuntimeSettings & { visibleTaskProviders?: unknown }
-            }
-          ).settings
-        : null
-      if (settingsValue) {
-        setRuntimeSettings(settingsValue)
+      if (settingsResult) {
+        setRuntimeSettings((settingsResult.result as { settings: RuntimeSettings }).settings)
       }
       const uiResult = okResult(uiRes)
       if (uiResult) {
         const ui = (uiResult.result as { ui?: { trustedYiruHooks?: PersistedTrustedYiruHooks } }).ui
         setTrustedYiruHooks(ui?.trustedYiruHooks ?? {})
       }
-
-      const [statusRes, preflightRes, linearRes] = await probes
-      if (stale) {
-        return
-      }
-      // Tasks is an additive RPC surface, so older paired desktops without the
-      // capability fall back to branch + blank sources only.
-      const statusResult = okResult(statusRes)
-      const capabilities =
-        (statusResult?.result as { capabilities?: string[] } | undefined)?.capabilities ?? []
-      setTasksSupported(capabilities.includes(MOBILE_TASKS_CAPABILITY))
-      const glabInstalled =
+      setGitLabAvailable(
         (okResult(preflightRes)?.result as { glab?: { installed?: boolean } } | undefined)?.glab
           ?.installed === true
-      const linearConnected =
-        (okResult(linearRes)?.result as { connected?: boolean } | undefined)?.connected === true
-      const visibleProviders = normalizeVisibleTaskProviders(settingsValue?.visibleTaskProviders)
-      setAvailableProviders(
-        // Drop filterAvailableTaskProviders' forced 'github' fallback when the user
-        // hid GitHub; the Branch tab always guarantees at least one tab remains.
-        filterAvailableTaskProviders(visibleProviders, {
-          gitlabInstalled: glabInstalled,
-          linearConnected
-        }).filter((provider) => visibleProviders.includes(provider))
       )
     })()
     return () => {
@@ -757,9 +716,8 @@ function NewWorktreeModalContent({
   function handleRepoSelected(repo: Repo): void {
     const repoChanged = repo.id !== selectedRepo?.id
     setSelectedRepo(repo)
-    // Branch and provider-backed sources are repo-scoped; Linear/Jira are global
-    // work context and survive choosing a different implementation repo.
-    if (repoChanged && !shouldPreserveWorkspaceSourceOnRepoChange(composer.linkedWorkItem)) {
+    // Review and branch sources are repo-scoped and cannot survive a repo switch.
+    if (repoChanged && !shouldPreserveWorkspaceSourceOnRepoChange()) {
       composer.handleClearSmartNameSelection()
     }
   }

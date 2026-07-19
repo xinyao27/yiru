@@ -82,14 +82,14 @@ export const FEATURE_WALL_TILES: readonly FeatureWallTile[] = [
   {
     id: 'tile-03',
     kind: 'media',
-    title: 'GitHub & Linear, native',
+    title: 'Pull request review, native',
     caption:
-      'Find connected GitHub or Linear work in Tasks, open its context, and start workspaces without switching tools.',
+      'Open GitHub pull requests and GitLab merge requests, inspect checks, and review changes without switching tools.',
     gifPath: 'tile-03.gif',
     posterPath: 'tile-03.poster.jpg',
     recordedAtPath: 'tile-03.recorded-at.json',
-    owner: 'task-integrations',
-    docsUrl: 'https://yiru.ai/docs/review/linear'
+    owner: 'review',
+    docsUrl: 'https://yiru.ai/docs/review'
   },
   {
     id: 'tile-04',

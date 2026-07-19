@@ -218,11 +218,8 @@ function buildRuntimeSessionPlaceholders({
       hostId,
       displayName: getPathDisplayName(parsed.worktreePath, parsed.repoId),
       comment: '',
-      linkedIssue: null,
       linkedPR: null,
-      linkedLinearIssue: null,
       linkedGitLabMR: null,
-      linkedGitLabIssue: null,
       isArchived: false,
       isUnread: false,
       isPinned: false,
@@ -532,10 +529,6 @@ export type TerminalSlice = {
     string,
     { command: string; env?: Record<string, string>; direction: SetupSplitDirection }
   >
-  /** Queued issue-command-split requests — similar to setup splits but triggered
-   *  when an issue is linked during worktree creation and the repo's issue
-   *  automation command is enabled. */
-  pendingIssueCommandSplitByTabId: Record<string, { command: string; env?: Record<string, string> }>
   tabBarOrderByWorktree: Record<string, string[]>
   workspaceSessionReady: boolean
   restoredRuntimeHostIdByWorkspaceSessionKey: Record<string, ExecutionHostId>
@@ -727,13 +720,6 @@ export type TerminalSlice = {
   consumeTabSetupSplit: (
     tabId: string
   ) => { command: string; env?: Record<string, string>; direction: SetupSplitDirection } | null
-  queueTabIssueCommandSplit: (
-    tabId: string,
-    issueCommand: { command: string; env?: Record<string, string> }
-  ) => void
-  consumeTabIssueCommandSplit: (
-    tabId: string
-  ) => { command: string; env?: Record<string, string> } | null
   /** Per-pane timestamp (ms) when the prompt-cache countdown started (agent became idle).
    *  Keys are `${tabId}:${leafId}` composites so split-pane tabs can track each pane
    *  independently. null means no active timer for that pane. */
@@ -786,7 +772,6 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
   pendingStartupByTabId: {},
   pendingInitialCwdByTabId: {},
   pendingSetupSplitByTabId: {},
-  pendingIssueCommandSplitByTabId: {},
   automaticAgentResumeClaimsByTabId: {},
   nativeChatLaunchPromptByTabId: {},
   tabBarOrderByWorktree: {},
@@ -1126,7 +1111,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
           ...orphanCleanupPatch.tabsByWorktree,
           [worktreeId]: [...existing, tab]
         },
-        // Why: task-page launch queues startup/setup work before React mounts
+        // Why: workspace creation queues startup/setup work before React mounts
         // the terminal. Publishing the unified tab atomically with the runtime
         // tab prevents a transient legacy mount from racing the split host.
         unifiedTabsByWorktree: {
@@ -1371,8 +1356,6 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
       delete nextPendingInitialCwdByTabId[tabId]
       const nextPendingSetupSplitByTabId = { ...s.pendingSetupSplitByTabId }
       delete nextPendingSetupSplitByTabId[tabId]
-      const nextPendingIssueCommandSplitByTabId = { ...s.pendingIssueCommandSplitByTabId }
-      delete nextPendingIssueCommandSplitByTabId[tabId]
       const nextCacheTimer = { ...s.cacheTimerByKey }
       // Why: cache timer keys are `${tabId}:${leafId}` composites. Remove all
       // entries for the closing tab, regardless of how many panes it had.
@@ -1458,7 +1441,6 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         nativeChatLaunchPromptByTabId: nextNativeChatLaunchPromptByTabId,
         pendingInitialCwdByTabId: nextPendingInitialCwdByTabId,
         pendingSetupSplitByTabId: nextPendingSetupSplitByTabId,
-        pendingIssueCommandSplitByTabId: nextPendingIssueCommandSplitByTabId,
         cacheTimerByKey: nextCacheTimer,
         tabBarOrderByWorktree: nextTabBarOrderByWorktree,
         pendingSnapshotByPtyId: nextSnapshots,
@@ -2639,11 +2621,9 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         }
         delete nextCodexRestartNoticeByPtyId[ptyId]
       }
-      // Why: setup-split and issue-command-split are transient one-shots that
-      // drive new-tab UX. They are not sleep-recovery state; clear in both
-      // cases.
+      // Why: setup splits are transient one-shots that drive new-tab UX. They
+      // are not sleep-recovery state, so clear them in both cases.
       const nextPendingSetupSplitByTabId = { ...s.pendingSetupSplitByTabId }
-      const nextPendingIssueCommandSplitByTabId = { ...s.pendingIssueCommandSplitByTabId }
       // Why: under remove-worktree (default), layout snapshots carry
       // `ptyIdsByLeafId` referencing now-dead PTY IDs; if we leave them, the
       // next remount takes the reattach branch in connectPanePty and produces
@@ -2672,7 +2652,6 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
           delete nextRuntimePaneTitlesByTabId[tab.id]
         }
         delete nextPendingSetupSplitByTabId[tab.id]
-        delete nextPendingIssueCommandSplitByTabId[tab.id]
         if (nextUnreadTerminalTabs[tab.id]) {
           if (nextUnreadTerminalTabs === s.unreadTerminalTabs) {
             nextUnreadTerminalTabs = { ...s.unreadTerminalTabs }
@@ -2737,7 +2716,6 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         pendingCodexPaneRestartIds: nextPendingCodexPaneRestartIds,
         codexRestartNoticeByPtyId: nextCodexRestartNoticeByPtyId,
         pendingSetupSplitByTabId: nextPendingSetupSplitByTabId,
-        pendingIssueCommandSplitByTabId: nextPendingIssueCommandSplitByTabId,
         terminalLayoutsByTabId: nextTerminalLayoutsByTabId,
         // Why: skip writing unreadTerminalTabs when the reference is unchanged —
         // avoids a no-op top-level state allocation that would force re-evaluation
@@ -3068,30 +3046,6 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
     return pending
   },
 
-  queueTabIssueCommandSplit: (tabId, issueCommand) => {
-    set((s) => ({
-      pendingIssueCommandSplitByTabId: {
-        ...s.pendingIssueCommandSplitByTabId,
-        [tabId]: issueCommand
-      }
-    }))
-  },
-
-  consumeTabIssueCommandSplit: (tabId) => {
-    const pending = get().pendingIssueCommandSplitByTabId[tabId]
-    if (!pending) {
-      return null
-    }
-
-    set((s) => {
-      const next = { ...s.pendingIssueCommandSplitByTabId }
-      delete next[tabId]
-      return { pendingIssueCommandSplitByTabId: next }
-    })
-
-    return pending
-  },
-
   consumePendingSnapshot: (ptyId) => {
     const snapshot = get().pendingSnapshotByPtyId[ptyId]
     if (!snapshot) {
@@ -3373,11 +3327,8 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
           repoId,
           displayName,
           comment: '',
-          linkedIssue: null,
           linkedPR: null,
-          linkedLinearIssue: null,
           linkedGitLabMR: null,
-          linkedGitLabIssue: null,
           isArchived: false,
           isUnread: false,
           isPinned: false,

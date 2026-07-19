@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { ChevronDown, ChevronRight } from 'lucide-react-native'
 import type { GitHubWorkItemDetails, PRState } from '../../../../src/shared/types'
-import type { GitHubPrRepoSlug } from '../../session/github-pr-rpc'
 import { colors } from '../../theme/mobile-theme'
 import { canAddRootComment } from '../../session/pr-comment-actions'
 import { isPrSidebarDetailsPlaceholder } from '../../session/mobile-pr-sidebar-state'
@@ -35,7 +34,6 @@ type Props = {
   prState: PRState | null
   // Repo slug for the slug-addressed comment edit/delete RPCs; threaded into the
   // per-card actions so the edit/delete affordances can gate on its presence.
-  prRepo?: GitHubPrRepoSlug | null
   // Interactive comment actions (reply/resolve/add/edit/delete). Absent (e.g.
   // non-PR) leaves the timeline read-only.
   actions?: MobilePrCommentActions
@@ -52,13 +50,7 @@ const COMMENT_PAGE = 12
 // PR body + full comment timeline, mirroring the desktop PR page: a Description
 // card, then a Comments section with an audience filter (PRs only), threaded
 // review comments, reactions, and collapsible resolved threads.
-export function PRCommentsSection({
-  details,
-  prState,
-  prRepo,
-  actions,
-  botAuthorOverrides
-}: Props) {
+export function PRCommentsSection({ details, prState, actions, botAuthorOverrides }: Props) {
   // details is null while phase 2 (the heavy comments/body payload) is still loading.
   // A synthetic placeholder means phase 2 failed — do not paint that as empty success.
   const loadingDetails = details === null
@@ -78,16 +70,11 @@ export function PRCommentsSection({
         ? {
             reply: actions.reply,
             toggleResolve: actions.toggleResolve,
-            editComment: actions.editComment,
-            deleteComment: actions.deleteComment,
             isReplyBusy: actions.isReplyBusy,
-            isResolveBusy: actions.isResolveBusy,
-            isEditBusy: actions.isEditBusy,
-            isDeleteBusy: actions.isDeleteBusy,
-            prRepo: prRepo ?? null
+            isResolveBusy: actions.isResolveBusy
           }
         : undefined,
-    [actions, isPr, prRepo]
+    [actions, isPr]
   )
   const canComment = isPr && actions !== undefined && canAddRootComment(prState)
 

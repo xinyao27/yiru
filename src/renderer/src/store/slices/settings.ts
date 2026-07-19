@@ -11,7 +11,6 @@ import { assertRuntimeStatusCompatible } from '@/runtime/runtime-protocol-compat
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
 import { normalizeTerminalQuickCommands } from '../../../../shared/terminal-quick-commands'
 import { normalizeTerminalCustomThemes } from '../../../../shared/terminal-custom-themes'
-import { normalizeTaskProviderSettings } from '../../../../shared/task-providers'
 import { normalizeOpenInApplications } from '../../../../shared/open-in-applications'
 import { createSettingsSearchState, type SettingsSearchState } from './settings-search-state'
 import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent-selection'
@@ -94,20 +93,6 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
         sanitizedUpdates.terminalCustomThemes = normalizeTerminalCustomThemes(
           updates.terminalCustomThemes
         )
-      }
-      if ('visibleTaskProviders' in updates || 'defaultTaskSource' in updates) {
-        const taskProviderSettings = normalizeTaskProviderSettings({
-          visibleTaskProviders:
-            'visibleTaskProviders' in updates
-              ? updates.visibleTaskProviders
-              : get().settings?.visibleTaskProviders,
-          defaultTaskSource:
-            'defaultTaskSource' in updates
-              ? updates.defaultTaskSource
-              : get().settings?.defaultTaskSource
-        })
-        sanitizedUpdates.defaultTaskSource = taskProviderSettings.defaultTaskSource
-        sanitizedUpdates.visibleTaskProviders = taskProviderSettings.visibleTaskProviders
       }
       if ('openInApplications' in updates) {
         sanitizedUpdates.openInApplications = normalizeOpenInApplications(

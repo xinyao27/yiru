@@ -94,10 +94,6 @@ const ProjectGroupImportNested = z.discriminatedUnion('mode', [
   })
 ])
 
-const RepoIssueCommandWrite = RepoSelector.extend({
-  content: z.string()
-})
-
 const RepoSparsePresetSave = RepoSelector.extend({
   id: OptionalString,
   name: requiredString('Missing preset name'),
@@ -256,16 +252,5 @@ export const REPO_METHODS: RpcMethod[] = [
     name: 'repo.setupScriptImports',
     params: RepoSelector,
     handler: async (params, { runtime }) => runtime.inspectRepoSetupScriptImports(params.repo)
-  }),
-  defineMethod({
-    name: 'repo.issueCommandRead',
-    params: RepoSelector,
-    handler: async (params, { runtime }) => runtime.readRepoIssueCommand(params.repo)
-  }),
-  defineMethod({
-    name: 'repo.issueCommandWrite',
-    params: RepoIssueCommandWrite,
-    handler: async (params, { runtime }) =>
-      runtime.writeRepoIssueCommand(params.repo, params.content)
   })
 ]

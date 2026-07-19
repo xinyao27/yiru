@@ -1,7 +1,7 @@
 import type { ParsedExecutionHost } from '../../../shared/execution-host'
 import { parseExecutionHostId } from '../../../shared/execution-host'
-import type { TaskSourceContext } from '../../../shared/task-source-context'
-import { getTaskSourceRuntimeSettings } from '../../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../../shared/project-source-context'
+import { getProjectSourceRuntimeSettings } from '../../../shared/project-source-context'
 import type { GlobalSettings } from '../../../shared/types'
 import type { RuntimeClientTarget } from '@/runtime/runtime-rpc-client'
 import { getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
@@ -13,7 +13,7 @@ import {
 export type GitHubRuntimeHost = Extract<ParsedExecutionHost, { kind: 'runtime' }>
 
 export function getGitHubSourceRuntimeHost(
-  sourceContext: TaskSourceContext | null | undefined
+  sourceContext: ProjectSourceContext | null | undefined
 ): GitHubRuntimeHost | null {
   if (sourceContext?.provider !== 'github') {
     return null
@@ -23,10 +23,10 @@ export function getGitHubSourceRuntimeHost(
 }
 
 export function getGitHubSourceRuntimeTarget(
-  sourceContext: TaskSourceContext | null | undefined
+  sourceContext: ProjectSourceContext | null | undefined
 ): RuntimeClientTarget {
   return getActiveRuntimeTarget(
-    getTaskSourceRuntimeSettings(sourceContext?.provider === 'github' ? sourceContext : null)
+    getProjectSourceRuntimeSettings(sourceContext?.provider === 'github' ? sourceContext : null)
   )
 }
 
@@ -37,7 +37,7 @@ export function getGitHubSourceRuntimeTarget(
 export function getGitHubMutationRoutingSettings(
   state: RepoRuntimeOwnerState,
   repoId: string | null | undefined,
-  sourceContext: TaskSourceContext | null | undefined
+  sourceContext: ProjectSourceContext | null | undefined
 ): Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> {
   const sourceHost = getGitHubSourceRuntimeHost(sourceContext)
   return {
@@ -48,21 +48,21 @@ export function getGitHubMutationRoutingSettings(
 
 export function canUseGitHubRepoContext(
   repoPath: string | null | undefined,
-  sourceContext: TaskSourceContext | null | undefined
+  sourceContext: ProjectSourceContext | null | undefined
 ): boolean {
   return Boolean(repoPath) || getGitHubSourceRuntimeHost(sourceContext) !== null
 }
 
 export function getGitHubRuntimeRepoId(
-  sourceContext: TaskSourceContext | null | undefined,
+  sourceContext: ProjectSourceContext | null | undefined,
   fallbackRepoId: string
 ): string
 export function getGitHubRuntimeRepoId(
-  sourceContext: TaskSourceContext | null | undefined,
+  sourceContext: ProjectSourceContext | null | undefined,
   fallbackRepoId: string | null | undefined
 ): string | undefined
 export function getGitHubRuntimeRepoId(
-  sourceContext: TaskSourceContext | null | undefined,
+  sourceContext: ProjectSourceContext | null | undefined,
   fallbackRepoId: string | null | undefined
 ): string | undefined {
   const fallback = fallbackRepoId ?? undefined

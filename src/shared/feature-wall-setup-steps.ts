@@ -4,7 +4,6 @@ export type FeatureWallSetupStepId =
   | 'notifications'
   | 'two-worktrees'
   | 'browser'
-  | 'task-sources'
   | 'agent-capabilities'
   | 'setup-script'
 
@@ -55,12 +54,6 @@ export const FEATURE_WALL_SETUP_STEPS: readonly FeatureWallSetupStep[] = [
     subtitle: 'Enable Yiru CLI',
     description:
       'Register the Yiru shell command and install agent skills for browser, computer, and orchestration workflows.'
-  },
-  {
-    id: 'task-sources',
-    name: 'Connect integrations',
-    subtitle: 'Connect integrations',
-    description: 'Start an agent from a task in one click and keep PR status in view.'
   },
   {
     id: 'setup-script',

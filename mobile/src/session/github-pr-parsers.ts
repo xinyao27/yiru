@@ -111,7 +111,7 @@ function readWorkItem(value: unknown): Omit<GitHubWorkItem, 'repoId'> | null {
   }
   const id = readString(value.id)
   const number = readNumber(value.number)
-  const type = value.type === 'issue' || value.type === 'pr' ? value.type : null
+  const type = value.type === 'pr' ? 'pr' : null
   const state = readPRState(value.state)
   if (id === undefined || number === undefined || type === null || state === null) {
     return null

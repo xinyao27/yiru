@@ -10,7 +10,6 @@ export type FeatureWallSetupProgressInput = {
   ready?: boolean
   settings: GlobalSettings | null
   featureInteractions: FeatureInteractionState
-  hasConnectedTaskSource: boolean
   browserUseSkillInstalled: boolean
   computerUseSkillInstalled: boolean
   computerUsePermissionsReady: boolean
@@ -60,7 +59,6 @@ export function getFeatureWallSetupProgress(
     // Why: the 'browser' interaction fires when a non-blank page is viewed, so
     // opening any real page in Yiru's browser durably completes this milestone.
     browser: hasFeatureInteraction(input.featureInteractions, 'browser'),
-    'task-sources': input.hasConnectedTaskSource,
     'agent-capabilities': agentCapabilitiesDone,
     'setup-script': input.hasSetupScript
   }

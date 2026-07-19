@@ -74,9 +74,9 @@ import {
 import { projectHostSetupProjectionFromRepos } from '../shared/project-host-setup-projection'
 import type { GitRemoteIdentity } from '../shared/git-remote-identity'
 import {
-  buildTaskSourceContextFromRepo,
+  buildProjectSourceContextFromRepo,
   buildWorkspaceRunContext
-} from '../shared/task-source-context'
+} from '../shared/project-source-context'
 import type { MigrationUnsupportedPtyEntry } from '../shared/agent-status-types'
 import { MOBILE_PAIRING_USERDATA_FILES } from './runtime/mobile-pairing-files'
 import { hardenExistingSecureFile } from '../shared/secure-file'
@@ -149,7 +149,6 @@ import {
   normalizeRuntimePathForComparison
 } from '../shared/cross-platform-path'
 import { normalizeTerminalQuickCommands } from '../shared/terminal-quick-commands'
-import { normalizeTaskProviderSettings } from '../shared/task-providers'
 import { normalizeAutoRenameBranchFromWorkDefaultOn } from '../shared/auto-rename-branch-from-work-settings'
 import { normalizeOpenInApplications } from '../shared/open-in-applications'
 import { normalizeTerminalShortcutPolicy } from '../shared/keybindings'
@@ -174,8 +173,6 @@ import { normalizeFeatureTipIds } from '../shared/feature-tips'
 import { normalizeManualRepoOrder } from '../shared/manual-repo-order'
 import {
   DEFAULT_WORKSPACE_STATUS_ID,
-  clampWorkspaceBoardColumnWidth,
-  clampWorkspaceBoardOpacity,
   normalizePersistedWorkspaceStatuses,
   normalizeWorkspaceStatuses
 } from '../shared/workspace-statuses'
@@ -352,7 +349,7 @@ function getDataFile(): string {
 // fetchedAt stamps change on every refresh — keeping it inside yiru-data.json
 // made every poll cycle rewrite the whole multi-MB durable state (defeating
 // the content-hash guard by design). It lives in memory during the session
-// and is snapshotted here best-effort at quit so PR/issue badges still paint
+// and is snapshotted here best-effort at quit so PR badges still paint
 // instantly on the next launch. Loss of this file costs nothing.
 function getGithubCacheFile(dataFile = getDataFile()): string {
   return join(dirname(dataFile), 'yiru-github-cache.json')
@@ -439,12 +436,8 @@ function readGithubCacheSnapshot(dataFile: string): PersistedState['githubCache'
     const parsed = JSON.parse(readFileSync(getGithubCacheFile(dataFile), 'utf-8')) as unknown
     const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
       typeof value === 'object' && value !== null && !Array.isArray(value)
-    if (
-      isPlainRecord(parsed) &&
-      isPlainRecord((parsed as { pr?: unknown }).pr) &&
-      isPlainRecord((parsed as { issue?: unknown }).issue)
-    ) {
-      return parsed as PersistedState['githubCache']
+    if (isPlainRecord(parsed) && isPlainRecord((parsed as { pr?: unknown }).pr)) {
+      return { pr: (parsed as PersistedState['githubCache']).pr }
     }
   } catch {
     // Missing or corrupt snapshot: start with an empty cache and refetch.
@@ -609,6 +602,8 @@ function readLegacyTerminalScrollbackSettings(settings: unknown): LegacyTerminal
     : {}
 }
 
+// Why: settings are merged with object spreads, so old profile keys must be
+// removed explicitly or later saves would preserve retired product state.
 function stripRetiredGlobalSettings(
   settings: Partial<GlobalSettings> | undefined
 ): Partial<GlobalSettings> {
@@ -617,17 +612,38 @@ function stripRetiredGlobalSettings(
     experimentalNewWorktreeCardStyle: _retiredCardStyle,
     compactWorktreeCards: _retiredCompactCards,
     experimentalCompactWorktreeCards: _retiredExperimentalCompactCards,
+    showTasksButton: _retiredShowTasksButton,
+    defaultTaskViewPreset: _retiredDefaultTaskViewPreset,
+    defaultTaskSource: _retiredDefaultTaskSource,
+    visibleTaskProviders: _retiredVisibleTaskProviders,
+    visibleTaskProvidersDefaultedForJira: _retiredVisibleTaskProvidersMigration,
+    defaultRepoSelection: _retiredDefaultRepoSelection,
+    defaultLinearTeamSelection: _retiredDefaultLinearTeamSelection,
     ...rest
   } = (settings ?? {}) as Partial<GlobalSettings> & {
     terminalScrollbackBytes?: unknown
     experimentalNewWorktreeCardStyle?: unknown
     compactWorktreeCards?: unknown
     experimentalCompactWorktreeCards?: unknown
+    showTasksButton?: unknown
+    defaultTaskViewPreset?: unknown
+    defaultTaskSource?: unknown
+    visibleTaskProviders?: unknown
+    visibleTaskProvidersDefaultedForJira?: unknown
+    defaultRepoSelection?: unknown
+    defaultLinearTeamSelection?: unknown
   }
   void _legacyScrollbackBytes
   void _retiredCardStyle
   void _retiredCompactCards
   void _retiredExperimentalCompactCards
+  void _retiredShowTasksButton
+  void _retiredDefaultTaskViewPreset
+  void _retiredDefaultTaskSource
+  void _retiredVisibleTaskProviders
+  void _retiredVisibleTaskProvidersMigration
+  void _retiredDefaultRepoSelection
+  void _retiredDefaultLinearTeamSelection
   return rest
 }
 
@@ -1064,7 +1080,7 @@ function getAutomationContextsForRepo(
     : null
   const providerIdentity = projectedProject?.providerIdentity
   const sourceContext = providerIdentity
-    ? buildTaskSourceContextFromRepo({
+    ? buildProjectSourceContextFromRepo({
         provider: providerIdentity.provider,
         projectId: providerIdentity.provider === 'github' ? (setup?.projectId ?? repo.id) : repo.id,
         repo,
@@ -3090,21 +3106,6 @@ export class Store {
         ) {
           this.loadNeedsSave = true
         }
-        const rawTaskProviderSettings = normalizeTaskProviderSettings({
-          visibleTaskProviders: parsed.settings?.visibleTaskProviders,
-          defaultTaskSource: parsed.settings?.defaultTaskSource
-        })
-        const visibleTaskProvidersDefaultedForJira =
-          parsed.settings?.visibleTaskProvidersDefaultedForJira === true
-        const migratedVisibleTaskProviders = visibleTaskProvidersDefaultedForJira
-          ? rawTaskProviderSettings.visibleTaskProviders
-          : rawTaskProviderSettings.visibleTaskProviders.includes('jira')
-            ? rawTaskProviderSettings.visibleTaskProviders
-            : [...rawTaskProviderSettings.visibleTaskProviders, 'jira' as const]
-        const taskProviderSettings = normalizeTaskProviderSettings({
-          visibleTaskProviders: migratedVisibleTaskProviders,
-          defaultTaskSource: rawTaskProviderSettings.defaultTaskSource
-        })
         const primarySelectionDefaultedForLinux =
           parsed.settings?.primarySelectionMiddleClickPasteDefaultedForLinux === true
         const primarySelectionDefaultedForTerminalDefaults =
@@ -3119,9 +3120,6 @@ export class Store {
         const stampPrimarySelectionTerminalDefaults =
           primarySelectionPlatformDefaultEnabled && !primarySelectionDefaultedForTerminalDefaults
         if (migratePrimarySelectionPlatformDefault || stampPrimarySelectionTerminalDefaults) {
-          this.loadNeedsSave = true
-        }
-        if (!visibleTaskProvidersDefaultedForJira) {
           this.loadNeedsSave = true
         }
         const claudeAgentTeamsDefaultDisabledMigrated =
@@ -3266,9 +3264,6 @@ export class Store {
             // unchanged on non-mac hosts; the darwin consumers gate the effect.
             showMenuBarIcon: parsed.settings?.showMenuBarIcon !== false,
             uiLanguage: normalizeUiLanguage(parsed.settings?.uiLanguage),
-            defaultTaskSource: taskProviderSettings.defaultTaskSource,
-            visibleTaskProviders: taskProviderSettings.visibleTaskProviders,
-            visibleTaskProvidersDefaultedForJira: true,
             terminalShortcutPolicy: normalizeTerminalShortcutPolicy(
               parsed.settings?.terminalShortcutPolicy
             ),
@@ -3373,12 +3368,6 @@ export class Store {
                   return candidate
                 }
                 const next = [...candidate]
-                // Why: Linear used to be controlled by the generic issue
-                // property and Ports were always visible. Add the split-out
-                // properties once so existing cards keep their prior surface.
-                if (candidate.includes('issue') && !candidate.includes('linear-issue')) {
-                  next.push('linear-issue' as const)
-                }
                 if (!candidate.includes('ports')) {
                   next.push('ports' as const)
                 }
@@ -3606,9 +3595,7 @@ export class Store {
     // kept as this session's seed and stripped from the durable file by the
     // save scheduled below; otherwise seed from the sidecar snapshot.
     const legacyCache = migrated.githubCache
-    const hasLegacyCache =
-      Object.keys(legacyCache?.pr ?? {}).length > 0 ||
-      Object.keys(legacyCache?.issue ?? {}).length > 0
+    const hasLegacyCache = Object.keys(legacyCache?.pr ?? {}).length > 0
     if (hasLegacyCache) {
       this.loadNeedsSave = true
       // Why: mark dirty so the first flush writes the sidecar even if no
@@ -4136,7 +4123,7 @@ export class Store {
     projectGroupId: string
     name?: string
     folderPath?: string | null
-    linkedTask?: FolderWorkspace['linkedTask']
+    linkedReview?: FolderWorkspace['linkedReview']
     connectionId?: string | null
     createdWithAgent?: FolderWorkspace['createdWithAgent']
     pendingFirstAgentMessageRename?: boolean
@@ -4158,7 +4145,7 @@ export class Store {
       name: normalizeFolderWorkspaceName(input.name, `${group.name} workspace`),
       folderPath,
       connectionId: input.connectionId ?? group.connectionId ?? null,
-      linkedTask: input.linkedTask ?? null,
+      linkedReview: input.linkedReview ?? null,
       comment: '',
       isArchived: false,
       isUnread: false,
@@ -4184,7 +4171,7 @@ export class Store {
         FolderWorkspace,
         | 'name'
         | 'folderPath'
-        | 'linkedTask'
+        | 'linkedReview'
         | 'comment'
         | 'isArchived'
         | 'isUnread'
@@ -4209,8 +4196,8 @@ export class Store {
     if (typeof updates.folderPath === 'string' && updates.folderPath.trim().length > 0) {
       workspace.folderPath = updates.folderPath
     }
-    if (updates.linkedTask !== undefined) {
-      workspace.linkedTask = updates.linkedTask
+    if (updates.linkedReview !== undefined) {
+      workspace.linkedReview = updates.linkedReview
     }
     if (updates.comment !== undefined) {
       workspace.comment = updates.comment
@@ -4462,7 +4449,7 @@ export class Store {
         | 'kind'
         | 'executionHostId'
         | 'symlinkPaths'
-        | 'issueSourcePreference'
+        | 'forgeRemotePreference'
         | 'forkSyncMode'
         | 'externalWorktreeVisibility'
         | 'externalWorktreeVisibilityPromptDismissedAt'
@@ -4507,11 +4494,11 @@ export class Store {
     // Why: selected repo fields use `undefined` as an explicit clear signal,
     // so delete them before assigning the rest of the patch.
     if (
-      'issueSourcePreference' in sanitizedUpdates &&
-      sanitizedUpdates.issueSourcePreference === undefined
+      'forgeRemotePreference' in sanitizedUpdates &&
+      sanitizedUpdates.forgeRemotePreference === undefined
     ) {
-      delete repo.issueSourcePreference
-      delete sanitizedUpdates.issueSourcePreference
+      delete repo.forgeRemotePreference
+      delete sanitizedUpdates.forgeRemotePreference
     }
     if ('worktreeBasePath' in sanitizedUpdates && sanitizedUpdates.worktreeBasePath === undefined) {
       delete repo.worktreeBasePath
@@ -5447,23 +5434,6 @@ export class Store {
     ) {
       sanitizedUpdates.terminalTuiScrollSensitivityDefaultedToOne = true
     }
-    if ('visibleTaskProviders' in updates || 'defaultTaskSource' in updates) {
-      const taskProviderSettings = normalizeTaskProviderSettings({
-        visibleTaskProviders:
-          'visibleTaskProviders' in updates
-            ? updates.visibleTaskProviders
-            : this.state.settings.visibleTaskProviders,
-        defaultTaskSource:
-          'defaultTaskSource' in updates
-            ? updates.defaultTaskSource
-            : this.state.settings.defaultTaskSource
-      })
-      sanitizedUpdates.defaultTaskSource = taskProviderSettings.defaultTaskSource
-      sanitizedUpdates.visibleTaskProviders = taskProviderSettings.visibleTaskProviders
-      if ('visibleTaskProviders' in updates) {
-        sanitizedUpdates.visibleTaskProvidersDefaultedForJira = true
-      }
-    }
     if ('autoRenameBranchFromWork' in updates || 'autoRenameBranchFromWorkDefaultedOn' in updates) {
       sanitizedUpdates.autoRenameBranchFromWorkDefaultedOn = true
     }
@@ -5578,11 +5548,6 @@ export class Store {
         this.state.ui?.agentActivityDisplayMode
       ),
       workspaceStatuses: normalizeWorkspaceStatuses(this.state.ui?.workspaceStatuses),
-      workspaceBoardOpacity: clampWorkspaceBoardOpacity(this.state.ui?.workspaceBoardOpacity),
-      workspaceBoardColumnWidth: clampWorkspaceBoardColumnWidth(
-        this.state.ui?.workspaceBoardColumnWidth
-      ),
-      syncTaskStatusFromWorkspaceBoard: this.state.ui?.syncTaskStatusFromWorkspaceBoard === true,
       usagePercentageDisplay: normalizeUsagePercentageDisplay(
         this.state.ui?.usagePercentageDisplay
       ),
@@ -5656,16 +5621,6 @@ export class Store {
         sanitizedUpdates.workspaceStatuses !== undefined
           ? normalizeWorkspaceStatuses(sanitizedUpdates.workspaceStatuses)
           : normalizeWorkspaceStatuses(this.state.ui?.workspaceStatuses),
-      workspaceBoardOpacity: clampWorkspaceBoardOpacity(
-        sanitizedUpdates.workspaceBoardOpacity ?? this.state.ui?.workspaceBoardOpacity
-      ),
-      workspaceBoardColumnWidth: clampWorkspaceBoardColumnWidth(
-        sanitizedUpdates.workspaceBoardColumnWidth ?? this.state.ui?.workspaceBoardColumnWidth
-      ),
-      syncTaskStatusFromWorkspaceBoard:
-        sanitizedUpdates.syncTaskStatusFromWorkspaceBoard !== undefined
-          ? sanitizedUpdates.syncTaskStatusFromWorkspaceBoard === true
-          : this.state.ui?.syncTaskStatusFromWorkspaceBoard === true,
       usagePercentageDisplay: normalizeUsagePercentageDisplay(
         sanitizedUpdates.usagePercentageDisplay ?? this.state.ui?.usagePercentageDisplay
       ),
@@ -6778,11 +6733,8 @@ function getDefaultWorktreeMeta(): WorktreeMeta {
     instanceId: randomUUID(),
     displayName: '',
     comment: '',
-    linkedIssue: null,
     linkedPR: null,
-    linkedLinearIssue: null,
     linkedGitLabMR: null,
-    linkedGitLabIssue: null,
     linkedBitbucketPR: null,
     linkedAzureDevOpsPR: null,
     linkedGiteaPR: null,

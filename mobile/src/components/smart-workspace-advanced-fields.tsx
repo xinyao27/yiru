@@ -1,5 +1,5 @@
 import { Platform, StyleSheet, Switch, Text, TextInput, View } from 'react-native'
-import type { MobileComposerSource } from '../tasks/use-mobile-composer-source'
+import type { MobileComposerSource } from '../workspace-create/use-mobile-composer-source'
 import { colors, radii, spacing, typography } from '../theme/mobile-theme'
 
 type Props = {

@@ -781,12 +781,6 @@ export function createMainWindow(
       case 'deleteCurrentWorkspace':
         mainWindow.webContents.send('ui:deleteCurrentWorkspace')
         return
-      case 'openWorkspaceBoard':
-        mainWindow.webContents.send('ui:openWorkspaceBoard')
-        return
-      case 'openTasks':
-        mainWindow.webContents.send('ui:openTasks')
-        return
       case 'switchRecentTab':
         mainWindow.webContents.send('ui:switchRecentTab')
         return

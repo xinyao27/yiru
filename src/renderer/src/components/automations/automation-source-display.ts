@@ -1,5 +1,5 @@
 import { getExecutionHostLabel } from '../../../../shared/execution-host'
-import type { TaskSourceContext } from '../../../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../../../shared/project-source-context'
 
 export type AutomationSourceDisplay = {
   label: string
@@ -7,7 +7,7 @@ export type AutomationSourceDisplay = {
 }
 
 export function getAutomationSourceDisplay(
-  sourceContext: TaskSourceContext | null | undefined,
+  sourceContext: ProjectSourceContext | null | undefined,
   hostLabelById?: ReadonlyMap<string, string>
 ): AutomationSourceDisplay | null {
   if (!sourceContext) {
@@ -31,20 +31,16 @@ export function getAutomationSourceDisplay(
   return { label, title }
 }
 
-function getProviderLabel(provider: TaskSourceContext['provider']): string {
+function getProviderLabel(provider: ProjectSourceContext['provider']): string {
   switch (provider) {
     case 'github':
       return 'GitHub'
     case 'gitlab':
       return 'GitLab'
-    case 'linear':
-      return 'Linear'
-    case 'jira':
-      return 'Jira'
   }
 }
 
-function getSourceIdentityLabel(sourceContext: TaskSourceContext): string | null {
+function getSourceIdentityLabel(sourceContext: ProjectSourceContext): string | null {
   const identity = sourceContext.providerIdentity
   if (identity) {
     switch (identity.provider) {
@@ -54,10 +50,6 @@ function getSourceIdentityLabel(sourceContext: TaskSourceContext): string | null
         return identity.namespace && identity.project
           ? `${identity.namespace}/${identity.project}`
           : (identity.projectId ?? null)
-      case 'linear':
-        return identity.workspaceName ?? identity.workspaceId ?? null
-      case 'jira':
-        return identity.siteUrl ?? identity.siteId ?? null
     }
   }
   return sourceContext.accountLabel ?? sourceContext.repoId ?? null

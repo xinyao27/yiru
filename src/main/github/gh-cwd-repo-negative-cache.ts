@@ -5,7 +5,7 @@ import type { GitHubRepoContext } from './github-repository-identity'
  * Negative cache for repos where gh's cwd-based repo resolution fails
  * ("no git remotes found" etc). Yiru only falls back to cwd resolution when
  * it could not resolve an owner/repo itself, so for a remote-less repo the
- * failure is deterministic — yet the Tasks page re-spawned gh for every such
+ * failure is deterministic — yet pull-request searches re-spawned gh for every such
  * repo on every refresh (×90 repos in the reported storm). Remember the
  * failure and re-throw it without a subprocess until the repo's git config
  * changes (signature check) or the TTL lapses.

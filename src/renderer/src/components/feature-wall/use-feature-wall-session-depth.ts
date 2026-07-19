@@ -9,8 +9,6 @@ import { getFeatureWallCompletionProgress } from './feature-wall-completion-prog
 
 type FeatureWallSessionDepthInput = {
   isOpen: boolean
-  hasConnectedTaskSource: boolean
-  isCheckingTaskSources: boolean
   hasUsageAccount: boolean
   orchestrationSkillInstalled: boolean
   browserUseSkillInstalled: boolean
@@ -32,8 +30,6 @@ export function useFeatureWallSessionDepth(
 ): FeatureWallSessionDepthTracker {
   const {
     isOpen,
-    hasConnectedTaskSource,
-    isCheckingTaskSources,
     hasUsageAccount,
     orchestrationSkillInstalled,
     browserUseSkillInstalled,
@@ -62,8 +58,6 @@ export function useFeatureWallSessionDepth(
       visitedAgentSteps: session.visitedAgentSteps,
       visitedWorkbenchSteps: session.visitedWorkbenchSteps,
       visitedReviewSteps: session.visitedReviewSteps,
-      hasConnectedTaskSource,
-      isCheckingTaskSources,
       hasUsageAccount,
       orchestrationSkillInstalled,
       browserUseSkillInstalled,
@@ -82,9 +76,7 @@ export function useFeatureWallSessionDepth(
     aiCommitPrConfigured,
     browserUseSkillInstalled,
     githubConfigured,
-    hasConnectedTaskSource,
     hasUsageAccount,
-    isCheckingTaskSources,
     orchestrationSkillInstalled
   ])
 

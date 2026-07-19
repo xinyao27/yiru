@@ -193,8 +193,8 @@ function OrchestrationFrame(): JSX.Element {
   )
 }
 
-function TasksFrame(): JSX.Element {
-  // Why: a left→right pipeline reads as "pick from backlog → workspace
+function ReviewFrame(): JSX.Element {
+  // Why: a left→right pipeline reads as "open a review → workspace
   // appears" in one glance. The wide aspect lets the backlog and the
   // resulting workspace card sit side-by-side instead of stacked, which
   // makes the cause/effect visible in the composition itself.
@@ -203,23 +203,23 @@ function TasksFrame(): JSX.Element {
       <div className="text-[14.5px] font-semibold uppercase tracking-[0.07em] leading-none text-muted-foreground">
         {translate(
           'auto.components.feature.wall.FeatureTourPreview.bee6b4088d',
-          'GitHub & Linear tasks'
+          'Pull request review'
         )}
       </div>
       <div className="relative grid flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-4 px-4">
         <div className="flex flex-col gap-2">
           <div className="flex h-9 items-center gap-2.5 rounded-md border border-border bg-background px-3">
             <span className="inline-flex h-5 items-center justify-center rounded-[3px] border border-border bg-muted px-1.5 font-mono text-[13px] leading-none text-muted-foreground">
-              {translate('auto.components.feature.wall.FeatureTourPreview.0688842445', 'GH #1799')}
+              {translate('auto.components.feature.wall.FeatureTourPreview.0688842445', 'PR #1799')}
             </span>
-            {/* Why: surrounding rows show only the issue number + a skeleton
+            {/* Why: surrounding rows show only the review number + a skeleton
                 so the user's eye is drawn to the row that has real text — the
                 one the cursor clicks on. */}
             <span className="h-2 w-[60%] rounded-full bg-foreground/12" />
           </div>
-          <div className="feature-tour-tasks-row relative flex h-9 items-center gap-2.5 rounded-md border border-border bg-background px-3">
+          <div className="feature-tour-review-row relative flex h-9 items-center gap-2.5 rounded-md border border-border bg-background px-3">
             <span className="inline-flex h-5 items-center justify-center rounded-[3px] border border-border bg-muted px-1.5 font-mono text-[13px] leading-none text-muted-foreground">
-              {translate('auto.components.feature.wall.FeatureTourPreview.fc0cc0b267', 'GH #1842')}
+              {translate('auto.components.feature.wall.FeatureTourPreview.fc0cc0b267', 'PR #1842')}
             </span>
             <span className="truncate text-[15px] font-medium leading-none text-foreground">
               {translate(
@@ -227,9 +227,9 @@ function TasksFrame(): JSX.Element {
                 'Worktree picker truncates'
               )}
             </span>
-            <span className="feature-tour-tasks-pill relative ml-auto flex h-6 items-center justify-center overflow-hidden rounded-full border border-emerald-500/30 bg-emerald-500/15">
-              <span className="feature-tour-tasks-pill-label flex items-center gap-1 whitespace-nowrap pl-3 pr-2.5 text-[13px] font-semibold leading-none tracking-[0.01em] text-primary-foreground">
-                {translate('auto.components.feature.wall.FeatureTourPreview.40bbd92ef4', 'Start')}
+            <span className="feature-tour-review-pill relative ml-auto flex h-6 items-center justify-center overflow-hidden rounded-full border border-emerald-500/30 bg-emerald-500/15">
+              <span className="feature-tour-review-pill-label flex items-center gap-1 whitespace-nowrap pl-3 pr-2.5 text-[13px] font-semibold leading-none tracking-[0.01em] text-primary-foreground">
+                {translate('auto.components.feature.wall.FeatureTourPreview.40bbd92ef4', 'Open')}
                 <svg
                   width="11"
                   height="11"
@@ -249,20 +249,20 @@ function TasksFrame(): JSX.Element {
             {/* Why: cursor + ring live inside the row so they anchor to the
                 pill's right-edge ml-auto, instead of using fixed pixel offsets
                 that drift when the preview is resized. */}
-            <span className="feature-tour-tasks-cursor">
+            <span className="feature-tour-review-cursor">
               <CursorIcon />
             </span>
-            <span className="feature-tour-tasks-click-ring" aria-hidden />
+            <span className="feature-tour-review-click-ring" aria-hidden />
           </div>
           <div className="flex h-9 items-center gap-2.5 rounded-md border border-border bg-background px-3">
             <span className="inline-flex h-5 items-center justify-center rounded-[3px] border border-border bg-muted px-1.5 font-mono text-[13px] leading-none text-muted-foreground">
-              {translate('auto.components.feature.wall.FeatureTourPreview.d54aefe09e', 'LIN-329')}
+              {translate('auto.components.feature.wall.FeatureTourPreview.d54aefe09e', 'MR !329')}
             </span>
             <span className="h-2 w-[45%] rounded-full bg-foreground/12" />
           </div>
         </div>
 
-        <div className="feature-tour-tasks-workspace flex flex-col gap-2 rounded-md border border-border bg-background px-4 py-2.5">
+        <div className="feature-tour-review-workspace flex flex-col gap-2 rounded-md border border-border bg-background px-4 py-2.5">
           <div className="flex items-center gap-2.5">
             <WorkingSpinner />
             <span className="truncate text-[15.5px] font-medium leading-none text-foreground">
@@ -283,7 +283,7 @@ function TasksFrame(): JSX.Element {
           <div className="text-[13.5px] leading-none text-muted-foreground">
             {translate(
               'auto.components.feature.wall.FeatureTourPreview.2a7cfc82c8',
-              'Linked to GH #1842'
+              'Linked to PR #1842'
             )}
           </div>
         </div>
@@ -309,7 +309,7 @@ export function FeatureTourPreview(props: { className?: string }): JSX.Element {
         <OrchestrationFrame />
       </div>
       <div className="feature-tour-frame" data-frame="3">
-        <TasksFrame />
+        <ReviewFrame />
       </div>
       <div className="feature-tour-frame" data-frame="4">
         <FeatureTourTerminalFrame />

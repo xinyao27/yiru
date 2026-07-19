@@ -7,7 +7,7 @@ import process from 'node:process'
 import ts from 'typescript-api'
 
 const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mts', '.cts'])
-const SKIP_PATH_PARTS = new Set(['.git', 'dist', 'node_modules', 'out', '__snapshots__', 'assets'])
+const SKIP_PATH_PARTS = new Set(['.git', 'dist', 'node_modules', 'out', 'assets'])
 const LOCALIZATION_CALL_NAMES = new Set(['t', 'translate'])
 const USER_VISIBLE_JSX_ATTRIBUTES = new Set([
   'ariaLabel',
@@ -67,12 +67,7 @@ function normalizePath(root, filePath) {
 
 function isSkippedFile(root, filePath) {
   const relative = normalizePath(root, filePath)
-  if (
-    relative.endsWith('.d.ts') ||
-    relative.includes('.test.') ||
-    relative.includes('.spec.') ||
-    relative.includes('/__tests__/')
-  ) {
+  if (relative.endsWith('.d.ts')) {
     return true
   }
   return relative.split('/').some((part) => SKIP_PATH_PARTS.has(part))

@@ -16,7 +16,6 @@ type OrphanTerminalCleanupState = Pick<
   | 'pendingStartupByTabId'
   | 'pendingInitialCwdByTabId'
   | 'pendingSetupSplitByTabId'
-  | 'pendingIssueCommandSplitByTabId'
   | 'automaticAgentResumeClaimsByTabId'
   | 'nativeChatLaunchPromptByTabId'
   | 'tabBarOrderByWorktree'
@@ -64,7 +63,6 @@ export function buildOrphanTerminalCleanupPatch(
   | 'pendingStartupByTabId'
   | 'pendingInitialCwdByTabId'
   | 'pendingSetupSplitByTabId'
-  | 'pendingIssueCommandSplitByTabId'
   | 'automaticAgentResumeClaimsByTabId'
   | 'nativeChatLaunchPromptByTabId'
   | 'tabBarOrderByWorktree'
@@ -83,7 +81,6 @@ export function buildOrphanTerminalCleanupPatch(
       pendingStartupByTabId: state.pendingStartupByTabId,
       pendingInitialCwdByTabId: state.pendingInitialCwdByTabId,
       pendingSetupSplitByTabId: state.pendingSetupSplitByTabId,
-      pendingIssueCommandSplitByTabId: state.pendingIssueCommandSplitByTabId,
       automaticAgentResumeClaimsByTabId: state.automaticAgentResumeClaimsByTabId,
       nativeChatLaunchPromptByTabId: state.nativeChatLaunchPromptByTabId,
       tabBarOrderByWorktree: state.tabBarOrderByWorktree,
@@ -104,7 +101,6 @@ export function buildOrphanTerminalCleanupPatch(
   const nextPendingStartupByTabId = { ...state.pendingStartupByTabId }
   const nextPendingInitialCwdByTabId = { ...state.pendingInitialCwdByTabId }
   const nextPendingSetupSplitByTabId = { ...state.pendingSetupSplitByTabId }
-  const nextPendingIssueCommandSplitByTabId = { ...state.pendingIssueCommandSplitByTabId }
   const nextAutomaticAgentResumeClaimsByTabId = {
     ...state.automaticAgentResumeClaimsByTabId
   }
@@ -130,7 +126,6 @@ export function buildOrphanTerminalCleanupPatch(
     delete nextPendingStartupByTabId[orphanTabId]
     delete nextPendingInitialCwdByTabId[orphanTabId]
     delete nextPendingSetupSplitByTabId[orphanTabId]
-    delete nextPendingIssueCommandSplitByTabId[orphanTabId]
     delete nextAutomaticAgentResumeClaimsByTabId[orphanTabId]
     delete nextNativeChatLaunchPromptByTabId[orphanTabId]
     for (const key of Object.keys(nextCacheTimerByKey)) {
@@ -160,7 +155,6 @@ export function buildOrphanTerminalCleanupPatch(
     pendingStartupByTabId: nextPendingStartupByTabId,
     pendingInitialCwdByTabId: nextPendingInitialCwdByTabId,
     pendingSetupSplitByTabId: nextPendingSetupSplitByTabId,
-    pendingIssueCommandSplitByTabId: nextPendingIssueCommandSplitByTabId,
     automaticAgentResumeClaimsByTabId: nextAutomaticAgentResumeClaimsByTabId,
     nativeChatLaunchPromptByTabId: nextNativeChatLaunchPromptByTabId,
     tabBarOrderByWorktree: nextTabBarOrderByWorktree,

@@ -24,14 +24,14 @@ import type { SessionOptionValue } from '../../../../shared/native-chat-session-
 import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
 import {
   getLinkedItemDisplayName,
-  toFolderWorkspaceLinkedTask
+  toFolderWorkspaceLinkedReview
 } from './folder-workspace-composer-helpers'
 
 type FolderWorkspaceCreateInput = {
   projectGroupId: string
   name: string
   connectionId?: string | null
-  linkedTask: FolderWorkspace['linkedTask']
+  linkedReview: FolderWorkspace['linkedReview']
   createdWithAgent?: TuiAgent
   pendingFirstAgentMessageRename?: boolean
 }
@@ -229,7 +229,7 @@ export async function submitFolderWorkspaceCreate({
     // Why: SSH folder groups must keep their target provenance even when the
     // focused runtime is local or another host.
     connectionId: projectGroup.connectionId ?? null,
-    linkedTask: toFolderWorkspaceLinkedTask(linkedWorkItem),
+    linkedReview: toFolderWorkspaceLinkedReview(linkedWorkItem),
     ...(quickAgent ? { createdWithAgent: quickAgent } : {}),
     ...(pendingFirstAgentMessageRename ? { pendingFirstAgentMessageRename: true } : {})
   })

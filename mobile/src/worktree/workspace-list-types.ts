@@ -39,10 +39,7 @@ export type Worktree = {
   isPinned: boolean
   isActive?: boolean
   linkedPR: { number: number; state: string } | null
-  linkedIssue?: number | null
-  linkedLinearIssue?: string | null
   linkedGitLabMR?: number | null
-  linkedGitLabIssue?: number | null
   comment?: string
   status?: 'working' | 'active' | 'permission' | 'done' | 'inactive'
   agents?: RuntimeWorktreeAgentRow[]

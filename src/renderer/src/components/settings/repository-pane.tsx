@@ -176,13 +176,7 @@ export function RepositoryPane({
     ['Sparse Checkout Presets'].includes(entry.title)
   )
   const hooksEntries = allEntries.filter((entry) =>
-    [
-      'Setup Script',
-      'Archive Script',
-      'Advanced',
-      'When to Run Setup',
-      'Custom GitHub Issue Command'
-    ].includes(entry.title)
+    ['Setup Script', 'Archive Script', 'Advanced', 'When to Run Setup'].includes(entry.title)
   )
   const mcpEntries = allEntries.filter((entry) => entry.title === 'MCP Configs')
   const symlinkEntries = allEntries.filter((entry) => entry.title === 'Worktree Shared Paths')

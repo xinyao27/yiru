@@ -34,14 +34,6 @@ export const mobileHomePreviewStyles = {
   resumeTitle: 'text-[13px] font-semibold text-neutral-200',
   resumeSub: 'mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400',
   repoDot: 'size-[7px] shrink-0',
-  taskCard: 'flex items-center gap-3 border border-neutral-800 bg-neutral-900 px-3 py-2.5',
-  taskIcon:
-    'grid size-[38px] place-items-center bg-neutral-800 text-neutral-400 [&>svg]:size-4 [&>svg]:stroke-[1.75]',
-  taskTitle: 'text-[13px] font-semibold text-neutral-200',
-  taskSubtitle: 'mt-0.5 text-[11px] text-neutral-400',
-  taskProviders: 'ml-2 flex items-center gap-0.5',
-  taskProviderButton:
-    'grid size-[34px] place-items-center text-neutral-400 [&>svg]:size-[22px] [&>svg]:stroke-[1.75]',
   quickActions: 'mb-2 grid grid-cols-2 gap-2',
   quickAction: 'flex items-center gap-2.5 border border-neutral-800 bg-neutral-900 px-3 py-2.5',
   quickActionIcon:

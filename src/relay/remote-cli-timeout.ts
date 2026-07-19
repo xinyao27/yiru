@@ -1,5 +1,5 @@
 // Why: the host bridges the full Yiru CLI over the relay (#7716), so mutation
-// commands (worktree create, orchestration dispatch, Linear writes, ...) can
+// commands (worktree create, orchestration dispatch, ...) can
 // legitimately outlive the relay's 30 s default request timeout. Long-poll
 // commands carry their waiter budget in --timeout-ms; extend past it so the
 // host-side CLI produces its proper timeout error instead of the relay

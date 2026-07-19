@@ -9,7 +9,6 @@ import type { UpdateCheckOptions } from '../../shared/types'
 import { translateMain } from '../i18n/main-i18n'
 
 export type AppearanceMenuState = {
-  showTasksButton: boolean
   showAutomationsButton: boolean
   showMobileButton: boolean
   statusBarVisible: boolean
@@ -179,7 +178,7 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
   }
 
   // Why: mirror VS Code's View > Appearance submenu so users can toggle
-  // sidebar/status-bar/tasks-button/titlebar-activity from the menu bar as
+  // sidebar/status-bar/titlebar activity controls from the menu bar as
   // well as from the settings pane. Electron doesn't reactively update
   // menu items when the backing state changes, so rebuildAppMenu() must be
   // called after every settings update — each build reads current
@@ -210,12 +209,6 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
         click: () => onToggleAppearance('statusBarVisible')
       },
       { type: 'separator' },
-      {
-        label: translateMain('menu.showTasksButton', 'Show Tasks Button'),
-        type: 'checkbox',
-        checked: appearance.showTasksButton,
-        click: () => onToggleAppearance('showTasksButton')
-      },
       {
         label: translateMain('menu.showAutomationsButton', 'Show Automations Button'),
         type: 'checkbox',

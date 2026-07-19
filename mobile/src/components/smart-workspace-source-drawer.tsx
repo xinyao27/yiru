@@ -17,14 +17,14 @@ import {
   SMART_MODE_OPTIONS,
   type SmartModeAvailabilityInput,
   type SmartModeOption
-} from '../tasks/mobile-smart-source-modes'
-import type { MrStateFilter, SmartNameMode } from '../tasks/mobile-composer-source-types'
+} from '../workspace-create/mobile-smart-source-modes'
+import type { MrStateFilter, SmartNameMode } from '../workspace-create/mobile-composer-source-types'
 import {
   lookupGitHubItemByOwnerRepo,
   type PasteRepoCandidate
-} from '../tasks/smart-source-paste-intent'
-import { useSmartWorkspaceSource } from '../tasks/use-smart-workspace-source'
-import type { MobileComposerSource } from '../tasks/use-mobile-composer-source'
+} from '../workspace-create/smart-source-paste-intent'
+import { useSmartWorkspaceSource } from '../workspace-create/use-smart-workspace-source'
+import type { MobileComposerSource } from '../workspace-create/use-mobile-composer-source'
 import { colors, radii, spacing, typography } from '../theme/mobile-theme'
 import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
 import { SmartSourceModeIcon } from './smart-source-mode-icon'
@@ -37,7 +37,6 @@ type Props = {
   availability: SmartModeAvailabilityInput
   repoId: string | null
   repos: readonly PasteRepoCandidate[]
-  linearWorkspaceId?: string | null
   sshReady: boolean
   onRepoChange: (repoId: string) => void
   onClose: () => void
@@ -50,7 +49,6 @@ export function SmartWorkspaceSourceDrawer({
   availability,
   repoId,
   repos,
-  linearWorkspaceId,
   sshReady,
   onRepoChange,
   onClose
@@ -74,9 +72,7 @@ export function SmartWorkspaceSourceDrawer({
   // Snap the chosen mode back into the available set if availability changes.
   const effectiveMode = availableModes.includes(mode) ? mode : (availableModes[0] ?? 'text')
 
-  // Linear searches without a repo; every other provider/branch search needs a
-  // connected repo-backed target.
-  const searchEnabled = visible && (effectiveMode === 'linear' || sshReady)
+  const searchEnabled = visible && sshReady
 
   const {
     rows,
@@ -94,9 +90,7 @@ export function SmartWorkspaceSourceDrawer({
     repoId,
     githubAvailable: availability.githubAvailable,
     gitlabAvailable: availability.gitlabAvailable,
-    linearAvailable: availability.linearAvailable,
     mrStateFilter,
-    linearWorkspaceId,
     repos
   })
 
@@ -120,9 +114,6 @@ export function SmartWorkspaceSourceDrawer({
         break
       case 'branch':
         composer.handleSmartBranchSelect(row.refName, row.localBranchName)
-        break
-      case 'linear':
-        composer.handleSmartLinearIssueSelect(row.issue)
         break
     }
     onClose()
@@ -237,11 +228,11 @@ export function SmartWorkspaceSourceDrawer({
         </View>
       ) : null}
 
-      {!sshReady && effectiveMode !== 'text' && effectiveMode !== 'linear' ? (
+      {!sshReady && effectiveMode !== 'text' ? (
         <Text style={styles.notice}>Connect the repository to search sources.</Text>
       ) : needsGitHubRemote ? (
         <Text style={styles.notice}>
-          This SSH repo needs a GitHub remote to list issues and PRs.
+          This SSH repo needs a GitHub remote to list pull requests.
         </Text>
       ) : error ? (
         <Text style={styles.errorNotice}>{error}</Text>

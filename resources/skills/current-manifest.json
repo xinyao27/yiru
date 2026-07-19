@@ -20,24 +20,6 @@
       ]
     },
     {
-      "name": "linear-tickets",
-      "sourcePath": "skills/linear-tickets",
-      "releaseRevision": 5,
-      "packageDigest": "45b42268f044e65fed0dbcc08f85230b6d8b5885f8cc212d3a55c285de2886ec",
-      "gitTreeSha": "37b177bd3e4ad99ed7128c4a26ddf54529f04b1d",
-      "files": [
-        {
-          "path": "SKILL.md",
-          "size": 10539,
-          "executable": false,
-          "classification": "text",
-          "exactSha256": "8bb334ea6a27679a5b47ec346351bb770f244634f9d644883b3768aa455d5574",
-          "textNormalizedSha256": "8bb334ea6a27679a5b47ec346351bb770f244634f9d644883b3768aa455d5574",
-          "identitySha256": "8bb334ea6a27679a5b47ec346351bb770f244634f9d644883b3768aa455d5574"
-        }
-      ]
-    },
-    {
       "name": "orchestration",
       "sourcePath": "skills/orchestration",
       "releaseRevision": 25,
@@ -58,18 +40,18 @@
     {
       "name": "yiru-cli",
       "sourcePath": "skills/yiru-cli",
-      "releaseRevision": 32,
-      "packageDigest": "c4714c4dcc519687cc5060253c5e30d318e288b5d0600166a490137dfe3f0cec",
-      "gitTreeSha": "a19f81fc778924f6d452341d1e469f2ff8f13087",
+      "releaseRevision": 33,
+      "packageDigest": "9c794836a643b372afe198eb89a0be5723431e1c01dc3bfeea234190c9518da8",
+      "gitTreeSha": "9f4c5c32a686b966d342fa66cfcd6e1c02930e37",
       "files": [
         {
           "path": "SKILL.md",
-          "size": 21065,
+          "size": 21047,
           "executable": false,
           "classification": "text",
-          "exactSha256": "ad07c76489c674a6f5da65f3dfab09373324820973fb866d4983a4635c39f25a",
-          "textNormalizedSha256": "ad07c76489c674a6f5da65f3dfab09373324820973fb866d4983a4635c39f25a",
-          "identitySha256": "ad07c76489c674a6f5da65f3dfab09373324820973fb866d4983a4635c39f25a"
+          "exactSha256": "253e4172f54759d7a8a776eb0b5afb1be14bf84b68ab9d2d16d3982ce4a9f6b3",
+          "textNormalizedSha256": "253e4172f54759d7a8a776eb0b5afb1be14bf84b68ab9d2d16d3982ce4a9f6b3",
+          "identitySha256": "253e4172f54759d7a8a776eb0b5afb1be14bf84b68ab9d2d16d3982ce4a9f6b3"
         }
       ]
     },
@@ -106,24 +88,6 @@
           "exactSha256": "5af5226a0ea9573b06ac8bb828df55235a82dcf81ee0af13e823c7969fee5879",
           "textNormalizedSha256": "5af5226a0ea9573b06ac8bb828df55235a82dcf81ee0af13e823c7969fee5879",
           "identitySha256": "5af5226a0ea9573b06ac8bb828df55235a82dcf81ee0af13e823c7969fee5879"
-        }
-      ]
-    },
-    {
-      "name": "yiru-linear",
-      "sourcePath": "skills/yiru-linear",
-      "releaseRevision": 3,
-      "packageDigest": "c980911bdebb60d8f7ce45fddc95a4cfd8e79bfd1cc6b00c3a82ab25bd6c7940",
-      "gitTreeSha": "6206336ffe38f179cbc706f883dce7698779cc30",
-      "files": [
-        {
-          "path": "SKILL.md",
-          "size": 10263,
-          "executable": false,
-          "classification": "text",
-          "exactSha256": "9f212bab46ba8f6653e8a34703554ccf4ade8073e7459363da211fad7b670521",
-          "textNormalizedSha256": "9f212bab46ba8f6653e8a34703554ccf4ade8073e7459363da211fad7b670521",
-          "identitySha256": "9f212bab46ba8f6653e8a34703554ccf4ade8073e7459363da211fad7b670521"
         }
       ]
     },

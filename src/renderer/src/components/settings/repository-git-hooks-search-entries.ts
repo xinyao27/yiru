@@ -131,43 +131,6 @@ export function getRepositoryGitHooksSearchEntries(repo: Repo): SettingsSearchEn
           'skip by default'
         )
       ]
-    },
-    {
-      title: translate(
-        'auto.components.settings.repository.search.d86ea12d16',
-        'Custom GitHub Issue Command'
-      ),
-      description: translate(
-        'auto.components.settings.repository.search.d42d1e49c0',
-        'File-based linked-issue command configured via yiru.yaml and optional local override.'
-      ),
-      keywords: [
-        repo.displayName,
-        ...translateSearchKeyword(
-          'auto.components.settings.repository.search.2011a6a4f2',
-          'github issue command'
-        ),
-        ...translateSearchKeyword(
-          'auto.components.settings.repository.search.66b584bd6c',
-          'issue command'
-        ),
-        ...translateSearchKeyword(
-          'auto.components.settings.repository.search.ec70364df2',
-          'workflow'
-        ),
-        ...translateSearchKeyword(
-          'auto.components.settings.repository.search.9dc60d7f6d',
-          'github'
-        ),
-        ...translateSearchKeyword(
-          'auto.components.settings.repository.search.603c68b68c',
-          'yiru.yaml'
-        ),
-        ...translateSearchKeyword(
-          'auto.components.settings.repository.search.bc7e504b8e',
-          '.yiru/issue-command'
-        )
-      ]
     }
   ]
 }

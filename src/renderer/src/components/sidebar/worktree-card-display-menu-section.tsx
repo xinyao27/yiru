@@ -10,13 +10,7 @@ import type { WorktreeCardProperty } from '../../../../shared/types'
 import { getWorktreeCardPropertyOptions } from './sidebar-workspace-option-items'
 import { translate } from '@/i18n/i18n'
 
-type WorktreeCardDisplayMenuSectionProps = {
-  preserveWorkspaceBoardOpen: boolean
-}
-
-export function WorktreeCardDisplayMenuSection({
-  preserveWorkspaceBoardOpen
-}: WorktreeCardDisplayMenuSectionProps): React.JSX.Element {
+export function WorktreeCardDisplayMenuSection(): React.JSX.Element {
   const worktreeCardProperties = useAppStore((s) => s.worktreeCardProperties)
   const setWorktreeCardProperties = useAppStore((s) => s.setWorktreeCardProperties)
   const projectGroups = useAppStore((s) => s.projectGroups)
@@ -45,10 +39,7 @@ export function WorktreeCardDisplayMenuSection({
           )}
         </span>
       </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent
-        className="w-56"
-        data-workspace-board-preserve-open={preserveWorkspaceBoardOpen ? '' : undefined}
-      >
+      <DropdownMenuSubContent className="w-56">
         {worktreeCardPropertyOptions.map((opt) => (
           <DropdownMenuCheckboxItem
             key={opt.id}

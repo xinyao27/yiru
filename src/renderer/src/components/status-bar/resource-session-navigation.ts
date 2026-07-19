@@ -34,7 +34,7 @@ export function navigateResourceSessionToTab(
 
   // Why: stale tabsByWorktree mappings skip activateAndRevealWorktree (which
   // owns the view flip), so flip to terminal here too — otherwise a click
-  // from Space/Tasks/Settings updates activeTab but leaves the user on the
+  // from Space/Settings updates activeTab but leaves the user on the
   // non-terminal view and the click appears to do nothing.
   deps.setActiveView('terminal')
 

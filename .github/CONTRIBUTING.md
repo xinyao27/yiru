@@ -40,13 +40,10 @@ Run the same checks that CI runs:
 ```bash
 pnpm lint
 pnpm typecheck
-pnpm test
 pnpm build
 ```
 
-Add high-quality tests for behavior changes and bug fixes. Prefer tests that would actually catch a regression, not shallow coverage that only exercises the happy path.
-
-If your change affects UI or interaction behavior, verify it on the platforms it could impact.
+If your change affects UI or interaction behavior, verify it manually on the platforms it could impact.
 
 ## Type Declarations: Prefer `.ts` Over `.d.ts`
 

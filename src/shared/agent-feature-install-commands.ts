@@ -6,9 +6,6 @@ export const YIRU_CLI_SKILL_NAME = 'yiru-cli'
 export const COMPUTER_USE_SKILL_NAME = 'computer-use'
 export const ORCHESTRATION_SKILL_NAME = 'orchestration'
 export const EPHEMERAL_VMS_SKILL_NAME = 'yiru-per-workspace-env'
-export const YIRU_LINEAR_SKILL_NAME = 'yiru-linear'
-export const LINEAR_TICKETS_SKILL_NAME = 'linear-tickets'
-export const LINEAR_AGENT_SKILL_NAMES = [YIRU_LINEAR_SKILL_NAME, LINEAR_TICKETS_SKILL_NAME] as const
 
 export function buildAgentFeatureSkillInstallCommand(skillNames: readonly string[]): string {
   if (skillNames.length === 0) {
@@ -57,17 +54,3 @@ export const YIRU_CLI_ORCHESTRATION_SKILL_INSTALL_COMMAND = buildAgentFeatureSki
   YIRU_CLI_SKILL_NAME,
   ORCHESTRATION_SKILL_NAME
 ])
-
-export const YIRU_LINEAR_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstallCommand([
-  YIRU_LINEAR_SKILL_NAME
-])
-
-export const YIRU_LINEAR_SKILL_UPDATE_COMMAND =
-  buildAgentFeatureSkillUpdateCommand(YIRU_LINEAR_SKILL_NAME)
-
-export const LINEAR_TICKETS_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstallCommand([
-  LINEAR_TICKETS_SKILL_NAME
-])
-
-export const LINEAR_TICKETS_SKILL_UPDATE_COMMAND =
-  buildAgentFeatureSkillUpdateCommand(LINEAR_TICKETS_SKILL_NAME)

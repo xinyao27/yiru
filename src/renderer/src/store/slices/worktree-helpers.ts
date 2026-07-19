@@ -136,22 +136,17 @@ export type WorktreeSlice = {
      *  matters for the activation funnel. */
     telemetrySource?: WorkspaceCreateTelemetrySource,
     displayName?: string,
-    linkedIssue?: number,
     linkedPR?: number,
     pushTarget?: GitPushTarget,
     createdWithAgent?: TuiAgent,
-    linkedLinearIssue?: string,
     branchNameOverride?: string,
     workspaceStatus?: WorkspaceStatus,
     linkedGitLabMR?: number,
-    linkedGitLabIssue?: number,
     startup?: WorktreeStartupLaunch,
     pendingFirstAgentMessageRename?: boolean,
     /** When set, correlates the backend's `createWorktree:progress` events to a
      *  renderer pending creation. Synchronous callers omit it. */
     creationId?: string,
-    linkedLinearIssueWorkspaceId?: string | null,
-    linkedLinearIssueOrganizationUrlKey?: string | null,
     linkedBitbucketPR?: number | null,
     linkedAzureDevOpsPR?: number | null,
     linkedGiteaPR?: number | null,

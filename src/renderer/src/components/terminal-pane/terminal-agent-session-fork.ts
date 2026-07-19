@@ -249,7 +249,6 @@ export async function startAgentSessionFork(fork: PreparedAgentSessionFork): Pro
       `Fork of ${sourceWorktree.displayName || forkName}`,
       undefined,
       undefined,
-      undefined,
       fork.agent ?? undefined
     )
   } catch (error) {

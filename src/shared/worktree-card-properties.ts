@@ -2,11 +2,8 @@ import type { WorktreeCardProperty } from './types'
 
 const FIXED_WORKTREE_CARD_PROPERTIES: WorktreeCardProperty[] = ['status', 'unread']
 
-export const TASK_WORKTREE_CARD_PROPERTIES: WorktreeCardProperty[] = ['issue', 'linear-issue']
-
 export const DEFAULT_WORKTREE_CARD_PROPERTIES: WorktreeCardProperty[] = [
   ...FIXED_WORKTREE_CARD_PROPERTIES,
-  ...TASK_WORKTREE_CARD_PROPERTIES,
   'automation',
   'comment',
   'ports',
@@ -19,8 +16,6 @@ const WORKTREE_CARD_PROPERTY_ORDER: WorktreeCardProperty[] = [
   'status',
   'unread',
   'branch',
-  'issue',
-  'linear-issue',
   'automation',
   'comment',
   'ports',

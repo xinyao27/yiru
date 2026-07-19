@@ -249,10 +249,8 @@ function areWorktreesEqual(current: Worktree[] | undefined, next: Worktree[]): b
       worktree.isSparse === candidate.isSparse &&
       worktree.displayName === candidate.displayName &&
       worktree.comment === candidate.comment &&
-      worktree.linkedIssue === candidate.linkedIssue &&
       worktree.linkedPR === candidate.linkedPR &&
       worktree.linkedGitLabMR === candidate.linkedGitLabMR &&
-      worktree.linkedGitLabIssue === candidate.linkedGitLabIssue &&
       worktree.linkedBitbucketPR === candidate.linkedBitbucketPR &&
       worktree.linkedAzureDevOpsPR === candidate.linkedAzureDevOpsPR &&
       worktree.linkedGiteaPR === candidate.linkedGiteaPR &&
@@ -2162,7 +2160,6 @@ function buildWorktreePurgeState(s: AppState, worktreeIds: string[]): Partial<Ap
     // already empty at removal, but strand when a tab's pane never mounted.
     lastKnownRelayPtyIdByTabId: omitByTabId(s.lastKnownRelayPtyIdByTabId),
     pendingInitialCwdByTabId: omitByTabId(s.pendingInitialCwdByTabId),
-    pendingIssueCommandSplitByTabId: omitByTabId(s.pendingIssueCommandSplitByTabId),
     pendingSetupSplitByTabId: omitByTabId(s.pendingSetupSplitByTabId),
     pendingStartupByTabId: omitByTabId(s.pendingStartupByTabId),
     codexRestartNoticeByPtyId: omitByPtyId(s.codexRestartNoticeByPtyId),
@@ -2998,20 +2995,15 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
     sparseCheckout,
     telemetrySource,
     displayName,
-    linkedIssue,
     linkedPR,
     pushTarget,
     createdWithAgent,
-    linkedLinearIssue,
     branchNameOverride,
     workspaceStatus,
     linkedGitLabMR,
-    linkedGitLabIssue,
     startup,
     pendingFirstAgentMessageRename,
     creationId,
-    linkedLinearIssueWorkspaceId,
-    linkedLinearIssueOrganizationUrlKey,
     linkedBitbucketPR,
     linkedAzureDevOpsPR,
     linkedGiteaPR,
@@ -3048,23 +3040,16 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
             sparseCheckout,
             ...(displayName ? { displayName } : {}),
             ...(telemetrySource ? { telemetrySource } : {}),
-            ...(linkedIssue !== undefined ? { linkedIssue } : {}),
             ...(linkedPR !== undefined ? { linkedPR } : {}),
             ...(pushTarget ? { pushTarget } : {}),
             ...(createdWithAgent ? { createdWithAgent } : {}),
             ...(pendingFirstAgentMessageRename === true && createdWithAgent
               ? { pendingFirstAgentMessageRename: true }
               : {}),
-            ...(linkedLinearIssue !== undefined ? { linkedLinearIssue } : {}),
-            ...(linkedLinearIssueWorkspaceId !== undefined ? { linkedLinearIssueWorkspaceId } : {}),
-            ...(linkedLinearIssueOrganizationUrlKey !== undefined
-              ? { linkedLinearIssueOrganizationUrlKey }
-              : {}),
             ...(manualOrder !== undefined ? { manualOrder } : {}),
             ...(parentWorkspace ? { parentWorkspace } : {}),
             ...(workspaceStatus !== undefined ? { workspaceStatus } : {}),
             ...(linkedGitLabMR !== undefined ? { linkedGitLabMR } : {}),
-            ...(linkedGitLabIssue !== undefined ? { linkedGitLabIssue } : {}),
             ...(linkedBitbucketPR !== undefined ? { linkedBitbucketPR } : {}),
             ...(linkedAzureDevOpsPR !== undefined ? { linkedAzureDevOpsPR } : {}),
             ...(linkedGiteaPR !== undefined ? { linkedGiteaPR } : {}),
@@ -3091,25 +3076,16 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
                     sparseCheckout,
                     ...(displayName ? { displayName } : {}),
                     ...(telemetrySource ? { telemetrySource } : {}),
-                    ...(linkedIssue !== undefined ? { linkedIssue } : {}),
                     ...(linkedPR !== undefined ? { linkedPR } : {}),
                     ...(pushTarget ? { pushTarget } : {}),
                     ...(createdWithAgent ? { createdWithAgent } : {}),
                     ...(pendingFirstAgentMessageRename === true && createdWithAgent
                       ? { pendingFirstAgentMessageRename: true }
                       : {}),
-                    ...(linkedLinearIssue !== undefined ? { linkedLinearIssue } : {}),
-                    ...(linkedLinearIssueWorkspaceId !== undefined
-                      ? { linkedLinearIssueWorkspaceId }
-                      : {}),
-                    ...(linkedLinearIssueOrganizationUrlKey !== undefined
-                      ? { linkedLinearIssueOrganizationUrlKey }
-                      : {}),
                     ...(manualOrder !== undefined ? { manualOrder } : {}),
                     ...(parentWorkspace ? { parentWorkspace } : {}),
                     ...(workspaceStatus !== undefined ? { workspaceStatus } : {}),
                     ...(linkedGitLabMR !== undefined ? { linkedGitLabMR } : {}),
-                    ...(linkedGitLabIssue !== undefined ? { linkedGitLabIssue } : {}),
                     ...(linkedBitbucketPR !== undefined ? { linkedBitbucketPR } : {}),
                     ...(linkedAzureDevOpsPR !== undefined ? { linkedAzureDevOpsPR } : {}),
                     ...(linkedGiteaPR !== undefined ? { linkedGiteaPR } : {}),

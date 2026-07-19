@@ -41,7 +41,6 @@ import { filterEnabledTuiAgents } from '../../../shared/tui-agent-selection'
 import type {
   GitHubWorkItem,
   GitLabWorkItem,
-  LinearIssue,
   SetupAgentStartupPolicy,
   YiruHooks,
   SparsePreset,
@@ -61,7 +60,7 @@ import type {
 } from '@/lib/project-host-setup-options'
 import type { WorkspaceCreateErrorDisplay } from '@/lib/workspace-create-error-format'
 import type { SshConnectionStatus } from '../../../shared/ssh-types'
-import type { TaskSourceContext } from '../../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../../shared/project-source-context'
 import { translate } from '@/i18n/i18n'
 
 type RepoOption = React.ComponentProps<typeof RepoCombobox>['repos'][number]
@@ -95,7 +94,7 @@ type NewWorkspaceComposerCardProps = {
   repoBackedSearchRepos?: RepoOption[]
   repoBackedSourcesDisabled?: boolean
   allowSmartNameAddProject?: boolean
-  smartNameRepoSwitchTarget?: 'project' | 'task-source'
+  smartNameRepoSwitchTarget?: 'project' | 'project-source'
   primaryActionLabel: string
   projectLabel?: string
   projectPlaceholder?: string
@@ -109,7 +108,6 @@ type NewWorkspaceComposerCardProps = {
   onSmartGitLabItemSelect: (item: GitLabWorkItem) => void
   onSmartBranchSelect: (refName: string, localBranchName: string) => void
   onSmartNameModeChange?: (mode: SmartNameMode) => void
-  onSmartLinearIssueSelect: (issue: LinearIssue) => void
   smartNameSelection: SmartWorkspaceNameSelection | null
   onClearSmartNameSelection: () => void
   /** True when an existing local branch is selected and can be reused. */
@@ -120,7 +118,7 @@ type NewWorkspaceComposerCardProps = {
   showCreateMultiple?: boolean
   createMultiple?: boolean
   onCreateMultipleChange?: (next: boolean) => void
-  smartNameGitHubSourceContext?: TaskSourceContext | null
+  smartNameGitHubSourceContext?: ProjectSourceContext | null
   /** Advisory shown under the name field when a fork PR can't accept maintainer pushes. */
   forkPushWarning: string | null
   detectedAgentIds: Set<TuiAgent> | null
@@ -578,7 +576,6 @@ export default function NewWorkspaceComposerCard({
   onSmartGitLabItemSelect,
   onSmartBranchSelect,
   onSmartNameModeChange,
-  onSmartLinearIssueSelect,
   smartNameSelection,
   onClearSmartNameSelection,
   canReuseSelectedBranch,
@@ -950,7 +947,6 @@ export default function NewWorkspaceComposerCard({
             onGitHubItemSelect={onSmartGitHubItemSelect}
             onGitLabItemSelect={onSmartGitLabItemSelect}
             onBranchSelect={onSmartBranchSelect}
-            onLinearIssueSelect={onSmartLinearIssueSelect}
             selectedSource={smartNameSelection}
             onClearSelectedSource={onClearSmartNameSelection}
             githubSourceContext={smartNameGitHubSourceContext}
@@ -1130,7 +1126,7 @@ export default function NewWorkspaceComposerCard({
               )}
             >
               {smartNameSelection ? (
-                // Why: when a source (PR/issue/Linear/Jira/branch) is picked the
+                // Why: when a source (PR/MR/branch) is picked the
                 // smart field shows a pill instead of an editable name, so
                 // surface the auto-derived workspace name here under Advanced
                 // where it can be reviewed/overridden. When the user typed an
@@ -1155,7 +1151,7 @@ export default function NewWorkspaceComposerCard({
 
               {/* Why: only offer a manual branch name when creating from a
                   typed name or a base branch. When a tracked work item (PR/
-                  issue/MR/Linear) is the source, the branch is derived from
+                  MR) is the source, the branch is derived from
                   that item — a linked GitHub PR even re-resolves it at submit —
                   so an override typed here would be silently ignored. */}
               {selectedRepoIsGit &&

@@ -1,29 +1,9 @@
 import type { ExecutionHostId } from '../../../../shared/execution-host'
-import type { AutomationWorkspaceProvenance, IssueInfo } from '../../../../shared/types'
+import type { AutomationWorkspaceProvenance } from '../../../../shared/types'
 import type { WorktreeCardPrDisplay } from './worktree-card-pr-display'
 import type { WorktreeCardDetailsHoverControl } from './worktree-card-details-hover-state'
 
-export type WorktreeCardIssueDisplay =
-  | IssueInfo
-  | {
-      number: number
-      title: string
-      state?: IssueInfo['state']
-      url?: string
-      labels?: string[]
-    }
-
-export type WorktreeCardLinearIssueDisplay = {
-  identifier: string
-  title: string
-  url?: string
-  stateName?: string
-  labels?: string[]
-}
-
 export type WorktreeCardMetaBadgesProps = {
-  issue: WorktreeCardIssueDisplay | null
-  linearIssue: WorktreeCardLinearIssueDisplay | null
   review: WorktreeCardPrDisplay | null
   comment: string | null
   automationProvenance?: AutomationWorkspaceProvenance | null
@@ -44,10 +24,7 @@ export type WorktreeCardDetailsHoverProps = WorktreeCardMetaBadgesProps & {
   closeDelay?: number
   onRenameWorkspaceTitle?: (displayName: string) => Promise<void> | void
   onWorkspaceTitleEditingChange?: (editing: boolean) => void
-  onEditIssue?: (event: React.MouseEvent) => void
   onEditComment?: (event: React.MouseEvent) => void
-  onOpenGitHubIssueInYiru?: (event: React.MouseEvent) => void
-  onOpenLinearIssueInYiru?: (event: React.MouseEvent) => void
   onOpenReviewInYiru?: (event: React.MouseEvent) => void
   onUnlinkReview?: () => void
   onOpenAutomation?: (event: React.MouseEvent) => void

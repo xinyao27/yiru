@@ -7,13 +7,11 @@ import SidebarNav from './sidebar-nav'
 import SetupScriptPromptCard from './setup-script-prompt-card'
 import WorktreeList from './worktree-list'
 import SidebarToolbar from './sidebar-toolbar'
-import WorkspaceKanbanDrawer from './workspace-kanban-drawer'
 import type { VirtualizedScrollAnchor } from '@/hooks/use-virtualized-scroll-anchor'
 import { cn } from '@/lib/class-names'
 import { FolderPlus } from '@phosphor-icons/react'
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { useSidebarProjectDrop } from './use-sidebar-project-drop'
-import { useWorkspaceBoardPanel } from './use-workspace-board-panel'
 import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
 import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-prefers-dark'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
@@ -49,26 +47,12 @@ function Sidebar({
   const settings = useAppStore((s) => s.settings)
   const fetchAllWorktrees = useAppStore((s) => s.fetchAllWorktrees)
   const activeModal = useAppStore((s) => s.activeModal)
-  const statusBarVisible = useAppStore((s) => s.statusBarVisible)
   const systemPrefersDark = useSystemPrefersDark()
   const leftSidebarStyle = useMemo(
     () => resolveLeftSidebarStyleVariables(settings, systemPrefersDark),
     [settings, systemPrefersDark]
   ) as React.CSSProperties | undefined
   const { nativeDropTarget, dropHandlers, affordance } = useSidebarProjectDrop()
-  const {
-    workspaceBoardOpen,
-    workspaceBoardRenderedOpen,
-    workspaceBoardDragPreviewOpen,
-    workspaceBoardMenuOpen,
-    toggleWorkspaceBoard,
-    handleWorkspaceBoardOpenChange,
-    setWorkspaceBoardMenuOpen,
-    closeWorkspaceBoard,
-    previewWorkspaceBoardFromDrag,
-    solidifyWorkspaceBoardFromDrag,
-    cancelWorkspaceBoardDragPreview
-  } = useWorkspaceBoardPanel()
 
   const setLiveSidebarWidth = React.useCallback((width: number) => {
     document.documentElement.style.setProperty('--workspace-sidebar-live-width', `${width}px`)
@@ -115,12 +99,6 @@ function Sidebar({
     void fetchAllWorktrees().then(() => fetchWorktreeLineage())
   }, [onlineRuntimeEnvKey, fetchAllWorktrees, fetchWorktreeLineage])
 
-  useEffect(() => {
-    if (!sidebarOpen && workspaceBoardRenderedOpen) {
-      closeWorkspaceBoard()
-    }
-  }, [closeWorkspaceBoard, sidebarOpen, workspaceBoardRenderedOpen])
-
   const { containerRef, onResizeStart, isResizing } = useSidebarResize<HTMLDivElement>({
     isOpen: sidebarOpen,
     width: sidebarWidth,
@@ -144,25 +122,17 @@ function Sidebar({
           <>
             {/* Fixed controls */}
             <SidebarNav />
-            <SidebarHeader onWorkspaceBoardMenuOpenChange={setWorkspaceBoardMenuOpen} />
+            <SidebarHeader />
 
             <WorktreeList
               scrollOffsetRef={worktreeScrollOffsetRef}
               scrollAnchorRef={worktreeScrollAnchorRef}
-              workspaceBoardOpen={workspaceBoardOpen}
-              onWorkspaceBoardDragPreviewStart={previewWorkspaceBoardFromDrag}
-              onWorkspaceBoardDragPreviewCommit={solidifyWorkspaceBoardFromDrag}
-              onWorkspaceBoardDragPreviewCancel={cancelWorkspaceBoardDragPreview}
             />
 
             <SetupScriptPromptCard />
 
             {/* Fixed bottom toolbar */}
-            <SidebarToolbar
-              workspaceBoardOpen={workspaceBoardOpen}
-              workspaceBoardDragPreviewOpen={workspaceBoardDragPreviewOpen}
-              onWorkspaceBoardToggle={toggleWorkspaceBoard}
-            />
+            <SidebarToolbar />
           </>
         )}
 
@@ -209,17 +179,6 @@ function Sidebar({
         {activeModal === 'confirm-yiru-yaml-hooks' ? <YiruYamlTrustDialog /> : null}
         {activeModal === 'forget-ssh-workspace' ? <ForgetSshWorkspaceDialog /> : null}
       </React.Suspense>
-      {sidebarOpen ? (
-        <WorkspaceKanbanDrawer
-          leftSidebarStyle={leftSidebarStyle}
-          open={workspaceBoardRenderedOpen}
-          statusBarVisible={statusBarVisible}
-          dragPreview={workspaceBoardDragPreviewOpen}
-          preserveOpenForMenu={workspaceBoardMenuOpen}
-          onOpenChange={handleWorkspaceBoardOpenChange}
-          onMenuOpenChange={setWorkspaceBoardMenuOpen}
-        />
-      ) : null}
     </TooltipProvider>
   )
 }

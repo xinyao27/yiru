@@ -1,8 +1,8 @@
 /**
  * gh CLI auth diagnostics.
  *
- * Why: when project queries fail with "missing scope", the canned
- * remediation `gh auth refresh -s project ...` silently no-ops if the user
+ * Why: when GitHub queries fail with a missing scope, the canned
+ * remediation `gh auth refresh -s repo ...` silently no-ops if the user
  * has `GITHUB_TOKEN` (or `GH_TOKEN`) exported in their shell — gh prefers
  * env tokens over keyring credentials and refuses to refresh env-supplied
  * tokens. Users follow the instructions, see no error, retry, and stay
@@ -14,10 +14,7 @@
 import { ghExecFileAsync } from '../git/runner'
 import type { GhAuthDiagnostic, GhAuthAccount } from '../../shared/github-auth-types'
 
-// Required scopes for ProjectV2 GraphQL access in Yiru. `project` is the
-// scope that gates ProjectV2 reads/writes; the others are needed for the
-// surrounding repo/org queries we already run.
-const REQUIRED_SCOPES = ['project', 'read:org', 'repo'] as const
+const REQUIRED_SCOPES = ['repo'] as const
 
 /**
  * Parse `gh auth status` stderr/stdout. gh writes to stderr by default but

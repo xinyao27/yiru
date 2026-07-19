@@ -1,5 +1,5 @@
 import { gitExecFileAsync, glabExecFileAsync } from '../git/runner'
-import type { IssueSourcePreference } from '../../shared/types'
+import type { ForgeRemotePreference } from '../../shared/types'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { clearProjectRefInFlight, runProjectRefProbeOnce } from './project-ref-inflight'
 import {
@@ -160,7 +160,7 @@ export async function getProjectRef(
   return getProjectRefForRemote(repoPath, 'origin', knownHosts, connectionId, localGitOptions)
 }
 
-export async function getIssueProjectRef(
+export async function getPreferredProjectRef(
   repoPath: string,
   knownHosts?: readonly string[],
   connectionId?: string | null,
@@ -179,19 +179,19 @@ export async function getIssueProjectRef(
   )
 }
 
-export type ResolvedIssueSource = {
+export type ResolvedProjectSource = {
   source: ProjectRef | null
   /** True when explicit upstream is gone and resolver fell back to origin. */
   fellBack: boolean
 }
 
-export async function resolveIssueSource(
+export async function resolveProjectRemote(
   repoPath: string,
-  preference: IssueSourcePreference | undefined,
+  preference: ForgeRemotePreference | undefined,
   knownHosts?: readonly string[],
   connectionId?: string | null,
   localGitOptions: LocalGitExecOptions = {}
-): Promise<ResolvedIssueSource> {
+): Promise<ResolvedProjectSource> {
   if (preference === 'upstream') {
     const upstream = await getProjectRefForRemote(
       repoPath,
@@ -225,7 +225,7 @@ export async function resolveIssueSource(
     }
   }
   return {
-    source: await getIssueProjectRef(repoPath, knownHosts, connectionId, localGitOptions),
+    source: await getPreferredProjectRef(repoPath, knownHosts, connectionId, localGitOptions),
     fellBack: false
   }
 }

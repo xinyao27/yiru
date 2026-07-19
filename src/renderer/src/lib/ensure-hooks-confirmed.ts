@@ -2,7 +2,7 @@ import type { AppState } from '@/store/types'
 import type { YiruHooks } from '../../../shared/types'
 import { resolveHookCommandSourcePolicy } from '../../../shared/hook-command-source-policy'
 import { hashYiruHookScript, type YiruHookScriptKind } from './yiru-hook-trust'
-import { checkRuntimeHooks, readRuntimeIssueCommand } from '@/runtime/runtime-hooks-client'
+import { checkRuntimeHooks } from '@/runtime/runtime-hooks-client'
 import { getRuntimeEnvironmentIdForRepo } from './repo-runtime-owner'
 import {
   getRepoExecutionHostId,
@@ -99,53 +99,30 @@ export async function ensureHooksConfirmed(
 
     let scriptContent = ''
     try {
-      if (scriptKind === 'issueCommand') {
-        // Local overrides are user-owned; only shared yiru.yaml commands need repo trust.
-        // Why: hostId disambiguates duplicate repo ids on the local IPC path,
-        // matching the checkRuntimeHooks call below.
-        const result = await readRuntimeIssueCommand(
-          settingsForHookRepoOwner(state, repoId, hostId),
-          repoId,
-          hostId
-        )
-        if (result.source === 'local') {
-          return 'run'
-        }
-        if (result.status === 'error') {
-          return 'skip'
-        }
-        if (result.source !== 'shared') {
-          return 'run'
-        }
-        scriptContent = (result.sharedContent ?? '').trim()
-      } else {
-        const repo = findHookRepo(state, repoId, hostId)
-        const localScript = repo?.hookSettings?.scripts?.[scriptKind]?.trim()
-        const sourcePolicy = resolveHookCommandSourcePolicy(
-          repo?.hookSettings?.commandSourcePolicy,
-          {
-            hasLocalScript: Boolean(localScript)
-          }
-        )
-        if (sourcePolicy === 'local-only') {
-          return 'run'
-        }
-        const result = await checkRuntimeHooks(
-          settingsForHookRepoOwner(state, repoId, hostId),
-          repoId,
-          hostId
-        )
-        if (result.status === 'error') {
-          return 'skip'
-        }
-        const yamlHooks = (result.hooks as YiruHooks | null) ?? null
-        scriptContent =
-          scriptKind === 'setup'
-            ? getSetupTrustContent(yamlHooks)
-            : scriptKind === 'vmRecipe'
-              ? getVmRecipeTrustContent(yamlHooks)
-              : (yamlHooks?.scripts?.[scriptKind] ?? '').trim()
+      const repo = findHookRepo(state, repoId, hostId)
+      const localScript =
+        scriptKind === 'vmRecipe' ? undefined : repo?.hookSettings?.scripts?.[scriptKind]?.trim()
+      const sourcePolicy = resolveHookCommandSourcePolicy(repo?.hookSettings?.commandSourcePolicy, {
+        hasLocalScript: Boolean(localScript)
+      })
+      if (sourcePolicy === 'local-only') {
+        return 'run'
       }
+      const result = await checkRuntimeHooks(
+        settingsForHookRepoOwner(state, repoId, hostId),
+        repoId,
+        hostId
+      )
+      if (result.status === 'error') {
+        return 'skip'
+      }
+      const yamlHooks = (result.hooks as YiruHooks | null) ?? null
+      scriptContent =
+        scriptKind === 'setup'
+          ? getSetupTrustContent(yamlHooks)
+          : scriptKind === 'vmRecipe'
+            ? getVmRecipeTrustContent(yamlHooks)
+            : (yamlHooks?.scripts.archive ?? '').trim()
     } catch {
       // Fail closed: if we cannot inspect the script, we cannot trust it.
       return 'skip'

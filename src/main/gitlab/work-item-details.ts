@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- Why: aggregated detail-fetch for GitLabItemDialog spans issues, MRs, comments, pipelines, reviewers, approvals, and changed files; splitting would obscure the shared fetch context. */
+/* eslint-disable max-lines -- Why: aggregated MR detail-fetch spans comments, pipelines, reviewers, approvals, and changed files; splitting would obscure the shared fetch context. */
 // Why: aggregated detail-fetch for GitLabItemDialog. Parallel of
 // src/main/github/work-item-details.ts but scoped to v1 surface —
 // description body, flattened discussion notes, MR pipeline jobs/reviewers.
@@ -12,7 +12,7 @@ import type {
   GitLabWorkItemDetails,
   MRComment
 } from '../../shared/types'
-import { mapIssueToWorkItem, mapMRToWorkItem } from './mappers'
+import { mapMRToWorkItem } from './mappers'
 import {
   acquire,
   getGlabKnownHosts,
@@ -20,11 +20,11 @@ import {
   glabRepoExecOptions,
   glabExecFileAsync,
   release,
-  resolveIssueSource,
+  resolveProjectRemote,
   type LocalGitExecOptions,
   type ProjectRef
 } from './gl-utils'
-import type { IssueSourcePreference } from '../../shared/types'
+import type { ForgeRemotePreference } from '../../shared/types'
 
 function encodedProject(projectPath: string): string {
   return encodeURIComponent(projectPath)
@@ -85,19 +85,17 @@ function flattenDiscussions(discussions: GitLabRawDiscussion[]): MRComment[] {
 async function fetchDiscussions(
   repoPath: string,
   projectRef: ProjectRef,
-  type: 'issue' | 'mr',
   iid: number,
   connectionId?: string | null,
   localGitOptions: LocalGitExecOptions = {}
 ): Promise<GitLabRawDiscussion[]> {
-  const resource = type === 'mr' ? 'merge_requests' : 'issues'
   const { stdout } = await glabExecFileAsync(
     [
       'api',
       ...glabHostnameArgs(projectRef, connectionId),
       // Why: detail drawers need a bounded recent conversation snapshot.
       // Walking every historic discussion can retain and render huge note sets.
-      `projects/${encodedProject(projectRef.path)}/${resource}/${iid}/discussions?per_page=100`
+      `projects/${encodedProject(projectRef.path)}/merge_requests/${iid}/discussions?per_page=100`
     ],
     glabRepoExecOptions(repoPath, connectionId, localGitOptions)
   )
@@ -238,11 +236,6 @@ async function fetchMRFiles(
 
 // ── Top-level aggregator ───────────────────────────────────────────
 
-type GitLabRawIssue = Parameters<typeof mapIssueToWorkItem>[0] & {
-  description?: string | null
-  assignees?: { username?: string | null }[] | null
-}
-
 type GitLabRawMR = Parameters<typeof mapMRToWorkItem>[0] & {
   description?: string | null
   sha?: string
@@ -336,9 +329,8 @@ async function fetchMRApprovalState(
 }
 
 /**
- * Fetch full details for a GitLab MR or issue: the work item itself,
- * description body, discussion notes flattened to MRComment[], and (for
- * MRs only) per-job pipeline status.
+ * Fetch full details for a GitLab merge request, including discussion notes
+ * and per-job pipeline status.
  *
  * Returns null when the project ref can't be resolved or the item
  * can't be loaded — callers render a "not found" / error state.
@@ -346,8 +338,8 @@ async function fetchMRApprovalState(
 export async function getWorkItemDetails(
   repoPath: string,
   iid: number,
-  type: 'issue' | 'mr',
-  preference?: IssueSourcePreference,
+  _type: 'mr',
+  preference?: ForgeRemotePreference,
   connectionId?: string | null,
   projectRefOverride?: ProjectRef | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -358,7 +350,7 @@ export async function getWorkItemDetails(
   const projectRef =
     projectRefOverride ??
     (
-      await resolveIssueSource(
+      await resolveProjectRemote(
         repoPath,
         preference,
         await getGlabKnownHosts(connectionId),
@@ -371,53 +363,11 @@ export async function getWorkItemDetails(
   }
   await acquire()
   try {
-    if (type === 'issue') {
-      return await fetchIssueDetails(repoPath, projectRef, iid, connectionId, localGitOptions)
-    }
     return await fetchMRDetails(repoPath, projectRef, iid, connectionId, localGitOptions)
   } catch {
     return null
   } finally {
     release()
-  }
-}
-
-async function fetchIssueDetails(
-  repoPath: string,
-  projectRef: ProjectRef,
-  iid: number,
-  connectionId?: string | null,
-  localGitOptions: LocalGitExecOptions = {}
-): Promise<GitLabWorkItemDetails | null> {
-  // Why: fan out the two reads. Issues don't have a pipeline so this
-  // pair covers everything the dialog renders.
-  const [issueRes, discussions] = await Promise.all([
-    glabExecFileAsync(
-      [
-        'api',
-        ...glabHostnameArgs(projectRef, connectionId),
-        `projects/${encodedProject(projectRef.path)}/issues/${iid}`
-      ],
-      glabRepoExecOptions(repoPath, connectionId, localGitOptions)
-    ),
-    fetchDiscussions(repoPath, projectRef, 'issue', iid, connectionId, localGitOptions)
-  ])
-  const issueRaw = JSON.parse(issueRes.stdout) as GitLabRawIssue
-  const item: Omit<GitLabWorkItem, 'repoId'> = (() => {
-    const full = mapIssueToWorkItem(issueRaw, projectRef.path, projectRef)
-    // Why: omit repoId from the returned shape — the renderer stamps
-    // it from the dialog's caller (TaskPage / picker) so the main
-    // process doesn't need to know Yiru's Repo.id.
-    const { repoId: _repoId, ...rest } = full
-    return rest
-  })()
-  return {
-    item,
-    body: issueRaw.description ?? '',
-    comments: flattenDiscussions(discussions),
-    assignees: (issueRaw.assignees ?? [])
-      .map((a) => a?.username)
-      .filter((u): u is string => typeof u === 'string')
   }
 }
 
@@ -440,7 +390,7 @@ async function fetchMRDetails(
       ],
       glabRepoExecOptions(repoPath, connectionId, localGitOptions)
     ),
-    fetchDiscussions(repoPath, projectRef, 'mr', iid, connectionId, localGitOptions)
+    fetchDiscussions(repoPath, projectRef, iid, connectionId, localGitOptions)
   ])
   const mrRaw = JSON.parse(mrRes.stdout) as GitLabRawMR
   const item: Omit<GitLabWorkItem, 'repoId'> = (() => {

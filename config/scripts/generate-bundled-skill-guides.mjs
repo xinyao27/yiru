@@ -9,11 +9,9 @@ const REPO_ROOT = path.resolve(SCRIPT_DIR, '..', '..')
 
 const CANONICAL_GUIDE_NAMES = [
   'computer-use',
-  'linear-tickets',
   'yiru-cli',
   'yiru-emulator',
   'yiru-emulator-android',
-  'yiru-linear',
   'yiru-per-workspace-env',
   'orchestration'
 ]
@@ -22,11 +20,9 @@ const CANONICAL_GUIDE_NAMES = [
 // a compatibility ledger: add entries for renames, but never remove them.
 const GUIDE_ALIASES = {
   'computer-use': [],
-  'linear-tickets': [],
   'yiru-cli': [],
   'yiru-emulator': [],
   'yiru-emulator-android': [],
-  'yiru-linear': [],
   'yiru-per-workspace-env': [],
   orchestration: []
 }

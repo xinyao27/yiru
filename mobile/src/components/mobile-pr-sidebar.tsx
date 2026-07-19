@@ -326,7 +326,6 @@ function PrSidebarSections({
       <PRCommentsSection
         details={data.details}
         prState={data.pr.state}
-        prRepo={data.pr.prRepo ?? null}
         actions={commentActions}
         botAuthorOverrides={botAuthorOverrides}
       />

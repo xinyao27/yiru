@@ -30,7 +30,7 @@ const AUTOMATION_LOGIN_PATTERNS = [
 ]
 // Why: some AI/code-review services use regular GitHub user accounts rather
 // than GitHub Apps, so GitHub metadata can report them as users. Keep this
-// central so the Tasks dialog and PR sidebar classify comments identically.
+// central so review surfaces classify comments identically.
 const KNOWN_AUTOMATION_LOGIN_SUBSTRINGS = [
   'chatgpt-codex-connector',
   'codex-connector',

@@ -28,10 +28,10 @@ export function slugifyForWorkspaceName(input: string): string {
   return (
     foldWorkspaceNameWhitespaceToHyphen(normalized)
       .replace(/[^a-z0-9._-]+/g, '-')
-      .replace(/-+/g, '-')
       // Why: git check-ref-format rejects any ref containing `..`, so previews
       // must match the main-process sanitizer before workspace creation.
-      .replace(/\.{2,}/g, '.')
+      .replace(/\.{2,}/g, '-')
+      .replace(/-+/g, '-')
       .replace(/^[.-]+|[.-]+$/g, '')
       .slice(0, 48)
       .replace(/[-._]+$/g, '')
@@ -44,12 +44,9 @@ export function getLinkedWorkItemSuggestedName(item: { title: string }): string 
 }
 
 export type WorkspaceIntentWorkItem = {
-  type: 'issue' | 'pr' | 'mr'
+  type: 'pr' | 'mr'
   number: number
   title: string
-  provider?: 'github' | 'gitlab' | 'linear' | 'jira'
-  linearIdentifier?: string
-  jiraIdentifier?: string
 }
 
 export type WorkspaceIntentName = {
@@ -60,15 +57,15 @@ export type WorkspaceIntentName = {
 function getLinkedWorkItemTitleSubject(item: { title: string }): string {
   return item.title
     .trim()
-    .replace(/^(?:issue|pr|pull request|mr|merge request)\s*[#!]?\d+\s*[:-]\s*/i, '')
+    .replace(/^(?:pr|pull request|mr|merge request)\s*[#!]?\d+\s*[:-]\s*/i, '')
     .replace(/^#\d+\s*[:-]\s*/, '')
     .replace(/\([#!]?\d+\)/g, '')
     .replace(/\b#\d+\b/g, '')
     .trim()
 }
 
-// Why: generated workspace seeds are hyphenated; `issue-123-fix-title`
-// must not be reinterpreted as the user explicitly asking to fix a new issue.
+// Why: action words embedded in a generated branch must not be
+// reinterpreted as a fresh user instruction.
 const ACTION_LABELS: [RegExp, string][] = [
   [/(?:^|[^a-z0-9_-])(?:fix(?:e[sd])?|resolve|repair)(?:$|[^a-z0-9_-])/i, 'Fix'],
   [/(?:^|[^a-z0-9_-])(?:debug|diagnose)(?:$|[^a-z0-9_-])/i, 'Debug'],
@@ -136,65 +133,34 @@ function compactWords(input: string, maxWords = 4): string {
   return words.map(titleCaseWord).join(' ')
 }
 
-function escapeRegExp(input: string): string {
-  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
 function compactWorkItemTitle(title: string, item: WorkspaceIntentWorkItem): string {
-  const identifier = item.linearIdentifier ?? item.jiraIdentifier
   let withoutPrefix = title
     .trim()
-    .replace(/^(?:issue|pr|pull request|mr|merge request)\s*[#!]?\d+\s*[:-]\s*/i, '')
+    .replace(/^(?:pr|pull request|mr|merge request)\s*[#!]?\d+\s*[:-]\s*/i, '')
     .replace(/\([#!]?\d+\)/g, '')
     .replace(/^[^:]{1,32}:\s*/, '')
     .trim()
   if (item.number > 0) {
     withoutPrefix = withoutPrefix.replace(new RegExp(`\\b[#!]?${item.number}\\b`, 'g'), '').trim()
   }
-  if (identifier) {
-    withoutPrefix = withoutPrefix
-      .replace(new RegExp(`^${escapeRegExp(identifier)}\\s*[:-]?\\s*`, 'i'), '')
-      .trim()
-  }
   return compactWords(withoutPrefix || title, 3)
 }
 
 function workItemIdentity(item: WorkspaceIntentWorkItem): string {
-  if (item.linearIdentifier) {
-    return item.linearIdentifier.toUpperCase()
-  }
-  if (item.jiraIdentifier) {
-    return item.jiraIdentifier.toUpperCase()
-  }
-  if (item.type === 'pr') {
-    return `PR ${item.number}`
-  }
-  if (item.type === 'mr') {
-    return `MR ${item.number}`
-  }
-  return `Issue ${item.number}`
+  return `${item.type === 'pr' ? 'PR' : 'MR'} ${item.number}`
 }
 
 export function getLinkedWorkItemWorkspaceName(
   item: WorkspaceIntentWorkItem
 ): WorkspaceIntentName | null {
-  const identifier = item.linearIdentifier ?? item.jiraIdentifier
-  let subject = getLinkedWorkItemTitleSubject(item) || item.title.trim()
-  if (identifier) {
-    subject = subject
-      .replace(new RegExp(`^${escapeRegExp(identifier)}\\s*[:-]?\\s*`, 'i'), '')
-      .trim()
-  }
-  const displayName = [identifier, subject].filter(Boolean).join(' ') || workItemIdentity(item)
+  const subject = getLinkedWorkItemTitleSubject(item) || item.title.trim()
+  const displayName = subject || workItemIdentity(item)
   const seedName = slugifyForWorkspaceName(displayName)
-  if (!seedName) {
-    return null
-  }
-  return { displayName, seedName }
+  return seedName ? { displayName, seedName } : null
 }
 
-function defaultActionForWorkItem(item: WorkspaceIntentWorkItem): string | null {
-  return item.type === 'pr' || item.type === 'mr' ? 'Review' : null
+function defaultActionForWorkItem(): string {
+  return 'Review'
 }
 
 /**
@@ -212,7 +178,7 @@ export function getWorkspaceIntentName(args: {
   let displayName = ''
 
   if (item) {
-    const action = detectIntentAction(sourceText) ?? defaultActionForWorkItem(item)
+    const action = detectIntentAction(sourceText) ?? defaultActionForWorkItem()
     const identity = workItemIdentity(item)
     if (action) {
       // Identifier-first so the sidebar leads with the searchable token
@@ -240,21 +206,6 @@ export function getWorkspaceIntentName(args: {
     return null
   }
   return { displayName, seedName }
-}
-
-export function getLinearIssueWorkspaceName(issue: { identifier: string; title: string }): string {
-  const key = slugifyForWorkspaceName(issue.identifier)
-  const titleSlug = getLinkedWorkItemSuggestedName(issue)
-  if (!key) {
-    return titleSlug
-  }
-  let dedupedTitleSlug = titleSlug
-  if (titleSlug === key) {
-    dedupedTitleSlug = ''
-  } else if (titleSlug.startsWith(`${key}-`)) {
-    dedupedTitleSlug = titleSlug.slice(key.length + 1)
-  }
-  return slugifyForWorkspaceName([key, dedupedTitleSlug].filter(Boolean).join('-'))
 }
 
 export function resolveWorkspaceCreateName(args: {

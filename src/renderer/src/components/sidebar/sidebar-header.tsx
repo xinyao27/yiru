@@ -8,13 +8,7 @@ import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { openWorkspaceCreationComposerWithTourHandoff } from '../contextual-tours/workspace-creation-tour-handoff'
 import { translate } from '@/i18n/i18n'
 
-type SidebarHeaderProps = {
-  onWorkspaceBoardMenuOpenChange: (open: boolean) => void
-}
-
-const SidebarHeader = React.memo(function SidebarHeader({
-  onWorkspaceBoardMenuOpenChange
-}: SidebarHeaderProps) {
+const SidebarHeader = React.memo(function SidebarHeader() {
   const openModal = useAppStore((s) => s.openModal)
   const newWorktreeShortcutLabel = useShortcutLabel('workspace.create')
   const groupBy = useAppStore((s) => s.groupBy)
@@ -32,10 +26,7 @@ const SidebarHeader = React.memo(function SidebarHeader({
         </span>
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
-        <SidebarWorkspaceOptionsMenu
-          preserveWorkspaceBoardOpen
-          onMenuOpenChange={onWorkspaceBoardMenuOpenChange}
-        />
+        <SidebarWorkspaceOptionsMenu />
 
         <Tooltip>
           <TooltipTrigger

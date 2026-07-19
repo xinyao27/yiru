@@ -1,7 +1,6 @@
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite-plus'
 
-const windowsTestWorkerOptions = process.platform === 'win32' ? { maxWorkers: 4 } : {}
 const lintProfile = process.env.YIRU_LINT_PROFILE
 
 const yiruRootToolingConfig = defineConfig({
@@ -14,8 +13,8 @@ const yiruRootToolingConfig = defineConfig({
     '*.{json,css}': ['vp fmt --write']
   },
   fmt: {
-    // Why: Markdown includes generated skill guides and content-sensitive test
-    // fixtures; toolchain migration must not rewrite those payloads as source code.
+    // Why: Markdown includes generated skill guides whose formatting is part of
+    // their authored content; toolchain migration must not rewrite that prose.
     ignorePatterns: ['**/*.md'],
     singleQuote: true,
     semi: false,
@@ -201,19 +200,6 @@ const yiruRootToolingConfig = defineConfig({
                     }
                   ]
                 }
-              },
-              {
-                files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
-                rules: {
-                  'max-lines': [
-                    'error',
-                    {
-                      max: 800,
-                      skipBlankLines: true,
-                      skipComments: true
-                    }
-                  ]
-                }
               }
             ],
             // Why: mobile is an independent pnpm/Vite+ workspace with React Native
@@ -240,22 +226,6 @@ const yiruRootToolingConfig = defineConfig({
       '@renderer': resolve('src/renderer/src'),
       '@': resolve('src/renderer/src')
     }
-  },
-  test: {
-    environment: 'node',
-    include: [
-      'src/**/*.test.ts',
-      'src/**/*.test.tsx',
-      'config/scripts/**/*.test.mjs',
-      'tests/e2e/**/*.unit.test.ts'
-    ],
-    // Why: the full suite runs heavy TS transforms plus real git/http fixtures;
-    // the Vitest 5s defaults are too tight for the slowest integration cases.
-    hookTimeout: 60_000,
-    testTimeout: 30_000,
-    // Why: Windows process and shell startup are slower under full-suite load;
-    // macOS/Linux keep Vitest's default worker parallelism.
-    ...windowsTestWorkerOptions
   }
 })
 

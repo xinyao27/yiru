@@ -105,7 +105,7 @@ export type RepoUpdate = Partial<
     | 'worktreeBasePath'
     | 'kind'
     | 'symlinkPaths'
-    | 'issueSourcePreference'
+    | 'forgeRemotePreference'
     | 'forkSyncMode'
     | 'externalWorktreeVisibility'
     | 'externalWorktreeVisibilityPromptDismissedAt'
@@ -1439,7 +1439,7 @@ export type RepoSlice = {
       name?: string
       folderPath?: string | null
       connectionId?: string | null
-      linkedTask?: FolderWorkspace['linkedTask']
+      linkedReview?: FolderWorkspace['linkedReview']
       createdWithAgent?: FolderWorkspace['createdWithAgent']
       pendingFirstAgentMessageRename?: boolean
     },
@@ -1464,7 +1464,7 @@ export type RepoSlice = {
         FolderWorkspace,
         | 'name'
         | 'folderPath'
-        | 'linkedTask'
+        | 'linkedReview'
         | 'comment'
         | 'isArchived'
         | 'isUnread'

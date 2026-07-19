@@ -7,13 +7,12 @@ Describe the user-visible change.
 - Add screenshots or a screen recording for any new or changed UI behavior.
 - If there is no visual change, say `No visual change`.
 
-## Testing
+## Validation
 
 - [ ] `pnpm lint`
 - [ ] `pnpm typecheck`
-- [ ] `pnpm test`
 - [ ] `pnpm build`
-- [ ] Added or updated high-quality tests that would catch regressions, or explained why tests were not needed
+- [ ] Manually verified affected behavior on relevant platforms
 
 ## AI Review Report
 

@@ -6,46 +6,20 @@ import {
 import { sendFollowupPromptWhenAgentReady } from '@/lib/agent-followup-delivery'
 import { showAutomationPromptNotSentToast } from '@/lib/agent-background-session-timeout-toast'
 import type { AgentStartupPlan } from '@/lib/tui-agent-startup'
-import type { LinkedWorkItemContext } from '@/lib/linked-work-item-context'
 import {
   beginAgentStartupDeliveryAttempt,
   getAgentStartupTabPtyId,
   queuePendingAgentStartupDelivery,
   resolveAgentStartupTabId
 } from '@/lib/agent-startup-delayed-delivery'
-import type { FolderWorkspaceLinkedTask, YiruHooks, TaskViewPresetId } from '../../../shared/types'
+import type { FolderWorkspaceLinkedReview, YiruHooks } from '../../../shared/types'
 import { resolveHookCommandSourcePolicy } from '../../../shared/hook-command-source-policy'
 import { slugifyForWorkspaceName } from '../../../shared/workspace-name'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 export { getLinkedWorkItemSuggestedName } from '../../../shared/workspace-name'
 export { getLinkedWorkItemWorkspaceName } from '../../../shared/workspace-name'
 export { getWorkspaceIntentName } from '../../../shared/workspace-name'
-
-/**
- * Why: the TaskPage's preset buttons and the openTaskPage prefetcher both need
- * to compute the same GitHub query string for a given preset id. Keep the
- * mapping here so the prefetch warms exactly the cache key the page will look
- * up on mount.
- */
 export { PER_REPO_FETCH_LIMIT, CROSS_REPO_DISPLAY_LIMIT } from '../../../shared/work-items'
-
-export function getTaskPresetQuery(presetId: TaskViewPresetId | null): string {
-  switch (presetId) {
-    case 'all':
-    case 'issues':
-      return 'is:issue is:open'
-    case 'my-issues':
-      return 'assignee:@me is:issue is:open'
-    case 'prs':
-      return 'is:pr is:open'
-    case 'my-prs':
-      return 'author:@me is:pr is:open'
-    case 'review':
-      return 'review-requested:@me is:pr is:open'
-    case null:
-      return 'is:issue is:open'
-  }
-}
 
 export const CLIENT_PLATFORM: NodeJS.Platform = navigator.userAgent.includes('Windows')
   ? 'win32'
@@ -53,21 +27,11 @@ export const CLIENT_PLATFORM: NodeJS.Platform = navigator.userAgent.includes('Wi
     ? 'darwin'
     : 'linux'
 
-export { getLinkedWorkItemProvider, isGitLabIssueUrl } from './linked-work-item-provider'
+export { getLinkedWorkItemProvider } from './linked-work-item-provider'
 
-export type LinkedWorkItemSummary = Omit<FolderWorkspaceLinkedTask, 'provider'> & {
-  provider?: FolderWorkspaceLinkedTask['provider']
-  linearWorkspaceId?: string
-  linearOrganizationUrlKey?: string
-  linearBranchName?: string
-  linkedContext?: LinkedWorkItemContext
+export type LinkedWorkItemSummary = Omit<FolderWorkspaceLinkedReview, 'provider'> & {
+  provider?: FolderWorkspaceLinkedReview['provider']
 }
-
-// Why: when a repo has no `yiru.yaml` issueCommand and no per-user override,
-// we still want the composer to send a useful default prompt whenever the user
-// attaches a linked work item without typing anything else. "Complete <url>"
-// is the minimum viable instruction that always produces a coherent agent task.
-export const DEFAULT_ISSUE_COMMAND_TEMPLATE = 'Complete {{artifact_url}}'
 
 export type SetupConfig = {
   source: 'yaml' | 'local' | 'both'
@@ -102,26 +66,6 @@ function getSetupConfigKind(
   return 'setup'
 }
 
-/**
- * Substitute the issue-command template variables. Prefers `{{artifact_url}}`
- * and keeps `{{issue}}` working silently for repos that have not migrated
- * their `yiru.yaml` / `.yiru/issue-command` yet.
- */
-export function renderIssueCommandTemplate(
-  template: string,
-  vars: { issueNumber: number | null; artifactUrl: string | null }
-): string {
-  const { issueNumber, artifactUrl } = vars
-  let rendered = template
-  if (artifactUrl !== null) {
-    rendered = rendered.replace(/\{\{artifact_url\}\}/g, artifactUrl)
-  }
-  if (issueNumber !== null) {
-    rendered = rendered.replace(/\{\{issue\}\}/g, String(issueNumber))
-  }
-  return rendered
-}
-
 export function buildAgentPromptWithContext(
   prompt: string,
   attachments: string[],
@@ -129,34 +73,21 @@ export function buildAgentPromptWithContext(
   linkedContextBlocks: string[] = []
 ): string {
   const trimmedPrompt = prompt.trim()
-  if (attachments.length === 0 && linkedUrls.length === 0 && linkedContextBlocks.length === 0) {
-    return trimmedPrompt
-  }
-
   const sections: string[] = []
   if (attachments.length > 0) {
-    const attachmentBlock = attachments.map((pathValue) => `- ${pathValue}`).join('\n')
-    sections.push(`Attachments:\n${attachmentBlock}`)
+    sections.push(`Attachments:\n${attachments.map((pathValue) => `- ${pathValue}`).join('\n')}`)
   }
   if (linkedUrls.length > 0) {
-    const linkBlock = linkedUrls.map((url) => `- ${url}`).join('\n')
-    sections.push(`Linked work items:\n${linkBlock}`)
+    sections.push(`Linked reviews:\n${linkedUrls.map((url) => `- ${url}`).join('\n')}`)
   }
   if (linkedContextBlocks.length > 0) {
     sections.push(linkedContextBlocks.join('\n\n'))
   }
-  // Why: the new-workspace flow launches each agent with a single plain-text
-  // startup prompt. Appending attachments and bounded linked context keeps
-  // extra data visible to Claude/Codex/OpenCode without cluttering the textarea.
-  if (!trimmedPrompt) {
-    return sections.join('\n\n')
-  }
-  return `${trimmedPrompt}\n\n${sections.join('\n\n')}`
+  return [trimmedPrompt, ...sections].filter(Boolean).join('\n\n')
 }
 
 export function getAttachmentLabel(pathValue: string): string {
-  const segments = pathValue.split(/[/\\]/)
-  return segments.at(-1) || pathValue
+  return pathValue.split(/[/\\]/).at(-1) || pathValue
 }
 
 export function getSetupConfig(
@@ -203,7 +134,6 @@ export function getSetupConfig(
 export function getWorkspaceSeedName(args: {
   explicitName: string
   prompt: string
-  linkedIssueNumber: number | null
   linkedPR: number | null
   /** Why: when none of the other seed sources produce a name, the composer
    *  supplies a repo-scoped unique marine-creature name so blank submissions
@@ -211,15 +141,12 @@ export function getWorkspaceSeedName(args: {
    *  "workspace" literal that git would append numeric suffixes to. */
   fallbackName?: string
 }): string {
-  const { explicitName, prompt, linkedIssueNumber, linkedPR, fallbackName } = args
+  const { explicitName, prompt, linkedPR, fallbackName } = args
   if (explicitName.trim()) {
     return explicitName.trim()
   }
   if (linkedPR !== null) {
     return `pr-${linkedPR}`
-  }
-  if (linkedIssueNumber !== null) {
-    return `issue-${linkedIssueNumber}`
   }
   // Why: the prompt is free-form user text — it can easily exceed a sane
   // branch-name length or be composed entirely of characters that

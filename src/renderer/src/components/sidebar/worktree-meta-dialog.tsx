@@ -10,16 +10,12 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   buildWorktreeMetaUpdates,
   parseGitHubWorkItemNumberForMetaField,
   type WorktreeMetaSavedPayload
 } from './worktree-meta-updates'
-import { useWorktreeIssueLink } from './use-worktree-issue-link'
 import { getScreenSubmitShortcutLabel, isScreenSubmitShortcut } from '@/lib/screen-submit-shortcut'
-import { ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
-import { LoadingIndicator } from '@/components/loading-indicator'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 
@@ -41,8 +37,6 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
   const worktreeId = typeof modalData.worktreeId === 'string' ? modalData.worktreeId : ''
   const currentDisplayName =
     typeof modalData.currentDisplayName === 'string' ? modalData.currentDisplayName : ''
-  const currentIssue =
-    typeof modalData.currentIssue === 'number' ? String(modalData.currentIssue) : ''
   const currentPR = typeof modalData.currentPR === 'number' ? String(modalData.currentPR) : ''
   const currentComment =
     typeof modalData.currentComment === 'string' ? modalData.currentComment : ''
@@ -53,16 +47,9 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
       : null
 
   const [displayNameInput, setDisplayNameInput] = useState('')
-  const [issueInput, setIssueInput] = useState('')
   const [prInput, setPrInput] = useState('')
   const [commentInput, setCommentInput] = useState('')
   const [saving, setSaving] = useState(false)
-  const { canOpenIssue, openingIssue, handleOpenIssue, resetOpeningIssue } = useWorktreeIssueLink({
-    worktreeId,
-    issueInput
-  })
-
-  const issueInputRef = useRef<HTMLInputElement>(null)
   const prInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const prevIsOpenRef = useRef(false)
@@ -70,10 +57,8 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
   const mountedRef = useMountedRef()
   if (isOpen && !prevIsOpenRef.current) {
     setDisplayNameInput(currentDisplayName)
-    setIssueInput(currentIssue)
     setPrInput(currentPR)
     setCommentInput(currentComment)
-    resetOpeningIssue()
   }
   prevIsOpenRef.current = isOpen
 
@@ -97,14 +82,9 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
     if (!worktreeId) {
       return false
     }
-    const trimmedIssue = issueInput.trim()
     const trimmedPR = prInput.trim()
-    const issueValid =
-      trimmedIssue === '' || parseGitHubWorkItemNumberForMetaField(trimmedIssue, 'issue') !== null
-    const prValid =
-      trimmedPR === '' || parseGitHubWorkItemNumberForMetaField(trimmedPR, 'pr') !== null
-    return issueValid && prValid
-  }, [worktreeId, issueInput, prInput])
+    return trimmedPR === '' || parseGitHubWorkItemNumberForMetaField(trimmedPR, 'pr') !== null
+  }, [worktreeId, prInput])
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
@@ -124,7 +104,6 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
       const updates = buildWorktreeMetaUpdates({
         displayNameInput,
         currentDisplayName,
-        issueInput,
         prInput,
         commentInput
       })
@@ -148,7 +127,6 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
     canSave,
     displayNameInput,
     currentDisplayName,
-    issueInput,
     prInput,
     commentInput,
     updateWorktreeMeta,
@@ -169,7 +147,7 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
     [handleSave]
   )
 
-  const handleIssueKeyDown = useCallback(
+  const handleInputKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter') {
         e.preventDefault()
@@ -187,9 +165,6 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
           if (focusField === 'displayName') {
             return displayNameInputRef.current
           }
-          if (focusField === 'issue') {
-            return issueInputRef.current
-          }
           if (focusField === 'pr') {
             return prInputRef.current
           }
@@ -206,7 +181,7 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
           <DialogDescription className="text-xs">
             {translate(
               'auto.components.sidebar.WorktreeMetaDialog.65770ad0f0',
-              'Edit GitHub links and notes for this workspace.'
+              'Edit the GitHub pull request link and notes for this workspace.'
             )}
           </DialogDescription>
         </DialogHeader>
@@ -220,7 +195,7 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
               ref={displayNameInputRef}
               value={displayNameInput}
               onChange={(e) => setDisplayNameInput(e.target.value)}
-              onKeyDown={handleIssueKeyDown}
+              onKeyDown={handleInputKeyDown}
               placeholder={translate(
                 'auto.components.sidebar.WorktreeMetaDialog.7f21e0464f',
                 'Custom display name...'
@@ -237,68 +212,13 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
 
           <div className="space-y-1">
             <label className="text-[11px] font-medium text-muted-foreground">
-              {translate('auto.components.sidebar.WorktreeMetaDialog.645fa4a0fd', 'GH Issue')}
-            </label>
-            <div className="relative">
-              <Input
-                ref={issueInputRef}
-                value={issueInput}
-                onChange={(e) => setIssueInput(e.target.value)}
-                onKeyDown={handleIssueKeyDown}
-                placeholder={translate(
-                  'auto.components.sidebar.WorktreeMetaDialog.741279e7b7',
-                  'Issue # or GitHub URL'
-                )}
-                className="h-8 pr-9 text-xs"
-              />
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      aria-label={translate(
-                        'auto.components.sidebar.WorktreeMetaDialog.029ea5ec57',
-                        'Open GitHub issue'
-                      )}
-                      disabled={!canOpenIssue || openingIssue}
-                      onClick={handleOpenIssue}
-                      className="absolute right-1 top-1 text-muted-foreground"
-                    >
-                      {openingIssue ? (
-                        <LoadingIndicator className="size-3" />
-                      ) : (
-                        <ExternalLink className="size-3" />
-                      )}
-                    </Button>
-                  }
-                />
-                <TooltipContent side="top" sideOffset={4}>
-                  {translate(
-                    'auto.components.sidebar.WorktreeMetaDialog.029ea5ec57',
-                    'Open GitHub issue'
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <p className="text-[10px] text-muted-foreground">
-              {translate(
-                'auto.components.sidebar.WorktreeMetaDialog.7c454be4c5',
-                'Paste an issue URL, or enter a number. Leave blank to remove the link.'
-              )}
-            </p>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] font-medium text-muted-foreground">
               {translate('auto.components.sidebar.WorktreeMetaDialog.1b91db7e14', 'GH PR')}
             </label>
             <Input
               ref={prInputRef}
               value={prInput}
               onChange={(e) => setPrInput(e.target.value)}
-              onKeyDown={handleIssueKeyDown}
+              onKeyDown={handleInputKeyDown}
               placeholder={translate(
                 'auto.components.sidebar.WorktreeMetaDialog.077a4f7b5c',
                 'PR # or GitHub URL'

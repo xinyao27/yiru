@@ -1,20 +1,15 @@
-import { parseGitHubIssueOrPRLink } from './github-links'
+import { parseGitHubPullRequestLink } from './github-links'
 
 export type GitHubWorkItemIdentity = {
-  type: 'issue' | 'pr'
+  type: 'pr'
   number: number
 }
 
 export function resolveGitHubWorkItemIdentity(item: {
-  type: 'issue' | 'pr'
+  type: 'pr'
   number: number
   url?: string | null
 }): GitHubWorkItemIdentity {
-  const link = item.url ? parseGitHubIssueOrPRLink(item.url) : null
-  if (link) {
-    // Why: stale cached work-item payloads can disagree with a pasted URL. The
-    // URL path is the user-visible intent, so it decides issue-vs-PR launches.
-    return { type: link.type, number: link.number }
-  }
-  return { type: item.type, number: item.number }
+  const link = item.url ? parseGitHubPullRequestLink(item.url) : null
+  return { type: 'pr', number: link?.number ?? item.number }
 }

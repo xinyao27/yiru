@@ -5,7 +5,6 @@ export const FEATURE_INTERACTION_CATEGORIES = [
   'agent',
   'browser',
   'launcher',
-  'task_management',
   'notes',
   'review',
   'setup',
@@ -20,9 +19,7 @@ export const FEATURE_INTERACTION_CATEGORIES = [
 export type FeatureInteractionCategory = (typeof FEATURE_INTERACTION_CATEGORIES)[number]
 
 export const FEATURE_INTERACTION_CATEGORY_BY_ID = {
-  'workspace-board': 'workspace',
   'workspace-agent-sessions': 'workspace',
-  'workspace-board-actions': 'workspace',
   'cmd-j': 'launcher',
   'cmd-j-workspace-open': 'launcher',
   'cmd-j-browser-page-open': 'launcher',
@@ -31,11 +28,6 @@ export const FEATURE_INTERACTION_CATEGORY_BY_ID = {
   'cmd-j-create-workspace': 'launcher',
   browser: 'browser',
   'browser-tab-created': 'browser',
-  tasks: 'task_management',
-  'github-tasks': 'task_management',
-  'gitlab-tasks': 'task_management',
-  'linear-tasks': 'task_management',
-  'jira-tasks': 'task_management',
   automations: 'automation',
   'automation-created': 'automation',
   'automation-run': 'automation',

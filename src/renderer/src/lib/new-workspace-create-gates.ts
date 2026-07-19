@@ -3,7 +3,6 @@ export type ComposerCreateGateInput = {
   workspaceSeedName: string
   creating: boolean
   shouldWaitForSetupCheck: boolean
-  shouldWaitForIssueAutomationCheck: boolean
   requiresExplicitSetupChoice: boolean
   hasSetupDecision: boolean
   selectedRepoRequiresConnection: boolean
@@ -21,17 +20,12 @@ function hasBlockingCreateState(input: ComposerCreateGateInput): boolean {
 }
 
 export function getFullComposerCreateDisabled(input: ComposerCreateGateInput): boolean {
-  return (
-    hasBlockingCreateState(input) ||
-    input.shouldWaitForSetupCheck ||
-    input.shouldWaitForIssueAutomationCheck
-  )
+  return hasBlockingCreateState(input) || input.shouldWaitForSetupCheck
 }
 
 export function getQuickComposerCreateDisabled(input: ComposerCreateGateInput): boolean {
-  // Why: Cmd/Ctrl+N quick create can resolve setup hooks inside the submit
-  // handler, and it never runs issue-command automation. Keeping those
-  // background probes out of the disabled gate makes the primary action usable
+  // Why: Cmd/Ctrl+N quick create resolves setup hooks inside submit. Keeping
+  // that background probe out of the disabled gate makes the primary action usable
   // as soon as the form has enough local state to submit.
   return hasBlockingCreateState(input)
 }

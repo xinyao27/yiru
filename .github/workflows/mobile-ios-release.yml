@@ -1,7 +1,7 @@
 name: Mobile iOS Release
 
 # Why: iOS needs Xcode and Apple signing while Android uses JDK/Gradle; separate
-# triggers keep their credentials and test distribution independent.
+# triggers keep their credentials and beta distribution independent.
 on:
   push:
     tags:

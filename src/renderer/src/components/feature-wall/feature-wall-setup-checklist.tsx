@@ -13,7 +13,6 @@ import {
   SetupScriptAction,
   WorkspacesAction
 } from './feature-wall-setup-workflow-actions'
-import { ConnectIntegrationsList } from './connect-integrations-list'
 import { BrowserAction } from './feature-wall-browser-action'
 import {
   SetupBrowserVisual,
@@ -24,7 +23,6 @@ import { AgentStep } from '../onboarding/agent-step'
 import { NotificationStep } from '../onboarding/notification-step'
 import { useAppStore } from '@/store'
 import type { TuiAgent } from '../../../../shared/types'
-import { getProviderRuntimeContextKey } from '@/lib/provider-runtime-context'
 import { translate } from '@/i18n/i18n'
 
 type FeatureWallSetupChecklistLayout = 'modal' | 'embedded'
@@ -150,9 +148,6 @@ function SelectedStepAction(props: FeatureWallSetupChecklistProps): React.JSX.El
   if (activeStep.id === 'browser') {
     return <BrowserAction done={activeDone} />
   }
-  if (activeStep.id === 'task-sources') {
-    return <TaskSourcesAction />
-  }
   if (activeStep.id === 'agent-capabilities') {
     return (
       <AgentCapabilitiesSetupAction
@@ -220,31 +215,6 @@ function NotificationAction(): React.JSX.Element {
   return (
     <div className="max-w-3xl">
       <NotificationStep settings={settings} updateSettings={updateSettings} />
-    </div>
-  )
-}
-
-function TaskSourcesAction(): React.JSX.Element {
-  const refreshPreflightStatus = useAppStore((s) => s.refreshPreflightStatus)
-  const checkJiraConnection = useAppStore((s) => s.checkJiraConnection)
-  const checkLinearConnection = useAppStore((s) => s.checkLinearConnection)
-  const settings = useAppStore((s) => s.settings)
-  const providerRuntimeContextKey = getProviderRuntimeContextKey(settings)
-
-  useEffect(() => {
-    void refreshPreflightStatus()
-    void checkJiraConnection()
-    void checkLinearConnection()
-  }, [
-    refreshPreflightStatus,
-    checkJiraConnection,
-    checkLinearConnection,
-    providerRuntimeContextKey
-  ])
-
-  return (
-    <div className="space-y-5">
-      <ConnectIntegrationsList />
     </div>
   )
 }

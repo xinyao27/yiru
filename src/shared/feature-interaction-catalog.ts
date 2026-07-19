@@ -1,7 +1,5 @@
 export type FeatureInteractionId =
-  | 'workspace-board'
   | 'workspace-agent-sessions'
-  | 'workspace-board-actions'
   | 'cmd-j'
   | 'cmd-j-workspace-open'
   | 'cmd-j-browser-page-open'
@@ -10,11 +8,6 @@ export type FeatureInteractionId =
   | 'cmd-j-create-workspace'
   | 'browser'
   | 'browser-tab-created'
-  | 'tasks'
-  | 'github-tasks'
-  | 'gitlab-tasks'
-  | 'linear-tasks'
-  | 'jira-tasks'
   | 'automations'
   | 'automation-created'
   | 'automation-run'
@@ -62,14 +55,9 @@ export type FeatureInteractionDefinition = {
 // Why: these ids become persisted product state; see
 // docs/reference/feature-discovery-interaction-tracking.md before changing them.
 export const FEATURE_INTERACTIONS = [
-  { id: 'workspace-board', interaction: 'workspace board opened' },
   {
     id: 'workspace-agent-sessions',
     interaction: 'workspace agent-session surface opened'
-  },
-  {
-    id: 'workspace-board-actions',
-    interaction: 'workspace board card, lane, density, or status action used'
   },
   { id: 'cmd-j', interaction: 'Cmd+J palette opened' },
   { id: 'cmd-j-workspace-open', interaction: 'workspace opened from Cmd+J' },
@@ -79,11 +67,6 @@ export const FEATURE_INTERACTIONS = [
   { id: 'cmd-j-create-workspace', interaction: 'workspace creation started from Cmd+J' },
   { id: 'browser', interaction: 'in-app browser opened' },
   { id: 'browser-tab-created', interaction: 'browser tab explicitly created' },
-  { id: 'tasks', interaction: 'Tasks page opened' },
-  { id: 'github-tasks', interaction: 'GitHub task item workflow used' },
-  { id: 'gitlab-tasks', interaction: 'GitLab task item workflow used' },
-  { id: 'linear-tasks', interaction: 'Linear task item workflow used' },
-  { id: 'jira-tasks', interaction: 'Jira task item workflow used' },
   { id: 'automations', interaction: 'Automations page opened' },
   { id: 'automation-created', interaction: 'automation created' },
   { id: 'automation-run', interaction: 'automation run queued' },

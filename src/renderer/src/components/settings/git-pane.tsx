@@ -316,13 +316,12 @@ export function GitPane({
       title: translate('auto.components.settings.GitPane.e02ea23a32', 'Yiru Attribution'),
       description: translate(
         'auto.components.settings.GitPane.d2eede4c54',
-        'Add Yiru attribution to commits, PRs, and issues.'
+        'Add Yiru attribution to commits and PRs.'
       ),
       keywords: [
         translate('auto.components.settings.GitPane.32dca11189', 'github'),
         translate('auto.components.settings.GitPane.895d3f70b8', 'gh'),
         translate('auto.components.settings.GitPane.b4ef5428a7', 'pr'),
-        translate('auto.components.settings.GitPane.afada55042', 'issue'),
         translate('auto.components.settings.GitPane.9838c921ed', 'co-author'),
         translate('auto.components.settings.GitPane.b5f534717a', 'coauthored'),
         translate('auto.components.settings.GitPane.b9b5771bb1', 'attribution'),
@@ -334,9 +333,9 @@ export function GitPane({
         title={translate('auto.components.settings.GitPane.e02ea23a32', 'Yiru Attribution')}
         description={translate(
           'auto.components.settings.GitPane.d2eede4c54',
-          'Add Yiru attribution to commits, PRs, and issues.'
+          'Add Yiru attribution to commits and PRs.'
         )}
-        keywords={['github', 'gh', 'pr', 'issue', 'co-author', 'coauthored', 'attribution', 'yiru']}
+        keywords={['github', 'gh', 'pr', 'co-author', 'coauthored', 'attribution', 'yiru']}
         className="flex items-center justify-between gap-4 py-2"
       >
         <div className="space-y-0.5">
@@ -346,7 +345,7 @@ export function GitPane({
           <p className="text-xs text-muted-foreground">
             {translate(
               'auto.components.settings.GitPane.d2eede4c54',
-              'Add Yiru attribution to commits, PRs, and issues.'
+              'Add Yiru attribution to commits and PRs.'
             )}
           </p>
         </div>

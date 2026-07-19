@@ -1,6 +1,5 @@
 import type { CliStatusResult } from '../../shared/runtime-types'
 import type { RpcResponse } from '../runtime/rpc/core'
-import { formatRemoteLinearCli } from './ssh-remote-linear-output'
 
 export function formatRemoteCli(response: RpcResponse): { stdout: string; stderr: string } {
   if (!response.ok) {
@@ -10,10 +9,6 @@ export function formatRemoteCli(response: RpcResponse): { stdout: string; stderr
   if (isRecord(result) && 'app' in result && 'runtime' in result && 'graph' in result) {
     const record = result as Record<string, unknown>
     return formatStatusResult(record as CliStatusResult)
-  }
-  const linear = formatRemoteLinearCli(result)
-  if (linear) {
-    return linear
   }
   return { stdout: `${JSON.stringify(result)}\n`, stderr: '' }
 }

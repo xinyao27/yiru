@@ -1,46 +1,28 @@
 import { isWorkItemLinkQueryTooLarge } from './work-item-link-query-bounds'
 
-// Why: GitLab project paths can include nested groups, and the host may
-// be self-hosted (gitlab.example.com), so the URL pattern uses the
-// project-internal `/-/` separator as the GitLab-specific signal rather
-// than locking to gitlab.com. Anything matching `/<path>/-/(issues|
-// work_items|merge_requests)/<digits>` is treated as a GitLab item URL
-// regardless of host. Modern GitLab emits issue URLs as
-// `/-/work_items/<iid>`; treat that as an issue work item, same as the
-// legacy `/-/issues/<iid>` form.
-const GL_ITEM_PATH_RE = /\/(?:issues|work_items|merge_requests)\/(\d+)(?:\/.*)?$/i
-const GL_ITEM_PATH_FULL_RE = /^\/(.+)\/-\/(issues|work_items|merge_requests)\/(\d+)(?:\/.*)?$/i
+// GitLab project paths can contain nested groups and self-hosted domains. The
+// project-internal `/-/` separator distinguishes merge-request URLs from other hosts.
+const GL_MR_PATH_RE = /\/merge_requests\/(\d+)(?:\/.*)?$/i
+const GL_MR_PATH_FULL_RE = /^\/(.+)\/-\/merge_requests\/(\d+)(?:\/.*)?$/i
 
 export type ProjectSlug = {
-  /** GitLab hostname, preserving self-hosted instances from pasted URLs. */
   host: string
-  /** Full GitLab project path including any nested groups. */
   path: string
 }
 
-export type GitLabLinkQuery = {
+export type GitLabMergeRequestQuery = {
   query: string
   directNumber: number | null
   tooLarge?: boolean
 }
 
-/**
- * Parse a GitLab issue or MR reference from plain input. Accepts:
- *   - bare numbers ("42")
- *   - hash-prefixed numbers ("#42")
- *   - exclamation-prefixed numbers ("!42") — GitLab convention for MRs
- *   - full GitLab URLs (any host) for issues or merge_requests
- */
-export function parseGitLabIssueOrMRNumber(input: string): number | null {
+export function parseGitLabMergeRequestNumber(input: string): number | null {
   const trimmed = input.trim()
   if (!trimmed) {
     return null
   }
 
-  // Why: GitLab references issues with `#` and MRs with `!` in markdown
-  // and copy-paste contexts. Accept both prefixes so users can drop in
-  // either form.
-  const numeric = trimmed.startsWith('#') || trimmed.startsWith('!') ? trimmed.slice(1) : trimmed
+  const numeric = trimmed.startsWith('!') ? trimmed.slice(1) : trimmed
   if (/^\d+$/.test(numeric)) {
     return Number.parseInt(numeric, 10)
   }
@@ -51,65 +33,37 @@ export function parseGitLabIssueOrMRNumber(input: string): number | null {
   } catch {
     return null
   }
-
-  const match = GL_ITEM_PATH_RE.exec(url.pathname)
-  if (!match) {
-    return null
-  }
-  // Why: the basic pattern matches plain GitHub URLs too (e.g.
-  // /owner/repo/issues/123). Require the `/-/` separator that's
-  // unique to GitLab to avoid mis-classifying a GitHub URL.
   if (!url.pathname.includes('/-/')) {
     return null
   }
-  return Number.parseInt(match[1], 10)
+  const match = GL_MR_PATH_RE.exec(url.pathname)
+  return match ? Number.parseInt(match[1], 10) : null
 }
 
-/**
- * Parse a GitLab URL into project path + iid + type. Returns null for
- * anything that isn't a recognizable GitLab issue or merge-request URL.
- */
-export function parseGitLabIssueOrMRLink(input: string): {
+export function parseGitLabMergeRequestLink(input: string): {
   slug: ProjectSlug
   number: number
-  type: 'issue' | 'mr'
+  type: 'mr'
 } | null {
-  const trimmed = input.trim()
-  if (!trimmed) {
-    return null
-  }
-
   let url: URL
   try {
-    url = new URL(trimmed)
+    url = new URL(input.trim())
   } catch {
     return null
   }
 
-  const match = GL_ITEM_PATH_FULL_RE.exec(url.pathname)
-  if (!match) {
+  const match = GL_MR_PATH_FULL_RE.exec(url.pathname)
+  if (!match?.[1].includes('/')) {
     return null
   }
-
-  const path = match[1]
-  // Why: a project path needs at least one slash (group/project). A
-  // single-segment path is the user/group root, not a project.
-  if (!path.includes('/')) {
-    return null
-  }
-
   return {
-    slug: { host: url.host, path },
-    type: match[2].toLowerCase() === 'merge_requests' ? 'mr' : 'issue',
-    number: Number.parseInt(match[3], 10)
+    slug: { host: url.host, path: match[1] },
+    number: Number.parseInt(match[2], 10),
+    type: 'mr'
   }
 }
 
-/**
- * Normalize link-picker input so both raw issue/MR numbers and full
- * GitLab URLs resolve to a usable query + direct-number lookup.
- */
-export function normalizeGitLabLinkQuery(raw: string): GitLabLinkQuery {
+export function normalizeGitLabMergeRequestQuery(raw: string): GitLabMergeRequestQuery {
   if (isWorkItemLinkQueryTooLarge(raw)) {
     return { query: '', directNumber: null, tooLarge: true }
   }
@@ -117,22 +71,8 @@ export function normalizeGitLabLinkQuery(raw: string): GitLabLinkQuery {
   if (!trimmed) {
     return { query: '', directNumber: null }
   }
-
-  const direct = parseGitLabIssueOrMRNumber(trimmed)
-  if (direct !== null && !trimmed.startsWith('http')) {
-    return { query: trimmed, directNumber: direct }
-  }
-
-  const link = parseGitLabIssueOrMRLink(trimmed)
-  if (!link) {
-    return { query: trimmed, directNumber: null }
-  }
-
-  // Why: any GitLab issue/MR URL is accepted by number regardless of
-  // project slug, mirroring the GitHub-side behavior — fork checkouts
-  // can legitimately target an upstream's issue numbers.
   return {
     query: trimmed,
-    directNumber: link.number
+    directNumber: parseGitLabMergeRequestNumber(trimmed)
   }
 }

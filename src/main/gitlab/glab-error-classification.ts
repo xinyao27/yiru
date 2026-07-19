@@ -7,11 +7,11 @@ export function classifyGlabError(stderr: string): ClassifiedError {
   if (s.includes('http 403') || s.includes('forbidden') || s.includes('insufficient_scope')) {
     return {
       type: 'permission_denied',
-      message: "You don't have permission to edit this issue. Check your GitLab token scopes."
+      message: "You don't have permission to update this project. Check your GitLab token scopes."
     }
   }
   if (s.includes('http 404') || s.includes('project not found')) {
-    return { type: 'not_found', message: 'Issue not found — it may have been deleted.' }
+    return { type: 'not_found', message: 'GitLab resource not found.' }
   }
   if (s.includes('http 422') || s.includes('unprocessable')) {
     return { type: 'validation_error', message: `Invalid update — ${stderr.trim()}` }
@@ -30,23 +30,21 @@ export function classifyGlabError(stderr: string): ClassifiedError {
   ) {
     return { type: 'network_error', message: 'Network error — check your connection.' }
   }
-  return { type: 'unknown', message: `Failed to update issue: ${stderr.trim()}` }
+  return { type: 'unknown', message: `GitLab operation failed: ${stderr.trim()}` }
 }
 
-// Why: classifyGlabError's copy is phrased for edit/update operations; list
-// issues is a read op, so rewrite messages for read-context banners.
-export function classifyListIssuesError(stderr: string): ClassifiedError {
+// Why: list failures need read-oriented copy rather than mutation wording.
+export function classifyListError(stderr: string): ClassifiedError {
   const c = classifyGlabError(stderr)
   const trimmed = stderr.trim()
   const readMessages: Record<ClassifiedError['type'], string> = {
     permission_denied:
-      "You don't have permission to read issues for this project. Check your GitLab token scopes.",
+      "You don't have permission to read merge requests for this project. Check your GitLab token scopes.",
     not_found: 'Project not found.',
-    issues_disabled: 'Issues are disabled on this project.',
     validation_error: `Invalid request — ${trimmed}`,
     rate_limited: 'GitLab rate limit hit. Try again in a few minutes.',
     network_error: 'Network error — check your connection.',
-    unknown: `Failed to load issues: ${trimmed}`
+    unknown: `Failed to load merge requests: ${trimmed}`
   }
   return { type: c.type, message: readMessages[c.type] }
 }

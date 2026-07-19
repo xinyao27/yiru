@@ -10,7 +10,6 @@ import {
 import { cn } from '@/lib/class-names'
 import { PullRequestIcon, checksLabel } from './worktree-card-helpers'
 import type { WorktreeCardPrDisplay } from './worktree-card-pr-display'
-import type { IssueInfo } from '../../../../shared/types'
 import { translate } from '@/i18n/i18n'
 
 function MetadataStatusBadge({
@@ -33,62 +32,6 @@ function MetadataStatusBadge({
       {children}
       <span>{label}</span>
     </Badge>
-  )
-}
-
-export function IssueStateBadge({ state }: { state: IssueInfo['state'] }): React.JSX.Element {
-  if (state === 'closed') {
-    return (
-      <MetadataStatusBadge
-        label={translate(
-          'auto.components.sidebar.WorktreeCardMetadataStatusBadges.e888362def',
-          'State: Closed'
-        )}
-        className="border-purple-500/25 bg-purple-500/5 text-purple-600 dark:text-purple-300"
-      >
-        <CircleCheck />
-      </MetadataStatusBadge>
-    )
-  }
-
-  return (
-    <MetadataStatusBadge
-      label={translate(
-        'auto.components.sidebar.WorktreeCardMetadataStatusBadges.fe188062a1',
-        'State: Open'
-      )}
-      className="border-emerald-500/25 bg-emerald-500/5 text-emerald-600 dark:text-emerald-300"
-    >
-      <CircleDot />
-    </MetadataStatusBadge>
-  )
-}
-
-export function LinearStateBadge({ stateName }: { stateName: string }): React.JSX.Element {
-  const normalized = stateName.toLowerCase()
-  const done = /done|closed|complete|completed|merged|resolved/.test(normalized)
-  const cancelled = /cancel|canceled|duplicate|wontfix/.test(normalized)
-  const active = /progress|doing|started|active/.test(normalized)
-  const Icon = done ? CircleCheck : cancelled ? CircleX : active ? Clock : CircleDot
-  const tone = done
-    ? 'border-purple-500/25 bg-purple-500/5 text-purple-600 dark:text-purple-300'
-    : cancelled
-      ? 'border-rose-500/25 bg-rose-500/5 text-rose-600 dark:text-rose-300'
-      : active
-        ? 'border-amber-500/25 bg-amber-500/5 text-amber-600 dark:text-amber-300'
-        : 'border-border bg-muted/30 text-muted-foreground'
-
-  return (
-    <MetadataStatusBadge
-      label={translate(
-        'auto.components.sidebar.WorktreeCardMetadataStatusBadges.af2b07bda5',
-        'State: {{value0}}',
-        { value0: stateName }
-      )}
-      className={tone}
-    >
-      <Icon />
-    </MetadataStatusBadge>
   )
 }
 

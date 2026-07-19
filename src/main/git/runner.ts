@@ -1134,7 +1134,7 @@ export function gitSpawn(
 // or a `query=mutation …` arg); callers can also pass an explicit override.
 // A 5xx/socket reset after the request reaches GitHub but before the
 // response returns is the canonical case where the server-side write
-// succeeded; retrying would create a duplicate comment/issue/label addition.
+// succeeded; retrying would create a duplicate comment or label addition.
 // See bug-scan finding 1.
 type GhExecOptions = Omit<GitExecOptions, 'cwd'> & {
   cwd?: string
@@ -1221,8 +1221,8 @@ function argsLookIdempotent(args: string[]): boolean {
   ) {
     return false
   }
-  // `gh issue close`, `gh pr edit`, `gh pr merge`, etc. The first arg is the
-  // noun (issue/pr/repo/label/...) and the second is the verb. Defaulting
+  // `gh pr close`, `gh pr edit`, `gh pr merge`, etc. The first arg is the
+  // noun (pr/repo/label/...) and the second is the verb. Defaulting
   // `gh api` calls without an explicit -X to GET-equivalent (idempotent) is
   // intentional: callers that POST through `gh api` set `-X POST`.
   if (args.length >= 2 && args[0] !== 'api') {
@@ -1435,7 +1435,7 @@ export async function ghExecFileAsync(
         cwd: resolved.cwd,
         encoding: (options.encoding ?? 'utf-8') as BufferEncoding,
         maxBuffer: options.maxBuffer,
-        // Why: GitHub detail IPC powers PR cards, Tasks, and URL worktree
+        // Why: GitHub detail IPC powers PR cards and URL worktree
         // creation; one stuck gh child must fail visibly, not wedge every lane.
         timeout: options.timeout ?? defaultGhExecTimeoutMs(options.env),
         env: nonInteractiveGhEnv(options.env),
@@ -1599,7 +1599,7 @@ export async function glabExecFileAsync(
       const isLastAttempt = attempt >= GH_RETRY_DELAYS_MS.length
       // Why: mirror gh's write-safety gate. A transient error after GitLab
       // applies a POST/PATCH/PUT/DELETE must not create duplicate comments,
-      // issues, or merge actions through an automatic retry.
+      // pull-request edits or merge actions through an automatic retry.
       const idempotent = options.idempotent ?? argsLookIdempotent(args)
       if (idempotent && !isLastAttempt && isTransientGhError(stderr)) {
         const retryAfterMs = parseRetryAfterMs(stderr)

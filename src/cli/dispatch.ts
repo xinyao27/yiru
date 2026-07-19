@@ -22,7 +22,6 @@ import { AGENT_HOOK_HANDLERS } from './handlers/agent-hooks'
 import { DIAGNOSTICS_HANDLERS } from './handlers/diagnostics'
 import { INTROSPECTION_HANDLERS } from './handlers/introspection'
 import { EMULATOR_HANDLERS } from './handlers/emulator'
-import { LINEAR_HANDLERS } from './handlers/linear'
 import { VM_HANDLERS } from './handlers/vm'
 import { SKILL_HANDLERS } from './handlers/skills'
 
@@ -61,7 +60,6 @@ function buildHandlers(): Map<string, CommandHandler> {
     DIAGNOSTICS_HANDLERS,
     INTROSPECTION_HANDLERS,
     ENVIRONMENT_HANDLERS,
-    LINEAR_HANDLERS,
     VM_HANDLERS,
     SKILL_HANDLERS
   ]

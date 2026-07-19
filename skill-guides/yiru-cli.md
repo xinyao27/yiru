@@ -118,7 +118,7 @@ YIRU worktree rm --worktree id:<repoId>::<worktreePath> --force --json
 
 Selectors:
 
-- `id:<repoId>::<worktreePath>`, `name:<displayName>`, `path:<absolutePath>`, `branch:<branchName>`, `issue:<number>`
+- `id:<repoId>::<worktreePath>`, `name:<displayName>`, `path:<absolutePath>`, `branch:<branchName>`
 - The full id is the exact `<repo-id>::<path>` value returned by `yiru worktree create --json` or `yiru worktree list --json`; a bare repo id is not a worktree id.
 - `active` / `current` for the enclosing Yiru-managed worktree from the shell cwd
 - For `worktree create --parent-worktree` only, folder/worktree parent context keys are also valid: `folder:<folderId>`, `worktree:<repoId>::<worktreePath>`, `id:folder:<folderId>`, `id:worktree:<repoId>::<worktreePath>`
@@ -210,7 +210,7 @@ An automation is a scheduled Yiru prompt run by a chosen provider against either
 YIRU automations list --json
 YIRU automations show <automationId> --json
 YIRU automations create --name "Daily review" --trigger daily --time 09:00 --prompt "Review open changes" --provider codex --repo id:<repoId> --json
-YIRU automations create --name "Weekday triage" --trigger "0 9 * * 1-5" --prompt "Triage issues" --provider claude --repo path:/abs/repo --disabled --json
+YIRU automations create --name "Weekday triage" --trigger "0 9 * * 1-5" --prompt "Triage alerts" --provider claude --repo path:/abs/repo --disabled --json
 YIRU automations create --name "Inbox digest" --trigger hourly --prompt "Summarize unread mail" --provider codex --workspace active --reuse-session --json
 YIRU automations edit <automationId> --trigger weekdays --time 09:30 --fresh-session --json
 YIRU automations run <automationId> --json

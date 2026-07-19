@@ -33,14 +33,12 @@ import { DEFAULT_SHOW_SLEEPING_WORKSPACES } from '../../../../shared/constants'
 import { translate } from '@/i18n/i18n'
 
 type SidebarFilterProps = {
-  preserveWorkspaceBoardOpen?: boolean
   tooltipSide?: 'top' | 'right' | 'bottom' | 'left'
   contentSide?: 'top' | 'right' | 'bottom' | 'left'
   onMenuOpenChange?: (open: boolean) => void
 }
 
 const SidebarFilter = React.memo(function SidebarFilter({
-  preserveWorkspaceBoardOpen = false,
   tooltipSide = 'bottom',
   contentSide = 'right',
   onMenuOpenChange
@@ -164,7 +162,6 @@ const SidebarFilter = React.memo(function SidebarFilter({
                         )
                   }
                   className="relative text-muted-foreground"
-                  data-workspace-board-preserve-open={preserveWorkspaceBoardOpen ? '' : undefined}
                 >
                   <ListFilter className="size-3.5" strokeWidth={2.25} />
                   {hasAnyFilter && (
@@ -188,13 +185,7 @@ const SidebarFilter = React.memo(function SidebarFilter({
             : translate('auto.components.sidebar.SidebarFilter.f506a1262a', 'Filter workspaces')}
         </TooltipContent>
       </Tooltip>
-      <DropdownMenuContent
-        side={contentSide}
-        align="start"
-        sideOffset={8}
-        className="w-72"
-        data-workspace-board-preserve-open={preserveWorkspaceBoardOpen ? '' : undefined}
-      >
+      <DropdownMenuContent side={contentSide} align="start" sideOffset={8} className="w-72">
         <FilterToggleRow
           icon={<Moon className="size-3.5" />}
           label={translate('auto.components.sidebar.SidebarFilter.638a2d221d', 'Hide sleeping')}

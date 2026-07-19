@@ -24,7 +24,7 @@ import {
   CommandItem
 } from '@/components/ui/command'
 import { branchName } from '@/lib/git-utils'
-import { parseGitHubIssueOrPRNumber, parseGitHubIssueOrPRLink } from '@/lib/github-links'
+import { parseGitHubPullRequestNumber, parseGitHubPullRequestLink } from '@/lib/github-links'
 import { getLinkedWorkItemSuggestedName, getLinkedWorkItemWorkspaceName } from '@/lib/new-workspace'
 import type { LinkedWorkItemSummary } from '@/lib/new-workspace'
 import { sortWorktreesSmart } from '@/components/sidebar/smart-sort'
@@ -118,7 +118,7 @@ import { getHostDisplayLabelOverrides } from '../../../shared/host-setting-overr
 import { isRuntimeOwnedSshTargetId } from '../../../shared/execution-host'
 import type { BrowserPage, BrowserWorkspace, Worktree } from '../../../shared/types'
 import { isGitRepoKind } from '../../../shared/repo-kind'
-import { buildTaskSourceContextFromRepo } from '../../../shared/task-source-context'
+import { buildProjectSourceContextFromRepo } from '../../../shared/project-source-context'
 import { translate } from '@/i18n/i18n'
 
 type WorktreePaletteItem = {
@@ -383,7 +383,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
   const agentStatusEpoch = useAppStore((s) =>
     visible || statusInputsLingering ? s.agentStatusEpoch : 0
   )
-  const { prCache, issueCache, hostedReviewCache } = useAppStore(
+  const { prCache, hostedReviewCache } = useAppStore(
     useShallow((s) => selectWorktreePaletteCacheInputs(s, visible || statusInputsLingering))
   )
   const migrationUnsupportedByPtyId = useAppStore((s) => s.migrationUnsupportedByPtyId)
@@ -652,19 +652,11 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
         deferredQuery.trim(),
         repoMap,
         prCache,
-        issueCache,
+
         getWorkspacePortsByWorktreeId(workspacePortScan),
         checksReviewByWorktree
       ),
-    [
-      sortedWorktrees,
-      deferredQuery,
-      repoMap,
-      prCache,
-      issueCache,
-      workspacePortScan,
-      checksReviewByWorktree
-    ]
+    [sortedWorktrees, deferredQuery, repoMap, prCache, workspacePortScan, checksReviewByWorktree]
   )
 
   const browserPageEntries = useMemo<SearchableBrowserPage[]>(() => {
@@ -1525,8 +1517,8 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
   const handleCreateWorktree = useCallback(() => {
     skipRestoreFocusRef.current = true
     const trimmed = createWorktreeName.trim()
-    const ghLink = parseGitHubIssueOrPRLink(trimmed)
-    const ghNumber = parseGitHubIssueOrPRNumber(trimmed)
+    const ghLink = parseGitHubPullRequestLink(trimmed)
+    const ghNumber = parseGitHubPullRequestNumber(trimmed)
 
     const openComposer = (data: Record<string, unknown>): void => {
       prefetchCreateWorkspaceBaseForComposer(
@@ -1541,16 +1533,13 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
       )
     }
 
-    // Case 1: user pasted a GH issue/PR URL.
+    // Case 1: user pasted a GitHub pull request URL.
     if (ghLink) {
       const { number } = ghLink
       const state = useAppStore.getState()
 
-      // Why: the existing-worktree check only needs the issue/PR number, which
-      // is repo-agnostic on the worktree meta side.
-      const matches = allWorktrees.filter(
-        (w) => !w.isArchived && (w.linkedIssue === number || w.linkedPR === number)
-      )
+      // Why: review numbers are repo-agnostic on persisted workspace metadata.
+      const matches = allWorktrees.filter((w) => !w.isArchived && w.linkedPR === number)
       const activeMatch = matches.find((w) => w.repoId === state.activeRepoId) ?? matches[0]
       if (activeMatch) {
         closeModal()
@@ -1580,9 +1569,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
     // Case 2: user typed a raw issue number. Resolve against the active repo.
     if (ghNumber !== null) {
       const state = useAppStore.getState()
-      const matches = allWorktrees.filter(
-        (w) => !w.isArchived && (w.linkedIssue === ghNumber || w.linkedPR === ghNumber)
-      )
+      const matches = allWorktrees.filter((w) => !w.isArchived && w.linkedPR === ghNumber)
       const activeMatch = matches.find((w) => w.repoId === state.activeRepoId) ?? matches[0]
       if (activeMatch) {
         closeModal()
@@ -1600,7 +1587,7 @@ export default function WorktreeJumpPalette(): React.JSX.Element | null {
       }
 
       prefetchCreateWorkspaceBaseForComposer(repoForLookup.id)
-      const sourceContext = buildTaskSourceContextFromRepo({
+      const sourceContext = buildProjectSourceContextFromRepo({
         provider: 'github',
         projectId: repoForLookup.id,
         repo: repoForLookup
@@ -2341,8 +2328,6 @@ function getPaletteSupportingTextLabel(
   switch (labelKind) {
     case 'comment':
       return translate('worktreeJumpPalette.matchLabel.comment', 'Comment')
-    case 'issue':
-      return translate('worktreeJumpPalette.matchLabel.issue', 'Issue')
     case 'port':
       return translate('worktreeJumpPalette.matchLabel.port', 'Port')
     case 'pr':

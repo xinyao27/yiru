@@ -46,7 +46,7 @@ export function getLandingPreflightIssues(
     })
   }
 
-  // Why: gh only powers GitHub PRs/issues/checks; GitLab-only projects should
+  // Why: gh only powers GitHub pull requests and checks; GitLab-only projects should
   // not see GitHub setup pressure on the landing screen.
   if (!options.hasGitHubBackedProject) {
     return issues
@@ -58,7 +58,7 @@ export function getLandingPreflightIssues(
       title: translate('auto.components.Landing.5beaef5f9e', 'GitHub CLI is not installed'),
       description: translate(
         'auto.components.Landing.73e1ad4282',
-        'Yiru uses the GitHub CLI (gh) to show pull requests, issues, and checks.'
+        'Yiru uses the GitHub CLI (gh) to show pull requests and checks.'
       ),
       fixLabel: 'Install GitHub CLI',
       fixUrl: 'https://cli.github.com',

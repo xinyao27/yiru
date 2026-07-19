@@ -1,17 +1,10 @@
 /**
  * GitHub API rate-limit probe.
  *
- * Why: `listWorkItems` fan-out × selected repos plus `countWorkItems` in
- * parallel, plus `listAccessibleProjects` org-walk, can chew through the
- * core (5000/hr) or search (30/min) buckets quickly. Surfacing the remaining
- * budget in the TaskPage header lets users self-regulate before they hit the
- * wall — without actually throttling (which would hurt responsiveness in
- * the common not-near-the-limit case). The probe itself is exempt from
- * rate-limit accounting per GitHub docs.
- *
- * The result is intentionally minimal: we expose just the counts the UI
- * needs (remaining + limit for the three buckets we actually stress). If a
- * future feature needs reset-time countdowns we can add resetAt here.
+ * Why: pull-request refreshes combine REST, search, and GraphQL calls. A
+ * shared snapshot lets refresh coordinators avoid retry storms near a limit
+ * without slowing the common path. The probe itself is exempt from rate-limit
+ * accounting per GitHub docs.
  */
 import type {
   GetRateLimitResult,

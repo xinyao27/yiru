@@ -8,7 +8,7 @@ type PendingWorktreeHookCommandDelivery = {
 }
 
 // Why: runtime-owned worktrees mirror their session tabs asynchronously, so a
-// fresh create usually has no tab to queue setup/issue commands on yet. Hold
+// fresh create usually has no tab to queue setup and startup commands on yet. Hold
 // the delivery until the first mirrored terminal tab lands instead of
 // dropping it. Mirrors agent-startup-delayed-delivery's lazy-subscription
 // shape: subscribed only while something is pending.
