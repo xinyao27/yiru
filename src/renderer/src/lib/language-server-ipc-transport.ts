@@ -10,12 +10,14 @@ import type {
   LanguageServerJsonRpcMessage,
   LanguageServerSessionStatus
 } from '../../../shared/language-server'
+import type { LanguageServerSessionTransport } from './language-server-session-transport'
 
 export class LanguageServerIpcReader extends AbstractMessageReader {
   private unsubscribe: (() => void) | null = null
 
   constructor(
     private readonly sessionId: string,
+    private readonly transport: LanguageServerSessionTransport,
     private readonly onStatus: (status: LanguageServerSessionStatus, message?: string) => void
   ) {
     super()
@@ -25,7 +27,7 @@ export class LanguageServerIpcReader extends AbstractMessageReader {
     if (this.unsubscribe) {
       throw new Error('Language server IPC reader can only listen once.')
     }
-    this.unsubscribe = window.api.languageServers.onEvent((event) => {
+    this.unsubscribe = this.transport.onEvent((event) => {
       if (event.sessionId !== this.sessionId) {
         return
       }
@@ -62,13 +64,16 @@ export class LanguageServerIpcReader extends AbstractMessageReader {
 export class LanguageServerIpcWriter extends AbstractMessageWriter {
   private writeQueue = Promise.resolve()
 
-  constructor(private readonly sessionId: string) {
+  constructor(
+    private readonly sessionId: string,
+    private readonly transport: LanguageServerSessionTransport
+  ) {
     super()
   }
 
   write(message: Message): Promise<void> {
     const operation = this.writeQueue.then(() =>
-      window.api.languageServers.send({
+      this.transport.send({
         sessionId: this.sessionId,
         message: message as LanguageServerJsonRpcMessage
       })

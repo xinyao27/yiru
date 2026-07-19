@@ -6,13 +6,15 @@ import {
   type Disposable,
   type MessageConnection
 } from 'vscode-jsonrpc/browser'
-import { normalizeRuntimePathForComparison } from '../../../shared/cross-platform-path'
 import type {
   LanguageServerLocationResult,
   LanguageServerSessionStatus,
   LanguageServerStartResult
 } from '../../../shared/language-server'
 import { LanguageServerIpcReader, LanguageServerIpcWriter } from './language-server-ipc-transport'
+import type { LanguageServerSessionTransport } from './language-server-session-transport'
+import { LanguageServerWorkspaceFiles } from './language-server-workspace-files'
+import { LanguageServerSessionLogs } from './language-server-session-logs'
 import { MonacoLanguageServerDocuments } from './monaco-language-server-documents'
 import { LanguageServerRequestRouter } from './language-server-request-router'
 import { LanguageServerFeatureRequests } from './language-server-feature-requests'
@@ -36,6 +38,7 @@ export type LanguageServerSessionStatusUpdate = {
   state: 'starting' | 'ready' | 'failed' | 'stopped'
   message?: string
   serverName?: string
+  hostLabel?: string
 }
 
 export class MonacoLanguageServerSession {
@@ -43,8 +46,8 @@ export class MonacoLanguageServerSession {
   private connection: MessageConnection | null = null
   private capabilities: LspServerCapabilities = {}
   private readonly documents: MonacoLanguageServerDocuments
-  private readonly protocolLogs: string[] = []
-  private readonly archivedHostLogs: string[] = []
+  private readonly workspaceFiles: LanguageServerWorkspaceFiles
+  private readonly logs = new LanguageServerSessionLogs()
   private readonly publishedDiagnostics = new Map<
     string,
     { version: number | undefined; diagnostics: LspDiagnostic[] }
@@ -57,9 +60,17 @@ export class MonacoLanguageServerSession {
     readonly key: string,
     private readonly worktreeId: string,
     private readonly initialLanguageId: string,
+    private readonly transport: LanguageServerSessionTransport,
+    private readonly runtimeEnvironmentId: string | null | undefined,
+    connectionId: string | null | undefined,
     private readonly onStatus: (update: LanguageServerSessionStatusUpdate) => void,
     private readonly onDiagnostics: (params: LspPublishDiagnosticsParams) => void
   ) {
+    this.workspaceFiles = new LanguageServerWorkspaceFiles(
+      worktreeId,
+      runtimeEnvironmentId,
+      connectionId
+    )
     this.documents = new MonacoLanguageServerDocuments({
       resolveUri: (filePath) => this.resolveDocumentUri(filePath),
       notify: (method, params) => this.sendNotification(method, params),
@@ -76,7 +87,7 @@ export class MonacoLanguageServerSession {
     if (this.disposed) {
       throw new Error('Language server session is disposed.')
     }
-    await this.archiveCurrentHostLogs()
+    await this.logs.archive(this.transport, this.startResult)
     this.connection?.dispose()
     this.connection = null
     await this.stopHostSession()
@@ -98,14 +109,16 @@ export class MonacoLanguageServerSession {
         : {})
     })
     try {
-      this.startResult = await window.api.languageServers.start({
+      this.startResult = await this.transport.start({
         worktreeId: this.worktreeId,
         languageId: this.initialLanguageId
       })
-      const reader = new LanguageServerIpcReader(this.startResult.sessionId, (status, message) =>
-        this.handleProcessStatus(status, message)
+      const reader = new LanguageServerIpcReader(
+        this.startResult.sessionId,
+        this.transport,
+        (status, message) => this.handleProcessStatus(status, message)
       )
-      const writer = new LanguageServerIpcWriter(this.startResult.sessionId)
+      const writer = new LanguageServerIpcWriter(this.startResult.sessionId, this.transport)
       this.connection = createMessageConnection(reader, writer, NullLogger)
       this.registerServerMessages(this.connection)
       this.connection.listen()
@@ -113,7 +126,7 @@ export class MonacoLanguageServerSession {
         'initialize',
         {
           processId: null,
-          clientInfo: { name: 'Yiru', version: 'stage-3' },
+          clientInfo: { name: 'Yiru', version: 'stage-4' },
           rootUri: this.startResult.workspaceUri,
           workspaceFolders: [
             {
@@ -131,7 +144,11 @@ export class MonacoLanguageServerSession {
       if (reopenDocuments) {
         await this.documents.reopen()
       }
-      this.onStatus({ state: 'ready', serverName: result.serverInfo?.name })
+      this.onStatus({
+        state: 'ready',
+        serverName: result.serverInfo?.name,
+        hostLabel: this.startResult.hostLabel
+      })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       this.onStatus({ state: 'failed', message })
@@ -146,6 +163,10 @@ export class MonacoLanguageServerSession {
     return this.worktreeId
   }
 
+  getRuntimeEnvironmentId(): string | null {
+    return this.runtimeEnvironmentId?.trim() || null
+  }
+
   attachDocument(model: monaco.editor.ITextModel, filePath: string): Promise<Disposable> {
     return this.documents.attach(model, filePath)
   }
@@ -155,20 +176,7 @@ export class MonacoLanguageServerSession {
   }
 
   getDocumentModel(uri: string, canonicalFilePath?: string): monaco.editor.ITextModel | null {
-    const exact = this.documents.getModel(uri)
-    if (exact || !canonicalFilePath) {
-      return exact
-    }
-    const target = normalizeRuntimePathForComparison(canonicalFilePath)
-    return (
-      this.documents
-        .getModels()
-        .find(
-          (model) =>
-            model.uri.scheme === 'file' &&
-            normalizeRuntimePathForComparison(model.uri.fsPath) === target
-        ) ?? null
-    )
+    return this.documents.getModelByFilePath(uri, canonicalFilePath)
   }
 
   getPublishedDiagnostics(uri: string, modelVersion: number): LspDiagnostic[] {
@@ -183,20 +191,22 @@ export class MonacoLanguageServerSession {
     if (!this.startResult) {
       throw new Error('Language server is not ready.')
     }
-    return window.api.languageServers.resolveLocation({
+    return this.transport.resolveLocation({
       sessionId: this.startResult.sessionId,
       uri
     })
   }
 
-  async getLogs(): Promise<string[]> {
-    if (!this.startResult) {
-      return [...this.archivedHostLogs, ...this.protocolLogs].slice(-100)
-    }
-    const hostLogs = await window.api.languageServers
-      .getLogs({ sessionId: this.startResult.sessionId })
-      .catch(() => ({ lines: [] }))
-    return [...this.archivedHostLogs, ...hostLogs.lines, ...this.protocolLogs].slice(-100)
+  readWorkspaceTextFile(filePath: string, relativePath: string): Promise<string> {
+    return this.workspaceFiles.readText(filePath, relativePath)
+  }
+
+  writeWorkspaceTextFile(filePath: string, content: string): Promise<void> {
+    return this.workspaceFiles.writeText(filePath, content)
+  }
+
+  getLogs(): Promise<string[]> {
+    return this.logs.get(this.transport, this.startResult)
   }
 
   hasDocuments(): boolean {
@@ -221,6 +231,7 @@ export class MonacoLanguageServerSession {
       this.connection = null
     }
     await this.stopHostSession()
+    this.transport.dispose()
     this.onStatus({ state: 'stopped' })
   }
 
@@ -228,7 +239,7 @@ export class MonacoLanguageServerSession {
     if (!this.startResult) {
       throw new Error('Language server is not ready.')
     }
-    const resolved = await window.api.languageServers.resolveDocumentUri({
+    const resolved = await this.transport.resolveDocumentUri({
       sessionId: this.startResult.sessionId,
       filePath
     })
@@ -260,9 +271,8 @@ export class MonacoLanguageServerSession {
     )
     connection.onNotification('window/logMessage', (params: LspLogMessageParams) => {
       if (params?.message) {
-        this.protocolLogs.push(params.message.slice(0, 2_000))
+        this.logs.recordProtocolMessage(params.message)
       }
-      this.protocolLogs.splice(0, Math.max(0, this.protocolLogs.length - 100))
     })
   }
 
@@ -277,23 +287,12 @@ export class MonacoLanguageServerSession {
     }
   }
 
-  private async archiveCurrentHostLogs(): Promise<void> {
-    if (!this.startResult) {
-      return
-    }
-    const result = await window.api.languageServers
-      .getLogs({ sessionId: this.startResult.sessionId })
-      .catch(() => ({ lines: [] }))
-    this.archivedHostLogs.push(...result.lines.map((line) => `[previous server] ${line}`))
-    this.archivedHostLogs.splice(0, Math.max(0, this.archivedHostLogs.length - 100))
-  }
-
   private async stopHostSession(): Promise<void> {
     if (!this.startResult) {
       return
     }
     const { sessionId } = this.startResult
     this.startResult = null
-    await window.api.languageServers.stop({ sessionId }).catch(() => {})
+    await this.transport.stop(sessionId).catch(() => {})
   }
 }

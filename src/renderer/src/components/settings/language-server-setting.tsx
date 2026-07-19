@@ -49,7 +49,7 @@ export function LanguageServerSetting({
         )}
         description={translate(
           'auto.components.settings.LanguageServerSetting.description',
-          'Configure one local language server for diagnostics, completion, and code navigation.'
+          'Run one language server on the native, WSL, SSH, or runtime host that owns the code.'
         )}
       />
       <SearchableSetting
@@ -59,7 +59,7 @@ export function LanguageServerSetting({
         )}
         description={translate(
           'auto.components.settings.LanguageServerSetting.description',
-          'Configure one local language server for diagnostics, completion, and code navigation.'
+          'Run one language server on the native, WSL, SSH, or runtime host that owns the code.'
         )}
         keywords={[
           'lsp',
@@ -81,7 +81,7 @@ export function LanguageServerSetting({
             )}
             description={translate(
               'auto.components.settings.LanguageServerSetting.enableDescription',
-              'Run the configured executable when a matching local source file is open.'
+              'Run the configured executable on the code’s execution host when a matching file is open.'
             )}
             checked={languageServer.enabled}
             onChange={() =>
@@ -102,7 +102,7 @@ export function LanguageServerSetting({
               <p className="text-xs text-muted-foreground">
                 {translate(
                   'auto.components.settings.LanguageServerSetting.commandDescription',
-                  'A command on the local PATH or an absolute executable path. Yiru does not invoke a shell.'
+                  'A PATH command available on each execution host, or an absolute host-specific executable path.'
                 )}
               </p>
             </div>
@@ -170,7 +170,7 @@ export function LanguageServerSetting({
               <p className="text-xs text-muted-foreground">
                 {translate(
                   'auto.components.settings.LanguageServerSetting.languagesDescription',
-                  'Comma-separated IDs such as c, cpp. Only matching local edit models are shared.'
+                  'Comma-separated IDs such as c, cpp. Only matching editable models are shared.'
                 )}
               </p>
             </div>
@@ -194,7 +194,7 @@ export function LanguageServerSetting({
             <p className="text-[11px] text-muted-foreground">
               {translate(
                 'auto.components.settings.LanguageServerSetting.localOnly',
-                'Local only: server-requested workspace edits and commands are rejected.'
+                'Rename and code-action edits require preview; unsolicited edits, file operations, and commands are rejected.'
               )}
             </p>
           </div>

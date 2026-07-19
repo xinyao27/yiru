@@ -1,6 +1,7 @@
 import type * as monaco from 'monaco-editor'
 import type { Disposable } from 'vscode-jsonrpc/browser'
 import type { LspPosition, LspServerCapabilities } from './language-server-protocol'
+import { normalizeRuntimePathForComparison } from '../../../shared/cross-platform-path'
 
 type DocumentState = {
   refs: number
@@ -61,6 +62,21 @@ export class MonacoLanguageServerDocuments {
       }
     }
     return null
+  }
+
+  getModelByFilePath(uri: string, canonicalFilePath?: string): monaco.editor.ITextModel | null {
+    const exact = this.getModel(uri)
+    if (exact || !canonicalFilePath) {
+      return exact
+    }
+    const target = normalizeRuntimePathForComparison(canonicalFilePath)
+    return (
+      this.getModels().find(
+        (model) =>
+          model.uri.scheme === 'file' &&
+          normalizeRuntimePathForComparison(model.uri.fsPath) === target
+      ) ?? null
+    )
   }
 
   getModels(): monaco.editor.ITextModel[] {

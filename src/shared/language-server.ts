@@ -73,6 +73,8 @@ export type LanguageServerStartResult = {
   workspacePath: string
   workspaceUri: string
   commandLabel: string
+  hostId: string
+  hostLabel: string
 }
 
 export type LanguageServerSendArgs = {
@@ -98,6 +100,8 @@ export type LanguageServerLocationResult = {
   filePath: string
   relativePath: string
 }
+
+export const LANGUAGE_SERVER_EVENT_CHANNEL = 'languageServers:event' as const
 
 export type LanguageServerSessionStatus = 'running' | 'stopped' | 'failed'
 

@@ -11,7 +11,6 @@ import type { MonacoLanguageServerSession } from './monaco-language-server-sessi
 import { applyLanguageServerTextEdits } from './language-server-text-edits'
 import {
   applyLanguageServerWorkspaceEdit,
-  readLocalTextFile,
   utf8Size,
   type LanguageServerWorkspaceEditTarget
 } from './language-server-workspace-edit-apply'
@@ -145,6 +144,7 @@ async function planFile(
   const openFiles = state.openFiles.filter(
     (file) =>
       file.worktreeId === session.getWorktreeId() &&
+      (file.runtimeEnvironmentId?.trim() || null) === session.getRuntimeEnvironmentId() &&
       normalizeRuntimePathForComparison(file.filePath) ===
         normalizeRuntimePathForComparison(group.filePath)
   )
@@ -158,7 +158,9 @@ async function planFile(
   if (group.version !== null && (!model || model.getVersionId() !== group.version)) {
     throw new Error(`Document version changed before the edit: ${group.relativePath}`)
   }
-  const before = model ? model.getValue() : await readLocalTextFile(group.filePath)
+  const before = model
+    ? model.getValue()
+    : await session.readWorkspaceTextFile(group.filePath, group.relativePath)
   if (utf8Size(before) > MAX_FILE_BYTES) {
     throw new Error(`File is too large to edit safely: ${group.relativePath}`)
   }
@@ -173,7 +175,9 @@ async function planFile(
     isDirty: openFile?.isDirty === true,
     model,
     modelVersion: model?.getVersionId() ?? null,
-    openFileId: openFile?.id ?? null
+    openFileId: openFile?.id ?? null,
+    readText: () => session.readWorkspaceTextFile(group.filePath, group.relativePath),
+    writeText: (content) => session.writeWorkspaceTextFile(group.filePath, content)
   }
 }
 

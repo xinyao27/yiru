@@ -32,6 +32,7 @@ import { markFileChangedOnDisk } from './editor-changed-on-disk-mark'
 import { flushPendingEditorChange } from './editor-pending-flush'
 import {
   clearSelfWrite,
+  getEditorSelfWriteHostId,
   hasRecentSelfWrite,
   recordSelfWrite,
   SELF_WRITE_REMOTE_TTL_MS
@@ -117,10 +118,14 @@ export function attachEditorAutosaveController(store: AppStoreApi): () => void {
         // round-tripping back into a setContent that jumps the cursor to the
         // end (and, under round-trip drift, can drop keystrokes typed in the
         // debounce window). See editor-self-write-registry.
+        const selfWriteHostId = getEditorSelfWriteHostId(
+          liveFile.runtimeEnvironmentId,
+          connectionId
+        )
         recordSelfWrite(
           liveFile.filePath,
           contentToSave,
-          liveFile.runtimeEnvironmentId,
+          selfWriteHostId,
           connectionId || liveFile.runtimeEnvironmentId?.trim()
             ? SELF_WRITE_REMOTE_TTL_MS
             : undefined
@@ -140,7 +145,7 @@ export function attachEditorAutosaveController(store: AppStoreApi): () => void {
           // Why: the self-write stamp is only valid if a disk write actually
           // happened. Clearing it on failure keeps the external watcher from
           // suppressing a real third-party update that lands during the TTL.
-          clearSelfWrite(liveFile.filePath, liveFile.runtimeEnvironmentId)
+          clearSelfWrite(liveFile.filePath, selfWriteHostId)
           throw error
         }
 
@@ -444,9 +449,15 @@ export function attachEditorAutosaveController(store: AppStoreApi): () => void {
         // echo of Yiru's own save (the combined-Changes reload notification
         // routes through here and would otherwise bypass the watch hook's
         // echo verification).
-        if (!hasRecentSelfWrite(file.filePath, file.runtimeEnvironmentId)) {
+        const connectionId = getConnectionIdForFile(file.worktreeId, file.filePath) ?? undefined
+        if (
+          !hasRecentSelfWrite(
+            file.filePath,
+            getEditorSelfWriteHostId(file.runtimeEnvironmentId, connectionId)
+          )
+        ) {
           markFileChangedOnDisk(state, file, {
-            connectionId: getConnectionIdForFile(file.worktreeId, file.filePath) ?? undefined,
+            connectionId,
             origin: 'live'
           })
         }

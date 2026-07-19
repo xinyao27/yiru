@@ -1,6 +1,5 @@
 import type * as monaco from 'monaco-editor'
 import { useAppStore } from '@/store'
-import { clearSelfWrite, recordSelfWrite } from '@/components/editor/editor-self-write-registry'
 
 export type LanguageServerWorkspaceEditTarget = {
   filePath: string
@@ -13,6 +12,8 @@ export type LanguageServerWorkspaceEditTarget = {
   model: monaco.editor.ITextModel | null
   modelVersion: number | null
   openFileId: string | null
+  readText: () => Promise<string>
+  writeText: (content: string) => Promise<void>
 }
 
 export async function applyLanguageServerWorkspaceEdit(
@@ -25,10 +26,10 @@ export async function applyLanguageServerWorkspaceEdit(
   const changedModels: LanguageServerWorkspaceEditTarget[] = []
   try {
     for (const file of diskFiles) {
-      if ((await readLocalTextFile(file.filePath)) !== file.before) {
+      if ((await file.readText()) !== file.before) {
         throw new Error(`File changed while applying edits: ${file.relativePath}`)
       }
-      await writeLocalTextFile(file.filePath, file.after)
+      await file.writeText(file.after)
       written.push(file)
     }
     for (const file of modelFiles) {
@@ -78,7 +79,7 @@ async function revalidatePlan(files: LanguageServerWorkspaceEditTarget[]): Promi
       ) {
         throw new Error(`Editor content changed while previewing: ${file.relativePath}`)
       }
-    } else if ((await readLocalTextFile(file.filePath)) !== file.before) {
+    } else if ((await file.readText()) !== file.before) {
       throw new Error(`File changed on disk while previewing: ${file.relativePath}`)
     }
   }
@@ -105,10 +106,10 @@ async function rollbackDiskFiles(files: LanguageServerWorkspaceEditTarget[]): Pr
   for (const file of files.toReversed()) {
     try {
       // Why: never overwrite a third-party write that raced with our failed transaction.
-      if ((await readLocalTextFile(file.filePath)) !== file.after) {
+      if ((await file.readText()) !== file.after) {
         throw new Error('File changed after workspace edit write.')
       }
-      await writeLocalTextFile(file.filePath, file.before)
+      await file.writeText(file.before)
     } catch {
       failures.push(file.relativePath)
     }
@@ -146,24 +147,6 @@ function updateOpenFileState(
   // supply a fallback when that synchronous listener did not update the bit.
   if (forceDirty || current?.isDirty === file.isDirty) {
     state.markFileDirty(file.openFileId, dirty)
-  }
-}
-
-export async function readLocalTextFile(filePath: string): Promise<string> {
-  const result = await window.api.fs.readFile({ filePath })
-  if (result.isBinary) {
-    throw new Error('Language server workspace edits cannot modify binary files.')
-  }
-  return result.content
-}
-
-async function writeLocalTextFile(filePath: string, content: string): Promise<void> {
-  recordSelfWrite(filePath, content, null)
-  try {
-    await window.api.fs.writeFile({ filePath, content })
-  } catch (error) {
-    clearSelfWrite(filePath, null)
-    throw error
   }
 }
 

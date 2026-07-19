@@ -8,7 +8,7 @@ import { normalizeAbsolutePathForComparison } from '@/components/right-sidebar/f
 // getMarkdown() round-trip) can drift by a trailing newline or soft-break,
 // the reload can silently drop unsaved keystrokes as well. Stamping a path
 // right before writeFile lets the watch hook ignore the echo event without
-// touching the editor at all. Keyed by runtime owner + normalized absolute
+// touching the editor at all. Keyed by execution host + normalized absolute
 // path, bounded by a short TTL so a genuinely external edit that lands after
 // the window still gets picked up.
 const SELF_WRITE_TTL_MS = 750
@@ -29,8 +29,20 @@ type SelfWriteStamp = RecentSelfWrite & {
 
 const stamps = new Map<string, SelfWriteStamp>()
 
-function selfWriteKey(absolutePath: string, runtimeEnvironmentId?: string | null): string {
-  return `${runtimeEnvironmentId?.trim() || 'client'}::${normalizeAbsolutePathForComparison(absolutePath)}`
+export function getEditorSelfWriteHostId(
+  runtimeEnvironmentId?: string | null,
+  connectionId?: string | null
+): string | null {
+  const runtime = runtimeEnvironmentId?.trim()
+  if (runtime) {
+    return `runtime:${runtime}`
+  }
+  const connection = connectionId?.trim()
+  return connection ? `ssh:${connection}` : null
+}
+
+function selfWriteKey(absolutePath: string, executionHostId?: string | null): string {
+  return `${executionHostId?.trim() || 'client'}::${normalizeAbsolutePathForComparison(absolutePath)}`
 }
 
 function pruneExpiredSelfWrites(now = Date.now()): void {
@@ -54,12 +66,12 @@ function enforceSelfWriteStampLimit(): void {
 export function recordSelfWrite(
   absolutePath: string,
   content?: string,
-  runtimeEnvironmentId?: string | null,
+  executionHostId?: string | null,
   ttlMs: number = SELF_WRITE_TTL_MS
 ): void {
   const now = Date.now()
   pruneExpiredSelfWrites(now)
-  const key = selfWriteKey(absolutePath, runtimeEnvironmentId)
+  const key = selfWriteKey(absolutePath, executionHostId)
   // Why: a missing watcher echo should not leave stale path/content stamps in
   // memory for the whole renderer session.
   stamps.delete(key)
@@ -70,15 +82,15 @@ export function recordSelfWrite(
   enforceSelfWriteStampLimit()
 }
 
-export function clearSelfWrite(absolutePath: string, runtimeEnvironmentId?: string | null): void {
-  stamps.delete(selfWriteKey(absolutePath, runtimeEnvironmentId))
+export function clearSelfWrite(absolutePath: string, executionHostId?: string | null): void {
+  stamps.delete(selfWriteKey(absolutePath, executionHostId))
 }
 
 export function getRecentSelfWrite(
   absolutePath: string,
-  runtimeEnvironmentId?: string | null
+  executionHostId?: string | null
 ): RecentSelfWrite | null {
-  const key = selfWriteKey(absolutePath, runtimeEnvironmentId)
+  const key = selfWriteKey(absolutePath, executionHostId)
   const stamp = stamps.get(key)
   if (!stamp) {
     return null
@@ -90,11 +102,8 @@ export function getRecentSelfWrite(
   return { content: stamp.content }
 }
 
-export function hasRecentSelfWrite(
-  absolutePath: string,
-  runtimeEnvironmentId?: string | null
-): boolean {
-  return getRecentSelfWrite(absolutePath, runtimeEnvironmentId) !== null
+export function hasRecentSelfWrite(absolutePath: string, executionHostId?: string | null): boolean {
+  return getRecentSelfWrite(absolutePath, executionHostId) !== null
 }
 
 export function __clearSelfWriteRegistryForTests(): void {

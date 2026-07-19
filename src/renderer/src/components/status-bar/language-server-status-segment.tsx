@@ -146,7 +146,7 @@ export function LanguageServerStatusSegment({
             <p className="text-xs text-muted-foreground">
               {translate(
                 'auto.components.status.bar.LanguageServerStatusSegment.idle',
-                'Open a configured local source file to start the server.'
+                'Open a configured source file to start the server on its execution host.'
               )}
             </p>
           )}
@@ -185,6 +185,7 @@ function SessionStatus({ status }: { status: LanguageServerManagerStatus }): Rea
         <span className={statusTextClass(status.state)}>{getStatusLabel(status.state)}</span>
       </div>
       {status.serverName ? <p className="text-muted-foreground">{status.serverName}</p> : null}
+      {status.hostLabel ? <p className="text-muted-foreground">{status.hostLabel}</p> : null}
       {status.message ? <p className="break-words text-destructive">{status.message}</p> : null}
     </div>
   )

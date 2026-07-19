@@ -4,13 +4,22 @@ import {
   normalizeLanguageServerSettings,
   type LanguageServerSettings
 } from '../../../shared/language-server'
+import type { LanguageServerDocumentAttachment } from './language-server-document-attachment'
+import type {
+  LanguageServerManagerSnapshot,
+  LanguageServerManagerStatus
+} from './language-server-manager-status'
 import { MonacoLanguageServerDiagnostics } from './monaco-language-server-diagnostics'
 import { MonacoLanguageServerFeatures } from './monaco-language-server-features'
 import {
   MonacoLanguageServerSession,
   type LanguageServerSessionStatusUpdate
 } from './monaco-language-server-session'
-import { normalizeDefinitions, toLspPosition } from './monaco-language-server-conversions'
+import { createLanguageServerSessionTransport } from './language-server-session-transport'
+import {
+  findLanguageServerDefinition,
+  type LanguageServerNavigationTarget
+} from './monaco-language-server-navigation'
 
 const SESSION_IDLE_MS = 5_000
 // Why: restarts have a per-session lifetime budget so a broken user binary
@@ -36,35 +45,9 @@ type DocumentRoute = {
   refs: number
 }
 
-export type LanguageServerManagerStatus = {
-  key: string
-  worktreeId: string
-  state: 'starting' | 'ready' | 'failed' | 'stopped'
-  message?: string
-  serverName?: string
-  updatedAt: number
-}
+export type { LanguageServerManagerStatus } from './language-server-manager-status'
 
-export type LanguageServerManagerSnapshot = {
-  sessions: LanguageServerManagerStatus[]
-}
-
-export type LanguageServerDocumentAttachment = {
-  model: monaco.editor.ITextModel
-  filePath: string
-  worktreeId: string
-  runtimeEnvironmentId?: string | null
-  connectionId: string | null | undefined
-  readOnly: boolean
-  settings: LanguageServerSettings | undefined
-}
-
-export type LanguageServerNavigationTarget = {
-  filePath: string
-  relativePath: string
-  line: number
-  column: number
-}
+export type { LanguageServerNavigationTarget } from './monaco-language-server-navigation'
 
 class MonacoLanguageServerManager {
   private readonly sessions = new Map<string, SessionRecord>()
@@ -87,14 +70,20 @@ class MonacoLanguageServerManager {
     if (
       !settings.enabled ||
       options.readOnly ||
-      options.connectionId !== null ||
-      options.runtimeEnvironmentId?.trim() ||
       !settings.languageIds.includes(options.model.getLanguageId())
     ) {
       return null
     }
-    const key = `${options.worktreeId}\0${JSON.stringify(settings)}`
-    const record = this.ensureSession(key, options.worktreeId, options.model.getLanguageId())
+    const hostKey = options.runtimeEnvironmentId?.trim() || options.connectionId || 'local'
+    const key = `${options.worktreeId}\0${hostKey}\0${JSON.stringify(settings)}`
+    const record = this.ensureSession(
+      key,
+      options.worktreeId,
+      options.model.getLanguageId(),
+      settings,
+      options.runtimeEnvironmentId,
+      options.connectionId
+    )
     record.pendingAttachments++
     try {
       await record.startPromise
@@ -130,38 +119,37 @@ class MonacoLanguageServerManager {
     position: monaco.Position,
     token: monaco.CancellationToken
   ): Promise<LanguageServerNavigationTarget | null> {
-    const route = this.getModelRoute(model)
-    if (!route?.session.features.supportsDefinition()) {
-      return null
-    }
-    const definitions = normalizeDefinitions(
-      await route.session.features.definition(route.uri, toLspPosition(position), token)
-    )
-    for (const definition of definitions) {
-      try {
-        const location = await route.session.resolveLocation(definition.uri)
-        return {
-          ...location,
-          line: definition.range.start.line + 1,
-          column: definition.range.start.character + 1
-        }
-      } catch {
-        // Definitions outside the authorized workspace are skipped, not opened.
-      }
-    }
-    return null
+    return findLanguageServerDefinition(this.getModelRoute(model), position, token)
   }
 
   async getLogs(key: string): Promise<string[]> {
     return this.sessions.get(key)?.session.getLogs() ?? []
   }
 
-  private ensureSession(key: string, worktreeId: string, languageId: string): SessionRecord {
+  private ensureSession(
+    key: string,
+    worktreeId: string,
+    languageId: string,
+    settings: LanguageServerSettings,
+    runtimeEnvironmentId?: string | null,
+    connectionId?: string | null
+  ): SessionRecord {
     const existing = this.sessions.get(key)
     if (existing) {
       if (existing.idleTimer) {
         clearTimeout(existing.idleTimer)
         existing.idleTimer = null
+      }
+      if (
+        this.statuses.get(key)?.state === 'failed' &&
+        !existing.restartTimer &&
+        !existing.restartInFlight
+      ) {
+        // Why: closing/reopening a tab is the explicit retry after the bounded
+        // crash budget, including after an SSH or runtime host reconnects.
+        existing.restartAttempts = 0
+        existing.startPromise = existing.session.restart()
+        void existing.startPromise.catch(() => {})
       }
       return existing
     }
@@ -171,6 +159,9 @@ class MonacoLanguageServerManager {
       key,
       worktreeId,
       languageId,
+      createLanguageServerSessionTransport({ runtimeEnvironmentId, settings }),
+      runtimeEnvironmentId,
+      connectionId,
       (update) => this.handleSessionStatus(record, update),
       (params) => {
         if (this.sessions.get(key) === record) {
@@ -310,7 +301,13 @@ class MonacoLanguageServerManager {
     if (update.state === 'stopped') {
       this.statuses.delete(key)
     } else {
-      this.statuses.set(key, { key, worktreeId, ...update, updatedAt: Date.now() })
+      this.statuses.set(key, {
+        ...this.statuses.get(key),
+        key,
+        worktreeId,
+        ...update,
+        updatedAt: Date.now()
+      })
     }
     this.snapshot = {
       sessions: [...this.statuses.values()].sort((left, right) => right.updatedAt - left.updatedAt)

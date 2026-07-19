@@ -29,6 +29,9 @@ export function useMonacoLanguageServer({
   const connectionId = useAppStore((state) =>
     getConnectionIdForFileFromState(state, worktreeId ?? null, filePath)
   )
+  const connectionStatus = useAppStore((state) =>
+    connectionId ? state.sshConnectionStates.get(connectionId)?.status : null
+  )
 
   useEffect(() => {
     if (!editorInstance || !worktreeId) {
@@ -129,5 +132,14 @@ export function useMonacoLanguageServer({
       definitionContextRef.current?.set(false)
       attachment?.dispose()
     }
-  }, [connectionId, editorInstance, filePath, readOnly, runtimeEnvironmentId, settings, worktreeId])
+  }, [
+    connectionId,
+    connectionStatus,
+    editorInstance,
+    filePath,
+    readOnly,
+    runtimeEnvironmentId,
+    settings,
+    worktreeId
+  ])
 }
