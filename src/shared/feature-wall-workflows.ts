@@ -5,12 +5,7 @@ import {
   type FeatureWallMediaTileId
 } from './feature-wall-tiles'
 
-export type FeatureWallWorkflowId =
-  | 'tasks'
-  | 'workspaces'
-  | 'agents-orchestration'
-  | 'workbench'
-  | 'review'
+export type FeatureWallWorkflowId = 'workspaces' | 'agents-orchestration' | 'workbench' | 'review'
 
 export type FeatureWallWorkflow = {
   id: FeatureWallWorkflowId
@@ -31,15 +26,6 @@ export const FEATURE_WALL_WORKFLOWS: readonly FeatureWallWorkflow[] = [
     primaryTileId: 'tile-01',
     relatedTileIds: ['tile-10'],
     docsUrl: 'https://yiru.ai/docs/model/worktrees'
-  },
-  {
-    id: 'tasks',
-    title: 'Tasks',
-    meta: 'GitHub · Linear',
-    lede: 'Start work directly from GitHub or Linear.',
-    primaryTileId: 'tile-03',
-    relatedTileIds: [],
-    docsUrl: 'https://yiru.ai/docs/review/linear'
   },
   {
     id: 'agents-orchestration',

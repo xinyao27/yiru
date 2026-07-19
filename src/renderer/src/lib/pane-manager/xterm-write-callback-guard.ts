@@ -6,8 +6,7 @@ import { recordRendererCrashBreadcrumb } from '@/lib/crash-breadcrumb-recorder'
 // buffer never is again. One escaping throw therefore permanently freezes the
 // pane: output stops rendering and a pending replay guard never releases, so
 // the pane silently eats every keystroke while the shell stays alive
-// (Discord #performance / issue #2836). Verified against the vendored xterm
-// 6.1.0-beta.287 in xterm-write-buffer-stall.repro.test.ts.
+// (Discord #performance / issue #2836).
 const MAX_REPORTS_PER_CONTEXT = 5
 const reportCountsByContext = new Map<string, number>()
 

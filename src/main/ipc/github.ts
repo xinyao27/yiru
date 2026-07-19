@@ -6,8 +6,6 @@ import { ipcMain } from 'electron'
 import { resolve } from 'node:path'
 import type {
   Repo,
-  GitHubCreateIssueFields,
-  GitHubIssueUpdate,
   GitHubOwnerRepo,
   GitHubPullRequestStateUpdate,
   GitHubPRRefreshCandidate,
@@ -16,24 +14,19 @@ import type {
   PRRefreshOutcome
 } from '../../shared/types'
 import { getRepoExecutionHostId } from '../../shared/execution-host'
-import type { TaskSourceContext } from '../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../shared/project-source-context'
 import type { Store } from '../persistence'
 import type { StatsCollector } from '../stats/collector'
 import {
   getPRForBranch,
-  getIssue,
   getRepoSlug,
   getRepoUpstream,
-  listIssues,
   listWorkItems,
-  countWorkItems,
   getWorkItem,
   getWorkItemByOwnerRepo,
-  createIssue,
-  updateIssue,
-  addIssueComment,
-  listLabels,
-  listAssignableUsers,
+  addPullRequestComment,
+  listPullRequestLabels,
+  listPullRequestAssignableUsers,
   getAuthenticatedViewer,
   getPRChecks,
   getPRCheckDetails,
@@ -70,41 +63,6 @@ import {
 import { getLocalProjectWorktreeGitOptions } from '../project-runtime-git-options'
 import type { GitHubPRFile } from '../../shared/types'
 import { dispatchWorkItem, type WorkItemArgs } from './github-work-item-args'
-import {
-  getProjectViewTable,
-  listAccessibleProjects,
-  resolveProjectRef,
-  listProjectViews,
-  getWorkItemDetailsBySlug,
-  updateProjectItemFieldValue,
-  clearProjectItemFieldValue,
-  updateIssueBySlug,
-  updatePullRequestBySlug,
-  addIssueCommentBySlug,
-  updateIssueCommentBySlug,
-  deleteIssueCommentBySlug,
-  listLabelsBySlug,
-  listAssignableUsersBySlug,
-  listIssueTypesBySlug,
-  updateIssueTypeBySlug
-} from '../github/project-view'
-import type {
-  AddIssueCommentBySlugArgs,
-  ClearProjectItemFieldArgs,
-  DeleteIssueCommentBySlugArgs,
-  GetProjectViewTableArgs,
-  ListAssignableUsersBySlugArgs,
-  ListIssueTypesBySlugArgs,
-  ListLabelsBySlugArgs,
-  ListProjectViewsArgs,
-  ProjectWorkItemDetailsBySlugArgs,
-  ResolveProjectRefArgs,
-  UpdateIssueBySlugArgs,
-  UpdateIssueCommentBySlugArgs,
-  UpdateIssueTypeBySlugArgs,
-  UpdateProjectItemFieldArgs,
-  UpdatePullRequestBySlugArgs
-} from '../../shared/github-project-types'
 import { appStarSourceSchema } from '../../shared/gh-star-source'
 import { track } from '../telemetry/client'
 import { getCohortAtEmit } from '../telemetry/cohort-classifier'
@@ -118,7 +76,7 @@ function broadcastWorkItemMutated(
   payload: {
     repoPath: string
     repoId?: string
-    type: 'issue' | 'pr'
+    type: 'pr'
     number: number
   },
   senderId?: number
@@ -131,7 +89,7 @@ function broadcastWorkItemMutated(
 type RepoScopedArgs = {
   repoPath: string
   repoId?: string | null
-  sourceContext?: TaskSourceContext | null
+  sourceContext?: ProjectSourceContext | null
 }
 
 type RegisteredRepoValidationResult =
@@ -370,61 +328,6 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
   )
 
   ipcMain.handle(
-    'gh:issue',
-    (
-      _event,
-      args: {
-        repoPath: string
-        repoId?: string | null
-        sourceContext?: TaskSourceContext | null
-        number: number
-      }
-    ) => {
-      const repo = assertRegisteredRepo(args, store)
-      return getIssue(
-        repo.path,
-        args.number,
-        repoConnectionId(repo),
-        ...localGitOptionArgs(store, repo)
-      )
-    }
-  )
-
-  ipcMain.handle('gh:listIssues', (_event, args: { repoPath: string; limit?: number }) => {
-    const repo = assertRegisteredRepo(args, store)
-    // Why: listIssues now returns { items, error? }. The IPC handler unwraps to
-    // the items array for the existing contract; feature 1's UI consumes the
-    // richer envelope through `gh:listWorkItems` instead.
-    return listIssues(
-      repo.path,
-      args.limit,
-      repo.issueSourcePreference,
-      repoConnectionId(repo),
-      ...localGitOptionArgs(store, repo)
-    ).then((r) => r.items)
-  })
-
-  ipcMain.handle(
-    'gh:createIssue',
-    (_event, args: RepoScopedArgs & { title: string; body: string } & GitHubCreateIssueFields) => {
-      const repo = assertRegisteredRepo(args, store)
-      const fields =
-        args.labels !== undefined || args.assignees !== undefined
-          ? { labels: args.labels, assignees: args.assignees }
-          : undefined
-      return createIssue(
-        repo.path,
-        args.title,
-        args.body,
-        repo.issueSourcePreference,
-        repoConnectionId(repo),
-        fields,
-        ...localGitOptionArgs(store, repo)
-      )
-    }
-  )
-
-  ipcMain.handle(
     'gh:listWorkItems',
     (
       _event,
@@ -443,24 +346,13 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
         args.limit,
         args.query,
         args.page,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         args.noCache,
         ...localGitOptionArgs(store, repo)
       )
     }
   )
-
-  ipcMain.handle('gh:countWorkItems', (_event, args: { repoPath: string; query?: string }) => {
-    const repo = assertRegisteredRepo(args, store)
-    return countWorkItems(
-      repo.path,
-      args.query,
-      repo.issueSourcePreference,
-      repoConnectionId(repo),
-      ...localGitOptionArgs(store, repo)
-    )
-  })
 
   ipcMain.handle('gh:workItem', (_event, args: WorkItemArgs) => {
     const repo = assertRegisteredRepo(args, store)
@@ -475,7 +367,7 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
         owner: string
         repo: string
         number: number
-        type: 'issue' | 'pr'
+        type: 'pr'
       }
     ) => {
       const repo = assertRegisteredRepo(args, store)
@@ -501,7 +393,7 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
       args: {
         repoPath: string
         repoId?: string
-        type: 'issue' | 'pr'
+        type: 'pr'
         number: number
       }
     ) => {
@@ -512,7 +404,7 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
         return false
       }
       if (
-        (args.type !== 'issue' && args.type !== 'pr') ||
+        args.type !== 'pr' ||
         typeof args.number !== 'number' ||
         !Number.isInteger(args.number) ||
         args.number < 1
@@ -584,7 +476,7 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
       args: {
         repoPath: string
         repoId?: string | null
-        sourceContext?: TaskSourceContext | null
+        sourceContext?: ProjectSourceContext | null
         prNumber: number
         headSha?: string
         prRepo?: GitHubOwnerRepo | null
@@ -613,7 +505,7 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
       args: {
         repoPath: string
         repoId?: string | null
-        sourceContext?: TaskSourceContext | null
+        sourceContext?: ProjectSourceContext | null
         checkRunId?: number
         workflowRunId?: number
         checkName?: string
@@ -644,7 +536,7 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
       args: {
         repoPath: string
         repoId?: string | null
-        sourceContext?: TaskSourceContext | null
+        sourceContext?: ProjectSourceContext | null
         prNumber: number
         prRepo?: GitHubOwnerRepo | null
         noCache?: boolean
@@ -668,7 +560,7 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
       args: {
         repoPath: string
         repoId?: string | null
-        sourceContext?: TaskSourceContext | null
+        sourceContext?: ProjectSourceContext | null
         threadId: string
         resolve: boolean
       }
@@ -738,7 +630,7 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
       args: {
         repoPath: string
         repoId?: string
-        sourceContext?: TaskSourceContext | null
+        sourceContext?: ProjectSourceContext | null
         prNumber: number
         commentId: number
         body: string
@@ -884,7 +776,7 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
       args: {
         repoPath: string
         repoId?: string | null
-        sourceContext?: TaskSourceContext | null
+        sourceContext?: ProjectSourceContext | null
         prNumber: number
         method?: 'merge' | 'squash' | 'rebase'
         prRepo?: GitHubOwnerRepo | null
@@ -916,7 +808,7 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
       args: {
         repoPath: string
         repoId?: string | null
-        sourceContext?: TaskSourceContext | null
+        sourceContext?: ProjectSourceContext | null
         prNumber: number
         enabled: boolean
         method?: 'merge' | 'squash' | 'rebase'
@@ -1041,54 +933,26 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
   )
 
   ipcMain.handle(
-    'gh:updateIssue',
-    async (event, args: RepoScopedArgs & { number: number; updates: GitHubIssueUpdate }) => {
-      const repo = assertRegisteredRepo(args, store)
-      if (typeof args.number !== 'number' || !Number.isInteger(args.number) || args.number < 1) {
-        return { ok: false, error: 'Invalid issue number' }
-      }
-      if (!args.updates || typeof args.updates !== 'object') {
-        return { ok: false, error: 'Updates object is required' }
-      }
-      const result = await updateIssue(
-        repo.path,
-        args.number,
-        args.updates,
-        repoConnectionId(repo),
-        ...localGitOptionArgs(store, repo)
-      )
-      if (result.ok) {
-        broadcastWorkItemMutated(
-          { repoPath: repo.path, repoId: repo.id, type: 'issue', number: args.number },
-          event.sender.id
-        )
-      }
-      return result
-    }
-  )
-
-  ipcMain.handle(
-    'gh:addIssueComment',
+    'gh:addPRComment',
     async (
       event,
       args: {
         repoPath: string
         repoId?: string
-        sourceContext?: TaskSourceContext | null
+        sourceContext?: ProjectSourceContext | null
         number: number
         body: string
-        type?: 'issue' | 'pr'
         prRepo?: GitHubOwnerRepo | null
       }
     ) => {
       const repo = assertRegisteredRepo(args, store)
       if (typeof args.number !== 'number' || !Number.isInteger(args.number) || args.number < 1) {
-        return { ok: false, error: 'Invalid issue number' }
+        return { ok: false, error: 'Invalid pull request number' }
       }
       if (!args.body?.trim()) {
         return { ok: false, error: 'Comment body required' }
       }
-      const result = await addIssueComment(
+      const result = await addPullRequestComment(
         repo.path,
         args.number,
         args.body.trim(),
@@ -1097,13 +961,10 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
         ...localGitOptionArgs(store, repo)
       )
       if (result.ok) {
-        // Why: PR conversation comments hit `/issues/N/comments` too, but the
-        // drawer's cache key uses type='pr'. The caller passes through which
-        // drawer they're posting from so we only invalidate the matching key
-        // — broadcasting both would evict an unrelated PR/issue that happens
-        // to share the number.
+        // Why: GitHub stores PR conversation comments under the issues API,
+        // while renderer invalidation remains scoped to the pull request.
         broadcastWorkItemMutated(
-          { repoPath: repo.path, repoId: repo.id, type: args.type ?? 'issue', number: args.number },
+          { repoPath: repo.path, repoId: repo.id, type: 'pr', number: args.number },
           event.sender.id
         )
       }
@@ -1113,9 +974,8 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
 
   ipcMain.handle('gh:listLabels', (_event, args: RepoScopedArgs) => {
     const repo = assertRegisteredRepo(args, store)
-    return listLabels(
+    return listPullRequestLabels(
       repo.path,
-      repo.issueSourcePreference,
       repoConnectionId(repo),
       ...localGitOptionArgs(store, repo)
     )
@@ -1123,9 +983,8 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
 
   ipcMain.handle('gh:listAssignableUsers', (_event, args: RepoScopedArgs) => {
     const repo = assertRegisteredRepo(args, store)
-    return listAssignableUsers(
+    return listPullRequestAssignableUsers(
       repo.path,
-      repo.issueSourcePreference,
       repoConnectionId(repo),
       ...localGitOptionArgs(store, repo)
     )
@@ -1159,77 +1018,8 @@ export function registerGitHubHandlers(store: Store, stats: StatsCollector): voi
 
   ipcMain.handle('gh:diagnoseAuth', () => diagnoseGhAuth())
 
-  // ── GitHub ProjectV2 view handlers ─────────────────────────────────
-  // Why: registered unconditionally so enabling the experimental flag at
-  // runtime takes effect without a restart. The renderer gates entry points.
-  // Handlers never throw across IPC — every failure mode resolves through the
-  // GitHubProjectViewError envelope.
-
-  ipcMain.handle('gh:listAccessibleProjects', () => listAccessibleProjects())
-
-  ipcMain.handle('gh:resolveProjectRef', (_event, args: ResolveProjectRefArgs) =>
-    resolveProjectRef(args)
-  )
-
-  ipcMain.handle('gh:listProjectViews', (_event, args: ListProjectViewsArgs) =>
-    listProjectViews(args)
-  )
-
-  ipcMain.handle('gh:getProjectViewTable', (_event, args: GetProjectViewTableArgs) =>
-    getProjectViewTable(args)
-  )
-
-  ipcMain.handle(
-    'gh:projectWorkItemDetailsBySlug',
-    (_event, args: ProjectWorkItemDetailsBySlugArgs) => getWorkItemDetailsBySlug(args)
-  )
-
-  ipcMain.handle('gh:updateProjectItemField', (_event, args: UpdateProjectItemFieldArgs) =>
-    updateProjectItemFieldValue(args)
-  )
-
-  ipcMain.handle('gh:clearProjectItemField', (_event, args: ClearProjectItemFieldArgs) =>
-    clearProjectItemFieldValue(args)
-  )
-
-  ipcMain.handle('gh:updateIssueBySlug', (_event, args: UpdateIssueBySlugArgs) =>
-    updateIssueBySlug(args)
-  )
-
-  ipcMain.handle('gh:updatePullRequestBySlug', (_event, args: UpdatePullRequestBySlugArgs) =>
-    updatePullRequestBySlug(args)
-  )
-
-  ipcMain.handle('gh:addIssueCommentBySlug', (_event, args: AddIssueCommentBySlugArgs) =>
-    addIssueCommentBySlug(args)
-  )
-
-  ipcMain.handle('gh:updateIssueCommentBySlug', (_event, args: UpdateIssueCommentBySlugArgs) =>
-    updateIssueCommentBySlug(args)
-  )
-
-  ipcMain.handle('gh:deleteIssueCommentBySlug', (_event, args: DeleteIssueCommentBySlugArgs) =>
-    deleteIssueCommentBySlug(args)
-  )
-
-  ipcMain.handle('gh:listLabelsBySlug', (_event, args: ListLabelsBySlugArgs) =>
-    listLabelsBySlug(args)
-  )
-
-  ipcMain.handle('gh:listAssignableUsersBySlug', (_event, args: ListAssignableUsersBySlugArgs) =>
-    listAssignableUsersBySlug(args)
-  )
-
-  ipcMain.handle('gh:listIssueTypesBySlug', (_event, args: ListIssueTypesBySlugArgs) =>
-    listIssueTypesBySlug(args)
-  )
-
-  ipcMain.handle('gh:updateIssueTypeBySlug', (_event, args: UpdateIssueTypeBySlugArgs) =>
-    updateIssueTypeBySlug(args)
-  )
-
   // Why: issue-source preference writes go through the generic `repos:update`
-  // IPC (extended in this PR to accept `issueSourcePreference`). Routing
+  // IPC (extended in this PR to accept `forgeRemotePreference`). Routing
   // through the same channel keeps a single write path, guarantees the
   // `repos:changed` broadcast is emitted, and avoids two channels racing to
   // persist the same field with different validation and eviction semantics.

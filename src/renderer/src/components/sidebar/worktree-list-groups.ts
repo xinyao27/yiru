@@ -1058,8 +1058,8 @@ export function buildRows(
       }
     }
   } else if (groupBy === 'workspace-status') {
-    // Why: status grouping is opt-in while the board drawer remains the wider
-    // all-lanes drag target; keep the sidebar compact by omitting empty lanes.
+    // Why: status grouping is opt-in; empty groups add no navigation value and
+    // would make the sidebar unnecessarily tall.
     for (const status of workspaceStatuses) {
       const key = getWorkspaceStatusGroupKey(status.id)
       const group = grouped.get(key)

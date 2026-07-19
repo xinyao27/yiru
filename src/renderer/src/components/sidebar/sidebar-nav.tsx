@@ -15,7 +15,6 @@ import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { useMobileSidebarOnboardingBadge } from './mobile-sidebar-onboarding-badge'
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { SetupGuideSidebarEntry } from './setup-guide-sidebar-entry'
-import { SidebarTaskNavButton } from './sidebar-task-nav-button'
 import { HideSidebarMenu } from './sidebar-nav-controls'
 import { translate } from '@/i18n/i18n'
 
@@ -74,7 +73,6 @@ const SidebarNav = React.memo(function SidebarNav() {
       data-contextual-tour-target="sidebar-navigation"
     >
       <SetupGuideSidebarEntry />
-      <SidebarTaskNavButton />
       {showAutomationsButton ? (
         <ContextMenu>
           <ContextMenuTrigger

@@ -1,7 +1,7 @@
 import {
-  type GitHubIssueOrPRLink,
-  parseGitHubIssueOrPRLink,
-  parseGitHubIssueOrPRNumber
+  type GitHubPullRequestLink,
+  parseGitHubPullRequestLink,
+  parseGitHubPullRequestNumber
 } from '../github-links'
 import { isWorkItemLinkQueryTooLarge } from './work-item-link-query-bounds'
 
@@ -12,7 +12,7 @@ const HTTP_URL_PREFIX_RE = /^https?:\/\//i
 export type GitHubLinkQuery = {
   query: string
   directNumber: number | null
-  directLink?: GitHubIssueOrPRLink
+  directLink?: GitHubPullRequestLink
   tooLarge?: boolean
 }
 
@@ -29,12 +29,12 @@ export function normalizeGitHubLinkQuery(raw: string): GitHubLinkQuery {
     return { query: '', directNumber: null }
   }
 
-  const direct = parseGitHubIssueOrPRNumber(trimmed)
+  const direct = parseGitHubPullRequestNumber(trimmed)
   if (direct !== null && !HTTP_URL_PREFIX_RE.test(trimmed)) {
     return { query: trimmed, directNumber: direct }
   }
 
-  const link = parseGitHubIssueOrPRLink(trimmed)
+  const link = parseGitHubPullRequestLink(trimmed)
   if (!link) {
     return { query: trimmed, directNumber: null }
   }

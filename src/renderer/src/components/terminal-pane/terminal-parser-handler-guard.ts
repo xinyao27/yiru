@@ -5,9 +5,8 @@ import { recordRendererCrashBreadcrumb } from '@/lib/crash-breadcrumb-recorder'
 // handler throw skips the loop's tail re-schedule, and write() only re-arms
 // on an EMPTY buffer — one throw permanently freezes the pane (output stops;
 // a pending replay guard never releases and silently eats keystrokes).
-// Verified against vendored xterm 6.1.0-beta.287 in
-// xterm-write-buffer-stall.repro.test.ts. Same escape class as
-// terminal-link-provider-guard.ts, applied to parser handlers.
+// This guards the same escape class as terminal-link-provider-guard.ts, but
+// at the parser-handler boundary.
 const MAX_REPORTS_PER_HANDLER = 5
 const reportCountsByHandler = new Map<string, number>()
 

@@ -11,7 +11,6 @@ import {
   type RemoteYiruCliResult
 } from './ssh-remote-cli-host-passthrough'
 import { RemoteCliArgumentError, type ParsedRemoteCli } from './ssh-remote-cli-argument-error'
-import { getRemoteLinearHelp, tryDispatchRemoteLinearCli } from './ssh-remote-linear-cli'
 import {
   getRemoteOrchestrationPayload,
   hasRemoteLifecycleRejection,
@@ -94,17 +93,11 @@ async function runLegacyRemoteYiruCli(
   passthroughFailure: HostCliUnavailableError
 ): Promise<RemoteYiruCliResult> {
   const dispatcher = new RpcDispatcher({ runtime })
-  const help = getRemoteLinearHelp(parsed)
-  if (help) {
-    return { stdout: `${help}\n`, stderr: '', exitCode: 0 }
-  }
-
   try {
     const response = await dispatchRemoteCli(
       dispatcher,
       parsed,
       request.env,
-      request.stdin,
       passthroughFailure.message
     )
     const formatted = json
@@ -142,14 +135,9 @@ async function dispatchRemoteCli(
   dispatcher: RpcDispatcher,
   parsed: ParsedRemoteCli,
   env: Record<string, string>,
-  stdin: string | undefined,
   passthroughFailureReason: string
 ): Promise<RpcResponse> {
   const command = parsed.commandPath.join(' ')
-  const linearResponse = await tryDispatchRemoteLinearCli(dispatcher, parsed, env, stdin)
-  if (linearResponse) {
-    return linearResponse
-  }
   switch (command) {
     case 'status': {
       const response = await call(dispatcher, 'status.get')

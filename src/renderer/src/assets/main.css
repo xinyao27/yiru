@@ -221,14 +221,6 @@
   --sidebar-ring: var(--ring);
 }
 
-.linear-priority-bars {
-  --linear-priority-bar-inactive-fill: color-mix(in srgb, lch(39.576 1.25 282) 34%, transparent);
-}
-
-.dark .linear-priority-bars {
-  --linear-priority-bar-inactive-fill: color-mix(in srgb, lch(39.576 1.25 282) 62%, transparent);
-}
-
 [data-sonner-toaster] {
   font-family: var(--font-sans);
 }
@@ -1260,147 +1252,6 @@
   overflow: hidden;
 }
 
-/* Why: the workspace board is offset to the sidebar edge. The generic left
-   sheet translates by its full width, which makes an offset board fly in from
-   far offscreen; this reveals it from the sidebar boundary instead. */
-.workspace-kanban-sheet-content[data-state='open'] {
-  animation-name: workspace-kanban-sheet-in;
-  animation-duration: 300ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.workspace-kanban-sheet-content[data-state='closed'] {
-  animation-name: workspace-kanban-sheet-out;
-  animation-duration: 200ms;
-  animation-timing-function: cubic-bezier(0.7, 0, 0.84, 0);
-}
-
-/* Why: this board is attached to the worktree sidebar, not floating above it;
-   the generic Sheet elevation casts a haze over the sidebar when left open. */
-.workspace-kanban-sheet-content {
-  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--sidebar-border) 80%, transparent);
-  backdrop-filter: none;
-}
-
-/* Why: a sidebar-card drag should advertise the board as a possible drop
-   surface without fully committing the companion panel until the pointer enters it. */
-.workspace-kanban-sheet-content[data-workspace-board-drag-preview='true'] {
-  background: color-mix(in srgb, var(--sidebar) 88%, var(--background));
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--sidebar-ring) 58%, transparent),
-    0 10px 24px color-mix(in srgb, var(--foreground) 12%, transparent);
-}
-
-.workspace-kanban-sheet-content[data-workspace-board-drag-preview='true'] > * {
-  opacity: 0.42;
-}
-
-/* Why: while a card drag previews the board, pulse the toolbar trigger with the
-   same ring the drawer uses so it reads as another way to open the board. */
-@keyframes workspace-board-trigger-preview-pulse {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sidebar-ring) 55%, transparent);
-  }
-
-  70%,
-  100% {
-    box-shadow: 0 0 0 5px color-mix(in srgb, var(--sidebar-ring) 0%, transparent);
-  }
-}
-
-[data-workspace-board-trigger][data-workspace-board-preview='true'] {
-  animation: workspace-board-trigger-preview-pulse 1.4s ease-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-workspace-board-trigger][data-workspace-board-preview='true'] {
-    animation: none;
-  }
-}
-
-@keyframes workspace-kanban-sheet-in {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-@keyframes workspace-kanban-sheet-out {
-  from {
-    clip-path: inset(0 0 0 0);
-  }
-
-  to {
-    clip-path: inset(0 100% 0 0);
-  }
-}
-
-/* Why: board-origin cards use pointer drag so Shift+scroll can keep firing;
-   these replace the native drag cursor and ghost affordance. */
-[data-workspace-board-pointer-draggable='true'] {
-  cursor: grab;
-}
-
-[data-workspace-board-card-pointer-dragging='true'] {
-  outline: 1px solid var(--sidebar-ring);
-  outline-offset: 1px;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sidebar-ring) 36%, transparent);
-}
-
-[data-workspace-board-card-pointer-dragging='true'],
-[data-workspace-board-card-pointer-dragging='true'] *,
-:root[data-workspace-board-pointer-dragging] * {
-  cursor: grabbing !important;
-}
-
-[data-workspace-board-card-drag-preview='true'] {
-  z-index: 2147483647;
-  overflow: visible;
-  border-radius: var(--radius);
-  outline: 1px solid var(--sidebar-ring);
-  outline-offset: 1px;
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--foreground) 16%, transparent);
-  opacity: 0.96;
-  will-change: transform;
-}
-
-[data-workspace-board-card-drag-preview='true'][data-workspace-board-card-drag-stack='true'] {
-  isolation: isolate;
-}
-
-[data-workspace-board-card-drag-card='true'] {
-  width: 100%;
-  height: 100%;
-}
-
-[data-workspace-board-card-drag-preview='true'][data-workspace-board-card-drag-stack='true']::before,
-[data-workspace-board-card-drag-preview='true'][data-workspace-board-card-drag-stack='true']::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: var(--radius);
-  border: 1px solid color-mix(in srgb, var(--sidebar-ring) 44%, transparent);
-  background: var(--sidebar);
-}
-
-[data-workspace-board-card-drag-preview='true'][data-workspace-board-card-drag-stack='true']::before {
-  transform: translate(4px, 4px);
-  opacity: 0.72;
-}
-
-[data-workspace-board-card-drag-preview='true'][data-workspace-board-card-drag-stack='true']::after {
-  transform: translate(8px, 8px);
-  opacity: 0.44;
-}
-
-[data-workspace-board-card-drag-preview='true'] * {
-  cursor: grabbing !important;
-}
-
 [data-worktree-sidebar-drag-preview='true'] {
   z-index: 2147483000;
   overflow: visible;
@@ -1429,61 +1280,6 @@
   font-size: 10px;
   font-weight: 700;
   box-shadow: 0 0 0 2px var(--sidebar);
-}
-
-[data-workspace-board-card-drop-indicator='true'] {
-  z-index: 2147483646;
-  height: 3px;
-  border-radius: 9999px;
-  background: var(--sidebar-ring);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--sidebar-ring) 24%, transparent),
-    0 8px 20px color-mix(in srgb, var(--sidebar-ring) 36%, transparent);
-  opacity: 0;
-  transition:
-    transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    width 120ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 80ms ease-out;
-  will-change: transform, width, opacity;
-}
-
-[data-workspace-board-card-drop-indicator='true']::before,
-[data-workspace-board-card-drop-indicator='true']::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 7px;
-  height: 7px;
-  border-radius: 9999px;
-  background: var(--sidebar-ring);
-  transform: translateY(-50%);
-}
-
-[data-workspace-board-card-drop-indicator='true']::before {
-  left: -1px;
-}
-
-[data-workspace-board-card-drop-indicator='true']::after {
-  right: -1px;
-}
-
-[data-workspace-board-card-drag-count='true'] {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  z-index: 2;
-  display: flex;
-  min-width: 18px;
-  height: 18px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  border: 1px solid var(--sidebar-border);
-  background: var(--foreground);
-  color: var(--background);
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1;
 }
 
 .sidebar-header {
@@ -2504,7 +2300,7 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
 
 /* Frame 3 — Tasks: cursor lands on the second row, the "Open" pill morphs
    to a dark "Start workspace →" pill, then a workspace card slides in. */
-.feature-tour-tasks-cursor {
+.feature-tour-review-cursor {
   /* Why: anchored from the row's right edge so the cursor sits just past the
      pill's right edge (12px row padding + ~6px past pill end) instead of
      covering the label text. The arrow tip (top-left of the SVG) lands on the
@@ -2518,16 +2314,16 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   z-index: 8;
   transform: translate(120px, -30%);
   opacity: 0;
-  animation: feature-tour-tasks-cursor var(--feature-tour-cycle) cubic-bezier(0.45, 0.05, 0.2, 1)
+  animation: feature-tour-review-cursor var(--feature-tour-cycle) cubic-bezier(0.45, 0.05, 0.2, 1)
     infinite;
   animation-delay: 8s;
 }
-.feature-tour-tasks-cursor svg {
+.feature-tour-review-cursor svg {
   width: 14px;
   height: 14px;
   display: block;
 }
-@keyframes feature-tour-tasks-cursor {
+@keyframes feature-tour-review-cursor {
   0% {
     transform: translate(160px, -10%);
     opacity: 0;
@@ -2565,11 +2361,11 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   }
 }
 
-.feature-tour-tasks-row {
-  animation: feature-tour-tasks-row-hover var(--feature-tour-cycle) linear infinite;
+.feature-tour-review-row {
+  animation: feature-tour-review-row-hover var(--feature-tour-cycle) linear infinite;
   animation-delay: 8s;
 }
-@keyframes feature-tour-tasks-row-hover {
+@keyframes feature-tour-review-row-hover {
   0%,
   4% {
     background: transparent;
@@ -2590,11 +2386,11 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   }
 }
 
-.feature-tour-tasks-pill {
-  animation: feature-tour-tasks-pill-morph var(--feature-tour-cycle) linear infinite;
+.feature-tour-review-pill {
+  animation: feature-tour-review-pill-morph var(--feature-tour-cycle) linear infinite;
   animation-delay: 8s;
 }
-@keyframes feature-tour-tasks-pill-morph {
+@keyframes feature-tour-review-pill-morph {
   0%,
   6% {
     width: 28px;
@@ -2623,12 +2419,12 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   }
 }
 
-.feature-tour-tasks-pill-label {
+.feature-tour-review-pill-label {
   opacity: 0;
-  animation: feature-tour-tasks-pill-label var(--feature-tour-cycle) linear infinite;
+  animation: feature-tour-review-pill-label var(--feature-tour-cycle) linear infinite;
   animation-delay: 8s;
 }
-@keyframes feature-tour-tasks-pill-label {
+@keyframes feature-tour-review-pill-label {
   0%,
   7% {
     opacity: 0;
@@ -2650,7 +2446,7 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
 
 /* Click ring fires when the cursor "clicks" the morphed pill on the tasks
    row. Positioned to overlay the right-side pill of the second task. */
-.feature-tour-tasks-click-ring {
+.feature-tour-review-click-ring {
   /* Why: ring is centered on the cursor tip (right=28 from row's right edge)
      so the click feedback lands where the cursor is, on the arrow icon — not
      centered on the pill, which would visually disconnect from the cursor. */
@@ -2665,10 +2461,10 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   opacity: 0;
   z-index: 7;
   pointer-events: none;
-  animation: feature-tour-tasks-click-ring var(--feature-tour-cycle) linear infinite;
+  animation: feature-tour-review-click-ring var(--feature-tour-cycle) linear infinite;
   animation-delay: 8s;
 }
-@keyframes feature-tour-tasks-click-ring {
+@keyframes feature-tour-review-click-ring {
   0%,
   7% {
     opacity: 0;
@@ -2691,13 +2487,13 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
 
 /* Newly-created workspace card slides in beneath the task row once the
    user clicks "Start workspace" — sells the "task → workspace" jump. */
-.feature-tour-tasks-workspace {
+.feature-tour-review-workspace {
   opacity: 0;
   transform: translateY(-6px);
-  animation: feature-tour-tasks-workspace var(--feature-tour-cycle) linear infinite;
+  animation: feature-tour-review-workspace var(--feature-tour-cycle) linear infinite;
   animation-delay: 8s;
 }
-@keyframes feature-tour-tasks-workspace {
+@keyframes feature-tour-review-workspace {
   0%,
   10% {
     opacity: 0;
@@ -2767,12 +2563,12 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   .feature-tour-ws-status,
   .feature-tour-orch-bubble,
   .feature-tour-orch-child,
-  .feature-tour-tasks-cursor,
-  .feature-tour-tasks-row,
-  .feature-tour-tasks-pill,
-  .feature-tour-tasks-pill-label,
-  .feature-tour-tasks-click-ring,
-  .feature-tour-tasks-workspace,
+  .feature-tour-review-cursor,
+  .feature-tour-review-row,
+  .feature-tour-review-pill,
+  .feature-tour-review-pill-label,
+  .feature-tour-review-click-ring,
+  .feature-tour-review-workspace,
   .feature-tour-terminal-output {
     animation: none !important;
   }

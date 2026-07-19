@@ -19,6 +19,9 @@ const CURRENT_MANIFEST_PATH = path.join(OUTPUT_ROOT, 'current-manifest.json')
 const SNAPSHOT_REGISTRY_PATH = path.join(OUTPUT_ROOT, 'snapshot-registry.json')
 const RELEASE_MAPPING_PATH = path.join(OUTPUT_ROOT, 'release-mapping.json')
 const PRODUCT_SKILL_PREFIX = 'yiru-'
+// Why: release-tag history still contains removed integrations; exclude them so
+// regeneration cannot silently restore retired packages to shipped artifacts.
+const RETIRED_SKILL_NAMES = new Set(['linear-tickets', 'orca-linear', 'yiru-linear'])
 
 function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex')
@@ -359,6 +362,9 @@ function buildReleasedHistory(currentSkillNames = new Set()) {
     }
     for (const sourceName of [...packages.keys()].sort(compareCodeUnits)) {
       const name = normalizeReleasedSkillName(sourceName, currentSkillNames)
+      if (RETIRED_SKILL_NAMES.has(sourceName) || RETIRED_SKILL_NAMES.has(name)) {
+        continue
+      }
       if (Object.hasOwn(revisions, name)) {
         throw new Error(`Multiple released skill packages normalize to ${name} at ${tag}`)
       }
@@ -447,6 +453,9 @@ function assertReleasedHistoryPreserved(committedRegistry, artifacts) {
     return
   }
   for (const [name, committedSnapshots] of Object.entries(committedRegistry.skills ?? {})) {
+    if (RETIRED_SKILL_NAMES.has(name)) {
+      continue
+    }
     const releasedCount = artifacts.releasedSnapshotCounts[name] ?? 0
     const regenerated = artifacts.snapshotRegistry.skills[name] ?? []
     if (releasedCount < Math.max(0, committedSnapshots.length - 1)) {

@@ -23,7 +23,6 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "postinstall": "node scripts/build-terminal-webview-engine.mjs",
-    "test": "vp test run",
     "typecheck": "tsc --noEmit",
     "fmt": "vp fmt",
     "format": "vp fmt",
@@ -31,7 +30,6 @@
     "check": "vp check --fix && pnpm run typecheck",
     "format:check": "vp fmt --check",
     "mock-server": "npx tsx scripts/mock-server.ts",
-    "repro:workspace-picker-lag": "npx tsx scripts/repro-workspace-picker-lag.ts",
     "start:emulator": "node scripts/start-emulator.mjs"
   },
   "dependencies": {
@@ -84,12 +82,10 @@
   "devDependencies": {
     "@types/react": "^19.2.14",
     "@types/react-native": "^0.73.0",
-    "@types/react-test-renderer": "19.1.0",
     "@types/ws": "^8.18.1",
     "acorn": "8.15.0",
     "esbuild": "0.28.1",
     "expo-module-scripts": "^55.0.2",
-    "react-test-renderer": "19.2.6",
     "tsx": "^4.22.4",
     "typescript": "6.0.3",
     "vite": "catalog:",

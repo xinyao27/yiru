@@ -1,5 +1,4 @@
 import { branchName } from '@/lib/git-utils'
-import { issueCacheKey as getIssueCacheKey } from '@/store/slices/github'
 import type { HostedReviewInfo } from '../../../shared/hosted-review'
 import type { Repo, Worktree } from '../../../shared/types'
 import { extractWorktreePaletteCommentSnippet } from './worktree-palette-comment-snippet'
@@ -8,17 +7,10 @@ import { matchWorktreePaletteReview } from './worktree-palette-review-match'
 
 export type MatchRange = { start: number; end: number }
 
-export type PaletteMatchedField =
-  | 'displayName'
-  | 'branch'
-  | 'repo'
-  | 'comment'
-  | 'pr'
-  | 'issue'
-  | 'port'
+export type PaletteMatchedField = 'displayName' | 'branch' | 'repo' | 'comment' | 'pr' | 'port'
 
 export type PaletteSupportingText = {
-  labelKind: 'comment' | 'pr' | 'mr' | 'issue' | 'port'
+  labelKind: 'comment' | 'pr' | 'mr' | 'port'
   text: string
   matchRange: MatchRange | null
 }
@@ -47,7 +39,6 @@ export function getWorktreePaletteSearchScope(args: {
 }
 
 type PRCacheEntry = { data?: { number: number; title: string } | null } | undefined
-type IssueCacheEntry = { data?: { number: number; title: string } | null } | undefined
 
 function makeResult(
   worktreeId: string,
@@ -70,7 +61,6 @@ export function searchWorktrees(
   query: string,
   repoMap: Map<string, Repo>,
   prCache: Record<string, PRCacheEntry> | null,
-  issueCache: Record<string, IssueCacheEntry> | null,
   workspacePortsByWorktreeId?: Map<string, { port: number; processName?: string }[]>,
   checksReviewByWorktree?: ReadonlyMap<Worktree, HostedReviewInfo | null>
 ): PaletteSearchResult[] {
@@ -243,56 +233,6 @@ export function searchWorktrees(
         )
         continue
       }
-    }
-
-    if (worktree.linkedIssue == null) {
-      continue
-    }
-
-    const issueText = `Issue #${worktree.linkedIssue}`
-    const issueNumberIndex = String(worktree.linkedIssue).indexOf(numericQuery)
-    if (issueNumberIndex !== -1) {
-      results.push(
-        makeResult(worktree.id, 'issue', {
-          supportingText: {
-            labelKind: 'issue',
-            text: issueText,
-            matchRange: {
-              start: 'Issue #'.length + issueNumberIndex,
-              end: 'Issue #'.length + issueNumberIndex + numericQuery.length
-            }
-          }
-        })
-      )
-      continue
-    }
-
-    const issueKey = repo
-      ? getIssueCacheKey(
-          repo.path,
-          repo.id,
-          worktree.linkedIssue,
-          undefined,
-          repo.connectionId,
-          repo.executionHostId
-        )
-      : ''
-    const issue = issueKey && issueCache ? issueCache[issueKey]?.data : undefined
-    if (!issue?.title) {
-      continue
-    }
-
-    const issueTitleIndex = issue.title.toLowerCase().indexOf(q)
-    if (issueTitleIndex !== -1) {
-      results.push(
-        makeResult(worktree.id, 'issue', {
-          supportingText: {
-            labelKind: 'issue',
-            text: issue.title,
-            matchRange: { start: issueTitleIndex, end: issueTitleIndex + q.length }
-          }
-        })
-      )
     }
   }
 

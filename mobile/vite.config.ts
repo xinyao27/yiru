@@ -2,7 +2,6 @@ import { defineConfig } from 'vite-plus'
 import yiruRootToolingConfig from '../vite.config'
 import { mobileMaxLinesRatchets } from './config/mobile-max-lines-ratchets'
 
-const vitestOxcConfig = { tsconfig: false } as never
 const rootLintConfig = yiruRootToolingConfig.lint
 
 export default defineConfig({
@@ -42,12 +41,5 @@ export default defineConfig({
     // integrated type-aware engine follows TypeScript 7 semantics.
     options: { typeAware: false, typeCheck: false }
   },
-  root: import.meta.dirname,
-  // Why: the app tsconfig intentionally excludes tests; Vite 8's OXC transform
-  // otherwise fails before Vitest can run the test modules.
-  oxc: vitestOxcConfig,
-  test: {
-    environment: 'node',
-    include: ['src/**/*.test.ts']
-  }
+  root: import.meta.dirname
 })

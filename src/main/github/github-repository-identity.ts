@@ -1,5 +1,5 @@
 import { gitExecFileAsync } from '../git/runner'
-import type { GitHubOwnerRepo, IssueSourcePreference } from '../../shared/types'
+import type { GitHubOwnerRepo } from '../../shared/types'
 import { getSshGitProvider } from '../providers/ssh-git-dispatch'
 import { readLocalGitConfigSignature } from './local-git-config-signature'
 import {
@@ -154,7 +154,7 @@ export async function getOwnerRepoForRemote(
     return inFlight
   }
 
-  // Why: startup can resolve issue sources, PR candidates, and repo metadata
+  // Why: startup can resolve PR candidates and repository metadata
   // for the same repo concurrently. Coalesce missing-remote probes.
   const probe = resolveOwnerRepoForRemote(context, remoteName, cacheKey, nextConfigSignature)
   ownerRepoInFlight.set(cacheKey, probe)
@@ -255,41 +255,4 @@ export async function resolvePRRepositoryCandidates(
   }
 
   return { candidates, headRepo: origin }
-}
-
-export type ResolvedIssueSource = {
-  source: OwnerRepo | null
-  /** True when explicit upstream is gone and resolver fell back to origin. */
-  fellBack: boolean
-}
-
-export async function resolveIssueSource(
-  repoPath: string,
-  preference: IssueSourcePreference | undefined,
-  connectionId?: string | null,
-  localGitOptions: LocalGitExecOptions = {}
-): Promise<ResolvedIssueSource> {
-  if (preference === 'upstream') {
-    const upstream = await getOwnerRepoForRemote(
-      repoPath,
-      'upstream',
-      connectionId,
-      localGitOptions
-    )
-    if (upstream) {
-      return { source: upstream, fellBack: false }
-    }
-    const origin = await getOwnerRepoForRemote(repoPath, 'origin', connectionId, localGitOptions)
-    return { source: origin, fellBack: origin !== null }
-  }
-  if (preference === 'origin') {
-    return {
-      source: await getOwnerRepoForRemote(repoPath, 'origin', connectionId, localGitOptions),
-      fellBack: false
-    }
-  }
-  return {
-    source: await getIssueOwnerRepo(repoPath, connectionId, localGitOptions),
-    fellBack: false
-  }
 }

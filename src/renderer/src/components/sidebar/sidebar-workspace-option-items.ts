@@ -71,29 +71,6 @@ const WORKTREE_CARD_METADATA_OPTIONS: WorktreeCardPropertyOption[] = [
   }
 ]
 
-const ISSUE_WORKTREE_CARD_PROPERTY_OPTIONS: WorktreeCardPropertyOption[] = [
-  {
-    id: 'issue',
-    properties: ['issue'],
-    get label() {
-      return translate(
-        'auto.components.sidebar.SidebarWorkspaceOptionsMenu.bdd23b4e07',
-        'GitHub issues'
-      )
-    }
-  },
-  {
-    id: 'linear-issue',
-    properties: ['linear-issue'],
-    get label() {
-      return translate(
-        'auto.components.sidebar.SidebarWorkspaceOptionsMenu.44713a5d04',
-        'Linear issues'
-      )
-    }
-  }
-]
-
 type WorktreeCardPropertyOptionsInput = {
   hasProjectGroups?: boolean
 }
@@ -115,7 +92,7 @@ export function getWorktreeCardPropertyOptions({
         : translate('auto.components.sidebar.SidebarWorkspaceOptionsMenu.219ebf1961', 'Branch name')
     }
   }
-  return [...ISSUE_WORKTREE_CARD_PROPERTY_OPTIONS, ...WORKTREE_CARD_METADATA_OPTIONS, branchOption]
+  return [...WORKTREE_CARD_METADATA_OPTIONS, branchOption]
 }
 
 export const WORKTREE_CARD_PROPERTY_OPTIONS = getWorktreeCardPropertyOptions()

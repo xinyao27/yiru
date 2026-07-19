@@ -46,7 +46,6 @@ import {
   ConflictingFilesSection,
   MergeConflictNotice,
   ChecksList,
-  isMutablePRConversationComment,
   PRCommentsList,
   PRTriageStrip
 } from './checks-panel-content'
@@ -86,7 +85,6 @@ import { resolveHostedReviewCreationProvider } from '../../../../shared/hosted-r
 import { normalizeHostedReviewHeadRef } from '../../../../shared/hosted-review-refs'
 import { getHostedReviewCacheKey, refreshHostedReviewCard } from '@/store/slices/hosted-review'
 import { toast } from 'sonner'
-import { useConfirmationDialog } from '@/components/confirmation-dialog'
 import { type ChecksPanelReview, selectChecksPanelReview } from './checks-panel-review'
 import { selectReviewCacheEntry } from './review-cache-entry-selection'
 import {
@@ -483,7 +481,6 @@ function LocalChecksPanel(): React.JSX.Element {
   const titleInputFocusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pollIntervalRef = useRef(30_000) // start at 30s, backs off to 120s
   const mountedRef = useMountedRef()
-  const confirm = useConfirmationDialog()
   const prevChecksRef = useRef<string>('')
   const conflictSummaryRefreshKeyRef = useRef<string | null>(null)
   const panelVisibleSinceRef = useRef<number | null>(null)
@@ -2637,60 +2634,6 @@ function LocalChecksPanel(): React.JSX.Element {
     ]
   )
 
-  const handleEditComment = useCallback(
-    async (comment: PRComment, body: string): Promise<boolean> => {
-      if (!pr?.prRepo || !isMutablePRConversationComment(comment)) {
-        return false
-      }
-      const result = await window.api.gh.updateIssueCommentBySlug({
-        owner: pr.prRepo.owner,
-        repo: pr.prRepo.repo,
-        commentId: comment.id,
-        body
-      })
-      if (!result.ok) {
-        toast.error(result.error.message)
-        return false
-      }
-      setComments((prev) =>
-        prev.map((entry) => (entry.id === comment.id ? { ...entry, body } : entry))
-      )
-      return true
-    },
-    [pr?.prRepo]
-  )
-
-  const handleDeleteComment = useCallback(
-    async (comment: PRComment): Promise<void> => {
-      if (!pr?.prRepo || !isMutablePRConversationComment(comment)) {
-        return
-      }
-      const confirmed = await confirm({
-        title: translate('auto.components.right.sidebar.ChecksPanel.ea9b649ce3', 'Delete comment?'),
-        description: translate(
-          'auto.components.right.sidebar.ChecksPanel.3b203c62f8',
-          'This will permanently remove the comment from the PR.'
-        ),
-        confirmLabel: translate('auto.components.right.sidebar.ChecksPanel.786e3c143f', 'Delete'),
-        confirmVariant: 'destructive'
-      })
-      if (!confirmed) {
-        return
-      }
-      const result = await window.api.gh.deleteIssueCommentBySlug({
-        owner: pr.prRepo.owner,
-        repo: pr.prRepo.repo,
-        commentId: comment.id
-      })
-      if (!result.ok) {
-        toast.error(result.error.message)
-        return
-      }
-      setComments((prev) => prev.filter((entry) => entry.id !== comment.id))
-    },
-    [pr?.prRepo, confirm]
-  )
-
   const handleReplyToComment = useCallback(
     async (comment: PRComment, body: string) => {
       if (!repo || !prNumber || !pr?.prRepo) {
@@ -3187,7 +3130,6 @@ function LocalChecksPanel(): React.JSX.Element {
     openModal('edit-meta', {
       worktreeId: activeWorktreeId,
       currentDisplayName: activeWorktree.displayName,
-      currentIssue: activeWorktree.linkedIssue,
       currentPR: activeWorktree.linkedPR ?? activeReview.number,
       currentComment: activeWorktree.comment,
       focus: 'pr',
@@ -3845,8 +3787,6 @@ function LocalChecksPanel(): React.JSX.Element {
         }
         onReply={pr ? handleReplyToComment : undefined}
         onResolve={pr || activeGitLabReview ? handleResolve : undefined}
-        onEditComment={pr ? handleEditComment : undefined}
-        onDeleteComment={pr ? handleDeleteComment : undefined}
       />
       <SourceControlAgentActionDialog
         open={sourceControlAiActionsVisible && agentComposerState !== null}

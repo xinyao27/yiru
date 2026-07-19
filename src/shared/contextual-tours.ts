@@ -1,10 +1,8 @@
 import type { FeatureInteractionId } from './feature-interactions'
 
 export type ContextualTourId =
-  | 'workspace-board'
   | 'workspace-agent-sessions'
   | 'browser'
-  | 'tasks'
   | 'automations'
   | 'floating-workspace'
   | 'workspace-creation'
@@ -19,7 +17,6 @@ export type ContextualTourStepActionKind =
   | 'split-terminal-pane'
   | 'create-worktree'
   | 'show-worktrees'
-  | 'open-tasks'
   | 'open-getting-started'
 
 export type ContextualTourStepAction = {
@@ -51,24 +48,6 @@ export type ContextualTour = {
 }
 
 export const CONTEXTUAL_TOURS = [
-  {
-    id: 'workspace-board',
-    steps: [
-      {
-        title: 'Plan work on the board',
-        body: 'Use the board when you want to see workspaces by status instead of by project.',
-        targetSelector: '[data-contextual-tour-target="workspace-board-center"]',
-        requiredForStart: true,
-        preferredPlacement: 'bottom'
-      },
-      {
-        title: 'Move work through lanes',
-        body: 'Drag workspaces between lanes as their status changes.',
-        targetSelector:
-          '[data-contextual-tour-target="workspace-board-done-lane"], [data-contextual-tour-target="workspace-board-lanes"]'
-      }
-    ]
-  },
   {
     id: 'workspace-agent-sessions',
     steps: [
@@ -117,28 +96,6 @@ export const CONTEXTUAL_TOURS = [
           '[data-contextual-tour-target="browser-import-hint"], [data-contextual-tour-target="browser-import-cookies-control"]',
         // Sit below the Import button with the arrow pointing up at it.
         preferredPlacement: 'bottom'
-      }
-    ]
-  },
-  {
-    id: 'tasks',
-    steps: [
-      {
-        title: 'Choose the work source',
-        body: 'Switch between connected providers and project filters without changing pages.',
-        targetSelector: '[data-contextual-tour-target="tasks-source-filters"]',
-        requiredForStart: true
-      },
-      {
-        title: 'Filter to the work you need',
-        body: 'Use presets and search to narrow issues, reviews, merge requests, or tasks.',
-        targetSelector: '[data-contextual-tour-target="tasks-search-presets"]'
-      },
-      {
-        title: 'Start from work items',
-        body: 'Use Start or Open on a task, issue, review, or merge request to bring its context into a workspace.',
-        targetSelector:
-          '[data-contextual-tour-target="tasks-start-workspace"], [data-contextual-tour-target="tasks-actions"], [data-contextual-tour-target="tasks-search-presets"]'
       }
     ]
   },
@@ -192,7 +149,7 @@ export const CONTEXTUAL_TOURS = [
       },
       {
         title: 'Name it, or start from existing work',
-        body: 'Start from a linked task for a short issue or PR name. Or leave it blank to auto-name it from your first agent message.',
+        body: 'Start from a linked review for a short PR or MR name. Or leave it blank to auto-name it from your first agent message.',
         targetSelector: '[data-contextual-tour-target="workspace-creation-name"]',
         control: { kind: 'auto-rename-branch-from-work' }
       },

@@ -1,4 +1,1 @@
-export {
-  getWorkspaceSourceProvider as getLinkedWorkItemProvider,
-  isGitLabIssueUrl
-} from '../../../shared/new-workspace/workspace-source'
+export { getWorkspaceSourceProvider as getLinkedWorkItemProvider } from '../../../shared/new-workspace/workspace-source'

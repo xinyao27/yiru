@@ -63,7 +63,7 @@ const stepCopy = {
     get title() {
       return translate(
         'auto.components.onboarding.OnboardingFlow.ae3b00ca82',
-        'Set up GitHub tasks'
+        'Set up GitHub reviews'
       )
     },
     get subtitle() {

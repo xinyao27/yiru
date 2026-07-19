@@ -148,20 +148,15 @@ async function executeWorktreeCreation(
         preparedRequest.sparseCheckout,
         preparedRequest.telemetrySource,
         preparedRequest.displayName,
-        preparedRequest.linkedIssue,
         preparedRequest.linkedPR,
         preparedRequest.pushTarget,
         preparedRequest.agent ?? undefined,
-        preparedRequest.linkedLinearIssue,
         preparedRequest.branchNameOverride,
         preparedRequest.workspaceStatus,
         preparedRequest.linkedGitLabMR,
-        preparedRequest.linkedGitLabIssue,
         preparedRequest.startup,
         preparedRequest.pendingFirstAgentMessageRename,
         creationId,
-        preparedRequest.linkedLinearIssueWorkspaceId,
-        preparedRequest.linkedLinearIssueOrganizationUrlKey,
         preparedRequest.linkedBitbucketPR,
         preparedRequest.linkedAzureDevOpsPR,
         preparedRequest.linkedGiteaPR,
@@ -233,8 +228,7 @@ async function executeWorktreeCreation(
       sidebarRevealBehavior: 'auto',
       ...(result.setup ? { setup: result.setup } : {}),
       ...(result.defaultTabs ? { defaultTabs: result.defaultTabs } : {}),
-      ...(startupOpt ? { startup: startupOpt } : {}),
-      ...(preparedRequest.issueCommand ? { issueCommand: preparedRequest.issueCommand } : {})
+      ...(startupOpt ? { startup: startupOpt } : {})
     })
     primaryTabId = activation === false ? null : activation.primaryTabId
   } else {
@@ -246,7 +240,6 @@ async function executeWorktreeCreation(
       worktree.id,
       startupOpt,
       result.setup,
-      preparedRequest.issueCommand,
       result.defaultTabs,
       { activateCreatedTabs: false }
     )

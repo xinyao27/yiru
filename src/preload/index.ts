@@ -44,9 +44,7 @@ import type {
   GitHubPRRefreshReason,
   GitHubAssignableUser,
   GitHubCommentResult,
-  GitHubCreateIssueResult,
   GitHubWorkItem,
-  JiraProjectStatusOrder,
   GitPushTarget,
   GitStagingArea,
   GitForkSyncExpectedUpstream,
@@ -54,7 +52,6 @@ import type {
   GitUpstreamStatus,
   GhosttyImportPreview,
   ListWorkItemsResult,
-  LinearProjectDetail,
   MemorySnapshot,
   NotificationDismissResult,
   NotificationDispatchResult,
@@ -118,34 +115,6 @@ import type { WorkspaceSpaceScanProgress } from '../shared/workspace-space-types
 import type { WorkspaceCleanupScanProgress } from '../shared/workspace-cleanup'
 import type { WorkspacePortAdvertisedUrlChangedEvent } from '../shared/workspace-ports'
 import type { GhAuthDiagnostic } from '../shared/github-auth-types'
-import type { TaskSourceContext } from '../shared/task-source-context'
-import type {
-  AddIssueCommentBySlugArgs,
-  ClearProjectItemFieldArgs,
-  DeleteIssueCommentBySlugArgs,
-  GetProjectViewTableArgs,
-  GetProjectViewTableResult,
-  GitHubProjectCommentMutationResult,
-  GitHubProjectMutationResult,
-  ListAccessibleProjectsResult,
-  ListAssignableUsersBySlugArgs,
-  ListAssignableUsersBySlugResult,
-  ListIssueTypesBySlugArgs,
-  ListIssueTypesBySlugResult,
-  ListLabelsBySlugArgs,
-  ListLabelsBySlugResult,
-  ListProjectViewsArgs,
-  ListProjectViewsResult,
-  ProjectWorkItemDetailsBySlugArgs,
-  ProjectWorkItemDetailsBySlugResult,
-  ResolveProjectRefArgs,
-  ResolveProjectRefResult,
-  UpdateIssueBySlugArgs,
-  UpdateIssueCommentBySlugArgs,
-  UpdateIssueTypeBySlugArgs,
-  UpdatePullRequestBySlugArgs,
-  UpdateProjectItemFieldArgs
-} from '../shared/github-project-types'
 import {
   richMarkdownContextMenuCommandChannel,
   type RichMarkdownContextMenuCommandPayload
@@ -1272,19 +1241,11 @@ const api = {
       return () => ipcRenderer.removeListener('gh:prRefreshEvent', listener)
     },
 
-    issue: (args: {
-      repoPath: string
-      repoId?: string
-      sourceContext?: TaskSourceContext | null
-      number: number
-    }): Promise<unknown> => ipcRenderer.invoke('gh:issue', args),
-
     workItem: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       number: number
-      type?: 'issue' | 'pr'
+      type?: 'pr'
     }): Promise<unknown> => ipcRenderer.invoke('gh:workItem', args),
 
     workItemByOwnerRepo: (args: {
@@ -1293,28 +1254,26 @@ const api = {
       owner: string
       repo: string
       number: number
-      type: 'issue' | 'pr'
+      type: 'pr'
     }): Promise<unknown> => ipcRenderer.invoke('gh:workItemByOwnerRepo', args),
 
     workItemDetails: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       number: number
-      type?: 'issue' | 'pr'
+      type?: 'pr'
     }): Promise<unknown> => ipcRenderer.invoke('gh:workItemDetails', args),
 
     notifyWorkItemMutated: (args: {
       repoPath: string
       repoId?: string
-      type: 'issue' | 'pr'
+      type: 'pr'
       number: number
     }): Promise<boolean> => ipcRenderer.invoke('gh:notifyWorkItemMutated', args),
 
     prFileContents: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       path: string
       oldPath?: string
@@ -1322,25 +1281,6 @@ const api = {
       headSha: string
       baseSha: string
     }): Promise<unknown> => ipcRenderer.invoke('gh:prFileContents', args),
-
-    listIssues: (args: { repoPath: string; repoId?: string; limit?: number }): Promise<unknown[]> =>
-      ipcRenderer.invoke('gh:listIssues', args),
-
-    createIssue: (args: {
-      repoPath: string
-      repoId?: string
-      sourceContext?: TaskSourceContext | null
-      title: string
-      body: string
-      labels?: string[]
-      assignees?: string[]
-    }): Promise<GitHubCreateIssueResult> => ipcRenderer.invoke('gh:createIssue', args),
-
-    countWorkItems: (args: {
-      repoPath: string
-      repoId?: string
-      query?: string
-    }): Promise<number> => ipcRenderer.invoke('gh:countWorkItems', args),
 
     listWorkItems: (args: {
       repoPath: string
@@ -1355,7 +1295,6 @@ const api = {
     prChecks: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       headSha?: string
       prRepo?: { owner: string; repo: string } | null
@@ -1365,7 +1304,6 @@ const api = {
     prCheckDetails: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       checkRunId?: number
       workflowRunId?: number
       checkName?: string
@@ -1376,7 +1314,6 @@ const api = {
     rerunPRChecks: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       headSha?: string
       failedOnly?: boolean
@@ -1386,7 +1323,6 @@ const api = {
     prComments: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       prRepo?: { owner: string; repo: string } | null
       noCache?: boolean
@@ -1395,7 +1331,6 @@ const api = {
     resolveReviewThread: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       threadId: string
       resolve: boolean
     }): Promise<boolean> => ipcRenderer.invoke('gh:resolveReviewThread', args),
@@ -1403,7 +1338,6 @@ const api = {
     setPRFileViewed: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       pullRequestId: string
       path: string
@@ -1421,7 +1355,6 @@ const api = {
     mergePR: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       method?: 'merge' | 'squash' | 'rebase'
       prRepo?: { owner: string; repo: string } | null
@@ -1431,7 +1364,6 @@ const api = {
     setPRAutoMerge: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       enabled: boolean
       method?: 'merge' | 'squash' | 'rebase'
@@ -1442,7 +1374,6 @@ const api = {
     updatePRState: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       updates: { state: 'open' | 'closed' }
     }): Promise<{ ok: true } | { ok: false; error: string }> =>
@@ -1451,7 +1382,6 @@ const api = {
     requestPRReviewers: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       reviewers: string[]
     }): Promise<{ ok: true } | { ok: false; error: string }> =>
@@ -1460,35 +1390,22 @@ const api = {
     removePRReviewers: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       reviewers: string[]
     }): Promise<{ ok: true } | { ok: false; error: string }> =>
       ipcRenderer.invoke('gh:removePRReviewers', args),
 
-    updateIssue: (args: {
+    addPRComment: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
-      number: number
-      updates: unknown
-    }): Promise<{ ok: true } | { ok: false; error: string }> =>
-      ipcRenderer.invoke('gh:updateIssue', args),
-
-    addIssueComment: (args: {
-      repoPath: string
-      repoId?: string
-      sourceContext?: TaskSourceContext | null
       number: number
       body: string
-      type?: 'issue' | 'pr'
       prRepo?: { owner: string; repo: string } | null
-    }): Promise<GitHubCommentResult> => ipcRenderer.invoke('gh:addIssueComment', args),
+    }): Promise<GitHubCommentResult> => ipcRenderer.invoke('gh:addPRComment', args),
 
     addPRReviewCommentReply: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       commentId: number
       body: string
@@ -1501,7 +1418,6 @@ const api = {
     addPRReviewComment: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       commitId: string
       path: string
@@ -1510,32 +1426,23 @@ const api = {
       body: string
     }): Promise<GitHubCommentResult> => ipcRenderer.invoke('gh:addPRReviewComment', args),
 
-    listLabels: (args: {
-      repoPath: string
-      repoId?: string
-      sourceContext?: TaskSourceContext | null
-    }): Promise<string[]> => ipcRenderer.invoke('gh:listLabels', args),
+    listLabels: (args: { repoPath: string; repoId?: string }): Promise<string[]> =>
+      ipcRenderer.invoke('gh:listLabels', args),
 
     listAssignableUsers: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
     }): Promise<GitHubAssignableUser[]> => ipcRenderer.invoke('gh:listAssignableUsers', args),
 
     // Why: the app renderer owns the work-item-details cache. Main targets this
     // bridge for non-origin mutations; origin callers already updated their
     // cache optimistically — see src/main/ipc/github.ts.
     onWorkItemMutated: (
-      callback: (payload: {
-        repoPath: string
-        repoId?: string
-        type: 'issue' | 'pr'
-        number: number
-      }) => void
+      callback: (payload: { repoPath: string; repoId?: string; type: 'pr'; number: number }) => void
     ): (() => void) => {
       const listener = (
         _event: Electron.IpcRendererEvent,
-        payload: { repoPath: string; repoId?: string; type: 'issue' | 'pr'; number: number }
+        payload: { repoPath: string; repoId?: string; type: 'pr'; number: number }
       ): void => callback(payload)
       ipcRenderer.on('gh:workItemMutated', listener)
       return () => ipcRenderer.removeListener('gh:workItemMutated', listener)
@@ -1551,57 +1458,7 @@ const api = {
     rateLimit: (args?: { force?: boolean }): Promise<GetRateLimitResult> =>
       ipcRenderer.invoke('gh:rateLimit', args),
 
-    diagnoseAuth: (): Promise<GhAuthDiagnostic> => ipcRenderer.invoke('gh:diagnoseAuth'),
-
-    // ── ProjectV2 (GitHub Projects) ───────────────────────────────────
-    listAccessibleProjects: (): Promise<ListAccessibleProjectsResult> =>
-      ipcRenderer.invoke('gh:listAccessibleProjects'),
-    resolveProjectRef: (args: ResolveProjectRefArgs): Promise<ResolveProjectRefResult> =>
-      ipcRenderer.invoke('gh:resolveProjectRef', args),
-    listProjectViews: (args: ListProjectViewsArgs): Promise<ListProjectViewsResult> =>
-      ipcRenderer.invoke('gh:listProjectViews', args),
-    getProjectViewTable: (args: GetProjectViewTableArgs): Promise<GetProjectViewTableResult> =>
-      ipcRenderer.invoke('gh:getProjectViewTable', args),
-    projectWorkItemDetailsBySlug: (
-      args: ProjectWorkItemDetailsBySlugArgs
-    ): Promise<ProjectWorkItemDetailsBySlugResult> =>
-      ipcRenderer.invoke('gh:projectWorkItemDetailsBySlug', args),
-    updateProjectItemField: (
-      args: UpdateProjectItemFieldArgs
-    ): Promise<GitHubProjectMutationResult> =>
-      ipcRenderer.invoke('gh:updateProjectItemField', args),
-    clearProjectItemField: (
-      args: ClearProjectItemFieldArgs
-    ): Promise<GitHubProjectMutationResult> => ipcRenderer.invoke('gh:clearProjectItemField', args),
-    updateIssueBySlug: (args: UpdateIssueBySlugArgs): Promise<GitHubProjectMutationResult> =>
-      ipcRenderer.invoke('gh:updateIssueBySlug', args),
-    updatePullRequestBySlug: (
-      args: UpdatePullRequestBySlugArgs
-    ): Promise<GitHubProjectMutationResult> =>
-      ipcRenderer.invoke('gh:updatePullRequestBySlug', args),
-    addIssueCommentBySlug: (
-      args: AddIssueCommentBySlugArgs
-    ): Promise<GitHubProjectCommentMutationResult> =>
-      ipcRenderer.invoke('gh:addIssueCommentBySlug', args),
-    updateIssueCommentBySlug: (
-      args: UpdateIssueCommentBySlugArgs
-    ): Promise<GitHubProjectMutationResult> =>
-      ipcRenderer.invoke('gh:updateIssueCommentBySlug', args),
-    deleteIssueCommentBySlug: (
-      args: DeleteIssueCommentBySlugArgs
-    ): Promise<GitHubProjectMutationResult> =>
-      ipcRenderer.invoke('gh:deleteIssueCommentBySlug', args),
-    listLabelsBySlug: (args: ListLabelsBySlugArgs): Promise<ListLabelsBySlugResult> =>
-      ipcRenderer.invoke('gh:listLabelsBySlug', args),
-    listAssignableUsersBySlug: (
-      args: ListAssignableUsersBySlugArgs
-    ): Promise<ListAssignableUsersBySlugResult> =>
-      ipcRenderer.invoke('gh:listAssignableUsersBySlug', args),
-    listIssueTypesBySlug: (args: ListIssueTypesBySlugArgs): Promise<ListIssueTypesBySlugResult> =>
-      ipcRenderer.invoke('gh:listIssueTypesBySlug', args),
-    updateIssueTypeBySlug: (
-      args: UpdateIssueTypeBySlugArgs
-    ): Promise<GitHubProjectMutationResult> => ipcRenderer.invoke('gh:updateIssueTypeBySlug', args)
+    diagnoseAuth: (): Promise<GhAuthDiagnostic> => ipcRenderer.invoke('gh:diagnoseAuth')
   },
 
   hostedReview: {
@@ -1616,238 +1473,6 @@ const api = {
   // `gl.*` channel doesn't surface as a merge conflict on every
   // upstream sync of this central preload file.
   gl: glApi,
-
-  linear: {
-    connect: (args: {
-      apiKey: string
-    }): Promise<{ ok: true; viewer: unknown } | { ok: false; error: string }> =>
-      ipcRenderer.invoke('linear:connect', args),
-
-    disconnect: (args?: { workspaceId?: string }): Promise<void> =>
-      ipcRenderer.invoke('linear:disconnect', args),
-
-    selectWorkspace: (args: { workspaceId: string }): Promise<unknown> =>
-      ipcRenderer.invoke('linear:selectWorkspace', args),
-
-    status: (): Promise<unknown> => ipcRenderer.invoke('linear:status'),
-
-    testConnection: (args?: {
-      workspaceId?: string
-    }): Promise<{ ok: true; viewer: unknown } | { ok: false; error: string }> =>
-      ipcRenderer.invoke('linear:testConnection', args),
-
-    searchIssues: (args: {
-      query: string
-      limit?: number
-      workspaceId?: string
-    }): Promise<unknown[]> => ipcRenderer.invoke('linear:searchIssues', args),
-
-    listIssues: (args?: {
-      filter?: 'assigned' | 'created' | 'all' | 'completed'
-      limit?: number
-      workspaceId?: string
-      attributeFilter?: unknown
-    }): Promise<unknown> => ipcRenderer.invoke('linear:listIssues', args),
-
-    createIssue: (args: {
-      teamId: string
-      title: string
-      description?: string
-      workspaceId?: string
-      parentIssueId?: string
-      projectId?: string | null
-      stateId?: string
-      priority?: number
-      assigneeId?: string | null
-      labelIds?: string[]
-    }): Promise<
-      | { ok: true; id: string; identifier: string; title: string; url: string }
-      | { ok: false; error: string }
-    > => ipcRenderer.invoke('linear:createIssue', args),
-
-    getIssue: (args: { id: string; workspaceId?: string }): Promise<unknown> =>
-      ipcRenderer.invoke('linear:getIssue', args),
-
-    updateIssue: (args: {
-      id: string
-      updates: unknown
-      workspaceId?: string
-    }): Promise<{ ok: true } | { ok: false; error: string }> =>
-      ipcRenderer.invoke('linear:updateIssue', args),
-
-    addIssueComment: (args: {
-      issueId: string
-      body: string
-      workspaceId?: string
-    }): Promise<{ ok: true; id: string } | { ok: false; error: string }> =>
-      ipcRenderer.invoke('linear:addIssueComment', args),
-
-    issueComments: (args: { issueId: string; workspaceId?: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('linear:issueComments', args),
-
-    listTeams: (args?: { workspaceId?: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('linear:listTeams', args),
-
-    listProjects: (args?: {
-      query?: string
-      limit?: number
-      workspaceId?: string
-      force?: boolean
-    }): Promise<unknown> => ipcRenderer.invoke('linear:listProjects', args),
-
-    createProject: (args: {
-      name: string
-      description?: string
-      content?: string
-      teamIds: string[]
-      workspaceId?: string
-      leadId?: string | null
-      memberIds?: string[]
-      labelIds?: string[]
-      priority?: number
-      startDate?: string
-      targetDate?: string
-    }): Promise<{ ok: true; project: LinearProjectDetail } | { ok: false; error: string }> =>
-      ipcRenderer.invoke('linear:createProject', args),
-
-    getProject: (args: { id: string; workspaceId: string; force?: boolean }): Promise<unknown> =>
-      ipcRenderer.invoke('linear:getProject', args),
-
-    listProjectIssues: (args: {
-      projectId: string
-      limit?: number
-      workspaceId: string
-      force?: boolean
-    }): Promise<unknown> => ipcRenderer.invoke('linear:listProjectIssues', args),
-
-    listCustomViews: (args: {
-      model: string
-      limit?: number
-      workspaceId?: string
-      force?: boolean
-    }): Promise<unknown> => ipcRenderer.invoke('linear:listCustomViews', args),
-
-    getCustomView: (args: {
-      viewId: string
-      model: string
-      workspaceId: string
-      force?: boolean
-    }): Promise<unknown> => ipcRenderer.invoke('linear:getCustomView', args),
-
-    listCustomViewIssues: (args: {
-      viewId: string
-      limit?: number
-      workspaceId: string
-      force?: boolean
-    }): Promise<unknown> => ipcRenderer.invoke('linear:listCustomViewIssues', args),
-
-    listCustomViewProjects: (args: {
-      viewId: string
-      limit?: number
-      workspaceId: string
-      force?: boolean
-    }): Promise<unknown> => ipcRenderer.invoke('linear:listCustomViewProjects', args),
-
-    teamStates: (args: { teamId: string; workspaceId?: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('linear:teamStates', args),
-
-    teamLabels: (args: { teamId: string; workspaceId?: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('linear:teamLabels', args),
-
-    teamMembers: (args: { teamId: string; workspaceId?: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('linear:teamMembers', args)
-  },
-
-  jira: {
-    connect: (args: {
-      siteUrl: string
-      email: string
-      apiToken: string
-      authType?: 'cloud' | 'server'
-    }): Promise<{ ok: true; viewer: unknown } | { ok: false; error: string }> =>
-      ipcRenderer.invoke('jira:connect', args),
-
-    disconnect: (args?: { siteId?: string }): Promise<void> =>
-      ipcRenderer.invoke('jira:disconnect', args),
-
-    selectSite: (args: { siteId: string }): Promise<unknown> =>
-      ipcRenderer.invoke('jira:selectSite', args),
-
-    status: (): Promise<unknown> => ipcRenderer.invoke('jira:status'),
-
-    testConnection: (args?: {
-      siteId?: string
-    }): Promise<{ ok: true; viewer: unknown } | { ok: false; error: string }> =>
-      ipcRenderer.invoke('jira:testConnection', args),
-
-    searchIssues: (args: { jql: string; limit?: number; siteId?: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('jira:searchIssues', args),
-
-    listIssues: (args?: {
-      filter?: 'assigned' | 'reported' | 'all' | 'done'
-      limit?: number
-      siteId?: string
-    }): Promise<unknown[]> => ipcRenderer.invoke('jira:listIssues', args),
-
-    getIssue: (args: { key: string; siteId?: string }): Promise<unknown> =>
-      ipcRenderer.invoke('jira:getIssue', args),
-
-    createIssue: (args: {
-      siteId?: string
-      projectId: string
-      issueTypeId: string
-      title: string
-      description?: string
-      customFields?: Record<string, unknown>
-    }): Promise<
-      { ok: true; id: string; key: string; url: string } | { ok: false; error: string }
-    > => ipcRenderer.invoke('jira:createIssue', args),
-
-    updateIssue: (args: {
-      key: string
-      updates: unknown
-      siteId?: string
-    }): Promise<{ ok: true } | { ok: false; error: string }> =>
-      ipcRenderer.invoke('jira:updateIssue', args),
-
-    addIssueComment: (args: {
-      key: string
-      body: string
-      siteId?: string
-    }): Promise<{ ok: true; id: string } | { ok: false; error: string }> =>
-      ipcRenderer.invoke('jira:addIssueComment', args),
-
-    issueComments: (args: { key: string; siteId?: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('jira:issueComments', args),
-
-    listProjects: (args?: { siteId?: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('jira:listProjects', args),
-
-    listIssueTypes: (args: { projectIdOrKey: string; siteId?: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('jira:listIssueTypes', args),
-
-    listCreateFields: (args: {
-      projectIdOrKey: string
-      issueTypeId: string
-      siteId?: string
-    }): Promise<unknown[]> => ipcRenderer.invoke('jira:listCreateFields', args),
-
-    listPriorities: (args?: { siteId?: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('jira:listPriorities', args),
-
-    listAssignableUsers: (args: {
-      key: string
-      query?: string
-      siteId?: string
-    }): Promise<unknown[]> => ipcRenderer.invoke('jira:listAssignableUsers', args),
-
-    listTransitions: (args: { key: string; siteId?: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('jira:listTransitions', args),
-    getProjectStatusOrder: (args: {
-      projectKey: string
-      siteId?: string
-    }): Promise<JiraProjectStatusOrder> => ipcRenderer.invoke('jira:getProjectStatusOrder', args)
-  },
 
   starNag: {
     onShow: (
@@ -2069,7 +1694,6 @@ const api = {
         baseUrl: string | null
         tokenConfigured: boolean
       }
-      linear: { connected: boolean }
     }> => ipcRenderer.invoke('preflight:check', args),
     detectAgents: (args?: PreflightRuntimeContext): Promise<string[]> =>
       ipcRenderer.invoke('preflight:detectAgents', args),
@@ -2683,32 +2307,7 @@ const api = {
     }> => ipcRenderer.invoke('hooks:check', args),
 
     inspectSetupScriptImports: (args: { repoId: string }): Promise<unknown[]> =>
-      ipcRenderer.invoke('hooks:inspectSetupScriptImports', args),
-
-    createIssueCommandRunner: (args: {
-      repoId: string
-      worktreePath: string
-      command: string
-    }): Promise<{ runnerScriptPath: string; envVars: Record<string, string> }> =>
-      ipcRenderer.invoke('hooks:createIssueCommandRunner', args),
-
-    readIssueCommand: (args: {
-      repoId: string
-      hostId?: ExecutionHostId
-    }): Promise<{
-      status?: 'ok' | 'error'
-      localContent: string | null
-      sharedContent: string | null
-      effectiveContent: string | null
-      localFilePath: string
-      source: 'local' | 'shared' | 'none'
-    }> => ipcRenderer.invoke('hooks:readIssueCommand', args),
-
-    writeIssueCommand: (args: {
-      repoId: string
-      content: string
-      hostId?: ExecutionHostId
-    }): Promise<void> => ipcRenderer.invoke('hooks:writeIssueCommand', args)
+      ipcRenderer.invoke('hooks:inspectSetupScriptImports', args)
   },
 
   ephemeralVm: {
@@ -3267,16 +2866,6 @@ const api = {
       const listener = (_event: Electron.IpcRendererEvent) => callback()
       ipcRenderer.on('ui:deleteCurrentWorkspace', listener)
       return () => ipcRenderer.removeListener('ui:deleteCurrentWorkspace', listener)
-    },
-    onOpenWorkspaceBoard: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:openWorkspaceBoard', listener)
-      return () => ipcRenderer.removeListener('ui:openWorkspaceBoard', listener)
-    },
-    onOpenTasks: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:openTasks', listener)
-      return () => ipcRenderer.removeListener('ui:openTasks', listener)
     },
     onJumpToWorktreeIndex: (callback: (index: number) => void): (() => void) => {
       const listener = (_event: Electron.IpcRendererEvent, index: number) => callback(index)

@@ -15,12 +15,7 @@ const FAMILIES: VerbFamily[] = [
     name: 'deletion',
     offPolicyVerbs: new Set(['remove', 'delete', 'destroy']),
     canonical: 'rm',
-    allowlist: new Set([
-      'cookie delete',
-      'tab profile delete',
-      'automations remove',
-      'linear label remove'
-    ])
+    allowlist: new Set(['cookie delete', 'tab profile delete', 'automations remove'])
   },
   {
     name: 'single-item read',

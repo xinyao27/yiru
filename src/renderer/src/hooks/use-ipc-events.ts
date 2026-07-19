@@ -7,11 +7,9 @@ import { applyWorktreeHeadIdentities } from './worktree-head-identity-apply'
 import { getWorktreeMapFromState, getRepoMapFromState } from '@/store/selectors'
 import { applyUIZoom } from '@/lib/ui-zoom'
 import { activateAndRevealWorktree } from '@/lib/worktree-activation'
-import { buildLinearIssueLinkedWorkItem } from '@/lib/linear-linked-work-item'
 import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import { runSleepWorktree } from '@/components/sidebar/sleep-worktree-flow'
 import { createBackgroundSleepingAgentWakeDispatcher } from '@/lib/wake-sleeping-agents-in-background'
-import { OPEN_WORKSPACE_BOARD_EVENT } from '@/components/sidebar/use-workspace-board-panel'
 import { SPLIT_TERMINAL_PANE_EVENT, CLOSE_TERMINAL_PANE_EVENT } from '@/constants/terminal'
 import { requestBackgroundTerminalWorktreeMount } from '@/components/terminal/background-terminal-worktree-mount'
 import { planMobileTerminalTabMount } from '@/lib/mobile-terminal-tab-mount'
@@ -64,7 +62,6 @@ import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
 } from '../../../shared/agent-status-identity'
-import { isGitRepoKind } from '../../../shared/repo-kind'
 import { TOGGLE_FLOATING_TERMINAL_EVENT } from '@/lib/floating-terminal'
 import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '@/lib/quick-commands-menu-events'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
@@ -99,7 +96,6 @@ import { track } from '@/lib/telemetry'
 import { singlePaneLayoutSnapshot } from '@/store/slices/terminal-helpers'
 import { buildWorkspaceSessionPayload } from '@/lib/workspace-session'
 import { persistWorkspaceSessionByHost } from '@/lib/workspace-session-host-persistence'
-import { getLinearIssueWorkspaceName } from '../../../shared/workspace-name'
 import type { RuntimeClientEvent } from '../../../shared/runtime-client-events'
 import type { AppState } from '../store/types'
 import { guardPinnedTabClose, resolvePinnedTabLabel } from '../store/pinned-tab-close-guard'
@@ -678,37 +674,19 @@ type BrowserSessionTabTarget =
   | { kind: 'unified-browser'; unifiedTabId: string; workspaceId: string; groupId: string }
   | { kind: 'fallback-browser'; workspaceId: string }
 
-type NewWorkspaceShortcutModalData = {
-  telemetrySource: 'shortcut'
-  prefilledName?: string
-  linkedWorkItem?: ReturnType<typeof buildLinearIssueLinkedWorkItem>
-}
+type NewWorkspaceShortcutModalData = { telemetrySource: 'shortcut' }
 
-export function buildNewWorkspaceShortcutModalData(
-  state: Pick<AppState, 'activeView' | 'taskPageData'>
-): NewWorkspaceShortcutModalData {
-  const linearIssue =
-    state.activeView === 'tasks' ? (state.taskPageData.openLinearIssue ?? null) : null
-  if (!linearIssue) {
-    return { telemetrySource: 'shortcut' }
-  }
-
-  return {
-    telemetrySource: 'shortcut',
-    prefilledName: getLinearIssueWorkspaceName(linearIssue),
-    // Why: Cmd+N from a Linear issue should behave like the issue's Start
-    // workspace action; otherwise the agent launches without source context.
-    linkedWorkItem: buildLinearIssueLinkedWorkItem(linearIssue)
-  }
+export function buildNewWorkspaceShortcutModalData(): NewWorkspaceShortcutModalData {
+  return { telemetrySource: 'shortcut' }
 }
 
 export function openNewWorkspaceFromShortcut(
-  state: Pick<AppState, 'activeModal' | 'activeView' | 'taskPageData' | 'openModal'>
+  state: Pick<AppState, 'activeModal' | 'openModal'>
 ): void {
   if (state.activeModal === 'new-workspace-composer') {
     return
   }
-  state.openModal('new-workspace-composer', buildNewWorkspaceShortcutModalData(state))
+  state.openModal('new-workspace-composer', buildNewWorkspaceShortcutModalData())
 }
 
 export function resolveBrowserSessionTabTarget(
@@ -1023,15 +1001,6 @@ export function useIpcEvents(): void {
         void ensureRuntimeEventRepoKnown(environmentId, event.repoId).then(() =>
           worktreeChangeRefreshQueue.enqueue({ repoId: event.repoId })
         )
-        return
-      }
-      if (event.type === 'linearLinkedIssueUpdated') {
-        void useAppStore
-          .getState()
-          .refreshLinearIssue(event.identifier, event.workspaceId)
-          .catch((error) => {
-            console.error('Failed to refresh updated Linear issue:', error)
-          })
         return
       }
       void ensureRuntimeEventRepoKnown(environmentId, event.repoId)
@@ -1363,29 +1332,6 @@ export function useIpcEvents(): void {
       )
     }
 
-    if (window.api.ui.onOpenWorkspaceBoard) {
-      unsubs.push(
-        window.api.ui.onOpenWorkspaceBoard(() => {
-          const store = useAppStore.getState()
-          if (store.activeView === 'settings') {
-            return
-          }
-          store.setSidebarOpen(true)
-          window.dispatchEvent(new CustomEvent(OPEN_WORKSPACE_BOARD_EVENT))
-        })
-      )
-    }
-
-    unsubs.push(
-      window.api.ui.onOpenTasks(() => {
-        const store = useAppStore.getState()
-        if (store.activeView === 'settings' || !store.repos.some((repo) => isGitRepoKind(repo))) {
-          return
-        }
-        store.openTaskPage()
-      })
-    )
-
     unsubs.push(
       window.api.ui.onJumpToWorktreeIndex((index) => {
         const store = useAppStore.getState()
@@ -1409,7 +1355,7 @@ export function useIpcEvents(): void {
       window.api.ui.onWorktreeHistoryNavigate((direction) => {
         const store = useAppStore.getState()
         // Why: mirror the button-visibility rule — worktree history navigation
-        // is only meaningful in the terminal (worktree) view. Settings/Tasks
+        // is only meaningful in the terminal (worktree) view. Settings
         // transitions aren't worktree activations and the buttons are hidden,
         // so the shortcut no-ops there too.
         if (store.activeView !== 'terminal') {

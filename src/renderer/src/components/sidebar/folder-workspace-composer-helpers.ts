@@ -2,7 +2,6 @@ import type { LinkedWorkItemSummary } from '@/lib/new-workspace'
 import {
   buildGitHubWorkspaceSource,
   buildGitLabWorkspaceSource,
-  buildLinearWorkspaceSource,
   buildWorkspaceSourceSelection,
   getWorkspaceSourceName,
   getWorkspaceSourceProvider
@@ -21,7 +20,6 @@ import type {
   FolderWorkspace,
   GitHubWorkItem,
   GitLabWorkItem,
-  LinearIssue,
   ProjectGroup,
   Repo
 } from '../../../../shared/types'
@@ -60,9 +58,9 @@ export function getFolderSourceRepos(
   )
 }
 
-export function toFolderWorkspaceLinkedTask(
+export function toFolderWorkspaceLinkedReview(
   item: LinkedWorkItemSummary | null
-): FolderWorkspace['linkedTask'] {
+): FolderWorkspace['linkedReview'] {
   if (!item) {
     return null
   }
@@ -73,8 +71,6 @@ export function toFolderWorkspaceLinkedTask(
     number: item.number,
     title: item.title,
     url: item.url,
-    ...(item.linearIdentifier ? { linearIdentifier: item.linearIdentifier } : {}),
-    ...(item.jiraIdentifier ? { jiraIdentifier: item.jiraIdentifier } : {}),
     ...(item.repoId ? { repoId: item.repoId } : {})
   }
 }
@@ -95,10 +91,6 @@ export function toGitHubLinkedWorkItem(item: GitHubWorkItem): LinkedWorkItemSumm
 
 export function toGitLabLinkedWorkItem(item: GitLabWorkItem): LinkedWorkItemSummary {
   return buildGitLabWorkspaceSource(item)
-}
-
-export function toLinearLinkedWorkItem(issue: LinearIssue): LinkedWorkItemSummary {
-  return buildLinearWorkspaceSource(issue)
 }
 
 export function getFolderWorkspacePrimaryActionLabel(): string {

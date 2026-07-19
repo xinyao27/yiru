@@ -242,7 +242,6 @@ export const featureWallOpenSourceSchema = z.enum(['help_menu', 'popup', 'onboar
 export type FeatureWallOpenSourceTelemetry = z.infer<typeof featureWallOpenSourceSchema>
 
 export const featureWallWorkflowIdSchema = z.enum([
-  'tasks',
   'workspaces',
   'agents-orchestration',
   'workbench',
@@ -768,20 +767,6 @@ const onboardingValueKindSchema = z.enum([
   'repo'
 ])
 const onboardingTourOutcomeSchema = z.enum(['skipped_intro', 'started_partial', 'completed_inline'])
-const onboardingTaskSourcesGithubStatusSchema = z.enum([
-  'connected',
-  'not_authenticated',
-  'not_installed',
-  'checking',
-  'unknown'
-])
-const onboardingTaskSourcesLinearStatusSchema = z.enum([
-  'connected',
-  'not_connected',
-  'checking',
-  'unknown'
-])
-const onboardingTaskSourcesExitActionSchema = z.enum(['continue', 'skip_to_project_setup'])
 const onboardingWindowsTerminalShellSchema = z.enum([
   'powershell',
   'command_prompt',
@@ -808,23 +793,16 @@ const onboardingChecklistItemSchema = z.enum([
   'openedFile',
   'ranAgentOnFile'
 ])
-const onboardingFeatureSetupFeatureSchema = z.enum([
-  'browser_use',
-  'computer_use',
-  'orchestration',
-  'linear_tickets'
-])
+const onboardingFeatureSetupFeatureSchema = z.enum(['browser_use', 'computer_use', 'orchestration'])
 const onboardingFeatureSetupSelectionSchema = {
   browser_use: z.boolean(),
   computer_use: z.boolean(),
-  linear_tickets: z.boolean(),
   orchestration: z.boolean(),
   selected_count: z.number().int().min(0).max(3)
 } as const
 type OnboardingFeatureSetupSelectionTelemetry = {
   browser_use: boolean
   computer_use: boolean
-  linear_tickets: boolean
   orchestration: boolean
   selected_count: number
 }
@@ -836,8 +814,6 @@ const onboardingFeatureSetupSelectedCountRefinement = {
 function hasMatchingOnboardingFeatureSetupSelectedCount(
   props: OnboardingFeatureSetupSelectionTelemetry
 ): boolean {
-  // Why: Linear ticket setup is a recommended add-on and must not affect
-  // onboarding progress metrics.
   const selectedCount =
     (props.browser_use ? 1 : 0) + (props.computer_use ? 1 : 0) + (props.orchestration ? 1 : 0)
   return props.selected_count === selectedCount
@@ -1059,16 +1035,6 @@ const onboardingStep4PathFailedSchema = z
   .object({
     path: onboardingPathSchema,
     reason: onboardingFailureReasonSchema,
-    cohort: cohortSchema
-  })
-  .strict()
-const onboardingTaskSourcesSnapshotSchema = z
-  .object({
-    github_status: onboardingTaskSourcesGithubStatusSchema,
-    linear_status: onboardingTaskSourcesLinearStatusSchema,
-    exit_action: onboardingTaskSourcesExitActionSchema,
-    duration_ms: z.number().int().nonnegative().optional(),
-    advanced_via: advancedViaSchema,
     cohort: cohortSchema
   })
   .strict()
@@ -1457,7 +1423,6 @@ export const eventSchemas = {
   onboarding_tour_outcome: onboardingTourOutcomeEventSchema,
   onboarding_step4_path_clicked: onboardingStep4PathClickedSchema,
   onboarding_step4_path_failed: onboardingStep4PathFailedSchema,
-  onboarding_task_sources_snapshot: onboardingTaskSourcesSnapshotSchema,
   onboarding_windows_terminal_snapshot: onboardingWindowsTerminalSnapshotSchema,
   onboarding_completed: onboardingCompletedSchema,
   onboarding_dismissed: onboardingDismissedSchema,
@@ -1609,7 +1574,6 @@ type _OnboardingCohortRoster =
   | 'onboarding_tour_outcome'
   | 'onboarding_step4_path_clicked'
   | 'onboarding_step4_path_failed'
-  | 'onboarding_task_sources_snapshot'
   | 'onboarding_windows_terminal_snapshot'
   | 'onboarding_completed'
   | 'onboarding_dismissed'

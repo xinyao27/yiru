@@ -4,7 +4,7 @@ import {
   Brain,
   Coins,
   Database as DatabaseZap,
-  FolderSimple as FolderKanban,
+  FolderSimple as FolderUsage,
   ArrowClockwise as RefreshCw,
   SlidersHorizontal,
   Sparkle as Sparkles
@@ -296,7 +296,7 @@ export function CodexUsagePane(): React.JSX.Element {
                 'Sessions / Events'
               )}
               value={`${(summary?.sessions ?? 0).toLocaleString()} / ${(summary?.events ?? 0).toLocaleString()}`}
-              icon={<FolderKanban className="size-4" />}
+              icon={<FolderUsage className="size-4" />}
             />
             <StatCard
               label={translate(

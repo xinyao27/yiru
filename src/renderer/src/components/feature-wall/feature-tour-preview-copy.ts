@@ -44,13 +44,13 @@ export const FEATURE_TOUR_PREVIEW_COPY: readonly FeatureTourPreviewFrameCopy[] =
     get title() {
       return translate(
         'auto.components.feature.wall.FeatureTourPreview.ef737dcee1',
-        'GitHub & Linear tasks'
+        'Pull request review'
       )
     },
     get caption() {
       return translate(
         'auto.components.feature.wall.FeatureTourPreview.f10c14dd9d',
-        'Skip the tab-switching. Pick from your GitHub or Linear backlog and start a workspace in one click.'
+        'Open a GitHub pull request or GitLab merge request and review it without switching tools.'
       )
     }
   },

@@ -10,8 +10,7 @@ import {
   Plus,
   RefreshCw,
   PowerOff,
-  Edit3,
-  ListTodo
+  Edit3
 } from 'lucide-react-native'
 import { ClaudeIcon, OpenAIIcon } from '../src/components/agent-icons'
 import {
@@ -41,17 +40,11 @@ import type { ConnectionState, HostProfile } from '../src/transport/types'
 import { triggerMediumImpact } from '../src/platform/haptics'
 import { YiruLogo } from '../src/components/yiru-logo'
 import { MobileHostCard } from '../src/components/mobile-host-card'
-import { TaskProviderLogo } from '../src/components/task-provider-logo'
 import { ActionSheetModal, type ActionSheetAction } from '../src/components/action-sheet-modal'
 import { ConfirmModal } from '../src/components/confirm-modal'
 import { setCachedWorktrees, getCachedWorktrees } from '../src/cache/worktree-cache'
 import { loadHomeSnapshot, saveHomeSnapshot } from '../src/cache/home-snapshot-cache'
 import { colors, spacing, radii } from '../src/theme/mobile-theme'
-import {
-  filterAvailableTaskProviders,
-  normalizeVisibleTaskProviders,
-  type TaskProvider
-} from '../src/tasks/mobile-task-providers'
 import { useResponsiveLayout } from '../src/layout/responsive-layout'
 
 function endpointLabel(endpoint: string): string {
@@ -88,24 +81,6 @@ type HostWorktreeInfo = {
   totalWorktrees: number
   activeCount: number
   lastActiveWorktree: WorktreeSummary | null
-}
-
-type HomeTaskSettings = {
-  visibleTaskProviders?: unknown
-}
-
-type HomePreflightStatus = {
-  glab?: { installed?: boolean }
-}
-
-type HomeLinearStatus = {
-  connected?: boolean
-}
-
-const TASK_PROVIDER_LABELS: Record<TaskProvider, string> = {
-  github: 'GitHub',
-  gitlab: 'GitLab',
-  linear: 'Linear'
 }
 
 function formatDuration(ms: number): string {
@@ -244,48 +219,6 @@ function fetchAccountsSnapshot(
     .catch(() => {})
 }
 
-function fetchTaskProviders(
-  client: RpcClient,
-  hostId: string,
-  setProviders: (
-    updater: (prev: Record<string, TaskProvider[]>) => Record<string, TaskProvider[]>
-  ) => void,
-  disposed: () => boolean
-) {
-  Promise.all([
-    client.sendRequest('settings.get'),
-    client.sendRequest('preflight.check'),
-    client.sendRequest('linear.status')
-  ])
-    .then(([settingsResponse, preflightResponse, linearResponse]) => {
-      if (disposed()) {
-        return
-      }
-      const settings = settingsResponse.ok
-        ? (((settingsResponse.result as { settings?: HomeTaskSettings }).settings ??
-            {}) as HomeTaskSettings)
-        : {}
-      const preflight = preflightResponse.ok
-        ? (preflightResponse.result as HomePreflightStatus)
-        : null
-      const linear = linearResponse.ok ? (linearResponse.result as HomeLinearStatus) : null
-      const providers = filterAvailableTaskProviders(
-        normalizeVisibleTaskProviders(settings.visibleTaskProviders),
-        {
-          gitlabInstalled: preflight?.glab?.installed === true,
-          linearConnected: linear?.connected === true
-        }
-      )
-      setProviders((prev) => ({ ...prev, [hostId]: providers }))
-    })
-    .catch(() => {
-      if (disposed()) {
-        return
-      }
-      setProviders((prev) => (prev[hostId] ? prev : { ...prev, [hostId]: ['github'] }))
-    })
-}
-
 // Why: repo names get a stable color derived from hashing, matching the
 // host detail page's colored dots for visual consistency.
 const REPO_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4']
@@ -312,7 +245,6 @@ export default function HomeScreen() {
   const [stats, setStats] = useState<StatsSummary | null>(null)
   const [worktreeInfo, setWorktreeInfo] = useState<Record<string, HostWorktreeInfo>>({})
   const [accountsByHost, setAccountsByHost] = useState<Record<string, AccountsSnapshot>>({})
-  const [taskProvidersByHost, setTaskProvidersByHost] = useState<Record<string, TaskProvider[]>>({})
   const [lastVisited, setLastVisited] = useState<{ hostId: string; worktreeId: string } | null>(
     null
   )
@@ -422,7 +354,6 @@ export default function HomeScreen() {
           fetchStats(entry.client, setStats, () => stale)
           fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => stale)
           fetchAccountsSnapshot(entry.client, entry.hostId, setAccountsByHost, () => stale)
-          fetchTaskProviders(entry.client, entry.hostId, setTaskProvidersByHost, () => stale)
         }
       }
       return () => {
@@ -537,7 +468,6 @@ export default function HomeScreen() {
             statsFetched = true
             fetchStats(entry.client, setStats, () => false)
             fetchWorktreeInfo(entry.client, entry.hostId, setWorktreeInfo, () => false)
-            fetchTaskProviders(entry.client, entry.hostId, setTaskProvidersByHost, () => false)
           }
         } else {
           if (unsubNotif) {
@@ -639,73 +569,6 @@ export default function HomeScreen() {
     () => sortedHosts.find((host) => hostStates[host.id] === 'connected') ?? null,
     [sortedHosts, hostStates]
   )
-  const primaryTaskProviders = primaryConnectedHost
-    ? (taskProvidersByHost[primaryConnectedHost.id] ?? ['github'])
-    : []
-  const openTasks = useCallback(
-    (provider?: TaskProvider) => {
-      if (!primaryConnectedHost) {
-        return
-      }
-      const suffix = provider ? `?taskSource=${provider}` : ''
-      router.push(`/h/${primaryConnectedHost.id}/tasks${suffix}`)
-    },
-    [primaryConnectedHost, router]
-  )
-  const renderTaskHomeCard = () => (
-    <Pressable
-      disabled={!primaryConnectedHost}
-      style={({ pressed }) => [
-        styles.taskHomeCard,
-        !primaryConnectedHost && styles.quickActionDisabled,
-        pressed && styles.hostCardPressed
-      ]}
-      onPress={() => {
-        openTasks()
-      }}
-    >
-      <View style={styles.taskHomeIcon}>
-        <ListTodo size={18} color={colors.textSecondary} />
-      </View>
-      <View style={styles.taskHomeMain}>
-        <Text style={styles.taskHomeTitle}>Tasks</Text>
-        <Text style={styles.taskHomeSubtitle} numberOfLines={1}>
-          {primaryTaskProviders.length > 0
-            ? primaryTaskProviders.map((provider) => TASK_PROVIDER_LABELS[provider]).join(' · ')
-            : 'No task sources connected'}
-        </Text>
-      </View>
-      <View style={styles.taskHomeTrailing}>
-        <View
-          style={styles.taskHomeProviderRow}
-          accessibilityLabel={primaryTaskProviders
-            .map((provider) => TASK_PROVIDER_LABELS[provider])
-            .join(', ')}
-        >
-          {primaryTaskProviders.map((provider) => (
-            <Pressable
-              key={provider}
-              accessibilityRole="button"
-              accessibilityLabel={`Open ${TASK_PROVIDER_LABELS[provider]} tasks`}
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.taskHomeProviderButton,
-                pressed && styles.taskHomeProviderButtonPressed
-              ]}
-              onPress={(event) => {
-                event.stopPropagation()
-                openTasks(provider)
-              }}
-            >
-              <TaskProviderLogo provider={provider} size={22} color={colors.textSecondary} />
-            </Pressable>
-          ))}
-        </View>
-      </View>
-      <ChevronRight size={16} color={colors.textMuted} />
-    </Pressable>
-  )
-
   async function handleRemove() {
     if (!confirmRemove) {
       return
@@ -884,15 +747,8 @@ export default function HomeScreen() {
                     </View>
                     <ChevronRight size={16} color={colors.textMuted} />
                   </Pressable>
-                  <Text style={[styles.sectionHeading, styles.sectionHeadingTightTop]}>Tasks</Text>
-                  {renderTaskHomeCard()}
                 </>
-              ) : (
-                <>
-                  <Text style={[styles.sectionHeading, styles.sectionHeadingTightTop]}>Tasks</Text>
-                  {renderTaskHomeCard()}
-                </>
-              )}
+              ) : null}
 
               {/* ─── Quick actions ─── */}
               <Text style={[styles.sectionHeading, { marginTop: spacing.xl }]}>Quick Actions</Text>
@@ -1258,65 +1114,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textSecondary,
     flex: 1
-  },
-
-  /* ─── Tasks card ─── */
-  taskHomeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.card,
-    minHeight: 72,
-    paddingLeft: spacing.md,
-    paddingRight: spacing.md,
-    paddingVertical: 12
-  },
-  taskHomeIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: 13,
-    backgroundColor: colors.bgRaised,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14
-  },
-  taskHomeMain: {
-    flex: 1,
-    minWidth: 0
-  },
-  taskHomeTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  taskHomeSubtitle: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginTop: 3
-  },
-  taskHomeTrailing: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexShrink: 0,
-    marginLeft: spacing.sm
-  },
-  taskHomeProviderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 2
-  },
-  taskHomeProviderButton: {
-    width: 34,
-    height: 34,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button
-  },
-  taskHomeProviderButtonPressed: {
-    backgroundColor: colors.bgRaised
   },
 
   /* ─── Account usage ─── */

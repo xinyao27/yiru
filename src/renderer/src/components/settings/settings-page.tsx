@@ -57,7 +57,6 @@ import { OrchestrationPane } from './orchestration-pane'
 import { AccountsPane } from './accounts-pane'
 import { StatsPane } from '../stats/stats-pane'
 import { IntegrationsPane } from './integrations-pane'
-import { TasksPane } from './tasks-pane'
 import { QuickCommandsPane } from './quick-commands-pane'
 import { DeveloperPermissionsPane } from './developer-permissions-pane'
 import { ComputerUsePane } from './computer-use-pane'
@@ -1331,7 +1330,7 @@ function Settings(): React.JSX.Element {
                   title={translate('auto.components.settings.Settings.c9ca101a3b', 'Integrations')}
                   description={translate(
                     'auto.components.settings.Settings.b07041697f',
-                    'Connect GitHub, GitLab, Linear, and source-hosting services.'
+                    'Connect GitHub, GitLab, and source-hosting services.'
                   )}
                   searchEntries={getSectionSearchEntries('integrations')}
                   bodyClassName="rounded-none border-0 bg-transparent p-0 shadow-none"
@@ -1389,20 +1388,6 @@ function Settings(): React.JSX.Element {
                       />
                       <GitProviderApiBudgetPane settingsSearchQuery={settingsSearchQuery} />
                     </>
-                  ) : null}
-                </SettingsSection>
-
-                <SettingsSection
-                  id="tasks"
-                  title={translate('auto.components.settings.Settings.11faa2f7dd', 'Task Sources')}
-                  description={translate(
-                    'auto.components.settings.Settings.dd72ed437a',
-                    'Choose which task providers appear in the Tasks page and sidebar.'
-                  )}
-                  searchEntries={getSectionSearchEntries('tasks')}
-                >
-                  {isSectionMounted('tasks') ? (
-                    <TasksPane settings={settings} updateSettings={updateSettings} />
                   ) : null}
                 </SettingsSection>
 

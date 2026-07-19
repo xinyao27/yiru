@@ -9,10 +9,10 @@ import type {
 } from '../../shared/automations-types'
 import {
   buildWorkspaceRunContext,
-  normalizeTaskSourceContext,
-  type TaskSourceContext,
+  normalizeProjectSourceContext,
+  type ProjectSourceContext,
   type WorkspaceRunContext
-} from '../../shared/task-source-context'
+} from '../../shared/project-source-context'
 import type { ProjectHostSetup, TuiAgent } from '../../shared/types'
 import {
   DEFAULT_AUTOMATION_PRECHECK_TIMEOUT_SECONDS,
@@ -283,7 +283,7 @@ function getPrecheckFlag(
 
 function getSourceContextFlag(
   flags: Map<string, string | boolean>
-): TaskSourceContext | null | undefined {
+): ProjectSourceContext | null | undefined {
   if (!flags.has('source-context')) {
     return undefined
   }
@@ -291,7 +291,7 @@ function getSourceContextFlag(
   if (typeof value !== 'string') {
     throw new RuntimeClientError(
       'invalid_argument',
-      '--source-context requires a JSON TaskSourceContext or null'
+      '--source-context requires a JSON ProjectSourceContext or null'
     )
   }
   let parsed: unknown
@@ -306,16 +306,16 @@ function getSourceContextFlag(
   if (!parsed || typeof parsed !== 'object') {
     throw new RuntimeClientError(
       'invalid_argument',
-      '--source-context must be a JSON TaskSourceContext or null'
+      '--source-context must be a JSON ProjectSourceContext or null'
     )
   }
-  const sourceContext = normalizeTaskSourceContext(
-    parsed as Parameters<typeof normalizeTaskSourceContext>[0]
+  const sourceContext = normalizeProjectSourceContext(
+    parsed as Parameters<typeof normalizeProjectSourceContext>[0]
   )
   if (!sourceContext) {
     throw new RuntimeClientError(
       'invalid_argument',
-      '--source-context is not a valid TaskSourceContext'
+      '--source-context is not a valid ProjectSourceContext'
     )
   }
   return sourceContext

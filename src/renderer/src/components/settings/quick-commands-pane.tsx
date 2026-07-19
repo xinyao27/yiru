@@ -53,7 +53,7 @@ export function QuickCommandsPane({
   const [editor, setEditor] = useState<EditorState>(null)
   const consumedAddIntentSignalRef = useRef(0)
   // Why: `null` means "show all" (sticky-all), independent of the current repo
-  // list — mirrors the tasks-page repo combobox so newly added repos appear
+  // list — mirrors the repository combobox so newly added repos appear
   // automatically rather than being silently excluded.
   const [scopeSelection, setScopeSelection] = useState<ReadonlySet<string> | null>(null)
   const [scopePopoverOpen, setScopePopoverOpen] = useState(false)
@@ -126,7 +126,7 @@ export function QuickCommandsPane({
 
   const handleSelectAll = (): void => {
     if (showAll) {
-      // Why: tasks-page parity — clicking "All" while everything is selected
+      // Why: repository filter parity — clicking "All" while everything is selected
       // collapses to a single scope rather than emitting an empty set.
       setScopeSelection(new Set([GLOBAL_SCOPE_KEY]))
       return

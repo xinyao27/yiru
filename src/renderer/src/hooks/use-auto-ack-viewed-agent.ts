@@ -170,7 +170,7 @@ export function acknowledgeViewedAgentAttention(
 // that could legitimately affect the ack decision.
 //
 // It acks whenever:
-//   - activeView is 'terminal' (the user isn't on Settings/Tasks), AND
+//   - activeView is 'terminal' (the user isn't on Settings), AND
 //   - activeTabId identifies a live tab, AND
 //   - at least one agentStatusByPaneKey entry OR retainedAgentsByPaneKey
 //     entry matches the active tab+leaf AND its ackAt < stateStartedAt, OR

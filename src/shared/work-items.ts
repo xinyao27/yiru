@@ -1,6 +1,5 @@
-// Why: per-repo fetch budget for gh CLI calls. Kept in shared/ so the renderer's
-// prefetch sites (SidebarNav, ui.ts openTaskPage) and the TaskPage all use the
-// same value for cache-key alignment.
+// Why: per-repo fetch budget for gh CLI calls. Shared callers must use the
+// same value to preserve cache-key alignment.
 export const PER_REPO_FETCH_LIMIT = 36
 
 // Why: how many items to show after cross-repo merge. Decoupled from the per-repo
@@ -27,18 +26,8 @@ export function isGitHubWorkItemsSshRemoteRequiredError(error: unknown): boolean
 }
 
 // Why: generic over item shape for the same cross-caller reasons as
-// sortWorkItemsByUpdatedAt. Sorting by number descending matches GitHub's
-// default Issues view (newest issue number first).
+// other work-item sorting. Number-descending keeps recently created pull
+// requests first when callers merge repositories.
 export function sortWorkItemsByNumber<T extends { number: number }>(items: T[]): T[] {
   return [...items].sort((left, right) => right.number - left.number)
-}
-
-// Why: generic over the item shape because main-process callers emit items
-// without repoId (stamped by the renderer after IPC), while renderer callers
-// carry the full GitHubWorkItem. Both share only the updatedAt field needed
-// here.
-export function sortWorkItemsByUpdatedAt<T extends { updatedAt: string }>(items: T[]): T[] {
-  return [...items].sort((left, right) => {
-    return new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime()
-  })
 }

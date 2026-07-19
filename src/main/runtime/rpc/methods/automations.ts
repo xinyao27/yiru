@@ -5,7 +5,7 @@ import {
   normalizeAutomationPrecheckTimeoutSeconds
 } from '../../../../shared/automation-precheck'
 import { normalizeExecutionHostId } from '../../../../shared/execution-host'
-import type { TaskProviderIdentity as SharedTaskProviderIdentity } from '../../../../shared/task-source-context'
+import type { ProjectSourceIdentity as SharedProjectSourceIdentity } from '../../../../shared/project-source-context'
 import { isTuiAgent } from '../../../../shared/tui-agent-config'
 import { defineMethod, type RpcMethod } from '../core'
 import {
@@ -54,26 +54,26 @@ const OptionalNullablePlainString = z
   .pipe(z.union([z.string(), z.null(), z.undefined()]))
   .optional()
 
-const TaskProviderIdentity = z
-  .custom<SharedTaskProviderIdentity>(
+const ProjectSourceIdentity = z
+  .custom<SharedProjectSourceIdentity>(
     (value) =>
       value !== null &&
       typeof value === 'object' &&
       'provider' in value &&
-      ['github', 'gitlab', 'linear', 'jira'].includes(String(value.provider))
+      ['github', 'gitlab'].includes(String(value.provider))
   )
   .optional()
   .nullable()
 
-const TaskSourceContext = z
+const ProjectSourceContext = z
   .object({
-    kind: z.literal('task-source'),
-    provider: z.enum(['github', 'gitlab', 'linear', 'jira']),
+    kind: z.literal('project-source'),
+    provider: z.enum(['github', 'gitlab']),
     projectId: requiredString('Missing source project id'),
     hostId: ExecutionHostId,
     projectHostSetupId: OptionalNullablePlainString,
     repoId: OptionalNullablePlainString,
-    providerIdentity: TaskProviderIdentity,
+    providerIdentity: ProjectSourceIdentity,
     accountLabel: OptionalNullablePlainString
   })
   .optional()
@@ -105,7 +105,7 @@ const AutomationCreate = z.object({
   precheck: AutomationPrecheck,
   agentId: TuiAgent,
   runContext: WorkspaceRunContext,
-  sourceContext: TaskSourceContext,
+  sourceContext: ProjectSourceContext,
   repo: OptionalString,
   workspace: OptionalString,
   workspaceMode: AutomationWorkspaceMode,
@@ -125,7 +125,7 @@ const AutomationUpdateFields = z.object({
   precheck: AutomationPrecheck,
   agentId: TuiAgent.optional(),
   runContext: WorkspaceRunContext,
-  sourceContext: TaskSourceContext,
+  sourceContext: ProjectSourceContext,
   repo: OptionalString,
   workspace: OptionalString,
   workspaceMode: AutomationWorkspaceMode,

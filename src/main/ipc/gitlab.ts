@@ -3,50 +3,34 @@ GitLab IPC handlers co-located keeps the repo-path validation pattern
 reviewable as one surface. */
 import { ipcMain } from 'electron'
 import { resolve } from 'node:path'
-import type {
-  GitLabIssueUpdate,
-  GitLabMRInlineCommentInput,
-  GitLabMRUpdate,
-  GitLabWorkItem,
-  Repo
-} from '../../shared/types'
+import type { GitLabMRInlineCommentInput, GitLabMRUpdate, Repo } from '../../shared/types'
 import { getRepoExecutionHostId } from '../../shared/execution-host'
-import type { TaskSourceContext } from '../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../shared/project-source-context'
 import type { Store } from '../persistence'
 import {
-  normalizeGitLabIssueAssignee,
-  normalizeGitLabIssueListState,
   normalizeGitLabMRListState,
   normalizeGitLabPositiveInteger,
   normalizeGitLabSearchQuery
 } from '../gitlab/gitlab-preload-args'
-import { recordGitLabProjectRecent } from '../gitlab/gitlab-project-recents'
 import {
-  addIssueComment,
   addMRInlineComment,
   addMRComment,
   closeMR,
-  createIssue,
   diagnoseAuth,
   getAuthenticatedViewer,
   getJobTrace,
-  getIssue,
   getMergeRequest,
   getMergeRequestForBranch,
   getProjectSlug,
   getRateLimit,
   getWorkItemByProjectRef,
   listAssignableUsers,
-  listIssues,
   listLabels,
   listMergeRequests,
-  listTodos,
-  listWorkItems,
   mergeMR,
   reopenMR,
   resolveMRDiscussion,
   retryJob,
-  updateIssue,
   updateMR,
   updateMRReviewers
 } from '../gitlab/client'
@@ -59,7 +43,7 @@ import type { HostedReviewExecutionOptions } from '../source-control/hosted-revi
 type GitLabRepoSelectorArgs = {
   repoPath: string
   repoId?: string | null
-  sourceContext?: TaskSourceContext | null
+  sourceContext?: ProjectSourceContext | null
 }
 
 function findRegisteredGitLabRepo(args: GitLabRepoSelectorArgs, store: Store): Repo | undefined {
@@ -162,7 +146,7 @@ export function registerGitLabHandlers(store: Store): void {
       args: {
         repoPath: string
         repoId?: string | null
-        sourceContext?: TaskSourceContext | null
+        sourceContext?: ProjectSourceContext | null
         state?: 'opened' | 'merged' | 'closed' | 'all'
         page?: number
         perPage?: number
@@ -178,117 +162,9 @@ export function registerGitLabHandlers(store: Store): void {
         state,
         page,
         perPage,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         normalizeGitLabSearchQuery(args.query),
         repoConnectionId(repo),
-        ...localGitOptionArgs(store, repo)
-      )
-    }
-  )
-
-  ipcMain.handle(
-    'gitlab:issue',
-    async (_event, args: GitLabRepoSelectorArgs & { number: number }) => {
-      const repo = assertRegisteredRepo(args, store)
-      return getIssue(
-        repo.path,
-        args.number,
-        repoConnectionId(repo),
-        ...localGitOptionArgs(store, repo)
-      )
-    }
-  )
-
-  ipcMain.handle(
-    'gitlab:listIssues',
-    async (
-      _event,
-      args: {
-        repoPath: string
-        repoId?: string | null
-        sourceContext?: TaskSourceContext | null
-        state?: 'opened' | 'closed' | 'all'
-        assignee?: string
-        limit?: number
-      }
-    ) => {
-      const repo = assertRegisteredRepo(args, store)
-      const limit = normalizeGitLabPositiveInteger(args.limit, 20, 100)
-      const state = normalizeGitLabIssueListState(args.state)
-      const assignee = normalizeGitLabIssueAssignee(args.assignee)
-      const result = await listIssues(
-        repo.path,
-        limit,
-        repo.issueSourcePreference,
-        state,
-        assignee,
-        repoConnectionId(repo),
-        ...localGitOptionArgs(store, repo)
-      )
-      // Why: Tasks page expects GitLabWorkItem[] so it can share row
-      // rendering with MRs. Map IssueInfo → WorkItem here so the renderer
-      // doesn't need a separate code path.
-      const workItems: GitLabWorkItem[] = result.items.map((issue) => ({
-        id: `gitlab-issue-${repo.id}-${issue.number}`,
-        type: 'issue' as const,
-        number: issue.number,
-        title: issue.title,
-        state: issue.state,
-        url: issue.url,
-        labels: issue.labels,
-        updatedAt: issue.updatedAt ?? '',
-        author: issue.author ?? null,
-        repoId: repo.id
-      }))
-      return { items: workItems, ...(result.error ? { error: result.error } : {}) }
-    }
-  )
-
-  ipcMain.handle(
-    'gitlab:createIssue',
-    async (_event, args: GitLabRepoSelectorArgs & { title: string; body: string }) => {
-      const repo = assertRegisteredRepo(args, store)
-      return createIssue(
-        repo.path,
-        args.title,
-        args.body,
-        repo.issueSourcePreference,
-        repoConnectionId(repo),
-        ...localGitOptionArgs(store, repo)
-      )
-    }
-  )
-
-  ipcMain.handle(
-    'gitlab:updateIssue',
-    async (
-      _event,
-      args: GitLabRepoSelectorArgs & { number: number; updates: GitLabIssueUpdate }
-    ) => {
-      const repo = assertRegisteredRepo(args, store)
-      return updateIssue(
-        repo.path,
-        args.number,
-        args.updates,
-        repo.issueSourcePreference,
-        repoConnectionId(repo),
-        undefined,
-        ...localGitOptionArgs(store, repo)
-      )
-    }
-  )
-
-  ipcMain.handle(
-    'gitlab:addIssueComment',
-    async (_event, args: GitLabRepoSelectorArgs & { number: number; body: string }) => {
-      const repo = assertRegisteredRepo(args, store)
-      return addIssueComment(
-        repo.path,
-        args.number,
-        args.body,
-        repo.issueSourcePreference,
-        repoConnectionId(repo),
-        undefined,
         ...localGitOptionArgs(store, repo)
       )
     }
@@ -298,7 +174,7 @@ export function registerGitLabHandlers(store: Store): void {
     const repo = assertRegisteredRepo(args, store)
     return listLabels(
       repo.path,
-      repo.issueSourcePreference,
+      repo.forgeRemotePreference,
       repoConnectionId(repo),
       ...localGitOptionArgs(store, repo)
     )
@@ -308,54 +184,23 @@ export function registerGitLabHandlers(store: Store): void {
     const repo = assertRegisteredRepo(args, store)
     return listAssignableUsers(
       repo.path,
-      repo.issueSourcePreference,
+      repo.forgeRemotePreference,
       repoConnectionId(repo),
       ...localGitOptionArgs(store, repo)
     )
   })
 
-  // Why: combined MR + issue list — Tasks screen and any future picker
-  // that wants a unified view. Centralizes the merge / sort logic so
-  // callers don't have to re-implement it.
-  ipcMain.handle(
-    'gitlab:listWorkItems',
-    async (
-      _event,
-      args: {
-        repoPath: string
-        repoId?: string | null
-        sourceContext?: TaskSourceContext | null
-        state?: 'opened' | 'merged' | 'closed' | 'all'
-        page?: number
-        perPage?: number
-        query?: string
-      }
-    ) => {
-      const repo = assertRegisteredRepo(args, store)
-      return listWorkItems(
-        repo.path,
-        normalizeGitLabMRListState(args.state),
-        normalizeGitLabPositiveInteger(args.page, 1, 10_000),
-        normalizeGitLabPositiveInteger(args.perPage, 20, 100),
-        repo.issueSourcePreference,
-        normalizeGitLabSearchQuery(args.query),
-        repoConnectionId(repo),
-        ...localGitOptionArgs(store, repo)
-      )
-    }
-  )
-
   // Why: aggregated dialog payload — body + discussions + pipeline jobs.
   // Powers GitLabItemDialog's tabs.
   ipcMain.handle(
     'gitlab:workItemDetails',
-    async (_event, args: GitLabRepoSelectorArgs & { iid: number; type: 'issue' | 'mr' }) => {
+    async (_event, args: GitLabRepoSelectorArgs & { iid: number; type: 'mr' }) => {
       const repo = assertRegisteredRepo(args, store)
       return getWorkItemDetails(
         repo.path,
         args.iid,
         args.type,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         undefined,
         ...localGitOptionArgs(store, repo)
@@ -370,7 +215,7 @@ export function registerGitLabHandlers(store: Store): void {
       return closeMR(
         repo.path,
         args.iid,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         undefined,
         ...localGitOptionArgs(store, repo)
@@ -385,7 +230,7 @@ export function registerGitLabHandlers(store: Store): void {
       return reopenMR(
         repo.path,
         args.iid,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         undefined,
         ...localGitOptionArgs(store, repo)
@@ -404,7 +249,7 @@ export function registerGitLabHandlers(store: Store): void {
         repo.path,
         args.iid,
         args.method ?? 'merge',
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         undefined,
         ...localGitOptionArgs(store, repo)
@@ -420,7 +265,7 @@ export function registerGitLabHandlers(store: Store): void {
         repo.path,
         args.iid,
         args.updates,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         undefined,
         ...localGitOptionArgs(store, repo)
@@ -435,7 +280,7 @@ export function registerGitLabHandlers(store: Store): void {
       args: {
         repoPath: string
         repoId?: string | null
-        sourceContext?: TaskSourceContext | null
+        sourceContext?: ProjectSourceContext | null
         iid: number
         reviewerIds: number[]
         projectRef?: ProjectRef | null
@@ -446,7 +291,7 @@ export function registerGitLabHandlers(store: Store): void {
         repo.path,
         args.iid,
         args.reviewerIds,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         args.projectRef,
         ...localGitOptionArgs(store, repo)
@@ -462,7 +307,7 @@ export function registerGitLabHandlers(store: Store): void {
         repo.path,
         args.iid,
         args.body,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         undefined,
         ...localGitOptionArgs(store, repo)
@@ -477,7 +322,7 @@ export function registerGitLabHandlers(store: Store): void {
       args: {
         repoPath: string
         repoId?: string | null
-        sourceContext?: TaskSourceContext | null
+        sourceContext?: ProjectSourceContext | null
         iid: number
         input: GitLabMRInlineCommentInput
         projectRef?: ProjectRef | null
@@ -488,7 +333,7 @@ export function registerGitLabHandlers(store: Store): void {
         repo.path,
         args.iid,
         args.input,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         args.projectRef,
         ...localGitOptionArgs(store, repo)
@@ -508,7 +353,7 @@ export function registerGitLabHandlers(store: Store): void {
         args.iid,
         args.discussionId,
         args.resolved,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         undefined,
         ...localGitOptionArgs(store, repo)
@@ -526,7 +371,7 @@ export function registerGitLabHandlers(store: Store): void {
       return getJobTrace(
         repo.path,
         args.jobId,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         args.projectRef,
         ...localGitOptionArgs(store, repo)
@@ -544,7 +389,7 @@ export function registerGitLabHandlers(store: Store): void {
       return retryJob(
         repo.path,
         args.jobId,
-        repo.issueSourcePreference,
+        repo.forgeRemotePreference,
         repoConnectionId(repo),
         args.projectRef,
         ...localGitOptionArgs(store, repo)
@@ -552,18 +397,6 @@ export function registerGitLabHandlers(store: Store): void {
     }
   )
 
-  // Why: My Todos surface — cross-project, user-scoped. The repoPath is
-  // only used for the registered-repo guard; `glab api todos` doesn't
-  // care about cwd because the endpoint is user-scoped.
-  ipcMain.handle('gitlab:todos', async (_event, args: GitLabRepoSelectorArgs) => {
-    const repo = assertRegisteredRepo(args, store)
-    return listTodos(repo.path, repoConnectionId(repo), ...localGitOptionArgs(store, repo))
-  })
-
-  // Why: paste-URL flow in the picker. The user pastes a GitLab URL that
-  // may target a project different from the local checkout's remote, so
-  // the call carries the parsed project path explicitly rather than
-  // resolving from cwd.
   ipcMain.handle(
     'gitlab:workItemByPath',
     async (
@@ -572,7 +405,7 @@ export function registerGitLabHandlers(store: Store): void {
         host: string
         path: string
         iid: number
-        type: 'issue' | 'mr'
+        type: 'mr'
       }
     ) => {
       const repo = assertRegisteredRepo(args, store)
@@ -585,12 +418,6 @@ export function registerGitLabHandlers(store: Store): void {
         repoConnectionId(repo),
         ...localGitOptionArgs(store, repo)
       )
-      // Why: only persist a recent entry when the lookup actually
-      // produced an item. A 404 / auth failure shouldn't pollute the
-      // user's recents list with project paths they can't read.
-      if (result) {
-        recordGitLabProjectRecent(store, args.host, args.path)
-      }
       return result
     }
   )

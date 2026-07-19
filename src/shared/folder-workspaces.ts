@@ -1,4 +1,4 @@
-import type { FolderWorkspace, FolderWorkspaceLinkedTask, ProjectGroup } from './types'
+import type { FolderWorkspace, FolderWorkspaceLinkedReview, ProjectGroup } from './types'
 import { isTuiAgent } from './tui-agent-config'
 
 export function normalizeFolderWorkspaceName(
@@ -9,22 +9,17 @@ export function normalizeFolderWorkspaceName(
   return trimmed.length > 0 ? trimmed : fallback
 }
 
-export function normalizeFolderWorkspaceLinkedTask(
+export function normalizeFolderWorkspaceLinkedReview(
   value: unknown
-): FolderWorkspaceLinkedTask | null {
+): FolderWorkspaceLinkedReview | null {
   if (!value || typeof value !== 'object') {
     return null
   }
-  const raw = value as Partial<FolderWorkspaceLinkedTask>
+  const raw = value as Partial<FolderWorkspaceLinkedReview>
   if (
-    raw.provider !== 'github' &&
-    raw.provider !== 'gitlab' &&
-    raw.provider !== 'linear' &&
-    raw.provider !== 'jira'
+    (raw.provider !== 'github' || raw.type !== 'pr') &&
+    (raw.provider !== 'gitlab' || raw.type !== 'mr')
   ) {
-    return null
-  }
-  if (raw.type !== 'issue' && raw.type !== 'pr' && raw.type !== 'mr') {
     return null
   }
   if (
@@ -43,12 +38,6 @@ export function normalizeFolderWorkspaceLinkedTask(
     number: raw.number,
     title: raw.title.trim(),
     url: raw.url.trim(),
-    ...(typeof raw.linearIdentifier === 'string' && raw.linearIdentifier.trim().length > 0
-      ? { linearIdentifier: raw.linearIdentifier.trim() }
-      : {}),
-    ...(typeof raw.jiraIdentifier === 'string' && raw.jiraIdentifier.trim().length > 0
-      ? { jiraIdentifier: raw.jiraIdentifier.trim() }
-      : {}),
     ...(typeof raw.repoId === 'string' && raw.repoId.trim().length > 0
       ? { repoId: raw.repoId.trim() }
       : {})
@@ -106,7 +95,7 @@ export function normalizeFolderWorkspaces(
           : raw.connectionId === null
             ? null
             : (group?.connectionId ?? null),
-      linkedTask: normalizeFolderWorkspaceLinkedTask(raw.linkedTask),
+      linkedReview: normalizeFolderWorkspaceLinkedReview(raw.linkedReview),
       comment: typeof raw.comment === 'string' ? raw.comment : '',
       isArchived: raw.isArchived === true,
       isUnread: raw.isUnread === true,

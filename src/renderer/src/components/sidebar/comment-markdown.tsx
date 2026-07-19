@@ -64,7 +64,7 @@ const remarkPlugins = [remarkGfm, remarkBreaks]
 
 const GITHUB_REFERENCE_PATTERN = /(?:\b([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+))?#([1-9][0-9]*)\b/g
 
-function createGitHubIssueUrl(owner: string, repo: string, number: string): string {
+function createGitHubReferenceUrl(owner: string, repo: string, number: string): string {
   return `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${number}`
 }
 
@@ -83,7 +83,8 @@ function createGitHubReferenceLinkNode(
 ): MarkdownLinkNode {
   return {
     type: 'link',
-    url: createGitHubIssueUrl(owner, repo, number),
+    // GitHub resolves this shared issue/PR namespace to the matching object.
+    url: createGitHubReferenceUrl(owner, repo, number),
     title: null,
     children: [{ type: 'text', value: label }]
   }

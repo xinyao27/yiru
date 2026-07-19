@@ -50,8 +50,6 @@ import type {
   YiruProfileOrgMembersListResult
 } from '../shared/yiru-profiles'
 import type { TerminalPaneSplitSource } from '../shared/feature-education-telemetry'
-import type { TaskSourceContext } from '../shared/task-source-context'
-import type { LinearIssueAttributeFilter } from '../shared/linear-issue-attribute-filter'
 import type { ProjectExecutionRuntimeResolution } from '../shared/project-execution-runtime'
 import type { StartupCommandDelivery } from '../shared/codex-startup-delivery'
 import type { SleepingAgentLaunchConfig } from '../shared/agent-session-resume'
@@ -93,7 +91,6 @@ import type {
   BrowserSessionProfileSource,
   BrowserViewportOverride,
   ClaudeRateLimitAccountsState,
-  ClassifiedError,
   CodexRateLimitAccountsState,
   CreateWorktreeArgs,
   CreateWorktreeResult,
@@ -115,7 +112,6 @@ import type {
   GitStatusResult,
   GitUpstreamStatus,
   GitHubAssignableUser,
-  GitHubCreateIssueResult,
   GitHubPRFile,
   GitHubPRFileContents,
   GitHubPrStartPoint,
@@ -129,15 +125,12 @@ import type {
   GitLabAuthDiagnostic,
   GitLabCommentResult,
   GitLabDiscussionResolveResult,
-  GitLabIssueInfo,
-  GitLabIssueUpdate,
   GitLabJobTraceResult,
   GitLabMRInlineCommentInput,
   GitLabMRReviewersUpdateResult,
   GitLabMRUpdate,
   GitLabProjectRef,
   GitLabRetryJobResult,
-  GitLabTodo,
   GitLabViewer,
   GitLabWorkItem,
   GitLabWorkItemDetails,
@@ -146,40 +139,8 @@ import type {
   MRInfo,
   MRListState,
   ListWorkItemsResult,
-  IssueInfo,
-  JiraComment,
-  JiraConnectionStatus,
-  JiraCreateField,
-  JiraCreateIssueArgs,
-  JiraIssue,
-  JiraIssueFilter,
-  JiraIssueType,
-  JiraProjectStatusOrder,
-  JiraIssueUpdate,
-  JiraPriority,
-  JiraProject,
-  JiraSiteSelection,
-  JiraTransition,
-  JiraUser,
-  JiraViewer,
-  LinearViewer,
-  LinearCollectionResult,
-  LinearConnectionStatus,
-  LinearCustomViewModel,
-  LinearCustomViewSummary,
-  LinearWorkspaceSelection,
-  LinearIssue,
-  LinearIssueUpdate,
-  LinearComment,
-  LinearWorkflowState,
-  LinearLabel,
-  LinearMember,
-  LinearProjectDetail,
-  LinearProjectSummary,
-  LinearTeam,
   MarkdownDocument,
   FloatingTerminalCwdRequest,
-  GitHubIssueUpdate,
   GitHubPRRefreshCandidate,
   GitHubPRRefreshEnqueueResult,
   GitHubPRRefreshEvent,
@@ -264,33 +225,6 @@ import type { RuntimeAccessGrant } from '../shared/runtime-access-grants'
 import type { RuntimeRpcResponse } from '../shared/runtime-rpc-envelope'
 import type { ExecutionHostId } from '../shared/execution-host'
 import type { FeatureInteractionId } from '../shared/feature-interactions'
-import type {
-  AddIssueCommentBySlugArgs,
-  ClearProjectItemFieldArgs,
-  DeleteIssueCommentBySlugArgs,
-  GetProjectViewTableArgs,
-  GetProjectViewTableResult,
-  GitHubProjectCommentMutationResult,
-  GitHubProjectMutationResult,
-  ListAccessibleProjectsResult,
-  ListAssignableUsersBySlugArgs,
-  ListAssignableUsersBySlugResult,
-  ListIssueTypesBySlugArgs,
-  ListIssueTypesBySlugResult,
-  ListLabelsBySlugArgs,
-  ListLabelsBySlugResult,
-  ListProjectViewsArgs,
-  ListProjectViewsResult,
-  ProjectWorkItemDetailsBySlugArgs,
-  ProjectWorkItemDetailsBySlugResult,
-  ResolveProjectRefArgs,
-  ResolveProjectRefResult,
-  UpdateIssueBySlugArgs,
-  UpdateIssueCommentBySlugArgs,
-  UpdateIssueTypeBySlugArgs,
-  UpdatePullRequestBySlugArgs,
-  UpdateProjectItemFieldArgs
-} from '../shared/github-project-types'
 import type { RichMarkdownContextMenuCommandPayload } from '../shared/rich-markdown-context-menu'
 import type {
   BrowserSetGrabModeArgs,
@@ -483,13 +417,11 @@ import type { KeybindingActionId, KeybindingFileSnapshot } from '../shared/keybi
 type GitLabRepoSelectorArgs = {
   repoPath: string
   repoId?: string | null
-  sourceContext?: TaskSourceContext | null
 }
 
 type GitHubRepoSelectorArgs = {
   repoPath: string
   repoId?: string | null
-  sourceContext?: TaskSourceContext | null
 }
 
 export type BrowserApi = {
@@ -1020,7 +952,7 @@ export type PreloadApi = {
           | 'worktreeBaseRef'
           | 'worktreeBasePath'
           | 'kind'
-          | 'issueSourcePreference'
+          | 'forgeRemotePreference'
           | 'externalWorktreeVisibility'
           | 'externalWorktreeVisibilityPromptDismissedAt'
           | 'externalWorktreeInboxBaselinePaths'
@@ -1138,7 +1070,7 @@ export type PreloadApi = {
       name?: string
       folderPath?: string | null
       connectionId?: string | null
-      linkedTask?: FolderWorkspace['linkedTask']
+      linkedReview?: FolderWorkspace['linkedReview']
       createdWithAgent?: FolderWorkspace['createdWithAgent']
       pendingFirstAgentMessageRename?: boolean
     }) => Promise<FolderWorkspace>
@@ -1149,7 +1081,7 @@ export type PreloadApi = {
           FolderWorkspace,
           | 'name'
           | 'folderPath'
-          | 'linkedTask'
+          | 'linkedReview'
           | 'comment'
           | 'isArchived'
           | 'isUnread'
@@ -1516,18 +1448,11 @@ export type PreloadApi = {
       generation: number
     }) => Promise<boolean>
     onPRRefreshEvent: (callback: (event: GitHubPRRefreshEvent) => void) => () => void
-    issue: (args: {
-      repoPath: string
-      repoId?: string
-      sourceContext?: TaskSourceContext | null
-      number: number
-    }) => Promise<IssueInfo | null>
     workItem: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       number: number
-      type?: 'issue' | 'pr'
+      type?: 'pr'
     }) => Promise<Omit<GitHubWorkItem, 'repoId'> | null>
     workItemByOwnerRepo: (args: {
       repoPath: string
@@ -1535,18 +1460,18 @@ export type PreloadApi = {
       owner: string
       repo: string
       number: number
-      type: 'issue' | 'pr'
+      type: 'pr'
     }) => Promise<Omit<GitHubWorkItem, 'repoId'> | null>
     workItemDetails: (
       args: GitHubRepoSelectorArgs & {
         number: number
-        type?: 'issue' | 'pr'
+        type?: 'pr'
       }
     ) => Promise<GitHubWorkItemDetails | null>
     notifyWorkItemMutated: (args: {
       repoPath: string
       repoId?: string
-      type: 'issue' | 'pr'
+      type: 'pr'
       number: number
     }) => Promise<boolean>
     prFileContents: (
@@ -1559,21 +1484,6 @@ export type PreloadApi = {
         baseSha: string
       }
     ) => Promise<GitHubPRFileContents>
-    listIssues: (args: {
-      repoPath: string
-      repoId?: string
-      limit?: number
-    }) => Promise<IssueInfo[]>
-    createIssue: (args: {
-      repoPath: string
-      repoId?: string
-      sourceContext?: TaskSourceContext | null
-      title: string
-      body: string
-      labels?: string[]
-      assignees?: string[]
-    }) => Promise<GitHubCreateIssueResult>
-    countWorkItems: (args: { repoPath: string; repoId?: string; query?: string }) => Promise<number>
     listWorkItems: (args: {
       repoPath: string
       repoId?: string
@@ -1593,7 +1503,6 @@ export type PreloadApi = {
     prCheckDetails: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       checkRunId?: number
       workflowRunId?: number
       checkName?: string
@@ -1610,7 +1519,6 @@ export type PreloadApi = {
     prComments: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       prNumber: number
       prRepo?: GitHubOwnerRepo | null
       noCache?: boolean
@@ -1618,7 +1526,6 @@ export type PreloadApi = {
     resolveReviewThread: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
       threadId: string
       resolve: boolean
     }) => Promise<boolean>
@@ -1670,22 +1577,12 @@ export type PreloadApi = {
         reviewers: string[]
       }
     ) => Promise<{ ok: true } | { ok: false; error: string }>
-    updateIssue: (
-      args: GitHubRepoSelectorArgs & {
-        number: number
-        updates: GitHubIssueUpdate
-      }
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-    addIssueComment: (
+    addPRComment: (
       args: GitHubRepoSelectorArgs & {
         number: number
         body: string
-        /** Why: GitHub stores PR conversation comments under `/issues/N/comments`
-         *  too, so the IPC and `gh` call paths are identical. The renderer cache
-         *  key is keyed by the drawer's `type`, so callers pass it through to
-         *  scope the cross-window invalidation broadcast correctly and avoid
-         *  evicting an unrelated PR/issue that happens to share the number. */
-        type?: 'issue' | 'pr'
+        /** Why: GitHub stores PR conversation comments under `/issues/N/comments`,
+         *  but the product contract remains scoped to pull requests. */
         prRepo?: GitHubOwnerRepo | null
       }
     ) => Promise<GitHubCommentResult>
@@ -1703,18 +1600,12 @@ export type PreloadApi = {
     addPRReviewComment: (
       args: GitHubPRReviewCommentInput & {
         repoId?: string
-        sourceContext?: TaskSourceContext | null
       }
     ) => Promise<GitHubCommentResult>
-    listLabels: (args: {
-      repoPath: string
-      repoId?: string
-      sourceContext?: TaskSourceContext | null
-    }) => Promise<string[]>
+    listLabels: (args: { repoPath: string; repoId?: string }) => Promise<string[]>
     listAssignableUsers: (args: {
       repoPath: string
       repoId?: string
-      sourceContext?: TaskSourceContext | null
     }) => Promise<GitHubAssignableUser[]>
     /**
      * Subscribe to local-mutation broadcasts. Used by the work-item-drawer
@@ -1722,12 +1613,7 @@ export type PreloadApi = {
      * Returns an unsubscribe function.
      */
     onWorkItemMutated: (
-      callback: (payload: {
-        repoPath: string
-        repoId?: string
-        type: 'issue' | 'pr'
-        number: number
-      }) => void
+      callback: (payload: { repoPath: string; repoId?: string; type: 'pr'; number: number }) => void
     ) => () => void
     checkYiruStarred: () => Promise<boolean | null>
     starYiru: (source: AppStarSource) => Promise<boolean>
@@ -1739,43 +1625,12 @@ export type PreloadApi = {
     rateLimit: (args?: { force?: boolean }) => Promise<GetRateLimitResult>
     /**
      * Probe `gh auth status` and the Electron process env to explain
-     * why ProjectV2 calls are failing with scope_missing. Surfaces the
+     * why GitHub calls are failing with scope_missing. Surfaces the
      * common gotcha where `GITHUB_TOKEN` is exported in the user's
      * shell and silently shadows the keyring credential — in that case
      * `gh auth refresh` is a no-op and the UI must say so.
      */
     diagnoseAuth: () => Promise<GhAuthDiagnostic>
-    // ── ProjectV2 (GitHub Projects) ─────────────────────────────────
-    listAccessibleProjects: () => Promise<ListAccessibleProjectsResult>
-    resolveProjectRef: (args: ResolveProjectRefArgs) => Promise<ResolveProjectRefResult>
-    listProjectViews: (args: ListProjectViewsArgs) => Promise<ListProjectViewsResult>
-    getProjectViewTable: (args: GetProjectViewTableArgs) => Promise<GetProjectViewTableResult>
-    projectWorkItemDetailsBySlug: (
-      args: ProjectWorkItemDetailsBySlugArgs
-    ) => Promise<ProjectWorkItemDetailsBySlugResult>
-    updateProjectItemField: (
-      args: UpdateProjectItemFieldArgs
-    ) => Promise<GitHubProjectMutationResult>
-    clearProjectItemField: (args: ClearProjectItemFieldArgs) => Promise<GitHubProjectMutationResult>
-    updateIssueBySlug: (args: UpdateIssueBySlugArgs) => Promise<GitHubProjectMutationResult>
-    updatePullRequestBySlug: (
-      args: UpdatePullRequestBySlugArgs
-    ) => Promise<GitHubProjectMutationResult>
-    addIssueCommentBySlug: (
-      args: AddIssueCommentBySlugArgs
-    ) => Promise<GitHubProjectCommentMutationResult>
-    updateIssueCommentBySlug: (
-      args: UpdateIssueCommentBySlugArgs
-    ) => Promise<GitHubProjectMutationResult>
-    deleteIssueCommentBySlug: (
-      args: DeleteIssueCommentBySlugArgs
-    ) => Promise<GitHubProjectMutationResult>
-    listLabelsBySlug: (args: ListLabelsBySlugArgs) => Promise<ListLabelsBySlugResult>
-    listAssignableUsersBySlug: (
-      args: ListAssignableUsersBySlugArgs
-    ) => Promise<ListAssignableUsersBySlugResult>
-    listIssueTypesBySlug: (args: ListIssueTypesBySlugArgs) => Promise<ListIssueTypesBySlugResult>
-    updateIssueTypeBySlug: (args: UpdateIssueTypeBySlugArgs) => Promise<GitHubProjectMutationResult>
   }
   hostedReview: {
     forBranch: (args: HostedReviewForBranchArgs) => Promise<HostedReviewInfo | null>
@@ -1784,7 +1639,7 @@ export type PreloadApi = {
     ) => Promise<HostedReviewCreationEligibility>
     create: (args: CreateHostedReviewArgs) => Promise<CreateHostedReviewResult>
   }
-  // ── GitLab — parallel to gh, MR/issue surface only in v1 ────────
+  // ── GitLab merge-request review surface ────────────────────────
   // Shapes mirror gh.* one-to-one where the data matches; diverge
   // where GitLab's API differs (MR state values, project path with
   // host, paginated envelope from `glab api -i`).
@@ -1811,51 +1666,13 @@ export type PreloadApi = {
         query?: string
       }
     ) => Promise<ListMergeRequestsResult>
-    /** Combined MR + issue list filtered by state. Issues are skipped
-     *  when state is 'merged' (issues don't merge). */
-    listWorkItems: (
-      args: GitLabRepoSelectorArgs & {
-        state?: MRListState
-        page?: number
-        perPage?: number
-        query?: string
-      }
-    ) => Promise<ListMergeRequestsResult>
-    issue: (args: GitLabRepoSelectorArgs & { number: number }) => Promise<GitLabIssueInfo | null>
-    listIssues: (
-      args: GitLabRepoSelectorArgs & {
-        state?: 'opened' | 'closed' | 'all'
-        assignee?: string
-        limit?: number
-      }
-    ) => Promise<{ items: GitLabWorkItem[]; error?: ClassifiedError }>
-    createIssue: (
-      args: GitLabRepoSelectorArgs & {
-        title: string
-        body: string
-      }
-    ) => Promise<{ ok: true; number: number; url: string } | { ok: false; error: string }>
-    updateIssue: (
-      args: GitLabRepoSelectorArgs & {
-        number: number
-        updates: GitLabIssueUpdate
-      }
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-    addIssueComment: (
-      args: GitLabRepoSelectorArgs & {
-        number: number
-        body: string
-      }
-    ) => Promise<GitLabCommentResult>
     listLabels: (args: GitLabRepoSelectorArgs) => Promise<string[]>
     listAssignableUsers: (args: GitLabRepoSelectorArgs) => Promise<GitLabAssignableUser[]>
-    /** Cross-project user-scoped todos (gitlab.com/dashboard/todos). */
-    todos: (args: GitLabRepoSelectorArgs) => Promise<GitLabTodo[]>
     /** Aggregated dialog payload — body + discussions + pipeline jobs. */
     workItemDetails: (
       args: GitLabRepoSelectorArgs & {
         iid: number
-        type: 'issue' | 'mr'
+        type: 'mr'
       }
     ) => Promise<GitLabWorkItemDetails | null>
     closeMR: (
@@ -1924,175 +1741,9 @@ export type PreloadApi = {
         host: string
         path: string
         iid: number
-        type: 'issue' | 'mr'
+        type: 'mr'
       }
     ) => Promise<Omit<GitLabWorkItem, 'repoId'> | null>
-  }
-  linear: {
-    connect: (args: {
-      apiKey: string
-    }) => Promise<{ ok: true; viewer: LinearViewer } | { ok: false; error: string }>
-    disconnect: (args?: { workspaceId?: string }) => Promise<void>
-    selectWorkspace: (args: {
-      workspaceId: LinearWorkspaceSelection
-    }) => Promise<LinearConnectionStatus>
-    status: () => Promise<LinearConnectionStatus>
-    testConnection: (args?: {
-      workspaceId?: string
-    }) => Promise<{ ok: true; viewer: LinearViewer } | { ok: false; error: string }>
-    searchIssues: (args: {
-      query: string
-      limit?: number
-      workspaceId?: LinearWorkspaceSelection
-    }) => Promise<LinearIssue[]>
-    listIssues: (args?: {
-      filter?: 'assigned' | 'created' | 'all' | 'completed'
-      limit?: number
-      workspaceId?: LinearWorkspaceSelection
-      attributeFilter?: LinearIssueAttributeFilter
-    }) => Promise<LinearCollectionResult<LinearIssue>>
-    createIssue: (args: {
-      teamId: string
-      title: string
-      description?: string
-      workspaceId?: string
-      parentIssueId?: string
-      projectId?: string | null
-      stateId?: string
-      priority?: number
-      assigneeId?: string | null
-      labelIds?: string[]
-    }) => Promise<
-      | { ok: true; id: string; identifier: string; title: string; url: string }
-      | { ok: false; error: string }
-    >
-    getIssue: (args: { id: string; workspaceId?: string }) => Promise<LinearIssue | null>
-    updateIssue: (args: {
-      id: string
-      updates: LinearIssueUpdate
-      workspaceId?: string
-    }) => Promise<{ ok: true } | { ok: false; error: string }>
-    addIssueComment: (args: {
-      issueId: string
-      body: string
-      workspaceId?: string
-    }) => Promise<{ ok: true; id: string } | { ok: false; error: string }>
-    issueComments: (args: { issueId: string; workspaceId?: string }) => Promise<LinearComment[]>
-    listTeams: (args?: { workspaceId?: LinearWorkspaceSelection }) => Promise<LinearTeam[]>
-    listProjects: (args?: {
-      query?: string
-      limit?: number
-      workspaceId?: LinearWorkspaceSelection
-      force?: boolean
-    }) => Promise<LinearCollectionResult<LinearProjectSummary>>
-    createProject: (args: {
-      name: string
-      description?: string
-      content?: string
-      teamIds: string[]
-      workspaceId?: string
-      leadId?: string | null
-      memberIds?: string[]
-      labelIds?: string[]
-      priority?: number
-      startDate?: string
-      targetDate?: string
-    }) => Promise<{ ok: true; project: LinearProjectDetail } | { ok: false; error: string }>
-    getProject: (args: {
-      id: string
-      workspaceId: string
-      force?: boolean
-    }) => Promise<LinearProjectDetail | null>
-    listProjectIssues: (args: {
-      projectId: string
-      limit?: number
-      workspaceId: string
-      force?: boolean
-    }) => Promise<LinearCollectionResult<LinearIssue>>
-    listCustomViews: (args: {
-      model: LinearCustomViewModel
-      limit?: number
-      workspaceId?: LinearWorkspaceSelection
-      force?: boolean
-    }) => Promise<LinearCollectionResult<LinearCustomViewSummary>>
-    getCustomView: (args: {
-      viewId: string
-      model: LinearCustomViewModel
-      workspaceId: string
-      force?: boolean
-    }) => Promise<LinearCustomViewSummary | null>
-    listCustomViewIssues: (args: {
-      viewId: string
-      limit?: number
-      workspaceId: string
-      force?: boolean
-    }) => Promise<LinearCollectionResult<LinearIssue>>
-    listCustomViewProjects: (args: {
-      viewId: string
-      limit?: number
-      workspaceId: string
-      force?: boolean
-    }) => Promise<LinearCollectionResult<LinearProjectSummary>>
-    teamStates: (args: { teamId: string; workspaceId?: string }) => Promise<LinearWorkflowState[]>
-    teamLabels: (args: { teamId: string; workspaceId?: string }) => Promise<LinearLabel[]>
-    teamMembers: (args: { teamId: string; workspaceId?: string }) => Promise<LinearMember[]>
-  }
-  jira: {
-    connect: (args: {
-      siteUrl: string
-      email: string
-      apiToken: string
-      authType?: 'cloud' | 'server'
-    }) => Promise<{ ok: true; viewer: JiraViewer } | { ok: false; error: string }>
-    disconnect: (args?: { siteId?: string }) => Promise<void>
-    selectSite: (args: { siteId: JiraSiteSelection }) => Promise<JiraConnectionStatus>
-    status: () => Promise<JiraConnectionStatus>
-    testConnection: (args?: {
-      siteId?: string
-    }) => Promise<{ ok: true; viewer: JiraViewer } | { ok: false; error: string }>
-    searchIssues: (args: {
-      jql: string
-      limit?: number
-      siteId?: JiraSiteSelection
-    }) => Promise<JiraIssue[]>
-    listIssues: (args?: {
-      filter?: JiraIssueFilter
-      limit?: number
-      siteId?: JiraSiteSelection
-    }) => Promise<JiraIssue[]>
-    getIssue: (args: { key: string; siteId?: string }) => Promise<JiraIssue | null>
-    createIssue: (
-      args: JiraCreateIssueArgs
-    ) => Promise<{ ok: true; id: string; key: string; url: string } | { ok: false; error: string }>
-    updateIssue: (args: {
-      key: string
-      updates: JiraIssueUpdate
-      siteId?: string
-    }) => Promise<{ ok: true } | { ok: false; error: string }>
-    addIssueComment: (args: {
-      key: string
-      body: string
-      siteId?: string
-    }) => Promise<{ ok: true; id: string } | { ok: false; error: string }>
-    issueComments: (args: { key: string; siteId?: string }) => Promise<JiraComment[]>
-    listProjects: (args?: { siteId?: JiraSiteSelection }) => Promise<JiraProject[]>
-    listIssueTypes: (args: { projectIdOrKey: string; siteId?: string }) => Promise<JiraIssueType[]>
-    listCreateFields: (args: {
-      projectIdOrKey: string
-      issueTypeId: string
-      siteId?: string
-    }) => Promise<JiraCreateField[]>
-    listPriorities: (args?: { siteId?: string }) => Promise<JiraPriority[]>
-    listAssignableUsers: (args: {
-      key: string
-      query?: string
-      siteId?: string
-    }) => Promise<JiraUser[]>
-    listTransitions: (args: { key: string; siteId?: string }) => Promise<JiraTransition[]>
-    getProjectStatusOrder: (args: {
-      projectKey: string
-      siteId?: string
-    }) => Promise<JiraProjectStatusOrder>
   }
   starNag: {
     onShow: (
@@ -2301,24 +1952,6 @@ export type PreloadApi = {
       mayNeedUpdate: boolean
     }>
     inspectSetupScriptImports: (args: { repoId: string }) => Promise<SetupScriptImportCandidate[]>
-    createIssueCommandRunner: (args: {
-      repoId: string
-      worktreePath: string
-      command: string
-    }) => Promise<WorktreeSetupLaunch>
-    readIssueCommand: (args: { repoId: string; hostId?: ExecutionHostId }) => Promise<{
-      status?: 'ok' | 'error'
-      localContent: string | null
-      sharedContent: string | null
-      effectiveContent: string | null
-      localFilePath: string
-      source: 'local' | 'shared' | 'none'
-    }>
-    writeIssueCommand: (args: {
-      repoId: string
-      content: string
-      hostId?: ExecutionHostId
-    }) => Promise<void>
   }
   ephemeralVm: {
     listRecipes: (args: { repoId: string }) => Promise<{
@@ -2387,12 +2020,10 @@ export type PreloadApi = {
   cache: {
     getGitHub: () => Promise<{
       pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
-      issue: Record<string, { data: IssueInfo | null; fetchedAt: number }>
     }>
     setGitHub: (args: {
       cache: {
         pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
-        issue: Record<string, { data: IssueInfo | null; fetchedAt: number }>
       }
     }) => Promise<void>
   }
@@ -2810,8 +2441,6 @@ export type PreloadApi = {
     onToggleQuickCommandsMenu: (callback: () => void) => () => void
     onOpenNewWorkspace: (callback: () => void) => () => void
     onDeleteCurrentWorkspace: (callback: () => void) => () => void
-    onOpenWorkspaceBoard: (callback: () => void) => () => void
-    onOpenTasks: (callback: () => void) => () => void
     onJumpToWorktreeIndex: (callback: (index: number) => void) => () => void
     onJumpToTabIndex: (callback: (index: number) => void) => () => void
     onWorktreeHistoryNavigate: (callback: (direction: 'back' | 'forward') => void) => () => void

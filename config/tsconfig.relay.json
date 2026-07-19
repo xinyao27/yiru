@@ -5,7 +5,6 @@
     "../src/main/pty/overlay-mirror.ts",
     "../src/main/pty/shell-startup-env.ts"
   ],
-  "exclude": ["../src/relay/integration.test.ts"],
   "compilerOptions": {
     "composite": true,
     "rootDir": "../src",

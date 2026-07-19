@@ -82,11 +82,11 @@ Click any UI element in a real Chromium window to send its HTML, CSS, and a crop
 <tr>
 <td width="50%" valign="middle">
 
-### GitHub &amp; Linear, Native
+### Pull Request Review, Native
 
-Browse PRs, issues, and project boards in-app — open a worktree from any task and review without a context switch.
+Open GitHub pull requests and GitLab merge requests in-app, inspect checks, and review without a context switch.
 
-[Docs →](https://yiru.ai/docs/review/linear)
+[Docs →](https://yiru.ai/docs/review)
 
 </td>
 <td width="50%">

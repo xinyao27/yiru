@@ -5,7 +5,6 @@ import type { WorkbenchStepId } from './workbench-steps'
 
 export const FEATURE_WALL_TOUR_DEPTH_STEPS = [
   'workspaces',
-  'tasks',
   'agents_statuses',
   'agents_usage',
   'agents_orchestration',
@@ -104,7 +103,6 @@ export function buildFeatureWallTourDepthSummary(
 ): FeatureWallTourDepthSummary {
   const visitedDepthSteps = [
     ...(input.visitedWorkflows.has('workspaces') ? (['workspaces'] as const) : []),
-    ...(input.visitedWorkflows.has('tasks') ? (['tasks'] as const) : []),
     ...[...input.visitedAgentSteps].map((step) => AGENT_DEPTH_STEP[step]),
     ...[...input.visitedWorkbenchSteps].map((step) => WORKBENCH_DEPTH_STEP[step]),
     ...[...input.visitedReviewSteps].map((step) => REVIEW_DEPTH_STEP[step])

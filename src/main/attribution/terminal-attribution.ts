@@ -8,9 +8,9 @@ import { YIRU_GIT_COMMIT_TRAILER } from '../../shared/yiru-attribution'
 import { YIRU_GITHUB_REPOSITORY_URL } from '../../shared/yiru-github-repository'
 
 const ATTRIBUTION_ROOT_DIR = 'yiru-terminal-attribution'
-// Why: v7 rewrites persisted wrappers so their fallback footer points at the
-// migrated canonical repository even before PTY environment overrides apply.
-const ATTRIBUTION_SHIM_VERSION = '7'
+// Why: v8 rewrites persisted wrappers so retired issue-create attribution
+// cannot survive an upgrade through an already-generated shell shim.
+const ATTRIBUTION_SHIM_VERSION = '8'
 const YIRU_PRODUCT_URL = YIRU_GITHUB_REPOSITORY_URL
 const YIRU_GH_FOOTER = `Made with [Yiru](${YIRU_PRODUCT_URL}) 🐋`
 const SHELL_DOLLAR = '$'
@@ -19,7 +19,6 @@ const ATTRIBUTION_ENV_KEYS = [
   'YIRU_ENABLE_GIT_ATTRIBUTION',
   'YIRU_GIT_COMMIT_TRAILER',
   'YIRU_GH_PR_FOOTER',
-  'YIRU_GH_ISSUE_FOOTER',
   'YIRU_ATTRIBUTION_SHIM_DIR',
   'YIRU_REAL_GIT',
   'YIRU_REAL_GH'
@@ -109,7 +108,6 @@ export function applyTerminalAttributionEnv(
   baseEnv.YIRU_ENABLE_GIT_ATTRIBUTION = '1'
   baseEnv.YIRU_GIT_COMMIT_TRAILER = YIRU_GIT_COMMIT_TRAILER
   baseEnv.YIRU_GH_PR_FOOTER = YIRU_GH_FOOTER
-  baseEnv.YIRU_GH_ISSUE_FOOTER = YIRU_GH_FOOTER
   if (shellFamily === 'posix') {
     baseEnv.YIRU_ATTRIBUTION_SHIM_DIR = posixDir
   } else {
@@ -520,7 +518,7 @@ append_footer_url() {
     printf '%s\n' "$footer" >"$tmp_file"
   fi
   # Why: gh exposes create output as a URL, but does not provide a transactional
-  # body append. Use REST instead of gh pr/issue edit because those commands can
+  # body append. Use REST instead of gh pr edit because that command can
   # hit unrelated GraphQL fields, while the URL maps directly to one REST item.
   PATH="$real_path" "$real_gh" api -X PATCH "$api_path" -F "body=@$tmp_file" >/dev/null || true
   rm -f "$tmp_file"
@@ -531,10 +529,6 @@ github_api_path() {
   local url="$2"
   if [[ "$kind" == "pr" && "$url" =~ ^https://github[.]com/([^/]+)/([^/]+)/pull/([0-9]+) ]]; then
     printf 'repos/%s/%s/pulls/%s' "${SHELL_DOLLAR}{BASH_REMATCH[1]}" "${SHELL_DOLLAR}{BASH_REMATCH[2]}" "${SHELL_DOLLAR}{BASH_REMATCH[3]}"
-    return 0
-  fi
-  if [[ "$kind" == "issue" && "$url" =~ ^https://github[.]com/([^/]+)/([^/]+)/issues/([0-9]+) ]]; then
-    printf 'repos/%s/%s/issues/%s' "${SHELL_DOLLAR}{BASH_REMATCH[1]}" "${SHELL_DOLLAR}{BASH_REMATCH[2]}" "${SHELL_DOLLAR}{BASH_REMATCH[3]}"
     return 0
   fi
   return 1
@@ -602,40 +596,6 @@ if [[ "\${1:-}" == "pr" && "\${2:-}" == "create" ]]; then
   exit $status
 fi
 
-if [[ "\${1:-}" == "issue" && "\${2:-}" == "create" ]]; then
-  footer="\${YIRU_GH_ISSUE_FOOTER:-${YIRU_GH_FOOTER}}"
-  if has_passthrough_create_args "$@"; then
-    PATH="$real_path" exec "$real_gh" "$@"
-  fi
-  if ! has_noninteractive_create_args "$@"; then
-    # Why: gh issue create also requires a live TTY for prompts, but gh has no
-    # current-issue lookup equivalent to "pr view". Do not guess with issue list:
-    # that can edit an unrelated issue if the command printed no URL.
-    PATH="$real_path" exec "$real_gh" "$@"
-  fi
-  stdout_file="$(mktemp)"
-  stderr_file="$(mktemp)"
-  cleanup_capture() {
-    rm -f "$stdout_file" "$stderr_file"
-  }
-  trap cleanup_capture EXIT
-  if PATH="$real_path" "$real_gh" "$@" >"$stdout_file" 2>"$stderr_file"; then
-    status=0
-  else
-    status=$?
-  fi
-  stdout_capture="$(cat "$stdout_file")"
-  stderr_capture="$(cat "$stderr_file")"
-  cat "$stderr_file" >&2
-  cat "$stdout_file"
-  if [[ $status -eq 0 ]]; then
-    append_footer "issue" 'https://github.com/[^[:space:]]+/issues/[0-9]+' "$footer" "$stdout_capture" "$stderr_capture"
-  fi
-  cleanup_capture
-  trap - EXIT
-  exit $status
-fi
-
 PATH="$real_path" exec "$real_gh" "$@"
 `
 
@@ -686,7 +646,6 @@ setlocal
 if not "%YIRU_ENABLE_GIT_ATTRIBUTION%"=="1" goto run
 if "%YIRU_ATTRIBUTION_BYPASS%"=="1" goto run
 if /I "%~1"=="pr" if /I "%~2"=="create" goto wrap
-if /I "%~1"=="issue" if /I "%~2"=="create" goto wrap
 goto run
 :wrap
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0gh-wrapper.ps1" %*
@@ -923,9 +882,6 @@ function Get-GitHubApiPath {
   if ($Kind -eq 'pr' -and $CreatedUrl -match '^https://github\.com/([^/]+)/([^/]+)/pull/([0-9]+)') {
     return "repos/$($Matches[1])/$($Matches[2])/pulls/$($Matches[3])"
   }
-  if ($Kind -eq 'issue' -and $CreatedUrl -match '^https://github\.com/([^/]+)/([^/]+)/issues/([0-9]+)') {
-    return "repos/$($Matches[1])/$($Matches[2])/issues/$($Matches[3])"
-  }
   return $null
 }
 
@@ -935,13 +891,12 @@ function Test-CreateCommand {
 }
 
 $isPrCreate = Test-CreateCommand $args 'pr'
-$isIssueCreate = Test-CreateCommand $args 'issue'
-if (($isPrCreate -or $isIssueCreate) -and (Test-PassthroughCreateArgs $args)) {
+if ($isPrCreate -and (Test-PassthroughCreateArgs $args)) {
   & $realGh @args
   exit $LASTEXITCODE
 }
 
-if (($isPrCreate -or $isIssueCreate) -and -not (Test-NonInteractiveCreateArgs $args)) {
+if ($isPrCreate -and -not (Test-NonInteractiveCreateArgs $args)) {
   & $realGh @args
   $status = $LASTEXITCODE
   if ($status -ne 0) {
@@ -990,37 +945,6 @@ if ($isPrCreate) {
         }
         # Why: gh has no transactional body append for newly-created PRs. This
         # immediate REST patch keeps attribution scoped to the URL gh returned.
-        try {
-          & $realGh api -X PATCH $apiPath -F "body=@$tmpFile" | Out-Null
-        } catch {
-        }
-      } finally {
-        Remove-Item -LiteralPath $tmpFile -Force -ErrorAction SilentlyContinue
-      }
-    }
-  }
-}
-
-if ($isIssueCreate) {
-  $createdUrl = ([regex]::Matches(($stdoutCapture + [Environment]::NewLine + $stderrCapture), 'https://github.com/\S+/issues/\d+') | Select-Object -Last 1).Value
-  if ($createdUrl) {
-    $apiPath = Get-GitHubApiPath 'issue' $createdUrl
-    $body = if ($apiPath) { (& $realGh api $apiPath --jq '.body // ""' 2>$null) | Out-String } else { $null }
-    if ($LASTEXITCODE -ne 0) {
-      $body = $null
-    }
-    $footer = if ($env:YIRU_GH_ISSUE_FOOTER) { $env:YIRU_GH_ISSUE_FOOTER } else { '${YIRU_GH_FOOTER}' }
-    if ($null -ne $body -and $body -notmatch [Regex]::Escape($footer)) {
-      $tmpFile = [System.IO.Path]::GetTempFileName()
-      try {
-        $trimmed = $body.TrimEnd("${POWERSHELL_TICK}r", "${POWERSHELL_TICK}n")
-        if ([string]::IsNullOrWhiteSpace($trimmed)) {
-          Set-Content -LiteralPath $tmpFile -Value $footer -NoNewline
-        } else {
-          Set-Content -LiteralPath $tmpFile -Value ($trimmed + "${POWERSHELL_TICK}r${POWERSHELL_TICK}n${POWERSHELL_TICK}r${POWERSHELL_TICK}n" + $footer) -NoNewline
-        }
-        # Why: gh has no transactional body append for newly-created issues.
-        # This immediate REST patch keeps attribution scoped to the URL gh returned.
         try {
           & $realGh api -X PATCH $apiPath -F "body=@$tmpFile" | Out-Null
         } catch {

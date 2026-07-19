@@ -141,7 +141,6 @@ export function parseYiruYaml(content: string): YiruHooks | null {
   const scriptsRecord = asRecord(record.scripts)
   const setup = scriptsRecord ? asTrimmedString(scriptsRecord.setup) : undefined
   const archive = scriptsRecord ? asTrimmedString(scriptsRecord.archive) : undefined
-  const issueCommand = asTrimmedString(record.issueCommand)
   const defaultTabs = normalizeDefaultTabs(record.defaultTabs)
   const environmentRecipeParse = normalizeVmRecipes(record.environmentRecipes)
   const environmentRecipes = environmentRecipeParse.recipes
@@ -150,7 +149,6 @@ export function parseYiruYaml(content: string): YiruHooks | null {
   if (
     !setup &&
     !archive &&
-    !issueCommand &&
     defaultTabs.length === 0 &&
     environmentRecipes.length === 0 &&
     environmentRecipeDiagnostics.length === 0
@@ -163,7 +161,6 @@ export function parseYiruYaml(content: string): YiruHooks | null {
       ...(setup ? { setup } : {}),
       ...(archive ? { archive } : {})
     },
-    ...(issueCommand ? { issueCommand } : {}),
     ...(defaultTabs.length > 0 ? { defaultTabs } : {}),
     ...(environmentRecipes.length > 0 ? { environmentRecipes } : {}),
     ...(environmentRecipeDiagnostics.length > 0 ? { environmentRecipeDiagnostics } : {})

@@ -230,7 +230,6 @@
       "appVersion": "1.4.65-rc.3",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 1,
         "yiru-cli": 20,
         "yiru-emulator": 1,
         "orchestration": 12
@@ -249,7 +248,6 @@
       "appVersion": "1.4.66-rc.0",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 1,
         "yiru-cli": 20,
         "yiru-emulator": 1,
         "orchestration": 12
@@ -259,7 +257,6 @@
       "appVersion": "1.4.67-rc.0",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 2,
         "yiru-cli": 20,
         "yiru-emulator": 1,
         "orchestration": 12
@@ -269,7 +266,6 @@
       "appVersion": "1.4.68",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 2,
         "yiru-cli": 20,
         "yiru-emulator": 1,
         "orchestration": 13
@@ -279,7 +275,6 @@
       "appVersion": "1.4.74-rc.0",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 2,
         "yiru-cli": 21,
         "yiru-emulator": 1,
         "orchestration": 14
@@ -289,7 +284,6 @@
       "appVersion": "1.4.78-rc.1",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 2,
         "yiru-cli": 22,
         "yiru-emulator": 1,
         "orchestration": 15
@@ -299,7 +293,6 @@
       "appVersion": "1.4.78-rc.2",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 2,
         "yiru-cli": 23,
         "yiru-emulator": 1,
         "orchestration": 16
@@ -309,7 +302,6 @@
       "appVersion": "1.4.81-rc.2",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 2,
         "yiru-cli": 24,
         "yiru-emulator": 1,
         "orchestration": 16
@@ -319,7 +311,6 @@
       "appVersion": "1.4.81-rc.3",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 2,
         "yiru-cli": 25,
         "yiru-emulator": 1,
         "orchestration": 16
@@ -329,7 +320,6 @@
       "appVersion": "1.4.88",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 2,
         "yiru-cli": 26,
         "yiru-emulator": 1,
         "orchestration": 17
@@ -339,10 +329,8 @@
       "appVersion": "1.4.90",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 3,
         "yiru-cli": 26,
         "yiru-emulator": 1,
-        "yiru-linear": 1,
         "orchestration": 17
       }
     },
@@ -350,10 +338,8 @@
       "appVersion": "1.4.92-rc.1",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 3,
         "yiru-cli": 27,
         "yiru-emulator": 1,
-        "yiru-linear": 1,
         "orchestration": 17
       }
     },
@@ -361,10 +347,8 @@
       "appVersion": "1.4.96-rc.1",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 3,
         "yiru-cli": 28,
         "yiru-emulator": 1,
-        "yiru-linear": 1,
         "orchestration": 17
       }
     },
@@ -372,11 +356,9 @@
       "appVersion": "1.4.105-rc.2",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 3,
         "yiru-cli": 29,
         "yiru-emulator": 2,
         "yiru-emulator-android": 1,
-        "yiru-linear": 1,
         "orchestration": 18
       }
     },
@@ -384,11 +366,9 @@
       "appVersion": "1.4.111-rc.0",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 3,
         "yiru-cli": 29,
         "yiru-emulator": 2,
         "yiru-emulator-android": 1,
-        "yiru-linear": 1,
         "yiru-per-workspace-env": 1,
         "orchestration": 18
       }
@@ -397,11 +377,9 @@
       "appVersion": "1.4.124-rc.6",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 3,
         "yiru-cli": 29,
         "yiru-emulator": 2,
         "yiru-emulator-android": 1,
-        "yiru-linear": 1,
         "yiru-per-workspace-env": 2,
         "orchestration": 18
       }
@@ -410,11 +388,9 @@
       "appVersion": "1.4.124-rc.9",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 3,
         "yiru-cli": 29,
         "yiru-emulator": 2,
         "yiru-emulator-android": 1,
-        "yiru-linear": 1,
         "yiru-per-workspace-env": 2,
         "orchestration": 19
       }
@@ -423,11 +399,9 @@
       "appVersion": "1.4.124",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 4,
         "yiru-cli": 29,
         "yiru-emulator": 2,
         "yiru-emulator-android": 1,
-        "yiru-linear": 2,
         "yiru-per-workspace-env": 2,
         "orchestration": 20
       }
@@ -436,11 +410,9 @@
       "appVersion": "1.4.137-rc.1",
       "skills": {
         "computer-use": 3,
-        "linear-tickets": 4,
         "yiru-cli": 30,
         "yiru-emulator": 2,
         "yiru-emulator-android": 1,
-        "yiru-linear": 2,
         "yiru-per-workspace-env": 2,
         "orchestration": 21
       }
@@ -449,11 +421,9 @@
       "appVersion": "1.4.138-rc.0",
       "skills": {
         "computer-use": 4,
-        "linear-tickets": 4,
         "yiru-cli": 31,
         "yiru-emulator": 3,
         "yiru-emulator-android": 1,
-        "yiru-linear": 2,
         "yiru-per-workspace-env": 2,
         "orchestration": 22
       }
@@ -462,11 +432,9 @@
       "appVersion": "1.4.138-rc.3",
       "skills": {
         "computer-use": 4,
-        "linear-tickets": 4,
         "yiru-cli": 31,
         "yiru-emulator": 3,
         "yiru-emulator-android": 1,
-        "yiru-linear": 2,
         "yiru-per-workspace-env": 2,
         "orchestration": 23
       }
@@ -475,13 +443,22 @@
       "appVersion": "1.4.138-rc.4",
       "skills": {
         "computer-use": 4,
-        "linear-tickets": 4,
         "yiru-cli": 31,
         "yiru-emulator": 3,
         "yiru-emulator-android": 1,
-        "yiru-linear": 2,
         "yiru-per-workspace-env": 2,
         "orchestration": 24
+      }
+    },
+    {
+      "appVersion": "0.0.2",
+      "skills": {
+        "computer-use": 5,
+        "orchestration": 25,
+        "yiru-cli": 32,
+        "yiru-emulator": 4,
+        "yiru-emulator-android": 2,
+        "yiru-per-workspace-env": 3
       }
     }
   ]

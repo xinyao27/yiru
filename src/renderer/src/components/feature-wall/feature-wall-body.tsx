@@ -8,14 +8,13 @@ import type { GlobalSettings } from '../../../../shared/types'
 import type { InstalledAgentSkillState } from '@/hooks/use-installed-agent-skills'
 import { cn } from '@/lib/class-names'
 import { PreviewMedia, RelatedFeatures } from './feature-wall-preview'
-import { TasksAnimatedVisual } from './tasks-animated-visual'
 import { WorkspacesAnimatedVisual } from './workspaces-animated-visual'
 import { WorkbenchAnimatedVisual } from './workbench-animated-visual'
 import { EditorAnimatedVisual } from './editor-animated-visual'
 import { BrowserAnimatedVisual } from './browser-animated-visual'
 import { AgentsOrchestrationVisual } from './agents-orchestration-visual'
 import { ReviewAnimatedVisual } from './review-animated-visual'
-import { GitHubRow, LinearRow } from '../onboarding/integrations-step'
+import { GitHubRow } from '../onboarding/integrations-step'
 import { OrchestrationSetupCard } from '../settings/orchestration-setup-card'
 import { BrowserUseSkillSetupCard } from './browser-use-skill-setup-card'
 import { UsageAccountsCard } from './agents-orchestration/usage-accounts-card'
@@ -54,7 +53,6 @@ export function FeatureWallBody(props: {
     onUsageAccountStateChange
   } = props
   const isWorkspaces = selected.id === 'workspaces'
-  const isTasks = selected.id === 'tasks'
   const isAgents = selected.id === 'agents-orchestration'
   const isWorkbench = selected.id === 'workbench'
   const isReview = selected.id === 'review'
@@ -65,7 +63,7 @@ export function FeatureWallBody(props: {
   const isWorkbenchBrowser = isWorkbench && workbenchActiveStep?.id === 'browser'
   const isReviewPrView = isReview && reviewActiveStep?.id === 'pr-view'
   const isReviewShip = isReview && reviewActiveStep?.id === 'ship'
-  const hasAnimatedVisual = isWorkspaces || isTasks || isAgents || isWorkbench || isReview
+  const hasAnimatedVisual = isWorkspaces || isAgents || isWorkbench || isReview
   const isOnboardingUsage = isAgentsUsage && source === 'onboarding'
   const isOnboardingStatuses = isAgentsStatuses && source === 'onboarding'
   const isOnboardingWorkbenchBrowser = isWorkbenchBrowser && source === 'onboarding'
@@ -96,86 +94,76 @@ export function FeatureWallBody(props: {
                     ? 'w-[440px]'
                     : 'w-[520px]'
                   : 'w-[520px]'
-  const settingWidth = isTasks
-    ? 'max-w-[760px]'
-    : isAgentsUsage
-      ? isOnboardingUsage
-        ? 'max-w-[400px]'
-        : 'max-w-[440px]'
-      : isAgentsStatuses
-        ? isOnboardingStatuses
+  const settingWidth = isAgentsUsage
+    ? isOnboardingUsage
+      ? 'max-w-[400px]'
+      : 'max-w-[440px]'
+    : isAgentsStatuses
+      ? isOnboardingStatuses
+        ? 'max-w-[360px]'
+        : 'max-w-[520px]'
+      : isAgentsOrchestration
+        ? isOnboardingOrchestration
           ? 'max-w-[360px]'
-          : 'max-w-[520px]'
-        : isAgentsOrchestration
-          ? isOnboardingOrchestration
-            ? 'max-w-[360px]'
-            : 'max-w-[400px]'
-          : isReviewSettingStep
-            ? 'max-w-[420px]'
-            : isWorkbenchBrowser
-              ? isOnboardingWorkbenchBrowser
-                ? 'max-w-[340px]'
-                : 'max-w-[400px]'
-              : 'max-w-[480px]'
+          : 'max-w-[400px]'
+        : isReviewSettingStep
+          ? 'max-w-[420px]'
+          : isWorkbenchBrowser
+            ? isOnboardingWorkbenchBrowser
+              ? 'max-w-[340px]'
+              : 'max-w-[400px]'
+            : 'max-w-[480px]'
   const setupTerminalHeightPx = source === 'onboarding' ? 140 : 240
-  const settingContent = isTasks ? (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-      <LinearRow compact />
+  const settingContent =
+    isAgentsStatuses && props.settings ? (
+      <KeepAwakeCard settings={props.settings} updateSettings={props.updateSettings} />
+    ) : isAgentsUsage ? (
+      <UsageAccountsCard onAccountStateChange={onUsageAccountStateChange} />
+    ) : isAgentsOrchestration ? (
+      <OrchestrationSetupCard
+        compact
+        terminalHeightPx={setupTerminalHeightPx}
+        skill={orchestrationSkill}
+      />
+    ) : isWorkbenchBrowser ? (
+      <BrowserUseSkillSetupCard
+        compact
+        terminalHeightPx={setupTerminalHeightPx}
+        skill={browserUseSkill}
+      />
+    ) : isReviewPrView ? (
       <GitHubRow compact />
-    </div>
-  ) : isAgentsStatuses && props.settings ? (
-    <KeepAwakeCard settings={props.settings} updateSettings={props.updateSettings} />
-  ) : isAgentsUsage ? (
-    <UsageAccountsCard onAccountStateChange={onUsageAccountStateChange} />
-  ) : isAgentsOrchestration ? (
-    <OrchestrationSetupCard
-      compact
-      terminalHeightPx={setupTerminalHeightPx}
-      skill={orchestrationSkill}
-    />
-  ) : isWorkbenchBrowser ? (
-    <BrowserUseSkillSetupCard
-      compact
-      terminalHeightPx={setupTerminalHeightPx}
-      skill={browserUseSkill}
-    />
-  ) : isReviewPrView ? (
-    <GitHubRow compact />
-  ) : isReviewShip ? (
-    <AiCommitPrSettingsCard />
-  ) : null
+    ) : isReviewShip ? (
+      <AiCommitPrSettingsCard />
+    ) : null
   const shouldUseOnboardingTourZones =
     source === 'onboarding' && hasAnimatedVisual && Boolean(settingContent)
   const shouldStickSetupToBottom = shouldUseOnboardingTourZones
   // Why: several visuals expand/collapse internally; setup controls should sit
   // after a stable stage so they do not jump with the animation loop.
-  const visualStageHeight = isTasks
-    ? 'h-[288px]'
-    : isWorkbenchEditor
-      ? 'h-[390px]'
-      : isWorkbenchBrowser
-        ? 'h-[270px]'
-        : isWorkbench
-          ? 'h-[340px]'
-          : isReview
-            ? 'h-[416px]'
-            : isAgentsOrchestration
-              ? isOnboardingOrchestration
-                ? 'h-[240px]'
-                : 'h-[392px]'
-              : isAgentsStatuses
-                ? isOnboardingStatuses
-                  ? 'h-[200px]'
-                  : 'h-[250px]'
-                : isAgentsUsage
-                  ? isOnboardingUsage
-                    ? 'h-[320px]'
-                    : 'h-[392px]'
-                  : 'h-[330px]'
+  const visualStageHeight = isWorkbenchEditor
+    ? 'h-[390px]'
+    : isWorkbenchBrowser
+      ? 'h-[270px]'
+      : isWorkbench
+        ? 'h-[340px]'
+        : isReview
+          ? 'h-[416px]'
+          : isAgentsOrchestration
+            ? isOnboardingOrchestration
+              ? 'h-[240px]'
+              : 'h-[392px]'
+            : isAgentsStatuses
+              ? isOnboardingStatuses
+                ? 'h-[200px]'
+                : 'h-[250px]'
+              : isAgentsUsage
+                ? isOnboardingUsage
+                  ? 'h-[320px]'
+                  : 'h-[392px]'
+                : 'h-[330px]'
   const animatedVisual = isWorkspaces ? (
     <WorkspacesAnimatedVisual reducedMotion={prefersReducedMotion} />
-  ) : isTasks ? (
-    <TasksAnimatedVisual reducedMotion={prefersReducedMotion} />
   ) : isReview && reviewActiveStep ? (
     <ReviewAnimatedVisual reducedMotion={prefersReducedMotion} activeStepId={reviewActiveStep.id} />
   ) : isWorkbench ? (

@@ -18,11 +18,6 @@ type WorkspaceStatusNormalizationOptions = {
 export const DEFAULT_WORKSPACE_STATUS_ID: WorkspaceStatus = 'in-progress'
 export const DEFAULT_WORKSPACE_STATUS_COLOR_ID = 'neutral'
 export const DEFAULT_WORKSPACE_STATUS_ICON_ID = 'circle-dot'
-export const WORKSPACE_BOARD_COLUMN_WIDTH_DEFAULT = 308
-export const WORKSPACE_BOARD_COLUMN_WIDTH_MIN = 220
-export const WORKSPACE_BOARD_COLUMN_WIDTH_MAX = 520
-export const WORKSPACE_BOARD_COLUMN_WIDTH_STEP = 20
-
 export const WORKSPACE_STATUS_COLOR_IDS = [
   'neutral',
   'blue',
@@ -226,23 +221,6 @@ export function normalizePersistedWorkspaceStatuses(
   return normalizeWorkspaceStatusesInternal(value, {
     migrateLegacyDefaultStatusVisuals: options.migrateLegacyDefaultStatusVisuals
   })
-}
-
-export function clampWorkspaceBoardOpacity(value: unknown): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    return 1
-  }
-  return Math.min(1, Math.max(0.2, Math.round(value * 100) / 100))
-}
-
-export function clampWorkspaceBoardColumnWidth(value: unknown): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    return WORKSPACE_BOARD_COLUMN_WIDTH_DEFAULT
-  }
-  return Math.min(
-    WORKSPACE_BOARD_COLUMN_WIDTH_MAX,
-    Math.max(WORKSPACE_BOARD_COLUMN_WIDTH_MIN, Math.round(value))
-  )
 }
 
 export function isWorkspaceStatusId(

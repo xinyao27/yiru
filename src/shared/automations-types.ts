@@ -1,5 +1,5 @@
 import type { SetupDecision, TuiAgent } from './types'
-import type { TaskSourceContext, WorkspaceRunContext } from './task-source-context'
+import type { ProjectSourceContext, WorkspaceRunContext } from './project-source-context'
 
 export type AutomationWorkspaceMode = 'existing' | 'new_per_run'
 export type AutomationExecutionTargetType = 'local' | 'ssh'
@@ -99,9 +99,9 @@ export type Automation = {
    *  @deprecated Use runContext.projectId/runContext.repoId or
    *  getAutomationRunRepoId(). */
   runContext?: WorkspaceRunContext | null
-  /** Why: task/provider data can come from a different host/account than the
+  /** Why: source data can come from a different host/account than the
    *  workspace run target, so automations persist it separately. */
-  sourceContext?: TaskSourceContext | null
+  sourceContext?: ProjectSourceContext | null
   /** @deprecated Legacy repo-id compatibility field. New code should persist
    *  runContext and use getAutomationRunRepoId() for fallback reads. */
   projectId: string
@@ -129,7 +129,7 @@ export type AutomationRun = {
   id: string
   automationId: string
   runContext?: WorkspaceRunContext | null
-  sourceContext?: TaskSourceContext | null
+  sourceContext?: ProjectSourceContext | null
   title: string
   scheduledFor: number
   status: AutomationRunStatus
@@ -163,7 +163,7 @@ export type AutomationCreateInput = {
   precheck?: AutomationPrecheck | null
   agentId: TuiAgent
   runContext?: WorkspaceRunContext | null
-  sourceContext?: TaskSourceContext | null
+  sourceContext?: ProjectSourceContext | null
   /** @deprecated Legacy repo-id compatibility field required for older stored
    *  automations and clients. Pair it with runContext for new writes. */
   projectId: string

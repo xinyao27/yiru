@@ -9,7 +9,10 @@ import type {
 } from '../../../shared/types'
 import type { AgentStartupPlan } from '@/lib/tui-agent-startup'
 import type { AgentStartedTelemetry } from '@/lib/worktree-activation'
-import type { TaskSourceContext, WorkspaceRunContext } from '../../../shared/task-source-context'
+import type {
+  ProjectSourceContext,
+  WorkspaceRunContext
+} from '../../../shared/project-source-context'
 
 /** Two-phase status reported by the main process while a worktree is created.
  *  `preparing` covers renderer-side preflight before `createWorktree` starts;
@@ -29,9 +32,9 @@ export type WorktreeCreationProgressMode = 'stepped' | 'indeterminate'
  */
 export type WorktreeCreationRequest = {
   repoId: string
-  /** Source host/account that produced the linked task. Kept separate from the
+  /** Source host/account that produced the linked review. Kept separate from the
    *  run context so Retry does not infer provider ownership from the run host. */
-  taskSourceContext?: TaskSourceContext | null
+  projectSourceContext?: ProjectSourceContext | null
   /** Host/setup where the new workspace should run. Duplicates repoId by design:
    *  repoId keeps old create APIs working, while this records the project-first
    *  host intent for retry, diagnostics, and future metadata writes. */
@@ -59,17 +62,12 @@ export type WorktreeCreationRequest = {
   setupDecision: SetupDecision
   sparseCheckout?: CreateSparseCheckoutRequest
   telemetrySource?: WorkspaceCreateTelemetrySource
-  linkedIssue?: number
   linkedPR?: number
   pushTarget?: GitPushTarget
   agent: TuiAgent | null
-  linkedLinearIssue?: string
-  linkedLinearIssueWorkspaceId?: string | null
-  linkedLinearIssueOrganizationUrlKey?: string | null
   branchNameOverride?: string
   workspaceStatus?: WorkspaceStatus
   linkedGitLabMR?: number
-  linkedGitLabIssue?: number
   linkedBitbucketPR?: number | null
   linkedAzureDevOpsPR?: number | null
   linkedGiteaPR?: number | null
@@ -77,9 +75,6 @@ export type WorktreeCreationRequest = {
    *  agent launch is self-contained; otherwise the renderer drives startup via
    *  `startupPlan`. */
   startup?: WorktreeStartupLaunch
-  /** Repo Custom GitHub Issue Command to run in a side-pane split after the
-   *  workspace's first terminal is created. Mirrors the composer's trust-gated issueCommand. */
-  issueCommand?: { command: string; env?: Record<string, string> }
   pendingFirstAgentMessageRename: boolean
   /** Post-create note persisted as the worktree comment. */
   note: string

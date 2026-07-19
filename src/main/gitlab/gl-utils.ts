@@ -7,26 +7,26 @@ import { parseGlabApiResponse, type GlabApiResponse } from './glab-api-response'
 // WSL-aware routing. Repo-scoped callers should use the runner exports below.
 export const execFileAsync = promisify(execFile)
 export { glabExecFileAsync, gitExecFileAsync }
-export { classifyGlabError, classifyListIssuesError } from './glab-error-classification'
+export { classifyGlabError, classifyListError } from './glab-error-classification'
 export {
   DEFAULT_GITLAB_HOSTS,
   _getProjectRefCacheSize,
   _resetKnownHostsCache,
   _resetProjectRefCache,
   getGlabKnownHosts,
-  getIssueProjectRef,
+  getPreferredProjectRef,
   getProjectRef,
   getProjectRefForRemote,
   glabHostnameArgs,
   glabRepoExecOptions,
   parseGlabAuthStatusHosts,
   parseGitLabProjectRef,
-  resolveIssueSource
+  resolveProjectRemote
 } from './gitlab-project-ref-resolution'
 export type {
   LocalGitExecOptions,
   ProjectRef,
-  ResolvedIssueSource
+  ResolvedProjectSource
 } from './gitlab-project-ref-resolution'
 export { parseGlabApiResponse, type GlabApiResponse } from './glab-api-response'
 

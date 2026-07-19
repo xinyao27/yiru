@@ -4,7 +4,7 @@ import { Terminal } from 'lucide-react-native'
 import type { TuiAgent } from '../../../src/shared/types'
 import Svg, { Defs, G, LinearGradient, Path, Stop } from 'react-native-svg'
 import { colors } from '../theme/mobile-theme'
-import { MOBILE_AGENT_CATALOG } from '../tasks/mobile-agent-catalog'
+import { MOBILE_AGENT_CATALOG } from '../workspace-create/mobile-agent-catalog'
 import { MOBILE_AGENT_ICON_ASSETS } from './mobile-agent-icon-assets'
 import { ClaudeIcon, OpenAIIcon } from './agent-icons'
 

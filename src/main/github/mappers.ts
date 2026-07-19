@@ -1,4 +1,4 @@
-import type { PRInfo, IssueInfo, CheckStatus, PRCheckDetail } from '../../shared/types'
+import type { PRInfo, CheckStatus, PRCheckDetail } from '../../shared/types'
 
 // ── REST API check-runs mapping ───────────────────────────────────────
 // The REST check-runs endpoint returns separate status + conclusion fields
@@ -119,27 +119,6 @@ export function mapPRState(state: string, isDraft?: boolean): PRInfo['state'] {
     return 'draft'
   }
   return 'open'
-}
-
-// ── Issue mapping ────────────────────────────────────────────────────
-// REST API returns html_url + lowercase state; gh issue view returns url + mixed-case state.
-// This helper normalises both shapes into IssueInfo.
-
-export function mapIssueInfo(data: {
-  number: number
-  title: string
-  state: string
-  url?: string
-  html_url?: string
-  labels?: { name: string }[]
-}): IssueInfo {
-  return {
-    number: data.number,
-    title: data.title,
-    state: data.state?.toLowerCase() === 'open' ? 'open' : 'closed',
-    url: data.html_url ?? data.url ?? '',
-    labels: (data.labels || []).map((l) => l.name)
-  }
 }
 
 export function deriveCheckStatus(rollup: unknown[] | null | undefined): CheckStatus {

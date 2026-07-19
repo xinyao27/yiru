@@ -54,7 +54,7 @@ export function GitHubIntegrationCard(): React.JSX.Element {
         <>
           {translate(
             'auto.components.settings.cli.source.control.integration.cards.b4d900e7f1',
-            'Pull requests, issues, and checks via the'
+            'Pull requests and checks via the'
           )}{' '}
           <span className="font-mono text-[11px]">
             {translate(
@@ -102,7 +102,7 @@ export function GitHubIntegrationCard(): React.JSX.Element {
               <p className="text-xs text-muted-foreground">
                 {translate(
                   'auto.components.settings.cli.source.control.integration.cards.23cb5a0dee',
-                  'Install the GitHub CLI to enable pull requests, issues, and checks.'
+                  'Install the GitHub CLI to enable pull requests and checks.'
                 )}
               </p>
               <div className="flex items-center gap-2">
@@ -183,7 +183,7 @@ export function GitLabIntegrationCard(): React.JSX.Element {
         <>
           {translate(
             'auto.components.settings.cli.source.control.integration.cards.1f2b347bd3',
-            'Merge requests, issues, todos, and pipelines via the'
+            'Merge requests and pipelines via the'
           )}{' '}
           <span className="font-mono text-[11px]">
             {translate(
@@ -231,7 +231,7 @@ export function GitLabIntegrationCard(): React.JSX.Element {
               <p className="text-xs text-muted-foreground">
                 {translate(
                   'auto.components.settings.cli.source.control.integration.cards.b56fd5676a',
-                  'Install the GitLab CLI to enable merge requests, issues, and pipelines.'
+                  'Install the GitLab CLI to enable merge requests and pipelines.'
                 )}
               </p>
               <div className="flex items-center gap-2">

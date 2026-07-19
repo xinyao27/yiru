@@ -3,14 +3,6 @@ export const CROSS_LOCALE_KEY_OVERRIDES = {
     zh: '解决',
     ja: '解決'
   },
-  'auto.components.TaskPage.524f095d55': {
-    zh: '待评审',
-    ja: 'レビュー待ち'
-  },
-  'auto.components.TaskPage.9cd11ba218': {
-    zh: 'Jira',
-    ja: 'Jira'
-  },
   'auto.components.github.PRFilterDropdowns.19bb6f115f': {
     zh: 'reviewed-by',
     ja: 'reviewed-by'
@@ -18,10 +10,6 @@ export const CROSS_LOCALE_KEY_OVERRIDES = {
   'auto.components.onboarding.OnboardingFlow.a5e5da02f7': {
     zh: '集成',
     ja: '連携'
-  },
-  'auto.components.settings.TasksPane.6b23a34f6d': {
-    zh: 'Jira',
-    ja: 'Jira'
   },
   'auto.components.settings.integrations.search.03a7b275be': {
     zh: 'ADO',
@@ -39,10 +27,6 @@ export const CROSS_LOCALE_KEY_OVERRIDES = {
     zh: 'MR',
     ja: 'MR'
   },
-  'auto.components.settings.integrations.search.617603509b': {
-    zh: 'Jira 集成',
-    ja: 'Jira 連携'
-  },
   'auto.components.settings.integrations.search.67a2a0e868': {
     zh: 'Bitbucket 集成',
     ja: 'Bitbucket 連携'
@@ -54,10 +38,6 @@ export const CROSS_LOCALE_KEY_OVERRIDES = {
   'auto.components.settings.integrations.search.af6611fa6e': {
     zh: 'Azure DevOps 集成',
     ja: 'Azure DevOps 連携'
-  },
-  'auto.components.settings.integrations.search.b027b4b318': {
-    zh: 'Linear 集成',
-    ja: 'Linear 連携'
   },
   'auto.components.settings.integrations.search.b40cbe5de4': {
     zh: 'glab',
@@ -75,17 +55,9 @@ export const CROSS_LOCALE_KEY_OVERRIDES = {
     zh: '集成',
     ja: '連携'
   },
-  'auto.components.settings.integrations.search.e1263dd748': {
-    zh: 'Jira',
-    ja: 'Jira'
-  },
   'auto.components.settings.integrations.search.f16e41cc72': {
     zh: 'GitHub 集成',
     ja: 'GitHub 連携'
-  },
-  'auto.components.settings.jira.integration.card.09742875cd': {
-    zh: 'Jira',
-    ja: 'Jira'
   },
   'auto.components.sidebar.workspace.status.409528031f': {
     zh: '评审',

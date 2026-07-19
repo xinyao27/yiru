@@ -62,10 +62,10 @@ import {
   parseExecutionHostId
 } from '../../../../shared/execution-host'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
-import { TASK_SOURCE_CONTEXT_RUNTIME_CAPABILITY } from '../../../../shared/protocol-version'
+import { PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY } from '../../../../shared/protocol-version'
 import type { PreflightStatus } from '../../../../preload/api-types'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
-import type { TaskSourceContext } from '../../../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../../../shared/project-source-context'
 import type { YiruHooks, Repo, Worktree } from '../../../../shared/types'
 import { getWorktreePathBasenameFromId } from '../../../../shared/worktree-id'
 import {
@@ -123,8 +123,8 @@ import { checkRuntimeHooks } from '@/runtime/runtime-hooks-client'
 import {
   getRepoBackedProviderAvailability,
   type RuntimeProviderPreflightStatus
-} from '../task-source-provider-availability'
-import type { TaskSourceHostAvailability } from '../task-source-context-summary'
+} from '../project-source-provider-availability'
+import type { ProjectSourceHostAvailability } from '../project-source-host-availability'
 import {
   getExternalAutomationActionDisabledMessage,
   getExternalAutomationSourceAvailability,
@@ -152,7 +152,7 @@ const AGENTS = getAgentCatalog().map((agent) => agent.id)
 const DEFAULT_TIME = '09:00'
 const AUTOMATIONS_CHANGED_EVENT = 'yiru:automations-changed'
 type AutomationPaneTab = 'overview' | 'runs'
-type RepoBackedAutomationSourceContext = TaskSourceContext & { provider: 'github' | 'gitlab' }
+type RepoBackedAutomationSourceContext = ProjectSourceContext & { provider: 'github' | 'gitlab' }
 
 type ExternalAutomationListEntry =
   | {
@@ -201,19 +201,19 @@ function getRepoBackedAutomationSourceContext(
 }
 
 function getRuntimeSourceHostAvailability(
-  context: TaskSourceContext,
+  context: ProjectSourceContext,
   runtimeStatusByEnvironmentId: ReadonlyMap<
     string,
     { status: RuntimeStatus | null; checkedAt: number }
   >
-): TaskSourceHostAvailability | null {
+): ProjectSourceHostAvailability | null {
   const parsed = parseExecutionHostId(context.hostId)
   if (parsed?.kind !== 'runtime') {
     return null
   }
   const entry = runtimeStatusByEnvironmentId.get(parsed.environmentId)
   if (!entry) {
-    return { hostId: context.hostId, reason: 'checking-task-source-capability' }
+    return { hostId: context.hostId, reason: 'checking-project-source-capability' }
   }
   if (!entry.status) {
     return { hostId: context.hostId, health: 'disconnected' }
@@ -223,10 +223,10 @@ function getRuntimeSourceHostAvailability(
   }
   const capabilities = entry.status.capabilities
   if (!capabilities) {
-    return { hostId: context.hostId, reason: 'checking-task-source-capability' }
+    return { hostId: context.hostId, reason: 'checking-project-source-capability' }
   }
-  if (!capabilities.includes(TASK_SOURCE_CONTEXT_RUNTIME_CAPABILITY)) {
-    return { hostId: context.hostId, reason: 'missing-task-source-capability' }
+  if (!capabilities.includes(PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY)) {
+    return { hostId: context.hostId, reason: 'missing-project-source-capability' }
   }
   return null
 }
@@ -427,9 +427,9 @@ export default function AutomationsPage(): React.JSX.Element {
   const [selectedExternalRunPage, setSelectedExternalRunPage] =
     useState<SelectedExternalRunPage | null>(null)
   const runtimePreflightMountedRef = useRef(true)
-  const runtimePreflightRequestedHostIdsRef = useRef<Set<TaskSourceContext['hostId']>>(new Set())
+  const runtimePreflightRequestedHostIdsRef = useRef<Set<ProjectSourceContext['hostId']>>(new Set())
   const [runtimePreflightStatusByHostId, setRuntimePreflightStatusByHostId] = useState<
-    ReadonlyMap<TaskSourceContext['hostId'], RuntimeProviderPreflightStatus>
+    ReadonlyMap<ProjectSourceContext['hostId'], RuntimeProviderPreflightStatus>
   >(() => new Map())
   const selectAutomationId = useCallback(
     (automationId: string | null): void => {
@@ -781,7 +781,7 @@ export default function AutomationsPage(): React.JSX.Element {
     [automations]
   )
   const runtimeAutomationSourceHostIds = useMemo(() => {
-    const hostIds = new Set<TaskSourceContext['hostId']>()
+    const hostIds = new Set<ProjectSourceContext['hostId']>()
     for (const context of repoBackedAutomationSourceContexts) {
       const parsed = parseExecutionHostId(context.hostId)
       if (parsed?.kind !== 'runtime') {
@@ -860,7 +860,7 @@ export default function AutomationsPage(): React.JSX.Element {
     }
   }, [runtimeAutomationSourceHostIds])
   const automationSourceHostAvailabilityById = useMemo(() => {
-    const availabilityById = new Map<string, TaskSourceHostAvailability[]>()
+    const availabilityById = new Map<string, ProjectSourceHostAvailability[]>()
     for (const automation of automations) {
       const context = getRepoBackedAutomationSourceContext(automation)
       if (!context) {
@@ -2095,7 +2095,7 @@ export default function AutomationsPage(): React.JSX.Element {
         return
       }
 
-      // Why: match Tasks page behavior: Esc first exits field focus, then exits
+      // Why: match page behavior: Esc first exits field focus, then exits
       // the page once focus is back on page chrome.
       if (
         target instanceof HTMLInputElement ||

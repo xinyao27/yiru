@@ -44,11 +44,9 @@ export const NEVER_TRANSLATE_VALUES = new Set([
   'Goose',
   'Grok',
   'Hermes',
-  'Jira',
   'Kilocode',
   'Kimi',
   'Kiro',
-  'Linear',
   'Mistral Vibe',
   'OMP',
   'OpenClaude',
@@ -163,7 +161,6 @@ export const NEVER_TRANSLATE_VALUES = new Set([
   '/home/user',
   '/home/user/project',
   '/path/to/destination',
-  '.yiru/issue-command',
   'PLAN.md',
   'feat/mobile-page',
   'sk-...',
@@ -195,7 +192,6 @@ export const BRAND_MISTRANSLATIONS = {
     'GitHub Copilot': ['GitHub 코파일럿', '코파일럿'],
     Git: ['힘내'],
     Discord: ['디스코드'],
-    Linear: ['선형'],
     Agent: ['에이전트'],
     Agents: ['에이전트'],
     agent: ['에이전트'],
@@ -233,8 +229,6 @@ export const BRAND_MISTRANSLATIONS = {
     Droid: ['机器人'],
     'GitHub Copilot': ['GitHub 副驾驶', '副驾驶'],
     Bitbucket: ['位桶'],
-    Linear: ['线性', '线形'],
-    Jira: ['吉拉'],
     Tailscale: ['尾鳞', '尾鱗'],
     Agent: ['代理', '智能体'],
     Agents: ['代理', '智能体'],
@@ -281,7 +275,6 @@ export const BRAND_MISTRANSLATIONS = {
     Droid: ['ロボット', 'ドロイド'],
     'GitHub Copilot': ['GitHub コパイロット', 'コパイロット'],
     Discord: ['不和'],
-    Linear: ['線形'],
     Agent: ['エージェント'],
     Agents: ['エージェント'],
     agent: ['エージェント'],
@@ -311,8 +304,6 @@ export const BRAND_MISTRANSLATIONS = {
     Antigravity: ['antigravedad', 'Antigravedad'],
     'GitHub Copilot': ['Copiloto de GitHub'],
     Discord: ['discordia'],
-    Linear: ['lineal', 'Lineal'],
-    Jira: ['jira'],
     Agent: ['Agente', 'agente'],
     Agents: ['Agentes', 'agentes'],
     agent: ['agente'],
@@ -423,7 +414,7 @@ function applyCjkLatinTermSpacing(localeValue, locale) {
     )
   if (locale === 'ko') {
     // Korean particles attach to the noun (no space) only when the particle is a complete token at a
-    // boundary — re-glue "Yiru 에"/"PR 을"/"에서는" but keep "Jira 이슈"/"Yiru 로고"/"agent 에뮬레이터".
+    // boundary — re-glue "Yiru 에"/"PR 을"/"에서는" but keep product names and loanword phrases intact.
     result = result.replace(
       new RegExp(
         `(${CJK_LATIN_SPACED_TERM_PATTERN}) ((?:에서|에게|에는|에선|으로|로서|로써|부터|까지|보다|처럼|은|는|이|가|을|를|와|과|의|에|로|도|만)+)(?=$|[\\s.,!?…·:;)\\]}"'」』])`,

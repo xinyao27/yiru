@@ -1,16 +1,8 @@
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
-import {
-  CircleDot,
-  ExternalLink,
-  GitBranch,
-  GitMerge,
-  GitPullRequest,
-  X
-} from 'lucide-react-native'
-import type { SmartNameSelection } from '../tasks/mobile-composer-source-types'
-import type { MobileComposerSource } from '../tasks/use-mobile-composer-source'
+import { ExternalLink, GitBranch, GitMerge, GitPullRequest, X } from 'lucide-react-native'
+import type { SmartNameSelection } from '../workspace-create/mobile-composer-source-types'
+import type { MobileComposerSource } from '../workspace-create/use-mobile-composer-source'
 import { colors, radii, spacing, typography } from '../theme/mobile-theme'
-import { TaskProviderLogo } from './task-provider-logo'
 
 type Props = {
   composer: MobileComposerSource
@@ -27,13 +19,7 @@ function SelectionIcon({ kind }: { kind: SmartNameSelection['kind'] }) {
   if (kind === 'gitlab-mr') {
     return <GitMerge size={15} color={colors.textSecondary} />
   }
-  if (kind === 'github-issue' || kind === 'gitlab-issue') {
-    return <CircleDot size={15} color={colors.textSecondary} />
-  }
-  if (kind === 'branch') {
-    return <GitBranch size={15} color={colors.textSecondary} />
-  }
-  return <TaskProviderLogo provider="linear" size={15} color={colors.textSecondary} />
+  return <GitBranch size={15} color={colors.textSecondary} />
 }
 
 export function SmartWorkspaceSourceField({

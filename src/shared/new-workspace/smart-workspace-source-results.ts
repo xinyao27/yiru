@@ -1,32 +1,22 @@
-import type {
-  BaseRefSearchResult,
-  GitHubWorkItem,
-  GitLabWorkItem,
-  LinearCollectionResult,
-  LinearIssue
-} from '../types'
+import type { BaseRefSearchResult, GitHubWorkItem, GitLabWorkItem } from '../types'
 import { isClipboardTextByteLengthOverLimit } from '../clipboard-text'
 
-export type SmartNameMode = 'smart' | 'github' | 'gitlab' | 'branches' | 'linear' | 'text'
+export type SmartNameMode = 'smart' | 'github' | 'gitlab' | 'branches' | 'text'
 
 export const SMART_WORKSPACE_SOURCE_QUERY_MAX_BYTES = 2048
 
 export type SmartWorkspaceSourceRow =
   | { kind: 'use-name'; value: string; name: string }
   | { kind: 'create-branch'; value: string; name: string }
-  | { kind: 'github'; value: string; item: GitHubWorkItem }
-  | { kind: 'gitlab'; value: string; item: GitLabWorkItem }
+  | { kind: 'github'; value: string; item: GitHubWorkItem & { type: 'pr' } }
+  | { kind: 'gitlab'; value: string; item: GitLabWorkItem & { type: 'mr' } }
   | { kind: 'branch'; value: string; refName: string; localBranchName: string }
-  | { kind: 'linear'; value: string; issue: LinearIssue }
-
-type LinearIssueSourceInput = LinearIssue[] | LinearCollectionResult<LinearIssue> | null | undefined
 
 const EMPTY_HINT_BY_MODE: Record<SmartNameMode, string> = {
   smart: 'Start typing to create a name or find a source.',
-  github: 'Start typing to search GitHub PRs and issues.',
-  gitlab: 'Start typing to search GitLab MRs and issues.',
+  github: 'Start typing to search GitHub pull requests.',
+  gitlab: 'Start typing to search GitLab merge requests.',
   branches: 'No matching branches.',
-  linear: 'Start typing to search Linear issues.',
   text: ''
 }
 
@@ -108,8 +98,6 @@ export function buildSmartWorkspaceSourceRows({
   githubItems,
   gitlabAvailable,
   gitlabItems,
-  linearAvailable,
-  linearIssues,
   mode,
   resultLimit,
   value
@@ -118,8 +106,6 @@ export function buildSmartWorkspaceSourceRows({
   githubItems: GitHubWorkItem[]
   gitlabAvailable: boolean
   gitlabItems: GitLabWorkItem[]
-  linearAvailable: boolean
-  linearIssues: LinearIssueSourceInput
   mode: SmartNameMode
   resultLimit: number
   value: string
@@ -137,20 +123,24 @@ export function buildSmartWorkspaceSourceRows({
   }
   if (mode === 'smart' || mode === 'github') {
     nextRows.push(
-      ...githubItems.map((item) => ({
-        kind: 'github' as const,
-        value: `github-${item.repoId}-${item.type}-${item.number}`,
-        item
-      }))
+      ...githubItems
+        .filter((item): item is GitHubWorkItem & { type: 'pr' } => item.type === 'pr')
+        .map((item) => ({
+          kind: 'github' as const,
+          value: `github-${item.repoId}-pr-${item.number}`,
+          item
+        }))
     )
   }
   if (gitlabAvailable && (mode === 'smart' || mode === 'gitlab')) {
     nextRows.push(
-      ...gitlabItems.map((item) => ({
-        kind: 'gitlab' as const,
-        value: `gitlab-${item.repoId}-${item.type}-${item.number}`,
-        item
-      }))
+      ...gitlabItems
+        .filter((item): item is GitLabWorkItem & { type: 'mr' } => item.type === 'mr')
+        .map((item) => ({
+          kind: 'gitlab' as const,
+          value: `gitlab-${item.repoId}-mr-${item.number}`,
+          item
+        }))
     )
   }
   const shouldShowBranches = mode === 'branches' || (mode === 'smart' && trimmed.length > 0)
@@ -167,22 +157,6 @@ export function buildSmartWorkspaceSourceRows({
         value: `branch-${branch.refName}`,
         refName: branch.refName,
         localBranchName: branch.localBranchName
-      }))
-    )
-  }
-  if (linearAvailable && (mode === 'smart' || mode === 'linear')) {
-    // Why: mixed-version runtime responses may briefly carry the paginated
-    // collection shape into this render path; rendering must stay recoverable.
-    const resolvedLinearIssues = Array.isArray(linearIssues)
-      ? linearIssues
-      : Array.isArray(linearIssues?.items)
-        ? linearIssues.items
-        : []
-    nextRows.push(
-      ...resolvedLinearIssues.map((issue) => ({
-        kind: 'linear' as const,
-        value: `linear-${issue.id}`,
-        issue
       }))
     )
   }

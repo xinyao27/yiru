@@ -53,17 +53,14 @@ import { listRepoWorktrees } from '../repo-worktrees'
 import { getSshGitProvider, requireSshGitProvider } from '../providers/ssh-git-dispatch'
 import { getSshFilesystemProvider } from '../providers/ssh-filesystem-dispatch'
 import {
-  createIssueCommandRunnerScript,
   getEffectiveHooks,
   getEffectiveHooksFromConfig,
   getSetupRunnerEnvVars,
   loadHooks,
   parseYiruYaml,
-  readIssueCommand,
   runHook,
   hasHooksFile,
-  hasUnrecognizedYiruYamlKeys,
-  writeIssueCommand
+  hasUnrecognizedYiruYamlKeys
 } from '../hooks'
 import {
   mergeWorktree,
@@ -829,13 +826,8 @@ function mergeFolderWorkspace(repo: Repo, worktreeId: string, meta: WorktreeMeta
     isMainWorktree: worktreeId === getFolderWorkspaceRootId(repo),
     displayName: meta.displayName || repo.displayName,
     comment: meta.comment || '',
-    linkedIssue: meta.linkedIssue ?? null,
     linkedPR: meta.linkedPR ?? null,
-    linkedLinearIssue: meta.linkedLinearIssue ?? null,
-    linkedLinearIssueWorkspaceId: meta.linkedLinearIssueWorkspaceId ?? null,
-    linkedLinearIssueOrganizationUrlKey: meta.linkedLinearIssueOrganizationUrlKey ?? null,
     linkedGitLabMR: meta.linkedGitLabMR ?? null,
-    linkedGitLabIssue: meta.linkedGitLabIssue ?? null,
     linkedBitbucketPR: meta.linkedBitbucketPR ?? null,
     linkedAzureDevOpsPR: meta.linkedAzureDevOpsPR ?? null,
     linkedGiteaPR: meta.linkedGiteaPR ?? null,
@@ -941,18 +933,9 @@ function createFolderWorkspace(
     yiruCreationSource: 'desktop',
     ...(args.automationProvenance ? { automationProvenance: args.automationProvenance } : {}),
     ...(args.createdWithAgent ? { createdWithAgent: args.createdWithAgent } : {}),
-    ...(args.linkedIssue !== undefined ? { linkedIssue: args.linkedIssue } : {}),
     ...(args.linkedPR !== undefined ? { linkedPR: args.linkedPR } : {}),
-    ...(args.linkedLinearIssue !== undefined ? { linkedLinearIssue: args.linkedLinearIssue } : {}),
-    ...(args.linkedLinearIssueWorkspaceId !== undefined
-      ? { linkedLinearIssueWorkspaceId: args.linkedLinearIssueWorkspaceId }
-      : {}),
-    ...(args.linkedLinearIssueOrganizationUrlKey !== undefined
-      ? { linkedLinearIssueOrganizationUrlKey: args.linkedLinearIssueOrganizationUrlKey }
-      : {}),
     ...(args.manualOrder !== undefined ? { manualOrder: args.manualOrder } : {}),
     ...(args.workspaceStatus !== undefined ? { workspaceStatus: args.workspaceStatus } : {}),
-    ...(args.linkedGitLabIssue !== undefined ? { linkedGitLabIssue: args.linkedGitLabIssue } : {}),
     ...(args.linkedGitLabMR !== undefined ? { linkedGitLabMR: args.linkedGitLabMR } : {}),
     ...(args.linkedBitbucketPR !== undefined ? { linkedBitbucketPR: args.linkedBitbucketPR } : {}),
     ...(args.linkedAzureDevOpsPR !== undefined
@@ -1011,9 +994,6 @@ export function registerWorktreeHandlers(
   ipcMain.removeHandler('worktrees:getBranchRenameFailureOutput')
   ipcMain.removeHandler('hooks:check')
   ipcMain.removeHandler('hooks:inspectSetupScriptImports')
-  ipcMain.removeHandler('hooks:createIssueCommandRunner')
-  ipcMain.removeHandler('hooks:readIssueCommand')
-  ipcMain.removeHandler('hooks:writeIssueCommand')
 
   ipcMain.handle('worktrees:listAll', async () => {
     const repos = store.getRepos()
@@ -2226,23 +2206,6 @@ export function registerWorktreeHandlers(
     }
   )
 
-  ipcMain.handle(
-    'hooks:createIssueCommandRunner',
-    (_event, args: { repoId: string; worktreePath: string; command: string }) => {
-      const repo = store.getRepo(args.repoId)
-      if (!repo) {
-        throw new Error(`Repo not found: ${args.repoId}`)
-      }
-
-      return createIssueCommandRunnerScript(
-        repo,
-        args.worktreePath,
-        args.command,
-        getLocalProjectWorktreeGitOptions(store, repo)
-      )
-    }
-  )
-
   ipcMain.handle('hooks:inspectSetupScriptImports', async (_event, args: { repoId: string }) => {
     const repo = store.getRepo(args.repoId)
     if (!repo || isFolderRepo(repo)) {
@@ -2303,116 +2266,4 @@ export function registerWorktreeHandlers(
       }
     )
   })
-
-  ipcMain.handle(
-    'hooks:readIssueCommand',
-    async (_event, args: { repoId: string; hostId?: ExecutionHostId }) => {
-      const repo = getRepoForWorktreeRemoval(store, args.repoId, args.hostId)
-      if (!repo || isFolderRepo(repo)) {
-        return {
-          status: 'ok',
-          localContent: null,
-          sharedContent: null,
-          effectiveContent: null,
-          localFilePath: '',
-          source: 'none' as const
-        }
-      }
-      if (repo.connectionId) {
-        const issueCommandPath = joinWorktreeRelativePath(repo.path, '.yiru/issue-command')
-        const fsProvider = getSshFilesystemProvider(repo.connectionId)
-        if (!fsProvider) {
-          return {
-            status: 'error',
-            localContent: null,
-            sharedContent: null,
-            effectiveContent: null,
-            localFilePath: issueCommandPath,
-            source: 'none' as const
-          }
-        }
-
-        let status: 'ok' | 'error' = 'ok'
-        let localContent: string | null = null
-        let sharedContent: string | null = null
-        try {
-          const result = await fsProvider.readFile(issueCommandPath)
-          localContent = result.isBinary ? null : result.content.trim() || null
-        } catch (error) {
-          if (!isENOENT(error)) {
-            status = 'error'
-          }
-        }
-        try {
-          const result = await fsProvider.readFile(joinWorktreeRelativePath(repo.path, 'yiru.yaml'))
-          sharedContent = result.isBinary
-            ? null
-            : parseYiruYaml(result.content)?.issueCommand?.trim() || null
-        } catch (error) {
-          if (!isENOENT(error)) {
-            status = 'error'
-          }
-        }
-        const effectiveContent = localContent ?? sharedContent
-        return {
-          status: localContent ? 'ok' : status,
-          localContent,
-          sharedContent,
-          effectiveContent,
-          localFilePath: issueCommandPath,
-          source: localContent
-            ? ('local' as const)
-            : sharedContent
-              ? ('shared' as const)
-              : ('none' as const)
-        }
-      }
-      return readIssueCommand(repo.path)
-    }
-  )
-
-  ipcMain.handle(
-    'hooks:writeIssueCommand',
-    async (_event, args: { repoId: string; content: string; hostId?: ExecutionHostId }) => {
-      const repo = getRepoForWorktreeRemoval(store, args.repoId, args.hostId)
-      if (!repo || isFolderRepo(repo)) {
-        return
-      }
-      if (repo.connectionId) {
-        const issueCommandPath = joinWorktreeRelativePath(repo.path, '.yiru/issue-command')
-        const fsProvider = getSshFilesystemProvider(repo.connectionId)
-        if (!fsProvider) {
-          throw new Error(
-            'Remote filesystem unavailable. Reconnect the SSH target before retrying.'
-          )
-        }
-        const trimmed = args.content.trim()
-        if (!trimmed) {
-          await fsProvider.deletePath(issueCommandPath, false).catch((error: unknown) => {
-            if (!isENOENT(error)) {
-              throw error
-            }
-          })
-          return
-        }
-        await fsProvider.createDir(joinWorktreeRelativePath(repo.path, '.yiru'))
-        const gitignorePath = joinWorktreeRelativePath(repo.path, '.gitignore')
-        try {
-          const result = await fsProvider.readFile(gitignorePath)
-          if (!result.isBinary && !/^\.yiru\/?$/m.test(result.content)) {
-            const separator = result.content.endsWith('\n') ? '' : '\n'
-            await fsProvider.writeFile(gitignorePath, `${result.content}${separator}.yiru\n`)
-          }
-        } catch (error) {
-          if (!isENOENT(error)) {
-            throw error
-          }
-          await fsProvider.writeFile(gitignorePath, '.yiru\n')
-        }
-        await fsProvider.writeFile(issueCommandPath, `${trimmed}\n`)
-        return
-      }
-      writeIssueCommand(repo.path, args.content)
-    }
-  )
 }

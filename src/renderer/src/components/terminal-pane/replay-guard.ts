@@ -38,8 +38,7 @@ export type ReplayingPanesRef = React.RefObject<Map<number, number>>
 
 // Why stall handling exists: the decrement above only runs when xterm
 // completes the write. A wedged WriteBuffer (sync throw escaping a parse
-// handler or a write-completion callback — see
-// xterm-write-buffer-stall.repro.test.ts) or a disposed-terminal race can
+// handler or a write-completion callback) or a disposed-terminal race can
 // drop that completion forever, leaving the guard latched on a live pane —
 // which silently eats every keystroke (Discord #performance / issue #2836).
 //

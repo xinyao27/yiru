@@ -117,40 +117,6 @@ export function HomeSlide({ tapping }: { tapping: boolean }): React.JSX.Element 
           </div>
         </div>
 
-        <div className="mp-section-label" style={{ marginTop: 10 }}>
-          {translate('auto.components.mobile.slides.HomeSlide.a4c3f7b7aa', 'Tasks')}
-        </div>
-        <div className="mp-task-home-card">
-          <div className="mp-task-home-icon">
-            <ListTodoIcon />
-          </div>
-          <div className="mp-host-main">
-            <div className="mp-task-home-title">
-              {translate('auto.components.mobile.slides.HomeSlide.a4c3f7b7aa', 'Tasks')}
-            </div>
-            <div className="mp-task-home-subtitle">
-              {translate('auto.components.mobile.slides.HomeSlide.d047197480', 'GitHub · Linear')}
-            </div>
-          </div>
-          <div
-            className="mp-task-home-providers"
-            aria-label={translate(
-              'auto.components.mobile.slides.HomeSlide.0bad5b07c8',
-              'GitHub and Linear'
-            )}
-          >
-            <div className="mp-task-home-provider-button">
-              <GithubIcon />
-            </div>
-            <div className="mp-task-home-provider-button">
-              <LinearIcon />
-            </div>
-          </div>
-          <div className="mp-chevron-right">
-            <ChevronIcon />
-          </div>
-        </div>
-
         <div className="mp-section-label" style={{ marginTop: 14 }}>
           {translate('auto.components.mobile.slides.HomeSlide.0b00c98506', 'Quick Actions')}
         </div>
@@ -286,35 +252,6 @@ function ResumeIcon(): React.JSX.Element {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
       <path d="m4 17 6-6-6-6" />
       <path d="M12 19h8" />
-    </svg>
-  )
-}
-
-function ListTodoIcon(): React.JSX.Element {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <rect x="3" y="5" width="6" height="6" rx="1" />
-      <path d="m3 17 2 2 4-4" />
-      <path d="M13 6h8" />
-      <path d="M13 12h8" />
-      <path d="M13 18h8" />
-    </svg>
-  )
-}
-
-function GithubIcon(): React.JSX.Element {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-      <path d="M9 18c-4.51 2-5-2-7-2" />
-    </svg>
-  )
-}
-
-function LinearIcon(): React.JSX.Element {
-  return (
-    <svg viewBox="0 0 100 100" fill="currentColor" aria-hidden>
-      <path d="M1.225 61.523c-.187-.738.708-1.235 1.246-.697l36.703 36.703c.538.538.041 1.433-.697 1.246C20.6 94.16 5.84 79.4 1.225 61.523ZM.002 46.811a.997.997 0 0 0 .291.749l52.147 52.147a.998.998 0 0 0 .749.291 50.328 50.328 0 0 0 9.235-1.119c.667-.149.904-.972.422-1.454L1.575 37.154c-.482-.482-1.305-.245-1.454.422A50.328 50.328 0 0 0 .002 46.81Zm4.528-18.34a.998.998 0 0 0 .195 1.144l64.66 64.66a.998.998 0 0 0 1.144.195 50.45 50.45 0 0 0 5.913-3.46.999.999 0 0 0 .14-1.518L9.51 22.418a.999.999 0 0 0-1.518.14 50.45 50.45 0 0 0-3.46 5.913Zm10.435-13.075a.999.999 0 0 0 .002 1.41l68.226 68.226a.999.999 0 0 0 1.41.002c19.292-19.477 19.234-50.97-.176-70.378-19.410-19.410-50.901-19.468-70.378-.176-1.061 1.044.916 1.916.916 1.916Z" />
     </svg>
   )
 }

@@ -37,10 +37,8 @@ export type KeybindingActionId =
   | 'workspace.create'
   | 'workspace.rename'
   | 'workspace.delete'
-  | 'workspace.openBoard'
   | 'workspace.selectByIndex'
   | 'voice.dictation'
-  | 'view.tasks'
   | 'sidebar.left.toggle'
   | 'sidebar.right.toggle'
   | 'sidebar.explorer.toggle'
@@ -293,17 +291,6 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
     allowInTerminal: true
   },
   {
-    id: 'workspace.openBoard',
-    title: 'Open Workspace Board',
-    group: 'Global',
-    scope: 'global',
-    searchKeywords: ['shortcut', 'global', 'workspace', 'board', 'kanban', 'worktree'],
-    // Why: make the command configurable without taking a global chord from
-    // terminal/browser/editor users by default.
-    defaultBindings: platformBindings([]),
-    allowInTerminal: true
-  },
-  {
     id: 'workspace.selectByIndex',
     title: 'Select Workspace 1–9',
     group: 'Global',
@@ -332,14 +319,6 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
     scope: 'global',
     searchKeywords: ['shortcut', 'dictation', 'voice', 'speech', 'microphone'],
     defaultBindings: platformBindings(['Mod+E'])
-  },
-  {
-    id: 'view.tasks',
-    title: 'Open Tasks',
-    group: 'Global',
-    scope: 'global',
-    searchKeywords: ['shortcut', 'tasks', 'github issues', 'linear'],
-    defaultBindings: platformBindings([])
   },
   {
     id: 'sidebar.left.toggle',

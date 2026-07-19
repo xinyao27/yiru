@@ -237,9 +237,6 @@ type UseTerminalPaneLifecycleDeps = {
     env?: Record<string, string>
     direction: SetupSplitDirection
   } | null
-  /** When present, a split pane is created to run the repo's configured
-   *  issue-automation command with the linked issue number interpolated. */
-  issueCommandSplit?: { command: string; env?: Record<string, string> } | null
   isActive: boolean
   isVisible: boolean
   systemPrefersDark: boolean
@@ -456,7 +453,7 @@ export function splitPaneWithOneShotStartup<TPane>(
   // Pane creation fans out through onPaneCreated using a spread copy of `deps`,
   // so connectPanePty cannot clear the caller's original object for us.
   // Reset the shared field in finally so later user-driven splits never replay
-  // setup/issue commands, even if splitPane throws during creation.
+  // setup or startup commands, even if splitPane throws during creation.
   // Relies on manager.splitPane → onPaneCreated → connectPanePty reading
   // `deps.startup` synchronously before returning; if that chain ever becomes
   // async, this helper must switch to awaiting the split before clearing.
@@ -517,7 +514,6 @@ export function useTerminalPaneLifecycle({
   cwd,
   startup,
   setupSplit,
-  issueCommandSplit,
   isActive,
   isVisible,
   systemPrefersDark,
@@ -1599,55 +1595,23 @@ export function useTerminalPaneLifecycle({
     // inside connectPanePty don't propagate back to ptyDeps. Without clearing
     // here, any later user-initiated split (e.g. Cmd+D) would re-run the setup
     // command in the newly created pane.
-    let issueAutomationAnchorPaneId: number | null = null
     // Why: capture the main shell pane *before* any splits mutate the pane list.
-    // Both the setup and issue-command paths need to restore focus back to this
-    // pane after creating their splits, so we save the reference once rather
+    // The setup path restores focus after creating its split, so save the main pane rather
     // than relying on getPanes()[0] which returns insertion order, not visual order.
     const initialPane = manager.getActivePane() ?? manager.getPanes()[0]
 
-    // Why: setup/issue automation panes are internal workspace bootstrap flows,
+    // Why: setup panes are internal workspace bootstrap flows,
     // not the user-initiated terminal split interaction recorded below.
     if (setupSplit) {
       if (initialPane) {
-        const setupPane = splitPaneWithOneShotStartup(
+        splitPaneWithOneShotStartup(
           ptyDeps,
           { command: setupSplit.command, env: setupSplit.env },
           () => manager.splitPane(initialPane.id, setupSplit.direction)
         )
-        issueAutomationAnchorPaneId = setupPane?.id ?? null
         // Restore focus to the main pane so the user's terminal receives
         // keyboard input — the setup pane runs unattended.
         manager.setActivePane(initialPane.id, { focus: isActive })
-      }
-    }
-
-    // Why: when the user links a GitHub issue during worktree creation and has
-    // enabled that repo's issue automation, spawn a separate split pane to run
-    // the agent command. This runs independently from setup: the issue command
-    // is a per-user prompt/template rather than repo bootstrap, so Yiru should
-    // not guess at ordering requirements that vary by user workflow.
-    if (issueCommandSplit) {
-      let targetPane = manager.getActivePane() ?? manager.getPanes()[0] ?? null
-      if (issueAutomationAnchorPaneId !== null) {
-        // Why: keep the same anchor-first fallback order without the ternary +
-        // nullish chain that `tsgo` currently misreads as always-nullish.
-        targetPane =
-          manager.getPanes().find((pane) => pane.id === issueAutomationAnchorPaneId) ?? targetPane
-      }
-      if (targetPane) {
-        splitPaneWithOneShotStartup(
-          ptyDeps,
-          { command: issueCommandSplit.command, env: issueCommandSplit.env },
-          () => manager.splitPane(targetPane.id, 'vertical')
-        )
-        // Why: if setup already claimed the right half, nest issue automation
-        // inside that automation area instead of splitting the main shell again.
-        // This preserves the primary terminal as the dominant pane while setup
-        // and issue panes share the secondary column.
-        const focusPaneId =
-          issueAutomationAnchorPaneId !== null ? (initialPane?.id ?? targetPane.id) : targetPane.id
-        manager.setActivePane(focusPaneId, { focus: isActive })
       }
     }
 

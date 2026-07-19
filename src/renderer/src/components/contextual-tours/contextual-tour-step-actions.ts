@@ -9,7 +9,6 @@ export function performContextualTourStepAction(args: {
   advanceContextualTour: () => void
   detachContextualTourSource: () => void
   setSidebarOpen: (open: boolean) => void
-  openTaskPage: () => void
   openModal: (modal: 'setup-guide', data?: Record<string, unknown>) => void
   canCreateWorkspace: boolean
   openWorkspaceComposer: () => void
@@ -48,13 +47,6 @@ export function performContextualTourStepAction(args: {
       return
     case 'show-worktrees':
       args.setSidebarOpen(true)
-      advanceOrFinish()
-      return
-    case 'open-tasks':
-      // Why: the auto tour starts from the terminal, but this CTA intentionally
-      // navigates to Tasks before the final setup-guide step.
-      args.detachContextualTourSource()
-      args.openTaskPage()
       advanceOrFinish()
       return
     case 'open-getting-started':

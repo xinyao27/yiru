@@ -117,9 +117,6 @@ Computer Use:
   computer paste-text       Paste text through the native clipboard path
   computer set-value        Set the value of a settable app element
 
-Linear:
-  linear                    Read Linear ticket context for agents
-
 Mobile Emulator (iOS Simulator):
   emulator list             List available/running emulators (Yiru-managed + raw serve-sim)
   emulator attach <device>  Attach/start helper and make active for the worktree
@@ -206,10 +203,10 @@ Common Commands:
   yiru environment show --environment <selector> [--json]
   yiru environment rm --environment <selector> [--json]
   yiru worktree list [--repo <selector>] [--limit <n>] [--json]
-  yiru worktree create --name <name> [--repo <selector>|--project <id> [--host <host-id>]|--project-host-setup <id>] [--agent <id>] [--prompt <text>] [--setup run|skip|inherit] [--base-branch <ref>] [--issue <number>] [--linear-issue <identifier-or-url>] [--comment <text>] [--parent-worktree <selector>] [--no-parent] [--run-hooks] [--activate] [--json]
+  yiru worktree create --name <name> [--repo <selector>|--project <id> [--host <host-id>]|--project-host-setup <id>] [--agent <id>] [--prompt <text>] [--setup run|skip|inherit] [--base-branch <ref>] [--comment <text>] [--parent-worktree <selector>] [--no-parent] [--run-hooks] [--activate] [--json]
   yiru worktree show --worktree <selector> [--json]
   yiru worktree current [--json]
-  yiru worktree set --worktree <selector> [--display-name <name>] [--issue <number|null>] [--linear-issue <identifier-or-url|null>] [--comment <text>] [--workspace-status <id>] [--parent-worktree <selector>|--no-parent] [--json]
+  yiru worktree set --worktree <selector> [--display-name <name>] [--comment <text>] [--workspace-status <id>] [--parent-worktree <selector>|--no-parent] [--json]
   yiru worktree rm --worktree <selector> [--force] [--run-hooks] [--json]
   yiru worktree ps [--limit <n>] [--json]
   yiru file open <path> [--worktree <selector>] [--json]
@@ -240,9 +237,9 @@ Common Commands:
 
 Selectors:
   --repo <selector>         Registered repo selector such as id:<id>, name:<name>, or path:<path>
-  --worktree <selector>     Worktree selector such as id:<repo-id>::<path>, name:<displayName>, branch:<branch>, issue:<number>, path:<path>, or active/current
+  --worktree <selector>     Worktree selector such as id:<repo-id>::<path>, name:<displayName>, branch:<branch>, path:<path>, or active/current
   --terminal <handle>       Runtime-issued terminal handle returned by \`yiru terminal list --json\`
-  --parent-worktree <selector> Parent worktree selector such as id:<repo-id>::<path>, branch:<branch>, issue:<number>, path:<path>, or active/current
+  --parent-worktree <selector> Parent worktree selector such as id:<repo-id>::<path>, branch:<branch>, path:<path>, or active/current
   --no-parent               Force no parent lineage for unrelated worktree creation/update
 
 Terminal Send Options:
@@ -309,13 +306,10 @@ Examples:
   $ yiru diagnostics memory --json
   $ yiru repo list
   $ yiru worktree create --name agent-task --agent codex --prompt "hi"
-  $ yiru worktree create --repo name:yiru --name cli-test-1 --issue 273
-  $ yiru worktree create --repo name:yiru --name linear-task --linear-issue https://linear.app/stably/issue/STA-335/test-issue
-  $ yiru worktree create --name linear-task --linear-issue STA-335
+  $ yiru worktree create --repo name:yiru --name cli-test-1
   $ yiru worktree show --worktree branch:Jinwoo-H/cli
   $ yiru worktree current
   $ yiru worktree set --worktree active --comment "waiting on review"
-  $ yiru worktree set --worktree active --linear-issue null
   $ yiru worktree ps --limit 10
   $ yiru file open-changed --mode diff
   $ yiru file open src/App.tsx
@@ -401,56 +395,8 @@ export function formatGroupHelp(specs: CommandSpec[], group: string): string {
 
 function formatCommandFlagHelp(flag: string, commandPath: string[]): string {
   const command = commandPath.join(' ')
-  if (command === 'linear issue' && flag === 'id') {
-    return '--id <id>             Linear issue key, id, or URL'
-  }
-  if (command === 'linear issue' && flag === 'workspace') {
-    return '--workspace <id>      Connected Linear workspace id'
-  }
-  if (command === 'linear search' && flag === 'query') {
-    return '--query <text>        Text to search across Linear issues'
-  }
-  if (command === 'linear search' && flag === 'workspace') {
-    return '--workspace <id|all>  Connected Linear workspace id, or all'
-  }
-  if (command.startsWith('linear ') && flag === 'workspace') {
-    return '--workspace <id>      Connected Linear workspace id'
-  }
-  if (command.startsWith('linear ') && flag === 'body') {
-    return '--body <text>         Linear comment or issue body'
-  }
-  if (command.startsWith('linear ') && flag === 'body-file') {
-    return '--body-file <path|->  Read Linear body from a file or stdin'
-  }
-  if (command.startsWith('linear ') && flag === 'write-id') {
-    return '--write-id <uuid>     Retry id from linear_write_unconfirmed'
-  }
-  if (command.startsWith('linear ') && flag === 'to') {
-    return '--to <state>          Exact Linear workflow state name'
-  }
-  if (command === 'linear comment add' && flag === 'reply-to') {
-    return '--reply-to <id>       Comment id to reply to'
-  }
-  if (command === 'linear attach' && flag === 'url') {
-    return '--url <url>           Absolute http(s) link to attach'
-  }
-  if (command === 'linear attach' && flag === 'title') {
-    return '--title <text>        Attachment title'
-  }
-  if (command === 'linear create' && flag === 'title') {
-    return '--title <text>        New Linear issue title'
-  }
-  if (command === 'linear create' && flag === 'team') {
-    return '--team <key>          Linear team key'
-  }
-  if (command === 'linear create' && flag === 'parent') {
-    return '--parent <id>         Parent Linear issue key, id, or URL'
-  }
-  if (command === 'linear create' && flag === 'parent-current') {
-    return '--parent-current      Use the current linked issue as parent'
-  }
   if (command === 'worktree create' && flag === 'parent-worktree') {
-    return '--parent-worktree <selector> Parent selector such as active/current, id:<repo-id>::<path>, branch:<branch>, issue:<number>, path:<path>, folder:<id>, or worktree:<worktreeId>'
+    return '--parent-worktree <selector> Parent selector such as active/current, id:<repo-id>::<path>, branch:<branch>, path:<path>, folder:<id>, or worktree:<worktreeId>'
   }
   if (command === 'orchestration task-create' && flag === 'task-title') {
     return '--task-title <text>  Concise title for the orchestration task'
@@ -492,9 +438,6 @@ export function formatFlagHelp(flag: string): string {
     help: '--help                 Show this help message',
     interrupt: '--interrupt            Send as an interrupt-style input when supported',
     id: '--id <id>             Identifier for a target item or permission',
-    issue: '--issue <number|null>  Linked GitHub issue number',
-    'linear-issue':
-      '--linear-issue <id|url|null> Linked Linear issue identifier or URL; null clears on set',
     json: '--json                 Emit machine-readable JSON',
     key: '--key <key>            Key argument for this command',
     limit: '--limit <n>            Maximum number of rows to return',
@@ -505,7 +448,7 @@ export function formatFlagHelp(flag: string): string {
     'no-screenshot': '--no-screenshot       Skip screenshot capture after the operation',
     pages: '--pages <n>           Number of scroll pages',
     'parent-worktree':
-      '--parent-worktree <selector> Parent worktree selector such as id:<repo-id>::<path>, branch:<branch>, issue:<number>, path:<path>, or active/current',
+      '--parent-worktree <selector> Parent worktree selector such as id:<repo-id>::<path>, branch:<branch>, path:<path>, or active/current',
     path: '--path <path>          Path argument for the command',
     prompt: '--prompt <text>        Prompt text for agent-backed commands',
     query: '--query <text>        Search text for matching refs',
@@ -529,14 +472,14 @@ export function formatFlagHelp(flag: string): string {
     'to-x': '--to-x <x>             Destination window-local x coordinate',
     'to-y': '--to-y <y>             Destination window-local y coordinate',
     worktree:
-      '--worktree <selector>  Worktree selector such as id:<repo-id>::<path>, name:<displayName>, branch:<branch>, issue:<number>, path:<path>, or active/current',
+      '--worktree <selector>  Worktree selector such as id:<repo-id>::<path>, name:<displayName>, branch:<branch>, path:<path>, or active/current',
     workspace: '--workspace <selector> Existing worktree selector for automation runs',
     'workspace-status':
-      '--workspace-status <id> Board status id (defaults: todo, in-progress, in-review, completed)',
+      '--workspace-status <id> Workspace status id (defaults: todo, in-progress, in-review, completed)',
     staged: '--staged               Open staged source-control changes',
     provider: '--provider <agent>     Agent id such as codex, claude, or gemini',
     'source-context':
-      '--source-context <json|null> Explicit TaskSourceContext for automation task/provider data',
+      '--source-context <json|null> Explicit ProjectSourceContext for automation task/provider data',
     trigger: '--trigger <schedule>   Automation schedule preset, cron, or RRULE',
     schedule: '--schedule <schedule>  Alias for --trigger',
     time: '--time <HH:MM>        Time used with daily/weekdays/weekly presets',
@@ -564,28 +507,6 @@ export function formatFlagHelp(flag: string): string {
     profile: '--profile <id>        Browser profile id',
     'show-profile': '--show-profile        Include tab profile in text output',
     format: '--format <png|jpeg>    Screenshot image format'
-  }
-
-  if (flag === 'current') {
-    return '--current              Use the current Yiru worktree linked Linear issue'
-  }
-  if (flag === 'comments') {
-    return '--comments             Include threaded Linear comments'
-  }
-  if (flag === 'children') {
-    return '--children             Include recursive child issues'
-  }
-  if (flag === 'depth') {
-    return '--depth <n>            Child issue depth for --children/--full'
-  }
-  if (flag === 'attachments') {
-    return '--attachments          Include attachment metadata and URLs'
-  }
-  if (flag === 'relations') {
-    return '--relations            Include blocking, related, and duplicate links'
-  }
-  if (flag === 'full') {
-    return '--full                 Include all supported V1 issue context within caps'
   }
 
   return helpByFlag[flag] ?? `--${flag}`

@@ -90,44 +90,6 @@ yiru screenshot --json
 
 Use `snapshot` first to find the current element refs, then click/fill those refs. After mobile file edits, Metro usually hot reloads automatically, but navigating out of and back into the session screen can be useful because it re-runs `terminal.subscribe`.
 
-## Terminal Streaming Repro Without A Phone
-
-Use this when terminal output does not render on device and you need to split server streaming bugs from WebView/UI bugs:
-
-```bash
-cd mobile
-YIRU_MOBILE_WS_URL=ws://127.0.0.1:6768 pnpm exec tsx scripts/test-subscribe.ts <deviceToken> <serverPublicKeyB64>
-```
-
-You can pass a worktree selector as the third argument:
-
-```bash
-pnpm exec tsx scripts/test-subscribe.ts <deviceToken> <serverPublicKeyB64> "id:<worktreeId>"
-pnpm exec tsx scripts/test-subscribe.ts <deviceToken> <serverPublicKeyB64> "path:/absolute/worktree/path"
-pnpm exec tsx scripts/test-subscribe.ts <deviceToken> <serverPublicKeyB64> "name:my-worktree"
-```
-
-The expected result includes:
-
-```text
-streamSawMarker: true
-readSawMarker: true
-```
-
-If this repro fails, debug the desktop runtime/PTY path before the mobile WebView. If it passes but the phone is blank, debug the session screen or `TerminalWebView` readiness/queueing path.
-
-## Terminal Color Repro Without A Phone
-
-Use this when terminal colors disappear after switching tabs. Open a Claude Code terminal and at least one other terminal in the target worktree, then run:
-
-```bash
-cd mobile
-YIRU_MOBILE_WS_URL=ws://127.0.0.1:6768 pnpm exec tsx scripts/repro-terminal-colors.ts \
-  <deviceToken> <serverPublicKeyB64> "id:<worktreeId>"
-```
-
-The script captures `terminal.subscribe` snapshots in an A → B → A sequence and writes raw snapshots to `mobile/terminal-color-repro/`. If the two A snapshots have different `sgrColor` counts, the desktop snapshot changed during the switch. If they match, the ANSI color data is still present and the bug is in mobile replay/rendering.
-
 ## Validation
 
 Run these checks before committing mobile terminal changes:
@@ -199,7 +161,6 @@ mobile/
 │   ├── terminal/          # Terminal WebView and xterm bridge
 │   └── transport/         # WebSocket RPC client
 ├── scripts/
-│   ├── test-subscribe.ts  # Desktop streaming repro without a phone
 │   └── mock-server.ts     # Standalone mock WebSocket server
 └── assets/                # App icons and splash screen
 ```

@@ -680,9 +680,8 @@ export const ORCHESTRATION_HANDLERS: Record<string, CommandHandler> = {
     // Why: deliberate bypass of `printResult`. `--json` on `ask` emits a
     // single-line bare JSON object (no RPC envelope, no multi-line pretty-
     // print) so workers can pipe `yiru orchestration ask … --json | jq -r
-    // .answer` without reaching into a `result` envelope. This diverges from
-    // every other orchestration verb; called out in the commit message and
-    // guarded by a unit test in orchestration.test.ts.
+    // .answer` without reaching into a `result` envelope. This intentionally
+    // diverges from every other orchestration verb.
     if (json) {
       console.log(JSON.stringify(result.result))
     } else if (result.result.answer !== null) {

@@ -42,10 +42,9 @@ export const OptionalBoolean = z
   .pipe(z.union([z.boolean(), z.undefined()]))
   .optional()
 
-// Why: runtime handlers accept `linkedIssue: number | null | undefined` with
-// distinct meanings — undefined means "no update", null means "clear", number
-// means "set". The ambient JSON decode produces all three shapes as-is.
-export const TriStateLinkedIssue = z
+// Why: review links distinguish omitted (no update), null (clear), and a
+// numeric identifier (set); preserve all three shapes across JSON decoding.
+export const TriStateLinkedReviewNumber = z
   .unknown()
   .transform((value) => {
     if (value === null) {

@@ -10,10 +10,10 @@ import {
 } from '../../../../shared/protocol-version'
 import type { AutomationHostTarget } from './automation-host-client'
 import type { SshConnectionState } from '../../../../shared/ssh-types'
-import type { TaskSourceContext } from '../../../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../../../shared/project-source-context'
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
 import type { ProjectHostSetup, Repo, Worktree } from '../../../../shared/types'
-import type { TaskSourceHostAvailability } from '../task-source-context-summary'
+import type { ProjectSourceHostAvailability } from '../project-source-host-availability'
 
 export type AutomationTargetAvailability =
   | {
@@ -54,7 +54,7 @@ type AutomationTargetAvailabilityArgs = {
     { status: RuntimeStatus | null; checkedAt: number }
   >
   automationHostTarget?: AutomationHostTarget | null
-  sourceHostAvailability?: readonly TaskSourceHostAvailability[]
+  sourceHostAvailability?: readonly ProjectSourceHostAvailability[]
 }
 
 export function getAutomationTargetAvailability({
@@ -183,8 +183,8 @@ function repoHostMatchesRunContext(
 }
 
 function getAutomationSourceAvailability(
-  sourceContext: TaskSourceContext | null | undefined,
-  sourceHostAvailability: readonly TaskSourceHostAvailability[] | undefined
+  sourceContext: ProjectSourceContext | null | undefined,
+  sourceHostAvailability: readonly ProjectSourceHostAvailability[] | undefined
 ): AutomationTargetAvailability | null {
   if (!sourceContext) {
     return null
@@ -210,12 +210,12 @@ function getAutomationSourceAvailability(
         `Install or configure the ${providerLabel} source tool before running manually.`
       )
     case 'unsupported-provider':
-    case 'missing-task-source-capability':
+    case 'missing-project-source-capability':
       return unavailable(
         'source-provider-unsupported',
         `The saved ${providerLabel} source is not supported on this automation host.`
       )
-    case 'checking-task-source-capability':
+    case 'checking-project-source-capability':
       return unavailable(
         'source-host-unavailable',
         `Checking the saved ${providerLabel} source host before running manually.`
@@ -249,16 +249,12 @@ function getAutomationSourceAvailability(
   return null
 }
 
-function getAutomationSourceProviderLabel(provider: TaskSourceContext['provider']): string {
+function getAutomationSourceProviderLabel(provider: ProjectSourceContext['provider']): string {
   switch (provider) {
     case 'github':
       return 'GitHub'
     case 'gitlab':
       return 'GitLab'
-    case 'linear':
-      return 'Linear'
-    case 'jira':
-      return 'Jira'
   }
 }
 

@@ -2,20 +2,20 @@ import type { FolderWorkspace, Worktree } from './types'
 import { folderWorkspaceKey } from './workspace-scope'
 
 export function folderWorkspaceToWorktree(folderWorkspace: FolderWorkspace): Worktree {
-  const linkedTask = folderWorkspace.linkedTask
+  const linkedReview = folderWorkspace.linkedReview
   return {
     id: folderWorkspaceKey(folderWorkspace.id),
     repoId: `folder-workspace:${folderWorkspace.projectGroupId}`,
     displayName: folderWorkspace.name,
     comment: folderWorkspace.comment,
-    linkedIssue:
-      linkedTask?.provider === 'github' && linkedTask.type === 'issue' ? linkedTask.number : null,
-    linkedPR: null,
-    linkedLinearIssue:
-      linkedTask?.provider === 'linear' ? (linkedTask.linearIdentifier ?? null) : null,
-    linkedGitLabMR: null,
-    linkedGitLabIssue:
-      linkedTask?.provider === 'gitlab' && linkedTask.type === 'issue' ? linkedTask.number : null,
+    linkedPR:
+      linkedReview?.provider === 'github' && linkedReview.type === 'pr'
+        ? linkedReview.number
+        : null,
+    linkedGitLabMR:
+      linkedReview?.provider === 'gitlab' && linkedReview.type === 'mr'
+        ? linkedReview.number
+        : null,
     linkedBitbucketPR: null,
     linkedAzureDevOpsPR: null,
     linkedGiteaPR: null,

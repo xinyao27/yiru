@@ -232,7 +232,6 @@ export function normalizeMarkdownReferenceLinks(content: string): string {
   }
 
   // Why: Tiptap's Markdown parser drops reference definitions but leaves
-  // shortcut references as plain text. Inline them before parsing so Linear
-  // issue mentions keep their links in the rich description editor.
+  // shortcut references as plain text. Inline them before parsing so linked references keep their URLs in the editor.
   return replaceReferenceLinks(markdown, definitions)
 }

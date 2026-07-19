@@ -20,8 +20,7 @@ const INTERACTIVE_DRAG_BLOCKER_SELECTOR = [
   '[contenteditable="true"]',
   '[role="button"]',
   '[role="menuitem"]',
-  '[data-radix-collection-item]',
-  '[data-workspace-board-preserve-open]'
+  '[data-radix-collection-item]'
 ].join(',')
 
 export function isSidebarPointerDragBlocked(target: EventTarget | null, row: HTMLElement): boolean {

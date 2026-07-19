@@ -254,7 +254,7 @@ export function createDocumentCommentMarkdownComponents(
         />
       )
     },
-    // Why: GitHub issue/PR bodies commonly contain GFM tables. The dashboard
+    // Why: pull request bodies commonly contain GFM tables. The dashboard
     // dialog is wide enough to show them, but still needs overflow containment.
     table: ({ children }) => (
       <div className="my-3 max-w-full overflow-x-auto rounded-md border border-border/60">

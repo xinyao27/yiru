@@ -48,7 +48,6 @@ export function ContextualTourOverlay(): JSX.Element | null {
   const cancelContextualTour = useAppStore((s) => s.cancelContextualTour)
   const detachContextualTourSource = useAppStore((s) => s.detachContextualTourSource)
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen)
-  const openTaskPage = useAppStore((s) => s.openTaskPage)
   const openModal = useAppStore((s) => s.openModal)
   const [renderState, setRenderState] = useState<ActiveTourRenderState | null>(null)
   const [measureVersion, setMeasureVersion] = useState(0)
@@ -314,7 +313,6 @@ export function ContextualTourOverlay(): JSX.Element | null {
         }
       },
       setSidebarOpen,
-      openTaskPage,
       openModal,
       canCreateWorkspace,
       openWorkspaceComposer: openWorkspaceCreationComposerWithTourHandoff,

@@ -30,7 +30,7 @@ import {
   MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
   PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
   RUNTIME_PROTOCOL_VERSION,
-  TASK_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
+  PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
   WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
 } from '../../../../shared/protocol-version'
 import { Button } from '../ui/button'
@@ -143,7 +143,7 @@ export function getHostModelCapabilitySummary(
   }
   const missing = [
     PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
-    TASK_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
+    PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
     WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
   ].filter((capability) => !capabilities.includes(capability))
   if (missing.length === 0) {
@@ -167,10 +167,10 @@ function getHostModelCapabilityLabel(capability: string): string {
         'auto.components.settings.RuntimeEnvironmentsPane.hostModelCapabilityProjectSetup',
         'project setup'
       )
-    case TASK_SOURCE_CONTEXT_RUNTIME_CAPABILITY:
+    case PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY:
       return translate(
-        'auto.components.settings.RuntimeEnvironmentsPane.hostModelCapabilityTaskSourceContext',
-        'task source context'
+        'auto.components.settings.RuntimeEnvironmentsPane.hostModelCapabilityProjectSourceContext',
+        'project source context'
       )
     case WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY:
       return translate(

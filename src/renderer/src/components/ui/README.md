@@ -89,7 +89,6 @@ These are examples to copy when the same domain needs another composed picker; t
 
 - `components/repo/repo-multi-combobox.tsx`
 - `components/repo/repo-color-picker.tsx`
-- `components/linear-team-multi-combobox.tsx`
 - `components/settings/settings-form-controls.tsx`
 
 ## Adding or changing UI

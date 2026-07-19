@@ -15,7 +15,6 @@ import { DEFAULT_TERMINAL_FONT_SIZE, DEFAULT_TERMINAL_FONT_WEIGHT } from './term
 import { getDefaultTerminalQuickCommands } from './terminal-quick-commands'
 import type { VoiceSettings } from './speech-types'
 import { cloneDefaultWorkspaceStatuses } from './workspace-statuses'
-import { TASK_PROVIDERS } from './task-providers'
 import { DEFAULT_WORKTREE_CARD_PROPERTIES } from './worktree-card-properties'
 import { getDefaultSourceControlAiSettings } from './source-control-ai'
 import { DEFAULT_APP_ICON_ID } from './app-icon'
@@ -37,7 +36,6 @@ import { DEFAULT_USAGE_PERCENTAGE_DISPLAY } from './usage-percentage-display'
 export { DEFAULT_STATUS_BAR_ITEMS } from './status-bar-defaults'
 export {
   DEFAULT_WORKTREE_CARD_PROPERTIES,
-  TASK_WORKTREE_CARD_PROPERTIES,
   normalizeWorktreeCardProperties
 } from './worktree-card-properties'
 
@@ -294,7 +292,6 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     sourceControlGroupOrder: DEFAULT_SOURCE_CONTROL_GROUP_ORDER,
     sourceControlCompareAgainstUpstream: false,
     showTitlebarAppName: true,
-    showTasksButton: true,
     showAutomationsButton: true,
     showMobileButton: true,
     ctrlTabOrderMode: 'mru',
@@ -331,12 +328,6 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     skipCloseTerminalWithRunningProcessConfirm: false,
     skipDeleteAutomationConfirm: false,
     skipCodexRateLimitResetConfirm: false,
-    defaultTaskViewPreset: 'all',
-    defaultTaskSource: 'github',
-    visibleTaskProviders: [...TASK_PROVIDERS],
-    visibleTaskProvidersDefaultedForJira: true,
-    defaultRepoSelection: null,
-    defaultLinearTeamSelection: null,
     opencodeSessionCookie: '',
     opencodeWorkspaceId: '',
     minimaxGroupId: '',
@@ -379,16 +370,6 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     // Why: local desktop remains the default server until the user explicitly
     // selects a saved runtime environment.
     activeRuntimeEnvironmentId: null,
-    // Why: hydrate an empty default so the renderer's optional-chained reads
-    // (`settings?.githubProjects?.activeProject`) land on a stable shape
-    // instead of `undefined`. Upgraded profiles inherit this via the
-    // `{ ...defaults, ...parsed }` merge in persistence.ts.
-    githubProjects: {
-      pinned: [],
-      recent: [],
-      lastViewByProject: {},
-      activeProject: null
-    },
     // Why: default-on uses the user's default agent when it supports
     // non-interactive commit-message generation. Keep agent/model maps empty
     // so first use follows the default agent's configured default model instead
@@ -448,7 +429,7 @@ export function getDefaultPersistedState(homedir: string): PersistedState {
     workspaceLineageByChildKey: {},
     settings: getDefaultSettings(homedir),
     ui: getDefaultUIState(),
-    githubCache: { pr: {}, issue: {} },
+    githubCache: { pr: {} },
     workspaceSession: getDefaultWorkspaceSession(),
     workspaceSessionsByHostId: {},
     sshTargets: [],
@@ -495,9 +476,6 @@ export function getDefaultUIState(): PersistedUIState {
     worktreeCardProperties: [...DEFAULT_WORKTREE_CARD_PROPERTIES],
     agentActivityDisplayMode: DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE,
     workspaceStatuses: cloneDefaultWorkspaceStatuses(),
-    workspaceBoardOpacity: 1,
-    workspaceBoardColumnWidth: 308,
-    syncTaskStatusFromWorkspaceBoard: false,
     _workspaceStatusesDefaultOrderMigrated: true,
     _workspaceStatusesReorderedDefaultRepaired: true,
     _workspaceStatusesDefaultWorkflowMigrated: true,

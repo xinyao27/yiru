@@ -8,10 +8,6 @@ function createMaxLinesRule(max: number): MaxLinesRule {
 // until each oversized screen can be split without destabilizing active work.
 export const mobileMaxLinesRatchets = [
   {
-    files: ['app/h/*/tasks.tsx'],
-    rules: { 'max-lines': createMaxLinesRule(14_682) }
-  },
-  {
     files: ['app/h/*/session/*.tsx'],
     rules: { 'max-lines': createMaxLinesRule(5_015) }
   },
@@ -74,14 +70,6 @@ export const mobileMaxLinesRatchets = [
   {
     files: ['app/troubleshoot.tsx'],
     rules: { 'max-lines': createMaxLinesRule(436) }
-  },
-  {
-    files: ['scripts/repro-worktree-startup-stream.ts'],
-    rules: { 'max-lines': createMaxLinesRule(326) }
-  },
-  {
-    files: ['scripts/repro-terminal-colors.ts'],
-    rules: { 'max-lines': createMaxLinesRule(319) }
   },
   {
     files: ['app/h/*/files/*.tsx'],

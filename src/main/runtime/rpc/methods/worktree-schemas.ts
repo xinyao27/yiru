@@ -8,7 +8,7 @@ import {
   OptionalFiniteNumber,
   OptionalPlainString,
   OptionalString,
-  TriStateLinkedIssue
+  TriStateLinkedReviewNumber
 } from '../schemas'
 
 const OptionalTuiAgent = z
@@ -69,16 +69,11 @@ export const WorktreeCreate = z
     baseBranch: OptionalString,
     compareBaseRef: OptionalString,
     branchNameOverride: OptionalString,
-    linkedIssue: TriStateLinkedIssue,
-    linkedPR: TriStateLinkedIssue,
-    linkedLinearIssue: z.string().optional(),
-    linkedLinearIssueWorkspaceId: z.union([z.string(), z.null()]).optional(),
-    linkedLinearIssueOrganizationUrlKey: z.union([z.string(), z.null()]).optional(),
-    linkedGitLabMR: TriStateLinkedIssue,
-    linkedGitLabIssue: TriStateLinkedIssue,
-    linkedBitbucketPR: TriStateLinkedIssue,
-    linkedAzureDevOpsPR: TriStateLinkedIssue,
-    linkedGiteaPR: TriStateLinkedIssue,
+    linkedPR: TriStateLinkedReviewNumber,
+    linkedGitLabMR: TriStateLinkedReviewNumber,
+    linkedBitbucketPR: TriStateLinkedReviewNumber,
+    linkedAzureDevOpsPR: TriStateLinkedReviewNumber,
+    linkedGiteaPR: TriStateLinkedReviewNumber,
     comment: OptionalString,
     displayName: OptionalString,
     telemetrySource: z
@@ -137,7 +132,7 @@ export const WorktreeCreate = z
     startupAgent: OptionalTuiAgent,
     startupPrompt: OptionalString,
     // Why: task-driven mobile creates need desktop parity: the host chooses
-    // the same default/detected agent and drafts the linked issue/PR URL into it.
+    // the same default/detected agent and drafts the linked review URL into it.
     startupDraft: OptionalString,
     createdWithAgent: z
       .unknown()
@@ -179,16 +174,11 @@ export const WorktreeSet = WorktreeSelector.extend({
   // Why: empty comments are meaningful metadata updates, so use the plain
   // string parser instead of OptionalString's empty-as-undefined behavior.
   comment: OptionalPlainString,
-  linkedIssue: TriStateLinkedIssue,
-  linkedPR: TriStateLinkedIssue,
-  linkedLinearIssue: z.union([z.string(), z.null()]).optional(),
-  linkedLinearIssueWorkspaceId: z.union([z.string(), z.null()]).optional(),
-  linkedLinearIssueOrganizationUrlKey: z.union([z.string(), z.null()]).optional(),
-  linkedGitLabMR: TriStateLinkedIssue,
-  linkedGitLabIssue: TriStateLinkedIssue,
-  linkedBitbucketPR: TriStateLinkedIssue,
-  linkedAzureDevOpsPR: TriStateLinkedIssue,
-  linkedGiteaPR: TriStateLinkedIssue,
+  linkedPR: TriStateLinkedReviewNumber,
+  linkedGitLabMR: TriStateLinkedReviewNumber,
+  linkedBitbucketPR: TriStateLinkedReviewNumber,
+  linkedAzureDevOpsPR: TriStateLinkedReviewNumber,
+  linkedGiteaPR: TriStateLinkedReviewNumber,
   isArchived: OptionalBoolean,
   isUnread: OptionalBoolean,
   isPinned: OptionalBoolean,

@@ -3,7 +3,6 @@ import {
   Check,
   Globe as Globe2,
   Monitor as MonitorCog,
-  Ticket as TicketCheck,
   FlowArrow as Workflow
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/class-names'
@@ -77,28 +76,6 @@ const FEATURE_SETUP_ROWS: readonly FeatureSetupRow[] = [
     },
     setupSummary: 'Registers the Yiru CLI, enables orchestration, and prepares the skill.',
     icon: <Workflow className="size-4" />
-  },
-  {
-    id: 'linearTickets',
-    get title() {
-      return translate(
-        'auto.components.onboarding.FeatureSetupChecklist.linearTicketsTitle',
-        'Linear agent skill'
-      )
-    },
-    get description() {
-      return translate(
-        'auto.components.onboarding.FeatureSetupChecklist.linearTicketsDescription',
-        'Agents can use linked Linear tasks for richer ticket-aware handoffs.'
-      )
-    },
-    get setupSummary() {
-      return translate(
-        'auto.components.onboarding.FeatureSetupChecklist.linearTicketsSetupSummary',
-        'Recommended for Linear workspaces; does not affect Linear connection setup.'
-      )
-    },
-    icon: <TicketCheck className="size-4" />
   }
 ]
 
@@ -108,7 +85,7 @@ export function FeatureSetupChecklist({
 }: FeatureSetupChecklistProps): React.JSX.Element {
   return (
     <section className="mt-6">
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-3">
         {FEATURE_SETUP_ROWS.map((row) => {
           const selected = value[row.id]
           return (

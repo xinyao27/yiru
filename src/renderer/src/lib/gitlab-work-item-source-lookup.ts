@@ -1,19 +1,19 @@
 import type { GitLabWorkItem, ListMergeRequestsResult } from '../../../shared/types'
-import type { TaskSourceContext } from '../../../shared/task-source-context'
-import { getTaskSourceRuntimeSettings } from '../../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../../shared/project-source-context'
+import { getProjectSourceRuntimeSettings } from '../../../shared/project-source-context'
 import { callRuntimeRpc, getActiveRuntimeTarget } from '@/runtime/runtime-rpc-client'
 
 type GitLabSourceLookupArgs = {
   repoPath: string
   repoId: string
-  sourceContext?: TaskSourceContext | null
+  sourceContext?: ProjectSourceContext | null
 }
 
 type GitLabWorkItemByPathLookupArgs = GitLabSourceLookupArgs & {
   host: string
   path: string
   iid: number
-  type: 'issue' | 'mr'
+  type: 'mr'
 }
 
 type GitLabMRListLookupArgs = GitLabSourceLookupArgs & {
@@ -34,7 +34,7 @@ function withRendererRepoId(item: Omit<GitLabWorkItem, 'repoId'> | GitLabWorkIte
 export async function lookupGitLabWorkItemByPathForSource(
   args: GitLabWorkItemByPathLookupArgs
 ): Promise<GitLabWorkItem | null> {
-  const target = getActiveRuntimeTarget(getTaskSourceRuntimeSettings(args.sourceContext))
+  const target = getActiveRuntimeTarget(getProjectSourceRuntimeSettings(args.sourceContext))
   const item =
     target.kind === 'environment'
       ? await callRuntimeRpc<Omit<GitLabWorkItem, 'repoId'> | null>(
@@ -52,7 +52,6 @@ export async function lookupGitLabWorkItemByPathForSource(
       : ((await window.api.gl.workItemByPath({
           repoPath: args.repoPath,
           repoId: args.repoId,
-          sourceContext: args.sourceContext,
           host: args.host,
           path: args.path,
           iid: args.iid,
@@ -64,7 +63,7 @@ export async function lookupGitLabWorkItemByPathForSource(
 export async function listGitLabMRsForSource(
   args: GitLabMRListLookupArgs
 ): Promise<ListMergeRequestsResult> {
-  const target = getActiveRuntimeTarget(getTaskSourceRuntimeSettings(args.sourceContext))
+  const target = getActiveRuntimeTarget(getProjectSourceRuntimeSettings(args.sourceContext))
   const result =
     target.kind === 'environment'
       ? await callRuntimeRpc<ListMergeRequestsResult>(
@@ -82,7 +81,6 @@ export async function listGitLabMRsForSource(
       : ((await window.api.gl.listMRs({
           repoPath: args.repoPath,
           repoId: args.repoId,
-          sourceContext: args.sourceContext,
           state: args.state,
           page: args.page,
           perPage: args.perPage,

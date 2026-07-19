@@ -18,7 +18,6 @@ import {
   shouldEmitNestedRepoImportSubmitTelemetry,
   type NestedRepoTelemetryRuntimeKind
 } from '../../../../shared/nested-repo-telemetry'
-import type { EventProps } from '../../../../shared/telemetry-events'
 import type {
   GlobalSettings,
   NestedRepoScanResult,
@@ -41,11 +40,6 @@ export { STEPS } from './use-onboarding-flow-types'
 export type { StepId, StepNumber } from './use-onboarding-flow-types'
 
 export type OnboardingFlowController = ReturnType<typeof useOnboardingFlow>
-
-type TaskSourcesSnapshotProps = EventProps<'onboarding_task_sources_snapshot'>
-type TaskSourcesGithubStatus = TaskSourcesSnapshotProps['github_status']
-type TaskSourcesLinearStatus = TaskSourcesSnapshotProps['linear_status']
-type TaskSourcesExitAction = TaskSourcesSnapshotProps['exit_action']
 
 function shouldSkipIntegrationsStep(
   status: ReturnType<typeof useAppStore.getState>['preflightStatus']
@@ -89,29 +83,6 @@ function resolveStepIndex(
 
 function createNestedRepoScanId(): string {
   return `nested-repo-scan-${Date.now()}-${Math.random().toString(36).slice(2)}`
-}
-
-function getGitHubTaskSourceStatus(
-  status: ReturnType<typeof useAppStore.getState>['preflightStatus'],
-  loading: boolean
-): TaskSourcesGithubStatus {
-  if (loading || !status) {
-    return 'checking'
-  }
-  if (!status.gh.installed) {
-    return 'not_installed'
-  }
-  return status.gh.authenticated ? 'connected' : 'not_authenticated'
-}
-
-function getLinearTaskSourceStatus(
-  status: ReturnType<typeof useAppStore.getState>['linearStatus'],
-  checked: boolean
-): TaskSourcesLinearStatus {
-  if (status.connected) {
-    return 'connected'
-  }
-  return checked ? 'not_connected' : 'checking'
 }
 
 type OnboardingStepId = (typeof STEPS)[number]['id']
@@ -238,10 +209,7 @@ export function useOnboardingFlow(
   const openSettingsTarget = useAppStore((s) => s.openSettingsTarget)
   const preflightStatus = useAppStore((s) => s.preflightStatus)
   const preflightStatusChecked = useAppStore((s) => s.preflightStatusChecked)
-  const preflightStatusLoading = useAppStore((s) => s.preflightStatusLoading)
   const refreshPreflightStatus = useAppStore((s) => s.refreshPreflightStatus)
-  const linearStatus = useAppStore((s) => s.linearStatus)
-  const linearStatusChecked = useAppStore((s) => s.linearStatusChecked)
   // Why: App hydrates repos before mounting onboarding. Reading the store
   // synchronously lets the final step render its already-added state without a flash.
   const repos = useAppStore((s) => s.repos)
@@ -362,9 +330,8 @@ export function useOnboardingFlow(
         return
       }
       // Why: emit at click time, not at step completion, so we capture
-      // mind-changes within the step. The payload builder is extracted so the
-      // store-fields-attached invariant has unit coverage — see
-      // agent-picked-payload.test.ts.
+      // mind-changes within the step. The payload builder keeps the required
+      // store fields attached consistently.
       track(
         'onboarding_agent_picked',
         buildAgentPickedPayload({
@@ -531,25 +498,6 @@ export function useOnboardingFlow(
     applyDocumentTheme(persistedThemeRef.current)
   }, [])
 
-  const trackTaskSourcesSnapshot = useCallback(
-    (
-      exitAction: TaskSourcesExitAction,
-      durationMs: number,
-      advancedVia: 'button' | 'keyboard'
-    ): void => {
-      // Why: one low-cardinality snapshot answers whether task sources were
-      // usable at step exit without paying for per-button telemetry.
-      track('onboarding_task_sources_snapshot', {
-        github_status: getGitHubTaskSourceStatus(preflightStatus, preflightStatusLoading),
-        linear_status: getLinearTaskSourceStatus(linearStatus, linearStatusChecked),
-        exit_action: exitAction,
-        duration_ms: durationMs,
-        advanced_via: advancedVia
-      })
-    },
-    [linearStatus, linearStatusChecked, preflightStatus, preflightStatusLoading]
-  )
-
   // Why: only auto-pick on first mount when detection completes; otherwise
   // selecting an agent would re-trigger this effect and clobber/race user clicks.
   const didAutoSelectRef = useRef(false)
@@ -659,9 +607,6 @@ export function useOnboardingFlow(
         duration_ms: durationMs,
         advanced_via: advancedVia
       })
-      if (currentStep.id === 'integrations') {
-        trackTaskSourcesSnapshot('continue', durationMs, advancedVia)
-      }
       if (currentStep.id === 'windows_terminal') {
         track(
           'onboarding_windows_terminal_snapshot',
@@ -674,14 +619,7 @@ export function useOnboardingFlow(
         )
       }
     },
-    [
-      consumeStepDurationMs,
-      currentStep.id,
-      currentStep.stepNumber,
-      currentStep.valueKind,
-      settings,
-      trackTaskSourcesSnapshot
-    ]
+    [consumeStepDurationMs, currentStep.id, currentStep.stepNumber, currentStep.valueKind, settings]
   )
   const next = useCallback(
     async (advancedVia: 'button' | 'keyboard' = 'button') => {
@@ -1170,9 +1108,6 @@ export function useOnboardingFlow(
         duration_ms: durationMs,
         advanced_via: 'button'
       })
-      if (stepId === 'integrations') {
-        trackTaskSourcesSnapshot('skip_to_project_setup', durationMs, 'button')
-      }
       if (stepId === 'windows_terminal') {
         track(
           'onboarding_windows_terminal_snapshot',
@@ -1198,7 +1133,6 @@ export function useOnboardingFlow(
     openModal,
     selectedAgent,
     settings,
-    trackTaskSourcesSnapshot,
     updateSettings
   ])
 

@@ -1,7 +1,7 @@
 import { basename } from 'node:path'
 import type { GitWorktreeInfo, Worktree, WorktreeMeta } from '../../shared/types'
 import { DEFAULT_WORKSPACE_STATUS_ID } from '../../shared/workspace-statuses'
-import { getLinkedWorkItemMetadata } from './worktree-linked-work-item-metadata'
+import { getLinkedReviewMetadata } from './worktree-linked-review-metadata'
 
 /**
  * Merge raw git worktree info with persisted user metadata into a full Worktree.
@@ -30,12 +30,8 @@ export function mergeWorktree(
     isMainWorktree: git.isMainWorktree,
     displayName: meta?.displayName || branchShort || defaultDisplayName || basename(git.path),
     comment: meta?.comment || '',
-    linkedIssue: meta?.linkedIssue ?? null,
     linkedPR: meta?.linkedPR ?? null,
-    linkedLinearIssue: meta?.linkedLinearIssue ?? null,
-    linkedLinearIssueWorkspaceId: meta?.linkedLinearIssueWorkspaceId ?? null,
-    linkedLinearIssueOrganizationUrlKey: meta?.linkedLinearIssueOrganizationUrlKey ?? null,
-    ...getLinkedWorkItemMetadata(meta),
+    ...getLinkedReviewMetadata(meta),
     isArchived: meta?.isArchived ?? false,
     isUnread: meta?.isUnread ?? false,
     isPinned: meta?.isPinned ?? false,

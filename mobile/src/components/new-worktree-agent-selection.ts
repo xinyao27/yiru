@@ -1,7 +1,7 @@
 import type { TuiAgent } from '../../../src/shared/types'
-import { MOBILE_AGENT_CATALOG } from '../tasks/mobile-agent-catalog'
-import { isMobileTuiAgentEnabled } from '../tasks/mobile-tui-agents'
-import { pickWorkspaceAgent } from '../tasks/workspace-agent-selection'
+import { MOBILE_AGENT_CATALOG } from '../workspace-create/mobile-agent-catalog'
+import { isMobileTuiAgentEnabled } from '../workspace-create/mobile-tui-agents'
+import { pickWorkspaceAgent } from '../workspace-create/workspace-agent-selection'
 
 export type NewWorktreeRuntimeSettings = {
   defaultTuiAgent?: TuiAgent | 'blank' | null

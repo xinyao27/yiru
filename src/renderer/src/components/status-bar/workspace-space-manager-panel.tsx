@@ -41,7 +41,6 @@ import { activateAndRevealWorktree } from '@/lib/worktree-activation'
 import { useAppStore } from '../../store'
 import { getRepoMapFromState, getWorktreeMapFromState } from '../../store/selectors'
 import { getHostedReviewCacheKey } from '../../store/slices/hosted-review'
-import { issueCacheKey as getIssueCacheKey } from '../../store/slices/github'
 import { refreshGitStatusForWorktree } from '../right-sidebar/git-status-refresh'
 import { runWorktreeBatchDelete } from '../sidebar/delete-worktree-flow'
 import { prepareActiveWorktreeFocusAfterDelete } from '../sidebar/active-worktree-focus-after-delete'
@@ -120,8 +119,6 @@ type WorkspaceDecisionDetails = {
   changedFileCount: number | null
   branchStatus: string | null
   reviewLabel: string | null
-  issueLabel: string | null
-  linearIssueLabel: string | null
 }
 
 type WorkspaceDecisionInputs = {
@@ -141,11 +138,6 @@ type WorkspaceDecisionInputs = {
   hostedReviewCache: Record<
     string,
     { data?: { number: number; state: string; status: string; title: string } | null }
-  >
-  issueCache: Record<string, { data?: { number: number; title: string; state: string } | null }>
-  linearIssueCache: Record<
-    string,
-    { data?: { identifier: string; title: string; state?: { name: string } } | null }
   >
   settings: Parameters<typeof getHostedReviewCacheKey>[2]
   activeWorktreeId: string | null
@@ -220,38 +212,6 @@ export function getWorkspaceDecisionDetails(
       : linkedPR
         ? `PR #${linkedPR}`
         : null
-  const linkedIssue = workspaceRecord?.linkedIssue ?? null
-  const issue =
-    linkedIssue && repo
-      ? inputs.issueCache[
-          getIssueCacheKey(
-            repo.path,
-            repo.id,
-            linkedIssue,
-            inputs.settings,
-            repo.connectionId,
-            repo.executionHostId,
-            true
-          )
-        ]?.data
-      : null
-  const issueLabel = linkedIssue
-    ? issue
-      ? `#${issue.number} ${issue.state}: ${issue.title}`
-      : `#${linkedIssue}`
-    : null
-  const linkedLinearIssue = workspaceRecord?.linkedLinearIssue ?? null
-  const linearIssue = linkedLinearIssue
-    ? (inputs.linearIssueCache[`selected::${linkedLinearIssue}`]?.data ??
-      inputs.linearIssueCache[linkedLinearIssue]?.data)
-    : null
-  const linearIssueLabel = linkedLinearIssue
-    ? linearIssue
-      ? `${linearIssue.identifier}${
-          linearIssue.state?.name ? ` ${linearIssue.state.name}` : ''
-        }: ${linearIssue.title}`
-      : linkedLinearIssue
-    : null
 
   return {
     isActive: inputs.activeWorktreeId === worktree.worktreeId,
@@ -275,9 +235,7 @@ export function getWorkspaceDecisionDetails(
     browserTabCount: inputs.browserTabsByWorktree[worktree.worktreeId]?.length ?? 0,
     changedFileCount: gitEntries ? gitEntries.length : null,
     branchStatus: getBranchStatus(inputs.remoteStatusesByWorktree[worktree.worktreeId]),
-    reviewLabel,
-    issueLabel,
-    linearIssueLabel
+    reviewLabel
   }
 }
 
@@ -503,11 +461,7 @@ function StatusBadge({
       </Badge>
     )
   }
-  if (
-    decisionDetails?.reviewLabel ||
-    decisionDetails?.issueLabel ||
-    decisionDetails?.linearIssueLabel
-  ) {
+  if (decisionDetails?.reviewLabel) {
     return (
       <Badge variant="outline">
         {translate(
@@ -643,8 +597,6 @@ function WorkspaceDecisionHoverCard({
   onOpenWorkspace: () => void
 }): React.JSX.Element {
   const deleteDecision = getDeleteDecisionLabel(worktree, details)
-  const issueLabel =
-    [details.issueLabel, details.linearIssueLabel].filter(Boolean).join(' · ') || 'No linked issue'
   return (
     <HoverCardContent
       align="end"
@@ -725,14 +677,6 @@ function WorkspaceDecisionHoverCard({
             'Review'
           )}
           value={details.reviewLabel ?? 'No linked PR'}
-        />
-        <DecisionLine
-          icon={<ExternalLink />}
-          label={translate(
-            'auto.components.status.bar.WorkspaceSpaceManagerPanel.66870929fb',
-            'Issue'
-          )}
-          value={issueLabel}
         />
       </div>
 
@@ -1248,8 +1192,6 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
   const gitStatusByWorktree = useAppStore((state) => state.gitStatusByWorktree)
   const remoteStatusesByWorktree = useAppStore((state) => state.remoteStatusesByWorktree)
   const hostedReviewCache = useAppStore((state) => state.hostedReviewCache)
-  const issueCache = useAppStore((state) => state.issueCache)
-  const linearIssueCache = useAppStore((state) => state.linearIssueCache)
   const settings = useAppStore((state) => state.settings)
   const activeWorktreeId = useAppStore((state) => state.activeWorktreeId)
   const setGitStatus = useAppStore((state) => state.setGitStatus)
@@ -1303,8 +1245,6 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
           gitStatusByWorktree,
           remoteStatusesByWorktree,
           hostedReviewCache,
-          issueCache,
-          linearIssueCache,
           settings,
           activeWorktreeId,
           now
@@ -1320,8 +1260,6 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
     editorDrafts,
     gitStatusByWorktree,
     hostedReviewCache,
-    issueCache,
-    linearIssueCache,
     openFiles,
     ptyIdsByTabId,
     repoMap,
@@ -2046,8 +1984,6 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
                         gitStatusByWorktree,
                         remoteStatusesByWorktree,
                         hostedReviewCache,
-                        issueCache,
-                        linearIssueCache,
                         settings,
                         activeWorktreeId,
                         now: Date.now()

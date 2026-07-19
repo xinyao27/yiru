@@ -1,33 +1,29 @@
 /* eslint-disable max-lines -- Why: parallel to src/main/github/client.ts —
-co-locating GitLab MR/issue/work-item operations keeps the concurrency
-acquire/release pattern obvious across operations. */
+co-locating GitLab merge-request operations keeps concurrency and error handling consistent. */
 import type {
-  ClassifiedError,
   GitLabAssignableUser,
   GitLabAuthDiagnostic,
   GitLabDiscussionResolveResult,
   GitLabJobTraceResult,
-  GitLabPagedResult,
   GitLabPipelineJob,
   GitLabRateLimitSnapshot,
   GitLabMRInlineCommentInput,
   GitLabMRReviewersUpdateResult,
   GitLabRetryJobResult,
-  GitLabTodo,
   GitLabViewer,
   GitLabWorkItem,
   GetGitLabRateLimitResult,
-  IssueSourcePreference,
+  ForgeRemotePreference,
   ListMergeRequestsResult,
   MRComment,
   MRInfo,
   MRListState
 } from '../../shared/types'
-import { derivePipelineStatus, mapIssueToWorkItem, mapMRInfo, mapMRToWorkItem } from './mappers'
+import { derivePipelineStatus, mapMRInfo, mapMRToWorkItem } from './mappers'
 import {
   acquire,
   classifyGlabError,
-  classifyListIssuesError,
+  classifyListError,
   getGlabKnownHosts,
   getProjectRef,
   getProjectRefForRemote,
@@ -37,11 +33,10 @@ import {
   glabExecFileAsync,
   parseGlabAuthStatusHosts,
   release,
-  resolveIssueSource,
+  resolveProjectRemote,
   type LocalGitExecOptions,
   type ProjectRef
 } from './gl-utils'
-import type { IssueListState } from './issues'
 import {
   hasHostedReviewLocalGitOptions,
   getHostedReviewLocalGitOptions,
@@ -431,7 +426,7 @@ export async function listMergeRequests(
   state: MRListState = 'opened',
   page = 1,
   perPage = 20,
-  preference?: IssueSourcePreference,
+  preference?: ForgeRemotePreference,
   query?: string,
   connectionId?: string | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -441,7 +436,7 @@ export async function listMergeRequests(
   // they push branches and submit MRs). Mirror github's `getOwnerRepo`
   // call site by going through the upstream/origin preference resolver
   // so cross-fork workflows reuse the same plumbing.
-  const { source: projectRef } = await resolveIssueSource(
+  const { source: projectRef } = await resolveProjectRemote(
     repoPath,
     preference,
     knownHosts,
@@ -464,7 +459,7 @@ export async function listMergeRequests(
         }
       }
     }
-    // Why: fallback — let glab infer project from cwd, same as listIssues.
+    // Why: fallback — let glab infer the project from cwd when remote parsing fails.
     // Used when the repo's remote host is not in getGlabKnownHosts(connectionId)
     // (e.g. a fresh self-hosted instance), but glab itself can still
     // resolve it from the local git config.
@@ -500,7 +495,7 @@ export async function listMergeRequests(
         page,
         perPage,
         // Why: the CLI doesn't return x-total headers, so totals are
-        // approximate. For the Tasks UI this is acceptable.
+        // approximate. For the merge-request picker this is acceptable.
         totalCount: data.length,
         totalPages: data.length < perPage ? page : page + 1
       }
@@ -512,7 +507,7 @@ export async function listMergeRequests(
         perPage,
         totalCount: 0,
         totalPages: 0,
-        error: classifyListIssuesError(stderr)
+        error: classifyListError(stderr)
       }
     } finally {
       release()
@@ -553,7 +548,7 @@ export async function listMergeRequests(
       perPage,
       totalCount: 0,
       totalPages: 0,
-      error: classifyListIssuesError(stderr)
+      error: classifyListError(stderr)
     }
   } finally {
     release()
@@ -569,7 +564,7 @@ function parseHeaderInt(value: string | undefined, fallback: number): number {
 }
 
 /**
- * Fetch a work item (MR or issue) given an explicit project ref +
+ * Fetch a merge request given an explicit project ref +
  * iid + type. Mirrors github/getWorkItemByOwnerRepo — used by the
  * paste-URL flow in the picker where the URL determines the project
  * directly rather than going through the local repo's remotes.
@@ -578,13 +573,13 @@ export async function getWorkItemByProjectRef(
   repoPath: string,
   projectRef: ProjectRef,
   iid: number,
-  type: 'issue' | 'mr',
+  _type: 'mr',
   connectionId?: string | null,
   localGitOptions: LocalGitExecOptions = {}
 ): Promise<GitLabWorkItem | null> {
   await acquire()
   try {
-    const resource = type === 'mr' ? 'merge_requests' : 'issues'
+    const resource = 'merge_requests'
     const { stdout } = await glabExecFileAsync(
       [
         'api',
@@ -596,10 +591,7 @@ export async function getWorkItemByProjectRef(
       glabRepoExecOptions(repoPath, connectionId, localGitOptions)
     )
     const data = JSON.parse(stdout)
-    if (type === 'mr') {
-      return mapMRToWorkItem(data, projectRef.path, projectRef)
-    }
-    return mapIssueToWorkItem(data, projectRef.path, projectRef)
+    return mapMRToWorkItem(data, projectRef.path, projectRef)
   } catch {
     return null
   } finally {
@@ -607,236 +599,13 @@ export async function getWorkItemByProjectRef(
   }
 }
 
-function mrStateToIssueState(state: MRListState): IssueListState | null {
-  // Why: GitLab issues don't have a 'merged' state. When the user is
-  // filtering MRs to merged, return null so listWorkItems can skip the
-  // issues fetch entirely instead of mis-mapping to opened/closed.
-  switch (state) {
-    case 'opened':
-      return 'opened'
-    case 'closed':
-      return 'closed'
-    case 'all':
-      return 'all'
-    case 'merged':
-      return null
-  }
-}
-
-export async function listWorkItems(
-  repoPath: string,
-  state: MRListState = 'opened',
-  page = 1,
-  perPage = 20,
-  preference?: IssueSourcePreference,
-  query?: string,
-  connectionId?: string | null,
-  localGitOptions: LocalGitExecOptions = {}
-): Promise<GitLabPagedResult<GitLabWorkItem>> {
-  const issueState = mrStateToIssueState(state)
-  const knownHosts = await getGlabKnownHosts(connectionId)
-  const { source: projectRef } = await resolveIssueSource(
-    repoPath,
-    preference,
-    knownHosts,
-    connectionId,
-    localGitOptions
-  )
-  if (!projectRef) {
-    return {
-      items: [],
-      page,
-      perPage,
-      totalCount: 0,
-      totalPages: 0,
-      error: {
-        type: 'not_found',
-        message: 'No GitLab project found for this repository.'
-      }
-    }
-  }
-  // Why: fan out the two read calls so the response time is the slower
-  // of the two, not their sum. Errors classify per-side; an MR-side
-  // failure with a successful issues fetch still surfaces issues with
-  // an error envelope.
-  //
-  // Why we don't go through `listIssues` here: that function returns
-  // IssueInfo, which deliberately strips the raw glab fields (notably
-  // `updated_at`). The combined sort needs updatedAt, so we read the
-  // raw issues API directly and run mapIssueToWorkItem against the
-  // raw payload instead.
-  const [mrs, issues] = await Promise.all([
-    listMergeRequests(
-      repoPath,
-      state,
-      page,
-      perPage,
-      preference,
-      query,
-      connectionId,
-      localGitOptions
-    ),
-    issueState === null
-      ? Promise.resolve({
-          items: [] as GitLabWorkItem[],
-          error: undefined as ClassifiedError | undefined
-        })
-      : fetchIssuesAsWorkItems(
-          repoPath,
-          projectRef,
-          issueState,
-          page,
-          perPage,
-          query,
-          connectionId,
-          localGitOptions
-        )
-  ])
-  const merged = [...mrs.items, ...issues.items].sort((a, b) =>
-    (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '')
-  )
-  // Why: combine error envelopes — the renderer's banner cares about
-  // any failed fetch, not which one. MR-side error wins because it's
-  // strictly more informative than an issues-side error in most
-  // permission scenarios (issues can be disabled per project).
-  const error: ClassifiedError | undefined = mrs.error ?? issues.error
-  return {
-    items: merged,
-    page,
-    perPage,
-    // Why: approximate totals — an exact combined-pagination total would
-    // require a server-side ordering primitive across two distinct
-    // resources, which the GitLab API doesn't offer. MR total is the
-    // right direction; the UI's "Page X of Y" reads as a hint, not a
-    // strict count.
-    totalCount: mrs.totalCount,
-    totalPages: mrs.totalPages,
-    ...(error ? { error } : {})
-  }
-}
-
-export async function fetchIssuesAsWorkItems(
-  repoPath: string,
-  projectRef: ProjectRef,
-  state: IssueListState,
-  page: number,
-  perPage: number,
-  query?: string,
-  connectionId?: string | null,
-  localGitOptions: LocalGitExecOptions = {}
-): Promise<{ items: GitLabWorkItem[]; error: ClassifiedError | undefined }> {
-  await acquire()
-  try {
-    const stateParam = state === 'all' ? '' : `&state=${state}`
-    const searchParam = query?.trim() ? `&search=${encodeURIComponent(query.trim())}` : ''
-    const { stdout } = await glabExecFileAsync(
-      [
-        'api',
-        ...glabHostnameArgs(projectRef, connectionId),
-        `projects/${encodedProject(projectRef.path)}/issues?page=${page}&per_page=${perPage}&order_by=updated_at&sort=desc${stateParam}${searchParam}`
-      ],
-      glabRepoExecOptions(repoPath, connectionId, localGitOptions)
-    )
-    const data = JSON.parse(stdout) as Parameters<typeof mapIssueToWorkItem>[0][]
-    return {
-      items: data.map((d) => mapIssueToWorkItem(d, projectRef.path, projectRef)),
-      error: undefined
-    }
-  } catch (err) {
-    return {
-      items: [],
-      error: classifyListIssuesError(err instanceof Error ? err.message : String(err))
-    }
-  } finally {
-    release()
-  }
-}
-
-/**
- * List the authenticated user's GitLab todos (gitlab.com/dashboard/todos).
- * Cross-project — `glab api todos` is user-scoped so the cwd doesn't
- * affect the result; callers may pass any registered repo path so the
- * IPC handler's path-validation guard has something to check.
- *
- * Why: GitLab's todos surface is the closest GitLab-native analogue of
- * GitHub's notifications/inbox. Surfacing it in Yiru lets users start
- * work directly from a mention/assignment without going to gitlab.com
- * first.
- */
-export async function listTodos(
-  repoPath: string,
-  connectionId?: string | null,
-  localGitOptions: LocalGitExecOptions = {}
-): Promise<GitLabTodo[]> {
-  const projectRef = await getProjectRef(
-    repoPath,
-    await getGlabKnownHosts(connectionId),
-    connectionId,
-    localGitOptions
-  )
-  if (connectionId && !projectRef) {
-    return []
-  }
-  await acquire()
-  try {
-    // Why: per_page=50 keeps this user-scoped cross-project view cheap. The UI
-    // shows the highest-priority todos first, so avoid walking every pending
-    // todo page from large GitLab accounts.
-    const { stdout } = await glabExecFileAsync(
-      [
-        'api',
-        ...(projectRef ? glabHostnameArgs(projectRef, connectionId) : []),
-        'todos?state=pending&per_page=50'
-      ],
-      glabRepoExecOptions(repoPath, connectionId, localGitOptions)
-    )
-    type RESTTodo = {
-      id?: number
-      action_name?: string
-      target_type?: string
-      target?: {
-        iid?: number
-        title?: string
-        web_url?: string
-      } | null
-      target_url?: string
-      author?: { username?: string | null; avatar_url?: string | null } | null
-      project?: { path_with_namespace?: string } | null
-      updated_at?: string
-      state?: string
-    }
-    const data = JSON.parse(stdout) as RESTTodo[]
-    return data.map<GitLabTodo>((t) => ({
-      id: t.id ?? 0,
-      actionName: t.action_name ?? '',
-      targetType: t.target_type ?? '',
-      targetIid: typeof t.target?.iid === 'number' ? t.target.iid : null,
-      targetTitle: t.target?.title ?? '',
-      targetUrl: t.target_url ?? t.target?.web_url ?? '',
-      projectPath: t.project?.path_with_namespace ?? '',
-      authorUsername: t.author?.username ?? '',
-      authorAvatarUrl: t.author?.avatar_url ?? '',
-      updatedAt: t.updated_at ?? '',
-      state: t.state === 'done' ? 'done' : 'pending'
-    }))
-  } catch {
-    // Why: silent empty-list on auth/network failures matches the rest
-    // of the read-side surface (`listLabels`, `listAssignableUsers`).
-    // The caller's banner / loading-state UI signals connectivity issues.
-    return []
-  } finally {
-    release()
-  }
-}
-
 // ── MR mutations ──────────────────────────────────────────────────
-// Why: mirror the GitHub-side actions (mergePR, updatePRTitle, close
-// via gh issue close, etc.) for the GitLab dialog footer. All take a
+// Why: mirror the GitHub-side review actions for the GitLab dialog footer. All take a
 // repoPath + iid and resolve the project ref via the existing helper.
 
 async function withProjectRef<T>(
   repoPath: string,
-  preference: IssueSourcePreference | undefined,
+  preference: ForgeRemotePreference | undefined,
   connectionId: string | null | undefined,
   explicitProjectRef: ProjectRef | null | undefined,
   fn: (projectRef: ProjectRef, repoFlag: string) => Promise<T>,
@@ -846,7 +615,7 @@ async function withProjectRef<T>(
   const projectRef =
     explicitProjectRef ??
     (
-      await resolveIssueSource(
+      await resolveProjectRemote(
         repoPath,
         preference,
         await getGlabKnownHosts(connectionId),
@@ -863,7 +632,7 @@ async function withProjectRef<T>(
 export async function closeMR(
   repoPath: string,
   iid: number,
-  preference?: IssueSourcePreference,
+  preference?: ForgeRemotePreference,
   connectionId?: string | null,
   projectRef?: ProjectRef | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -909,7 +678,7 @@ export async function closeMR(
 export async function reopenMR(
   repoPath: string,
   iid: number,
-  preference?: IssueSourcePreference,
+  preference?: ForgeRemotePreference,
   connectionId?: string | null,
   projectRef?: ProjectRef | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -953,7 +722,7 @@ export async function mergeMR(
   repoPath: string,
   iid: number,
   method: 'merge' | 'squash' | 'rebase' = 'merge',
-  preference?: IssueSourcePreference,
+  preference?: ForgeRemotePreference,
   connectionId?: string | null,
   projectRef?: ProjectRef | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -1000,7 +769,7 @@ export async function addMRComment(
   repoPath: string,
   iid: number,
   body: string,
-  preference?: IssueSourcePreference,
+  preference?: ForgeRemotePreference,
   connectionId?: string | null,
   projectRef?: ProjectRef | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -1058,7 +827,7 @@ export async function addMRInlineComment(
   repoPath: string,
   iid: number,
   input: GitLabMRInlineCommentInput,
-  preference?: IssueSourcePreference,
+  preference?: ForgeRemotePreference,
   connectionId?: string | null,
   projectRef?: ProjectRef | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -1146,7 +915,7 @@ export async function resolveMRDiscussion(
   iid: number,
   discussionId: string,
   resolved: boolean,
-  preference?: IssueSourcePreference,
+  preference?: ForgeRemotePreference,
   connectionId?: string | null,
   projectRef?: ProjectRef | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -1236,7 +1005,7 @@ export async function updateMRReviewers(
   repoPath: string,
   iid: number,
   reviewerIds: number[],
-  preference?: IssueSourcePreference,
+  preference?: ForgeRemotePreference,
   connectionId?: string | null,
   projectRef?: ProjectRef | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -1286,7 +1055,7 @@ export async function updateMRReviewers(
 export async function getJobTrace(
   repoPath: string,
   jobId: number,
-  preference?: IssueSourcePreference,
+  preference?: ForgeRemotePreference,
   connectionId?: string | null,
   projectRef?: ProjectRef | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -1323,7 +1092,7 @@ export async function getJobTrace(
 export async function retryJob(
   repoPath: string,
   jobId: number,
-  preference?: IssueSourcePreference,
+  preference?: ForgeRemotePreference,
   connectionId?: string | null,
   projectRef?: ProjectRef | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -1372,7 +1141,7 @@ export async function updateMR(
     addLabels?: string[]
     removeLabels?: string[]
   },
-  preference?: IssueSourcePreference,
+  preference?: ForgeRemotePreference,
   connectionId?: string | null,
   projectRef?: ProjectRef | null,
   localGitOptions: LocalGitExecOptions = {}
@@ -1432,19 +1201,115 @@ export async function updateMR(
   )
 }
 
-/** Re-export so callers don't need to know the gl-utils module split. */
-export { _resetProjectRefCache } from './gl-utils'
-export {
-  addIssueComment,
-  createIssue,
-  getIssue,
-  listAssignableUsers,
-  listIssues,
-  listLabels,
-  updateIssue
-} from './issues'
+export async function listLabels(
+  repoPath: string,
+  preference?: ForgeRemotePreference,
+  connectionId?: string | null,
+  localGitOptions: LocalGitExecOptions = {}
+): Promise<string[]> {
+  const knownHosts = await getGlabKnownHosts(connectionId)
+  const { source: projectRef } = await resolveProjectRemote(
+    repoPath,
+    preference,
+    knownHosts,
+    connectionId,
+    localGitOptions
+  )
+  if (!projectRef) {
+    return []
+  }
+  await acquire()
+  try {
+    const { stdout } = await glabExecFileAsync(
+      [
+        'api',
+        ...glabHostnameArgs(projectRef, connectionId),
+        '--paginate',
+        `projects/${encodedProject(projectRef.path)}/labels`,
+        '--jq',
+        '.[].name'
+      ],
+      glabRepoExecOptions(repoPath, connectionId, localGitOptions)
+    )
+    return stdout
+      .trim()
+      .split('\n')
+      .filter((label) => label.length > 0)
+  } catch {
+    return []
+  } finally {
+    release()
+  }
+}
 
-// Why: surface the upstream-aware project-ref helper so non-issue call
-// sites that need the resolved project (e.g. the paste-URL UI) don't
+export async function listAssignableUsers(
+  repoPath: string,
+  preference?: ForgeRemotePreference,
+  connectionId?: string | null,
+  localGitOptions: LocalGitExecOptions = {}
+): Promise<GitLabAssignableUser[]> {
+  const knownHosts = await getGlabKnownHosts(connectionId)
+  const { source: projectRef } = await resolveProjectRemote(
+    repoPath,
+    preference,
+    knownHosts,
+    connectionId,
+    localGitOptions
+  )
+  if (!projectRef) {
+    return []
+  }
+  await acquire()
+  try {
+    const { stdout } = await glabExecFileAsync(
+      [
+        'api',
+        ...glabHostnameArgs(projectRef, connectionId),
+        '--paginate',
+        `projects/${encodedProject(projectRef.path)}/members/all?per_page=100`,
+        '--jq',
+        '.[] | {id, username, name, avatar_url, state}'
+      ],
+      glabRepoExecOptions(repoPath, connectionId, localGitOptions)
+    )
+    const users: GitLabAssignableUser[] = []
+    for (const line of stdout.split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed) {
+        continue
+      }
+      try {
+        const user = JSON.parse(trimmed) as {
+          id?: number
+          username?: string
+          name?: string | null
+          avatar_url?: string | null
+          state?: string | null
+        }
+        if (user.username) {
+          users.push({
+            ...(typeof user.id === 'number' ? { id: user.id } : {}),
+            username: user.username,
+            name: user.name ?? null,
+            avatarUrl: user.avatar_url ?? '',
+            ...(user.state !== undefined ? { state: user.state } : {})
+          })
+        }
+      } catch {
+        // Skip malformed NDJSON lines defensively.
+      }
+    }
+    return users
+  } catch {
+    return []
+  } finally {
+    release()
+  }
+}
+
+export { _resetProjectRefCache } from './gl-utils'
+
+// Why: surface the remote-aware project-ref helper so callers that need the
+// resolved project (e.g. the paste-URL UI) don't
 // have to import from gl-utils directly.
 export { getProjectRefForRemote }

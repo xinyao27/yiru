@@ -15,7 +15,6 @@ import {
   Search,
   X,
   Pin,
-  List,
   SlidersHorizontal,
   Layers,
   ChevronDown,
@@ -1032,22 +1031,6 @@ export function HostScreen({
                   styles.embeddedToolbarIconButton,
                   connState !== 'connected' && styles.toolbarIconDisabled
                 ]}
-                onPress={() => navigateFromHostList(`/h/${hostId}/tasks`)}
-                disabled={connState !== 'connected'}
-                accessibilityRole="button"
-                accessibilityLabel="Tasks"
-              >
-                <List
-                  size={16}
-                  color={connState === 'connected' ? colors.textSecondary : colors.textMuted}
-                />
-              </Pressable>
-
-              <Pressable
-                style={[
-                  styles.embeddedToolbarIconButton,
-                  connState !== 'connected' && styles.toolbarIconDisabled
-                ]}
                 onPress={openNewWorktreeModal}
                 disabled={connState !== 'connected'}
                 accessibilityRole="button"
@@ -1121,17 +1104,6 @@ export function HostScreen({
               disabled={connState !== 'connected'}
             >
               <UserCircle
-                size={16}
-                color={connState === 'connected' ? colors.textSecondary : colors.textMuted}
-              />
-            </Pressable>
-
-            <Pressable
-              style={styles.searchToggle}
-              onPress={() => navigateFromHostList(`/h/${hostId}/tasks`)}
-              disabled={connState !== 'connected'}
-            >
-              <List
                 size={16}
                 color={connState === 'connected' ? colors.textSecondary : colors.textMuted}
               />

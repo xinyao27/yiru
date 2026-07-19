@@ -102,8 +102,7 @@ const MAX_WRITES_PER_DRAIN = 2
 // xterm confirms the previous batch parsed, and Chromium clamps chained
 // timers to ~4ms — so per-tick volume (8 x 16KB = 128KB ≈ 1.3ms of parse)
 // sets the sustained ceiling (~30MB/s) while staying far inside
-// DRAIN_TIME_BUDGET_MS. At 2 the ceiling was 8MB/s against a ~100MB/s
-// parser (see pane-terminal-output-scheduler-throughput.bench.test.ts).
+// DRAIN_TIME_BUDGET_MS. At 2 the ceiling was 8MB/s against a ~100MB/s parser.
 const HIGH_PRIORITY_MAX_WRITES_PER_DRAIN = 8
 const DRAIN_TIME_BUDGET_MS = 8
 const LARGE_BACKLOG_CHARS = 512 * 1024

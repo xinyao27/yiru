@@ -1,10 +1,9 @@
 import type { GitHubWorkItem, GitPushTarget } from '../../../shared/types'
-import type { TaskSourceContext } from '../../../shared/task-source-context'
-import { getTaskSourceCacheScope } from '../../../shared/task-source-context'
+import type { ProjectSourceContext } from '../../../shared/project-source-context'
+import { getProjectSourceCacheScope } from '../../../shared/project-source-context'
 import { getLinkedWorkItemWorkspaceName } from '../../../shared/workspace-name'
 import type { LinkedWorkItemSummary } from './new-workspace'
-import { parseGitHubIssueOrPRLink } from './github-links'
-import { resolveGitHubWorkItemIdentity } from '@/lib/github-work-item-identity'
+import { parseGitHubPullRequestLink } from './github-links'
 
 export type SmartGitHubSubmitIntent =
   | {
@@ -12,7 +11,7 @@ export type SmartGitHubSubmitIntent =
       owner: string
       repo: string
       number: number
-      type: 'issue' | 'pr'
+      type: 'pr'
     }
   | {
       kind: 'hash-number'
@@ -23,7 +22,6 @@ export type SmartGitHubSubmitResolution = {
   workspaceName: string
   displayName: string
   linkedWorkItem: LinkedWorkItemSummary
-  linkedIssueNumber: number | null
   linkedPR: number | null
   baseBranch?: string
   compareBaseRef?: string
@@ -34,22 +32,22 @@ export type SmartGitHubSubmitResolution = {
 export type SmartGitHubSubmitLookup = {
   repoId: string
   repoPath: string
-  sourceContext?: TaskSourceContext | null
+  sourceContext?: ProjectSourceContext | null
   intent: SmartGitHubSubmitIntent
   workItem: (args: {
     repoPath: string
     repoId: string
-    sourceContext?: TaskSourceContext | null
+    sourceContext?: ProjectSourceContext | null
     number: number
   }) => Promise<GitHubWorkItem | null>
   workItemByOwnerRepo: (args: {
     repoPath: string
     repoId: string
-    sourceContext?: TaskSourceContext | null
+    sourceContext?: ProjectSourceContext | null
     owner: string
     repo: string
     number: number
-    type: 'issue' | 'pr'
+    type: 'pr'
   }) => Promise<GitHubWorkItem | null>
 }
 
@@ -86,7 +84,7 @@ export function getSmartGitHubSubmitIntent(input: string): SmartGitHubSubmitInte
     return null
   }
 
-  const link = parseGitHubIssueOrPRLink(trimmed) ?? parseGitHubIssueOrPRLinkFromText(trimmed)
+  const link = parseGitHubPullRequestLink(trimmed) ?? parseGitHubPullRequestLinkFromText(trimmed)
   if (link) {
     return {
       kind: 'link',
@@ -107,12 +105,12 @@ export function getSmartGitHubSubmitIntent(input: string): SmartGitHubSubmitInte
   return null
 }
 
-function parseGitHubIssueOrPRLinkFromText(
+function parseGitHubPullRequestLinkFromText(
   input: string
-): ReturnType<typeof parseGitHubIssueOrPRLink> {
+): ReturnType<typeof parseGitHubPullRequestLink> {
   const match = GITHUB_ITEM_URL_RE.exec(input)
   return match
-    ? parseGitHubIssueOrPRLink(match[0].replace(TRAILING_GITHUB_ITEM_URL_PUNCTUATION_RE, ''))
+    ? parseGitHubPullRequestLink(match[0].replace(TRAILING_GITHUB_ITEM_URL_PUNCTUATION_RE, ''))
     : null
 }
 
@@ -124,10 +122,10 @@ function getSmartGitHubSubmitLookupCacheKey({
 }: {
   repoId: string
   repoPath: string
-  sourceContext?: TaskSourceContext | null
+  sourceContext?: ProjectSourceContext | null
   intent: SmartGitHubSubmitIntent
 }): string {
-  const sourceScope = sourceContext ? getTaskSourceCacheScope(sourceContext) : 'default'
+  const sourceScope = sourceContext ? getProjectSourceCacheScope(sourceContext) : 'default'
   const repoScope = `${sourceScope}:${repoId}:${repoPath}`
   if (intent.kind === 'hash-number') {
     return `${repoScope}:hash:${intent.number}`
@@ -197,14 +195,12 @@ export function getSmartGitHubSubmitLookupCacheSizeForTests(): number {
 export function getSmartGitHubSubmitResolution(
   item: Pick<GitHubWorkItem, 'number' | 'title' | 'type' | 'url'>
 ): SmartGitHubSubmitResolution {
-  const identity = resolveGitHubWorkItemIdentity(item)
-  const normalizedItem = { ...item, type: identity.type, number: identity.number }
-  const fallbackName = `${identity.type}-${identity.number}`
-  const titleName = getLinkedWorkItemWorkspaceName(normalizedItem)
+  const fallbackName = `pr-${item.number}`
+  const titleName = getLinkedWorkItemWorkspaceName(item)
   const workspaceName = titleName?.seedName || fallbackName
   const linkedWorkItem: LinkedWorkItemSummary = {
-    type: identity.type,
-    number: identity.number,
+    type: 'pr',
+    number: item.number,
     title: item.title,
     url: item.url
   }
@@ -213,7 +209,6 @@ export function getSmartGitHubSubmitResolution(
     workspaceName,
     displayName: titleName?.displayName ?? fallbackName,
     linkedWorkItem,
-    linkedIssueNumber: identity.type === 'issue' ? identity.number : null,
-    linkedPR: identity.type === 'pr' ? identity.number : null
+    linkedPR: item.number
   }
 }

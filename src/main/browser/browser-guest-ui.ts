@@ -475,10 +475,6 @@ export function setupGuestShortcutForwarding(args: {
       renderer.send('ui:toggleQuickCommandsMenu')
     } else if (action?.type === 'openNewWorkspace') {
       renderer.send('ui:openNewWorkspace')
-    } else if (action?.type === 'openWorkspaceBoard') {
-      renderer.send('ui:openWorkspaceBoard')
-    } else if (action?.type === 'openTasks') {
-      renderer.send('ui:openTasks')
     } else if (action?.type === 'openSettings') {
       renderer.send('ui:openSettings')
     } else if (action?.type === 'forceReload') {

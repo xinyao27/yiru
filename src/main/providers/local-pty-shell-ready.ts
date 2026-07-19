@@ -4,7 +4,7 @@
 /**
  * Shell-ready startup command support for local PTYs.
  *
- * Why: when Yiru needs to inject a startup command (e.g. issue command runner),
+ * Why: when Yiru needs to inject a startup command (for example, repository setup),
  * it must wait until the shell has fully initialized before writing. This module
  * provides shell wrapper rcfiles that emit an OSC 777 marker after startup,
  * and a data scanner that detects that marker so the command can be written at
