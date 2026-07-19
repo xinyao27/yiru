@@ -11,8 +11,9 @@ const buttonGroupVariants = cva(
   {
     variants: {
       orientation: {
+        // Why: disabled tooltip triggers wrap buttons in spans; nested rules preserve grouped seams.
         horizontal:
-          '[&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0 [&>*:not(:last-child)]:rounded-r-none',
+          '[&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0 [&>*:not(:last-child)]:rounded-r-none [&>[data-slot=tooltip-trigger]:not(:first-child)>button]:rounded-l-none [&>[data-slot=tooltip-trigger]:not(:first-child)>button]:border-l-0 [&>[data-slot=tooltip-trigger]:not(:last-child)>button]:rounded-r-none',
         vertical:
           'flex-col [&>*:not(:first-child)]:rounded-t-none [&>*:not(:first-child)]:border-t-0 [&>*:not(:last-child)]:rounded-b-none'
       }

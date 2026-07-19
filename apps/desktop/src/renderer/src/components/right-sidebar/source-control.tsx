@@ -41,6 +41,7 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import { BaseRefPicker } from '@/components/settings/base-ref-picker'
 import { SpoolGitPane } from '@/components/spool/spool-git-pane'
 import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
 import {
   Dialog,
   DialogContent,
@@ -6885,14 +6886,11 @@ export function CommitArea({
             ))}
         </div>
       ) : null}
-      {/* Why: the current manual action + chevron sit together as a visual
-          split button so the edit → commit → push loop stays in a single
-          vertical band. The chevron exposes the full action surface without
-          forcing morphing labels to carry every possible intent. */}
+      {/* Why: the grouped split action keeps commit and remote operations in one vertical band. */}
       <div
         className={cn(showComposer ? 'mt-1 flex items-stretch gap-1' : 'flex items-stretch gap-1')}
       >
-        <div className="flex flex-1 items-stretch">
+        <ButtonGroup className="flex-1">
           {/* Why: match the hosted-review action buttons in Checks
               (size="xs", px-3 text-[11px]) so the sidebar has a consistent
               action-button shape across Source Control and Checks. */}
@@ -6906,7 +6904,7 @@ export function CommitArea({
                     size="xs"
                     disabled={primaryAction.disabled}
                     onClick={() => onPrimaryAction()}
-                    className="w-full rounded-r-none px-3 text-[11px]"
+                    className="w-full px-3 text-[11px]"
                     title={primaryAction.title}
                   >
                     {showSpinner ? (
@@ -6935,7 +6933,7 @@ export function CommitArea({
                           variant="outline"
                           size="xs"
                           className={cn(
-                            'rounded-l-none border-l border-border px-1.5 shrink-0',
+                            'px-1.5 shrink-0',
                             // Why: mirror the primary's disabled dimming so the split
                             // button reads as one unit when Commit is unavailable. The
                             // chevron itself stays clickable — its dropdown exposes
@@ -6963,7 +6961,7 @@ export function CommitArea({
             </Tooltip>
             {dropdownMenuContent}
           </DropdownMenu>
-        </div>
+        </ButtonGroup>
       </div>
       {commitError && commitFailureSummary ? (
         <SourceControlRecoveryNotice

@@ -207,11 +207,8 @@ export function FloatingTerminalToggleButton({
               type="button"
               variant="outline"
               size="icon"
-              // Why: a parked launcher needs contrast against the page. On light
-              // pages a soft drop shadow lifts it; on near-black dark surfaces a
-              // drop shadow vanishes, so use a distinctly lighter fill plus a
-              // bright hairline ring to define the edge.
-              className="text-foreground bg-card hover:bg-accent dark:bg-accent relative cursor-grab rounded-lg border-transparent shadow-[0_4px_12px_rgb(0_0_0_/_0.22),0_0_0_1px_color-mix(in_srgb,var(--foreground)_12%,transparent)] hover:-translate-y-0.5 active:translate-y-0 active:cursor-grabbing dark:shadow-[0_6px_16px_rgb(0_0_0_/_0.55),0_0_0_1px_rgb(255_255_255_/_0.22)] dark:hover:bg-[color-mix(in_srgb,var(--accent)_82%,white)]"
+              // Why: the global accent token is translucent; this launcher must stay opaque over content.
+              className="relative cursor-grab rounded-lg hover:-translate-y-0.5 hover:bg-[color-mix(in_srgb,var(--foreground)_14%,var(--background))] active:translate-y-0 active:cursor-grabbing dark:hover:bg-[color-mix(in_srgb,var(--foreground)_14%,var(--background))]"
               data-floating-terminal-toggle
               aria-label={
                 open
@@ -240,13 +237,12 @@ export function FloatingTerminalToggleButton({
             >
               <PanelsTopLeft className="size-4" />
               {showAttentionDot ? (
-                // Why: amber matches Yiru's "needs attention / unread" convention
-                // (the tab-unread bell); the ring matches the button fill so the
-                // dot reads on both light (bg-card) and dark (dark:bg-accent).
+                // Why: amber matches Yiru's "needs attention / unread" convention;
+                // the ring matches the standard outline button fill in both themes.
                 <span
                   aria-hidden
                   data-floating-terminal-attention
-                  className="ring-card dark:ring-accent pointer-events-none absolute top-1 right-1 size-2 rounded-full bg-amber-500 ring-2"
+                  className="ring-background pointer-events-none absolute top-1 right-1 size-2 rounded-full bg-amber-500 ring-2"
                 />
               ) : null}
             </Button>
