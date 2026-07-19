@@ -14,6 +14,10 @@ const {
 
 const isMacRelease = process.env.YIRU_MAC_RELEASE === '1'
 const isLinuxArm64Release = process.env.YIRU_LINUX_ARM64_RELEASE === '1'
+const desktopRoot = resolve(__dirname, '..')
+const electronUpdaterVersion = require(
+  join(desktopRoot, 'node_modules', 'electron-updater', 'package.json')
+).version
 const featureWallResources = {
   from: 'resources/onboarding/feature-wall',
   to: 'onboarding/feature-wall'
@@ -59,6 +63,13 @@ const winSpeechNativeResource = {
 module.exports = {
   appId: 'com.xinyao27.yiru',
   productName: 'Yiru',
+  // Why: electron-builder validates this dependency as semver before packing,
+  // but does not understand pnpm's catalog: protocol used by source manifests.
+  extraMetadata: {
+    dependencies: {
+      'electron-updater': electronUpdaterVersion
+    }
+  },
   directories: {
     buildResources: 'resources/build'
   },

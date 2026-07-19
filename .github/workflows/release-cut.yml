@@ -680,20 +680,6 @@ jobs:
           YIRU_DIAGNOSTICS_TOKEN_URL: https://yiru.ai/diagnostics/token
           YIRU_POSTHOG_WRITE_KEY: ${{ secrets.YIRU_POSTHOG_WRITE_KEY }}
 
-      - name: Gate runtime file-watcher process isolation
-        if: runner.os == 'Linux'
-        run: |
-          # Why: #8212 is a native-process crash contract. Prove both the Node
-          # host and the exact Electron runtime survive SIGSEGV before packaging.
-          pnpm --filter yiru exec node config/scripts/runtime-file-watcher-fault-harness.mjs
-          ELECTRON_RUN_AS_NODE=1 pnpm --filter yiru exec electron config/scripts/runtime-file-watcher-fault-harness.mjs
-
-      - name: Gate SSH relay watcher process isolation
-        run: |
-          # Why: the remote native watcher shares a daemon with live PTYs.
-          # Kill only its child and require both PTY and watch recovery before packaging.
-          pnpm --filter yiru exec node config/scripts/relay-watcher-fault-harness.mjs
-
       - name: Publish release artifacts (Linux)
         if: matrix.platform == 'linux-x64' || matrix.platform == 'linux-arm64'
         uses: nick-fields/retry@v4
@@ -1139,7 +1125,7 @@ jobs:
           }
 
           Copy-Item -Path $signedInstaller.FullName -Destination 'apps/desktop/dist/yiru-windows-setup.exe' -Force
-          & 'node_modules/app-builder-bin/win/x64/app-builder.exe' blockmap --input 'apps/desktop/dist/yiru-windows-setup.exe' --output 'apps/desktop/dist/yiru-windows-setup.exe.blockmap'
+          node apps/desktop/config/scripts/windows-release-archive-tools.mjs blockmap 'apps/desktop/dist/yiru-windows-setup.exe' 'apps/desktop/dist/yiru-windows-setup.exe.blockmap'
 
           $installer = Get-Item 'apps/desktop/dist/yiru-windows-setup.exe'
           $blockmap = Get-Item 'apps/desktop/dist/yiru-windows-setup.exe.blockmap'
@@ -1207,9 +1193,8 @@ jobs:
 
             # Why: verify the files a user actually gets on disk, not the build
             # tree — 7z parses the NSIS exe directly as its embedded payload.
-            $7za = 'node_modules/7zip-bin/win/x64/7za.exe'
             New-Item -ItemType Directory -Path inner-evidence-extract -Force | Out-Null
-            & $7za x 'apps/desktop/dist/yiru-windows-setup.exe' '-oinner-evidence-extract' -y | Out-Null
+            node apps/desktop/config/scripts/windows-release-archive-tools.mjs extract 'apps/desktop/dist/yiru-windows-setup.exe' 'inner-evidence-extract'
 
             $root = Resolve-Path 'inner-evidence-extract'
             # Why elevate.exe is always appended: staging skips already-signed

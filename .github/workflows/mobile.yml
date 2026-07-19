@@ -9,6 +9,12 @@ on:
       - ready_for_review
     paths:
       - 'apps/mobile/**'
+      # Why: mobile consumes this local Expo module and the workspace catalog,
+      # so changes outside apps/mobile can still break its install or build.
+      - 'packages/expo-two-way-audio/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
 
 jobs:
   verify:

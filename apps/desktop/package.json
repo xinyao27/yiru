@@ -101,6 +101,8 @@
     "@sanity/diff-match-patch": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@tanstack/react-virtual": "catalog:",
+    "@tiptap/core": "catalog:",
+    "@tiptap/extension-code": "catalog:",
     "@tiptap/extension-code-block-lowlight": "catalog:",
     "@tiptap/extension-details": "catalog:",
     "@tiptap/extension-image": "catalog:",
@@ -131,6 +133,7 @@
     "@xterm/addon-web-links": "catalog:",
     "@xterm/addon-webgl": "catalog:desktop",
     "@xterm/xterm": "catalog:desktop",
+    "app-builder-lib": "catalog:",
     "class-variance-authority": "catalog:",
     "cmdk": "catalog:",
     "dompurify": "catalog:",
@@ -161,6 +164,7 @@
     "remark-gfm": "catalog:",
     "remark-math": "catalog:",
     "remark-parse": "catalog:",
+    "rolldown": "catalog:",
     "shadcn": "catalog:",
     "sonner": "catalog:",
     "tailwindcss": "catalog:",
@@ -182,10 +186,6 @@
     "sherpa-onnx-linux-x64": "catalog:",
     "sherpa-onnx-win-x64": "catalog:"
   },
-  "engines": {
-    "node": "24"
-  },
-  "packageManager": "pnpm@10.34.5+sha512.a4ee05f2f73658255bd6a89859c065a45c28a57daefae2c893a168ee2b73168c37b91e83e57ea67654ad03f03031746430e8bce38e362e042605fb8abc80192e",
   "reactDoctor": {
     "rules": {
       "react-doctor/js-combine-iterations": "off"

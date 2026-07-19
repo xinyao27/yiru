@@ -2,13 +2,14 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
-import * as esbuild from 'esbuild'
+import { rolldown } from 'rolldown'
 
 const require = createRequire(import.meta.url)
 const scriptDir = import.meta.dirname
 const mobileRoot = path.resolve(scriptDir, '..')
 const outputPath = path.join(mobileRoot, 'src', 'terminal', 'terminal-webview-engine.generated.ts')
 const target = 'chrome74'
+const virtualEntryId = path.join(mobileRoot, 'terminal-webview-engine-entry.js')
 
 const packages = ['@xterm/xterm', '@xterm/addon-unicode11', '@xterm/addon-webgl']
 
@@ -25,15 +26,13 @@ function htmlText(value, closingTag) {
 }
 
 async function buildEngineJs() {
-  const result = await esbuild.build({
-    stdin: {
-      contents: `
+  const entrySource = `
         import { Terminal } from '@xterm/xterm'
         import { Unicode11Addon } from '@xterm/addon-unicode11'
         import { WebglAddon } from '@xterm/addon-webgl'
 
         // Why: xterm reaches for these runtime APIs on the terminal-bringup path,
-        // and esbuild lowers syntax but not runtime APIs. Guarded shims let the
+        // and syntax lowering does not add runtime APIs. Guarded shims let the
         // chrome74-syntax bundle actually run on old WebViews (the #7030 goal)
         // instead of throwing at construction and only surfacing the error overlay.
 
@@ -63,21 +62,44 @@ async function buildEngineJs() {
         window.Terminal = Terminal
         window.Unicode11Addon = { Unicode11Addon }
         window.WebglAddon = { WebglAddon }
-      `,
-      resolveDir: mobileRoot,
-      sourcefile: 'terminal-webview-engine-entry.js'
-    },
-    bundle: true,
-    format: 'iife',
-    minify: true,
+      `
+
+  const bundle = await rolldown({
+    input: virtualEntryId,
+    cwd: mobileRoot,
     platform: 'browser',
-    target,
-    legalComments: 'none',
-    write: false,
-    logLevel: 'silent'
+    logLevel: 'silent',
+    transform: { target },
+    plugins: [
+      {
+        name: 'terminal-webview-engine-entry',
+        resolveId(source) {
+          return source === virtualEntryId ? virtualEntryId : null
+        },
+        load(id) {
+          // Why: keeping the entry virtual avoids a disposable source file while
+          // its absolute ID still gives package imports the mobile resolution base.
+          return id === virtualEntryId ? entrySource : null
+        }
+      }
+    ]
   })
 
-  return result.outputFiles[0].text
+  try {
+    const result = await bundle.generate({
+      format: 'iife',
+      minify: true,
+      codeSplitting: false,
+      comments: { legal: false }
+    })
+    const entryChunk = result.output.find((output) => output.type === 'chunk' && output.isEntry)
+    if (!entryChunk) {
+      throw new Error('Rolldown did not emit the terminal WebView entry chunk')
+    }
+    return entryChunk.code
+  } finally {
+    await bundle.close()
+  }
 }
 
 async function main() {

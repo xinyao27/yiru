@@ -12,7 +12,7 @@ import { join } from 'node:path'
  * marked external and expected to be installed on the remote or
  * gracefully degraded.
  */
-import { build } from 'esbuild'
+import { rolldown } from 'rolldown'
 
 const __dirname = import.meta.dirname
 // Why: the script lives under config/scripts, so go two levels up to reach the repo root.
@@ -31,41 +31,47 @@ const PLATFORMS = [
 
 const RELAY_VERSION = '0.1.0'
 
+async function bundleNodeEntry(input, output, external = []) {
+  const bundle = await rolldown({
+    input,
+    cwd: ROOT,
+    external,
+    platform: 'node',
+    transform: {
+      target: 'node18',
+      define: {
+        'process.env.NODE_ENV': '"production"'
+      }
+    }
+  })
+
+  try {
+    await bundle.write({
+      file: output,
+      format: 'cjs',
+      minify: true,
+      codeSplitting: false,
+      sourcemap: false,
+      comments: { legal: false }
+    })
+  } finally {
+    await bundle.close()
+  }
+}
+
 for (const platform of PLATFORMS) {
   const outDir = join(ROOT, 'out', 'relay', platform)
   mkdirSync(outDir, { recursive: true })
 
-  await build({
-    entryPoints: [RELAY_ENTRY],
-    bundle: true,
-    platform: 'node',
-    target: 'node18',
-    format: 'cjs',
-    outfile: join(outDir, 'relay.js'),
+  await bundleNodeEntry(RELAY_ENTRY, join(outDir, 'relay.js'), [
     // Native addons cannot be bundled — they must exist on the remote host.
     // The relay gracefully degrades when they are absent.
-    external: ['node-pty', '@parcel/watcher', 'electron'],
-    sourcemap: false,
-    minify: true,
-    define: {
-      'process.env.NODE_ENV': '"production"'
-    }
-  })
+    'node-pty',
+    '@parcel/watcher',
+    'electron'
+  ])
 
-  await build({
-    entryPoints: [WATCHER_ENTRY],
-    bundle: true,
-    platform: 'node',
-    target: 'node18',
-    format: 'cjs',
-    outfile: join(outDir, 'relay-watcher.js'),
-    external: ['@parcel/watcher'],
-    sourcemap: false,
-    minify: true,
-    define: {
-      'process.env.NODE_ENV': '"production"'
-    }
-  })
+  await bundleNodeEntry(WATCHER_ENTRY, join(outDir, 'relay-watcher.js'), ['@parcel/watcher'])
 
   // Why: include a content hash so the deploy check detects code changes
   // even when RELAY_VERSION hasn't been bumped. Hash both process artifacts
@@ -90,19 +96,7 @@ for (const platform of PLATFORMS) {
   const wslEntry = join(ROOT, 'src', 'relay', 'wsl-agent-hook-relay.ts')
   const outDir = join(ROOT, 'out', 'relay', 'wsl')
   mkdirSync(outDir, { recursive: true })
-  await build({
-    entryPoints: [wslEntry],
-    bundle: true,
-    platform: 'node',
-    target: 'node18',
-    format: 'cjs',
-    outfile: join(outDir, 'wsl-agent-hook-relay.js'),
-    sourcemap: false,
-    minify: true,
-    define: {
-      'process.env.NODE_ENV': '"production"'
-    }
-  })
+  await bundleNodeEntry(wslEntry, join(outDir, 'wsl-agent-hook-relay.js'))
   const content = readFileSync(join(outDir, 'wsl-agent-hook-relay.js'))
   const hash = createHash('sha256').update(content).digest('hex').slice(0, 12)
   writeFileSync(join(outDir, '.version'), `${RELAY_VERSION}+${hash}`)
