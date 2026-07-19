@@ -262,7 +262,7 @@ export function GitHistoryPanel({
               render={
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="icon-xs"
                   className={cn(
                     RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
@@ -292,7 +292,7 @@ export function GitHistoryPanel({
               render={
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="icon-xs"
                   className={cn(
                     RIGHT_SIDEBAR_BUTTON_SURFACE_CLASS_NAME,
