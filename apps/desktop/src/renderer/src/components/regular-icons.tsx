@@ -29,6 +29,7 @@ import {
   GitBranch as PhosphorGitBranch,
   MonitorArrowUp as PhosphorMonitorArrowUp,
   Plus as PhosphorPlus,
+  X as PhosphorX,
   type Icon,
   type IconProps
 } from '@phosphor-icons/react'
@@ -42,8 +43,8 @@ function createRegularIcon(IconComponent: Icon, displayName: string): Icon {
   return RegularIcon
 }
 
-// Why: duotone add and arrow affordances gain filled background shapes that
-// make compact controls look selected; these icon roles intentionally stay plain.
+// Why: duotone add, arrow, and close affordances gain filled background shapes
+// that make compact controls look selected; these icon roles intentionally stay plain.
 export const ArrowClockwise = createRegularIcon(PhosphorArrowClockwise, 'ArrowClockwise')
 export const ArrowCounterClockwise = createRegularIcon(
   PhosphorArrowCounterClockwise,
@@ -80,3 +81,4 @@ export const FolderPlus = createRegularIcon(PhosphorFolderPlus, 'FolderPlus')
 export const GitBranch = createRegularIcon(PhosphorGitBranch, 'GitBranch')
 export const MonitorArrowUp = createRegularIcon(PhosphorMonitorArrowUp, 'MonitorArrowUp')
 export const Plus = createRegularIcon(PhosphorPlus, 'Plus')
+export const X = createRegularIcon(PhosphorX, 'X')

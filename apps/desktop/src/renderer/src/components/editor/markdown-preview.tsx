@@ -1,4 +1,4 @@
-import { Check, Copy, Chat as MessageSquare, X } from '@phosphor-icons/react'
+import { Check, Copy, Chat as MessageSquare } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: MarkdownPreview owns rendering, link interception,
 search, and viewport state for the preview surface in one place so markdown
 behavior stays coherent across split panes and preview tabs. */
@@ -29,7 +29,8 @@ import {
   CaretDown as ChevronDown,
   CaretUp as ChevronUp,
   ArrowElbowDownLeft as CornerDownLeft,
-  Plus
+  Plus,
+  X
 } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

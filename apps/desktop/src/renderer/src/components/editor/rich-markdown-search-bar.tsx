@@ -1,8 +1,7 @@
 import {
   TextAa as CaseSensitive,
   Swap as Replace,
-  BracketsSquare as WholeWord,
-  X
+  BracketsSquare as WholeWord
 } from '@phosphor-icons/react'
 import React from 'react'
 
@@ -10,7 +9,8 @@ import {
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
   CaretUp as ChevronUp,
-  ArrowsClockwise as ReplaceAll
+  ArrowsClockwise as ReplaceAll,
+  X
 } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

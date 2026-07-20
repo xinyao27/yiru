@@ -5,10 +5,10 @@ import {
   PushPinSlash as PinOff,
   Pencil,
   TerminalWindow as SquareTerminal,
-  X,
   List as ListX
 } from '@phosphor-icons/react'
 
+import { X } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

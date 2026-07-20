@@ -1,10 +1,11 @@
-import { Warning as AlertTriangle, Star, X } from '@phosphor-icons/react'
+import { Warning as AlertTriangle, Star } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   ArrowSquareOut as ExternalLink,
   FolderPlus,
-  GitBranch as GitBranchPlus
+  GitBranch as GitBranchPlus,
+  X
 } from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { useShortcutKeyDetails, type ShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'

@@ -5,11 +5,10 @@ import {
   Sidebar as PanelRightClose,
   Pencil,
   PushPin as Pin,
-  PushPinSlash as PinOff,
-  X
+  PushPinSlash as PinOff
 } from '@phosphor-icons/react'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
+import { ArrowSquareOut as ExternalLink, X } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

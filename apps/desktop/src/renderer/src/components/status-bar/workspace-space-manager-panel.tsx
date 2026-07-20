@@ -13,8 +13,7 @@ import {
   Terminal,
   Trash as Trash2,
   MagnifyingGlassPlus as ZoomIn,
-  MagnifyingGlassMinus as ZoomOut,
-  X
+  MagnifyingGlassMinus as ZoomOut
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the analyzer's private treemap, selection,
    breakdown, and table pieces share one scan state and should evolve as one resource-manager surface. */
@@ -27,7 +26,8 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw
+  ArrowClockwise as RefreshCw,
+  X
 } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

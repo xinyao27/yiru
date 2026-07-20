@@ -12,8 +12,7 @@ import {
   PencilLine,
   PaperPlaneRight as Send,
   BracketsAngle as SquareCode,
-  Trash as Trash2,
-  X
+  Trash as Trash2
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines */
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: BrowserPane synchronizes Electron webviews, remote browser drivers, streams, downloads, and annotation overlays; those external lifecycles cannot be derived during render. */
@@ -36,7 +35,8 @@ import {
   ArrowElbowDownLeft as CornerDownLeft,
   ArrowSquareOut as ExternalLink,
   ChatCentered as MessageSquarePlus,
-  ArrowClockwise as RefreshCw
+  ArrowClockwise as RefreshCw,
+  X
 } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {

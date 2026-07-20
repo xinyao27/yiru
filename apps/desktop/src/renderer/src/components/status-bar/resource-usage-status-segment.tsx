@@ -3,8 +3,7 @@ import {
   Globe,
   Memory as MemoryStick,
   Terminal,
-  Trash as Trash2,
-  X
+  Trash as Trash2
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: consolidating memory + sessions into one
    surface deliberately co-locates the sparkline, worktree tree, session list,
@@ -18,7 +17,8 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import {
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
-  ArrowClockwise as RotateCw
+  ArrowClockwise as RotateCw,
+  X
 } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {

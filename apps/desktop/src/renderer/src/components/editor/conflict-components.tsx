@@ -2,15 +2,15 @@ import {
   CheckCircle as CircleCheck,
   GitMerge,
   SidebarSimple as PanelLeftOpen,
-  Warning as TriangleAlert,
-  X
+  Warning as TriangleAlert
 } from '@phosphor-icons/react'
 import React from 'react'
 
 import {
   CaretDown as ChevronDown,
   CaretUp as ChevronUp,
-  ArrowClockwise as RefreshCw
+  ArrowClockwise as RefreshCw,
+  X
 } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

@@ -1,7 +1,7 @@
-import { TreeStructure as ListTree, X } from '@phosphor-icons/react'
+import { TreeStructure as ListTree } from '@phosphor-icons/react'
 import React, { useEffect, useState } from 'react'
 
-import { CaretRight as ChevronRight } from '@/components/regular-icons'
+import { CaretRight as ChevronRight, X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { useSidebarResize } from '@/hooks/use-sidebar-resize'
 import { translate } from '@/i18n/i18n'

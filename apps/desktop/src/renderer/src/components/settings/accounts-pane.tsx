@@ -4,8 +4,7 @@ import {
   Lock,
   LockOpen,
   ShieldCheck,
-  Trash as Trash2,
-  X
+  Trash as Trash2
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: AccountsPane owns all per-provider account UI
    (Claude, Codex, Gemini, OpenCode Go, and future providers). Each provider's
@@ -19,7 +18,8 @@ import { LoadingIndicator } from '@/components/loading-indicator'
 import {
   ArrowSquareOut as ExternalLink,
   Plus,
-  ArrowClockwise as RefreshCw
+  ArrowClockwise as RefreshCw,
+  X
 } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

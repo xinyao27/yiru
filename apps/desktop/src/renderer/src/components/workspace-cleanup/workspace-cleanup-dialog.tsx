@@ -2,8 +2,7 @@ import {
   Warning as AlertTriangle,
   MagnifyingGlass as Search,
   SlidersHorizontal,
-  Trash as Trash2,
-  X
+  Trash as Trash2
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the cleanup dialog keeps scan status,
    filters, row actions, localized review copy, and force-aware confirmation
@@ -13,7 +12,7 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowCounterClockwise as RefreshCcw } from '@/components/regular-icons'
+import { ArrowCounterClockwise as RefreshCcw, X } from '@/components/regular-icons'
 import RepoMultiCombobox from '@/components/repo/repo-multi-combobox'
 import { Button } from '@/components/ui/button'
 import {

@@ -33,9 +33,9 @@
 // off), the notice never returns, because the cohort condition
 // (`optedIn === null`) clears in all three resolving paths.
 
-import { X } from '@phosphor-icons/react'
 import { useState } from 'react'
 
+import { X } from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 

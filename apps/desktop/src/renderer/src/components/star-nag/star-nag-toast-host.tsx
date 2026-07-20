@@ -1,9 +1,9 @@
-import { Check, Star, X } from '@phosphor-icons/react'
+import { Check, Star } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
+import { ArrowSquareOut as ExternalLink, X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

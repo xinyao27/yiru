@@ -1,7 +1,8 @@
-import { Warning as AlertTriangle, X } from '@phosphor-icons/react'
+import { Warning as AlertTriangle } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import {

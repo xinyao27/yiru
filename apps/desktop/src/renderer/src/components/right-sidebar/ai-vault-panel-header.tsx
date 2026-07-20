@@ -1,7 +1,7 @@
-import { MagnifyingGlass as Search, X } from '@phosphor-icons/react'
+import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
+import { ArrowClockwise as RefreshCw, X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

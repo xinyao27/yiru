@@ -1,7 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable'
 import {
   Globe,
-  X,
   Copy,
   PushPin as Pin,
   PushPinSlash as PinOff,
@@ -9,7 +8,7 @@ import {
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
+import { ArrowSquareOut as ExternalLink, X } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

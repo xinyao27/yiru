@@ -2069,9 +2069,10 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
             <Tooltip>
               <TooltipTrigger
                 render={
+                  // Why: this compact status-bar control sits flush with app chrome, so it stays flat.
                   <button
                     type="button"
-                    className="border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground relative inline-flex size-5 cursor-pointer items-center justify-center rounded border shadow-xs transition-colors"
+                    className="border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground relative inline-flex size-5 cursor-pointer items-center justify-center rounded border transition-colors"
                     aria-label={
                       showFloatingWorkspaceAttentionDot
                         ? `${floatingTerminalActionLabel}, new activity`

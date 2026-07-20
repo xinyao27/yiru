@@ -15,8 +15,7 @@ import {
   DotsThree as MoreHorizontal,
   Pencil,
   SlidersHorizontal,
-  Trash,
-  X
+  Trash
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: legacy checks-panel sub-components for checks, conflicts,
 and threaded PR comments still share tightly coupled selection and composer state. */
@@ -27,7 +26,8 @@ import {
   Plus,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
-  ArrowSquareOut as ExternalLink
+  ArrowSquareOut as ExternalLink,
+  X
 } from '@/components/regular-icons'
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import {
