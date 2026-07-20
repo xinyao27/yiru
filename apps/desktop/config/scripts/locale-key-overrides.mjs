@@ -368,6 +368,9 @@ const BASE_LOCALE_KEY_OVERRIDES = {
     ja: 'スマートフォンモードに切り替え'
   },
   'auto.components.right.sidebar.PortsPanel.c9d106547a': { ja: '転送' },
+  // Distinguish clipboard copying from creating a second file in the same directory.
+  'auto.components.right.sidebar.FileExplorerRow.98a79948b3': { zh: '复制到剪贴板' },
+  'auto.components.right.sidebar.FileExplorerRow.0fec99bfd7': { zh: '创建副本' },
   // Worktree badge: stand-alone 主要な leaves the adnominal な dangling — align with the Tooltip's プライマリ.
   'auto.components.sidebar.WorktreeCard.7d517f82e2': { ja: 'プライマリ' },
   'auto.components.WorktreeJumpPalette.739bda980c': { ja: 'プライマリ' }
