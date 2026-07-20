@@ -1,6 +1,7 @@
-import { Check, ArrowSquareOut as ExternalLink, Info } from '@phosphor-icons/react'
+import { Check, Info } from '@phosphor-icons/react'
 import { useLayoutEffect, useRef, useState } from 'react'
 
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

@@ -1,6 +1,5 @@
 import {
   Warning as AlertTriangle,
-  ArrowCounterClockwise as RefreshCcw,
   MagnifyingGlass as Search,
   SlidersHorizontal,
   Trash as Trash2,
@@ -14,6 +13,7 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowCounterClockwise as RefreshCcw } from '@/components/regular-icons'
 import RepoMultiCombobox from '@/components/repo/repo-multi-combobox'
 import { Button } from '@/components/ui/button'
 import {

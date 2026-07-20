@@ -1,12 +1,11 @@
-import {
-  CalendarDots as CalendarClock,
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw,
-  Sparkle as Sparkles
-} from '@phosphor-icons/react'
+import { CalendarDots as CalendarClock, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw
+} from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { useAppStore } from '../../store'

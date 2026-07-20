@@ -1,8 +1,9 @@
-import { Copy, ArrowClockwise as RefreshCw, Terminal } from '@phosphor-icons/react'
+import { Copy, Terminal } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { notifyInstalledAgentSkillsChanged } from '@/hooks/use-installed-agent-skills'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'

@@ -1,8 +1,9 @@
-import { FilePlus as FilePlus2, FolderPlus, Trash as Trash2 } from '@phosphor-icons/react'
+import { Trash as Trash2 } from '@phosphor-icons/react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import type React from 'react'
 import { useRef } from 'react'
 
+import { FilePlus as FilePlus2, FolderPlus } from '@/components/regular-icons'
 import { isDotfileRelativePath } from '@/components/right-sidebar/file-explorer-entries'
 import { FileExplorerToolbar } from '@/components/right-sidebar/file-explorer-toolbar'
 import { FileExplorerTreeRowButton } from '@/components/right-sidebar/file-explorer-tree-row-button'

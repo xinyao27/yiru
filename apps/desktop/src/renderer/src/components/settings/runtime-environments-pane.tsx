@@ -3,9 +3,6 @@
    the state transitions stay auditable. */
 import {
   Warning as AlertTriangle,
-  CaretDown as ChevronDown,
-  Plus,
-  ArrowClockwise as RefreshCw,
   HardDrives as Server,
   HardDrive as ServerOff,
   ShareNetwork as Share2,
@@ -15,6 +12,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  CaretDown as ChevronDown,
+  Plus,
+  ArrowClockwise as RefreshCw
+} from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

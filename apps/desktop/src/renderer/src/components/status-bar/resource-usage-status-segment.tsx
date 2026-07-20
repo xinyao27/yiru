@@ -1,10 +1,7 @@
 import {
   Warning as AlertTriangle,
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
   Globe,
   Memory as MemoryStick,
-  ArrowClockwise as RotateCw,
   Terminal,
   Trash as Trash2,
   X
@@ -18,6 +15,11 @@ import {
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  ArrowClockwise as RotateCw
+} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

@@ -1,5 +1,4 @@
 import {
-  CaretRight as ChevronRight,
   TextHOne as Heading1,
   TextHTwo as Heading2,
   TextHThree as Heading3,
@@ -17,6 +16,7 @@ import {
 import type { Editor } from '@tiptap/react'
 import React from 'react'
 
+import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

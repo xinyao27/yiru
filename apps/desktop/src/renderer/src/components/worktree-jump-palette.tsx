@@ -2,7 +2,6 @@ import {
   FileText,
   Folders as FolderTree,
   Globe,
-  Plus,
   HardDrives as Server,
   HardDrive as ServerOff,
   DeviceMobile as Smartphone,
@@ -44,6 +43,7 @@ import {
 } from '@/components/cmd-j/quick-actions'
 import { buildWorktreeChecksReviewIndex } from '@/components/cmd-j/worktree-checks-review-index'
 import { selectWorktreePaletteCacheInputs } from '@/components/cmd-j/worktree-palette-cache-inputs'
+import { Plus } from '@/components/regular-icons'
 import { RepoBadgeMark } from '@/components/repo/repo-badge-label'
 import { runWorktreeDelete } from '@/components/sidebar/delete-worktree-flow'
 import { buildImportedWorktreesCardCandidates } from '@/components/sidebar/imported-worktrees-card-candidates'

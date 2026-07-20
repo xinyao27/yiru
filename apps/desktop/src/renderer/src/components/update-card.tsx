@@ -1,17 +1,11 @@
-import {
-  WarningCircle as AlertCircle,
-  Check,
-  Minus,
-  Network,
-  ArrowClockwise as RotateCw,
-  X
-} from '@phosphor-icons/react'
+import { WarningCircle as AlertCircle, Check, Minus, Network, X } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the update card owns the full updater lifecycle in one
    renderer surface. Keeping the state machine and its presentation variants together avoids
    scattering tightly coupled update behavior across multiple files. */
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowClockwise as RotateCw } from '@/components/regular-icons'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

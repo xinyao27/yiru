@@ -1,6 +1,7 @@
-import { FolderOpen, ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
+import { FolderOpen } from '@phosphor-icons/react'
 import React, { useEffect, useId, useRef, useState } from 'react'
 
+import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { isImeCompositionKeyDown } from '@/lib/ime-composition-keyboard-event'
 

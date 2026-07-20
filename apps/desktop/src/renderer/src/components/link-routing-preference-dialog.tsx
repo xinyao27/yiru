@@ -1,6 +1,7 @@
-import { ArrowSquareOut as ExternalLink, Gear as Settings } from '@phosphor-icons/react'
+import { Gear as Settings } from '@phosphor-icons/react'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

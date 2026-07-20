@@ -1,6 +1,7 @@
-import { Check, CaretUpDown as ChevronsUpDown, HardDrives as Server } from '@phosphor-icons/react'
+import { Check, HardDrives as Server } from '@phosphor-icons/react'
 import React from 'react'
 
+import { CaretUpDown as ChevronsUpDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'

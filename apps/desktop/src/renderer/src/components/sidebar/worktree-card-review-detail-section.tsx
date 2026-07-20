@@ -1,12 +1,10 @@
-import {
-  Copy,
-  DotsThree as Ellipsis,
-  ArrowSquareOut as ExternalLink,
-  MonitorArrowUp as MonitorUp,
-  LinkBreak as Unlink
-} from '@phosphor-icons/react'
+import { Copy, DotsThree as Ellipsis, LinkBreak as Unlink } from '@phosphor-icons/react'
 import React from 'react'
 
+import {
+  ArrowSquareOut as ExternalLink,
+  MonitorArrowUp as MonitorUp
+} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

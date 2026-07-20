@@ -4,7 +4,6 @@ import {
   Pencil,
   Plug,
   PlugCharging as PlugZap,
-  ArrowClockwise as RefreshCw,
   GearSix as Settings2,
   Trash as Trash2
 } from '@phosphor-icons/react'
@@ -12,6 +11,7 @@ import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

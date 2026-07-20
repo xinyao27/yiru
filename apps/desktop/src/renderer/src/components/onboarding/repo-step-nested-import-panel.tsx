@@ -1,7 +1,8 @@
-import { ArrowLeft, StopCircle as CircleStop, FolderOpen } from '@phosphor-icons/react'
+import { StopCircle as CircleStop, FolderOpen } from '@phosphor-icons/react'
 import type { Dispatch, SetStateAction } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowLeft } from '@/components/regular-icons'
 import { NestedRepoChecklist } from '@/components/repo/nested-repo-checklist'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

@@ -2,8 +2,6 @@ import {
   Clipboard,
   Copy,
   GitFork,
-  ArrowsOut as Maximize2,
-  ArrowsIn as Minimize2,
   Layout as PanelBottomClose,
   Layout as PanelsTopLeft,
   Sidebar as PanelRightClose,
@@ -21,6 +19,7 @@ import {
   type RefObject
 } from 'react'
 
+import { ArrowsOut as Maximize2, ArrowsIn as Minimize2 } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

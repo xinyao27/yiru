@@ -1,7 +1,8 @@
-import { FolderOpen, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { FolderOpen } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
@@ -46,13 +47,11 @@ type CliSectionProps = {
 }
 
 function getRevealLabel(platform: string): string {
-  if (platform === 'darwin') {
-    return 'Show in Finder'
-  }
-  if (platform === 'win32') {
-    return 'Show in Explorer'
-  }
-  return 'Show in File Manager'
+  return platform === 'darwin'
+    ? 'Show in Finder'
+    : platform === 'win32'
+      ? 'Show in Explorer'
+      : 'Show in File Manager'
 }
 
 function getInstallDescription(platform: string): string {

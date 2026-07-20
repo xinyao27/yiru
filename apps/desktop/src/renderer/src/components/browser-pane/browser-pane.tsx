@@ -1,21 +1,15 @@
 import type { Menu } from '@base-ui/react/menu'
 import {
-  ArrowLeft,
-  ArrowRight,
   CheckCircle as CircleCheck,
   Copy,
-  ArrowElbowDownLeft as CornerDownLeft,
   Crosshair,
   Download,
-  ArrowSquareOut as ExternalLink,
   FolderOpen,
   Globe,
   Image,
   ChatCircle as MessageCircleQuestionMark,
-  ChatCentered as MessageSquarePlus,
   XCircle as OctagonX,
   PencilLine,
-  ArrowClockwise as RefreshCw,
   PaperPlaneRight as Send,
   BracketsAngle as SquareCode,
   Trash as Trash2,
@@ -36,6 +30,14 @@ import { createPortal } from 'react-dom'
 
 import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowElbowDownLeft as CornerDownLeft,
+  ArrowSquareOut as ExternalLink,
+  ChatCentered as MessageSquarePlus,
+  ArrowClockwise as RefreshCw
+} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

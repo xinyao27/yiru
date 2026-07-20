@@ -1,12 +1,9 @@
 'use client'
 
 import { Select as SelectPrimitive } from '@base-ui/react/select'
-import {
-  CheckIcon,
-  CaretDown as ChevronDownIcon,
-  CaretUp as ChevronUpIcon
-} from '@phosphor-icons/react'
+import { CheckIcon } from '@phosphor-icons/react'
 
+import { CaretDown as ChevronDownIcon, CaretUp as ChevronUpIcon } from '@/components/regular-icons'
 import {
   floatingSurfaceClass,
   floatingSurfaceMotionClass

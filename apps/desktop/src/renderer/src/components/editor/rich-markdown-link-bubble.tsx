@@ -1,13 +1,9 @@
-import {
-  Copy,
-  ArrowSquareOut as ExternalLink,
-  Pencil,
-  LinkBreak as Unlink
-} from '@phosphor-icons/react'
+import { Copy, Pencil, LinkBreak as Unlink } from '@phosphor-icons/react'
 import type { Editor } from '@tiptap/react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'

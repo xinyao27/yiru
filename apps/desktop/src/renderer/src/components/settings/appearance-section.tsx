@@ -1,6 +1,6 @@
-import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import type React from 'react'
 
+import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import { cn } from '@/lib/class-names'
 
 type AppearanceSectionProps = {

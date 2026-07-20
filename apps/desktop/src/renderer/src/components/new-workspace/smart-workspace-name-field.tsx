@@ -1,9 +1,7 @@
 import type { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 import {
   TextAa as CaseSensitive,
-  ArrowSquareOut as ExternalLink,
   GitBranch,
-  GitBranch as GitBranchPlus,
   GitMerge,
   GitPullRequest,
   MagnifyingGlass as Search,
@@ -17,6 +15,10 @@ import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowSquareOut as ExternalLink,
+  GitBranch as GitBranchPlus
+} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
 import {

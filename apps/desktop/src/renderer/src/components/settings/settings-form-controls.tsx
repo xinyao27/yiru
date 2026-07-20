@@ -1,11 +1,12 @@
 import type { Popover as PopoverPrimitive } from '@base-ui/react/popover'
-import { Check, CaretUpDown as ChevronsUpDown, XCircle as CircleX } from '@phosphor-icons/react'
+import { Check, XCircle as CircleX } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: these small settings form primitives and controls
 co-locate shared layout and keyboard interaction logic, which keeps the settings
 panel wiring simple even though the file exceeds the default line limit. */
 import type React from 'react'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
+import { CaretUpDown as ChevronsUpDown } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { normalizeColor, type TerminalThemeOption } from '@/lib/terminal-theme'

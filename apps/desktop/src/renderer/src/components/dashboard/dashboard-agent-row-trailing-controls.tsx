@@ -1,6 +1,7 @@
-import { CaretDown as ChevronDown, PaperPlaneRight as Send, X } from '@phosphor-icons/react'
+import { PaperPlaneRight as Send, X } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 
+import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

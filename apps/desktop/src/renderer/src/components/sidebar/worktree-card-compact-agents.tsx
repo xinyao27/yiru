@@ -1,8 +1,8 @@
-import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import React, { useCallback, useRef } from 'react'
 
 import { AgentStateDot } from '@/components/agent-state-dot'
 import type { DashboardAgentRow as DashboardAgentRowData } from '@/components/dashboard/use-dashboard-data'
+import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { agentTypeToIconAgent } from '@/lib/agent-status'

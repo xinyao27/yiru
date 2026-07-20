@@ -1,11 +1,11 @@
-import {
-  ArrowSquareOut as ExternalLink,
-  QrCode,
-  ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
+import { QrCode } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw
+} from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pairing-connection-mode'

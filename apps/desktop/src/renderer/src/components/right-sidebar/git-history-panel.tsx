@@ -1,11 +1,8 @@
-import {
-  CaretDown as ChevronDown,
-  Question as CircleHelp,
-  ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
+import { Question as CircleHelp } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { CaretDown as ChevronDown, ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

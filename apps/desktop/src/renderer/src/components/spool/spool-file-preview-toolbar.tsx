@@ -1,13 +1,15 @@
 import {
-  ArrowClockwise as RefreshCw,
-  CaretLeft as ChevronLeft,
-  CaretRight as ChevronRight,
   DotsThree as MoreHorizontal,
   FloppyDisk as Save,
   Trash as Trash2
 } from '@phosphor-icons/react'
 import type React from 'react'
 
+import {
+  ArrowClockwise as RefreshCw,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight
+} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

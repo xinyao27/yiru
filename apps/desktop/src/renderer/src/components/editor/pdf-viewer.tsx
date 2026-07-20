@@ -1,6 +1,5 @@
 import {
   Image as ImageIcon,
-  ArrowCounterClockwise as RotateCcw,
   MagnifyingGlass as Search,
   MagnifyingGlassPlus as ZoomIn,
   MagnifyingGlassMinus as ZoomOut
@@ -18,6 +17,7 @@ import 'pdfjs-dist/web/pdf_viewer.css'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: PDF loading drives pdf.js document/viewer instances and decode errors through an external worker lifecycle. */
 import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { getShortcutPlatform } from '@/lib/shortcut-platform'

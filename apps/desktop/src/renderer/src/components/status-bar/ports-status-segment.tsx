@@ -1,7 +1,8 @@
-import { Plug, CaretDown as ChevronDown, CaretRight as ChevronRight } from '@phosphor-icons/react'
+import { Plug } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/regular-icons'
 import { SelectedTextCopyMenu } from '@/components/selected-text-copy-menu'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

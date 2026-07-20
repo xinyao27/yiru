@@ -1,6 +1,5 @@
 import {
   Copy,
-  ArrowSquareOut as ExternalLink,
   Eye,
   List as ListX,
   Sidebar as PanelRightClose,
@@ -10,6 +9,7 @@ import {
   X
 } from '@phosphor-icons/react'
 
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -1,6 +1,7 @@
-import { CaretLeft as ChevronLeft, GitDiff as GitCompareArrows } from '@phosphor-icons/react'
+import { GitDiff as GitCompareArrows } from '@phosphor-icons/react'
 import type React from 'react'
 
+import { CaretLeft as ChevronLeft } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

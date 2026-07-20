@@ -1,14 +1,12 @@
-import {
-  PersonArmsSpread as Accessibility,
-  Camera,
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw,
-  ShieldCheck
-} from '@phosphor-icons/react'
+import { PersonArmsSpread as Accessibility, Camera, ShieldCheck } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw
+} from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'

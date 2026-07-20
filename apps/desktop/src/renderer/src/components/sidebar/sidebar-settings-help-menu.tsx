@@ -1,12 +1,9 @@
 import {
   BookOpen,
   Question as CircleHelp,
-  ArrowSquareOut as ExternalLink,
   GithubLogo as Github,
   Keyboard,
   ChatText as MessageSquareText,
-  ArrowClockwise as RefreshCw,
-  ArrowClockwise as RotateCw,
   Student as School,
   Scroll as ScrollText,
   Gear as Settings
@@ -15,6 +12,11 @@ import React, { useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw,
+  ArrowClockwise as RotateCw
+} from '@/components/regular-icons'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Button } from '@/components/ui/button'
 import {

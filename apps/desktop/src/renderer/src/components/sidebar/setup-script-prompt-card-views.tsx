@@ -2,13 +2,13 @@ import {
   Check,
   Download,
   Package as PackageCheck,
-  ArrowClockwise as RefreshCw,
   Gear as Settings,
   X
 } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'

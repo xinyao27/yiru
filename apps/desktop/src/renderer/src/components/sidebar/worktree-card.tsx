@@ -1,18 +1,17 @@
 import {
   WarningCircle as AlertCircle,
   Warning as AlertTriangle,
-  CaretDown as ChevronDown,
   GitMerge,
   HardDrives as Server,
   HardDrive as ServerOff,
-  Trash as Trash2,
-  FlowArrow as Workflow
+  Trash as Trash2
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the worktree card centralizes sidebar card state (selection, drag, agent status, git info, context menu) in one cohesive component so sidebar rendering doesn't fan out across files. */
 import React, { useEffect, useCallback, useState } from 'react'
 
 import { DetachedHeadBadge } from '@/components/detached-head-badge'
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { CaretDown as ChevronDown, FlowArrow as Workflow } from '@/components/regular-icons'
 import { RepoIconGlyph } from '@/components/repo/repo-icon'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

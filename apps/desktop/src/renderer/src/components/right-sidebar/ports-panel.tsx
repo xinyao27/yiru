@@ -1,12 +1,8 @@
 import {
-  ArrowSquareOut as ExternalLink,
   Copy,
   Trash as Trash2,
-  Plus,
   Plugs as Unplug,
-  CaretRight as ChevronRight,
   Pencil,
-  ArrowClockwise as RefreshCw,
   HardDrives as Server,
   Cube as Box,
   Info
@@ -17,6 +13,12 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowSquareOut as ExternalLink,
+  Plus,
+  CaretRight as ChevronRight,
+  ArrowClockwise as RefreshCw
+} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   ContextMenu,

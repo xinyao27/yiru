@@ -1,11 +1,8 @@
-import {
-  DotsThree as Ellipsis,
-  ListDashes as ListCollapse,
-  ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
+import { DotsThree as Ellipsis, ListDashes as ListCollapse } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { WorktreeOpenInMenuItems } from '@/components/sidebar/worktree-open-in-menu'
 import { Button } from '@/components/ui/button'
 import {

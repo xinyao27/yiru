@@ -1,8 +1,9 @@
-import { ArrowSquareOut as ExternalLink, GithubLogo as Github } from '@phosphor-icons/react'
+import { GithubLogo as Github } from '@phosphor-icons/react'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: feedback viewer details are loaded through GitHub IPC after the dialog receives the issue URL. */
 import React, { useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

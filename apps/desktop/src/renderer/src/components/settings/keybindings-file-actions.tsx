@@ -1,14 +1,12 @@
-import {
-  CaretDown as ChevronDown,
-  Code as Code2,
-  ArrowSquareOut as ExternalLink,
-  FileText,
-  FolderOpen,
-  ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
+import { Code as Code2, FileText, FolderOpen } from '@phosphor-icons/react'
 import React from 'react'
 import { toast } from 'sonner'
 
+import {
+  CaretDown as ChevronDown,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw
+} from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'

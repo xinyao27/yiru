@@ -1,8 +1,6 @@
-import {
-  ArrowSquareOut as ExternalLink,
-  GitPullRequest as GitPullRequestArrow
-} from '@phosphor-icons/react'
+import { GitPullRequest as GitPullRequestArrow } from '@phosphor-icons/react'
 
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

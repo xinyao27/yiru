@@ -2,20 +2,22 @@ import {
   PersonArmsSpread as Accessibility,
   Bluetooth,
   Camera,
-  ArrowSquareOut as ExternalLink,
   HardDrive,
   Microphone as Mic,
-  MonitorArrowUp as MonitorUp,
   Network,
-  ArrowClockwise as RefreshCw,
   ShieldCheck,
-  Usb,
-  FlowArrow as Workflow
+  Usb
 } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowSquareOut as ExternalLink,
+  MonitorArrowUp as MonitorUp,
+  ArrowClockwise as RefreshCw,
+  FlowArrow as Workflow
+} from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

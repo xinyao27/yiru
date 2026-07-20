@@ -1,7 +1,6 @@
 import {
   CheckCircle as CheckCircle2,
   Info,
-  ArrowCounterClockwise as RotateCcw,
   Gear as Settings,
   Sparkle as Sparkles,
   Warning as TriangleAlert
@@ -10,6 +9,7 @@ import React from 'react'
 
 import AgentCombobox from '@/components/agent/agent-combobox'
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'

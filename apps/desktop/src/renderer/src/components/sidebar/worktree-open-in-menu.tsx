@@ -1,7 +1,8 @@
-import { ArrowSquareOut as ExternalLink, FolderOpen } from '@phosphor-icons/react'
+import { FolderOpen } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,

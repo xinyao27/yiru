@@ -1,6 +1,7 @@
-import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
+import { Check } from '@phosphor-icons/react'
 import React from 'react'
 
+import { CaretUpDown as ChevronsUpDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Command,

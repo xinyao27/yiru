@@ -10,9 +10,7 @@ import {
   Tag,
   Trash as Trash2,
   LinkBreak as Unlink,
-  FlowArrow as Workflow,
   FolderOpen as FolderInput,
-  FolderPlus,
   Folders as FolderTree,
   Globe as Globe2,
   LockKey as LockKeyhole
@@ -21,6 +19,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { FlowArrow as Workflow, FolderPlus } from '@/components/regular-icons'
 import { SpoolWorktreeVisibilityDialog } from '@/components/spool/spool-worktree-visibility-dialog'
 import {
   DropdownMenu,

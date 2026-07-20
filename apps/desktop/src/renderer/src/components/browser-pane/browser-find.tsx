@@ -1,6 +1,7 @@
-import { CaretUp as ChevronUp, CaretDown as ChevronDown, X } from '@phosphor-icons/react'
+import { X } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { CaretUp as ChevronUp, CaretDown as ChevronDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { getFindRequestQuery } from '@/lib/find-query-bounds'

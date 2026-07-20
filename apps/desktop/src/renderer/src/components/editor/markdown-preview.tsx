@@ -1,13 +1,4 @@
-import {
-  Check,
-  CaretDown as ChevronDown,
-  CaretUp as ChevronUp,
-  Copy,
-  ArrowElbowDownLeft as CornerDownLeft,
-  Chat as MessageSquare,
-  Plus,
-  X
-} from '@phosphor-icons/react'
+import { Check, Copy, Chat as MessageSquare, X } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: MarkdownPreview owns rendering, link interception,
 search, and viewport state for the preview surface in one place so markdown
 behavior stays coherent across split panes and preview tabs. */
@@ -34,6 +25,12 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import { toast } from 'sonner'
 
+import {
+  CaretDown as ChevronDown,
+  CaretUp as ChevronUp,
+  ArrowElbowDownLeft as CornerDownLeft,
+  Plus
+} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useMountedRef } from '@/hooks/use-mounted-ref'

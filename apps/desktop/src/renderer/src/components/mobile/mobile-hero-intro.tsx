@@ -1,5 +1,4 @@
-import { ArrowRight } from '@phosphor-icons/react'
-
+import { ArrowRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { AndroidLogo, IosBrandIcon } from './mobile-brand-icons'

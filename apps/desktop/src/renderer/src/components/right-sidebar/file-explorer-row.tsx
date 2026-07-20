@@ -1,13 +1,10 @@
 import {
   Copy,
   Download,
-  ArrowSquareOut as ExternalLink,
   Eye,
   File,
-  FilePlus,
   Files,
   Folder,
-  FolderPlus,
   Globe,
   ListDashes as ListCollapse,
   Pencil,
@@ -19,6 +16,7 @@ import {
 import React, { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
+import { ArrowSquareOut as ExternalLink, FilePlus, FolderPlus } from '@/components/regular-icons'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '@/components/tab-bar/sortable-tab'
 import {
   ContextMenu,

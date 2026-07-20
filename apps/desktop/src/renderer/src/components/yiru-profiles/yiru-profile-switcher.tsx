@@ -1,10 +1,8 @@
 import {
   Check,
-  CaretDown as ChevronDown,
   UserCircle as CircleUserRound,
   Cloud,
   Laptop,
-  Plus,
   GearSix as Settings2,
   Users
 } from '@phosphor-icons/react'
@@ -12,6 +10,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { CaretDown as ChevronDown, Plus } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

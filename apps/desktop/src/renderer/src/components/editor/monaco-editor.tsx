@@ -1,5 +1,4 @@
 import Editor, { type OnMount } from '@monaco-editor/react'
-import { Plus } from '@phosphor-icons/react'
 import type { editor } from 'monaco-editor'
 /* eslint-disable max-lines -- Why: MonacoEditor centralizes Monaco setup,
 source-mode markdown annotations, persistence-safe content sync, reveal
@@ -8,6 +7,7 @@ handling, and editor-local UI overlays so split-pane state remains coherent. */
 import React, { useRef, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
+import { Plus } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { isMarkdownComment } from '@/lib/diff-comment-compat'
 import { computeEditorFontSize } from '@/lib/editor-font-zoom'

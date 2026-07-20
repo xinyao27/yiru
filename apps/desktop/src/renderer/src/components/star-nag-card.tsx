@@ -1,6 +1,7 @@
-import { ArrowSquareOut as ExternalLink, Star, X } from '@phosphor-icons/react'
+import { Star, X } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

@@ -1,11 +1,8 @@
 import {
   Warning as AlertTriangle,
-  ArrowSquareOut as ExternalLink,
   Question as HelpCircle,
   Lock,
   LockOpen,
-  Plus,
-  ArrowClockwise as RefreshCw,
   ShieldCheck,
   Trash as Trash2,
   X
@@ -19,6 +16,11 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowSquareOut as ExternalLink,
+  Plus,
+  ArrowClockwise as RefreshCw
+} from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { markLiveCodexSessionsForRestart } from '@/lib/codex-session-restart'

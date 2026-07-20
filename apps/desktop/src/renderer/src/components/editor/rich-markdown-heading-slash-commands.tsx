@@ -1,5 +1,4 @@
 import {
-  CaretRight as ChevronRight,
   TextHOne as Heading1,
   TextHTwo as Heading2,
   TextHThree as Heading3,
@@ -7,6 +6,7 @@ import {
   TextHFive as Heading5
 } from '@phosphor-icons/react'
 
+import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { icon, insertToggle, type SlashCommand } from './rich-markdown-slash-command-primitives'

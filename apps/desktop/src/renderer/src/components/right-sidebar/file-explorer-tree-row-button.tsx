@@ -1,13 +1,8 @@
-import {
-  CaretRight as ChevronRight,
-  Folder,
-  FolderOpen,
-  Link,
-  Prohibit as CircleSlash
-} from '@phosphor-icons/react'
+import { Folder, FolderOpen, Link, Prohibit as CircleSlash } from '@phosphor-icons/react'
 import type React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'

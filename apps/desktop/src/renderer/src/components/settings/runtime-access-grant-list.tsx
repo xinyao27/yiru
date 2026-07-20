@@ -1,6 +1,7 @@
-import { ArrowClockwise as RefreshCw, Trash as Trash2 } from '@phosphor-icons/react'
+import { Trash as Trash2 } from '@phosphor-icons/react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type { RuntimeAccessGrant } from '../../../../shared/runtime-access-grants'

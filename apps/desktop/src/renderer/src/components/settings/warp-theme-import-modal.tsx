@@ -1,6 +1,7 @@
-import { FileArrowUp as FileUp, FolderOpen } from '@phosphor-icons/react'
+import { FolderOpen } from '@phosphor-icons/react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { FileArrowUp as FileUp } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

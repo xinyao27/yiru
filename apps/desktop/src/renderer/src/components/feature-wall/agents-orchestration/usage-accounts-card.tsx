@@ -1,9 +1,9 @@
-import { Plus } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import type { JSX, ReactNode } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Plus } from '@/components/regular-icons'
 import { ClaudeIcon, OpenAIIcon } from '@/components/status-bar/icons'
 import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/use-mounted-ref'

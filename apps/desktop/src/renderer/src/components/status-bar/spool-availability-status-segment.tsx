@@ -1,7 +1,8 @@
-import { ArrowClockwise as RefreshCw, WarningCircle } from '@phosphor-icons/react'
+import { WarningCircle } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import {
   projectSpoolAvailabilityDiagnostic,
   type SpoolAvailabilityDiagnostic

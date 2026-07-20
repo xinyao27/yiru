@@ -7,9 +7,6 @@ import {
   Copy,
   Check,
   Chat as MessageSquare,
-  Plus,
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
   Sidebar as PanelRight,
   PaperPlaneTilt as SendHorizontal,
   Sparkle as Sparkles,
@@ -21,12 +18,17 @@ import {
   Trash,
   X
 } from '@phosphor-icons/react'
-import { ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: legacy checks-panel sub-components for checks, conflicts,
 and threaded PR comments still share tightly coupled selection and composer state. */
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  Plus,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  ArrowSquareOut as ExternalLink
+} from '@/components/regular-icons'
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import {
   Accordion,
