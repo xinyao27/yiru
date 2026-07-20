@@ -237,7 +237,7 @@ Icons come from **`@phosphor-icons/react`**. Don't import a second icon library.
 - **Default size:** `size-4` (16px). `Button` auto-applies this to any `<svg>` it contains via `[&_svg:not([class*='size-'])]:size-4`, so most call sites don't need to set a size on the icon.
 - **`size-3` / `size-3.5`:** for metadata, captions, and dense list rows where 16px is too loud.
 - **`size-7`+:** for featured/empty-state hero icons only.
-- **Weight:** use Phosphor's default `regular` weight. Don't override per-icon.
+- **Weight:** the renderer-wide `IconContext.Provider` defaults to `duotone`. Don't override per-icon unless a state needs a distinct treatment.
 - **Color:** inherit from surrounding text — `text-muted-foreground` for secondary, `text-destructive` for destructive, etc. Don't apply a token to the SVG directly when the parent already carries the right color.
 - **Loader:** the canonical loading icon is `<LoadingIndicator className="size-4" />` from `components/loading-indicator.tsx`. It follows the user's Appearance setting, so don't import a one-off generic spinner. For 3s+ multi-step work, prefer a label that names the stage ("Cloning…" → "Installing…") over an unlabeled loader. See _UX rule 1_.
 

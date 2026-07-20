@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 
 import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/recoverable-render-error-boundary'
+import { PhosphorIconContextProvider } from '../components/phosphor-icon-context-provider'
 import { translate } from '../i18n/i18n'
 import { I18nProvider } from '../i18n/i18n-provider'
 import WebConnect from './web-connect'
@@ -87,7 +88,9 @@ function WebRootBoundary(): React.JSX.Element {
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <I18nProvider>
-    <WebRootBoundary />
-  </I18nProvider>
+  <PhosphorIconContextProvider>
+    <I18nProvider>
+      <WebRootBoundary />
+    </I18nProvider>
+  </PhosphorIconContextProvider>
 )
