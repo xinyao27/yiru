@@ -1,16 +1,9 @@
 import {
-  ArrowsDownUp as ArrowDownUp,
   Warning as AlertTriangle,
-  ArrowUp,
-  CaretDown as ChevronDown,
-  CloudArrowUp as CloudUpload,
   Minus,
-  Plus,
-  ArrowClockwise as RefreshCw,
   GearSix as Settings2,
   Sparkle as Sparkles,
   Square,
-  ArrowCounterClockwise as Undo2,
   Check,
   Copy,
   Folder,
@@ -38,6 +31,15 @@ import {
   requestEditorSaveQuiesce
 } from '@/components/editor/editor-autosave'
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowsDownUp as ArrowDownUp,
+  ArrowUp,
+  CaretDown as ChevronDown,
+  CloudArrowUp as CloudUpload,
+  Plus,
+  ArrowClockwise as RefreshCw,
+  ArrowCounterClockwise as Undo2
+} from '@/components/regular-icons'
 import { BaseRefPicker } from '@/components/settings/base-ref-picker'
 import { SpoolGitPane } from '@/components/spool/spool-git-pane'
 import { Button } from '@/components/ui/button'

@@ -1,7 +1,8 @@
 import { useDroppable } from '@dnd-kit/core'
-import { DotsThree as Ellipsis, X } from '@phosphor-icons/react'
+import { DotsThree as Ellipsis } from '@phosphor-icons/react'
 import { Suspense, useMemo } from 'react'
 
+import { X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

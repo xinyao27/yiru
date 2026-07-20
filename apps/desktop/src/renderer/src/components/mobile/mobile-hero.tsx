@@ -1,7 +1,8 @@
-import { ArrowLeft, ArrowRight, Copy, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { Copy } from '@phosphor-icons/react'
 import { useLayoutEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowLeft, ArrowRight, ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 
 import type { MobilePairingConnectionMode } from '../../../../shared/mobile-pairing-connection-mode'
 import { cn } from '../../lib/class-names'

@@ -1,6 +1,7 @@
-import { Copy, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
+import { Copy } from '@phosphor-icons/react'
 import React from 'react'
 
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

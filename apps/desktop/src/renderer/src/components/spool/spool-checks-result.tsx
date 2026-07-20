@@ -1,6 +1,7 @@
-import { ArrowSquareOut as ExternalLink, GitMerge, GitPullRequest } from '@phosphor-icons/react'
+import { GitMerge, GitPullRequest } from '@phosphor-icons/react'
 import type React from 'react'
 
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { CHECK_COLOR, CHECK_ICON } from '@/components/right-sidebar/check-status-presentation'
 import { ChecksList } from '@/components/right-sidebar/checks-panel-content'
 import { Button } from '@/components/ui/button'

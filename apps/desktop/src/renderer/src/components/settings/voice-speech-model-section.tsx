@@ -1,14 +1,9 @@
-import {
-  Cloud,
-  Download,
-  Trash as Trash2,
-  CaretDown as ChevronDown,
-  Check
-} from '@phosphor-icons/react'
+import { Cloud, Download, Trash as Trash2, Check } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

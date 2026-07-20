@@ -1,5 +1,6 @@
-import { ArrowLeft, Bell } from '@phosphor-icons/react'
+import { Bell } from '@phosphor-icons/react'
 
+import { ArrowLeft } from '@/components/regular-icons'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

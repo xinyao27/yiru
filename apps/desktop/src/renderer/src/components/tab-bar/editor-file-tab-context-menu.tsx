@@ -1,15 +1,14 @@
 import {
   Copy,
-  ArrowSquareOut as ExternalLink,
   Eye,
   List as ListX,
   Sidebar as PanelRightClose,
   Pencil,
   PushPin as Pin,
-  PushPinSlash as PinOff,
-  X
+  PushPinSlash as PinOff
 } from '@phosphor-icons/react'
 
+import { ArrowSquareOut as ExternalLink, X } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

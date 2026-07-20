@@ -1,14 +1,7 @@
-import {
-  Check,
-  Clipboard,
-  Eye,
-  FileText,
-  Trash as Trash2,
-  CloudArrowUp as UploadCloud,
-  X
-} from '@phosphor-icons/react'
+import { Check, Clipboard, Eye, FileText, Trash as Trash2 } from '@phosphor-icons/react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { CloudArrowUp as UploadCloud, X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type {

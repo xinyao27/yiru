@@ -1,11 +1,8 @@
-import {
-  ArrowSquareOut as ExternalLink,
-  GithubLogo as Github,
-  Terminal
-} from '@phosphor-icons/react'
+import { GithubLogo as Github, Terminal } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 
 import { IntegrationStatusPill } from '@/components/integration-status-pill'
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

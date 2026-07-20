@@ -1,6 +1,7 @@
-import { MagnifyingGlass as Search, X } from '@phosphor-icons/react'
+import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import React from 'react'
 
+import { X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { isClipboardTextByteLengthOverLimit } from '../../../../shared/clipboard-text'

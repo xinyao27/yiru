@@ -1,12 +1,8 @@
 import Editor, { type OnMount } from '@monaco-editor/react'
 import {
   WarningCircle as AlertCircle,
-  ArrowLineDown as ArrowDownToLine,
-  ArrowLineUp as ArrowUpToLine,
   BracketsCurly as Braces,
   FileCode as FileCode2,
-  ArrowDown as MoveDown,
-  ArrowUp as MoveUp,
   Play,
   FloppyDisk as Save,
   Trash as Trash2
@@ -32,6 +28,12 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowLineDown as ArrowDownToLine,
+  ArrowLineUp as ArrowUpToLine,
+  ArrowDown as MoveDown,
+  ArrowUp as MoveUp
+} from '@/components/regular-icons'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Button } from '@/components/ui/button'
 import {

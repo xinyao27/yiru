@@ -1,11 +1,6 @@
-import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  Columns as Columns2
-} from '@phosphor-icons/react'
+import { Columns as Columns2 } from '@phosphor-icons/react'
 
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from '@/components/regular-icons'
 import {
   DropdownMenuSeparator,
   DropdownMenuSub,

@@ -4,7 +4,6 @@ import {
   Database as DatabaseZap,
   FolderSimple as FolderUsage,
   Gauge,
-  ArrowClockwise as RefreshCw,
   SlidersHorizontal,
   Sparkle as Sparkles,
   Path as Waypoints
@@ -12,6 +11,7 @@ import {
 import { useEffect } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type { ClaudeUsageRange, ClaudeUsageScope } from '../../../../shared/claude-usage-types'

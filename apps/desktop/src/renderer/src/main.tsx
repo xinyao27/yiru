@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import App from './application-shell'
 import { RecoverableRenderErrorBoundary } from './components/error-boundaries/recoverable-render-error-boundary'
+import { PhosphorIconContextProvider } from './components/phosphor-icon-context-provider'
 import { translate } from './i18n/i18n'
 import { I18nProvider } from './i18n/i18n-provider'
 import {
@@ -56,9 +57,11 @@ function RendererRoot(): React.JSX.Element {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <I18nProvider>
-      <RendererRoot />
-    </I18nProvider>
+    <PhosphorIconContextProvider>
+      <I18nProvider>
+        <RendererRoot />
+      </I18nProvider>
+    </PhosphorIconContextProvider>
   </StrictMode>
 )
 recordRendererCrashBreadcrumb('renderer_bootstrap_rendered')

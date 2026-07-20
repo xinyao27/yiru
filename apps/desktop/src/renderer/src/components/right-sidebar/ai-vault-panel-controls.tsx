@@ -1,7 +1,6 @@
 import {
   Archive as ArchiveRestore,
   Calendar,
-  CaretRight as ChevronRight,
   Clock as Clock3,
   FolderOpen,
   Funnel as ListFilter,
@@ -11,6 +10,7 @@ import {
 import type React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

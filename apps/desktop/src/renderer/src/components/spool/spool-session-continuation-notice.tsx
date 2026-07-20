@@ -1,5 +1,4 @@
 import {
-  ArrowCounterClockwise as RotateCcw,
   LockKey as LockKeyhole,
   Play,
   TerminalWindow as SquareTerminal,
@@ -8,6 +7,7 @@ import {
 import type React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

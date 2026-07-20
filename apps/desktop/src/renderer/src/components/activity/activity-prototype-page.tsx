@@ -1,7 +1,6 @@
 import {
   Bell,
   BellRinging as BellDot,
-  ArrowSquareOut as ExternalLink,
   ChatText as MessageSquareText,
   DotsThreeVertical as MoreVertical,
   MagnifyingGlass as Search,
@@ -14,6 +13,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { useShallow } from 'zustand/react/shallow'
 
 import { AgentStateDot, agentStateLabel } from '@/components/agent-state-dot'
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { RepoBadgeMark } from '@/components/repo/repo-badge-label'
 import { Button } from '@/components/ui/button'
 import {

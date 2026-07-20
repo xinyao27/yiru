@@ -1,12 +1,7 @@
 import {
   Warning as AlertTriangle,
   Check,
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
-  CaretUpDown as ChevronsUpDown,
   Cloud,
-  ArrowElbowDownLeft as CornerDownLeft,
-  FolderPlus,
   PlugCharging as PlugZap,
   GearSix as Settings2,
   HardDrives as Server
@@ -26,6 +21,13 @@ import SmartWorkspaceNameField, {
   type SmartWorkspaceNameSelection
 } from '@/components/new-workspace/smart-workspace-name-field'
 import type { SmartNameMode } from '@/components/new-workspace/smart-workspace-source-results'
+import {
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  CaretUpDown as ChevronsUpDown,
+  ArrowElbowDownLeft as CornerDownLeft,
+  FolderPlus
+} from '@/components/regular-icons'
 import type RepoCombobox from '@/components/repo/repo-combobox'
 import { SettingsSwitch } from '@/components/settings/settings-form-controls'
 import SparseCheckoutPresetSelect from '@/components/sparse/sparse-checkout-preset-select'

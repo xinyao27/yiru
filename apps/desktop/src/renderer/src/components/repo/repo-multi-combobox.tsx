@@ -1,6 +1,7 @@
-import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
+import { Check } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 
+import { CaretUpDown as ChevronsUpDown } from '@/components/regular-icons'
 import RepoBadgeLabel from '@/components/repo/repo-badge-label'
 import { Button } from '@/components/ui/button'
 import {

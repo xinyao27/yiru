@@ -1,13 +1,9 @@
 import {
   Warning as AlertTriangle,
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
   Globe,
   Memory as MemoryStick,
-  ArrowClockwise as RotateCw,
   Terminal,
-  Trash as Trash2,
-  X
+  Trash as Trash2
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: consolidating memory + sessions into one
    surface deliberately co-locates the sparkline, worktree tree, session list,
@@ -18,6 +14,12 @@ import {
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  ArrowClockwise as RotateCw,
+  X
+} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

@@ -1,8 +1,11 @@
-import { ArrowSquareOut as ExternalLink, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import React from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import {
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw
+} from '@/components/regular-icons'
 import { SourceControlFixSplitButton } from '@/components/right-sidebar/source-control-fix-split-button'
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import { Button } from '@/components/ui/button'

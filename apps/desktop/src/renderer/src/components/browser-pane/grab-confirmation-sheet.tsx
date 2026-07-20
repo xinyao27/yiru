@@ -1,5 +1,6 @@
-import { Copy, Image, ChatCentered as MessageSquarePlus, X } from '@phosphor-icons/react'
+import { Copy, Image } from '@phosphor-icons/react'
 
+import { ChatCentered as MessageSquarePlus, X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { translate } from '@/i18n/i18n'

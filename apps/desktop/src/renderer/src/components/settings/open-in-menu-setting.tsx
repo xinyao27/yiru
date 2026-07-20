@@ -1,7 +1,8 @@
-import { Check, CaretDown as ChevronDown, Pencil, Trash as Trash2 } from '@phosphor-icons/react'
+import { Check, Pencil, Trash as Trash2 } from '@phosphor-icons/react'
 import type React from 'react'
 import { useState } from 'react'
 
+import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import {

@@ -1,6 +1,7 @@
-import { Folder, LinkSimple as Link2, Plus, X } from '@phosphor-icons/react'
+import { Folder, LinkSimple as Link2 } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 
+import { Plus, X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getFileTypeIcon } from '@/lib/file-type-icons'

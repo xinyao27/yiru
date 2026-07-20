@@ -1,11 +1,7 @@
-import {
-  Check,
-  Globe as Globe2,
-  Monitor as MonitorCog,
-  FlowArrow as Workflow
-} from '@phosphor-icons/react'
+import { Check, Globe as Globe2, Monitor as MonitorCog } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 
+import { FlowArrow as Workflow } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

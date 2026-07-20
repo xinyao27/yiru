@@ -1,6 +1,5 @@
 import {
   FileText,
-  FolderPlus,
   Globe,
   Play,
   TerminalWindow as SquareTerminal,
@@ -8,6 +7,7 @@ import {
 } from '@phosphor-icons/react'
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 
+import { FolderPlus } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 

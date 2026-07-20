@@ -2,7 +2,6 @@ import {
   StopCircle as CircleStop,
   Devices as MonitorSmartphone,
   Pencil,
-  ArrowCounterClockwise as RotateCcw,
   HardDrives as Server,
   HardDrive as ServerOff,
   Trash as Trash2
@@ -10,6 +9,7 @@ import {
 import { useCallback, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

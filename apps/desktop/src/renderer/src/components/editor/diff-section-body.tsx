@@ -1,7 +1,8 @@
 import { DiffEditor, type DiffOnMount } from '@monaco-editor/react'
-import { WarningCircle as AlertCircle, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { WarningCircle as AlertCircle } from '@phosphor-icons/react'
 import type { RefObject } from 'react'
 
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

@@ -1,5 +1,4 @@
-import { CaretDown as ChevronDown } from '@phosphor-icons/react'
-
+import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { cn } from '@/lib/class-names'
 
 import { Button } from '../ui/button'

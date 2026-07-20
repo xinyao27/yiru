@@ -5,20 +5,17 @@ import {
   Copy,
   Eraser,
   GitFork,
-  ArrowsOut as Maximize2,
   Chat as MessageSquare,
-  ArrowsIn as Minimize2,
   Layout as PanelBottomClose,
   Layout as PanelsTopLeft,
   Sidebar as PanelRightClose,
   Pencil,
   Play,
-  Plus,
-  TerminalWindow as SquareTerminal,
-  X
+  TerminalWindow as SquareTerminal
 } from '@phosphor-icons/react'
 import { useMemo } from 'react'
 
+import { ArrowsOut as Maximize2, ArrowsIn as Minimize2, Plus, X } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

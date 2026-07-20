@@ -1,12 +1,8 @@
-import {
-  Warning as AlertTriangle,
-  GitBranch,
-  ArrowCounterClockwise as RotateCcw,
-  X
-} from '@phosphor-icons/react'
+import { Warning as AlertTriangle, GitBranch } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowCounterClockwise as RotateCcw, X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { getCreationProgressLabel } from '@/lib/pending-worktree-creation'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'

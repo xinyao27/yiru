@@ -2,14 +2,11 @@ import {
   Clipboard,
   Copy,
   GitFork,
-  ArrowsOut as Maximize2,
-  ArrowsIn as Minimize2,
   Layout as PanelBottomClose,
   Layout as PanelsTopLeft,
   Sidebar as PanelRightClose,
   Pencil,
-  TerminalWindow as SquareTerminal,
-  X
+  TerminalWindow as SquareTerminal
 } from '@phosphor-icons/react'
 import {
   useCallback,
@@ -21,6 +18,7 @@ import {
   type RefObject
 } from 'react'
 
+import { ArrowsOut as Maximize2, ArrowsIn as Minimize2, X } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

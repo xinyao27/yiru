@@ -1,6 +1,5 @@
-import { ArrowsLeftRight as ArrowRightLeft } from '@phosphor-icons/react'
-
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowsLeftRight as ArrowRightLeft } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

@@ -1,14 +1,10 @@
-import {
-  Warning as AlertTriangle,
-  Copy,
-  ArrowClockwise as RefreshCw,
-  Trash as Trash2
-} from '@phosphor-icons/react'
+import { Warning as AlertTriangle, Copy, Trash as Trash2 } from '@phosphor-icons/react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

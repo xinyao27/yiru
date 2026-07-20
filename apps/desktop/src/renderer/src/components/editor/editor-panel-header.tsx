@@ -1,6 +1,4 @@
 import {
-  ArrowDown,
-  ArrowUp,
   Columns as Columns2,
   Eye,
   FileText,
@@ -9,6 +7,7 @@ import {
 } from '@phosphor-icons/react'
 import { useMemo } from 'react'
 
+import { ArrowDown, ArrowUp } from '@/components/regular-icons'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

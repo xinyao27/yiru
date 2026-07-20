@@ -1,5 +1,6 @@
-import { CaretDown, FolderOpen } from '@phosphor-icons/react'
+import { FolderOpen } from '@phosphor-icons/react'
 
+import { CaretDown } from '@/components/regular-icons'
 import {
   getLocalFileManagerLabel,
   getPreferredWorktreeOpenInEntry,

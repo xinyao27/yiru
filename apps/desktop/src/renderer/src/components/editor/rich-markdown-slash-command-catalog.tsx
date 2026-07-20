@@ -1,14 +1,13 @@
 import {
-  CaretRight as ChevronRight,
   ImageIcon,
   List,
   ListNumbers as ListOrdered,
   Quotes as Quote,
   Sigma,
-  Table as Table2,
-  FlowArrow as Workflow
+  Table as Table2
 } from '@phosphor-icons/react'
 
+import { CaretRight as ChevronRight, FlowArrow as Workflow } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { headingSlashCommands } from './rich-markdown-heading-slash-commands'

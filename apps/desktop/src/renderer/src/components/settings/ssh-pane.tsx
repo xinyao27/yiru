@@ -1,7 +1,8 @@
-import { Plus, Upload } from '@phosphor-icons/react'
+import { Upload } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { Plus } from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
@@ -21,6 +22,8 @@ import { removeSshTargetWithBestEffortCleanup } from './ssh-target-remove'
 import { buildSshTargetSavePayload } from './ssh-target-save-payload'
 export { getSshPaneSearchEntries } from './ssh-search'
 
+type HostRemoveTarget = { targetId: string; label: string }
+
 export function SshPane(): React.JSX.Element {
   const [targets, setTargets] = useState<SshTarget[]>([])
   // Why: connection states are already hydrated and kept up-to-date by the
@@ -36,10 +39,7 @@ export function SshPane(): React.JSX.Element {
   // workspace-aware HostRemoveDialog (same as the sidebar) instead of the plain
   // confirm, so the user chooses to delete or keep them rather than silently
   // orphaning them.
-  const [hostRemoveTarget, setHostRemoveTarget] = useState<{
-    targetId: string
-    label: string
-  } | null>(null)
+  const [hostRemoveTarget, setHostRemoveTarget] = useState<HostRemoveTarget | null>(null)
   const mountedRef = useMountedRef()
 
   const setSshTargetsMetadata = useAppStore((s) => s.setSshTargetsMetadata)

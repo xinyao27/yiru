@@ -1,9 +1,9 @@
+import { GitMerge } from '@phosphor-icons/react'
+
 import {
   CaretRight as ChevronRight,
-  ArrowSquareOut as ExternalLink,
-  GitMerge
-} from '@phosphor-icons/react'
-
+  ArrowSquareOut as ExternalLink
+} from '@/components/regular-icons'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

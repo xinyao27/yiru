@@ -1,15 +1,9 @@
-import {
-  ArrowLeft,
-  BookOpen,
-  Clock,
-  FolderOpen,
-  ArrowClockwise as RefreshCw,
-  MagnifyingGlass as Search
-} from '@phosphor-icons/react'
+import { BookOpen, Clock, FolderOpen, MagnifyingGlass as Search } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowLeft, ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'

@@ -1,6 +1,6 @@
-import { X } from '@phosphor-icons/react'
 import type { CSSProperties, JSX } from 'react'
 
+import { X } from '@/components/regular-icons'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

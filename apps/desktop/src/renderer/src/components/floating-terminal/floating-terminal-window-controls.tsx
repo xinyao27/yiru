@@ -1,8 +1,9 @@
-import { ArrowsOut as Maximize2, ArrowsIn as Minimize2, Minus } from '@phosphor-icons/react'
+import { Minus } from '@phosphor-icons/react'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import { seedNativeChatAppliedSessionOptions } from '@/components/native-chat/native-chat-session-option-cache'
+import { ArrowsOut as Maximize2, ArrowsIn as Minimize2 } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useOptionalShortcutLabel } from '@/hooks/use-shortcut-label'

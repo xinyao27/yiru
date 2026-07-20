@@ -3,12 +3,12 @@ import {
   CalendarBlank as CalendarDays,
   Coins,
   Database as DatabaseZap,
-  ArrowClockwise as RefreshCw,
   Sparkle as Sparkles
 } from '@phosphor-icons/react'
 import { useEffect, useMemo } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { useAppStore } from '../../store'

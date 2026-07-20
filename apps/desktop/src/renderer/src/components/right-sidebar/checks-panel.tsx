@@ -1,7 +1,5 @@
 import {
-  ArrowClockwise as RefreshCw,
   Check,
-  X,
   Pencil,
   GitMerge,
   DotsThree as Ellipsis,
@@ -15,6 +13,7 @@ import { toast } from 'sonner'
 
 import { DetachedHeadBadge } from '@/components/detached-head-badge'
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowClockwise as RefreshCw, X } from '@/components/regular-icons'
 import { SpoolChecksPane } from '@/components/spool/spool-checks-pane'
 import { Button } from '@/components/ui/button'
 import {

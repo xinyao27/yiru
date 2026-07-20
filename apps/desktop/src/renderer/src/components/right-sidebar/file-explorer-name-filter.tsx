@@ -1,7 +1,8 @@
-import { Funnel as ListFilter, X } from '@phosphor-icons/react'
+import { Funnel as ListFilter } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

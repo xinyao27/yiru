@@ -6,6 +6,7 @@ coordination so those invariants stay in one place. */
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 
+import { PhosphorIconContextProvider } from '@/components/phosphor-icon-context-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { getCommentBodyLayoutLineCount } from '@/lib/comment-body-line-count'
@@ -519,48 +520,52 @@ export function useDiffCommentDecorator({
     const renderCard = (root: Root, comment: DecoratedDiffComment): void => {
       root.render(
         // Why: Monaco view zones are separate React roots outside the app root,
-        // so context providers from application-shell.tsx do not reach tooltip-using actions.
-        <TooltipProvider delay={400}>
-          <DiffCommentCard
-            lineNumber={comment.lineNumber}
-            startLine={comment.startLine}
-            label={comment.author ? getDiffCommentLineLabel(comment).toLowerCase() : undefined}
-            body={comment.body}
-            sentAt={comment.sentAt}
-            author={comment.author}
-            createdAtLabel={comment.createdAtLabel}
-            url={comment.url}
-            onDelete={
-              comment.canDelete === false ? undefined : () => onDeleteCommentRef.current(comment.id)
-            }
-            onSubmitEdit={
-              onUpdateCommentRef.current && comment.canEdit !== false
-                ? async (body) => {
-                    const fn = onUpdateCommentRef.current
-                    if (!fn) {
-                      return false
+        // so app-level icon and tooltip contexts do not reach these actions.
+        <PhosphorIconContextProvider>
+          <TooltipProvider delay={400}>
+            <DiffCommentCard
+              lineNumber={comment.lineNumber}
+              startLine={comment.startLine}
+              label={comment.author ? getDiffCommentLineLabel(comment).toLowerCase() : undefined}
+              body={comment.body}
+              sentAt={comment.sentAt}
+              author={comment.author}
+              createdAtLabel={comment.createdAtLabel}
+              url={comment.url}
+              onDelete={
+                comment.canDelete === false
+                  ? undefined
+                  : () => onDeleteCommentRef.current(comment.id)
+              }
+              onSubmitEdit={
+                onUpdateCommentRef.current && comment.canEdit !== false
+                  ? async (body) => {
+                      const fn = onUpdateCommentRef.current
+                      if (!fn) {
+                        return false
+                      }
+                      return fn(comment.id, body)
                     }
-                    return fn(comment.id, body)
-                  }
-                : undefined
-            }
-            onContentResize={() => resizeZone(comment.id)}
-            headerActions={
-              worktreeId && comment.author === undefined ? (
-                <NotesSendMenu
-                  worktreeId={worktreeId}
-                  groupId={activeGroupId}
-                  modeIdParts={['diff-comment-note', worktreeId, filePath, comment.id]}
-                  scopes={getSingleCommentSendScopes(comment, formatCommentPrompt)}
-                  targetModeLabel="This note"
-                  triggerClassName="yiru-diff-comment-edit"
-                  disabledTooltip="Note already sent"
-                  onDelivered={(notes) => void clearDeliveredDiffComments(worktreeId, notes)}
-                />
-              ) : null
-            }
-          />
-        </TooltipProvider>
+                  : undefined
+              }
+              onContentResize={() => resizeZone(comment.id)}
+              headerActions={
+                worktreeId && comment.author === undefined ? (
+                  <NotesSendMenu
+                    worktreeId={worktreeId}
+                    groupId={activeGroupId}
+                    modeIdParts={['diff-comment-note', worktreeId, filePath, comment.id]}
+                    scopes={getSingleCommentSendScopes(comment, formatCommentPrompt)}
+                    targetModeLabel="This note"
+                    triggerClassName="yiru-diff-comment-edit"
+                    disabledTooltip="Note already sent"
+                    onDelivered={(notes) => void clearDeliveredDiffComments(worktreeId, notes)}
+                  />
+                ) : null
+              }
+            />
+          </TooltipProvider>
+        </PhosphorIconContextProvider>
       )
     }
 

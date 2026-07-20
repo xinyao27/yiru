@@ -1,7 +1,7 @@
-import { ArrowUpRight } from '@phosphor-icons/react'
 import type React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowUpRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { getFileTypeIcon } from '@/lib/file-type-icons'
 import { basename, dirname } from '@/lib/path'

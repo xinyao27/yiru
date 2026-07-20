@@ -1,15 +1,10 @@
-import {
-  ArrowRight,
-  Check,
-  Copy,
-  ArrowClockwise as RefreshCw,
-  HardDrives as Server
-} from '@phosphor-icons/react'
+import { Check, Copy, HardDrives as Server } from '@phosphor-icons/react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { ArrowRight, ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,

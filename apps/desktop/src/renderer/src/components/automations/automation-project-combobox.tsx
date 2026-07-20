@@ -1,11 +1,11 @@
+import { Check } from '@phosphor-icons/react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
 import {
-  Check,
   CaretRight as ChevronRight,
   CaretUpDown as ChevronsUpDown,
   FolderPlus
-} from '@phosphor-icons/react'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
+} from '@/components/regular-icons'
 import RepoBadgeLabel from '@/components/repo/repo-badge-label'
 import { Button } from '@/components/ui/button'
 import { Command, CommandInput, CommandList } from '@/components/ui/command'

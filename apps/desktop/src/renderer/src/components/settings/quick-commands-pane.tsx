@@ -1,7 +1,7 @@
-import { Plus } from '@phosphor-icons/react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { useConfirmationDialog } from '@/components/confirmation-dialog'
+import { Plus } from '@/components/regular-icons'
 import {
   createTerminalQuickCommandDraft,
   TerminalQuickCommandDialog

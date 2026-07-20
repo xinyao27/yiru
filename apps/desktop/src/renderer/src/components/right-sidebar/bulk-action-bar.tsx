@@ -1,6 +1,7 @@
-import { Plus, Minus, X } from '@phosphor-icons/react'
+import { Minus } from '@phosphor-icons/react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { Plus, X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

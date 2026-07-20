@@ -1,4 +1,4 @@
-import { WarningCircle as AlertCircle, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
+import { WarningCircle as AlertCircle } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: EditorContent is the dispatch surface for
 every editor mode (edit, diff, conflict, markdown-preview, combined-diff, and
 now Changes view mode). Keeping the mode-selection branches colocated is easier
@@ -7,6 +7,7 @@ renderers (MonacoEditor, DiffViewer, ChangesModeView, MarkdownPreview, etc.)
 already live in their own modules. */
 import React from 'react'
 
+import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { detectLanguage } from '@/lib/language-detect'

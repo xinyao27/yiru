@@ -1,15 +1,12 @@
 import {
   Warning as AlertTriangle,
-  CaretDown as ChevronDown,
   XCircle as CircleX,
   DotsThree as Ellipsis,
   Eye,
   FolderOpen as FolderInput,
-  FolderPlus,
   FolderMinus as FolderX,
   Globe as Globe2,
   LockKey as LockKeyhole,
-  Plus,
   HardDrives as Server,
   HardDrive as ServerOff,
   Shapes,
@@ -27,6 +24,7 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { CaretDown as ChevronDown, FolderPlus, Plus } from '@/components/regular-icons'
 import { RepoForkIndicator } from '@/components/repo/repo-fork-indicator'
 import { RepoIconGlyph } from '@/components/repo/repo-icon'
 import { getRepositoryIconSectionId } from '@/components/settings/repository-settings-targets'

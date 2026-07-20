@@ -1,12 +1,12 @@
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: image surface size is measured with ResizeObserver and DOM refs, which are external layout systems outside render derivation. */
 import {
   Image as ImageIcon,
-  ArrowCounterClockwise as RotateCcw,
   MagnifyingGlassPlus as ZoomIn,
   MagnifyingGlassMinus as ZoomOut
 } from '@phosphor-icons/react'
 import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

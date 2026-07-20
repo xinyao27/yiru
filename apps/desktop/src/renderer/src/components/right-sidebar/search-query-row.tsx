@@ -2,12 +2,12 @@ import {
   MagnifyingGlass as SearchIcon,
   TextAa as CaseSensitive,
   BracketsSquare as WholeWord,
-  Asterisk as Regex,
-  X
+  Asterisk as Regex
 } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
+import { X } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

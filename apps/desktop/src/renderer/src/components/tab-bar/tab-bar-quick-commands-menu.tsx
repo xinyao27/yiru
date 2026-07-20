@@ -1,6 +1,7 @@
-import { CaretDown as ChevronDown, Play } from '@phosphor-icons/react'
+import { Play } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import {
   Command,
@@ -61,8 +62,7 @@ export function TabBarQuickCommandsMenu({
   // Why: closing restores focus to the chevron for accessibility, but that
   // focus restoration should not immediately reopen its tooltip.
   const suppressMoreCommandsTooltipRef = useRef(false)
-  const totalVisible = repoCommands.length + globalCommands.length
-  const showSearch = totalVisible > 1
+  const showSearch = repoCommands.length + globalCommands.length > 1
   const filteredRepoCommands = useMemo(
     () => searchTerminalQuickCommands(repoCommands, query),
     [repoCommands, query]

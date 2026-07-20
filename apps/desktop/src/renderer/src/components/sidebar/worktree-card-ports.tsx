@@ -1,7 +1,8 @@
-import { Plug, Copy, ArrowSquareOut as ExternalLink, Trash as Trash2 } from '@phosphor-icons/react'
+import { Plug, Copy, Trash as Trash2 } from '@phosphor-icons/react'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
+import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { SelectedTextCopyMenu } from '@/components/selected-text-copy-menu'
 import { Button } from '@/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'

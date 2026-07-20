@@ -2,8 +2,6 @@ import {
   Warning as AlertTriangle,
   CalendarDots as CalendarClock,
   CheckCircle as CheckCircle2,
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
   Clock,
   Fingerprint,
   Chat as MessageSquare,
@@ -13,6 +11,7 @@ import {
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import React, { useMemo, useState } from 'react'
 
+import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/regular-icons'
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
