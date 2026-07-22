@@ -1,6 +1,6 @@
 // Why: import from 'buffer' (the npm polyfill), not 'node:buffer' because
 // Metro cannot resolve Node builtins in a React Native bundle.
-import { Buffer } from 'node:buffer'
+import { Buffer } from 'buffer'
 
 import type { RpcClient } from '../transport/rpc-client'
 

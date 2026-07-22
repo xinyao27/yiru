@@ -1,108 +1,29 @@
-import { StyleSheet } from 'react-native'
+import { cn } from '@/style/class-names'
 
-import { colors, radii, spacing, typography } from '../../theme/mobile-theme'
-
-export const prCreateEmptyStateStyles = StyleSheet.create({
-  section: {
-    backgroundColor: colors.bgPanel,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle,
-    overflow: 'hidden'
-  },
-  header: {
-    minHeight: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle
-  },
-  headerTitle: {
-    flex: 1,
-    minWidth: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs
-  },
-  headerLabel: {
-    color: colors.textPrimary,
-    fontSize: 13,
-    fontWeight: '600'
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs
-  },
-  createButton: {
-    minHeight: 32,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radii.button,
-    backgroundColor: colors.textPrimary
-  },
-  createButtonDisabled: {
-    opacity: 0.5
-  },
-  createButtonText: {
-    color: colors.bgBase,
-    fontSize: typography.metaSize,
-    fontWeight: '700'
-  },
-  iconButton: {
-    minWidth: 32,
-    minHeight: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button
-  },
-  iconButtonPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  body: {
-    padding: spacing.md,
-    gap: spacing.sm
-  },
-  bodyTitle: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '700'
-  },
-  bodyText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    lineHeight: 18
-  },
-  composerArea: {
-    backgroundColor: colors.bgPanel,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle,
-    padding: spacing.md
-  },
+export const prCreateEmptyStateStyles = {
+  section: cn('bg-card border-b-hairline border-b-border overflow-hidden'),
+  header: cn(
+    'min-h-10 flex-row items-center justify-between gap-2 px-3 py-2 border-b-hairline border-b-border'
+  ),
+  headerTitle: cn('flex-1 min-w-0 flex-row items-center gap-1'),
+  headerLabel: cn('text-foreground text-[13px] font-semibold'),
+  headerActions: cn('flex-row items-center gap-1'),
+  createButton: cn(
+    'min-h-8 flex-row items-center justify-center gap-1 px-2 rounded-none bg-foreground'
+  ),
+  createButtonDisabled: cn('opacity-[0.5]'),
+  createButtonText: cn('text-background text-[12px] font-bold'),
+  iconButton: cn('min-w-8 min-h-8 items-center justify-center rounded-none'),
+  iconButtonPressed: cn('bg-secondary'),
+  iconButtonPressedActive: cn('active:bg-secondary'),
+  body: cn('p-3 gap-2'),
+  bodyTitle: cn('text-foreground text-[14px] font-bold'),
+  bodyText: cn('text-muted-foreground text-[12px] leading-[18px]'),
+  composerArea: cn('bg-card border-b-hairline border-b-border p-3'),
   // Secondary link-an-existing-PR affordance, set apart from the body copy.
-  linkButton: {
-    marginTop: spacing.xs,
-    minHeight: 32,
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs
-  },
-  linkButtonDisabled: {
-    opacity: 0.5
-  },
-  linkButtonPressed: {
-    opacity: 0.6
-  },
-  linkButtonText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontWeight: '600'
-  }
-})
+  linkButton: cn('mt-1 min-h-8 self-start flex-row items-center gap-1'),
+  linkButtonDisabled: cn('opacity-[0.5]'),
+  linkButtonPressed: cn('opacity-[0.6]'),
+  linkButtonPressedActive: cn('active:opacity-[0.6]'),
+  linkButtonText: cn('text-muted-foreground text-[12px] font-semibold')
+} as const

@@ -1,5 +1,3 @@
-import type { StyleProp, ViewStyle } from 'react-native'
-
 import type { RuntimeMobileTerminalTheme } from '../../../desktop/src/shared/runtime-types'
 import type { TerminalOscLinkRange } from './terminal-osc-link-ranges'
 
@@ -41,7 +39,7 @@ export type TerminalSelectionEvents = {
 }
 
 export type TerminalWebViewProps = {
-  style?: StyleProp<ViewStyle>
+  className?: string
   terminalTheme?: MobileTerminalTheme
   // Why: baseline zoom multiplier applied on top of fit-to-width scale; raw
   // xterm fontSize alone cannot drive apparent size because fitting cancels it.

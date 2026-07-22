@@ -1,111 +1,41 @@
-import { StyleSheet } from 'react-native'
-
-import { colors, radii, spacing, typography } from '../../theme/mobile-theme'
+import { cn } from '@/style/class-names'
 
 // Styles for PRActionsSection (action buttons, auto-merge toggle, transient-error
 // line). Split out of mobile-pr-sidebar-styles to keep that file under the
 // 300-line cap.
-export const prActionsStyles = StyleSheet.create({
+export const prActionsStyles = {
   // Bare block when identity + actions share one section card.
-  actionsBlock: {
-    gap: spacing.sm
-  },
+  actionsBlock: cn('gap-2'),
   // Close/Reopen + Unlink share a row so secondary actions don't stack full-width.
-  secondaryRow: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: spacing.sm
-  },
-  secondaryButton: {
-    flex: 1
-  },
+  secondaryRow: cn('flex-row items-stretch gap-2'),
+  secondaryButton: cn('flex-1'),
   // Primary CTA (merge) and secondary action buttons (close/reopen/rerun/add).
-  actionButton: {
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle
-  },
+  actionButton: cn(
+    'min-h-11 flex-row items-center justify-center gap-2 py-2 px-3 rounded-none bg-secondary border-hairline border-border'
+  ),
   // Neutral primary: a light fill with dark text, mirroring the desktop PR page's
   // default button (no bright accent) so the sidebar stays mostly monochrome.
-  actionButtonPrimary: {
-    backgroundColor: colors.textPrimary,
-    borderColor: colors.textPrimary
-  },
+  actionButtonPrimary: cn('bg-foreground border-foreground'),
   // Merge CTA: green fill + white text, matching the desktop ChecksPanel's
   // affirmative merge action. The merge still confirms before firing.
-  actionButtonMerge: {
-    backgroundColor: colors.mergeGreen,
-    borderColor: colors.mergeGreen
-  },
-  actionButtonTextMerge: {
-    color: colors.onMergeGreen
-  },
-  actionButtonDisabled: {
-    opacity: 0.5
-  },
-  actionButtonText: {
-    // Why: shrink + single-line (numberOfLines=1 at call sites) so a long label
-    // like "Link existing pull request" can't wrap and inflate the button's
-    // effective padding on a narrow sidebar.
-    flexShrink: 1,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '700'
-  },
-  actionButtonTextPrimary: {
-    color: colors.bgBase
-  },
-  actionButtonDestructiveText: {
-    color: colors.statusRed
-  },
+  actionButtonMerge: cn('bg-green-600 border-green-600'),
+  actionButtonTextMerge: cn('text-white'),
+  actionButtonDisabled: cn('opacity-[0.5]'),
+  // Why: shrink + single-line (numberOfLines=1 at call sites) so a long label
+  // like "Link existing pull request" can't wrap and inflate the button's
+  // effective padding on a narrow sidebar.
+  actionButtonText: cn('shrink text-foreground text-[14px] font-bold'),
+  actionButtonTextPrimary: cn('text-background'),
+  actionButtonDestructiveText: cn('text-destructive'),
   // Auto-merge toggle row: label + a pill that reflects on/off state.
-  toggleRow: {
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm
-  },
-  toggleLabel: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    flexShrink: 1
-  },
-  togglePill: {
-    minWidth: 56,
-    minHeight: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
-    borderRadius: radii.button,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel
-  },
-  togglePillOn: {
-    borderColor: colors.textSecondary,
-    backgroundColor: colors.bgRaised
-  },
-  togglePillText: {
-    fontSize: typography.metaSize,
-    fontWeight: '700',
-    color: colors.textSecondary
-  },
-  togglePillTextOn: {
-    color: colors.textPrimary
-  },
+  toggleRow: cn('min-h-11 flex-row items-center justify-between gap-2'),
+  toggleLabel: cn('text-foreground text-[14px] shrink'),
+  togglePill: cn(
+    'min-w-14 min-h-[30px] items-center justify-center px-2 rounded-none border-hairline border-border bg-card'
+  ),
+  togglePillOn: cn('border-muted-foreground bg-secondary'),
+  togglePillText: cn('text-[12px] font-bold text-muted-foreground'),
+  togglePillTextOn: cn('text-foreground'),
   // Non-blocking error line shown under an action after a transient failure.
-  actionError: {
-    color: colors.statusRed,
-    fontSize: typography.metaSize,
-    lineHeight: 18
-  }
-})
+  actionError: cn('text-destructive text-[12px] leading-[18px]')
+} as const

@@ -1,7 +1,8 @@
-import { ImagePlus, Mic } from 'lucide-react-native'
-import { ActivityIndicator, Pressable, type StyleProp, type ViewStyle } from 'react-native'
+import { ActivityIndicator, Pressable } from 'react-native'
 
-import { colors } from '../theme/mobile-theme'
+import { ImageSquare as ImagePlus, Microphone as Mic } from '@/components/uniwind-icons'
+
+import { cn } from '../style/class-names'
 
 type DictationState = {
   readonly isStarting: boolean
@@ -14,9 +15,9 @@ type MobileTerminalInputActionsProps = {
   readonly isAttaching: boolean
   readonly dictation: DictationState
   readonly dictationMode: 'toggle' | 'hold'
-  readonly buttonStyle: StyleProp<ViewStyle>
-  readonly activeButtonStyle: StyleProp<ViewStyle>
-  readonly disabledButtonStyle: StyleProp<ViewStyle>
+  readonly buttonClassName: string
+  readonly activeButtonClassName: string
+  readonly disabledButtonClassName: string
   readonly onAttachImage: () => void
   readonly onAttachFile: () => void
   readonly onDictationToggle: () => void
@@ -32,9 +33,9 @@ export function MobileTerminalInputActions({
   isAttaching,
   dictation,
   dictationMode,
-  buttonStyle,
-  activeButtonStyle,
-  disabledButtonStyle,
+  buttonClassName,
+  activeButtonClassName,
+  disabledButtonClassName,
   onAttachImage,
   onAttachFile,
   onDictationToggle,
@@ -46,7 +47,7 @@ export function MobileTerminalInputActions({
   return (
     <>
       <Pressable
-        style={[buttonStyle, (!canSend || isAttaching) && disabledButtonStyle]}
+        className={cn(buttonClassName, (!canSend || isAttaching) && disabledButtonClassName)}
         disabled={!canSend || isAttaching}
         // Tap opens the photo library; long-press picks a file. Uploads via host
         // RPC so SSH/remote sessions attach the same as local ones.
@@ -57,13 +58,17 @@ export function MobileTerminalInputActions({
         accessibilityHint="Long press to attach a file instead"
       >
         {isAttaching ? (
-          <ActivityIndicator size="small" color={colors.textSecondary} />
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
         ) : (
-          <ImagePlus size={17} color={colors.textSecondary} strokeWidth={2.4} />
+          <ImagePlus size={17} colorClassName="accent-muted-foreground" />
         )}
       </Pressable>
       <Pressable
-        style={[buttonStyle, dictationActive && activeButtonStyle, !canSend && disabledButtonStyle]}
+        className={cn(
+          buttonClassName,
+          dictationActive && activeButtonClassName,
+          !canSend && disabledButtonClassName
+        )}
         disabled={!canSend}
         onPress={dictationMode === 'toggle' ? onDictationToggle : undefined}
         onPressIn={dictationMode === 'hold' ? onDictationPressIn : undefined}
@@ -88,12 +93,11 @@ export function MobileTerminalInputActions({
         }
       >
         {dictation.isProcessing ? (
-          <ActivityIndicator size="small" color={colors.textSecondary} />
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
         ) : (
           <Mic
             size={17}
-            color={dictationActive ? colors.textPrimary : colors.textSecondary}
-            strokeWidth={2.4}
+            colorClassName={dictationActive ? 'accent-foreground' : 'accent-muted-foreground'}
           />
         )}
       </Pressable>

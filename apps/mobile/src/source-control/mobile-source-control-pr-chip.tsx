@@ -1,16 +1,17 @@
-import {
-  AlertTriangle,
-  Check,
-  ChevronRight,
-  CircleDot,
-  GitPullRequest,
-  MessageSquare,
-  X
-} from 'lucide-react-native'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
-import { statusColor } from '../components/pr-sidebar/pr-sidebar-status-color'
-import { colors } from '../theme/mobile-theme'
+import {
+  Warning as AlertTriangle,
+  Check,
+  CaretRight as ChevronRight,
+  RadioButton as CircleDot,
+  GitPullRequest,
+  Chat as MessageSquare,
+  X
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
+import { statusColorClasses } from '../components/pr-sidebar/pr-sidebar-status-color'
 import type { MobilePrChipRollup, MobilePrChipSummary } from './mobile-pr-chip-summary'
 import { hubStyles } from './mobile-source-control-hub-styles'
 
@@ -23,53 +24,54 @@ type Props = {
 // Pull Request segment. Rendered only when the repo supports hosted review — the
 // parent gates on that, so this component always has something meaningful to show.
 export function MobileSourceControlPrChip({ summary, onPress }: Props) {
+  const stateColors = summary.kind === 'ready' ? statusColorClasses(summary.stateToken) : null
   return (
     <Pressable
-      style={({ pressed }) => [hubStyles.chip, pressed && hubStyles.chipPressed]}
+      className={cn(hubStyles.chip, hubStyles.chipPressedActive)}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={chipAccessibilityLabel(summary)}
     >
-      <View style={hubStyles.chipIcon}>
-        <GitPullRequest size={15} color={colors.textSecondary} strokeWidth={2.1} />
+      <View className={hubStyles.chipIcon}>
+        <GitPullRequest size={15} colorClassName="accent-muted-foreground" />
       </View>
       {summary.kind === 'loading' ? (
         <>
-          <ActivityIndicator size="small" color={colors.textSecondary} />
-          <Text style={hubStyles.chipMutedText} numberOfLines={1}>
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+          <Text className={hubStyles.chipMutedText} numberOfLines={1}>
             Loading pull request…
           </Text>
         </>
       ) : summary.kind === 'none' ? (
         <>
-          <Text style={hubStyles.chipCreateText}>Create pull request</Text>
-          <View style={hubStyles.chipSpacer} />
-          <ChevronRight size={16} color={colors.textMuted} strokeWidth={2.1} />
+          <Text className={hubStyles.chipCreateText}>Create pull request</Text>
+          <View className={hubStyles.chipSpacer} />
+          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         </>
       ) : summary.kind === 'unavailable' ? (
         <>
-          <Text style={hubStyles.chipMutedText} numberOfLines={1}>
+          <Text className={hubStyles.chipMutedText} numberOfLines={1}>
             {summary.message}
           </Text>
-          <ChevronRight size={16} color={colors.textMuted} strokeWidth={2.1} />
+          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         </>
       ) : (
         <>
-          <Text style={hubStyles.chipNumber}>#{summary.number}</Text>
-          <View style={[hubStyles.statePill, { borderColor: statusColor(summary.stateToken) }]}>
-            <Text style={[hubStyles.statePillText, { color: statusColor(summary.stateToken) }]}>
+          <Text className={hubStyles.chipNumber}>#{summary.number}</Text>
+          <View className={cn(hubStyles.statePill, stateColors?.border)}>
+            <Text className={cn(hubStyles.statePillText, stateColors?.text)}>
               {summary.stateLabel}
             </Text>
           </View>
           <ChipRollup rollup={summary.rollup} />
           {summary.commentCount != null && summary.commentCount > 0 ? (
-            <View style={hubStyles.comment}>
-              <MessageSquare size={13} color={colors.textSecondary} strokeWidth={2.1} />
-              <Text style={hubStyles.commentText}>{summary.commentCount}</Text>
+            <View className={hubStyles.comment}>
+              <MessageSquare size={13} colorClassName="accent-muted-foreground" />
+              <Text className={hubStyles.commentText}>{summary.commentCount}</Text>
             </View>
           ) : null}
-          <View style={hubStyles.chipSpacer} />
-          <ChevronRight size={16} color={colors.textMuted} strokeWidth={2.1} />
+          <View className={hubStyles.chipSpacer} />
+          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         </>
       )}
     </Pressable>
@@ -77,27 +79,33 @@ export function MobileSourceControlPrChip({ summary, onPress }: Props) {
 }
 
 function ChipRollup({ rollup }: { rollup: MobilePrChipRollup }) {
-  const color = statusColor(rollup.token)
+  const colors = statusColorClasses(rollup.token)
   return (
-    <View style={hubStyles.rollup}>
-      <RollupIcon kind={rollup.kind} color={color} />
-      <Text style={[hubStyles.rollupText, { color }]}>{rollup.text}</Text>
+    <View className={hubStyles.rollup}>
+      <RollupIcon kind={rollup.kind} colorClassName={colors.accent} />
+      <Text className={cn(hubStyles.rollupText, colors.text)}>{rollup.text}</Text>
     </View>
   )
 }
 
-function RollupIcon({ kind, color }: { kind: MobilePrChipRollup['kind']; color: string }) {
+function RollupIcon({
+  kind,
+  colorClassName
+}: {
+  kind: MobilePrChipRollup['kind']
+  colorClassName: string
+}) {
   const size = 13
-  const strokeWidth = 2.3
+
   switch (kind) {
     case 'conflict':
-      return <AlertTriangle size={size} color={color} strokeWidth={strokeWidth} />
+      return <AlertTriangle size={size} colorClassName={colorClassName} />
     case 'failing':
-      return <X size={size} color={color} strokeWidth={strokeWidth} />
+      return <X size={size} colorClassName={colorClassName} />
     case 'running':
-      return <CircleDot size={size} color={color} strokeWidth={strokeWidth} />
+      return <CircleDot size={size} colorClassName={colorClassName} />
     case 'passed':
-      return <Check size={size} color={color} strokeWidth={strokeWidth} />
+      return <Check size={size} colorClassName={colorClassName} />
     case 'none':
       return null
   }

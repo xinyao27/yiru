@@ -1,9 +1,10 @@
-import { Check, ChevronDown } from 'lucide-react-native'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Pressable, Text, TextInput, View } from 'react-native'
+
+import { Check, CaretDown as ChevronDown } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import { searchBaseRefs } from '../source-control/mobile-base-ref-search'
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
 import type { RpcClient } from '../transport/rpc-client'
 
 type Props = {
@@ -77,9 +78,9 @@ export function MobilePrBasePicker({
 
   return (
     <View>
-      <View style={[styles.inputShell, !editable && styles.inputShellDisabled]}>
+      <View className={cn(styles.inputShell, !editable && styles.inputShellDisabled)}>
         <TextInput
-          style={styles.input}
+          className={styles.input}
           value={value}
           onChangeText={(text) => {
             onChange(text)
@@ -88,30 +89,28 @@ export function MobilePrBasePicker({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholder="main"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColorClassName="accent-muted-foreground"
           autoCapitalize="none"
           autoCorrect={false}
           editable={editable}
         />
-        <ChevronDown size={14} color={colors.textSecondary} strokeWidth={2.2} />
+        <ChevronDown size={14} colorClassName="accent-muted-foreground" />
       </View>
       {focused && results.length > 0 ? (
-        <View style={styles.results}>
+        <View className={styles.results}>
           {results.map((ref) => (
             <Pressable
               key={ref}
-              style={({ pressed }) => [styles.resultRow, pressed && styles.resultRowPressed]}
+              className={cn(styles.resultRow, styles.resultRowPressedActive)}
               onPress={() => {
                 onChange(ref)
                 setResults([])
               }}
             >
-              <Text style={styles.resultText} numberOfLines={1}>
+              <Text className={styles.resultText} numberOfLines={1}>
                 {ref}
               </Text>
-              {ref === value ? (
-                <Check size={14} color={colors.textPrimary} strokeWidth={2.2} />
-              ) : null}
+              {ref === value ? <Check size={14} colorClassName="accent-foreground" /> : null}
             </Pressable>
           ))}
         </View>
@@ -120,52 +119,14 @@ export function MobilePrBasePicker({
   )
 }
 
-const styles = StyleSheet.create({
-  inputShell: {
-    minHeight: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs
-  },
-  inputShellDisabled: {
-    opacity: 0.6
-  },
-  input: {
-    flex: 1,
-    minWidth: 0,
-    padding: 0,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontFamily: typography.monoFamily
-  },
-  results: {
-    marginTop: spacing.xs,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.input,
-    backgroundColor: colors.bgPanel,
-    overflow: 'hidden'
-  },
-  resultRow: {
-    minHeight: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle
-  },
-  resultRowPressed: { backgroundColor: colors.bgRaised },
-  resultText: {
-    flex: 1,
-    minWidth: 0,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontFamily: typography.monoFamily
-  }
-})
+const styles = {
+  inputShell: cn('min-h-10 flex-row items-center gap-1 bg-secondary rounded-none px-3 py-1'),
+  inputShellDisabled: cn('opacity-[0.6]'),
+  input: cn('flex-1 min-w-0 p-0 text-foreground text-[14px] font-mono'),
+  results: cn('mt-1 border-hairline border-border rounded-none bg-card overflow-hidden'),
+  resultRow: cn(
+    'min-h-10 flex-row items-center justify-between gap-2 px-3 border-b-hairline border-b-border'
+  ),
+  resultRowPressedActive: cn('active:bg-secondary'),
+  resultText: cn('flex-1 min-w-0 text-foreground text-[14px] font-mono')
+} as const

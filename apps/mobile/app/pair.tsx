@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Linking, Pressable, Text, View } from 'react-native'
 
-import { colors, radii, spacing, typography } from '../src/theme/mobile-theme'
+import { cn } from '@/style/class-names'
+
 import { extractPairingCodeFromUrl } from '../src/transport/pairing'
 
 export default function PairRedirectScreen() {
@@ -43,46 +44,24 @@ export default function PairRedirectScreen() {
   }, [params.code, router])
 
   return (
-    <View style={styles.container}>
+    <View className={styles.container}>
       {missingCode ? (
         <>
-          <Text style={styles.errorText}>Missing pairing code</Text>
-          <Pressable style={styles.primaryButton} onPress={goHome}>
-            <Text style={styles.primaryButtonText}>Back to home</Text>
+          <Text className={styles.errorText}>Missing pairing code</Text>
+          <Pressable className={styles.primaryButton} onPress={goHome}>
+            <Text className={styles.primaryButtonText}>Back to home</Text>
           </Pressable>
         </>
       ) : (
-        <ActivityIndicator size="large" color={colors.textSecondary} />
+        <ActivityIndicator size="large" colorClassName="accent-muted-foreground" />
       )}
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.bgBase,
-    padding: spacing.lg
-  },
-  errorText: {
-    color: colors.statusRed,
-    fontSize: typography.bodySize,
-    lineHeight: 20,
-    marginBottom: spacing.xl,
-    textAlign: 'center'
-  },
-  primaryButton: {
-    alignItems: 'center',
-    backgroundColor: colors.textPrimary,
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.sm + 2
-  },
-  primaryButtonText: {
-    color: colors.bgBase,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  }
-})
+const styles = {
+  container: cn('flex-1 items-center justify-center bg-background p-4'),
+  errorText: cn('text-destructive text-[14px] leading-[20px] mb-6 text-center'),
+  primaryButton: cn('items-center bg-foreground rounded-none px-6 py-2.5'),
+  primaryButtonText: cn('text-background text-[14px] font-semibold')
+} as const

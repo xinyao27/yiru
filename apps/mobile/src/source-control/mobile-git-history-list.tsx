@@ -1,9 +1,11 @@
-import { ChevronDown, ChevronRight } from 'lucide-react-native'
 import { memo, useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native'
+
+import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type { GitBranchChangeEntry } from '../../../desktop/src/shared/types'
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import { spacing } from '../theme/uniwind-theme-values'
 import { useForceReconnect } from '../transport/client-context'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState, RpcSuccess } from '../transport/types'
@@ -141,40 +143,40 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
       const files = filesById[item.id]
       const isOpen = expanded === item.id
       return (
-        <View style={styles.commit}>
+        <View className={styles.commit}>
           <Pressable
-            style={({ pressed }) => [styles.commitHeader, pressed && styles.commitHeaderPressed]}
+            className={cn(styles.commitHeader, styles.commitHeaderPressedActive)}
             onPress={() => toggleCommit(item)}
           >
             {isOpen ? (
-              <ChevronDown size={14} color={colors.textMuted} />
+              <ChevronDown size={14} colorClassName="accent-muted-foreground" />
             ) : (
-              <ChevronRight size={14} color={colors.textMuted} />
+              <ChevronRight size={14} colorClassName="accent-muted-foreground" />
             )}
-            <View style={styles.commitMain}>
-              <Text style={styles.commitSubject} numberOfLines={1}>
+            <View className={styles.commitMain}>
+              <Text className={styles.commitSubject} numberOfLines={1}>
                 {item.subject}
               </Text>
-              <Text style={styles.commitMeta} numberOfLines={1}>
+              <Text className={styles.commitMeta} numberOfLines={1}>
                 {item.shortId} · {item.author} · {item.relativeTime}
               </Text>
             </View>
           </Pressable>
           {isOpen ? (
-            <View style={styles.files}>
+            <View className={styles.files}>
               {files === 'loading' || files === undefined ? (
-                <ActivityIndicator size="small" color={colors.textSecondary} />
+                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               ) : files.length === 0 ? (
-                <Text style={styles.empty}>No file changes</Text>
+                <Text className={styles.empty}>No file changes</Text>
               ) : (
                 files.map((file) => (
-                  <View key={file.path} style={styles.fileRow}>
-                    <Text style={styles.filePath} numberOfLines={1}>
+                  <View key={file.path} className={styles.fileRow}>
+                    <Text className={styles.filePath} numberOfLines={1}>
                       {file.path}
                     </Text>
-                    <Text style={styles.fileStat}>
-                      {file.added ? <Text style={styles.add}>+{file.added} </Text> : null}
-                      {file.removed ? <Text style={styles.del}>-{file.removed}</Text> : null}
+                    <Text className={styles.fileStat}>
+                      {file.added ? <Text className={styles.add}>+{file.added} </Text> : null}
+                      {file.removed ? <Text className={styles.del}>-{file.removed}</Text> : null}
                     </Text>
                   </View>
                 ))
@@ -195,27 +197,27 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
 
   if (view.kind === 'error' || view.kind === 'waiting') {
     return (
-      <View style={styles.state}>
-        <Text style={styles.stateText}>
+      <View className={styles.state}>
+        <Text className={styles.stateText}>
           {view.kind === 'waiting' ? 'Waiting for desktop...' : view.message}
         </Text>
-        <Pressable style={styles.retryButton} onPress={retry} accessibilityLabel="Retry">
-          <Text style={styles.retryText}>Retry</Text>
+        <Pressable className={styles.retryButton} onPress={retry} accessibilityLabel="Retry">
+          <Text className={styles.retryText}>Retry</Text>
         </Pressable>
       </View>
     )
   }
   if (view.kind === 'loading') {
     return (
-      <View style={styles.state}>
-        <ActivityIndicator color={colors.textSecondary} />
+      <View className={styles.state}>
+        <ActivityIndicator colorClassName="accent-muted-foreground" />
       </View>
     )
   }
   if (view.kind === 'empty') {
     return (
-      <View style={styles.state}>
-        <Text style={styles.stateText}>No commits.</Text>
+      <View className={styles.state}>
+        <Text className={styles.stateText}>No commits.</Text>
       </View>
     )
   }
@@ -229,44 +231,22 @@ export const MobileGitHistoryList = memo(function MobileGitHistoryList({
   )
 })
 
-const styles = StyleSheet.create({
-  state: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.lg },
-  stateText: { color: colors.textMuted, fontSize: typography.bodySize },
-  retryButton: {
-    marginTop: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised
-  },
-  retryText: { color: colors.textPrimary, fontSize: typography.bodySize, fontWeight: '600' },
-  commit: { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle },
-  commitHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2
-  },
-  commitHeaderPressed: { backgroundColor: colors.bgRaised },
-  commitMain: { flex: 1, minWidth: 0 },
-  commitSubject: { color: colors.textPrimary, fontSize: typography.bodySize },
-  commitMeta: {
-    color: colors.textMuted,
-    fontSize: typography.metaSize,
-    fontFamily: typography.monoFamily,
-    marginTop: 2
-  },
-  files: { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm, gap: 4 },
-  fileRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  filePath: {
-    flex: 1,
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontFamily: typography.monoFamily
-  },
-  fileStat: { fontSize: typography.metaSize, fontFamily: typography.monoFamily },
-  add: { color: colors.gitDecorationAdded },
-  del: { color: colors.gitDecorationDeleted },
-  empty: { color: colors.textMuted, fontSize: typography.metaSize }
-})
+const styles = {
+  state: cn('flex-1 items-center justify-center p-4'),
+  stateText: cn('text-muted-foreground/60 text-[14px]'),
+  retryButton: cn('mt-3 px-4 py-2 rounded-none bg-secondary'),
+  retryText: cn('text-foreground text-[14px] font-semibold'),
+  commit: cn('border-b border-b-border'),
+  commitHeader: cn('flex-row items-center gap-2 px-3 py-2.5'),
+  commitHeaderPressedActive: cn('active:bg-secondary'),
+  commitMain: cn('flex-1 min-w-0'),
+  commitSubject: cn('text-foreground text-[14px]'),
+  commitMeta: cn('text-muted-foreground/60 text-[12px] font-mono mt-[2px]'),
+  files: cn('px-4 pb-2 gap-1'),
+  fileRow: cn('flex-row items-center gap-2'),
+  filePath: cn('flex-1 text-muted-foreground text-[12px] font-mono'),
+  fileStat: cn('text-[12px] font-mono'),
+  add: cn('text-[var(--git-decoration-added)]'),
+  del: cn('text-[var(--git-decoration-deleted)]'),
+  empty: cn('text-muted-foreground/60 text-[12px]')
+} as const

@@ -1,14 +1,14 @@
 import * as Clipboard from 'expo-clipboard'
 import Constants from 'expo-constants'
 import { useRouter } from 'expo-router'
-import { ChevronLeft, Copy, Check } from 'lucide-react-native'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
-import { View, Text, StyleSheet, Pressable, Platform } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { View, Text, Pressable, Platform } from 'react-native'
+
+import { CaretLeft as ChevronLeft, Copy, Check } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import { ConnectionLog } from '../src/components/connection-log'
 import { buildConnectionDiagnosticsReport } from '../src/diagnostics/connection-diagnostics-report'
-import { colors, spacing, typography } from '../src/theme/mobile-theme'
 import { useHostClient } from '../src/transport/client-context'
 import {
   useLastConnectedAt,
@@ -27,7 +27,7 @@ const EMPTY_ENTRIES: readonly ConnectionLogEntry[] = []
 // log fills live instead of showing a stale tail.
 export default function ConnectionLogScreen() {
   const router = useRouter()
-  const insets = useSafeAreaInsets()
+
   const [hosts, setHosts] = useState<HostProfile[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -82,24 +82,27 @@ export default function ConnectionLogScreen() {
   }, [selected, state, reconnectAttempts, lastConnectedAt, entries])
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.sm }]}>
-      <View style={styles.topRow}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} color={colors.textSecondary} />
+    <View className={cn(styles.container, 'pt-safe-offset-2')}>
+      <View className={styles.topRow}>
+        <Pressable className={styles.backButton} onPress={() => router.back()}>
+          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text style={styles.heading}>Connection log</Text>
+        <Text className={styles.heading}>Connection log</Text>
       </View>
 
       {hosts.length > 1 && (
-        <View style={styles.hostPicker}>
+        <View className={styles.hostPicker}>
           {hosts.map((host) => (
             <Pressable
               key={host.id}
-              style={[styles.hostChip, host.id === selectedId && styles.hostChipActive]}
+              className={cn(styles.hostChip, host.id === selectedId && styles.hostChipActive)}
               onPress={() => setSelectedId(host.id)}
             >
               <Text
-                style={[styles.hostChipText, host.id === selectedId && styles.hostChipTextActive]}
+                className={cn(
+                  styles.hostChipText,
+                  host.id === selectedId && styles.hostChipTextActive
+                )}
                 numberOfLines={1}
               >
                 {host.name}
@@ -111,112 +114,50 @@ export default function ConnectionLogScreen() {
 
       {selected ? (
         <>
-          <View style={styles.statusRow}>
-            <Text style={styles.statusText}>
+          <View className={styles.statusRow}>
+            <Text className={styles.statusText}>
               {state}
               {reconnectAttempts > 0 ? ` · attempt ${reconnectAttempts}` : ''}
             </Text>
-            <Pressable style={styles.copyButton} onPress={() => void copyDiagnostics()}>
+            <Pressable className={styles.copyButton} onPress={() => void copyDiagnostics()}>
               {copied ? (
-                <Check size={14} color={colors.statusGreen} />
+                <Check size={14} colorClassName="accent-green-500" />
               ) : (
-                <Copy size={14} color={colors.textSecondary} />
+                <Copy size={14} colorClassName="accent-muted-foreground" />
               )}
-              <Text style={styles.copyButtonText}>{copied ? 'Copied' : 'Copy diagnostics'}</Text>
+              <Text className={styles.copyButtonText}>
+                {copied ? 'Copied' : 'Copy diagnostics'}
+              </Text>
             </Pressable>
           </View>
           {entries.length > 0 ? (
             <ConnectionLog entries={[...entries]} title={selected.name} />
           ) : (
-            <Text style={styles.emptyText}>
+            <Text className={styles.emptyText}>
               No connection events yet this session. Events appear as the app dials this host.
             </Text>
           )}
         </>
       ) : (
-        <Text style={styles.emptyText}>No paired hosts.</Text>
+        <Text className={styles.emptyText}>No paired hosts.</Text>
       )}
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase,
-    padding: spacing.lg
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.lg
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.textPrimary
-  },
-  hostPicker: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginBottom: spacing.md
-  },
-  hostChip: {
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.md,
-    borderRadius: 16,
-    backgroundColor: colors.bgRaised
-  },
-  hostChipActive: {
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  hostChipText: {
-    fontSize: typography.metaSize,
-    color: colors.textSecondary,
-    maxWidth: 160
-  },
-  hostChipTextActive: {
-    color: colors.textPrimary,
-    fontWeight: '600'
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm
-  },
-  statusText: {
-    fontSize: typography.metaSize,
-    color: colors.textSecondary
-  },
-  copyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs + 2,
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.md,
-    borderRadius: 8,
-    backgroundColor: colors.bgRaised
-  },
-  copyButtonText: {
-    fontSize: typography.metaSize,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  emptyText: {
-    fontSize: typography.metaSize,
-    color: colors.textMuted,
-    lineHeight: 18
-  }
-})
+const styles = {
+  container: cn('flex-1 bg-background p-4'),
+  topRow: cn('flex-row items-center mb-4'),
+  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
+  heading: cn('text-[20px] font-bold text-foreground'),
+  hostPicker: cn('flex-row flex-wrap gap-2 mb-3'),
+  hostChip: cn('py-1.5 px-3 rounded-none bg-secondary'),
+  hostChipActive: cn('bg-card border border-border'),
+  hostChipText: cn('text-[12px] text-muted-foreground max-w-40'),
+  hostChipTextActive: cn('text-foreground font-semibold'),
+  statusRow: cn('flex-row items-center justify-between mb-2'),
+  statusText: cn('text-[12px] text-muted-foreground'),
+  copyButton: cn('flex-row items-center gap-1.5 py-1.5 px-3 rounded-none bg-secondary'),
+  copyButtonText: cn('text-[12px] font-semibold text-foreground'),
+  emptyText: cn('text-[12px] text-muted-foreground/60 leading-[18px]')
+} as const

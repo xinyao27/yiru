@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
+
+import { cn } from '@/style/class-names'
 
 import type { RuntimeWorktreeAgentRow } from '../../../desktop/src/shared/runtime-types'
 import { flattenAgentRowLineage } from '../worktree/agent-row-lineage'
@@ -19,7 +21,7 @@ export function WorktreeAgentList({ agents, now, unvisited }: Props) {
   // re-render (the shared useNow tick re-renders this list every 30s).
   const nodes = useMemo(() => flattenAgentRowLineage(agents), [agents])
   return (
-    <View style={styles.list}>
+    <View className={styles.list}>
       {nodes.map((node) => (
         <WorktreeAgentRow
           key={node.row.paneKey}
@@ -33,8 +35,6 @@ export function WorktreeAgentList({ agents, now, unvisited }: Props) {
   )
 }
 
-const styles = StyleSheet.create({
-  list: {
-    marginTop: 3
-  }
-})
+const styles = {
+  list: cn('mt-[3px]')
+} as const

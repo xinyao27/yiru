@@ -1,12 +1,13 @@
-import { Check, Download, Trash2 } from 'lucide-react-native'
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+
+import { Check, Download, Trash as Trash2 } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import {
   isModelInFlight,
   type MobileSpeechModel,
   type MobileSpeechSetup
 } from '../dictation/mobile-dictation-setup'
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
 
 type Props = {
   setup: MobileSpeechSetup
@@ -50,7 +51,10 @@ export function VoiceModelList({
   onDelete
 }: Props): React.JSX.Element {
   return (
-    <View style={disabled ? styles.disabled : undefined} pointerEvents={disabled ? 'none' : 'auto'}>
+    <View
+      className={cn(disabled ? styles.disabled : undefined)}
+      pointerEvents={disabled ? 'none' : 'auto'}
+    >
       {setup.models.map((model, idx) => {
         const anyBusy = busyAction !== null
         const isSelected = model.id === setup.selectedModelId
@@ -61,70 +65,69 @@ export function VoiceModelList({
         const deleteBusy = rowBusy && busyAction?.type === 'delete'
         return (
           <View key={model.id}>
-            {idx > 0 && <View style={styles.separator} />}
-            <View style={styles.modelRow}>
-              <View style={styles.modelInfo}>
-                <View style={styles.modelTitleRow}>
-                  <Text style={styles.modelLabel} numberOfLines={1}>
+            {idx > 0 && <View className={styles.separator} />}
+            <View className={styles.modelRow}>
+              <View className={styles.modelInfo}>
+                <View className={styles.modelTitleRow}>
+                  <Text className={styles.modelLabel} numberOfLines={1}>
                     {model.label}
                   </Text>
-                  {model.recommended ? <Text style={styles.recommended}>Recommended</Text> : null}
+                  {model.recommended ? (
+                    <Text className={styles.recommended}>Recommended</Text>
+                  ) : null}
                 </View>
-                <Text style={styles.modelMeta}>{modelMeta(model)}</Text>
+                <Text className={styles.modelMeta}>{modelMeta(model)}</Text>
               </View>
               {model.provider === 'openai' ? (
-                <Text style={styles.modelStateText}>
+                <Text className={styles.modelStateText}>
                   {model.status === 'ready' ? 'API key set' : 'Set up on desktop'}
                 </Text>
               ) : model.status === 'ready' ? (
-                <View style={styles.readyActions}>
+                <View className={styles.readyActions}>
                   {isSelected ? (
-                    <View style={styles.selectedTag}>
-                      <Check size={14} color={colors.statusGreen} strokeWidth={2.4} />
-                      <Text style={styles.selectedText}>In use</Text>
+                    <View className={styles.selectedTag}>
+                      <Check size={14} colorClassName="accent-green-500" />
+                      <Text className={styles.selectedText}>In use</Text>
                     </View>
                   ) : (
                     <Pressable
-                      style={({ pressed }) => [
-                        styles.actionButton,
-                        pressed && styles.actionPressed
-                      ]}
+                      className={cn(styles.actionButton, styles.actionPressedActive)}
                       disabled={anyBusy}
                       onPress={() => onUseModel(model)}
                     >
                       {selectBusy ? (
-                        <ActivityIndicator size="small" color={colors.textSecondary} />
+                        <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                       ) : (
-                        <Text style={styles.actionText}>Use</Text>
+                        <Text className={styles.actionText}>Use</Text>
                       )}
                     </Pressable>
                   )}
                   <Pressable
-                    style={({ pressed }) => [styles.iconButton, pressed && styles.actionPressed]}
+                    className={cn(styles.iconButton, styles.actionPressedActive)}
                     disabled={anyBusy}
                     onPress={() => onDelete(model)}
                     accessibilityLabel={`Delete ${model.label}`}
                   >
                     {deleteBusy ? (
-                      <ActivityIndicator size="small" color={colors.statusRed} />
+                      <ActivityIndicator size="small" colorClassName="accent-destructive" />
                     ) : (
-                      <Trash2 size={18} color={colors.statusRed} strokeWidth={2.2} />
+                      <Trash2 size={18} colorClassName="accent-destructive" />
                     )}
                   </Pressable>
                 </View>
               ) : inFlight ? (
-                <ActivityIndicator size="small" color={colors.textSecondary} />
+                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               ) : (
                 <Pressable
-                  style={({ pressed }) => [styles.iconButton, pressed && styles.actionPressed]}
+                  className={cn(styles.iconButton, styles.actionPressedActive)}
                   disabled={anyBusy}
                   onPress={() => onDownload(model)}
                   accessibilityLabel={`Download ${model.label}`}
                 >
                   {downloadBusy ? (
-                    <ActivityIndicator size="small" color={colors.textSecondary} />
+                    <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                   ) : (
-                    <Download size={18} color={colors.textSecondary} strokeWidth={2.2} />
+                    <Download size={18} colorClassName="accent-muted-foreground" />
                   )}
                 </Pressable>
               )}
@@ -136,52 +139,21 @@ export function VoiceModelList({
   )
 }
 
-const styles = StyleSheet.create({
-  disabled: { opacity: 0.5 },
-  modelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  modelInfo: { flex: 1, minWidth: 0 },
-  modelTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  modelLabel: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    flexShrink: 1
-  },
-  recommended: { color: colors.statusGreen, fontSize: 10, fontWeight: '700' },
-  modelMeta: { color: colors.textMuted, fontSize: typography.metaSize, marginTop: 2 },
-  modelStateText: { color: colors.textMuted, fontSize: typography.metaSize },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised
-  },
-  actionPressed: { opacity: 0.7 },
-  actionText: { color: colors.textSecondary, fontSize: typography.metaSize, fontWeight: '600' },
-  iconButton: {
-    width: 34,
-    height: 34,
-    borderRadius: radii.button,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.bgRaised
-  },
-  readyActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  selectedTag: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  selectedText: { color: colors.statusGreen, fontSize: typography.metaSize, fontWeight: '600' },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  }
-})
+const styles = {
+  disabled: cn('opacity-[0.5]'),
+  modelRow: cn('flex-row items-center justify-between gap-3 py-3 px-3.5'),
+  modelInfo: cn('flex-1 min-w-0'),
+  modelTitleRow: cn('flex-row items-center gap-2'),
+  modelLabel: cn('text-foreground text-[14px] font-medium shrink'),
+  recommended: cn('text-green-500 text-[10px] font-bold'),
+  modelMeta: cn('text-muted-foreground/60 text-[12px] mt-[2px]'),
+  modelStateText: cn('text-muted-foreground/60 text-[12px]'),
+  actionButton: cn('flex-row items-center gap-[5px] px-3 py-1.5 rounded-none bg-secondary'),
+  actionPressedActive: cn('active:opacity-[0.7]'),
+  actionText: cn('text-muted-foreground text-[12px] font-semibold'),
+  iconButton: cn('w-[34px] h-[34px] rounded-none items-center justify-center bg-secondary'),
+  readyActions: cn('flex-row items-center gap-1'),
+  selectedTag: cn('flex-row items-center gap-1'),
+  selectedText: cn('text-green-500 text-[12px] font-semibold'),
+  separator: cn('h-hairline bg-border mx-3')
+} as const

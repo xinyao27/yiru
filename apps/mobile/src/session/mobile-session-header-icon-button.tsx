@@ -1,13 +1,14 @@
 import type { ComponentType } from 'react'
 import { Pressable } from 'react-native'
 
+import { cn } from '@/style/class-names'
+
 import { styles } from '../../app/h/[hostId]/session/mobile-session-styles'
-import { colors } from '../theme/mobile-theme'
 
 type HeaderIconProps = {
   size?: number
   color?: string
-  strokeWidth?: number
+  colorClassName?: string
 }
 
 type MobileSessionHeaderIconButtonProps = {
@@ -25,16 +26,12 @@ export function MobileSessionHeaderIconButton({
 }: MobileSessionHeaderIconButtonProps) {
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.filesButton,
-        pressed && styles.filesButtonPressed,
-        active && styles.filesButtonActive
-      ]}
+      className={cn(styles.filesButton, 'active:bg-secondary', active && styles.filesButtonActive)}
       onPress={onPress}
       hitSlop={8}
       accessibilityLabel={accessibilityLabel}
     >
-      <Icon size={18} color={colors.textSecondary} strokeWidth={2.1} />
+      <Icon size={18} colorClassName="accent-muted-foreground" />
     </Pressable>
   )
 }

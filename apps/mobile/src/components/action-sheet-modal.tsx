@@ -1,13 +1,14 @@
-import { Edit3, Trash2, type LucideIcon } from 'lucide-react-native'
 import { useRef, type ReactNode } from 'react'
-import { ActivityIndicator, View, Text, Pressable, StyleSheet } from 'react-native'
+import { ActivityIndicator, View, Text, Pressable } from 'react-native'
 
-import { colors, spacing, typography } from '../theme/mobile-theme'
+import { PencilSimple as Edit3, Trash as Trash2, type Icon } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import { BottomDrawer } from './bottom-drawer'
 
 export type ActionSheetAction = {
   label: string
-  icon?: LucideIcon
+  icon?: Icon
   renderIcon?: () => ReactNode
   destructive?: boolean
   disabled?: boolean
@@ -26,7 +27,7 @@ type Props = {
   onClose: () => void
 }
 
-function iconForAction(label: string, destructive?: boolean, icon?: LucideIcon): LucideIcon {
+function iconForAction(label: string, destructive?: boolean, icon?: Icon): Icon {
   if (icon) {
     return icon
   }
@@ -47,29 +48,29 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
   return (
     <>
       {(title || message) && (
-        <View style={styles.header}>
+        <View className={styles.header}>
           {title ? (
-            <Text style={styles.title} numberOfLines={1}>
+            <Text className={styles.title} numberOfLines={1}>
               {title}
             </Text>
           ) : null}
-          {message ? <Text style={styles.message}>{message}</Text> : null}
+          {message ? <Text className={styles.message}>{message}</Text> : null}
         </View>
       )}
 
-      <View style={styles.actionGroup}>
+      <View className={styles.actionGroup}>
         {actions.map((action, i) => {
           const Icon = iconForAction(action.label, action.destructive, action.icon)
           const customIcon = action.renderIcon?.()
           return (
             <View key={action.label}>
-              {i > 0 && <View style={styles.separator} />}
+              {i > 0 && <View className={styles.separator} />}
               <Pressable
-                style={({ pressed }) => [
+                className={cn(
                   styles.action,
                   action.disabled && styles.actionDisabled,
-                  pressed && !action.disabled && !action.loading && styles.actionPressed
-                ]}
+                  !action.disabled && !action.loading && styles.actionPressedActive
+                )}
                 disabled={action.disabled || action.loading}
                 onPress={() => {
                   action.onPress()
@@ -81,23 +82,25 @@ export function ActionSheetContent({ title, message, actions, onClose }: Content
                 {customIcon ?? (
                   <Icon
                     size={16}
-                    color={action.destructive ? colors.statusRed : colors.textSecondary}
+                    colorClassName={
+                      action.destructive ? 'accent-destructive' : 'accent-muted-foreground'
+                    }
                   />
                 )}
-                <View style={styles.actionTextBlock}>
+                <View className={styles.actionTextBlock}>
                   <Text
-                    style={[
+                    className={cn(
                       styles.actionText,
                       action.destructive && styles.actionTextDestructive,
                       action.disabled && styles.actionTextDisabled
-                    ]}
+                    )}
                   >
                     {action.label}
                   </Text>
-                  {action.hint ? <Text style={styles.actionHint}>{action.hint}</Text> : null}
+                  {action.hint ? <Text className={styles.actionHint}>{action.hint}</Text> : null}
                 </View>
                 {action.loading ? (
-                  <ActivityIndicator size="small" color={colors.textSecondary} />
+                  <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                 ) : null}
               </Pressable>
             </View>
@@ -144,62 +147,18 @@ export function ActionSheetModal({ visible, title, message, actions, onClose }: 
   )
 }
 
-const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal: spacing.xs,
-    paddingBottom: spacing.sm
-  },
-  title: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: colors.textMuted
-  },
-  message: {
-    fontSize: 12,
-    color: colors.textMuted,
-    marginTop: 2
-  },
-  actionGroup: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: 12,
-    overflow: 'hidden'
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  },
-  action: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  actionDisabled: {
-    opacity: 0.58
-  },
-  actionPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  actionTextBlock: {
-    flex: 1,
-    minWidth: 0
-  },
-  actionText: {
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    color: colors.textPrimary
-  },
-  actionTextDisabled: {
-    color: colors.textSecondary
-  },
-  actionTextDestructive: {
-    color: colors.statusRed
-  },
-  actionHint: {
-    marginTop: 2,
-    fontSize: typography.metaSize,
-    color: colors.textMuted
-  }
-})
+const styles = {
+  header: cn('px-1 pb-2'),
+  title: cn('text-[13px] font-medium text-muted-foreground/60'),
+  message: cn('text-[12px] text-muted-foreground/60 mt-[2px]'),
+  actionGroup: cn('bg-card rounded-none overflow-hidden'),
+  separator: cn('h-hairline bg-border mx-3'),
+  action: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
+  actionDisabled: cn('opacity-[0.58]'),
+  actionPressedActive: cn('active:bg-secondary'),
+  actionTextBlock: cn('flex-1 min-w-0'),
+  actionText: cn('text-[14px] font-medium text-foreground'),
+  actionTextDisabled: cn('text-muted-foreground'),
+  actionTextDestructive: cn('text-destructive'),
+  actionHint: cn('mt-[2px] text-[12px] text-muted-foreground/60')
+} as const

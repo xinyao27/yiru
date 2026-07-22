@@ -1,12 +1,12 @@
-import { GitMerge, MessageSquare } from 'lucide-react-native'
 import { View } from 'react-native'
 
-import { colors } from '../theme/mobile-theme'
-import { statusColor } from './pr-sidebar/pr-sidebar-status-color'
+import { GitMerge, Chat as MessageSquare } from '@/components/uniwind-icons'
+
+import { statusColorClasses, type StatusColorClasses } from './pr-sidebar/pr-sidebar-status-color'
 import { prStateToken } from './pr-state-token'
 
-export function prStateColor(state: string): string {
-  return statusColor(prStateToken(state))
+export function prStateColorClasses(state: string): StatusColorClasses {
+  return statusColorClasses(prStateToken(state))
 }
 
 type Props = {
@@ -22,9 +22,9 @@ export function WorktreeMetaGlyphs({ comment, linkedPR, linkedGitLabMR }: Props)
     return null
   }
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-      {hasNotes && <MessageSquare size={11} color={colors.textMuted} />}
-      {hasReview && <GitMerge size={11} color={colors.textMuted} />}
+    <View className="flex-row items-center gap-[5px]">
+      {hasNotes && <MessageSquare size={11} colorClassName="accent-muted-foreground" />}
+      {hasReview && <GitMerge size={11} colorClassName="accent-muted-foreground" />}
     </View>
   )
 }

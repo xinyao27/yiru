@@ -1,8 +1,9 @@
-import { ShieldQuestion } from 'lucide-react-native'
 import { memo, useRef, useState } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import { SealQuestion as ShieldQuestion } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import type { MobileChatPermission } from './mobile-native-chat-permission'
 
 // Renders a detected agent permission ask as a card with tappable options.
@@ -30,28 +31,28 @@ function MobileNativeChatPermissionImpl({
     }
   }
   return (
-    <View style={styles.card}>
-      <View style={styles.header}>
-        <ShieldQuestion size={16} color={colors.accentBlue} strokeWidth={2} />
-        <Text style={styles.title}>{permission.title}</Text>
+    <View className={styles.card}>
+      <View className={styles.header}>
+        <ShieldQuestion size={16} colorClassName="accent-primary" />
+        <Text className={styles.title}>{permission.title}</Text>
       </View>
-      {permission.detail ? <Text style={styles.detail}>{permission.detail}</Text> : null}
-      <View style={styles.options}>
+      {permission.detail ? <Text className={styles.detail}>{permission.detail}</Text> : null}
+      <View className={styles.options}>
         {permission.options.map((option, index) => {
           const isPrimary = index === 0
           return (
             <Pressable
               key={`${option.send}:${option.label}`}
-              style={({ pressed }) => [
+              className={cn(
                 styles.option,
                 isPrimary ? styles.optionPrimary : styles.optionSecondary,
-                pressed && !submitting && styles.optionPressed
-              ]}
+                !submitting && styles.optionPressedActive
+              )}
               hitSlop={6}
               onPress={() => respond(option.send)}
               disabled={submitting}
             >
-              <Text style={[styles.optionText, isPrimary && styles.optionTextPrimary]}>
+              <Text className={cn(styles.optionText, isPrimary && styles.optionTextPrimary)}>
                 {option.label}
               </Text>
             </Pressable>
@@ -64,61 +65,16 @@ function MobileNativeChatPermissionImpl({
 
 export const MobileNativeChatPermission = memo(MobileNativeChatPermissionImpl)
 
-const styles = StyleSheet.create({
-  card: {
-    marginHorizontal: spacing.lg,
-    marginVertical: spacing.sm,
-    padding: spacing.md,
-    gap: spacing.sm,
-    borderRadius: radii.card,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  },
-  detail: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    lineHeight: typography.metaSize + 5
-  },
-  options: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm
-  },
-  option: {
-    minHeight: 44,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.button
-  },
-  optionPrimary: {
-    backgroundColor: colors.accentBlue
-  },
-  optionSecondary: {
-    backgroundColor: colors.bgRaised,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle
-  },
-  optionPressed: {
-    opacity: 0.7
-  },
-  optionText: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  },
-  optionTextPrimary: {
-    color: colors.onAccent
-  }
-})
+const styles = {
+  card: cn('mx-4 my-2 p-3 gap-2 rounded-none border-hairline border-border bg-card'),
+  header: cn('flex-row items-center gap-2'),
+  title: cn('text-foreground text-[14px] font-semibold'),
+  detail: cn('text-muted-foreground text-[12px] leading-[17px]'),
+  options: cn('flex-row flex-wrap gap-2'),
+  option: cn('min-h-11 justify-center px-3 py-2 rounded-none'),
+  optionPrimary: cn('bg-primary'),
+  optionSecondary: cn('bg-secondary border-hairline border-border'),
+  optionPressedActive: cn('active:opacity-[0.7]'),
+  optionText: cn('text-foreground text-[14px] font-semibold'),
+  optionTextPrimary: cn('text-primary-foreground')
+} as const

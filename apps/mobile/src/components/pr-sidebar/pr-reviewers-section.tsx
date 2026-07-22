@@ -1,11 +1,12 @@
-import { UserPlus, X } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+
+import { UserPlus, X } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type { GitHubWorkItemDetails } from '../../../../desktop/src/shared/types'
 import { isPrSidebarDetailsPlaceholder } from '../../session/mobile-pr-sidebar-state'
 import type { MobilePrActions } from '../../session/use-mobile-pr-actions'
-import { colors } from '../../theme/mobile-theme'
 import type { RpcClient } from '../../transport/rpc-client'
 import { mobilePrSidebarStyles as styles } from './mobile-pr-sidebar-styles'
 import { getPRReviewerRows } from './pr-checks-presentation'
@@ -59,52 +60,54 @@ export function PRReviewersSection({ details, actions, client, worktreeId }: Pro
 
   const addButton = (
     <Pressable
-      style={styles.iconButton}
+      className={styles.iconButton}
       onPress={() => setPickerOpen(true)}
       accessibilityRole="button"
       accessibilityLabel="Add or remove reviewers"
     >
-      <UserPlus size={16} color={colors.textSecondary} strokeWidth={2.2} />
+      <UserPlus size={16} colorClassName="accent-muted-foreground" />
     </Pressable>
   )
 
   return (
     <PRSection title="Reviewers" trailing={addButton}>
       {loadingDetails ? (
-        <View style={styles.reviewersStatus}>
-          <ActivityIndicator color={colors.textSecondary} />
-          <Text style={styles.emptyText}>Loading reviewers…</Text>
+        <View className={styles.reviewersStatus}>
+          <ActivityIndicator colorClassName="accent-muted-foreground" />
+          <Text className={styles.emptyText}>Loading reviewers…</Text>
         </View>
       ) : detailsFailed ? (
-        <Text style={styles.emptyText}>Could not load reviewers. Tap refresh to try again.</Text>
+        <Text className={styles.emptyText}>
+          Could not load reviewers. Tap refresh to try again.
+        </Text>
       ) : rows.length === 0 ? (
-        <Text style={styles.emptyText}>No reviewers requested</Text>
+        <Text className={styles.emptyText}>No reviewers requested</Text>
       ) : (
         rows.map((row) => {
           const busy = actions.isBusy({ kind: 'reviewer', login: row.login })
           return (
-            <View key={row.login} style={styles.row}>
-              <View style={styles.rowMain}>
-                <Text style={styles.rowTitle} numberOfLines={1}>
+            <View key={row.login} className={styles.row}>
+              <View className={styles.rowMain}>
+                <Text className={styles.rowTitle} numberOfLines={1}>
                   {row.name ? `${row.name} (${row.login})` : row.login}
                 </Text>
               </View>
               {/* Neutral gray like the desktop PR page (the label text carries the
                   state); keeps the sidebar mostly monochrome. */}
-              <Text style={[styles.rowStatus, { color: colors.textSecondary }]}>
+              <Text className={cn(styles.rowStatus, 'text-muted-foreground')}>
                 {row.stateLabel}
               </Text>
               <Pressable
-                style={styles.rowTrailing}
+                className={styles.rowTrailing}
                 onPress={() => actions.removeReviewer(row.login)}
                 disabled={busy}
                 accessibilityRole="button"
                 accessibilityLabel={`Remove ${row.login}`}
               >
                 {busy ? (
-                  <ActivityIndicator color={colors.textSecondary} />
+                  <ActivityIndicator colorClassName="accent-muted-foreground" />
                 ) : (
-                  <X size={14} color={colors.textSecondary} strokeWidth={2.2} />
+                  <X size={14} colorClassName="accent-muted-foreground" />
                 )}
               </Pressable>
             </View>

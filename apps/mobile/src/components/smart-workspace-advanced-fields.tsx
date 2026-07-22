@@ -1,6 +1,7 @@
-import { Platform, StyleSheet, Switch, Text, TextInput, View } from 'react-native'
+import { Switch, Text, TextInput, View } from 'react-native'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import { cn } from '@/style/class-names'
+
 import type { MobileComposerSource } from '../workspace-create/use-mobile-composer-source'
 
 type Props = {
@@ -17,14 +18,14 @@ export function SmartWorkspaceAdvancedFields({ composer, selectedRepoIsGit }: Pr
   return (
     <>
       {selection ? (
-        <View style={styles.field}>
-          <Text style={styles.label}>Name</Text>
+        <View className={styles.field}>
+          <Text className={styles.label}>Name</Text>
           <TextInput
-            style={styles.input}
+            className={styles.input}
             value={composer.name}
             onChangeText={composer.setName}
             placeholder="Workspace name"
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColorClassName="accent-muted-foreground"
             autoCapitalize="none"
             autoCorrect={false}
           />
@@ -32,14 +33,14 @@ export function SmartWorkspaceAdvancedFields({ composer, selectedRepoIsGit }: Pr
       ) : null}
 
       {showBranchOverride ? (
-        <View style={styles.field}>
-          <Text style={styles.label}>Branch name</Text>
+        <View className={styles.field}>
+          <Text className={styles.label}>Branch name</Text>
           <TextInput
-            style={styles.input}
+            className={styles.input}
             value={composer.branchNameOverride ?? ''}
             onChangeText={composer.handleBranchNameOverrideChange}
             placeholder="Derived from name"
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColorClassName="accent-muted-foreground"
             autoCapitalize="none"
             autoCorrect={false}
           />
@@ -47,17 +48,19 @@ export function SmartWorkspaceAdvancedFields({ composer, selectedRepoIsGit }: Pr
       ) : null}
 
       {composer.reuseEligibleBranch ? (
-        <View style={styles.field}>
-          <View style={styles.reuseRow}>
-            <Text style={styles.reuseLabel} numberOfLines={1}>
+        <View className={styles.field}>
+          <View className={styles.reuseRow}>
+            <Text className={styles.reuseLabel} numberOfLines={1}>
               Reuse branch “{composer.reuseEligibleBranch}”
             </Text>
             <Switch
+              style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
               value={composer.reuseSelectedBranch}
               onValueChange={composer.setReuseSelectedBranch}
-              trackColor={{ false: colors.borderSubtle, true: colors.textSecondary }}
-              thumbColor={colors.textPrimary}
-              style={styles.reuseSwitch}
+              trackColorOffClassName="accent-border"
+              trackColorOnClassName="accent-muted-foreground"
+              thumbColorClassName="accent-foreground"
+              ios_backgroundColorClassName="accent-border"
             />
           </View>
         </View>
@@ -66,38 +69,12 @@ export function SmartWorkspaceAdvancedFields({ composer, selectedRepoIsGit }: Pr
   )
 }
 
-const styles = StyleSheet.create({
-  field: {
-    marginBottom: spacing.md
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: colors.textSecondary,
-    marginBottom: spacing.xs
-  },
-  input: {
-    backgroundColor: colors.bgRaised,
-    color: colors.textPrimary,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: Platform.OS === 'ios' ? spacing.sm + 2 : spacing.sm,
-    fontSize: typography.bodySize,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  reuseRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm
-  },
-  reuseLabel: {
-    flex: 1,
-    fontSize: 13,
-    color: colors.textSecondary
-  },
-  reuseSwitch: {
-    transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }]
-  }
-})
+const styles = {
+  field: cn('mb-3'),
+  label: cn('text-[13px] font-medium text-muted-foreground mb-1'),
+  input: cn(
+    'bg-secondary text-foreground rounded-none px-3 py-2 ios:py-2.5 text-[14px] border border-border'
+  ),
+  reuseRow: cn('flex-row items-center justify-between gap-2'),
+  reuseLabel: cn('flex-1 text-[13px] text-muted-foreground')
+} as const

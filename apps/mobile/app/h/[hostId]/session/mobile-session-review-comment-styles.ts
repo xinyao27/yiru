@@ -1,189 +1,39 @@
-import { StyleSheet } from 'react-native'
+import { cn } from '@/style/class-names'
 
-import { colors, spacing, radii, typography } from '../../../../src/theme/mobile-theme'
-
-export const mobileSessionReviewCommentStyles = StyleSheet.create({
-  diffCommentAddButton: {
-    width: 26,
-    height: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button
-  },
-  diffCommentAddButtonPressed: {
-    backgroundColor: colors.bgPanel
-  },
-  diffCommentButtonDisabled: {
-    opacity: 0.45
-  },
-  diffCommentList: {
-    gap: spacing.xs,
-    marginLeft: 44,
-    marginRight: spacing.sm,
-    marginTop: spacing.xs
-  },
-  diffCommentCard: {
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgPanel,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs
-  },
-  diffCommentHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    marginBottom: 2
-  },
-  diffCommentMeta: {
-    flex: 1,
-    color: colors.textMuted,
-    fontSize: typography.metaSize,
-    fontWeight: '600'
-  },
-  diffCommentDeleteButton: {
-    width: 22,
-    height: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 11
-  },
-  diffCommentBody: {
-    color: colors.textPrimary,
-    fontSize: typography.metaSize,
-    lineHeight: 17
-  },
-  diffCommentComposer: {
-    gap: spacing.xs,
-    marginLeft: 44,
-    marginRight: spacing.sm,
-    marginTop: spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgPanel,
-    padding: spacing.sm
-  },
-  diffCommentInput: {
-    minHeight: 70,
-    height: 70,
-    marginRight: 0,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm
-  },
-  diffCommentComposerActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: spacing.xs
-  },
-  diffCommentSecondaryAction: {
-    minHeight: 30,
-    justifyContent: 'center',
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.md
-  },
-  diffCommentSecondaryText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontWeight: '600'
-  },
-  diffCommentPrimaryAction: {
-    minHeight: 30,
-    justifyContent: 'center',
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised,
-    paddingHorizontal: spacing.md
-  },
-  diffCommentPrimaryText: {
-    color: colors.textPrimary,
-    fontSize: typography.metaSize,
-    fontWeight: '700'
-  },
-  markdownRefreshButton: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.bgRaised,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs
-  },
-  markdownButtonDisabled: {
-    opacity: 0.45
-  },
-  markdownRefreshText: {
-    color: colors.textPrimary,
-    fontSize: 13,
-    fontWeight: '600'
-  },
-  markdownFloatingBar: {
-    position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
-    bottom: spacing.lg,
-    alignItems: 'flex-end',
-    gap: spacing.xs
-  },
-  markdownFloatingStatus: {
-    maxWidth: '100%',
-    alignSelf: 'flex-end',
-    overflow: 'hidden',
-    color: colors.textSecondary,
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    fontSize: typography.metaSize
-  },
-  markdownFloatingActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-end',
-    gap: spacing.xs
-  },
-  markdownFloatingButton: {
-    minHeight: 34,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs
-  },
-  markdownSaveButton: {
-    backgroundColor: colors.bgRaised
-  },
-  markdownFloatingButtonText: {
-    color: colors.textPrimary,
-    fontSize: 13,
-    fontWeight: '600'
-  },
-  toast: {
-    position: 'absolute',
-    bottom: spacing.lg,
-    alignSelf: 'center',
-    left: 0,
-    right: 0,
-    alignItems: 'center'
-  },
-  toastText: {
-    backgroundColor: colors.bgRaised,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    color: colors.textPrimary,
-    fontSize: 13,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.button,
-    overflow: 'hidden'
-  }
-})
+export const mobileSessionReviewCommentStyles = {
+  diffCommentAddButton: cn('w-[26px] h-[22px] items-center justify-center rounded-none'),
+  diffCommentAddButtonPressed: cn('bg-card'),
+  diffCommentButtonDisabled: cn('opacity-[0.45]'),
+  diffCommentList: cn('gap-1 ml-11 mr-2 mt-1'),
+  diffCommentCard: cn('border border-border rounded-none bg-card px-2 py-1'),
+  diffCommentHeader: cn('flex-row items-center gap-1 mb-[2px]'),
+  diffCommentMeta: cn('flex-1 text-muted-foreground/60 text-[12px] font-semibold'),
+  diffCommentDeleteButton: cn('w-[22px] h-[22px] items-center justify-center rounded-none'),
+  diffCommentBody: cn('text-foreground text-[12px] leading-[17px]'),
+  diffCommentComposer: cn('gap-1 ml-11 mr-2 mt-1 border border-border rounded-none bg-card p-2'),
+  diffCommentInput: cn('min-h-[70px] h-[70px] mr-0 pt-2 pb-2'),
+  diffCommentComposerActions: cn('flex-row justify-end gap-1'),
+  diffCommentSecondaryAction: cn('min-h-[30px] justify-center rounded-none px-3'),
+  diffCommentSecondaryText: cn('text-muted-foreground text-[12px] font-semibold'),
+  diffCommentPrimaryAction: cn('min-h-[30px] justify-center rounded-none bg-secondary px-3'),
+  diffCommentPrimaryText: cn('text-foreground text-[12px] font-bold'),
+  markdownRefreshButton: cn(
+    'self-start flex-row items-center gap-1 bg-secondary border border-border rounded-none px-3 py-1'
+  ),
+  markdownButtonDisabled: cn('opacity-[0.45]'),
+  markdownRefreshText: cn('text-foreground text-[13px] font-semibold'),
+  markdownFloatingBar: cn('absolute left-3 right-3 bottom-4 items-end gap-1'),
+  markdownFloatingStatus: cn(
+    'max-w-full self-end overflow-hidden text-muted-foreground bg-card border border-border rounded-none px-2 py-1 text-[12px]'
+  ),
+  markdownFloatingActions: cn('flex-row flex-wrap justify-end gap-1'),
+  markdownFloatingButton: cn(
+    'min-h-[34px] flex-row items-center gap-1 bg-card border border-border rounded-none px-3 py-1'
+  ),
+  markdownSaveButton: cn('bg-secondary'),
+  markdownFloatingButtonText: cn('text-foreground text-[13px] font-semibold'),
+  toast: cn('absolute bottom-4 self-center left-0 right-0 items-center'),
+  toastText: cn(
+    'bg-secondary border-hairline border-border text-foreground text-[13px] px-4 py-2 rounded-none overflow-hidden'
+  )
+} as const

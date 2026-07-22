@@ -1,222 +1,50 @@
-import { StyleSheet } from 'react-native'
+import { cn } from '@/style/class-names'
 
-import { colors, spacing, radii, typography } from '../../../../src/theme/mobile-theme'
-
-export const mobileSessionCommandInputStyles = StyleSheet.create({
-  createWarningBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-    backgroundColor: colors.bgPanel,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm
-  },
-  createWarningText: {
-    flex: 1,
-    color: colors.textPrimary,
-    fontSize: 12,
-    lineHeight: 16
-  },
-  createWarningDismiss: {
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -4
-  },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl
-  },
-  emptyText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    marginBottom: spacing.lg
-  },
-  createError: {
-    color: colors.statusRed,
-    fontSize: 13,
-    marginBottom: spacing.sm
-  },
-  emptyActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: spacing.sm
-  },
-  createButton: {
-    backgroundColor: colors.bgRaised,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.sm + 2,
-    borderRadius: radii.button
-  },
-  createButtonDisabled: {
-    opacity: 0.5
-  },
-  createButtonText: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  },
-  commandDock: {
-    zIndex: 20
-  },
-  accessoryBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel
-  },
-  accessoryScroll: {
-    flex: 1,
-    minWidth: 0
-  },
-  accessoryContent: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    gap: spacing.xs
-  },
-  accessoryKey: {
-    backgroundColor: colors.bgRaised,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.xs,
-    borderRadius: radii.button,
-    minWidth: 36,
-    alignItems: 'center'
-  },
-  accessoryKeyPressed: {
-    backgroundColor: colors.borderSubtle
-  },
-  accessoryKeyActive: {
-    backgroundColor: colors.textPrimary
-  },
-  customAccessoryKey: {
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  accessoryKeyDisabled: {
-    opacity: 0.35
-  },
-  accessoryKeyText: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    fontFamily: typography.monoFamily
-  },
-  accessoryKeyTextActive: {
-    color: colors.bgBase,
-    fontWeight: '700'
-  },
-  accessoryKeyTextDisabled: {
-    color: colors.textMuted
-  },
-  keyboardDismissKey: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: spacing.sm,
-    marginVertical: spacing.xs,
-    backgroundColor: colors.bgRaised,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: 0,
-    borderRadius: radii.button,
-    minWidth: 36,
-    height: 28
-  },
-  keyboardDismissGlyph: {
-    alignItems: 'center',
-    height: 18,
-    justifyContent: 'flex-start',
-    position: 'relative',
-    width: 18
-  },
-  keyboardDismissChevron: {
-    bottom: -2,
-    position: 'absolute'
-  },
-  inputBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 46,
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel
-  },
-  textInput: {
-    flex: 1,
-    height: 34,
-    backgroundColor: colors.bgRaised,
-    color: colors.textPrimary,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 0,
-    fontSize: 14,
-    fontFamily: typography.monoFamily,
-    marginRight: spacing.sm
-  },
-  liveInputBar: {
-    gap: spacing.sm
-  },
-
-  liveInputFocusTarget: {
-    flex: 1,
-    minHeight: 34,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.bgRaised,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.sm + 2
-  },
-
-  liveInputFocusTargetPressed: {
-    backgroundColor: colors.borderSubtle
-  },
-
-  liveInputFocusTargetDisabled: {
-    opacity: 0.45
-  },
-
-  liveInputCapture: {
-    position: 'absolute',
-    opacity: 0,
-    width: 1,
-    height: 1,
-    color: colors.textPrimary
-  },
-  sendButton: {
-    backgroundColor: colors.bgRaised,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  dictationButton: {
-    backgroundColor: colors.bgRaised,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm
-  },
-  dictationButtonActive: {
-    backgroundColor: colors.bgPanel,
-    borderColor: colors.textSecondary
-  },
-  sendButtonDisabled: {
-    opacity: 0.35
-  }
-})
+export const mobileSessionCommandInputStyles = {
+  createWarningBanner: cn(
+    'flex-row items-start gap-2 bg-card border-b-hairline border-b-border px-3 py-2'
+  ),
+  createWarningText: cn('flex-1 text-foreground text-[12px] leading-[16px]'),
+  createWarningDismiss: cn('w-6 h-6 items-center justify-center mt-[-4px]'),
+  emptyState: cn('flex-1 items-center justify-center p-6'),
+  emptyText: cn('text-muted-foreground text-[14px] mb-4'),
+  createError: cn('text-destructive text-[13px] mb-2'),
+  emptyActions: cn('flex-row flex-wrap justify-center gap-2'),
+  createButton: cn('bg-secondary border border-border px-6 py-2.5 rounded-none'),
+  createButtonDisabled: cn('opacity-[0.5]'),
+  createButtonText: cn('text-foreground text-[14px] font-semibold'),
+  commandDock: cn('z-[20]'),
+  accessoryBar: cn('flex-row items-center border-t border-t-border bg-card'),
+  accessoryScroll: cn('flex-1 min-w-0'),
+  accessoryContent: cn('px-2 py-1 gap-1'),
+  accessoryKey: cn('bg-secondary px-2.5 py-1 rounded-none min-w-9 items-center'),
+  accessoryKeyPressed: cn('bg-border'),
+  accessoryKeyActive: cn('bg-foreground'),
+  customAccessoryKey: cn('border border-border'),
+  accessoryKeyDisabled: cn('opacity-[0.35]'),
+  accessoryKeyText: cn('text-muted-foreground text-[12px] font-mono'),
+  accessoryKeyTextActive: cn('text-background font-bold'),
+  accessoryKeyTextDisabled: cn('text-muted-foreground/60'),
+  keyboardDismissKey: cn(
+    'items-center justify-center ml-2 my-1 bg-secondary px-2.5 py-0 rounded-none min-w-9 h-7'
+  ),
+  keyboardDismissGlyph: cn('items-center h-[18px] justify-start relative w-[18px]'),
+  keyboardDismissChevron: cn('bottom-[-2px] absolute'),
+  inputBar: cn('flex-row items-center min-h-[46px] py-1.5 px-3 border-t border-t-border bg-card'),
+  textInput: cn(
+    'flex-1 h-[34px] bg-secondary text-foreground rounded-none px-3 py-0 text-[14px] font-mono mr-2'
+  ),
+  liveInputBar: cn('gap-2'),
+  liveInputFocusTarget: cn(
+    'flex-1 min-h-[34px] flex-row items-center gap-2 bg-secondary border border-border rounded-none px-2.5'
+  ),
+  liveInputFocusTargetPressed: cn('bg-border'),
+  liveInputFocusTargetDisabled: cn('opacity-[0.45]'),
+  liveInputCapture: cn('absolute opacity-[0] w-[1px] h-[1px] text-foreground'),
+  sendButton: cn('bg-secondary w-[34px] h-[34px] rounded-none items-center justify-center'),
+  dictationButton: cn(
+    'bg-secondary w-[34px] h-[34px] rounded-none border border-transparent items-center justify-center mr-2'
+  ),
+  dictationButtonActive: cn('bg-card border-muted-foreground'),
+  sendButtonDisabled: cn('opacity-[0.35]')
+} as const

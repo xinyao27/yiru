@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Text, View, type LayoutChangeEvent } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import { SafeAreaView, useSafeAreaInsets } from '@/components/uniwind-native-components'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
 import type { useMobileDiffReviewController } from '../session/use-mobile-diff-review-controller'
@@ -51,7 +52,7 @@ export function MobileDiffReviewScreenView({ controller, onBack }: Props) {
   }, [])
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView className={styles.safeArea} edges={['top']}>
       <MobileDiffReviewHeader
         filter={controller.filter}
         isWideLayout={isWideLayout}
@@ -66,10 +67,10 @@ export function MobileDiffReviewScreenView({ controller, onBack }: Props) {
         onOpenPRSidebar={controller.openPRSidebar}
         onSelectFilter={controller.selectFilter}
       />
-      <View style={{ flex: 1, flexDirection: 'row' }} onLayout={handleContentRowLayout}>
+      <View className="flex-1 flex-row" onLayout={handleContentRowLayout}>
         {/* Diff column keeps its full layout; in wide mode the docked sidebar sits
             beside it and each column scrolls independently. */}
-        <View style={{ flex: 1, minWidth: 0 }}>
+        <View className="min-w-0 flex-1">
           {controller.currentItem ? (
             <MobileDiffReviewFileSummary
               currentIndex={controller.currentIndex}
@@ -83,8 +84,8 @@ export function MobileDiffReviewScreenView({ controller, onBack }: Props) {
             />
           ) : null}
           {controller.actionError ? (
-            <View style={styles.actionError}>
-              <Text style={styles.actionErrorText}>{controller.actionError}</Text>
+            <View className={styles.actionError}>
+              <Text className={styles.actionErrorText}>{controller.actionError}</Text>
             </View>
           ) : null}
           <MobileDiffReviewBody
@@ -113,7 +114,7 @@ export function MobileDiffReviewScreenView({ controller, onBack }: Props) {
           ) : null}
         </View>
         {showInlineDock ? (
-          <View style={mobilePrSidebarStyles.dockColumn}>
+          <View className={mobilePrSidebarStyles.dockColumn}>
             <MobilePRSidebar
               state={controller.prSidebarState}
               onRetry={controller.retryPRSidebar}

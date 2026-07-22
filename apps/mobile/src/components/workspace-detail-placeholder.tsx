@@ -1,49 +1,27 @@
-import { SquareTerminal } from 'lucide-react-native'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text } from 'react-native'
 
-import { colors, spacing } from '../theme/mobile-theme'
+import { TerminalWindow as SquareTerminal } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 // Empty detail pane shown beside the worktree-list sidebar on wide
 // tablet/foldable layouts until the user opens a workspace.
 export function WorkspaceDetailPlaceholder() {
   return (
-    <View style={styles.container}>
-      <View style={styles.icon}>
-        <SquareTerminal size={28} color={colors.textMuted} />
+    <View className={styles.container}>
+      <View className={styles.icon}>
+        <SquareTerminal size={28} colorClassName="accent-muted-foreground" />
       </View>
-      <Text style={styles.title}>No workspace open</Text>
-      <Text style={styles.body}>Pick a workspace from the sidebar to open its terminal here.</Text>
+      <Text className={styles.title}>No workspace open</Text>
+      <Text className={styles.body}>
+        Pick a workspace from the sidebar to open its terminal here.
+      </Text>
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.xl,
-    backgroundColor: colors.bgBase
-  },
-  icon: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.bgPanel,
-    marginBottom: spacing.lg
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: spacing.xs
-  },
-  body: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    textAlign: 'center',
-    maxWidth: 320
-  }
-})
+const styles = {
+  container: cn('flex-1 items-center justify-center px-6 bg-background'),
+  icon: cn('w-14 h-14 rounded-none items-center justify-center bg-card mb-4'),
+  title: cn('text-foreground text-[16px] font-semibold mb-1'),
+  body: cn('text-muted-foreground text-[13px] text-center max-w-80')
+} as const

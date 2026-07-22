@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { Animated, Easing, StyleSheet, View } from 'react-native'
+import { Animated, Easing, View } from 'react-native'
+
+import { cn } from '@/style/class-names'
 
 type WorktreeStatus = 'working' | 'active' | 'permission' | 'done' | 'inactive'
 
@@ -9,12 +11,12 @@ type WorktreeStatus = 'working' | 'active' | 'permission' | 'done' | 'inactive'
 // 'working', same emerald dot for 'active'/'done', same neutral-500 @ 40%
 // for 'inactive', same red for 'permission'. Diverging palettes here lose
 // the design intent ('moving' vs 'alive' vs 'completed') the desktop encodes.
-const STATUS_COLORS: Record<WorktreeStatus, string> = {
-  working: '#eab308',
-  active: '#10b981',
-  done: '#10b981',
-  permission: '#ef4444',
-  inactive: 'rgba(115,115,115,0.4)'
+const STATUS_COLOR_CLASSES: Record<WorktreeStatus, string> = {
+  working: 'border-yellow-500',
+  active: 'bg-emerald-500',
+  done: 'bg-emerald-500',
+  permission: 'bg-red-500',
+  inactive: 'bg-neutral-500/40'
 }
 
 export function AgentSpinner({ status }: { status: WorktreeStatus }) {
@@ -36,7 +38,7 @@ export function AgentSpinner({ status }: { status: WorktreeStatus }) {
     spinValue.setValue(0)
   }, [status, spinValue])
 
-  const color = STATUS_COLORS[status] ?? STATUS_COLORS.inactive
+  const colorClassName = STATUS_COLOR_CLASSES[status] ?? STATUS_COLOR_CLASSES.inactive
 
   if (status === 'working') {
     const rotate = spinValue.interpolate({
@@ -44,40 +46,28 @@ export function AgentSpinner({ status }: { status: WorktreeStatus }) {
       outputRange: ['0deg', '360deg']
     })
     return (
-      <View style={styles.wrapper}>
-        <Animated.View style={[styles.spinner, { borderColor: color, transform: [{ rotate }] }]} />
+      <View className={styles.wrapper}>
+        <Animated.View
+          className={cn(styles.spinner, colorClassName)}
+          style={[{ transform: [{ rotate }] }]}
+        />
       </View>
     )
   }
 
   return (
-    <View style={styles.wrapper}>
-      <View style={[styles.dot, { backgroundColor: color }]} />
+    <View className={styles.wrapper}>
+      <View className={cn(styles.dot, colorClassName)} />
     </View>
   )
 }
 
-const styles = StyleSheet.create({
+const styles = {
   // Why: 12x12 wrapper centered around an 8x8 inner glyph mirrors the
   // desktop's `inline-flex h-3 w-3 ... items-center justify-center` shell
   // around `size-2` indicator — keeps row height/baseline alignment stable
   // across status transitions.
-  wrapper: {
-    width: 12,
-    height: 12,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4
-  },
-  spinner: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderTopColor: 'transparent'
-  }
-})
+  wrapper: cn('w-3 h-3 items-center justify-center'),
+  dot: cn('w-2 h-2 rounded-none'),
+  spinner: cn('w-2 h-2 rounded-none border-2 border-t-transparent')
+} as const

@@ -1,130 +1,33 @@
-import { StyleSheet } from 'react-native'
+import { cn } from '@/style/class-names'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
-
-export const mobileDiffReviewControlStyles = StyleSheet.create({
-  footer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    gap: spacing.sm,
-    backgroundColor: colors.bgBase,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.borderSubtle
-  },
-  fileActionRow: {
-    flexDirection: 'row',
-    gap: spacing.sm
-  },
-  footerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm
-  },
-  navButton: {
-    width: 44,
-    minHeight: 44,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  footerButton: {
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.md,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised
-  },
-  footerButtonText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    fontWeight: '700'
-  },
-  primaryButton: {
-    flex: 1,
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.md,
-    borderRadius: radii.button,
-    backgroundColor: colors.textPrimary
-  },
-  primaryButtonDone: {
-    backgroundColor: colors.statusGreen
-  },
-  primaryButtonText: {
-    color: colors.bgBase,
-    fontSize: typography.bodySize,
-    fontWeight: '800'
-  },
-  secondaryButton: {
-    flex: 1,
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.md,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised
-  },
-  secondaryButtonText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    fontWeight: '700'
-  },
-  destructiveText: {
-    color: colors.statusRed,
-    fontSize: typography.bodySize,
-    fontWeight: '700'
-  },
-  buttonPressed: {
-    opacity: 0.76
-  },
-  buttonDisabled: {
-    opacity: 0.45
-  },
-  composerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: spacing.md,
-    marginBottom: spacing.md
-  },
-  drawerTitle: {
-    color: colors.textPrimary,
-    fontSize: typography.titleSize,
-    fontWeight: '700'
-  },
-  drawerSubtitle: {
-    color: colors.textMuted,
-    fontSize: typography.metaSize,
-    marginTop: 2
-  },
-  composerInput: {
-    minHeight: 112,
-    borderRadius: radii.input,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    lineHeight: 20,
-    padding: spacing.md,
-    textAlignVertical: 'top'
-  },
-  drawerButtonRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginTop: spacing.md
-  }
-})
+export const mobileDiffReviewControlStyles = {
+  footer: cn(
+    'absolute left-0 right-0 bottom-0 px-4 pt-2 gap-2 bg-background border-t-hairline border-t-border'
+  ),
+  fileActionRow: cn('flex-row gap-2'),
+  footerRow: cn('flex-row items-center gap-2'),
+  navButton: cn('w-11 min-h-11 rounded-none bg-secondary items-center justify-center'),
+  footerButton: cn(
+    'min-h-11 flex-row items-center justify-center gap-1 px-3 rounded-none bg-secondary'
+  ),
+  footerButtonText: cn('text-muted-foreground text-[14px] font-bold'),
+  primaryButton: cn(
+    'flex-1 min-h-11 flex-row items-center justify-center gap-1 px-3 rounded-none bg-foreground'
+  ),
+  primaryButtonDone: cn('bg-green-500'),
+  primaryButtonText: cn('text-background text-[14px] font-extrabold'),
+  secondaryButton: cn(
+    'flex-1 min-h-11 flex-row items-center justify-center gap-1 px-3 rounded-none bg-secondary'
+  ),
+  secondaryButtonText: cn('text-muted-foreground text-[14px] font-bold'),
+  destructiveText: cn('text-destructive text-[14px] font-bold'),
+  buttonPressed: cn('opacity-[0.76]'),
+  buttonDisabled: cn('opacity-[0.45]'),
+  composerHeader: cn('flex-row justify-between items-center gap-3 mb-3'),
+  drawerTitle: cn('text-foreground text-[18px] font-bold'),
+  drawerSubtitle: cn('text-muted-foreground/60 text-[12px] mt-[2px]'),
+  composerInput: cn(
+    'min-h-28 rounded-none border-hairline border-border bg-card text-foreground text-[14px] leading-[20px] p-3'
+  ),
+  drawerButtonRow: cn('flex-row gap-2 mt-3')
+} as const

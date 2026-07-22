@@ -1,15 +1,8 @@
 import { useState } from 'react'
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  StyleSheet,
-  Platform,
-  type KeyboardTypeOptions
-} from 'react-native'
+import { View, Text, TextInput, Pressable, type KeyboardTypeOptions } from 'react-native'
 
-import { colors, spacing, radii, typography } from '../theme/mobile-theme'
+import { cn } from '@/style/class-names'
+
 import { BottomDrawer } from './bottom-drawer'
 
 type Props = {
@@ -65,17 +58,17 @@ export function TextInputModal({
 
   return (
     <BottomDrawer visible={visible} onClose={onCancel}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
-        {message ? <Text style={styles.message}>{message}</Text> : null}
+      <View className={styles.header}>
+        <Text className={styles.title}>{title}</Text>
+        {message ? <Text className={styles.message}>{message}</Text> : null}
       </View>
 
       <TextInput
-        style={styles.input}
+        className={styles.input}
         value={value}
         onChangeText={setValue}
         placeholder={placeholder}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColorClassName="accent-muted-foreground"
         autoFocus
         autoCapitalize="none"
         autoCorrect={false}
@@ -83,92 +76,48 @@ export function TextInputModal({
         keyboardType={keyboardType}
         returnKeyType="done"
         onSubmitEditing={handleSubmit}
-        selectionColor={colors.accentBlue}
+        selectionColorClassName="accent-primary"
       />
 
-      <View style={styles.actions}>
+      <View className={styles.actions}>
         <Pressable
-          style={({ pressed }) => [styles.cancelButton, pressed && styles.buttonPressed]}
+          className={cn(styles.cancelButton, styles.buttonPressedActive)}
           onPress={onCancel}
         >
-          <Text style={styles.cancelText}>Cancel</Text>
+          <Text className={styles.cancelText}>Cancel</Text>
         </Pressable>
         <Pressable
-          style={({ pressed }) => [
+          className={cn(
             styles.submitButton,
-            pressed && styles.buttonPressed,
+            styles.buttonPressedActive,
             !canSubmit && styles.submitButtonDisabled
-          ]}
+          )}
           disabled={!canSubmit}
           onPress={handleSubmit}
         >
-          <Text style={styles.submitText}>{submitLabel}</Text>
+          <Text className={styles.submitText}>{submitLabel}</Text>
         </Pressable>
       </View>
     </BottomDrawer>
   )
 }
 
-const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal: spacing.xs,
-    paddingBottom: spacing.sm
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  message: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2
-  },
+const styles = {
+  header: cn('px-1 pb-2'),
+  title: cn('text-[15px] font-semibold text-foreground'),
+  message: cn('text-[13px] text-muted-foreground/60 mt-[2px]'),
   // Why: matches NewWorktreeModal's input — bgRaised on the modal
   // background reads as a tappable surface (brighter than the wrapper)
   // rather than a recessed pit (darker than the wrapper, which is what
   // bgBase looked like inside a bgPanel group).
-  input: {
-    backgroundColor: colors.bgRaised,
-    color: colors.textPrimary,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: Platform.OS === 'ios' ? spacing.sm + 2 : spacing.sm,
-    fontSize: typography.bodySize,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: spacing.sm,
-    marginTop: spacing.md
-  },
-  cancelButton: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.button
-  },
-  submitButton: {
-    backgroundColor: colors.textPrimary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.button
-  },
-  buttonPressed: {
-    opacity: 0.7
-  },
-  submitButtonDisabled: {
-    opacity: 0.4
-  },
-  cancelText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    fontWeight: '500'
-  },
-  submitText: {
-    color: colors.bgBase,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  }
-})
+  input: cn(
+    'bg-secondary text-foreground rounded-none px-3 py-2 ios:py-2.5 text-[14px] border border-border'
+  ),
+  actions: cn('flex-row justify-end gap-2 mt-3'),
+  cancelButton: cn('px-4 py-2 rounded-none'),
+  submitButton: cn('bg-foreground px-4 py-2 rounded-none'),
+  buttonPressedActive: cn('active:opacity-[0.7]'),
+  submitButtonDisabled: cn('opacity-[0.4]'),
+  cancelText: cn('text-muted-foreground text-[14px] font-medium'),
+  submitText: cn('text-background text-[14px] font-semibold')
+} as const

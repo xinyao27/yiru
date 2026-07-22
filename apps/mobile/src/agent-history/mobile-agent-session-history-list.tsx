@@ -1,11 +1,12 @@
-import { Play } from 'lucide-react-native'
 import { useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, RefreshControl, SectionList, Text, View } from 'react-native'
+
+import { Play } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import { recentSessionConversationTurns } from '../../../desktop/src/shared/ai-vault-session-display'
 import type { AiVaultSession } from '../../../desktop/src/shared/ai-vault-types'
 import { MobileAgentIcon } from '../components/mobile-agent-icon'
-import { colors } from '../theme/mobile-theme'
 import type { MobileAgentHistorySection } from './agent-history-sections'
 import type { MobileAgentHistoryCard } from './agent-history-session-card'
 import { styles } from './agent-history-styles'
@@ -67,20 +68,20 @@ export function MobileAgentSessionHistoryList({
       sections={sections}
       keyExtractor={(card) => card.id}
       stickySectionHeadersEnabled={false}
-      contentContainerStyle={styles.list}
+      contentContainerClassName={styles.list}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor={colors.textSecondary}
+          tintColorClassName="accent-muted-foreground"
         />
       }
       renderSectionHeader={({ section }) => (
-        <View style={styles.groupHeader}>
-          <Text style={styles.groupHeaderText} numberOfLines={1}>
+        <View className={styles.groupHeader}>
+          <Text className={styles.groupHeaderText} numberOfLines={1}>
             {section.label}
           </Text>
-          <Text style={styles.groupHeaderCount}>{section.data.length}</Text>
+          <Text className={styles.groupHeaderCount}>{section.data.length}</Text>
         </View>
       )}
       renderItem={renderItem}
@@ -111,39 +112,36 @@ function AgentHistoryCardRow({
   )
 
   return (
-    <Pressable
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-      onPress={onPress}
-    >
-      <View style={styles.cardTopRow}>
+    <Pressable className={cn(styles.card, styles.cardPressedActive)} onPress={onPress}>
+      <View className={styles.cardTopRow}>
         <MobileAgentIcon agentId={card.agent} size={16} />
-        <Text style={styles.cardTitle} numberOfLines={1}>
+        <Text className={styles.cardTitle} numberOfLines={1}>
           {card.title}
         </Text>
-        {card.timeAgo ? <Text style={styles.cardTimeAgo}>{card.timeAgo}</Text> : null}
+        {card.timeAgo ? <Text className={styles.cardTimeAgo}>{card.timeAgo}</Text> : null}
       </View>
       {card.lastMessage ? (
-        <Text style={styles.cardLastMessage} numberOfLines={expanded ? undefined : 2}>
+        <Text className={styles.cardLastMessage} numberOfLines={expanded ? undefined : 2}>
           {card.lastMessage}
         </Text>
       ) : null}
-      <View style={styles.cardMetaRow}>
-        <Text style={styles.cardMetaText}>{card.agentLabel}</Text>
-        <Text style={styles.cardMetaText}>
+      <View className={styles.cardMetaRow}>
+        <Text className={styles.cardMetaText}>{card.agentLabel}</Text>
+        <Text className={styles.cardMetaText}>
           {card.messageCount} {card.messageCount === 1 ? 'message' : 'messages'}
         </Text>
         {showCurrentWorktreeBadge && card.isCurrentWorktree ? (
-          <View style={styles.currentBadge}>
-            <Text style={styles.currentBadgeText}>current worktree</Text>
+          <View className={styles.currentBadge}>
+            <Text className={styles.currentBadgeText}>current worktree</Text>
           </View>
         ) : null}
         {session && onResume ? (
           <Pressable
-            style={({ pressed }) => [
+            className={cn(
               styles.resumeButton,
               resumeActionState?.disabled && styles.resumeButtonDisabled,
-              pressed && !resumeActionState?.disabled && styles.resumeButtonPressed
-            ]}
+              !resumeActionState?.disabled && styles.resumeButtonPressedActive
+            )}
             onPress={(event) => {
               event.stopPropagation()
               if (!resumeActionState?.disabled) {
@@ -156,19 +154,19 @@ function AgentHistoryCardRow({
             accessibilityLabel="Resume agent session"
           >
             {resumeActionState?.loading ? (
-              <ActivityIndicator size="small" color={colors.textPrimary} />
+              <ActivityIndicator size="small" colorClassName="accent-foreground" />
             ) : (
-              <Play size={17} color={colors.textPrimary} strokeWidth={2.4} />
+              <Play size={17} colorClassName="accent-foreground" />
             )}
           </Pressable>
         ) : null}
       </View>
       {expanded && previewTurns.length > 0 ? (
-        <View style={styles.preview}>
+        <View className={styles.preview}>
           {previewTurns.map((turn, index) => (
-            <View key={`${card.id}-turn-${index}`} style={styles.previewTurn}>
-              <Text style={styles.previewRole}>{turn.role}</Text>
-              <Text style={styles.previewText}>{turn.text}</Text>
+            <View key={`${card.id}-turn-${index}`} className={styles.previewTurn}>
+              <Text className={styles.previewRole}>{turn.role}</Text>
+              <Text className={styles.previewText}>{turn.text}</Text>
             </View>
           ))}
         </View>

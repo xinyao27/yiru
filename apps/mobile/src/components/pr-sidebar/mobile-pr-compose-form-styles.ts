@@ -1,166 +1,40 @@
-import { StyleSheet } from 'react-native'
+import { cn } from '@/style/class-names'
 
-import { colors, radii, spacing, typography } from '../../theme/mobile-theme'
-
-export const mobilePrComposeFormStyles = StyleSheet.create({
-  root: {
-    gap: spacing.sm
-  },
-  headingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    marginBottom: spacing.xs
-  },
-  headingTitle: {
-    flex: 1,
-    minWidth: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs
-  },
-  heading: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '700'
-  },
-  headingActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs
-  },
-  genButton: {
-    minHeight: 32,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radii.button,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel
-  },
-  genButtonPressed: {
-    opacity: 0.7
-  },
-  genButtonText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontWeight: '700'
-  },
-  iconButton: {
-    minWidth: 32,
-    minHeight: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button
-  },
-  branchFlow: {
-    minHeight: 28,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs
-  },
-  branchToken: {
-    maxWidth: 116,
-    color: colors.textPrimary,
-    fontSize: typography.metaSize,
-    fontFamily: typography.monoFamily
-  },
-  branchTokenError: {
-    color: colors.statusRed
-  },
-  fieldStack: {
-    gap: spacing.sm
-  },
-  titleInput: {
-    minHeight: 40,
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  },
-  bodyInput: {
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    // Why: a moderate fixed height avoids over-expanding inside the sidebar scroll.
-    minHeight: 120,
-    textAlignVertical: 'top'
-  },
-  baseRow: {
-    minHeight: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm
-  },
-  baseLabel: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    width: 36
-  },
-  baseControl: {
-    flex: 1,
-    minWidth: 0
-  },
-  draftRow: {
-    minHeight: 36,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgPanel,
-    paddingHorizontal: spacing.sm
-  },
-  draftText: {
-    color: colors.textPrimary,
-    fontSize: typography.metaSize,
-    fontWeight: '700'
-  },
-  notice: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.xs
-  },
-  noticeText: {
-    flex: 1,
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    lineHeight: 18
-  },
-  errorText: {
-    color: colors.statusRed
-  },
-  submit: {
-    marginTop: spacing.xs,
-    minHeight: 44,
-    borderRadius: radii.button,
-    backgroundColor: colors.textPrimary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs
-  },
-  submitDisabled: {
-    opacity: 0.45
-  },
-  submitPressed: {
-    opacity: 0.8
-  },
-  submitText: {
-    color: colors.bgBase,
-    fontSize: typography.bodySize,
-    fontWeight: '700'
-  }
-})
+export const mobilePrComposeFormStyles = {
+  root: cn('gap-2'),
+  headingRow: cn('flex-row items-center justify-between gap-2 mb-1'),
+  headingTitle: cn('flex-1 min-w-0 flex-row items-center gap-1'),
+  heading: cn('text-foreground text-[14px] font-bold'),
+  headingActions: cn('flex-row items-center gap-1'),
+  genButton: cn(
+    'min-h-8 flex-row items-center justify-center gap-1 px-2 rounded-none border-hairline border-border bg-card'
+  ),
+  genButtonPressed: cn('opacity-[0.7]'),
+  genButtonPressedActive: cn('active:opacity-[0.7]'),
+  genButtonText: cn('text-muted-foreground text-[12px] font-bold'),
+  iconButton: cn('min-w-8 min-h-8 items-center justify-center rounded-none'),
+  branchFlow: cn('min-h-7 flex-row items-center gap-1'),
+  branchToken: cn('max-w-[116px] text-foreground text-[12px] font-mono'),
+  branchTokenError: cn('text-destructive'),
+  fieldStack: cn('gap-2'),
+  titleInput: cn(
+    'min-h-10 bg-secondary rounded-none px-3 py-2 text-foreground text-[14px] font-semibold'
+  ),
+  // Why: a moderate fixed height avoids over-expanding inside the sidebar scroll.
+  bodyInput: cn('bg-secondary rounded-none px-3 py-2 text-foreground text-[14px] min-h-[120px]'),
+  baseRow: cn('min-h-10 flex-row items-center gap-2'),
+  baseLabel: cn('text-muted-foreground text-[12px] w-9'),
+  baseControl: cn('flex-1 min-w-0'),
+  draftRow: cn(
+    'min-h-9 flex-row items-center justify-between gap-2 border-hairline border-border rounded-none bg-card px-2'
+  ),
+  draftText: cn('text-foreground text-[12px] font-bold'),
+  notice: cn('flex-row items-start gap-1'),
+  noticeText: cn('flex-1 text-muted-foreground text-[12px] leading-[18px]'),
+  errorText: cn('text-destructive'),
+  submit: cn('mt-1 min-h-11 rounded-none bg-foreground flex-row items-center justify-center gap-1'),
+  submitDisabled: cn('opacity-[0.45]'),
+  submitPressed: cn('opacity-[0.8]'),
+  submitPressedActive: cn('active:opacity-[0.8]'),
+  submitText: cn('text-background text-[14px] font-bold')
+} as const

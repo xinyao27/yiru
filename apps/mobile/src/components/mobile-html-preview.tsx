@@ -1,9 +1,9 @@
-import { Code, Eye } from 'lucide-react-native'
 import { useState } from 'react'
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
-import { WebView } from 'react-native-webview'
+import { Linking, Pressable, Text, View } from 'react-native'
 
-import { colors, spacing, typography } from '../theme/mobile-theme'
+import { Code, Eye } from '@/components/uniwind-icons'
+import { UniwindWebView } from '@/components/uniwind-web-view'
+import { cn } from '@/style/class-names'
 
 type Props = {
   html: string
@@ -19,28 +19,28 @@ export function MobileHtmlPreview({ html, renderSource }: Props) {
   const [mode, setMode] = useState<'preview' | 'source'>('preview')
 
   return (
-    <View style={styles.container}>
-      <View style={styles.toolbar}>
+    <View className={styles.container}>
+      <View className={styles.toolbar}>
         <Pressable
-          style={[styles.toggle, mode === 'preview' && styles.toggleActive]}
+          className={cn(styles.toggle, mode === 'preview' && styles.toggleActive)}
           onPress={() => setMode('preview')}
           accessibilityLabel="Preview rendered HTML"
         >
-          <Eye size={13} color={colors.textSecondary} strokeWidth={2.2} />
-          <Text style={styles.toggleText}>Preview</Text>
+          <Eye size={13} colorClassName="accent-muted-foreground" />
+          <Text className={styles.toggleText}>Preview</Text>
         </Pressable>
         <Pressable
-          style={[styles.toggle, mode === 'source' && styles.toggleActive]}
+          className={cn(styles.toggle, mode === 'source' && styles.toggleActive)}
           onPress={() => setMode('source')}
           accessibilityLabel="View HTML source"
         >
-          <Code size={13} color={colors.textSecondary} strokeWidth={2.2} />
-          <Text style={styles.toggleText}>Source</Text>
+          <Code size={13} colorClassName="accent-muted-foreground" />
+          <Text className={styles.toggleText}>Source</Text>
         </Pressable>
       </View>
       {mode === 'preview' ? (
-        <WebView
-          style={styles.webview}
+        <UniwindWebView
+          className={styles.webview}
           originWhitelist={['*']}
           source={{ html }}
           javaScriptEnabled
@@ -62,30 +62,11 @@ export function MobileHtmlPreview({ html, renderSource }: Props) {
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  toolbar: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle
-  },
-  toggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 6,
-    backgroundColor: colors.bgRaised
-  },
-  toggleActive: {
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  toggleText: { color: colors.textSecondary, fontSize: typography.metaSize },
-  webview: { flex: 1, backgroundColor: '#ffffff' }
-})
+const styles = {
+  container: cn('flex-1'),
+  toolbar: cn('flex-row gap-2 px-3 py-2 border-b border-b-border'),
+  toggle: cn('flex-row items-center gap-[5px] px-2 py-1 rounded-none bg-secondary'),
+  toggleActive: cn('bg-card border border-border'),
+  toggleText: cn('text-muted-foreground text-[12px]'),
+  webview: cn('flex-1 bg-white')
+} as const

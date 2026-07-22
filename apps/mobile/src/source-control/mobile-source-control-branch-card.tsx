@@ -1,7 +1,8 @@
-import { GitBranch } from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
 
-import { colors } from '../theme/mobile-theme'
+import { GitBranch } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import type { MobilePrChipSummary } from './mobile-pr-chip-summary'
 import { mobileConflictAbortLabel } from './mobile-source-control-conflict-abort'
 import { MobileSourceControlPrChip } from './mobile-source-control-pr-chip'
@@ -42,36 +43,36 @@ export function MobileSourceControlBranchCard({
 }: Props) {
   const showConflict = conflictOperation !== null && conflictOperation !== 'unknown'
   return (
-    <View style={styles.summaryCard}>
-      <View style={styles.summaryHeader}>
-        <View style={styles.branchLine}>
-          <GitBranch size={15} color={colors.textSecondary} strokeWidth={2.1} />
-          <Text style={styles.branchText} numberOfLines={1}>
+    <View className={styles.summaryCard}>
+      <View className={styles.summaryHeader}>
+        <View className={styles.branchLine}>
+          <GitBranch size={15} colorClassName="accent-muted-foreground" />
+          <Text className={styles.branchText} numberOfLines={1}>
             {branchLabel}
           </Text>
         </View>
-        {syncLabel ? <Text style={styles.syncText}>{syncLabel}</Text> : null}
+        {syncLabel ? <Text className={styles.syncText}>{syncLabel}</Text> : null}
       </View>
-      <View style={styles.countRow}>
-        <Text style={styles.countText}>{unstagedCount} changed</Text>
-        <Text style={styles.countText}>{stagedCount} staged</Text>
-        {branchCount > 0 ? <Text style={styles.countText}>{branchCount} on branch</Text> : null}
+      <View className={styles.countRow}>
+        <Text className={styles.countText}>{unstagedCount} changed</Text>
+        <Text className={styles.countText}>{stagedCount} staged</Text>
+        {branchCount > 0 ? <Text className={styles.countText}>{branchCount} on branch</Text> : null}
       </View>
       {/* Own row so Abort never overflows past the card when counts are long. */}
       {showConflict ? (
-        <View style={styles.conflictRow}>
-          <Text style={styles.conflictText}>{conflictOperation}</Text>
+        <View className={styles.conflictRow}>
+          <Text className={styles.conflictText}>{conflictOperation}</Text>
           {conflictOperation === 'merge' || conflictOperation === 'rebase' ? (
             <Pressable
-              style={({ pressed }) => [
+              className={cn(
                 styles.abortButton,
                 conflictBusy && styles.abortButtonDisabled,
-                pressed && !conflictBusy && styles.abortPressed
-              ]}
+                !conflictBusy && 'active:opacity-[0.75]'
+              )}
               disabled={conflictBusy}
               onPress={() => onAbortConflict(conflictOperation)}
             >
-              <Text style={styles.abortText}>
+              <Text className={styles.abortText}>
                 {mobileConflictAbortLabel(conflictOperation, conflictAborting)}
               </Text>
             </Pressable>

@@ -1,7 +1,8 @@
-import { Check } from 'lucide-react-native'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import { Check } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import { BottomDrawer } from './bottom-drawer'
 
 export type SetupTrustPrompt = {
@@ -38,38 +39,38 @@ export function SetupHookTrustDrawer({
     <BottomDrawer visible={visible && prompt != null} onClose={onClose}>
       {prompt ? (
         <View>
-          <View style={styles.trustHeader}>
-            <Text style={styles.title}>
+          <View className={styles.trustHeader}>
+            <Text className={styles.title}>
               {prompt.previouslyApproved
                 ? `${prompt.repoName}'s setup script changed`
                 : `Run setup from ${prompt.repoName}?`}
             </Text>
-            <Text style={styles.subtitle}>
+            <Text className={styles.subtitle}>
               This repository's yiru.yaml runs before the workspace starts. Only run it if you trust
               this repository.
             </Text>
           </View>
 
-          <View style={styles.trustScriptBox}>
-            <Text style={styles.trustScriptLabel}>
+          <View className={styles.trustScriptBox}>
+            <Text className={styles.trustScriptLabel}>
               {prompt.previouslyApproved ? 'New setup script' : 'Setup script'}
             </Text>
-            <Text style={styles.trustScriptText}>{prompt.scriptContent}</Text>
+            <Text className={styles.trustScriptText}>{prompt.scriptContent}</Text>
           </View>
 
-          <View style={styles.trustActionGroup}>
-            <Pressable style={styles.trustActionRow} disabled={busy} onPress={onRunOnce}>
-              <Check size={16} color={colors.textPrimary} />
-              <Text style={styles.trustActionText}>Run hooks</Text>
+          <View className={styles.trustActionGroup}>
+            <Pressable className={styles.trustActionRow} disabled={busy} onPress={onRunOnce}>
+              <Check size={16} colorClassName="accent-foreground" />
+              <Text className={styles.trustActionText}>Run hooks</Text>
             </Pressable>
-            <View style={styles.trustActionSeparator} />
-            <Pressable style={styles.trustActionRow} disabled={busy} onPress={onAlwaysTrust}>
-              <Check size={16} color={colors.textPrimary} />
-              <Text style={styles.trustActionText}>Always trust and run</Text>
+            <View className={styles.trustActionSeparator} />
+            <Pressable className={styles.trustActionRow} disabled={busy} onPress={onAlwaysTrust}>
+              <Check size={16} colorClassName="accent-foreground" />
+              <Text className={styles.trustActionText}>Always trust and run</Text>
             </Pressable>
-            <View style={styles.trustActionSeparator} />
-            <Pressable style={styles.trustActionRow} disabled={busy} onPress={onDontRun}>
-              <Text style={styles.trustActionText}>Don't run</Text>
+            <View className={styles.trustActionSeparator} />
+            <Pressable className={styles.trustActionRow} disabled={busy} onPress={onDontRun}>
+              <Text className={styles.trustActionText}>Don't run</Text>
             </Pressable>
           </View>
         </View>
@@ -78,61 +79,15 @@ export function SetupHookTrustDrawer({
   )
 }
 
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  subtitle: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2
-  },
-  trustHeader: {
-    paddingHorizontal: spacing.xs,
-    marginBottom: spacing.md
-  },
-  trustScriptBox: {
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.input,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    padding: spacing.md,
-    marginBottom: spacing.md
-  },
-  trustScriptLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginBottom: spacing.sm
-  },
-  trustScriptText: {
-    fontSize: 13,
-    fontFamily: typography.monoFamily,
-    color: colors.textPrimary
-  },
-  trustActionGroup: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: radii.input,
-    overflow: 'hidden'
-  },
-  trustActionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md
-  },
-  trustActionText: {
-    flex: 1,
-    fontSize: typography.bodySize,
-    color: colors.textPrimary,
-    fontWeight: '500'
-  },
-  trustActionSeparator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  }
-})
+const styles = {
+  title: cn('text-[15px] font-semibold text-foreground'),
+  subtitle: cn('text-[13px] text-muted-foreground/60 mt-[2px]'),
+  trustHeader: cn('px-1 mb-3'),
+  trustScriptBox: cn('bg-secondary rounded-none border border-border p-3 mb-3'),
+  trustScriptLabel: cn('text-[12px] font-semibold text-muted-foreground mb-2'),
+  trustScriptText: cn('text-[13px] font-mono text-foreground'),
+  trustActionGroup: cn('bg-card rounded-none overflow-hidden'),
+  trustActionRow: cn('flex-row items-center gap-2 py-3 px-3'),
+  trustActionText: cn('flex-1 text-[14px] text-foreground font-medium'),
+  trustActionSeparator: cn('h-hairline bg-border mx-3')
+} as const

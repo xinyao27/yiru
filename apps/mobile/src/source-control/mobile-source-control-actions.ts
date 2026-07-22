@@ -1,7 +1,7 @@
 import type { MobileGitUpstreamStatus } from './mobile-git-status'
 
-// Icon identifier resolved to a lucide component by the screen. Kept as a string
-// here so this module stays free of the native lucide import and unit-testable.
+// Icon identifier resolved to a Phosphor component by the screen. Kept as a
+// string so this domain module stays independent from native UI code.
 export type MobileSourceControlActionIcon =
   | 'commit'
   | 'push'

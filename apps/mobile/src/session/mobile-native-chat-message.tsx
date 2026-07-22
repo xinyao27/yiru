@@ -1,14 +1,20 @@
 import * as Clipboard from 'expo-clipboard'
-import { ArrowUp, ChevronDown, Copy, SquareChevronRight } from 'lucide-react-native'
 import { memo, useEffect, useRef, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
+
+import {
+  ArrowUp,
+  CaretDown as ChevronDown,
+  Copy,
+  ArrowSquareRight as SquareChevronRight
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type {
   NativeChatBlock,
   NativeChatMessage
 } from '../../../desktop/src/shared/native-chat-types'
 import { MobileMarkdown } from '../components/mobile-markdown'
-import { colors } from '../theme/mobile-theme'
 import {
   isImageRefBlock,
   isTextBlock,
@@ -30,16 +36,16 @@ const MAX_TOOL_RUN_DIFF_ROWS = 240
 
 function DiffView({ lines }: { lines: DiffLine[] }): React.JSX.Element {
   return (
-    <View style={styles.diff}>
+    <View className={styles.diff}>
       {lines.map((line, i) => (
         <Text
           key={i}
-          style={[
+          className={cn(
             styles.diffLine,
             line.kind === 'add' && styles.diffAdd,
             line.kind === 'del' && styles.diffDel,
             line.kind === 'meta' && styles.diffMeta
-          ]}
+          )}
         >
           {line.kind === 'add' ? '+' : line.kind === 'del' ? '-' : ' '}
           {line.text}
@@ -65,8 +71,8 @@ function ResultBody({
     return <DiffView lines={diff} />
   }
   return (
-    <View style={[styles.toolResult, isError && styles.toolResultError]}>
-      <Text style={styles.mono}>
+    <View className={cn(styles.toolResult, isError && styles.toolResultError)}>
+      <Text className={styles.mono}>
         {output.length > MAX_TOOL_RESULT_CHARS
           ? `${output.slice(0, MAX_TOOL_RESULT_CHARS)}…`
           : output}
@@ -106,19 +112,19 @@ function ToolLine({
   return (
     <View>
       <Pressable
-        style={styles.toolLine}
+        className={styles.toolLine}
         onPress={() => hasDetail && setExpanded((v) => !v)}
         hitSlop={6}
       >
         {expanded ? (
-          <ChevronDown size={15} color={colors.textMuted} strokeWidth={2} />
+          <ChevronDown size={15} colorClassName="accent-muted-foreground" />
         ) : (
-          <SquareChevronRight size={15} color={colors.textMuted} strokeWidth={2} />
+          <SquareChevronRight size={15} colorClassName="accent-muted-foreground" />
         )}
-        <Text style={styles.toolName}>{name}</Text>
+        <Text className={styles.toolName}>{name}</Text>
         {preview ? (
           <Text
-            style={[styles.toolPreview, openable && styles.toolPreviewLink]}
+            className={cn(styles.toolPreview, openable && styles.toolPreviewLink)}
             numberOfLines={1}
             onPress={openable ? () => onOpenFile!(filePath!) : undefined}
             suppressHighlighting={!openable}
@@ -128,9 +134,9 @@ function ToolLine({
         ) : null}
       </Pressable>
       {expanded ? (
-        <View style={styles.toolDetail}>
+        <View className={styles.toolDetail}>
           {callDiff ? <DiffView lines={callDiff} /> : null}
-          {!callDiff && call && preview ? <Text style={styles.mono}>{preview}</Text> : null}
+          {!callDiff && call && preview ? <Text className={styles.mono}>{preview}</Text> : null}
           {result ? (
             <ResultBody output={result.output} isError={result.isError} diff={resultDiff} />
           ) : null}
@@ -156,7 +162,9 @@ function Prose({
     // markdown renderer's light-on-dark palette.
     if (invert) {
       return (
-        <Text style={[styles.userText, { fontSize: TEXT_SIZE * fontScale }]}>{block.text}</Text>
+        <Text className={styles.userText} style={[{ fontSize: TEXT_SIZE * fontScale }]}>
+          {block.text}
+        </Text>
       )
     }
     return (
@@ -165,7 +173,7 @@ function Prose({
   }
   if (isImageRefBlock(block)) {
     return (
-      <Text style={[styles.imageRef, { fontSize: TEXT_SIZE * fontScale }]}>
+      <Text className={styles.imageRef} style={[{ fontSize: TEXT_SIZE * fontScale }]}>
         🖼 {block.alt ?? block.path ?? block.url ?? 'image'}
       </Text>
     )
@@ -199,23 +207,23 @@ function ToolRun({
   callCount ||= pairs.length
   const summary = summarizeToolRun(blocks)
   return (
-    <View style={styles.toolRun}>
-      <View style={styles.toolRunHeader}>
-        <Pressable style={styles.toolRunToggle} onPress={() => setOpen((v) => !v)} hitSlop={6}>
+    <View className={styles.toolRun}>
+      <View className={styles.toolRunHeader}>
+        <Pressable className={styles.toolRunToggle} onPress={() => setOpen((v) => !v)} hitSlop={6}>
           {open ? (
-            <ChevronDown size={15} color={colors.textMuted} strokeWidth={2} />
+            <ChevronDown size={15} colorClassName="accent-muted-foreground" />
           ) : (
-            <SquareChevronRight size={15} color={colors.textMuted} strokeWidth={2} />
+            <SquareChevronRight size={15} colorClassName="accent-muted-foreground" />
           )}
-          <Text style={styles.toolRunCount}>{callCount}×</Text>
-          <Text style={styles.toolRunLabel} numberOfLines={1}>
+          <Text className={styles.toolRunCount}>{callCount}×</Text>
+          <Text className={styles.toolRunLabel} numberOfLines={1}>
             {summary || `${callCount} tool ${callCount === 1 ? 'call' : 'calls'}`}
           </Text>
         </Pressable>
         {trailing}
       </View>
       {open ? (
-        <View style={styles.toolRunBody}>
+        <View className={styles.toolRunBody}>
           {pairs.map((pair, i) => (
             <ToolLine
               key={i}
@@ -226,7 +234,7 @@ function ToolRun({
             />
           ))}
           {callCount > pairs.length ? (
-            <Text style={styles.toolPreview}>… {callCount - pairs.length} more tool calls</Text>
+            <Text className={styles.toolPreview}>… {callCount - pairs.length} more tool calls</Text>
           ) : null}
         </View>
       ) : null}
@@ -244,23 +252,23 @@ function AgentControls({
   onScrollToTop?: () => void
 }): React.JSX.Element {
   return (
-    <View style={styles.controls}>
+    <View className={styles.controls}>
       <Pressable
-        style={({ pressed }) => [styles.controlButton, pressed && styles.controlPressed]}
+        className={cn(styles.controlButton, styles.controlPressedActive)}
         onPress={onCopy}
         hitSlop={8}
         accessibilityLabel="Copy message"
       >
-        <Copy size={14} color={colors.textMuted} strokeWidth={2} />
+        <Copy size={14} colorClassName="accent-muted-foreground" />
       </Pressable>
       {onScrollToTop ? (
         <Pressable
-          style={({ pressed }) => [styles.controlButton, pressed && styles.controlPressed]}
+          className={cn(styles.controlButton, styles.controlPressedActive)}
           onPress={onScrollToTop}
           hitSlop={8}
           accessibilityLabel="Scroll this message to top"
         >
-          <ArrowUp size={14} color={colors.textMuted} strokeWidth={2} />
+          <ArrowUp size={14} colorClassName="accent-muted-foreground" />
         </Pressable>
       ) : null}
     </View>
@@ -334,16 +342,16 @@ function MobileNativeChatMessageImpl({
     ) : null
 
   return (
-    <View style={[styles.row, isUser && styles.rowUser]}>
-      {isUser && queued ? <Text style={styles.queuedTag}>Queued</Text> : null}
+    <View className={cn(styles.row, isUser && styles.rowUser)}>
+      {isUser && queued ? <Text className={styles.queuedTag}>Queued</Text> : null}
       <View
-        style={[
+        className={cn(
           styles.content,
           isUser && styles.userBubble,
           isReasoning && styles.reasoning,
           queued && styles.queued,
           copied && styles.copied
-        ]}
+        )}
       >
         {prose.map((block, index) => (
           <Prose
@@ -365,7 +373,7 @@ function MobileNativeChatMessageImpl({
             onOpenFile={onOpenFile}
           />
         ) : controls ? (
-          <View style={styles.controlsRow}>{controls}</View>
+          <View className={styles.controlsRow}>{controls}</View>
         ) : null}
       </View>
     </View>

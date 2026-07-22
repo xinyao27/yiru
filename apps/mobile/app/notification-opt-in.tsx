@@ -1,21 +1,14 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
-import { BellRing } from 'lucide-react-native'
 import { useCallback, useState } from 'react'
-import {
-  ActivityIndicator,
-  BackHandler,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { ActivityIndicator, BackHandler, Pressable, ScrollView, Text, View } from 'react-native'
+
+import { BellRinging as BellRing } from '@/components/uniwind-icons'
+import { SafeAreaView } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import { YiruLogo } from '../src/components/yiru-logo'
 import { ensureNotificationPermissions } from '../src/notifications/mobile-notifications'
 import { savePushNotificationsEnabled } from '../src/storage/preferences'
-import { colors, radii, spacing, typography } from '../src/theme/mobile-theme'
 
 export default function NotificationOptInScreen() {
   const router = useRouter()
@@ -57,27 +50,30 @@ export default function NotificationOptInScreen() {
   )
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.brandRow}>
+    <SafeAreaView className={styles.container}>
+      <ScrollView
+        contentContainerClassName={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className={styles.brandRow}>
           <YiruLogo size={22} />
-          <Text style={styles.brandName}>Yiru</Text>
+          <Text className={styles.brandName}>Yiru</Text>
         </View>
 
-        <View style={styles.content}>
-          <View style={styles.iconSurface}>
-            <BellRing size={30} color={colors.textPrimary} />
+        <View className={styles.content}>
+          <View className={styles.iconSurface}>
+            <BellRing size={30} colorClassName="accent-foreground" />
           </View>
-          <Text style={styles.eyebrow}>Notifications</Text>
-          <Text style={styles.title}>Stay updated while away</Text>
-          <Text style={styles.body}>
+          <Text className={styles.eyebrow}>Notifications</Text>
+          <Text className={styles.title}>Stay updated while away</Text>
+          <Text className={styles.body}>
             Get notified on this device when an agent needs your input or finishes a task.
           </Text>
         </View>
 
-        <View style={styles.footer}>
+        <View className={styles.footer}>
           {error ? (
-            <Text style={styles.error} accessibilityRole="alert">
+            <Text className={styles.error} accessibilityRole="alert">
               {error}
             </Text>
           ) : null}
@@ -85,153 +81,63 @@ export default function NotificationOptInScreen() {
             accessibilityRole="button"
             accessibilityLabel="Enable agent notifications"
             disabled={busyChoice !== null}
-            style={({ pressed }) => [
+            className={cn(
               styles.primaryButton,
-              pressed && styles.buttonPressed,
+              styles.buttonPressedActive,
               busyChoice !== null && styles.buttonDisabled
-            ]}
+            )}
             onPress={() => void choose('enable')}
           >
             {busyChoice === 'enable' ? (
-              <ActivityIndicator color={colors.bgBase} />
+              <ActivityIndicator colorClassName="accent-primary-foreground" />
             ) : (
-              <Text style={styles.primaryButtonText}>Enable notifications</Text>
+              <Text className={styles.primaryButtonText}>Enable notifications</Text>
             )}
           </Pressable>
           <Pressable
             accessibilityRole="button"
             disabled={busyChoice !== null}
-            style={({ pressed }) => [
+            className={cn(
               styles.secondaryButton,
-              pressed && styles.buttonPressed,
+              styles.buttonPressedActive,
               busyChoice !== null && styles.buttonDisabled
-            ]}
+            )}
             onPress={() => void choose('skip')}
           >
             {busyChoice === 'skip' ? (
-              <ActivityIndicator color={colors.textSecondary} />
+              <ActivityIndicator colorClassName="accent-muted-foreground" />
             ) : (
-              <Text style={styles.secondaryButtonText}>Not now</Text>
+              <Text className={styles.secondaryButtonText}>Not now</Text>
             )}
           </Pressable>
-          <Text style={styles.footerNote}>You can change this any time in Settings.</Text>
+          <Text className={styles.footerNote}>You can change this any time in Settings.</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase,
-    paddingHorizontal: spacing.xl
-  },
+const styles = {
+  container: cn('flex-1 bg-background px-6'),
   // Why: this decision screen cannot be dismissed with Back, so every action
   // must remain reachable in landscape and with accessibility text scaling.
-  scrollContent: {
-    flexGrow: 1
-  },
-  brandRow: {
-    minHeight: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm
-  },
-  brandName: {
-    color: colors.textPrimary,
-    fontSize: 17,
-    fontWeight: '700'
-  },
-  content: {
-    flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.xl
-  },
-  iconSurface: {
-    width: 64,
-    height: 64,
-    borderRadius: radii.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.bgRaised,
-    marginBottom: spacing.xl
-  },
-  eyebrow: {
-    color: colors.textMuted,
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.55,
-    textTransform: 'uppercase',
-    marginBottom: spacing.sm
-  },
-  title: {
-    maxWidth: 420,
-    color: colors.textPrimary,
-    fontSize: 26,
-    fontWeight: '700',
-    letterSpacing: -0.3,
-    textAlign: 'center'
-  },
-  body: {
-    maxWidth: 420,
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    lineHeight: 21,
-    textAlign: 'center',
-    marginTop: spacing.md
-  },
-  footer: {
-    width: '100%',
-    maxWidth: 420,
-    alignSelf: 'center',
-    paddingBottom: spacing.lg
-  },
-  primaryButton: {
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button,
-    backgroundColor: colors.surfaceBright,
-    paddingVertical: spacing.sm
-  },
-  primaryButtonText: {
-    color: colors.bgBase,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  },
-  secondaryButton: {
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button,
-    marginTop: spacing.xs,
-    paddingVertical: spacing.sm
-  },
-  secondaryButtonText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    fontWeight: '500'
-  },
-  buttonPressed: {
-    opacity: 0.72
-  },
-  buttonDisabled: {
-    opacity: 0.58
-  },
-  footerNote: {
-    color: colors.textMuted,
-    fontSize: typography.metaSize,
-    lineHeight: 18,
-    textAlign: 'center',
-    marginTop: spacing.sm
-  },
-  error: {
-    color: colors.statusRed,
-    fontSize: typography.metaSize,
-    lineHeight: 18,
-    textAlign: 'center',
-    marginBottom: spacing.sm
-  }
-})
+  scrollContent: cn('grow'),
+  brandRow: cn('min-h-[52px] flex-row items-center gap-2'),
+  brandName: cn('text-foreground text-[17px] font-bold'),
+  content: cn('grow items-center justify-center py-6'),
+  iconSurface: cn('w-16 h-16 rounded-none items-center justify-center bg-secondary mb-6'),
+  eyebrow: cn(
+    'text-muted-foreground/60 text-[11px] font-semibold tracking-[0.55px] uppercase mb-2'
+  ),
+  title: cn('max-w-[420px] text-foreground text-[26px] font-bold tracking-[-0.3px] text-center'),
+  body: cn('max-w-[420px] text-muted-foreground text-[14px] leading-[21px] text-center mt-3'),
+  footer: cn('w-full max-w-[420px] self-center pb-4'),
+  primaryButton: cn('min-h-11 items-center justify-center rounded-none bg-primary py-2'),
+  primaryButtonText: cn('text-primary-foreground text-[14px] font-semibold'),
+  secondaryButton: cn('min-h-11 items-center justify-center rounded-none mt-1 py-2'),
+  secondaryButtonText: cn('text-muted-foreground text-[14px] font-medium'),
+  buttonPressedActive: cn('active:opacity-[0.72]'),
+  buttonDisabled: cn('opacity-[0.58]'),
+  footerNote: cn('text-muted-foreground/60 text-[12px] leading-[18px] text-center mt-2'),
+  error: cn('text-destructive text-[12px] leading-[18px] text-center mb-2')
+} as const

@@ -1,6 +1,5 @@
-import { GripVertical } from 'lucide-react-native'
 import { useCallback, useEffect, type ReactNode } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
   measure,
@@ -14,8 +13,11 @@ import Animated, {
   type SharedValue
 } from 'react-native-reanimated'
 
+import { DotsSixVertical as GripVertical } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import { triggerMediumImpact, triggerSelection } from '../platform/haptics'
-import { colors, spacing } from '../theme/mobile-theme'
+import { useThemeColors } from '../theme/uniwind-theme-values'
 import {
   clampDragReorderIndex,
   dragReorderPositionsFromKeys,
@@ -228,6 +230,7 @@ function DragReorderRow({
   onAccessibilityMove: (key: string, delta: number) => void
   children: ReactNode
 }): React.JSX.Element {
+  const colors = useThemeColors()
   const {
     positions,
     activeKey,
@@ -273,8 +276,6 @@ function DragReorderRow({
       return {
         top: activeTop.value,
         zIndex: 2,
-        elevation: 4,
-        shadowOpacity: 0.3,
         backgroundColor: colors.bgRaised,
         transform: [{ scale: 1.02 }]
       }
@@ -282,19 +283,17 @@ function DragReorderRow({
     return {
       top: withSpring(index * rowHeight, ROW_SPRING),
       zIndex: 0,
-      elevation: 0,
-      shadowOpacity: 0,
       backgroundColor: colors.bgPanel,
       transform: [{ scale: 1 }]
     }
-  })
+  }, [colors.bgPanel, colors.bgRaised])
 
   return (
-    <Animated.View style={[styles.row, { height: rowHeight }, rowStyle]}>
-      <View style={styles.rowContent}>{children}</View>
+    <Animated.View className={styles.row} style={[{ height: rowHeight }, rowStyle]}>
+      <View className={styles.rowContent}>{children}</View>
       <GestureDetector gesture={pan}>
         <Animated.View
-          style={styles.handle}
+          className={styles.handle}
           accessible
           accessibilityRole="button"
           accessibilityLabel="Drag to reorder"
@@ -312,39 +311,17 @@ function DragReorderRow({
           }}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <GripVertical size={18} color={colors.textMuted} />
+          <GripVertical size={18} colorClassName="accent-muted-foreground" />
         </Animated.View>
       </GestureDetector>
-      <View style={styles.rowSeparator} />
+      <View className={styles.rowSeparator} />
     </Animated.View>
   )
 }
 
-const styles = StyleSheet.create({
-  row: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8
-  },
-  rowContent: {
-    flex: 1
-  },
-  handle: {
-    alignSelf: 'stretch',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md
-  },
-  rowSeparator: {
-    position: 'absolute',
-    bottom: 0,
-    left: spacing.md,
-    right: spacing.md,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle
-  }
-})
+const styles = {
+  row: cn('absolute left-0 right-0 flex-row items-center'),
+  rowContent: cn('flex-1'),
+  handle: cn('self-stretch justify-center px-3'),
+  rowSeparator: cn('absolute bottom-0 left-3 right-3 h-hairline bg-border')
+} as const

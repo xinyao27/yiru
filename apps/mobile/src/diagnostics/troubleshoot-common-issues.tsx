@@ -1,6 +1,4 @@
-import { WifiOff, Shield, Monitor, Clock, Globe } from 'lucide-react-native'
-
-import { colors } from '../theme/mobile-theme'
+import { WifiSlash as WifiOff, Shield, Monitor, Clock, Globe } from '@/components/uniwind-icons'
 
 export type TroubleshootSection = {
   id: string
@@ -12,7 +10,7 @@ export type TroubleshootSection = {
 export const troubleshootCommonIssues: TroubleshootSection[] = [
   {
     id: 'wifi',
-    icon: <WifiOff size={16} color={colors.textSecondary} />,
+    icon: <WifiOff size={16} colorClassName="accent-muted-foreground" />,
     title: 'Different WiFi Networks',
     steps: [
       'Both devices must be on the same local network (unless connected through Tailscale).',
@@ -22,7 +20,7 @@ export const troubleshootCommonIssues: TroubleshootSection[] = [
   },
   {
     id: 'firewall',
-    icon: <Shield size={16} color={colors.textSecondary} />,
+    icon: <Shield size={16} colorClassName="accent-muted-foreground" />,
     title: 'Firewall Blocking Port 6768',
     steps: [
       'macOS: System Settings → Network → Firewall — allow Yiru.',
@@ -33,7 +31,7 @@ export const troubleshootCommonIssues: TroubleshootSection[] = [
   },
   {
     id: 'desktop',
-    icon: <Monitor size={16} color={colors.textSecondary} />,
+    icon: <Monitor size={16} colorClassName="accent-muted-foreground" />,
     title: 'Desktop App Not Running',
     steps: [
       'Yiru must be open on your desktop to accept connections.',
@@ -43,7 +41,7 @@ export const troubleshootCommonIssues: TroubleshootSection[] = [
   },
   {
     id: 'timeout',
-    icon: <Clock size={16} color={colors.textSecondary} />,
+    icon: <Clock size={16} colorClassName="accent-muted-foreground" />,
     title: 'Connection Timeout',
     steps: [
       'Check WiFi signal strength on your phone.',
@@ -53,7 +51,7 @@ export const troubleshootCommonIssues: TroubleshootSection[] = [
   },
   {
     id: 'tailscale',
-    icon: <Globe size={16} color={colors.textSecondary} />,
+    icon: <Globe size={16} colorClassName="accent-muted-foreground" />,
     title: 'Tailscale Host Unreachable',
     steps: [
       'Host addresses like 100.x.x.x or *.ts.net connect through Tailscale — keep it ON.',
@@ -64,7 +62,7 @@ export const troubleshootCommonIssues: TroubleshootSection[] = [
   },
   {
     id: 'vpn',
-    icon: <Shield size={16} color={colors.textSecondary} />,
+    icon: <Shield size={16} colorClassName="accent-muted-foreground" />,
     title: 'Other VPN Interference',
     steps: [
       'Non-Tailscale VPNs can route local traffic through a remote server.',

@@ -1,4 +1,6 @@
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
+
+import { cn } from '@/style/class-names'
 
 import {
   MobileNativeChatView,
@@ -38,7 +40,7 @@ export function MobileNativeChatOverlay({
   }
   const session = controller.nativeChatSession
   return (
-    <View style={styles.overlay}>
+    <View className={styles.overlay}>
       <MobileNativeChatView
         messages={session.messages}
         status={session.status}
@@ -78,6 +80,6 @@ export function MobileNativeChatOverlay({
   )
 }
 
-const styles = StyleSheet.create({
-  overlay: StyleSheet.absoluteFillObject
-})
+const styles = {
+  overlay: cn('absolute inset-0')
+} as const

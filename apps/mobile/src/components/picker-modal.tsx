@@ -1,8 +1,9 @@
-import { Check } from 'lucide-react-native'
 import type { ReactNode } from 'react'
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { View, Text, Pressable } from 'react-native'
 
-import { colors, spacing, typography } from '../theme/mobile-theme'
+import { Check } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import { BottomDrawer } from './bottom-drawer'
 
 export type PickerOption<T extends string = string> = {
@@ -41,8 +42,8 @@ export function PickerModal<T extends string = string>({
 }: Props<T>) {
   return (
     <BottomDrawer visible={visible} onClose={onClose} zIndex={zIndex}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
+      <View className={styles.header}>
+        <Text className={styles.title}>{title}</Text>
       </View>
 
       <PickerModalContent
@@ -66,19 +67,19 @@ function PickerModalContent<T extends string = string>({
   // Why: closed BottomDrawer instances return null, so keeping option rows in
   // this child avoids rebuilding hidden picker contents on every parent render.
   return (
-    <View style={styles.group}>
+    <View className={styles.group}>
       {options.map((opt, i) => {
         const isSelected = opt.value === selected
         return (
           <View key={opt.value}>
-            {i > 0 && <View style={styles.separator} />}
+            {i > 0 && <View className={styles.separator} />}
             <Pressable
               disabled={opt.disabled}
-              style={({ pressed }) => [
+              className={cn(
                 styles.row,
-                pressed && !opt.disabled && styles.rowPressed,
+                !opt.disabled && styles.rowPressedActive,
                 opt.disabled && styles.rowDisabled
-              ]}
+              )}
               onPress={() => {
                 if (opt.disabled) {
                   return
@@ -99,15 +100,15 @@ function PickerModalContent<T extends string = string>({
               }
             >
               {opt.renderIcon ? (
-                <View style={styles.rowIcon}>{opt.renderIcon(isSelected)}</View>
+                <View className={styles.rowIcon}>{opt.renderIcon(isSelected)}</View>
               ) : null}
-              <View style={styles.rowContent}>
-                <Text style={[styles.rowLabel, isSelected && styles.rowLabelSelected]}>
+              <View className={styles.rowContent}>
+                <Text className={cn(styles.rowLabel, isSelected && styles.rowLabelSelected)}>
                   {opt.label}
                 </Text>
-                {opt.subtitle ? <Text style={styles.rowSubtitle}>{opt.subtitle}</Text> : null}
+                {opt.subtitle ? <Text className={styles.rowSubtitle}>{opt.subtitle}</Text> : null}
               </View>
-              {isSelected && <Check size={16} color={colors.textPrimary} />}
+              {isSelected && <Check size={16} colorClassName="accent-foreground" />}
             </Pressable>
           </View>
         )
@@ -116,57 +117,17 @@ function PickerModalContent<T extends string = string>({
   )
 }
 
-const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal: spacing.xs,
-    paddingBottom: spacing.sm
-  },
-  title: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: colors.textMuted
-  },
-  group: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: 12,
-    overflow: 'hidden'
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  rowPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  rowDisabled: {
-    opacity: 0.45
-  },
-  rowContent: {
-    flex: 1,
-    minWidth: 0
-  },
-  rowIcon: {
-    width: 22,
-    alignItems: 'center',
-    marginRight: spacing.sm
-  },
-  rowLabel: {
-    fontSize: typography.bodySize,
-    color: colors.textPrimary
-  },
-  rowLabelSelected: {
-    fontWeight: '600'
-  },
-  rowSubtitle: {
-    fontSize: 11,
-    color: colors.textMuted,
-    marginTop: 1
-  }
-})
+const styles = {
+  header: cn('px-1 pb-2'),
+  title: cn('text-[13px] font-medium text-muted-foreground/60'),
+  group: cn('bg-card rounded-none overflow-hidden'),
+  separator: cn('h-hairline bg-border mx-3'),
+  row: cn('flex-row items-center py-3 px-3.5'),
+  rowPressedActive: cn('active:bg-secondary'),
+  rowDisabled: cn('opacity-[0.45]'),
+  rowContent: cn('flex-1 min-w-0'),
+  rowIcon: cn('w-[22px] items-center mr-2'),
+  rowLabel: cn('text-[14px] text-foreground'),
+  rowLabelSelected: cn('font-semibold'),
+  rowSubtitle: cn('text-[11px] text-muted-foreground/60 mt-[1px]')
+} as const

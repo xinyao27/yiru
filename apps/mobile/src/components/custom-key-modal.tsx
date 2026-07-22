@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { ChevronLeft } from 'lucide-react-native'
 import { useCallback, useMemo, useState } from 'react'
-import { View, Text, Pressable, TextInput, StyleSheet, Switch } from 'react-native'
+import { View, Text, Pressable, TextInput, Switch } from 'react-native'
+
+import { CaretLeft as ChevronLeft } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import {
   buildTerminalShortcutKey,
@@ -10,7 +12,6 @@ import {
   type TerminalShortcutModifier,
   type TerminalShortcutSpecialKey
 } from '../terminal/terminal-accessory-keys'
-import { colors, spacing, radii, typography } from '../theme/mobile-theme'
 import { BottomDrawer } from './bottom-drawer'
 
 const CUSTOM_ACCESSORY_KEYS_STORAGE_KEY = 'yiru:custom-accessory-keys'
@@ -186,53 +187,53 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
 
   return (
     <BottomDrawer visible={visible} onClose={onClose}>
-      <View style={styles.header}>
+      <View className={styles.header}>
         {showBack ? (
           <Pressable
-            style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
+            className={cn(styles.backButton, styles.backButtonPressedActive)}
             onPress={onBack}
             accessibilityLabel="Back"
           >
-            <ChevronLeft size={18} color={colors.textSecondary} />
+            <ChevronLeft size={18} colorClassName="accent-muted-foreground" />
           </Pressable>
         ) : (
-          <View style={styles.backSpacer} />
+          <View className={styles.backSpacer} />
         )}
-        <Text style={styles.title}>
+        <Text className={styles.title}>
           {step === 'choose-type' && 'Add Shortcut'}
           {step === 'shortcut-combo' && 'Shortcut Combo'}
           {step === 'special-keys' && 'Pick a key'}
           {step === 'text-macro' && 'Text Macro'}
         </Text>
-        <View style={styles.backSpacer} />
+        <View className={styles.backSpacer} />
       </View>
 
       {step === 'choose-type' && (
-        <View style={styles.group}>
+        <View className={styles.group}>
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => setStep('shortcut-combo')}
           >
-            <Text style={styles.rowLabel}>Shortcut Combo</Text>
-            <Text style={styles.rowHint}>Build Ctrl, Alt, and Shift key chords</Text>
+            <Text className={styles.rowLabel}>Shortcut Combo</Text>
+            <Text className={styles.rowHint}>Build Ctrl, Alt, and Shift key chords</Text>
           </Pressable>
-          <View style={styles.separator} />
+          <View className={styles.separator} />
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => setStep('text-macro')}
           >
-            <Text style={styles.rowLabel}>Text Macro</Text>
-            <Text style={styles.rowHint}>Send custom text command</Text>
+            <Text className={styles.rowLabel}>Text Macro</Text>
+            <Text className={styles.rowHint}>Send custom text command</Text>
           </Pressable>
           {onManageShortcuts ? (
             <>
-              <View style={styles.separator} />
+              <View className={styles.separator} />
               <Pressable
-                style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+                className={cn(styles.row, styles.rowPressedActive)}
                 onPress={onManageShortcuts}
               >
-                <Text style={styles.rowLabel}>Manage Shortcuts</Text>
-                <Text style={styles.rowHint}>Show, hide, or reorder shortcut keys</Text>
+                <Text className={styles.rowLabel}>Manage Shortcuts</Text>
+                <Text className={styles.rowHint}>Show, hide, or reorder shortcut keys</Text>
               </Pressable>
             </>
           ) : null}
@@ -240,46 +241,48 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
       )}
 
       {step === 'shortcut-combo' && (
-        <View style={styles.shortcutForm}>
-          <View style={styles.preview}>
+        <View className={styles.shortcutForm}>
+          <View className={styles.preview}>
             {orderedActiveModifiers.map((modifier, index) => (
-              <View key={modifier.id} style={styles.previewKeycapRow}>
-                {index > 0 ? <Text style={styles.previewPlus}>+</Text> : null}
-                <View style={[styles.keycap, styles.keycapModifier]}>
-                  <Text style={styles.keycapModifierText}>{modifier.label}</Text>
+              <View key={modifier.id} className={styles.previewKeycapRow}>
+                {index > 0 ? <Text className={styles.previewPlus}>+</Text> : null}
+                <View className={cn(styles.keycap, styles.keycapModifier)}>
+                  <Text className={styles.keycapModifierText}>{modifier.label}</Text>
                 </View>
               </View>
             ))}
-            {orderedActiveModifiers.length > 0 ? <Text style={styles.previewPlus}>+</Text> : null}
-            <View style={[styles.keycap, !shortcutPreview && styles.keycapWarn]}>
-              <Text style={[styles.keycapText, !shortcutPreview && styles.keycapTextWarn]}>
+            {orderedActiveModifiers.length > 0 ? (
+              <Text className={styles.previewPlus}>+</Text>
+            ) : null}
+            <View className={cn(styles.keycap, !shortcutPreview && styles.keycapWarn)}>
+              <Text className={cn(styles.keycapText, !shortcutPreview && styles.keycapTextWarn)}>
                 {previewKeyLabel}
               </Text>
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Modifiers</Text>
-            <View style={styles.mods}>
+          <View className={styles.section}>
+            <Text className={styles.sectionLabel}>Modifiers</Text>
+            <View className={styles.mods}>
               {SHORTCUT_MODIFIERS.map((modifier) => {
                 const selected = shortcutModifiers.includes(modifier.id)
                 return (
                   <Pressable
                     key={modifier.id}
-                    style={({ pressed }) => [
+                    className={cn(
                       styles.chip,
                       selected && styles.chipSelected,
-                      pressed && !selected && styles.chipPressed
-                    ]}
+                      !selected && styles.chipPressedActive
+                    )}
                     onPress={() => toggleShortcutModifier(modifier.id)}
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
                   >
-                    <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+                    <Text className={cn(styles.chipText, selected && styles.chipTextSelected)}>
                       {modifier.label}
                     </Text>
                     {modifier.glyph ? (
-                      <Text style={[styles.chipGlyph, selected && styles.chipGlyphSelected]}>
+                      <Text className={cn(styles.chipGlyph, selected && styles.chipGlyphSelected)}>
                         {modifier.glyph}
                       </Text>
                     ) : null}
@@ -289,33 +292,36 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Key</Text>
+          <View className={styles.section}>
+            <Text className={styles.sectionLabel}>Key</Text>
             <TextInput
-              style={styles.keyInput}
+              className={styles.keyInput}
               value={shortcutKey.length === 1 ? shortcutKey.toUpperCase() : ''}
               onChangeText={handleShortcutKeyInput}
               placeholder={SPECIAL_KEY_BY_ID[shortcutKey]?.label ?? 'C'}
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColorClassName="accent-muted-foreground"
               autoCapitalize="characters"
               autoCorrect={false}
               maxLength={1}
             />
             <Pressable
-              style={({ pressed }) => [styles.moreLink, pressed && styles.moreLinkPressed]}
+              className={cn(styles.moreLink, styles.moreLinkPressedActive)}
               onPress={() => setStep('special-keys')}
             >
-              <Text style={styles.moreLinkText}>More keys — Tab, arrows, F1–F12…</Text>
+              <Text className={styles.moreLinkText}>More keys — Tab, arrows, F1–F12…</Text>
             </Pressable>
           </View>
 
           <Pressable
-            style={[styles.saveButton, !shortcutPreview && styles.saveButtonDisabled]}
+            className={cn(styles.saveButton, !shortcutPreview && styles.saveButtonDisabled)}
             disabled={!shortcutPreview}
             onPress={handleShortcutSave}
           >
             <Text
-              style={[styles.saveButtonText, !shortcutPreview && styles.saveButtonTextDisabled]}
+              className={cn(
+                styles.saveButtonText,
+                !shortcutPreview && styles.saveButtonTextDisabled
+              )}
             >
               Add
             </Text>
@@ -324,11 +330,11 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
       )}
 
       {step === 'special-keys' && (
-        <View style={styles.specialKeysForm}>
+        <View className={styles.specialKeysForm}>
           {SPECIAL_KEY_GROUPS.map((group) => (
-            <View key={group.title} style={styles.specialGroup}>
-              <Text style={styles.specialGroupTitle}>{group.title}</Text>
-              <View style={styles.keyGrid}>
+            <View key={group.title} className={styles.specialGroup}>
+              <Text className={styles.specialGroupTitle}>{group.title}</Text>
+              <View className={styles.keyGrid}>
                 {group.ids.map((id) => {
                   const key = SPECIAL_KEY_BY_ID[id]
                   if (!key) {
@@ -337,18 +343,20 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
                   const selected = shortcutKey === id
                   const flexBasis = `${100 / group.columns}%` as const
                   return (
-                    <View key={id} style={[styles.keyCellWrap, { flexBasis }]}>
+                    <View key={id} className={styles.keyCellWrap} style={[{ flexBasis }]}>
                       <Pressable
-                        style={({ pressed }) => [
+                        className={cn(
                           styles.keyCell,
                           selected && styles.keyCellSelected,
-                          pressed && !selected && styles.keyCellPressed
-                        ]}
+                          !selected && styles.keyCellPressedActive
+                        )}
                         onPress={() => handleSpecialKeyPick(id)}
                         accessibilityLabel={key.accessibilityLabel}
                         accessibilityState={{ selected }}
                       >
-                        <Text style={[styles.keyCellText, selected && styles.keyCellTextSelected]}>
+                        <Text
+                          className={cn(styles.keyCellText, selected && styles.keyCellTextSelected)}
+                        >
                           {key.label}
                         </Text>
                       </Pressable>
@@ -362,44 +370,49 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
       )}
 
       {step === 'text-macro' && (
-        <View style={styles.group}>
-          <View style={styles.macroForm}>
-            <Text style={styles.fieldLabel}>Label</Text>
+        <View className={styles.group}>
+          <View className={styles.macroForm}>
+            <Text className={styles.fieldLabel}>Label</Text>
             <TextInput
-              style={styles.fieldInput}
+              className={styles.fieldInput}
               value={macroLabel}
               onChangeText={setMacroLabel}
               placeholder="e.g. Build"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColorClassName="accent-muted-foreground"
               autoCapitalize="none"
               autoCorrect={false}
             />
-            <Text style={styles.fieldLabel}>Command</Text>
+            <Text className={styles.fieldLabel}>Command</Text>
             <TextInput
-              style={styles.fieldInput}
+              className={styles.fieldInput}
               value={macroText}
               onChangeText={setMacroText}
               placeholder="e.g. pnpm build"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColorClassName="accent-muted-foreground"
               autoCapitalize="none"
               autoCorrect={false}
             />
-            <View style={styles.switchRow}>
-              <Text style={styles.switchLabel}>Press Enter</Text>
+            <View className={styles.switchRow}>
+              <Text className={styles.switchLabel}>Press Enter</Text>
               <Switch
                 value={macroEnter}
                 onValueChange={setMacroEnter}
-                trackColor={{ false: colors.bgRaised, true: colors.textSecondary }}
-                thumbColor={colors.textPrimary}
+                trackColorOffClassName="accent-secondary"
+                trackColorOnClassName="accent-muted-foreground"
+                thumbColorClassName="accent-foreground"
+                ios_backgroundColorClassName="accent-secondary"
               />
             </View>
             <Pressable
-              style={[styles.saveButton, !macroText.trim() && styles.saveButtonDisabled]}
+              className={cn(styles.saveButton, !macroText.trim() && styles.saveButtonDisabled)}
               disabled={!macroText.trim()}
               onPress={handleMacroSave}
             >
               <Text
-                style={[styles.saveButtonText, !macroText.trim() && styles.saveButtonTextDisabled]}
+                className={cn(
+                  styles.saveButtonText,
+                  !macroText.trim() && styles.saveButtonTextDisabled
+                )}
               >
                 Add Shortcut
               </Text>
@@ -411,276 +424,67 @@ export function CustomKeyModal({ visible, onClose, onKeysChanged, onManageShortc
   )
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingBottom: spacing.sm
-  },
-  backButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  backButtonPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  backSpacer: {
-    width: 30
-  },
-  title: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    textAlign: 'center'
-  },
-  group: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: 12,
-    overflow: 'hidden'
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  },
-  row: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  rowPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  rowLabel: {
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    color: colors.textPrimary,
-    marginBottom: 1
-  },
-  rowHint: {
-    fontSize: 12,
-    color: colors.textMuted
-  },
-  shortcutForm: {
-    paddingTop: spacing.sm
-  },
-  preview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.lg + spacing.xs,
-    flexWrap: 'wrap'
-  },
-  previewKeycapRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm
-  },
-  previewPlus: {
-    color: colors.textMuted,
-    fontSize: 16
-  },
-  keycap: {
-    minWidth: 48,
-    height: 48,
-    paddingHorizontal: spacing.md,
-    borderRadius: 10,
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  keycapModifier: {
-    minWidth: 0
-  },
-  keycapWarn: {
-    borderColor: colors.statusAmber
-  },
-  keycapText: {
-    color: colors.textPrimary,
-    fontFamily: typography.monoFamily,
-    fontSize: 17,
-    fontWeight: '600'
-  },
-  keycapTextWarn: {
-    color: colors.statusAmber
-  },
-  keycapModifierText: {
-    color: colors.textSecondary,
-    fontFamily: typography.monoFamily,
-    fontSize: 14,
-    fontWeight: '600'
-  },
-  section: {
-    marginTop: spacing.md
-  },
-  sectionLabel: {
-    fontSize: 11,
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: spacing.sm,
-    paddingLeft: 2
-  },
-  mods: {
-    flexDirection: 'row',
-    gap: spacing.sm
-  },
-  chip: {
-    flex: 1,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: colors.bgPanel,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4
-  },
-  chipSelected: {
-    backgroundColor: colors.textPrimary
-  },
-  chipPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  chipText: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    fontWeight: '500'
-  },
-  chipTextSelected: {
-    color: colors.bgBase
-  },
-  chipGlyph: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontFamily: typography.monoFamily
-  },
-  chipGlyphSelected: {
-    color: 'rgba(10,10,10,0.5)'
-  },
-  keyInput: {
-    width: '100%',
-    height: 56,
-    borderRadius: 10,
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    color: colors.textPrimary,
-    fontFamily: typography.monoFamily,
-    fontSize: 22,
-    fontWeight: '600',
-    textAlign: 'center'
-  },
-  moreLink: {
-    paddingVertical: spacing.sm,
-    alignItems: 'center'
-  },
-  moreLinkPressed: {
-    opacity: 0.6
-  },
-  moreLinkText: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    textDecorationLine: 'underline'
-  },
-  specialKeysForm: {
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.md,
-    gap: spacing.md
-  },
-  specialGroup: {
-    gap: spacing.xs
-  },
-  specialGroupTitle: {
-    fontSize: 11,
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    paddingLeft: 2,
-    marginBottom: spacing.xs
-  },
-  keyGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginHorizontal: -spacing.xs / 2
-  },
-  keyCellWrap: {
-    paddingHorizontal: spacing.xs / 2,
-    paddingVertical: spacing.xs / 2
-  },
-  keyCell: {
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: colors.bgPanel,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  keyCellPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  keyCellSelected: {
-    backgroundColor: colors.textPrimary
-  },
-  keyCellText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    fontFamily: typography.monoFamily
-  },
-  keyCellTextSelected: {
-    color: colors.bgBase
-  },
-  macroForm: {
-    padding: spacing.md,
-    gap: spacing.sm
-  },
-  fieldLabel: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: colors.textSecondary
-  },
-  fieldInput: {
-    backgroundColor: colors.bgBase,
-    color: colors.textPrimary,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: 14,
-    fontFamily: typography.monoFamily,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.xs
-  },
-  switchLabel: {
-    fontSize: typography.bodySize,
-    color: colors.textPrimary
-  },
-  saveButton: {
-    marginTop: spacing.md,
-    backgroundColor: colors.textPrimary,
-    paddingVertical: spacing.md,
-    borderRadius: 10,
-    alignItems: 'center'
-  },
-  saveButtonDisabled: {
-    backgroundColor: colors.bgRaised
-  },
-  saveButtonText: {
-    color: colors.bgBase,
-    fontSize: 15,
-    fontWeight: '600'
-  },
-  saveButtonTextDisabled: {
-    color: colors.textMuted
-  }
-})
+const styles = {
+  header: cn('flex-row items-center pb-2'),
+  backButton: cn('w-[30px] h-[30px] rounded-none items-center justify-center'),
+  backButtonPressedActive: cn('active:bg-secondary'),
+  backSpacer: cn('w-[30px]'),
+  title: cn('flex-1 text-[15px] font-semibold text-foreground text-center'),
+  group: cn('bg-card rounded-none overflow-hidden'),
+  separator: cn('h-hairline bg-border mx-3'),
+  row: cn('py-3 px-3.5'),
+  rowPressedActive: cn('active:bg-secondary'),
+  rowLabel: cn('text-[14px] font-medium text-foreground mb-[1px]'),
+  rowHint: cn('text-[12px] text-muted-foreground/60'),
+  shortcutForm: cn('pt-2'),
+  preview: cn('flex-row items-center justify-center gap-2 py-5 flex-wrap'),
+  previewKeycapRow: cn('flex-row items-center gap-2'),
+  previewPlus: cn('text-muted-foreground/60 text-[16px]'),
+  keycap: cn(
+    'min-w-12 h-12 px-3 rounded-none bg-card border border-border items-center justify-center'
+  ),
+  keycapModifier: cn('min-w-0'),
+  keycapWarn: cn('border-amber-500'),
+  keycapText: cn('text-foreground font-mono text-[17px] font-semibold'),
+  keycapTextWarn: cn('text-amber-500'),
+  keycapModifierText: cn('text-muted-foreground font-mono text-[14px] font-semibold'),
+  section: cn('mt-3'),
+  sectionLabel: cn('text-[11px] text-muted-foreground/60 uppercase tracking-[0.8px] mb-2 pl-[2px]'),
+  mods: cn('flex-row gap-2'),
+  chip: cn('flex-1 h-10 rounded-none bg-card flex-row items-center justify-center gap-1'),
+  chipSelected: cn('bg-foreground'),
+  chipPressedActive: cn('active:bg-secondary'),
+  chipText: cn('text-muted-foreground text-[14px] font-medium'),
+  chipTextSelected: cn('text-background'),
+  chipGlyph: cn('text-muted-foreground/60 text-[13px] font-mono'),
+  chipGlyphSelected: cn('text-black/50'),
+  keyInput: cn(
+    'w-full h-14 rounded-none bg-card border border-border text-foreground font-mono text-[22px] font-semibold text-center'
+  ),
+  moreLink: cn('py-2 items-center'),
+  moreLinkPressedActive: cn('active:opacity-[0.6]'),
+  moreLinkText: cn('text-muted-foreground text-[13px] underline'),
+  specialKeysForm: cn('pt-1 pb-3 gap-3'),
+  specialGroup: cn('gap-1'),
+  specialGroupTitle: cn(
+    'text-[11px] text-muted-foreground/60 uppercase tracking-[0.8px] pl-[2px] mb-1'
+  ),
+  keyGrid: cn('flex-row flex-wrap mx-[-2px]'),
+  keyCellWrap: cn('px-[2px] py-[2px]'),
+  keyCell: cn('h-10 rounded-none bg-card items-center justify-center'),
+  keyCellPressedActive: cn('active:bg-secondary'),
+  keyCellSelected: cn('bg-foreground'),
+  keyCellText: cn('text-[13px] font-semibold text-foreground font-mono'),
+  keyCellTextSelected: cn('text-background'),
+  macroForm: cn('p-3 gap-2'),
+  fieldLabel: cn('text-[13px] font-medium text-muted-foreground'),
+  fieldInput: cn(
+    'bg-background text-foreground rounded-none px-3 py-2 text-[14px] font-mono border border-border'
+  ),
+  switchRow: cn('flex-row items-center justify-between py-1'),
+  switchLabel: cn('text-[14px] text-foreground'),
+  saveButton: cn('mt-3 bg-foreground py-3 rounded-none items-center'),
+  saveButtonDisabled: cn('bg-secondary'),
+  saveButtonText: cn('text-background text-[15px] font-semibold'),
+  saveButtonTextDisabled: cn('text-muted-foreground/60')
+} as const

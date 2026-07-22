@@ -1,6 +1,8 @@
-import { Check, Download } from 'lucide-react-native'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, StyleSheet, Switch, Text, View } from 'react-native'
+import { ActivityIndicator, Pressable, Switch, Text, View } from 'react-native'
+
+import { Check, Download } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import {
   downloadDictationModel,
@@ -11,7 +13,6 @@ import {
   type MobileSpeechSetup
 } from '../dictation/mobile-dictation-setup'
 import { triggerError, triggerSuccess } from '../platform/haptics'
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
 import type { RpcClient } from '../transport/rpc-client'
 import { BottomDrawer } from './bottom-drawer'
 
@@ -135,20 +136,27 @@ export function MobileDictationSetupSheet({ visible, client, onClose, onReady }:
       {/* Why: BottomDrawer already scrolls its children in a keyboard-aware container;
           a nested capped ScrollView cut off the lower controls. */}
       <View>
-        <Text style={styles.heading}>Set up voice dictation</Text>
-        <Text style={styles.subtitle}>
+        <Text className={styles.heading}>Set up voice dictation</Text>
+        <Text className={styles.subtitle}>
           Download a model and enable dictation on your desktop — all from here.
         </Text>
 
         {setup === null ? (
-          <View style={styles.loading}>
-            <ActivityIndicator color={colors.textSecondary} />
+          <View className={styles.loading}>
+            <ActivityIndicator colorClassName="accent-muted-foreground" />
           </View>
         ) : (
           <>
-            <View style={styles.enableRow}>
-              <Text style={styles.enableLabel}>Dictation enabled</Text>
-              <Switch value={setup.enabled} onValueChange={(v) => void handleToggleEnabled(v)} />
+            <View className={styles.enableRow}>
+              <Text className={styles.enableLabel}>Dictation enabled</Text>
+              <Switch
+                value={setup.enabled}
+                onValueChange={(v) => void handleToggleEnabled(v)}
+                trackColorOffClassName="accent-secondary"
+                trackColorOnClassName="accent-muted-foreground"
+                thumbColorClassName="accent-foreground"
+                ios_backgroundColorClassName="accent-secondary"
+              />
             </View>
 
             {setup.models.map((model) => {
@@ -156,15 +164,15 @@ export function MobileDictationSetupSheet({ visible, client, onClose, onReady }:
               const inFlight = isModelInFlight(model)
               const rowBusy = busy === model.id
               return (
-                <View key={model.id} style={styles.modelRow}>
-                  <View style={styles.modelInfo}>
-                    <View style={styles.modelTitleRow}>
-                      <Text style={styles.modelLabel}>{model.label}</Text>
+                <View key={model.id} className={styles.modelRow}>
+                  <View className={styles.modelInfo}>
+                    <View className={styles.modelTitleRow}>
+                      <Text className={styles.modelLabel}>{model.label}</Text>
                       {model.recommended ? (
-                        <Text style={styles.recommended}>Recommended</Text>
+                        <Text className={styles.recommended}>Recommended</Text>
                       ) : null}
                     </View>
-                    <Text style={styles.modelMeta}>
+                    <Text className={styles.modelMeta}>
                       {model.provider === 'openai' ? 'OpenAI API' : formatSize(model.sizeBytes)}
                       {inFlight && model.progress != null
                         ? ` · ${Math.round(model.progress * 100)}%`
@@ -174,44 +182,38 @@ export function MobileDictationSetupSheet({ visible, client, onClose, onReady }:
                     </Text>
                   </View>
                   {model.provider === 'openai' ? (
-                    <Text style={styles.modelStateText}>
+                    <Text className={styles.modelStateText}>
                       {model.status === 'ready' ? 'API key set' : 'Set up on desktop'}
                     </Text>
                   ) : model.status === 'ready' ? (
                     isSelected ? (
-                      <View style={styles.selectedTag}>
-                        <Check size={14} color={colors.statusGreen} strokeWidth={2.4} />
-                        <Text style={styles.selectedText}>In use</Text>
+                      <View className={styles.selectedTag}>
+                        <Check size={14} colorClassName="accent-green-500" />
+                        <Text className={styles.selectedText}>In use</Text>
                       </View>
                     ) : (
                       <Pressable
-                        style={({ pressed }) => [
-                          styles.actionButton,
-                          pressed && styles.actionPressed
-                        ]}
+                        className={cn(styles.actionButton, styles.actionPressedActive)}
                         disabled={rowBusy}
                         onPress={() => void handleUseModel(model)}
                       >
-                        <Text style={styles.actionText}>Use</Text>
+                        <Text className={styles.actionText}>Use</Text>
                       </Pressable>
                     )
                   ) : inFlight ? (
-                    <ActivityIndicator size="small" color={colors.textSecondary} />
+                    <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                   ) : (
                     <Pressable
-                      style={({ pressed }) => [
-                        styles.actionButton,
-                        pressed && styles.actionPressed
-                      ]}
+                      className={cn(styles.actionButton, styles.actionPressedActive)}
                       disabled={rowBusy}
                       onPress={() => void handleDownload(model)}
                     >
                       {rowBusy ? (
-                        <ActivityIndicator size="small" color={colors.textSecondary} />
+                        <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                       ) : (
                         <>
-                          <Download size={13} color={colors.textSecondary} strokeWidth={2.2} />
-                          <Text style={styles.actionText}>Download</Text>
+                          <Download size={13} colorClassName="accent-muted-foreground" />
+                          <Text className={styles.actionText}>Download</Text>
                         </>
                       )}
                     </Pressable>
@@ -221,64 +223,29 @@ export function MobileDictationSetupSheet({ visible, client, onClose, onReady }:
             })}
           </>
         )}
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text className={styles.error}>{error}</Text> : null}
       </View>
     </BottomDrawer>
   )
 }
 
-const styles = StyleSheet.create({
-  heading: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '700'
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    marginTop: spacing.xs,
-    marginBottom: spacing.md
-  },
-  loading: { paddingVertical: spacing.xl, alignItems: 'center' },
-  enableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
-    marginBottom: spacing.sm
-  },
-  enableLabel: { color: colors.textPrimary, fontSize: typography.bodySize },
-  modelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-    paddingVertical: spacing.sm
-  },
-  modelInfo: { flex: 1, minWidth: 0 },
-  modelTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  modelLabel: { color: colors.textPrimary, fontSize: typography.bodySize },
-  recommended: {
-    color: colors.statusGreen,
-    fontSize: 10,
-    fontWeight: '700'
-  },
-  modelMeta: { color: colors.textMuted, fontSize: typography.metaSize, marginTop: 2 },
-  modelStateText: { color: colors.textMuted, fontSize: typography.metaSize },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised
-  },
-  actionPressed: { opacity: 0.7 },
-  actionText: { color: colors.textSecondary, fontSize: typography.metaSize, fontWeight: '600' },
-  selectedTag: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  selectedText: { color: colors.statusGreen, fontSize: typography.metaSize, fontWeight: '600' },
-  error: { color: colors.statusRed, fontSize: typography.metaSize, marginTop: spacing.md }
-})
+const styles = {
+  heading: cn('text-foreground text-[14px] font-bold'),
+  subtitle: cn('text-muted-foreground text-[12px] mt-1 mb-3'),
+  loading: cn('py-6 items-center'),
+  enableRow: cn('flex-row items-center justify-between py-2 border-b border-b-border mb-2'),
+  enableLabel: cn('text-foreground text-[14px]'),
+  modelRow: cn('flex-row items-center justify-between gap-3 py-2'),
+  modelInfo: cn('flex-1 min-w-0'),
+  modelTitleRow: cn('flex-row items-center gap-2'),
+  modelLabel: cn('text-foreground text-[14px]'),
+  recommended: cn('text-green-500 text-[10px] font-bold'),
+  modelMeta: cn('text-muted-foreground/60 text-[12px] mt-[2px]'),
+  modelStateText: cn('text-muted-foreground/60 text-[12px]'),
+  actionButton: cn('flex-row items-center gap-[5px] px-3 py-1.5 rounded-none bg-secondary'),
+  actionPressedActive: cn('active:opacity-[0.7]'),
+  actionText: cn('text-muted-foreground text-[12px] font-semibold'),
+  selectedTag: cn('flex-row items-center gap-1'),
+  selectedText: cn('text-green-500 text-[12px] font-semibold'),
+  error: cn('text-destructive text-[12px] mt-3')
+} as const

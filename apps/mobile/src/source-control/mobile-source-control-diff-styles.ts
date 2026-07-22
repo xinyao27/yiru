@@ -1,115 +1,25 @@
-import { StyleSheet } from 'react-native'
-
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import { cn } from '@/style/class-names'
 
 // Empty-state, retry, and committed-diff-preview drawer styles. Split from the
 // main source-control stylesheet to stay under the line limit.
-export const diffStyles = StyleSheet.create({
-  state: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl
-  },
-  stateTitle: {
-    color: colors.textPrimary,
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: spacing.xs
-  },
-  stateText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    lineHeight: 20,
-    textAlign: 'center'
-  },
-  retryButton: {
-    marginTop: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised
-  },
-  retryText: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  },
-  diffDrawerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingBottom: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle
-  },
-  diffDrawerTitleBlock: {
-    flex: 1,
-    minWidth: 0
-  },
-  diffDrawerTitle: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '700'
-  },
-  diffDrawerMeta: {
-    color: colors.textMuted,
-    fontSize: typography.metaSize,
-    marginTop: 2
-  },
-  diffCloseButton: {
-    width: 34,
-    height: 34,
-    borderRadius: radii.button,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  diffState: {
-    minHeight: 160,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg
-  },
-  diffLines: {
-    paddingTop: spacing.md,
-    paddingBottom: spacing.lg
-  },
-  diffTruncatedText: {
-    color: colors.textMuted,
-    fontSize: typography.metaSize,
-    marginBottom: spacing.sm
-  },
-  diffLine: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.xs,
-    paddingVertical: 2,
-    paddingHorizontal: spacing.xs
-  },
-  diffLineAdd: {
-    backgroundColor: colors.diffAddedBg
-  },
-  diffLineDelete: {
-    backgroundColor: colors.diffDeletedBg
-  },
-  diffLineNumber: {
-    width: 40,
-    color: colors.textMuted,
-    fontFamily: typography.monoFamily,
-    fontSize: typography.metaSize,
-    textAlign: 'right'
-  },
-  diffLinePrefix: {
-    width: 12,
-    color: colors.textSecondary,
-    fontFamily: typography.monoFamily,
-    fontSize: typography.metaSize
-  },
-  diffLineText: {
-    flex: 1,
-    color: colors.textPrimary,
-    fontFamily: typography.monoFamily,
-    fontSize: typography.metaSize,
-    lineHeight: 17
-  }
-})
+export const diffStyles = {
+  state: cn('flex-1 items-center justify-center p-6'),
+  stateTitle: cn('text-foreground text-[16px] font-bold mb-1'),
+  stateText: cn('text-muted-foreground text-[14px] leading-[20px] text-center'),
+  retryButton: cn('mt-3 px-4 py-2 rounded-none bg-secondary'),
+  retryText: cn('text-foreground text-[14px] font-semibold'),
+  diffDrawerHeader: cn('flex-row items-center gap-3 pb-3 border-b-hairline border-b-border'),
+  diffDrawerTitleBlock: cn('flex-1 min-w-0'),
+  diffDrawerTitle: cn('text-foreground text-[14px] font-bold'),
+  diffDrawerMeta: cn('text-muted-foreground/60 text-[12px] mt-[2px]'),
+  diffCloseButton: cn('w-[34px] h-[34px] rounded-none items-center justify-center'),
+  diffState: cn('min-h-40 items-center justify-center p-4'),
+  diffLines: cn('pt-3 pb-4'),
+  diffTruncatedText: cn('text-muted-foreground/60 text-[12px] mb-2'),
+  diffLine: cn('flex-row items-start gap-1 py-[2px] px-1'),
+  diffLineAdd: cn('bg-[var(--editor-diff-inserted-line-background)]'),
+  diffLineDelete: cn('bg-[var(--editor-diff-removed-line-background)]'),
+  diffLineNumber: cn('w-10 text-muted-foreground/60 font-mono text-[12px] text-right'),
+  diffLinePrefix: cn('w-3 text-muted-foreground font-mono text-[12px]'),
+  diffLineText: cn('flex-1 text-foreground font-mono text-[12px] leading-[17px]')
+} as const

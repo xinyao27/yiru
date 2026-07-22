@@ -1,7 +1,7 @@
 import type { MrStateFilter, SmartNameMode } from './mobile-composer-source-types'
 
 export type SmartModeIcon =
-  | { type: 'lucide'; name: 'sparkles' | 'git-branch' | 'case-sensitive' }
+  | { type: 'phosphor'; name: 'sparkles' | 'git-branch' | 'case-sensitive' }
   | { type: 'provider'; provider: 'github' | 'gitlab' }
 
 export type SmartModeOption = {
@@ -11,11 +11,11 @@ export type SmartModeOption = {
 }
 
 export const SMART_MODE_OPTIONS: readonly SmartModeOption[] = [
-  { id: 'smart', label: 'Smart', icon: { type: 'lucide', name: 'sparkles' } },
+  { id: 'smart', label: 'Smart', icon: { type: 'phosphor', name: 'sparkles' } },
   { id: 'github', label: 'GitHub', icon: { type: 'provider', provider: 'github' } },
   { id: 'gitlab', label: 'GitLab', icon: { type: 'provider', provider: 'gitlab' } },
-  { id: 'branches', label: 'Branch', icon: { type: 'lucide', name: 'git-branch' } },
-  { id: 'text', label: 'Name', icon: { type: 'lucide', name: 'case-sensitive' } }
+  { id: 'branches', label: 'Branch', icon: { type: 'phosphor', name: 'git-branch' } },
+  { id: 'text', label: 'Name', icon: { type: 'phosphor', name: 'case-sensitive' } }
 ]
 
 export type SmartModeAvailabilityInput = {

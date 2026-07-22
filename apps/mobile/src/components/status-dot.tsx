@@ -1,16 +1,17 @@
-import { View, StyleSheet } from 'react-native'
+import { View } from 'react-native'
 
-import { colors } from '../theme/mobile-theme'
+import { cn } from '@/style/class-names'
+
 import type { ConnectionVerdict } from '../transport/connection-health'
 import type { ConnectionState } from '../transport/types'
 
-const stateColors: Record<ConnectionState, string> = {
-  connected: colors.statusGreen,
-  connecting: colors.statusAmber,
-  handshaking: colors.statusAmber,
-  reconnecting: colors.statusAmber,
-  disconnected: colors.textMuted,
-  'auth-failed': colors.statusRed
+const stateColorClasses: Record<ConnectionState, string> = {
+  connected: 'bg-green-500',
+  connecting: 'bg-amber-500',
+  handshaking: 'bg-amber-500',
+  reconnecting: 'bg-amber-500',
+  disconnected: 'bg-neutral-500/40',
+  'auth-failed': 'bg-red-500'
 }
 
 // Why: when caller passes a verdict, the dot color reflects the verdict's
@@ -25,20 +26,15 @@ export function StatusDot({
   state: ConnectionState
   verdict?: ConnectionVerdict
 }) {
-  const color =
+  const colorClassName =
     verdict?.kind === 'unreachable' || verdict?.kind === 'auth-failed'
-      ? colors.statusRed
+      ? 'bg-red-500'
       : verdict?.kind === 'warning'
-        ? colors.statusAmber
-        : (stateColors[state] ?? colors.textMuted)
-  return <View style={[styles.dot, { backgroundColor: color }]} />
+        ? 'bg-amber-500'
+        : (stateColorClasses[state] ?? 'bg-neutral-500/40')
+  return <View className={cn(styles.dot, colorClassName)} />
 }
 
-const styles = StyleSheet.create({
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8
-  }
-})
+const styles = {
+  dot: cn('w-2 h-2 rounded-none mr-2')
+} as const

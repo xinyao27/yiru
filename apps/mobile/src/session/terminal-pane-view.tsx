@@ -1,5 +1,7 @@
 import { useCallback } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
+
+import { cn } from '@/style/class-names'
 
 import { TerminalWebView } from '../terminal/terminal-web-view'
 import type {
@@ -64,15 +66,12 @@ export function TerminalPaneView({
       // Why: inactive terminal WebViews stay mounted to preserve xterm state,
       // while touch and visibility are disabled until the tab is active again.
       pointerEvents={active ? 'auto' : 'none'}
-      style={[
-        styles.terminalPane,
-        keyboardLift > 0 && { transform: [{ translateY: -keyboardLift }] },
-        !active && styles.terminalPaneHidden
-      ]}
+      className={cn(styles.terminalPane, !active && styles.terminalPaneHidden)}
+      style={[keyboardLift > 0 && { transform: [{ translateY: -keyboardLift }] }]}
     >
       <TerminalWebView
         ref={setRef}
-        style={styles.terminalWebView}
+        className={styles.terminalWebView}
         terminalTheme={terminalTheme}
         textScale={textScale}
         onWebReady={() => onWebReady(handle)}
@@ -93,14 +92,8 @@ export function TerminalPaneView({
   )
 }
 
-const styles = StyleSheet.create({
-  terminalPane: {
-    ...StyleSheet.absoluteFillObject
-  },
-  terminalPaneHidden: {
-    opacity: 0
-  },
-  terminalWebView: {
-    flex: 1
-  }
-})
+const styles = {
+  terminalPane: cn('absolute inset-0'),
+  terminalPaneHidden: cn('opacity-[0]'),
+  terminalWebView: cn('flex-1')
+} as const

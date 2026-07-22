@@ -1,16 +1,9 @@
 import { useRouter } from 'expo-router'
-import { ChevronLeft, ChevronRight } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  View
-} from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ActivityIndicator, Pressable, ScrollView, Switch, Text, View } from 'react-native'
+
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import { BottomDrawer } from '../src/components/bottom-drawer'
 import { VoiceModelList } from '../src/components/voice-model-list'
@@ -23,7 +16,6 @@ import {
   type MobileSpeechModel,
   type MobileSpeechSetup
 } from '../src/dictation/mobile-dictation-setup'
-import { colors, radii, spacing, typography } from '../src/theme/mobile-theme'
 import { useAllHostClients } from '../src/transport/client-context'
 import { loadHosts } from '../src/transport/host-store'
 import type { RpcClient } from '../src/transport/rpc-client'
@@ -40,7 +32,6 @@ type ModelBusyAction = { modelId: string; type: 'download' | 'select' | 'delete'
 
 export default function VoiceSettingsScreen(): React.JSX.Element {
   const router = useRouter()
-  const insets = useSafeAreaInsets()
 
   const [hosts, setHosts] = useState<HostProfile[]>([])
   useEffect(() => {
@@ -198,70 +189,72 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
   const selectedModelLabel = selectedModel?.label ?? 'None selected'
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.sm }]}>
-      <View style={styles.topRow}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} color={colors.textSecondary} />
+    <View className={cn(styles.container, 'pt-safe-offset-2')}>
+      <View className={styles.topRow}>
+        <Pressable className={styles.backButton} onPress={() => router.back()}>
+          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text style={styles.heading}>Voice</Text>
+        <Text className={styles.heading}>Voice</Text>
       </View>
 
       {!client ? (
-        <View style={[styles.section, styles.sectionTopGap]}>
-          <Text style={styles.emptyText}>Connect to a desktop to manage voice settings.</Text>
+        <View className={cn(styles.section, styles.sectionTopGap)}>
+          <Text className={styles.emptyText}>Connect to a desktop to manage voice settings.</Text>
         </View>
       ) : loading && setup === null ? (
-        <View style={styles.loading}>
-          <ActivityIndicator color={colors.textSecondary} />
+        <View className={styles.loading}>
+          <ActivityIndicator colorClassName="accent-muted-foreground" />
         </View>
       ) : setup === null ? (
-        <View style={[styles.section, styles.sectionTopGap]}>
-          <Text style={styles.errorText}>{error ?? 'Failed to load voice settings.'}</Text>
+        <View className={cn(styles.section, styles.sectionTopGap)}>
+          <Text className={styles.errorText}>{error ?? 'Failed to load voice settings.'}</Text>
         </View>
       ) : (
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerClassName={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.groupHeading}>DICTATION</Text>
-          <View style={[styles.section, styles.sectionTopGap]}>
-            <View style={styles.row}>
-              <View style={styles.rowContent}>
-                <Text style={styles.rowLabel}>Enable Voice Dictation</Text>
-                <Text style={styles.rowSublabel}>
+          <Text className={styles.groupHeading}>DICTATION</Text>
+          <View className={cn(styles.section, styles.sectionTopGap)}>
+            <View className={styles.row}>
+              <View className={styles.rowContent}>
+                <Text className={styles.rowLabel}>Enable Voice Dictation</Text>
+                <Text className={styles.rowSublabel}>
                   Dictate text into any focused pane on your desktop.
                 </Text>
               </View>
               <Switch
                 value={enabled}
                 onValueChange={(v) => void handleToggleEnabled(v)}
-                trackColor={{ false: colors.bgRaised, true: colors.textSecondary }}
-                thumbColor={colors.textPrimary}
+                trackColorOffClassName="accent-secondary"
+                trackColorOnClassName="accent-muted-foreground"
+                thumbColorClassName="accent-foreground"
+                ios_backgroundColorClassName="accent-secondary"
               />
             </View>
 
-            <View style={styles.separator} />
+            <View className={styles.separator} />
 
             <View
-              style={[styles.row, !enabled && styles.disabled]}
+              className={cn(styles.row, !enabled && styles.disabled)}
               pointerEvents={enabled ? 'auto' : 'none'}
             >
-              <View style={styles.rowContent}>
-                <Text style={styles.rowLabel}>Dictation Mode</Text>
-                <Text style={styles.rowSublabel}>
+              <View className={styles.rowContent}>
+                <Text className={styles.rowLabel}>Dictation Mode</Text>
+                <Text className={styles.rowSublabel}>
                   Toggle: press once to start, again to stop. Hold: dictate while held.
                 </Text>
               </View>
-              <View style={styles.segmented}>
+              <View className={styles.segmented}>
                 {DICTATION_MODES.map((mode) => {
                   const active = setup.dictationMode === mode.value
                   return (
                     <Pressable
                       key={mode.value}
                       onPress={() => void handleSelectMode(mode.value)}
-                      style={[styles.segment, active && styles.segmentActive]}
+                      className={cn(styles.segment, active && styles.segmentActive)}
                     >
-                      <Text style={[styles.segmentText, active && styles.segmentTextActive]}>
+                      <Text className={cn(styles.segmentText, active && styles.segmentTextActive)}>
                         {mode.label}
                       </Text>
                     </Pressable>
@@ -271,33 +264,29 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
             </View>
           </View>
 
-          <Text style={[styles.groupHeading, styles.inputGroupGap]}>SPEECH MODEL</Text>
-          <View style={[styles.section, styles.sectionTopGap]}>
+          <Text className={cn(styles.groupHeading, styles.inputGroupGap)}>SPEECH MODEL</Text>
+          <View className={cn(styles.section, styles.sectionTopGap)}>
             <Pressable
-              style={({ pressed }) => [
-                styles.row,
-                !enabled && styles.disabled,
-                pressed && styles.rowPressed
-              ]}
+              className={cn(styles.row, !enabled && styles.disabled, styles.rowPressedActive)}
               disabled={!enabled}
               onPress={() => setModelDrawerOpen(true)}
             >
-              <View style={styles.rowContent}>
-                <Text style={styles.rowLabel}>Speech Model</Text>
-                <Text style={styles.rowSublabel} numberOfLines={1}>
+              <View className={styles.rowContent}>
+                <Text className={styles.rowLabel}>Speech Model</Text>
+                <Text className={styles.rowSublabel} numberOfLines={1}>
                   {selectedModelLabel}
                 </Text>
               </View>
-              <ChevronRight size={18} color={colors.textMuted} />
+              <ChevronRight size={18} colorClassName="accent-muted-foreground" />
             </Pressable>
           </View>
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? <Text className={styles.error}>{error}</Text> : null}
         </ScrollView>
       )}
 
       <BottomDrawer visible={modelDrawerOpen} onClose={() => setModelDrawerOpen(false)}>
-        <Text style={styles.drawerTitle}>Speech Model</Text>
+        <Text className={styles.drawerTitle}>Speech Model</Text>
         {setup ? (
           <VoiceModelList
             setup={setup}
@@ -313,107 +302,31 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase,
-    paddingHorizontal: spacing.lg
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.lg
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.textPrimary
-  },
-  scrollContent: {
-    paddingBottom: spacing.xl
-  },
-  loading: { paddingVertical: spacing.xl, alignItems: 'center' },
-  groupHeading: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textMuted,
-    letterSpacing: 0.5,
-    marginBottom: spacing.xs,
-    paddingHorizontal: spacing.xs
-  },
-  section: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: radii.card,
-    overflow: 'hidden'
-  },
-  sectionTopGap: { marginTop: spacing.sm },
-  inputGroupGap: { marginTop: spacing.xl },
-  disabled: { opacity: 0.5 },
-  emptyText: {
-    fontSize: typography.bodySize,
-    color: colors.textSecondary,
-    padding: spacing.md
-  },
-  errorText: {
-    fontSize: typography.bodySize,
-    color: colors.statusRed,
-    padding: spacing.md
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  rowPressed: { backgroundColor: colors.bgRaised },
-  rowContent: { flex: 1 },
-  rowLabel: {
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    color: colors.textPrimary
-  },
-  drawerTitle: {
-    fontSize: typography.bodySize,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    paddingHorizontal: spacing.md + 2,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xs
-  },
-  rowSublabel: {
-    fontSize: typography.bodySize - 2,
-    color: colors.textSecondary,
-    marginTop: 2
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  },
-  segmented: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.bgBase,
-    borderRadius: radii.button,
-    padding: 2
-  },
-  segment: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: radii.button - 1
-  },
-  segmentActive: { backgroundColor: colors.bgRaised },
-  segmentText: { fontSize: typography.metaSize, color: colors.textSecondary, fontWeight: '600' },
-  segmentTextActive: { color: colors.textPrimary },
-  error: { color: colors.statusRed, fontSize: typography.metaSize, marginTop: spacing.md }
-})
+const styles = {
+  container: cn('flex-1 bg-background px-4'),
+  topRow: cn('flex-row items-center mt-2 mb-4'),
+  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
+  heading: cn('text-[20px] font-bold text-foreground'),
+  scrollContent: cn('pb-6'),
+  loading: cn('py-6 items-center'),
+  groupHeading: cn('text-[11px] font-semibold text-muted-foreground/60 tracking-[0.5px] mb-1 px-1'),
+  section: cn('bg-card rounded-none overflow-hidden'),
+  sectionTopGap: cn('mt-2'),
+  inputGroupGap: cn('mt-6'),
+  disabled: cn('opacity-[0.5]'),
+  emptyText: cn('text-[14px] text-muted-foreground p-3'),
+  errorText: cn('text-[14px] text-destructive p-3'),
+  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
+  rowPressedActive: cn('active:bg-secondary'),
+  rowContent: cn('flex-1'),
+  rowLabel: cn('text-[14px] font-medium text-foreground'),
+  drawerTitle: cn('text-[14px] font-bold text-foreground px-3.5 pt-2 pb-1'),
+  rowSublabel: cn('text-[12px] text-muted-foreground mt-[2px]'),
+  separator: cn('h-hairline bg-border mx-3'),
+  segmented: cn('flex-row items-center bg-background rounded-none p-[2px]'),
+  segment: cn('px-3 py-1.5 rounded-none'),
+  segmentActive: cn('bg-secondary'),
+  segmentText: cn('text-[12px] text-muted-foreground font-semibold'),
+  segmentTextActive: cn('text-foreground'),
+  error: cn('text-destructive text-[12px] mt-3')
+} as const

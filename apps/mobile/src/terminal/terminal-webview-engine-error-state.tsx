@@ -1,8 +1,8 @@
-import { RefreshCw } from 'lucide-react-native'
 import { useCallback, useState } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
-import { colors } from '../theme/mobile-theme'
+import { ArrowClockwise as RefreshCw } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 export type NativeWebViewEngineEvent = {
   readonly nativeEvent?: object
@@ -80,52 +80,25 @@ export function TerminalWebViewEngineErrorOverlay({
   onReload
 }: TerminalWebViewEngineErrorOverlayProps) {
   return (
-    <View style={styles.errorOverlay}>
-      <Text style={styles.errorTitle}>Terminal failed to load</Text>
-      <Text style={styles.errorDetail} numberOfLines={4}>
+    <View className={styles.errorOverlay}>
+      <Text className={styles.errorTitle}>Terminal failed to load</Text>
+      <Text className={styles.errorDetail} numberOfLines={4}>
         {message}
       </Text>
-      <Pressable accessibilityRole="button" style={styles.reloadButton} onPress={onReload}>
-        <RefreshCw size={16} color={colors.terminalBg} />
-        <Text style={styles.reloadButtonText}>Reload</Text>
+      <Pressable accessibilityRole="button" className={styles.reloadButton} onPress={onReload}>
+        <RefreshCw size={16} colorClassName="accent-primary-foreground" />
+        <Text className={styles.reloadButtonText}>Reload</Text>
       </Pressable>
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  errorOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    padding: 24,
-    backgroundColor: colors.terminalBg
-  },
-  errorTitle: {
-    color: colors.textPrimary,
-    fontSize: 16,
-    fontWeight: '700',
-    textAlign: 'center'
-  },
-  errorDetail: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    lineHeight: 18,
-    textAlign: 'center'
-  },
-  reloadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    minHeight: 36,
-    paddingHorizontal: 14,
-    borderRadius: 6,
-    backgroundColor: colors.surfaceBright
-  },
-  reloadButtonText: {
-    color: colors.terminalBg,
-    fontSize: 14,
-    fontWeight: '700'
-  }
-})
+const styles = {
+  errorOverlay: cn(
+    'absolute inset-0 items-center justify-center gap-3 p-6 bg-[var(--terminal-background)]'
+  ),
+  errorTitle: cn('text-foreground text-[16px] font-bold text-center'),
+  errorDetail: cn('text-muted-foreground text-[13px] leading-[18px] text-center'),
+  reloadButton: cn('flex-row items-center gap-2 min-h-9 px-3.5 rounded-none bg-primary'),
+  reloadButtonText: cn('text-primary-foreground text-[14px] font-bold')
+} as const

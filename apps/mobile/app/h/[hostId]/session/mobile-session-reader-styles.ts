@@ -1,140 +1,39 @@
-import { Platform, StyleSheet } from 'react-native'
+import { cn } from '@/style/class-names'
 
-import { colors, spacing, radii, typography } from '../../../../src/theme/mobile-theme'
-
-export const mobileSessionReaderStyles = StyleSheet.create({
-  markdownTextInput: {
-    flex: 1,
-    minHeight: 0,
-    color: colors.textPrimary,
-    backgroundColor: colors.bgBase,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl * 3,
-    fontSize: typography.bodySize,
-    lineHeight: 22,
-    fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' })
-  },
-  filePreviewScroll: {
-    flex: 1,
-    minHeight: 0,
-    backgroundColor: colors.editorSurface
-  },
-  filePreviewContent: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl
-  },
-  filePreviewText: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    lineHeight: 22,
-    fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' })
-  },
-  imagePreviewContainer: {
-    flex: 1,
-    minHeight: 0,
-    backgroundColor: colors.editorSurface
-  },
-  imagePreviewScroll: {
-    flex: 1
-  },
-  imagePreviewContent: {
-    flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg
-  },
-  imagePreview: {
-    width: '100%',
-    height: '100%',
-    minHeight: 200
-  },
-  diffNotesToolbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel
-  },
-  diffNotesTitleRow: {
-    minWidth: 0,
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs
-  },
-  diffNotesTitle: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontWeight: '600'
-  },
-  diffNotesActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs
-  },
-  diffNotesActionButton: {
-    minHeight: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.sm,
-    backgroundColor: colors.bgRaised
-  },
-  diffNotesActionText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontWeight: '600'
-  },
-  diffLineBlock: {
-    marginBottom: spacing.xs
-  },
-  diffLine: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderLeftWidth: 2,
-    borderLeftColor: colors.editorSurface,
-    paddingRight: spacing.sm
-  },
-  diffLineAdded: {
-    backgroundColor: colors.diffAddedBg,
-    borderLeftColor: colors.gitDecorationAdded
-  },
-  diffLineDeleted: {
-    backgroundColor: colors.diffDeletedBg,
-    borderLeftColor: colors.gitDecorationDeleted
-  },
-  diffGutter: {
-    width: 42,
-    paddingRight: spacing.sm,
-    textAlign: 'right',
-    color: colors.textMuted,
-    fontSize: typography.metaSize,
-    lineHeight: 22,
-    fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' })
-  },
-  diffText: {
-    flex: 1,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    lineHeight: 22,
-    fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' })
-  },
-  diffPrefix: {
-    color: colors.textMuted
-  },
-  diffPrefixAdded: {
-    color: colors.gitDecorationAdded
-  },
-  diffPrefixDeleted: {
-    color: colors.gitDecorationDeleted
-  }
-})
+export const mobileSessionReaderStyles = {
+  markdownTextInput: cn(
+    'flex-1 min-h-0 text-foreground bg-background px-4 pt-4 pb-18 text-[14px] leading-[22px] font-mono'
+  ),
+  filePreviewScroll: cn('flex-1 min-h-0 bg-[var(--editor-surface)]'),
+  filePreviewContent: cn('px-4 pt-4 pb-6'),
+  filePreviewText: cn('text-foreground text-[14px] leading-[22px] font-mono'),
+  imagePreviewContainer: cn('flex-1 min-h-0 bg-[var(--editor-surface)]'),
+  imagePreviewScroll: cn('flex-1'),
+  imagePreviewContent: cn('grow items-center justify-center p-4'),
+  imagePreview: cn('w-full h-full min-h-50'),
+  diffNotesToolbar: cn(
+    'flex-row items-center justify-between gap-2 px-4 py-2 border-b-hairline border-b-border bg-card'
+  ),
+  diffNotesTitleRow: cn('min-w-0 flex-1 flex-row items-center gap-1'),
+  diffNotesTitle: cn('text-muted-foreground text-[12px] font-semibold'),
+  diffNotesActions: cn('flex-row items-center gap-1'),
+  diffNotesActionButton: cn(
+    'min-h-[30px] flex-row items-center gap-1 border border-border rounded-none px-2 bg-secondary'
+  ),
+  diffNotesActionText: cn('text-muted-foreground text-[12px] font-semibold'),
+  diffLineBlock: cn('mb-1'),
+  diffLine: cn('flex-row items-start border-l-2 border-l-[var(--editor-surface)] pr-2'),
+  diffLineAdded: cn(
+    'bg-[var(--editor-diff-inserted-line-background)] border-l-[var(--git-decoration-added)]'
+  ),
+  diffLineDeleted: cn(
+    'bg-[var(--editor-diff-removed-line-background)] border-l-[var(--git-decoration-deleted)]'
+  ),
+  diffGutter: cn(
+    'w-[42px] pr-2 text-right text-muted-foreground/60 text-[12px] leading-[22px] font-mono'
+  ),
+  diffText: cn('flex-1 text-foreground text-[14px] leading-[22px] font-mono'),
+  diffPrefix: cn('text-muted-foreground/60'),
+  diffPrefixAdded: cn('text-[var(--git-decoration-added)]'),
+  diffPrefixDeleted: cn('text-[var(--git-decoration-deleted)]')
+} as const

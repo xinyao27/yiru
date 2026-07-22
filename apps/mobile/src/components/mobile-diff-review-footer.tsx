@@ -1,18 +1,18 @@
+import { Pressable, Text, View } from 'react-native'
+
 import {
   Check,
-  ChevronLeft,
-  ChevronRight,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
   FileText,
   Plus,
-  Trash2,
-  Undo2
-} from 'lucide-react-native'
-import { Pressable, Text, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+  Trash as Trash2,
+  ArrowCounterClockwise as Undo2
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type { MobileDiffReviewQueueItem } from '../session/mobile-diff-review-queue'
 import type { GitMutationMethod } from '../session/mobile-diff-review-screen-model'
-import { colors, spacing } from '../theme/mobile-theme'
 import { mobileDiffReviewStyles as styles } from './mobile-diff-review-screen-styles'
 
 type Props = {
@@ -34,87 +34,86 @@ export function MobileDiffReviewFooter({
   onMarkReviewed,
   onMoveFile
 }: Props) {
-  const insets = useSafeAreaInsets()
   return (
-    <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.sm }]}>
-      <View style={styles.fileActionRow}>
+    <View className={cn(styles.footer, 'pb-safe-offset-2')}>
+      <View className={styles.fileActionRow}>
         {item.canStage ? (
           <Pressable
-            style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+            className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
             disabled={busyAction !== null}
             onPress={() => onGitMutation('git.stage', item)}
             accessibilityRole="button"
             accessibilityLabel="Stage file"
           >
-            <Plus size={14} color={colors.textSecondary} strokeWidth={2.2} />
-            <Text style={styles.secondaryButtonText}>Stage</Text>
+            <Plus size={14} colorClassName="accent-muted-foreground" />
+            <Text className={styles.secondaryButtonText}>Stage</Text>
           </Pressable>
         ) : null}
         {item.canUnstage ? (
           <Pressable
-            style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+            className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
             disabled={busyAction !== null}
             onPress={() => onGitMutation('git.unstage', item)}
             accessibilityRole="button"
             accessibilityLabel="Unstage file"
           >
-            <Undo2 size={14} color={colors.textSecondary} strokeWidth={2.2} />
-            <Text style={styles.secondaryButtonText}>Unstage</Text>
+            <Undo2 size={14} colorClassName="accent-muted-foreground" />
+            <Text className={styles.secondaryButtonText}>Unstage</Text>
           </Pressable>
         ) : null}
         {item.canDiscard ? (
           <Pressable
-            style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+            className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
             disabled={busyAction !== null}
             onPress={() => onDiscard(item)}
             accessibilityRole="button"
             accessibilityLabel="Discard file"
           >
-            <Trash2 size={14} color={colors.statusRed} strokeWidth={2.2} />
-            <Text style={styles.destructiveText}>Discard</Text>
+            <Trash2 size={14} colorClassName="accent-destructive" />
+            <Text className={styles.destructiveText}>Discard</Text>
           </Pressable>
         ) : null}
       </View>
-      <View style={styles.footerRow}>
+      <View className={styles.footerRow}>
         <Pressable
-          style={({ pressed }) => [styles.navButton, pressed && styles.buttonPressed]}
+          className={cn(styles.navButton, 'active:opacity-[0.76]')}
           onPress={() => onMoveFile('previous')}
           accessibilityRole="button"
           accessibilityLabel="Previous file"
         >
-          <ChevronLeft size={17} color={colors.textPrimary} strokeWidth={2.2} />
+          <ChevronLeft size={17} colorClassName="accent-foreground" />
         </Pressable>
         <Pressable
-          style={({ pressed }) => [styles.footerButton, pressed && styles.buttonPressed]}
+          className={cn(styles.footerButton, 'active:opacity-[0.76]')}
           onPress={onAddFileNote}
           accessibilityRole="button"
           accessibilityLabel="Add file note"
         >
-          <FileText size={14} color={colors.textSecondary} strokeWidth={2.2} />
-          <Text style={styles.footerButtonText}>Note</Text>
+          <FileText size={14} colorClassName="accent-muted-foreground" />
+          <Text className={styles.footerButtonText}>Note</Text>
         </Pressable>
         <Pressable
-          style={({ pressed }) => [
+          className={cn(
             styles.primaryButton,
             item.isReviewed && styles.primaryButtonDone,
-            pressed && styles.buttonPressed
-          ]}
+            'active:opacity-[0.76]'
+          )}
           onPress={onMarkReviewed}
           accessibilityRole="button"
           accessibilityLabel="Mark file reviewed"
         >
-          <Check size={14} color={colors.bgBase} strokeWidth={2.2} />
-          <Text style={styles.primaryButtonText}>
+          <Check size={14} colorClassName="accent-primary-foreground" />
+          <Text className={styles.primaryButtonText}>
             {item.isReviewed ? 'Reviewed' : 'Mark Reviewed'}
           </Text>
         </Pressable>
         <Pressable
-          style={({ pressed }) => [styles.navButton, pressed && styles.buttonPressed]}
+          className={cn(styles.navButton, 'active:opacity-[0.76]')}
           onPress={() => onMoveFile('next')}
           accessibilityRole="button"
           accessibilityLabel="Next file"
         >
-          <ChevronRight size={17} color={colors.textPrimary} strokeWidth={2.2} />
+          <ChevronRight size={17} colorClassName="accent-foreground" />
         </Pressable>
       </View>
     </View>

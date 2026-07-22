@@ -1,11 +1,12 @@
-import { GitMerge, Link2Off } from 'lucide-react-native'
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+
+import { GitMerge, LinkBreak as Link2Off } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type { GitHubPRMergeMethod, PRInfo } from '../../../../desktop/src/shared/types'
 import type { MobilePrActions } from '../../session/use-mobile-pr-actions'
 import { unlinkMobilePr } from '../../source-control/mobile-pr-link'
-import { colors } from '../../theme/mobile-theme'
 import type { RpcClient } from '../../transport/rpc-client'
 import { ConfirmModal } from '../confirm-modal'
 import { resolveMobilePrMergeMethod, resolvePrActionAvailability } from './pr-actions-state'
@@ -110,14 +111,14 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
   const copy = confirmCopy()
 
   return (
-    <View style={styles.actionsBlock}>
+    <View className={styles.actionsBlock}>
       {avail.canMerge ? (
         <Pressable
-          style={[
+          className={cn(
             styles.actionButton,
             styles.actionButtonMerge,
             mergeBusy && styles.actionButtonDisabled
-          ]}
+          )}
           onPress={() => {
             setUnlinkError(null)
             setConfirm({ kind: 'merge', method: effectiveMethod })
@@ -127,21 +128,21 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
           accessibilityLabel="Merge pull request"
         >
           {mergeBusy ? (
-            <ActivityIndicator color={colors.onMergeGreen} />
+            <ActivityIndicator colorClassName="accent-white" />
           ) : (
-            <GitMerge size={16} color={colors.onMergeGreen} strokeWidth={2.2} />
+            <GitMerge size={16} colorClassName="accent-white" />
           )}
-          <Text style={[styles.actionButtonText, styles.actionButtonTextMerge]}>
+          <Text className={cn(styles.actionButtonText, styles.actionButtonTextMerge)}>
             Merge pull request
           </Text>
         </Pressable>
       ) : null}
 
       {showAutoMerge ? (
-        <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>Auto-merge when ready</Text>
+        <View className={styles.toggleRow}>
+          <Text className={styles.toggleLabel}>Auto-merge when ready</Text>
           <Pressable
-            style={[styles.togglePill, autoMerge && styles.togglePillOn]}
+            className={cn(styles.togglePill, autoMerge && styles.togglePillOn)}
             onPress={() => {
               setUnlinkError(null)
               actions.setAutoMerge(!autoMerge, effectiveMethod)
@@ -152,9 +153,9 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
             accessibilityLabel="Toggle auto-merge"
           >
             {autoMergeBusy ? (
-              <ActivityIndicator color={colors.textSecondary} />
+              <ActivityIndicator colorClassName="accent-muted-foreground" />
             ) : (
-              <Text style={[styles.togglePillText, autoMerge && styles.togglePillTextOn]}>
+              <Text className={cn(styles.togglePillText, autoMerge && styles.togglePillTextOn)}>
                 {autoMerge ? 'On' : 'Off'}
               </Text>
             )}
@@ -163,14 +164,14 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
       ) : null}
 
       {showSecondary ? (
-        <View style={styles.secondaryRow}>
+        <View className={styles.secondaryRow}>
           {avail.canClose || avail.canReopen ? (
             <Pressable
-              style={[
+              className={cn(
                 styles.actionButton,
                 styles.secondaryButton,
                 stateBusy && styles.actionButtonDisabled
-              ]}
+              )}
               onPress={() => {
                 setUnlinkError(null)
                 setConfirm({ kind: 'state', state: avail.canClose ? 'closed' : 'open' })
@@ -179,12 +180,12 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
               accessibilityRole="button"
               accessibilityLabel={avail.canClose ? 'Close pull request' : 'Reopen pull request'}
             >
-              {stateBusy ? <ActivityIndicator color={colors.textSecondary} /> : null}
+              {stateBusy ? <ActivityIndicator colorClassName="accent-muted-foreground" /> : null}
               <Text
-                style={[
+                className={cn(
                   styles.actionButtonText,
                   avail.canClose && styles.actionButtonDestructiveText
-                ]}
+                )}
               >
                 {avail.canClose ? 'Close' : 'Reopen'}
               </Text>
@@ -192,28 +193,28 @@ export function PRActionsSection({ pr, actions, client, worktreeId, onUnlinked }
           ) : null}
           {avail.canUnlink ? (
             <Pressable
-              style={[
+              className={cn(
                 styles.actionButton,
                 styles.secondaryButton,
                 unlinkBusy && styles.actionButtonDisabled
-              ]}
+              )}
               onPress={() => void unlink()}
               disabled={unlinkBusy}
               accessibilityRole="button"
               accessibilityLabel="Unlink pull request"
             >
               {unlinking ? (
-                <ActivityIndicator color={colors.textSecondary} />
+                <ActivityIndicator colorClassName="accent-muted-foreground" />
               ) : (
-                <Link2Off size={16} color={colors.textSecondary} strokeWidth={2.2} />
+                <Link2Off size={16} colorClassName="accent-muted-foreground" />
               )}
-              <Text style={styles.actionButtonText}>Unlink</Text>
+              <Text className={styles.actionButtonText}>Unlink</Text>
             </Pressable>
           ) : null}
         </View>
       ) : null}
 
-      {actionError ? <Text style={styles.actionError}>{actionError}</Text> : null}
+      {actionError ? <Text className={styles.actionError}>{actionError}</Text> : null}
 
       <ConfirmModal
         visible={confirm !== null}

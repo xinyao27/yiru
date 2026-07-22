@@ -1,14 +1,18 @@
+import '../global.css'
 import * as Linking from 'expo-linking'
 import * as Notifications from 'expo-notifications'
 import { Stack, useRouter } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
-import { useCallback, useEffect, useRef } from 'react'
-import { View, StyleSheet } from 'react-native'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { View, type TextStyle, type ViewStyle } from 'react-native'
+import { Uniwind, useCSSVariable, useResolveClassNames, useUniwind } from 'uniwind'
+
+import { IconContext } from '@/components/uniwind-icons'
+import { SafeAreaListener, SafeAreaProvider } from '@/components/uniwind-native-components'
 
 import { YiruLogo } from '../src/components/yiru-logo'
 import { getNotificationNavigationPath } from '../src/notifications/notification-routing'
-import { colors } from '../src/theme/mobile-theme'
 import { RpcClientProvider } from '../src/transport/client-context'
 import { loadHosts } from '../src/transport/host-store'
 import { recoverMobileRelayPairing } from '../src/transport/mobile-relay-pairing-recovery'
@@ -36,6 +40,18 @@ Notifications.setNotificationHandler({
 export default function RootLayout() {
   const router = useRouter()
   const handledNotificationIdsRef = useRef<Set<string>>(new Set())
+  const { theme } = useUniwind()
+  const foreground = useCSSVariable('--color-foreground') as string
+  const iconContextValue = useMemo(
+    () => ({ color: foreground, weight: 'duotone' as const }),
+    [foreground]
+  )
+  const headerStyle = useResolveClassNames('bg-card') as { backgroundColor?: string }
+  const headerTitleStyle = useResolveClassNames('text-[16px] font-semibold') as Pick<
+    TextStyle,
+    'fontFamily' | 'fontSize' | 'fontWeight'
+  > & { color?: string }
+  const contentStyle = useResolveClassNames('bg-background') as ViewStyle
 
   useEffect(() => {
     // Why: pairing publication is journaled across process death; startup must
@@ -152,55 +168,59 @@ export default function RootLayout() {
   }, [])
 
   return (
-    <RpcClientProvider>
-      <View style={styles.root} onLayout={onNavigatorLayout}>
-        <StatusBar style="light" />
-        <Stack
-          screenOptions={{
-            headerStyle: { backgroundColor: colors.bgPanel },
-            headerTintColor: colors.textPrimary,
-            headerTitleStyle: { fontSize: 16, fontWeight: '600' },
-            contentStyle: { backgroundColor: colors.bgBase },
-            headerShadowVisible: false
-            // Why: deliberately no `orientation` screenOption. react-native-screens
-            // has no value that respects the device rotation lock — even 'default'
-            // calls setRequestedOrientation(UNSPECIFIED) at runtime, overriding the
-            // manifest. Leaving it unset lets the manifest's "fullUser" (set by the
-            // android-respect-rotation-lock config plugin) honor the auto-rotate lock.
-          }}
-        >
-          <Stack.Screen
-            name="index"
-            options={{
-              headerShown: false,
-              headerTitle: () => <YiruLogo size={22} />
-            }}
-          />
-          <Stack.Screen name="pair-scan" options={{ headerShown: false }} />
-          <Stack.Screen name="pair" options={{ headerShown: false }} />
-          <Stack.Screen name="pair-confirm" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="notification-opt-in"
-            options={{ headerShown: false, presentation: 'modal', gestureEnabled: false }}
-          />
-          <Stack.Screen name="settings" options={{ headerShown: false }} />
-          <Stack.Screen name="terminal-settings" options={{ headerShown: false }} />
-          <Stack.Screen name="browser-settings" options={{ headerShown: false }} />
-          <Stack.Screen name="voice-settings" options={{ headerShown: false }} />
-          <Stack.Screen name="notifications" options={{ headerShown: false }} />
-          <Stack.Screen name="troubleshoot" options={{ headerShown: false }} />
-          <Stack.Screen name="connection-log" options={{ headerShown: false }} />
-          <Stack.Screen name="about" options={{ headerShown: false }} />
-          <Stack.Screen name="h" options={{ headerShown: false }} />
-        </Stack>
-      </View>
-    </RpcClientProvider>
+    <SafeAreaProvider>
+      <SafeAreaListener
+        onChange={({ insets }) => {
+          // Why: free Uniwind reads safe-area utilities from explicit native inset updates.
+          Uniwind.updateInsets(insets)
+        }}
+      >
+        <IconContext.Provider value={iconContextValue}>
+          <RpcClientProvider>
+            <View className="bg-background flex-1" onLayout={onNavigatorLayout}>
+              <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+              <Stack
+                screenOptions={{
+                  headerStyle,
+                  headerTintColor: foreground,
+                  headerTitleStyle,
+                  contentStyle,
+                  headerShadowVisible: false
+                  // Why: deliberately no `orientation` screenOption. react-native-screens
+                  // has no value that respects the device rotation lock — even 'default'
+                  // calls setRequestedOrientation(UNSPECIFIED) at runtime, overriding the
+                  // manifest. Leaving it unset lets the manifest's "fullUser" (set by the
+                  // android-respect-rotation-lock config plugin) honor the auto-rotate lock.
+                }}
+              >
+                <Stack.Screen
+                  name="index"
+                  options={{
+                    headerShown: false,
+                    headerTitle: () => <YiruLogo size={22} />
+                  }}
+                />
+                <Stack.Screen name="pair-scan" options={{ headerShown: false }} />
+                <Stack.Screen name="pair" options={{ headerShown: false }} />
+                <Stack.Screen name="pair-confirm" options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="notification-opt-in"
+                  options={{ headerShown: false, presentation: 'modal', gestureEnabled: false }}
+                />
+                <Stack.Screen name="settings" options={{ headerShown: false }} />
+                <Stack.Screen name="terminal-settings" options={{ headerShown: false }} />
+                <Stack.Screen name="browser-settings" options={{ headerShown: false }} />
+                <Stack.Screen name="voice-settings" options={{ headerShown: false }} />
+                <Stack.Screen name="notifications" options={{ headerShown: false }} />
+                <Stack.Screen name="troubleshoot" options={{ headerShown: false }} />
+                <Stack.Screen name="connection-log" options={{ headerShown: false }} />
+                <Stack.Screen name="about" options={{ headerShown: false }} />
+                <Stack.Screen name="h" options={{ headerShown: false }} />
+              </Stack>
+            </View>
+          </RpcClientProvider>
+        </IconContext.Provider>
+      </SafeAreaListener>
+    </SafeAreaProvider>
   )
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.bgBase
-  }
-})

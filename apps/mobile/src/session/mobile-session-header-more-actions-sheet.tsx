@@ -1,8 +1,7 @@
-import { ListChecks } from 'lucide-react-native'
+import { ListChecks } from '@/components/uniwind-icons'
 
 import { MobileAgentSessionHistoryIcon } from '../agent-history/mobile-agent-session-history-icon'
 import { ActionSheetModal } from '../components/action-sheet-modal'
-import { colors } from '../theme/mobile-theme'
 
 type Props = {
   visible: boolean
@@ -33,8 +32,7 @@ export function MobileSessionHeaderMoreActionsSheet({
                 renderIcon: () => (
                   <MobileAgentSessionHistoryIcon
                     size={16}
-                    color={colors.textSecondary}
-                    strokeWidth={2.1}
+                    colorClassName="accent-muted-foreground"
                   />
                 ),
                 onPress: onOpenAgentSessionHistory

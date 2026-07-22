@@ -1,5 +1,4 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { ChevronLeft, Check, RefreshCw, User } from 'lucide-react-native'
 import { useEffect, useState, useCallback } from 'react'
 import {
   View,
@@ -10,7 +9,15 @@ import {
   RefreshControl,
   Alert
 } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import {
+  CaretLeft as ChevronLeft,
+  Check,
+  ArrowClockwise as RefreshCw,
+  User
+} from '@/components/uniwind-icons'
+import { SafeAreaView } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import {
   type AccountsSnapshot,
@@ -23,7 +30,6 @@ import {
   UsageBar
 } from '../../../src/components/account-usage'
 import { ClaudeIcon, OpenAIIcon } from '../../../src/components/agent-icons'
-import { colors, spacing } from '../../../src/theme/mobile-theme'
 import { useHostClient } from '../../../src/transport/client-context'
 import { loadHosts } from '../../../src/transport/host-store'
 import type { RpcSuccess } from '../../../src/transport/types'
@@ -31,7 +37,7 @@ import { styles } from './accounts-screen-styles'
 
 export default function AccountsScreen() {
   const router = useRouter()
-  const insets = useSafeAreaInsets()
+
   const { hostId } = useLocalSearchParams<{ hostId: string }>()
 
   // Why: shared client per host. See docs/mobile-shared-client-per-host.md.
@@ -148,26 +154,26 @@ export default function AccountsScreen() {
     const activeWeeklyBar = getUsageBarState(activeUsage, 'weekly')
     const Icon = provider === 'claude' ? ClaudeIcon : OpenAIIcon
     return (
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
+      <View className={styles.section}>
+        <View className={styles.sectionHeader}>
           <Icon size={14} />
-          <Text style={styles.sectionHeading}>{title}</Text>
+          <Text className={styles.sectionHeading}>{title}</Text>
         </View>
-        <View style={styles.card}>
+        <View className={styles.card}>
           {/* System default row */}
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => selectAccount(provider, null)}
             disabled={busyAccountId !== null || connState !== 'connected'}
           >
-            <View style={styles.rowMain}>
-              <Text style={styles.rowTitle}>System default</Text>
-              <Text style={styles.rowSubtitle}>Use the agent's own login</Text>
+            <View className={styles.rowMain}>
+              <Text className={styles.rowTitle}>System default</Text>
+              <Text className={styles.rowSubtitle}>Use the agent's own login</Text>
               {/* Why: when system default is the active selection, activeUsage
                   holds the system-default login's rate limits — surface them
                   here so non-managed users still see their usage. */}
               {state.activeAccountId === null && hasActiveProviderUsage(activeUsage) ? (
-                <View style={styles.usageRow}>
+                <View className={styles.usageRow}>
                   <UsageBar
                     label="5h"
                     usedPercent={activeSessionBar.usedPercent}
@@ -185,11 +191,11 @@ export default function AccountsScreen() {
                 </View>
               ) : null}
             </View>
-            <View style={styles.rowTrailing}>
+            <View className={styles.rowTrailing}>
               {state.activeAccountId === null ? (
-                <Check size={16} color={colors.accentBlue} />
+                <Check size={16} colorClassName="accent-primary" />
               ) : busyAccountId === `${provider}:default` ? (
-                <ActivityIndicator size="small" color={colors.textSecondary} />
+                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               ) : null}
             </View>
           </Pressable>
@@ -207,17 +213,17 @@ export default function AccountsScreen() {
             const weeklyBar = getUsageBarState(usage, 'weekly', isFetching)
             return (
               <View key={account.id}>
-                <View style={styles.separator} />
+                <View className={styles.separator} />
                 <Pressable
-                  style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+                  className={cn(styles.row, styles.rowPressedActive)}
                   onPress={() => selectAccount(provider, account.id)}
                   disabled={busyAccountId !== null || connState !== 'connected' || isActive}
                 >
-                  <View style={styles.rowMain}>
-                    <Text style={styles.rowTitle} numberOfLines={1}>
+                  <View className={styles.rowMain}>
+                    <Text className={styles.rowTitle} numberOfLines={1}>
                       {account.email}
                     </Text>
-                    <View style={styles.usageRow}>
+                    <View className={styles.usageRow}>
                       <UsageBar
                         label="5h"
                         usedPercent={sessionBar.usedPercent}
@@ -234,16 +240,16 @@ export default function AccountsScreen() {
                       />
                     </View>
                     {usage?.error ? (
-                      <Text style={styles.errorText} numberOfLines={1}>
+                      <Text className={styles.errorText} numberOfLines={1}>
                         {usage.error}
                       </Text>
                     ) : null}
                   </View>
-                  <View style={styles.rowTrailing}>
+                  <View className={styles.rowTrailing}>
                     {isActive ? (
-                      <Check size={16} color={colors.accentBlue} />
+                      <Check size={16} colorClassName="accent-primary" />
                     ) : busyAccountId === account.id ? (
-                      <ActivityIndicator size="small" color={colors.textSecondary} />
+                      <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                     ) : null}
                   </View>
                 </Pressable>
@@ -256,63 +262,63 @@ export default function AccountsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.topRow}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} color={colors.textPrimary} />
+    <SafeAreaView className={styles.container} edges={['top']}>
+      <View className={styles.topRow}>
+        <Pressable className={styles.backButton} onPress={() => router.back()}>
+          <ChevronLeft size={22} colorClassName="accent-foreground" />
         </Pressable>
-        <View style={styles.titleWrap}>
-          <Text style={styles.heading}>Accounts</Text>
+        <View className={styles.titleWrap}>
+          <Text className={styles.heading}>Accounts</Text>
           {hostName ? (
-            <Text style={styles.subheading} numberOfLines={1}>
+            <Text className={styles.subheading} numberOfLines={1}>
               {hostName}
             </Text>
           ) : null}
         </View>
         <Pressable
-          style={styles.iconButton}
+          className={styles.iconButton}
           onPress={refresh}
           disabled={!client || refreshing || connState !== 'connected'}
         >
           {refreshing ? (
-            <ActivityIndicator size="small" color={colors.textSecondary} />
+            <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
           ) : (
-            <RefreshCw size={18} color={colors.textSecondary} />
+            <RefreshCw size={18} colorClassName="accent-muted-foreground" />
           )}
         </Pressable>
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + spacing.xl }]}
+        contentContainerClassName={cn(styles.scroll, 'pb-safe-offset-6')}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            tintColor={colors.textSecondary}
+            tintColorClassName="accent-muted-foreground"
           />
         }
       >
         {connState !== 'connected' && !snapshot ? (
-          <View style={styles.placeholder}>
-            <ActivityIndicator color={colors.textSecondary} />
-            <Text style={styles.placeholderText}>Connecting to {hostName || 'host'}…</Text>
+          <View className={styles.placeholder}>
+            <ActivityIndicator colorClassName="accent-muted-foreground" />
+            <Text className={styles.placeholderText}>Connecting to {hostName || 'host'}…</Text>
           </View>
         ) : error && !snapshot ? (
-          <View style={styles.placeholder}>
-            <Text style={styles.errorText}>{error}</Text>
+          <View className={styles.placeholder}>
+            <Text className={styles.errorText}>{error}</Text>
           </View>
         ) : !snapshot ? (
-          <View style={styles.placeholder}>
-            <ActivityIndicator color={colors.textSecondary} />
-            <Text style={styles.placeholderText}>Loading accounts…</Text>
+          <View className={styles.placeholder}>
+            <ActivityIndicator colorClassName="accent-muted-foreground" />
+            <Text className={styles.placeholderText}>Loading accounts…</Text>
           </View>
         ) : (
           <>
             {renderProviderSection('claude', 'Claude')}
             {renderProviderSection('codex', 'Codex')}
-            <View style={styles.footerHint}>
-              <User size={14} color={colors.textMuted} />
-              <Text style={styles.footerHintText}>
+            <View className={styles.footerHint}>
+              <User size={14} colorClassName="accent-muted-foreground" />
+              <Text className={styles.footerHintText}>
                 Add or re-authenticate accounts from desktop Settings → Accounts.
               </Text>
             </View>

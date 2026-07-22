@@ -1,7 +1,6 @@
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
 
 import type { PRCheckRunDetails } from '../../../../desktop/src/shared/types'
-import { colors } from '../../theme/mobile-theme'
 import { mobilePrSidebarStyles as styles } from './mobile-pr-sidebar-styles'
 import { presentCheckDetail, type CheckDetailJob } from './pr-check-detail-content'
 
@@ -19,22 +18,22 @@ export type DetailEntry =
 export function PRCheckDetailView({ entry }: { entry: DetailEntry | undefined }) {
   if (!entry || entry.status === 'loading') {
     return (
-      <View style={styles.checkDetailArea}>
-        <ActivityIndicator color={colors.textSecondary} />
+      <View className={styles.checkDetailArea}>
+        <ActivityIndicator colorClassName="accent-muted-foreground" />
       </View>
     )
   }
   if (entry.status === 'error') {
     return (
-      <View style={styles.checkDetailArea}>
-        <Text style={styles.checkDetailText}>{entry.message}</Text>
+      <View className={styles.checkDetailArea}>
+        <Text className={styles.checkDetailText}>{entry.message}</Text>
       </View>
     )
   }
   if (!entry.details) {
     return (
-      <View style={styles.checkDetailArea}>
-        <Text style={styles.checkDetailText}>No details available.</Text>
+      <View className={styles.checkDetailArea}>
+        <Text className={styles.checkDetailText}>No details available.</Text>
       </View>
     )
   }
@@ -46,44 +45,44 @@ export function PRCheckDetailView({ entry }: { entry: DetailEntry | undefined })
     content.jobs.length === 0
 
   return (
-    <View style={styles.checkDetailArea}>
+    <View className={styles.checkDetailArea}>
       {isEmpty ? (
-        <Text style={styles.checkDetailText}>No details available.</Text>
+        <Text className={styles.checkDetailText}>No details available.</Text>
       ) : (
         <>
           {content.summaryLines.map((line, index) => (
-            <Text key={index} style={styles.checkDetailText}>
+            <Text key={index} className={styles.checkDetailText}>
               {line}
             </Text>
           ))}
           {content.annotations.length > 0 ? (
-            <View style={styles.checkDetailGroup}>
-              <Text style={styles.checkDetailGroupLabel}>Annotations</Text>
+            <View className={styles.checkDetailGroup}>
+              <Text className={styles.checkDetailGroupLabel}>Annotations</Text>
               {content.annotations.map((annotation, index) => (
                 <View key={index}>
-                  <Text style={styles.checkDetailLocator} numberOfLines={1}>
+                  <Text className={styles.checkDetailLocator} numberOfLines={1}>
                     {annotation.locator}
                     {annotation.level ? ` · ${annotation.level}` : ''}
                   </Text>
                   {annotation.title ? (
-                    <Text style={styles.checkDetailEmphasis}>{annotation.title}</Text>
+                    <Text className={styles.checkDetailEmphasis}>{annotation.title}</Text>
                   ) : null}
-                  <Text style={styles.checkDetailText}>{annotation.message}</Text>
+                  <Text className={styles.checkDetailText}>{annotation.message}</Text>
                 </View>
               ))}
               {content.annotationsTruncated ? (
-                <Text style={styles.checkDetailText}>Showing first 20 annotations</Text>
+                <Text className={styles.checkDetailText}>Showing first 20 annotations</Text>
               ) : null}
             </View>
           ) : null}
           {content.jobs.length > 0 ? (
-            <View style={styles.checkDetailGroup}>
-              <Text style={styles.checkDetailGroupLabel}>{content.jobsLabel}</Text>
+            <View className={styles.checkDetailGroup}>
+              <Text className={styles.checkDetailGroupLabel}>{content.jobsLabel}</Text>
               {content.jobs.map((job, index) => (
                 <JobRow key={index} job={job} />
               ))}
               {content.jobsTruncated ? (
-                <Text style={styles.checkDetailText}>Showing first 100 jobs</Text>
+                <Text className={styles.checkDetailText}>Showing first 100 jobs</Text>
               ) : null}
             </View>
           ) : null}
@@ -96,23 +95,23 @@ export function PRCheckDetailView({ entry }: { entry: DetailEntry | undefined })
 function JobRow({ job }: { job: CheckDetailJob }) {
   return (
     <View>
-      <View style={styles.checkDetailStepRow}>
-        <Text style={styles.checkDetailEmphasis} numberOfLines={1}>
+      <View className={styles.checkDetailStepRow}>
+        <Text className={styles.checkDetailEmphasis} numberOfLines={1}>
           {job.name}
         </Text>
-        <Text style={styles.checkDetailText}>{job.state}</Text>
+        <Text className={styles.checkDetailText}>{job.state}</Text>
       </View>
       {job.failedSteps.map((step, index) => (
-        <View key={index} style={styles.checkDetailStepRow}>
-          <Text style={styles.checkDetailText} numberOfLines={1}>
+        <View key={index} className={styles.checkDetailStepRow}>
+          <Text className={styles.checkDetailText} numberOfLines={1}>
             {step.name}
           </Text>
-          <Text style={styles.checkDetailText}>{step.state}</Text>
+          <Text className={styles.checkDetailText}>{step.state}</Text>
         </View>
       ))}
       {job.logTail ? (
-        <ScrollView style={styles.checkDetailLogScroll} nestedScrollEnabled>
-          <Text style={styles.checkDetailLogText}>{job.logTail}</Text>
+        <ScrollView className={styles.checkDetailLogScroll} nestedScrollEnabled>
+          <Text className={styles.checkDetailLogText}>{job.logTail}</Text>
         </ScrollView>
       ) : null}
     </View>

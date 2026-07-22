@@ -1,6 +1,7 @@
 import Svg, { Path } from 'react-native-svg'
+import { withUniwind } from 'uniwind'
 
-import { colors } from '../theme/mobile-theme'
+import { useThemeColors } from '../theme/uniwind-theme-values'
 
 // Why: SVG paths sourced from the desktop codebase
 // (src/renderer/src/components/status-bar/icons.tsx) so mobile and desktop
@@ -18,7 +19,8 @@ export function ClaudeIcon({ size = 16 }: { size?: number }) {
   )
 }
 
-export function OpenAIIcon({ size = 16, color }: { size?: number; color?: string }) {
+function OpenAIIconBase({ size = 16, color }: { size?: number; color?: string }) {
+  const colors = useThemeColors()
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Path
@@ -29,3 +31,5 @@ export function OpenAIIcon({ size = 16, color }: { size?: number; color?: string
     </Svg>
   )
 }
+
+export const OpenAIIcon = withUniwind(OpenAIIconBase)

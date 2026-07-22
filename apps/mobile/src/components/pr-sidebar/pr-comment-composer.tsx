@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
 
+import { cn } from '@/style/class-names'
+
 import { isSubmittableCommentBody } from '../../session/pr-comment-actions'
-import { colors } from '../../theme/mobile-theme'
 import { prCommentComposerStyles as styles } from './pr-comment-composer-styles'
 
 type Props = {
@@ -50,44 +51,41 @@ export function PRCommentComposer({
   }
 
   return (
-    <View style={styles.container}>
+    <View className={styles.container}>
       <TextInput
-        style={styles.input}
+        className={styles.input}
+        style={{ textAlignVertical: 'top' }}
         value={body}
         onChangeText={setBody}
         placeholder={placeholder}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColorClassName="accent-muted-foreground"
         multiline
         editable={!submitting}
         autoFocus={autoFocus}
       />
-      <View style={styles.actions}>
+      <View className={styles.actions}>
         {onCancel ? (
           <Pressable
-            style={({ pressed }) => [styles.cancel, pressed && styles.pressed]}
+            className={cn(styles.cancel, styles.pressedActive)}
             onPress={onCancel}
             disabled={submitting}
             accessibilityRole="button"
             accessibilityLabel="Cancel"
           >
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text className={styles.cancelText}>Cancel</Text>
           </Pressable>
         ) : null}
         <Pressable
-          style={({ pressed }) => [
-            styles.submit,
-            !canSubmit && styles.submitDisabled,
-            pressed && styles.pressed
-          ]}
+          className={cn(styles.submit, !canSubmit && styles.submitDisabled, styles.pressedActive)}
           onPress={() => void submit()}
           disabled={!canSubmit}
           accessibilityRole="button"
           accessibilityLabel={submitLabel}
         >
           {submitting ? (
-            <ActivityIndicator size="small" color={colors.bgBase} />
+            <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
           ) : (
-            <Text style={styles.submitText}>{submitLabel}</Text>
+            <Text className={styles.submitText}>{submitLabel}</Text>
           )}
         </Pressable>
       </View>

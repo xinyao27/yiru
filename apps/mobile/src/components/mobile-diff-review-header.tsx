@@ -1,9 +1,14 @@
-import { ChevronLeft, ListChecks, MoreHorizontal } from 'lucide-react-native'
 import { FlatList, Pressable, Text, View } from 'react-native'
+
+import {
+  CaretLeft as ChevronLeft,
+  ListChecks,
+  DotsThree as MoreHorizontal
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type { MobileDiffReviewQueueFilter } from '../session/mobile-diff-review-queue'
 import { REVIEW_FILTERS, mobileReviewCountLabel } from '../session/mobile-diff-review-screen-model'
-import { colors } from '../theme/mobile-theme'
 import { mobileDiffReviewStyles as styles } from './mobile-diff-review-screen-styles'
 import { shouldShowTrigger } from './mobile-pr-sidebar-presentation'
 
@@ -44,48 +49,48 @@ export function MobileDiffReviewHeader({
     canDock: prSidebarCanDock
   })
   return (
-    <View style={styles.header}>
-      <View style={styles.topBar}>
+    <View className={styles.header}>
+      <View className={styles.topBar}>
         <Pressable
-          style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
+          className={cn(styles.iconButton, 'active:bg-secondary')}
           onPress={onBack}
           accessibilityRole="button"
           accessibilityLabel="Back"
         >
-          <ChevronLeft size={19} color={colors.textPrimary} strokeWidth={2.2} />
+          <ChevronLeft size={19} colorClassName="accent-foreground" />
         </Pressable>
-        <View style={styles.titleBlock}>
-          <Text style={styles.title} numberOfLines={1}>
+        <View className={styles.titleBlock}>
+          <Text className={styles.title} numberOfLines={1}>
             Changes
           </Text>
-          <Text style={styles.subtitle} numberOfLines={1}>
+          <Text className={styles.subtitle} numberOfLines={1}>
             {worktreeLabel}
           </Text>
         </View>
         {showPRTrigger ? (
           <Pressable
-            style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
+            className={cn(styles.iconButton, 'active:bg-secondary')}
             onPress={onOpenPRSidebar}
             accessibilityRole="button"
             accessibilityLabel="Open pull request sidebar"
           >
-            <ListChecks size={19} color={colors.textPrimary} strokeWidth={2.2} />
+            <ListChecks size={19} colorClassName="accent-foreground" />
           </Pressable>
         ) : null}
         <Pressable
-          style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
+          className={cn(styles.iconButton, 'active:bg-secondary')}
           onPress={onOpenActions}
           accessibilityRole="button"
           accessibilityLabel="Open review actions"
         >
-          <MoreHorizontal size={19} color={colors.textPrimary} strokeWidth={2.2} />
+          <MoreHorizontal size={19} colorClassName="accent-foreground" />
         </Pressable>
       </View>
-      <View style={styles.progressRow}>
-        <Text style={styles.progressText}>
+      <View className={styles.progressRow}>
+        <Text className={styles.progressText}>
           {reviewedCount}/{queueLength} reviewed
         </Text>
-        <Text style={styles.progressText}>
+        <Text className={styles.progressText}>
           {mobileReviewCountLabel(unsentCount, 'unsent note', 'unsent notes')}
         </Text>
       </View>
@@ -94,20 +99,20 @@ export function MobileDiffReviewHeader({
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item}
-        contentContainerStyle={styles.filterRow}
+        contentContainerClassName={styles.filterRow}
         renderItem={({ item }) => (
           <Pressable
-            style={({ pressed }) => [
+            className={cn(
               styles.filterChip,
               filter === item && styles.filterChipActive,
-              pressed && styles.filterChipPressed
-            ]}
+              'active:opacity-[0.78]'
+            )}
             onPress={() => onSelectFilter(item)}
             accessibilityRole="button"
             accessibilityState={{ selected: filter === item }}
             accessibilityLabel={`Show ${item} review files`}
           >
-            <Text style={[styles.filterText, filter === item && styles.filterTextActive]}>
+            <Text className={cn(styles.filterText, filter === item && styles.filterTextActive)}>
               {item === 'all' ? 'All' : item[0]?.toUpperCase() + item.slice(1)}
             </Text>
           </Pressable>

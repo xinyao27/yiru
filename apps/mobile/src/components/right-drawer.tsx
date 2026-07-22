@@ -1,14 +1,5 @@
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
-import {
-  View,
-  Pressable,
-  StyleSheet,
-  Platform,
-  useWindowDimensions,
-  Keyboard,
-  BackHandler
-} from 'react-native'
-import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
+import { View, Pressable, useWindowDimensions, Keyboard, BackHandler } from 'react-native'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -19,10 +10,17 @@ import Animated, {
   interpolate,
   Extrapolation
 } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView
+} from '@/components/uniwind-native-components'
+import { useSafeAreaInsets } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
-import { colors, spacing } from '../theme/mobile-theme'
+import { spacing } from '../theme/uniwind-theme-values'
 // Why: mount-before-commit logic is anchor-agnostic, so the X-axis drawer reuses
 // the exact same gate as BottomDrawer rather than duplicating it.
 import { resolveBottomDrawerMounted } from './bottom-drawer-mount-state'
@@ -172,20 +170,21 @@ function MountedRightDrawer({
   return (
     <Animated.View
       pointerEvents={visible ? 'auto' : 'none'}
-      style={[styles.overlay, { zIndex, elevation: zIndex }]}
+      className={styles.overlay}
+      style={[{ zIndex }]}
       accessibilityViewIsModal
       aria-modal
     >
-      <GestureHandlerRootView style={styles.root}>
-        <Animated.View style={[styles.backdrop, backdropStyle]}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={dismiss} />
+      <GestureHandlerRootView className={styles.root}>
+        <Animated.View className={styles.backdrop} style={[backdropStyle]}>
+          <Pressable className="absolute inset-0" onPress={dismiss} />
         </Animated.View>
 
-        <View style={styles.anchor} pointerEvents="box-none">
+        <View className={styles.anchor} pointerEvents="box-none">
           <GestureDetector gesture={panGesture}>
             <Animated.View
+              className={styles.drawer}
               style={[
-                styles.drawer,
                 {
                   width: panelWidth,
                   paddingTop: insets.top + spacing.md,
@@ -214,39 +213,10 @@ function MountedRightDrawer({
   )
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1000
-  },
-  root: {
-    flex: 1
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)'
-  },
-  anchor: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-end'
-  },
-  drawer: {
-    height: '100%',
-    backgroundColor: colors.bgBase,
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
-    paddingHorizontal: spacing.md,
-    borderLeftWidth: StyleSheet.hairlineWidth,
-    borderLeftColor: colors.borderSubtle,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: -2, height: 0 },
-        shadowOpacity: 0.2,
-        shadowRadius: 10
-      },
-      android: { elevation: 8 }
-    })
-  }
-})
+const styles = {
+  overlay: cn('absolute inset-0 z-[1000]'),
+  root: cn('flex-1'),
+  backdrop: cn('absolute inset-0 bg-black/50'),
+  anchor: cn('flex-1 flex-row justify-end'),
+  drawer: cn('h-full bg-background rounded-none px-3 border-l-hairline border-l-border')
+} as const

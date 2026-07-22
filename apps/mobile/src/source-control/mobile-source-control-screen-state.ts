@@ -1,19 +1,18 @@
 import {
   ArrowDown,
-  ArrowDownUp,
+  ArrowsDownUp as ArrowDownUp,
   ArrowUp,
   Check,
-  CloudUpload,
+  CloudArrowUp as CloudUpload,
   GitBranch,
-  GitPullRequestArrow,
-  History,
-  RefreshCw,
-  type LucideIcon
-} from 'lucide-react-native'
+  GitPullRequest as GitPullRequestArrow,
+  ClockCounterClockwise as History,
+  ArrowClockwise as RefreshCw,
+  type Icon
+} from '@/components/uniwind-icons'
 
 import type { MobileDiffLine } from '../session/mobile-diff-lines'
 import type { MobileHighlightedDiffLine } from '../session/mobile-file-syntax'
-import { colors } from '../theme/mobile-theme'
 import type {
   MobileGitBranchChangeEntry,
   MobileGitBranchCompareResult,
@@ -104,7 +103,7 @@ export type GitDiffTextResult = {
 
 export const KEYBOARD_COMMIT_BAR_CLEARANCE = 10
 
-export const SOURCE_CONTROL_ACTION_ICONS: Record<MobileSourceControlActionIcon, LucideIcon> = {
+export const SOURCE_CONTROL_ACTION_ICONS: Record<MobileSourceControlActionIcon, Icon> = {
   commit: Check,
   push: ArrowUp,
   pull: ArrowDown,
@@ -135,19 +134,20 @@ export function formatBranchLabel(branch: string | undefined, head: string | und
   return branch || head?.slice(0, 7) || 'No branch'
 }
 
-export function statusColor(status: MobileGitFileStatus): string {
+export function statusColorClassName(status: MobileGitFileStatus): string {
   switch (status) {
     case 'added':
+      return 'text-[var(--git-decoration-added)]'
     case 'copied':
-      return colors.statusGreen
+      return 'text-[var(--git-decoration-copied)]'
     case 'deleted':
-      return colors.statusRed
+      return 'text-[var(--git-decoration-deleted)]'
     case 'renamed':
-      return colors.accentBlue
+      return 'text-[var(--git-decoration-renamed)]'
     case 'untracked':
-      return colors.statusAmber
+      return 'text-[var(--git-decoration-untracked)]'
     case 'modified':
     default:
-      return colors.textSecondary
+      return 'text-[var(--git-decoration-modified)]'
   }
 }

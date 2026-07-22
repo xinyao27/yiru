@@ -1,4 +1,8 @@
-import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react-native'
+import {
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  ArrowClockwise as RefreshCw
+} from '@/components/uniwind-icons'
 
 import type { MobileSessionTab } from '../../app/h/[hostId]/session/mobile-session-route-types'
 import { ActionSheetModal } from '../components/action-sheet-modal'

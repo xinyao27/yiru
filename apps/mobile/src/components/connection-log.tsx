@@ -1,7 +1,8 @@
 import { useRef } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ScrollView, Text, View } from 'react-native'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import { cn } from '@/style/class-names'
+
 import type { ConnectionLogEntry } from '../transport/types'
 
 type Props = {
@@ -11,11 +12,11 @@ type Props = {
   title?: string
 }
 
-const LEVEL_COLOR: Record<ConnectionLogEntry['level'], string> = {
-  info: colors.textSecondary,
-  success: colors.statusGreen,
-  warn: colors.statusAmber,
-  error: colors.statusRed
+const LEVEL_COLOR_CLASS: Record<ConnectionLogEntry['level'], string> = {
+  info: 'text-muted-foreground',
+  success: 'text-green-500',
+  warn: 'text-amber-500',
+  error: 'text-red-500'
 }
 
 const LEVEL_GLYPH: Record<ConnectionLogEntry['level'], string> = {
@@ -47,27 +48,27 @@ export function ConnectionLog({ entries, title }: Props) {
   const baseTs = entries[0]!.ts
 
   return (
-    <View style={styles.container}>
-      {title && <Text style={styles.title}>{title}</Text>}
+    <View className={styles.container}>
+      {title && <Text className={styles.title}>{title}</Text>}
       <ScrollView
         ref={scrollRef}
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        className={styles.scroll}
+        contentContainerClassName={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
       >
         {entries.map((entry) => (
-          <View key={entry.id} style={styles.row}>
-            <Text style={styles.timestamp}>{formatTime(entry.ts, baseTs)}</Text>
-            <Text style={[styles.glyph, { color: LEVEL_COLOR[entry.level] }]}>
+          <View key={entry.id} className={styles.row}>
+            <Text className={styles.timestamp}>{formatTime(entry.ts, baseTs)}</Text>
+            <Text className={cn(styles.glyph, LEVEL_COLOR_CLASS[entry.level])}>
               {LEVEL_GLYPH[entry.level]}
             </Text>
-            <View style={styles.rowText}>
-              <Text style={[styles.message, { color: LEVEL_COLOR[entry.level] }]}>
+            <View className={styles.rowText}>
+              <Text className={cn(styles.message, LEVEL_COLOR_CLASS[entry.level])}>
                 {entry.message}
               </Text>
               {entry.detail && (
-                <Text style={styles.detail} numberOfLines={2}>
+                <Text className={styles.detail} numberOfLines={2}>
                   {entry.detail}
                 </Text>
               )}
@@ -79,63 +80,15 @@ export function ConnectionLog({ entries, title }: Props) {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    maxHeight: 240,
-    backgroundColor: colors.bgPanel,
-    borderRadius: radii.card,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md
-  },
-  title: {
-    fontSize: typography.metaSize,
-    fontFamily: typography.monoFamily,
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: spacing.xs
-  },
-  scroll: {
-    maxHeight: 200
-  },
-  scrollContent: {
-    gap: 6
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm
-  },
-  timestamp: {
-    fontFamily: typography.monoFamily,
-    fontSize: typography.metaSize,
-    color: colors.textMuted,
-    width: 52,
-    paddingTop: 1
-  },
-  glyph: {
-    fontFamily: typography.monoFamily,
-    fontSize: typography.metaSize,
-    width: 12,
-    textAlign: 'center',
-    paddingTop: 1
-  },
-  rowText: {
-    flex: 1
-  },
-  message: {
-    fontFamily: typography.monoFamily,
-    fontSize: typography.metaSize,
-    lineHeight: 16
-  },
-  detail: {
-    fontFamily: typography.monoFamily,
-    fontSize: 11,
-    color: colors.textMuted,
-    lineHeight: 14,
-    marginTop: 1
-  }
-})
+const styles = {
+  container: cn('w-full max-h-60 bg-card rounded-none border-hairline border-border py-2 px-3'),
+  title: cn('text-[12px] font-mono text-muted-foreground/60 uppercase tracking-[1px] mb-1'),
+  scroll: cn('max-h-50'),
+  scrollContent: cn('gap-1.5'),
+  row: cn('flex-row items-start gap-2'),
+  timestamp: cn('font-mono text-[12px] text-muted-foreground/60 w-[52px] pt-[1px]'),
+  glyph: cn('font-mono text-[12px] w-3 text-center pt-[1px]'),
+  rowText: cn('flex-1'),
+  message: cn('font-mono text-[12px] leading-[16px]'),
+  detail: cn('font-mono text-[11px] text-muted-foreground/60 leading-[14px] mt-[1px]')
+} as const

@@ -1,7 +1,8 @@
-import { ChevronRight, Monitor } from 'lucide-react-native'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
-import { colors, radii, spacing } from '../theme/mobile-theme'
+import { CaretRight as ChevronRight, Monitor } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import type { ConnectionVerdict } from '../transport/connection-health'
 import { verdictDisplayLabel } from '../transport/connection-health'
 import { mobileConnectionPathLabel } from '../transport/mobile-connection-path-label'
@@ -25,79 +26,52 @@ export function MobileHostCard(props: {
     : null
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+      className={cn(styles.card, styles.cardPressedActive)}
       onPress={props.onPress}
       onLongPress={props.onLongPress}
       delayLongPress={400}
     >
-      <View style={styles.icon}>
-        <Monitor size={20} color={connected ? colors.textPrimary : colors.textSecondary} />
+      <View className={styles.icon}>
+        <Monitor
+          size={20}
+          colorClassName={connected ? 'accent-foreground' : 'accent-muted-foreground'}
+        />
       </View>
-      <View style={styles.main}>
-        <Text
-          style={[styles.name, !connected && { color: colors.textSecondary }]}
-          numberOfLines={1}
-        >
+      <View className={styles.main}>
+        <Text className={cn(styles.name, !connected && 'text-muted-foreground')} numberOfLines={1}>
           {props.host.name}
         </Text>
-        <View style={styles.meta}>
+        <View className={styles.meta}>
           <StatusDot state={props.state} verdict={props.verdict} />
-          <Text style={[styles.metaText, isError && { color: colors.statusRed }]} numberOfLines={1}>
+          <Text className={cn(styles.metaText, isError && 'text-destructive')} numberOfLines={1}>
             {verdictDisplayLabel(props.verdict)}
             {connected ? ` · ${mobileConnectionPathLabel(props.path)}` : ''}
           </Text>
         </View>
         {connected && worktreeSummary ? (
-          <Text style={styles.worktreeMetaText} numberOfLines={1}>
+          <Text className={styles.worktreeMetaText} numberOfLines={1}>
             {worktreeSummary}
           </Text>
         ) : null}
         {props.verdict.kind === 'unreachable' && !props.host.relay ? (
-          <Text style={styles.discoveryHint} numberOfLines={2}>
+          <Text className={styles.discoveryHint} numberOfLines={2}>
             Update desktop Yiru and sign in to connect from anywhere
           </Text>
         ) : null}
       </View>
-      <ChevronRight size={16} color={colors.textMuted} />
+      <ChevronRight size={16} colorClassName="accent-muted-foreground" />
     </Pressable>
   )
 }
 
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: 12,
-    borderRadius: radii.card,
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  cardPressed: { backgroundColor: colors.bgRaised },
-  icon: {
-    width: 46,
-    height: 46,
-    borderRadius: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.bgRaised,
-    marginRight: 14
-  },
-  main: { flex: 1, minWidth: 0, marginRight: spacing.sm },
-  name: { color: colors.textPrimary, fontSize: 15, fontWeight: '600', lineHeight: 20 },
-  meta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3, minWidth: 0 },
-  metaText: { flex: 1, fontSize: 12, color: colors.textSecondary },
-  worktreeMetaText: {
-    marginTop: 2,
-    marginLeft: spacing.xl,
-    fontSize: 12,
-    color: colors.textMuted
-  },
-  discoveryHint: {
-    marginTop: spacing.xs,
-    fontSize: 11,
-    lineHeight: 15,
-    color: colors.textMuted
-  }
-})
+const styles = {
+  card: cn('flex-row items-center px-3 py-3 rounded-none bg-card border border-border'),
+  cardPressedActive: cn('active:bg-secondary'),
+  icon: cn('w-[46px] h-[46px] rounded-none items-center justify-center bg-secondary mr-3.5'),
+  main: cn('flex-1 min-w-0 mr-2'),
+  name: cn('text-foreground text-[15px] font-semibold leading-[20px]'),
+  meta: cn('flex-row items-center gap-1.5 mt-[3px] min-w-0'),
+  metaText: cn('flex-1 text-[12px] text-muted-foreground'),
+  worktreeMetaText: cn('mt-[2px] ml-6 text-[12px] text-muted-foreground/60'),
+  discoveryHint: cn('mt-1 text-[11px] leading-[15px] text-muted-foreground/60')
+} as const

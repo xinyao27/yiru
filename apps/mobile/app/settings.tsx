@@ -1,31 +1,23 @@
 import { useFocusEffect, useRouter } from 'expo-router'
+import { useCallback, useRef, useState } from 'react'
+import { View, Text, Pressable, Linking, ActivityIndicator, ScrollView } from 'react-native'
+
 import {
-  ChevronLeft,
-  ChevronRight,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
   Info,
   Bell,
   Wrench,
   Shield,
-  LifeBuoy,
-  Mic,
+  Lifebuoy as LifeBuoy,
+  Microphone as Mic,
   Globe,
   Terminal as TerminalIcon,
-  KeyRound
-} from 'lucide-react-native'
-import { useCallback, useRef, useState } from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Linking,
-  ActivityIndicator,
-  ScrollView
-} from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+  Key as KeyRound
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import { YIRU_GITHUB_ISSUES_URL } from '../../desktop/src/shared/yiru-github-repository'
-import { colors, radii, spacing, typography } from '../src/theme/mobile-theme'
 import {
   loadPendingHostCredentialCleanup,
   subscribePendingHostCredentialCleanup
@@ -34,7 +26,7 @@ import { retryPendingHostCredentialCleanup } from '../src/transport/host-store'
 
 export default function SettingsScreen() {
   const router = useRouter()
-  const insets = useSafeAreaInsets()
+
   const [pendingCredentialIds, setPendingCredentialIds] = useState<string[]>([])
   const [credentialStorageUnreadable, setCredentialStorageUnreadable] = useState(false)
   const [retryingCredentialCleanup, setRetryingCredentialCleanup] = useState(false)
@@ -94,81 +86,78 @@ export default function SettingsScreen() {
   const showCredentialCleanup = pendingCredentialCount > 0 || credentialStorageUnreadable
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.sm }]}>
-      <View style={styles.topRow}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} color={colors.textSecondary} />
+    <View className={cn(styles.container, 'pt-safe-offset-2')}>
+      <View className={styles.topRow}>
+        <Pressable className={styles.backButton} onPress={() => router.back()}>
+          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text style={styles.heading}>Settings</Text>
+        <Text className={styles.heading}>Settings</Text>
       </View>
 
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + spacing.lg }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.section}>
+      <ScrollView contentContainerClassName="pb-safe-offset-4" showsVerticalScrollIndicator={false}>
+        <View className={styles.section}>
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/terminal-settings')}
           >
-            <TerminalIcon size={16} color={colors.textSecondary} />
-            <Text style={styles.rowLabel}>Terminal</Text>
-            <ChevronRight size={16} color={colors.textMuted} />
+            <TerminalIcon size={16} colorClassName="accent-muted-foreground" />
+            <Text className={styles.rowLabel}>Terminal</Text>
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
-          <View style={styles.separator} />
+          <View className={styles.separator} />
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/browser-settings')}
           >
-            <Globe size={16} color={colors.textSecondary} />
-            <Text style={styles.rowLabel}>Browser</Text>
-            <ChevronRight size={16} color={colors.textMuted} />
+            <Globe size={16} colorClassName="accent-muted-foreground" />
+            <Text className={styles.rowLabel}>Browser</Text>
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
-          <View style={styles.separator} />
+          <View className={styles.separator} />
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/voice-settings')}
           >
-            <Mic size={16} color={colors.textSecondary} />
-            <Text style={styles.rowLabel}>Voice</Text>
-            <ChevronRight size={16} color={colors.textMuted} />
+            <Mic size={16} colorClassName="accent-muted-foreground" />
+            <Text className={styles.rowLabel}>Voice</Text>
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
-          <View style={styles.separator} />
+          <View className={styles.separator} />
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/notifications')}
           >
-            <Bell size={16} color={colors.textSecondary} />
-            <Text style={styles.rowLabel}>Notifications</Text>
-            <ChevronRight size={16} color={colors.textMuted} />
+            <Bell size={16} colorClassName="accent-muted-foreground" />
+            <Text className={styles.rowLabel}>Notifications</Text>
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
-          <View style={styles.separator} />
+          <View className={styles.separator} />
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/troubleshoot')}
           >
-            <Wrench size={16} color={colors.textSecondary} />
-            <Text style={styles.rowLabel}>Troubleshooting</Text>
-            <ChevronRight size={16} color={colors.textMuted} />
+            <Wrench size={16} colorClassName="accent-muted-foreground" />
+            <Text className={styles.rowLabel}>Troubleshooting</Text>
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
-          <View style={styles.separator} />
+          <View className={styles.separator} />
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => router.push('/about')}
           >
-            <Info size={16} color={colors.textSecondary} />
-            <Text style={styles.rowLabel}>About</Text>
-            <ChevronRight size={16} color={colors.textMuted} />
+            <Info size={16} colorClassName="accent-muted-foreground" />
+            <Text className={styles.rowLabel}>About</Text>
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
         </View>
 
         {showCredentialCleanup ? (
-          <View style={[styles.section, styles.sectionSpacer]}>
-            <View style={styles.credentialCleanupRow}>
-              <KeyRound size={16} color={colors.statusAmber} />
-              <View style={styles.credentialCleanupCopy}>
-                <Text style={styles.credentialCleanupTitle}>Pairing credential cleanup</Text>
-                <Text accessibilityLiveRegion="polite" style={styles.rowHint}>
+          <View className={cn(styles.section, styles.sectionSpacer)}>
+            <View className={styles.credentialCleanupRow}>
+              <KeyRound size={16} colorClassName="accent-amber-500" />
+              <View className={styles.credentialCleanupCopy}>
+                <Text className={styles.credentialCleanupTitle}>Pairing credential cleanup</Text>
+                <Text accessibilityLiveRegion="polite" className={styles.rowHint}>
                   {credentialRetryFailed
                     ? "Cleanup still couldn't be confirmed. Try again later."
                     : pendingCredentialCount > 0
@@ -185,37 +174,37 @@ export default function SettingsScreen() {
                 }}
                 disabled={retryingCredentialCleanup}
                 hitSlop={8}
-                style={({ pressed }) => [
+                className={cn(
                   styles.retryButton,
-                  pressed && !retryingCredentialCleanup && styles.rowPressed
-                ]}
+                  !retryingCredentialCleanup && styles.rowPressedActive
+                )}
                 onPress={() => void retryCredentialCleanup()}
               >
                 {retryingCredentialCleanup ? (
-                  <ActivityIndicator size="small" color={colors.textSecondary} />
+                  <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                 ) : (
-                  <Text style={styles.retryButtonText}>Retry</Text>
+                  <Text className={styles.retryButtonText}>Retry</Text>
                 )}
               </Pressable>
             </View>
           </View>
         ) : null}
 
-        <View style={[styles.section, styles.sectionSpacer]}>
+        <View className={cn(styles.section, styles.sectionSpacer)}>
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => void Linking.openURL('https://yiru.ai/privacy')}
           >
-            <Shield size={16} color={colors.textSecondary} />
-            <Text style={styles.rowLabel}>Privacy Policy</Text>
+            <Shield size={16} colorClassName="accent-muted-foreground" />
+            <Text className={styles.rowLabel}>Privacy Policy</Text>
           </Pressable>
-          <View style={styles.separator} />
+          <View className={styles.separator} />
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => void Linking.openURL(YIRU_GITHUB_ISSUES_URL)}
           >
-            <LifeBuoy size={16} color={colors.textSecondary} />
-            <Text style={styles.rowLabel}>Support</Text>
+            <LifeBuoy size={16} colorClassName="accent-muted-foreground" />
+            <Text className={styles.rowLabel}>Support</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -223,91 +212,21 @@ export default function SettingsScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase,
-    paddingHorizontal: spacing.lg
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.xl
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.textPrimary
-  },
-  section: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: 12,
-    overflow: 'hidden'
-  },
-  sectionSpacer: {
-    marginTop: spacing.md
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  rowPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  rowLabel: {
-    flex: 1,
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    color: colors.textPrimary
-  },
-  credentialCleanupRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  credentialCleanupCopy: {
-    flex: 1,
-    gap: spacing.xs
-  },
-  credentialCleanupTitle: {
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    color: colors.textPrimary
-  },
-  rowHint: {
-    fontSize: typography.metaSize,
-    color: colors.textSecondary,
-    lineHeight: 17
-  },
-  retryButton: {
-    width: 72,
-    height: 32,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  retryButtonText: {
-    fontSize: typography.metaSize,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  }
-})
+const styles = {
+  container: cn('flex-1 bg-background px-4'),
+  topRow: cn('flex-row items-center mb-6'),
+  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
+  heading: cn('text-[20px] font-bold text-foreground'),
+  section: cn('bg-card rounded-none overflow-hidden'),
+  sectionSpacer: cn('mt-3'),
+  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
+  rowPressedActive: cn('active:bg-secondary'),
+  rowLabel: cn('flex-1 text-[14px] font-medium text-foreground'),
+  credentialCleanupRow: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
+  credentialCleanupCopy: cn('flex-1 gap-1'),
+  credentialCleanupTitle: cn('text-[14px] font-medium text-foreground'),
+  rowHint: cn('text-[12px] text-muted-foreground leading-[17px]'),
+  retryButton: cn('w-18 h-8 rounded-none bg-secondary items-center justify-center'),
+  retryButtonText: cn('text-[12px] font-semibold text-foreground'),
+  separator: cn('h-hairline bg-border mx-3')
+} as const

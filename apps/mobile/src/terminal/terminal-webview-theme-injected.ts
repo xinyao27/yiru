@@ -1,4 +1,4 @@
-import { colors } from '../theme/mobile-theme'
+import { colors } from '../theme/uniwind-theme-values'
 
 // Theme normalization and page-surface painting injected into the WebView IIFE.
 export const TERMINAL_WEBVIEW_THEME_JS = `

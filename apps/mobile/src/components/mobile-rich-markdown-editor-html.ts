@@ -1,11 +1,14 @@
-import { colors } from '../theme/mobile-theme'
+import type { ThemeColors } from '../theme/uniwind-theme-values'
 import { MOBILE_RICH_MARKDOWN_KEYBOARD_INSET_SCRIPT } from './mobile-rich-markdown-editor-keyboard-inset-script'
 
 export function escapeInjectedJavaScriptString(value: string): string {
   return JSON.stringify(value).replace(/<\/script/gi, '<\\/script')
 }
 
-export function buildMobileRichMarkdownEditorHtml(): string {
+export function buildMobileRichMarkdownEditorHtml(
+  colors: ThemeColors,
+  colorScheme: 'light' | 'dark'
+): string {
   return `<!doctype html>
 <html>
 <head>
@@ -13,7 +16,7 @@ export function buildMobileRichMarkdownEditorHtml(): string {
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <style>
     :root {
-      color-scheme: dark;
+      color-scheme: ${colorScheme};
       --background: ${colors.bgBase};
       --editor-surface: ${colors.bgBase};
       --foreground: ${colors.textPrimary};
@@ -94,7 +97,7 @@ export function buildMobileRichMarkdownEditorHtml(): string {
       height: 16px;
       margin: 0;
       border: 1.5px solid color-mix(in srgb, var(--foreground) 55%, transparent);
-      border-radius: 4px;
+      border-radius: 0;
       background: transparent;
       position: relative;
     }
@@ -127,7 +130,7 @@ export function buildMobileRichMarkdownEditorHtml(): string {
     blockquote {
       padding: 0.5em 1em;
       border-left: 3px solid var(--border);
-      border-radius: 0 6px 6px 0;
+      border-radius: 0;
       color: var(--muted-foreground);
       background: color-mix(in srgb, var(--foreground) 2%, transparent);
     }
@@ -152,7 +155,7 @@ export function buildMobileRichMarkdownEditorHtml(): string {
     }
     code {
       padding: 0.2em 0.4em;
-      border-radius: 5px;
+      border-radius: 0;
       background: color-mix(in srgb, var(--foreground) 8%, transparent);
       font-size: 0.88em;
       font-family: var(--font-mono);
@@ -160,7 +163,7 @@ export function buildMobileRichMarkdownEditorHtml(): string {
     pre {
       margin: 0.75em 0;
       padding: 14px 18px;
-      border-radius: 8px;
+      border-radius: 0;
       border: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
       overflow-x: auto;
       line-height: 1.55;
@@ -199,7 +202,7 @@ export function buildMobileRichMarkdownEditorHtml(): string {
       display: block;
       max-width: 100%;
       margin: 0.75em 0;
-      border-radius: 8px;
+      border-radius: 0;
     }
   </style>
 </head>
