@@ -21,21 +21,33 @@ type RightSidebarPanelContentProps = {
   rightSidebarOpen: boolean
   isVisible?: boolean
   source?: RightSidebarPanelSource
+  workspacePanelTabId?: string
 }
 
 export function RightSidebarPanelContent({
   effectiveTab,
   rightSidebarOpen,
   isVisible,
-  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  workspacePanelTabId
 }: RightSidebarPanelContentProps): React.JSX.Element {
   const panelVisible = isVisible ?? rightSidebarOpen
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <Suspense fallback={null}>
-        {effectiveTab === 'explorer' && <FileExplorer source={source} isVisible={panelVisible} />}
+        {effectiveTab === 'explorer' && (
+          <FileExplorer
+            source={source}
+            isVisible={panelVisible}
+            workspacePanelTabId={workspacePanelTabId}
+          />
+        )}
         {effectiveTab === 'source-control' && (
-          <SourceControl source={source} isVisible={panelVisible} />
+          <SourceControl
+            source={source}
+            isVisible={panelVisible}
+            workspacePanelTabId={workspacePanelTabId}
+          />
         )}
         {effectiveTab === 'checks' && <ChecksPanel source={source} isVisible={panelVisible} />}
         {/* Why: SSH port forwarding still depends on the raw ports.detect data,

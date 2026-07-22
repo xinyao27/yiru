@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
 /* eslint-disable max-lines */
-import type { StateCreator } from 'zustand'
+import type { StateCreator, StoreApi } from 'zustand'
 
 import {
   buildCheckRunDetailsTabId,
@@ -320,6 +320,7 @@ const MAX_RECENT_CLOSED_EDITOR_TABS = 10
 
 type EditorOpenTargetOptions = {
   targetGroupId?: string
+  workspacePanelTabId?: string
   preview?: boolean
   runtimeEnvironmentId?: string | null
   forceContentReload?: boolean
@@ -479,6 +480,9 @@ export type EditorSlice = {
 
   // Open files / editor tabs
   openFiles: OpenFile[]
+  // Why: Explorer and Source Control own an editor inside their workspace tab;
+  // keep that nested selection separate from top-level editor-tab activation.
+  workspacePanelEditorFileIdByTab: Record<string, string>
   activeFileId: string | null
   activeFileIdByWorktree: Record<string, string | null> // worktreeId -> last active file
   activeTabTypeByWorktree: Record<string, WorkspaceVisibleTabType> // worktreeId -> last active tab type
@@ -492,6 +496,7 @@ export type EditorSlice = {
       recordReplacedPreview?: boolean
       suppressActiveRuntimeFallback?: boolean
       forceContentReload?: boolean
+      workspacePanelTabId?: string
     }
   ) => void
   openNewMarkdownInActiveWorkspace: (groupId: string) => Promise<void>
@@ -785,6 +790,23 @@ function openWorkspaceEditorItem(
   return created?.id ?? fileId
 }
 
+function setWorkspacePanelEditorTarget(
+  set: StoreApi<AppState>['setState'],
+  panelTabId: string | undefined,
+  fileId: string
+): boolean {
+  if (!panelTabId) {
+    return false
+  }
+  set((state) => ({
+    workspacePanelEditorFileIdByTab: {
+      ...state.workspacePanelEditorFileIdByTab,
+      [panelTabId]: fileId
+    }
+  }))
+  return true
+}
+
 function isEditorTabContentType(contentType: Tab['contentType']): boolean {
   return (
     contentType === 'editor' ||
@@ -795,11 +817,35 @@ function isEditorTabContentType(contentType: Tab['contentType']): boolean {
 }
 
 function getReplaceablePreviewFileId(
-  state: Pick<AppState, 'openFiles' | 'unifiedTabsByWorktree'>,
+  state: Pick<AppState, 'openFiles' | 'unifiedTabsByWorktree' | 'workspacePanelEditorFileIdByTab'>,
   worktreeId: string,
-  targetGroupId: string | undefined
+  targetGroupId: string | undefined,
+  workspacePanelTabId?: string
 ): string | null {
   const tabsForWorktree = state.unifiedTabsByWorktree?.[worktreeId] ?? []
+  if (workspacePanelTabId) {
+    const previewFileId = state.workspacePanelEditorFileIdByTab[workspacePanelTabId]
+    if (!previewFileId) {
+      return null
+    }
+    // Why: embedded preview replacement must not remove an OpenFile that is
+    // simultaneously rendered by a top-level tab or another workspace panel.
+    const isSharedEntity =
+      tabsForWorktree.some(
+        (tab) => tab.entityId === previewFileId && isEditorTabContentType(tab.contentType)
+      ) ||
+      Object.entries(state.workspacePanelEditorFileIdByTab).some(
+        ([tabId, fileId]) => tabId !== workspacePanelTabId && fileId === previewFileId
+      )
+    if (isSharedEntity) {
+      return null
+    }
+    return (
+      state.openFiles.find(
+        (file) => file.id === previewFileId && file.worktreeId === worktreeId && file.isPreview
+      )?.id ?? null
+    )
+  }
   if (targetGroupId) {
     const previewTab = tabsForWorktree.find(
       (tab) =>
@@ -1605,6 +1651,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
 
   // Open files
   openFiles: [],
+  workspacePanelEditorFileIdByTab: {},
   activeFileId: null,
   activeFileIdByWorktree: {},
   activeTabTypeByWorktree: {},
@@ -1622,6 +1669,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     }),
 
   openFile: (file, options) => {
+    const workspacePanelTabId = options?.workspacePanelTabId
     let editorItemWorktreeId = file.worktreeId
     let editorItemFileId = file.filePath
     let editorItemLabel = file.relativePath
@@ -1736,7 +1784,12 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       // matching the prior behavior.
       let newFiles = s.openFiles
       if (isPreview) {
-        const replaceablePreviewId = getReplaceablePreviewFileId(s, worktreeId, targetGroupId)
+        const replaceablePreviewId = getReplaceablePreviewFileId(
+          s,
+          worktreeId,
+          targetGroupId,
+          workspacePanelTabId
+        )
         const existingPreviewIdx = s.openFiles.findIndex((f) => f.id === replaceablePreviewId)
         if (existingPreviewIdx !== -1) {
           const replacedPreview = s.openFiles[existingPreviewIdx]
@@ -1851,6 +1904,9 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         ...activeResult
       }
     })
+    if (setWorkspacePanelEditorTarget(set, workspacePanelTabId, editorItemFileId)) {
+      return
+    }
     void openWorkspaceEditorItem(
       get(),
       editorItemFileId,
@@ -2562,6 +2618,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
     })),
 
   openDiff: (worktreeId, filePath, relativePath, language, staged, options) => {
+    const workspacePanelTabId = options?.workspacePanelTabId
     const isPreview = options?.preview ?? false
     let editorItemTargetGroupId = options?.targetGroupId
     let editorItemFileId = ''
@@ -2614,7 +2671,12 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         runtimeEnvironmentId
       }
       if (isPreview) {
-        const replaceablePreviewId = getReplaceablePreviewFileId(s, worktreeId, targetGroupId)
+        const replaceablePreviewId = getReplaceablePreviewFileId(
+          s,
+          worktreeId,
+          targetGroupId,
+          workspacePanelTabId
+        )
         const replaceablePreviewIndex = s.openFiles.findIndex(
           (file) => file.id === replaceablePreviewId
         )
@@ -2639,6 +2701,9 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         activeTabTypeByWorktree: { ...s.activeTabTypeByWorktree, [worktreeId]: 'editor' }
       }
     })
+    if (setWorkspacePanelEditorTarget(set, workspacePanelTabId, editorItemFileId)) {
+      return
+    }
     void openWorkspaceEditorItem(
       get(),
       editorItemFileId,
@@ -2651,6 +2716,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
   },
 
   openBranchDiff: (worktreeId, worktreePath, entry, compare, language, options) => {
+    const workspacePanelTabId = options?.workspacePanelTabId
     const branchCompare = toBranchCompareSnapshot(compare)
     const id = `${worktreeId}::diff::branch::${compare.baseRef}::${branchCompare.compareVersion}::${entry.path}`
     const isPreview = options?.preview ?? false
@@ -2705,7 +2771,12 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         runtimeEnvironmentId
       }
       if (isPreview) {
-        const replaceablePreviewId = getReplaceablePreviewFileId(s, worktreeId, targetGroupId)
+        const replaceablePreviewId = getReplaceablePreviewFileId(
+          s,
+          worktreeId,
+          targetGroupId,
+          workspacePanelTabId
+        )
         const replaceablePreviewIndex = s.openFiles.findIndex(
           (file) => file.id === replaceablePreviewId
         )
@@ -2730,6 +2801,9 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         activeTabTypeByWorktree: { ...s.activeTabTypeByWorktree, [worktreeId]: 'editor' }
       }
     })
+    if (setWorkspacePanelEditorTarget(set, workspacePanelTabId, id)) {
+      return
+    }
     void openWorkspaceEditorItem(
       get(),
       id,
@@ -2742,6 +2816,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
   },
 
   openCommitDiff: (worktreeId, worktreePath, entry, compare, language, options) => {
+    const workspacePanelTabId = options?.workspacePanelTabId
     const commitCompare = toCommitCompareSnapshot(compare)
     const id = `${worktreeId}::diff::commit::${commitCompare.compareVersion}::${entry.path}`
     const isPreview = options?.preview ?? false
@@ -2796,7 +2871,12 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         runtimeEnvironmentId
       }
       if (isPreview) {
-        const replaceablePreviewId = getReplaceablePreviewFileId(s, worktreeId, targetGroupId)
+        const replaceablePreviewId = getReplaceablePreviewFileId(
+          s,
+          worktreeId,
+          targetGroupId,
+          workspacePanelTabId
+        )
         const replaceablePreviewIndex = s.openFiles.findIndex(
           (file) => file.id === replaceablePreviewId
         )
@@ -2821,6 +2901,9 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
         activeTabTypeByWorktree: { ...s.activeTabTypeByWorktree, [worktreeId]: 'editor' }
       }
     })
+    if (setWorkspacePanelEditorTarget(set, workspacePanelTabId, id)) {
+      return
+    }
     void openWorkspaceEditorItem(
       get(),
       id,
@@ -2932,6 +3015,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
   },
 
   openConflictFile: (worktreeId, worktreePath, entry, language, options) => {
+    const workspacePanelTabId = options?.workspacePanelTabId
     const absolutePath = joinPath(worktreePath, entry.path)
     const isPreview = options?.preview ?? false
     let editorItemTargetGroupId = options?.targetGroupId
@@ -2997,7 +3081,12 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       }
 
       if (isPreview) {
-        const replaceablePreviewId = getReplaceablePreviewFileId(s, worktreeId, targetGroupId)
+        const replaceablePreviewId = getReplaceablePreviewFileId(
+          s,
+          worktreeId,
+          targetGroupId,
+          workspacePanelTabId
+        )
         const replaceablePreviewIndex = s.openFiles.findIndex(
           (file) => file.id === replaceablePreviewId
         )
@@ -3031,6 +3120,12 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
             : { ...s.trackedConflictPathsByWorktree, [worktreeId]: nextTracked }
       }
     })
+    if (
+      get().openFiles.some((file) => file.id === absolutePath) &&
+      setWorkspacePanelEditorTarget(set, workspacePanelTabId, absolutePath)
+    ) {
+      return
+    }
     void openWorkspaceEditorItem(
       get(),
       absolutePath,

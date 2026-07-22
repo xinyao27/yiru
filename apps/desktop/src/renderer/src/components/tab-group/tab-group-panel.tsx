@@ -267,8 +267,8 @@ export default function TabGroupPanel({
           </div>
         )}
 
-      {activeWorkspacePanelType ? (
-        <WorkspacePanelTabContent panel={activeWorkspacePanelType} />
+      {activeWorkspacePanelType && activeTab ? (
+        <WorkspacePanelTabContent panel={activeWorkspacePanelType} panelTabId={activeTab.id} />
       ) : null}
 
       {/* Why: terminal/browser/simulator panes are rendered at the worktree level by

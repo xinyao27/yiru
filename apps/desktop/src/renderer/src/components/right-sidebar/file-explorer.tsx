@@ -71,7 +71,13 @@ import { useFileExplorerVisibleRowProjection } from './use-file-explorer-visible
 import { useFileExplorerWatch } from './use-file-explorer-watch'
 import { useFileSearchPanel } from './use-file-search-panel'
 
-function FileExplorerFiles({ isVisible }: { isVisible: boolean }): React.JSX.Element {
+function FileExplorerFiles({
+  isVisible,
+  workspacePanelTabId
+}: {
+  isVisible: boolean
+  workspacePanelTabId?: string
+}): React.JSX.Element {
   const explorerView = useAppStore((s) => s.rightSidebarExplorerView)
   const showRightSidebarFiles = useAppStore((s) => s.showRightSidebarFiles)
   const showRightSidebarSearch = useAppStore((s) => s.showRightSidebarSearch)
@@ -79,7 +85,7 @@ function FileExplorerFiles({ isVisible }: { isVisible: boolean }): React.JSX.Ele
   const [nameFilterCollapsedPaths, setNameFilterCollapsedPaths] = useState<Set<string>>(
     () => new Set()
   )
-  const searchPanel = useFileSearchPanel(explorerView)
+  const searchPanel = useFileSearchPanel(explorerView, workspacePanelTabId)
 
   const handleSelectExplorerView = useCallback(
     (view: RightSidebarExplorerView) => {
@@ -486,6 +492,7 @@ function FileExplorerFiles({ isVisible }: { isVisible: boolean }): React.JSX.Ele
   const { handleClick, handleDoubleClick } = useFileExplorerHandlers({
     activeWorktreeId,
     runtimeEnvironmentId: activeRuntimeEnvironmentId,
+    workspacePanelTabId,
     openFile,
     makePreviewFilePermanent,
     toggleDir: hasNameFilter ? handleToggleNameFilterDir : toggleDir,
@@ -871,15 +878,17 @@ const FileExplorerFilesMemo = React.memo(FileExplorerFiles)
 
 function FileExplorer({
   source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
-  isVisible = true
+  isVisible = true,
+  workspacePanelTabId
 }: {
   source?: RightSidebarPanelSource
   isVisible?: boolean
+  workspacePanelTabId?: string
 }): React.JSX.Element {
   if (source.kind === 'spool') {
     return <SpoolFilesPane route={source.route} supportsDiff={source.supportsGit} />
   }
-  return <FileExplorerFilesMemo isVisible={isVisible} />
+  return <FileExplorerFilesMemo isVisible={isVisible} workspacePanelTabId={workspacePanelTabId} />
 }
 
 export default React.memo(FileExplorer)

@@ -816,7 +816,13 @@ export function clearRemoteActionErrorsForCompletedConflictOperations({
   return next ?? remoteActionErrors
 }
 
-function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.Element {
+function SourceControlInner({
+  isVisible,
+  workspacePanelTabId
+}: {
+  isVisible: boolean
+  workspacePanelTabId?: string
+}): React.JSX.Element {
   const sourceControlRef = useRef<HTMLDivElement | null>(null)
   // Why: the changed-file sections virtualize against the panel's shared
   // scroller rather than owning a nested scroll container. State (not a ref)
@@ -4445,6 +4451,7 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
         return
       }
       const targetGroupId = resolveSplitTargetGroupId(event)
+      const embeddedTargetTabId = targetGroupId ? undefined : workspacePanelTabId
       const openAsPreview = shouldOpenSourceControlRowAsPreview(event, targetGroupId)
       if (entry.conflictKind && entry.conflictStatus) {
         if (entry.conflictStatus === 'unresolved') {
@@ -4452,17 +4459,18 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
         }
         openConflictFile(activeWorktreeId, worktreePath, entry, detectLanguage(entry.path), {
           targetGroupId,
+          workspacePanelTabId: embeddedTargetTabId,
           preview: openAsPreview
         })
         return
       }
       const language = detectLanguage(entry.path)
       const filePath = joinPath(worktreePath, entry.path)
-      // Why: unstaged markdown diffs open as a normal edit tab in Changes
-      // view mode rather than a dedicated diff tab. This unifies sidebar
+      // Why: unstaged markdown diffs open as a normal editable file in Changes
+      // view mode rather than a dedicated diff entity. This unifies tree
       // clicks with the header's Edit|Changes toggle: there is exactly one
-      // tab per markdown file, and the sidebar click flips that tab's view
-      // mode. Staged diffs still open as a separate diff tab because the
+      // editor entity per markdown file, and the click flips that entity's
+      // mode. Staged diffs still use a separate diff entity because the
       // staged content is not what the editor would be editing. Non-markdown
       // files keep the existing diff-tab flow until the diff-tab type is
       // eventually collapsed (see reviews/changes-view-mode-plan.md §"Follow-up").
@@ -4475,13 +4483,14 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
             language,
             mode: 'edit'
           },
-          { targetGroupId, preview: openAsPreview }
+          { targetGroupId, workspacePanelTabId: embeddedTargetTabId, preview: openAsPreview }
         )
         setEditorViewMode(filePath, 'changes')
         return
       }
       openDiff(activeWorktreeId, filePath, entry.path, language, entry.area === 'staged', {
         targetGroupId,
+        workspacePanelTabId: embeddedTargetTabId,
         preview: openAsPreview
       })
     },
@@ -4493,7 +4502,8 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
       openConflictFile,
       openDiff,
       openFile,
-      setEditorViewMode
+      setEditorViewMode,
+      workspacePanelTabId
     ]
   )
 
@@ -5125,16 +5135,28 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
         return
       }
       const targetGroupId = resolveSplitTargetGroupId(event)
+      const embeddedTargetTabId = targetGroupId ? undefined : workspacePanelTabId
       openBranchDiff(
         activeWorktreeId,
         worktreePath,
         entry,
         branchSummary,
         detectLanguage(entry.path),
-        { targetGroupId, preview: shouldOpenSourceControlRowAsPreview(event, targetGroupId) }
+        {
+          targetGroupId,
+          workspacePanelTabId: embeddedTargetTabId,
+          preview: shouldOpenSourceControlRowAsPreview(event, targetGroupId)
+        }
       )
     },
-    [activeWorktreeId, branchSummary, openBranchDiff, resolveSplitTargetGroupId, worktreePath]
+    [
+      activeWorktreeId,
+      branchSummary,
+      openBranchDiff,
+      resolveSplitTargetGroupId,
+      workspacePanelTabId,
+      worktreePath
+    ]
   )
 
   const { loadCommitFiles, openHistoryCommitDiff, openCommitFile, handleCommitAction } =
@@ -5142,6 +5164,7 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
       activeWorktreeId,
       worktreePath,
       activeRepoSettings,
+      workspacePanelTabId,
       resolveSplitTargetGroupId
     })
 
@@ -5150,11 +5173,11 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
   // currently owns that file. Prefer the `unstaged` entry when a path is also
   // staged — diff comments are authored against the working-tree (unstaged)
   // diff card. Fall back to the branch compare, and finally just open the
-  // file as a normal editor tab so the user still gets navigation when
+  // file in the editor so the user still gets navigation when
   // neither side has the path anymore. When `commentId` is supplied and the
   // route lands on a diff surface, also stamp scrollToDiffCommentId so the
   // diff decorator scrolls that note into view; we clear any prior request
-  // first, so the editor-tab fallback then leaves the global null and a
+  // first, so the editor fallback then leaves the global null and a
   // future DiffViewer mount can't accidentally consume a stale id.
   const handleOpenComment = useCallback(
     (comment: DiffComment) => {
@@ -5172,13 +5195,16 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
         const language = detectLanguage(filePath)
         setEditorViewMode(absPath, 'edit')
         setMarkdownViewMode(absPath, 'source')
-        openFile({
-          filePath: absPath,
-          relativePath: filePath,
-          worktreeId: activeWorktreeId,
-          language,
-          mode: 'edit'
-        })
+        openFile(
+          {
+            filePath: absPath,
+            relativePath: filePath,
+            worktreeId: activeWorktreeId,
+            language,
+            mode: 'edit'
+          },
+          { workspacePanelTabId }
+        )
         setPendingEditorReveal(null)
         requestSourceControlEditorRevealFrame(pendingCommentEditorRevealFrameIdsRef, () => {
           requestSourceControlEditorRevealFrame(pendingCommentEditorRevealFrameIdsRef, () => {
@@ -5213,7 +5239,7 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
         }
         return
       }
-      // Why: fall through to a normal editor tab when neither the working-tree
+      // Why: fall through to a normal editor when neither the working-tree
       // nor branch-compare diff has the file (e.g. the change has since been
       // committed and merged, but the note still references the file). Force
       // the editor tab into 'changes' mode and stamp scrollToDiffCommentId so
@@ -5222,13 +5248,16 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
       // via the editor's Edit/Changes toggle.
       const absPath = joinPath(worktreePath, filePath)
       const language = detectLanguage(filePath)
-      openFile({
-        filePath: absPath,
-        relativePath: filePath,
-        worktreeId: activeWorktreeId,
-        language,
-        mode: 'edit'
-      })
+      openFile(
+        {
+          filePath: absPath,
+          relativePath: filePath,
+          worktreeId: activeWorktreeId,
+          language,
+          mode: 'edit'
+        },
+        { workspacePanelTabId }
+      )
       if (commentId) {
         setEditorViewMode(absPath, 'changes')
         setScrollToDiffCommentId(commentId)
@@ -5246,6 +5275,7 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
       setScrollToDiffCommentId,
       setMarkdownViewMode,
       setPendingEditorReveal,
+      workspacePanelTabId,
       worktreePath
     ]
   )
@@ -6518,15 +6548,17 @@ function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.El
 
 function SourceControl({
   source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
-  isVisible = true
+  isVisible = true,
+  workspacePanelTabId
 }: {
   source?: RightSidebarPanelSource
   isVisible?: boolean
+  workspacePanelTabId?: string
 }): React.JSX.Element | null {
   if (source.kind === 'spool') {
     return source.supportsGit ? <SpoolGitPane route={source.route} /> : null
   }
-  return <SourceControlInner isVisible={isVisible} />
+  return <SourceControlInner isVisible={isVisible} workspacePanelTabId={workspacePanelTabId} />
 }
 
 const SourceControlMemo = React.memo(SourceControl)

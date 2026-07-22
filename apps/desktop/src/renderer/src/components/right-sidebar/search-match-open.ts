@@ -13,13 +13,17 @@ export function openMatchResult(params: {
   activeWorktreeId: string
   fileResult: SearchFileResult
   match: SearchMatch
-  openFile: (file: {
-    filePath: string
-    relativePath: string
-    worktreeId: string
-    language: string
-    mode: 'edit'
-  }) => void
+  openFile: (
+    file: {
+      filePath: string
+      relativePath: string
+      worktreeId: string
+      language: string
+      mode: 'edit'
+    },
+    options?: { workspacePanelTabId?: string }
+  ) => void
+  workspacePanelTabId?: string
   setPendingEditorReveal: (
     reveal: {
       filePath: string
@@ -36,24 +40,28 @@ export function openMatchResult(params: {
     fileResult,
     match,
     openFile,
+    workspacePanelTabId,
     setPendingEditorReveal,
     revealRafRef,
     revealInnerRafRef
   } = params
 
-  openFile({
-    filePath: fileResult.filePath,
-    relativePath: fileResult.relativePath,
-    worktreeId: activeWorktreeId,
-    language: detectLanguage(fileResult.relativePath),
-    mode: 'edit'
-  })
+  openFile(
+    {
+      filePath: fileResult.filePath,
+      relativePath: fileResult.relativePath,
+      worktreeId: activeWorktreeId,
+      language: detectLanguage(fileResult.relativePath),
+      mode: 'edit'
+    },
+    { workspacePanelTabId }
+  )
 
   cancelRevealFrame(revealRafRef)
   cancelRevealFrame(revealInnerRafRef)
   setPendingEditorReveal(null)
 
-  // Why: opening a result can replace the active tab and mount Monaco
+  // Why: opening a result can replace the active editor target and mount Monaco
   // asynchronously. Matching terminal-link navigation, wait two frames so
   // the destination editor owns focus/layout before we ask it to reveal.
   revealRafRef.current = requestAnimationFrame(() => {

@@ -12,6 +12,7 @@ import type { TreeNode } from './file-explorer-types'
 type UseFileExplorerHandlersParams = {
   activeWorktreeId: string | null
   runtimeEnvironmentId?: string | null
+  workspacePanelTabId?: string
   openFile: (
     params: {
       filePath: string
@@ -21,7 +22,11 @@ type UseFileExplorerHandlersParams = {
       mode: 'edit'
       runtimeEnvironmentId?: string | null
     },
-    options?: { preview?: boolean; suppressActiveRuntimeFallback?: boolean }
+    options?: {
+      preview?: boolean
+      suppressActiveRuntimeFallback?: boolean
+      workspacePanelTabId?: string
+    }
   ) => void
   makePreviewFilePermanent: (filePath: string) => void
   toggleDir: (worktreeId: string, dirPath: string) => void
@@ -50,6 +55,7 @@ export async function activateFileExplorerNode(args: {
   node: TreeNode
   activeWorktreeId: string | null
   runtimeEnvironmentId?: string | null
+  workspacePanelTabId?: string
   openFile: (params: OpenFileParams, options?: OpenFileOptions) => void
   toggleDir: (worktreeId: string, dirPath: string) => void
   canToggleDirectories?: boolean
@@ -62,6 +68,7 @@ export async function activateFileExplorerNode(args: {
     node,
     activeWorktreeId,
     runtimeEnvironmentId,
+    workspacePanelTabId,
     openFile,
     toggleDir,
     canToggleDirectories = true,
@@ -128,6 +135,7 @@ export async function activateFileExplorerNode(args: {
     },
     {
       preview: true,
+      workspacePanelTabId,
       // Why: explicit local opens must not inherit the active runtime, so we
       // encode "no runtime owner" via the fallback-suppression option.
       suppressActiveRuntimeFallback: runtimeEnvironmentId === null
@@ -138,6 +146,7 @@ export async function activateFileExplorerNode(args: {
 export function useFileExplorerHandlers({
   activeWorktreeId,
   runtimeEnvironmentId,
+  workspacePanelTabId,
   openFile,
   makePreviewFilePermanent,
   toggleDir,
@@ -154,6 +163,7 @@ export function useFileExplorerHandlers({
         node,
         activeWorktreeId,
         runtimeEnvironmentId,
+        workspacePanelTabId,
         openFile,
         toggleDir,
         canToggleDirectories,
@@ -166,6 +176,7 @@ export function useFileExplorerHandlers({
     [
       activeWorktreeId,
       runtimeEnvironmentId,
+      workspacePanelTabId,
       canToggleDirectories,
       loadDir,
       markPathAsDirectory,
