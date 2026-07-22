@@ -381,24 +381,6 @@
   margin-left: -1px;
 }
 
-.pane-title-bar[data-chromeless] .pane-title-split-trigger::before,
-.pane-title-bar[data-chromeless] .pane-title-close::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 23px;
-  height: 23px;
-  background: radial-gradient(
-    circle,
-    var(--yiru-pane-title-bg, var(--background)) 0 44%,
-    color-mix(in srgb, var(--yiru-pane-title-bg, var(--background)) 74%, transparent) 62%,
-    transparent 100%
-  );
-  border-radius: 9999px;
-  transform: translate(-50%, -50%);
-}
-
 .pane-title-close {
   flex-shrink: 0;
   margin-left: auto;

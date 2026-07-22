@@ -309,13 +309,28 @@
 /* ── Base Layer ──────────────────────────────────────── */
 
 @layer base {
-  *,
-  *::before,
-  *::after {
+  :root:root *,
+  :root:root *::before,
+  :root:root *::after {
     @apply border-border outline-ring/50;
-    /* Why: the rectilinear design must also cover legacy utilities, inline
-       styles, and third-party components that bypass the radius token. */
+    /* Why: the flat, rectilinear design must also cover legacy utilities,
+       inline styles, and third-party components that bypass design tokens. */
     border-radius: 0 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  :root:root *:focus-visible {
+    /* Why: shadows are forbidden, so keyboard focus uses a real outline instead
+       of Tailwind's box-shadow-based ring implementation. */
+    outline: 2px solid var(--ring) !important;
+    outline-offset: 1px;
+  }
+
+  :root:root [class*='drop-shadow'] {
+    /* Why: drop-shadow utilities use filters rather than box-shadow and need a
+       separate flat-design guardrail. */
+    filter: none !important;
   }
 
   body {
@@ -1234,7 +1249,7 @@
   overflow: visible;
   border-radius: var(--radius);
   opacity: 0.96;
-  filter: drop-shadow(0 10px 24px color-mix(in srgb, var(--foreground) 18%, transparent));
+  filter: none;
   will-change: transform;
 }
 

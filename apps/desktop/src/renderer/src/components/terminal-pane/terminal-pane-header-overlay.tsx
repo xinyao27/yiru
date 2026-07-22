@@ -292,7 +292,7 @@ export default function TerminalPaneHeaderOverlay({
                             type="button"
                             variant="outline"
                             size="icon-xs"
-                            className="pane-title-split-trigger shadow-none"
+                            className="pane-title-split-trigger"
                             data-contextual-tour-target={
                               isActivePane ? 'terminal-pane-split-target' : undefined
                             }

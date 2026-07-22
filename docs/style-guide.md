@@ -137,20 +137,18 @@ Native chat borrows Cursor's transcript hierarchy while remaining fully rectilin
 
 ## Elevation & shadows
 
-Yiru uses only Tailwind/shadcn shadow tiers:
-
-1. **Hairline** — `border` with the `border` token. The default for inline surfaces.
-2. **Subtle lift** — `shadow-xs` or the shadcn primitive default. Inputs, outline controls, embedded cards.
-3. **Floating** — `shadow-md` for compact popovers and menus; `shadow-lg` for dialogs and sheets.
-
-Do not add a shadow token or arbitrary `shadow-[…]` recipe to a primitive. If a surface needs more emphasis, use the focus `ring` or fix its hierarchy.
+Yiru does not use decorative shadows. Use `border` with the `border` token for
+surface separation, opaque backgrounds for overlays, and a real CSS `outline`
+for keyboard focus. Do not add `shadow-*`, `drop-shadow-*`, `box-shadow`, or
+`text-shadow`; the renderer base layer neutralizes legacy and third-party shadow
+declarations so every surface stays flat.
 
 ### Floating surfaces
 
 Floating primitives share the recipes in `components/ui/floating-surface-styles.ts`; the module composes default roles rather than introducing overlay tokens:
 
-- **Popover, menu, hover card, select:** `bg-popover text-popover-foreground border shadow-md`.
-- **Dialog, command dialog, sheet:** `bg-background text-foreground border shadow-lg` with `bg-black/50` backdrop.
+- **Popover, menu, hover card, select:** `bg-popover text-popover-foreground border`.
+- **Dialog, command dialog, sheet:** `bg-background text-foreground border` with `bg-black/50` backdrop.
 
 Foreground floating surfaces are always opaque while visible. Their base must not use `/NN` background alpha, translucent `rgba`, `color-mix(..., transparent)`, resting element opacity below 1, or backdrop blur. Enter/exit opacity motion is allowed; transparency also remains valid for modal backdrops, transcript fade masks, drag/selection affordances, and hover-state tints because those intentionally reveal context rather than carry foreground content.
 

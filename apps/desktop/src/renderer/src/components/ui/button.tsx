@@ -15,7 +15,7 @@ const buttonVariants = cva(
           'bg-destructive text-white hover:bg-[color-mix(in_srgb,var(--destructive)_90%,var(--background))] focus-visible:ring-destructive/20 dark:bg-destructive dark:focus-visible:ring-destructive/40',
         // Why: toolbar controls must keep an opaque resting surface in both themes.
         outline:
-          'border border-border bg-background text-foreground shadow-xs hover:border-muted-foreground/35 hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-background dark:hover:bg-accent',
+          'border border-border bg-background text-foreground hover:border-muted-foreground/35 hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-background dark:hover:bg-accent',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-[color-mix(in_srgb,var(--secondary)_80%,var(--background))]',
         ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent',
