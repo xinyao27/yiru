@@ -7,6 +7,7 @@ import {
   buildPersistedBrowserPagesByWorkspace,
   buildPersistedBrowserTabsByWorktree,
   buildSanitizedTabsByWorktree,
+  buildSanitizedTerminalLayoutsByTabId,
   buildTerminalSessionData,
   type WorkspaceSessionSnapshot
 } from './workspace-session'
@@ -26,13 +27,17 @@ function hasAnyChangedField(
 function buildPrunedTerminalLayoutsByTabId(
   snapshot: WorkspaceSessionSnapshot
 ): WorkspaceSessionState['terminalLayoutsByTabId'] {
+  const tabsByWorktree = buildSanitizedTabsByWorktree(snapshot.tabsByWorktree)
   return pruneLocalTerminalScrollbackBuffers(
     {
       activeRepoId: snapshot.activeRepoId,
       activeWorktreeId: snapshot.activeWorktreeId,
       activeTabId: snapshot.activeTabId,
-      tabsByWorktree: snapshot.tabsByWorktree,
-      terminalLayoutsByTabId: snapshot.terminalLayoutsByTabId
+      tabsByWorktree,
+      terminalLayoutsByTabId: buildSanitizedTerminalLayoutsByTabId(
+        tabsByWorktree,
+        snapshot.terminalLayoutsByTabId
+      )
     },
     snapshot.repos
   ).terminalLayoutsByTabId

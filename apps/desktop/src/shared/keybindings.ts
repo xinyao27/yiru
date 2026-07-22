@@ -48,6 +48,7 @@ export type KeybindingActionId =
   | 'sidebar.ports.toggle'
   | 'sidebar.sleepingWorkspaces.toggle'
   | 'sidebar.focusWorktreeList'
+  | 'assistant.toggle'
   | 'floatingTerminal.toggle'
   | 'floatingWorkspace.maximize'
   | 'floatingWorkspace.minimize'
@@ -409,6 +410,15 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
     // Why: keep zoom.reset on the browser-standard Mod+0; this chord was
     // unreachable while it shared that default (#8584).
     defaultBindings: platformBindings(['Mod+Shift+0'])
+  },
+  {
+    id: 'assistant.toggle',
+    title: 'Toggle Global Assistant',
+    group: 'Global',
+    scope: 'global',
+    searchKeywords: ['shortcut', 'assistant', 'chat', 'global assistant'],
+    defaultBindings: platformBindings(['Mod+Shift+A']),
+    allowInTerminal: true
   },
   {
     id: 'floatingTerminal.toggle',

@@ -1,13 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-import {
-  deriveNativeChatStreamingText,
-  nativeChatStreamingMessage
-} from '../../../../shared/native-chat-streaming'
 import type { NativeChatSession } from '../../../../shared/native-chat-types'
 import type { TuiAgent } from '../../../../shared/types'
 import { useAppStore } from '../../store'
+import { pruneConfirmedNativeChatActivePrompt } from './native-chat-active-prompt'
 import { NativeChatComposer, type NativeChatComposerHandle } from './native-chat-composer'
 import { NativeChatEmptyState } from './native-chat-empty-state'
 import { resolveNativeChatFileLinkContext } from './native-chat-file-link'
@@ -17,10 +14,8 @@ import { NativeChatMessageList } from './native-chat-message-list'
 import {
   applyCommandMarkerBoundaries,
   appendPendingSendCache,
-  commandMarkersAsMessages,
   appendCommandMarkerCache,
   launchPromptAsMessage,
-  pendingSendsAsMessages,
   nextNativeChatPendingSendId,
   prunePendingSends,
   readCommandMarkerCache,
@@ -54,6 +49,7 @@ import { useNativeChatFontScale } from './use-native-chat-font-scale'
 import { useNativeChatInteractiveSend } from './use-native-chat-interactive-send'
 import { useNativeChatLiveSession } from './use-native-chat-live-session'
 import { useNativeChatPasteBridge } from './use-native-chat-paste-bridge'
+import { useNativeChatTransientSession } from './use-native-chat-transient-session'
 
 export type NativeChatViewProps = {
   /** The terminal tab hosting the agent. paneKey is `${tabId}:${leafId}`. */
@@ -68,6 +64,8 @@ export type NativeChatViewProps = {
   resolvedAgent?: TuiAgent | null
   /** Return this pane to the hosted terminal surface. */
   onSwitchToTerminal?: () => void
+  /** Start a fresh app-owned assistant session when this chat owns one. */
+  onNewConversation?: () => void
   /** Current xterm screen reader used to recover agent-reported session state. */
   readTerminalScreen?: () => string | null
   contextMenuActions?: Omit<NativeChatContextMenuActions, 'onPaste'>
@@ -81,6 +79,7 @@ export default function NativeChatView({
   launchAgent,
   resolvedAgent,
   onSwitchToTerminal,
+  onNewConversation,
   readTerminalScreen,
   contextMenuActions
 }: NativeChatViewProps): React.JSX.Element {
@@ -114,6 +113,7 @@ export default function NativeChatView({
           targetPtyId={targetPtyId}
           terminalTabId={terminalTabId}
           onSwitchToTerminal={onSwitchToTerminal}
+          onNewConversation={onNewConversation}
           readTerminalScreen={readTerminalScreen}
           contextMenuActions={contextMenuActions}
         />
@@ -130,6 +130,7 @@ function NativeChatResolvedView({
   targetPtyId,
   terminalTabId,
   onSwitchToTerminal,
+  onNewConversation,
   readTerminalScreen,
   contextMenuActions
 }: {
@@ -140,6 +141,7 @@ function NativeChatResolvedView({
   targetPtyId: string | null
   terminalTabId: string
   onSwitchToTerminal?: () => void
+  onNewConversation?: () => void
   readTerminalScreen?: () => string | null
   contextMenuActions?: Omit<NativeChatContextMenuActions, 'onPaste'>
 }): React.JSX.Element {
@@ -161,10 +163,13 @@ function NativeChatResolvedView({
   // Live hook state for this pane, selected directly so the working indicator
   // flips the instant the agent reports 'working' — even when switching to chat
   // mid-turn before the transcript merge has caught up.
-  const hookWorking = useAppStore((s) => s.agentStatusByPaneKey[paneKey]?.state === 'working')
+  const hookState = useAppStore((s) => s.agentStatusByPaneKey[paneKey]?.state ?? null)
+  const hookWorking = hookState === 'working'
   // The agent's in-progress reply preview (hook), shown as a live streaming
   // bubble while it works — before the completed turn flushes to the transcript.
   const hookPreview = useAppStore((s) => s.agentStatusByPaneKey[paneKey]?.lastAssistantMessage)
+  const hookPrompt = useAppStore((s) => s.agentStatusByPaneKey[paneKey]?.prompt)
+  const hookUpdatedAt = useAppStore((s) => s.agentStatusByPaneKey[paneKey]?.updatedAt ?? null)
   const canSend = useNativeChatCanSend(targetPtyId)
   // Reuse the verified composer send path for interactive cards and composer
   // stop (Stop sends ESC, the agent-TUI interrupt key).
@@ -190,6 +195,7 @@ function NativeChatResolvedView({
   const contextMenu = useNativeChatContextMenu({
     rootRef,
     onSwitchToTerminal,
+    onNewConversation,
     actions: {
       onPaste: pasteClipboardIntoComposer,
       ...(contextMenuActions ?? emptyNativeChatContextMenuActions)
@@ -228,10 +234,20 @@ function NativeChatResolvedView({
   }, [commandMarkerScope])
   // Prune echoes whose real user turn is now in the transcript.
   useEffect(() => {
-    setPending((prev) =>
-      writePendingSendCache(pendingScope, prunePendingSends(prev, session.messages))
-    )
-  }, [session.messages, pendingScope])
+    setPending((prev) => {
+      const transcriptPruned = prunePendingSends(prev, session.messages)
+      return writePendingSendCache(
+        pendingScope,
+        pruneConfirmedNativeChatActivePrompt({
+          pending: transcriptPruned,
+          existingMessages: session.messages,
+          prompt: hookPrompt,
+          state: hookState,
+          statusUpdatedAt: hookUpdatedAt
+        })
+      )
+    })
+  }, [session.messages, pendingScope, hookPrompt, hookState, hookUpdatedAt])
   useEffect(() => {
     if (!paneLaunchPrompt || !shouldPruneLaunchPrompt(paneLaunchPrompt, session.messages)) {
       return
@@ -266,9 +282,7 @@ function NativeChatResolvedView({
     [pendingScope]
   )
   const onSlashCommand = useCallback(
-    (command: string) => {
-      setCommandMarkers(appendCommandMarkerCache(commandMarkerScope, command))
-    },
+    (command: string) => setCommandMarkers(appendCommandMarkerCache(commandMarkerScope, command)),
     [commandMarkerScope]
   )
 
@@ -299,36 +313,15 @@ function NativeChatResolvedView({
     return new Set([launchPromptMessage.id])
   }, [paneLaunchPrompt?.failed, launchPromptMessage, launchPromptVisible])
 
-  // The streaming preview bubble (if any) sits after the transcript but before
-  // the optimistic user echoes — same order mobile uses.
-  const pendingMessages = useMemo(
-    () => pendingSendsAsMessages(pending, sessionAfterCommandBoundaries.messages),
-    [pending, sessionAfterCommandBoundaries.messages]
-  )
-  const streamingText = useMemo(() => {
-    return deriveNativeChatStreamingText({
-      messages:
-        pendingMessages.length > 0
-          ? [...sessionAfterCommandBoundaries.messages, ...pendingMessages]
-          : sessionAfterCommandBoundaries.messages,
-      previewText: hookPreview,
-      working: hookWorking
-    })
-  }, [sessionAfterCommandBoundaries.messages, pendingMessages, hookPreview, hookWorking])
-  const sessionWithPending = useMemo<typeof session>(() => {
-    if (pending.length === 0 && commandMarkers.length === 0 && !streamingText) {
-      return sessionAfterCommandBoundaries
-    }
-    return {
-      ...sessionAfterCommandBoundaries,
-      messages: [
-        ...sessionAfterCommandBoundaries.messages,
-        ...commandMarkersAsMessages(commandMarkers),
-        ...(streamingText ? [nativeChatStreamingMessage(streamingText)] : []),
-        ...pendingMessages
-      ]
-    }
-  }, [sessionAfterCommandBoundaries, pending, pendingMessages, commandMarkers, streamingText])
+  const sessionWithPending = useNativeChatTransientSession({
+    session: sessionAfterCommandBoundaries,
+    pending,
+    commandMarkers,
+    hookPrompt,
+    hookPreview,
+    hookState,
+    hookUpdatedAt
+  })
   // Derive the view state from the pending-augmented session so a send into an
   // otherwise-empty conversation flips to the list (showing the queued bubble)
   // instead of staying on the empty state.

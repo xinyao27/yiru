@@ -2,6 +2,10 @@ import { useCallback, type Dispatch, type KeyboardEventHandler, type SetStateAct
 
 import type { DiscoveredSkill } from '../../../../shared/skills'
 import {
+  isNativeChatComposerComposing,
+  shouldSubmitNativeChatComposer
+} from './native-chat-composer-key-policy'
+import {
   applySkillSuggestion,
   recallNext,
   recallPrevious,
@@ -43,6 +47,11 @@ export function useNativeChatComposerKeyDown({
 }: UseNativeChatComposerKeyDownArgs): KeyboardEventHandler<HTMLTextAreaElement> {
   return useCallback(
     (event) => {
+      // Why: Enter and arrows belong to the IME candidate window until composition
+      // ends; treating them as chat shortcuts submits partial CJK input.
+      if (isNativeChatComposerComposing(event)) {
+        return
+      }
       if (autocomplete.mode === 'slash' && autocomplete.suggestions.length > 0) {
         if (event.key === 'ArrowDown') {
           event.preventDefault()
@@ -107,7 +116,7 @@ export function useNativeChatComposerKeyDown({
         return
       }
 
-      if (event.key === 'Enter' && !event.shiftKey) {
+      if (shouldSubmitNativeChatComposer(event)) {
         event.preventDefault()
         send()
         return

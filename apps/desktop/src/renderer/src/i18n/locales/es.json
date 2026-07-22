@@ -12117,6 +12117,12 @@
           "githubPullRequestNumber": "PR #{{value0}}"
         }
       }
+    },
+    "global-assistant": {
+      "open": "Abrir el asistente",
+      "startError": "No se pudo iniciar el Asistente global.",
+      "newConversation": "Nueva conversación",
+      "starting": "Iniciando el asistente…"
     }
   },
   "browser": {

@@ -603,6 +603,10 @@ function createWebPreloadApi(): Partial<PreloadApi> {
     },
     runtime: createRuntimeApi(),
     nativeChat: createNativeChatApi(),
+    globalAssistant: {
+      getOrCreate: () => Promise.reject(new Error('Global Assistant is available on desktop.')),
+      restart: () => Promise.reject(new Error('Global Assistant is available on desktop.'))
+    },
     runtimeEnvironments: createRuntimeEnvironmentsApi(),
     repos: createReposApi(),
     worktrees: createWorktreesApi(),
@@ -2291,6 +2295,7 @@ function createWebUiApi(): NonNullable<Partial<PreloadApi>['ui']> {
     onToggleRightSidebar: () => noopUnsubscribe,
     onToggleWorktreePalette: () => noopUnsubscribe,
     onToggleFloatingTerminal: () => noopUnsubscribe,
+    onToggleAssistant: () => noopUnsubscribe,
     onTerminalShortcutCaptured: () => noopUnsubscribe,
     onOpenQuickOpen: () => noopUnsubscribe,
     onToggleQuickCommandsMenu: () => noopUnsubscribe,

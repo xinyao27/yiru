@@ -1,4 +1,5 @@
 import {
+  ArrowClockwise,
   Clipboard,
   Copy,
   GitFork,
@@ -42,6 +43,7 @@ type NativeChatContextMenuState = {
 type UseNativeChatContextMenuArgs = {
   rootRef: RefObject<HTMLElement | null>
   onSwitchToTerminal?: () => void
+  onNewConversation?: () => void
   actions: NativeChatContextMenuActions
 }
 
@@ -82,6 +84,7 @@ export const emptyNativeChatContextMenuActions: Omit<NativeChatContextMenuAction
 export function useNativeChatContextMenu({
   rootRef,
   onSwitchToTerminal,
+  onNewConversation,
   actions
 }: UseNativeChatContextMenuArgs): {
   onContextMenuCapture: MouseEventHandler<HTMLElement>
@@ -159,6 +162,12 @@ export function useNativeChatContextMenu({
             <Clipboard />
             {translate('auto.components.terminal.pane.TerminalContextMenu.0a917b591a', 'Paste')}
           </DropdownMenuItem>
+          {onNewConversation ? (
+            <DropdownMenuItem onClick={onNewConversation}>
+              <ArrowClockwise />
+              {translate('components.global-assistant.newConversation', 'New conversation')}
+            </DropdownMenuItem>
+          ) : null}
           {onSwitchToTerminal ? (
             <DropdownMenuItem onClick={onSwitchToTerminal}>
               <SquareTerminal />

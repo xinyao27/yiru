@@ -12140,6 +12140,12 @@
           "githubPullRequestNumber": "PR #{{value0}}"
         }
       }
+    },
+    "global-assistant": {
+      "open": "Open Assistant",
+      "startError": "Global Assistant could not start.",
+      "newConversation": "New conversation",
+      "starting": "Starting assistant…"
     }
   }
 }

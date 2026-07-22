@@ -4,6 +4,7 @@
 // completed turn is flushed to the transcript. Desktop and mobile both use this
 // so the show/hide rule can't drift between platforms.
 
+import type { AgentStatusState } from './agent-status-types'
 import type { NativeChatMessage } from './native-chat-types'
 
 /** The synthetic streaming bubble's stable id (kept stable so the list keys it
@@ -29,23 +30,31 @@ function assistantText(message: NativeChatMessage | undefined): string {
  * the same (or more) text, the preview is suppressed so the bubble doesn't
  * duplicate or flicker as the transcript catches up.
  *
- * `working` gates it: a stale preview from a finished turn never shows.
+ * A completed hook can also bridge a missed transcript append. The latest
+ * transcript assistant turn suppresses that fallback even when a pending user
+ * turn follows it.
  */
 export function deriveNativeChatStreamingText(args: {
   messages: readonly NativeChatMessage[]
   previewText: string | null | undefined
-  working: boolean
+  state: AgentStatusState | null
 }): string | null {
-  const { messages, previewText, working } = args
-  if (!working) {
+  const { messages, previewText, state } = args
+  const working = state === 'working'
+  const completed = state === 'done'
+  if (!working && !completed) {
     return null
   }
   const text = previewText?.trim()
   if (!text) {
     return null
   }
-  const lastText = assistantText(messages.at(-1))
-  if (lastText.includes(text) || text.length <= lastText.length) {
+  const lastText = assistantText(
+    completed && !working
+      ? messages.findLast((candidate) => candidate.role === 'assistant')
+      : messages.at(-1)
+  )
+  if (lastText.includes(text) || (working && text.length <= lastText.length)) {
     return null
   }
   return text

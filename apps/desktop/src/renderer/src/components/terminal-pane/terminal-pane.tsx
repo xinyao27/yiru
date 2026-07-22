@@ -15,6 +15,7 @@ import TerminalSearch from '@/components/terminal-search'
 import { APP_MENU_PASTE_EVENT } from '@/lib/app-menu-paste'
 import { getConnectionId, getConnectionIdFromState } from '@/lib/connection-context'
 import { isPairedWebClientWindow } from '@/lib/desktop-window-chrome'
+import { requestGlobalAssistant } from '@/lib/global-assistant'
 import { useEffectiveMacOptionAsAlt } from '@/lib/keyboard-layout/use-effective-mac-option-as-alt'
 import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
 import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
@@ -679,7 +680,6 @@ export default function TerminalPane({
         ?.viewMode === 'chat'
   )
   const nativeChatEnabled = useAppStore((store) => store.settings?.experimentalNativeChat === true)
-  const effectiveChatViewMode = nativeChatEnabled && isChatViewMode
   const unifiedTabLabel = useAppStore(
     (store) =>
       getCachedUnifiedTerminalTabForWorktree(store.unifiedTabsByWorktree, worktreeId, tabId)?.label
@@ -702,6 +702,8 @@ export default function TerminalPane({
   const terminalTab = useAppStore((store) =>
     getCachedTerminalTabForWorktree(store.tabsByWorktree, worktreeId, tabId)
   )
+  const isGlobalAssistantTab = terminalTab?.isGlobalAssistant === true
+  const effectiveChatViewMode = (nativeChatEnabled || isGlobalAssistantTab) && isChatViewMode
   const restoredLayout = useMemo(
     () => (terminalTab ? sanitizeTerminalLayoutPaneTitles(savedLayout, terminalTab) : savedLayout),
     [savedLayout, terminalTab]
@@ -770,7 +772,7 @@ export default function TerminalPane({
         leafIds: getNativeChatLeafIds()
       })
       return canToggleNativeChat({
-        experimentalNativeChatEnabled: nativeChatEnabled,
+        experimentalNativeChatEnabled: nativeChatEnabled || isGlobalAssistantTab,
         contentType: 'terminal',
         launchAgent: detectedAgent ? null : launchAgent,
         detectedAgent,
@@ -780,6 +782,7 @@ export default function TerminalPane({
     },
     [
       tabAgentTypeByLeaf,
+      isGlobalAssistantTab,
       nativeChatEnabled,
       nativeChatTranscriptIsLocalReadable,
       terminalTab?.launchAgent,
@@ -793,9 +796,18 @@ export default function TerminalPane({
       // Scope the "always allow toggling back" rule to the leaf actually showing
       // chat; it must not make an unsupported sibling look eligible.
       const isChatViewForLeaf = effectiveChatViewMode && leafId !== null && chatLeafId === leafId
-      return (nativeChatEnabled && isChatViewForLeaf) || isChatEligibleForLeaf(leafId)
+      return (
+        ((nativeChatEnabled || isGlobalAssistantTab) && isChatViewForLeaf) ||
+        isChatEligibleForLeaf(leafId)
+      )
     },
-    [chatLeafId, effectiveChatViewMode, isChatEligibleForLeaf, nativeChatEnabled]
+    [
+      chatLeafId,
+      effectiveChatViewMode,
+      isChatEligibleForLeaf,
+      isGlobalAssistantTab,
+      nativeChatEnabled
+    ]
   )
   const toggleNativeChatForLeaf = useCallback(
     (leafId: string) => {
@@ -3121,6 +3133,9 @@ export default function TerminalPane({
                 launchAgent={chatPaneLaunchAgent}
                 resolvedAgent={chatPaneResolvedAgent}
                 onSwitchToTerminal={() => toggleNativeChatForLeaf(chatPane.leafId)}
+                onNewConversation={
+                  isGlobalAssistantTab ? () => requestGlobalAssistant('restart') : undefined
+                }
                 readTerminalScreen={readNativeChatTerminalScreen}
                 contextMenuActions={{
                   onSplitRight: () => contextMenu.runForPane(chatPane.id, contextMenu.onSplitRight),

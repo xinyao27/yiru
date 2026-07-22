@@ -48,6 +48,7 @@ import type { TerminalPaneSplitSource } from '../shared/feature-education-teleme
 import type { AppStarSource } from '../shared/gh-star-source'
 import type { GitHistoryOptions, GitHistoryResult } from '../shared/git-history'
 import type { GhAuthDiagnostic } from '../shared/github-auth-types'
+import type { GlobalAssistantSession } from '../shared/global-assistant-types'
 import type { HostedReviewForBranchArgs } from '../shared/hosted-review'
 import type { KeybindingActionId, KeybindingFileSnapshot } from '../shared/keybindings'
 import type { LanguageServerEvent } from '../shared/language-server'
@@ -2850,6 +2851,11 @@ const api = {
       ipcRenderer.on('ui:toggleFloatingTerminal', listener)
       return () => ipcRenderer.removeListener('ui:toggleFloatingTerminal', listener)
     },
+    onToggleAssistant: (callback: () => void): (() => void) => {
+      const listener = (_event: Electron.IpcRendererEvent) => callback()
+      ipcRenderer.on('ui:toggleAssistant', listener)
+      return () => ipcRenderer.removeListener('ui:toggleAssistant', listener)
+    },
     onTerminalShortcutCaptured: (
       callback: (data: { actionId: KeybindingActionId }) => void
     ): (() => void) => {
@@ -3116,6 +3122,7 @@ const api = {
         launchToken?: string
         launchAgent?: TuiAgent
         viewMode?: 'terminal' | 'chat'
+        isGlobalAssistant?: boolean
         title?: string
         ptyId?: string
         activate?: boolean
@@ -3139,6 +3146,7 @@ const api = {
           launchToken?: string
           launchAgent?: TuiAgent
           viewMode?: 'terminal' | 'chat'
+          isGlobalAssistant?: boolean
           title?: string
           ptyId?: string
           activate?: boolean
@@ -3594,6 +3602,12 @@ const api = {
         ipcRenderer.send('nativeChat:unsubscribe', { subscriptionId: args.subscriptionId })
       }
     }
+  },
+
+  globalAssistant: {
+    getOrCreate: (): Promise<GlobalAssistantSession> =>
+      ipcRenderer.invoke('globalAssistant:getOrCreate'),
+    restart: (): Promise<GlobalAssistantSession> => ipcRenderer.invoke('globalAssistant:restart')
   },
 
   runtime: {

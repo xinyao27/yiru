@@ -12117,6 +12117,12 @@
           "githubPullRequestNumber": "PR #{{value0}}"
         }
       }
+    },
+    "global-assistant": {
+      "open": "アシスタントを開く",
+      "startError": "グローバルアシスタントを起動できませんでした。",
+      "newConversation": "新しい会話",
+      "starting": "アシスタントを起動中…"
     }
   },
   "browser": {

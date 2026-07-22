@@ -12117,6 +12117,12 @@
           "githubPullRequestNumber": "PR #{{value0}}"
         }
       }
+    },
+    "global-assistant": {
+      "open": "打开助理",
+      "startError": "全局助理无法启动。",
+      "newConversation": "新建对话",
+      "starting": "正在启动助理…"
     }
   },
   "browser": {

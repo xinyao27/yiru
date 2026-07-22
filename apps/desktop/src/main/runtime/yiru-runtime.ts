@@ -64,6 +64,7 @@ import { createCommandCodeOutputStatusDetector } from '../../shared/command-code
 import {
   DEFAULT_REPO_BADGE_COLOR,
   FLOATING_TERMINAL_WORKTREE_ID,
+  GLOBAL_ASSISTANT_WORKTREE_ID,
   getDefaultVoiceSettings
 } from '../../shared/constants'
 import {
@@ -1189,6 +1190,7 @@ type RuntimeNotifier = {
       launchToken?: string
       launchAgent?: TuiAgent
       viewMode?: 'terminal' | 'chat'
+      isGlobalAssistant?: boolean
       activate?: boolean
       presentation?: RuntimeTerminalPresentation
       tabId?: string
@@ -19069,6 +19071,40 @@ export class YiruRuntimeService {
     return { handle, tabId: leaf.tabId, worktreeId: leaf.worktreeId }
   }
 
+  async revealGlobalAssistantChat(handle: string): Promise<string> {
+    const pty = this.getRuntimeOwnedPtyForHandle(handle)
+    if (!pty || pty.pty.worktreeId !== GLOBAL_ASSISTANT_WORKTREE_ID) {
+      throw new Error('global_assistant_terminal_not_found')
+    }
+    if (!pty.pty.connected) {
+      throw new Error('terminal_exited')
+    }
+    if (!this.notifier?.revealTerminalSession) {
+      throw new Error('runtime_unavailable')
+    }
+    const parsedPaneKey = parsePaneKey(pty.pty.paneKey ?? '')
+    // Why: the assistant keeps a synthetic PTY owner, but its visible surface
+    // is an ordinary terminal/chat tab in the local floating workspace.
+    const revealed = await this.notifier.revealTerminalSession(FLOATING_TERMINAL_WORKTREE_ID, {
+      ptyId: pty.pty.ptyId,
+      // Why: agent OSC titles change during startup; the app-owned tab should
+      // keep its stable product identity rather than becoming "Claude Code".
+      title: 'Yiru Assistant',
+      ...(pty.pty.launchConfig
+        ? { launchConfig: copySleepingAgentLaunchConfig(pty.pty.launchConfig) }
+        : {}),
+      ...(pty.pty.launchToken ? { launchToken: pty.pty.launchToken } : {}),
+      ...(pty.pty.launchAgent ? { launchAgent: pty.pty.launchAgent } : {}),
+      ...(pty.pty.tabId !== null ? { tabId: pty.pty.tabId } : {}),
+      ...(parsedPaneKey ? { leafId: parsedPaneKey.leafId } : {}),
+      viewMode: 'chat',
+      isGlobalAssistant: true,
+      activate: false,
+      presentation: 'background'
+    })
+    return revealed?.tabId ?? pty.pty.tabId ?? pty.record.tabId
+  }
+
   async closeTerminal(handle: string): Promise<RuntimeTerminalClose> {
     const pty = this.getLivePtyForHandle(handle)
     this.claudeAgentTeams.removeTeamForLeaderHandle(handle)
@@ -19665,6 +19701,20 @@ export class YiruRuntimeService {
       // keep rejecting it because there is no backing repo/worktree record.
       return {
         id: FLOATING_TERMINAL_WORKTREE_ID,
+        path: homedir(),
+        connectionId: null,
+        repo: null,
+        folderWorkspace: null
+      }
+    }
+
+    const globalAssistantSelector =
+      selector === GLOBAL_ASSISTANT_WORKTREE_ID || selector === `id:${GLOBAL_ASSISTANT_WORKTREE_ID}`
+    if (globalAssistantSelector) {
+      // Why: the assistant is local even while the user is browsing an SSH
+      // workspace; its synthetic owner must never inherit a remote connection.
+      return {
+        id: GLOBAL_ASSISTANT_WORKTREE_ID,
         path: homedir(),
         connectionId: null,
         repo: null,
@@ -20651,7 +20701,12 @@ export class YiruRuntimeService {
       return pty
     }
 
-    if (pty.worktreeId !== worktreeId) {
+    const preservesGlobalAssistantOwner =
+      pty.worktreeId === GLOBAL_ASSISTANT_WORKTREE_ID &&
+      worktreeId === FLOATING_TERMINAL_WORKTREE_ID
+    // Why: the floating workspace is only the assistant's presentation host;
+    // its runtime-owned PTY must retain the synthetic assistant owner.
+    if (pty.worktreeId !== worktreeId && !preservesGlobalAssistantOwner) {
       pty.worktreeId = worktreeId
       // Why: path/controller inference can relocate a PTY but cannot attest a new instance.
       pty.worktreeInstanceId = null
@@ -22202,6 +22257,25 @@ export class YiruRuntimeService {
     // a second handle for the same terminal.
     this.handleByPtyId.set(record.ptyId, handle)
     return { record, pty }
+  }
+
+  private getRuntimeOwnedPtyForHandle(handle: string): {
+    record: TerminalHandleRecord
+    pty: RuntimePtyWorktreeRecord
+  } | null {
+    const syntheticPty = this.getLivePtyForHandle(handle)
+    if (syntheticPty) {
+      return syntheticPty
+    }
+    try {
+      const liveLeaf = this.getLiveLeafForHandle(handle)
+      const pty = liveLeaf.leaf.ptyId ? this.ptysById.get(liveLeaf.leaf.ptyId) : null
+      // Why: renderer reload adopts the assistant's synthetic handle into the
+      // rebuilt leaf graph; reveal must follow that live handle back to its PTY.
+      return pty ? { record: liveLeaf.record, pty } : null
+    } catch {
+      return null
+    }
   }
 
   private readPtyTerminal(
