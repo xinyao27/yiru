@@ -175,10 +175,10 @@
   inset: 0 4px 4px 0;
   z-index: 5;
   pointer-events: none;
+  border: 1.5px solid color-mix(in srgb, var(--terminal-pane-locate) 64%, transparent);
+  outline: 1.5px solid color-mix(in srgb, var(--terminal-pane-locate) 18%, transparent);
+  outline-offset: -3px;
   border-radius: 2px;
-  box-shadow:
-    inset 0 0 0 1.5px color-mix(in srgb, var(--terminal-pane-locate) 64%, transparent),
-    inset 0 0 0 3px color-mix(in srgb, var(--terminal-pane-locate) 18%, transparent);
 }
 
 @keyframes pane-focus-rim-flash {
@@ -406,9 +406,8 @@
 
 .pane-title-bar[data-chromeless] .pane-title-split-trigger svg,
 .pane-title-bar[data-chromeless] .pane-title-close svg {
-  /* Why: chromeless controls overlap row-one terminal text; the rounded backing
-     clears text inside open glyphs without adding one shared toolbar fill. */
-  position: relative;
+  /* Why: chromeless controls overlap terminal text, so their glyphs need a
+     heavier stroke to remain legible without a backing glow. */
   stroke-width: 2.75px;
 }
 

@@ -266,7 +266,7 @@ The pattern in `apps/desktop/src/renderer/src/components/settings/settings-form-
 
 - **Outer stack:** `space-y-3` for full-section forms (`ThemePicker`); `space-y-2` for compact single-control fields (`ColorField`, `NumberField`). Pick by density, not preference.
 - **Label group:** `space-y-1` containing `<Label>` and a description in `text-xs text-muted-foreground`.
-- **Control:** the shadcn primitive (`<Input>`, `<Textarea>`, `<Select>`, `<Switch>`, etc.). Errors surface via `aria-invalid`; form primitives already map that to a destructive ring — don't paint your own.
+- **Control:** the shadcn primitive (`<Input>`, `<Textarea>`, `<Select>`, `<Switch>`, etc.). Errors surface via `aria-invalid`; the renderer maps that to a destructive focus outline — don't paint your own.
 - **Trailing metadata:** `text-[11px] text-muted-foreground` below the control (e.g., "Current: 14px · Default: 13px"), not next to the label.
 
 ### Scrollbars

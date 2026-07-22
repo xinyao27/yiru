@@ -327,6 +327,12 @@
     outline-offset: 1px;
   }
 
+  :root:root [aria-invalid='true']:focus-visible {
+    /* Why: invalid controls keep their semantic error state after shadow-based
+       focus rings are replaced by the renderer-wide outline. */
+    outline-color: var(--destructive) !important;
+  }
+
   :root:root [class*='drop-shadow'] {
     /* Why: drop-shadow utilities use filters rather than box-shadow and need a
        separate flat-design guardrail. */
