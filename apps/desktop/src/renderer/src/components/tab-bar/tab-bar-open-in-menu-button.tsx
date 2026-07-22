@@ -77,7 +77,7 @@ export function TabBarOpenInMenuButton({
                 type="button"
                 variant="outline"
                 size="icon-xs"
-                className="text-muted-foreground hover:text-foreground size-7"
+                className="text-muted-foreground hover:text-foreground size-7 shadow-none"
                 aria-label={openLabel}
                 onClick={() => openEntry(preferredEntry)}
               >
@@ -105,7 +105,7 @@ export function TabBarOpenInMenuButton({
                     type="button"
                     variant="outline"
                     size="icon-xs"
-                    className="text-muted-foreground hover:text-foreground h-7 w-6"
+                    className="text-muted-foreground hover:text-foreground h-7 w-6 shadow-none"
                     aria-label={chooseLabel}
                   >
                     <CaretDown className="size-3" />

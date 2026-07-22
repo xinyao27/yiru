@@ -78,6 +78,7 @@ function DropdownMenuItem({
   className,
   inset,
   variant = 'default',
+  style,
   ...props
 }: DropdownMenuPrimitive.Item.Props & {
   inset?: boolean
@@ -89,6 +90,9 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(menuItemClass, 'px-2 data-[inset]:pl-7', className)}
+      // Why: menu rows can overlap Electron titlebar drag regions; marking the
+      // popup alone does not reliably keep native hit-testing from dragging.
+      style={{ ...style, WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       {...props}
     />
   )
