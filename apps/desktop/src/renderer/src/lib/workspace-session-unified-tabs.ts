@@ -84,7 +84,9 @@ export function buildPersistedUnifiedTabSessionData(
   ])
 
   for (const worktreeId of worktreeIds) {
-    const tabs = sourceTabs[worktreeId] ?? []
+    // Why: Global Assistant is a runtime-owned tab whose PTY is deliberately
+    // closed at app shutdown; its next visible tab is recreated on demand.
+    const tabs = (sourceTabs[worktreeId] ?? []).filter((tab) => tab.isGlobalAssistant !== true)
     if (tabs.length === 0) {
       continue
     }

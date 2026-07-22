@@ -88,7 +88,8 @@ const terminalTabSchema = z.object({
   launchAgent: z
     .custom<TuiAgent>((v) => isTuiAgent(v))
     .optional()
-    .catch(undefined)
+    .catch(undefined),
+  isGlobalAssistant: z.boolean().optional()
 })
 
 // ─── Unified tab model ──────────────────────────────────────────────
@@ -125,8 +126,46 @@ const tabSchema = z.object({
   // newer build that wrote an unrecognized mode) by degrading to the safe
   // default instead of failing the whole-session parse. Legacy/missing stays
   // undefined → 'terminal' in the renderer.
-  viewMode: z.enum(['terminal', 'chat']).catch('terminal').optional()
+  viewMode: z.enum(['terminal', 'chat']).catch('terminal').optional(),
+  isGlobalAssistant: z.boolean().optional()
 })
+
+const retiredSidebarTabContentTypes = new Set([
+  'explorer',
+  'search',
+  'vault',
+  'workspaces',
+  'pr-checks',
+  'source-control',
+  'checks',
+  'ports'
+])
+
+const unifiedTabsSchema = z.preprocess(
+  (raw) => {
+    if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
+      return raw
+    }
+    const cleaned: Record<string, unknown> = Object.create(null)
+    for (const [worktreeId, tabs] of Object.entries(raw as Record<string, unknown>)) {
+      if (!Array.isArray(tabs)) {
+        cleaned[worktreeId] = tabs
+        continue
+      }
+      // Why: sidebar surfaces lived in unified tab groups in older builds; their
+      // stale chrome can be dropped without sacrificing valid workspace tabs.
+      cleaned[worktreeId] = tabs.filter((tab) => {
+        if (tab == null || typeof tab !== 'object' || Array.isArray(tab)) {
+          return true
+        }
+        const contentType = (tab as Record<string, unknown>).contentType
+        return typeof contentType !== 'string' || !retiredSidebarTabContentTypes.has(contentType)
+      })
+    }
+    return { ...cleaned }
+  },
+  z.record(z.string(), z.array(tabSchema))
+)
 
 const tabGroupSchema = z.object({
   id: z.string(),
@@ -265,7 +304,7 @@ export const workspaceSessionStateSchema: z.ZodType<WorkspaceSessionState> = z.o
   activeTabTypeByWorktree: z.record(z.string(), workspaceVisibleTabTypeSchema).optional(),
   browserUrlHistory: browserHistoryEntriesSchema.optional(),
   activeTabIdByWorktree: z.record(z.string(), z.string().nullable()).optional(),
-  unifiedTabs: z.record(z.string(), z.array(tabSchema)).optional(),
+  unifiedTabs: unifiedTabsSchema.optional(),
   tabGroups: z.record(z.string(), z.array(tabGroupSchema)).optional(),
   tabGroupLayouts: z.record(z.string(), tabGroupLayoutNodeSchema).optional(),
   activeGroupIdByWorktree: z.record(z.string(), z.string()).optional(),

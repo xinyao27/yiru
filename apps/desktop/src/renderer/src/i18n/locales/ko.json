@@ -12110,18 +12110,10 @@
       }
     },
     "global-assistant": {
-      "renderError": "The Global Assistant hit an error.",
-      "renderErrorDescription": "Retry the assistant or close and reopen it.",
-      "open": "Open Assistant",
-      "startError": "Global Assistant could not start.",
-      "terminalError": "Could not open the assistant terminal.",
-      "title": "Global Assistant",
-      "newConversation": "New conversation",
-      "showTerminal": "Show raw terminal",
-      "close": "Close assistant",
-      "starting": "Starting assistant…",
-      "unavailable": "Assistant unavailable",
-      "retry": "Retry"
+      "open": "어시스턴트 열기",
+      "startError": "글로벌 어시스턴트를 시작할 수 없습니다.",
+      "newConversation": "새 대화",
+      "starting": "어시스턴트 시작 중…"
     }
   },
   "browser": {

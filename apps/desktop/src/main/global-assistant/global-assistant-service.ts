@@ -72,15 +72,18 @@ export class GlobalAssistantService {
     if (this.disposed) {
       throw new Error('Global Assistant is shutting down.')
     }
-    if (this.session && (await this.isAlive(this.session))) {
-      return this.session
+    let session = this.session
+    if (!session || !(await this.isAlive(session))) {
+      this.session = null
+      session = await this.startCreatingSession('resume')
     }
-    this.session = null
-    this.session = await this.startCreatingSession('resume')
-    return this.session
+    return this.revealSession(session)
   }
 
   async restart(): Promise<GlobalAssistantSession> {
+    if (this.disposed) {
+      throw new Error('Global Assistant is shutting down.')
+    }
     const pending = this.creating
     if (pending) {
       await pending.catch(() => undefined)
@@ -90,13 +93,8 @@ export class GlobalAssistantService {
     if (current) {
       await this.runtime.closeTerminal(current.handle).catch(() => undefined)
     }
-    this.session = await this.startCreatingSession('fresh')
-    return this.session
-  }
-
-  async showTerminal(): Promise<void> {
-    const session = await this.getOrCreate()
-    await this.runtime.revealGlobalAssistantTerminal(session.handle)
+    const session = await this.startCreatingSession('fresh')
+    return this.revealSession(session)
   }
 
   async dispose(): Promise<void> {
@@ -119,6 +117,13 @@ export class GlobalAssistantService {
       })
     }
     return this.creating
+  }
+
+  private async revealSession(session: GlobalAssistantSession): Promise<GlobalAssistantSession> {
+    const tabId = await this.runtime.revealGlobalAssistantChat(session.handle)
+    const revealed = tabId === session.tabId ? session : { ...session, tabId }
+    this.session = revealed
+    return revealed
   }
 
   private async createSession(mode: 'resume' | 'fresh'): Promise<GlobalAssistantSession> {

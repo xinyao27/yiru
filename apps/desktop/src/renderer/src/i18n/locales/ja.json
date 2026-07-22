@@ -12110,18 +12110,10 @@
       }
     },
     "global-assistant": {
-      "renderError": "The Global Assistant hit an error.",
-      "renderErrorDescription": "Retry the assistant or close and reopen it.",
-      "open": "Open Assistant",
-      "startError": "Global Assistant could not start.",
-      "terminalError": "Could not open the assistant terminal.",
-      "title": "Global Assistant",
-      "newConversation": "New conversation",
-      "showTerminal": "Show raw terminal",
-      "close": "Close assistant",
-      "starting": "Starting assistant…",
-      "unavailable": "Assistant unavailable",
-      "retry": "Retry"
+      "open": "アシスタントを開く",
+      "startError": "グローバルアシスタントを起動できませんでした。",
+      "newConversation": "新しい会話",
+      "starting": "アシスタントを起動中…"
     }
   },
   "browser": {

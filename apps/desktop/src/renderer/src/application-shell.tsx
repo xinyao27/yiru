@@ -42,7 +42,6 @@ import {
   shouldMinimizeFloatingWorkspacePanelOnCloseShortcut
 } from '@/lib/floating-workspace-terminal-actions'
 import { createFloatingWorkspaceTourInteractionSnapshot } from '@/lib/floating-workspace-tour-interaction-snapshot'
-import { TOGGLE_GLOBAL_ASSISTANT_EVENT } from '@/lib/global-assistant'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
 import { getRendererAppPlatform } from '@/lib/renderer-app-platform'
@@ -58,6 +57,7 @@ import {
 } from '@/store/slices/worktree-nav-history'
 
 import logo from '../../../resources/logo.svg'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '../../shared/constants'
 import {
   isRuntimeOwnedSshTargetId,
   toRuntimeExecutionHostId,
@@ -131,6 +131,7 @@ import { useAppMenuPaste } from './hooks/use-app-menu-paste'
 import { useAutoAckViewedAgent } from './hooks/use-auto-ack-viewed-agent'
 import { useAutomationDispatchEvents } from './hooks/use-automation-dispatch-events'
 import { useEditorExternalWatch } from './hooks/use-editor-external-watch'
+import { useGlobalAssistantFloatingTab } from './hooks/use-global-assistant-floating-tab'
 import { useGlobalFileDrop } from './hooks/use-global-file-drop'
 import { isRemoteWorkspaceSnapshotApplyInProgress, useIpcEvents } from './hooks/use-ipc-events'
 import { useLargeTextControlPaste } from './hooks/use-large-text-control-paste'
@@ -387,9 +388,6 @@ const FloatingTerminalPanel = lazy(() =>
     default: module.FloatingTerminalPanel
   }))
 )
-const GlobalAssistantPanel = lazy(
-  () => import('./components/global-assistant/global-assistant-panel')
-)
 // Why: lazy-loaded so the WebP asset + overlay module aren't fetched unless
 // the user opts into the experimental flag.
 const PetOverlay = lazy(() => import('./components/pet/pet-overlay'))
@@ -444,7 +442,6 @@ function App(): React.JSX.Element {
   useWebSessionTabsSync()
   useSpoolSharingBridge()
   const [floatingTerminalOpen, setFloatingTerminalOpen] = useState(false)
-  const [globalAssistantOpen, setGlobalAssistantOpen] = useState(false)
   const floatingWorkspaceTourInteractionSnapshotRef = useRef<{
     wasPreviouslyInteracted?: boolean
     persisted?: Promise<void>
@@ -529,6 +526,11 @@ function App(): React.JSX.Element {
   const worktreeSidebarScrollOffsetRef = useRef(0)
   const worktreeSidebarScrollAnchorRef = useRef<VirtualizedScrollAnchor>(null)
   const floatingVisibleTabCount = useAppStore(selectFloatingVisibleTabCount)
+  const hasFloatingAssistantTab = useAppStore((state) =>
+    (state.unifiedTabsByWorktree[FLOATING_TERMINAL_WORKTREE_ID] ?? []).some(
+      (tab) => tab.isGlobalAssistant === true
+    )
+  )
   const workspaceSessionReady = useAppStore((s) => s.workspaceSessionReady)
   const backgroundTerminalMountRequested = useSyncExternalStore(
     subscribeBackgroundTerminalWorktreeMountRequests,
@@ -580,11 +582,6 @@ function App(): React.JSX.Element {
     activeWorktreeId !== null &&
     !hasActiveSpoolWorkspace &&
     !creationLayoutActive
-  // Why: a closed empty floating workspace is not startup-critical. Once it owns
-  // tabs, keep it mounted while closed so hidden terminal/browser/editor panes
-  // retain their local state.
-  const shouldMountFloatingTerminalPanel =
-    floatingTerminalEnabled && (floatingTerminalOpen || floatingVisibleTabCount > 0)
   // Why: the floating workspace is a transient overlay; hotkey minimize should
   // return keyboard focus to the surface the user was working in before it.
   const floatingTerminalReturnFocusRef = useRef<HTMLElement | null>(null)
@@ -659,12 +656,20 @@ function App(): React.JSX.Element {
     [floatingTerminalOpen, rememberFloatingTerminalReturnFocus, restoreFloatingTerminalReturnFocus]
   )
 
+  const { assistantPending, assistantLoadingVisible, openAssistant } =
+    useGlobalAssistantFloatingTab({
+      floatingWorkspaceOpen: floatingTerminalOpen,
+      setFloatingWorkspaceOpen: setFloatingTerminalOpenWithFocus
+    })
+  // Why: Global Assistant owns the same floating tab surface even when ordinary
+  // floating terminals are disabled; pending startup also needs its loading UI.
+  const shouldMountFloatingTerminalPanel =
+    (floatingTerminalEnabled || assistantPending || hasFloatingAssistantTab) &&
+    (floatingTerminalOpen || floatingVisibleTabCount > 0)
+
   useEffect(() => {
-    // Why: both panels own global typing shortcuts and focus restoration, so
-    // opening one must close the other before its input surface mounts.
     const toggleFloatingTerminal = (): void => {
       if (floatingTerminalEnabled) {
-        setGlobalAssistantOpen(false)
         setFloatingTerminalOpenWithFocus((open) => !open)
       }
     }
@@ -673,23 +678,15 @@ function App(): React.JSX.Element {
   }, [floatingTerminalEnabled, setFloatingTerminalOpenWithFocus])
 
   useEffect(() => {
-    // Why: keep shortcut-driven opens subject to the same one-overlay rule as
-    // the floating workspace's explicit "Open Assistant" action.
-    const toggleGlobalAssistant = (): void => {
-      if (!globalAssistantOpen) {
-        setFloatingTerminalOpenWithFocus(false)
-      }
-      setGlobalAssistantOpen((open) => !open)
-    }
-    window.addEventListener(TOGGLE_GLOBAL_ASSISTANT_EVENT, toggleGlobalAssistant)
-    return () => window.removeEventListener(TOGGLE_GLOBAL_ASSISTANT_EVENT, toggleGlobalAssistant)
-  }, [globalAssistantOpen, setFloatingTerminalOpenWithFocus])
-
-  useEffect(() => {
-    if (!floatingTerminalEnabled) {
+    if (!floatingTerminalEnabled && !assistantPending && !hasFloatingAssistantTab) {
       setFloatingTerminalOpenWithFocus(false)
     }
-  }, [floatingTerminalEnabled, setFloatingTerminalOpenWithFocus])
+  }, [
+    assistantPending,
+    floatingTerminalEnabled,
+    hasFloatingAssistantTab,
+    setFloatingTerminalOpenWithFocus
+  ])
 
   const sidebarWidth = useAppStore((s) => s.sidebarWidth)
   const sidebarOpen = useAppStore((s) => s.sidebarOpen)
@@ -2588,38 +2585,10 @@ function App(): React.JSX.Element {
                   <FloatingTerminalPanel
                     open={floatingTerminalOpen}
                     onOpenChange={setFloatingTerminalOpenWithFocus}
-                    onOpenAssistant={() => {
-                      setFloatingTerminalOpenWithFocus(false)
-                      setGlobalAssistantOpen(true)
-                    }}
+                    onOpenAssistant={isPairedWebClientWindow() ? undefined : openAssistant}
+                    assistantPending={assistantPending}
+                    assistantLoadingVisible={assistantLoadingVisible}
                     tourInteractionSnapshot={floatingWorkspaceTourInteractionSnapshotRef.current}
-                  />
-                </RecoverableRenderErrorBoundary>
-              </Suspense>
-            ) : null}
-            {globalAssistantOpen ? (
-              <Suspense fallback={null}>
-                <RecoverableRenderErrorBoundary
-                  boundaryId="overlay.global-assistant"
-                  surface="overlay"
-                  resetKey={globalAssistantOpen}
-                  compact
-                  title={translate(
-                    'components.global-assistant.renderError',
-                    'The Global Assistant hit an error.'
-                  )}
-                  description={translate(
-                    'components.global-assistant.renderErrorDescription',
-                    'Retry the assistant or close and reopen it.'
-                  )}
-                >
-                  <GlobalAssistantPanel
-                    open={globalAssistantOpen}
-                    onOpenChange={setGlobalAssistantOpen}
-                    onShowTerminal={() => {
-                      setGlobalAssistantOpen(false)
-                      setFloatingTerminalOpenWithFocus(true)
-                    }}
                   />
                 </RecoverableRenderErrorBoundary>
               </Suspense>

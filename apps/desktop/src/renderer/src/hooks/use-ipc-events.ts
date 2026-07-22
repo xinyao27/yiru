@@ -34,7 +34,7 @@ import {
   switchFloatingWorkspaceTab
 } from '@/lib/floating-workspace-terminal-actions'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { TOGGLE_GLOBAL_ASSISTANT_EVENT } from '@/lib/global-assistant'
+import { requestGlobalAssistant } from '@/lib/global-assistant'
 import { detectLanguage } from '@/lib/language-detect'
 import { planMobileTerminalTabMount } from '@/lib/mobile-terminal-tab-mount'
 import { initialAgentTabViewModeProps } from '@/lib/native-chat-initial-view-mode'
@@ -1287,7 +1287,7 @@ export function useIpcEvents(): void {
 
     unsubs.push(
       window.api.ui.onToggleAssistant(() => {
-        window.dispatchEvent(new CustomEvent(TOGGLE_GLOBAL_ASSISTANT_EVENT))
+        requestGlobalAssistant()
       })
     )
 
@@ -1415,6 +1415,7 @@ export function useIpcEvents(): void {
           launchToken,
           launchAgent,
           viewMode,
+          isGlobalAssistant,
           title,
           ptyId,
           activate,
@@ -1496,6 +1497,7 @@ export function useIpcEvents(): void {
                               }))
                         }
                       : {}),
+                    ...(isGlobalAssistant ? { isGlobalAssistant: true } : {}),
                     ...(cwd ? { startupCwd: cwd } : {}),
                     // Why: tabId hint comes from CLI-spawned PTYs whose env
                     // already has the pane key baked in. Adopting the tab under
@@ -1528,6 +1530,14 @@ export function useIpcEvents(): void {
             if (shouldActivate) {
               store.setActiveTabType('terminal')
               store.setActiveTab(tab.id)
+            }
+            if (viewMode && reusedTab) {
+              // Why: reopening the assistant should return its existing tab to
+              // chat after the user previously used the raw-terminal escape.
+              store.setTabViewMode(tab.id, viewMode)
+            }
+            if (isGlobalAssistant) {
+              store.markTabAsGlobalAssistant(tab.id)
             }
             if (shouldSurfaceOwner) {
               store.revealWorktreeInSidebar(worktreeId)
@@ -3042,8 +3052,8 @@ export function useIpcEvents(): void {
         owningWorktreeId
       } = resolvePaneKey(store, paneKey)
       if (!exists && data.worktreeId === GLOBAL_ASSISTANT_WORKTREE_ID) {
-        // Why: the assistant PTY deliberately has no renderer terminal tab;
-        // its native-chat transcript still needs the hook-owned provider id.
+        // Why: assistant hooks may arrive before its hidden PTY is adopted by
+        // the floating tab; native chat still needs the hook-owned provider id.
         exists = true
         owningWorktreeId = GLOBAL_ASSISTANT_WORKTREE_ID
         repoConnectionId = null

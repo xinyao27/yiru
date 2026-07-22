@@ -12,9 +12,14 @@ import type { OpenFile } from '../store/slices/editor'
 import { buildLastVisitedAtByWorktreeId } from './workspace-session-focus-recency'
 import { buildActiveConnectionIdsAtShutdown } from './workspace-session-reconnect-targets'
 import { buildSleepingAgentSessionData } from './workspace-session-sleeping-agents'
+import {
+  buildSanitizedTabsByWorktree,
+  buildSanitizedTerminalLayoutsByTabId
+} from './workspace-session-terminal-tabs'
 import { buildPersistedUnifiedTabSessionData } from './workspace-session-unified-tabs'
 
 export { buildActiveConnectionIdsAtShutdown }
+export { buildSanitizedTabsByWorktree, buildSanitizedTerminalLayoutsByTabId }
 
 /** Why (issue #1158): the debounced + shutdown session writers share this
  *  gate so a hydration failure cannot overwrite yiru-data.json with the
@@ -247,34 +252,10 @@ export function buildPersistedBrowserPagesByWorkspace(
   )
 }
 
-export function buildSanitizedTabsByWorktree(
-  tabsByWorktree: WorkspaceSessionSnapshot['tabsByWorktree']
-): WorkspaceSessionState['tabsByWorktree'] {
-  // Why: pendingActivationSpawn is documented on TerminalTab as a transient
-  // renderer-only handoff between setActiveWorktree and the next updateTabPtyId
-  // — it must never be persisted. The main-process session:set handler writes
-  // the payload to disk without re-parsing it against the Zod schema, so if
-  // the flag were ever set and not consumed before a save (e.g. app quits
-  // mid-handoff), it would round-trip to disk and the next session would
-  // start with a stale suppression flag that drops the first legitimate PTY
-  // spawn from the sidebar's recency sort. Strip it here to enforce the
-  // type-level invariant at the persistence boundary.
-  return Object.fromEntries(
-    Object.entries(tabsByWorktree).map(([worktreeId, tabs]) => [
-      worktreeId,
-      tabs.map((tab) => {
-        const { pendingActivationSpawn: _unused, ...rest } = tab
-        void _unused
-        return rest
-      })
-    ])
-  )
-}
-
 export function buildTerminalSessionData(
   snapshot: WorkspaceSessionSnapshot
 ): Pick<WorkspaceSessionState, 'activeWorktreeIdsOnShutdown' | 'remoteSessionIdsByTabId'> {
-  const tabsByWorktree = snapshot.tabsByWorktree
+  const tabsByWorktree = buildSanitizedTabsByWorktree(snapshot.tabsByWorktree)
 
   // Why: ptyIdsByTabId is the live-PTY map. tab.ptyId is only a wake hint that
   // sleep intentionally preserves, so using it as liveness would revive slept
@@ -345,7 +326,10 @@ export function buildWorkspaceSessionPayload(
     activeWorktreeId: snapshot.activeWorktreeId,
     activeTabId: snapshot.activeTabId,
     tabsByWorktree: buildSanitizedTabsByWorktree(snapshot.tabsByWorktree),
-    terminalLayoutsByTabId: snapshot.terminalLayoutsByTabId,
+    terminalLayoutsByTabId: buildSanitizedTerminalLayoutsByTabId(
+      snapshot.tabsByWorktree,
+      snapshot.terminalLayoutsByTabId
+    ),
     // Why: session:set fully replaces the persisted object, so every write path
     // must carry forward which worktrees still had live PTYs. Dropping this
     // field silently disables eager terminal reconnect on the next restart.

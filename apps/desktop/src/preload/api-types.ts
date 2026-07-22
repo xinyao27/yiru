@@ -2096,7 +2096,6 @@ export type PreloadApi = {
   globalAssistant: {
     getOrCreate: () => Promise<GlobalAssistantSession>
     restart: () => Promise<GlobalAssistantSession>
-    showTerminal: () => Promise<void>
   }
   fs: {
     readDir: (args: { dirPath: string; connectionId?: string }) => Promise<DirEntry[]>
@@ -2534,6 +2533,7 @@ export type PreloadApi = {
         launchToken?: string
         launchAgent?: TuiAgent
         viewMode?: 'terminal' | 'chat'
+        isGlobalAssistant?: boolean
         title?: string
         ptyId?: string
         activate?: boolean

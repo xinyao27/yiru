@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 
 import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
 import EmulatorPane from '@/components/emulator-pane/emulator-pane'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import TabBar from '@/components/tab-bar/tab-bar'
 import { resolveGroupTabFromVisibleId } from '@/components/tab-group/tab-group-visible-id'
@@ -103,7 +104,9 @@ const EditorPanel = lazy(() => import('@/components/editor/editor-panel'))
 type FloatingTerminalPanelProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onOpenAssistant: () => void
+  onOpenAssistant?: () => void
+  assistantPending?: boolean
+  assistantLoadingVisible?: boolean
   tourInteractionSnapshot?: FloatingWorkspaceTourInteractionSnapshot | null | undefined
 }
 
@@ -172,6 +175,8 @@ export function FloatingTerminalPanel({
   open,
   onOpenChange,
   onOpenAssistant,
+  assistantPending = false,
+  assistantLoadingVisible = false,
   tourInteractionSnapshot
 }: FloatingTerminalPanelProps): React.JSX.Element | null {
   const { tabs, browserTabs, groups, unifiedTabs, floatingFiles, expandedPaneByTabId } =
@@ -1594,6 +1599,8 @@ export function FloatingTerminalPanel({
               onOpenMarkdown={openFloatingMarkdownTab}
               onNewBrowser={createFloatingBrowserTab}
               onOpenAssistant={onOpenAssistant}
+              assistantPending={assistantPending}
+              assistantLoadingVisible={assistantLoadingVisible}
               onClose={() => onOpenChange(false)}
               onFocusPanel={focusPanelForShortcuts}
               newTerminalShortcut={newTerminalShortcut}
@@ -1738,6 +1745,8 @@ function FloatingTerminalEmptyState({
   onOpenMarkdown,
   onNewBrowser,
   onOpenAssistant,
+  assistantPending,
+  assistantLoadingVisible,
   onClose,
   onFocusPanel,
   newTerminalShortcut,
@@ -1751,7 +1760,9 @@ function FloatingTerminalEmptyState({
   onNewMarkdown: () => void
   onOpenMarkdown: () => void
   onNewBrowser: () => void
-  onOpenAssistant: () => void
+  onOpenAssistant?: () => void
+  assistantPending: boolean
+  assistantLoadingVisible: boolean
   onClose: () => void
   onFocusPanel: () => void
   newTerminalShortcut: ShortcutKeyComboDetails
@@ -1769,18 +1780,27 @@ function FloatingTerminalEmptyState({
       onPointerDown={onFocusPanel}
     >
       <div className="flex w-[360px] flex-col items-center gap-1.5" data-floating-terminal-no-drag>
-        <Button
-          type="button"
-          variant="ghost"
-          className="text-foreground hover:bg-accent hover:text-accent-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 px-3 py-0 text-sm font-normal"
-          onClick={onOpenAssistant}
-        >
-          <ChatCircleDots className="size-3.5 opacity-90" />
-          <span className="truncate text-left leading-none">
-            {translate('components.global-assistant.open', 'Open Assistant')}
-          </span>
-          <FloatingEmptyStateShortcut shortcut={assistantShortcut} />
-        </Button>
+        {onOpenAssistant ? (
+          <Button
+            type="button"
+            variant="ghost"
+            className="text-foreground hover:bg-accent hover:text-accent-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 px-3 py-0 text-sm font-normal"
+            onClick={onOpenAssistant}
+            disabled={assistantPending}
+          >
+            {assistantLoadingVisible ? (
+              <LoadingIndicator className="size-3.5" />
+            ) : (
+              <ChatCircleDots className="size-3.5 opacity-90" />
+            )}
+            <span className="truncate text-left leading-none">
+              {assistantLoadingVisible
+                ? translate('components.global-assistant.starting', 'Starting assistant…')
+                : translate('components.global-assistant.open', 'Open Assistant')}
+            </span>
+            <FloatingEmptyStateShortcut shortcut={assistantShortcut} />
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="ghost"

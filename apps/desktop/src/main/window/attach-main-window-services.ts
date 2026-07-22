@@ -337,6 +337,7 @@ function registerRuntimeWindowLifecycle(
           ...(opts.launchToken ? { launchToken: opts.launchToken } : {}),
           ...(opts.launchAgent ? { launchAgent: opts.launchAgent } : {}),
           ...(opts.viewMode ? { viewMode: opts.viewMode } : {}),
+          ...(opts.isGlobalAssistant ? { isGlobalAssistant: true } : {}),
           activate: opts.activate !== false,
           ...(opts.presentation ? { presentation: opts.presentation } : {}),
           // Why: pre-minted tabId from main keeps the renderer's tab id aligned

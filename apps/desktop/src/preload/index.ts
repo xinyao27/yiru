@@ -3122,6 +3122,7 @@ const api = {
         launchToken?: string
         launchAgent?: TuiAgent
         viewMode?: 'terminal' | 'chat'
+        isGlobalAssistant?: boolean
         title?: string
         ptyId?: string
         activate?: boolean
@@ -3145,6 +3146,7 @@ const api = {
           launchToken?: string
           launchAgent?: TuiAgent
           viewMode?: 'terminal' | 'chat'
+          isGlobalAssistant?: boolean
           title?: string
           ptyId?: string
           activate?: boolean
@@ -3605,8 +3607,7 @@ const api = {
   globalAssistant: {
     getOrCreate: (): Promise<GlobalAssistantSession> =>
       ipcRenderer.invoke('globalAssistant:getOrCreate'),
-    restart: (): Promise<GlobalAssistantSession> => ipcRenderer.invoke('globalAssistant:restart'),
-    showTerminal: (): Promise<void> => ipcRenderer.invoke('globalAssistant:showTerminal')
+    restart: (): Promise<GlobalAssistantSession> => ipcRenderer.invoke('globalAssistant:restart')
   },
 
   runtime: {

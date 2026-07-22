@@ -10,6 +10,9 @@ function cssAttributeString(value: string): string {
 }
 
 let pendingFocusFrameIds: number[] = []
+// Why: daemon-backed chat can mount after the tab itself; keep the shortcut's
+// focus intent alive for roughly two seconds without a polling timer.
+const NATIVE_CHAT_FOCUS_FRAME_LIMIT = 120
 
 function cancelPendingFocusFrames(): void {
   if (typeof cancelAnimationFrame === 'function') {
@@ -41,6 +44,15 @@ export function focusTerminalTabSurface(tabId: string, leafId?: string | null): 
         return
       }
       const escapedTabId = cssAttributeString(tabId)
+      const nativeChatRoot = document.querySelector(
+        `[data-terminal-tab-id="${escapedTabId}"] [data-native-chat-root="true"]`
+      ) as HTMLElement | null
+      if (nativeChatRoot) {
+        // Why: chat tabs keep xterm mounted underneath; focusing its hidden
+        // textarea would steal typing from the visible composer surface.
+        nativeChatRoot.focus({ preventScroll: true })
+        return
+      }
       const scopedSelector = leafId
         ? `[data-terminal-tab-id="${escapedTabId}"] [data-leaf-id="${cssAttributeString(leafId)}"] .xterm-helper-textarea`
         : `[data-terminal-tab-id="${escapedTabId}"] .xterm-helper-textarea`
@@ -73,4 +85,31 @@ export function focusTerminalTabSurface(tabId: string, leafId?: string | null): 
     pendingFocusFrameIds.push(secondFrameId)
   })
   pendingFocusFrameIds.push(firstFrameId)
+}
+
+export function focusNativeChatTabSurface(tabId: string): void {
+  cancelPendingFocusFrames()
+  const escapedTabId = cssAttributeString(tabId)
+  let framesRemaining = NATIVE_CHAT_FOCUS_FRAME_LIMIT
+
+  const focusWhenMounted = (): void => {
+    const root = document.querySelector(
+      `[data-terminal-tab-id="${escapedTabId}"] [data-native-chat-root="true"]`
+    ) as HTMLElement | null
+    if (root && root.getClientRects().length > 0) {
+      root.focus({ preventScroll: true })
+      return
+    }
+    framesRemaining -= 1
+    if (framesRemaining <= 0) {
+      return
+    }
+    const frameId = requestAnimationFrame(() => {
+      pendingFocusFrameIds = pendingFocusFrameIds.filter((pending) => pending !== frameId)
+      focusWhenMounted()
+    })
+    pendingFocusFrameIds.push(frameId)
+  }
+
+  focusWhenMounted()
 }

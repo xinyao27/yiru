@@ -16,7 +16,6 @@ export function registerGlobalAssistantHandlers(
 ): void {
   ipcMain.removeHandler('globalAssistant:getOrCreate')
   ipcMain.removeHandler('globalAssistant:restart')
-  ipcMain.removeHandler('globalAssistant:showTerminal')
 
   ipcMain.handle('globalAssistant:getOrCreate', async (event): Promise<GlobalAssistantSession> => {
     assertMainWindowSender(event, mainWindow)
@@ -25,9 +24,5 @@ export function registerGlobalAssistantHandlers(
   ipcMain.handle('globalAssistant:restart', async (event): Promise<GlobalAssistantSession> => {
     assertMainWindowSender(event, mainWindow)
     return service.restart()
-  })
-  ipcMain.handle('globalAssistant:showTerminal', async (event): Promise<void> => {
-    assertMainWindowSender(event, mainWindow)
-    await service.showTerminal()
   })
 }

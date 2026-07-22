@@ -1190,6 +1190,7 @@ type RuntimeNotifier = {
       launchToken?: string
       launchAgent?: TuiAgent
       viewMode?: 'terminal' | 'chat'
+      isGlobalAssistant?: boolean
       activate?: boolean
       presentation?: RuntimeTerminalPresentation
       tabId?: string
@@ -19070,7 +19071,7 @@ export class YiruRuntimeService {
     return { handle, tabId: leaf.tabId, worktreeId: leaf.worktreeId }
   }
 
-  async revealGlobalAssistantTerminal(handle: string): Promise<void> {
+  async revealGlobalAssistantChat(handle: string): Promise<string> {
     const pty = this.getLivePtyForHandle(handle)
     if (!pty || pty.pty.worktreeId !== GLOBAL_ASSISTANT_WORKTREE_ID) {
       throw new Error('global_assistant_terminal_not_found')
@@ -19082,11 +19083,13 @@ export class YiruRuntimeService {
       throw new Error('runtime_unavailable')
     }
     const parsedPaneKey = parsePaneKey(pty.pty.paneKey ?? '')
-    // Why: raw-terminal escape adopts the hidden local PTY into the existing
-    // floating workspace without exposing the synthetic assistant workspace.
-    await this.notifier.revealTerminalSession(FLOATING_TERMINAL_WORKTREE_ID, {
+    // Why: the assistant keeps a synthetic PTY owner, but its visible surface
+    // is an ordinary terminal/chat tab in the local floating workspace.
+    const revealed = await this.notifier.revealTerminalSession(FLOATING_TERMINAL_WORKTREE_ID, {
       ptyId: pty.pty.ptyId,
-      title: getLatestPtyTitle(pty.pty),
+      // Why: agent OSC titles change during startup; the app-owned tab should
+      // keep its stable product identity rather than becoming "Claude Code".
+      title: 'Yiru Assistant',
       ...(pty.pty.launchConfig
         ? { launchConfig: copySleepingAgentLaunchConfig(pty.pty.launchConfig) }
         : {}),
@@ -19094,10 +19097,12 @@ export class YiruRuntimeService {
       ...(pty.pty.launchAgent ? { launchAgent: pty.pty.launchAgent } : {}),
       ...(pty.pty.tabId !== null ? { tabId: pty.pty.tabId } : {}),
       ...(parsedPaneKey ? { leafId: parsedPaneKey.leafId } : {}),
-      viewMode: 'terminal',
+      viewMode: 'chat',
+      isGlobalAssistant: true,
       activate: false,
       presentation: 'background'
     })
+    return revealed?.tabId ?? pty.pty.tabId ?? pty.record.tabId
   }
 
   async closeTerminal(handle: string): Promise<RuntimeTerminalClose> {

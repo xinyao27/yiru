@@ -68,6 +68,8 @@ export type NativeChatViewProps = {
   resolvedAgent?: TuiAgent | null
   /** Return this pane to the hosted terminal surface. */
   onSwitchToTerminal?: () => void
+  /** Start a fresh app-owned assistant session when this chat owns one. */
+  onNewConversation?: () => void
   /** Current xterm screen reader used to recover agent-reported session state. */
   readTerminalScreen?: () => string | null
   contextMenuActions?: Omit<NativeChatContextMenuActions, 'onPaste'>
@@ -81,6 +83,7 @@ export default function NativeChatView({
   launchAgent,
   resolvedAgent,
   onSwitchToTerminal,
+  onNewConversation,
   readTerminalScreen,
   contextMenuActions
 }: NativeChatViewProps): React.JSX.Element {
@@ -114,6 +117,7 @@ export default function NativeChatView({
           targetPtyId={targetPtyId}
           terminalTabId={terminalTabId}
           onSwitchToTerminal={onSwitchToTerminal}
+          onNewConversation={onNewConversation}
           readTerminalScreen={readTerminalScreen}
           contextMenuActions={contextMenuActions}
         />
@@ -130,6 +134,7 @@ function NativeChatResolvedView({
   targetPtyId,
   terminalTabId,
   onSwitchToTerminal,
+  onNewConversation,
   readTerminalScreen,
   contextMenuActions
 }: {
@@ -140,6 +145,7 @@ function NativeChatResolvedView({
   targetPtyId: string | null
   terminalTabId: string
   onSwitchToTerminal?: () => void
+  onNewConversation?: () => void
   readTerminalScreen?: () => string | null
   contextMenuActions?: Omit<NativeChatContextMenuActions, 'onPaste'>
 }): React.JSX.Element {
@@ -190,6 +196,7 @@ function NativeChatResolvedView({
   const contextMenu = useNativeChatContextMenu({
     rootRef,
     onSwitchToTerminal,
+    onNewConversation,
     actions: {
       onPaste: pasteClipboardIntoComposer,
       ...(contextMenuActions ?? emptyNativeChatContextMenuActions)
