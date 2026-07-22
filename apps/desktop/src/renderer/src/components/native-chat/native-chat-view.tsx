@@ -167,7 +167,8 @@ function NativeChatResolvedView({
   // Live hook state for this pane, selected directly so the working indicator
   // flips the instant the agent reports 'working' — even when switching to chat
   // mid-turn before the transcript merge has caught up.
-  const hookWorking = useAppStore((s) => s.agentStatusByPaneKey[paneKey]?.state === 'working')
+  const hookState = useAppStore((s) => s.agentStatusByPaneKey[paneKey]?.state ?? null)
+  const hookWorking = hookState === 'working'
   // The agent's in-progress reply preview (hook), shown as a live streaming
   // bubble while it works — before the completed turn flushes to the transcript.
   const hookPreview = useAppStore((s) => s.agentStatusByPaneKey[paneKey]?.lastAssistantMessage)
@@ -273,9 +274,7 @@ function NativeChatResolvedView({
     [pendingScope]
   )
   const onSlashCommand = useCallback(
-    (command: string) => {
-      setCommandMarkers(appendCommandMarkerCache(commandMarkerScope, command))
-    },
+    (command: string) => setCommandMarkers(appendCommandMarkerCache(commandMarkerScope, command)),
     [commandMarkerScope]
   )
 
@@ -319,9 +318,9 @@ function NativeChatResolvedView({
           ? [...sessionAfterCommandBoundaries.messages, ...pendingMessages]
           : sessionAfterCommandBoundaries.messages,
       previewText: hookPreview,
-      working: hookWorking
+      state: hookState
     })
-  }, [sessionAfterCommandBoundaries.messages, pendingMessages, hookPreview, hookWorking])
+  }, [sessionAfterCommandBoundaries.messages, pendingMessages, hookPreview, hookState])
   const sessionWithPending = useMemo<typeof session>(() => {
     if (pending.length === 0 && commandMarkers.length === 0 && !streamingText) {
       return sessionAfterCommandBoundaries
