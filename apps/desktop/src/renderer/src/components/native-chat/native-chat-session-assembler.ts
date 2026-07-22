@@ -7,6 +7,7 @@ import {
   type NativeChatSession,
   type NativeChatSessionStatus
 } from '../../../../shared/native-chat-types'
+import { isNativeChatActivePromptMessageId } from './native-chat-active-prompt'
 import { normalizeImageTranscriptMessages } from './native-chat-image-transcript-markers'
 import { isLaunchPromptMessageId, isPendingMessageId } from './native-chat-pending'
 
@@ -87,15 +88,17 @@ function supersedes(candidate: NativeChatMessage, existing: NativeChatMessage): 
 }
 
 // Why: the tail bubbles form fixed tiers that timestamps alone can't express.
-// The streaming preview (null timestamp) must follow real content but sit ahead
-// of the optimistic composer echoes, which carry finite `sentAt` timestamps that
-// would otherwise sort past it. Rank first, then timestamp within a tier.
+// The active/launch prompt must lead its assistant preview; only sends that the
+// hook has not accepted yet stay queued behind that preview.
 function messageSortRank(message: NativeChatMessage): number {
-  if (message.id === NATIVE_CHAT_STREAMING_ID) {
+  if (isNativeChatActivePromptMessageId(message.id) || isLaunchPromptMessageId(message.id)) {
     return 1
   }
-  if (isPendingMessageId(message.id) || isLaunchPromptMessageId(message.id)) {
+  if (message.id === NATIVE_CHAT_STREAMING_ID) {
     return 2
+  }
+  if (isPendingMessageId(message.id)) {
+    return 3
   }
   return 0
 }
