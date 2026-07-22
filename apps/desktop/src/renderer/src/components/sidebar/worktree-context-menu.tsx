@@ -13,13 +13,14 @@ import {
   FolderOpen as FolderInput,
   Folders as FolderTree,
   Globe as Globe2,
-  LockKey as LockKeyhole
+  LockKey as LockKeyhole,
+  FlowArrow as Workflow,
+  FolderPlus
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: this menu keeps row targeting, batch actions, and ctrl-click event guards together so nested worktree menus share one event policy. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import { FlowArrow as Workflow, FolderPlus } from '@/components/regular-icons'
 import { SpoolWorktreeVisibilityDialog } from '@/components/spool/spool-worktree-visibility-dialog'
 import {
   DropdownMenu,

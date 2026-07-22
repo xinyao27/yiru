@@ -4,7 +4,8 @@ import {
   ChatText as MessageSquareText,
   DotsThreeVertical as MoreVertical,
   MagnifyingGlass as Search,
-  TerminalWindow as TerminalSquare
+  TerminalWindow as TerminalSquare,
+  ArrowSquareOut as ExternalLink
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: this prototype keeps the real-data adapter
 and current visual skeleton together until the next refinement pass decides
@@ -13,7 +14,6 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { useShallow } from 'zustand/react/shallow'
 
 import { AgentStateDot, agentStateLabel } from '@/components/agent-state-dot'
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { RepoBadgeMark } from '@/components/repo/repo-badge-label'
 import { Button } from '@/components/ui/button'
 import {

@@ -1,12 +1,12 @@
-import { Check } from '@phosphor-icons/react'
-import { useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
 import {
+  Check,
   CaretRight as ChevronRight,
   CaretUpDown as ChevronsUpDown,
   Plus
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+import { useState } from 'react'
+
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Command, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'

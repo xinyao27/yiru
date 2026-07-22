@@ -2,12 +2,12 @@ import {
   FileText,
   Globe,
   DeviceMobile as Smartphone,
-  TerminalWindow as TerminalSquare
+  TerminalWindow as TerminalSquare,
+  FilePlus
 } from '@phosphor-icons/react'
 import React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { FilePlus } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'

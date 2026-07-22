@@ -1,8 +1,7 @@
 import { Menu as DropdownMenuPrimitive } from '@base-ui/react/menu'
-import { CheckIcon, CircleIcon } from '@phosphor-icons/react'
+import { CheckIcon, CircleIcon, CaretRight as ChevronRightIcon } from '@phosphor-icons/react'
 import * as React from 'react'
 
-import { CaretRight as ChevronRightIcon } from '@/components/regular-icons'
 import {
   floatingSurfaceClass,
   floatingSurfaceMotionClass

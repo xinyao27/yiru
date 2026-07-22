@@ -1,8 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable'
-import { PushPin as Pin } from '@phosphor-icons/react'
+import { PushPin as Pin, ArrowsIn as Minimize2 } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { ArrowsIn as Minimize2 } from '@/components/regular-icons'
 import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'

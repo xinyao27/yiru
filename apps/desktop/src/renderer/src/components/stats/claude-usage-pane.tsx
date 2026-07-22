@@ -6,12 +6,12 @@ import {
   Gauge,
   SlidersHorizontal,
   Sparkle as Sparkles,
-  Path as Waypoints
+  Path as Waypoints,
+  ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import { useEffect } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type { ClaudeUsageRange, ClaudeUsageScope } from '../../../../shared/claude-usage-types'

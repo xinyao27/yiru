@@ -1,6 +1,6 @@
+import { Plus, X } from '@phosphor-icons/react'
 import { useState } from 'react'
 
-import { Plus, X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type { ExecutionHostId } from '../../../../shared/execution-host'

@@ -1,8 +1,7 @@
-import { Info } from '@phosphor-icons/react'
+import { Info, Plus } from '@phosphor-icons/react'
 import React from 'react'
 
 import AgentCombobox from '@/components/agent/agent-combobox'
-import { Plus } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

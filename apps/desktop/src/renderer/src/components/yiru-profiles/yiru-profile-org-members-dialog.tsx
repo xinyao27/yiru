@@ -1,8 +1,7 @@
-import { Envelope as Mail, Users } from '@phosphor-icons/react'
+import { Envelope as Mail, Users, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

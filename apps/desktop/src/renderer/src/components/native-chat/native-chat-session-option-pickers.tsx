@@ -1,7 +1,7 @@
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import { memo, useState } from 'react'
 import { toast } from 'sonner'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

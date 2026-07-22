@@ -1,8 +1,12 @@
-import { Copy, FolderOpen, Trash as Trash2 } from '@phosphor-icons/react'
+import {
+  Copy,
+  FolderOpen,
+  Trash as Trash2,
+  ArrowSquareOut as ExternalLink
+} from '@phosphor-icons/react'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'

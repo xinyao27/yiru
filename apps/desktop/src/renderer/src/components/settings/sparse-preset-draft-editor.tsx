@@ -1,7 +1,6 @@
-import { FloppyDisk as Save } from '@phosphor-icons/react'
+import { FloppyDisk as Save, X } from '@phosphor-icons/react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import type { SparsePresetDirectoryParseResult } from '@/lib/sparse-preset-draft'
 

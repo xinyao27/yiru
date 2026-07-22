@@ -11,11 +11,14 @@ import {
   Sidebar as PanelRightClose,
   Pencil,
   Play,
-  TerminalWindow as SquareTerminal
+  TerminalWindow as SquareTerminal,
+  ArrowsOut as Maximize2,
+  ArrowsIn as Minimize2,
+  Plus,
+  X
 } from '@phosphor-icons/react'
 import { useMemo } from 'react'
 
-import { ArrowsOut as Maximize2, ArrowsIn as Minimize2, Plus, X } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

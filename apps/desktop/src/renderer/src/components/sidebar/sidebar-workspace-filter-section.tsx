@@ -1,7 +1,6 @@
-import { GitBranch, Moon } from '@phosphor-icons/react'
+import { GitBranch, Moon, FlowArrow as Workflow } from '@phosphor-icons/react'
 import React from 'react'
 
-import { FlowArrow as Workflow } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'

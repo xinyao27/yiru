@@ -1,8 +1,13 @@
-import { TextAa as CaseSensitive, Asterisk as Regex } from '@phosphor-icons/react'
+import {
+  TextAa as CaseSensitive,
+  Asterisk as Regex,
+  CaretUp as ChevronUp,
+  CaretDown as ChevronDown,
+  X
+} from '@phosphor-icons/react'
 import type { SearchAddon } from '@xterm/addon-search'
 import { useEffect, useState, useCallback } from 'react'
 
-import { CaretUp as ChevronUp, CaretDown as ChevronDown, X } from '@/components/regular-icons'
 import type { SearchState } from '@/components/terminal-pane/keyboard-handlers'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'

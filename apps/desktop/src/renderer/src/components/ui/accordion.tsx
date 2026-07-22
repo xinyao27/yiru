@@ -1,9 +1,9 @@
 'use client'
 
 import { Accordion as AccordionPrimitive } from '@base-ui/react/accordion'
+import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import * as React from 'react'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { cn } from '@/lib/class-names'
 
 function Accordion({ className, ...props }: AccordionPrimitive.Root.Props): React.JSX.Element {

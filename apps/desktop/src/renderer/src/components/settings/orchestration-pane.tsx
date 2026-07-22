@@ -1,10 +1,11 @@
-import { GitBranch, ListChecks } from '@phosphor-icons/react'
-import { useState } from 'react'
-
 import {
+  GitBranch,
+  ListChecks,
   ArrowsLeftRight as ArrowRightLeft,
   FlowArrow as Workflow
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+import { useState } from 'react'
+
 import { useActiveProjectSkillRuntime } from '@/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,

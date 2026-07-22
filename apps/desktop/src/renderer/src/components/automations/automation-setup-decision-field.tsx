@@ -1,7 +1,6 @@
-import { Check } from '@phosphor-icons/react'
+import { Check, CaretDown as ChevronDown } from '@phosphor-icons/react'
 import React from 'react'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

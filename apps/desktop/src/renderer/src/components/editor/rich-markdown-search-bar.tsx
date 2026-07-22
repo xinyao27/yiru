@@ -1,17 +1,15 @@
 import {
   TextAa as CaseSensitive,
   Swap as Replace,
-  BracketsSquare as WholeWord
-} from '@phosphor-icons/react'
-import React from 'react'
-
-import {
+  BracketsSquare as WholeWord,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
   CaretUp as ChevronUp,
   ArrowsClockwise as ReplaceAll,
   X
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+import React from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useOptionalShortcutLabel } from '@/hooks/use-shortcut-label'

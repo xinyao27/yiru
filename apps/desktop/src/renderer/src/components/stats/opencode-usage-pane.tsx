@@ -5,12 +5,12 @@ import {
   Database as DatabaseZap,
   FolderSimple as FolderUsage,
   SlidersHorizontal,
-  Sparkle as Sparkles
+  Sparkle as Sparkles,
+  ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import { useEffect } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type {

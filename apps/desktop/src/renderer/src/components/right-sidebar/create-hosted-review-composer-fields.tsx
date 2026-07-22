@@ -1,6 +1,11 @@
-import { Check, Sparkle as Sparkles, Warning as TriangleAlert } from '@phosphor-icons/react'
+import {
+  Check,
+  Sparkle as Sparkles,
+  Warning as TriangleAlert,
+  ArrowsDownUp as ArrowDownUp,
+  CaretDown as ChevronDown
+} from '@phosphor-icons/react'
 
-import { ArrowsDownUp as ArrowDownUp, CaretDown as ChevronDown } from '@/components/regular-icons'
 import type { LocalizedHostedReviewCopy } from '@/i18n/hosted-review-localized-copy'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

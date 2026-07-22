@@ -1,4 +1,5 @@
-import { Plus } from '@/components/regular-icons'
+import { Plus } from '@phosphor-icons/react'
+
 import { translate } from '@/i18n/i18n'
 
 import { DiffCommentPopover } from '../diff-comments/diff-comment-popover'

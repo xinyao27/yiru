@@ -6,18 +6,16 @@ import {
   ActivityIcon as Activity,
   Plug,
   Layout as PanelsTopLeft,
-  HardDrives as Server
+  HardDrives as Server,
+  ArrowCounterClockwise as RotateCcw,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { FloatingTerminalIconContextMenu } from '@/components/floating-terminal/floating-terminal-icon-context-menu'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowCounterClockwise as RotateCcw,
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
-  ArrowClockwise as RefreshCw
-} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {

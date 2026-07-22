@@ -5,7 +5,11 @@ import {
   Pencil,
   HardDrives as Server,
   Cube as Box,
-  Info
+  Info,
+  ArrowSquareOut as ExternalLink,
+  Plus,
+  CaretRight as ChevronRight,
+  ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 /* oxlint-disable max-lines -- Why: co-locates forwarded list, detected list, modal form, and
 per-entry actions in one file to keep the data flow straightforward. */
@@ -13,12 +17,6 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowSquareOut as ExternalLink,
-  Plus,
-  CaretRight as ChevronRight,
-  ArrowClockwise as RefreshCw
-} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   ContextMenu,

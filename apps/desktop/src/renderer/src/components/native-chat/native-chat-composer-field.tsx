@@ -1,7 +1,6 @@
-import { Image as ImageIcon, ImageBroken as ImageOff } from '@phosphor-icons/react'
+import { Image as ImageIcon, ImageBroken as ImageOff, X } from '@phosphor-icons/react'
 import type { ClipboardEventHandler, KeyboardEventHandler, RefObject } from 'react'
 
-import { X } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { basename } from '@/lib/path'

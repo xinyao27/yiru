@@ -1,4 +1,5 @@
-import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
+import { ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
+
 import { translate } from '@/i18n/i18n'
 import {
   TERMINAL_TUI_MOUSE_WHEEL_MULTIPLIER,

@@ -15,20 +15,18 @@ import {
   DotsThree as MoreHorizontal,
   Pencil,
   SlidersHorizontal,
-  Trash
+  Trash,
+  Plus,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  ArrowSquareOut as ExternalLink,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: legacy checks-panel sub-components for checks, conflicts,
 and threaded PR comments still share tightly coupled selection and composer state. */
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  Plus,
-  CaretDown as ChevronDown,
-  CaretRight as ChevronRight,
-  ArrowSquareOut as ExternalLink,
-  X
-} from '@/components/regular-icons'
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import {
   Accordion,

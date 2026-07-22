@@ -1,9 +1,14 @@
-import { Check, Globe as Globe2, Monitor as MonitorCog, Terminal } from '@phosphor-icons/react'
+import {
+  Check,
+  Globe as Globe2,
+  Monitor as MonitorCog,
+  Terminal,
+  FlowArrow as Workflow
+} from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { FlowArrow as Workflow } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

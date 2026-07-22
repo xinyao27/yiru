@@ -3,11 +3,12 @@ import {
   GitBranch,
   Funnel as ListFilter,
   Moon,
-  HardDrives as Server
+  HardDrives as Server,
+  FolderPlus,
+  FlowArrow as Workflow
 } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 
-import { FolderPlus, FlowArrow as Workflow } from '@/components/regular-icons'
 import RepoBadgeLabel from '@/components/repo/repo-badge-label'
 import { Button } from '@/components/ui/button'
 import {

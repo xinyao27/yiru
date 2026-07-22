@@ -1,7 +1,6 @@
-import { Folder, FolderOpen } from '@phosphor-icons/react'
+import { Folder, FolderOpen, CaretDown as ChevronDown } from '@phosphor-icons/react'
 import type React from 'react'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import type { SourceControlTreeNode } from '@/components/right-sidebar/source-control-tree'
 import { STATUS_COLORS, STATUS_LABELS } from '@/components/right-sidebar/status-display'
 import { cn } from '@/lib/class-names'

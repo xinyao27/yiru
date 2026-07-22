@@ -1,6 +1,5 @@
+import { Plus } from '@phosphor-icons/react'
 import React, { useState } from 'react'
-
-import { Plus } from '@/components/regular-icons'
 
 import {
   Select,

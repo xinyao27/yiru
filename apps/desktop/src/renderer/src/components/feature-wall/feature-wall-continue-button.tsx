@@ -1,6 +1,6 @@
+import { ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import type { JSX } from 'react'
 
-import { ArrowElbowDownLeft as CornerDownLeft } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 
 export function FeatureWallContinueButton(props: {

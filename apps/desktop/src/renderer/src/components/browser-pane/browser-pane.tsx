@@ -12,7 +12,14 @@ import {
   PencilLine,
   PaperPlaneRight as Send,
   BracketsAngle as SquareCode,
-  Trash as Trash2
+  Trash as Trash2,
+  ArrowLeft,
+  ArrowRight,
+  ArrowElbowDownLeft as CornerDownLeft,
+  ArrowSquareOut as ExternalLink,
+  ChatCentered as MessageSquarePlus,
+  ArrowClockwise as RefreshCw,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines */
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: BrowserPane synchronizes Electron webviews, remote browser drivers, streams, downloads, and annotation overlays; those external lifecycles cannot be derived during render. */
@@ -29,15 +36,6 @@ import { createPortal } from 'react-dom'
 
 import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowElbowDownLeft as CornerDownLeft,
-  ArrowSquareOut as ExternalLink,
-  ChatCentered as MessageSquarePlus,
-  ArrowClockwise as RefreshCw,
-  X
-} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

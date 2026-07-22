@@ -1,7 +1,11 @@
-import { Folder, FolderOpen, SidebarSimple as PanelLeftClose } from '@phosphor-icons/react'
+import {
+  Folder,
+  FolderOpen,
+  SidebarSimple as PanelLeftClose,
+  CaretDown as ChevronDown
+} from '@phosphor-icons/react'
 import React from 'react'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import {
   buildSourceControlTree,
   compactSourceControlTree,

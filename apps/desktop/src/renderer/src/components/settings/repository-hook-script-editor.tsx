@@ -1,6 +1,6 @@
+import { Plus } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 
-import { Plus } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { getRepositoryHookScriptTextareaRows } from '@/lib/script-textarea-rows'

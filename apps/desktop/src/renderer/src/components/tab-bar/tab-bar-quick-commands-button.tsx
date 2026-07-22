@@ -1,8 +1,7 @@
-import { Pencil, Play, Trash as Trash2 } from '@phosphor-icons/react'
+import { Pencil, Play, Trash as Trash2, Plus } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 
 import { useConfirmationDialog } from '@/components/confirmation-dialog'
-import { Plus } from '@/components/regular-icons'
 import {
   createTerminalQuickCommandDraft,
   TerminalQuickCommandDialog

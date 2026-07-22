@@ -1,8 +1,7 @@
-import { Check, Copy } from '@phosphor-icons/react'
+import { Check, Copy, ArrowsOut as Maximize2 } from '@phosphor-icons/react'
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 
-import { ArrowsOut as Maximize2 } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { Button } from '../ui/button'

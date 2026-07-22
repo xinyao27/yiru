@@ -1,8 +1,7 @@
-import { MagnifyingGlass as Search, HardDrives as Server } from '@phosphor-icons/react'
+import { MagnifyingGlass as Search, HardDrives as Server, ArrowLeft } from '@phosphor-icons/react'
 import type { CSSProperties, RefObject } from 'react'
 import { useMemo } from 'react'
 
-import { ArrowLeft } from '@/components/regular-icons'
 import { useShortcutKeyComboDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

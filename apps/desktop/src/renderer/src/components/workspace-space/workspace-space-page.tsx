@@ -1,7 +1,6 @@
-import { HardDrive } from '@phosphor-icons/react'
+import { HardDrive, ArrowLeft } from '@phosphor-icons/react'
 import { useEffect } from 'react'
 
-import { ArrowLeft } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { useAppStore } from '../../store'

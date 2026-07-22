@@ -1,7 +1,12 @@
-import { Check, Star, Terminal } from '@phosphor-icons/react'
+import {
+  Check,
+  Star,
+  Terminal,
+  ArrowRight,
+  CaretUpDown as ChevronsUpDown
+} from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 
-import { ArrowRight, CaretUpDown as ChevronsUpDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Command,

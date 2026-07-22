@@ -1,6 +1,6 @@
+import { ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React from 'react'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import type { PRCheckAnnotation } from '../../../../shared/types'

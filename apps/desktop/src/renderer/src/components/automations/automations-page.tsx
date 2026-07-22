@@ -6,7 +6,10 @@ import {
   Pause,
   Pencil,
   Play,
-  Trash as Trash2
+  Trash as Trash2,
+  Plus,
+  ArrowClockwise as RefreshCw,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: this page owns the automations list/detail
  * orchestration while the form and detail presentation live in sibling files. */
@@ -15,7 +18,6 @@ import { toast } from 'sonner'
 
 import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { Plus, ArrowClockwise as RefreshCw, X } from '@/components/regular-icons'
 import RepoBadgeLabel from '@/components/repo/repo-badge-label'
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import type { Badge } from '@/components/ui/badge'

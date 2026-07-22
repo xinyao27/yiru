@@ -11,7 +11,10 @@ import {
   HardDrive as ServerOff,
   Shapes,
   SlidersHorizontal,
-  Trash as Trash2
+  Trash as Trash2,
+  CaretDown as ChevronDown,
+  FolderPlus,
+  Plus
 } from '@phosphor-icons/react'
 import {
   measureElement as measureVirtualElementSize,
@@ -24,7 +27,6 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretDown as ChevronDown, FolderPlus, Plus } from '@/components/regular-icons'
 import { RepoForkIndicator } from '@/components/repo/repo-fork-indicator'
 import { RepoIconGlyph } from '@/components/repo/repo-icon'
 import { getRepositoryIconSectionId } from '@/components/settings/repository-settings-targets'

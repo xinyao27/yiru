@@ -1,4 +1,9 @@
-import { Warning as AlertTriangle, CheckCircle as CheckCircle2 } from '@phosphor-icons/react'
+import {
+  Warning as AlertTriangle,
+  CheckCircle as CheckCircle2,
+  CaretDown as ChevronDown,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import {
   useEffect,
   useMemo,
@@ -10,7 +15,6 @@ import {
 
 import { LoadingIndicator } from '@/components/loading-indicator'
 import { OnboardingInlineCommandTerminal } from '@/components/onboarding/onboarding-inline-command-terminal'
-import { CaretDown as ChevronDown, ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {

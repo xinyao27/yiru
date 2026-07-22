@@ -1,9 +1,12 @@
-import { GitMerge, GitPullRequest as GitPullRequestClosed } from '@phosphor-icons/react'
+import {
+  GitMerge,
+  GitPullRequest as GitPullRequestClosed,
+  CaretDown as ChevronDown
+} from '@phosphor-icons/react'
 import React, { useCallback, useMemo } from 'react'
 
 import { presentGitHubPRMergeState } from '@/components/github-pr-merge-state'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

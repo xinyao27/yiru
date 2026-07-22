@@ -1,11 +1,13 @@
-import { Copy, Globe, ShieldWarning as ShieldAlert } from '@phosphor-icons/react'
+import {
+  Copy,
+  Globe,
+  ShieldWarning as ShieldAlert,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw
-} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

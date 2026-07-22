@@ -1,4 +1,10 @@
-import { DotsThree as MoreHorizontal, SidebarSimple as PanelLeft } from '@phosphor-icons/react'
+import {
+  DotsThree as MoreHorizontal,
+  SidebarSimple as PanelLeft,
+  ArrowLeft,
+  ArrowRight,
+  ArrowsIn as Minimize2
+} from '@phosphor-icons/react'
 /* eslint-disable max-lines */
 import {
   Suspense,
@@ -15,7 +21,6 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { LoadingIndicatorStyleProvider } from '@/components/loading-indicator'
-import { ArrowLeft, ArrowRight, ArrowsIn as Minimize2 } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

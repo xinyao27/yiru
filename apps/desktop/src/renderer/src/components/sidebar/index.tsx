@@ -1,7 +1,7 @@
+import { FolderPlus } from '@phosphor-icons/react'
 import React, { useEffect, useMemo } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { FolderPlus } from '@/components/regular-icons'
 import { useSystemPrefersDark } from '@/components/terminal-pane/use-system-prefers-dark'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useSidebarResize } from '@/hooks/use-sidebar-resize'

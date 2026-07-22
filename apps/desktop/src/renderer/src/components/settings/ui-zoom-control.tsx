@@ -1,7 +1,6 @@
-import { Minus } from '@phosphor-icons/react'
+import { Minus, Plus, ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
 import { useEffect, useState, useCallback } from 'react'
 
-import { Plus, ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { applyUIZoom } from '@/lib/ui-zoom'
 

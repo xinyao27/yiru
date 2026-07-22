@@ -1,9 +1,14 @@
-import { Folder, House as Home, MagnifyingGlass as Search } from '@phosphor-icons/react'
+import {
+  Folder,
+  House as Home,
+  MagnifyingGlass as Search,
+  CaretRight as ChevronRight,
+  ArrowUp
+} from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the remote file browser centralizes filter state, path-mode preview state, cache, debounce, request gen, and click/keyboard handling in one component so picker navigation stays coherent. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretRight as ChevronRight, ArrowUp } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

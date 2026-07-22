@@ -5,7 +5,11 @@ import {
   FileCode as FileCode2,
   Play,
   FloppyDisk as Save,
-  Trash as Trash2
+  Trash as Trash2,
+  ArrowLineDown as ArrowDownToLine,
+  ArrowLineUp as ArrowUpToLine,
+  ArrowDown as MoveDown,
+  ArrowUp as MoveUp
 } from '@phosphor-icons/react'
 import DOMPurify from 'dompurify'
 /* eslint-disable max-lines -- Why: notebook editing, output rendering, and cell
@@ -28,12 +32,6 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowLineDown as ArrowDownToLine,
-  ArrowLineUp as ArrowUpToLine,
-  ArrowDown as MoveDown,
-  ArrowUp as MoveUp
-} from '@/components/regular-icons'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Button } from '@/components/ui/button'
 import {

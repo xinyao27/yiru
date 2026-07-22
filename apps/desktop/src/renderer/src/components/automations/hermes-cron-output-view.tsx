@@ -6,12 +6,13 @@ import {
   Fingerprint,
   Chat as MessageSquare,
   Sparkle as Sparkles,
-  Terminal
+  Terminal,
+  type Icon as PhosphorIcon,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight
 } from '@phosphor-icons/react'
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import React, { useMemo, useState } from 'react'
 
-import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/regular-icons'
 import CommentMarkdown from '@/components/sidebar/comment-markdown'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

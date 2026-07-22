@@ -1,9 +1,8 @@
-import { GitBranch } from '@phosphor-icons/react'
+import { GitBranch, CaretDown as ChevronDown } from '@phosphor-icons/react'
 // Step for AddRepoDialog (yiru#763), split out so create-project state stays scoped.
 import React, { useMemo, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'

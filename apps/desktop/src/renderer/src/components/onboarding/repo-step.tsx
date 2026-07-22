@@ -3,12 +3,12 @@ import {
   FolderOpen,
   GitBranch,
   Lightbulb,
-  HardDrives as Server
+  HardDrives as Server,
+  ArrowRight
 } from '@phosphor-icons/react'
 import type { Dispatch, SetStateAction } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowRight } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'

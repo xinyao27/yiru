@@ -1,9 +1,13 @@
-import { WarningCircle as AlertCircle, FileCode as FileCode2 } from '@phosphor-icons/react'
+import {
+  WarningCircle as AlertCircle,
+  FileCode as FileCode2,
+  Plus,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { Plus, ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'
 

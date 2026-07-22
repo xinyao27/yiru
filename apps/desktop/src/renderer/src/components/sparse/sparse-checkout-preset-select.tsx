@@ -1,12 +1,13 @@
-import { Check, Pencil } from '@phosphor-icons/react'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
-
-import { LoadingIndicator } from '@/components/loading-indicator'
 import {
+  Check,
+  Pencil,
   CaretUpDown as ChevronsUpDown,
   Plus,
   ArrowCounterClockwise as RefreshCcw
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
+
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useMountedRef } from '@/hooks/use-mounted-ref'

@@ -1,7 +1,6 @@
-import { FolderOpen, Globe, Monitor } from '@phosphor-icons/react'
+import { FolderOpen, Globe, Monitor, Plus } from '@phosphor-icons/react'
 import type { ComponentType } from 'react'
 
-import { Plus } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 export type AddRepoLocalStartActionHandlers = {

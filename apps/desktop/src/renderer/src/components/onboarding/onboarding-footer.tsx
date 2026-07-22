@@ -1,8 +1,9 @@
-import { LoadingIndicator } from '@/components/loading-indicator'
 import {
   CaretLeft as ChevronLeft,
   ArrowElbowDownLeft as CornerDownLeft
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { translate } from '@/i18n/i18n'
 
 type OnboardingFooterProps = {

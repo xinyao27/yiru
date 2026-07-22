@@ -1,15 +1,16 @@
-import { Check, Terminal } from '@phosphor-icons/react'
+import {
+  Check,
+  Terminal,
+  CaretDown as ChevronDown,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the Agents pane keeps catalog rows, default
    selection, per-agent controls, and runtime location together so settings
    reconciliation stays visible in one file. */
 import { useId, useMemo, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  CaretDown as ChevronDown,
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw
-} from '@/components/regular-icons'
 import { useDetectedAgents } from '@/hooks/use-detected-agents'
 import { translate } from '@/i18n/i18n'
 import { getAgentCatalog, AgentIcon } from '@/lib/agent-catalog'

@@ -2,12 +2,12 @@ import {
   LockKey as LockKeyhole,
   Play,
   TerminalWindow as SquareTerminal,
-  WarningCircle as AlertCircle
+  WarningCircle as AlertCircle,
+  ArrowCounterClockwise as RotateCcw
 } from '@phosphor-icons/react'
 import type React from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 

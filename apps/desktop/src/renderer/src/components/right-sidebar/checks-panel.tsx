@@ -4,7 +4,9 @@ import {
   GitMerge,
   DotsThree as Ellipsis,
   Link,
-  LinkBreak as Unlink
+  LinkBreak as Unlink,
+  ArrowClockwise as RefreshCw,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the checks panel co-locates PR header, checks, comments,
 merge actions, and conflict state in one component to keep the data flow straightforward. */
@@ -13,7 +15,6 @@ import { toast } from 'sonner'
 
 import { DetachedHeadBadge } from '@/components/detached-head-badge'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { ArrowClockwise as RefreshCw, X } from '@/components/regular-icons'
 import { SpoolChecksPane } from '@/components/spool/spool-checks-pane'
 import { Button } from '@/components/ui/button'
 import {

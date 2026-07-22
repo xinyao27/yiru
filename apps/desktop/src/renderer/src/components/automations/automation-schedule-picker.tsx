@@ -1,7 +1,6 @@
-import { CalendarDots as CalendarClock } from '@phosphor-icons/react'
+import { CalendarDots as CalendarClock, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import React from 'react'
 
-import { CaretUpDown as ChevronsUpDown } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {

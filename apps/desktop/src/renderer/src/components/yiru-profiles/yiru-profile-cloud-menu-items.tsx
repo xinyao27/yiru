@@ -1,7 +1,6 @@
-import { Check, Cloud, SignIn as LogIn, SignOut as LogOut } from '@phosphor-icons/react'
+import { Check, Cloud, SignIn as LogIn, SignOut as LogOut, Plus } from '@phosphor-icons/react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import { Plus } from '@/components/regular-icons'
 import {
   DropdownMenuItem,
   DropdownMenuLabel,

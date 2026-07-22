@@ -1,7 +1,6 @@
-import { HardDrives as Server } from '@phosphor-icons/react'
+import { HardDrives as Server, X } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 
-import { X } from '@/components/regular-icons'
 import RepoBadgeLabel from '@/components/repo/repo-badge-label'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

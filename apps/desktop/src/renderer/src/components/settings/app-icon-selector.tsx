@@ -1,6 +1,6 @@
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import type React from 'react'
 
-import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import blueIconUrl from '../../../../../resources/app-icons/yiru-graphite.png?url'

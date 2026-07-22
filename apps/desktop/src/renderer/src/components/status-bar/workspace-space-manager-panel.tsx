@@ -13,7 +13,12 @@ import {
   Terminal,
   Trash as Trash2,
   MagnifyingGlassPlus as ZoomIn,
-  MagnifyingGlassMinus as ZoomOut
+  MagnifyingGlassMinus as ZoomOut,
+  ArrowDown,
+  ArrowUp,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw,
+  X
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the analyzer's private treemap, selection,
    breakdown, and table pieces share one scan state and should evolve as one resource-manager surface. */
@@ -22,13 +27,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw,
-  X
-} from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { installWindowVisibilityInterval } from '@/lib/window-visibility-interval'

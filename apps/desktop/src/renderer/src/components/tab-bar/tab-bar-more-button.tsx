@@ -1,4 +1,4 @@
-import { DotsThree as MoreHorizontal } from '@phosphor-icons/react'
+import { DotsThree as MoreHorizontal, X } from '@phosphor-icons/react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -14,7 +14,6 @@ import { useAppStore } from '@/store'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
-import { X } from '../regular-icons'
 import { TabBarQuickCommandsButton } from './tab-bar-quick-commands-button'
 
 export function TabBarMoreButton({

@@ -1,4 +1,5 @@
-import { ArrowLeft } from '@/components/regular-icons'
+import { ArrowLeft } from '@phosphor-icons/react'
+
 import { translate } from '@/i18n/i18n'
 
 import type { AddRepoDialogStep } from './add-repo-dialog-types'

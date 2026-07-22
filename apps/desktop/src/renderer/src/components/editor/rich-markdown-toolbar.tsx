@@ -11,12 +11,12 @@ import {
   ListChecks as ListTodo,
   DotsThree as MoreHorizontal,
   Paragraph as Pilcrow,
-  Quotes as Quote
+  Quotes as Quote,
+  CaretRight as ChevronRight
 } from '@phosphor-icons/react'
 import type { Editor } from '@tiptap/react'
 import React from 'react'
 
-import { CaretRight as ChevronRight } from '@/components/regular-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,

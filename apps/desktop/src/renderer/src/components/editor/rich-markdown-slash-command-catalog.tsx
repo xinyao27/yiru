@@ -4,10 +4,11 @@ import {
   ListNumbers as ListOrdered,
   Quotes as Quote,
   Sigma,
-  Table as Table2
+  Table as Table2,
+  CaretRight as ChevronRight,
+  FlowArrow as Workflow
 } from '@phosphor-icons/react'
 
-import { CaretRight as ChevronRight, FlowArrow as Workflow } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 
 import { headingSlashCommands } from './rich-markdown-heading-slash-commands'

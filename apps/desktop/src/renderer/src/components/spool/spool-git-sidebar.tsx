@@ -1,7 +1,10 @@
-import { Check, GitCommit as GitCommitHorizontal } from '@phosphor-icons/react'
+import {
+  Check,
+  GitCommit as GitCommitHorizontal,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import type React from 'react'
 
-import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'

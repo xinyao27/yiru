@@ -1,5 +1,5 @@
 import { SortableContext } from '@dnd-kit/sortable'
-import { DeviceMobile as Smartphone, FileText, Globe } from '@phosphor-icons/react'
+import { DeviceMobile as Smartphone, FileText, Globe, FilePlus } from '@phosphor-icons/react'
 /* oxlint-disable max-lines -- Why: rendering the drop-indicator prop on each
  * of three distinct tab components (terminal, browser, editor) adds 3 lines
  * to a file that was already ~398 code lines on main. The per-type render
@@ -10,7 +10,6 @@ import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 
 import { getEditorDisplayLabel } from '@/components/editor/editor-labels'
-import { FilePlus } from '@/components/regular-icons'
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,

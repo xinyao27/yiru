@@ -1,7 +1,6 @@
-import { Download, FolderOpen } from '@phosphor-icons/react'
+import { Download, FolderOpen, ArrowLeft, Plus } from '@phosphor-icons/react'
 import type { ComponentType } from 'react'
 
-import { ArrowLeft, Plus } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

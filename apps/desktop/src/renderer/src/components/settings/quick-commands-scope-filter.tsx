@@ -1,7 +1,6 @@
-import { Check } from '@phosphor-icons/react'
+import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import type { Dispatch, SetStateAction } from 'react'
 
-import { CaretUpDown as ChevronsUpDown } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

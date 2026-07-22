@@ -1,6 +1,6 @@
+import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '@phosphor-icons/react'
 import { useState } from 'react'
 
-import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'

@@ -1,6 +1,10 @@
-import { GithubLogo as Github, GitlabLogo as Gitlab, Terminal } from '@phosphor-icons/react'
+import {
+  GithubLogo as Github,
+  GitlabLogo as Gitlab,
+  Terminal,
+  ArrowSquareOut as ExternalLink
+} from '@phosphor-icons/react'
 
-import { ArrowSquareOut as ExternalLink } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'

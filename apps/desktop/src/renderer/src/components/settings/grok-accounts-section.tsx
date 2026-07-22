@@ -1,11 +1,11 @@
-import { ShieldCheck } from '@phosphor-icons/react'
+import {
+  ShieldCheck,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw
+} from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw
-} from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'

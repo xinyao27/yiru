@@ -2,11 +2,11 @@ import {
   CheckCircle as CheckCircle2,
   CircleDashed,
   MinusCircle,
-  XCircle
+  XCircle,
+  CaretDown as ChevronDown
 } from '@phosphor-icons/react'
 import React from 'react'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { CheckJobLogTail } from '@/components/right-sidebar/check-job-log-tail'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

@@ -1,6 +1,6 @@
+import { ArrowLeft } from '@phosphor-icons/react'
 import React from 'react'
 
-import { ArrowLeft } from '@/components/regular-icons'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'

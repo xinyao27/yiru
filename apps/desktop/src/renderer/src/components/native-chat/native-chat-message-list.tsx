@@ -1,7 +1,6 @@
-import { Image as ImageIcon } from '@phosphor-icons/react'
+import { Image as ImageIcon, ArrowDown, ArrowUp } from '@phosphor-icons/react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-import { ArrowDown, ArrowUp } from '@/components/regular-icons'
 import CommentMarkdown, {
   type CommentMarkdownLinkClickHandler
 } from '@/components/sidebar/comment-markdown'

@@ -2,11 +2,11 @@
 import {
   Image as ImageIcon,
   MagnifyingGlassPlus as ZoomIn,
-  MagnifyingGlassMinus as ZoomOut
+  MagnifyingGlassMinus as ZoomOut,
+  ArrowCounterClockwise as RotateCcw
 } from '@phosphor-icons/react'
 import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { ArrowCounterClockwise as RotateCcw } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 

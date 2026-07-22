@@ -1,12 +1,13 @@
-import { Copy, FolderSimple as FolderGit2 } from '@phosphor-icons/react'
+import {
+  Copy,
+  FolderSimple as FolderGit2,
+  ArrowsLeftRight as ArrowRightLeft,
+  ArrowRight as MoveRight
+} from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowsLeftRight as ArrowRightLeft,
-  ArrowRight as MoveRight
-} from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

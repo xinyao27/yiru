@@ -1,7 +1,6 @@
-import { Pencil, Trash } from '@phosphor-icons/react'
+import { Pencil, Trash, ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
-import { ArrowElbowDownLeft as CornerDownLeft } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import { useMountedRef } from '@/hooks/use-mounted-ref'
 import { translate } from '@/i18n/i18n'

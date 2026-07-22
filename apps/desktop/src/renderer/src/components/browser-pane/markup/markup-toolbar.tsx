@@ -4,15 +4,13 @@ import {
   Pencil,
   Square,
   Trash as Trash2,
-  TextT as Type
-} from '@phosphor-icons/react'
-import React from 'react'
-
-import {
+  TextT as Type,
   ArrowUpRight,
   ArrowClockwise as Redo2,
   ArrowCounterClockwise as Undo2
-} from '@/components/regular-icons'
+} from '@phosphor-icons/react'
+import React from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

@@ -3,11 +3,11 @@ import {
   TreeStructure as ListTree,
   Chat as MessageSquare,
   DotsThree as MoreHorizontal,
-  GearSix as Settings2
+  GearSix as Settings2,
+  ArrowClockwise as RefreshCw
 } from '@phosphor-icons/react'
 import React from 'react'
 
-import { ArrowClockwise as RefreshCw } from '@/components/regular-icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

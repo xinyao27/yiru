@@ -17,7 +17,14 @@ import {
   Warning as TriangleAlert,
   CheckCircle as CircleCheck,
   DotsThree as MoreHorizontal,
-  type Icon as PhosphorIcon
+  type Icon as PhosphorIcon,
+  ArrowsDownUp as ArrowDownUp,
+  ArrowUp,
+  CaretDown as ChevronDown,
+  CloudArrowUp as CloudUpload,
+  Plus,
+  ArrowClockwise as RefreshCw,
+  ArrowCounterClockwise as Undo2
 } from '@phosphor-icons/react'
 /* eslint-disable max-lines */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -31,15 +38,6 @@ import {
   requestEditorSaveQuiesce
 } from '@/components/editor/editor-autosave'
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowsDownUp as ArrowDownUp,
-  ArrowUp,
-  CaretDown as ChevronDown,
-  CloudArrowUp as CloudUpload,
-  Plus,
-  ArrowClockwise as RefreshCw,
-  ArrowCounterClockwise as Undo2
-} from '@/components/regular-icons'
 import { BaseRefPicker } from '@/components/settings/base-ref-picker'
 import { SpoolGitPane } from '@/components/spool/spool-git-pane'
 import { Button } from '@/components/ui/button'

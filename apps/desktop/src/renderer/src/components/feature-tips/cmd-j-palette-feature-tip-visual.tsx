@@ -1,8 +1,7 @@
-import { MagnifyingGlass as Search } from '@phosphor-icons/react'
+import { MagnifyingGlass as Search, Plus } from '@phosphor-icons/react'
 import { Fragment, useEffect, useState, type JSX } from 'react'
 
 import { usePrefersReducedMotion } from '@/components/feature-wall/feature-wall-modal-helpers'
-import { Plus } from '@/components/regular-icons'
 import { formatShortcutKeyComboDetails, useShortcutKeyDetails } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'

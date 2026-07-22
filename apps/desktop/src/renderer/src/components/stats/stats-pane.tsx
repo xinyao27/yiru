@@ -3,11 +3,11 @@ import {
   Robot as Bot,
   Check,
   Clock,
-  GitPullRequest
+  GitPullRequest,
+  CaretDown as ChevronDown
 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 
-import { CaretDown as ChevronDown } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { cn } from '@/lib/class-names'

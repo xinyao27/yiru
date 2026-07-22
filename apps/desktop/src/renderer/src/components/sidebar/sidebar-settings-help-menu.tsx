@@ -6,17 +6,15 @@ import {
   ChatText as MessageSquareText,
   Student as School,
   Scroll as ScrollText,
-  Gear as Settings
+  Gear as Settings,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw,
+  ArrowClockwise as RotateCw
 } from '@phosphor-icons/react'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingIndicator } from '@/components/loading-indicator'
-import {
-  ArrowSquareOut as ExternalLink,
-  ArrowClockwise as RefreshCw,
-  ArrowClockwise as RotateCw
-} from '@/components/regular-icons'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import { Button } from '@/components/ui/button'
 import {
