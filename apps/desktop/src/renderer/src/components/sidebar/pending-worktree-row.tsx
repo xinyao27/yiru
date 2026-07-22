@@ -40,7 +40,7 @@ export function PendingWorktreeRow({
       className={cn(
         'group flex w-full items-center gap-1 rounded-md transition-colors',
         active
-          ? 'border border-sidebar-ring/35 bg-sidebar-accent/70 ring-1 ring-sidebar-ring/30'
+          ? 'border border-sidebar-ring/35 bg-sidebar-accent/70'
           : 'border border-transparent hover:bg-sidebar-accent/60'
       )}
     >

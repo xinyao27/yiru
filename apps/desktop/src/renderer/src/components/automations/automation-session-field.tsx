@@ -33,7 +33,7 @@ export function AutomationSessionField({
                     'auto.components.automations.AutomationSessionField.4bdce31f37',
                     'Session reuse help'
                   )}
-                  className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 rounded-sm outline-none focus-visible:ring-[3px]"
+                  className="text-muted-foreground hover:text-foreground rounded-sm outline-none"
                 >
                   <Info className="size-3.5" />
                 </button>

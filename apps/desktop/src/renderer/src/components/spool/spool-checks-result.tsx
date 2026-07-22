@@ -46,7 +46,7 @@ export function SpoolChecksResult({
               type="button"
               variant="outline"
               size="xs"
-              className="border-sidebar-border bg-sidebar text-sidebar-foreground hover:border-muted-foreground/35 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:border-sidebar-ring focus-visible:ring-sidebar-ring/50 dark:border-sidebar-border dark:bg-sidebar dark:hover:bg-sidebar-accent"
+              className="border-sidebar-border bg-sidebar text-sidebar-foreground hover:border-muted-foreground/35 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:border-sidebar-ring dark:border-sidebar-border dark:bg-sidebar dark:hover:bg-sidebar-accent"
               onClick={() => openOwnerUrl(reviewUrl)}
             >
               <ExternalLink aria-hidden="true" className="size-3" />

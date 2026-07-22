@@ -22,7 +22,7 @@ export function ClaudeUsageLoadingState({
         <div className="flex shrink-0 items-center gap-2 self-start">
           <LoadingIndicator className="text-muted-foreground size-3.5" />
           <div className="bg-foreground/80 relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent">
-            <span className="bg-background pointer-events-none block size-3.5 translate-x-4 rounded-full shadow-sm" />
+            <span className="bg-background pointer-events-none block size-3.5 translate-x-4 rounded-full" />
           </div>
         </div>
       </div>

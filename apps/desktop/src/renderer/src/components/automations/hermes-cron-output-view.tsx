@@ -58,27 +58,27 @@ function getMetadataIconStyle(label: string): MetadataIconStyle {
     return {
       icon: Fingerprint,
       iconClass: 'text-violet-400',
-      ringClass: 'bg-violet-500/10 ring-1 ring-violet-500/30'
+      ringClass: 'bg-violet-500/10'
     }
   }
   if (/time|run/.test(normalized)) {
     return {
       icon: Clock,
       iconClass: 'text-sky-400',
-      ringClass: 'bg-sky-500/10 ring-1 ring-sky-500/30'
+      ringClass: 'bg-sky-500/10'
     }
   }
   if (/schedule|cron/.test(normalized)) {
     return {
       icon: CalendarClock,
       iconClass: 'text-amber-400',
-      ringClass: 'bg-amber-500/10 ring-1 ring-amber-500/30'
+      ringClass: 'bg-amber-500/10'
     }
   }
   return {
     icon: Sparkles,
     iconClass: 'text-muted-foreground',
-    ringClass: 'bg-muted/40 ring-1 ring-border/60'
+    ringClass: 'bg-muted/40'
   }
 }
 
@@ -132,7 +132,7 @@ function SectionCard({ title, accent = 'default', children }: SectionCardProps):
   return (
     <section
       className={cn(
-        'relative overflow-hidden rounded-lg border shadow-sm',
+        'relative overflow-hidden rounded-lg border',
         accent === 'error'
           ? 'border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-background to-background'
           : accent === 'response'

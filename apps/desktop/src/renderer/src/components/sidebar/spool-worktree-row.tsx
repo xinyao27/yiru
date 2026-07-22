@@ -40,7 +40,6 @@ export function SpoolWorktreeRow({
       density={metadata ? 'details' : 'title-only'}
       flush
       activeVariant={row.active ? 'primary' : undefined}
-      className="focus-visible:ring-sidebar-ring focus-visible:ring-1"
       style={{
         paddingLeft: getFlushWorktreeCardPaddingLeft(DIRECT_PROJECT_WORKTREE_CONTENT_INDENT)
       }}

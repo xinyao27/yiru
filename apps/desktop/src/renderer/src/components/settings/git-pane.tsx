@@ -270,7 +270,7 @@ export function GitPane({
         >
           <span
             className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
+              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
               settings.refreshLocalBaseRefOnWorktreeCreate ? 'translate-x-4' : 'translate-x-0.5'
             )}
           />
@@ -365,7 +365,7 @@ export function GitPane({
         >
           <span
             className={cn(
-              'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
+              'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
               settings.enableGitHubAttribution ? 'translate-x-4' : 'translate-x-0.5'
             )}
           />

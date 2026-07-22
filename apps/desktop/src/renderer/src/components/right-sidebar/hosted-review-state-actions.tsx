@@ -68,7 +68,7 @@ export function MergedReviewActions({
       size="xs"
       // Why: outline matches the sibling Reopen control; destructive text signals danger
       // without a solid red fill dominating the PR summary panel.
-      className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive focus-visible:ring-destructive/20 cursor-pointer text-[11px] disabled:cursor-not-allowed disabled:opacity-50"
+      className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer text-[11px] disabled:cursor-not-allowed disabled:opacity-50"
       onClick={onDeleteWorktree}
       disabled={isDeletingWorktree}
     >

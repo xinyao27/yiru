@@ -100,7 +100,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
 }: MarkupToolbarProps) {
   return (
     <TooltipProvider delay={300}>
-      <div className="border-border bg-card flex items-center gap-1 rounded-md border px-1.5 py-1 shadow-md">
+      <div className="border-border bg-card flex items-center gap-1 rounded-md border px-1.5 py-1">
         {toolItems().map((item) => (
           <IconButton
             key={item.kind}
@@ -152,7 +152,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   onClick={() => onColorChange(swatch)}
                   className={cn(
                     'size-6 rounded-full border',
-                    color === swatch ? 'border-ring ring-1 ring-ring' : 'border-border'
+                    color === swatch ? 'border-ring' : 'border-border'
                   )}
                   style={{ backgroundColor: swatch }}
                 />

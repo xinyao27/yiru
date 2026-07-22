@@ -244,7 +244,6 @@
   flex-wrap: wrap;
   gap: 10px;
   padding: 14px 16px;
-  box-shadow: var(--shadow-lg);
 }
 
 [data-sonner-toaster] [data-sonner-toast][data-styled='true'] [data-icon] {
@@ -316,27 +315,17 @@
     /* Why: the flat, rectilinear design must also cover legacy utilities,
        inline styles, and third-party components that bypass design tokens. */
     border-radius: 0 !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
   }
 
   :root:root *:focus-visible {
-    /* Why: shadows are forbidden, so keyboard focus uses a real outline instead
-       of Tailwind's box-shadow-based ring implementation. */
+    /* Why: flat controls use a real outline so keyboard focus remains visible. */
     outline: 2px solid var(--ring) !important;
     outline-offset: 1px;
   }
 
   :root:root [aria-invalid='true']:focus-visible {
-    /* Why: invalid controls keep their semantic error state after shadow-based
-       focus rings are replaced by the renderer-wide outline. */
+    /* Why: invalid controls keep their semantic error state in the shared outline. */
     outline-color: var(--destructive) !important;
-  }
-
-  :root:root [class*='drop-shadow'] {
-    /* Why: drop-shadow utilities use filters rather than box-shadow and need a
-       separate flat-design guardrail. */
-    filter: none !important;
   }
 
   body {
@@ -763,7 +752,6 @@
   /* Why: flat bg-accent ≈ panel background in light mode, so selection mixes
      foreground into accent and adds an inset ring to stay legible in both themes. */
   background: color-mix(in srgb, var(--foreground) 8%, var(--accent));
-  box-shadow: inset 0 0 0 1px var(--border);
   color: var(--accent-foreground);
 }
 
@@ -803,18 +791,15 @@
 [data-worktree-card-surface][data-worktree-card-active='primary'] {
   border-color: color-mix(in srgb, var(--sidebar-border) 40%, transparent);
   background: color-mix(in srgb, var(--sidebar-foreground) 8%, transparent);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--sidebar-foreground) 4%, transparent);
 }
 
 .dark [data-worktree-card-surface][data-worktree-card-active='primary'] {
   background: color-mix(in srgb, var(--sidebar-foreground) 10%, transparent);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--sidebar-foreground) 3%, transparent);
 }
 
 [data-worktree-card-surface][data-worktree-card-active='secondary'] {
   border-color: color-mix(in srgb, var(--sidebar-ring) 25%, transparent);
   background: color-mix(in srgb, var(--sidebar-accent) 45%, transparent);
-  box-shadow: none;
 }
 
 .dark [data-worktree-card-surface][data-worktree-card-active='secondary'] {
@@ -857,17 +842,11 @@
   position: relative;
   border: 1px solid color-mix(in srgb, var(--sidebar-foreground) 24%, var(--sidebar-border));
   background: color-mix(in srgb, var(--sidebar-foreground) 9%, var(--sidebar));
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--sidebar-foreground) 8%, transparent),
-    0 1px 2px color-mix(in srgb, var(--sidebar-foreground) 10%, transparent);
 }
 
 .dark .worktree-sidebar-notice-card {
   border-color: color-mix(in srgb, var(--sidebar-foreground) 32%, var(--sidebar-border));
   background: color-mix(in srgb, var(--sidebar-foreground) 14%, var(--sidebar));
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--sidebar-foreground) 12%, transparent),
-    0 1px 4px rgb(0 0 0 / 0.28);
 }
 
 /* Why: the project-order notice sits directly under the Projects header; a
@@ -892,13 +871,11 @@
 }
 
 /* Why: one-shot status-bar callout is portaled fixed above the meters.
-   Opaque popover surface (not glass) so titlebar/terminal chrome cannot
-   bleed through; use design tokens + the documented floating elevation. */
+   Its opaque popover surface keeps titlebar and terminal chrome from bleeding through. */
 .status-bar-change-notice-card {
   border: 1px solid var(--border);
   background: var(--popover);
   color: var(--popover-foreground);
-  box-shadow: var(--shadow-lg);
 }
 
 /* Why: caret points down at the usage meters this notice explains. */
@@ -940,9 +917,6 @@
   /* Why: inline orchestration trees have two chevron levels; the manager row
      needs a structural cue that is quieter than the workspace card chrome. */
   background: color-mix(in srgb, var(--sidebar-foreground) 3%, var(--sidebar));
-  box-shadow:
-    inset 2px 0 0 color-mix(in srgb, var(--sidebar-foreground) 38%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--sidebar-foreground) 10%, transparent);
 }
 
 .worktree-agent-lineage-parent-row.worktree-agent-row-hover:hover {
@@ -951,9 +925,6 @@
 
 .dark .worktree-agent-lineage-parent-row {
   background: color-mix(in srgb, var(--accent) 22%, var(--sidebar));
-  box-shadow:
-    inset 2px 0 0 color-mix(in srgb, var(--accent) 58%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 .dark .worktree-agent-lineage-parent-row.worktree-agent-row-hover:hover {
@@ -963,7 +934,6 @@
 .worktree-agent-lineage-child-row {
   position: relative;
   background: color-mix(in srgb, var(--sidebar) 74%, var(--background));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sidebar-foreground) 7%, transparent);
 }
 
 .worktree-agent-lineage-child-row.worktree-agent-row-hover:hover {
@@ -981,7 +951,6 @@
 
 .dark .worktree-agent-lineage-child-row {
   background: color-mix(in srgb, var(--accent) 10%, var(--sidebar));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 .dark .worktree-agent-lineage-child-row.worktree-agent-row-hover:hover {
@@ -1008,19 +977,16 @@
      is explicit without boxing the whole session. */
   border-color: color-mix(in srgb, var(--ai-action-accent) 72%, transparent);
   background: color-mix(in srgb, var(--ai-action-accent) 12%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ai-action-accent) 22%, transparent);
   color: var(--foreground);
 }
 
 .worktree-agent-send-target-button:hover {
   border-color: color-mix(in srgb, var(--ai-action-accent) 88%, transparent);
   background: color-mix(in srgb, var(--ai-action-accent) 18%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ai-action-accent) 34%, transparent);
 }
 
 .worktree-agent-send-target-button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 50%, transparent);
 }
 
 /* Why: the virtualized card row is height-measured; animate the grid track
@@ -1057,15 +1023,11 @@
   padding: 2px;
   border-radius: var(--radius-sm, 0.25rem);
   background: transparent;
-  box-shadow: inset 0 0 0 1px transparent;
-  transition:
-    background 180ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .compact-agent-summary-panel-expanded {
   background: transparent;
-  box-shadow: inset 0 0 0 1px transparent;
 }
 
 [data-compact-agent-list='true'] {
@@ -1079,7 +1041,6 @@
 [data-compact-agent-list='true'] .compact-agent-row.worktree-agent-lineage-parent-row,
 [data-compact-agent-list='true'] .compact-agent-row.worktree-agent-lineage-child-row {
   background: transparent;
-  box-shadow: none;
 }
 
 [data-compact-agent-list='true'] .compact-agent-row.worktree-agent-lineage-child-row::before {
@@ -1149,17 +1110,11 @@
   pointer-events: none;
   border: 1.5px solid color-mix(in srgb, var(--terminal-pane-locate) 68%, transparent);
   border-radius: inherit;
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--terminal-pane-locate) 34%, transparent),
-    0 0 14px color-mix(in srgb, var(--terminal-pane-locate) 36%, transparent);
   animation: scroll-to-current-workspace-reveal-glow 1.5s ease-out forwards;
 }
 
 .scroll-to-current-workspace-reveal-highlight--ai::before {
   border-color: color-mix(in srgb, var(--ai-action-accent) 68%, transparent);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--ai-action-accent) 34%, transparent),
-    0 0 14px color-mix(in srgb, var(--ai-action-accent) 36%, transparent);
 }
 
 @keyframes scroll-to-current-workspace-reveal-glow {
@@ -1255,7 +1210,6 @@
   overflow: visible;
   border-radius: var(--radius);
   opacity: 0.96;
-  filter: none;
   will-change: transform;
 }
 
@@ -1277,7 +1231,6 @@
   color: var(--sidebar);
   font-size: 10px;
   font-weight: 700;
-  box-shadow: 0 0 0 2px var(--sidebar);
 }
 
 .sidebar-header {
@@ -1406,7 +1359,6 @@
   box-sizing: border-box !important;
   vertical-align: middle !important;
   border: none !important;
-  box-shadow: none !important;
   transition: none !important;
 }
 
@@ -1433,7 +1385,6 @@
 .monaco-editor .monaco-search-result-highlight {
   background: color-mix(in srgb, var(--warning, #f59e0b) 34%, transparent);
   border-radius: 3px;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warning, #f59e0b) 52%, transparent);
 }
 
 .monaco-editor .monaco-markdown-doc-link {
@@ -1807,9 +1758,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    0 6px 16px rgba(24, 24, 27, 0.22),
-    0 1px 2px rgba(24, 24, 27, 0.12);
   opacity: 0;
   offset-rotate: 0deg;
   offset-distance: 0%;
@@ -2046,7 +1994,6 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   inset: -2px;
   border: 1px solid color-mix(in srgb, var(--ring) 72%, transparent);
   border-radius: inherit;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ring) 18%, transparent);
   opacity: 0;
   transform-origin: center;
   animation: contextual-tour-target-ring 1.8s ease-out infinite;
@@ -2285,20 +2232,16 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
 @keyframes feature-tour-orch-child-flash {
   0%,
   6% {
-    box-shadow: 0 0 0 0 transparent;
     border-color: var(--border);
   }
   7% {
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--foreground) 12%, transparent);
     border-color: color-mix(in srgb, var(--foreground) 38%, transparent);
   }
   9% {
-    box-shadow: 0 0 0 0 transparent;
     border-color: var(--border);
   }
   25%,
   100% {
-    box-shadow: 0 0 0 0 transparent;
     border-color: var(--border);
   }
 }
@@ -2374,20 +2317,16 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   0%,
   4% {
     background: transparent;
-    box-shadow: none;
   }
   6% {
     background: color-mix(in srgb, var(--foreground) 5%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 6%, transparent);
   }
   23.5% {
     background: color-mix(in srgb, var(--foreground) 5%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 6%, transparent);
   }
   25%,
   100% {
     background: transparent;
-    box-shadow: none;
   }
 }
 
@@ -2401,26 +2340,22 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
     width: 28px;
     background: rgb(34 197 94 / 0.14);
     border-color: rgb(34 197 94 / 0.3);
-    box-shadow: none;
   }
   8% {
     width: 78px;
     background: var(--primary);
     border-color: var(--primary);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
   }
   23.5% {
     width: 78px;
     background: var(--primary);
     border-color: var(--primary);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
   }
   25%,
   100% {
     width: 28px;
     background: rgb(34 197 94 / 0.14);
     border-color: rgb(34 197 94 / 0.3);
-    box-shadow: none;
   }
 }
 
@@ -2608,19 +2543,16 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   cursor: pointer;
   z-index: 5;
   opacity: 1;
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--foreground) 12%, transparent);
   transition:
     color 100ms ease,
     background-color 100ms ease,
-    border-color 100ms ease,
-    box-shadow 100ms ease;
+    border-color 100ms ease;
 }
 
 .yiru-diff-comment-add-btn:hover {
   color: var(--primary);
   border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
   background: color-mix(in srgb, var(--primary) 12%, var(--background));
-  box-shadow: 0 1px 4px color-mix(in srgb, var(--foreground) 16%, transparent);
 }
 
 .yiru-diff-comment-add-btn:focus-visible {
@@ -2650,9 +2582,9 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
 
 /* Why: the saved note used to blend into the editor background because it
    reused the same muted/background mix the editor itself uses. Stay
-   grayscale to match the rest of the UI, but lift the card off the editor
-   with a foreground-tinted fill, a solid left accent bar, a soft shadow,
-   and a bolded uppercase meta label. Dark mode uses 6% (vs light's 5%)
+   grayscale to match the rest of the UI, but distinguish the card with a
+   foreground-tinted fill, a solid left accent bar, and a bolded uppercase
+   meta label. Dark mode uses 6% (vs light's 5%)
    to produce roughly the same absolute luminance delta above its editor
    surface — the foreground color is different (white vs black) so equal
    percentages would not give equal contrast. Override lives in `.dark`. */
@@ -2671,21 +2603,14 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   background: var(--background);
   padding: 12px 14px;
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 4px 12px rgba(0, 0, 0, 0.03);
   transition:
     border-color 150ms ease,
-    box-shadow 150ms ease,
     background-color 150ms ease;
 }
 
 .dark .yiru-diff-comment-card {
   border-color: color-mix(in srgb, var(--foreground) 12%, var(--border));
   background: color-mix(in srgb, var(--foreground) 2%, var(--editor-surface));
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.2),
-    0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 /* Content Column */
@@ -2729,7 +2654,6 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   border-radius: 6px;
   background: var(--background);
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .dark .yiru-diff-comment-actions-pill {
@@ -2822,17 +2746,11 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   border-radius: 8px;
   background: var(--background);
   color: var(--foreground);
-  box-shadow:
-    0 10px 32px rgba(0, 0, 0, 0.12),
-    0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .dark .yiru-diff-comment-popover {
   border-color: color-mix(in srgb, var(--foreground) 14%, var(--border));
   background: color-mix(in srgb, var(--foreground) 2%, var(--editor-surface));
-  box-shadow:
-    0 10px 32px rgba(0, 0, 0, 0.3),
-    0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .yiru-diff-comment-popover-label {
@@ -2859,9 +2777,7 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   font-size: 13px;
   line-height: 1.45;
   outline: none;
-  transition:
-    border-color 150ms ease,
-    box-shadow 150ms ease;
+  transition: border-color 150ms ease;
 }
 
 .dark .yiru-diff-comment-popover-textarea {
@@ -2871,12 +2787,10 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
 
 .yiru-diff-comment-popover-textarea:focus {
   border-color: color-mix(in srgb, var(--ring) 70%, var(--border));
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 18%, transparent);
 }
 
 .dark .yiru-diff-comment-popover-textarea:focus {
   border-color: color-mix(in srgb, var(--ring) 70%, var(--border));
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 12%, transparent);
 }
 
 .yiru-diff-comment-popover-textarea::-webkit-scrollbar {
@@ -2904,5 +2818,4 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
 .yiru-contextual-tour-panel {
   background: var(--popover);
   border-color: var(--border);
-  box-shadow: var(--shadow-lg);
 }

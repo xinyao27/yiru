@@ -248,7 +248,7 @@ export function ChecksPanelReviewHeader({
       <ReviewIcon className="text-muted-foreground size-4 shrink-0" />
       <button
         type="button"
-        className="text-foreground decoration-border hover:text-foreground hover:decoration-foreground focus-visible:ring-ring rounded px-0.5 text-[12px] font-semibold underline underline-offset-2 focus-visible:ring-1 focus-visible:outline-none"
+        className="text-foreground decoration-border hover:text-foreground hover:decoration-foreground rounded px-0.5 text-[12px] font-semibold underline underline-offset-2 focus-visible:outline-none"
         title={title}
         onClick={onOpenReview}
       >
@@ -3687,7 +3687,7 @@ function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Elem
           <div className="flex items-center gap-1">
             <input
               ref={titleInputRef}
-              className="bg-background border-border text-foreground focus:ring-ring flex-1 rounded border px-2 py-1 text-[12px] outline-none focus:ring-1"
+              className="bg-background border-border text-foreground flex-1 rounded border px-2 py-1 text-[12px] outline-none"
               value={titleDraft}
               onChange={(e) => setTitleDraft(e.target.value)}
               onKeyDown={handleTitleKeyDown}

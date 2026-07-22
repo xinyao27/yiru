@@ -111,7 +111,7 @@ export function RepoStep({
           </div>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <input
-              className="border-border bg-background text-foreground focus:border-foreground/50 focus:ring-foreground/15 min-w-0 flex-1 rounded-lg border px-4 py-3 font-mono text-sm transition outline-none focus:ring-2"
+              className="border-border bg-background text-foreground focus:border-foreground/50 min-w-0 flex-1 rounded-lg border px-4 py-3 font-mono text-sm transition outline-none"
               placeholder={translate(
                 'auto.components.onboarding.RepoStep.2ebbc26343',
                 '/home/user/project'
@@ -141,7 +141,7 @@ export function RepoStep({
       ) : (
         <button
           type="button"
-          className="group border-border bg-muted/30 hover:border-foreground/40 hover:bg-muted/60 focus:border-foreground/70 focus:bg-muted/40 focus:ring-foreground/25 w-full rounded-xl border p-5 text-left transition focus:ring-2 focus:outline-none focus:ring-inset disabled:opacity-60"
+          className="group border-border bg-muted/30 hover:border-foreground/40 hover:bg-muted/60 focus:border-foreground/70 focus:bg-muted/40 w-full rounded-xl border p-5 text-left transition focus:outline-none disabled:opacity-60"
           disabled={disabled}
           autoFocus={!disabled}
           onClick={onOpenFolder}
@@ -207,7 +207,7 @@ export function RepoStep({
         </div>
         <div className="mt-4 flex gap-2">
           <input
-            className="border-border bg-background text-foreground focus:border-foreground/50 focus:ring-foreground/15 min-w-0 flex-1 rounded-lg border px-4 py-3 font-mono text-sm transition outline-none focus:ring-2"
+            className="border-border bg-background text-foreground focus:border-foreground/50 min-w-0 flex-1 rounded-lg border px-4 py-3 font-mono text-sm transition outline-none"
             placeholder={translate(
               'auto.components.onboarding.RepoStep.955134915e',
               'git@github.com:org/repo.git'
@@ -230,7 +230,7 @@ export function RepoStep({
               {translate('auto.components.onboarding.RepoStep.24c7c8696c', 'Clone into host path')}
             </label>
             <input
-              className="border-border bg-background text-foreground focus:border-foreground/50 focus:ring-foreground/15 w-full rounded-lg border px-4 py-3 font-mono text-sm transition outline-none focus:ring-2"
+              className="border-border bg-background text-foreground focus:border-foreground/50 w-full rounded-lg border px-4 py-3 font-mono text-sm transition outline-none"
               placeholder={translate(
                 'auto.components.onboarding.RepoStep.7ec3f48820',
                 '/home/user'
@@ -263,7 +263,7 @@ export function RepoStep({
         ) : (
           <button
             type="button"
-            className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 inline-flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 transition focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+            className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 transition focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
             disabled={disabled}
             onClick={onOpenSshSettings}
           >
@@ -290,7 +290,7 @@ export function RepoStep({
                     type="button"
                     variant="ghost"
                     size="icon-xs"
-                    className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive/40"
+                    className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive"
                     aria-label={translate(
                       'auto.components.onboarding.RepoStep.c3d9d44ca2',
                       'Stop scan'

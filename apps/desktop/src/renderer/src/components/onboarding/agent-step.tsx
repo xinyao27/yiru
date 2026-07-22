@@ -173,7 +173,7 @@ export function AgentStep({
             </div>
             {fallbackRest.length > 0 && (
               <Collapsible open={openState} onOpenChange={setOpenState}>
-                <CollapsibleTrigger className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 cursor-pointer text-xs font-medium transition-colors outline-none focus-visible:ring-2 data-[state=open]:mb-3">
+                <CollapsibleTrigger className="text-muted-foreground hover:text-foreground cursor-pointer text-xs font-medium transition-colors outline-none data-[state=open]:mb-3">
                   {fallbackRestLabel}
                 </CollapsibleTrigger>
                 <CollapsibleContent className="collapsible-height-content">
@@ -237,7 +237,7 @@ function YoloPermissionsControl({
                 'Agent permission info'
               )}
               onPointerDown={(event) => event.preventDefault()}
-              className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 grid size-6 shrink-0 place-items-center rounded-md transition-colors outline-none focus-visible:ring-[3px]"
+              className="text-muted-foreground hover:bg-muted hover:text-foreground grid size-6 shrink-0 place-items-center rounded-md transition-colors outline-none"
             >
               <Info className="size-3.5" />
             </button>
@@ -292,13 +292,13 @@ function AgentButton({
       className={cn(
         'group relative overflow-hidden rounded-xl border p-3.5 text-left transition-all',
         selected
-          ? 'border-violet-500/60 bg-violet-500/10 ring-2 ring-violet-500/30'
+          ? 'border-violet-500/60 bg-violet-500/10'
           : 'border-border bg-muted/30 hover:bg-muted/60'
       )}
       onClick={onClick}
     >
       {selected ? (
-        <div className="absolute top-2 right-2 grid size-5 place-items-center rounded-full bg-violet-500 text-white shadow-sm">
+        <div className="absolute top-2 right-2 grid size-5 place-items-center rounded-full bg-violet-500 text-white">
           <Check className="size-3" strokeWidth={3} />
         </div>
       ) : null}

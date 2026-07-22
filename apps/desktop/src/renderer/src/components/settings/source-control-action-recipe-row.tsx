@@ -163,7 +163,7 @@ export function SourceControlActionRecipeRow({
             rows={3}
             spellCheck={false}
             onChange={(event) => onTemplateChange(actionId, event.target.value)}
-            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-ring w-full resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none focus-visible:ring-1"
+            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 w-full resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none"
           />
           <SourceControlActionVariableChips
             actionId={actionId}

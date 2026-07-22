@@ -43,7 +43,7 @@ function QuickCommandRow({
 }): React.JSX.Element {
   const scope = getTerminalQuickCommandScope(command)
   return (
-    <div className="border-border/60 bg-background flex items-center gap-3 rounded-md border px-3 py-2 shadow-xs">
+    <div className="border-border/60 bg-background flex items-center gap-3 rounded-md border px-3 py-2">
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-2">
           <div className="truncate text-sm font-medium">

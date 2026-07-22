@@ -1400,7 +1400,7 @@ export function ResourceUsageStatusSegment({
                   render={
                     <span
                       tabIndex={0}
-                      className="text-foreground focus-visible:ring-ring font-medium focus-visible:rounded focus-visible:ring-1 focus-visible:outline-none"
+                      className="text-foreground font-medium focus-visible:rounded focus-visible:outline-none"
                     >
                       {formatCpu(totalCpu)}
                     </span>
@@ -1419,7 +1419,7 @@ export function ResourceUsageStatusSegment({
                   render={
                     <span
                       tabIndex={0}
-                      className="text-foreground focus-visible:ring-ring font-medium focus-visible:rounded focus-visible:ring-1 focus-visible:outline-none"
+                      className="text-foreground font-medium focus-visible:rounded focus-visible:outline-none"
                     >
                       {formatMemory(totalMemory)}
                     </span>
@@ -1438,7 +1438,7 @@ export function ResourceUsageStatusSegment({
                   render={
                     <span
                       tabIndex={0}
-                      className="text-muted-foreground focus-visible:ring-ring focus-visible:rounded focus-visible:ring-1 focus-visible:outline-none"
+                      className="text-muted-foreground focus-visible:rounded focus-visible:outline-none"
                     >
                       {formatPercent(hostShare)}{' '}
                       {translate(

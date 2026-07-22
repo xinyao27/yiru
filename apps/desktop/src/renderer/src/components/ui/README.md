@@ -20,7 +20,7 @@ The supported general-purpose vocabulary is the default shadcn set. Use those ro
 - `bg-popover`, not a menu-surface token.
 - `border-border`, not a floating-border token.
 - `text-green-700 dark:text-green-300`, not a success token.
-- `shadow-md` / `shadow-lg`, not a custom elevation variable.
+- `border-border` plus an opaque surface, not an elevation variable.
 
 Custom variables are reserved for stable product-domain semantics such as git decorations and embedded editor surfaces. CSS-only variables stay outside `@theme inline`. `config/scripts/check-design-token-budget.mjs` keeps the Tailwind theme on the default shadcn vocabulary in CI; promoting an exception requires a deliberate contract change, not an incidental task edit.
 

@@ -336,7 +336,7 @@ function CheckButton({
         onClick()
       }}
       className={cn(
-        'flex size-6 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'flex size-6 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:outline-none',
         disabled && 'cursor-default opacity-35'
       )}
     >
@@ -800,7 +800,7 @@ function WorkspaceTreemap({
       <div className="absolute top-2 right-2 z-10 flex max-w-[calc(100%-1rem)] items-center gap-2">
         {zoomedWorktree ? (
           <>
-            <div className="border-border/70 bg-background max-w-56 truncate rounded-md border px-2 py-1 text-[11px] font-medium shadow-xs">
+            <div className="border-border/70 bg-background max-w-56 truncate rounded-md border px-2 py-1 text-[11px] font-medium">
               {zoomedWorktree.displayName}
             </div>
             <Button
@@ -868,8 +868,8 @@ function WorkspaceTreemap({
             title={`${rect.label} • ${formatBytes(rect.sizeBytes)}`}
             onClick={() => onSelect(rect.id)}
             className={cn(
-              'absolute overflow-hidden border border-background/80 p-2 text-left transition-[filter,outline] hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              selected && 'ring-2 ring-ring ring-offset-1 ring-offset-background'
+              'absolute overflow-hidden border border-background/80 p-2 text-left transition-[filter,border-color] hover:brightness-105 focus-visible:outline-none',
+              selected && 'border-ring'
             )}
             style={rectStyle}
           >
@@ -1044,7 +1044,7 @@ function WorkspaceRow({
         onInspect()
       }}
       className={cn(
-        'grid w-full cursor-pointer grid-cols-[1.75rem_minmax(0,1.25fr)_minmax(9rem,0.55fr)_8rem_9.5rem] items-center gap-3 border-b border-border/45 px-3 py-2.5 text-left text-sm transition-colors last:border-b-0 hover:bg-accent/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'grid w-full cursor-pointer grid-cols-[1.75rem_minmax(0,1.25fr)_minmax(9rem,0.55fr)_8rem_9.5rem] items-center gap-3 border-b border-border/45 px-3 py-2.5 text-left text-sm transition-colors last:border-b-0 hover:bg-accent/45 focus-visible:outline-none',
         inspected && 'bg-accent/55',
         isDeleting && 'cursor-wait opacity-50 grayscale hover:bg-transparent'
       )}
@@ -1733,7 +1733,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
       ) : null}
 
       {hasRows ? (
-        <div className="border-border/70 bg-background sticky top-0 z-10 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2 shadow-xs">
+        <div className="border-border/70 bg-background sticky top-0 z-10 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2">
           <div className="text-muted-foreground min-w-0 text-xs">
             <span className="text-foreground font-medium">
               {selectedDeletableIds.length}{' '}

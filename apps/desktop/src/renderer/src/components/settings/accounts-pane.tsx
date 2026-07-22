@@ -1441,7 +1441,7 @@ export function AccountsPane({
           >
             <span
               className={cn(
-                'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
+                'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
                 settings.geminiCliOAuthEnabled ? 'translate-x-4' : 'translate-x-0.5'
               )}
             />

@@ -56,7 +56,7 @@ function SetupStepRow(props: {
       aria-current={active ? 'step' : undefined}
       className={cn(
         'relative flex w-full items-center gap-3 text-left transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'focus-visible:outline-none',
         isEmbedded
           ? cn(
               'rounded-lg px-3 py-2',

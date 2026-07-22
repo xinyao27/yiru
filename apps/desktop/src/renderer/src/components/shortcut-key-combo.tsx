@@ -7,7 +7,7 @@ function KeyCap({ label, className }: { label: string; className?: string }): Re
   return (
     <span
       className={cn(
-        'inline-flex min-w-6 items-center justify-center rounded border border-border/80 bg-secondary/70 px-1.5 py-0.5 text-xs font-medium text-muted-foreground shadow-sm',
+        'inline-flex min-w-6 items-center justify-center rounded border border-border/80 bg-secondary/70 px-1.5 py-0.5 text-xs font-medium text-muted-foreground',
         className
       )}
     >

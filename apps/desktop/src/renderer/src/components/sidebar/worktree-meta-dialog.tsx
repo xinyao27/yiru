@@ -249,7 +249,7 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
                 'Notes about this worktree...'
               )}
               rows={3}
-              className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 scrollbar-sleek max-h-60 w-full min-w-0 resize-none overflow-y-auto rounded-md border bg-transparent px-3 py-2 text-xs shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+              className="border-input placeholder:text-muted-foreground focus-visible:border-ring scrollbar-sleek max-h-60 w-full min-w-0 resize-none overflow-y-auto rounded-md border bg-transparent px-3 py-2 text-xs transition-[color] outline-none"
             />
             <p className="text-muted-foreground text-[10px]">
               {translate(

@@ -127,7 +127,7 @@ export function FirstLaunchBanner({
     // `relative` is load-bearing: the absolutely-positioned ✕ anchors to
     // this container.
     <div
-      className="border-border bg-card fixed top-2 left-1/2 z-40 flex w-[min(44.625rem,calc(100vw-2rem))] -translate-x-1/2 items-start gap-4 rounded-lg border py-3 pr-3 pl-4 shadow-lg"
+      className="border-border bg-card fixed top-2 left-1/2 z-40 flex w-[min(44.625rem,calc(100vw-2rem))] -translate-x-1/2 items-start gap-4 rounded-lg border py-3 pr-3 pl-4"
       role="region"
       aria-label={translate('auto.components.FirstLaunchBanner.fcbee32f08', 'Telemetry notice')}
       aria-live="polite"

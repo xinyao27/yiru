@@ -21,9 +21,7 @@ export function WorkspaceCard(props: {
       data-feature-wall-card={dataCard}
       className={cn(
         'relative flex flex-col gap-[7px] rounded-[9px] px-[13px] py-[11px]',
-        variant === 'coordinator'
-          ? 'bg-foreground/[0.04] shadow-[inset_0_0_0_1px_rgba(24,24,27,0.14)]'
-          : 'bg-card shadow-[inset_0_0_0_1px_rgba(24,24,27,0.10),0_1px_2px_rgba(24,24,27,0.03)]'
+        variant === 'coordinator' ? 'bg-foreground/[0.04]' : 'bg-card'
       )}
     >
       <div className="grid grid-cols-[12px_minmax(0,1fr)] items-center gap-[9px]">

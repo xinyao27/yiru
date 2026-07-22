@@ -26,14 +26,7 @@ const KBD_CLASS_DOC =
 
 function CursorIcon(): JSX.Element {
   return (
-    <svg
-      width={16}
-      height={16}
-      viewBox="0 0 16 16"
-      aria-hidden
-      focusable="false"
-      className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]"
-    >
+    <svg width={16} height={16} viewBox="0 0 16 16" aria-hidden focusable="false">
       <path
         d="M2 1.5 L2 12 L5 9 L7.2 14.5 L9.5 13.6 L7.3 8 L11.5 8 Z"
         fill="#fff"
@@ -597,7 +590,7 @@ export function EditorAnimatedVisual(props: { reducedMotion: boolean }): JSX.Ele
   }, [reducedMotion])
 
   return (
-    <div className="border-border bg-card text-foreground relative overflow-visible rounded-xl border shadow-[0_1px_2px_rgba(24,24,27,0.04)]">
+    <div className="border-border bg-card text-foreground relative overflow-visible rounded-xl border">
       {/* Faux titlebar with the editing path so the surface reads as a
           real document, not a generic notes widget. */}
       <div className="border-border bg-muted/40 flex h-7 items-center gap-1.5 border-b px-3">
@@ -676,7 +669,7 @@ export function EditorAnimatedVisual(props: { reducedMotion: boolean }): JSX.Ele
         <div
           ref={menuRef}
           data-slash-menu
-          className="border-border bg-card pointer-events-none absolute z-10 min-w-[220px] origin-top-left rounded-lg border p-1.5 text-[12px] shadow-[0_16px_38px_rgba(24,24,27,0.18),0_2px_6px_rgba(24,24,27,0.08)] transition-[opacity,transform] duration-[160ms] ease-out"
+          className="border-border bg-card pointer-events-none absolute z-10 min-w-[220px] origin-top-left rounded-lg border p-1.5 text-[12px] transition-[opacity,transform] duration-[160ms] ease-out"
           style={{
             opacity: 0,
             transform: 'translateY(-4px) scale(0.985)'
@@ -785,7 +778,7 @@ export function EditorAnimatedVisual(props: { reducedMotion: boolean }): JSX.Ele
       <style>
         {translate(
           'auto.components.feature.wall.EditorAnimatedVisual.e16479c1c5',
-          '[data-slash-menu] [data-slash-row].slash-active { background: rgba(24,24,27,0.07); box-shadow: inset 0 0 0 1px rgba(24,24,27,0.06); } [data-md-active-line][data-role="active"] { color: rgb(113 113 122); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; } [data-md-active-line][data-role="h1"] { color: inherit; font-family: inherit; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; margin-top: 6px; } [data-md-caret] { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: md-caret-blink 1.05s steps(1) infinite; } @keyframes md-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } } @keyframes md-block-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } @keyframes md-cursor-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } [data-clicking="1"] [data-cursor-ripple] { animation: md-cursor-ripple 460ms ease-out forwards; }'
+          '[data-slash-menu] [data-slash-row].slash-active { background: rgba(24,24,27,0.07); } [data-md-active-line][data-role="active"] { color: rgb(113 113 122); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; } [data-md-active-line][data-role="h1"] { color: inherit; font-family: inherit; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; margin-top: 6px; } [data-md-caret] { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: md-caret-blink 1.05s steps(1) infinite; } @keyframes md-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } } @keyframes md-block-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } @keyframes md-cursor-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } [data-clicking="1"] [data-cursor-ripple] { animation: md-cursor-ripple 460ms ease-out forwards; }'
         )}
       </style>
     </div>

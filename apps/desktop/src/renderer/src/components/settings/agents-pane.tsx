@@ -223,7 +223,7 @@ export function AgentPermissionsSetting({
                       'auto.components.settings.AgentsPane.agentPermissionsInfo',
                       'Agent permissions info'
                     )}
-                    className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 grid size-5 place-items-center rounded-md transition-colors outline-none focus-visible:ring-[3px]"
+                    className="text-muted-foreground hover:bg-muted hover:text-foreground grid size-5 place-items-center rounded-md transition-colors outline-none"
                   >
                     <Info className="size-3.5" />
                   </button>
@@ -670,7 +670,7 @@ function DefaultAgentPill({ active, onClick, children }: DefaultAgentPillProps):
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
+        'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm outline-none transition-colors    ',
         active
           ? 'border-muted-foreground/40 bg-accent font-medium text-accent-foreground'
           : 'border-border bg-background/50 text-muted-foreground hover:border-muted-foreground/35 hover:text-foreground'

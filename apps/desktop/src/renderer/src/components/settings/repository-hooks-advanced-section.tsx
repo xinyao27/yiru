@@ -65,7 +65,7 @@ export function RepositoryHooksAdvancedSection({
       ]}
     >
       <details
-        className="group border-border/50 bg-background/80 rounded-2xl border shadow-sm"
+        className="group border-border/50 bg-background/80 rounded-2xl border"
         open={advancedMatchesSearch || isAdvancedOpen}
         onToggle={(event) => {
           if (advancedMatchesSearch) {

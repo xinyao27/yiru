@@ -241,7 +241,7 @@ export function RepositorySourceControlAiActionRows({
                   disabled={!hasOverride}
                   placeholder={inheritedTemplate}
                   spellCheck={false}
-                  className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-ring disabled:bg-muted/40 w-full resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none focus-visible:ring-1 disabled:cursor-not-allowed"
+                  className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 disabled:bg-muted/40 w-full resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none disabled:cursor-not-allowed"
                 />
                 <SourceControlActionVariableChips
                   actionId={actionId}

@@ -117,7 +117,7 @@ export function AutomationEditorDialogFooter({
                         'auto.components.automations.AutomationEditorDialog.2c3fd9bfa1',
                         'Workspace mode help'
                       )}
-                      className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 rounded-sm outline-none focus-visible:ring-[3px]"
+                      className="text-muted-foreground hover:text-foreground rounded-sm outline-none"
                     >
                       <Info className="size-3.5" />
                     </button>

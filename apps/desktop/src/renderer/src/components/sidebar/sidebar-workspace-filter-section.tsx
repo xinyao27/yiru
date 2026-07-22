@@ -71,7 +71,7 @@ function FilterToggleRow({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="hover:bg-muted focus-visible:ring-ring flex w-full items-center justify-between gap-2 rounded-[5px] px-2 py-1.5 text-[12px] font-medium focus-visible:ring-1 focus-visible:outline-none"
+      className="hover:bg-muted flex w-full items-center justify-between gap-2 rounded-[5px] px-2 py-1.5 text-[12px] font-medium focus-visible:outline-none"
     >
       <span className="text-foreground inline-flex items-center gap-2">
         <span className="text-muted-foreground">{icon}</span>
@@ -86,7 +86,7 @@ function FilterToggleRow({
       >
         <span
           className={cn(
-            'absolute top-0.5 left-0.5 size-2.5 rounded-full bg-background shadow-sm transition-transform',
+            'absolute top-0.5 left-0.5 size-2.5 rounded-full bg-background transition-transform',
             checked && 'translate-x-2.5'
           )}
         />

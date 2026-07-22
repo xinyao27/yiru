@@ -113,7 +113,7 @@ export default function WebConnect({
 
   return (
     <div className="bg-background text-foreground flex min-h-dvh items-center justify-center px-4 py-6">
-      <div className="border-border bg-card flex w-full max-w-[520px] flex-col gap-5 rounded-lg border p-5 shadow-sm">
+      <div className="border-border bg-card flex w-full max-w-[520px] flex-col gap-5 rounded-lg border p-5">
         <div className="flex items-start gap-3">
           <div className="border-border bg-muted flex size-9 shrink-0 items-center justify-center rounded-md border">
             <Server size={18} aria-hidden />

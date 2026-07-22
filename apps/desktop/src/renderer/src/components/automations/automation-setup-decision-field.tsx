@@ -82,7 +82,7 @@ export function AutomationSetupDecisionField({
             <label className="group text-foreground flex items-center gap-2 text-xs">
               <span
                 className={cn(
-                  'flex size-4 items-center justify-center rounded-[3px] border shadow-sm transition',
+                  'flex size-4 items-center justify-center rounded-[3px] border transition',
                   checked
                     ? 'border-emerald-500/60 bg-emerald-500 text-white'
                     : 'border-foreground/20 bg-background dark:border-white/20 dark:bg-muted/10'

@@ -140,8 +140,8 @@ Native chat borrows Cursor's transcript hierarchy while remaining fully rectilin
 Yiru does not use decorative shadows. Use `border` with the `border` token for
 surface separation, opaque backgrounds for overlays, and a real CSS `outline`
 for keyboard focus. Do not add `shadow-*`, `drop-shadow-*`, `box-shadow`, or
-`text-shadow`; the renderer base layer neutralizes legacy and third-party shadow
-declarations so every surface stays flat.
+`text-shadow`; remove legacy declarations at their source so every surface stays
+flat without a global override.
 
 ### Floating surfaces
 

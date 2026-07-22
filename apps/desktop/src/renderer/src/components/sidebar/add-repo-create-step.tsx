@@ -180,7 +180,7 @@ export function CreateStep({
             type="button"
             onClick={() => setAdvancedOpen((open) => !open)}
             aria-expanded={advancedOpen}
-            className="hover:bg-accent/50 focus-visible:ring-ring/50 flex w-full min-w-0 cursor-pointer items-start gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors focus-visible:ring-[3px] focus-visible:outline-none"
+            className="hover:bg-accent/50 flex w-full min-w-0 cursor-pointer items-start gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors focus-visible:outline-none"
           >
             <span className="border-border bg-background/60 text-muted-foreground mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md border">
               <GitBranch className="size-3.5" />

@@ -291,7 +291,7 @@ export function SourceControlTextGenerationDialogForm({
               setCommandTemplate(event.target.value)
               setGenerationError(null)
             }}
-            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-ring box-border w-full max-w-full min-w-0 resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none focus-visible:ring-1"
+            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 box-border w-full max-w-full min-w-0 resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none"
           />
           <SourceControlActionVariableChips
             actionId={actionId}

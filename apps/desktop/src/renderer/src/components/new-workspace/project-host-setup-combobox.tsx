@@ -48,7 +48,7 @@ export default function ProjectHostSetupCombobox({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="border-input focus:border-ring focus:ring-ring/50 h-9 w-full justify-between px-3 text-sm font-normal focus:ring-[3px]"
+            className="border-input focus:border-ring h-9 w-full justify-between px-3 text-sm font-normal"
           >
             {selected ? (
               <span className="inline-flex min-w-0 items-center gap-1.5">

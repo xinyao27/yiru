@@ -24,7 +24,7 @@ export function SetupWorkspacesVisual(): JSX.Element {
   return (
     <div aria-hidden className="relative h-28 w-[156px] shrink-0">
       <WorktreeGlyphPanel className="bg-muted/60 top-0 right-0" />
-      <WorktreeGlyphPanel className="bg-muted bottom-0 left-0 shadow-[0_6px_16px_rgba(0,0,0,0.12)]" />
+      <WorktreeGlyphPanel className="bg-muted bottom-0 left-0" />
     </div>
   )
 }
@@ -37,7 +37,7 @@ function WorktreeGlyphPanel(props: { className?: string }): JSX.Element {
         props.className
       )}
     >
-      <span className="mt-0.5 size-2 shrink-0 rounded-full bg-emerald-500 ring-[3px] ring-emerald-500/10" />
+      <span className="mt-0.5 size-2 shrink-0 rounded-full bg-emerald-500" />
       <span className="flex min-w-0 flex-1 flex-col gap-1.5">
         <span className="bg-foreground/10 h-[5px] w-4/5 rounded-full" />
         <span className="bg-foreground/10 h-[5px] w-1/2 rounded-full" />
@@ -51,7 +51,7 @@ function WorktreeGlyphPanel(props: { className?: string }): JSX.Element {
 export function SetupBrowserVisual(): JSX.Element {
   return (
     <div aria-hidden className="relative h-28 w-[156px] shrink-0">
-      <div className="border-border bg-muted absolute inset-x-0 inset-y-1 flex flex-col overflow-hidden rounded-[10px] border-[1.5px] shadow-[0_6px_16px_rgba(0,0,0,0.12)]">
+      <div className="border-border bg-muted absolute inset-x-0 inset-y-1 flex flex-col overflow-hidden rounded-[10px] border-[1.5px]">
         <div className="border-border flex items-center gap-1.5 border-b px-2 py-1.5">
           <TerminalDots />
           <span className="bg-foreground/10 ml-1 h-[5px] flex-1 rounded-full" />
@@ -81,13 +81,13 @@ export function SetupMultipleReposVisual(): JSX.Element {
 
 function RepoCard(props: { nameWidth: string; worktreeWidth: string }): JSX.Element {
   return (
-    <div className="bg-muted flex flex-col gap-2 rounded-[10px] border-[1.5px] border-emerald-500/35 p-2.5 shadow-[0_6px_16px_rgba(0,0,0,0.12)]">
+    <div className="bg-muted flex flex-col gap-2 rounded-[10px] border-[1.5px] border-emerald-500/35 p-2.5">
       <span className="flex items-center gap-1.5">
         <FolderGit2 className="text-muted-foreground size-[15px] shrink-0" />
         <span className={cn('h-[5px] rounded-full bg-foreground/10', props.nameWidth)} />
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="size-2 shrink-0 rounded-full bg-emerald-500 ring-[3px] ring-emerald-500/10" />
+        <span className="size-2 shrink-0 rounded-full bg-emerald-500" />
         <span className={cn('h-[5px] rounded-full bg-foreground/10', props.worktreeWidth)} />
       </span>
     </div>

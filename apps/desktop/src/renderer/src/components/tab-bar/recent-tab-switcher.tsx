@@ -161,7 +161,7 @@ export default function RecentTabSwitcher(): React.JSX.Element | null {
   return createPortal(
     <div className="pointer-events-none fixed inset-0 z-[100] flex items-start justify-center pt-[12vh]">
       <div
-        className="border-border bg-popover text-popover-foreground w-[min(520px,calc(100vw-48px))] overflow-hidden rounded-lg border shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+        className="border-border bg-popover text-popover-foreground w-[min(520px,calc(100vw-48px))] overflow-hidden rounded-lg border"
         role="listbox"
         aria-label={translate(
           'auto.components.tab.bar.RecentTabSwitcher.07ad4cd0b7',

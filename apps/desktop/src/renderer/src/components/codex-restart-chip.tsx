@@ -191,7 +191,7 @@ function LoudRestartOverlay({
       aria-describedby={bodyId}
       className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
     >
-      <div className="border-border bg-card text-card-foreground pointer-events-auto flex w-full max-w-[30rem] flex-col gap-3 rounded-lg border p-6 pb-5 shadow-xs">
+      <div className="border-border bg-card text-card-foreground pointer-events-auto flex w-full max-w-[30rem] flex-col gap-3 rounded-lg border p-6 pb-5">
         <div className="flex items-start gap-3">
           <div className="border-border bg-muted flex size-10 shrink-0 items-center justify-center rounded-full border">
             <RefreshCw className="text-foreground size-5" aria-hidden="true" />
@@ -244,7 +244,7 @@ function CollapsedRestartChip({
 }): React.JSX.Element {
   return (
     <div
-      className="border-border bg-card text-card-foreground absolute top-2 right-2 z-50 flex max-w-[min(100%-1rem,24rem)] items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium shadow-xs"
+      className="border-border bg-card text-card-foreground absolute top-2 right-2 z-50 flex max-w-[min(100%-1rem,24rem)] items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium"
       role="status"
       aria-live="polite"
     >

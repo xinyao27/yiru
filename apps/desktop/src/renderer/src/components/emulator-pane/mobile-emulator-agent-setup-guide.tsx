@@ -41,7 +41,7 @@ export function MobileEmulatorAgentSetupGuide({
         'auto.components.emulator.pane.MobileEmulatorAgentSetupGuide.2fda9ff015',
         'Set up agent control'
       )}
-      className="border-border bg-card text-card-foreground overflow-hidden rounded-lg border shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+      className="border-border bg-card text-card-foreground overflow-hidden rounded-lg border"
     >
       <div className="flex items-center gap-2 px-3 py-2">
         <p className="text-muted-foreground min-w-0 flex-1 text-[11px] leading-4">

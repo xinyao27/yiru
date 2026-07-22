@@ -229,7 +229,7 @@ const SidebarFilter = React.memo(function SidebarFilter({
                 <button
                   type="button"
                   onClick={selectAllRepos}
-                  className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring rounded-full px-2 py-0.5 text-[11px] focus-visible:ring-1 focus-visible:outline-none disabled:opacity-40 disabled:hover:bg-transparent"
+                  className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-full px-2 py-0.5 text-[11px] focus-visible:outline-none disabled:opacity-40 disabled:hover:bg-transparent"
                   disabled={allSelected}
                 >
                   {translate('auto.components.sidebar.SidebarFilter.139877b384', 'Select all')}
@@ -237,7 +237,7 @@ const SidebarFilter = React.memo(function SidebarFilter({
                 <button
                   type="button"
                   onClick={clearRepos}
-                  className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring rounded-full px-2 py-0.5 text-[11px] focus-visible:ring-1 focus-visible:outline-none disabled:opacity-40 disabled:hover:bg-transparent"
+                  className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-full px-2 py-0.5 text-[11px] focus-visible:outline-none disabled:opacity-40 disabled:hover:bg-transparent"
                   disabled={!hasRepoFilter}
                 >
                   {translate('auto.components.sidebar.SidebarFilter.779b7ba05d', 'Clear')}
@@ -318,7 +318,7 @@ const SidebarFilter = React.memo(function SidebarFilter({
             <button
               type="button"
               onClick={clearAll}
-              className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring rounded-[5px] px-2 py-1 text-[11px] focus-visible:ring-1 focus-visible:outline-none"
+              className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-[5px] px-2 py-1 text-[11px] focus-visible:outline-none"
             >
               {translate('auto.components.sidebar.SidebarFilter.92a23e6d07', 'Reset filters')}
             </button>
@@ -328,7 +328,7 @@ const SidebarFilter = React.memo(function SidebarFilter({
           <button
             type="button"
             onClick={() => addRepo()}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-[5px] px-2 py-1 text-[11px] focus-visible:ring-1 focus-visible:outline-none"
+            className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex items-center gap-1.5 rounded-[5px] px-2 py-1 text-[11px] focus-visible:outline-none"
           >
             <FolderPlus className="size-3.5" />
             {translate('auto.components.sidebar.SidebarFilter.e3b3898218', 'Add project')}
@@ -358,7 +358,7 @@ function FilterToggleRow({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="hover:bg-muted focus-visible:ring-ring flex w-full items-center justify-between gap-2 rounded-[5px] px-2 py-1.5 text-[12px] font-medium focus-visible:ring-1 focus-visible:outline-none"
+      className="hover:bg-muted flex w-full items-center justify-between gap-2 rounded-[5px] px-2 py-1.5 text-[12px] font-medium focus-visible:outline-none"
     >
       <span className="text-foreground inline-flex items-center gap-2">
         <span className="text-muted-foreground">{icon}</span>
@@ -375,7 +375,7 @@ function FilterToggleRow({
         >
           <span
             className={cn(
-              'absolute top-0.5 left-0.5 size-2.5 rounded-full bg-background shadow-sm transition-transform',
+              'absolute top-0.5 left-0.5 size-2.5 rounded-full bg-background   transition-transform',
               checked && 'translate-x-2.5'
             )}
           />

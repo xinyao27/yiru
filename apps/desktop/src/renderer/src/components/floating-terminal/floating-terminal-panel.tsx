@@ -1403,7 +1403,7 @@ export function FloatingTerminalPanel({
   return (
     // Why: root notification cards use z-40; keep the floating workspace below
     // them so alerts are never hidden behind an open terminal panel.
-    // Drop shadow on the outer shell, border on an inner shell — mixing both on
+    // Keep the border on an inner shell rather than mixing frame chrome on
     // one rounded node made corners look stubby. Floating tabs skip their top
     // border so the titlebar curve stays clean.
     <div
@@ -1412,7 +1412,7 @@ export function FloatingTerminalPanel({
       aria-hidden={!open}
       tabIndex={-1}
       className={cn(
-        'fixed z-30 flex min-h-[280px] min-w-[420px] rounded-lg bg-transparent text-card-foreground shadow-[0_4px_12px_rgba(0,0,0,0.16),0_24px_64px_rgba(0,0,0,0.32)] outline-none dark:shadow-[0_8px_20px_rgba(0,0,0,0.35),0_28px_72px_rgba(0,0,0,0.58)]',
+        'fixed z-30 flex min-h-[280px] min-w-[420px] rounded-lg bg-transparent text-card-foreground outline-none',
         open ? 'opacity-100' : 'invisible pointer-events-none opacity-0'
       )}
       style={{
@@ -1597,7 +1597,7 @@ export function FloatingTerminalPanel({
       </div>
       {showOrchestrationSetup && activeTabType === 'terminal' ? (
         <div
-          className="border-border/60 bg-card text-card-foreground absolute right-4 bottom-4 z-10 w-[280px] rounded-md border p-3 shadow-xs"
+          className="border-border/60 bg-card text-card-foreground absolute right-4 bottom-4 z-10 w-[280px] rounded-md border p-3"
           data-floating-terminal-no-drag
         >
           <div className="space-y-2">

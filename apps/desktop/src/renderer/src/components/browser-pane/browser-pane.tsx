@@ -425,7 +425,7 @@ function PendingBrowserAnnotationCard({
         align="center"
         sideOffset={10}
         portalContainer={portalContainer}
-        className="z-40 w-[22rem] max-w-[calc(var(--radix-popover-content-available-width)-1rem)] p-3 shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+        className="z-40 w-[22rem] max-w-[calc(var(--radix-popover-content-available-width)-1rem)] p-3"
         aria-label={translate(
           'auto.components.browser.pane.BrowserPane.b472c5fe03',
           'Add browser annotation'
@@ -453,7 +453,7 @@ function PendingBrowserAnnotationCard({
             'Describe what the agent should change here...'
           )}
           maxLength={GRAB_BUDGET.annotationCommentMaxLength}
-          className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring h-24 w-full resize-none rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+          className="border-input bg-background placeholder:text-muted-foreground h-24 w-full resize-none rounded-md border px-3 py-2 text-sm outline-none"
           autoFocus
           onKeyDown={(event) => {
             if (event.key === 'Escape') {
@@ -497,7 +497,7 @@ function PendingBrowserAnnotationCard({
                   key={option.value}
                   value={option.value}
                   aria-label={option.label}
-                  className="data-[state=on]:border-foreground/20 data-[state=on]:bg-foreground/10 data-[state=on]:text-foreground data-[state=on]:hover:bg-foreground/15 data-[state=on]:hover:text-foreground gap-1.5 text-xs data-[state=on]:shadow-xs"
+                  className="data-[state=on]:border-foreground/20 data-[state=on]:bg-foreground/10 data-[state=on]:text-foreground data-[state=on]:hover:bg-foreground/15 data-[state=on]:hover:text-foreground gap-1.5 text-xs"
                 >
                   <Icon className="size-3.5" />
                   <span>{option.label}</span>
@@ -2730,7 +2730,7 @@ function RemoteBrowserPagePane({
           />
         ) : null}
         {remoteError ? (
-          <div className="border-border bg-popover text-popover-foreground absolute bottom-4 left-1/2 max-w-md -translate-x-1/2 rounded-md border px-3 py-2 text-xs shadow-md">
+          <div className="border-border bg-popover text-popover-foreground absolute bottom-4 left-1/2 max-w-md -translate-x-1/2 rounded-md border px-3 py-2 text-xs">
             {remoteError}
           </div>
         ) : null}
@@ -5564,7 +5564,7 @@ function BrowserPagePane({
                 aria-live="polite"
                 aria-hidden={browserZoomIndicatorState.ariaHidden}
                 className={cn(
-                  'pointer-events-none absolute top-3 right-3 z-30 rounded-md border border-border bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-xs transition-opacity duration-300 ease-out',
+                  'pointer-events-none absolute top-3 right-3 z-30 rounded-md border border-border bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground transition-opacity duration-300 ease-out',
                   browserZoomIndicatorState.opacityClassName
                 )}
               >
@@ -5648,7 +5648,7 @@ function BrowserPagePane({
                 />
               ) : null}
               {browserAnnotations.length > 0 && browserAnnotationTrayOpen ? (
-                <div className="border-border bg-popover text-popover-foreground absolute right-3 bottom-3 z-30 flex max-h-[45%] w-[min(20rem,calc(100%-1.5rem))] flex-col overflow-hidden rounded-lg border shadow-[0_10px_24px_rgba(0,0,0,0.18)]">
+                <div className="border-border bg-popover text-popover-foreground absolute right-3 bottom-3 z-30 flex max-h-[45%] w-[min(20rem,calc(100%-1.5rem))] flex-col overflow-hidden rounded-lg border">
                   <div className="border-border flex items-center gap-2 border-b px-3 py-2">
                     <MessageSquarePlus className="text-muted-foreground size-4" />
                     <div className="min-w-0 flex-1 text-sm font-medium">
@@ -5880,7 +5880,7 @@ function BrowserPagePane({
                   />
                   <div
                     className={cn(
-                      'flex items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 shadow-lg',
+                      'flex items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5',
                       grabToast.type === 'success'
                         ? 'bg-white text-gray-900'
                         : 'bg-white text-red-600'

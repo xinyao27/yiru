@@ -88,7 +88,7 @@ export function WorkspaceTabCreateMenu({
       <DropdownMenuContent
         align="start"
         sideOffset={6}
-        className="border-border/80 w-72 max-w-[calc(100vw-1rem)] rounded-lg p-1 shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+        className="border-border/80 w-72 max-w-[calc(100vw-1rem)] rounded-lg p-1"
         finalFocus={finalFocus}
       >
         {children}

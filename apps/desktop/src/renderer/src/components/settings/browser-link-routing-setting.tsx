@@ -57,7 +57,7 @@ export function BrowserLinkRoutingSetting({
       >
         <span
           className={cn(
-            'inline-block h-3.5 w-3.5 transform rounded-full bg-background shadow-sm transition-transform',
+            'inline-block h-3.5 w-3.5 transform rounded-full bg-background transition-transform',
             settings.openLinksInApp ? 'translate-x-4' : 'translate-x-0.5'
           )}
         />

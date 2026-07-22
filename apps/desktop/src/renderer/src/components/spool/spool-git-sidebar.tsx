@@ -209,7 +209,7 @@ function HistoryList({
             data-current={selectedKey === entry.commitRef ? 'true' : undefined}
             onClick={() => onSelect(entry)}
             className={cn(
-              'block w-full rounded-md px-2 py-2 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring',
+              'block w-full rounded-md px-2 py-2 text-left focus-visible:outline-none',
               selectedKey === entry.commitRef
                 ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                 : 'hover:bg-sidebar-accent'

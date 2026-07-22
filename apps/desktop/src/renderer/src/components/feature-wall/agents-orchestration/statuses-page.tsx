@@ -68,7 +68,7 @@ export function StatusesPage(props: { active: boolean; reducedMotion: boolean })
   return (
     <div className="flex h-full flex-col gap-5">
       <SupportedAgentsMarquee reducedMotion={reducedMotion} />
-      <div className="bg-foreground/[0.05] rounded-[10px] px-2 py-2.5 shadow-[inset_0_0_0_1px_rgba(24,24,27,0.06)]">
+      <div className="bg-foreground/[0.05] rounded-[10px] px-2 py-2.5">
         <div className="grid grid-cols-[14px_minmax(0,1fr)] items-center gap-3 px-1.5">
           <span className="inline-block size-[9px] rounded-full bg-emerald-500" />
           <div className="truncate text-[15.5px] leading-[1.2] font-semibold">
@@ -238,7 +238,7 @@ function SupportedAgentsMarquee(props: { reducedMotion: boolean }): JSX.Element 
 
 function MarqueePill(props: { agentId: AgentCatalogEntry['id']; label: string }): JSX.Element {
   return (
-    <span className="bg-foreground/[0.05] inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] leading-none shadow-[inset_0_0_0_1px_rgba(24,24,27,0.06)]">
+    <span className="bg-foreground/[0.05] inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] leading-none">
       <span className="inline-flex size-3.5 items-center justify-center">
         <AgentIcon agent={props.agentId} size={14} />
       </span>

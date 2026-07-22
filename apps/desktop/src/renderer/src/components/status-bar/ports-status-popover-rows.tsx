@@ -242,7 +242,7 @@ export function PortRow({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <div className="border-border/40 bg-popover can-hover:opacity-0 absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-md border px-0.5 shadow-xs transition-opacity group-focus-within/port:opacity-100 group-hover/port:opacity-100">
+          <div className="border-border/40 bg-popover can-hover:opacity-0 absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-md border px-0.5 transition-opacity group-focus-within/port:opacity-100 group-hover/port:opacity-100">
             <PortAction
               label={openBrowserLabel}
               tooltipLabel={getPortOpenBrowserTooltipLabel(openBrowserLabel)}

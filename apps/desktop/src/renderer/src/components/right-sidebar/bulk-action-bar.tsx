@@ -23,7 +23,7 @@ export function BulkActionBar({
   isExecuting: boolean
 }) {
   return (
-    <div className="bg-background border-border animate-in slide-in-from-bottom-2 absolute right-0 bottom-0 left-0 z-10 border-t p-2 shadow-lg">
+    <div className="bg-background border-border animate-in slide-in-from-bottom-2 absolute right-0 bottom-0 left-0 z-10 border-t p-2">
       <div className="bg-accent/30 border-border/50 flex items-center justify-between gap-2 rounded-md border p-1.5 pr-2">
         <div className="text-foreground ml-1 flex items-center gap-2 text-xs font-medium">
           {isExecuting ? (

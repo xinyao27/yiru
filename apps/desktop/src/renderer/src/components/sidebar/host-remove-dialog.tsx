@@ -242,7 +242,7 @@ export function HostRemoveDialog({
                     role="switch"
                     aria-checked={deleteWorkspaces}
                     onClick={() => setDeleteWorkspaces((v) => !v)}
-                    className="group focus-visible:ring-ring/50 mt-0.5 flex shrink-0 cursor-pointer items-center rounded-md outline-none focus-visible:ring-[3px]"
+                    className="group mt-0.5 flex shrink-0 cursor-pointer items-center rounded-md outline-none"
                   >
                     <span
                       aria-hidden
@@ -253,7 +253,7 @@ export function HostRemoveDialog({
                     >
                       <span
                         className={cn(
-                          'pointer-events-none block size-3.5 rounded-full bg-background shadow-sm transition-transform',
+                          'pointer-events-none block size-3.5 rounded-full bg-background transition-transform',
                           deleteWorkspaces ? 'translate-x-4' : 'translate-x-0.5'
                         )}
                       />

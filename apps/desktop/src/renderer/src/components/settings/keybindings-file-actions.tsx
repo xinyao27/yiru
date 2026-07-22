@@ -158,13 +158,13 @@ export function KeybindingsFileActions(): React.JSX.Element {
   return (
     <div
       ref={setActionsRootNode}
-      className="border-border bg-background inline-flex shrink-0 overflow-hidden rounded-md border shadow-xs"
+      className="border-border bg-background inline-flex shrink-0 overflow-hidden rounded-md border"
     >
       <Button
         type="button"
         variant="ghost"
         size="xs"
-        className="rounded-none border-0 shadow-none"
+        className="rounded-none border-0"
         onClick={() => void editKeybindingsInYiru()}
       >
         <FileText className="size-3" />

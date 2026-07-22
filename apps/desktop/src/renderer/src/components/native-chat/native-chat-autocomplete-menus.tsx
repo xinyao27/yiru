@@ -16,7 +16,7 @@ export function NativeChatSlashMenu({
   onChoose: (command: SlashCommandSuggestion) => void
 }): React.JSX.Element {
   return (
-    <div className="border-border bg-popover absolute right-3 bottom-full left-3 mb-1 overflow-hidden rounded-md border shadow-md sm:right-4 sm:left-4">
+    <div className="border-border bg-popover absolute right-3 bottom-full left-3 mb-1 overflow-hidden rounded-md border sm:right-4 sm:left-4">
       {suggestions.map((command, index) => (
         <button
           key={command.name}
@@ -48,7 +48,7 @@ export function NativeChatMentionHint({
     <button
       type="button"
       onClick={onAccept}
-      className="border-border bg-popover text-muted-foreground absolute right-3 bottom-full left-3 mb-1 flex w-auto items-center gap-2 rounded-md border px-3 py-1.5 text-left text-xs shadow-md sm:right-4 sm:left-4"
+      className="border-border bg-popover text-muted-foreground absolute right-3 bottom-full left-3 mb-1 flex w-auto items-center gap-2 rounded-md border px-3 py-1.5 text-left text-xs sm:right-4 sm:left-4"
     >
       {translate('components.native-chat.composer.mentionHint', 'Referencing file:')}{' '}
       <span className="text-foreground font-medium">@{query || '…'}</span>
@@ -72,7 +72,7 @@ export function NativeChatSkillMenu({
   }, [activeIndex, suggestions])
 
   return (
-    <div className="scrollbar-sleek border-border bg-popover absolute right-0 bottom-full left-0 mb-1 max-h-64 overflow-y-auto rounded-md border p-1 shadow-md">
+    <div className="scrollbar-sleek border-border bg-popover absolute right-0 bottom-full left-0 mb-1 max-h-64 overflow-y-auto rounded-md border p-1">
       {suggestions.length === 0 ? (
         <div className="text-muted-foreground px-2 py-1.5 text-xs">
           {translate('components.native-chat.composer.noSkills', 'No matching skills')}

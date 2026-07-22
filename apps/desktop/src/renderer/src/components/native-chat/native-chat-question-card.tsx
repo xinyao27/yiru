@@ -159,7 +159,7 @@ export function NativeChatQuestionCard({
             </div>
           ) : null}
 
-          <div className="border-input bg-card overflow-hidden border shadow-xs">
+          <div className="border-input bg-card overflow-hidden border">
             <div className="flex items-center justify-between gap-2 px-3.5 py-2.5">
               <p
                 className="text-foreground min-w-0 truncate text-sm font-semibold"
@@ -171,7 +171,7 @@ export function NativeChatQuestionCard({
                 type="button"
                 onClick={onCancel}
                 aria-label={translate('components.native-chat.question.cancel', 'Cancel')}
-                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex size-6 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex size-6 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:outline-none"
               >
                 <X className="size-4" />
               </button>
@@ -217,7 +217,7 @@ export function NativeChatQuestionCard({
                   disabled={isSubmitting}
                   onClick={() => confirm()}
                   className={cn(
-                    'w-24 shrink-0 rounded-md px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:opacity-50',
+                    'w-24 shrink-0 rounded-md px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none disabled:cursor-default disabled:opacity-50',
                     currentAnswered
                       ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                       : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'

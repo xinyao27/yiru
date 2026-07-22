@@ -86,7 +86,7 @@ export const mobilePageStyles = {
   stage:
     'relative z-[1] grid h-[min(100%,calc(100vh-112px))] min-h-0 place-items-center max-[920px]:h-[min(420px,42vh)]',
   phoneFrame:
-    'relative aspect-[9/19.5] w-[min(100%,420px,calc((100vh-112px)*9/19.5))] bg-neutral-950 p-[7px] shadow-lg ring-1 ring-foreground/15 max-[920px]:w-[min(290px,100%)]',
+    'relative aspect-[9/19.5] w-[min(100%,420px,calc((100vh-112px)*9/19.5))] bg-neutral-950 p-[7px] max-[920px]:w-[min(290px,100%)]',
   phoneScreen: 'relative isolate size-full overflow-hidden bg-neutral-950 [contain:paint]',
   screenSlide:
     'pointer-events-none absolute inset-0 translate-x-full transition-transform duration-300 ease-out will-change-transform motion-reduce:transition-none',

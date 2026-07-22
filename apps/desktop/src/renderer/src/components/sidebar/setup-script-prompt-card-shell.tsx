@@ -50,7 +50,7 @@ export function SetupScriptPromptCardShell({
 }: SetupScriptPromptCardShellProps): React.JSX.Element {
   return (
     <div className="shrink-0 px-3 pb-2">
-      <div className="setup-script-prompt-card border-sidebar-border text-sidebar-accent-foreground rounded-lg border p-3 shadow-xs">
+      <div className="setup-script-prompt-card border-sidebar-border text-sidebar-accent-foreground rounded-lg border p-3">
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm leading-snug font-semibold">
             {translate(

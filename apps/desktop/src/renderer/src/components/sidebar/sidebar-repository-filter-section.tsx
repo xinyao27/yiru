@@ -285,7 +285,7 @@ function ProjectFilterHeader({
       <button
         type="button"
         onClick={onClear}
-        className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring rounded-full px-2 py-0.5 text-[11px] focus-visible:ring-1 focus-visible:outline-none disabled:opacity-40 disabled:hover:bg-transparent"
+        className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-full px-2 py-0.5 text-[11px] focus-visible:outline-none disabled:opacity-40 disabled:hover:bg-transparent"
         disabled={!hasRepoFilter}
       >
         {translate('auto.components.sidebar.SidebarRepositoryFilterSection.d3a9c4cea1', 'Clear')}

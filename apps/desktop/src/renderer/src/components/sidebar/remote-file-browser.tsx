@@ -686,8 +686,8 @@ export function RemoteFileBrowser({
           aria-describedby={preview?.error ? 'remote-file-browser-path-error' : undefined}
           className={cn(
             'w-full h-7 pl-7 pr-7 text-xs rounded-md bg-background',
-            'border border-border focus:outline-none focus:ring-1 focus:ring-ring',
-            preview?.error && 'border-destructive/60 focus:ring-destructive/60'
+            'border border-border focus:outline-none    ',
+            preview?.error && 'border-destructive/60  '
           )}
         />
         {showPreviewLoading && (

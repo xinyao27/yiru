@@ -507,7 +507,7 @@ export function BrowserAnimatedVisual(props: {
           }}
         >
           {/* Browser app-window — column 1 */}
-          <div className="border-border bg-card text-card-foreground relative flex min-w-0 flex-col overflow-hidden rounded-xl border shadow-xs">
+          <div className="border-border bg-card text-card-foreground relative flex min-w-0 flex-col overflow-hidden rounded-xl border">
             <div
               ref={titlebarRef}
               className="border-border bg-muted/40 relative flex min-h-[32px] items-end gap-1.5 border-b px-2.5 pt-2"
@@ -725,7 +725,7 @@ export function BrowserAnimatedVisual(props: {
 
           <div
             className={cn(
-              'flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card font-mono text-[10px] text-card-foreground shadow-xs transition-[opacity,transform] duration-500',
+              'flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card font-mono text-[10px] text-card-foreground transition-[opacity,transform] duration-500',
               isSplit ? 'translate-x-0 opacity-100' : 'translate-x-2 opacity-0'
             )}
           >
@@ -943,11 +943,11 @@ function PricingCard(props: {
       <span
         ref={ctaRef}
         className={cn(
-          'mt-1 inline-flex w-fit items-center rounded-md px-2 py-1 text-[11px] font-semibold transition-[background-color,color,box-shadow,transform] duration-300',
+          'mt-1 inline-flex w-fit items-center rounded-md px-2 py-1 text-[11px] font-semibold transition-[background-color,color,transform] duration-300',
           highlighted
             ? 'bg-foreground text-background'
             : ctaIsBranded
-              ? 'bg-blue-600 text-white shadow-[0_6px_16px_rgba(37,99,235,0.35)]'
+              ? 'bg-blue-600 text-white'
               : 'bg-foreground/[0.07] text-foreground',
           ctaPressing ? 'scale-[0.96]' : null
         )}
@@ -1021,14 +1021,7 @@ function GlobeGlyph(): JSX.Element {
 
 function CursorIcon(): JSX.Element {
   return (
-    <svg
-      width={16}
-      height={16}
-      viewBox="0 0 16 16"
-      aria-hidden
-      focusable="false"
-      className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]"
-    >
+    <svg width={16} height={16} viewBox="0 0 16 16" aria-hidden focusable="false">
       <path
         d="M2 1.5 L2 12 L5 9 L7.2 14.5 L9.5 13.6 L7.3 8 L11.5 8 Z"
         fill="#fff"

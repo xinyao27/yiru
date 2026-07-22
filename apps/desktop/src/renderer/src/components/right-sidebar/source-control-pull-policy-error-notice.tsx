@@ -63,7 +63,7 @@ export function PullPolicyRemoteActionNotice({
       id={id}
       role="alert"
       aria-live="polite"
-      className="border-destructive/20 bg-card text-card-foreground mt-2 min-w-0 overflow-hidden rounded-lg border shadow-xs"
+      className="border-destructive/20 bg-card text-card-foreground mt-2 min-w-0 overflow-hidden rounded-lg border"
     >
       <div className="bg-destructive/70 h-0.5" aria-hidden="true" />
       <div className="space-y-2.5 px-2.5 py-2.5">

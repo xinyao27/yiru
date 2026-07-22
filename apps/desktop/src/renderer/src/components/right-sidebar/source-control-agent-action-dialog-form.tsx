@@ -251,7 +251,7 @@ export function SourceControlAgentActionDialogForm({
             rows={7}
             value={commandTemplate}
             onChange={(event) => onCommandTemplateChange(event.target.value)}
-            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-ring box-border min-h-[6.5rem] w-full max-w-full min-w-0 resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none focus-visible:ring-1"
+            className="border-border bg-background text-foreground placeholder:text-muted-foreground/70 box-border min-h-[6.5rem] w-full max-w-full min-w-0 resize-y rounded-md border px-2.5 py-2 font-mono text-xs outline-none"
             spellCheck={false}
           />
           <SourceControlActionVariableChips
@@ -296,7 +296,7 @@ export function SourceControlAgentActionDialogForm({
           <div
             className={cn(
               'space-y-2 rounded-md border border-border bg-background p-3',
-              saveLaunchRecipe && 'border-foreground shadow-[inset_0_0_0_1px_var(--foreground)]'
+              saveLaunchRecipe && 'border-foreground  '
             )}
           >
             <label className="grid cursor-pointer grid-cols-[1rem_1fr] items-start gap-2.5">

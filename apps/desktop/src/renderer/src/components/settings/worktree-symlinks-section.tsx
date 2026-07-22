@@ -229,7 +229,7 @@ export function WorktreeSymlinksSection({
           )}
         </div>
       ) : (
-        <div className="border-border/50 bg-background/70 rounded-xl border px-4 py-3 shadow-sm">
+        <div className="border-border/50 bg-background/70 rounded-xl border px-4 py-3">
           <div className="flex items-start gap-3">
             <div className="border-border/50 bg-muted/30 mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border">
               <Link2 className="text-muted-foreground size-4" />

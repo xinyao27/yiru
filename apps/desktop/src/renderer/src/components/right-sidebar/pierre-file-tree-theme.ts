@@ -36,6 +36,6 @@ export const PIERRE_FILE_TREE_UNSAFE_CSS = `
   }
   [data-yiru-flashing="true"] {
     background-color: var(--trees-selected-bg) !important;
-    box-shadow: inset 0 0 0 1px var(--trees-focus-ring-color);
+
   }
 `

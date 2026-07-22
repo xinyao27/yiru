@@ -137,7 +137,7 @@ function GitHubStarButton({ hasRepos }: { hasRepos: boolean }): React.JSX.Elemen
             : translate('auto.components.Landing.0d0ace8861', 'Star on GitHub')}
       </button>
       {state === 'starred' && menuOpen && (
-        <div className="border-border bg-popover absolute top-[calc(100%+4px)] right-0 z-10 min-w-[100px] rounded-md border py-1 shadow-md">
+        <div className="border-border bg-popover absolute top-[calc(100%+4px)] right-0 z-10 min-w-[100px] rounded-md border py-1">
           <button
             className="text-foreground hover:bg-muted w-full px-3 py-1.5 text-left text-[13px]"
             onClick={() => {
@@ -325,7 +325,7 @@ export default function Landing(): React.JSX.Element {
       <div className="w-full max-w-lg px-6">
         <div className="flex flex-col items-center gap-4 py-8">
           <div
-            className="border-border/80 flex size-20 items-center justify-center rounded-2xl border shadow-lg shadow-black/40"
+            className="border-border/80 flex size-20 items-center justify-center rounded-2xl border"
             style={{ backgroundColor: '#12181e' }}
           >
             <img

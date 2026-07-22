@@ -175,7 +175,7 @@ const SidebarNav = React.memo(function SidebarNav() {
           'auto.components.sidebar.SidebarNav.0c3395fd32',
           'Search worktrees and browser tabs'
         )}
-        className="group border-sidebar-border/70 bg-sidebar-foreground/5 text-sidebar-foreground/45 hover:border-sidebar-border hover:bg-sidebar-foreground/8 hover:text-sidebar-foreground/60 focus-visible:ring-sidebar-ring/50 relative flex h-7 w-full items-center rounded-md border pr-1.5 pl-7 text-left text-[12px] font-medium tracking-tight transition-colors focus-visible:ring-[3px] focus-visible:outline-none"
+        className="group border-sidebar-border/70 bg-sidebar-foreground/5 text-sidebar-foreground/45 hover:border-sidebar-border hover:bg-sidebar-foreground/8 hover:text-sidebar-foreground/60 relative flex h-7 w-full items-center rounded-md border pr-1.5 pl-7 text-left text-[12px] font-medium tracking-tight transition-colors focus-visible:outline-none"
       >
         <Search
           className="text-sidebar-foreground/30 pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2"
@@ -191,7 +191,7 @@ const SidebarNav = React.memo(function SidebarNav() {
               keys={combo.keys}
               doubleTap={combo.doubleTap}
               className="inline-flex gap-0.5"
-              keyCapClassName="min-w-4 border-sidebar-border/80 bg-sidebar-foreground/8 px-1 py-px text-[9px] text-sidebar-foreground/55 shadow-none"
+              keyCapClassName="min-w-4 border-sidebar-border/80 bg-sidebar-foreground/8 px-1 py-px text-[9px] text-sidebar-foreground/55"
               separatorClassName="text-[9px] text-sidebar-foreground/45"
             />
           ))}

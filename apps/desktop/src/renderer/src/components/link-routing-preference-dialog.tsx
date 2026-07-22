@@ -210,7 +210,7 @@ export function LinkRoutingPreferenceDialogProvider({
                   </span>
                   <ShortcutKeyCombo
                     keys={systemBrowserShortcutKeys}
-                    keyCapClassName="min-w-0 px-1 py-0 text-[10px] shadow-none"
+                    keyCapClassName="min-w-0 px-1 py-0 text-[10px] "
                     separatorClassName="text-[10px] text-muted-foreground"
                   />
                   <span>

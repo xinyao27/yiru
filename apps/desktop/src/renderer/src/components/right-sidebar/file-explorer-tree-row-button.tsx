@@ -55,7 +55,7 @@ export function FileExplorerTreeRowButton({
         'flex w-full items-center gap-1 rounded-sm px-2 py-1 text-left text-xs transition-colors',
         !isSelected && 'hover:bg-accent hover:text-foreground',
         isSelected && 'text-accent-foreground',
-        isFlashing && 'bg-accent ring-1 ring-inset ring-ring',
+        isFlashing && 'bg-accent',
         className
       )}
       style={{ ...style, paddingLeft: `${node.depth * 16 + 8}px` }}

@@ -248,7 +248,7 @@ export function ExternalAutomationRunTable({
                     onOpenRun?.(run)
                   }}
                   className={cn(
-                    'grid w-full grid-cols-[minmax(7.5rem,.45fr)_minmax(0,1fr)_auto] items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                    'grid w-full grid-cols-[minmax(7.5rem,.45fr)_minmax(0,1fr)_auto] items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none',
                     selectedRun?.id === run.id && 'bg-accent text-accent-foreground'
                   )}
                 >

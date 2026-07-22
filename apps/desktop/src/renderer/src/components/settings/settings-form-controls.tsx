@@ -169,7 +169,7 @@ export function SettingsSegmentedControl<T extends string | number>({
               }
             }}
             className={cn(
-              'rounded-sm text-center outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
+              'rounded-sm text-center outline-none transition-colors',
               size === 'sm' ? 'px-2.5 py-0.5 text-xs' : 'px-3 py-1 text-sm',
               equalWidth && 'flex-1',
               active
@@ -386,7 +386,7 @@ export function ThemePicker({
                   ref={isImported ? importedGroupRef : undefined}
                   className={cn(
                     'space-y-1 rounded-md transition-colors duration-500',
-                    isImported && highlightImported && 'bg-accent/40 ring-1 ring-accent'
+                    isImported && highlightImported && 'bg-accent/40    '
                   )}
                 >
                   <p className="text-muted-foreground px-3 pt-2 text-[11px] font-semibold tracking-[0.05em] uppercase">

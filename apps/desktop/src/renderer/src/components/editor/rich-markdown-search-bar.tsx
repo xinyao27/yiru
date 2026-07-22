@@ -133,7 +133,7 @@ export function RichMarkdownSearchBar({
                 'auto.components.editor.RichMarkdownSearchBar.98b89276f3',
                 'Find in rich editor'
               )}
-              className="rich-markdown-search-input h-7 !border-0 bg-transparent px-2 shadow-none focus-visible:!border-0 focus-visible:ring-0"
+              className="rich-markdown-search-input h-7 !border-0 bg-transparent px-2 focus-visible:!border-0"
               aria-label={translate(
                 'auto.components.editor.RichMarkdownSearchBar.158c645829',
                 'Find in rich markdown editor'
@@ -264,7 +264,7 @@ export function RichMarkdownSearchBar({
                   'auto.components.editor.RichMarkdownSearchBar.fd97c7e585',
                   'Replace'
                 )}
-                className="rich-markdown-search-input h-7 !border-0 bg-transparent px-2 shadow-none focus-visible:!border-0 focus-visible:ring-0"
+                className="rich-markdown-search-input h-7 !border-0 bg-transparent px-2 focus-visible:!border-0"
                 aria-label={translate(
                   'auto.components.editor.RichMarkdownSearchBar.44682b4159',
                   'Replace in rich markdown editor'

@@ -20,7 +20,7 @@ export function MobileRelayBetaAvailability(): React.JSX.Element {
       </span>
       <button
         type="button"
-        className="text-foreground decoration-border hover:decoration-foreground focus-visible:ring-ring font-medium underline underline-offset-2 focus-visible:ring-1 focus-visible:outline-none"
+        className="text-foreground decoration-border hover:decoration-foreground font-medium underline underline-offset-2 focus-visible:outline-none"
         onClick={() => void window.api.shell.openUrl(YIRU_IOS_TESTFLIGHT_URL)}
       >
         {translate('auto.components.settings.MobileRelayBetaAvailability.testFlight', 'TestFlight')}
@@ -28,7 +28,7 @@ export function MobileRelayBetaAvailability(): React.JSX.Element {
       <span aria-hidden="true">/</span>
       <button
         type="button"
-        className="text-foreground decoration-border hover:decoration-foreground focus-visible:ring-ring font-medium underline underline-offset-2 focus-visible:ring-1 focus-visible:outline-none"
+        className="text-foreground decoration-border hover:decoration-foreground font-medium underline underline-offset-2 focus-visible:outline-none"
         onClick={() => void window.api.shell.openUrl(YIRU_ANDROID_LATEST_APK_URL)}
       >
         {translate(

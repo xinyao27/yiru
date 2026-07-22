@@ -78,7 +78,7 @@ export function TerminalTabLeadingIcon({
         )}
         className="mr-1 inline-flex shrink-0 items-center gap-1"
       >
-        <FilledBellIcon className="size-4 text-amber-500 drop-shadow-sm" />
+        <FilledBellIcon className="size-4 text-amber-500" />
         {agent ? <TerminalTabAgentIdentityIcon agent={agent} isActive={isActive} /> : null}
       </span>
     )

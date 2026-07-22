@@ -91,7 +91,7 @@ export function SpoolChecksPane({ state }: { state: SpoolChecksReadState }): Rea
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:border-sidebar-ring focus-visible:ring-sidebar-ring/50 dark:hover:bg-sidebar-accent/50"
+                className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:border-sidebar-ring dark:hover:bg-sidebar-accent/50"
                 disabled={loading}
                 onClick={() => void refresh()}
                 aria-label={translate('auto.components.spool.SpoolChecksPane.refresh', 'Refresh')}

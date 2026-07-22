@@ -1313,7 +1313,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
                     type="button"
                     variant="ghost"
                     size="xs"
-                    className="border-sidebar-border bg-sidebar text-muted-foreground hover:bg-sidebar-accent hover:text-foreground focus-visible:ring-sidebar-ring relative z-10 h-[18px] max-w-[8rem] gap-1 rounded-md border px-1.5 text-[10px] leading-none font-medium shadow-none focus-visible:ring-1"
+                    className="border-sidebar-border bg-sidebar text-muted-foreground hover:bg-sidebar-accent hover:text-foreground relative z-10 h-[18px] max-w-[8rem] gap-1 rounded-md border px-1.5 text-[10px] leading-none font-medium"
                     aria-label={lineageChildAriaLabel}
                     aria-expanded={!lineageCollapsed}
                     onClick={onLineageToggle}
@@ -1396,7 +1396,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
           'scroll-to-current-workspace-reveal-highlight',
           revealHighlightTone === 'ai' && 'scroll-to-current-workspace-reveal-highlight--ai'
         ],
-        titleRenaming && '!border-transparent !bg-transparent !shadow-none !ring-0',
+        titleRenaming && '!border-transparent !bg-transparent    ',
         isDeleting && 'opacity-50 grayscale cursor-not-allowed',
         (isSshDisconnected || isRuntimeDisconnected) && !isDeleting && 'opacity-60'
       )}
@@ -1410,7 +1410,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
     >
       {isDeleting && (
         <div className="bg-background/50 absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-[1px]">
-          <div className="bg-background text-foreground border-border/50 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-medium shadow-sm">
+          <div className="bg-background text-foreground border-border/50 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-medium">
             {!isQueuedForDeletion ? (
               <LoadingIndicator className="text-muted-foreground size-3.5" />
             ) : null}

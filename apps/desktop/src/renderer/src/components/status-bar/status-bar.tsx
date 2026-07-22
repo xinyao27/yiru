@@ -649,7 +649,7 @@ function AccountRuntimeToggle<TGroup extends { key: string; label: string }>({
               aria-checked={active}
               onClick={() => onChange(group)}
               className={cn(
-                'min-w-0 flex-1 rounded-sm px-2 py-1 text-center text-xs outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                'min-w-0 flex-1 rounded-sm px-2 py-1 text-center text-xs outline-none transition-colors',
                 active
                   ? 'bg-accent font-medium text-accent-foreground'
                   : 'text-muted-foreground hover:text-foreground'
@@ -2084,12 +2084,11 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                   >
                     <PanelsTopLeft className="size-3.5" />
                     {showFloatingWorkspaceAttentionDot ? (
-                      // Why: amber = Yiru's "needs attention" convention; ring
-                      // matches the button fill so the dot reads on the icon.
+                      // Why: amber = Yiru's "needs attention" convention.
                       <span
                         aria-hidden
                         data-floating-terminal-attention
-                        className="ring-secondary pointer-events-none absolute top-0.5 right-0.5 size-1.5 rounded-full bg-amber-500 ring-1"
+                        className="pointer-events-none absolute top-0.5 right-0.5 size-1.5 rounded-full bg-amber-500"
                       />
                     ) : null}
                   </button>

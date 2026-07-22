@@ -77,7 +77,7 @@ export function SegmentedPolicyToggle<P extends string>({
             className={cn(
               'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
               active
-                ? 'bg-primary text-primary-foreground shadow-sm'
+                ? 'bg-primary text-primary-foreground'
                 : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
             )}
           >

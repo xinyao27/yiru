@@ -4016,7 +4016,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
         onWheel={markDirectScrollInput}
         onDragOver={handleWorktreeDragOver}
         onDrop={handleWorktreeDrop}
-        className="worktree-sidebar-scrollbar scrollbar-sleek focus-visible:ring-ring h-full overflow-x-hidden overflow-y-auto pt-px pl-1 outline-none focus-visible:ring-1 focus-visible:ring-inset"
+        className="worktree-sidebar-scrollbar scrollbar-sleek h-full overflow-x-hidden overflow-y-auto pt-px pl-1 outline-none"
         style={WORKTREE_SIDEBAR_SCROLL_STYLE}
       >
         <div
@@ -4288,16 +4288,13 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                       isDraggableRepoHeader || isDraggableProjectGroupHeader
                         ? 'cursor-grab active:cursor-grabbing'
                         : 'cursor-pointer',
-                      highlightedRevealRowKey === row.key &&
-                        'rounded-md bg-sidebar-accent ring-1 ring-sidebar-ring/50',
+                      highlightedRevealRowKey === row.key && 'rounded-md bg-sidebar-accent    ',
                       (isDraggingThis || isDraggingThisProjectGroup) &&
-                        'bg-accent/80 ring-1 ring-ring/40 shadow-md rounded-md scale-[1.01]',
+                        'bg-accent/80       rounded-md scale-[1.01]',
                       headerWorkspaceStatus &&
                         dragOverStatus === headerWorkspaceStatus &&
-                        'rounded-md bg-sidebar-accent ring-1 ring-sidebar-ring/40',
-                      isPinnedHeader &&
-                        pinDragOver &&
-                        'rounded-md bg-sidebar-accent ring-1 ring-sidebar-ring/40',
+                        'rounded-md bg-sidebar-accent    ',
+                      isPinnedHeader && pinDragOver && 'rounded-md bg-sidebar-accent    ',
                       row.repo && 'overflow-hidden'
                     )}
                     icon={

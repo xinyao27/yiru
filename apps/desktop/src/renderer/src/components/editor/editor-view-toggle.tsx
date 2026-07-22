@@ -136,7 +136,7 @@ export default function EditorViewToggle({
                   <ToggleGroupItem
                     value={viewMode}
                     aria-label={metadata.label}
-                    className="aria-[checked=true]:border-foreground/20 aria-[checked=true]:bg-foreground/10 aria-[checked=true]:text-foreground aria-[checked=true]:hover:bg-foreground/15 aria-[checked=true]:hover:text-foreground data-[state=on]:border-foreground/20 data-[state=on]:bg-foreground/10 data-[state=on]:text-foreground data-[state=on]:hover:bg-foreground/15 data-[state=on]:hover:text-foreground h-[23px] min-w-[24px] px-2 aria-[checked=true]:shadow-xs data-[state=on]:shadow-xs"
+                    className="aria-[checked=true]:border-foreground/20 aria-[checked=true]:bg-foreground/10 aria-[checked=true]:text-foreground aria-[checked=true]:hover:bg-foreground/15 aria-[checked=true]:hover:text-foreground data-[state=on]:border-foreground/20 data-[state=on]:bg-foreground/10 data-[state=on]:text-foreground data-[state=on]:hover:bg-foreground/15 data-[state=on]:hover:text-foreground h-[23px] min-w-[24px] px-2"
                   >
                     <Icon className="size-3.5" />
                   </ToggleGroupItem>

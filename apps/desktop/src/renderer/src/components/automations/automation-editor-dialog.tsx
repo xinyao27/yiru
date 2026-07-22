@@ -30,9 +30,9 @@ import { AutomationSchedulePicker } from './automation-schedule-picker'
 import { getAutomationTemplates, type AutomationTemplate } from './automation-templates'
 
 const PICKER_TRIGGER_CLASS =
-  'border-input bg-input/30 shadow-xs hover:bg-accent/60 dark:bg-input/30 dark:hover:bg-input/50'
+  'border-input bg-input/30 hover:bg-accent/60 dark:bg-input/30 dark:hover:bg-input/50'
 const MODE_TOGGLE_ITEM_CLASS =
-  'w-full border-input bg-input/30 shadow-xs hover:bg-accent/60 data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary/90 dark:bg-input/30 dark:data-[state=on]:bg-primary dark:data-[state=on]:text-primary-foreground dark:data-[state=on]:hover:bg-primary/90'
+  'w-full border-input bg-input/30 hover:bg-accent/60 data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary/90 dark:bg-input/30 dark:data-[state=on]:bg-primary dark:data-[state=on]:text-primary-foreground dark:data-[state=on]:hover:bg-primary/90'
 
 export type AutomationDraft = {
   name: string

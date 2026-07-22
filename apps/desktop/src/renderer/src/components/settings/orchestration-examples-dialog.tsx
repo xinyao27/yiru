@@ -92,7 +92,7 @@ export function OrchestrationExampleDialog(props: {
         </div>
 
         <div className="px-6 py-5">
-          <div className="group border-border/70 relative rounded-md border bg-[var(--editor-surface)] shadow-xs">
+          <div className="group border-border/70 relative rounded-md border bg-[var(--editor-surface)]">
             <p className="text-foreground px-3 py-3 pr-11 font-mono text-[12px] leading-relaxed">
               <OrchestrationExamplePromptText prompt={example.prompt} />
             </p>

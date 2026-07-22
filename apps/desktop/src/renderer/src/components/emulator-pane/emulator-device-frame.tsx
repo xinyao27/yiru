@@ -368,7 +368,7 @@ export function EmulatorDeviceFrame({
         {frameLayout?.kind === 'phone' ? <PhoneHardwareButtons layout={frameLayout} /> : null}
         <div
           data-yiru-emulator-frame="true"
-          className="relative overflow-hidden bg-black shadow-lg ring-1 ring-black/25"
+          className="relative overflow-hidden bg-black"
           style={{
             left: frameLayout ? `${frameLayout.hardwareOutset}px` : undefined,
             width: frameLayout ? `${frameLayout.shellWidth}px` : '100%',

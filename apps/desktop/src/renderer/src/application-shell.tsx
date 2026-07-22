@@ -199,7 +199,7 @@ const TITLEBAR_CLASS_NAME =
   'flex h-9 min-h-9 flex-row items-center border-b border-border bg-[var(--bg-titlebar,var(--card))] select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
 // Why: the inset seam preserves the full 36px content box, keeping controls aligned with traffic lights.
 const TITLEBAR_LEFT_CLASS_NAME =
-  'worktree-sidebar-theme flex h-9 min-h-9 shrink-0 flex-row items-center overflow-hidden bg-sidebar shadow-[inset_0_-1px_0_var(--border)] select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
+  'worktree-sidebar-theme flex h-9 min-h-9 shrink-0 flex-row items-center overflow-hidden bg-sidebar select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
 const WINDOW_CONTROL_BUTTON_CLASS_NAME =
   'h-9 w-[46px] bg-[var(--bg-titlebar,var(--card))] text-muted-foreground transition-[background,color] duration-100 hover:bg-accent hover:text-foreground'
 

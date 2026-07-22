@@ -58,7 +58,7 @@ export function CliFeatureTipVisual(): JSX.Element {
       className="bg-muted/60 relative flex min-h-[27rem] flex-col overflow-hidden px-6 py-7"
       aria-hidden="true"
     >
-      <div className="border-border/70 bg-card relative rounded-lg border shadow-xs">
+      <div className="border-border/70 bg-card relative rounded-lg border">
         <div className="border-border/70 flex items-center gap-2 border-b px-3 py-2">
           <span className="bg-muted-foreground/35 size-2 rounded-full" />
           <span className="bg-muted-foreground/25 size-2 rounded-full" />
@@ -93,7 +93,7 @@ export function CliFeatureTipVisual(): JSX.Element {
         </div>
       </div>
 
-      <div className="cli-tip-orchestration-frame border-border/70 bg-background relative mt-5 flex h-[17rem] items-center justify-center overflow-hidden rounded-lg border px-5 shadow-xs">
+      <div className="cli-tip-orchestration-frame border-border/70 bg-background relative mt-5 flex h-[17rem] items-center justify-center overflow-hidden rounded-lg border px-5">
         <div className="origin-center">
           <AgentsOrchestrationVisual
             activeStepId="orchestration"

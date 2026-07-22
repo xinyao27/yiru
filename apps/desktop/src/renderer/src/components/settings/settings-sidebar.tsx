@@ -97,7 +97,7 @@ function SettingsSetupGuideNavRow({
         })
       }
       className={cn(
-        'flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-sidebar-ring/50',
+        'flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left outline-none transition-colors',
         setupActive
           ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
           : 'text-sidebar-foreground/60 hover:bg-sidebar-foreground/8 hover:text-sidebar-foreground'
@@ -144,9 +144,9 @@ export function SettingsSidebar({
   const searchShortcutCombos = useShortcutKeyComboDetails('settings.search')
   const navItemClassName = (isActive: boolean): string =>
     cn(
-      'flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-[13px] outline-none transition-colors duration-150 focus-visible:ring-[3px] focus-visible:ring-sidebar-ring/50',
+      'flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-[13px] outline-none transition-colors duration-150',
       isActive
-        ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground ring-1 ring-sidebar-ring/25'
+        ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
         : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
     )
   const installStatusLabel = (status: SettingsNavInstallStatus): string => {

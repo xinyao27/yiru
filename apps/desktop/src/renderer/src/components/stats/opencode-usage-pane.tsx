@@ -121,7 +121,7 @@ export function OpenCodeUsagePane(): React.JSX.Element {
             onClick={() => handleSetEnabled(true)}
             className="bg-muted-foreground/30 relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors"
           >
-            <span className="bg-background pointer-events-none block size-3.5 translate-x-0.5 rounded-full shadow-sm transition-transform" />
+            <span className="bg-background pointer-events-none block size-3.5 translate-x-0.5 rounded-full transition-transform" />
           </button>
         </div>
       </div>
@@ -259,7 +259,7 @@ export function OpenCodeUsagePane(): React.JSX.Element {
             onClick={() => handleSetEnabled(false)}
             className="bg-foreground relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors"
           >
-            <span className="bg-background pointer-events-none block size-3.5 translate-x-4 rounded-full shadow-sm transition-transform" />
+            <span className="bg-background pointer-events-none block size-3.5 translate-x-4 rounded-full transition-transform" />
           </button>
         </div>
       </div>

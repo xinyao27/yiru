@@ -6829,7 +6829,7 @@ export function CommitArea({
             // Why: match Input surface tokens and pin disabled:border-input so
             // Chromium's UA disabled styles don't wash out the field outline.
             className={cn(
-              'mt-0.5 min-h-14 w-full resize-none appearance-none rounded-md border border-input bg-background shadow-xs px-2 py-1.5 text-xs text-foreground outline-none placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:border-input disabled:bg-background disabled:text-foreground disabled:shadow-xs dark:bg-input/30 dark:disabled:bg-input/30',
+              'mt-0.5 min-h-14 w-full resize-none appearance-none rounded-md border border-input bg-background   px-2 py-1.5 text-xs text-foreground outline-none placeholder:text-muted-foreground/70 focus-visible:border-ring     disabled:cursor-not-allowed disabled:border-input disabled:bg-background disabled:text-foreground   dark:bg-input/30 dark:disabled:bg-input/30',
               showGenerate ? 'pr-8' : ''
             )}
           />
@@ -6854,7 +6854,7 @@ export function CommitArea({
                         'auto.components.right.sidebar.SourceControl.ddc1fbd690',
                         'Stop generating commit message'
                       )}
-                      className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive/40 absolute top-1.5 right-1.5 inline-flex size-5 items-center justify-center rounded transition-colors focus-visible:ring-1 focus-visible:outline-none"
+                      className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive absolute top-1.5 right-1.5 inline-flex size-5 items-center justify-center rounded transition-colors focus-visible:outline-none"
                     >
                       <LoadingIndicator className="size-3.5 group-hover:hidden group-focus-visible:hidden" />
                       <Square className="hidden size-3.5 fill-current group-hover:block group-focus-visible:block" />
@@ -6894,7 +6894,7 @@ export function CommitArea({
                         'Generate commit message with AI'
                       )}
                       className={cn(
-                        'absolute right-1.5 top-1.5 inline-flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                        'absolute right-1.5 top-1.5 inline-flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none    ',
                         isGenerateDisabled &&
                           'cursor-not-allowed opacity-40 hover:bg-transparent hover:text-muted-foreground'
                       )}

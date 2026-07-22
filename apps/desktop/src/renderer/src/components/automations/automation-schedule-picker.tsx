@@ -25,7 +25,7 @@ import { AutomationCustomCronPanel } from './automation-custom-cron-panel'
 import type { AutomationDraft } from './automation-editor-dialog'
 import { Field } from './automation-page-parts'
 
-const FIELD_CONTROL_CLASS = 'border-input bg-input/30 shadow-xs dark:bg-input/30'
+const FIELD_CONTROL_CLASS = 'border-input bg-input/30 dark:bg-input/30'
 
 export const AUTOMATION_SCHEDULE_PRESET_OPTIONS = [
   ['hourly', 'Hourly'],

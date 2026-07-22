@@ -65,8 +65,8 @@ export function EmulatorScreenSurface({
     <div
       className={cn(
         frameLayout
-          ? 'absolute overflow-hidden bg-black ring-1 ring-white/10'
-          : 'relative w-full overflow-hidden bg-black ring-1 ring-white/10',
+          ? 'absolute overflow-hidden bg-black'
+          : 'relative w-full overflow-hidden bg-black',
         isLive && 'touch-none select-none'
       )}
       style={{

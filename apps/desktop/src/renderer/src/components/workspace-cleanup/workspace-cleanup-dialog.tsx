@@ -778,7 +778,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
                         selected={effectiveRepoSelection}
                         onChange={(next) => setRepoSelection(new Set(next))}
                         onSelectAll={() => setRepoSelection(new Set(eligibleRepoIds))}
-                        triggerClassName="h-8 w-full rounded-md border border-border/60 bg-background px-2 text-xs font-medium shadow-xs hover:bg-accent/60"
+                        triggerClassName="h-8 w-full rounded-md border border-border/60 bg-background px-2 text-xs font-medium hover:bg-accent/60"
                       />
                     </div>
                   ) : null}

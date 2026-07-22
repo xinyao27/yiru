@@ -48,7 +48,7 @@ export function HiddenExperimentalGroup(): React.JSX.Element {
           className="relative inline-flex h-5 w-9 shrink-0 cursor-not-allowed items-center rounded-full border border-orange-500/40 bg-orange-500/20 opacity-70"
           disabled
         >
-          <span className="inline-block h-3.5 w-3.5 translate-x-0.5 transform rounded-full bg-orange-200 shadow-sm dark:bg-orange-100" />
+          <span className="inline-block h-3.5 w-3.5 translate-x-0.5 transform rounded-full bg-orange-200 dark:bg-orange-100" />
         </button>
       </div>
     </section>

@@ -59,7 +59,7 @@ export function RepoStepNestedImportPanel({
                         type="button"
                         variant="ghost"
                         size="icon-xs"
-                        className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive/40"
+                        className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive"
                         aria-label={translate(
                           'auto.components.onboarding.RepoStep.c3d9d44ca2',
                           'Stop scan'

@@ -404,7 +404,7 @@ function CodeCell({
   }
 
   return (
-    <div className="focus-within:ring-ring bg-[var(--editor-surface)] focus-within:ring-1">
+    <div className="bg-[var(--editor-surface)]">
       <Editor
         height={editorHeight}
         defaultLanguage={cell.language}
@@ -451,7 +451,7 @@ function EditableTextCell({
     <textarea
       value={source}
       onChange={(event) => onChange(event.target.value)}
-      className="bg-background text-foreground focus:ring-ring block min-h-24 w-full resize-y border-0 px-4 py-3 text-sm outline-none focus:ring-1"
+      className="bg-background text-foreground block min-h-24 w-full resize-y border-0 px-4 py-3 text-sm outline-none"
     />
   )
 }

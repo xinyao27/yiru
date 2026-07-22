@@ -64,7 +64,7 @@ export function FolderWorkspacePrChecksRow({
       <div
         role="button"
         tabIndex={0}
-        className="focus-visible:ring-ring flex w-full min-w-0 items-start gap-2 rounded-md px-2 py-2 text-left focus-visible:ring-1 focus-visible:outline-none"
+        className="flex w-full min-w-0 items-start gap-2 rounded-md px-2 py-2 text-left focus-visible:outline-none"
         onClick={onToggle}
         onKeyDown={(event) => {
           if (event.key !== 'Enter' && event.key !== ' ') {

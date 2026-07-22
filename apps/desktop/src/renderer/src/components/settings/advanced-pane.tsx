@@ -81,7 +81,7 @@ export function AdvancedPane({ settings, updateSettings }: AdvancedPaneProps): R
                             'auto.components.settings.AdvancedPane.6627e75c92',
                             'Explain HTTP/1.1 compatibility'
                           )}
-                          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 inline-flex size-6 items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-[3px]"
+                          className="text-muted-foreground hover:text-foreground inline-flex size-6 items-center justify-center rounded-md transition-colors outline-none"
                         >
                           <Info className="size-3.5" />
                         </button>

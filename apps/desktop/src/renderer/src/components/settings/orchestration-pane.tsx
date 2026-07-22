@@ -184,7 +184,7 @@ export function OrchestrationPane(): React.JSX.Element {
               <button
                 key={example.id}
                 type="button"
-                className="border-border/60 bg-muted/20 hover:bg-muted/35 focus-visible:border-ring focus-visible:ring-ring/50 rounded-md border px-4 py-3 text-left transition-colors focus-visible:ring-[3px]"
+                className="border-border/60 bg-muted/20 hover:bg-muted/35 focus-visible:border-ring rounded-md border px-4 py-3 text-left transition-colors"
                 onClick={() => setSelectedExampleId(example.id)}
               >
                 <div className="flex items-start gap-3">

@@ -1843,7 +1843,7 @@ export default function MarkdownPreview({
                   'auto.components.editor.MarkdownPreview.517aea303b',
                   'Find in preview'
                 )}
-                className="markdown-preview-search-input h-7 !border-0 bg-transparent px-2 shadow-none focus-visible:!border-0 focus-visible:ring-0"
+                className="markdown-preview-search-input h-7 !border-0 bg-transparent px-2 focus-visible:!border-0"
                 aria-label={translate(
                   'auto.components.editor.MarkdownPreview.ec77985138',
                   'Find in markdown preview'

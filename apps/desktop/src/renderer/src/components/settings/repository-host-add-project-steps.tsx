@@ -294,8 +294,8 @@ function HostSetupActionButton({
       className={cn(
         'flex min-h-[3.25rem] w-full items-center gap-3 border border-transparent px-3 py-2.5 text-left transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:cursor-default disabled:opacity-40',
         selected
-          ? 'rounded-md border-ring bg-foreground/10 text-foreground focus-visible:ring-0 dark:bg-accent dark:text-accent-foreground'
-          : 'hover:bg-accent focus-visible:bg-accent focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50',
+          ? 'rounded-md border-ring bg-foreground/10 text-foreground dark:bg-accent dark:text-accent-foreground'
+          : 'hover:bg-accent focus-visible:bg-accent',
         className
       )}
     >

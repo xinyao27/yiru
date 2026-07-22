@@ -185,7 +185,7 @@ export default function ImportedWorktreesVisibilityLine({
                     render={
                       <span
                         tabIndex={0}
-                        className="text-muted-foreground focus-visible:ring-sidebar-ring block min-w-0 flex-1 truncate font-mono text-[10px] leading-4 outline-none focus-visible:ring-1"
+                        className="text-muted-foreground block min-w-0 flex-1 truncate font-mono text-[10px] leading-4 outline-none"
                       >
                         {group.path}
                       </span>

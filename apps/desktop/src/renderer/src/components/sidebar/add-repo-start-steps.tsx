@@ -36,7 +36,7 @@ function AddRepoNestedScanProgressNotice({
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive/40"
+                className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive"
                 aria-label={translate(
                   'auto.components.sidebar.AddRepoStartSteps.9906cae183',
                   'Stop scan'
@@ -275,8 +275,8 @@ const AddRepoPrimaryStartAction = ({
     className={cn(
       'h-auto min-h-[3.75rem] w-full justify-start gap-3 whitespace-normal px-3 py-2.5 text-left',
       selected
-        ? 'border border-ring bg-foreground/10 text-foreground focus-visible:border-ring focus-visible:ring-0 dark:bg-accent dark:text-accent-foreground'
-        : 'border border-border bg-background shadow-none dark:bg-background'
+        ? 'border border-ring bg-foreground/10 text-foreground focus-visible:border-ring dark:bg-accent dark:text-accent-foreground'
+        : 'border border-border bg-background dark:bg-background'
     )}
   >
     <span
@@ -319,8 +319,8 @@ function AddRepoSecondaryStartAction({
         className,
         // Selected mirrors the primary card's neutral wash so the highlight moves between rows.
         selected
-          ? 'border-ring bg-foreground/10 text-foreground focus-visible:ring-0 dark:bg-accent dark:text-accent-foreground'
-          : 'hover:bg-accent focus-visible:bg-accent focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50'
+          ? 'border-ring bg-foreground/10 text-foreground   dark:bg-accent dark:text-accent-foreground'
+          : 'hover:bg-accent focus-visible:bg-accent      '
       )}
     >
       <span

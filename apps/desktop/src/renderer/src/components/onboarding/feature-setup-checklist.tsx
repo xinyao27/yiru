@@ -94,9 +94,9 @@ export function FeatureSetupChecklist({
               aria-checked={selected}
               className={cn(
                 'flex min-h-40 flex-col rounded-lg border px-4 py-3 text-left transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                'focus-visible:outline-none',
                 selected
-                  ? 'border-ring bg-accent text-foreground ring-2 ring-ring/25'
+                  ? 'border-ring bg-accent text-foreground'
                   : 'border-border bg-muted/20 text-muted-foreground hover:bg-muted/40'
               )}
               onClick={() => onChange({ ...value, [row.id]: !selected })}

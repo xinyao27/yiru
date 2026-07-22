@@ -866,7 +866,7 @@ function EventTime({ timestamp }: { timestamp: number }): React.JSX.Element {
         render={
           <button
             type="button"
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 rounded px-1 py-0.5 text-xs focus-visible:ring-[3px] focus-visible:outline-none"
+            className="text-muted-foreground hover:text-foreground rounded px-1 py-0.5 text-xs focus-visible:outline-none"
             aria-label={absolute}
             onClick={(event) => event.stopPropagation()}
           >
@@ -1278,8 +1278,8 @@ function ThreadRow({
       }}
       className={cn(
         // Why (selected/hover/unread cues match WorktreeCard):
-        // - selected → solid black/white tint + faint shadow, no hover
-        //   override (the active class wins so hover doesn't fight it).
+        // - selected → solid black/white tint, no hover
+        // override (the active class wins so hover doesn't fight it).
         // - non-selected → only then does hover apply (bg-accent/40), so a
         //   selected row stays visually fixed when the cursor moves over it.
         // - unread → weight + left-edge primary bar carry the cue; no row
@@ -1291,9 +1291,7 @@ function ThreadRow({
         // below the secondary badge row. Symmetric py made the top read
         // heavier; the smaller top pad visually evens the row.
         'group relative flex w-full cursor-pointer flex-col gap-1 border-b border-border px-3 pt-2.5 pb-3 text-left transition-colors',
-        selected
-          ? 'bg-black/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.10] dark:shadow-[0_1px_2px_rgba(0,0,0,0.03)]'
-          : 'hover:bg-accent/40'
+        selected ? 'bg-black/[0.08] dark:bg-white/[0.10]' : 'hover:bg-accent/40'
       )}
     >
       {thread.unread ? (
@@ -1387,7 +1385,7 @@ function ThreadRow({
               <span className="inline-flex size-4 shrink-0 items-center justify-center">
                 {thread.unread ? (
                   <FilledBellIcon
-                    className="size-[13px] shrink-0 text-amber-500 drop-shadow-sm"
+                    className="size-[13px] shrink-0 text-amber-500"
                     aria-label={translate(
                       'auto.components.activity.ActivityPrototypePage.beb2c19173',
                       'Unread'
@@ -1407,7 +1405,7 @@ function ThreadRow({
                           className={cn(
                             'group/unread flex size-4 shrink-0 cursor-pointer items-center justify-center rounded transition-all',
                             'hover:bg-accent/80 active:scale-95',
-                            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+                            'focus-visible:outline-none'
                           )}
                           aria-label={translate(
                             'auto.components.activity.ActivityPrototypePage.59b131fbd9',
@@ -1900,7 +1898,7 @@ export default function ActivityPrototypePage(): React.JSX.Element {
                       className={cn(
                         'size-8 shrink-0 p-0',
                         readFilter === 'unread'
-                          ? '!border-primary !bg-primary !text-primary-foreground shadow-xs ring-2 ring-primary/35 hover:!bg-primary/90 hover:!text-primary-foreground'
+                          ? '!border-primary !bg-primary !text-primary-foreground       hover:!bg-primary/90 hover:!text-primary-foreground'
                           : 'text-muted-foreground hover:text-foreground'
                       )}
                       aria-label={translate(
@@ -2072,7 +2070,7 @@ export default function ActivityPrototypePage(): React.JSX.Element {
                         aria-hidden="true"
                       >
                         {visiblePortalUnavailable ? (
-                          <div className="border-border bg-background text-muted-foreground mt-3 ml-3 inline-flex items-center gap-2 rounded-md border px-2 py-1 text-xs shadow-xs">
+                          <div className="border-border bg-background text-muted-foreground mt-3 ml-3 inline-flex items-center gap-2 rounded-md border px-2 py-1 text-xs">
                             <span className="bg-muted-foreground/70 h-3 w-1.5 rounded-sm" />
                             <span>
                               {translate(
@@ -2082,7 +2080,7 @@ export default function ActivityPrototypePage(): React.JSX.Element {
                             </span>
                           </div>
                         ) : showTerminalLoadingLabel ? (
-                          <div className="border-border bg-background text-muted-foreground mt-3 ml-3 inline-flex items-center gap-2 rounded-md border px-2 py-1 text-xs shadow-xs">
+                          <div className="border-border bg-background text-muted-foreground mt-3 ml-3 inline-flex items-center gap-2 rounded-md border px-2 py-1 text-xs">
                             <span className="bg-muted-foreground/70 h-3 w-1.5 animate-pulse rounded-sm" />
                             <span>
                               {translate(

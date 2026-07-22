@@ -30,7 +30,7 @@ type FloatingTerminalWindowControlsProps = {
 }
 
 const controlButtonClassName =
-  'border-border bg-secondary text-secondary-foreground shadow-xs hover:bg-accent hover:text-accent-foreground'
+  'border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'
 
 // Why: matches the repo convention (e.g. ReviewPRViewAnimatedVisual) of
 // surfacing the live keybinding in a tooltip as "Label (shortcut)", while

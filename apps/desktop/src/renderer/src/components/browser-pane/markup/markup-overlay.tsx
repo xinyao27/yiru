@@ -113,11 +113,7 @@ export function MarkupOverlay({
             lineHeight: 1,
             height: '1em',
             boxSizing: 'content-box',
-            padding: 0,
-            textShadow:
-              editor.color.toLowerCase() === '#ffffff'
-                ? '0 0 3px rgba(0,0,0,0.7)'
-                : '0 0 3px rgba(255,255,255,0.9), 0 0 2px rgba(255,255,255,0.9)'
+            padding: 0
           }}
         />
       ) : null}
@@ -140,7 +136,7 @@ export function MarkupOverlay({
             onClear={editor.clear}
           />
         </div>
-        <div className="border-border bg-card pointer-events-auto flex items-center gap-2 rounded-md border p-1.5 shadow-md">
+        <div className="border-border bg-card pointer-events-auto flex items-center gap-2 rounded-md border p-1.5">
           <span className="text-muted-foreground px-1 text-xs">
             {translate(
               'auto.components.browser-pane.markup.hint',

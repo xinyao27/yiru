@@ -160,7 +160,7 @@ export function AiVaultPanelHeader({
         />
       </div>
 
-      <div className="border-sidebar-border bg-input/50 focus-within:border-sidebar-ring focus-within:ring-sidebar-ring/30 mt-2 flex h-8 items-center gap-1.5 rounded-md border px-2 focus-within:ring-[2px]">
+      <div className="border-sidebar-border bg-input/50 focus-within:border-sidebar-ring mt-2 flex h-8 items-center gap-1.5 rounded-md border px-2">
         <Search className="text-muted-foreground size-3.5 shrink-0" />
         <input
           value={query}

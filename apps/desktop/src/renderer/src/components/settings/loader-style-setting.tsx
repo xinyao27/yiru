@@ -62,7 +62,7 @@ export function LoaderStyleSetting({
               data-current={active ? 'true' : undefined}
               onClick={() => onChange(loaderStyle)}
               className={cn(
-                'flex min-h-16 flex-col items-center justify-center gap-1.5 border px-2 py-2 text-center outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                'flex min-h-16 flex-col items-center justify-center gap-1.5 border px-2 py-2 text-center outline-none transition-colors',
                 active
                   ? 'border-ring bg-accent text-accent-foreground'
                   : 'border-border bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground'

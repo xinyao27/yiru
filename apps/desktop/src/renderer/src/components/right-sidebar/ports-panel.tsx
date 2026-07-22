@@ -120,7 +120,7 @@ function workspacePortAsExternal(port: WorkspacePort & { kind: 'workspace' }): W
 }
 
 const LOCAL_PORT_MENU_CONTENT_CLASS =
-  '!rounded-md !border-border/60 !bg-popover !text-popover-foreground !shadow-[0_10px_24px_rgba(0,0,0,0.18)] !backdrop-blur-none'
+  '!rounded-md !border-border/60 !bg-popover !text-popover-foreground !backdrop-blur-none'
 const LOCAL_PORT_MENU_ITEM_CLASS =
   'rounded-md focus:bg-accent focus:text-accent-foreground dark:focus:bg-accent'
 const LOCAL_PORT_MENU_LABEL_CLASS = 'px-2 py-1 text-[11px] font-semibold text-muted-foreground'
@@ -590,7 +590,7 @@ function LocalPortRow({
         <ContextMenuTrigger
           render={
             <div
-              className="focus-visible:ring-ring flex min-w-0 flex-1 items-center gap-2 rounded focus:outline-none focus-visible:ring-1"
+              className="flex min-w-0 flex-1 items-center gap-2 rounded focus:outline-none"
               tabIndex={0}
               aria-label={translate(
                 'auto.components.right.sidebar.PortsPanel.5be4f7f727',
@@ -1245,7 +1245,7 @@ function digitsOnly(value: string): string {
 }
 
 const INPUT_CLASS =
-  'block w-full mt-0.5 px-2 py-1.5 text-xs rounded border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring'
+  'block w-full mt-0.5 px-2 py-1.5 text-xs rounded border border-border bg-background text-foreground focus:outline-none    '
 
 function PortForwardDialog({
   state,

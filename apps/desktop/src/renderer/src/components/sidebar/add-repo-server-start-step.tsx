@@ -149,7 +149,7 @@ export function AddRepoServerPathStartStep({
             type="button"
             onClick={() => setPathEntryOpen(true)}
             disabled={disabled}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 mx-auto block rounded px-2 py-1 text-xs transition-colors focus-visible:ring-[3px] focus-visible:outline-none disabled:cursor-default disabled:opacity-40"
+            className="text-muted-foreground hover:text-foreground mx-auto block rounded px-2 py-1 text-xs transition-colors focus-visible:outline-none disabled:cursor-default disabled:opacity-40"
           >
             {translate(
               'auto.components.sidebar.AddRepoServerStartStep.438493f214',
@@ -262,7 +262,7 @@ export function AddRepoServerPathStartStep({
           type="button"
           onClick={() => setPathEntryOpen(false)}
           disabled={isAddingServerPath}
-          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 mx-auto block rounded px-2 py-1 text-xs transition-colors focus-visible:ring-[3px] focus-visible:outline-none disabled:cursor-default disabled:opacity-40"
+          className="text-muted-foreground hover:text-foreground mx-auto block rounded px-2 py-1 text-xs transition-colors focus-visible:outline-none disabled:cursor-default disabled:opacity-40"
         >
           {translate(
             'auto.components.sidebar.AddRepoServerStartStep.ae990c86a0',

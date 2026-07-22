@@ -120,8 +120,8 @@ export function WorkspacesAnimatedVisual(props: { reducedMotion: boolean }): JSX
               key={ws.id}
               data-ws-id={ws.id}
               className={cn(
-                'absolute inset-x-0 rounded-[10px] px-2 py-2.5 transition-[background,box-shadow,transform] duration-[1100ms] [transition-timing-function:cubic-bezier(.2,.8,.2,1)]',
-                isSelected ? 'bg-accent shadow-[inset_0_0_0_1px_rgba(24,24,27,0.06)]' : 'bg-card'
+                'absolute inset-x-0 rounded-[10px] px-2 py-2.5 transition-[background,transform] duration-[1100ms] [transition-timing-function:cubic-bezier(.2,.8,.2,1)]',
+                isSelected ? 'bg-accent' : 'bg-card'
               )}
               // Why: the card that was bottom before rotation must pass above the
               // cards it crosses; stable slots avoid the old end-of-cycle FLIP snap.
