@@ -65,7 +65,7 @@ export function CombinedDiffFileTreeRow({
       >
         <button
           type="button"
-          className="flex min-w-0 flex-1 items-center gap-1 text-left"
+          className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-1 text-left outline-none"
           onClick={() => onToggleDirectory(node.key)}
           aria-expanded={!isCollapsed}
         >
@@ -98,6 +98,7 @@ export function CombinedDiffFileTreeRow({
     <button
       type="button"
       className={cn(
+        'outline-none focus-visible:bg-accent/40',
         'group flex w-full min-w-0 cursor-pointer items-center gap-1 py-1 pr-3 text-left text-xs transition-colors hover:bg-accent/40 disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent',
         activeSectionKey === sectionKey && 'bg-accent/60'
       )}

@@ -47,7 +47,7 @@ export function SidebarDisclosure({
   return (
     <button
       type="button"
-      className={cn(DISCLOSURE_CLASS_NAME, className)}
+      className={cn('outline-none focus-visible:bg-accent', DISCLOSURE_CLASS_NAME, className)}
       aria-label={
         label ??
         (itemLabel

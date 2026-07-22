@@ -123,14 +123,14 @@ export function RepoStep({
             />
             <button
               type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0 rounded-lg px-4 py-3 text-sm font-medium disabled:opacity-40"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:bg-primary/90 shrink-0 rounded-lg px-4 py-3 text-sm font-medium outline-none disabled:opacity-40"
               disabled={!serverPath.trim() || disabled}
             >
               {translate('auto.components.onboarding.RepoStep.3863747c56', 'Add Git Project')}
             </button>
             <button
               type="button"
-              className="border-border bg-background text-foreground hover:bg-muted/60 shrink-0 rounded-lg border px-4 py-3 text-sm font-medium disabled:opacity-40"
+              className="border-border bg-background text-foreground hover:bg-muted/60 focus-visible:bg-muted/60 shrink-0 rounded-lg border px-4 py-3 text-sm font-medium outline-none disabled:opacity-40"
               disabled={!serverPath.trim() || disabled}
               onClick={() => onOpenServerFolder('folder')}
             >
@@ -218,7 +218,7 @@ export function RepoStep({
           />
           <button
             type="submit"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0 rounded-lg px-5 py-3 text-sm font-medium disabled:opacity-40"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:bg-primary/90 shrink-0 rounded-lg px-5 py-3 text-sm font-medium outline-none disabled:opacity-40"
             disabled={!cloneUrl.trim() || (runtimeActive && !cloneDestination.trim()) || disabled}
           >
             {translate('auto.components.onboarding.RepoStep.7932e95f68', 'Clone')}

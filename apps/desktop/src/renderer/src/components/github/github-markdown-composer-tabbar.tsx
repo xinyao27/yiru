@@ -21,7 +21,11 @@ export function GitHubMarkdownComposerTabbar({
           type="button"
           role="tab"
           aria-selected={activeTab === 'write'}
-          className={cn('github-markdown-composer-tab', activeTab === 'write' && 'is-active')}
+          className={cn(
+            'outline-none focus-visible:bg-accent',
+            'github-markdown-composer-tab',
+            activeTab === 'write' && 'is-active'
+          )}
           onClick={() => onTabChange('write')}
         >
           {translate('auto.components.github.GitHubMarkdownComposer.c91f0a2b14', 'Write')}
@@ -30,7 +34,11 @@ export function GitHubMarkdownComposerTabbar({
           type="button"
           role="tab"
           aria-selected={activeTab === 'preview'}
-          className={cn('github-markdown-composer-tab', activeTab === 'preview' && 'is-active')}
+          className={cn(
+            'outline-none focus-visible:bg-accent',
+            'github-markdown-composer-tab',
+            activeTab === 'preview' && 'is-active'
+          )}
           onClick={() => onTabChange('preview')}
         >
           {translate('auto.components.github.GitHubMarkdownComposer.d82b1e3f05', 'Preview')}

@@ -123,7 +123,7 @@ export function BrowserProfileRow({
         }
       }}
       className={cn(
-        'flex w-full items-center gap-3 rounded-md border px-3 py-2.5 text-left transition-colors cursor-pointer',
+        'flex w-full items-center gap-3 rounded-md border px-3 py-2.5 text-left transition-colors cursor-pointer outline-none focus-visible:border-ring',
         isActive
           ? 'border-foreground/20 bg-accent/15'
           : 'border-border/70 hover:border-border hover:bg-accent/8'

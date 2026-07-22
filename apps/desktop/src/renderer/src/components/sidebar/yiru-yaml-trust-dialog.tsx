@@ -184,7 +184,7 @@ const YiruYamlTrustDialog = React.memo(function YiruYamlTrustDialog() {
         >
           <input
             type="checkbox"
-            className="accent-primary h-4 w-4"
+            className="accent-primary focus-visible:border-ring h-4 w-4 outline-none"
             checked={alwaysTrust}
             onChange={(event) => setAlwaysTrust(event.target.checked)}
           />

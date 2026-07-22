@@ -39,7 +39,7 @@ function HoverCardContent({
           className={cn(
             floatingSurfaceClass,
             floatingSurfaceMotionClass,
-            'z-50 w-64 p-4 outline-hidden',
+            'z-50 w-64 p-4 outline-none focus-visible:border-ring',
             className
           )}
           {...props}

@@ -24,9 +24,9 @@ export function normalizeTerminalFastScrollSensitivity(value: number | undefined
 export function resolveTerminalCursorInactiveStyle(
   cursorStyle: TerminalCursorStyle | undefined
 ): TerminalCursorInactiveStyle {
-  // Why: xterm's default inactive outline turns a bar/underline cursor into
-  // extra strokes in blurred panes; only block cursors benefit from outline.
-  return (cursorStyle ?? 'block') === 'block' ? 'outline' : (cursorStyle ?? 'block')
+  // Why: inactive panes keep the configured cursor shape so focus changes do
+  // not introduce separate geometry.
+  return cursorStyle ?? 'block'
 }
 
 export function buildDefaultTerminalOptions(): ITerminalOptions {

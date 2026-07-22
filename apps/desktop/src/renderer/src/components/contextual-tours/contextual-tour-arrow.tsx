@@ -41,7 +41,7 @@ export function ContextualTourArrow({
       {/* Why: an open path fills as a triangle but strokes only the two slanted
           edges; a closed polygon (Radix Arrow) also strokes the base, drawing a
           seam across the panel border. Stroke width must match the 1px panel
-          border so the outline reads as continuous. */}
+          border so the edge reads as continuous. */}
       <path
         d={`M0,0 L${ARROW_WIDTH / 2},${ARROW_HEIGHT} L${ARROW_WIDTH},0`}
         strokeWidth={CONTEXTUAL_TOUR_PANEL_BORDER_WIDTH}

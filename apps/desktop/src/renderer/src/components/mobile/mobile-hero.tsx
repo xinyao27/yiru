@@ -147,6 +147,7 @@ export function HeroFlow({
                 <button
                   type="button"
                   className={cn(
+                    'outline-none focus-visible:bg-accent',
                     mobilePageStyles.platformTab,
                     platform === 'ios' && mobilePageStyles.platformTabActive
                   )}
@@ -159,6 +160,7 @@ export function HeroFlow({
                 <button
                   type="button"
                   className={cn(
+                    'outline-none focus-visible:bg-accent',
                     mobilePageStyles.platformTab,
                     platform === 'android' && mobilePageStyles.platformTabActive
                   )}
@@ -172,14 +174,17 @@ export function HeroFlow({
               <div className={mobilePageStyles.inlineActions}>
                 <button
                   type="button"
-                  className={mobilePageStyles.ghostAction}
+                  className={cn(
+                    'outline-none focus-visible:bg-accent',
+                    mobilePageStyles.ghostAction
+                  )}
                   onClick={onOpenInstallUrl}
                 >
                   {installCopy.ctaLabel}
                 </button>
                 <button
                   type="button"
-                  className={mobilePageStyles.textLink}
+                  className={cn('outline-none focus-visible:bg-accent', mobilePageStyles.textLink)}
                   onClick={onCopyInstallUrl}
                 >
                   <Copy className="size-3.5" />
@@ -270,7 +275,7 @@ export function HeroFlow({
               </div>
               <button
                 type="button"
-                className={mobilePageStyles.linkUnder}
+                className={cn('outline-none focus-visible:bg-accent', mobilePageStyles.linkUnder)}
                 onClick={onRegeneratePairing}
                 disabled={pairLoading}
               >
@@ -297,7 +302,10 @@ export function HeroFlow({
                 />
                 <button
                   type="button"
-                  className={mobilePageStyles.networkRefresh}
+                  className={cn(
+                    'outline-none focus-visible:bg-accent',
+                    mobilePageStyles.networkRefresh
+                  )}
                   onClick={onRefreshNetworkInterfaces}
                   disabled={refreshingNetworkInterfaces}
                   aria-label={translate(
@@ -323,7 +331,7 @@ export function HeroFlow({
                 </span>
                 <button
                   type="button"
-                  className={mobilePageStyles.textLink}
+                  className={cn('outline-none focus-visible:bg-accent', mobilePageStyles.textLink)}
                   onClick={onCopyPairingCode}
                   disabled={!pairingUrl || pairLoading}
                 >
@@ -342,7 +350,11 @@ export function HeroFlow({
       </div>
 
       <div className={mobilePageStyles.flowActions}>
-        <button type="button" className={mobilePageStyles.flowBack} onClick={onBack}>
+        <button
+          type="button"
+          className={cn('outline-none focus-visible:bg-accent', mobilePageStyles.flowBack)}
+          onClick={onBack}
+        >
           <ArrowLeft className="size-3" />
           {translate('auto.components.mobile.MobileHero.b622eba64d', 'Back')}
         </button>
@@ -350,7 +362,11 @@ export function HeroFlow({
           onDone ? (
             <button
               type="button"
-              className={cn(mobilePageStyles.primaryAction, mobilePageStyles.flowPrimaryAction)}
+              className={cn(
+                'outline-none border border-transparent focus-visible:border-ring',
+                mobilePageStyles.primaryAction,
+                mobilePageStyles.flowPrimaryAction
+              )}
               onClick={onDone}
             >
               {translate('auto.components.mobile.MobileHero.3f90dbd274', 'Done')}
@@ -362,7 +378,11 @@ export function HeroFlow({
         ) : (
           <button
             type="button"
-            className={cn(mobilePageStyles.flowContinue, mobilePageStyles.flowPrimaryAction)}
+            className={cn(
+              'outline-none focus-visible:bg-accent',
+              mobilePageStyles.flowContinue,
+              mobilePageStyles.flowPrimaryAction
+            )}
             onClick={onContinue}
           >
             {translate('auto.components.mobile.MobileHero.a8fb43cf1c', 'Continue')}

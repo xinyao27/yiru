@@ -91,7 +91,7 @@ export function UpdateStatusSegment({
           <button
             type="button"
             onClick={handleClick}
-            className="hover:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5"
+            className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 outline-none"
             aria-label={segment.ariaLabel}
             aria-expanded={!collapsed}
           >

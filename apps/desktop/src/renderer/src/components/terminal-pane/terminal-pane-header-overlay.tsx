@@ -182,7 +182,7 @@ export default function TerminalPaneHeaderOverlay({
             {isEditing ? (
               <input
                 ref={renameInputRef}
-                className="pane-title-input"
+                className="pane-title-input focus-visible:border-ring outline-none"
                 aria-label={translate(
                   'auto.components.terminal.pane.TerminalPane.7dbbfcbecc',
                   'Pane title'
@@ -229,7 +229,7 @@ export default function TerminalPaneHeaderOverlay({
                 {title ? (
                   <button
                     type="button"
-                    className="pane-title-text"
+                    className="pane-title-text focus-visible:bg-accent outline-none"
                     onClick={() => onStartRename(pane.id)}
                     aria-label={translate(
                       'auto.components.terminal.pane.TerminalPane.cc5a2dc706',

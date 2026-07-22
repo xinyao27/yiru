@@ -68,7 +68,7 @@ export class RichMarkdownErrorBoundary extends React.Component<Props, State> {
             )}
           </div>
           <button
-            className="border-border/60 hover:bg-accent rounded border px-3 py-1 text-xs"
+            className="border-border/60 hover:bg-accent focus-visible:bg-accent rounded border px-3 py-1 text-xs outline-none"
             onClick={this.handleReset}
           >
             {translate('auto.components.editor.RichMarkdownErrorBoundary.aad0998127', 'Retry')}

@@ -1269,6 +1269,7 @@ function CleanupViewNav({
             key={item.view}
             type="button"
             className={cn(
+              'outline-none focus-visible:bg-accent focus-visible:text-accent-foreground',
               'flex h-8 w-full items-center justify-between gap-2 rounded-md px-2 text-left text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
               activeView === item.view && 'bg-accent text-accent-foreground'
             )}

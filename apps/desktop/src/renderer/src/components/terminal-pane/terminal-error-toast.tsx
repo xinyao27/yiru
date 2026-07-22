@@ -73,6 +73,7 @@ export function TerminalErrorToast({
               <a
                 href={YIRU_GITHUB_ISSUES_URL}
                 style={{ color: '#fca5a5', textDecoration: 'underline' }}
+                className="focus-visible:bg-accent outline-none"
               >
                 {translate(
                   'auto.components.terminal.pane.TerminalErrorToast.a7e2fd2699',
@@ -98,6 +99,7 @@ export function TerminalErrorToast({
               whiteSpace: 'nowrap',
               flexShrink: 0
             }}
+            className="focus-visible:bg-accent outline-none"
           >
             {translate(
               'auto.components.terminal.pane.TerminalErrorToast.e4aa243f8c',
@@ -117,6 +119,7 @@ export function TerminalErrorToast({
             lineHeight: 1,
             flexShrink: 0
           }}
+          className="focus-visible:bg-accent outline-none"
         >
           ×
         </button>

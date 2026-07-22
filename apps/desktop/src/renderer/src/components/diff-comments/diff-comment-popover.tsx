@@ -234,7 +234,7 @@ export function DiffCommentPopover({
         </div>
         <textarea
           ref={focusTextareaRef}
-          className="yiru-diff-comment-popover-textarea"
+          className="yiru-diff-comment-popover-textarea focus-visible:border-ring outline-none"
           placeholder={placeholder}
           value={body}
           onChange={(e) => {

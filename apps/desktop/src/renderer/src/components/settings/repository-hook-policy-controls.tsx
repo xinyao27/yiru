@@ -31,6 +31,7 @@ export function PolicyOptionGrid<P extends string>({
             key={policy}
             onClick={() => onSelect(policy)}
             className={cn(
+              'outline-none focus-visible:border-border focus-visible:bg-muted/40',
               'rounded-xl border px-3 py-2.5 text-center transition-colors',
               active
                 ? 'border-foreground/15 bg-accent text-accent-foreground'
@@ -75,6 +76,7 @@ export function SegmentedPolicyToggle<P extends string>({
             onClick={() => onSelect(policy)}
             title={description}
             className={cn(
+              'outline-none focus-visible:bg-background/60 focus-visible:text-foreground',
               'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
               active
                 ? 'bg-primary text-primary-foreground'

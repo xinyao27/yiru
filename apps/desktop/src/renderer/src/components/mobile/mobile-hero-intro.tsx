@@ -1,5 +1,6 @@
 import { ArrowRight } from '@/components/regular-icons'
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 import { AndroidLogo, IosBrandIcon } from './mobile-brand-icons'
 import { mobilePageStyles } from './mobile-page-tailwind'
@@ -46,7 +47,10 @@ export function HeroIntro({ onStart }: { onStart: () => void }): React.JSX.Eleme
       <div className={mobilePageStyles.ctaRow}>
         <button
           type="button"
-          className={`${mobilePageStyles.primaryAction} ${mobilePageStyles.flowPrimaryAction}`}
+          className={cn(
+            'outline-none border border-transparent focus-visible:border-ring',
+            `${mobilePageStyles.primaryAction} ${mobilePageStyles.flowPrimaryAction}`
+          )}
           onClick={onStart}
         >
           {translate('auto.components.mobile.MobileHero.10d27b4cba', 'Get started')}

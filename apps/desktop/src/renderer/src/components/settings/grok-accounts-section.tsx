@@ -83,7 +83,7 @@ export function GrokAccountsSection(): React.JSX.Element {
           href={GROK_CLI_DOCS_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs"
+          className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex items-center gap-1 text-xs outline-none"
         >
           {translate('auto.components.settings.GrokAccountsSection.0d8e77bc40', 'Grok CLI docs')}
           <ExternalLink className="size-3" />

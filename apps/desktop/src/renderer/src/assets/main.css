@@ -311,21 +311,10 @@
   :root:root *,
   :root:root *::before,
   :root:root *::after {
-    @apply border-border outline-ring/50;
+    @apply border-border;
     /* Why: the flat, rectilinear design must also cover legacy utilities,
        inline styles, and third-party components that bypass design tokens. */
     border-radius: 0 !important;
-  }
-
-  :root:root *:focus-visible {
-    /* Why: flat controls use a real outline so keyboard focus remains visible. */
-    outline: 2px solid var(--ring) !important;
-    outline-offset: 1px;
-  }
-
-  :root:root [aria-invalid='true']:focus-visible {
-    /* Why: invalid controls keep their semantic error state in the shared outline. */
-    outline-color: var(--destructive) !important;
   }
 
   body {
@@ -973,7 +962,7 @@
 
 .worktree-agent-send-target-button {
   /* Why: the row remains an ordinary agent row during send-target mode; the
-     action itself carries the AI target outline so the clickable affordance
+     action itself carries the AI target border so the clickable affordance
      is explicit without boxing the whole session. */
   border-color: color-mix(in srgb, var(--ai-action-accent) 72%, transparent);
   background: color-mix(in srgb, var(--ai-action-accent) 12%, transparent);
@@ -1380,6 +1369,16 @@
   justify-content: center !important;
   width: 100% !important;
   height: 100% !important;
+}
+
+/* Why: Monaco's generated select-description links bypass renderer primitives. */
+.monaco-select-box-dropdown-container
+  > .select-box-details-pane
+  > .select-box-description-markdown
+  a:focus-visible {
+  outline: none !important;
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 
 .monaco-editor .monaco-search-result-highlight {
@@ -2543,6 +2542,7 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
   cursor: pointer;
   z-index: 5;
   opacity: 1;
+  outline: none;
   transition:
     color 100ms ease,
     background-color 100ms ease,
@@ -2556,8 +2556,7 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
 }
 
 .yiru-diff-comment-add-btn:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 1px;
+  border-color: var(--primary);
 }
 
 .yiru-diff-comment-range-highlight {

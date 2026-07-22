@@ -3694,7 +3694,7 @@ function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Elem
               disabled={titleSaving}
             />
             <button
-              className="hover:bg-accent cursor-pointer rounded p-1 text-emerald-500 transition-colors hover:text-emerald-400 disabled:cursor-default disabled:opacity-50"
+              className="hover:bg-accent focus-visible:bg-accent cursor-pointer rounded p-1 text-emerald-500 transition-colors outline-none hover:text-emerald-400 focus-visible:text-emerald-400 disabled:cursor-default disabled:opacity-50"
               title={translate('auto.components.right.sidebar.ChecksPanel.2ab7fd4b6d', 'Save')}
               onClick={() => void handleSaveTitle()}
               disabled={titleSaving}
@@ -3706,7 +3706,7 @@ function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Elem
               )}
             </button>
             <button
-              className="text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer rounded p-1 transition-colors disabled:cursor-default disabled:opacity-50"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground cursor-pointer rounded p-1 transition-colors outline-none disabled:cursor-default disabled:opacity-50"
               title={translate('auto.components.right.sidebar.ChecksPanel.058039787c', 'Cancel')}
               onClick={handleCancelEdit}
               disabled={titleSaving}

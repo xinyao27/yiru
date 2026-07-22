@@ -602,7 +602,7 @@ function CodexRestartStatusPrompt(): React.JSX.Element | null {
         <button
           type="button"
           onClick={() => queueCodexPaneRestarts(staleCodexStatus.stalePtyIds)}
-          className="border-border/70 text-foreground hover:bg-accent/60 mt-2 inline-flex w-full items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors"
+          className="border-border/70 text-foreground hover:bg-accent/60 focus-visible:bg-accent/60 mt-2 inline-flex w-full items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors outline-none"
         >
           {staleCodexStatus.staleSessionCount === 1
             ? translate('auto.components.status.bar.StatusBar.6cd6650b4c', 'Restart Session')
@@ -1627,7 +1627,7 @@ export function ProviderDetailsMenu({
         render={
           <button
             type="button"
-            className="hover:bg-accent/70 inline-flex cursor-pointer items-center rounded px-1 py-0.5"
+            className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center rounded px-1 py-0.5 outline-none"
             aria-label={ariaLabel}
           >
             {iconOnly ? (
@@ -2027,7 +2027,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                 <button
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="hover:bg-accent text-muted-foreground hover:text-foreground rounded p-0.5 transition-colors disabled:opacity-40"
+                  className="hover:bg-accent text-muted-foreground hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-0.5 transition-colors outline-none disabled:opacity-40"
                   aria-label={translate(
                     'auto.components.status.bar.StatusBar.3325d996cb',
                     'Refresh rate limits'
@@ -2072,7 +2072,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                   // Why: this compact status-bar control sits flush with app chrome, so it stays flat.
                   <button
                     type="button"
-                    className="border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground relative inline-flex size-5 cursor-pointer items-center justify-center rounded border transition-colors"
+                    className="border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground relative inline-flex size-5 cursor-pointer items-center justify-center rounded border transition-colors outline-none"
                     aria-label={
                       showFloatingWorkspaceAttentionDot
                         ? `${floatingTerminalActionLabel}, new activity`

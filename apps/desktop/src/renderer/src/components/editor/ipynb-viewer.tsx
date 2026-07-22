@@ -188,7 +188,7 @@ function NotebookCellHeader({
       <select
         value={cell.kind}
         onChange={(event) => onKindChange(event.target.value as IpynbCellKind)}
-        className="border-input bg-background text-foreground h-7 rounded-md border px-2 text-xs"
+        className="border-input bg-background text-foreground focus-visible:border-ring h-7 rounded-md border px-2 text-xs outline-none"
       >
         <option value="code">
           {translate('auto.components.editor.IpynbViewer.7005960d73', 'Code')}
@@ -384,7 +384,7 @@ function CodeCell({
       <div
         role="button"
         tabIndex={0}
-        className="block w-full cursor-text bg-[var(--editor-surface)] text-left"
+        className="focus-visible:bg-accent block w-full cursor-text bg-[var(--editor-surface)] text-left outline-none"
         onClick={onActivate}
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
@@ -486,7 +486,7 @@ function OutputItem({ item }: { item: IpynbOutputItem }): React.JSX.Element | nu
         sandbox=""
         referrerPolicy="no-referrer"
         loading="lazy"
-        className="bg-background block h-80 w-full border-0"
+        className="bg-background block h-80 w-full border-0 outline-none"
         srcDoc={html}
       />
     )

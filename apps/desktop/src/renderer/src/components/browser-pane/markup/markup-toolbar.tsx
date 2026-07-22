@@ -151,6 +151,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   aria-label={swatch}
                   onClick={() => onColorChange(swatch)}
                   className={cn(
+                    'outline-none focus-visible:bg-accent',
                     'size-6 rounded-full border',
                     color === swatch ? 'border-ring' : 'border-border'
                   )}
@@ -170,6 +171,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   )}
                   onClick={() => onWidthChange(option)}
                   className={cn(
+                    'outline-none focus-visible:bg-accent',
                     'flex h-6 flex-1 items-center justify-center rounded-sm border',
                     width === option
                       ? 'border-ring bg-accent'
@@ -226,6 +228,7 @@ export const MarkupToolbar = React.memo(function MarkupToolbar({
                   )}
                   onClick={() => onFontSizeChange(size)}
                   className={cn(
+                    'outline-none focus-visible:bg-accent',
                     'flex h-6 min-w-7 items-center justify-center rounded-sm border px-1 text-[11px] tabular-nums',
                     fontSize === size
                       ? 'border-ring bg-accent'

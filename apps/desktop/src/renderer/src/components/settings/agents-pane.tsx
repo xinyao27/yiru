@@ -223,7 +223,7 @@ export function AgentPermissionsSetting({
                       'auto.components.settings.AgentsPane.agentPermissionsInfo',
                       'Agent permissions info'
                     )}
-                    className="text-muted-foreground hover:bg-muted hover:text-foreground grid size-5 place-items-center rounded-md transition-colors outline-none"
+                    className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:border-ring grid size-5 place-items-center rounded-md border border-transparent transition-colors outline-none"
                   >
                     <Info className="size-3.5" />
                   </button>
@@ -574,7 +574,7 @@ function AgentRow({
                 ? translate('auto.components.settings.AgentsPane.fe4d630c94', 'Docs')
                 : translate('auto.components.settings.AgentsPane.f95b5c79b8', 'Install')
             }
-            className="text-muted-foreground hover:bg-muted/50 hover:text-foreground flex size-7 items-center justify-center rounded-md transition-colors"
+            className="text-muted-foreground hover:bg-muted/50 hover:text-foreground focus-visible:bg-muted/50 focus-visible:text-foreground flex size-7 items-center justify-center rounded-md transition-colors outline-none"
           >
             <ExternalLink className="size-3.5" />
           </a>
@@ -670,7 +670,7 @@ function DefaultAgentPill({ active, onClick, children }: DefaultAgentPillProps):
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm outline-none transition-colors    ',
+        'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm outline-none transition-colors focus-visible:border-ring',
         active
           ? 'border-muted-foreground/40 bg-accent font-medium text-accent-foreground'
           : 'border-border bg-background/50 text-muted-foreground hover:border-muted-foreground/35 hover:text-foreground'

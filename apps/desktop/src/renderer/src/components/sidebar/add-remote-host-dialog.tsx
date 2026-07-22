@@ -267,7 +267,7 @@ export function AddRemoteHostDialog({
           {mode === 'ssh' ? (
             <button
               type="button"
-              className="text-muted-foreground hover:text-foreground self-center text-left text-xs underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent self-center text-left text-xs underline-offset-2 outline-none hover:underline disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => void importSshConfig()}
               disabled={isSaving || isImporting}
             >

@@ -60,6 +60,7 @@ function ToolLine({ block }: { block: NativeChatBlock }): React.JSX.Element | nu
         type="button"
         onClick={() => hasDetail && setExpanded((v) => !v)}
         className={cn(
+          'outline-none focus-visible:bg-accent',
           'group flex w-full items-center gap-1.5 py-0.5 text-left',
           hasDetail ? 'cursor-pointer' : 'cursor-default'
         )}
@@ -144,7 +145,7 @@ export function NativeChatToolRun({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="group flex w-full items-center gap-1.5 py-0.5 text-left"
+        className="group focus-visible:bg-accent flex w-full items-center gap-1.5 py-0.5 text-left outline-none"
       >
         <span className="text-muted-foreground group-hover:text-foreground/80 shrink-0 font-mono text-[11px] font-bold transition-colors">
           {callCount}×

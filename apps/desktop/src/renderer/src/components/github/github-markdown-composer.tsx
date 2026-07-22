@@ -357,7 +357,7 @@ export function GitHubMarkdownComposer({
   const attachmentFooter = isTabbed ? (
     <button
       type="button"
-      className="github-markdown-composer-attachment"
+      className="github-markdown-composer-attachment focus-visible:bg-accent outline-none"
       disabled={disabled}
       onClick={openImagePicker}
     >

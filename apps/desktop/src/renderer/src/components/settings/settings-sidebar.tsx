@@ -264,7 +264,10 @@ export function SettingsSidebar({
                             altKey: event.altKey
                           })
                         }
-                        className={navItemClassName(isActive)}
+                        className={cn(
+                          'outline-none focus-visible:bg-accent',
+                          navItemClassName(isActive)
+                        )}
                       >
                         <Icon className="size-4 shrink-0" />
                         <span className="truncate">{section.title}</span>
@@ -307,7 +310,10 @@ export function SettingsSidebar({
                           altKey: event.altKey
                         })
                       }
-                      className={navItemClassName(isActive)}
+                      className={cn(
+                        'outline-none focus-visible:bg-accent',
+                        navItemClassName(isActive)
+                      )}
                     >
                       <RepoIconGlyph
                         repoIcon={section.repoIcon}

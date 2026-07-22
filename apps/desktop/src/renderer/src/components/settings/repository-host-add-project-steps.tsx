@@ -292,10 +292,10 @@ function HostSetupActionButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'flex min-h-[3.25rem] w-full items-center gap-3 border border-transparent px-3 py-2.5 text-left transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:cursor-default disabled:opacity-40',
+        'flex min-h-[3.25rem] w-full items-center gap-3 border border-transparent px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:bg-accent disabled:pointer-events-none disabled:cursor-default disabled:opacity-40',
         selected
           ? 'rounded-md border-ring bg-foreground/10 text-foreground dark:bg-accent dark:text-accent-foreground'
-          : 'hover:bg-accent focus-visible:bg-accent',
+          : 'hover:bg-accent',
         className
       )}
     >

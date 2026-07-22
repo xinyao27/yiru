@@ -31,7 +31,7 @@ function BaseRefButton({
   return (
     <button
       type="button"
-      className="text-foreground/90 decoration-border hover:text-foreground hover:decoration-foreground max-w-full min-w-0 truncate rounded-sm border-0 bg-transparent p-0 text-left font-mono text-[10.5px] font-medium underline underline-offset-2"
+      className="text-foreground/90 decoration-border hover:text-foreground hover:decoration-foreground focus-visible:text-foreground focus-visible:bg-accent max-w-full min-w-0 truncate rounded-sm border-0 bg-transparent p-0 text-left font-mono text-[10.5px] font-medium underline underline-offset-2 outline-none"
       onClick={onClick}
       title={`${title} (${baseRef})`}
     >

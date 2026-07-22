@@ -116,6 +116,7 @@ export function EditorPanelHeaderPath({
           <button
             type="button"
             className={cn(
+              'outline-none focus-visible:bg-accent',
               'editor-header-path',
               canCopyHeaderPath ? '' : 'editor-header-path--static'
             )}

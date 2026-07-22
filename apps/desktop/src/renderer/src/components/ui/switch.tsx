@@ -16,7 +16,7 @@ const Switch = React.forwardRef<HTMLElement, SwitchProps>(function Switch(
       render={<button type="button" />}
       data-slot="switch"
       className={cn(
-        'relative inline-flex h-5 w-8 shrink-0 cursor-pointer items-center border border-transparent outline-none transition-colors data-checked:bg-primary data-unchecked:bg-input data-disabled:cursor-not-allowed data-disabled:opacity-50 dark:data-unchecked:bg-input/80',
+        'relative inline-flex h-5 w-8 shrink-0 cursor-pointer items-center border border-transparent outline-none transition-colors focus-visible:border-ring data-checked:bg-primary data-unchecked:bg-input data-disabled:cursor-not-allowed data-disabled:opacity-50 dark:data-unchecked:bg-input/80',
         className
       )}
       {...props}

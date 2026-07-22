@@ -160,7 +160,7 @@ export function DiffCommentCard({
                 <>
                   <button
                     type="button"
-                    className="yiru-diff-comment-pill-btn"
+                    className="yiru-diff-comment-pill-btn focus-visible:bg-accent outline-none"
                     title={translate(
                       'auto.components.diff.comments.DiffCommentCard.508ee678a5',
                       'Open in browser'
@@ -186,7 +186,7 @@ export function DiffCommentCard({
                 <>
                   <button
                     type="button"
-                    className="yiru-diff-comment-pill-btn"
+                    className="yiru-diff-comment-pill-btn focus-visible:bg-accent outline-none"
                     title={translate(
                       'auto.components.diff.comments.DiffCommentCard.cad3384faa',
                       'Edit note'
@@ -209,7 +209,7 @@ export function DiffCommentCard({
               {onDelete && (
                 <button
                   type="button"
-                  className="yiru-diff-comment-pill-btn yiru-diff-comment-pill-btn-danger"
+                  className="yiru-diff-comment-pill-btn yiru-diff-comment-pill-btn-danger focus-visible:bg-accent outline-none"
                   title={translate(
                     'auto.components.diff.comments.DiffCommentCard.cce596969e',
                     'Delete note'
@@ -243,7 +243,7 @@ export function DiffCommentCard({
           <div className="mt-1 flex flex-col gap-2">
             <textarea
               ref={textareaRef}
-              className="yiru-diff-comment-popover-textarea"
+              className="yiru-diff-comment-popover-textarea focus-visible:border-ring outline-none"
               value={draft}
               onChange={(e) => {
                 setDraft(e.target.value)

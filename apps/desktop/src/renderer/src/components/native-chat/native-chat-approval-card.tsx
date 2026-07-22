@@ -44,7 +44,7 @@ export function NativeChatApprovalCard({
                   type="button"
                   onClick={() => onChoose(opt.send)}
                   className={cn(
-                    'rounded-md px-4 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none    ',
+                    'rounded-md border border-transparent px-4 py-1.5 text-sm font-semibold transition-colors outline-none focus-visible:border-ring',
                     i === 0
                       ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                       : 'border border-border bg-background text-foreground hover:bg-accent'

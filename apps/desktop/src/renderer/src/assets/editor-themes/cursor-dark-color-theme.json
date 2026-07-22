@@ -3,7 +3,7 @@
   "colors": {
     "debugExceptionWidget.border": "#141414",
     "errorForeground": "#E34671",
-    "focusBorder": "#F0F0F026",
+    "focusBorder": "#00000000",
     "foreground": "#F0F0F0",
     "selection.background": "#F0F0F030",
     "activityBar.background": "#141414",
@@ -81,7 +81,7 @@
     "editorStickyScroll.border": "#F0F0F013",
     "editorHoverWidget.foreground": "#F0F0F0",
     "editorHoverWidget.background": "#141414",
-    "editorHoverWidget.border": "#F0F0F026",
+    "editorHoverWidget.border": "#00000000",
     "editorIndentGuide.activeBackground1": "#F0F0F030",
     "editorIndentGuide.background1": "#F0F0F013",
     "editorInlayHint.background": "#00000000",

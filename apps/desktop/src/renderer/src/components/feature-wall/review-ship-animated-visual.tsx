@@ -13,6 +13,7 @@ import {
   FileIcon,
   PR_BODY,
   PR_TITLE,
+  ReviewAnimatedVisualButton,
   SHIP_FILES
 } from './review-animated-visual-shared'
 import { ReviewShipVisualStyles } from './review-animated-visual-ship-styles'
@@ -267,8 +268,7 @@ export function ReviewShipAnimatedVisual(props: { reducedMotion: boolean }): JSX
           </div>
           <div className="ravs-sc-commit-area">
             <div className="ravs-sc-textarea" data-commit-textarea>
-              <button
-                type="button"
+              <ReviewAnimatedVisualButton
                 className="ravs-sc-sparkle"
                 data-commit-sparkle
                 aria-label={translate(
@@ -277,7 +277,7 @@ export function ReviewShipAnimatedVisual(props: { reducedMotion: boolean }): JSX
                 )}
               >
                 <Sparkles className="size-3.5" />
-              </button>
+              </ReviewAnimatedVisualButton>
               <span className="ravs-placeholder" data-commit-placeholder>
                 {translate(
                   'auto.components.feature.wall.ReviewShipAnimatedVisual.7347fa5839',
@@ -336,8 +336,7 @@ export function ReviewShipAnimatedVisual(props: { reducedMotion: boolean }): JSX
                 'Create Pull Request'
               )}
             </div>
-            <button
-              type="button"
+            <ReviewAnimatedVisualButton
               className="ravs-pr-gen-btn"
               data-pr-gen-btn
               aria-label={translate(
@@ -350,7 +349,7 @@ export function ReviewShipAnimatedVisual(props: { reducedMotion: boolean }): JSX
               )}
             >
               <Sparkles className="size-3.5" />
-            </button>
+            </ReviewAnimatedVisualButton>
           </div>
           <div className="ravs-pr-body">
             <div className="ravs-pr-field">
@@ -403,18 +402,22 @@ export function ReviewShipAnimatedVisual(props: { reducedMotion: boolean }): JSX
               </div>
             </div>
             <div className="ravs-pr-footer">
-              <button type="button" className="ravs-pr-btn is-outline">
+              <ReviewAnimatedVisualButton className="ravs-pr-btn is-outline">
                 {translate(
                   'auto.components.feature.wall.ReviewShipAnimatedVisual.62544e0852',
                   'Cancel'
                 )}
-              </button>
-              <button type="button" className="ravs-pr-btn is-solid" data-pr-create-btn>
+              </ReviewAnimatedVisualButton>
+              <ReviewAnimatedVisualButton
+                className="ravs-pr-btn is-solid"
+                data-pr-create-btn
+                focusBorder
+              >
                 {translate(
                   'auto.components.feature.wall.ReviewShipAnimatedVisual.4d99496b8c',
                   'Create PR'
                 )}
-              </button>
+              </ReviewAnimatedVisualButton>
             </div>
           </div>
         </div>

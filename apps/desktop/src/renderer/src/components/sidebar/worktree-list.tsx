@@ -808,7 +808,7 @@ function HostSectionHeader({
         data-host-header-drag-id={row.hostId}
         aria-expanded={!row.collapsed}
         className={cn(
-          'group/host-header flex h-8 w-full cursor-pointer items-center gap-2 rounded-md border px-2 text-left transition-all',
+          'group/host-header flex h-8 w-full cursor-pointer items-center gap-2 rounded-md border px-2 text-left transition-all outline-none focus-visible:border-ring',
           onDragPointerDown && 'cursor-grab active:cursor-grabbing',
           isBlocked
             ? 'border-destructive/40 bg-destructive/10'
@@ -4713,7 +4713,7 @@ const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktreeViewp
                               createState?.disabled ? (
                                 <span
                                   className={cn(
-                                    'inline-flex cursor-not-allowed transition-[margin,max-width,opacity]',
+                                    'inline-flex cursor-not-allowed transition-[margin,max-width,opacity] outline-none focus-visible:bg-accent',
                                     REPO_HEADER_ACTION_REVEAL_CLASS
                                   )}
                                   data-repo-header-action=""
@@ -6772,7 +6772,7 @@ const WorktreeList = React.memo(function WorktreeList({
             {hasFilters && (
               <button
                 onClick={clearFilters}
-                className="bg-secondary/70 border-border/80 text-foreground hover:bg-accent inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors"
+                className="bg-secondary/70 border-border/80 text-foreground hover:bg-accent focus-visible:bg-accent inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors outline-none"
               >
                 <CircleX className="size-3.5" />
                 {translate('auto.components.sidebar.WorktreeList.370c6a55dd', 'Clear Filters')}

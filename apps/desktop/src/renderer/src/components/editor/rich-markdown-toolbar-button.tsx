@@ -23,7 +23,11 @@ export function RichMarkdownToolbarButton({
           render={
             <button
               type="button"
-              className={cn('rich-markdown-toolbar-button', active && 'is-active')}
+              className={cn(
+                'outline-none focus-visible:bg-accent',
+                'rich-markdown-toolbar-button',
+                active && 'is-active'
+              )}
               aria-label={label}
               onMouseDown={(event) => event.preventDefault()}
               onClick={onClick}

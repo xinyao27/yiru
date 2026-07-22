@@ -1831,7 +1831,7 @@ export default function CombinedDiffViewer({
                     render={
                       <button
                         type="button"
-                        className="text-foreground/80 hover:bg-accent hover:text-foreground inline-flex h-6 items-center gap-1 pr-1.5 pl-2 text-[11px] leading-none font-medium transition-colors"
+                        className="text-foreground/80 hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground inline-flex h-6 items-center gap-1 pr-1.5 pl-2 text-[11px] leading-none font-medium transition-colors outline-none"
                         aria-label={translate(
                           'auto.components.editor.CombinedDiffViewer.8f68ad9ca9',
                           'Show {{value0}} AI {{value1}}',
@@ -1878,7 +1878,7 @@ export default function CombinedDiffViewer({
           <div className="flex shrink-0 items-center gap-2">
             {file.combinedAlternate && (
               <button
-                className="text-muted-foreground hover:text-foreground text-xs transition-colors"
+                className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent text-xs transition-colors outline-none"
                 onClick={openAlternateDiff}
               >
                 {file.combinedAlternate.source === 'combined-branch'
@@ -1893,7 +1893,7 @@ export default function CombinedDiffViewer({
               </button>
             )}
             <button
-              className="text-muted-foreground hover:text-foreground w-20 text-left text-xs transition-colors"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent w-20 text-left text-xs transition-colors outline-none"
               onClick={() => setAllSectionsCollapsed(!allSectionsCollapsed)}
             >
               {allSectionsCollapsed
@@ -1901,7 +1901,7 @@ export default function CombinedDiffViewer({
                 : translate('auto.components.editor.CombinedDiffViewer.ea08dae15b', 'Collapse All')}
             </button>
             <button
-              className="border-border text-muted-foreground hover:text-foreground w-24 rounded border px-2 py-0.5 text-center text-xs transition-colors"
+              className="border-border text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent w-24 rounded border px-2 py-0.5 text-center text-xs transition-colors outline-none"
               onClick={toggleSideBySide}
             >
               {sideBySide
@@ -1910,6 +1910,7 @@ export default function CombinedDiffViewer({
             </button>
             <button
               className={cn(
+                'outline-none focus-visible:text-foreground focus-visible:bg-accent',
                 'inline-flex h-6 items-center gap-1 rounded border border-border px-2 text-xs transition-colors hover:text-foreground',
                 settings?.diffWordWrap === true
                   ? 'bg-accent text-foreground'

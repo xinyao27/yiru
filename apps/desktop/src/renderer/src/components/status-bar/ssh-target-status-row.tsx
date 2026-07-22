@@ -140,7 +140,7 @@ export function SshTargetStatusRow({
         <button
           type="button"
           onClick={() => void handleConnect()}
-          className="text-foreground hover:bg-accent/70 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium"
+          className="text-foreground hover:bg-accent/70 focus-visible:bg-accent/70 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium outline-none"
         >
           {translate('auto.components.status.bar.SshStatusSegment.63f36455cc', 'Connect')}
         </button>
@@ -148,7 +148,7 @@ export function SshTargetStatusRow({
         <button
           type="button"
           onClick={() => void handleDisconnect()}
-          className="text-muted-foreground hover:bg-accent/70 hover:text-foreground shrink-0 rounded px-1.5 py-0.5 text-[10px]"
+          className="text-muted-foreground hover:bg-accent/70 hover:text-foreground focus-visible:bg-accent/70 focus-visible:text-foreground shrink-0 rounded px-1.5 py-0.5 text-[10px] outline-none"
         >
           {translate('auto.components.status.bar.SshStatusSegment.59b553e2aa', 'Disconnect')}
         </button>

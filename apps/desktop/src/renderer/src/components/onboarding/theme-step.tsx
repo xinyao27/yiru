@@ -226,6 +226,7 @@ export function ThemeStep({ theme, onThemeChange, settings, updateSettings }: Th
             <button
               key={id}
               className={cn(
+                'outline-none focus-visible:bg-muted/60',
                 'group overflow-hidden rounded-xl border p-3 text-left transition-all',
                 selected
                   ? 'border-violet-500/60 bg-violet-500/10'

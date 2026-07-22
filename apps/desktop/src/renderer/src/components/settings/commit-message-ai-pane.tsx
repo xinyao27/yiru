@@ -207,6 +207,7 @@ export function CommitMessageAiPane({
           aria-checked={config.enabled}
           onClick={onToggleEnabled}
           className={cn(
+            'outline-none focus-visible:border-ring',
             'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
             config.enabled ? 'bg-foreground' : 'bg-muted-foreground/30'
           )}

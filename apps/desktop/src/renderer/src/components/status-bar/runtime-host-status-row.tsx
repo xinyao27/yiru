@@ -122,7 +122,7 @@ export function RuntimeHostStatusRow({
         <button
           type="button"
           onClick={() => void handleAction()}
-          className="text-muted-foreground hover:bg-accent/70 hover:text-foreground shrink-0 rounded px-1.5 py-0.5 text-[10px]"
+          className="text-muted-foreground hover:bg-accent/70 hover:text-foreground focus-visible:bg-accent/70 focus-visible:text-foreground shrink-0 rounded px-1.5 py-0.5 text-[10px] outline-none"
         >
           {actionLabel}
         </button>

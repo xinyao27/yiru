@@ -139,7 +139,7 @@ export function NativeChatQuestionCard({
                   disabled={isSubmitting}
                   onClick={() => setIndex(i)}
                   className={cn(
-                    'flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium disabled:pointer-events-none',
+                    'flex shrink-0 items-center gap-1 rounded-md border border-transparent px-2 py-1 text-xs font-medium outline-none focus-visible:border-ring disabled:pointer-events-none',
                     i === index
                       ? 'bg-accent text-accent-foreground'
                       : 'text-muted-foreground hover:text-foreground'
@@ -171,7 +171,7 @@ export function NativeChatQuestionCard({
                 type="button"
                 onClick={onCancel}
                 aria-label={translate('components.native-chat.question.cancel', 'Cancel')}
-                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex size-6 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:outline-none"
+                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring flex size-6 shrink-0 items-center justify-center rounded-md border border-transparent transition-colors outline-none"
               >
                 <X className="size-4" />
               </button>
@@ -210,14 +210,14 @@ export function NativeChatQuestionCard({
                     'components.native-chat.question.otherPlaceholder',
                     'Type your answer'
                   )}
-                  className="text-foreground placeholder:text-muted-foreground/60 min-w-0 flex-1 bg-transparent text-sm outline-none disabled:cursor-default disabled:opacity-50"
+                  className="text-foreground placeholder:text-muted-foreground/60 focus:bg-accent min-w-0 flex-1 bg-transparent text-sm outline-none disabled:cursor-default disabled:opacity-50"
                 />
                 <button
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => confirm()}
                   className={cn(
-                    'w-24 shrink-0 rounded-md px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none disabled:cursor-default disabled:opacity-50',
+                    'w-24 shrink-0 rounded-md border border-transparent px-3 py-1 text-xs font-semibold transition-colors outline-none focus-visible:border-ring disabled:cursor-default disabled:opacity-50',
                     currentAnswered
                       ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                       : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
@@ -270,7 +270,7 @@ function OptionRow({
       // assistive tech.
       aria-pressed={selected}
       className={cn(
-        'flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors disabled:pointer-events-none',
+        'flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors outline-none focus-visible:bg-accent disabled:pointer-events-none',
         selected ? 'bg-accent' : 'hover:bg-accent'
       )}
     >

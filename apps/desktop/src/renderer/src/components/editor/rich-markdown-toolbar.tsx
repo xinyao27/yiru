@@ -54,7 +54,7 @@ function RichMarkdownMoreBlocksMenu({ editor }: { editor: Editor | null }): Reac
                 render={
                   <button
                     type="button"
-                    className="rich-markdown-toolbar-button"
+                    className="rich-markdown-toolbar-button focus-visible:bg-accent outline-none"
                     aria-label={label}
                     onMouseDown={(event) => event.preventDefault()}
                   >

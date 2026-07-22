@@ -838,6 +838,7 @@ export function AccountsPane({
               }
               disabled={claudeAction !== 'idle' || accountRuntimeUnavailable}
               className={cn(
+                'outline-none focus-visible:border-border focus-visible:bg-accent/8',
                 'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
                 systemClaudeActive
                   ? 'border-foreground/20 bg-accent/15'
@@ -922,7 +923,7 @@ export function AccountsPane({
                           )
                         }}
                         disabled={isBusy}
-                        className="flex min-w-0 flex-1 flex-col gap-0.5 text-left disabled:cursor-default"
+                        className="focus-visible:bg-accent flex min-w-0 flex-1 flex-col gap-0.5 text-left outline-none disabled:cursor-default"
                       >
                         <div className="flex min-w-0 items-center gap-2">
                           <span className="truncate text-sm font-medium">{account.email}</span>
@@ -1133,6 +1134,7 @@ export function AccountsPane({
               }
               disabled={codexAction !== 'idle' || accountRuntimeUnavailable}
               className={cn(
+                'outline-none focus-visible:border-border focus-visible:bg-accent/8',
                 'flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
                 systemCodexNeedsReauthentication
                   ? 'border-destructive/50 bg-destructive/5'
@@ -1256,7 +1258,7 @@ export function AccountsPane({
                           )
                         }}
                         disabled={isBusy}
-                        className="flex min-w-0 flex-1 flex-col gap-0.5 text-left disabled:cursor-default"
+                        className="focus-visible:bg-accent flex min-w-0 flex-1 flex-col gap-0.5 text-left outline-none disabled:cursor-default"
                       >
                         <div className="flex min-w-0 items-center gap-2">
                           <span className="truncate text-sm font-medium">{account.email}</span>
@@ -1435,6 +1437,7 @@ export function AccountsPane({
               })
             }}
             className={cn(
+              'outline-none focus-visible:border-ring',
               'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
               settings.geminiCliOAuthEnabled ? 'bg-foreground' : 'bg-muted-foreground/30'
             )}
@@ -1612,7 +1615,7 @@ export function AccountsPane({
             href={MINIMAX_CONSOLE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs"
+            className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex items-center gap-1 text-xs outline-none"
           >
             {translate('auto.components.settings.AccountsPane.0d8e77bc40', 'Open console')}
             <ExternalLink className="size-3" />

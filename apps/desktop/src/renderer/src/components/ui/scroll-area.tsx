@@ -29,7 +29,7 @@ function ScrollArea({
         tabIndex={viewportTabIndex}
         data-slot="scroll-area-viewport"
         className={cn(
-          'size-full rounded-[inherit] transition-[color] outline-none focus-visible:outline-1',
+          'size-full rounded-[inherit] border border-transparent transition-[color] outline-none focus-visible:border-ring',
           viewportClassName
         )}
         {...viewportProps}

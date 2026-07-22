@@ -87,7 +87,7 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
                   <button
                     type="button"
                     {...STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS}
-                    className="hover:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5"
+                    className="hover:bg-accent/70 focus-visible:bg-accent/70 inline-flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 outline-none"
                     aria-label={translate(
                       'auto.components.status.bar.PortsStatusSegment.b8bc3e420a',
                       'Ports, {{value0}} workspace {{value1}}',
@@ -204,7 +204,7 @@ export function PortsStatusSegment({ iconOnly }: PortsStatusSegmentProps): React
               <section className="border-border/60 border-t">
                 <button
                   type="button"
-                  className="border-border/40 bg-popover text-muted-foreground hover:bg-accent/50 hover:text-foreground sticky top-0 z-10 flex w-full items-center gap-1.5 border-b px-3 py-2 text-left text-[11px] font-medium tracking-[0.05em] uppercase"
+                  className="border-border/40 bg-popover text-muted-foreground hover:bg-accent/50 hover:text-foreground focus-visible:bg-accent/50 focus-visible:text-foreground sticky top-0 z-10 flex w-full items-center gap-1.5 border-b px-3 py-2 text-left text-[11px] font-medium tracking-[0.05em] uppercase outline-none"
                   aria-expanded={externalOpen}
                   onClick={() => {
                     recordFeatureInteraction('ports')

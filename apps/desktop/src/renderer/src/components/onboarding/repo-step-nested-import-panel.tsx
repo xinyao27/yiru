@@ -119,7 +119,7 @@ export function RepoStepNestedImportPanel({
         <div className="mt-4 flex shrink-0 flex-wrap items-center gap-2">
           <button
             type="button"
-            className="text-muted-foreground hover:bg-muted/60 hover:text-foreground inline-flex items-center gap-1 rounded-lg px-3 py-3 text-sm disabled:opacity-40"
+            className="text-muted-foreground hover:bg-muted/60 hover:text-foreground focus-visible:bg-muted/60 focus-visible:text-foreground inline-flex items-center gap-1 rounded-lg px-3 py-3 text-sm outline-none disabled:opacity-40"
             disabled={disabled && !nestedScanInProgress}
             onClick={onCancelNested}
           >
@@ -128,7 +128,7 @@ export function RepoStepNestedImportPanel({
           </button>
           <button
             type="button"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 ml-auto rounded-lg px-4 py-3 text-sm font-medium disabled:opacity-40"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:bg-primary/90 ml-auto rounded-lg px-4 py-3 text-sm font-medium outline-none disabled:opacity-40"
             disabled={nestedImportDisabled || nestedSelectedPaths.size === 0}
             onClick={onImportNested}
           >

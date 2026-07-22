@@ -139,7 +139,7 @@ export function MobileEmulatorAgentSetupGuide({
             <button
               type="button"
               onClick={openSettings}
-              className="text-muted-foreground hover:text-foreground text-[11px] underline-offset-2 hover:underline"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent text-[11px] underline-offset-2 outline-none hover:underline"
             >
               {translate(
                 'auto.components.emulator.pane.MobileEmulatorAgentSetupGuide.3f003507f4',

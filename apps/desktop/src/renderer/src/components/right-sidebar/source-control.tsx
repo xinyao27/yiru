@@ -5641,7 +5641,7 @@ function SourceControlInner({
             <div className="flex items-center gap-1 py-1.5 pr-2 pl-3">
               <button
                 type="button"
-                className="text-muted-foreground hover:text-foreground flex min-w-0 flex-1 items-center gap-1.5 text-left text-xs transition-colors"
+                className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-1.5 text-left text-xs transition-colors outline-none"
                 onClick={() => setDiffCommentsExpanded((prev) => !prev)}
                 aria-expanded={diffCommentsExpanded}
                 title={
@@ -5686,7 +5686,7 @@ function SourceControlInner({
                         render={
                           <button
                             type="button"
-                            className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-6 items-center justify-center rounded transition-colors"
+                            className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground inline-flex size-6 items-center justify-center rounded transition-colors outline-none"
                             onClick={() => void handleCopyDiffComments()}
                             aria-label={translate(
                               'auto.components.right.sidebar.SourceControl.3baf6c77b4',
@@ -5719,7 +5719,7 @@ function SourceControlInner({
                             render={
                               <button
                                 type="button"
-                                className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-6 items-center justify-center rounded transition-colors"
+                                className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground inline-flex size-6 items-center justify-center rounded transition-colors outline-none"
                                 aria-label={translate(
                                   'auto.components.right.sidebar.SourceControl.2fe2a67580',
                                   'More note actions'
@@ -6827,9 +6827,9 @@ export function CommitArea({
             // Why: reserve right padding so typed text does not slide under the
             // absolute-positioned Generate icon in the top-right corner.
             // Why: match Input surface tokens and pin disabled:border-input so
-            // Chromium's UA disabled styles don't wash out the field outline.
+            // Chromium's UA disabled styles don't wash out the field edge.
             className={cn(
-              'mt-0.5 min-h-14 w-full resize-none appearance-none rounded-md border border-input bg-background   px-2 py-1.5 text-xs text-foreground outline-none placeholder:text-muted-foreground/70 focus-visible:border-ring     disabled:cursor-not-allowed disabled:border-input disabled:bg-background disabled:text-foreground   dark:bg-input/30 dark:disabled:bg-input/30',
+              'mt-0.5 min-h-14 w-full resize-none appearance-none rounded-md border border-input bg-background px-2 py-1.5 text-xs text-foreground outline-none placeholder:text-muted-foreground/70 focus-visible:border-ring disabled:cursor-not-allowed disabled:border-input disabled:bg-background disabled:text-foreground dark:bg-input/30 dark:disabled:bg-input/30',
               showGenerate ? 'pr-8' : ''
             )}
           />
@@ -6894,7 +6894,7 @@ export function CommitArea({
                         'Generate commit message with AI'
                       )}
                       className={cn(
-                        'absolute right-1.5 top-1.5 inline-flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none    ',
+                        'absolute right-1.5 top-1.5 inline-flex size-5 items-center justify-center rounded border border-transparent text-muted-foreground transition-colors outline-none hover:bg-muted/60 hover:text-foreground focus-visible:border-ring',
                         isGenerateDisabled &&
                           'cursor-not-allowed opacity-40 hover:bg-transparent hover:text-muted-foreground'
                       )}
@@ -7083,7 +7083,7 @@ export function CommitArea({
           {createPrIntentNotice.action === 'settings' && onOpenSourceControlAiSettings ? (
             <button
               type="button"
-              className="text-foreground decoration-border hover:decoration-foreground shrink-0 font-medium underline underline-offset-2"
+              className="text-foreground decoration-border hover:decoration-foreground focus-visible:bg-accent shrink-0 font-medium underline underline-offset-2 outline-none"
               onClick={() => onOpenSourceControlAiSettings()}
             >
               {translate(
@@ -7438,7 +7438,7 @@ function DiffCommentsInlineList({
           <div className="group/file flex items-center gap-1">
             <button
               type="button"
-              className="text-muted-foreground hover:text-foreground block min-w-0 flex-1 truncate text-left text-[10px] font-medium"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent block min-w-0 flex-1 truncate text-left text-[10px] font-medium outline-none"
               onClick={() => {
                 const first = list[0]
                 if (first) {
@@ -7455,7 +7455,7 @@ function DiffCommentsInlineList({
             </button>
             <button
               type="button"
-              className="text-muted-foreground can-hover:opacity-0 hover:text-destructive shrink-0 rounded p-0.5 transition-opacity group-hover/file:opacity-100 focus-visible:opacity-100"
+              className="text-muted-foreground can-hover:opacity-0 hover:text-destructive focus-visible:text-destructive focus-visible:bg-accent shrink-0 rounded p-0.5 transition-opacity outline-none group-hover/file:opacity-100 focus-visible:opacity-100"
               onClick={() => onClearFile(filePath)}
               title={translate(
                 'auto.components.right.sidebar.SourceControl.59654650d3',
@@ -7485,7 +7485,7 @@ function DiffCommentsInlineList({
                   // pattern violates ARIA's no-interactive-descendants rule
                   // for buttons and lets bubbled key events from the children
                   // fire the row's open handler.
-                  className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 rounded text-left"
+                  className="focus-visible:bg-accent flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 rounded text-left outline-none"
                   onClick={() => onOpen(c)}
                   title={translate(
                     'auto.components.right.sidebar.SourceControl.0b5b8c234c',
@@ -7517,7 +7517,7 @@ function DiffCommentsInlineList({
                 </button>
                 <button
                   type="button"
-                  className="text-muted-foreground can-hover:opacity-0 hover:text-foreground shrink-0 rounded p-0.5 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                  className="text-muted-foreground can-hover:opacity-0 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent shrink-0 rounded p-0.5 transition-opacity outline-none group-hover:opacity-100 focus-visible:opacity-100"
                   onClick={() => void handleCopyOne(c)}
                   title={translate(
                     'auto.components.right.sidebar.SourceControl.1623bf4e19',
@@ -7533,7 +7533,7 @@ function DiffCommentsInlineList({
                 </button>
                 <button
                   type="button"
-                  className="text-muted-foreground can-hover:opacity-0 hover:text-destructive shrink-0 rounded p-0.5 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                  className="text-muted-foreground can-hover:opacity-0 hover:text-destructive focus-visible:text-destructive focus-visible:bg-accent shrink-0 rounded p-0.5 transition-opacity outline-none group-hover:opacity-100 focus-visible:opacity-100"
                   onClick={() => onDelete(c.id)}
                   title={translate(
                     'auto.components.right.sidebar.SourceControl.b656381c18',
@@ -7759,7 +7759,7 @@ function SourceControlTreeDirectoryRow({
     >
       <button
         type="button"
-        className="flex min-w-0 flex-1 items-center gap-1 text-left"
+        className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-1 text-left outline-none"
         onClick={onToggle}
         aria-expanded={!isCollapsed}
       >
@@ -7854,7 +7854,7 @@ function SourceControlBranchTreeDirectoryRow({
     >
       <button
         type="button"
-        className="flex min-w-0 flex-1 items-center gap-1 text-left"
+        className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-1 text-left outline-none"
         onClick={onToggle}
         aria-expanded={!isCollapsed}
       >

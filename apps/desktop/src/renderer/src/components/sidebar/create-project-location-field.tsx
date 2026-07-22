@@ -140,7 +140,7 @@ export function CreateProjectLocationField({
             type="button"
             onClick={onPickParent}
             disabled={isCreating}
-            className="text-muted-foreground hover:text-foreground inline-flex shrink-0 cursor-pointer items-center gap-1 text-[11px] transition-colors disabled:cursor-not-allowed"
+            className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex shrink-0 cursor-pointer items-center gap-1 text-[11px] transition-colors outline-none disabled:cursor-not-allowed"
             aria-label={translate(
               'auto.components.sidebar.CreateProjectLocationField.afaf54f245',
               'Change parent folder'

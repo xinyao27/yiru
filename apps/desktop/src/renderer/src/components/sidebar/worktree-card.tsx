@@ -1189,6 +1189,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
                         onPointerDown={stopQuickActionPointerPropagation}
                         onClick={handleWorkspaceQuickAction}
                         className={cn(
+                          'outline-none',
                           'inline-flex size-4 items-center justify-center rounded bg-transparent opacity-0 transition-colors transition-opacity',
                           'group-hover/worktree-card:opacity-100 group-focus-within/worktree-card:opacity-100 focus-visible:opacity-100',
                           'text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive'

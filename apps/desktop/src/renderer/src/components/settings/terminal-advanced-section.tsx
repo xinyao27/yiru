@@ -250,7 +250,7 @@ export function TerminalAdvancedSection({
                       href="https://github.com/PowerShell/PowerShell/releases/latest"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-foreground underline"
+                      className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline outline-none"
                     >
                       {translate(
                         'auto.components.settings.TerminalPane.822f62ddcd',

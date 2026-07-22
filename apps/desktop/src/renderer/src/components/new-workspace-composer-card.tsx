@@ -999,9 +999,19 @@ export default function NewWorkspaceComposerCard({
             <div className="min-h-0">
               <div className="space-y-1 pt-1">
                 <label className="group text-foreground flex w-fit items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={reuseSelectedBranch}
+                    onChange={(event) => onReuseSelectedBranchChange(event.target.checked)}
+                    // Why: while collapsed the row is aria-hidden, so disable the
+                    // input too — keeps a hidden control out of the tab order and
+                    // fully inert (no focusable control inside an aria-hidden tree).
+                    disabled={!canReuseSelectedBranch}
+                    className="peer sr-only outline-none"
+                  />
                   <span
                     className={cn(
-                      'flex size-4 items-center justify-center rounded-[3px] border transition',
+                      'peer-focus-visible:border-ring flex size-4 items-center justify-center rounded-[3px] border transition',
                       reuseSelectedBranch
                         ? 'border-emerald-500/60 bg-emerald-500 text-white'
                         : 'border-foreground/20 bg-background dark:border-white/20 dark:bg-muted/10'
@@ -1014,16 +1024,6 @@ export default function NewWorkspaceComposerCard({
                       )}
                     />
                   </span>
-                  <input
-                    type="checkbox"
-                    checked={reuseSelectedBranch}
-                    onChange={(event) => onReuseSelectedBranchChange(event.target.checked)}
-                    // Why: while collapsed the row is aria-hidden, so disable the
-                    // input too — keeps a hidden control out of the tab order and
-                    // fully inert (no focusable control inside an aria-hidden tree).
-                    disabled={!canReuseSelectedBranch}
-                    className="sr-only"
-                  />
                   <span>
                     {translate(
                       'auto.components.NewWorkspaceComposerCard.reuseExistingBranch',
@@ -1116,11 +1116,9 @@ export default function NewWorkspaceComposerCard({
           aria-hidden={!advancedOpen}
         >
           <div className="min-h-0">
-            {/* Why: px-1 leaves room for the shared focus outline inside the
- overflow-hidden drawer so it is not clipped on either edge. */}
             <div
               className={cn(
-                'space-y-4 px-1 pt-1 pb-3 transition-[opacity,transform] duration-150 ease-out',
+                'space-y-4 pt-1 pb-3 transition-[opacity,transform] duration-150 ease-out',
                 advancedOpen
                   ? 'translate-y-0 opacity-100 delay-200'
                   : '-translate-y-1 opacity-0 delay-0'
@@ -1239,9 +1237,17 @@ export default function NewWorkspaceComposerCard({
                     headerAction={
                       requiresExplicitSetupChoice ? null : (
                         <label className="group text-foreground flex items-center gap-2 text-xs">
+                          <input
+                            type="checkbox"
+                            checked={resolvedSetupDecision === 'run'}
+                            onChange={(event) =>
+                              onSetupDecisionChange(event.target.checked ? 'run' : 'skip')
+                            }
+                            className="peer sr-only outline-none"
+                          />
                           <span
                             className={cn(
-                              'flex size-4 items-center justify-center rounded-[3px] border transition',
+                              'peer-focus-visible:border-ring flex size-4 items-center justify-center rounded-[3px] border transition',
                               resolvedSetupDecision === 'run'
                                 ? 'border-emerald-500/60 bg-emerald-500 text-white'
                                 : 'border-foreground/20 bg-background dark:border-white/20 dark:bg-muted/10'
@@ -1254,14 +1260,6 @@ export default function NewWorkspaceComposerCard({
                               )}
                             />
                           </span>
-                          <input
-                            type="checkbox"
-                            checked={resolvedSetupDecision === 'run'}
-                            onChange={(event) =>
-                              onSetupDecisionChange(event.target.checked ? 'run' : 'skip')
-                            }
-                            className="sr-only"
-                          />
                           <span>{setupRunLabel}</span>
                         </label>
                       )

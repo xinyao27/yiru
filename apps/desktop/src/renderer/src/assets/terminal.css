@@ -12,7 +12,7 @@
   height: 100% !important;
 }
 
-/* Reset the global border/outline base rule inside terminal panes */
+/* Why: terminal internals manage focus themselves; suppress Chromium's native ring locally. */
 .pane-manager-root *,
 .pane-manager-root *::before,
 .pane-manager-root *::after {
@@ -172,8 +172,6 @@
   z-index: 5;
   pointer-events: none;
   border: 1.5px solid color-mix(in srgb, var(--terminal-pane-locate) 64%, transparent);
-  outline: 1.5px solid color-mix(in srgb, var(--terminal-pane-locate) 18%, transparent);
-  outline-offset: -3px;
   border-radius: 2px;
 }
 
@@ -349,8 +347,7 @@
 }
 
 .pane-title-text:focus-visible {
-  outline: 1px solid var(--ring);
-  outline-offset: 1px;
+  background: var(--accent);
 }
 
 .pane-title-bar[data-chromeless] {

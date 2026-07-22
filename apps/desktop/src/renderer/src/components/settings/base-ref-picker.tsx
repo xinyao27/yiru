@@ -260,6 +260,7 @@ export function BaseRefPicker({
                     onSelect(ref)
                   }}
                   className={cn(
+                    'outline-none focus-visible:bg-muted/60',
                     'flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors hover:bg-muted/60',
                     effectiveBaseRef === ref
                       ? 'bg-accent text-accent-foreground'

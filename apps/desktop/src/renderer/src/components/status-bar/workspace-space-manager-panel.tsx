@@ -1909,7 +1909,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
               <button
                 type="button"
                 onClick={() => toggleSort('name')}
-                className="flex items-center gap-1 text-left"
+                className="focus-visible:bg-accent flex items-center gap-1 text-left outline-none"
               >
                 {translate(
                   'auto.components.status.bar.WorkspaceSpaceManagerPanel.e4aebea158',
@@ -1920,7 +1920,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
               <button
                 type="button"
                 onClick={() => toggleSort('repo')}
-                className="flex items-center gap-1 text-left"
+                className="focus-visible:bg-accent flex items-center gap-1 text-left outline-none"
               >
                 {translate(
                   'auto.components.status.bar.WorkspaceSpaceManagerPanel.81f14d9924',
@@ -1931,7 +1931,7 @@ export function WorkspaceSpaceManagerPanel(): React.JSX.Element {
               <button
                 type="button"
                 onClick={() => toggleSort('size')}
-                className="flex items-center justify-end gap-1 text-right"
+                className="focus-visible:bg-accent flex items-center justify-end gap-1 text-right outline-none"
               >
                 {translate(
                   'auto.components.status.bar.WorkspaceSpaceManagerPanel.33aef3e9cc',

@@ -37,6 +37,7 @@ export function NotificationSettingToggle({
         disabled={disabled}
         onClick={onToggle}
         className={cn(
+          'outline-none focus-visible:border-ring',
           'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors',
           checked ? 'bg-foreground' : 'bg-muted-foreground/30',
           disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'

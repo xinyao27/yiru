@@ -208,7 +208,7 @@ export function GitHubRateLimitPanel({ className }: { className?: string }): Rea
           type="button"
           onClick={() => void refresh(true)}
           disabled={isFetching}
-          className="border-border bg-secondary text-secondary-foreground hover:bg-accent inline-flex size-7 items-center justify-center rounded-md border transition disabled:opacity-50"
+          className="border-border bg-secondary text-secondary-foreground hover:bg-accent focus-visible:bg-accent inline-flex size-7 items-center justify-center rounded-md border transition outline-none disabled:opacity-50"
           aria-label={translate(
             'auto.components.github.github.rate.limit.display.d12d3d6f33',
             'Refresh GitHub API budget'

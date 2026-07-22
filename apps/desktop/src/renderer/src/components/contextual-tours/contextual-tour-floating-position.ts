@@ -38,8 +38,7 @@ export const CONTEXTUAL_TOUR_ARROW_SIZE = {
   height: ARROW_HEIGHT
 } as const
 
-// Why: keep the arrow just outside the panel border. Letting it overlap the
-// border makes the callout look like it is colliding with the tip card outline.
+// Why: keep the arrow just outside the panel border so the two edges do not collide.
 export const CONTEXTUAL_TOUR_PANEL_BORDER_WIDTH = 1
 
 export async function getContextualTourFloatingPosition(args: {

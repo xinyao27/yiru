@@ -86,7 +86,7 @@ export function PierreDiffCommentComposer({
                 mountedRef.current = false
               }
             }}
-            className="yiru-diff-comment-popover-textarea"
+            className="yiru-diff-comment-popover-textarea focus-visible:border-ring outline-none"
             placeholder={placeholder ?? 'Add note for the AI'}
             value={body}
             rows={3}

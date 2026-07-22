@@ -136,7 +136,7 @@ function ConflictReviewFileTreeRow({
     return (
       <button
         type="button"
-        className="group text-muted-foreground hover:bg-accent/40 hover:text-foreground flex w-full items-center gap-1 py-1 pr-3 text-left text-xs transition-colors"
+        className="group text-muted-foreground hover:bg-accent/40 hover:text-foreground focus-visible:bg-accent/40 focus-visible:text-foreground flex w-full items-center gap-1 py-1 pr-3 text-left text-xs transition-colors outline-none"
         style={{
           paddingLeft: `${node.depth * CONFLICT_REVIEW_TREE_INDENT_PX + CONFLICT_REVIEW_DIRECTORY_PADDING_PX}px`
         }}
@@ -167,6 +167,7 @@ function ConflictReviewFileTreeRow({
     <button
       type="button"
       className={cn(
+        'outline-none focus-visible:bg-accent/40 focus-visible:bg-accent/70',
         'group flex w-full min-w-0 cursor-pointer items-center gap-1 py-1 pr-3 text-left text-xs transition-colors hover:bg-accent/40 disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent',
         isSelected && 'bg-accent/60 text-accent-foreground hover:bg-accent/70'
       )}

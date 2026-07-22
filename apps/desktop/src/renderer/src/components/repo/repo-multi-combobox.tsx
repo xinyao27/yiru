@@ -175,6 +175,7 @@ export default function RepoMultiCombobox({
               onMouseDown={(event) => event.preventDefault()}
               onMouseEnter={() => setCommandValue('')}
               className={cn(
+                'outline-none focus-visible:bg-accent focus-visible:text-accent-foreground',
                 'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
                 allSelected && 'opacity-80'
               )}

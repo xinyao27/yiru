@@ -148,7 +148,7 @@ export function FirstLaunchBanner({
           )}{' '}
           <button
             type="button"
-            className="hover:text-foreground underline underline-offset-2"
+            className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline underline-offset-2 outline-none"
             onClick={() => void window.api.shell.openUrl(PRIVACY_URL)}
           >
             {translate('auto.components.FirstLaunchBanner.d1deebb050', 'Privacy policy')}
@@ -183,7 +183,7 @@ export function FirstLaunchBanner({
         aria-label={translate('auto.components.FirstLaunchBanner.b9e1b966c7', 'Dismiss notice')}
         onClick={handleAcknowledge}
         disabled={inFlight}
-        className="text-muted-foreground hover:bg-muted hover:text-foreground absolute top-1.5 right-1.5 rounded p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground absolute top-1.5 right-1.5 rounded p-1 transition-colors outline-none disabled:cursor-not-allowed disabled:opacity-50"
       >
         <X className="size-3.5" />
       </button>

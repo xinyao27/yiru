@@ -34,7 +34,7 @@ function NestedRepoSelectAllRow({
       <input
         ref={handleCheckboxRef}
         type="checkbox"
-        className="size-3.5"
+        className="focus-visible:border-ring size-3.5 outline-none"
         checked={allSelected}
         disabled={disabled}
         onChange={onToggle}
@@ -98,7 +98,7 @@ export function NestedRepoChecklist({
             <label className="border-border hover:bg-accent flex max-w-full min-w-0 cursor-pointer items-center gap-2.5 overflow-hidden border-t px-3 py-2 text-sm">
               <input
                 type="checkbox"
-                className="size-3.5"
+                className="focus-visible:border-ring size-3.5 outline-none"
                 checked={selectedPaths.has(repo.path)}
                 disabled={disabled}
                 onChange={(event) => {

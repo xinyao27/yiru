@@ -231,7 +231,7 @@ export function RichMarkdownCodeBlock({
   return (
     <NodeViewWrapper className="rich-markdown-code-block-wrapper">
       <select
-        className="rich-markdown-code-block-lang"
+        className="rich-markdown-code-block-lang focus-visible:border-ring outline-none"
         contentEditable={false}
         value={language}
         onChange={onChange}
@@ -249,7 +249,7 @@ export function RichMarkdownCodeBlock({
       <button
         ref={setCopyButtonRef}
         type="button"
-        className="code-block-copy-btn"
+        className="code-block-copy-btn focus-visible:bg-accent outline-none"
         contentEditable={false}
         onClick={handleCopy}
         aria-label={translate(

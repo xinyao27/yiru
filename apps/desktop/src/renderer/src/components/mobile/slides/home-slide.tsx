@@ -17,7 +17,7 @@ export function HomeSlide({ tapping }: { tapping: boolean }): React.JSX.Element 
         </div>
         <button
           type="button"
-          className={mobileHomePreviewStyles.iconButton}
+          className={cn('outline-none focus-visible:bg-accent', mobileHomePreviewStyles.iconButton)}
           aria-label={translate('auto.components.mobile.slides.HomeSlide.af761a0c0d', 'Settings')}
         >
           <SettingsIcon />

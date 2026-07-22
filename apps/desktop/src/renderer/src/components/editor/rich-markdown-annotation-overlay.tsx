@@ -26,7 +26,7 @@ export function RichMarkdownAnnotationOverlay({
       {target ? (
         <button
           type="button"
-          className="yiru-diff-comment-add-btn rich-markdown-comment-add-btn"
+          className="yiru-diff-comment-add-btn rich-markdown-comment-add-btn focus-visible:bg-accent outline-none"
           style={{
             top: target.buttonTop ?? 56,
             left: target.buttonLeft ?? 16

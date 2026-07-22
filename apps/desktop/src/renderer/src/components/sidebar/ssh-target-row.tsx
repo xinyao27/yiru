@@ -73,7 +73,7 @@ export function SshTargetRow({
       role={isConnected ? 'button' : undefined}
       tabIndex={isConnected ? 0 : undefined}
       className={cn(
-        'w-full flex items-center gap-2 px-3 py-2 rounded-md border text-xs transition-colors',
+        'w-full flex items-center gap-2 px-3 py-2 rounded-md border text-xs transition-colors outline-none focus-visible:border-ring',
         isSelected ? 'border-foreground/30 bg-accent' : 'border-border hover:bg-accent/50',
         isConnected ? 'cursor-pointer' : ''
       )}
@@ -94,7 +94,7 @@ export function SshTargetRow({
         // bring up a configured target.
         <button
           type="button"
-          className="text-foreground hover:bg-accent/70 ml-auto flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium disabled:cursor-default disabled:opacity-50"
+          className="text-foreground hover:bg-accent/70 focus-visible:bg-accent/70 ml-auto flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium outline-none disabled:cursor-default disabled:opacity-50"
           onClick={handleConnectClick}
           disabled={isBusy}
         >

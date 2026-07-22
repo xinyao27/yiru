@@ -376,6 +376,7 @@
   color: var(--muted-foreground);
   cursor: pointer;
   opacity: 0;
+  outline: none;
   transition:
     opacity 100ms ease,
     color 100ms ease,
@@ -388,8 +389,7 @@
 }
 
 .markdown-annotation-add:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 1px;
+  border-color: var(--ring);
   opacity: 1;
 }
 
@@ -517,6 +517,12 @@
   cursor: pointer;
   font-weight: 600;
   line-height: 1.35;
+  outline: none;
+}
+
+/* Why: rendered markdown creates native summaries outside the shared primitives. */
+.markdown-body details.yiru-details > summary:focus-visible {
+  background: var(--accent);
 }
 
 .markdown-body details.yiru-details > summary::before {

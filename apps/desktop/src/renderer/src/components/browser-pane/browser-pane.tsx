@@ -2639,7 +2639,7 @@ function RemoteBrowserPagePane({
       <div
         ref={remoteViewportRef}
         tabIndex={-1}
-        className="bg-background relative min-h-0 flex-1 overflow-hidden"
+        className="bg-background relative min-h-0 flex-1 overflow-hidden outline-none"
       >
         {markup.isActive && markup.baseImage ? (
           <MarkupOverlay
@@ -5394,7 +5394,7 @@ function BrowserPagePane({
             <button
               type="button"
               onClick={() => setResourceNotice(null)}
-              className="text-muted-foreground/60 hover:text-foreground shrink-0"
+              className="text-muted-foreground/60 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent shrink-0 outline-none"
               aria-label={translate(
                 'auto.components.browser.pane.BrowserPane.2fdca7df09',
                 'Dismiss'
@@ -5537,7 +5537,7 @@ function BrowserPagePane({
               </>
             ) : null}
             <button
-              className="text-muted-foreground hover:text-foreground ml-auto shrink-0 rounded px-2 py-0.5 transition-colors"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent ml-auto shrink-0 rounded px-2 py-0.5 transition-colors outline-none"
               onClick={() => {
                 setPendingAnnotationPayload(null)
                 grab.cancel()
@@ -5906,7 +5906,7 @@ function BrowserPagePane({
                       >
                         <DropdownMenuTrigger
                           render={
-                            <button className="flex size-6 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-black/10 hover:text-gray-700">
+                            <button className="flex size-6 items-center justify-center rounded-full text-gray-500 transition-colors outline-none hover:bg-black/10 hover:text-gray-700 focus-visible:bg-black/10 focus-visible:text-gray-700">
                               <span className="text-sm leading-none font-bold">···</span>
                             </button>
                           }

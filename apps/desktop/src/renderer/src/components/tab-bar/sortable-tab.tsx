@@ -394,6 +394,7 @@ export default function SortableTab({
           // collapse only when that close control exists so hit targets never stack.
           <button
             className={cn(
+              'outline-none focus-visible:bg-muted focus-visible:text-foreground',
               'mr-1 flex items-center justify-center w-4 h-4 rounded-sm shrink-0',
               !isPinned ? 'group-hover:pointer-events-none group-hover:opacity-0' : '',
               isActive

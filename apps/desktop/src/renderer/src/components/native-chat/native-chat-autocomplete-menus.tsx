@@ -23,6 +23,7 @@ export function NativeChatSlashMenu({
           type="button"
           onClick={() => onChoose(command)}
           className={cn(
+            'outline-none focus-visible:bg-accent',
             'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
             index === activeIndex ? 'bg-accent text-accent-foreground' : 'text-foreground'
           )}
@@ -48,7 +49,7 @@ export function NativeChatMentionHint({
     <button
       type="button"
       onClick={onAccept}
-      className="border-border bg-popover text-muted-foreground absolute right-3 bottom-full left-3 mb-1 flex w-auto items-center gap-2 rounded-md border px-3 py-1.5 text-left text-xs sm:right-4 sm:left-4"
+      className="border-border bg-popover text-muted-foreground focus-visible:bg-accent absolute right-3 bottom-full left-3 mb-1 flex w-auto items-center gap-2 rounded-md border px-3 py-1.5 text-left text-xs outline-none sm:right-4 sm:left-4"
     >
       {translate('components.native-chat.composer.mentionHint', 'Referencing file:')}{' '}
       <span className="text-foreground font-medium">@{query || '…'}</span>
@@ -85,6 +86,7 @@ export function NativeChatSkillMenu({
           type="button"
           onClick={() => onChoose(skill)}
           className={cn(
+            'outline-none focus-visible:bg-accent',
             'flex w-full items-start gap-2 rounded-sm px-2 py-1.5 text-left text-sm',
             index === activeIndex ? 'bg-accent text-accent-foreground' : 'text-foreground'
           )}

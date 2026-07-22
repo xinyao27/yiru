@@ -131,6 +131,7 @@ export function TerminalWindowSection({
                 updateSettings({ windowBackgroundBlur: !settings.windowBackgroundBlur })
               }
               className={cn(
+                'outline-none focus-visible:border-ring',
                 'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
                 (settings.windowBackgroundBlur ?? false)
                   ? 'bg-foreground'
@@ -273,6 +274,7 @@ export function TerminalWindowSection({
               })
             }
             className={cn(
+              'outline-none focus-visible:border-ring',
               'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
               (settings.terminalMouseHideWhileTyping ?? false)
                 ? 'bg-foreground'
@@ -305,7 +307,7 @@ export function TerminalWindowSection({
           <div className="space-y-2">
             <button
               onClick={() => setColorOverridesExpanded((prev) => !prev)}
-              className="flex items-center gap-2 text-sm font-medium"
+              className="focus-visible:bg-accent flex items-center gap-2 text-sm font-medium outline-none"
             >
               <span
                 className={cn('transition-transform', colorOverridesExpanded ? 'rotate-90' : '')}

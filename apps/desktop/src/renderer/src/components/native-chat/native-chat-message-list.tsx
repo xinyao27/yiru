@@ -94,7 +94,7 @@ function AgentControls({
           'Scroll this message to top'
         )}
         title={translate('components.native-chat.scrollMessageToTop', 'Scroll this message to top')}
-        className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex size-6 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:outline-none"
+        className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring flex size-6 shrink-0 items-center justify-center rounded-md border border-transparent transition-colors outline-none"
       >
         <ArrowUp className="size-3.5" />
       </button>
@@ -397,7 +397,7 @@ export function NativeChatMessageList({
                 type="button"
                 onClick={loadEarlier}
                 disabled={loadingEarlier}
-                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md px-3 py-1 text-xs font-medium focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring rounded-md border border-transparent px-3 py-1 text-xs font-medium outline-none disabled:pointer-events-none disabled:opacity-50"
               >
                 {loadingEarlier
                   ? translate('components.native-chat.loadingEarlier', 'Loading…')
@@ -424,7 +424,7 @@ export function NativeChatMessageList({
           type="button"
           onClick={scrollToBottom}
           aria-label={translate('components.native-chat.jumpToLatest', 'Jump to latest')}
-          className="border-border bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground absolute left-1/2 flex -translate-x-1/2 items-center gap-1.5 border px-3 py-1.5 text-xs focus-visible:outline-none"
+          className="border-border bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:border-ring absolute left-1/2 flex -translate-x-1/2 items-center gap-1.5 border px-3 py-1.5 text-xs outline-none"
           style={{ bottom: bottomInset + 12 }}
         >
           <ArrowDown className="size-3.5" />

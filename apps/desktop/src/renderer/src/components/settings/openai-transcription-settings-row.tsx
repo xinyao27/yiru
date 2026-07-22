@@ -66,7 +66,7 @@ export function OpenAiTranscriptionSettingsRow({
               'Disconnect OpenAI API key'
             )}
             disabled={disabled}
-            className="text-muted-foreground/50 hover:text-destructive rounded-md p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+            className="text-muted-foreground/50 hover:text-destructive focus-visible:text-destructive focus-visible:bg-accent rounded-md p-1 transition-colors outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Unlink className="size-3.5" />
           </button>

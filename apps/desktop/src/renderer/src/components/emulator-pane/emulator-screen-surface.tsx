@@ -64,6 +64,7 @@ export function EmulatorScreenSurface({
   return (
     <div
       className={cn(
+        'outline-none',
         frameLayout
           ? 'absolute overflow-hidden bg-black'
           : 'relative w-full overflow-hidden bg-black',

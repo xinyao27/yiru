@@ -184,6 +184,7 @@ export function GitPane({
               key={option}
               onClick={() => updateSettings({ branchPrefix: option })}
               className={cn(
+                'outline-none focus-visible:text-foreground focus-visible:bg-accent',
                 'rounded-sm px-3 py-1 text-sm transition-colors',
                 settings.branchPrefix === option
                   ? 'bg-accent font-medium text-accent-foreground'
@@ -262,6 +263,7 @@ export function GitPane({
             })
           }
           className={cn(
+            'outline-none focus-visible:border-ring',
             'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
             settings.refreshLocalBaseRefOnWorktreeCreate
               ? 'bg-foreground'
@@ -359,6 +361,7 @@ export function GitPane({
             })
           }
           className={cn(
+            'outline-none focus-visible:border-ring',
             'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
             settings.enableGitHubAttribution ? 'bg-foreground' : 'bg-muted-foreground/30'
           )}

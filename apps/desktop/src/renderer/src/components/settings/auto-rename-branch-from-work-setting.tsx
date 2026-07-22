@@ -183,6 +183,7 @@ export function AutoRenameBranchFromWorkSetting({
             })
           }
           className={cn(
+            'outline-none focus-visible:border-ring',
             'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors',
             settings.autoRenameBranchFromWork ? 'bg-foreground' : 'bg-muted-foreground/30'
           )}

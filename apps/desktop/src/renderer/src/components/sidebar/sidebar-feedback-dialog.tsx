@@ -218,6 +218,7 @@ export function SidebarFeedbackDialog({
                   checked={submitAnonymously}
                   onChange={(event) => setSubmitAnonymously(event.target.checked)}
                   className={cn(
+                    'outline-none focus-visible:border-ring',
                     'size-3.5 rounded border border-border bg-background align-middle',
                     'accent-foreground'
                   )}

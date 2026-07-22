@@ -82,7 +82,7 @@ export function GhosttyDiscoveryRow({
         )}
       </div>
       <button
-        className="bg-foreground text-background hover:bg-foreground/90 shrink-0 rounded-md px-3 py-1.5 text-[11.5px] font-semibold disabled:opacity-50"
+        className="bg-foreground text-background hover:bg-foreground/90 focus-visible:bg-foreground/90 shrink-0 rounded-md px-3 py-1.5 text-[11.5px] font-semibold outline-none disabled:opacity-50"
         disabled={importing || disabled}
         onClick={() => onImport(preview)}
       >

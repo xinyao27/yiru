@@ -112,7 +112,7 @@ export function SelectedTextCopyMenu({
           >
             <button
               type="button"
-              className="hover:bg-accent focus:bg-accent flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-1 text-left text-[12px] leading-5 font-[450] outline-hidden"
+              className="hover:bg-accent focus:bg-accent flex w-full cursor-default items-center gap-2 rounded-[7px] px-2 py-1 text-left text-[12px] leading-5 font-[450] outline-none"
               onClick={handleCopy}
             >
               <Copy className="text-muted-foreground size-3.5" />

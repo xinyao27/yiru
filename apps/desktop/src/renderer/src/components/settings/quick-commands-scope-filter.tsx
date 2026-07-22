@@ -100,6 +100,7 @@ export function QuickCommandsScopeFilter({
                 onClick={handleSelectAll}
                 onMouseDown={(event) => event.preventDefault()}
                 className={cn(
+                  'outline-none focus-visible:bg-accent focus-visible:text-accent-foreground',
                   'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
                   showAll && 'opacity-80'
                 )}

@@ -66,7 +66,7 @@ export function VaultGroupHeader({
   return (
     <button
       type="button"
-      className="border-sidebar-border bg-sidebar-accent/60 text-foreground hover:bg-sidebar-accent flex h-8 w-full items-center gap-2 border-y px-3 text-left text-xs font-semibold transition-colors"
+      className="border-sidebar-border bg-sidebar-accent/60 text-foreground hover:bg-sidebar-accent focus-visible:bg-sidebar-accent flex h-8 w-full items-center gap-2 border-y px-3 text-left text-xs font-semibold transition-colors outline-none"
       onClick={onToggle}
       aria-expanded={!collapsed}
     >

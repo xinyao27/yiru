@@ -119,7 +119,7 @@ export function HostedReviewCreationDefaults({
               type="checkbox"
               checked={prDefaults[row.key] === true}
               onChange={(event) => onPrDefaultChange(row.key, event.target.checked)}
-              className="border-border accent-primary mt-0.5 size-4 rounded"
+              className="border-border accent-primary focus-visible:border-ring mt-0.5 size-4 rounded outline-none"
             />
           </label>
         ))}

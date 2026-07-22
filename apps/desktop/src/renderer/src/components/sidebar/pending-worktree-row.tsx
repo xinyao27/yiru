@@ -54,7 +54,7 @@ export function PendingWorktreeRow({
           store.updatePendingWorktreeCreation(creationId, { loaderVisible: true })
           store.setActiveView('terminal')
         }}
-        className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left"
+        className="focus-visible:bg-accent flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left outline-none"
       >
         <span className="flex size-4 shrink-0 items-center justify-center">
           {isError ? (
@@ -86,6 +86,7 @@ export function PendingWorktreeRow({
         )}
         onClick={() => useAppStore.getState().removePendingWorktreeCreation(creationId)}
         className={cn(
+          'outline-none focus-visible:bg-sidebar-accent focus-visible:text-foreground',
           'mr-1 flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground transition-opacity hover:bg-sidebar-accent hover:text-foreground focus-visible:opacity-100',
           isError ? 'opacity-100' : 'can-hover:opacity-0 group-hover:opacity-100'
         )}

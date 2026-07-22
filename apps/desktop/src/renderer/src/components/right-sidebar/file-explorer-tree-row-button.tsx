@@ -52,6 +52,7 @@ export function FileExplorerTreeRowButton({
       data-file-explorer-row=""
       data-selected={isSelected ? 'true' : undefined}
       className={cn(
+        'outline-none focus-visible:bg-accent focus-visible:text-foreground',
         'flex w-full items-center gap-1 rounded-sm px-2 py-1 text-left text-xs transition-colors',
         !isSelected && 'hover:bg-accent hover:text-foreground',
         isSelected && 'text-accent-foreground',

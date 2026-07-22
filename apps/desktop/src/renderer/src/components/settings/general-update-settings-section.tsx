@@ -179,7 +179,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-foreground underline"
+                className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline outline-none"
               >
                 {translate(
                   'auto.components.settings.GeneralUpdateSettingsSection.8a52ca1d02',
@@ -217,7 +217,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-foreground underline"
+                className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline outline-none"
               >
                 {translate(
                   'auto.components.settings.GeneralUpdateSettingsSection.8a52ca1d02',

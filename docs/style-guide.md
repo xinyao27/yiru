@@ -48,9 +48,9 @@ Tokens come in pairs: a **surface** and a **foreground** that meets contrast on 
 | `muted` / `muted-foreground`             | De-emphasized text, captions, placeholders, disabled chrome | Body copy; primary actions                          |
 | `accent` / `accent-foreground`           | Hover/active backgrounds for ghost buttons and list rows    | Solid filled buttons (use `secondary` instead)      |
 | `destructive` / `destructive-foreground` | Delete, discard, irreversible-action buttons; error states  | Cancel buttons (Cancel is not destructive)          |
-| `border`                                 | All hairlines: dividers, input outlines, card edges         | Heavy emphasis; that's `ring`                       |
+| `border`                                 | All hairlines: dividers, input edges, card edges            | Heavy emphasis; that's `ring`                       |
 | `input`                                  | Form field background only                                  | Anywhere outside form fields                        |
-| `ring`                                   | Focus-visible outlines, active selection halos              | Persistent decoration                               |
+| `ring`                                   | Focus-visible border color, active selection emphasis       | Persistent decoration                               |
 | `sidebar` (+ variants)                   | Secondary panel chrome, including the right sidebar         | Main canvas and floating surfaces                   |
 | `editor-surface`                         | Background of Monaco / markdown editor panes                | App chrome                                          |
 
@@ -94,7 +94,7 @@ A common point of drift. Use these conventions for any list-style row (worktrees
 
 - **Idle:** transparent background.
 - **Hover:** `bg-accent` (in the worktree sidebar, `bg-sidebar-accent`).
-- **Keyboard-selected (cmdk highlight):** `data-[selected=true]:bg-accent` plus a `border-border` outline so the active row stays visible while the user types. The `data-selected` attribute is set by `cmdk` automatically.
+- **Keyboard-selected (cmdk highlight):** `data-[selected=true]:bg-accent` plus a `border-border` edge so the active row stays visible while the user types. The `data-selected` attribute is set by `cmdk` automatically.
 - **Persistent "current" / "active" row** (e.g. the worktree the user is viewing): also `bg-accent`, _plus_ a `data-current="true"` attribute so CSS or future styling can distinguish it from the cmdk highlight.
 - **Don't:** hardcode `bg-[#ededed]` / `bg-[#333333]` or invent a "selected" color. The accent token already adapts to light/dark and matches the rest of the app.
 
@@ -137,11 +137,14 @@ Native chat borrows Cursor's transcript hierarchy while remaining fully rectilin
 
 ## Elevation & shadows
 
-Yiru does not use decorative shadows. Use `border` with the `border` token for
-surface separation, opaque backgrounds for overlays, and a real CSS `outline`
-for keyboard focus. Do not add `shadow-*`, `drop-shadow-*`, `box-shadow`, or
-`text-shadow`; remove legacy declarations at their source so every surface stays
-flat without a global override.
+Yiru does not use decorative shadows or visible CSS outlines. Use `border` with
+the `border` token for surface separation and focus state, plus opaque
+backgrounds for overlays. Do not add `shadow-*`, `drop-shadow-*`, `box-shadow`,
+`text-shadow`, or outline styles that draw a stroke; remove legacy declarations
+at their source. A source-local `outline: none` / `outline-none` reset is allowed
+only to suppress the browser's native focus ring when the component supplies a
+border or background focus state. Never implement either policy as a global
+override.
 
 ### Floating surfaces
 
@@ -266,7 +269,7 @@ The pattern in `apps/desktop/src/renderer/src/components/settings/settings-form-
 
 - **Outer stack:** `space-y-3` for full-section forms (`ThemePicker`); `space-y-2` for compact single-control fields (`ColorField`, `NumberField`). Pick by density, not preference.
 - **Label group:** `space-y-1` containing `<Label>` and a description in `text-xs text-muted-foreground`.
-- **Control:** the shadcn primitive (`<Input>`, `<Textarea>`, `<Select>`, `<Switch>`, etc.). Errors surface via `aria-invalid`; the renderer maps that to a destructive focus outline — don't paint your own.
+- **Control:** the shadcn primitive (`<Input>`, `<Textarea>`, `<Select>`, `<Switch>`, etc.). Errors surface via `aria-invalid`; the renderer maps that to a destructive focus border — don't paint your own.
 - **Trailing metadata:** `text-[11px] text-muted-foreground` below the control (e.g., "Current: 14px · Default: 13px"), not next to the label.
 
 ### Scrollbars

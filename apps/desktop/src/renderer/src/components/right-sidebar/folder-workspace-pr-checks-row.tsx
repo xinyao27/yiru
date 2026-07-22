@@ -106,7 +106,7 @@ export function FolderWorkspacePrChecksRow({
               render={
                 <button
                   type="button"
-                  className="text-muted-foreground hover:bg-accent hover:text-foreground rounded p-1 opacity-80 group-hover:opacity-100"
+                  className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 opacity-80 outline-none group-hover:opacity-100"
                   aria-label={openExternalLabel}
                   onClick={(event) => {
                     event.stopPropagation()

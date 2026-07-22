@@ -175,7 +175,7 @@ export function CreateHostedReviewComposerFields({
           checked={draft}
           disabled={fieldsLocked}
           onChange={(event) => setDraft(event.target.checked)}
-          className="border-border accent-primary size-3.5 shrink-0 rounded"
+          className="border-border accent-primary focus-visible:border-ring size-3.5 shrink-0 rounded outline-none"
         />
         <span className="min-w-0 flex-1 truncate">
           {translate('auto.components.right.sidebar.SourceControl.78ddfd0bb4', 'Create as draft')}
@@ -190,6 +190,7 @@ export function CreateHostedReviewComposerFields({
               type="button"
               disabled={fieldsLocked}
               className={cn(
+                'outline-none focus-visible:bg-accent',
                 'flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-left font-mono text-xs hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent',
                 stripBaseRef(base) === ref && 'bg-accent text-accent-foreground'
               )}

@@ -234,8 +234,12 @@ export function SortableTabContextMenu({
                   key={color.label}
                   className={cn(
                     'relative h-4 w-4 min-w-4 p-0 rounded-full border',
-                    isSelected ? 'outline outline-1 outline-foreground/70 outline-offset-1' : '',
-                    color.value ? 'border-transparent' : 'border-muted-foreground/50 bg-transparent'
+                    // Why: selection reuses the existing edge because Yiru does not use CSS outlines.
+                    isSelected
+                      ? 'border-ring'
+                      : color.value
+                        ? 'border-transparent'
+                        : 'border-muted-foreground/50 bg-transparent'
                   )}
                   style={color.value ? { backgroundColor: color.value } : undefined}
                   onClick={() => {

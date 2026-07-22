@@ -239,7 +239,7 @@ export function CombinedDiffFileTree({
                     <button
                       key={extension}
                       type="button"
-                      className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors"
+                      className="hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors outline-none"
                       onClick={() => toggleExtension(extension)}
                     >
                       <Check
@@ -253,7 +253,7 @@ export function CombinedDiffFileTree({
               <div className="border-border border-t py-1">
                 <button
                   type="button"
-                  className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors"
+                  className="hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors outline-none"
                   onClick={() => setIncludeViewed((prev) => !prev)}
                 >
                   <Check
@@ -269,7 +269,7 @@ export function CombinedDiffFileTree({
                 {activeFilterCount > 0 && (
                   <button
                     type="button"
-                    className="text-muted-foreground hover:bg-accent hover:text-foreground w-full px-3 py-1.5 text-left text-xs transition-colors"
+                    className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground w-full px-3 py-1.5 text-left text-xs transition-colors outline-none"
                     onClick={resetFilters}
                   >
                     {translate(

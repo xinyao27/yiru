@@ -120,7 +120,7 @@ function PetStatusSegmentInner(): React.JSX.Element {
         render={
           <button
             type="button"
-            className="group inline-flex cursor-pointer items-center py-0.5 pr-[6.5rem] pl-1"
+            className="group focus-visible:bg-accent inline-flex cursor-pointer items-center py-0.5 pr-[6.5rem] pl-1 outline-none"
             aria-label={translate(
               'auto.components.status.bar.PetStatusSegment.aec479308a',
               'Pet menu'
@@ -178,7 +178,7 @@ function PetStatusSegmentInner(): React.JSX.Element {
             step={10}
             value={petSize}
             onChange={(e) => setPetSize(Number(e.target.value))}
-            className="w-full"
+            className="focus-visible:border-ring w-full outline-none"
             aria-label={translate(
               'auto.components.status.bar.PetStatusSegment.b75484a01a',
               'Pet size'
@@ -234,7 +234,7 @@ function PetStatusSegmentInner(): React.JSX.Element {
                     <span className="flex-1 truncate">{model.label}</span>
                     <button
                       type="button"
-                      className="text-muted-foreground hover:bg-destructive/15 hover:text-destructive ml-2 flex size-5 items-center justify-center rounded"
+                      className="text-muted-foreground hover:bg-destructive/15 hover:text-destructive focus-visible:bg-destructive/15 focus-visible:text-destructive ml-2 flex size-5 items-center justify-center rounded outline-none"
                       aria-label={translate(
                         'auto.components.status.bar.PetStatusSegment.3668339495',
                         'Remove {{value0}}',

@@ -25,7 +25,7 @@ export function SourceControlSectionHeader({
       <div className="group/section hover:bg-accent hover:text-accent-foreground flex items-center rounded-md pr-1">
         <button
           type="button"
-          className="text-foreground/70 group-hover/section:text-accent-foreground flex flex-1 items-center gap-1 px-0.5 py-0.5 text-left text-xs font-semibold tracking-wider uppercase"
+          className="text-foreground/70 group-hover/section:text-accent-foreground focus-visible:bg-accent flex flex-1 items-center gap-1 px-0.5 py-0.5 text-left text-xs font-semibold tracking-wider uppercase outline-none"
           onClick={onToggle}
         >
           <ChevronDown

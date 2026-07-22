@@ -38,7 +38,7 @@ export function MobileSettingsPane(): React.JSX.Element {
           <button
             type="button"
             onClick={() => void window.api.shell.openUrl(YIRU_IOS_TESTFLIGHT_URL)}
-            className="hover:text-foreground cursor-pointer underline underline-offset-2"
+            className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent cursor-pointer underline underline-offset-2 outline-none"
           >
             {translate('auto.components.settings.MobileSettingsPane.testFlight', 'TestFlight')}
           </button>{' '}
@@ -46,7 +46,7 @@ export function MobileSettingsPane(): React.JSX.Element {
           <button
             type="button"
             onClick={() => void window.api.shell.openUrl(YIRU_ANDROID_LATEST_APK_URL)}
-            className="hover:text-foreground cursor-pointer underline underline-offset-2"
+            className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent cursor-pointer underline underline-offset-2 outline-none"
           >
             {translate('auto.components.settings.MobileSettingsPane.androidApk', 'Android APK')}
           </button>

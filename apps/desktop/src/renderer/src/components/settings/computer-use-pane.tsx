@@ -355,7 +355,7 @@ export function ComputerUsePane(): React.JSX.Element {
               type="button"
               disabled={resetAccessDisabled}
               onClick={() => void resetAccess()}
-              className="text-muted-foreground hover:text-foreground mr-4 ml-auto block w-28 text-right text-xs underline underline-offset-2 disabled:pointer-events-none disabled:opacity-50"
+              className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent mr-4 ml-auto block w-28 text-right text-xs underline underline-offset-2 outline-none disabled:pointer-events-none disabled:opacity-50"
             >
               {resetting
                 ? translate(

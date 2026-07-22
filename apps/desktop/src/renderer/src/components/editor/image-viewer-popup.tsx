@@ -45,7 +45,7 @@ export default function ImageViewerPopup({
           <div className="text-foreground min-w-0 truncate text-sm font-medium">{filename}</div>
           <button
             type="button"
-            className="border-border/60 bg-background text-muted-foreground hover:bg-accent hover:text-foreground inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs"
+            className="border-border/60 bg-background text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs outline-none"
             onClick={() => onOpenChange(false)}
           >
             <X size={14} />

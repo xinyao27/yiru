@@ -634,6 +634,12 @@
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
+  outline: none;
+}
+
+/* Why: editor-generated controls bypass JSX primitives, so they own the same flat focus treatment here. */
+.rich-markdown-editor ul[data-type='taskList'] li > label input[type='checkbox']:focus-visible {
+  border-color: var(--ring);
 }
 
 .rich-markdown-editor ul[data-type='taskList'] li > label input[type='checkbox']:checked {
@@ -687,6 +693,12 @@
   cursor: pointer;
   font-weight: 600;
   line-height: 1.35;
+  outline: none;
+}
+
+.rich-markdown-editor details.yiru-details > summary:focus-visible,
+.rich-markdown-editor .yiru-details[data-type='details'] summary:focus-visible {
+  background: var(--accent);
 }
 
 .rich-markdown-editor details.yiru-details > summary::-webkit-details-marker,
@@ -713,6 +725,11 @@
   background: transparent;
   color: var(--muted-foreground);
   cursor: pointer;
+  outline: none;
+}
+
+.rich-markdown-editor .yiru-details[data-type='details'] > button:focus-visible {
+  background: var(--accent);
 }
 
 .rich-markdown-editor .yiru-details[data-type='details'] > button::before {
@@ -1055,8 +1072,9 @@
 }
 
 .rich-markdown-editor .ProseMirror-selectednode {
-  outline: 2px solid color-mix(in srgb, var(--ring) 78%, transparent);
-  outline-offset: 2px;
+  /* Why: selected embedded nodes need a state marker that stays inside the node edge. */
+  box-sizing: border-box;
+  border: 2px solid color-mix(in srgb, var(--ring) 78%, transparent);
 }
 
 .rich-markdown-slash-menu {

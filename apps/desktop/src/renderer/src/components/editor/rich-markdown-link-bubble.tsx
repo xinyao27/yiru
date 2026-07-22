@@ -156,7 +156,7 @@ function LinkEditInput({
         'auto.components.editor.RichMarkdownLinkBubble.7b0b945fdc',
         'Paste or type a link…'
       )}
-      className="rich-markdown-link-input"
+      className="rich-markdown-link-input focus-visible:border-ring outline-none"
     />
   )
 }

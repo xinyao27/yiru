@@ -149,7 +149,7 @@ export function MobilePairingSetupSection({
             <button
               type="button"
               onClick={() => void window.api.shell.openUrl(TAILSCALE_DOWNLOAD_URL)}
-              className="text-foreground inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline"
+              className="text-foreground focus-visible:bg-accent inline-flex items-center gap-1 font-medium underline-offset-2 outline-none hover:underline"
             >
               {translate(
                 'auto.components.settings.MobilePairingSetupSection.getTailscale',

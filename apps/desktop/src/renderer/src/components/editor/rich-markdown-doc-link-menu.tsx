@@ -47,7 +47,11 @@ export function RichMarkdownDocLinkMenu({
             <button
               key={rowKey}
               type="button"
-              className={cn('rich-markdown-doc-link-item', index === selectedIndex && 'is-active')}
+              className={cn(
+                'outline-none focus-visible:bg-accent',
+                'rich-markdown-doc-link-item',
+                index === selectedIndex && 'is-active'
+              )}
               // Why: mousedown inside the editor-mounted popover would otherwise
               // blur the editor before click fires, losing the selection we need
               // to run the commit transaction against.

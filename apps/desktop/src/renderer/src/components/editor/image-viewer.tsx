@@ -308,7 +308,7 @@ export default function ImageViewer({
           <div className="flex items-center gap-1">
             <button
               type="button"
-              className="hover:bg-accent hover:text-foreground rounded p-1 disabled:opacity-50"
+              className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none disabled:opacity-50"
               onClick={() =>
                 applyInlineZoomChange((currentZoom) => currentZoom / IMAGE_VIEWER_ZOOM_STEP)
               }
@@ -319,7 +319,7 @@ export default function ImageViewer({
             </button>
             <button
               type="button"
-              className="hover:bg-accent hover:text-foreground rounded p-1 disabled:opacity-50"
+              className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none disabled:opacity-50"
               onClick={() => applyInlineZoomChange(() => 1)}
               disabled={inlineZoom === 1}
               title={translate('auto.components.editor.ImageViewer.6c89c73d9f', 'Reset zoom')}
@@ -328,7 +328,7 @@ export default function ImageViewer({
             </button>
             <button
               type="button"
-              className="hover:bg-accent hover:text-foreground rounded p-1 disabled:opacity-50"
+              className="hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground rounded p-1 outline-none disabled:opacity-50"
               onClick={() =>
                 applyInlineZoomChange((currentZoom) => currentZoom * IMAGE_VIEWER_ZOOM_STEP)
               }

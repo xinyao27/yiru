@@ -34,7 +34,7 @@ export function OnboardingFooter({
     <footer className="border-border mt-6 flex flex-none items-center justify-between border-t pt-5">
       {shouldShowSkipToProjectSetup ? (
         <button
-          className="text-muted-foreground hover:text-foreground disabled:hover:text-muted-foreground rounded-md px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+          className="text-muted-foreground hover:text-foreground disabled:hover:text-muted-foreground focus-visible:text-foreground focus-visible:bg-accent rounded-md px-3 py-2 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-60"
           disabled={Boolean(busyLabel)}
           onClick={onSkipToRepo}
         >
@@ -49,7 +49,7 @@ export function OnboardingFooter({
       <div className="flex items-center gap-2">
         {stepIndex > 0 && (
           <button
-            className="border-border bg-muted/60 text-foreground hover:bg-muted inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm disabled:opacity-60"
+            className="border-border bg-muted/60 text-foreground hover:bg-muted focus-visible:bg-muted inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm outline-none disabled:opacity-60"
             disabled={Boolean(busyLabel)}
             onClick={onBack}
           >
@@ -59,7 +59,7 @@ export function OnboardingFooter({
         )}
         {showPrimary && (
           <button
-            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 rounded-md px-5 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:bg-primary/90 inline-flex items-center justify-center gap-2 rounded-md px-5 py-2 text-sm font-medium outline-none disabled:cursor-not-allowed disabled:opacity-60"
             aria-busy={primaryBusy}
             disabled={Boolean(busyLabel)}
             onClick={onPrimary}

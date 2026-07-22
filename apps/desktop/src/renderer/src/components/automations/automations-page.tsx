@@ -2441,6 +2441,7 @@ export default function AutomationsPage(): React.JSX.Element {
                           selectAutomationId(automation.id)
                         }}
                         className={cn(
+                          'outline-none focus-visible:bg-muted/50',
                           'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
                           selectedExternal === null && selected?.id === automation.id
                             ? 'border-foreground/30 bg-muted/70 text-foreground  '
@@ -2571,6 +2572,7 @@ export default function AutomationsPage(): React.JSX.Element {
                       setActivePaneTab('overview')
                     }}
                     className={cn(
+                      'outline-none focus-visible:bg-muted/50',
                       'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
                       selectedExternal?.key === entry.key
                         ? 'border-foreground/30 bg-muted/70 text-foreground  '
@@ -2631,6 +2633,7 @@ export default function AutomationsPage(): React.JSX.Element {
                           setActivePaneTab('overview')
                         }}
                         className={cn(
+                          'outline-none focus-visible:bg-muted/50',
                           'mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
                           selectedExternal?.key === entry.key
                             ? 'border-foreground/30 bg-muted/70 text-foreground  '

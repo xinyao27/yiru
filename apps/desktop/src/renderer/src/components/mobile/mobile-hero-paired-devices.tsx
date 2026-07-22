@@ -1,6 +1,7 @@
 import { DeviceMobile as Smartphone, Trash as Trash2 } from '@phosphor-icons/react'
 
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 import { mobilePageStyles } from './mobile-page-tailwind'
 
@@ -59,7 +60,10 @@ export function HeroPaired({
               </div>
               <button
                 type="button"
-                className={mobilePageStyles.pairedRevoke}
+                className={cn(
+                  'outline-none focus-visible:bg-accent',
+                  mobilePageStyles.pairedRevoke
+                )}
                 onClick={() => onRevoke(device.deviceId)}
                 disabled={revoking}
                 aria-label={translate(
@@ -76,7 +80,11 @@ export function HeroPaired({
         })}
       </ul>
       <div className={mobilePageStyles.flowActions}>
-        <button type="button" className={mobilePageStyles.secondaryAction} onClick={onPairAnother}>
+        <button
+          type="button"
+          className={cn('outline-none focus-visible:bg-accent', mobilePageStyles.secondaryAction)}
+          onClick={onPairAnother}
+        >
           <Smartphone className="size-3.5" />
           {translate('auto.components.mobile.MobileHero.ff48d9d520', 'Pair another device')}
         </button>

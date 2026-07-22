@@ -1290,8 +1290,10 @@ function ThreadRow({
         // ~3px of internal space above the cap-height that isn't present
         // below the secondary badge row. Symmetric py made the top read
         // heavier; the smaller top pad visually evens the row.
-        'group relative flex w-full cursor-pointer flex-col gap-1 border-b border-border px-3 pt-2.5 pb-3 text-left transition-colors',
-        selected ? 'bg-black/[0.08] dark:bg-white/[0.10]' : 'hover:bg-accent/40'
+        'group relative flex w-full cursor-pointer flex-col gap-1 border-b border-border px-3 pt-2.5 pb-3 text-left transition-colors outline-none',
+        selected
+          ? 'bg-black/[0.08] dark:bg-white/[0.10]'
+          : 'hover:bg-accent/40 focus-visible:bg-accent/40'
       )}
     >
       {thread.unread ? (

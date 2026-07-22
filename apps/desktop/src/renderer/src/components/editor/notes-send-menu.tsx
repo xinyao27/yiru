@@ -160,6 +160,7 @@ export function NotesSendMenu<TNote>({
                 <button
                   type="button"
                   className={cn(
+                    'outline-none focus-visible:bg-accent focus-visible:text-foreground',
                     'inline-flex items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground',
                     triggerClassName
                   )}

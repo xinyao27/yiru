@@ -58,6 +58,7 @@ export function MetadataActionIcon({
           rel="noreferrer"
           aria-label={label}
           onClick={(event) => event.stopPropagation()}
+          className="focus-visible:bg-accent outline-none"
         />
       }
       nativeButton={false}

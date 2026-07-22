@@ -135,7 +135,7 @@ export function OrchestrationPane(): React.JSX.Element {
               )}{' '}
               <button
                 type="button"
-                className="text-foreground font-medium underline-offset-2 hover:underline"
+                className="text-foreground focus-visible:bg-accent font-medium underline-offset-2 outline-none hover:underline"
                 onClick={() => {
                   setSkillPromptOpen(true)
                 }}
@@ -184,7 +184,7 @@ export function OrchestrationPane(): React.JSX.Element {
               <button
                 key={example.id}
                 type="button"
-                className="border-border/60 bg-muted/20 hover:bg-muted/35 focus-visible:border-ring rounded-md border px-4 py-3 text-left transition-colors"
+                className="border-border/60 bg-muted/20 hover:bg-muted/35 focus-visible:border-ring focus-visible:bg-muted/35 rounded-md border px-4 py-3 text-left transition-colors outline-none"
                 onClick={() => setSelectedExampleId(example.id)}
               >
                 <div className="flex items-start gap-3">

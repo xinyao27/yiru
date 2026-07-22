@@ -63,7 +63,7 @@ function MarkdownTocRow({
         {hasChildren ? (
           <button
             type="button"
-            className="markdown-toc-disclosure"
+            className="markdown-toc-disclosure focus-visible:bg-accent outline-none"
             aria-label={
               expanded
                 ? translate(
@@ -90,7 +90,7 @@ function MarkdownTocRow({
         ) : null}
         <button
           type="button"
-          className="markdown-toc-title-button"
+          className="markdown-toc-title-button focus-visible:bg-accent outline-none"
           onClick={() => onNavigate(item.id)}
         >
           <span className="markdown-toc-title">{item.title}</span>

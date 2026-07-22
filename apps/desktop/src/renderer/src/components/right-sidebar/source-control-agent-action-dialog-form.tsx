@@ -304,7 +304,7 @@ export function SourceControlAgentActionDialogForm({
                 type="checkbox"
                 checked={saveLaunchRecipe}
                 onChange={(event) => onSaveLaunchRecipeChange(event.target.checked)}
-                className="accent-foreground mt-0.5 size-3.5"
+                className="accent-foreground focus-visible:border-ring mt-0.5 size-3.5 outline-none"
               />
               <span>
                 <span className="block text-xs font-semibold">

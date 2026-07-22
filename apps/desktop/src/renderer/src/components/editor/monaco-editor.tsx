@@ -877,7 +877,7 @@ export default function MonacoEditor({
       {selectionAnnotationTarget && shouldShowMarkdownAnnotations && !commentPopover ? (
         <button
           type="button"
-          className="yiru-diff-comment-add-btn"
+          className="yiru-diff-comment-add-btn focus-visible:bg-accent outline-none"
           style={{
             display: 'flex',
             top: Math.max(4, selectionAnnotationTarget.top - 22),

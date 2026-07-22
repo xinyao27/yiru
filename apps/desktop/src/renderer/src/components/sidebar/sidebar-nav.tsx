@@ -84,6 +84,7 @@ const SidebarNav = React.memo(function SidebarNav() {
                 onClick={openAutomationsPage}
                 aria-current={automationsActive ? 'page' : undefined}
                 className={cn(
+                  'outline-none focus-visible:bg-sidebar-foreground/8',
                   'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium tracking-tight transition-colors',
                   automationsActive
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground'
@@ -112,6 +113,7 @@ const SidebarNav = React.memo(function SidebarNav() {
           onClick={openActivityPage}
           aria-current={activityActive ? 'page' : undefined}
           className={cn(
+            'outline-none focus-visible:bg-sidebar-foreground/8',
             'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium tracking-tight transition-colors',
             activityActive
               ? 'bg-sidebar-accent text-sidebar-accent-foreground'
@@ -144,6 +146,7 @@ const SidebarNav = React.memo(function SidebarNav() {
                 }}
                 aria-current={mobileActive ? 'page' : undefined}
                 className={cn(
+                  'outline-none focus-visible:bg-sidebar-foreground/8',
                   'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium tracking-tight transition-colors',
                   mobileActive
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground'

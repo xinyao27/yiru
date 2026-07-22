@@ -133,7 +133,7 @@ export function AgentStep({
           </span>
           <button
             type="button"
-            className="inline-flex shrink-0 items-center gap-1 rounded-md border border-amber-400/40 bg-amber-400/10 px-2 py-1 font-medium text-amber-800 hover:bg-amber-400/20 dark:text-amber-100"
+            className="inline-flex shrink-0 items-center gap-1 rounded-md border border-amber-400/40 bg-amber-400/10 px-2 py-1 font-medium text-amber-800 outline-none hover:bg-amber-400/20 focus-visible:bg-amber-400/20 dark:text-amber-100"
             onClick={() => void window.api.shell.openUrl(selectedEntry.homepageUrl)}
           >
             {translate('auto.components.onboarding.AgentStep.9c163bb0e0', 'Install instructions')}
@@ -290,6 +290,7 @@ function AgentButton({
       data-agent-card
       aria-pressed={selected}
       className={cn(
+        'outline-none focus-visible:bg-muted/60',
         'group relative overflow-hidden rounded-xl border p-3.5 text-left transition-all',
         selected
           ? 'border-violet-500/60 bg-violet-500/10'

@@ -1,10 +1,30 @@
-import type { JSX } from 'react'
+import type { ComponentProps, JSX } from 'react'
 
 import { translate } from '@/i18n/i18n'
+import { cn } from '@/lib/class-names'
 
 // Why: shared between ReviewNotesAnimatedVisual / ReviewShipAnimatedVisual.
 // Kept in a single module so the two pages stay aligned (same diff data,
 // same icon set, same caret/cursor scaffolding).
+
+// Why: animated feature previews use native buttons outside the shared Button primitive.
+export function ReviewAnimatedVisualButton({
+  className,
+  focusBorder = false,
+  ...props
+}: ComponentProps<'button'> & { focusBorder?: boolean }): JSX.Element {
+  return (
+    <button
+      type="button"
+      className={cn(
+        'outline-none',
+        focusBorder ? 'focus-visible:border-ring' : 'focus-visible:bg-accent',
+        className
+      )}
+      {...props}
+    />
+  )
+}
 
 export function CursorIcon(): JSX.Element {
   return (

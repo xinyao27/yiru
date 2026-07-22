@@ -267,9 +267,9 @@ function AgentCapabilitySetupChecklist(props: {
               aria-label={`${selected ? 'Disable' : 'Enable'} ${row.title}`}
               className={cn(
                 'flex min-h-24 flex-col rounded-lg border px-4 py-3 text-left transition-colors',
-                'focus-visible:outline-none      ',
+                'outline-none focus-visible:border-ring',
                 selected
-                  ? 'border-ring bg-accent text-foreground    '
+                  ? 'border-ring bg-accent text-foreground'
                   : 'border-border bg-muted/20 text-muted-foreground hover:bg-muted/40'
               )}
               onClick={() => props.onChange({ ...props.value, [row.id]: !selected })}

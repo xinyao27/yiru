@@ -74,7 +74,7 @@ export function MobilePairingQrSection({
         <button
           type="button"
           onClick={() => onQrEnlargedChange(true)}
-          className="group border-border/60 relative cursor-pointer rounded-lg border bg-white p-3"
+          className="group border-border/60 focus-visible:bg-accent relative cursor-pointer rounded-lg border bg-white p-3 outline-none"
         >
           <img
             src={qrDataUrl}

@@ -230,7 +230,8 @@ export default function OnboardingFlow({
                           type="button"
                           className={cn(
                             // Why: the visible bars stay 4px tall, but the invisible
-                            // hit area makes hover/click/tooltip targeting reliable.'relative h-1 rounded-full outline-none transition-all duration-300 before:absolute before:-inset-y-2 before:-inset-x-1        ',
+                            // hit area makes hover/click/tooltip targeting reliable.
+                            'relative h-1 rounded-full outline-none transition-all duration-300 before:absolute before:-inset-y-2 before:-inset-x-1 focus-visible:bg-foreground',
                             isActive
                               ? 'w-10 bg-foreground'
                               : isDone
