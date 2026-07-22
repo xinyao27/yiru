@@ -227,7 +227,8 @@ export function WorktreeOpenInMenuContent({
 export function WorktreeOpenInSubMenu({
   worktreePath,
   connectionId,
-  disabled
+  disabled,
+  onEntryOpen
 }: WorktreeOpenInMenuItemsProps): React.JSX.Element {
   return (
     <DropdownMenuSub>
@@ -244,6 +245,7 @@ export function WorktreeOpenInSubMenu({
           worktreePath={worktreePath}
           connectionId={connectionId}
           disabled={disabled}
+          onEntryOpen={onEntryOpen}
         />
       </DropdownMenuSubContent>
     </DropdownMenuSub>

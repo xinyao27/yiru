@@ -47,6 +47,7 @@ const ACTIVITY_BAR_SIDE_WIDTH = 40
 export type RightSidebarFrameProps = {
   activeTab: ActiveRightSidebarTab
   activityBarPosition: ActivityBarPosition
+  activityNavigation?: boolean
   children: React.ReactNode
   checksStatus?: CheckStatus | null
   isOpen: boolean
@@ -62,6 +63,7 @@ export type RightSidebarFrameProps = {
 export function RightSidebarFrame({
   activeTab,
   activityBarPosition,
+  activityNavigation = true,
   children,
   checksStatus,
   isOpen,
@@ -78,7 +80,8 @@ export function RightSidebarFrame({
     isWebClient: isPairedWebClientWindow()
   })
   const [topActivityStripWidth, setTopActivityStripWidth] = useState<number | null>(null)
-  const activityBarSideWidth = activityBarPosition === 'side' ? ACTIVITY_BAR_SIDE_WIDTH : 0
+  const activityBarSideWidth =
+    activityNavigation && activityBarPosition === 'side' ? ACTIVITY_BAR_SIDE_WIDTH : 0
   const windowWidth = useWindowWidth()
   const maxWidth = computeMaxRightSidebarPanelWidth(windowWidth, activityBarSideWidth)
   const renderedWidth = clampRightSidebarPanelWidth(width, windowWidth, activityBarSideWidth)
@@ -145,7 +148,7 @@ export function RightSidebarFrame({
           isOpen ? 'border-l border-sidebar-border' : 'border-l-0'
         )}
       >
-        {activityBarPosition === 'top' ? (
+        {activityNavigation && activityBarPosition === 'top' ? (
           <ContextMenu>
             {/* Why: the desktop window controls overlay the right edge of this header. */}
             <div
@@ -219,10 +222,14 @@ export function RightSidebarFrame({
             />
           </ContextMenu>
         ) : (
-          // Why: the adjacent 40px icon rail already clears part of the desktop controls.
+          // Why: local panel launchers live in the workspace tab menu; the
+          // sidebar header only identifies the active destination and closes it.
           <div
             className={cn(
-              'right-sidebar-header-drag flex h-[36px] min-h-[36px] items-center justify-between border-b border-border pl-3 pr-[max(0px,calc(var(--window-controls-width,0px)-40px))] select-none [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]',
+              'right-sidebar-header-drag flex h-[36px] min-h-[36px] items-center justify-between border-b border-border pl-3 select-none [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]',
+              activityNavigation
+                ? 'pr-[max(0px,calc(var(--window-controls-width,0px)-40px))]'
+                : 'pr-[var(--window-controls-width,0px)]',
               RIGHT_SIDEBAR_HEADER_DRAG_CLASS_NAME
             )}
           >
@@ -245,7 +252,7 @@ export function RightSidebarFrame({
         />
       </div>
 
-      {activityBarPosition === 'side' ? (
+      {activityNavigation && activityBarPosition === 'side' ? (
         <ContextMenu>
           <ContextMenuTrigger
             render={

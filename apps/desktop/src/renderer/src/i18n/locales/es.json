@@ -1809,6 +1809,12 @@
           "TabBarOpenInMenuButton": {
             "3f5d946e01": "Open in {{value0}}",
             "50ec9a165e": "Choose application"
+          },
+          "TabBarMoreButton": {
+            "more": "Más"
+          },
+          "TabBarWorkspacePanelMenuItems": {
+            "workspacePanels": "Paneles del espacio de trabajo"
           }
         }
       },

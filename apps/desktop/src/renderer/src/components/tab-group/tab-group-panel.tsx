@@ -1,22 +1,12 @@
 import { useDroppable } from '@dnd-kit/core'
-import { DotsThree as Ellipsis } from '@phosphor-icons/react'
 import { Suspense, useMemo } from 'react'
 
-import { X } from '@/components/regular-icons'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 
 import TabBar from '../tab-bar/tab-bar'
-import { TabBarOpenInMenuButton } from '../tab-bar/tab-bar-open-in-menu-button'
+import { TabBarMoreButton } from '../tab-bar/tab-bar-more-button'
 import { TabBarQuickCommandsButton } from '../tab-bar/tab-bar-quick-commands-button'
 import { closeTerminalTab } from '../terminal/terminal-tab-actions'
 import { tabGroupBodyAnchorName } from './tab-group-body-anchor'
@@ -187,7 +177,6 @@ export default function TabGroupPanel({
     />
   )
 
-  const menuButtonClassName = 'my-auto h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground'
   // Why: focused-only — workspace actions and Close split pane stay with the
   // active pane so unfocused strips stay compact.
   const focusedActionChromeClassName = cn(
@@ -216,52 +205,11 @@ export default function TabGroupPanel({
           {isFocused ? (
             <TabBarQuickCommandsButton worktreeId={worktreeId} groupId={groupId} />
           ) : null}
-          {isFocused ? <TabBarOpenInMenuButton worktreeId={worktreeId} /> : null}
-          {isFocused && hasSplitGroups ? (
-            <Tooltip>
-              <DropdownMenu modal={false}>
-                <TooltipTrigger
-                  render={
-                    <DropdownMenuTrigger
-                      render={
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon-xs"
-                          aria-label={translate(
-                            'auto.components.tab.group.TabGroupPanel.9acaf92093',
-                            'Pane Actions'
-                          )}
-                          onClick={(event) => {
-                            event.stopPropagation()
-                          }}
-                          className={menuButtonClassName}
-                        >
-                          <Ellipsis className="size-4" />
-                        </Button>
-                      }
-                    />
-                  }
-                />
-                <DropdownMenuContent align="end" side="bottom" sideOffset={4}>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => {
-                      commands.closeGroup()
-                    }}
-                  >
-                    <X className="size-4" />
-                    {translate(
-                      'auto.components.tab.group.TabGroupPanel.closePaneColumn',
-                      'Close split pane'
-                    )}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <TooltipContent side="bottom" sideOffset={6}>
-                {translate('auto.components.tab.group.TabGroupPanel.9acaf92093', 'Pane Actions')}
-              </TooltipContent>
-            </Tooltip>
+          {isFocused ? (
+            <TabBarMoreButton
+              worktreeId={worktreeId}
+              onClosePane={hasSplitGroups ? commands.closeGroup : undefined}
+            />
           ) : null}
         </div>
       }

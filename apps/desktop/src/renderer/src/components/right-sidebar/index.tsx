@@ -1,27 +1,18 @@
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { useAppStore } from '@/store'
 import { normalizeRightSidebarRoute } from '@/store/right-sidebar-route'
-import { useRepoById } from '@/store/selectors'
 import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 
-import { isFolderRepo } from '../../../../shared/repo-kind'
-import { parseWorkspaceKey } from '../../../../shared/workspace-scope'
 import { getActiveChecksStatus } from './active-checks-status'
-import type { ActivityBarItem } from './activity-bar-buttons'
-import { createRightSidebarActivityItems } from './right-sidebar-activity-items'
-import { getVisibleRightSidebarActivityItems } from './right-sidebar-activity-visibility'
 import { resolveRightSidebarEffectiveTab } from './right-sidebar-effective-tab'
 import { RightSidebarFrame } from './right-sidebar-frame'
 import { RightSidebarPanelContent } from './right-sidebar-panel-content'
+import { useRightSidebarActivityItems } from './use-right-sidebar-activity-items'
 
 function RightSidebarInner(): React.JSX.Element {
   const rightSidebarShortcut = useShortcutLabel('sidebar.right.toggle')
-  const explorerShortcut = useShortcutLabel('sidebar.explorer.toggle')
-  const sourceControlShortcut = useShortcutLabel('sidebar.sourceControl.toggle')
-  const checksShortcut = useShortcutLabel('sidebar.checks.toggle')
-  const portsShortcut = useShortcutLabel('sidebar.ports.toggle')
   const rightSidebarOpen = useAppStore((state) => state.rightSidebarOpen)
   const rightSidebarWidth = useAppStore((state) => state.rightSidebarWidth)
   const setRightSidebarWidth = useAppStore((state) => state.setRightSidebarWidth)
@@ -38,35 +29,7 @@ function RightSidebarInner(): React.JSX.Element {
   const activeWorktreeId = useAppStore((state) =>
     rightSidebarOpen ? state.activeWorktreeId : null
   )
-  // Why: source control and checks are meaningless for non-git folders.
-  const activeWorktree = useAppStore((state) =>
-    activeWorktreeId ? (state.getKnownWorktreeById(activeWorktreeId) ?? null) : null
-  )
-  const activeRepo = useRepoById(activeWorktree?.repoId ?? null)
-  const activeWorkspaceScope = parseWorkspaceKey(activeWorktreeId ?? '')
-  const isFolderWorkspace = activeWorkspaceScope?.type === 'folder'
-  const isFolder = isFolderWorkspace || (activeRepo ? isFolderRepo(activeRepo) : false)
-  const isSshRepo = Boolean(activeRepo?.connectionId)
-
-  const activityItems = useMemo<ActivityBarItem[]>(
-    () =>
-      createRightSidebarActivityItems({
-        explorer: explorerShortcut,
-        sourceControl: sourceControlShortcut,
-        checks: checksShortcut,
-        ports: portsShortcut
-      }),
-    [checksShortcut, explorerShortcut, portsShortcut, sourceControlShortcut]
-  )
-  const visibleItems = useMemo(
-    () =>
-      getVisibleRightSidebarActivityItems(activityItems, {
-        isFolder,
-        isFolderWorkspace,
-        isSshRepo
-      }),
-    [activityItems, isFolder, isFolderWorkspace, isSshRepo]
-  )
+  const { isFolderWorkspace, items: visibleItems } = useRightSidebarActivityItems(activeWorktreeId)
   const rememberedFolderTabByWorkspaceKeyRef = useRef<Record<string, ActiveRightSidebarTab>>({})
   const lastRightSidebarRouteRequestIdRef = useRef(rightSidebarRouteRequestId)
   const activeFolderWorkspaceKey = isFolderWorkspace ? (activeWorktreeId ?? null) : null
@@ -112,6 +75,7 @@ function RightSidebarInner(): React.JSX.Element {
     <RightSidebarFrame
       activeTab={effectiveTab}
       activityBarPosition={activityBarPosition}
+      activityNavigation={false}
       checksStatus={checksStatus}
       isOpen={rightSidebarOpen}
       items={visibleItems}
