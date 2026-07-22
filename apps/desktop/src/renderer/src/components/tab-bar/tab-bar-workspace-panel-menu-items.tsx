@@ -30,7 +30,7 @@ export function TabBarWorkspacePanelMenuItems({
             key={item.id}
             onClick={() => openWorkspacePanelTab({ panel: item.id, worktreeId, groupId })}
           >
-            <Icon className="text-muted-foreground size-4" />
+            <Icon className="size-4" />
             <span className="flex-1">{item.title}</span>
             {item.shortcut ? <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut> : null}
           </DropdownMenuItem>

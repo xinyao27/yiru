@@ -1,7 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable'
-import { Files, GitBranch, ListChecks, Plug } from '@phosphor-icons/react'
+import { Files, FlowArrow as Workflow, GitBranch, ListChecks, Plug } from '@phosphor-icons/react'
 
-import { FlowArrow as Workflow } from '@/components/regular-icons'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/class-names'
@@ -21,7 +20,7 @@ import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
 import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
 
 function WorkspacePanelIcon({ panel }: { panel: WorkspacePanelTabContentType }): React.JSX.Element {
-  const className = 'text-muted-foreground mr-1 size-4 shrink-0'
+  const className = 'mr-1 size-4 shrink-0'
   switch (panel) {
     case 'explorer':
       return <Files className={className} />
@@ -107,7 +106,7 @@ export function WorkspacePanelTab({
         <TabCloseButton
           className="right-1"
           ariaLabel={translate(
-            'auto.components.tab.bar.WorkspacePanelTab.close',
+            'auto.components.tab.bar.SortableTab.6df69d9388',
             'Close tab {{value0}}',
             {
               value0: label

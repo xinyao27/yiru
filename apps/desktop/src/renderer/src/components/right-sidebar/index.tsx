@@ -75,7 +75,6 @@ function RightSidebarInner(): React.JSX.Element {
     <RightSidebarFrame
       activeTab={effectiveTab}
       activityBarPosition={activityBarPosition}
-      activityNavigation={false}
       checksStatus={checksStatus}
       isOpen={rightSidebarOpen}
       items={visibleItems}

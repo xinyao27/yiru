@@ -1,6 +1,7 @@
 import {
   LockKey as LockKeyhole,
   ShieldCheck,
+  Sidebar as PanelRight,
   TerminalWindow as SquareTerminal,
   Warning as TriangleAlert
 } from '@phosphor-icons/react'
@@ -17,6 +18,8 @@ import {
 import { WorkspacePaneFrame } from '@/components/tab-group/workspace-pane-frame'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import {
@@ -60,6 +63,9 @@ function SpoolWorkspaceSurfaceContent({
   const controlState = useAppStore((state) => selectSpoolRequesterControlState(state, route))
   const markControlPending = useAppStore((state) => state.markSpoolControlPending)
   const setActiveRoute = useAppStore((state) => state.setActiveSpoolWorkspaceRoute)
+  const rightSidebarOpen = useAppStore((state) => state.rightSidebarOpen)
+  const toggleRightSidebar = useAppStore((state) => state.toggleRightSidebar)
+  const rightSidebarShortcut = useShortcutLabel('sidebar.right.toggle')
   const [requesting, setRequesting] = useState(false)
   const [pendingFocusSessionRef, setPendingFocusSessionRef] = useState<string | null>(null)
   const catalogSessions = workspace?.worktree.sessions ?? EMPTY_SPOOL_SESSION_TABS
@@ -143,6 +149,34 @@ function SpoolWorkspaceSurfaceContent({
 
   const accessControls = (
     <>
+      {!rightSidebarOpen ? (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={toggleRightSidebar}
+                aria-label={translate(
+                  'auto.components.right.sidebar.index.e8e2e4ce74',
+                  'Toggle right sidebar'
+                )}
+              >
+                {/* Why: Phosphor's sidebar glyph is left-oriented by default. */}
+                <PanelRight className="-scale-x-100" />
+              </Button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={6}>
+            {translate(
+              'auto.components.right.sidebar.index.9fffaf17c1',
+              'Toggle right sidebar ({{value0}})',
+              { value0: rightSidebarShortcut }
+            )}
+          </TooltipContent>
+        </Tooltip>
+      ) : null}
       <SpoolSessionCatalogStatus status={workspace.worktree.sessionCatalog.status} />
       <Badge variant="outline" className="h-5 gap-1 px-1.5 text-[11px]">
         {canControl ? <ShieldCheck aria-hidden="true" /> : <LockKeyhole aria-hidden="true" />}

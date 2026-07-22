@@ -64,7 +64,6 @@ export function TabBarMoreButton({
             <TabBarQuickCommandsButton
               worktreeId={worktreeId}
               groupId={groupId}
-              placement="more-menu"
               moreMenuOpen={menuOpen}
               onMoreMenuOpenChange={setMenuOpen}
               separatorAfter={Boolean(onClosePane)}

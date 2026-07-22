@@ -199,8 +199,9 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
         click: () => onToggleLeftSidebar()
       },
       {
-        // Why: display-only shortcut hint for the same reason as above.
-        label: `${translateMain('menu.toggleRightSidebar', 'Toggle Right Sidebar')}\t${shortcutLabel('sidebar.right.toggle')}`,
+        // Why: the legacy action id preserves customized shortcuts while the
+        // visible destination is now an Explorer workspace tab.
+        label: `${translateMain('menu.openExplorerTab', 'Open Explorer Tab')}\t${shortcutLabel('sidebar.right.toggle')}`,
         click: () => onToggleRightSidebar()
       },
       {

@@ -339,6 +339,7 @@ const WorkspaceCleanupDialog = lazy(
 )
 const Terminal = lazy(() => import('./components/terminal-workspace'))
 const SpoolWorkspaceSurface = lazy(() => import('./components/spool/spool-workspace-surface'))
+const SpoolRightSidebar = lazy(() => import('./components/spool/spool-right-sidebar'))
 const StatusBar = lazy(() =>
   import('./components/status-bar/status-bar').then((module) => ({ default: module.StatusBar }))
 )
@@ -881,7 +882,7 @@ function App(): React.JSX.Element {
   // already-fitted cols/rows.
   useLayoutEffect(() => {
     window.dispatchEvent(new CustomEvent(SYNC_FIT_PANES_EVENT))
-  }, [sidebarOpen])
+  }, [rightSidebarOpen, sidebarOpen])
 
   // Fetch initial data + hydrate GitHub cache from disk
   useEffect(() => {
@@ -1677,6 +1678,9 @@ function App(): React.JSX.Element {
         activeWorktreeId !== null &&
         workspaceChromeActive
 
+      const spoolWorkspaceActive =
+        activeView === 'terminal' && useAppStore.getState().activeSpoolWorkspaceRoute !== null
+
       const openSearchTab = (query: string | null): void => {
         openWorkspacePanelTab({
           panel: 'explorer',
@@ -1858,6 +1862,39 @@ function App(): React.JSX.Element {
       // globally — including when focus lives inside the markdown rich editor
       // (contentEditable) or a browser guest webContents, both of which bypass
       // this renderer-side window keydown listener.
+
+      if (spoolWorkspaceActive) {
+        const state = useAppStore.getState()
+        if (matchShortcut('sidebar.right.toggle')) {
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.right.toggle')
+          state.toggleRightSidebar()
+        } else if (matchShortcut('sidebar.explorer.toggle')) {
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.explorer.toggle')
+          state.showRightSidebarFiles()
+        } else if (matchShortcut('sidebar.search.toggle')) {
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.search.toggle')
+          state.showRightSidebarSearch()
+        } else if (matchShortcut('sidebar.sourceControl.toggle')) {
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.sourceControl.toggle')
+          state.setRightSidebarTab('source-control')
+          state.setRightSidebarOpen(true)
+        } else if (matchShortcut('sidebar.checks.toggle')) {
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.checks.toggle')
+          state.setRightSidebarTab('checks')
+          state.setRightSidebarOpen(true)
+        } else if (matchShortcut('sidebar.ports.toggle')) {
+          input.preventDefault()
+          notifyTerminalCapture('sidebar.ports.toggle')
+          state.setRightSidebarTab('ports')
+          state.setRightSidebarOpen(true)
+        }
+        return
+      }
 
       if (!canOpenWorkspacePanel) {
         return
@@ -2454,6 +2491,30 @@ function App(): React.JSX.Element {
                     </div>
                   </div>
                 </div>
+                {/* Why: shared Spool workspaces still use their route-scoped
+                remote panel model; removing it would strand remote Explorer
+                and review data until that separate tab model is migrated. */}
+                {hasActiveSpoolWorkspace && activeSpoolWorkspaceRoute ? (
+                  <RecoverableRenderErrorBoundary
+                    boundaryId="spool-right-sidebar"
+                    surface="right-sidebar"
+                    resetKey={JSON.stringify([
+                      activeSpoolWorkspaceRoute.desktopRef,
+                      activeSpoolWorkspaceRoute.worktreeRef,
+                      activeSpoolWorkspaceRoute.connectionEpoch,
+                      rightSidebarTab
+                    ])}
+                    title={translate('auto.App.ed6b168d00', 'The right sidebar hit an error.')}
+                    description={translate(
+                      'auto.App.8d1e160ed1',
+                      'Retry the sidebar or switch tabs to reload this surface.'
+                    )}
+                  >
+                    <Suspense fallback={null}>
+                      <SpoolRightSidebar route={activeSpoolWorkspaceRoute} />
+                    </Suspense>
+                  </RecoverableRenderErrorBoundary>
+                ) : null}
               </div>
             </RecoverableRenderErrorBoundary>
             {shouldMountFloatingTerminalPanel ? (

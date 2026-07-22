@@ -1259,7 +1259,16 @@ export function useIpcEvents(): void {
     unsubs.push(
       window.api.ui.onToggleRightSidebar(() => {
         const store = useAppStore.getState()
-        if (store.activeView !== 'terminal' || !store.activeWorktreeId) {
+        if (store.activeView !== 'terminal') {
+          return
+        }
+        // Why: shared workspaces retain a separate remote panel model until
+        // their session strip can represent these destinations as real tabs.
+        if (store.activeSpoolWorkspaceRoute) {
+          store.toggleRightSidebar()
+          return
+        }
+        if (!store.activeWorktreeId) {
           return
         }
         openWorkspacePanelTab({ panel: 'explorer' })
