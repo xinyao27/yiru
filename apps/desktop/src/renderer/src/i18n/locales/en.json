@@ -1835,9 +1835,6 @@
           },
           "TabBarMoreButton": {
             "more": "More"
-          },
-          "TabBarWorkspacePanelMenuItems": {
-            "workspacePanels": "Workspace panels"
           }
         }
       },

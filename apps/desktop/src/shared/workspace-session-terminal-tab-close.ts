@@ -5,6 +5,7 @@ import type {
   WorkspaceSessionState,
   WorkspaceVisibleTabType
 } from './types'
+import { isWorkspacePanelTabContentType } from './workspace-panel-tab'
 
 export type WorkspaceSessionTerminalTabCloseResult = {
   session: WorkspaceSessionState
@@ -124,6 +125,14 @@ function deriveActiveSurface(
       browserTabId: activeUnified.entityId,
       fileId: fileFallback,
       type: 'browser'
+    }
+  }
+  if (activeUnified && isWorkspacePanelTabContentType(activeUnified.contentType)) {
+    return {
+      terminalTabId: terminalFallback,
+      browserTabId: browserFallback,
+      fileId: fileFallback,
+      type: 'editor'
     }
   }
   if (activeUnified) {

@@ -173,7 +173,7 @@ function SplitNode({
         suppressLeftBorder={suppressLeftBorder}
         suppressRightBorder={suppressRightBorder}
         suppressBottomBorder={suppressBottomBorder}
-        reserveClosedExplorerToggleSpace={touchesTopEdge && touchesRightEdge}
+        reserveWindowControlsSpace={touchesTopEdge && touchesRightEdge}
         reserveCollapsedSidebarHeaderSpace={touchesTopEdge && touchesLeftEdge}
         isTabDragActive={isTabDragActive}
         hoveredTabInsertion={

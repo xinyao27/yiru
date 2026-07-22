@@ -9,6 +9,7 @@ import { dedupeTabOrder } from '@/store/slices/tab-group-state'
 import type { AppState } from '@/store/types'
 
 import type { Tab } from '../../../shared/types'
+import { isWorkspacePanelTabContentType } from '../../../shared/workspace-panel-tab'
 
 type TabNumberShortcutState = Pick<
   AppState,
@@ -97,6 +98,13 @@ export function activateTabNumberShortcut(index: number): boolean {
   if (target.contentType === 'simulator') {
     store.setActiveTab(target.id)
     store.setActiveTabType('simulator')
+    return true
+  }
+
+  if (isWorkspacePanelTabContentType(target.contentType)) {
+    store.setRightSidebarTab(target.contentType)
+    store.setRightSidebarOpen(true)
+    store.setActiveTabType('editor')
     return true
   }
 

@@ -6,6 +6,7 @@ import {
   type TypeCyclableTab
 } from '@/components/terminal/tab-type-cycle'
 
+import { isWorkspacePanelTabContentType } from '../../../shared/workspace-panel-tab'
 import { useAppStore } from '../store'
 import { sanitizeRecentTabIds } from '../store/slices/tab-group-state'
 
@@ -75,6 +76,19 @@ export function activateCyclableTab(store: AppStoreState, next: TypeCyclableTab)
       store.activateTab?.(next.tabId)
     }
     store.setActiveTabType('simulator')
+  } else if (next.type === 'workspace-panel') {
+    const tab = next.tabId
+      ? Object.values(store.unifiedTabsByWorktree)
+          .flat()
+          .find((candidate) => candidate.id === next.tabId)
+      : null
+    if (!tab || !isWorkspacePanelTabContentType(tab.contentType)) {
+      return
+    }
+    store.activateTab(tab.id)
+    store.setRightSidebarTab(tab.contentType)
+    store.setRightSidebarOpen(true)
+    store.setActiveTabType('editor')
   } else {
     // Why: `setActiveFile` targets the file entity (its implicit activateTab
     // picks the first matching tab in the active group); `activateTab(tabId)`

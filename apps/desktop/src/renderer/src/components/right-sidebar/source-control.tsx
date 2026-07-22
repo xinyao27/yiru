@@ -72,6 +72,7 @@ import { formatDiffComment, formatDiffComments } from '@/lib/diff-comments-forma
 import { getFileTypeIcon } from '@/lib/file-type-icons'
 import { detectLanguage } from '@/lib/language-detect'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
+import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { basename, dirname, joinPath } from '@/lib/path'
 import { getRepoOwnerRoutedSettings } from '@/lib/repo-runtime-owner'
 import {
@@ -815,7 +816,7 @@ export function clearRemoteActionErrorsForCompletedConflictOperations({
   return next ?? remoteActionErrors
 }
 
-function SourceControlInner(): React.JSX.Element {
+function SourceControlInner({ isVisible }: { isVisible: boolean }): React.JSX.Element {
   const sourceControlRef = useRef<HTMLDivElement | null>(null)
   // Why: the changed-file sections virtualize against the panel's shared
   // scroller rather than owning a nested scroll container. State (not a ref)
@@ -953,8 +954,6 @@ function SourceControlInner(): React.JSX.Element {
   const clearDiffComments = useAppStore((s) => s.clearDiffComments)
   const clearDiffCommentsForFile = useAppStore((s) => s.clearDiffCommentsForFile)
   const setScrollToDiffCommentId = useAppStore((s) => s.setScrollToDiffCommentId)
-  const setRightSidebarOpen = useAppStore((s) => s.setRightSidebarOpen)
-  const setRightSidebarTab = useAppStore((s) => s.setRightSidebarTab)
   // Why: pass activeWorktreeId directly (even when null/undefined) so the
   // selector returns its stable empty sentinel. An
   // inline `[]` fallback would allocate a new array each store update, break
@@ -1282,12 +1281,9 @@ function SourceControlInner(): React.JSX.Element {
     recordKey: activePullRequestGenerationKey,
     record: activePullRequestGenerationRecord
   })
-  const rightSidebarOpen = useAppStore((s) => s.rightSidebarOpen)
-  // Why: gate polling on both the active tab AND the sidebar being open.
-  // The sidebar now stays mounted when closed (for performance), so without
-  // this guard the branchCompare interval and PR fetch would keep running
-  // with no visible consumer, wasting git process spawns and API calls.
-  const isBranchVisible = rightSidebarTab === 'source-control' && rightSidebarOpen
+  // Why: panel content can now live in a unified tab or the legacy remote
+  // shell, so visibility must come from its owning surface rather than a route.
+  const isBranchVisible = isVisible
 
   const refreshActiveGitStatus = useCallback(async (): Promise<void> => {
     if (!activeWorktreeId || !worktreePath || isFolder) {
@@ -2822,8 +2818,7 @@ function SourceControlInner(): React.JSX.Element {
         resolveSupportedHostedReviewCopyProvider(result.provider)
       )
       if (openChecks) {
-        setRightSidebarOpen(true)
-        setRightSidebarTab('checks')
+        openWorkspacePanelTab({ panel: 'checks', worktreeId })
       }
       try {
         if (worktreeId && result.provider === 'github') {
@@ -2908,16 +2903,13 @@ function SourceControlInner(): React.JSX.Element {
       linkedGiteaPR,
       linkedGitHubPR,
       linkedGitLabMR,
-      setRightSidebarOpen,
-      setRightSidebarTab,
       updateWorktreeMeta
     ]
   )
 
   const openHostedReviewInChecks = useCallback(() => {
-    setRightSidebarOpen(true)
-    setRightSidebarTab('checks')
-  }, [setRightSidebarOpen, setRightSidebarTab])
+    openWorkspacePanelTab({ panel: 'checks', worktreeId: activeWorktreeId })
+  }, [activeWorktreeId])
 
   const handleBranchChangedByPullRequestGeneration = useCallback(async (): Promise<void> => {
     // Why: AI PR detail generation may rebase before summarizing; if HEAD moved,
@@ -6525,14 +6517,16 @@ function SourceControlInner(): React.JSX.Element {
 }
 
 function SourceControl({
-  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  isVisible = true
 }: {
   source?: RightSidebarPanelSource
+  isVisible?: boolean
 }): React.JSX.Element | null {
   if (source.kind === 'spool') {
     return source.supportsGit ? <SpoolGitPane route={source.route} /> : null
   }
-  return <SourceControlInner />
+  return <SourceControlInner isVisible={isVisible} />
 }
 
 const SourceControlMemo = React.memo(SourceControl)

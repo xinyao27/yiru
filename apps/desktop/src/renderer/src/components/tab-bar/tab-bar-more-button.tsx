@@ -1,52 +1,46 @@
 import { DotsThree as MoreHorizontal } from '@phosphor-icons/react'
+import { useState } from 'react'
 
-import {
-  WorktreeOpenInSubMenu,
-  type OpenInMenuEntry
-} from '@/components/sidebar/worktree-open-in-menu'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import { useRepoById } from '@/store/selectors'
 
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
+import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 import { X } from '../regular-icons'
+import { TabBarQuickCommandsButton } from './tab-bar-quick-commands-button'
 
 export function TabBarMoreButton({
   worktreeId,
+  groupId,
   onClosePane
 }: {
   worktreeId: string
+  groupId: string
   onClosePane?: () => void
 }): React.JSX.Element | null {
   const worktree = useAppStore((state) => state.getKnownWorktreeById(worktreeId) ?? null)
-  const repo = useRepoById(worktree?.repoId ?? null)
-  const lastOpenInTargetKey = useAppStore((state) => state.settings?.lastOpenInTargetKey)
-  const updateSettings = useAppStore((state) => state.updateSettings)
+  const repos = useAppStore((state) => state.repos)
   const canOpenWorktree = Boolean(worktree && worktreeId !== FLOATING_TERMINAL_WORKTREE_ID)
+  const canShowQuickCommands =
+    canOpenWorktree && repos.some((repo) => repo.id === getRepoIdFromWorktreeId(worktreeId))
+  const [menuOpen, setMenuOpen] = useState(false)
 
-  if (!canOpenWorktree && !onClosePane) {
+  if (!canShowQuickCommands && !onClosePane) {
     return null
   }
 
   const label = translate('auto.components.tab.bar.TabBarMoreButton.more', 'More')
-  const rememberOpenInEntry = (entry: OpenInMenuEntry): void => {
-    if (entry.preferenceKey !== lastOpenInTargetKey) {
-      void updateSettings({ lastOpenInTargetKey: entry.preferenceKey })
-    }
-  }
-
   return (
     <Tooltip>
-      <DropdownMenu modal={false}>
+      <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
         <TooltipTrigger
           render={
             <DropdownMenuTrigger
@@ -65,15 +59,17 @@ export function TabBarMoreButton({
             />
           }
         />
-        <DropdownMenuContent align="end" side="bottom" sideOffset={4}>
-          {canOpenWorktree && worktree ? (
-            <WorktreeOpenInSubMenu
-              worktreePath={worktree.path}
-              connectionId={repo?.connectionId ?? null}
-              onEntryOpen={rememberOpenInEntry}
+        <DropdownMenuContent align="end" side="bottom" sideOffset={4} keepMounted>
+          {canShowQuickCommands ? (
+            <TabBarQuickCommandsButton
+              worktreeId={worktreeId}
+              groupId={groupId}
+              placement="more-menu"
+              moreMenuOpen={menuOpen}
+              onMoreMenuOpenChange={setMenuOpen}
+              separatorAfter={Boolean(onClosePane)}
             />
           ) : null}
-          {canOpenWorktree && onClosePane ? <DropdownMenuSeparator /> : null}
           {onClosePane ? (
             <DropdownMenuItem onClick={onClosePane}>
               <X className="size-4" />

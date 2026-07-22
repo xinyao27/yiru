@@ -104,7 +104,13 @@ function toSwitcherItem(
     ...entry,
     key: getVisibleTabKey(entry),
     label: getTabLabel(backingTab, generatedTitlesEnabled, entry.id),
-    contentType: backingTab?.contentType ?? (entry.type === 'editor' ? 'editor' : entry.type),
+    contentType:
+      backingTab?.contentType ??
+      (entry.type === 'workspace-panel'
+        ? 'explorer'
+        : entry.type === 'editor'
+          ? 'editor'
+          : entry.type),
     isDirty: entry.type === 'editor' && dirtyFileIds.has(entry.id)
   }
 }

@@ -199,7 +199,7 @@ function SpoolWorkspaceSurfaceContent({
           }
           trailingActions={accessControls}
           reserveCollapsedSidebarHeaderSpace
-          reserveClosedExplorerToggleSpace
+          reserveWindowControlsSpace
           bodyClassName="flex bg-[var(--editor-surface)]"
         >
           {sessionRoute ? (

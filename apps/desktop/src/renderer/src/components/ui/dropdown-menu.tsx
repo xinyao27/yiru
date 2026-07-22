@@ -35,11 +35,14 @@ function DropdownMenuContent({
   align,
   alignOffset,
   style,
+  keepMounted,
   ...props
 }: DropdownMenuPrimitive.Popup.Props &
-  Pick<DropdownMenuPrimitive.Positioner.Props, 'side' | 'sideOffset' | 'align' | 'alignOffset'>) {
+  Pick<DropdownMenuPrimitive.Positioner.Props, 'side' | 'sideOffset' | 'align' | 'alignOffset'> & {
+    keepMounted?: boolean
+  }) {
   return (
-    <DropdownMenuPrimitive.Portal>
+    <DropdownMenuPrimitive.Portal keepMounted={keepMounted}>
       {/* Base UI positions via Positioner; forward side/align/offsets here so they hit the anchored element, not the Popup. */}
       <DropdownMenuPrimitive.Positioner
         className="isolate z-[70] outline-none"

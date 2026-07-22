@@ -744,6 +744,15 @@ export type TabGroupLayoutNode =
     }
 
 // ─── Unified Tab ────────────────────────────────────────────────────
+export type WorkspacePanelTabContentType =
+  | 'explorer'
+  | 'vault'
+  | 'workspaces'
+  | 'pr-checks'
+  | 'source-control'
+  | 'checks'
+  | 'ports'
+
 export type TabContentType =
   | 'terminal'
   | 'editor'
@@ -752,6 +761,7 @@ export type TabContentType =
   | 'check-details'
   | 'browser'
   | 'simulator'
+  | WorkspacePanelTabContentType
 
 export type WorkspaceVisibleTabType = 'terminal' | 'editor' | 'browser' | 'simulator'
 export type CtrlTabOrderMode = 'mru' | 'sequential'
@@ -2782,16 +2792,8 @@ export type StatusBarItem =
   | 'ports'
 export type FloatingTerminalTriggerLocation = 'floating-button' | 'status-bar'
 
-export type RightSidebarTab =
-  | 'explorer'
-  | 'search'
-  | 'vault'
-  | 'workspaces'
-  | 'pr-checks'
-  | 'source-control'
-  | 'checks'
-  | 'ports'
-export type ActiveRightSidebarTab = Exclude<RightSidebarTab, 'search'>
+export type RightSidebarTab = WorkspacePanelTabContentType | 'search'
+export type ActiveRightSidebarTab = WorkspacePanelTabContentType
 export type RightSidebarExplorerView = 'files' | 'search'
 
 export type ProjectOrderBy = 'manual' | 'recent'

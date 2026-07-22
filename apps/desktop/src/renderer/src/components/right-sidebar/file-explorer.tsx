@@ -71,7 +71,7 @@ import { useFileExplorerVisibleRowProjection } from './use-file-explorer-visible
 import { useFileExplorerWatch } from './use-file-explorer-watch'
 import { useFileSearchPanel } from './use-file-search-panel'
 
-function FileExplorerFiles(): React.JSX.Element {
+function FileExplorerFiles({ isVisible }: { isVisible: boolean }): React.JSX.Element {
   const explorerView = useAppStore((s) => s.rightSidebarExplorerView)
   const showRightSidebarFiles = useAppStore((s) => s.showRightSidebarFiles)
   const showRightSidebarSearch = useAppStore((s) => s.showRightSidebarSearch)
@@ -112,7 +112,6 @@ function FileExplorerFiles(): React.JSX.Element {
   const openFiles = useAppStore((s) => s.openFiles)
   const closeFile = useAppStore((s) => s.closeFile)
   const openModal = useAppStore((s) => s.openModal)
-  const rightSidebarOpen = useAppStore((s) => s.rightSidebarOpen)
   const showDotfiles = useAppStore((s) =>
     activeWorktreeId ? (s.showDotfilesByWorktree[activeWorktreeId] ?? true) : true
   )
@@ -134,7 +133,7 @@ function FileExplorerFiles(): React.JSX.Element {
   const isFilesViewActive = explorerView === 'files'
   const visibleFilesWorktreePath = getVisibleFileExplorerWorktreePath({
     explorerView,
-    rightSidebarOpen,
+    rightSidebarOpen: isVisible,
     worktreePath
   })
   const repoName = activeRepo?.displayName ?? (worktreePath ? basename(worktreePath) : '')
@@ -871,14 +870,16 @@ function FileExplorerFiles(): React.JSX.Element {
 const FileExplorerFilesMemo = React.memo(FileExplorerFiles)
 
 function FileExplorer({
-  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  isVisible = true
 }: {
   source?: RightSidebarPanelSource
+  isVisible?: boolean
 }): React.JSX.Element {
   if (source.kind === 'spool') {
     return <SpoolFilesPane route={source.route} supportsDiff={source.supportsGit} />
   }
-  return <FileExplorerFilesMemo />
+  return <FileExplorerFilesMemo isVisible={isVisible} />
 }
 
 export default React.memo(FileExplorer)

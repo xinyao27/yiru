@@ -894,43 +894,6 @@
   background: var(--popover);
 }
 
-/* Why: the first-run Mobile Emulator intro sits directly under that menu row;
-   an upward caret aligned to the phone icon reads as a callout, not a footer. */
-.mobile-emulator-tab-intro-callout--menu {
-  position: relative;
-}
-
-.mobile-emulator-tab-intro-callout--menu::before {
-  content: '';
-  position: absolute;
-  top: -7px;
-  left: 0.8125rem;
-  border-style: solid;
-  border-width: 0 7px 7px;
-  /* Why: use foreground + border to create a subtle shadow that adapts to theme */
-  border-color: transparent transparent color-mix(in srgb, var(--foreground) 10%, var(--border))
-    transparent;
-}
-
-.mobile-emulator-tab-intro-callout--menu::after {
-  content: '';
-  position: absolute;
-  top: -6px;
-  left: 0.8125rem;
-  border-style: solid;
-  border-width: 0 6px 6px;
-  border-color: transparent transparent var(--muted) transparent;
-}
-
-.dark .mobile-emulator-tab-intro-callout--menu::before {
-  /* Why: use foreground + border to create a subtle shadow that adapts to theme */
-  border-bottom-color: color-mix(in srgb, var(--foreground) 12%, var(--border));
-}
-
-.dark .mobile-emulator-tab-intro-callout--menu::after {
-  border-bottom-color: color-mix(in srgb, var(--accent) 80%, transparent);
-}
-
 /* Why: anchor the optional setup card over the emulator without blurring the
    device preview, which read as a rendering glitch. */
 .mobile-emulator-agent-setup-guide-scrim {

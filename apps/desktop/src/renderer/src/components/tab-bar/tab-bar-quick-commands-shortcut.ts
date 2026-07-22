@@ -15,6 +15,7 @@ import {
 } from '../../../../shared/modifier-double-tap-detector'
 
 type UseTabBarQuickCommandsShortcutParams = {
+  enabled?: boolean
   menuOpen: boolean
   onOpenChange: (next: boolean) => void
 }
@@ -35,6 +36,7 @@ function getQuickCommandsShortcutContext(target: EventTarget | null): Keybinding
 }
 
 export function useTabBarQuickCommandsShortcut({
+  enabled = true,
   menuOpen,
   onOpenChange
 }: UseTabBarQuickCommandsShortcutParams): void {
@@ -47,7 +49,7 @@ export function useTabBarQuickCommandsShortcut({
   // Why: this hook only runs in the focused tab group's menu component, so the
   // listener naturally scopes to the active group with no extra coordination.
   useEffect(() => {
-    if (activeView !== 'terminal') {
+    if (!enabled || activeView !== 'terminal') {
       return
     }
     const platform = getShortcutPlatform()
@@ -135,10 +137,10 @@ export function useTabBarQuickCommandsShortcut({
       window.removeEventListener('keyup', onKeyUp, { capture: true })
       window.removeEventListener('blur', onBlur)
     }
-  }, [activeView, keybindings, menuOpen, onOpenChange, terminalShortcutPolicy])
+  }, [activeView, enabled, keybindings, menuOpen, onOpenChange, terminalShortcutPolicy])
 
   useEffect(() => {
-    if (activeView !== 'terminal') {
+    if (!enabled || activeView !== 'terminal') {
       return
     }
     const onToggleQuickCommandsMenu = (): void => {
@@ -148,5 +150,5 @@ export function useTabBarQuickCommandsShortcut({
     return () => {
       window.removeEventListener(TOGGLE_QUICK_COMMANDS_MENU_EVENT, onToggleQuickCommandsMenu)
     }
-  }, [activeView, menuOpen, onOpenChange])
+  }, [activeView, enabled, menuOpen, onOpenChange])
 }

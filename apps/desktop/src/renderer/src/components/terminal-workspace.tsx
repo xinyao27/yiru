@@ -60,6 +60,7 @@ import {
 } from '../../../shared/keybindings'
 import type { Tab, TabContentType, TabGroupLayoutNode, TuiAgent } from '../../../shared/types'
 import { matchesRecentTabSwitcherChord } from '../../../shared/window-shortcut-policy'
+import { isWorkspacePanelTabContentType } from '../../../shared/workspace-panel-tab'
 import { folderWorkspaceKey } from '../../../shared/workspace-scope'
 import {
   handleSwitchRecentTab,
@@ -1868,7 +1869,14 @@ function Terminal(): React.JSX.Element | null {
           target?.closest('textarea:not(.xterm-helper-textarea), input') !== null
         if (!inEditor) {
           const state = useAppStore.getState()
-          if (state.activeTabType === 'editor' && state.activeFileId) {
+          const activeUnifiedTab = state.activeWorktreeId
+            ? state.getActiveTab(state.activeWorktreeId)
+            : null
+          if (
+            state.activeTabType === 'editor' &&
+            state.activeFileId &&
+            (!activeUnifiedTab || !isWorkspacePanelTabContentType(activeUnifiedTab.contentType))
+          ) {
             e.preventDefault()
             notifyTerminalCapture('editor.save')
             window.dispatchEvent(new Event(YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT))
@@ -1914,7 +1922,12 @@ function Terminal(): React.JSX.Element | null {
         }
         e.preventDefault()
         notifyTerminalCapture('tab.close')
-        if (state.activeTabType === 'editor' && state.activeFileId) {
+        const activeUnifiedTab = state.activeWorktreeId
+          ? state.getActiveTab(state.activeWorktreeId)
+          : null
+        if (activeUnifiedTab && isWorkspacePanelTabContentType(activeUnifiedTab.contentType)) {
+          state.closeUnifiedTab(activeUnifiedTab.id)
+        } else if (state.activeTabType === 'editor' && state.activeFileId) {
           handleCloseFile(state.activeFileId)
         } else if (state.activeTabType === 'browser' && state.activeBrowserTabId) {
           handleCloseBrowserTab(state.activeBrowserTabId)

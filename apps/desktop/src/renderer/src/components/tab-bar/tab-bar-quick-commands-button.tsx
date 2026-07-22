@@ -7,6 +7,13 @@ import {
   TerminalQuickCommandDialog
 } from '@/components/terminal-quick-commands/terminal-quick-command-dialog'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger
+} from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { runQuickCommandInNewTab } from '@/lib/run-quick-command-in-new-tab'
@@ -20,21 +27,37 @@ import {
 import type { TerminalQuickCommand } from '../../../../shared/types'
 import { getRepoIdFromWorktreeId } from '../../../../shared/worktree-id'
 import { TabBarQuickCommandsMenu } from './tab-bar-quick-commands-menu'
+import { useTabBarQuickCommandsShortcut } from './tab-bar-quick-commands-shortcut'
 
 type TabBarQuickCommandsButtonProps = {
   worktreeId: string
   groupId: string
+  placement?: 'toolbar' | 'more-menu'
+  moreMenuOpen?: boolean
+  onMoreMenuOpenChange?: (open: boolean) => void
+  separatorAfter?: boolean
 }
+
+const noopMoreMenuOpenChange = (_open: boolean): void => undefined
 
 export function TabBarQuickCommandsButton({
   worktreeId,
-  groupId
+  groupId,
+  placement = 'toolbar',
+  moreMenuOpen = false,
+  onMoreMenuOpenChange = noopMoreMenuOpenChange,
+  separatorAfter = false
 }: TabBarQuickCommandsButtonProps): React.JSX.Element | null {
   const allCommands = useAppStore((s) => s.settings?.terminalQuickCommands)
   const recentByGroup = useAppStore((s) => s.recentQuickCommandIdByGroup)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const repos = useAppStore((s) => s.repos)
   const confirm = useConfirmationDialog()
+  useTabBarQuickCommandsShortcut({
+    enabled: placement === 'more-menu',
+    menuOpen: moreMenuOpen,
+    onOpenChange: onMoreMenuOpenChange
+  })
   // Why: floating terminals share a synthetic worktree id (`global-floating-terminal`)
   // that has no separator, so naive `getRepoIdFromWorktreeId` would return that
   // sentinel as a "repo id" and the button would point at a repo that doesn't
@@ -137,6 +160,57 @@ export function TabBarQuickCommandsButton({
   // repo at all.
   if (!repoId) {
     return null
+  }
+
+  if (placement === 'more-menu') {
+    const menuEntry = hasAnyCommands ? (
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger>
+          <Play className="size-4" />
+          {translate('auto.components.tab.bar.TabBarQuickCommandsButton.a2c7a33831', 'Command')}
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="min-w-56">
+          {repoCommands.map((command) => (
+            <DropdownMenuItem key={command.id} onClick={() => handleRun(command)}>
+              <Play className="size-3.5" />
+              <span className="truncate">{command.label}</span>
+            </DropdownMenuItem>
+          ))}
+          {repoCommands.length > 0 && globalCommands.length > 0 ? <DropdownMenuSeparator /> : null}
+          {globalCommands.map((command) => (
+            <DropdownMenuItem key={command.id} onClick={() => handleRun(command)}>
+              <Play className="size-3.5" />
+              <span className="truncate">{command.label}</span>
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={addRepoCommand}>
+            <Play className="size-3.5" />
+            {translate('auto.components.tab.bar.TabBarQuickCommandsButton.a2c7a33831', 'Command')}
+          </DropdownMenuItem>
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    ) : (
+      <DropdownMenuItem onClick={addRepoCommand}>
+        <Play className="size-4" />
+        {translate('auto.components.tab.bar.TabBarQuickCommandsButton.a2c7a33831', 'Command')}
+      </DropdownMenuItem>
+    )
+
+    return (
+      <>
+        {menuEntry}
+        {separatorAfter ? <DropdownMenuSeparator /> : null}
+        <TerminalQuickCommandDialog
+          open={editor !== null}
+          mode={editor?.mode ?? 'add'}
+          command={editor?.command ?? createTerminalQuickCommandDraft({ type: 'repo', repoId })}
+          repos={repos}
+          onOpenChange={(open) => !open && setEditor(null)}
+          onSave={handleSaveCommand}
+        />
+      </>
+    )
   }
 
   // Empty state: single button that opens the dialog directly.

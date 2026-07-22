@@ -14,6 +14,7 @@ import { computeEditorFontSize } from '@/lib/editor-font-zoom'
 import { registerFileSearchSelectedTextProvider } from '@/lib/file-search-selection'
 import { formatMarkdownReviewNotes, type MarkdownReviewNote } from '@/lib/markdown-review-notes'
 import { resolveCursorThemeName } from '@/lib/monaco-setup'
+import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { scrollTopCache, cursorPositionCache, setWithLRU } from '@/lib/scroll-cache'
 import { useAppStore } from '@/store'
 import { selectWorktreeDiffComments } from '@/store/worktree-diff-comments-selector'
@@ -492,8 +493,11 @@ export default function MonacoEditor({
           if (!query) {
             return
           }
-          const state = useAppStore.getState()
-          state.showRightSidebarSearch({ query })
+          openWorkspacePanelTab({
+            panel: 'explorer',
+            worktreeId,
+            explorerDestination: { view: 'search', query }
+          })
         }
       })
       const onLargeTextPaste = (event: ClipboardEvent): void => {

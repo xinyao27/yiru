@@ -41,12 +41,14 @@ import type {
   Tab,
   TerminalTab,
   TuiAgent,
+  WorkspacePanelTabContentType,
   WorkspaceVisibleTabType
 } from '../../../../shared/types'
 import {
   type BuiltInWindowsTerminalShell,
   WINDOWS_GIT_BASH_SHELL
 } from '../../../../shared/windows-terminal-shell'
+import { isWorkspacePanelTabContentType } from '../../../../shared/workspace-panel-tab'
 import { useAppStore } from '../../store'
 import type { OpenFile } from '../../store/slices/editor'
 import { MobileEmulatorTabIntroCallout } from '../emulator-pane/mobile-emulator-tab-intro-callout'
@@ -73,6 +75,7 @@ import type { TabCreateEntryArgs } from './tab-create-entry-action'
 import { buildTabCreateMenuOptions, type TabCreateMenuOption } from './tab-create-menu-options'
 import { resolveWindowsShellLaunchTarget } from './windows-shell-launch'
 import { shouldShowWindowsShellMenu } from './windows-shell-menu-visibility'
+import { WorkspacePanelTab } from './workspace-panel-tab'
 import { WorkspaceNewTerminalMenuItem, WorkspaceTabCreateMenu } from './workspace-tab-create-menu'
 import { WorkspaceTabStripViewport } from './workspace-tab-strip-viewport'
 
@@ -127,10 +130,12 @@ type TabBarProps = {
   activeFileId?: string | null
   activeBrowserTabId?: string | null
   activeSimulatorTabId?: string | null
+  activeWorkspacePanelTabId?: string | null
   activeTabType?: WorkspaceVisibleTabType
   onActivateFile?: (fileId: string) => void
   onCloseFile?: (fileId: string) => void
   onActivateBrowserTab?: (tabId: string) => void
+  onActivateWorkspacePanelTab?: (tabId: string) => void
   onCloseBrowserTab?: (tabId: string) => void
   onDuplicateBrowserTab?: (tabId: string) => void
   onCloseAllFiles?: () => void
@@ -169,6 +174,13 @@ type TabItem =
       isPinned: boolean
       data: Tab
     }
+  | {
+      type: 'workspace-panel'
+      id: string
+      unifiedTabId: string
+      isPinned: boolean
+      data: Tab & { contentType: WorkspacePanelTabContentType }
+    }
 
 function getTabDragLabel(item: TabItem, generatedTitlesEnabled: boolean): string {
   if (item.type === 'terminal') {
@@ -179,6 +191,9 @@ function getTabDragLabel(item: TabItem, generatedTitlesEnabled: boolean): string
   }
   if (item.type === 'simulator') {
     return item.data.label || 'Mobile Emulator'
+  }
+  if (item.type === 'workspace-panel') {
+    return item.data.label
   }
   return getEditorDisplayLabel(item.data)
 }
@@ -250,10 +265,12 @@ function TabBarInner({
   activeFileId,
   activeBrowserTabId,
   activeSimulatorTabId,
+  activeWorkspacePanelTabId,
   activeTabType,
   onActivateFile,
   onCloseFile,
   onActivateBrowserTab,
+  onActivateWorkspacePanelTab,
   onCloseBrowserTab,
   onDuplicateBrowserTab,
   onCloseAllFiles,
@@ -854,6 +871,22 @@ function TabBarInner({
         .map((t) => t.id),
     [unifiedTabs, resolvedGroupId]
   )
+  const workspacePanelTabs = useMemo(
+    () =>
+      (unifiedTabs ?? []).filter(
+        (tab): tab is Tab & { contentType: WorkspacePanelTabContentType } =>
+          tab.groupId === resolvedGroupId && isWorkspacePanelTabContentType(tab.contentType)
+      ),
+    [resolvedGroupId, unifiedTabs]
+  )
+  const workspacePanelMap = useMemo(
+    () => new Map(workspacePanelTabs.map((tab) => [tab.id, tab])),
+    [workspacePanelTabs]
+  )
+  const workspacePanelTabIds = useMemo(
+    () => workspacePanelTabs.map((tab) => tab.id),
+    [workspacePanelTabs]
+  )
 
   // Build the unified ordered list, reconciling stored order with current items
   const orderedItems = useMemo(() => {
@@ -862,7 +895,8 @@ function TabBarInner({
       terminalIds,
       editorFileIds,
       browserTabIds,
-      simulatorTabIds
+      simulatorTabIds,
+      workspacePanelTabIds
     )
     const items: TabItem[] = []
     for (const id of ids) {
@@ -913,6 +947,16 @@ function TabBarInner({
         })
         continue
       }
+      const workspacePanel = workspacePanelMap.get(id)
+      if (workspacePanel) {
+        items.push({
+          type: 'workspace-panel',
+          id,
+          unifiedTabId: workspacePanel.id,
+          isPinned: workspacePanel.isPinned === true,
+          data: workspacePanel
+        })
+      }
     }
     return items
   }, [
@@ -921,10 +965,12 @@ function TabBarInner({
     editorFileIds,
     browserTabIds,
     simulatorTabIds,
+    workspacePanelTabIds,
     terminalMap,
     editorMap,
     browserMap,
-    unifiedTabByVisibleId
+    unifiedTabByVisibleId,
+    workspacePanelMap
   ])
 
   const sortableIds = useMemo(() => orderedItems.map((item) => item.id), [orderedItems])
@@ -955,6 +1001,9 @@ function TabBarInner({
       if (item.type === 'simulator') {
         return activeTabType === 'simulator' && item.id === activeSimulatorTabId
       }
+      if (item.type === 'workspace-panel') {
+        return item.id === activeWorkspacePanelTabId
+      }
       return (
         (activeTabType === 'editor' || activeTabType === 'simulator') && activeFileId === item.id
       )
@@ -964,6 +1013,7 @@ function TabBarInner({
     activeBrowserTabId,
     activeFileId,
     activeSimulatorTabId,
+    activeWorkspacePanelTabId,
     activeTabId,
     activeTabType,
     orderedItems
@@ -1145,6 +1195,21 @@ function TabBarInner({
                 />
               )
             }
+            if (item.type === 'workspace-panel') {
+              return (
+                <WorkspacePanelTab
+                  key={item.id}
+                  id={item.id}
+                  panel={item.data.contentType}
+                  label={item.data.label}
+                  isActive={item.id === activeWorkspacePanelTabId}
+                  onActivate={() => onActivateWorkspacePanelTab?.(item.id)}
+                  onClose={() => onCloseFile?.(item.id)}
+                  dragData={dragData}
+                  dropIndicator={dropIndicatorByVisibleId.get(item.id) ?? null}
+                />
+              )
+            }
             return (
               <EditorFileTab
                 key={item.id}
@@ -1212,7 +1277,7 @@ function TabBarInner({
           </>
         ) : null}
         {showStaticCreateMenuItems && !terminalOnly ? (
-          <TabBarWorkspacePanelMenuItems worktreeId={worktreeId} />
+          <TabBarWorkspacePanelMenuItems worktreeId={worktreeId} groupId={resolvedGroupId} />
         ) : null}
       </WorkspaceTabCreateMenu>
     </div>

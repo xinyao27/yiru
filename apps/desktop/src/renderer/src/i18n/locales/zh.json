@@ -1812,9 +1812,6 @@
           },
           "TabBarMoreButton": {
             "more": "更多"
-          },
-          "TabBarWorkspacePanelMenuItems": {
-            "workspacePanels": "工作区面板"
           }
         }
       },

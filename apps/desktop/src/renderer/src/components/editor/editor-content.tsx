@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { detectLanguage } from '@/lib/language-detect'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
+import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { joinPath } from '@/lib/path'
 import { useAppStore } from '@/store'
 import type { MarkdownViewMode, OpenFile, PendingEditorReveal } from '@/store/slices/editor'
@@ -193,7 +194,6 @@ export function EditorContent({
   const openConflictReviewFile = useAppStore((s) => s.openConflictReviewFile)
   const openConflictReview = useAppStore((s) => s.openConflictReview)
   const closeFile = useAppStore((s) => s.closeFile)
-  const setRightSidebarTab = useAppStore((s) => s.setRightSidebarTab)
   const setPendingEditorReveal = useAppStore((s) => s.setPendingEditorReveal)
   const reloadOpenCheckRunDetailsTab = useAppStore((s) => s.reloadOpenCheckRunDetailsTab)
   const [conflictNavigationIndexByFile, setConflictNavigationIndexByFile] = React.useState<
@@ -698,7 +698,9 @@ export function EditorContent({
             'live-summary'
           )
         }
-        onReturnToSourceControl={() => setRightSidebarTab('source-control')}
+        onReturnToSourceControl={() =>
+          openWorkspacePanelTab({ panel: 'source-control', worktreeId: activeFile.worktreeId })
+        }
       />
     )
   }

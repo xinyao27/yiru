@@ -39,6 +39,7 @@ import { planMobileTerminalTabMount } from '@/lib/mobile-terminal-tab-mount'
 import { initialAgentTabViewModeProps } from '@/lib/native-chat-initial-view-mode'
 import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
 import { openMobileEmulatorTab } from '@/lib/open-mobile-emulator-tab'
+import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import {
   hydrateBrowserDrivers,
   setDriverForBrowserPage
@@ -46,7 +47,6 @@ import {
 import { setDriverForPty, hydrateDrivers } from '@/lib/pane-manager/mobile-driver-state'
 import { setFitOverride, hydrateOverrides } from '@/lib/pane-manager/mobile-fit-overrides'
 import { TOGGLE_QUICK_COMMANDS_MENU_EVENT } from '@/lib/quick-commands-menu-events'
-import { canShowRightSidebarForView } from '@/lib/right-sidebar-visibility'
 import {
   isManualSimulatorLaunchPending,
   rememberPrelaunchedSimulatorSession
@@ -1259,10 +1259,10 @@ export function useIpcEvents(): void {
     unsubs.push(
       window.api.ui.onToggleRightSidebar(() => {
         const store = useAppStore.getState()
-        if (!canShowRightSidebarForView(store.activeView)) {
+        if (store.activeView !== 'terminal' || !store.activeWorktreeId) {
           return
         }
-        store.toggleRightSidebar()
+        openWorkspacePanelTab({ panel: 'explorer' })
       })
     )
 

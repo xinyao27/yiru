@@ -31,6 +31,7 @@ import { getConnectionId } from '@/lib/connection-context'
 import { startFixChecksAgent } from '@/lib/fix-checks-agent-launch'
 import { openHttpLink } from '@/lib/http-link-routing'
 import { getLocalProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
+import { openWorkspacePanelTab } from '@/lib/open-workspace-panel-tab'
 import { groupPRComments, type PRCommentGroup } from '@/lib/pr-comment-groups'
 import { readSourceControlLaunchRecipeAgentId } from '@/lib/source-control-launch-agent-selection'
 import { resolveSourceControlLaunchPlatform } from '@/lib/source-control-launch-platform'
@@ -402,13 +403,10 @@ async function resolveGitLabMRDiscussionForChecks(args: {
   })
 }
 
-function LocalChecksPanel(): React.JSX.Element {
-  // Why: the sidebar stays mounted when closed (for performance). Gate
-  // polling on visibility so we don't fetch checks/comments — or poll the
-  // terminal cwd — in the background when the panel isn't visible.
-  const rightSidebarOpen = useAppStore((s) => s.rightSidebarOpen)
-  const rightSidebarTab = useAppStore((s) => s.rightSidebarTab)
-  const isPanelVisible = rightSidebarOpen && rightSidebarTab === 'checks'
+function LocalChecksPanel({ isVisible }: { isVisible: boolean }): React.JSX.Element {
+  // Why: the panel can be hosted by a unified tab, so its owner reports
+  // visibility directly instead of coupling background work to sidebar state.
+  const isPanelVisible = isVisible
 
   // Follow the active terminal's cwd so linked-PR/checks state tracks the
   // worktree the terminal is actually operating in (e.g. across a stack),
@@ -446,8 +444,6 @@ function LocalChecksPanel(): React.JSX.Element {
   const isRemoteOperationActive = useAppStore((s) => s.isRemoteOperationActive)
   const pushBranch = useAppStore((s) => s.pushBranch)
   const fetchUpstreamStatus = useAppStore((s) => s.fetchUpstreamStatus)
-  const setRightSidebarOpen = useAppStore((s) => s.setRightSidebarOpen)
-  const setRightSidebarTab = useAppStore((s) => s.setRightSidebarTab)
   const updateWorktreeMeta = useAppStore((s) => s.updateWorktreeMeta)
   const updateWorktreeGitIdentity = useAppStore((s) => s.updateWorktreeGitIdentity)
   const openModal = useAppStore((s) => s.openModal)
@@ -3245,8 +3241,7 @@ function LocalChecksPanel(): React.JSX.Element {
       if (!repo || !branch) {
         return
       }
-      setRightSidebarOpen(true)
-      setRightSidebarTab('checks')
+      openWorkspacePanelTab({ panel: 'checks', worktreeId: activeWorktreeId })
       try {
         if (activeWorktreeId && result.provider === 'github') {
           await updateWorktreeMeta(activeWorktreeId, { linkedPR: result.number })
@@ -3311,8 +3306,6 @@ function LocalChecksPanel(): React.JSX.Element {
       linkedPR,
       refreshLinkedGitHubPullRequest,
       repo,
-      setRightSidebarOpen,
-      setRightSidebarTab,
       activeWorktreeId,
       updateWorktreeMeta
     ]
@@ -3891,12 +3884,14 @@ function LocalChecksPanel(): React.JSX.Element {
 }
 
 export default function ChecksPanel({
-  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE
+  source = LOCAL_RIGHT_SIDEBAR_PANEL_SOURCE,
+  isVisible = true
 }: {
   source?: RightSidebarPanelSource
+  isVisible?: boolean
 }): React.JSX.Element | null {
   if (source.kind === 'spool') {
     return source.supportsGit ? <SpoolChecksPane state={source.checksState} /> : null
   }
-  return <LocalChecksPanel />
+  return <LocalChecksPanel isVisible={isVisible} />
 }

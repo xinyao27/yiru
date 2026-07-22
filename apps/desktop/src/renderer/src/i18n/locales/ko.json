@@ -1812,9 +1812,6 @@
           },
           "TabBarMoreButton": {
             "more": "더 보기"
-          },
-          "TabBarWorkspacePanelMenuItems": {
-            "workspacePanels": "워크스페이스 패널"
           }
         }
       },
