@@ -38,13 +38,19 @@
       },
       "loader": {
         "title": "Cargador",
-        "description": "Elige la animación de carga que se usa en Yiru. Los iconos dibujados alternan entre una alcancía, una calculadora, una cartera y un gatito.",
+        "description": "Elige la animación de carga que se usa en Yiru. Los iconos dibujados alternan entre cuatro bocetos y Thinking Orbs añade seis animaciones punteadas de estados del agente.",
         "drawing": "Iconos dibujados",
         "code": "Llaves de código",
         "macos": "macOS",
         "square": "Cuadrado",
         "flipbook": "Libro animado",
-        "escalade": "Escalade"
+        "escalade": "Escalade",
+        "orbWorking": "Trabajando",
+        "orbSearching": "Buscando",
+        "orbSolving": "Resolviendo",
+        "orbListening": "Escuchando",
+        "orbComposing": "Redactando",
+        "orbShaping": "Dando forma"
       }
     }
   },

@@ -132,6 +132,7 @@ catalog:
   ssh2: ^1.17.0
   tailwindcss: ^4.3.3
   taze: ^19.14.1
+  thinking-orbs: 0.1.1
   tw-animate-css: ^1.4.0
   tweetnacl: ^1.0.3
   typescript-api: npm:typescript@6.0.3
@@ -260,3 +261,6 @@ supportedArchitectures:
     - darwin
     - linux
     - win32
+# Why: this explicitly requested package is exact-pinned while it is newer than the supply-chain age gate.
+minimumReleaseAgeExclude:
+  - thinking-orbs@0.1.1

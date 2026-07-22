@@ -84,6 +84,7 @@
     "serve-sim": "catalog:",
     "sherpa-onnx": "catalog:",
     "ssh2": "catalog:",
+    "thinking-orbs": "catalog:",
     "tweetnacl": "catalog:",
     "vscode-jsonrpc": "catalog:",
     "ws": "catalog:desktop",

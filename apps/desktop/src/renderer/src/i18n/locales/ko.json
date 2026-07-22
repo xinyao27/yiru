@@ -38,13 +38,19 @@
       },
       "loader": {
         "title": "로더",
-        "description": "Yiru 전체에서 사용할 로딩 애니메이션을 선택합니다. 손그림 아이콘은 저금통, 계산기, 지갑, 고양이 순으로 전환됩니다.",
+        "description": "Yiru 전체에서 사용할 로딩 애니메이션을 선택합니다. 손그림 아이콘은 네 가지 스케치를 순환하고 Thinking Orbs는 여섯 가지 점형 에이전트 상태 애니메이션을 추가합니다.",
         "drawing": "손그림 아이콘",
         "code": "코드 중괄호",
         "macos": "macOS",
         "square": "사각형",
         "flipbook": "플립북",
-        "escalade": "Escalade"
+        "escalade": "Escalade",
+        "orbWorking": "작업 중",
+        "orbSearching": "검색 중",
+        "orbSolving": "해결 중",
+        "orbListening": "듣는 중",
+        "orbComposing": "작성 중",
+        "orbShaping": "변형 중"
       }
     }
   },

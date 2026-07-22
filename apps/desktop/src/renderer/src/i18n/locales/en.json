@@ -61,13 +61,19 @@
       },
       "loader": {
         "title": "Loader",
-        "description": "Choose the animation used across Yiru. The drawn icons option cycles through a piggy bank, calculator, wallet, and kitten.",
+        "description": "Choose the animation used across Yiru. Drawn icons cycle through four sketches, and Thinking Orbs adds six dotted agent-state animations.",
         "drawing": "Drawn icons",
         "code": "Code braces",
         "macos": "macOS",
         "square": "Square",
         "flipbook": "Flipbook",
-        "escalade": "Escalade"
+        "escalade": "Escalade",
+        "orbWorking": "Working",
+        "orbSearching": "Searching",
+        "orbSolving": "Solving",
+        "orbListening": "Listening",
+        "orbComposing": "Composing",
+        "orbShaping": "Shaping"
       }
     }
   },

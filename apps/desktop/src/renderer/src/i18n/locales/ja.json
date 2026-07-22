@@ -38,13 +38,19 @@
       },
       "loader": {
         "title": "ローダー",
-        "description": "Yiru 全体で使用する読み込みアニメーションを選択します。手描きアイコンは貯金箱、電卓、財布、子猫の順に切り替わります。",
+        "description": "Yiru 全体で使用する読み込みアニメーションを選択します。手描きアイコンは4種類のスケッチを切り替え、Thinking Orbs は6種類のドット状エージェント状態アニメーションを追加します。",
         "drawing": "手描きアイコン",
         "code": "コードの波括弧",
         "macos": "macOS",
         "square": "スクエア",
         "flipbook": "フリップブック",
-        "escalade": "Escalade"
+        "escalade": "Escalade",
+        "orbWorking": "作業中",
+        "orbSearching": "検索中",
+        "orbSolving": "解決中",
+        "orbListening": "リスニング中",
+        "orbComposing": "作成中",
+        "orbShaping": "変形中"
       }
     }
   },

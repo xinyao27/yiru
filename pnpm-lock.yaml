@@ -300,6 +300,9 @@ catalogs:
     taze:
       specifier: ^19.14.1
       version: 19.14.1
+    thinking-orbs:
+      specifier: 0.1.1
+      version: 0.1.1
     tw-animate-css:
       specifier: ^1.4.0
       version: 1.4.0
@@ -606,6 +609,9 @@ importers:
       ssh2:
         specifier: 'catalog:'
         version: 1.17.0
+      thinking-orbs:
+        specifier: 'catalog:'
+        version: 0.1.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tweetnacl:
         specifier: 'catalog:'
         version: 1.0.3
@@ -10393,6 +10399,12 @@ packages:
   test-exclude@6.0.0:
     resolution: {integrity: sha512-cAGWPIyOHU6zlmg88jwm7VRyXnMN7iV68OGAbYDk/Mh/xC/pzVPlQtY6ngoIH/5/tciuhGfvESU8GrHrcxD56w==}
     engines: {node: '>=8'}
+
+  thinking-orbs@0.1.1:
+    resolution: {integrity: sha512-nLvLTGJtk74K13MmP7XiRdzFiQx7UsoZAIyBZNgXyl7Q3h2mdz0r3eKn9LCsuzb3DGOVjwDvMhtnAkIqJJRVQA==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
 
   throat@5.0.0:
     resolution: {integrity: sha512-fcwX4mndzpLQKBS1DVYhGAcYaYt7vsHNIvQV+WXMvnow5cgjPphq5CaayLaGsjRdSCKZFNGt7/GYAuXaNOiYCA==}
@@ -23071,6 +23083,11 @@ snapshots:
       '@istanbuljs/schema': 0.1.6
       glob: 7.2.3
       minimatch: 3.1.5
+
+  thinking-orbs@0.1.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+    dependencies:
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
 
   throat@5.0.0: {}
 
