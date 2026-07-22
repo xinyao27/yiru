@@ -8,6 +8,9 @@ import { translate } from '@/i18n/i18n'
 import { AgentIcon } from '@/lib/agent-catalog'
 
 import type { SpoolSessionCatalogEntry } from '../../../../shared/spool/spool-catalog-contract'
+import type { WorkspacePanelTabContentType } from '../../../../shared/types'
+import type { ActivityBarItem } from '../right-sidebar/activity-bar-buttons'
+import { getSpoolWorkspacePanelTabId, SpoolWorkspacePanelTab } from './spool-workspace-panel-tab'
 
 const MAX_VISIBLE_SPOOL_SESSION_TABS = 24
 const MAX_RECENT_SPOOL_SESSION_TABS = 8
@@ -17,13 +20,21 @@ type SpoolSessionTabStripProps = {
   activeSessionRef: string | null
   onSelect: (sessionRef: string) => void
   createMenu: React.ReactNode
+  panelItems: readonly ActivityBarItem[]
+  activePanel: WorkspacePanelTabContentType | null
+  onSelectPanel: (panel: WorkspacePanelTabContentType) => void
+  onClosePanel: (panel: WorkspacePanelTabContentType) => void
 }
 
 export function SpoolSessionTabStrip({
   sessions,
   activeSessionRef,
   onSelect,
-  createMenu
+  createMenu,
+  panelItems,
+  activePanel,
+  onSelectPanel,
+  onClosePanel
 }: SpoolSessionTabStripProps): React.JSX.Element {
   const navigationScopeId = useId()
   const [recentSessionRefs, setRecentSessionRefs] = useState<readonly string[]>([])
@@ -45,9 +56,10 @@ export function SpoolSessionTabStrip({
     () => projectVisibleSpoolSessionTabs(sessions, activeSessionRef, recentSessionRefs),
     [activeSessionRef, recentSessionRefs, sessions]
   )
-  const activeTabIsVisible = visibleSessions.some(
-    (session) => session.sessionRef === activeSessionRef
-  )
+  const activeTabId = activePanel ? getSpoolWorkspacePanelTabId(activePanel) : activeSessionRef
+  const activeTabIsVisible = activePanel
+    ? panelItems.some((item) => item.id === activePanel)
+    : visibleSessions.some((session) => session.sessionRef === activeSessionRef)
   const layoutKey = useMemo(
     () =>
       visibleSessions
@@ -55,16 +67,17 @@ export function SpoolSessionTabStrip({
           (session) =>
             `${session.sessionRef}:${session.kind}:${session.agent ?? ''}:${session.title}`
         )
+        .concat(panelItems.map((item) => `panel:${item.id}:${item.title}`))
         .join('\u001f'),
-    [visibleSessions]
+    [panelItems, visibleSessions]
   )
 
   return (
     <div className="flex h-full min-w-0 flex-1 items-stretch overflow-hidden">
       <WorkspaceTabStripViewport
-        activeTabId={activeSessionRef}
+        activeTabId={activeTabId}
         layoutKey={layoutKey}
-        tabCount={visibleSessions.length}
+        tabCount={visibleSessions.length + panelItems.length}
         navigationScopeId={navigationScopeId}
         stripProps={{
           role: 'tablist',
@@ -80,10 +93,11 @@ export function SpoolSessionTabStrip({
             key={session.sessionRef}
             id={session.sessionRef}
             title={session.title}
-            active={session.sessionRef === activeSessionRef}
+            active={activePanel === null && session.sessionRef === activeSessionRef}
             hasTabsToRight={index < visibleSessions.length - 1}
             tabIndex={
-              session.sessionRef === activeSessionRef || (!activeTabIsVisible && index === 0)
+              (activePanel === null && session.sessionRef === activeSessionRef) ||
+              (!activeTabIsVisible && index === 0)
                 ? 0
                 : -1
             }
@@ -95,6 +109,21 @@ export function SpoolSessionTabStrip({
               )
             }
             onSelect={onSelect}
+          />
+        ))}
+        {panelItems.map((item, index) => (
+          <SpoolWorkspacePanelTab
+            key={item.id}
+            item={item}
+            active={item.id === activePanel}
+            tabIndex={
+              item.id === activePanel ||
+              (!activeTabIsVisible && visibleSessions.length === 0 && index === 0)
+                ? 0
+                : -1
+            }
+            onSelect={() => onSelectPanel(item.id)}
+            onClose={() => onClosePanel(item.id)}
           />
         ))}
       </WorkspaceTabStripViewport>

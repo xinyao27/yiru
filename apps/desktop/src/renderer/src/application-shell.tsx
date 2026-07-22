@@ -339,7 +339,6 @@ const WorkspaceCleanupDialog = lazy(
 )
 const Terminal = lazy(() => import('./components/terminal-workspace'))
 const SpoolWorkspaceSurface = lazy(() => import('./components/spool/spool-workspace-surface'))
-const SpoolRightSidebar = lazy(() => import('./components/spool/spool-right-sidebar'))
 const StatusBar = lazy(() =>
   import('./components/status-bar/status-bar').then((module) => ({ default: module.StatusBar }))
 )
@@ -882,7 +881,7 @@ function App(): React.JSX.Element {
   // already-fitted cols/rows.
   useLayoutEffect(() => {
     window.dispatchEvent(new CustomEvent(SYNC_FIT_PANES_EVENT))
-  }, [rightSidebarOpen, sidebarOpen])
+  }, [sidebarOpen])
 
   // Fetch initial data + hydrate GitHub cache from disk
   useEffect(() => {
@@ -1868,7 +1867,7 @@ function App(): React.JSX.Element {
         if (matchShortcut('sidebar.right.toggle')) {
           input.preventDefault()
           notifyTerminalCapture('sidebar.right.toggle')
-          state.toggleRightSidebar()
+          state.showRightSidebarFiles()
         } else if (matchShortcut('sidebar.explorer.toggle')) {
           input.preventDefault()
           notifyTerminalCapture('sidebar.explorer.toggle')
@@ -1878,6 +1877,9 @@ function App(): React.JSX.Element {
           notifyTerminalCapture('sidebar.search.toggle')
           state.showRightSidebarSearch()
         } else if (matchShortcut('sidebar.sourceControl.toggle')) {
+          if (document.querySelector('[data-terminal-search-root]')) {
+            return
+          }
           input.preventDefault()
           notifyTerminalCapture('sidebar.sourceControl.toggle')
           state.setRightSidebarTab('source-control')
@@ -2491,30 +2493,6 @@ function App(): React.JSX.Element {
                     </div>
                   </div>
                 </div>
-                {/* Why: shared Spool workspaces still use their route-scoped
-                remote panel model; removing it would strand remote Explorer
-                and review data until that separate tab model is migrated. */}
-                {hasActiveSpoolWorkspace && activeSpoolWorkspaceRoute ? (
-                  <RecoverableRenderErrorBoundary
-                    boundaryId="spool-right-sidebar"
-                    surface="right-sidebar"
-                    resetKey={JSON.stringify([
-                      activeSpoolWorkspaceRoute.desktopRef,
-                      activeSpoolWorkspaceRoute.worktreeRef,
-                      activeSpoolWorkspaceRoute.connectionEpoch,
-                      rightSidebarTab
-                    ])}
-                    title={translate('auto.App.ed6b168d00', 'The right sidebar hit an error.')}
-                    description={translate(
-                      'auto.App.8d1e160ed1',
-                      'Retry the sidebar or switch tabs to reload this surface.'
-                    )}
-                  >
-                    <Suspense fallback={null}>
-                      <SpoolRightSidebar route={activeSpoolWorkspaceRoute} />
-                    </Suspense>
-                  </RecoverableRenderErrorBoundary>
-                ) : null}
               </div>
             </RecoverableRenderErrorBoundary>
             {shouldMountFloatingTerminalPanel ? (

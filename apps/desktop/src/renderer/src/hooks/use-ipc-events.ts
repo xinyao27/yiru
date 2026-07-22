@@ -1262,10 +1262,8 @@ export function useIpcEvents(): void {
         if (store.activeView !== 'terminal') {
           return
         }
-        // Why: shared workspaces retain a separate remote panel model until
-        // their session strip can represent these destinations as real tabs.
         if (store.activeSpoolWorkspaceRoute) {
-          store.toggleRightSidebar()
+          store.showRightSidebarFiles()
           return
         }
         if (!store.activeWorktreeId) {

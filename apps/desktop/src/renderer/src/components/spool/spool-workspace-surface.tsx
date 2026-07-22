@@ -1,7 +1,6 @@
 import {
   LockKey as LockKeyhole,
   ShieldCheck,
-  Sidebar as PanelRight,
   TerminalWindow as SquareTerminal,
   Warning as TriangleAlert
 } from '@phosphor-icons/react'
@@ -18,8 +17,6 @@ import {
 import { WorkspacePaneFrame } from '@/components/tab-group/workspace-pane-frame'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useShortcutLabel } from '@/hooks/use-shortcut-label'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
 import {
@@ -38,9 +35,11 @@ import { SpoolSessionCreateMenu } from './spool-session-create-menu'
 import { SpoolSessionPane } from './spool-session-pane'
 import { getSpoolSessionRouteKey } from './spool-session-route'
 import { SpoolSessionTabStrip } from './spool-session-tab-strip'
+import { SpoolWorkspacePanelPane } from './spool-workspace-panel-pane'
 import { getSpoolWorktreeRouteKey } from './spool-worktree-route'
 import { useSpoolCreatedSessionTabs } from './use-spool-created-session-tabs'
 import { useSpoolDefaultSessionRoute } from './use-spool-default-session-route'
+import { useSpoolWorkspacePanelTabs } from './use-spool-workspace-panel-tabs'
 
 const EMPTY_SPOOL_SESSION_TABS: readonly SpoolSessionCatalogEntry[] = []
 
@@ -63,14 +62,22 @@ function SpoolWorkspaceSurfaceContent({
   const controlState = useAppStore((state) => selectSpoolRequesterControlState(state, route))
   const markControlPending = useAppStore((state) => state.markSpoolControlPending)
   const setActiveRoute = useAppStore((state) => state.setActiveSpoolWorkspaceRoute)
-  const rightSidebarOpen = useAppStore((state) => state.rightSidebarOpen)
-  const toggleRightSidebar = useAppStore((state) => state.toggleRightSidebar)
-  const rightSidebarShortcut = useShortcutLabel('sidebar.right.toggle')
   const [requesting, setRequesting] = useState(false)
   const [pendingFocusSessionRef, setPendingFocusSessionRef] = useState<string | null>(null)
   const catalogSessions = workspace?.worktree.sessions ?? EMPTY_SPOOL_SESSION_TABS
   const sessionCatalogStatus = workspace?.worktree.sessionCatalog.status ?? null
   const catalogRevision = workspace?.desktop.catalog?.catalogRevision ?? null
+  const connected = workspace?.desktop.connectionStatus === 'connected'
+  const supportsGit = workspace?.worktree.kind === 'git'
+  const {
+    activePanel,
+    checksState,
+    closePanel,
+    items: panelItems,
+    openItems: openPanelItems,
+    openPanel,
+    selectSession: selectSessionPanel
+  } = useSpoolWorkspacePanelTabs({ route, connected, supportsGit })
   const { sessions, retainMissingSession, recordCreatedSession } = useSpoolCreatedSessionTabs({
     catalogSessions,
     catalogStatus: sessionCatalogStatus,
@@ -116,19 +123,21 @@ function SpoolWorkspaceSurfaceContent({
 
   const selectSession = useCallback(
     (sessionRef: string): void => {
+      selectSessionPanel()
       setPendingFocusSessionRef(null)
       setActiveRoute({ ...route, sessionRef })
     },
-    [route, setActiveRoute]
+    [route, selectSessionPanel, setActiveRoute]
   )
 
   const handleSessionCreated = useCallback(
     (session: SpoolSessionCatalogEntry): void => {
       recordCreatedSession(session)
+      selectSessionPanel()
       setPendingFocusSessionRef(session.sessionRef)
       setActiveRoute({ ...route, sessionRef: session.sessionRef })
     },
-    [recordCreatedSession, route, setActiveRoute]
+    [recordCreatedSession, route, selectSessionPanel, setActiveRoute]
   )
 
   const handleCreatedSessionFocused = useCallback((sessionRef: string): void => {
@@ -139,7 +148,6 @@ function SpoolWorkspaceSurfaceContent({
     return null
   }
 
-  const connected = workspace.desktop.connectionStatus === 'connected'
   const accessLabel = !connected
     ? translate('auto.components.spool.SpoolWorkspaceSurface.disconnected', 'Disconnected')
     : canControl
@@ -149,34 +157,6 @@ function SpoolWorkspaceSurfaceContent({
 
   const accessControls = (
     <>
-      {!rightSidebarOpen ? (
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={toggleRightSidebar}
-                aria-label={translate(
-                  'auto.components.right.sidebar.index.e8e2e4ce74',
-                  'Toggle right sidebar'
-                )}
-              >
-                {/* Why: Phosphor's sidebar glyph is left-oriented by default. */}
-                <PanelRight className="-scale-x-100" />
-              </Button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={6}>
-            {translate(
-              'auto.components.right.sidebar.index.9fffaf17c1',
-              'Toggle right sidebar ({{value0}})',
-              { value0: rightSidebarShortcut }
-            )}
-          </TooltipContent>
-        </Tooltip>
-      ) : null}
       <SpoolSessionCatalogStatus status={workspace.worktree.sessionCatalog.status} />
       <Badge variant="outline" className="h-5 gap-1 px-1.5 text-[11px]">
         {canControl ? <ShieldCheck aria-hidden="true" /> : <LockKeyhole aria-hidden="true" />}
@@ -225,10 +205,15 @@ function SpoolWorkspaceSurfaceContent({
                   route={route}
                   connected={connected}
                   canControl={canControl}
-                  controlState={controlState}
                   onCreated={handleSessionCreated}
+                  panelItems={panelItems}
+                  onOpenPanel={openPanel}
                 />
               }
+              panelItems={openPanelItems}
+              activePanel={activePanel}
+              onSelectPanel={openPanel}
+              onClosePanel={closePanel}
             />
           }
           trailingActions={accessControls}
@@ -236,7 +221,16 @@ function SpoolWorkspaceSurfaceContent({
           reserveWindowControlsSpace
           bodyClassName="flex bg-[var(--editor-surface)]"
         >
-          {sessionRoute ? (
+          {activePanel ? (
+            <SpoolWorkspacePanelPane
+              panel={activePanel}
+              route={route}
+              supportsGit={supportsGit}
+              sessions={sessions}
+              catalogStatus={workspace.worktree.sessionCatalog.status}
+              checksState={checksState}
+            />
+          ) : sessionRoute ? (
             <SpoolSessionPane
               key={getSpoolSessionRouteKey(sessionRoute)}
               route={sessionRoute}
