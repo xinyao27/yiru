@@ -1,14 +1,6 @@
-import { StyleSheet } from 'react-native'
+import { cn } from '@/style/class-names'
 
-import { colors } from '../theme/mobile-theme'
-
-export const TERMINAL_WEBVIEW_FRAME_STYLES = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.terminalBg
-  },
-  webview: {
-    flex: 1,
-    backgroundColor: colors.terminalBg
-  }
-})
+export const TERMINAL_WEBVIEW_FRAME_STYLES = {
+  container: cn('flex-1 bg-[var(--terminal-background)]'),
+  webview: cn('flex-1 bg-[var(--terminal-background)]')
+} as const

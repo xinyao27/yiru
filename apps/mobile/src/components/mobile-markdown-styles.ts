@@ -1,151 +1,33 @@
-import { StyleSheet } from 'react-native'
+import { cn } from '@/style/class-names'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
-
-export const styles = StyleSheet.create({
-  root: {
-    gap: spacing.sm
-  },
-  paragraph: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: colors.textPrimary
-  },
-  heading: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '700',
-    color: colors.textPrimary
-  },
-  headingLarge: {
-    fontSize: 15,
-    lineHeight: 21
-  },
-  bold: {
-    fontWeight: '700',
-    color: colors.textPrimary
-  },
-  italic: {
-    fontStyle: 'italic'
-  },
-  strike: {
-    textDecorationLine: 'line-through'
-  },
-  link: {
-    color: colors.accentBlue,
-    textDecorationLine: 'underline'
-  },
-  inlineCode: {
-    fontFamily: typography.monoFamily,
-    fontSize: 12,
-    color: colors.textPrimary,
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.row,
-    paddingHorizontal: 4
-  },
-  inlineCodeLink: {
-    color: colors.accentBlue,
-    textDecorationLine: 'underline'
-  },
-  quote: {
-    borderLeftWidth: 2,
-    borderLeftColor: colors.borderSubtle,
-    paddingLeft: spacing.sm
-  },
-  quoteText: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: colors.textSecondary
-  },
-  codeBlock: {
-    backgroundColor: colors.bgRaised,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.input,
-    padding: spacing.sm
-  },
-  codeLanguage: {
-    fontSize: 10,
-    color: colors.textMuted,
-    marginBottom: spacing.xs,
-    textTransform: 'uppercase'
-  },
-  codeText: {
-    fontFamily: typography.monoFamily,
-    fontSize: 12,
-    lineHeight: 17,
-    color: colors.textPrimary
-  },
-  imageFrame: {
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.input,
-    backgroundColor: colors.bgRaised,
-    overflow: 'hidden',
-    padding: spacing.sm
-  },
-  imageCaption: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    fontSize: 11,
-    color: colors.textSecondary
-  },
-  table: {
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.input,
-    overflow: 'hidden',
-    backgroundColor: colors.bgPanel
-  },
-  tableRow: {
-    flexDirection: 'row'
-  },
-  tableCell: {
-    minWidth: 112,
-    maxWidth: 220,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: colors.borderSubtle,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    fontSize: 12,
-    lineHeight: 17,
-    color: colors.textPrimary
-  },
-  tableHeader: {
-    fontWeight: '700',
-    backgroundColor: colors.bgRaised
-  },
-  tableTruncated: {
-    padding: spacing.sm,
-    fontSize: 12,
-    color: colors.textMuted
-  },
-  list: {
-    gap: spacing.xs
-  },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm
-  },
-  listMarker: {
-    width: 22,
-    fontSize: 13,
-    lineHeight: 19,
-    color: colors.textSecondary,
-    fontFamily: typography.monoFamily
-  },
-  listText: {
-    flex: 1,
-    minWidth: 0,
-    fontSize: 13,
-    lineHeight: 19,
-    color: colors.textPrimary
-  },
-  rule: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle
-  }
-})
+export const styles = {
+  root: cn('gap-2'),
+  paragraph: cn('text-[13px] leading-[19px] text-foreground'),
+  heading: cn('text-[14px] leading-[20px] font-bold text-foreground'),
+  headingLarge: cn('text-[15px] leading-[21px]'),
+  bold: cn('font-bold text-foreground'),
+  italic: cn('italic'),
+  strike: cn('line-through'),
+  link: cn('text-primary underline'),
+  inlineCode: cn('font-mono text-[12px] text-foreground bg-secondary rounded-none px-1'),
+  inlineCodeLink: cn('text-primary underline'),
+  quote: cn('border-l-2 border-l-border pl-2'),
+  quoteText: cn('text-[13px] leading-[19px] text-muted-foreground'),
+  codeBlock: cn('bg-secondary border border-border rounded-none p-2'),
+  codeLanguage: cn('text-[10px] text-muted-foreground/60 mb-1 uppercase'),
+  codeText: cn('font-mono text-[12px] leading-[17px] text-foreground'),
+  imageFrame: cn('border border-border rounded-none bg-secondary overflow-hidden p-2'),
+  imageCaption: cn('px-2 py-1 text-[11px] text-muted-foreground'),
+  table: cn('border-t border-l border-border rounded-none overflow-hidden bg-card'),
+  tableRow: cn('flex-row'),
+  tableCell: cn(
+    'min-w-28 max-w-[220px] border-r border-b border-border px-2 py-1 text-[12px] leading-[17px] text-foreground'
+  ),
+  tableHeader: cn('font-bold bg-secondary'),
+  tableTruncated: cn('p-2 text-[12px] text-muted-foreground/60'),
+  list: cn('gap-1'),
+  listItem: cn('flex-row items-start gap-2'),
+  listMarker: cn('w-[22px] text-[13px] leading-[19px] text-muted-foreground font-mono'),
+  listText: cn('flex-1 min-w-0 text-[13px] leading-[19px] text-foreground'),
+  rule: cn('h-hairline bg-border')
+} as const

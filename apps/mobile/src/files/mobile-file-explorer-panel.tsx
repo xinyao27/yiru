@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router'
-import { ChevronLeft, X } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
@@ -9,10 +8,12 @@ import {
   View,
   type ListRenderItem
 } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+
+import { CaretLeft as ChevronLeft, X } from '@/components/uniwind-icons'
+import { SafeAreaView } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import { getWorktreeLabel } from '../session/worktree-label'
-import { colors } from '../theme/mobile-theme'
 import { useHostClient, useForceReconnect } from '../transport/client-context'
 import type { RpcSuccess } from '../transport/types'
 import {
@@ -288,31 +289,31 @@ export function MobileFileExplorerPanel(props: {
   }
 
   const headerBar = (
-    <View style={styles.topBar}>
+    <View className={styles.topBar}>
       {embedded ? (
         <Pressable
-          style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
+          className={cn(styles.backButton, styles.backButtonPressedActive)}
           onPress={() => onRequestClose?.()}
           hitSlop={8}
           accessibilityLabel="Close files"
         >
-          <X size={20} color={colors.textSecondary} strokeWidth={2.2} />
+          <X size={20} colorClassName="accent-muted-foreground" />
         </Pressable>
       ) : (
         <Pressable
-          style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
+          className={cn(styles.backButton, styles.backButtonPressedActive)}
           onPress={() => router.back()}
           hitSlop={8}
           accessibilityLabel="Back to session"
         >
-          <ChevronLeft size={22} color={colors.textSecondary} strokeWidth={2.2} />
+          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
       )}
-      <View style={styles.titleBlock}>
-        <Text style={styles.title} numberOfLines={1}>
+      <View className={styles.titleBlock}>
+        <Text className={styles.title} numberOfLines={1}>
           Files
         </Text>
-        <Text style={styles.meta} numberOfLines={1}>
+        <Text className={styles.meta} numberOfLines={1}>
           {worktreeLabel}
           {legacyListTruncated ? ' - Showing first 5000' : ''}
         </Text>
@@ -321,46 +322,46 @@ export function MobileFileExplorerPanel(props: {
   )
 
   const body = loading ? (
-    <View style={styles.state}>
-      <ActivityIndicator size="small" color={colors.textSecondary} />
+    <View className={styles.state}>
+      <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
     </View>
   ) : error ? (
-    <View style={styles.state}>
-      <Text style={styles.errorText}>{error}</Text>
+    <View className={styles.state}>
+      <Text className={styles.errorText}>{error}</Text>
       {/* Why: while disconnected, re-sending the request is useless — revive
           the parked transport instead (issue #5049); loadDirectory re-runs via
           its effect once the new client connects. */}
       <Pressable
-        style={styles.retryButton}
+        className={styles.retryButton}
         onPress={() =>
           connState !== 'connected' && hostId ? void forceReconnect(hostId) : void loadDirectory('')
         }
       >
-        <Text style={styles.retryText}>Retry</Text>
+        <Text className={styles.retryText}>Retry</Text>
       </Pressable>
     </View>
   ) : rows.length === 0 ? (
-    <View style={styles.state}>
-      <Text style={styles.emptyText}>No files found</Text>
+    <View className={styles.state}>
+      <Text className={styles.emptyText}>No files found</Text>
     </View>
   ) : (
     <FlatList
       data={rows}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
-      contentContainerStyle={styles.listContent}
-      style={styles.list}
+      contentContainerClassName={styles.listContent}
+      className={styles.list}
     />
   )
 
   // Embedded: the dock column owns safe-area/layout, so render a plain View and
   // a non-inset header. Full-screen: keep the SafeAreaView top inset + chrome.
   return (
-    <View style={styles.container}>
+    <View className={styles.container}>
       {embedded ? (
-        <View style={styles.header}>{headerBar}</View>
+        <View className={styles.header}>{headerBar}</View>
       ) : (
-        <SafeAreaView style={styles.header} edges={['top']}>
+        <SafeAreaView className={styles.header} edges={['top']}>
           {headerBar}
         </SafeAreaView>
       )}

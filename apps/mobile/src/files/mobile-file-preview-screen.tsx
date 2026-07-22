@@ -1,11 +1,13 @@
 import { useRouter } from 'expo-router'
-import { ChevronLeft, Save } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, BackHandler, Pressable, Text, View, useWindowDimensions } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+
+import { CaretLeft as ChevronLeft, FloppyDisk as Save } from '@/components/uniwind-icons'
+import { SafeAreaView } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import { getWorktreeLabel } from '../session/worktree-label'
-import { colors, spacing } from '../theme/mobile-theme'
+import { spacing } from '../theme/uniwind-theme-values'
 import { useForceReconnect, useHostClient } from '../transport/client-context'
 import { MobileFilePreviewBody } from './mobile-file-preview-body'
 import {
@@ -237,33 +239,36 @@ export function MobileFilePreviewScreen({ route }: Props) {
   }, [requestBack])
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView style={styles.header} edges={['top']}>
-        <View style={styles.topBar}>
+    <View className={styles.container}>
+      <SafeAreaView className={styles.header} edges={['top']}>
+        <View className={styles.topBar}>
           <Pressable
-            style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
+            className={cn(styles.backButton, styles.backButtonPressedActive)}
             onPress={requestBack}
             hitSlop={8}
             accessibilityLabel="Back to files"
           >
-            <ChevronLeft size={22} color={colors.textSecondary} strokeWidth={2.2} />
+            <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
           </Pressable>
-          <View style={styles.titleBlock}>
-            <Text style={styles.title} numberOfLines={1}>
+          <View className={styles.titleBlock}>
+            <Text className={styles.title} numberOfLines={1}>
               {title || 'Preview'}
             </Text>
-            <Text style={styles.meta} numberOfLines={1}>
+            <Text className={styles.meta} numberOfLines={1}>
               {meta}
             </Text>
           </View>
           {isEditableTerminalArtifact ? (
             <Pressable
-              style={[styles.saveButton, (!canSaveArtifact || saving) && styles.saveButtonDisabled]}
+              className={cn(
+                styles.saveButton,
+                (!canSaveArtifact || saving) && styles.saveButtonDisabled
+              )}
               onPress={() => void saveArtifact()}
               disabled={!canSaveArtifact || saving}
               accessibilityLabel="Save terminal artifact"
             >
-              <Save size={18} color={colors.textPrimary} strokeWidth={2.2} />
+              <Save size={18} colorClassName="accent-foreground" />
             </Pressable>
           ) : null}
         </View>

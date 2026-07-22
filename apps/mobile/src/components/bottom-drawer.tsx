@@ -2,7 +2,6 @@ import { type ReactNode, useCallback, useEffect, useState } from 'react'
 import {
   View,
   Pressable,
-  StyleSheet,
   Platform,
   useWindowDimensions,
   ScrollView,
@@ -10,7 +9,6 @@ import {
   BackHandler,
   Modal
 } from 'react-native'
-import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -21,10 +19,17 @@ import Animated, {
   interpolate,
   Extrapolation
 } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView
+} from '@/components/uniwind-native-components'
+import { useSafeAreaInsets } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import { useResponsiveLayout } from '../layout/responsive-layout'
-import { colors, spacing } from '../theme/mobile-theme'
+import { spacing } from '../theme/uniwind-theme-values'
 import { useInsideBottomDrawerModalHost } from './bottom-drawer-modal-host'
 import { resolveBottomDrawerMounted } from './bottom-drawer-mount-state'
 
@@ -282,19 +287,23 @@ function MountedBottomDrawer({
   const overlay = (
     <Animated.View
       pointerEvents={visible ? 'auto' : 'none'}
-      style={[styles.overlay, { zIndex, elevation: zIndex }]}
+      className={styles.overlay}
+      style={[{ zIndex }]}
       accessibilityViewIsModal
       aria-modal
     >
-      <GestureHandlerRootView style={styles.root}>
-        <Animated.View style={[styles.backdrop, backdropStyle]}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={dismiss} />
+      <GestureHandlerRootView className={styles.root}>
+        <Animated.View className={styles.backdrop} style={[backdropStyle]}>
+          <Pressable className="absolute inset-0" onPress={dismiss} />
         </Animated.View>
 
-        <View style={[styles.anchor, isWideLayout && styles.anchorWide]} pointerEvents="box-none">
+        <View
+          className={cn(styles.anchor, isWideLayout && styles.anchorWide)}
+          pointerEvents="box-none"
+        >
           <Animated.View
+            className={styles.drawer}
             style={[
-              styles.drawer,
               {
                 width: '100%',
                 maxWidth: isWideLayout ? modalMaxWidth : undefined,
@@ -308,24 +317,24 @@ function MountedBottomDrawer({
               <>
                 <GestureDetector gesture={handlePanGesture}>
                   <Animated.View
-                    style={styles.handleHitArea}
+                    className={styles.handleHitArea}
                     accessibilityRole="button"
                     accessibilityLabel="Dismiss drawer"
                   >
-                    <View style={styles.handle} />
+                    <View className={styles.handle} />
                   </Animated.View>
                 </GestureDetector>
-                <View style={styles.staticContent}>{children}</View>
+                <View className={styles.staticContent}>{children}</View>
               </>
             ) : dragContentToDismiss ? (
               <>
                 <GestureDetector gesture={handlePanGesture}>
                   <Animated.View
-                    style={styles.handleHitArea}
+                    className={styles.handleHitArea}
                     accessibilityRole="button"
                     accessibilityLabel="Dismiss drawer"
                   >
-                    <View style={styles.handle} />
+                    <View className={styles.handle} />
                   </Animated.View>
                 </GestureDetector>
                 <GestureDetector gesture={contentPanGesture}>
@@ -348,11 +357,11 @@ function MountedBottomDrawer({
               <>
                 <GestureDetector gesture={handlePanGesture}>
                   <Animated.View
-                    style={styles.handleHitArea}
+                    className={styles.handleHitArea}
                     accessibilityRole="button"
                     accessibilityLabel="Dismiss drawer"
                   >
-                    <View style={styles.handle} />
+                    <View className={styles.handle} />
                   </Animated.View>
                 </GestureDetector>
                 <ScrollView
@@ -364,7 +373,7 @@ function MountedBottomDrawer({
                 </ScrollView>
               </>
             )}
-            <View style={styles.bottomExtension} />
+            <View className={styles.bottomExtension} />
           </Animated.View>
         </View>
       </GestureHandlerRootView>
@@ -385,62 +394,15 @@ function MountedBottomDrawer({
   )
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1000
-  },
-  root: {
-    flex: 1
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)'
-  },
-  anchor: {
-    flex: 1,
-    justifyContent: 'flex-end'
-  },
-  anchorWide: {
-    alignItems: 'center'
-  },
-  drawer: {
-    backgroundColor: colors.bgBase,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingHorizontal: spacing.md,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 10
-      },
-      android: { elevation: 8 }
-    })
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.textMuted,
-    opacity: 0.4
-  },
-  handleHitArea: {
-    alignItems: 'center',
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.md
-  },
-  staticContent: {
-    minHeight: 0
-  },
-  bottomExtension: {
-    position: 'absolute',
-    bottom: -500,
-    left: 0,
-    right: 0,
-    height: 500,
-    backgroundColor: colors.bgBase
-  }
-})
+const styles = {
+  overlay: cn('absolute inset-0 z-[1000]'),
+  root: cn('flex-1'),
+  backdrop: cn('absolute inset-0 bg-black/50'),
+  anchor: cn('flex-1 justify-end'),
+  anchorWide: cn('items-center'),
+  drawer: cn('bg-background rounded-none px-3'),
+  handle: cn('self-center w-9 h-1 rounded-none bg-muted-foreground/60 opacity-[0.4]'),
+  handleHitArea: cn('items-center pt-2 pb-3'),
+  staticContent: cn('min-h-0'),
+  bottomExtension: cn('absolute bottom-[-500px] left-0 right-0 h-[500px] bg-background')
+} as const

@@ -1,14 +1,20 @@
 import { useRouter } from 'expo-router'
-import { ChevronLeft, ChevronRight, Smartphone, Type } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { View, Text, StyleSheet, Pressable, Switch } from 'react-native'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { View, Text, Pressable, Switch } from 'react-native'
 import Animated, {
   useAnimatedRef,
   useAnimatedScrollHandler,
   useSharedValue
 } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import {
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  DeviceMobile as Smartphone,
+  TextT as Type
+} from '@/components/uniwind-icons'
+import { GestureHandlerRootView } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import { TerminalShortcutSettings } from '../src/components/terminal-shortcut-settings'
@@ -19,7 +25,6 @@ import {
   saveTerminalTextScale
 } from '../src/storage/preferences'
 import { setTerminalAutoRestoreFitMsForHost } from '../src/terminal/terminal-auto-restore-fit-state'
-import { colors, radii, spacing, typography } from '../src/theme/mobile-theme'
 import { useAllHostClients } from '../src/transport/client-context'
 import { loadHosts } from '../src/transport/host-store'
 import type { RpcClient } from '../src/transport/rpc-client'
@@ -106,23 +111,23 @@ function HostFitRow({
 }): React.JSX.Element {
   return (
     <Pressable
-      style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+      className={cn(styles.row, styles.rowPressedActive)}
       onPress={onPress}
       disabled={!client}
     >
-      <Smartphone size={16} color={colors.textSecondary} />
-      <View style={styles.rowContent}>
-        <Text style={styles.rowLabel}>{hostName}</Text>
-        <Text style={styles.rowSublabel}>{autoRestoreSummary(ms)}</Text>
+      <Smartphone size={16} colorClassName="accent-muted-foreground" />
+      <View className={styles.rowContent}>
+        <Text className={styles.rowLabel}>{hostName}</Text>
+        <Text className={styles.rowSublabel}>{autoRestoreSummary(ms)}</Text>
       </View>
-      <ChevronRight size={16} color={colors.textMuted} />
+      <ChevronRight size={16} colorClassName="accent-muted-foreground" />
     </Pressable>
   )
 }
 
 export default function TerminalSettingsScreen() {
   const router = useRouter()
-  const insets = useSafeAreaInsets()
+
   const [hosts, setHosts] = useState<HostProfile[]>([])
   useEffect(() => {
     void loadHosts().then(setHosts)
@@ -255,17 +260,17 @@ export default function TerminalSettingsScreen() {
   )
 
   return (
-    <GestureHandlerRootView style={[styles.container, { paddingTop: insets.top + spacing.sm }]}>
-      <View style={styles.topRow}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} color={colors.textSecondary} />
+    <GestureHandlerRootView className={cn(styles.container, 'pt-safe-offset-2')}>
+      <View className={styles.topRow}>
+        <Pressable className={styles.backButton} onPress={() => router.back()}>
+          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text style={styles.heading}>Terminal</Text>
+        <Text className={styles.heading}>Terminal</Text>
       </View>
 
       <Animated.ScrollView
         ref={scrollRef}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerClassName={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
@@ -273,8 +278,8 @@ export default function TerminalSettingsScreen() {
           scrollContentHeight.value = height
         }}
       >
-        <Text style={styles.groupHeading}>WHEN YOU LEAVE THE APP</Text>
-        <Text style={styles.groupDescription}>
+        <Text className={styles.groupHeading}>WHEN YOU LEAVE THE APP</Text>
+        <Text className={styles.groupDescription}>
           While you&apos;re using a terminal on your phone, Yiru shrinks it to fit your screen. When
           you close the app or switch away, this controls whether it stays at phone size (so
           interactive CLI tools don&apos;t reflow) or resizes back to your desktop. You can always
@@ -282,18 +287,18 @@ export default function TerminalSettingsScreen() {
         </Text>
 
         {hosts.length === 0 ? (
-          <View style={[styles.section, styles.sectionTopGap]}>
-            <Text style={styles.emptyText}>
+          <View className={cn(styles.section, styles.sectionTopGap)}>
+            <Text className={styles.emptyText}>
               No paired desktops yet. Pair one to control terminal behavior.
             </Text>
           </View>
         ) : (
-          <View style={[styles.section, styles.sectionTopGap]}>
+          <View className={cn(styles.section, styles.sectionTopGap)}>
             {hosts.map((host, idx) => {
               const client = hostClientsById.get(host.id) ?? null
               return (
                 <View key={host.id}>
-                  {idx > 0 && <View style={styles.separator} />}
+                  {idx > 0 && <View className={styles.separator} />}
                   <HostFitRow
                     client={client}
                     hostName={host.name}
@@ -306,45 +311,47 @@ export default function TerminalSettingsScreen() {
           </View>
         )}
 
-        <Text style={[styles.groupHeading, styles.inputGroupGap]}>TEXT SIZE</Text>
-        <Text style={styles.groupDescription}>
+        <Text className={cn(styles.groupHeading, styles.inputGroupGap)}>TEXT SIZE</Text>
+        <Text className={styles.groupDescription}>
           Scale the terminal text. Smaller sizes fit more columns with side margins; larger sizes
           show fewer columns — drag sideways to pan. You can also pinch to zoom in the terminal
           itself, which updates this setting. Per-device display only; doesn&apos;t change the
           desktop terminal.
         </Text>
-        <View style={[styles.section, styles.sectionTopGap]}>
+        <View className={cn(styles.section, styles.sectionTopGap)}>
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => setTextSizePickerOpen(true)}
           >
-            <Type size={16} color={colors.textSecondary} />
-            <View style={styles.rowContent}>
-              <Text style={styles.rowLabel}>Text size</Text>
-              <Text style={styles.rowSublabel}>{textSizeSummary(textScale)}</Text>
+            <Type size={16} colorClassName="accent-muted-foreground" />
+            <View className={styles.rowContent}>
+              <Text className={styles.rowLabel}>Text size</Text>
+              <Text className={styles.rowSublabel}>{textSizeSummary(textScale)}</Text>
             </View>
-            <ChevronRight size={16} color={colors.textMuted} />
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
         </View>
 
-        <Text style={[styles.groupHeading, styles.inputGroupGap]}>KEYBOARD INPUT</Text>
-        <Text style={styles.groupDescription}>
+        <Text className={cn(styles.groupHeading, styles.inputGroupGap)}>KEYBOARD INPUT</Text>
+        <Text className={styles.groupDescription}>
           Enable phone-style autocomplete, autocorrect, and spelling suggestions in the terminal
           command bar. Off by default so the keyboard never rewrites commands, flags, or paths.
           Direct keyboard input (when keys go straight to the terminal) always sends raw keystrokes,
           so suggestions don&apos;t apply there.
         </Text>
-        <View style={[styles.section, styles.sectionTopGap]}>
-          <View style={styles.row}>
-            <View style={styles.rowContent}>
-              <Text style={styles.rowLabel}>Autocomplete &amp; autocorrect</Text>
-              <Text style={styles.rowSublabel}>{autocompleteEnabled ? 'On' : 'Off'}</Text>
+        <View className={cn(styles.section, styles.sectionTopGap)}>
+          <View className={styles.row}>
+            <View className={styles.rowContent}>
+              <Text className={styles.rowLabel}>Autocomplete &amp; autocorrect</Text>
+              <Text className={styles.rowSublabel}>{autocompleteEnabled ? 'On' : 'Off'}</Text>
             </View>
             <Switch
               value={autocompleteEnabled}
               onValueChange={toggleAutocomplete}
-              trackColor={{ false: colors.bgRaised, true: colors.textSecondary }}
-              thumbColor={colors.textPrimary}
+              trackColorOffClassName="accent-accent"
+              trackColorOnClassName="accent-muted-foreground"
+              thumbColorClassName="accent-foreground"
+              ios_backgroundColorClassName="accent-accent"
             />
           </View>
         </View>
@@ -382,91 +389,22 @@ export default function TerminalSettingsScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase,
-    paddingHorizontal: spacing.lg,
-    paddingTop: 0
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.lg
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.textPrimary
-  },
-  scrollContent: {
-    paddingBottom: spacing.xl
-  },
-  groupHeading: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textMuted,
-    letterSpacing: 0.5,
-    marginBottom: spacing.xs,
-    paddingHorizontal: spacing.xs
-  },
-  groupDescription: {
-    fontSize: typography.bodySize - 1,
-    color: colors.textSecondary,
-    lineHeight: 20,
-    paddingHorizontal: spacing.xs
-  },
-  section: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: radii.card,
-    overflow: 'hidden'
-  },
-  sectionTopGap: {
-    marginTop: spacing.sm
-  },
-  inputGroupGap: {
-    marginTop: spacing.xl
-  },
-  emptyText: {
-    fontSize: typography.bodySize,
-    color: colors.textSecondary,
-    padding: spacing.md
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  rowPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  rowContent: {
-    flex: 1
-  },
-  rowLabel: {
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    color: colors.textPrimary
-  },
-  rowSublabel: {
-    fontSize: typography.bodySize - 2,
-    color: colors.textSecondary,
-    marginTop: 2
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  }
-})
+const styles = {
+  container: cn('flex-1 bg-background px-4 pt-0'),
+  topRow: cn('flex-row items-center mt-2 mb-4'),
+  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
+  heading: cn('text-[20px] font-bold text-foreground'),
+  scrollContent: cn('pb-6'),
+  groupHeading: cn('text-[11px] font-semibold text-muted-foreground/60 tracking-[0.5px] mb-1 px-1'),
+  groupDescription: cn('text-[13px] text-muted-foreground leading-[20px] px-1'),
+  section: cn('bg-card rounded-none overflow-hidden'),
+  sectionTopGap: cn('mt-2'),
+  inputGroupGap: cn('mt-6'),
+  emptyText: cn('text-[14px] text-muted-foreground p-3'),
+  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
+  rowPressedActive: cn('active:bg-secondary'),
+  rowContent: cn('flex-1'),
+  rowLabel: cn('text-[14px] font-medium text-foreground'),
+  rowSublabel: cn('text-[12px] text-muted-foreground mt-[2px]'),
+  separator: cn('h-hairline bg-border mx-3')
+} as const

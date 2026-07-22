@@ -1,170 +1,41 @@
-import { StyleSheet } from 'react-native'
+import { cn } from '@/style/class-names'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
-
-export const filePreviewStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase
-  },
-  header: {
-    backgroundColor: colors.bgPanel,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle
-  },
-  topBar: {
-    minHeight: 58,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.md
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button
-  },
-  backButtonPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  titleBlock: {
-    flex: 1,
-    minWidth: 0
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: typography.titleSize,
-    fontWeight: '600'
-  },
-  meta: {
-    marginTop: 2,
-    color: colors.textSecondary,
-    fontSize: typography.metaSize
-  },
-  state: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.md,
-    padding: spacing.xl
-  },
-  stateText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    textAlign: 'center'
-  },
-  errorText: {
-    color: colors.statusRed,
-    fontSize: typography.bodySize,
-    textAlign: 'center'
-  },
-  retryButton: {
-    minHeight: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    paddingHorizontal: spacing.lg
-  },
-  retryText: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  },
-  saveButton: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised
-  },
-  saveButtonDisabled: {
-    opacity: 0.42
-  },
-  scroll: {
-    flex: 1,
-    backgroundColor: colors.editorSurface
-  },
-  textContent: {
-    padding: spacing.md,
-    paddingBottom: spacing.xl
-  },
-  textPreview: {
-    color: colors.textPrimary,
-    fontFamily: typography.monoFamily,
-    fontSize: 13,
-    lineHeight: 19
-  },
-  markdownContent: {
-    padding: spacing.md,
-    paddingBottom: spacing.xl
-  },
-  modeContainer: {
-    flex: 1,
-    backgroundColor: colors.editorSurface
-  },
-  modeToolbar: {
-    flexDirection: 'row',
-    alignSelf: 'flex-start',
-    marginHorizontal: spacing.md,
-    marginVertical: spacing.sm,
-    padding: 1,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgPanel
-  },
-  modeToggle: {
-    width: 34,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.row,
-    backgroundColor: 'transparent',
-    opacity: 0.72
-  },
-  modeToggleActive: {
-    backgroundColor: colors.bgRaised,
-    opacity: 1
-  },
-  truncatedNote: {
-    marginBottom: spacing.md,
-    color: colors.textSecondary,
-    fontSize: typography.metaSize
-  },
-  imageContainer: {
-    flex: 1,
-    backgroundColor: colors.editorSurface
-  },
-  imageScrollContent: {
-    flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.md
-  },
-  image: {
-    backgroundColor: colors.editorSurface
-  },
-  editContainer: {
-    flex: 1,
-    backgroundColor: colors.editorSurface,
-    padding: spacing.md
-  },
-  saveErrorText: {
-    marginBottom: spacing.sm,
-    color: colors.statusRed,
-    fontSize: typography.metaSize
-  },
-  editInput: {
-    flex: 1,
-    color: colors.textPrimary,
-    fontFamily: typography.monoFamily,
-    fontSize: 13,
-    lineHeight: 19,
-    padding: 0
-  }
-})
+export const filePreviewStyles = {
+  container: cn('flex-1 bg-background'),
+  header: cn('bg-card border-b-hairline border-b-border'),
+  topBar: cn('min-h-[58px] flex-row items-center gap-3 px-3'),
+  backButton: cn('w-9 h-9 items-center justify-center rounded-none'),
+  backButtonPressed: cn('bg-secondary'),
+  backButtonPressedActive: cn('active:bg-secondary'),
+  titleBlock: cn('flex-1 min-w-0'),
+  title: cn('text-foreground text-[18px] font-semibold'),
+  meta: cn('mt-[2px] text-muted-foreground text-[12px]'),
+  state: cn('flex-1 items-center justify-center gap-3 p-6'),
+  stateText: cn('text-muted-foreground text-[14px] text-center'),
+  errorText: cn('text-destructive text-[14px] text-center'),
+  retryButton: cn(
+    'min-h-9 items-center justify-center rounded-none border-hairline border-border px-4'
+  ),
+  retryText: cn('text-foreground text-[14px] font-semibold'),
+  saveButton: cn('w-9 h-9 items-center justify-center rounded-none bg-secondary'),
+  saveButtonDisabled: cn('opacity-[0.42]'),
+  scroll: cn('flex-1 bg-[var(--editor-surface)]'),
+  textContent: cn('p-3 pb-6'),
+  textPreview: cn('text-foreground font-mono text-[13px] leading-[19px]'),
+  markdownContent: cn('p-3 pb-6'),
+  modeContainer: cn('flex-1 bg-[var(--editor-surface)]'),
+  modeToolbar: cn(
+    'flex-row self-start mx-3 my-2 p-[1px] border-hairline border-border rounded-none bg-card'
+  ),
+  modeToggle: cn(
+    'w-[34px] h-7 items-center justify-center rounded-none bg-transparent opacity-[0.72]'
+  ),
+  modeToggleActive: cn('bg-secondary opacity-[1]'),
+  truncatedNote: cn('mb-3 text-muted-foreground text-[12px]'),
+  imageContainer: cn('flex-1 bg-[var(--editor-surface)]'),
+  imageScrollContent: cn('grow items-center justify-center p-3'),
+  image: cn('bg-[var(--editor-surface)]'),
+  editContainer: cn('flex-1 bg-[var(--editor-surface)] p-3'),
+  saveErrorText: cn('mb-2 text-destructive text-[12px]'),
+  editInput: cn('flex-1 text-foreground font-mono text-[13px] leading-[19px] p-0')
+} as const

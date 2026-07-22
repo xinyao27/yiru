@@ -1,11 +1,20 @@
-import { Check, Copy, FileText, Plus, Send, Trash2, X } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
+
+import {
+  Check,
+  Copy,
+  FileText,
+  Plus,
+  PaperPlaneTilt as Send,
+  Trash as Trash2,
+  X
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type { DiffComment } from '../../../desktop/src/shared/types'
 import { mobileReviewCountLabel } from '../session/mobile-diff-review-screen-model'
 import type { useMobileDiffReviewController } from '../session/use-mobile-diff-review-controller'
-import { colors } from '../theme/mobile-theme'
 import type { ActionSheetAction } from './action-sheet-modal'
 import { ActionSheetModal } from './action-sheet-modal'
 import { BottomDrawer } from './bottom-drawer'
@@ -166,37 +175,38 @@ function NoteComposerDrawer({ controller }: Props) {
   return (
     <BottomDrawer visible={composer !== null} onClose={controller.closeComposer}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={styles.composerHeader}>
+        <View className={styles.composerHeader}>
           <View>
-            <Text style={styles.drawerTitle}>
+            <Text className={styles.drawerTitle}>
               {composer?.mode === 'edit' ? 'Edit Note' : 'Add Note'}
             </Text>
-            <Text style={styles.drawerSubtitle}>
+            <Text className={styles.drawerSubtitle}>
               {composer?.mode === 'create' && composer.lineNumber > 0
                 ? `Line ${composer.lineNumber}`
                 : 'File note'}
             </Text>
           </View>
           <Pressable
-            style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
+            className={cn(styles.iconButton, 'active:bg-secondary')}
             onPress={controller.closeComposer}
             accessibilityRole="button"
             accessibilityLabel="Cancel note"
           >
-            <X size={18} color={colors.textPrimary} strokeWidth={2.2} />
+            <X size={18} colorClassName="accent-foreground" />
           </Pressable>
         </View>
         <TextInput
-          style={styles.composerInput}
+          className={styles.composerInput}
+          style={{ textAlignVertical: 'top' }}
           value={controller.composerBody}
           onChangeText={controller.setComposerBody}
           multiline
           autoFocus
           placeholder="Review note"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColorClassName="accent-muted-foreground"
           accessibilityLabel={composerLabel(composer)}
         />
-        <View style={styles.drawerButtonRow}>
+        <View className={styles.drawerButtonRow}>
           {composer?.mode === 'edit' ? (
             <DeleteNoteButton onPress={controller.deleteComment} />
           ) : null}
@@ -218,13 +228,13 @@ function composerLabel(
 function DeleteNoteButton({ onPress }: { onPress: () => Promise<void> }) {
   return (
     <Pressable
-      style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+      className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
       onPress={() => void onPress()}
       accessibilityRole="button"
       accessibilityLabel="Delete note"
     >
-      <Trash2 size={14} color={colors.statusRed} strokeWidth={2.2} />
-      <Text style={styles.destructiveText}>Delete</Text>
+      <Trash2 size={14} colorClassName="accent-destructive" />
+      <Text className={styles.destructiveText}>Delete</Text>
     </Pressable>
   )
 }
@@ -239,18 +249,18 @@ function SaveNoteButton({
   const disabled = controller.composerBody.trim().length === 0
   return (
     <Pressable
-      style={({ pressed }) => [
+      className={cn(
         styles.primaryButton,
         disabled && styles.buttonDisabled,
-        pressed && styles.buttonPressed
-      ]}
+        'active:opacity-[0.76]'
+      )}
       disabled={disabled}
       onPress={() => void controller.saveComposer()}
       accessibilityRole="button"
       accessibilityLabel={composerLabel(composer)}
     >
-      <Check size={14} color={colors.bgBase} strokeWidth={2.2} />
-      <Text style={styles.primaryButtonText}>Save</Text>
+      <Check size={14} colorClassName="accent-primary-foreground" />
+      <Text className={styles.primaryButtonText}>Save</Text>
     </Pressable>
   )
 }
@@ -263,31 +273,31 @@ function CompletionDrawer({ controller }: Props) {
       visible={controller.showCompletion}
       onClose={() => controller.setShowCompletion(false)}
     >
-      <Text style={styles.drawerTitle}>Review Complete</Text>
-      <Text style={styles.drawerSubtitle}>
+      <Text className={styles.drawerTitle}>Review Complete</Text>
+      <Text className={styles.drawerSubtitle}>
         {mobileReviewCountLabel(controller.queue.length, 'file', 'files')} reviewed,{' '}
         {mobileReviewCountLabel(noteCount, 'note', 'notes')}
       </Text>
-      <View style={styles.drawerButtonRow}>
+      <View className={styles.drawerButtonRow}>
         <Pressable
-          style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+          className={cn(styles.secondaryButton, 'active:opacity-[0.76]')}
           disabled={controller.reviewedUnstagedCount === 0}
           onPress={() => void controller.stageReviewedFiles()}
           accessibilityRole="button"
           accessibilityLabel="Stage reviewed files"
         >
-          <Check size={14} color={colors.textSecondary} strokeWidth={2.2} />
-          <Text style={styles.secondaryButtonText}>Stage Reviewed</Text>
+          <Check size={14} colorClassName="accent-muted-foreground" />
+          <Text className={styles.secondaryButtonText}>Stage Reviewed</Text>
         </Pressable>
         <Pressable
-          style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+          className={cn(styles.primaryButton, 'active:opacity-[0.76]')}
           disabled={controller.unsentComments.length === 0}
           onPress={() => void controller.openSendSheet()}
           accessibilityRole="button"
           accessibilityLabel="Send notes to agent"
         >
-          <Send size={14} color={colors.bgBase} strokeWidth={2.2} />
-          <Text style={styles.primaryButtonText}>Send Notes</Text>
+          <Send size={14} colorClassName="accent-primary-foreground" />
+          <Text className={styles.primaryButtonText}>Send Notes</Text>
         </Pressable>
       </View>
     </BottomDrawer>

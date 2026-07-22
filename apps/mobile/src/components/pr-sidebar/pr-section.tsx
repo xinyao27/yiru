@@ -19,14 +19,14 @@ type Props = {
 export function PRSection({ title, trailing, children }: Props) {
   const showHeader = Boolean(title) || trailing != null
   return (
-    <View style={styles.section}>
+    <View className={styles.section}>
       {showHeader ? (
-        <View style={styles.sectionHeader}>
-          {title ? <Text style={styles.sectionLabel}>{title}</Text> : null}
-          {trailing ? <View style={styles.sectionHeaderTrailing}>{trailing}</View> : null}
+        <View className={styles.sectionHeader}>
+          {title ? <Text className={styles.sectionLabel}>{title}</Text> : null}
+          {trailing ? <View className={styles.sectionHeaderTrailing}>{trailing}</View> : null}
         </View>
       ) : null}
-      <View style={styles.sectionBody}>{children}</View>
+      <View className={styles.sectionBody}>{children}</View>
     </View>
   )
 }

@@ -1,5 +1,7 @@
 import { memo } from 'react'
-import { View, StyleSheet } from 'react-native'
+import { View } from 'react-native'
+
+import { cn } from '@/style/class-names'
 
 import { mobilePrSidebarStyles } from '../components/pr-sidebar/mobile-pr-sidebar-styles'
 import { MobileFileExplorerPanel } from '../files/mobile-file-explorer-panel'
@@ -37,10 +39,10 @@ export function SessionDockColumn({
 }: Props) {
   const { dockWidth, panHandlers } = useMobileDockResize(availableWidth)
   return (
-    <View style={[mobilePrSidebarStyles.dockColumn, { width: dockWidth }]}>
+    <View className={mobilePrSidebarStyles.dockColumn} style={[{ width: dockWidth }]}>
       {/* Dedicated drag handle over the dock's left border — a leaf overlay so the
           inner ScrollView can't intercept the gesture on Android. */}
-      <View style={styles.resizeHandle} {...panHandlers} />
+      <View className={styles.resizeHandle} style={{ elevation: 20 }} {...panHandlers} />
       <DockPanelContent
         activePanel={activePanel}
         hostId={hostId}
@@ -94,18 +96,8 @@ const DockPanelContent = memo(function DockPanelContent({
   )
 })
 
-const RESIZE_EDGE_WIDTH = 24
-
-const styles = StyleSheet.create({
+const styles = {
   // Invisible grab strip over the dock's left edge. Absolute + elevated so it sits
   // above the panel content and reliably owns the drag on Android.
-  resizeHandle: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    width: RESIZE_EDGE_WIDTH,
-    zIndex: 20,
-    elevation: 20
-  }
-})
+  resizeHandle: cn('absolute top-0 bottom-0 left-0 w-6 z-[20]')
+} as const

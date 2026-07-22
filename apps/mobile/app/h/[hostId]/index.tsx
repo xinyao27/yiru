@@ -1,32 +1,33 @@
 import { useFocusEffect, useLocalSearchParams, usePathname, useRouter } from 'expo-router'
-import {
-  Search,
-  X,
-  Pin,
-  SlidersHorizontal,
-  Layers,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  Plus,
-  Moon,
-  Filter,
-  Check,
-  UserCircle,
-  PanelLeftClose
-} from 'lucide-react-native'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
   View,
   Text,
-  StyleSheet,
   SectionList,
   Pressable,
   ActivityIndicator,
   Alert,
   RefreshControl
 } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import {
+  MagnifyingGlass as Search,
+  X,
+  PushPin as Pin,
+  SlidersHorizontal,
+  Stack as Layers,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  CaretLeft as ChevronLeft,
+  Plus,
+  Moon,
+  Funnel as Filter,
+  Check,
+  UserCircle,
+  SidebarSimple as PanelLeftClose
+} from '@/components/uniwind-icons'
+import { SafeAreaView } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import type { RepoIcon } from '../../../../desktop/src/shared/repo-icon'
 import type { WorkspaceStatusDefinition } from '../../../../desktop/src/shared/types'
@@ -39,7 +40,7 @@ import { BottomDrawer } from '../../../src/components/bottom-drawer'
 import { ConfirmModal } from '../../../src/components/confirm-modal'
 import { MobileRepoIcon } from '../../../src/components/mobile-repo-icon'
 import { MobileSearchField } from '../../../src/components/mobile-search-field'
-import { NewWorkspaceFab, FAB_SIZE } from '../../../src/components/new-workspace-fab'
+import { NewWorkspaceFab } from '../../../src/components/new-workspace-fab'
 import { NewWorktreeModalController } from '../../../src/components/new-worktree-modal-controller'
 import { PickerModal } from '../../../src/components/picker-modal'
 import { ProtocolBlockScreen } from '../../../src/components/protocol-block-screen'
@@ -56,7 +57,6 @@ import {
 import { leaveHostRoute } from '../../../src/host-route-exit'
 import { useResponsiveLayout } from '../../../src/layout/responsive-layout'
 import { loadPinnedIds, savePinnedIds } from '../../../src/storage/preferences'
-import { colors, radii, spacing, typography } from '../../../src/theme/mobile-theme'
 import {
   useHostClient,
   useCloseHost,
@@ -132,11 +132,12 @@ export function HostScreen({
   const action = actionProp ?? params.action
   const router = useRouter()
   const pathname = usePathname()
-  const insets = useSafeAreaInsets()
+
   // Why: cap and center the worktree list on wide/tablet canvases; on phones
   // isWideLayout is false so the list stays edge-to-edge as before. When
   // embedded as the sidebar the list already lives in a narrow pane, so the
   // cap is skipped (see the SectionList contentContainerStyle below).
+
   const { isWideLayout, contentMaxWidth } = useResponsiveLayout()
   const [initialCache] = useState(() =>
     hostId ? (getCachedWorktrees(hostId) as Worktree[] | null) : null
@@ -873,8 +874,8 @@ export function HostScreen({
 
   if (error) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>{error}</Text>
+      <View className={styles.centered}>
+        <Text className={styles.errorText}>{error}</Text>
       </View>
     )
   }
@@ -884,17 +885,17 @@ export function HostScreen({
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.topChrome}>
-        <View style={styles.statusBar}>
+    <SafeAreaView className={styles.container} edges={['top']}>
+      <View className={styles.topChrome}>
+        <View className={styles.statusBar}>
           <Pressable
-            style={styles.backButton}
+            className={styles.backButton}
             onPress={leaveHost}
             accessibilityRole="button"
             accessibilityLabel="Back to hosts"
             hitSlop={8}
           >
-            <ChevronLeft size={22} color={colors.textPrimary} />
+            <ChevronLeft size={22} colorClassName="accent-foreground" />
           </Pressable>
           {(() => {
             const headerVerdict = classifyConnection({
@@ -904,9 +905,9 @@ export function HostScreen({
             })
             return (
               <>
-                <View style={styles.hostIdentity}>
+                <View className={styles.hostIdentity}>
                   <StatusDot state={connState} verdict={headerVerdict} />
-                  <Text style={styles.hostNameText} numberOfLines={1}>
+                  <Text className={styles.hostNameText} numberOfLines={1}>
                     {hostName || 'Host'}
                   </Text>
                 </View>
@@ -926,11 +927,11 @@ export function HostScreen({
                     }
                     return (
                       <Pressable
-                        style={styles.reconnectButton}
+                        className={styles.reconnectButton}
                         onPress={() => void forceReconnectHost(hostId!)}
                         hitSlop={8}
                       >
-                        <Text style={styles.reconnectButtonText}>Reconnect</Text>
+                        <Text className={styles.reconnectButtonText}>Reconnect</Text>
                       </Pressable>
                     )
                   })()}
@@ -939,40 +940,42 @@ export function HostScreen({
           })()}
           {embedded && onHideSidebar ? (
             <Pressable
-              style={styles.sidebarCollapseButton}
+              className={styles.sidebarCollapseButton}
               onPress={onHideSidebar}
               accessibilityRole="button"
               accessibilityLabel="Hide sidebar"
               hitSlop={8}
             >
-              <PanelLeftClose size={14} color={colors.textSecondary} />
+              <PanelLeftClose size={14} colorClassName="accent-muted-foreground" />
             </Pressable>
           ) : null}
         </View>
 
         {/* Filter/sort/group toolbar */}
         {embedded ? (
-          <View style={styles.embeddedToolbar}>
-            <View style={styles.embeddedToolbarRow}>
+          <View className={styles.embeddedToolbar}>
+            <View className={styles.embeddedToolbarRow}>
               <Pressable
-                style={[
+                className={cn(
                   styles.filterChip,
                   styles.embeddedFilterChip,
                   activeFilterCount > 0 && styles.filterChipActive
-                ]}
+                )}
                 onPress={() => setShowFilterModal(true)}
                 accessibilityRole="button"
                 accessibilityLabel={`Filter workspaces${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ''}`}
               >
                 <Filter
                   size={12}
-                  color={activeFilterCount > 0 ? colors.textPrimary : colors.textSecondary}
+                  colorClassName={
+                    activeFilterCount > 0 ? 'accent-foreground' : 'accent-muted-foreground'
+                  }
                 />
                 <Text
-                  style={[
+                  className={cn(
                     styles.filterChipText,
                     activeFilterCount > 0 && styles.filterChipTextActive
-                  ]}
+                  )}
                   numberOfLines={1}
                 >
                   Filter{activeFilterCount > 0 ? ` ${activeFilterCount}` : ''}
@@ -980,25 +983,25 @@ export function HostScreen({
               </Pressable>
 
               <Pressable
-                style={[styles.modeButton, styles.embeddedModeButton]}
+                className={cn(styles.modeButton, styles.embeddedModeButton)}
                 onPress={() => setShowSortPicker(true)}
                 accessibilityRole="button"
                 accessibilityLabel={`Sort by ${selectedSortLabel}`}
               >
-                <SlidersHorizontal size={14} color={colors.textSecondary} />
-                <Text style={styles.sortLabel} numberOfLines={1}>
+                <SlidersHorizontal size={14} colorClassName="accent-muted-foreground" />
+                <Text className={styles.sortLabel} numberOfLines={1}>
                   {selectedSortLabel}
                 </Text>
               </Pressable>
 
               <Pressable
-                style={[styles.modeButton, styles.embeddedModeButton]}
+                className={cn(styles.modeButton, styles.embeddedModeButton)}
                 onPress={() => setShowGroupPicker(true)}
                 accessibilityRole="button"
                 accessibilityLabel="Group workspaces"
               >
-                <Layers size={14} color={colors.textSecondary} />
-                <Text style={styles.sortLabel} numberOfLines={1}>
+                <Layers size={14} colorClassName="accent-muted-foreground" />
+                <Text className={styles.sortLabel} numberOfLines={1}>
                   {groupMode === 'none'
                     ? 'Group'
                     : groupMode === 'workspaceStatus'
@@ -1010,28 +1013,25 @@ export function HostScreen({
               </Pressable>
             </View>
 
-            <View style={styles.embeddedToolbarRow}>
+            <View className={styles.embeddedToolbarRow}>
               <Pressable
-                style={[
+                className={cn(
                   styles.embeddedToolbarIconButton,
                   connState !== 'connected' && styles.toolbarIconDisabled
-                ]}
+                )}
                 onPress={() => navigateFromHostList(`/h/${hostId}/accounts`)}
                 disabled={connState !== 'connected'}
                 accessibilityRole="button"
                 accessibilityLabel="Accounts"
               >
-                <UserCircle
-                  size={16}
-                  color={connState === 'connected' ? colors.textSecondary : colors.textMuted}
-                />
+                <UserCircle size={16} colorClassName="accent-muted-foreground" />
               </Pressable>
 
               <Pressable
-                style={[
+                className={cn(
                   styles.embeddedToolbarIconButton,
                   connState !== 'connected' && styles.toolbarIconDisabled
-                ]}
+                )}
                 onPress={openNewWorktreeModal}
                 disabled={connState !== 'connected'}
                 accessibilityRole="button"
@@ -1039,54 +1039,58 @@ export function HostScreen({
               >
                 <Plus
                   size={16}
-                  color={connState === 'connected' ? colors.textPrimary : colors.textMuted}
+                  colorClassName={
+                    connState === 'connected' ? 'accent-foreground' : 'accent-muted-foreground'
+                  }
                 />
               </Pressable>
 
               <Pressable
-                style={styles.embeddedToolbarIconButton}
+                className={styles.embeddedToolbarIconButton}
                 onPress={() => setShowSearch((s) => !s)}
                 accessibilityRole="button"
                 accessibilityLabel={showSearch ? 'Close search' : 'Search workspaces'}
               >
                 {showSearch ? (
-                  <X size={16} color={colors.textSecondary} />
+                  <X size={16} colorClassName="accent-muted-foreground" />
                 ) : (
-                  <Search size={16} color={colors.textSecondary} />
+                  <Search size={16} colorClassName="accent-muted-foreground" />
                 )}
               </Pressable>
             </View>
           </View>
         ) : (
-          <View style={styles.toolbar}>
+          <View className={styles.toolbar}>
             <Pressable
-              style={[styles.filterChip, activeFilterCount > 0 && styles.filterChipActive]}
+              className={cn(styles.filterChip, activeFilterCount > 0 && styles.filterChipActive)}
               onPress={() => setShowFilterModal(true)}
             >
               <Filter
                 size={12}
-                color={activeFilterCount > 0 ? colors.textPrimary : colors.textSecondary}
+                colorClassName={
+                  activeFilterCount > 0 ? 'accent-foreground' : 'accent-muted-foreground'
+                }
               />
               <Text
-                style={[
+                className={cn(
                   styles.filterChipText,
                   activeFilterCount > 0 && styles.filterChipTextActive
-                ]}
+                )}
               >
                 Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
               </Text>
             </Pressable>
 
-            <Pressable style={styles.modeButton} onPress={() => setShowSortPicker(true)}>
-              <SlidersHorizontal size={14} color={colors.textSecondary} />
-              <Text style={styles.sortLabel} numberOfLines={1}>
+            <Pressable className={styles.modeButton} onPress={() => setShowSortPicker(true)}>
+              <SlidersHorizontal size={14} colorClassName="accent-muted-foreground" />
+              <Text className={styles.sortLabel} numberOfLines={1}>
                 {selectedSortLabel}
               </Text>
             </Pressable>
 
-            <Pressable style={styles.modeButton} onPress={() => setShowGroupPicker(true)}>
-              <Layers size={14} color={colors.textSecondary} />
-              <Text style={styles.sortLabel} numberOfLines={1}>
+            <Pressable className={styles.modeButton} onPress={() => setShowGroupPicker(true)}>
+              <Layers size={14} colorClassName="accent-muted-foreground" />
+              <Text className={styles.sortLabel} numberOfLines={1}>
                 {groupMode === 'none'
                   ? 'Group'
                   : groupMode === 'workspaceStatus'
@@ -1097,24 +1101,21 @@ export function HostScreen({
               </Text>
             </Pressable>
 
-            <View style={styles.toolbarSpacer} />
+            <View className={styles.toolbarSpacer} />
 
             <Pressable
-              style={styles.searchToggle}
+              className={styles.searchToggle}
               onPress={() => navigateFromHostList(`/h/${hostId}/accounts`)}
               disabled={connState !== 'connected'}
             >
-              <UserCircle
-                size={16}
-                color={connState === 'connected' ? colors.textSecondary : colors.textMuted}
-              />
+              <UserCircle size={16} colorClassName="accent-muted-foreground" />
             </Pressable>
 
-            <Pressable style={styles.searchToggle} onPress={() => setShowSearch((s) => !s)}>
+            <Pressable className={styles.searchToggle} onPress={() => setShowSearch((s) => !s)}>
               {showSearch ? (
-                <X size={16} color={colors.textSecondary} />
+                <X size={16} colorClassName="accent-muted-foreground" />
               ) : (
-                <Search size={16} color={colors.textSecondary} />
+                <Search size={16} colorClassName="accent-muted-foreground" />
               )}
             </Pressable>
           </View>
@@ -1133,7 +1134,7 @@ export function HostScreen({
 
       {/* Search bar */}
       {showSearch && (
-        <View style={styles.searchBar}>
+        <View className={styles.searchBar}>
           <MobileSearchField
             value={search}
             onChangeText={setSearch}
@@ -1151,15 +1152,15 @@ export function HostScreen({
       {((connState === 'connecting' || connState === 'reconnecting') &&
         displayWorktrees.length === 0) ||
       (connState === 'connected' && !worktreesLoaded && displayWorktrees.length === 0) ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="small" color={colors.textSecondary} />
+        <View className={styles.centered}>
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
         </View>
       ) : null}
 
       {/* Empty state */}
       {connState === 'connected' && worktreesLoaded && sections.length === 0 && (
-        <View style={styles.centered}>
-          <Text style={styles.emptyText}>
+        <View className={styles.centered}>
+          <Text className={styles.emptyText}>
             {search
               ? 'No matching worktrees'
               : activeFilterCount > 0
@@ -1182,14 +1183,15 @@ export function HostScreen({
           // Why: edge-to-edge — the list scrolls under the system nav bar
           // while reserving insets.bottom keeps the last worktree row reachable
           // above the Samsung 3-button nav / iOS home indicator.
-          contentContainerStyle={[
+          contentContainerClassName={cn(
             styles.list,
-            // Phone shows a floating "+" button bottom-right; reserve room so the
-            // last row stays tappable above it. Embedded sidebars keep the toolbar +.
-            { paddingBottom: (embedded ? spacing.lg : FAB_SIZE + spacing.xl) + insets.bottom },
-            isWideLayout &&
-              !embedded && { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }
-          ]}
+            embedded ? 'pb-safe-offset-4' : 'pb-safe-offset-[72px]'
+          )}
+          contentContainerStyle={
+            isWideLayout && !embedded
+              ? { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }
+              : undefined
+          }
           renderSectionHeader={({ section }) => {
             if (!section.title) {
               return null
@@ -1201,26 +1203,35 @@ export function HostScreen({
               groupMode === 'repo' ? uniqueRepoColors.get(section.title) : null
             const repoSectionIcon = groupMode === 'repo' ? repoIconsByName.get(section.title) : null
             return (
-              <Pressable style={styles.sectionHeader} onPress={() => toggleCollapsed(section.key)}>
+              <Pressable
+                className={styles.sectionHeader}
+                onPress={() => toggleCollapsed(section.key)}
+              >
                 {isCollapsed ? (
-                  <ChevronRight size={12} color={colors.textMuted} style={styles.sectionIcon} />
+                  <View className={styles.sectionIcon}>
+                    <ChevronRight size={12} colorClassName="accent-muted-foreground" />
+                  </View>
                 ) : (
-                  <ChevronDown size={12} color={colors.textMuted} style={styles.sectionIcon} />
+                  <View className={styles.sectionIcon}>
+                    <ChevronDown size={12} colorClassName="accent-muted-foreground" />
+                  </View>
                 )}
                 {section.icon === 'pin' && (
-                  <Pin size={12} color={colors.textMuted} style={styles.sectionIcon} />
+                  <View className={styles.sectionIcon}>
+                    <Pin size={12} colorClassName="accent-muted-foreground" />
+                  </View>
                 )}
                 {groupMode === 'repo' ? (
-                  <View style={styles.sectionRepoIcon}>
+                  <View className={styles.sectionRepoIcon}>
                     <MobileRepoIcon
                       repoIcon={repoSectionIcon}
                       size={14}
-                      color={repoSectionColor ?? colors.textSecondary}
+                      color={repoSectionColor ?? undefined}
                     />
                   </View>
                 ) : null}
-                <Text style={styles.sectionTitle}>{section.title}</Text>
-                <Text style={styles.sectionCount}>{count}</Text>
+                <Text className={styles.sectionTitle}>{section.title}</Text>
+                <Text className={styles.sectionCount}>{count}</Text>
               </Pressable>
             )
           }}
@@ -1231,8 +1242,8 @@ export function HostScreen({
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor={colors.textSecondary}
-              colors={[colors.textSecondary]}
+              tintColorClassName="accent-muted-foreground"
+              colorsClassName="accent-muted-foreground"
             />
           }
           renderItem={({ item }) => (
@@ -1278,42 +1289,45 @@ export function HostScreen({
       />
 
       <BottomDrawer visible={showFilterModal} onClose={() => setShowFilterModal(false)}>
-        <View style={styles.filterModalHeader}>
-          <Text style={styles.filterModalTitle}>Filter</Text>
+        <View className={styles.filterModalHeader}>
+          <Text className={styles.filterModalTitle}>Filter</Text>
           {activeFilterCount > 0 && (
             <Pressable onPress={clearFilters}>
-              <Text style={styles.clearFiltersText}>Clear filters</Text>
+              <Text className={styles.clearFiltersText}>Clear filters</Text>
             </Pressable>
           )}
         </View>
 
-        <Text style={styles.filterSectionLabel}>Workspaces</Text>
-        <View style={styles.filterGroup}>
-          <Pressable style={styles.filterRow} onPress={toggleHideSleeping}>
-            <Text style={styles.filterRowText}>Hide sleeping</Text>
-            {filters.hideSleeping && <Check size={14} color={colors.textPrimary} />}
+        <Text className={styles.filterSectionLabel}>Workspaces</Text>
+        <View className={styles.filterGroup}>
+          <Pressable className={styles.filterRow} onPress={toggleHideSleeping}>
+            <Text className={styles.filterRowText}>Hide sleeping</Text>
+            {filters.hideSleeping && <Check size={14} colorClassName="accent-foreground" />}
           </Pressable>
-          <View style={styles.filterSeparator} />
-          <Pressable style={styles.filterRow} onPress={toggleHideDefaultBranch}>
-            <Text style={styles.filterRowText}>Hide default branch</Text>
-            {filters.hideDefaultBranch && <Check size={14} color={colors.textPrimary} />}
+          <View className={styles.filterSeparator} />
+          <Pressable className={styles.filterRow} onPress={toggleHideDefaultBranch}>
+            <Text className={styles.filterRowText}>Hide default branch</Text>
+            {filters.hideDefaultBranch && <Check size={14} colorClassName="accent-foreground" />}
           </Pressable>
         </View>
 
         {uniqueRepos.length > 1 && (
           <>
-            <Text style={styles.filterSectionLabel}>Repositories</Text>
-            <View style={styles.filterGroup}>
+            <Text className={styles.filterSectionLabel}>Repositories</Text>
+            <View className={styles.filterGroup}>
               {uniqueRepos.map((repo, i) => (
                 <View key={repo.id}>
-                  {i > 0 && <View style={styles.filterSeparator} />}
-                  <Pressable style={styles.filterRow} onPress={() => toggleRepoFilter(repo.id)}>
-                    <View style={[styles.filterRepoDot, { backgroundColor: repo.color }]} />
-                    <Text style={styles.filterRowText} numberOfLines={1}>
+                  {i > 0 && <View className={styles.filterSeparator} />}
+                  <Pressable className={styles.filterRow} onPress={() => toggleRepoFilter(repo.id)}>
+                    <View
+                      className={styles.filterRepoDot}
+                      style={[{ backgroundColor: repo.color }]}
+                    />
+                    <Text className={styles.filterRowText} numberOfLines={1}>
                       {repo.name}
                     </Text>
                     {filters.filterRepoIds.has(repo.id) && (
-                      <Check size={14} color={colors.textPrimary} />
+                      <Check size={14} colorClassName="accent-foreground" />
                     )}
                   </Pressable>
                 </View>
@@ -1333,29 +1347,29 @@ export function HostScreen({
       >
         {confirmDelete ? (
           <View>
-            <View style={styles.confirmContent}>
-              <Text style={styles.confirmTitle}>Delete Worktree</Text>
-              <Text style={styles.confirmMessage}>
+            <View className={styles.confirmContent}>
+              <Text className={styles.confirmTitle}>Delete Worktree</Text>
+              <Text className={styles.confirmMessage}>
                 Delete "{confirmDelete.displayName || confirmDelete.repo}" ({confirmDelete.branch})?
               </Text>
             </View>
-            <View style={styles.confirmButtons}>
+            <View className={styles.confirmButtons}>
               <Pressable
-                style={({ pressed }) => [
+                className={cn(
                   styles.confirmBtn,
                   styles.confirmBtnCancel,
-                  pressed && styles.confirmBtnPressed
-                ]}
+                  styles.confirmBtnPressedActive
+                )}
                 onPress={() => setConfirmDelete(null)}
               >
-                <Text style={styles.confirmBtnCancelText}>Cancel</Text>
+                <Text className={styles.confirmBtnCancelText}>Cancel</Text>
               </Pressable>
               <Pressable
-                style={({ pressed }) => [
+                className={cn(
                   styles.confirmBtn,
                   styles.confirmBtnDestructive,
-                  pressed && styles.confirmBtnPressed
-                ]}
+                  styles.confirmBtnPressedActive
+                )}
                 onPress={() => {
                   if (confirmDelete) {
                     void handleDeleteWorktree(confirmDelete)
@@ -1364,7 +1378,7 @@ export function HostScreen({
                   setActionTarget(null)
                 }}
               >
-                <Text style={styles.confirmBtnDestructiveText}>Delete</Text>
+                <Text className={styles.confirmBtnDestructiveText}>Delete</Text>
               </Pressable>
             </View>
           </View>
@@ -1464,312 +1478,65 @@ export default function HostWorktreeRoute() {
 }
 
 function ListSeparator() {
-  return <View style={styles.separator} />
+  return <View className={styles.separator} />
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase
-  },
-  topChrome: {
-    backgroundColor: colors.bgPanel,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle
-  },
-  statusBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 34,
-    paddingTop: spacing.xs,
-    paddingHorizontal: spacing.lg
-  },
-  backButton: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.xs
-  },
-  sidebarCollapseButton: {
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button,
-    marginLeft: spacing.xs
-  },
-  hostIdentity: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    minWidth: 0,
-    marginRight: spacing.md
-  },
-  hostNameText: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  reconnectButton: {
-    paddingVertical: 4,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  reconnectButtonText: {
-    color: colors.textPrimary,
-    fontSize: typography.metaSize,
-    fontWeight: '600'
-  },
-  toolbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle
-  },
-  embeddedToolbar: {
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.sm,
-    gap: spacing.xs,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle
-  },
-  embeddedToolbarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm
-  },
-  embeddedFilterChip: {
-    flex: 1,
-    minWidth: 0,
-    height: 30,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 0
-  },
-  embeddedModeButton: {
-    flex: 1,
-    minWidth: 0,
-    height: 30,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 0
-  },
-  filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.xs,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  filterChipActive: {
-    borderColor: colors.textSecondary,
-    backgroundColor: colors.bgRaised
-  },
-  filterChipText: {
-    fontSize: 12,
-    color: colors.textSecondary
-  },
-  filterChipTextActive: {
-    color: colors.textPrimary
-  },
-  modeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexShrink: 1,
-    minWidth: 0,
-    gap: 4,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs
-  },
-  sortLabel: {
-    flexShrink: 1,
-    minWidth: 0,
-    fontSize: 12,
-    color: colors.textSecondary
-  },
-  toolbarSpacer: {
-    flex: 1
-  },
-  toolbarIconButton: {
-    width: 32,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button
-  },
-  embeddedToolbarIconButton: {
-    flex: 1,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button
-  },
-  toolbarIconDisabled: {
-    opacity: 0.6
-  },
-  searchToggle: {
-    padding: spacing.xs
-  },
-  searchBar: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel
-  },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  emptyText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize
-  },
-  errorText: {
-    color: colors.statusRed,
-    fontSize: typography.bodySize
-  },
-  list: {
-    paddingBottom: spacing.lg
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xs
-  },
-  sectionIcon: {
-    marginRight: spacing.xs
-  },
-  sectionRepoIcon: {
-    marginRight: spacing.xs
-  },
-  sectionTitle: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5
-  },
-  sectionCount: {
-    fontSize: 11,
-    color: colors.textMuted,
-    marginLeft: spacing.xs
-  },
-  separator: {
-    height: 1,
-    backgroundColor: colors.borderSubtle,
-    marginLeft: spacing.lg + 24,
-    marginRight: spacing.lg
-  },
-  filterModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.xs,
-    marginBottom: spacing.md
-  },
-  filterModalTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  clearFiltersText: {
-    fontSize: 13,
-    color: colors.textSecondary
-  },
-  filterSectionLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: spacing.xs,
-    paddingHorizontal: spacing.xs
-  },
-  filterGroup: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: spacing.md
-  },
-  filterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2,
-    gap: spacing.sm
-  },
-  filterRowText: {
-    flex: 1,
-    fontSize: typography.bodySize,
-    color: colors.textPrimary
-  },
-  filterSeparator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  },
-  filterRepoDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4
-  },
-  confirmContent: {
-    paddingBottom: spacing.lg
-  },
-  confirmTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.textPrimary
-  },
-  confirmMessage: {
-    fontSize: typography.bodySize,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-    lineHeight: 20
-  },
-  confirmButtons: {
-    flexDirection: 'row',
-    gap: spacing.sm
-  },
-  confirmBtn: {
-    flex: 1,
-    paddingVertical: spacing.sm + 2,
-    borderRadius: 10,
-    alignItems: 'center'
-  },
-  confirmBtnCancel: {
-    backgroundColor: colors.bgPanel
-  },
-  confirmBtnDestructive: {
-    backgroundColor: colors.statusRed
-  },
-  confirmBtnPressed: {
-    opacity: 0.7
-  },
-  confirmBtnCancelText: {
-    fontSize: typography.bodySize,
-    fontWeight: '600',
-    color: colors.textSecondary
-  },
-  confirmBtnDestructiveText: {
-    fontSize: typography.bodySize,
-    fontWeight: '600',
-    color: '#fff'
-  }
-})
+const styles = {
+  container: cn('flex-1 bg-background'),
+  topChrome: cn('bg-card border-b border-b-border'),
+  statusBar: cn('flex-row items-center justify-between min-h-[34px] pt-1 px-4'),
+  backButton: cn('w-8 h-8 items-center justify-center mr-1'),
+  sidebarCollapseButton: cn('w-6 h-6 items-center justify-center rounded-none ml-1'),
+  hostIdentity: cn('flex-1 flex-row items-center min-w-0 mr-3'),
+  hostNameText: cn('flex-1 text-[15px] font-semibold text-foreground'),
+  reconnectButton: cn('py-1 px-2 rounded-none bg-card border border-border'),
+  reconnectButtonText: cn('text-foreground text-[12px] font-semibold'),
+  toolbar: cn('flex-row items-center py-1.5 px-3 gap-2 border-b border-b-border'),
+  embeddedToolbar: cn('py-1.5 px-2 gap-1 border-b border-b-border'),
+  embeddedToolbarRow: cn('flex-row items-center gap-2'),
+  embeddedFilterChip: cn('flex-1 min-w-0 h-[30px] justify-center px-1 py-0'),
+  embeddedModeButton: cn('flex-1 min-w-0 h-[30px] justify-center px-1 py-0'),
+  filterChip: cn('flex-row items-center gap-1 px-2.5 py-1 rounded-none border border-border'),
+  filterChipActive: cn('border-muted-foreground bg-secondary'),
+  filterChipText: cn('text-[12px] text-muted-foreground'),
+  filterChipTextActive: cn('text-foreground'),
+  modeButton: cn('flex-row items-center shrink min-w-0 gap-1 px-2 py-1'),
+  sortLabel: cn('shrink min-w-0 text-[12px] text-muted-foreground'),
+  toolbarSpacer: cn('flex-1'),
+  toolbarIconButton: cn('w-8 h-7 items-center justify-center rounded-none'),
+  embeddedToolbarIconButton: cn('flex-1 h-7 items-center justify-center rounded-none'),
+  toolbarIconDisabled: cn('opacity-[0.6]'),
+  searchToggle: cn('p-1'),
+  searchBar: cn('px-3 py-2 border-b-hairline border-b-border bg-card'),
+  centered: cn('flex-1 items-center justify-center'),
+  emptyText: cn('text-muted-foreground text-[14px]'),
+  errorText: cn('text-destructive text-[14px]'),
+  list: cn('pb-4'),
+  sectionHeader: cn('flex-row items-center px-4 pt-3 pb-1'),
+  sectionIcon: cn('mr-1'),
+  sectionRepoIcon: cn('mr-1'),
+  sectionTitle: cn('text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.5px]'),
+  sectionCount: cn('text-[11px] text-muted-foreground/60 ml-1'),
+  separator: cn('h-[1px] bg-border ml-10 mr-4'),
+  filterModalHeader: cn('flex-row items-center justify-between px-1 mb-3'),
+  filterModalTitle: cn('text-[15px] font-semibold text-foreground'),
+  clearFiltersText: cn('text-[13px] text-muted-foreground'),
+  filterSectionLabel: cn(
+    'text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.5px] mb-1 px-1'
+  ),
+  filterGroup: cn('bg-card rounded-none overflow-hidden mb-3'),
+  filterRow: cn('flex-row items-center py-3 px-3.5 gap-2'),
+  filterRowText: cn('flex-1 text-[14px] text-foreground'),
+  filterSeparator: cn('h-hairline bg-border mx-3'),
+  filterRepoDot: cn('w-2 h-2 rounded-none'),
+  confirmContent: cn('pb-4'),
+  confirmTitle: cn('text-[16px] font-bold text-foreground'),
+  confirmMessage: cn('text-[14px] text-muted-foreground mt-1 leading-[20px]'),
+  confirmButtons: cn('flex-row gap-2'),
+  confirmBtn: cn('flex-1 py-2.5 rounded-none items-center'),
+  confirmBtnCancel: cn('bg-card'),
+  confirmBtnDestructive: cn('bg-destructive'),
+  confirmBtnPressedActive: cn('active:opacity-[0.7]'),
+  confirmBtnCancelText: cn('text-[14px] font-semibold text-muted-foreground'),
+  confirmBtnDestructiveText: cn('text-[14px] font-semibold text-destructive-foreground')
+} as const

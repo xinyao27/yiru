@@ -1,9 +1,8 @@
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: mobile browser state mirrors a remote desktop screencast session and CDP dialogs, which are external systems that cannot be derived during render. */
 // Why: import from 'buffer' (the npm polyfill), not 'node:buffer' — Metro
 // can't resolve Node's builtin in a React Native bundle.
-import { Buffer } from 'node:buffer'
+import { Buffer } from 'buffer'
 
-import { ArrowUp, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react-native'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
@@ -13,7 +12,6 @@ import {
   PixelRatio,
   Platform,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -21,7 +19,14 @@ import {
   type PanResponderGestureState
 } from 'react-native'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import {
+  ArrowUp,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  ArrowClockwise as RefreshCw
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import type {
   BrowserScreencastFrame,
   BrowserScreencastFrameMetadata
@@ -1057,11 +1062,11 @@ export function MobileBrowserPane({
   )
   const renderedFrameSource =
     frameUriRef.current || frameUri ? { uri: frameUriRef.current ?? frameUri! } : null
-  const frameLayerStyle = useCallback((layer: FrameLayer) => {
-    return [
+  const frameLayerClassName = useCallback((layer: FrameLayer) => {
+    return cn(
       styles.browserImageLayer,
       visibleFrameLayerRef.current !== layer && styles.browserImageLayerHidden
-    ]
+    )
   }, [])
   const browserLayerRef = useCallback(
     (layer: FrameLayer) => (layer === 0 ? setBrowserLayer0Ref : setBrowserLayer1Ref),
@@ -1083,31 +1088,32 @@ export function MobileBrowserPane({
   )
 
   return (
-    <View ref={setRootViewRef} style={styles.root}>
-      <View style={styles.toolbar}>
+    <View ref={setRootViewRef} className={styles.root}>
+      <View className={styles.toolbar}>
         <MobileBrowserToolbarIconButton
           disabled={controlsDisabled || !tab.canGoBack}
           label="Back"
           onPress={goBack}
         >
-          <ChevronLeft size={15} color={buttonColor(!controlsDisabled && tab.canGoBack)} />
+          <ChevronLeft size={15} colorClassName="accent-muted-foreground" />
         </MobileBrowserToolbarIconButton>
         <MobileBrowserToolbarIconButton
           disabled={controlsDisabled || !tab.canGoForward}
           label="Forward"
           onPress={goForward}
         >
-          <ChevronRight size={15} color={buttonColor(!controlsDisabled && tab.canGoForward)} />
+          <ChevronRight size={15} colorClassName="accent-muted-foreground" />
         </MobileBrowserToolbarIconButton>
         <MobileBrowserToolbarIconButton
           disabled={controlsDisabled}
           label="Reload"
           onPress={reloadPage}
         >
-          <RefreshCw size={15} color={buttonColor(!controlsDisabled)} />
+          <RefreshCw size={15} colorClassName="accent-muted-foreground" />
         </MobileBrowserToolbarIconButton>
         <TextInput
-          style={styles.addressInput}
+          className={styles.addressInput}
+          style={{ includeFontPadding: false, textAlignVertical: 'center' }}
           value={addressValue}
           onChangeText={setAddressValue}
           onFocus={() => setAddressFocused(true)}
@@ -1121,7 +1127,7 @@ export function MobileBrowserPane({
           numberOfLines={1}
           returnKeyType="go"
           placeholder="URL"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColorClassName="accent-muted-foreground"
           editable={!controlsDisabled}
         />
         <MobileBrowserViewModeSwitch
@@ -1132,7 +1138,7 @@ export function MobileBrowserPane({
       </View>
 
       <View
-        style={styles.viewport}
+        className={styles.viewport}
         onLayout={(event) => {
           const next = {
             width: event.nativeEvent.layout.width,
@@ -1148,12 +1154,12 @@ export function MobileBrowserPane({
         {...panResponder.panHandlers}
       >
         {renderedFrameSource ? (
-          <View style={styles.browserImageHost}>
+          <View className={styles.browserImageHost}>
             {frameGeometry ? (
               <View
                 pointerEvents="none"
+                className={styles.browserZoomOffset}
                 style={[
-                  styles.browserZoomOffset,
                   {
                     width: frameGeometry.renderedWidth,
                     height: frameGeometry.renderedHeight,
@@ -1162,8 +1168,8 @@ export function MobileBrowserPane({
                 ]}
               >
                 <View
+                  className={styles.browserFrameBox}
                   style={[
-                    styles.browserFrameBox,
                     {
                       width: frameGeometry.renderedWidth,
                       height: frameGeometry.renderedHeight,
@@ -1176,7 +1182,7 @@ export function MobileBrowserPane({
                       key={layer}
                       ref={browserLayerRef(layer)}
                       pointerEvents="none"
-                      style={frameLayerStyle(layer)}
+                      className={frameLayerClassName(layer)}
                     >
                       <Image
                         ref={frameLayerRef(layer)}
@@ -1185,8 +1191,8 @@ export function MobileBrowserPane({
                         fadeDuration={0}
                         onLoad={frameLayerLoadHandler(layer)}
                         onError={frameLayerErrorHandler(layer)}
+                        className={styles.browserImage}
                         style={[
-                          styles.browserImage,
                           {
                             width: frameGeometry.renderedWidth,
                             height: frameGeometry.renderedHeight
@@ -1203,7 +1209,7 @@ export function MobileBrowserPane({
                   key={layer}
                   ref={browserLayerRef(layer)}
                   pointerEvents="none"
-                  style={frameLayerStyle(layer)}
+                  className={frameLayerClassName(layer)}
                 >
                   <Image
                     ref={frameLayerRef(layer)}
@@ -1212,7 +1218,7 @@ export function MobileBrowserPane({
                     fadeDuration={0}
                     onLoad={frameLayerLoadHandler(layer)}
                     onError={frameLayerErrorHandler(layer)}
-                    style={styles.browserImageFill}
+                    className={styles.browserImageFill}
                   />
                 </View>
               ))
@@ -1220,39 +1226,38 @@ export function MobileBrowserPane({
           </View>
         ) : null}
         {!renderedFrameSource || busy || error ? (
-          <View pointerEvents="none" style={styles.overlay}>
+          <View pointerEvents="none" className={styles.overlay}>
             {busy || (!ready && !error) ? (
-              <ActivityIndicator size="small" color={colors.textSecondary} />
+              <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             ) : null}
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? <Text className={styles.errorText}>{error}</Text> : null}
           </View>
         ) : null}
         {dialog ? (
-          <View style={styles.dialogOverlay}>
-            <View style={styles.dialogCard}>
-              <Text style={styles.dialogTitle}>Browser Dialog</Text>
-              <Text style={styles.dialogMessage}>{dialog.message}</Text>
-              <View style={styles.dialogActions}>
+          <View className={styles.dialogOverlay}>
+            <View className={styles.dialogCard}>
+              <Text className={styles.dialogTitle}>Browser Dialog</Text>
+              <Text className={styles.dialogMessage}>{dialog.message}</Text>
+              <View className={styles.dialogActions}>
                 {dialog.dialogType !== 'alert' ? (
                   <Pressable
-                    style={({ pressed }) => [
-                      styles.dialogButton,
-                      pressed && styles.dialogButtonPressed
-                    ]}
+                    className={cn(styles.dialogButton, styles.dialogButtonPressedActive)}
                     onPress={() => void sendDialogCommand('browser.dialogDismiss')}
                   >
-                    <Text style={styles.dialogButtonText}>Cancel</Text>
+                    <Text className={styles.dialogButtonText}>Cancel</Text>
                   </Pressable>
                 ) : null}
                 <Pressable
-                  style={({ pressed }) => [
+                  className={cn(
                     styles.dialogButton,
                     styles.dialogButtonPrimary,
-                    pressed && styles.dialogButtonPressed
-                  ]}
+                    styles.dialogButtonPressedActive
+                  )}
                   onPress={() => void sendDialogCommand('browser.dialogAccept')}
                 >
-                  <Text style={[styles.dialogButtonText, styles.dialogButtonPrimaryText]}>OK</Text>
+                  <Text className={cn(styles.dialogButtonText, styles.dialogButtonPrimaryText)}>
+                    OK
+                  </Text>
                 </Pressable>
               </View>
             </View>
@@ -1261,10 +1266,8 @@ export function MobileBrowserPane({
       </View>
 
       <View
-        style={[
-          styles.keyboardDock,
-          { paddingBottom: bottomInset, transform: [{ translateY: -keyboardLift }] }
-        ]}
+        className={styles.keyboardDock}
+        style={[{ paddingBottom: bottomInset, transform: [{ translateY: -keyboardLift }] }]}
       >
         <MobileBrowserPointerModifiers
           disabled={controlsDisabled}
@@ -1275,34 +1278,33 @@ export function MobileBrowserPane({
           disabled={controlsDisabled}
           onKeypress={(key) => void sendKeypress(key)}
         />
-        <View style={styles.inputRow}>
+        <View className={styles.inputRow}>
           <TextInput
-            style={styles.keyboardInput}
+            className={styles.keyboardInput}
             value={keyboardValue}
             onChangeText={setKeyboardValue}
             placeholder="Type on page…"
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColorClassName="accent-muted-foreground"
             autoCapitalize="none"
             autoCorrect={false}
             editable={!controlsDisabled}
             onSubmitEditing={() => void sendKeyboardText()}
           />
           <Pressable
-            style={[styles.sendButton, (controlsDisabled || !keyboardValue) && styles.disabled]}
+            className={cn(
+              styles.sendButton,
+              (controlsDisabled || !keyboardValue) && styles.disabled
+            )}
             disabled={controlsDisabled || !keyboardValue}
             onPress={() => void sendKeyboardText()}
             accessibilityLabel="Send text to browser"
           >
-            <ArrowUp size={18} color={buttonColor(!controlsDisabled && !!keyboardValue)} />
+            <ArrowUp size={18} colorClassName="accent-muted-foreground" />
           </Pressable>
         </View>
       </View>
     </View>
   )
-}
-
-function buttonColor(enabled: boolean): string {
-  return enabled ? colors.textSecondary : colors.textMuted
 }
 
 function createBrowserFrameDataUri(frame: BrowserScreencastFrame): string {
@@ -1479,186 +1481,40 @@ function updatePinchZoom(
   )
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    minHeight: 0,
-    backgroundColor: colors.bgBase
-  },
-  toolbar: {
-    minHeight: 32,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel
-  },
-  addressInput: {
-    flex: 1,
-    minWidth: 0,
-    height: 28,
-    borderRadius: radii.input,
-    backgroundColor: colors.bgRaised,
-    color: colors.textPrimary,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 0,
-    fontSize: 12,
-    lineHeight: 16,
-    includeFontPadding: false,
-    textAlignVertical: 'center',
-    fontFamily: typography.monoFamily
-  },
-  viewport: {
-    flex: 1,
-    minHeight: 0,
-    overflow: 'hidden',
-    backgroundColor: colors.bgBase
-  },
-  browserImageHost: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden'
-  },
-  browserImageFill: {
-    width: '100%',
-    height: '100%'
-  },
-  browserImageLayer: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  browserImageLayerHidden: {
-    opacity: 0
-  },
-  browserZoomOffset: {
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  browserFrameBox: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden'
-  },
-  browserImage: {
-    backgroundColor: colors.bgBase
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-    gap: spacing.sm,
-    backgroundColor: 'rgba(13, 15, 24, 0.2)'
-  },
-  errorText: {
-    color: colors.textPrimary,
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: 13,
-    textAlign: 'center',
-    overflow: 'hidden'
-  },
-  dialogOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-    backgroundColor: 'rgba(13, 15, 24, 0.5)'
-  },
-  dialogCard: {
-    width: '100%',
-    maxWidth: 360,
-    borderRadius: radii.card,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel,
-    padding: spacing.lg
-  },
-  dialogTitle: {
-    color: colors.textPrimary,
-    fontSize: 16,
-    fontWeight: '600'
-  },
-  dialogMessage: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    lineHeight: 20,
-    marginTop: spacing.sm
-  },
-  dialogActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: spacing.sm,
-    marginTop: spacing.lg
-  },
-  dialogButton: {
-    minHeight: 34,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised,
-    paddingHorizontal: spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  dialogButtonPrimary: {
-    backgroundColor: colors.textPrimary
-  },
-  dialogButtonPressed: {
-    opacity: 0.75
-  },
-  dialogButtonText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  },
-  dialogButtonPrimaryText: {
-    color: colors.bgBase
-  },
-  keyboardDock: {
-    zIndex: 20,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.xs + 2
-  },
-  keyboardInput: {
-    flex: 1,
-    height: 34,
-    backgroundColor: colors.bgRaised,
-    color: colors.textPrimary,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    fontSize: 14,
-    fontFamily: typography.monoFamily,
-    marginRight: spacing.sm
-  },
-  sendButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.bgRaised
-  },
-  disabled: {
-    opacity: 0.35
-  },
-  disabledText: {
-    color: colors.textMuted
-  }
-})
+const styles = {
+  root: cn('flex-1 min-h-0 bg-background'),
+  toolbar: cn('min-h-8 flex-row items-center gap-1 px-2 py-[2px] border-b border-b-border bg-card'),
+  addressInput: cn(
+    'flex-1 min-w-0 h-7 rounded-none bg-secondary text-foreground px-2 py-0 text-[12px] leading-[16px] font-mono'
+  ),
+  viewport: cn('flex-1 min-h-0 overflow-hidden bg-background'),
+  browserImageHost: cn('absolute inset-0 items-center justify-center overflow-hidden'),
+  browserImageFill: cn('w-full h-full'),
+  browserImageLayer: cn('absolute inset-0 items-center justify-center'),
+  browserImageLayerHidden: cn('opacity-[0]'),
+  browserZoomOffset: cn('items-center justify-center'),
+  browserFrameBox: cn('items-center justify-center overflow-hidden'),
+  browserImage: cn('bg-background'),
+  overlay: cn('absolute inset-0 items-center justify-center p-6 gap-2 bg-black/20'),
+  errorText: cn(
+    'text-foreground bg-card border border-border rounded-none px-3 py-2 text-[13px] text-center overflow-hidden'
+  ),
+  dialogOverlay: cn('absolute inset-0 z-[30] items-center justify-center p-6 bg-black/50'),
+  dialogCard: cn('w-full max-w-[360px] rounded-none border border-border bg-card p-4'),
+  dialogTitle: cn('text-foreground text-[16px] font-semibold'),
+  dialogMessage: cn('text-muted-foreground text-[14px] leading-[20px] mt-2'),
+  dialogActions: cn('flex-row justify-end gap-2 mt-4'),
+  dialogButton: cn('min-h-[34px] rounded-none bg-secondary px-3 items-center justify-center'),
+  dialogButtonPrimary: cn('bg-foreground'),
+  dialogButtonPressedActive: cn('active:opacity-[0.75]'),
+  dialogButtonText: cn('text-muted-foreground text-[14px] font-semibold'),
+  dialogButtonPrimaryText: cn('text-background'),
+  keyboardDock: cn('z-[20] border-t border-t-border bg-card'),
+  inputRow: cn('flex-row items-center px-3 pt-1 pb-1.5'),
+  keyboardInput: cn(
+    'flex-1 h-[34px] bg-secondary text-foreground rounded-none px-3 text-[14px] font-mono mr-2'
+  ),
+  sendButton: cn('w-[34px] h-[34px] rounded-none items-center justify-center bg-secondary'),
+  disabled: cn('opacity-[0.35]'),
+  disabledText: cn('text-muted-foreground/60')
+} as const

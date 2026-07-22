@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import { useSafeAreaInsets } from '@/components/uniwind-native-components'
 
 import type { RuntimeGitLocalBranches } from '../../../desktop/src/shared/runtime-types'
 import { getWorktreeLabel } from '../session/worktree-label'

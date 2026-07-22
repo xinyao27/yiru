@@ -1,6 +1,8 @@
-import { RefreshCw } from 'lucide-react-native'
 import type { RefObject } from 'react'
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native'
+
+import { ArrowClockwise as RefreshCw } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type { DiffComment } from '../../../desktop/src/shared/types'
 import type { MobileDiffReviewQueueItem } from '../session/mobile-diff-review-queue'
@@ -9,7 +11,6 @@ import type {
   ReviewDiffState,
   ReviewScreenState
 } from '../session/mobile-diff-review-screen-model'
-import { colors } from '../theme/mobile-theme'
 import { MobileDiffReviewLine } from './mobile-diff-review-line'
 import { mobileDiffReviewStyles as styles } from './mobile-diff-review-screen-styles'
 
@@ -83,7 +84,7 @@ export function MobileDiffReviewBody({
           />
         )
       }}
-      contentContainerStyle={styles.diffList}
+      contentContainerClassName={styles.diffList}
       onScrollToIndexFailed={(info) => {
         listRef.current?.scrollToOffset({
           offset: Math.max(0, info.averageItemLength * info.index),
@@ -92,7 +93,7 @@ export function MobileDiffReviewBody({
       }}
       ListFooterComponent={
         diffState.truncated ? (
-          <Text style={styles.truncatedText}>Diff truncated for mobile preview.</Text>
+          <Text className={styles.truncatedText}>Diff truncated for mobile preview.</Text>
         ) : null
       }
     />
@@ -141,21 +142,23 @@ function CenteredState({
   onRetry?: () => void
 }) {
   return (
-    <View style={styles.state}>
+    <View className={styles.state}>
       {busy ? (
-        <ActivityIndicator color={muted ? colors.textSecondary : colors.textPrimary} />
+        <ActivityIndicator
+          colorClassName={muted ? 'accent-muted-foreground' : 'accent-foreground'}
+        />
       ) : null}
-      {title ? <Text style={styles.stateTitle}>{title}</Text> : null}
-      <Text style={styles.stateText}>{text}</Text>
+      {title ? <Text className={styles.stateTitle}>{title}</Text> : null}
+      <Text className={styles.stateText}>{text}</Text>
       {onRetry ? (
         <Pressable
-          style={({ pressed }) => [styles.retryButton, pressed && styles.buttonPressed]}
+          className={cn(styles.retryButton, 'active:opacity-[0.76]')}
           onPress={onRetry}
           accessibilityRole="button"
           accessibilityLabel="Retry loading review"
         >
-          <RefreshCw size={14} color={colors.textPrimary} strokeWidth={2.2} />
-          <Text style={styles.retryText}>Retry</Text>
+          <RefreshCw size={14} colorClassName="accent-foreground" />
+          <Text className={styles.retryText}>Retry</Text>
         </Pressable>
       ) : null}
     </View>

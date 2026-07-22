@@ -38,10 +38,10 @@ export function MobileFilePreviewEditableSource({
   }, [draftContent, lineColumn, revealedTargetKey, selectionTargetKey])
 
   return (
-    <View style={styles.editContainer}>
-      {saveError ? <Text style={styles.saveErrorText}>{saveError}</Text> : null}
+    <View className={styles.editContainer}>
+      {saveError ? <Text className={styles.saveErrorText}>{saveError}</Text> : null}
       <TextInput
-        style={styles.editInput}
+        className={styles.editInput}
         value={draftContent}
         onChangeText={onDraftChange}
         multiline

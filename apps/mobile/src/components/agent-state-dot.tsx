@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { Animated, Easing, StyleSheet, View } from 'react-native'
+import { Animated, Easing, View } from 'react-native'
+
+import { cn } from '@/style/class-names'
 
 import type { AgentDotState } from '../worktree/agent-row-display'
 
@@ -8,12 +10,12 @@ import type { AgentDotState } from '../worktree/agent-row-display'
 // emerald for 'done', red for blocked/waiting/interrupted (attention), neutral
 // for idle. Distinct from the worktree-level AgentSpinner, which collapses the
 // agent vocabulary into the 5-state rollup the sidebar dot uses.
-const DOT_COLORS: Record<Exclude<AgentDotState, 'working'>, string> = {
-  done: '#10b981',
-  blocked: '#ef4444',
-  waiting: '#ef4444',
-  interrupted: '#ef4444',
-  idle: 'rgba(115,115,115,0.4)'
+const DOT_COLOR_CLASSES: Record<Exclude<AgentDotState, 'working'>, string> = {
+  done: 'bg-emerald-500',
+  blocked: 'bg-red-500',
+  waiting: 'bg-red-500',
+  interrupted: 'bg-red-500',
+  idle: 'bg-neutral-500/40'
 }
 
 export function AgentStateDot({ state }: { state: AgentDotState }) {
@@ -39,28 +41,21 @@ export function AgentStateDot({ state }: { state: AgentDotState }) {
   if (state === 'working') {
     const rotate = spinValue.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] })
     return (
-      <View style={styles.wrapper}>
-        <Animated.View style={[styles.spinner, { transform: [{ rotate }] }]} />
+      <View className={styles.wrapper}>
+        <Animated.View className={styles.spinner} style={[{ transform: [{ rotate }] }]} />
       </View>
     )
   }
 
   return (
-    <View style={styles.wrapper}>
-      <View style={[styles.dot, { backgroundColor: DOT_COLORS[state] }]} />
+    <View className={styles.wrapper}>
+      <View className={cn(styles.dot, DOT_COLOR_CLASSES[state])} />
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  wrapper: { width: 10, height: 10, alignItems: 'center', justifyContent: 'center' },
-  dot: { width: 6, height: 6, borderRadius: 3 },
-  spinner: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    borderWidth: 1.5,
-    borderColor: '#eab308',
-    borderTopColor: 'transparent'
-  }
-})
+const styles = {
+  wrapper: cn('w-2.5 h-2.5 items-center justify-center'),
+  dot: cn('w-1.5 h-1.5 rounded-none'),
+  spinner: cn('w-1.5 h-1.5 rounded-none border-[1.5px] border-yellow-500 border-t-transparent')
+} as const

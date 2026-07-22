@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
+
+import { cn } from '@/style/class-names'
 
 import type { RuntimeWorktreeAgentRow } from '../../../desktop/src/shared/runtime-types'
-import { colors, spacing } from '../theme/mobile-theme'
 import { agentDisplayLabel, agentDotState, formatTimeAgo } from '../worktree/agent-row-display'
 import { AgentStateDot } from './agent-state-dot'
 import { MobileAgentIcon } from './mobile-agent-icon'
@@ -25,37 +26,22 @@ export function WorktreeAgentRow({ agent, depth, now, unvisited }: Props) {
   const ts = formatTimeAgo(agent.stateStartedAt, now)
 
   return (
-    <View style={[styles.row, { paddingLeft: depth * INDENT_PER_DEPTH }]}>
+    <View className={styles.row} style={[{ paddingLeft: depth * INDENT_PER_DEPTH }]}>
       <AgentStateDot state={dotState} />
       {/* Agent identity logo (Claude/Codex/…), matching the desktop sidebar's
           agent icons instead of a two-letter text code. */}
       {agent.agentType ? <MobileAgentIcon agentId={agent.agentType} size={13} /> : null}
-      <Text style={[styles.label, unvisited && styles.labelUnvisited]} numberOfLines={1}>
+      <Text className={cn(styles.label, unvisited && styles.labelUnvisited)} numberOfLines={1}>
         {label}
       </Text>
-      <Text style={styles.time}>{ts}</Text>
+      <Text className={styles.time}>{ts}</Text>
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    marginTop: 3
-  },
-  label: {
-    flex: 1,
-    fontSize: 11,
-    color: colors.textMuted
-  },
-  labelUnvisited: {
-    color: colors.textPrimary,
-    fontWeight: '600'
-  },
-  time: {
-    fontSize: 10,
-    color: colors.textMuted
-  }
-})
+const styles = {
+  row: cn('flex-row items-center gap-1 mt-[3px]'),
+  label: cn('flex-1 text-[11px] text-muted-foreground/60'),
+  labelUnvisited: cn('text-foreground font-semibold'),
+  time: cn('text-[10px] text-muted-foreground/60')
+} as const

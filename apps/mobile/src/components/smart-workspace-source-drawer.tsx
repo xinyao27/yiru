@@ -1,16 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View
-} from 'react-native'
+import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'react-native'
+
+import { cn } from '@/style/class-names'
 
 import type { SmartWorkspaceSourceRow as SourceRow } from '../../../desktop/src/shared/new-workspace/smart-workspace-source-results'
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
 import type { RpcClient } from '../transport/rpc-client'
 import type { MrStateFilter, SmartNameMode } from '../workspace-create/mobile-composer-source-types'
 import {
@@ -153,38 +146,40 @@ export function SmartWorkspaceSourceDrawer({
       dragContentToDismiss={false}
       contentScrollable={false}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>Name or 'Create From'</Text>
+      <View className={styles.header}>
+        <Text className={styles.title}>Name or 'Create From'</Text>
         <Pressable onPress={closeSoon} hitSlop={8}>
-          <Text style={styles.done}>Done</Text>
+          <Text className={styles.done}>Done</Text>
         </Pressable>
       </View>
 
       <TextInput
-        style={styles.search}
+        className={styles.search}
         value={composer.name}
         onChangeText={composer.setName}
         placeholder="Type a name or search a source"
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColorClassName="accent-muted-foreground"
         autoCapitalize="none"
         autoCorrect={false}
         autoFocus
       />
 
-      <View style={styles.tabRow}>
+      <View className={styles.tabRow}>
         {SMART_MODE_OPTIONS.filter((option: SmartModeOption) =>
           availableModes.includes(option.id)
         ).map((option) => {
           const selected = option.id === effectiveMode
-          const tint = selected ? colors.textPrimary : colors.textSecondary
           return (
             <Pressable
               key={option.id}
-              style={[styles.tab, selected && styles.tabSelected]}
+              className={cn(styles.tab, selected && styles.tabSelected)}
               onPress={() => setMode(option.id)}
             >
-              <SmartSourceModeIcon icon={option.icon} color={tint} />
-              <Text style={[styles.tabText, selected && styles.tabTextSelected]}>
+              <SmartSourceModeIcon
+                icon={option.icon}
+                colorClassName={selected ? 'accent-foreground' : 'accent-muted-foreground'}
+              />
+              <Text className={cn(styles.tabText, selected && styles.tabTextSelected)}>
                 {option.label}
               </Text>
             </Pressable>
@@ -193,16 +188,16 @@ export function SmartWorkspaceSourceDrawer({
       </View>
 
       {effectiveMode === 'gitlab' ? (
-        <View style={styles.chipRow}>
+        <View className={styles.chipRow}>
           {MR_STATE_FILTER_OPTIONS.map((option) => {
             const selected = option.id === mrStateFilter
             return (
               <Pressable
                 key={option.id}
-                style={[styles.chip, selected && styles.chipSelected]}
+                className={cn(styles.chip, selected && styles.chipSelected)}
                 onPress={() => setMrStateFilter(option.id)}
               >
-                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+                <Text className={cn(styles.chipText, selected && styles.chipTextSelected)}>
                   {option.label}
                 </Text>
               </Pressable>
@@ -212,16 +207,19 @@ export function SmartWorkspaceSourceDrawer({
       ) : null}
 
       {crossRepoPrompt ? (
-        <View style={styles.crossRepo}>
-          <Text style={styles.crossRepoText}>
+        <View className={styles.crossRepo}>
+          <Text className={styles.crossRepoText}>
             This item lives in {crossRepoPrompt.link.slug.owner}/{crossRepoPrompt.link.slug.repo}.
           </Text>
-          <View style={styles.crossRepoActions}>
-            <Pressable style={styles.crossRepoDismiss} onPress={dismissCrossRepoPrompt}>
-              <Text style={styles.crossRepoDismissText}>Cancel</Text>
+          <View className={styles.crossRepoActions}>
+            <Pressable className={styles.crossRepoDismiss} onPress={dismissCrossRepoPrompt}>
+              <Text className={styles.crossRepoDismissText}>Cancel</Text>
             </Pressable>
-            <Pressable style={styles.crossRepoSwitch} onPress={() => void handleAcceptCrossRepo()}>
-              <Text style={styles.crossRepoSwitchText}>
+            <Pressable
+              className={styles.crossRepoSwitch}
+              onPress={() => void handleAcceptCrossRepo()}
+            >
+              <Text className={styles.crossRepoSwitchText}>
                 Switch to {crossRepoPrompt.matchingRepo.displayName}
               </Text>
             </Pressable>
@@ -230,28 +228,28 @@ export function SmartWorkspaceSourceDrawer({
       ) : null}
 
       {!sshReady && effectiveMode !== 'text' ? (
-        <Text style={styles.notice}>Connect the repository to search sources.</Text>
+        <Text className={styles.notice}>Connect the repository to search sources.</Text>
       ) : needsGitHubRemote ? (
-        <Text style={styles.notice}>
+        <Text className={styles.notice}>
           This SSH repo needs a GitHub remote to list pull requests.
         </Text>
       ) : error ? (
-        <Text style={styles.errorNotice}>{error}</Text>
+        <Text className={styles.errorNotice}>{error}</Text>
       ) : null}
 
       <FlatList
         data={rows}
         keyExtractor={(row) => row.value}
-        style={styles.list}
+        className={styles.list}
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled
         ListFooterComponent={
           loading ? (
-            <View style={styles.loading}>
-              <ActivityIndicator size="small" color={colors.textSecondary} />
+            <View className={styles.loading}>
+              <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
             </View>
           ) : showEmpty ? (
-            <Text style={styles.empty}>{emptyHint || 'No results found.'}</Text>
+            <Text className={styles.empty}>{emptyHint || 'No results found.'}</Text>
           ) : null
         }
         renderItem={({ item }) => (
@@ -262,156 +260,33 @@ export function SmartWorkspaceSourceDrawer({
   )
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.xs,
-    paddingBottom: spacing.sm
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  done: {
-    fontSize: typography.bodySize,
-    fontWeight: '600',
-    color: colors.accentBlue
-  },
-  search: {
-    backgroundColor: colors.bgRaised,
-    color: colors.textPrimary,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: typography.bodySize,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    marginBottom: spacing.sm
-  },
-  tabRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-    marginBottom: spacing.sm
-  },
-  tab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: radii.button,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  tabSelected: {
-    backgroundColor: colors.bgPanel,
-    borderColor: colors.textSecondary
-  },
-  tabText: {
-    fontSize: 13,
-    color: colors.textSecondary
-  },
-  tabTextSelected: {
-    color: colors.textPrimary,
-    fontWeight: '600'
-  },
-  chipRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    marginBottom: spacing.sm
-  },
-  chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: radii.button,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  chipSelected: {
-    backgroundColor: colors.bgPanel,
-    borderColor: colors.textSecondary
-  },
-  chipText: {
-    fontSize: 12,
-    color: colors.textSecondary
-  },
-  chipTextSelected: {
-    color: colors.textPrimary,
-    fontWeight: '600'
-  },
-  crossRepo: {
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.input,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    gap: spacing.sm
-  },
-  crossRepoText: {
-    fontSize: 13,
-    color: colors.textSecondary
-  },
-  crossRepoActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: spacing.sm
-  },
-  crossRepoDismiss: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: radii.button,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  crossRepoDismissText: {
-    fontSize: 13,
-    color: colors.textSecondary
-  },
-  crossRepoSwitch: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.textSecondary
-  },
-  crossRepoSwitchText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  notice: {
-    fontSize: 12,
-    color: colors.textMuted,
-    paddingHorizontal: spacing.xs,
-    paddingBottom: spacing.sm
-  },
-  errorNotice: {
-    fontSize: 12,
-    color: colors.statusRed,
-    paddingHorizontal: spacing.xs,
-    paddingBottom: spacing.sm
-  },
-  list: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: radii.card,
-    overflow: 'hidden',
-    maxHeight: 420,
-    flexGrow: 0
-  },
-  loading: {
-    paddingVertical: spacing.lg,
-    alignItems: 'center'
-  },
-  empty: {
-    paddingVertical: spacing.lg,
-    textAlign: 'center',
-    color: colors.textMuted,
-    fontSize: 13
-  }
-})
+const styles = {
+  header: cn('flex-row items-center justify-between px-1 pb-2'),
+  title: cn('text-[15px] font-semibold text-foreground'),
+  done: cn('text-[14px] font-semibold text-primary'),
+  search: cn(
+    'bg-secondary text-foreground rounded-none px-3 py-2 text-[14px] border border-border mb-2'
+  ),
+  tabRow: cn('flex-row flex-wrap gap-1 mb-2'),
+  tab: cn('flex-row items-center gap-1 px-2.5 py-1.5 rounded-none border border-border'),
+  tabSelected: cn('bg-card border-muted-foreground'),
+  tabText: cn('text-[13px] text-muted-foreground'),
+  tabTextSelected: cn('text-foreground font-semibold'),
+  chipRow: cn('flex-row gap-1 mb-2'),
+  chip: cn('px-3 py-1 rounded-none border border-border'),
+  chipSelected: cn('bg-card border-muted-foreground'),
+  chipText: cn('text-[12px] text-muted-foreground'),
+  chipTextSelected: cn('text-foreground font-semibold'),
+  crossRepo: cn('bg-secondary rounded-none border border-border p-3 mb-2 gap-2'),
+  crossRepoText: cn('text-[13px] text-muted-foreground'),
+  crossRepoActions: cn('flex-row justify-end gap-2'),
+  crossRepoDismiss: cn('px-3 py-1.5 rounded-none border border-border'),
+  crossRepoDismissText: cn('text-[13px] text-muted-foreground'),
+  crossRepoSwitch: cn('px-3 py-1.5 rounded-none bg-card border border-muted-foreground'),
+  crossRepoSwitchText: cn('text-[13px] font-semibold text-foreground'),
+  notice: cn('text-[12px] text-muted-foreground/60 px-1 pb-2'),
+  errorNotice: cn('text-[12px] text-destructive px-1 pb-2'),
+  list: cn('bg-card rounded-none overflow-hidden max-h-[420px] grow-0'),
+  loading: cn('py-4 items-center'),
+  empty: cn('py-4 text-center text-muted-foreground/60 text-[13px]')
+} as const

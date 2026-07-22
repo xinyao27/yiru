@@ -1,23 +1,14 @@
-import { ChevronDown, ChevronUp } from 'lucide-react-native'
 import { useState, useEffect, useMemo, useRef } from 'react'
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  Switch,
-  StyleSheet,
-  Platform,
-  ActivityIndicator,
-  Keyboard
-} from 'react-native'
+import { View, Text, TextInput, Pressable, Switch, ActivityIndicator, Keyboard } from 'react-native'
+
+import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import { getComposerRepoWorktreeBranches } from '../../../desktop/src/shared/composer-branch-selection'
 import { shouldPreserveWorkspaceSourceOnRepoChange } from '../../../desktop/src/shared/new-workspace/workspace-source'
 import type { SshConnectionState } from '../../../desktop/src/shared/ssh-types'
 import type { PersistedTrustedYiruHooks, TuiAgent } from '../../../desktop/src/shared/types'
 import { getCachedRepos, setCachedRepos } from '../cache/repo-cache'
-import { colors, spacing, radii, typography } from '../theme/mobile-theme'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcResponse, RpcSuccess } from '../transport/types'
 import { createBlankWorkspace } from '../workspace-create/blank-workspace-create'
@@ -792,27 +783,27 @@ function NewWorktreeModalContent({
       }}
     >
       <BottomDrawer visible={visible && drawerView === 'form'} onClose={onClose}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Create Workspace</Text>
-          <Text style={styles.subtitle}>
+        <View className={styles.header}>
+          <Text className={styles.title}>Create Workspace</Text>
+          <Text className={styles.subtitle}>
             Pick a repository and agent to spin up a new workspace.
           </Text>
         </View>
 
         {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color={colors.textSecondary} />
+          <View className={styles.loadingContainer}>
+            <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
           </View>
         ) : repos.length === 0 ? (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.emptyText}>No repositories found</Text>
+          <View className={styles.loadingContainer}>
+            <Text className={styles.emptyText}>No repositories found</Text>
           </View>
         ) : (
           <>
-            <View style={styles.field}>
-              <Text style={styles.label}>Repository</Text>
+            <View className={styles.field}>
+              <Text className={styles.label}>Repository</Text>
               <Pressable
-                style={styles.fieldButton}
+                className={styles.fieldButton}
                 onPress={() => {
                   prepareSelectionPickerOpen()
                   transitionDrawer('repo')
@@ -820,16 +811,20 @@ function NewWorktreeModalContent({
               >
                 {selectedRepo ? (
                   <View
-                    style={[styles.repoDot, { backgroundColor: repoBadgeColor(selectedRepo) }]}
+                    className={styles.repoDot}
+                    style={[{ backgroundColor: repoBadgeColor(selectedRepo) }]}
                   />
                 ) : null}
                 <Text
-                  style={[styles.fieldButtonText, !selectedRepo && styles.fieldButtonPlaceholder]}
+                  className={cn(
+                    styles.fieldButtonText,
+                    !selectedRepo && styles.fieldButtonPlaceholder
+                  )}
                   numberOfLines={1}
                 >
                   {selectedRepo?.displayName ?? 'Select a repository'}
                 </Text>
-                <ChevronDown size={14} color={colors.textMuted} />
+                <ChevronDown size={14} colorClassName="accent-muted-foreground" />
               </Pressable>
             </View>
 
@@ -842,56 +837,58 @@ function NewWorktreeModalContent({
             />
 
             {composer.forkPushWarning ? (
-              <Text style={styles.sourceWarning}>{composer.forkPushWarning}</Text>
+              <Text className={styles.sourceWarning}>{composer.forkPushWarning}</Text>
             ) : null}
 
             {selectedRepoConnectionId ? (
-              <View style={styles.field}>
-                <Text style={styles.label}>SSH Connection</Text>
-                <View style={styles.sshBox}>
-                  <View style={styles.sshRow}>
+              <View className={styles.field}>
+                <Text className={styles.label}>SSH Connection</Text>
+                <View className={styles.sshBox}>
+                  <View className={styles.sshRow}>
                     <View
-                      style={[
+                      className={cn(
                         styles.sshDot,
                         sshGate.status === 'connected'
                           ? styles.sshDotConnected
                           : sshGate.connectInProgress
                             ? styles.sshDotProgress
                             : styles.sshDotDisconnected
-                      ]}
+                      )}
                     />
-                    <View style={styles.sshCopy}>
-                      <Text style={styles.sshTitle} numberOfLines={1}>
+                    <View className={styles.sshCopy}>
+                      <Text className={styles.sshTitle} numberOfLines={1}>
                         {selectedRepo?.displayName ?? 'Remote repository'}
                       </Text>
-                      <Text style={styles.sshSubtitle}>
+                      <Text className={styles.sshSubtitle}>
                         {workspaceSshStatusLabel(sshGate.status)}
                       </Text>
                     </View>
                     {sshGate.status === 'connected' ? null : (
                       <Pressable
-                        style={[
+                        className={cn(
                           styles.sshConnectButton,
                           sshGate.connectInProgress && styles.disabled
-                        ]}
+                        )}
                         disabled={sshGate.connectInProgress}
                         onPress={() => void connectSelectedSshRepo()}
                       >
-                        <Text style={styles.sshConnectText}>
+                        <Text className={styles.sshConnectText}>
                           {sshGate.connectInProgress ? 'Connecting...' : 'Connect'}
                         </Text>
                       </Pressable>
                     )}
                   </View>
-                  {sshGate.error ? <Text style={styles.errorInline}>{sshGate.error}</Text> : null}
+                  {sshGate.error ? (
+                    <Text className={styles.errorInline}>{sshGate.error}</Text>
+                  ) : null}
                 </View>
               </View>
             ) : null}
 
-            <View style={styles.field}>
-              <Text style={styles.label}>Agent</Text>
+            <View className={styles.field}>
+              <Text className={styles.label}>Agent</Text>
               <Pressable
-                style={[styles.fieldButton, sshGate.requiresConnection && styles.disabled]}
+                className={cn(styles.fieldButton, sshGate.requiresConnection && styles.disabled)}
                 disabled={sshGate.requiresConnection}
                 onPress={() => {
                   prepareSelectionPickerOpen()
@@ -899,19 +896,22 @@ function NewWorktreeModalContent({
                 }}
               >
                 <MobileAgentIcon agentId={selectedAgent.id} size={16} />
-                <Text style={styles.fieldButtonText} numberOfLines={1}>
+                <Text className={styles.fieldButtonText} numberOfLines={1}>
                   {sshGate.requiresConnection ? 'Connect repository first' : selectedAgent.label}
                 </Text>
-                <ChevronDown size={14} color={colors.textMuted} />
+                <ChevronDown size={14} colorClassName="accent-muted-foreground" />
               </Pressable>
             </View>
 
-            <Pressable style={styles.advancedToggle} onPress={() => setShowAdvanced(!showAdvanced)}>
-              <Text style={styles.advancedText}>Advanced</Text>
+            <Pressable
+              className={styles.advancedToggle}
+              onPress={() => setShowAdvanced(!showAdvanced)}
+            >
+              <Text className={styles.advancedText}>Advanced</Text>
               {showAdvanced ? (
-                <ChevronUp size={14} color={colors.textSecondary} />
+                <ChevronUp size={14} colorClassName="accent-muted-foreground" />
               ) : (
-                <ChevronDown size={14} color={colors.textSecondary} />
+                <ChevronDown size={14} colorClassName="accent-muted-foreground" />
               )}
             </Pressable>
 
@@ -922,67 +922,69 @@ function NewWorktreeModalContent({
                   selectedRepoIsGit={selectedRepoIsGit}
                 />
 
-                <View style={styles.field}>
-                  <Text style={styles.label}>Note</Text>
+                <View className={styles.field}>
+                  <Text className={styles.label}>Note</Text>
                   <TextInput
-                    style={styles.input}
+                    className={styles.input}
                     value={note}
                     onChangeText={setNote}
                     placeholder="Write a note"
-                    placeholderTextColor={colors.textMuted}
+                    placeholderTextColorClassName="accent-muted-foreground"
                     autoCapitalize="none"
                     autoCorrect={false}
                   />
                 </View>
 
                 {setupCommand ? (
-                  <View style={styles.field}>
-                    <View style={styles.setupHeader}>
-                      <Text style={styles.label}>Setup script</Text>
+                  <View className={styles.field}>
+                    <View className={styles.setupHeader}>
+                      <Text className={styles.label}>Setup script</Text>
                       {setupSource && (
-                        <View style={styles.sourceBadge}>
-                          <Text style={styles.sourceBadgeText}>
+                        <View className={styles.sourceBadge}>
+                          <Text className={styles.sourceBadgeText}>
                             {setupSource === 'yiru.yaml' ? 'YIRU.YAML' : 'HOOKS'}
                           </Text>
                         </View>
                       )}
                     </View>
-                    <View style={styles.setupBox}>
+                    <View className={styles.setupBox}>
                       {setupRunPolicy === 'ask' ? (
-                        <View style={styles.setupChoiceRow}>
+                        <View className={styles.setupChoiceRow}>
                           <Pressable
-                            style={[
+                            className={cn(
                               styles.setupChoiceButton,
                               setupDecisionChoice === 'run' && styles.setupChoiceButtonSelected
-                            ]}
+                            )}
                             onPress={() => setSetupDecisionChoice('run')}
                           >
-                            <Text style={styles.setupChoiceText}>Run</Text>
+                            <Text className={styles.setupChoiceText}>Run</Text>
                           </Pressable>
                           <Pressable
-                            style={[
+                            className={cn(
                               styles.setupChoiceButton,
                               setupDecisionChoice === 'skip' && styles.setupChoiceButtonSelected
-                            ]}
+                            )}
                             onPress={() => setSetupDecisionChoice('skip')}
                           >
-                            <Text style={styles.setupChoiceText}>Skip</Text>
+                            <Text className={styles.setupChoiceText}>Skip</Text>
                           </Pressable>
                         </View>
                       ) : (
-                        <View style={styles.setupToggleRow}>
-                          <Text style={styles.setupToggleLabel}>Run setup command</Text>
+                        <View className={styles.setupToggleRow}>
+                          <Text className={styles.setupToggleLabel}>Run setup command</Text>
                           <Switch
+                            style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
                             value={runSetup}
                             onValueChange={setRunSetup}
-                            trackColor={{ false: colors.borderSubtle, true: colors.textSecondary }}
-                            thumbColor={colors.textPrimary}
-                            style={styles.setupSwitch}
+                            trackColorOffClassName="accent-border"
+                            trackColorOnClassName="accent-muted-foreground"
+                            thumbColorClassName="accent-foreground"
+                            ios_backgroundColorClassName="accent-border"
                           />
                         </View>
                       )}
-                      <View style={styles.setupCommandBlock}>
-                        <Text style={styles.setupCommand}>{setupCommand}</Text>
+                      <View className={styles.setupCommandBlock}>
+                        <Text className={styles.setupCommand}>{setupCommand}</Text>
                       </View>
                     </View>
                   </View>
@@ -990,18 +992,18 @@ function NewWorktreeModalContent({
               </>
             )}
 
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? <Text className={styles.error}>{error}</Text> : null}
 
-            <View style={styles.actions}>
+            <View className={styles.actions}>
               <Pressable
-                style={[styles.createButton, !canCreate && styles.createButtonDisabled]}
+                className={cn(styles.createButton, !canCreate && styles.createButtonDisabled)}
                 disabled={!canCreate}
                 onPress={() => void handleCreate()}
               >
                 {creating ? (
-                  <ActivityIndicator size="small" color={colors.bgBase} />
+                  <ActivityIndicator size="small" colorClassName="accent-primary-foreground" />
                 ) : (
-                  <Text style={styles.createText}>
+                  <Text className={styles.createText}>
                     {sshGate.requiresConnection ? 'Connect Repository' : 'Create Workspace'}
                   </Text>
                 )}
@@ -1038,7 +1040,12 @@ function NewWorktreeModalContent({
         onSelect={(item) => handleRepoSelected(item.repo)}
         onClose={() => transitionDrawer('form')}
         renderIcon={(item) => {
-          return <View style={[styles.repoDot, { backgroundColor: repoBadgeColor(item.repo) }]} />
+          return (
+            <View
+              className={styles.repoDot}
+              style={[{ backgroundColor: repoBadgeColor(item.repo) }]}
+            />
+          )
         }}
       />
 
@@ -1068,250 +1075,55 @@ function NewWorktreeModalContent({
   )
 }
 
-const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal: spacing.xs,
-    marginBottom: spacing.md
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  subtitle: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2
-  },
-  loadingContainer: {
-    paddingVertical: spacing.xl,
-    alignItems: 'center'
-  },
-  emptyText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize
-  },
-  field: {
-    marginBottom: spacing.md
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: colors.textSecondary,
-    marginBottom: spacing.xs
-  },
-  labelHint: {
-    fontWeight: '400',
-    color: colors.textMuted
-  },
-  fieldButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: Platform.OS === 'ios' ? spacing.sm + 2 : spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  fieldButtonText: {
-    flex: 1,
-    fontSize: typography.bodySize,
-    color: colors.textPrimary
-  },
-  fieldButtonPlaceholder: {
-    color: colors.textMuted
-  },
-  repoDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 999
-  },
-  disabled: {
-    opacity: 0.55
-  },
-  sshBox: {
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.input,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    gap: spacing.xs
-  },
-  sshRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm
-  },
-  sshDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 999
-  },
-  sshDotConnected: {
-    backgroundColor: colors.statusGreen
-  },
-  sshDotProgress: {
-    backgroundColor: colors.statusAmber
-  },
-  sshDotDisconnected: {
-    backgroundColor: colors.statusRed
-  },
-  sshCopy: {
-    flex: 1,
-    minWidth: 0
-  },
-  sshTitle: {
-    fontSize: typography.bodySize,
-    color: colors.textPrimary,
-    fontWeight: '600'
-  },
-  sshSubtitle: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginTop: 1
-  },
-  sshConnectButton: {
-    borderRadius: radii.button,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs
-  },
-  sshConnectText: {
-    color: colors.textPrimary,
-    fontSize: 12,
-    fontWeight: '600'
-  },
-  errorInline: {
-    color: colors.statusRed,
-    fontSize: 12
-  },
-  input: {
-    backgroundColor: colors.bgRaised,
-    color: colors.textPrimary,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: Platform.OS === 'ios' ? spacing.sm + 2 : spacing.sm,
-    fontSize: typography.bodySize,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  error: {
-    color: colors.statusRed,
-    fontSize: 13,
-    marginBottom: spacing.md
-  },
-  sourceWarning: {
-    marginTop: -spacing.sm,
-    marginBottom: spacing.md,
-    fontSize: 12,
-    color: colors.statusAmber
-  },
-  advancedToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingVertical: spacing.sm,
-    marginBottom: spacing.xs
-  },
-  advancedText: {
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    color: colors.textSecondary
-  },
-  setupHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xs
-  },
-  sourceBadge: {
-    backgroundColor: colors.bgRaised,
-    borderRadius: 4,
-    paddingHorizontal: spacing.xs + 2,
-    paddingVertical: 2
-  },
-  sourceBadgeText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.textMuted,
-    letterSpacing: 0.5
-  },
-  setupBox: {
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.input,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    padding: spacing.md
-  },
-  setupToggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm
-  },
-  setupToggleLabel: {
-    fontSize: 13,
-    color: colors.textSecondary
-  },
-  setupChoiceRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.sm
-  },
-  setupChoiceButton: {
-    flex: 1,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.button,
-    paddingVertical: spacing.sm
-  },
-  setupChoiceButtonSelected: {
-    backgroundColor: colors.bgPanel,
-    borderColor: colors.textSecondary
-  },
-  setupChoiceText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  setupSwitch: {
-    transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }]
-  },
-  setupCommandBlock: {
-    backgroundColor: colors.bgBase,
-    borderRadius: 6,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.sm
-  },
-  setupCommand: {
-    fontSize: 13,
-    fontFamily: typography.monoFamily,
-    color: colors.textPrimary
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: spacing.sm
-  },
-  createButton: {
-    backgroundColor: colors.textPrimary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.button,
-    minWidth: 160,
-    alignItems: 'center'
-  },
-  createButtonDisabled: {
-    opacity: 0.4
-  },
-  createText: {
-    color: colors.bgBase,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  }
-})
+const styles = {
+  header: cn('px-1 mb-3'),
+  title: cn('text-[15px] font-semibold text-foreground'),
+  subtitle: cn('text-[13px] text-muted-foreground/60 mt-[2px]'),
+  loadingContainer: cn('py-6 items-center'),
+  emptyText: cn('text-muted-foreground text-[14px]'),
+  field: cn('mb-3'),
+  label: cn('text-[13px] font-medium text-muted-foreground mb-1'),
+  labelHint: cn('font-normal text-muted-foreground/60'),
+  fieldButton: cn(
+    'flex-row items-center gap-2 bg-secondary rounded-none px-3 py-2 ios:py-2.5 border border-border'
+  ),
+  fieldButtonText: cn('flex-1 text-[14px] text-foreground'),
+  fieldButtonPlaceholder: cn('text-muted-foreground/60'),
+  repoDot: cn('w-2 h-2 rounded-none'),
+  disabled: cn('opacity-[0.55]'),
+  sshBox: cn('bg-secondary rounded-none border border-border px-3 py-2 gap-1'),
+  sshRow: cn('flex-row items-center gap-2'),
+  sshDot: cn('w-2 h-2 rounded-none'),
+  sshDotConnected: cn('bg-green-500'),
+  sshDotProgress: cn('bg-amber-500'),
+  sshDotDisconnected: cn('bg-destructive'),
+  sshCopy: cn('flex-1 min-w-0'),
+  sshTitle: cn('text-[14px] text-foreground font-semibold'),
+  sshSubtitle: cn('text-[12px] text-muted-foreground mt-[1px]'),
+  sshConnectButton: cn('rounded-none border border-border px-2 py-1'),
+  sshConnectText: cn('text-foreground text-[12px] font-semibold'),
+  errorInline: cn('text-destructive text-[12px]'),
+  input: cn(
+    'bg-secondary text-foreground rounded-none px-3 py-2 ios:py-2.5 text-[14px] border border-border'
+  ),
+  error: cn('text-destructive text-[13px] mb-3'),
+  sourceWarning: cn('mt-[-8px] mb-3 text-[12px] text-amber-500'),
+  advancedToggle: cn('flex-row items-center gap-1 py-2 mb-1'),
+  advancedText: cn('text-[14px] font-medium text-muted-foreground'),
+  setupHeader: cn('flex-row items-center justify-between mb-1'),
+  sourceBadge: cn('bg-secondary rounded-none px-1.5 py-[2px]'),
+  sourceBadgeText: cn('text-[10px] font-semibold text-muted-foreground/60 tracking-[0.5px]'),
+  setupBox: cn('bg-secondary rounded-none border border-border p-3'),
+  setupToggleRow: cn('flex-row items-center justify-between mb-2'),
+  setupToggleLabel: cn('text-[13px] text-muted-foreground'),
+  setupChoiceRow: cn('flex-row gap-2 mb-2'),
+  setupChoiceButton: cn('flex-1 items-center border border-border rounded-none py-2'),
+  setupChoiceButtonSelected: cn('bg-card border-muted-foreground'),
+  setupChoiceText: cn('text-[13px] font-semibold text-foreground'),
+  setupCommandBlock: cn('bg-background rounded-none px-2.5 py-2'),
+  setupCommand: cn('text-[13px] font-mono text-foreground'),
+  actions: cn('flex-row justify-end mt-2'),
+  createButton: cn('bg-foreground px-4 py-2 rounded-none min-w-40 items-center'),
+  createButtonDisabled: cn('opacity-[0.4]'),
+  createText: cn('text-background text-[14px] font-semibold')
+} as const

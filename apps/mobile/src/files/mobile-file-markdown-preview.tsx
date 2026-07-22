@@ -1,9 +1,10 @@
-import { Code, Pencil } from 'lucide-react-native'
 import { useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 
+import { Code, Pencil } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import { MobileMarkdown } from '../components/mobile-markdown'
-import { colors } from '../theme/mobile-theme'
 import {
   MobileFilePreviewSourceText,
   MobileFilePreviewTruncatedNote
@@ -39,10 +40,10 @@ export function MobileFileMarkdownPreview({
   const sourceSelected = mode === 'source'
 
   return (
-    <View style={styles.modeContainer}>
-      <View style={styles.modeToolbar}>
+    <View className={styles.modeContainer}>
+      <View className={styles.modeToolbar}>
         <Pressable
-          style={[styles.modeToggle, sourceSelected && styles.modeToggleActive]}
+          className={cn(styles.modeToggle, sourceSelected && styles.modeToggleActive)}
           onPress={() => setMode('source')}
           accessibilityRole="button"
           accessibilityState={{ selected: sourceSelected }}
@@ -50,12 +51,11 @@ export function MobileFileMarkdownPreview({
         >
           <Code
             size={15}
-            color={sourceSelected ? colors.textPrimary : colors.textSecondary}
-            strokeWidth={2.2}
+            colorClassName={sourceSelected ? 'accent-foreground' : 'accent-muted-foreground'}
           />
         </Pressable>
         <Pressable
-          style={[styles.modeToggle, previewSelected && styles.modeToggleActive]}
+          className={cn(styles.modeToggle, previewSelected && styles.modeToggleActive)}
           onPress={() => setMode('preview')}
           accessibilityRole="button"
           accessibilityState={{ selected: previewSelected }}
@@ -63,13 +63,12 @@ export function MobileFileMarkdownPreview({
         >
           <Pencil
             size={15}
-            color={previewSelected ? colors.textPrimary : colors.textSecondary}
-            strokeWidth={2.2}
+            colorClassName={previewSelected ? 'accent-foreground' : 'accent-muted-foreground'}
           />
         </Pressable>
       </View>
       {mode === 'preview' ? (
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.markdownContent}>
+        <ScrollView className={styles.scroll} contentContainerClassName={styles.markdownContent}>
           {truncated ? <MobileFilePreviewTruncatedNote byteLength={byteLength} /> : null}
           <MobileMarkdown content={content} />
         </ScrollView>

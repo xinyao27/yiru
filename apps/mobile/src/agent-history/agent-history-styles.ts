@@ -1,243 +1,55 @@
-import { StyleSheet } from 'react-native'
+import { cn } from '@/style/class-names'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
-
-export const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase
-  },
-  header: {
-    backgroundColor: colors.bgBase
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle
-  },
-  backButton: {
-    padding: spacing.xs,
-    borderRadius: radii.button
-  },
-  backButtonPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  titleBlock: {
-    flex: 1,
-    marginHorizontal: spacing.sm
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: typography.titleSize,
-    fontWeight: '600'
-  },
-  meta: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize
-  },
-  refreshButton: {
-    padding: spacing.xs,
-    borderRadius: radii.button
-  },
-  refreshButtonPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  scopeTabs: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    gap: spacing.xs
-  },
-  scopeTab: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgPanel
-  },
-  scopeTabActive: {
-    backgroundColor: colors.bgRaised
-  },
-  scopeTabText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize
-  },
-  scopeTabTextActive: {
-    color: colors.textPrimary,
-    fontWeight: '600'
-  },
-  searchRow: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm
-  },
-  searchInput: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize
-  },
-  list: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xl
-  },
-  groupHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    gap: spacing.sm
-  },
-  groupHeaderText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontWeight: '600',
-    textTransform: 'uppercase'
-  },
-  groupHeaderCount: {
-    color: colors.textMuted,
-    fontSize: typography.metaSize
-  },
-  card: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: radii.card,
-    padding: spacing.md,
-    marginBottom: spacing.sm
-  },
-  cardPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  cardTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm
-  },
-  cardTitle: {
-    flex: 1,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  },
-  cardTimeAgo: {
-    color: colors.textMuted,
-    fontSize: typography.metaSize
-  },
-  cardLastMessage: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    marginTop: spacing.xs
-  },
-  cardMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginTop: spacing.xs
-  },
-  cardMetaText: {
-    color: colors.textMuted,
-    fontSize: typography.metaSize
-  },
-  currentBadge: {
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2
-  },
-  currentBadgeText: {
-    color: colors.accentBlue,
-    fontSize: typography.metaSize,
-    fontWeight: '600'
-  },
-  resumeButton: {
-    minHeight: 28,
-    minWidth: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 'auto',
-    paddingHorizontal: spacing.xs,
-    paddingVertical: spacing.xs,
-    borderRadius: radii.button
-  },
-  resumeButtonPressed: {
-    opacity: 0.78
-  },
-  resumeButtonDisabled: {
-    opacity: 0.45
-  },
-  preview: {
-    marginTop: spacing.sm,
-    paddingTop: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderSubtle,
-    gap: spacing.sm
-  },
-  previewTurn: {
-    gap: 2
-  },
-  previewRole: {
-    color: colors.textMuted,
-    fontSize: typography.metaSize,
-    fontWeight: '600',
-    textTransform: 'uppercase'
-  },
-  previewText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize
-  },
-  noticeBanner: {
-    marginHorizontal: spacing.md,
-    marginTop: spacing.sm,
-    padding: spacing.sm,
-    borderRadius: radii.input,
-    backgroundColor: colors.bgPanel
-  },
-  noticeText: {
-    color: colors.statusAmber,
-    fontSize: typography.metaSize
-  },
-  resumeBanner: {
-    marginHorizontal: spacing.md,
-    marginTop: spacing.sm,
-    padding: spacing.sm,
-    borderRadius: radii.input,
-    backgroundColor: colors.bgPanel
-  },
-  resumeBannerText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize
-  },
-  state: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-    gap: spacing.sm
-  },
-  stateTitle: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  },
-  stateText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    textAlign: 'center'
-  },
-  retryButton: {
-    marginTop: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised
-  },
-  retryText: {
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  }
-})
+export const styles = {
+  container: cn('flex-1 bg-background'),
+  header: cn('bg-background'),
+  topBar: cn('flex-row items-center px-2 py-2 border-b border-b-border'),
+  backButton: cn('p-1 rounded-none'),
+  backButtonPressed: cn('bg-secondary'),
+  backButtonPressedActive: cn('active:bg-secondary'),
+  titleBlock: cn('flex-1 mx-2'),
+  title: cn('text-foreground text-[18px] font-semibold'),
+  meta: cn('text-muted-foreground text-[12px]'),
+  refreshButton: cn('p-1 rounded-none'),
+  refreshButtonPressed: cn('bg-secondary'),
+  refreshButtonPressedActive: cn('active:bg-secondary'),
+  scopeTabs: cn('flex-row px-3 pt-2 gap-1'),
+  scopeTab: cn('flex-1 items-center py-2 rounded-none bg-card'),
+  scopeTabActive: cn('bg-secondary'),
+  scopeTabText: cn('text-muted-foreground text-[14px]'),
+  scopeTabTextActive: cn('text-foreground font-semibold'),
+  searchRow: cn('px-3 pt-2'),
+  searchInput: cn('bg-card rounded-none px-3 py-2 text-foreground text-[14px]'),
+  list: cn('px-3 pt-2 pb-6'),
+  groupHeader: cn('flex-row items-center py-2 gap-2'),
+  groupHeaderText: cn('text-muted-foreground text-[12px] font-semibold uppercase'),
+  groupHeaderCount: cn('text-muted-foreground/60 text-[12px]'),
+  card: cn('bg-card rounded-none p-3 mb-2'),
+  cardPressed: cn('bg-secondary'),
+  cardPressedActive: cn('active:bg-secondary'),
+  cardTopRow: cn('flex-row items-center gap-2'),
+  cardTitle: cn('flex-1 text-foreground text-[14px] font-semibold'),
+  cardTimeAgo: cn('text-muted-foreground/60 text-[12px]'),
+  cardLastMessage: cn('text-muted-foreground text-[12px] mt-1'),
+  cardMetaRow: cn('flex-row items-center flex-wrap gap-2 mt-1'),
+  cardMetaText: cn('text-muted-foreground/60 text-[12px]'),
+  currentBadge: cn('bg-secondary rounded-none px-2 py-[2px]'),
+  currentBadgeText: cn('text-primary text-[12px] font-semibold'),
+  resumeButton: cn('min-h-7 min-w-7 items-center justify-center ml-auto px-1 py-1 rounded-none'),
+  resumeButtonPressed: cn('opacity-[0.78]'),
+  resumeButtonPressedActive: cn('active:opacity-[0.78]'),
+  resumeButtonDisabled: cn('opacity-[0.45]'),
+  preview: cn('mt-2 pt-2 border-t border-t-border gap-2'),
+  previewTurn: cn('gap-[2px]'),
+  previewRole: cn('text-muted-foreground/60 text-[12px] font-semibold uppercase'),
+  previewText: cn('text-muted-foreground text-[12px]'),
+  noticeBanner: cn('mx-3 mt-2 p-2 rounded-none bg-card'),
+  noticeText: cn('text-amber-500 text-[12px]'),
+  resumeBanner: cn('mx-3 mt-2 p-2 rounded-none bg-card'),
+  resumeBannerText: cn('text-muted-foreground text-[12px]'),
+  state: cn('flex-1 items-center justify-center p-6 gap-2'),
+  stateTitle: cn('text-foreground text-[14px] font-semibold'),
+  stateText: cn('text-muted-foreground text-[12px] text-center'),
+  retryButton: cn('mt-2 px-4 py-2 rounded-none bg-secondary'),
+  retryText: cn('text-foreground text-[14px] font-semibold')
+} as const

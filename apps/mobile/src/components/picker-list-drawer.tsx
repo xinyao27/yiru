@@ -1,8 +1,9 @@
-import { Check } from 'lucide-react-native'
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, Text, View } from 'react-native'
 
-import { colors, spacing, typography } from '../theme/mobile-theme'
+import { Check } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import { BottomDrawer, BOTTOM_DRAWER_HIDE_DURATION_MS } from './bottom-drawer'
 
 type Props<T extends { id: string; label: string }> = {
@@ -67,14 +68,14 @@ export function PickerListDrawer<T extends { id: string; label: string }>({
       dragContentToDismiss={false}
       contentScrollable={false}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
+      <View className={styles.header}>
+        <Text className={styles.title}>{title}</Text>
       </View>
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
-        style={styles.group}
-        contentContainerStyle={items.length === 0 ? styles.emptyContent : undefined}
+        className={styles.group}
+        contentContainerClassName={cn(items.length === 0 ? styles.emptyContent : undefined)}
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled
         ItemSeparatorComponent={PickerSeparator}
@@ -82,17 +83,17 @@ export function PickerListDrawer<T extends { id: string; label: string }>({
           const selected = item.id === selectedId
           return (
             <Pressable
-              style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
+              className={cn(styles.item, styles.itemPressedActive)}
               onPress={() => closeThenSelect(item)}
             >
               {renderIcon?.(item)}
               <Text
-                style={[styles.itemText, selected && styles.itemTextSelected]}
+                className={cn(styles.itemText, selected && styles.itemTextSelected)}
                 numberOfLines={1}
               >
                 {item.label}
               </Text>
-              {selected && <Check size={14} color={colors.textPrimary} />}
+              {selected && <Check size={14} colorClassName="accent-foreground" />}
             </Pressable>
           )
         }}
@@ -102,50 +103,17 @@ export function PickerListDrawer<T extends { id: string; label: string }>({
 }
 
 function PickerSeparator() {
-  return <View style={styles.separator} />
+  return <View className={styles.separator} />
 }
 
-const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal: spacing.xs,
-    paddingBottom: spacing.sm
-  },
-  title: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: colors.textMuted
-  },
-  group: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: 12,
-    overflow: 'hidden',
-    maxHeight: 420,
-    flexGrow: 0
-  },
-  emptyContent: {
-    minHeight: spacing.xl
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  itemPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  itemText: {
-    flex: 1,
-    fontSize: typography.bodySize,
-    color: colors.textPrimary
-  },
-  itemTextSelected: {
-    fontWeight: '600'
-  }
-})
+const styles = {
+  header: cn('px-1 pb-2'),
+  title: cn('text-[13px] font-medium text-muted-foreground/60'),
+  group: cn('bg-card rounded-none overflow-hidden max-h-[420px] grow-0'),
+  emptyContent: cn('min-h-6'),
+  separator: cn('h-hairline bg-border mx-3'),
+  item: cn('flex-row items-center gap-2 py-3 px-3.5'),
+  itemPressedActive: cn('active:bg-secondary'),
+  itemText: cn('flex-1 text-[14px] text-foreground'),
+  itemTextSelected: cn('font-semibold')
+} as const

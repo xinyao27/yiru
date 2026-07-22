@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import { cn } from '@/style/class-names'
 
 export type BrowserPointerModifier = 'cmd' | 'ctrl' | 'alt' | 'shift'
 
@@ -23,18 +23,18 @@ export function MobileBrowserPointerModifiers({
   onToggle
 }: Props): React.JSX.Element {
   return (
-    <View style={styles.modifierRow}>
+    <View className={styles.modifierRow}>
       {BROWSER_POINTER_MODIFIERS.map((modifier) => {
         const selected = selectedModifiers.includes(modifier.id)
         return (
           <Pressable
             key={modifier.id}
-            style={({ pressed }) => [
+            className={cn(
               styles.keyButton,
               selected && styles.keyButtonSelected,
-              pressed && !selected && styles.keyButtonPressed,
+              !selected && styles.keyButtonPressedActive,
               disabled && styles.disabled
-            ]}
+            )}
             disabled={disabled}
             onPress={() => onToggle(modifier.id)}
             accessibilityRole="button"
@@ -42,11 +42,11 @@ export function MobileBrowserPointerModifiers({
             accessibilityLabel={`${modifier.label} click modifier`}
           >
             <Text
-              style={[
+              className={cn(
                 styles.keyButtonText,
                 selected && styles.keyButtonTextSelected,
                 disabled && styles.disabledText
-              ]}
+              )}
             >
               {modifier.label}
             </Text>
@@ -57,40 +57,15 @@ export function MobileBrowserPointerModifiers({
   )
 }
 
-const styles = StyleSheet.create({
-  modifierRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingTop: spacing.xs
-  },
-  keyButton: {
-    minHeight: 30,
-    minWidth: 42,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button,
-    backgroundColor: colors.bgRaised,
-    paddingHorizontal: spacing.sm
-  },
-  keyButtonPressed: {
-    backgroundColor: colors.borderSubtle
-  },
-  keyButtonSelected: {
-    backgroundColor: colors.textPrimary
-  },
-  keyButtonText: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    fontFamily: typography.monoFamily
-  },
-  keyButtonTextSelected: {
-    color: colors.bgBase
-  },
-  disabled: {
-    opacity: 0.35
-  },
-  disabledText: {
-    color: colors.textMuted
-  }
-})
+const styles = {
+  modifierRow: cn('flex-row gap-1 px-2 pt-1'),
+  keyButton: cn(
+    'min-h-[30px] min-w-[42px] items-center justify-center rounded-none bg-secondary px-2'
+  ),
+  keyButtonPressedActive: cn('active:bg-border'),
+  keyButtonSelected: cn('bg-foreground'),
+  keyButtonText: cn('text-muted-foreground text-[12px] font-mono'),
+  keyButtonTextSelected: cn('text-background'),
+  disabled: cn('opacity-[0.35]'),
+  disabledText: cn('text-muted-foreground/60')
+} as const

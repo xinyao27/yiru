@@ -1,7 +1,6 @@
-import { GitBranch } from 'lucide-react-native'
+import { GitBranch } from '@/components/uniwind-icons'
 
 import type { ActionSheetAction } from '../components/action-sheet-modal'
-import { colors } from '../theme/mobile-theme'
 import { MOBILE_AI_VAULT_CAPABILITY } from './agent-history-capability'
 import { MobileAgentSessionHistoryIcon } from './mobile-agent-session-history-icon'
 
@@ -36,8 +35,9 @@ export function buildWorktreeNavigationActions(args: Args): ActionSheetAction[] 
   if (args.hostCapabilities.includes(MOBILE_AI_VAULT_CAPABILITY)) {
     actions.push({
       label: 'Agent Session History',
-      renderIcon: () =>
-        MobileAgentSessionHistoryIcon({ size: 16, color: colors.textSecondary, strokeWidth: 2 }),
+      renderIcon: () => (
+        <MobileAgentSessionHistoryIcon size={16} colorClassName="accent-muted-foreground" />
+      ),
       onPress: () => {
         const params = new URLSearchParams({ name: args.worktreeName })
         args.navigate(

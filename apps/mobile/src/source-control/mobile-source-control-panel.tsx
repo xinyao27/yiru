@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+
+import { SafeAreaView } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import { openMobilePrUrl } from '../components/mobile-pr-compose-sheet'
 import { MobilePrViewPanelBody } from '../components/pr-sidebar/mobile-pr-view-panel'
 import { prSidebarDetailsNeedFetch } from '../session/mobile-pr-sidebar-state'
 import { useMobilePrSidebarController } from '../session/use-mobile-pr-sidebar-controller'
-import { colors } from '../theme/mobile-theme'
 import { MobileGitHistoryList } from './mobile-git-history-list'
 import { buildMobilePrChipSummary, countUnresolvedReviewThreads } from './mobile-pr-chip-summary'
 import { MobileSourceControlBranchCard } from './mobile-source-control-branch-card'
@@ -265,18 +266,18 @@ export function MobileSourceControlPanel({
 
   const statusGate =
     screenState.kind === 'loading' ? (
-      <View style={styles.state}>
-        <ActivityIndicator size="small" color={colors.textSecondary} />
+      <View className={styles.state}>
+        <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
       </View>
     ) : screenState.kind === 'error' || screenState.kind === 'unavailable' ? (
-      <View style={styles.state}>
-        <Text style={styles.stateTitle}>
+      <View className={styles.state}>
+        <Text className={styles.stateTitle}>
           {screenState.kind === 'unavailable' ? 'Source Control Unavailable' : 'Unable to Load'}
         </Text>
-        <Text style={styles.stateText}>{screenState.message}</Text>
+        <Text className={styles.stateText}>{screenState.message}</Text>
         {screenState.kind === 'error' ? (
           <Pressable
-            style={styles.retryButton}
+            className={styles.retryButton}
             onPress={() => {
               // Why: retrying the request is useless while the transport's
               // reconnect loop is parked at its give-up cap — revive the
@@ -289,7 +290,7 @@ export function MobileSourceControlPanel({
               void loadStatus()
             }}
           >
-            <Text style={styles.retryText}>Retry</Text>
+            <Text className={styles.retryText}>Retry</Text>
           </Pressable>
         ) : null}
       </View>
@@ -309,11 +310,11 @@ export function MobileSourceControlPanel({
   const conflictAborting = isMobileConflictAborting(busyAction, conflictOperation)
 
   return (
-    <View ref={setRootRef} style={styles.container}>
+    <View ref={setRootRef} className={styles.container}>
       {embedded ? (
-        <View style={styles.header}>{header}</View>
+        <View className={styles.header}>{header}</View>
       ) : (
-        <SafeAreaView style={styles.header} edges={['top']}>
+        <SafeAreaView className={styles.header} edges={['top']}>
           {header}
         </SafeAreaView>
       )}
@@ -341,7 +342,7 @@ export function MobileSourceControlPanel({
       ) : null}
 
       {showChanges ? (
-        <View style={activeTab === 'changes' ? hubStyles.tabBody : hubStyles.tabBodyHidden}>
+        <View className={cn(activeTab === 'changes' ? hubStyles.tabBody : hubStyles.tabBodyHidden)}>
           <MobileSourceControlContent state={state} />
         </View>
       ) : activeTab === 'changes' ? (
@@ -349,7 +350,7 @@ export function MobileSourceControlPanel({
       ) : null}
 
       {showPrBody ? (
-        <View style={hubStyles.tabBody}>
+        <View className={hubStyles.tabBody}>
           <MobilePrViewPanelBody
             client={client}
             connState={connState}
@@ -369,7 +370,7 @@ export function MobileSourceControlPanel({
       ) : null}
 
       {showHistory ? (
-        <View style={activeTab === 'history' ? hubStyles.tabBody : hubStyles.tabBodyHidden}>
+        <View className={cn(activeTab === 'history' ? hubStyles.tabBody : hubStyles.tabBodyHidden)}>
           <MobileGitHistoryList
             client={client}
             connState={connState}

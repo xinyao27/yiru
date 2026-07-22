@@ -1,15 +1,17 @@
+import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+
 import {
-  ChevronDown,
-  ChevronRight,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
   File,
   FileText,
   Folder,
   Image as ImageIcon
-} from 'lucide-react-native'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import { triggerSelection } from '../platform/haptics'
-import { colors, spacing } from '../theme/mobile-theme'
+import { spacing } from '../theme/uniwind-theme-values'
 import { type FileExplorerRow, isMarkdownPath, type TreeNode } from './file-tree'
 import { fileExplorerStyles as styles } from './mobile-file-explorer-styles'
 import { canPreviewMobileFileRow } from './mobile-file-preview-navigation'
@@ -27,30 +29,36 @@ export function MobileFileExplorerRow(props: Props) {
 
   if (item.kind === 'loading') {
     return (
-      <View style={[styles.inlineStatusRow, { paddingLeft: spacing.lg + item.depth * 18 }]}>
-        <View style={styles.chevronSpacer} />
-        <ActivityIndicator size="small" color={colors.textSecondary} />
-        <Text style={styles.inlineStatusText}>Loading...</Text>
+      <View
+        className={styles.inlineStatusRow}
+        style={[{ paddingLeft: spacing.lg + item.depth * 18 }]}
+      >
+        <View className={styles.chevronSpacer} />
+        <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+        <Text className={styles.inlineStatusText}>Loading...</Text>
       </View>
     )
   }
 
   if (item.kind === 'error') {
     return (
-      <View style={[styles.inlineStatusRow, { paddingLeft: spacing.lg + item.depth * 18 }]}>
-        <View style={styles.chevronSpacer} />
-        <Text style={styles.inlineErrorText} numberOfLines={1}>
+      <View
+        className={styles.inlineStatusRow}
+        style={[{ paddingLeft: spacing.lg + item.depth * 18 }]}
+      >
+        <View className={styles.chevronSpacer} />
+        <Text className={styles.inlineErrorText} numberOfLines={1}>
           {item.message || 'Unable to load folder'}
         </Text>
         <Pressable
-          style={({ pressed }) => [styles.inlineRetryButton, pressed && styles.rowPressed]}
+          className={cn(styles.inlineRetryButton, styles.rowPressedActive)}
           onPress={() => {
             triggerSelection()
             onRetryDirectory(item.relativePath)
           }}
           accessibilityLabel={`Retry loading ${item.relativePath}`}
         >
-          <Text style={styles.inlineRetryText}>Retry</Text>
+          <Text className={styles.inlineRetryText}>Retry</Text>
         </Pressable>
       </View>
     )
@@ -94,12 +102,12 @@ function TreeRow(props: {
 
   return (
     <Pressable
-      style={({ pressed }) => [
+      className={cn(
         styles.row,
-        { paddingLeft: spacing.lg + item.depth * 18 },
-        pressed && !disabled && styles.rowPressed,
+        !disabled && styles.rowPressedActive,
         disabled && styles.rowDisabled
-      ]}
+      )}
+      style={{ paddingLeft: spacing.lg + item.depth * 18 }}
       disabled={disabled}
       onPress={() => {
         triggerSelection()
@@ -119,27 +127,30 @@ function TreeRow(props: {
     >
       {isDirectory ? (
         isExpanded ? (
-          <ChevronDown size={16} color={colors.textSecondary} />
+          <ChevronDown size={16} colorClassName="accent-muted-foreground" />
         ) : (
-          <ChevronRight size={16} color={colors.textSecondary} />
+          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         )
       ) : (
-        <View style={styles.chevronSpacer} />
+        <View className={styles.chevronSpacer} />
       )}
       {isDirectory ? (
-        <Folder size={17} color={colors.textSecondary} />
+        <Folder size={17} colorClassName="accent-muted-foreground" />
       ) : markdown ? (
-        <FileText size={17} color={disabled ? colors.textMuted : colors.textSecondary} />
+        <FileText size={17} colorClassName="accent-muted-foreground" />
       ) : isImage ? (
-        <ImageIcon size={17} color={colors.textSecondary} />
+        <ImageIcon size={17} colorClassName="accent-muted-foreground" />
       ) : (
-        <File size={17} color={disabled ? colors.textMuted : colors.textSecondary} />
+        <File size={17} colorClassName="accent-muted-foreground" />
       )}
-      <View style={styles.rowTextBlock}>
-        <Text style={[styles.rowTitle, disabled && styles.rowTitleDisabled]} numberOfLines={1}>
+      <View className={styles.rowTextBlock}>
+        <Text
+          className={cn(styles.rowTitle, disabled && styles.rowTitleDisabled)}
+          numberOfLines={1}
+        >
           {item.name}
         </Text>
-        {disabled ? <Text style={styles.rowMeta}>Unavailable on mobile</Text> : null}
+        {disabled ? <Text className={styles.rowMeta}>Unavailable on mobile</Text> : null}
       </View>
     </Pressable>
   )

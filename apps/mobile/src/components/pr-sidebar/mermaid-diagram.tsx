@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
-import { WebView } from 'react-native-webview'
+import { ScrollView, Text, View } from 'react-native'
+import { useUniwind } from 'uniwind'
 
-import { colors, radii, spacing, typography } from '../../theme/mobile-theme'
+import { UniwindWebView } from '@/components/uniwind-web-view'
+import { cn } from '@/style/class-names'
+
+import { type ThemeColors, useThemeColors } from '../../theme/uniwind-theme-values'
 
 type Props = {
   source: string
@@ -11,25 +14,29 @@ type Props = {
 
 // Renders a ```mermaid fence as a diagram via a sandboxed WebView (mermaid has no
 // native RN renderer). Mermaid is loaded from a CDN inside the WebView HTML, the
-// SVG is themed dark to match the sidebar, and the WebView posts back its rendered
+// SVG follows the active app theme, and the WebView posts back its rendered
 // height so we can size to content. On any failure (no network, parse error,
 // render error) we fall back to the raw source in a labeled mono code box.
 export function MermaidDiagram({ source, base }: Props) {
+  const colors = useThemeColors()
+  const { theme } = useUniwind()
   const [height, setHeight] = useState(0)
   const [failed, setFailed] = useState(false)
-  const html = useMemo(() => buildHtml(source), [source])
+  const colorScheme = theme === 'light' ? 'light' : 'dark'
+  const html = useMemo(() => buildHtml(source, colors, colorScheme), [colorScheme, colors, source])
 
   if (failed) {
     return <MermaidFallback source={source} base={base} />
   }
 
   return (
-    <View style={styles.frame}>
-      <View style={styles.label}>
-        <Text style={styles.labelText}>mermaid</Text>
+    <View className={styles.frame}>
+      <View className={styles.label}>
+        <Text className={styles.labelText}>mermaid</Text>
       </View>
-      <WebView
-        style={[styles.webview, { height: height || 120 }]}
+      <UniwindWebView
+        className={styles.webview}
+        style={[{ height: height || 120 }]}
         originWhitelist={['*']}
         source={{ html }}
         javaScriptEnabled
@@ -63,20 +70,26 @@ export function MermaidDiagram({ source, base }: Props) {
 
 function MermaidFallback({ source, base }: Props) {
   return (
-    <View style={styles.frame}>
-      <View style={styles.label}>
-        <Text style={styles.labelText}>mermaid</Text>
+    <View className={styles.frame}>
+      <View className={styles.label}>
+        <Text className={styles.labelText}>mermaid</Text>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.fallbackScroll}>
-        <Text style={[styles.fallbackText, { fontSize: base - 1 }]}>{source}</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className={styles.fallbackScroll}
+      >
+        <Text className={styles.fallbackText} style={[{ fontSize: base - 1 }]}>
+          {source}
+        </Text>
       </ScrollView>
     </View>
   )
 }
 
 // Self-contained HTML: load mermaid from CDN, render the graph, post the body
-// height (or "error") back to RN. Theme variables match the dark sidebar palette.
-function buildHtml(source: string): string {
+// height (or "error") back to RN. Theme variables follow the active app palette.
+function buildHtml(source: string, colors: ThemeColors, colorScheme: 'light' | 'dark'): string {
   // JSON.stringify safely escapes the user's diagram source for embedding.
   const encoded = JSON.stringify(source)
   return `<!DOCTYPE html>
@@ -103,9 +116,9 @@ function buildHtml(source: string): string {
     document.querySelector('.mermaid').textContent = ${encoded};
     mermaid.initialize({
       startOnLoad: false,
-      theme: 'dark',
+      theme: '${colorScheme === 'dark' ? 'dark' : 'default'}',
       securityLevel: 'strict',
-      darkMode: true,
+      darkMode: ${colorScheme === 'dark'},
       themeVariables: {
         background: '${colors.bgRaised}',
         primaryColor: '${colors.bgPanel}',
@@ -125,28 +138,11 @@ function buildHtml(source: string): string {
 </html>`
 }
 
-const styles = StyleSheet.create({
-  frame: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.row,
-    marginBottom: spacing.sm,
-    overflow: 'hidden',
-    backgroundColor: colors.bgRaised
-  },
-  label: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel
-  },
-  labelText: {
-    color: colors.textSecondary,
-    fontSize: 11,
-    fontFamily: typography.monoFamily
-  },
-  webview: { backgroundColor: colors.bgRaised },
-  fallbackScroll: { padding: spacing.sm },
-  fallbackText: { color: colors.textPrimary, fontFamily: typography.monoFamily }
-})
+const styles = {
+  frame: cn('border-hairline border-border rounded-none mb-2 overflow-hidden bg-secondary'),
+  label: cn('px-2 py-[2px] border-b-hairline border-b-border bg-card'),
+  labelText: cn('text-muted-foreground text-[11px] font-mono'),
+  webview: cn('bg-secondary'),
+  fallbackScroll: cn('p-2'),
+  fallbackText: cn('text-foreground font-mono')
+} as const

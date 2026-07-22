@@ -1,6 +1,7 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { View, Text, Pressable } from 'react-native'
 
-import { colors, spacing, radii, typography } from '../theme/mobile-theme'
+import { cn } from '@/style/class-names'
+
 import { BottomDrawer } from './bottom-drawer'
 
 type Props = {
@@ -26,29 +27,29 @@ export function ConfirmModal({
 }: Props) {
   return (
     <BottomDrawer visible={visible} onClose={onCancel}>
-      <View style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-        {message ? <Text style={styles.message}>{message}</Text> : null}
+      <View className={styles.content}>
+        <Text className={styles.title}>{title}</Text>
+        {message ? <Text className={styles.message}>{message}</Text> : null}
       </View>
-      <View style={styles.buttons}>
+      <View className={styles.buttons}>
         <Pressable
-          style={({ pressed }) => [styles.button, styles.cancelButton, pressed && styles.pressed]}
+          className={cn(styles.button, styles.cancelButton, styles.pressedActive)}
           onPress={onCancel}
         >
-          <Text style={styles.cancelText}>{cancelLabel}</Text>
+          <Text className={styles.cancelText}>{cancelLabel}</Text>
         </Pressable>
         <Pressable
-          style={({ pressed }) => [
+          className={cn(
             styles.button,
             destructive ? styles.destructiveButton : styles.confirmButton,
-            pressed && styles.pressed
-          ]}
+            styles.pressedActive
+          )}
           onPress={() => {
             onConfirm()
             onCancel()
           }}
         >
-          <Text style={destructive ? styles.destructiveText : styles.confirmText}>
+          <Text className={cn(destructive ? styles.destructiveText : styles.confirmText)}>
             {confirmLabel}
           </Text>
         </Pressable>
@@ -57,56 +58,18 @@ export function ConfirmModal({
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    paddingBottom: spacing.lg
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.textPrimary
-  },
-  message: {
-    fontSize: typography.bodySize,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-    lineHeight: 20
-  },
-  buttons: {
-    flexDirection: 'row',
-    gap: spacing.sm
-  },
-  button: {
-    flex: 1,
-    paddingVertical: spacing.sm + 2,
-    borderRadius: radii.button,
-    alignItems: 'center'
-  },
-  cancelButton: {
-    backgroundColor: colors.bgPanel
-  },
-  confirmButton: {
-    backgroundColor: colors.textPrimary
-  },
-  destructiveButton: {
-    backgroundColor: colors.statusRed
-  },
-  pressed: {
-    opacity: 0.7
-  },
-  cancelText: {
-    fontSize: typography.bodySize,
-    fontWeight: '600',
-    color: colors.textSecondary
-  },
-  confirmText: {
-    fontSize: typography.bodySize,
-    fontWeight: '600',
-    color: colors.bgBase
-  },
-  destructiveText: {
-    fontSize: typography.bodySize,
-    fontWeight: '600',
-    color: '#fff'
-  }
-})
+const styles = {
+  content: cn('pb-4'),
+  title: cn('text-[16px] font-bold text-foreground'),
+  message: cn('text-[14px] text-muted-foreground mt-1 leading-[20px]'),
+  buttons: cn('flex-row gap-2'),
+  button: cn('flex-1 py-2.5 rounded-none items-center'),
+  cancelButton: cn('bg-card'),
+  confirmButton: cn('bg-foreground'),
+  destructiveButton: cn('bg-destructive'),
+  pressed: cn('opacity-[0.7]'),
+  pressedActive: cn('active:opacity-[0.7]'),
+  cancelText: cn('text-[14px] font-semibold text-muted-foreground'),
+  confirmText: cn('text-[14px] font-semibold text-background'),
+  destructiveText: cn('text-[14px] font-semibold text-destructive-foreground')
+} as const

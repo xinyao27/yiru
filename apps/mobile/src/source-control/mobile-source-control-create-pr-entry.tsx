@@ -1,7 +1,8 @@
-import { GitPullRequestArrow } from 'lucide-react-native'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 
-import { colors } from '../theme/mobile-theme'
+import { GitPullRequest as GitPullRequestArrow } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import type { MobileCreatePrAction } from './mobile-create-pr-action'
 import { styles } from './mobile-source-control-styles'
 
@@ -15,13 +16,13 @@ export function MobileSourceControlCreatePrEntry({ action }: Props) {
   }
   const enabled = !action.disabled
   return (
-    <View style={styles.createPrBlock}>
+    <View className={styles.createPrBlock}>
       <Pressable
-        style={({ pressed }) => [
+        className={cn(
           styles.createPrButton,
           !enabled && styles.createPrButtonDisabled,
-          pressed && enabled && styles.createPrButtonPressed
-        ]}
+          enabled && 'active:opacity-[0.78]'
+        )}
         disabled={action.disabled}
         onPress={action.onPress}
         accessibilityRole="button"
@@ -29,20 +30,24 @@ export function MobileSourceControlCreatePrEntry({ action }: Props) {
         accessibilityHint={action.hint}
       >
         {action.loading ? (
-          <ActivityIndicator size="small" color={enabled ? colors.bgBase : colors.textSecondary} />
+          <ActivityIndicator
+            size="small"
+            colorClassName={enabled ? 'accent-primary-foreground' : 'accent-muted-foreground'}
+          />
         ) : (
           <GitPullRequestArrow
             size={16}
-            color={enabled ? colors.bgBase : colors.textSecondary}
-            strokeWidth={2.2}
+            colorClassName={enabled ? 'accent-primary-foreground' : 'accent-muted-foreground'}
           />
         )}
-        <Text style={[styles.createPrButtonText, !enabled && styles.createPrButtonTextDisabled]}>
+        <Text
+          className={cn(styles.createPrButtonText, !enabled && styles.createPrButtonTextDisabled)}
+        >
           {action.label}
         </Text>
       </Pressable>
       {action.hint ? (
-        <Text style={styles.createPrHint} numberOfLines={2}>
+        <Text className={styles.createPrHint} numberOfLines={2}>
           {action.hint}
         </Text>
       ) : null}

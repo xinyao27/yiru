@@ -1,11 +1,12 @@
-import { MessageSquare } from 'lucide-react-native'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
+
+import { Chat as MessageSquare } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type { DiffComment } from '../../../desktop/src/shared/types'
 import type { MobileDiffLine } from '../session/mobile-diff-lines'
 import type { MobileHighlightedDiffLine } from '../session/mobile-file-syntax'
 import { mobileDiffLineNumber, mobileDiffLinePrefix } from '../source-control/mobile-diff-format'
-import { colors, spacing, typography } from '../theme/mobile-theme'
 import { MobileSyntaxSegments } from './mobile-syntax-segments'
 
 type Props = {
@@ -40,19 +41,19 @@ export function MobileDiffReviewLine({
 
   return (
     <View
-      style={[
+      className={cn(
         styles.row,
         line.kind === 'add' && styles.addedRow,
         line.kind === 'delete' && styles.deletedRow,
         active && styles.activeRow
-      ]}
+      )}
       accessible
       accessibilityLabel={accessibilityLabelForLine(line)}
     >
-      <Text style={styles.prefix}>{mobileDiffLinePrefix(line.kind)}</Text>
-      <Text style={styles.lineNumber}>{lineNumber ? String(lineNumber) : ''}</Text>
+      <Text className={styles.prefix}>{mobileDiffLinePrefix(line.kind)}</Text>
+      <Text className={styles.lineNumber}>{lineNumber ? String(lineNumber) : ''}</Text>
       <Pressable
-        style={({ pressed }) => [styles.code, pressed && canComment && styles.codePressed]}
+        className={cn(styles.code, canComment && styles.codePressedActive)}
         disabled={!canComment}
         onPress={() => {
           if (canComment && line.newLineNumber !== undefined) {
@@ -66,24 +67,25 @@ export function MobileDiffReviewLine({
             : accessibilityLabelForLine(line)
         }
       >
-        <Text style={styles.codeText}>
+        <Text className={styles.codeText}>
           <MobileSyntaxSegments segments={line.segments} />
         </Text>
       </Pressable>
       {comments.length > 0 ? (
-        <View style={styles.notes}>
+        <View className={styles.notes}>
           {comments.map((comment) => (
             <Pressable
               key={comment.id}
-              style={({ pressed }) => [styles.noteButton, pressed && styles.noteButtonPressed]}
+              className={cn(styles.noteButton, styles.noteButtonPressedActive)}
               onPress={() => onEditNote(comment)}
               accessibilityRole="button"
               accessibilityLabel={`Edit note on line ${comment.lineNumber}`}
             >
               <MessageSquare
                 size={13}
-                color={staleCommentIds.has(comment.id) ? colors.statusAmber : colors.textSecondary}
-                strokeWidth={2}
+                colorClassName={
+                  staleCommentIds.has(comment.id) ? 'accent-amber-500' : 'accent-muted-foreground'
+                }
               />
             </Pressable>
           ))}
@@ -95,67 +97,19 @@ export function MobileDiffReviewLine({
 
 // Row height comes from the 18px code lineHeight alone (no vertical padding or
 // minHeight) so mobile diff density matches the desktop diff editor (STA-1239).
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle
-  },
-  addedRow: {
-    backgroundColor: colors.diffAddedBg
-  },
-  deletedRow: {
-    backgroundColor: colors.diffDeletedBg
-  },
-  activeRow: {
-    borderLeftWidth: 2,
-    borderLeftColor: colors.accentBlue
-  },
-  prefix: {
-    width: 18,
-    textAlign: 'center',
-    color: colors.textMuted,
-    fontFamily: typography.monoFamily,
-    fontSize: typography.metaSize,
-    lineHeight: 18
-  },
-  lineNumber: {
-    width: 44,
-    paddingRight: spacing.xs,
-    textAlign: 'right',
-    color: colors.textMuted,
-    fontFamily: typography.monoFamily,
-    fontSize: typography.metaSize,
-    lineHeight: 18
-  },
-  code: {
-    flex: 1,
-    minWidth: 0,
-    paddingHorizontal: spacing.sm
-  },
-  codePressed: {
-    backgroundColor: colors.bgRaised
-  },
-  codeText: {
-    color: colors.textPrimary,
-    fontFamily: typography.monoFamily,
-    fontSize: 12,
-    lineHeight: 18
-  },
-  notes: {
-    width: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2
-  },
-  noteButton: {
-    minWidth: 32,
-    minHeight: 28,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  noteButtonPressed: {
-    opacity: 0.72
-  }
-})
+const styles = {
+  row: cn('flex-row items-stretch border-b-hairline border-b-border'),
+  addedRow: cn('bg-[var(--editor-diff-inserted-line-background)]'),
+  deletedRow: cn('bg-[var(--editor-diff-removed-line-background)]'),
+  activeRow: cn('border-l-2 border-l-primary'),
+  prefix: cn('w-[18px] text-center text-muted-foreground/60 font-mono text-[12px] leading-[18px]'),
+  lineNumber: cn(
+    'w-11 pr-1 text-right text-muted-foreground/60 font-mono text-[12px] leading-[18px]'
+  ),
+  code: cn('flex-1 min-w-0 px-2'),
+  codePressedActive: cn('active:bg-secondary'),
+  codeText: cn('text-foreground font-mono text-[12px] leading-[18px]'),
+  notes: cn('w-10 items-center justify-center gap-[2px]'),
+  noteButton: cn('min-w-8 min-h-7 items-center justify-center'),
+  noteButtonPressedActive: cn('active:opacity-[0.72]')
+} as const

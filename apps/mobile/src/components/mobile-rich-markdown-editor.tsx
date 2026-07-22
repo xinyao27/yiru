@@ -1,25 +1,31 @@
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
+import { Linking, Pressable, ScrollView, View } from 'react-native'
+import type WebView from 'react-native-webview'
+import type { WebViewMessageEvent } from 'react-native-webview'
+import { useUniwind } from 'uniwind'
+
 import {
-  Bold,
-  Code2,
-  FileCode2,
-  Heading1,
-  Heading2,
-  Heading3,
-  ImageIcon,
-  Italic,
+  TextB as Bold,
+  CodeSimple as Code2,
+  FileCode as FileCode2,
+  TextHOne as Heading1,
+  TextHTwo as Heading2,
+  TextHThree as Heading3,
+  Image as ImageIcon,
+  TextItalic as Italic,
   Link,
   List,
-  ListOrdered,
-  ListTodo,
-  Pilcrow,
-  Quote,
-  Strikethrough
-} from 'lucide-react-native'
-import { memo, useCallback, useEffect, useMemo, useRef, type ComponentType } from 'react'
-import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import WebView, { type WebViewMessageEvent } from 'react-native-webview'
+  ListNumbers as ListOrdered,
+  ListChecks as ListTodo,
+  Paragraph as Pilcrow,
+  Quotes as Quote,
+  TextStrikethrough as Strikethrough,
+  type Icon
+} from '@/components/uniwind-icons'
+import { UniwindWebView } from '@/components/uniwind-web-view'
+import { cn } from '@/style/class-names'
 
-import { colors, radii, spacing } from '../theme/mobile-theme'
+import { useThemeColors } from '../theme/uniwind-theme-values'
 import {
   buildMobileRichMarkdownEditorHtml,
   escapeInjectedJavaScriptString
@@ -87,7 +93,7 @@ type EditorWebViewMessage =
 type ToolbarItem = {
   command: RichMarkdownCommand
   label: string
-  icon: ComponentType<{ size?: number; color?: string }>
+  icon: Icon
 }
 
 const TOOLBAR_ITEMS: ToolbarItem[] = [
@@ -114,11 +120,17 @@ function MobileRichMarkdownEditorInner({
   onChange,
   onKeyboardInsetChange
 }: Props) {
+  const colors = useThemeColors()
+  const { theme } = useUniwind()
   const webViewRef = useRef<WebView>(null)
   const readyRef = useRef(false)
   const documentGenerationRef = useRef(0)
   const currentWebViewContentRef = useRef<string | null>(null)
-  const html = useMemo(() => buildMobileRichMarkdownEditorHtml(), [])
+  const colorScheme = theme === 'light' ? 'light' : 'dark'
+  const html = useMemo(
+    () => buildMobileRichMarkdownEditorHtml(colors, colorScheme),
+    [colorScheme, colors]
+  )
 
   const inject = useCallback((script: string) => {
     webViewRef.current?.injectJavaScript(`${script}\ntrue;`)
@@ -229,12 +241,12 @@ function MobileRichMarkdownEditorInner({
   )
 
   return (
-    <View style={styles.container}>
-      <View style={styles.toolbar}>
+    <View className={styles.container}>
+      <View className={styles.toolbar}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.toolbarContent}
+          contentContainerClassName={styles.toolbarContent}
           keyboardShouldPersistTaps="handled"
         >
           {TOOLBAR_ITEMS.map((item) => {
@@ -246,19 +258,22 @@ function MobileRichMarkdownEditorInner({
                 accessibilityRole="button"
                 accessibilityLabel={item.label}
                 onPress={() => runCommand(item.command)}
-                style={({ pressed }) => [
+                className={cn(
                   styles.toolbarButton,
-                  pressed && editable ? styles.toolbarButtonPressed : null,
+                  editable && styles.toolbarButtonPressedActive,
                   !editable ? styles.toolbarButtonDisabled : null
-                ]}
+                )}
               >
-                <Icon size={15} color={editable ? colors.textPrimary : colors.textMuted} />
+                <Icon
+                  size={15}
+                  colorClassName={editable ? 'accent-foreground' : 'accent-muted-foreground'}
+                />
               </Pressable>
             )
           })}
         </ScrollView>
       </View>
-      <WebView
+      <UniwindWebView
         ref={webViewRef}
         source={{ html, baseUrl: EDITOR_DOCUMENT_URL }}
         originWhitelist={[EDITOR_DOCUMENT_ORIGIN, 'about:blank']}
@@ -268,7 +283,7 @@ function MobileRichMarkdownEditorInner({
         keyboardDisplayRequiresUserAction={false}
         onMessage={handleMessage}
         onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
-        style={styles.webView}
+        className={styles.webView}
         scrollEnabled
         bounces={false}
         nestedScrollEnabled
@@ -281,41 +296,12 @@ function MobileRichMarkdownEditorInner({
 
 export const MobileRichMarkdownEditor = memo(MobileRichMarkdownEditorInner)
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    minHeight: 0,
-    backgroundColor: colors.bgBase
-  },
-  toolbar: {
-    minHeight: 42,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle,
-    backgroundColor: colors.bgPanel
-  },
-  toolbarContent: {
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6
-  },
-  toolbarButton: {
-    minWidth: 30,
-    height: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.xs
-  },
-  toolbarButtonPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  toolbarButtonDisabled: {
-    opacity: 0.55
-  },
-  webView: {
-    flex: 1,
-    minHeight: 0,
-    backgroundColor: colors.bgBase
-  }
-})
+const styles = {
+  container: cn('flex-1 min-h-0 bg-background'),
+  toolbar: cn('min-h-[42px] border-b-hairline border-b-border bg-card'),
+  toolbarContent: cn('items-center gap-1.5 px-2 py-1.5'),
+  toolbarButton: cn('min-w-[30px] h-[30px] items-center justify-center rounded-none px-1'),
+  toolbarButtonPressedActive: cn('active:bg-secondary'),
+  toolbarButtonDisabled: cn('opacity-[0.55]'),
+  webView: cn('flex-1 min-h-0 bg-background')
+} as const

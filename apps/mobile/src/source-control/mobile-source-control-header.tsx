@@ -1,7 +1,13 @@
-import { ChevronLeft, ExternalLink, RefreshCw, X } from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
 
-import { colors } from '../theme/mobile-theme'
+import {
+  CaretLeft as ChevronLeft,
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw,
+  X
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import { styles } from './mobile-source-control-styles'
 
 type Props = {
@@ -26,30 +32,30 @@ export function MobileSourceControlHeader({
   prNumber = null
 }: Props) {
   return (
-    <View style={styles.topBar}>
+    <View className={styles.topBar}>
       <Pressable
-        style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
+        className={cn(styles.backButton, 'active:bg-secondary')}
         onPress={onBack}
         hitSlop={8}
         accessibilityLabel={embedded ? 'Close source control' : 'Back to session'}
       >
         {embedded ? (
-          <X size={22} color={colors.textSecondary} strokeWidth={2.2} />
+          <X size={22} colorClassName="accent-muted-foreground" />
         ) : (
-          <ChevronLeft size={22} color={colors.textSecondary} strokeWidth={2.2} />
+          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         )}
       </Pressable>
-      <View style={styles.titleBlock}>
-        <Text style={styles.title} numberOfLines={1}>
+      <View className={styles.titleBlock}>
+        <Text className={styles.title} numberOfLines={1}>
           Source Control
         </Text>
-        <Text style={styles.meta} numberOfLines={1}>
+        <Text className={styles.meta} numberOfLines={1}>
           {worktreeLabel}
         </Text>
       </View>
       {onOpenPrWeb ? (
         <Pressable
-          style={({ pressed }) => [styles.refreshButton, pressed && styles.refreshButtonPressed]}
+          className={cn(styles.refreshButton, 'active:bg-secondary')}
           onPress={onOpenPrWeb}
           hitSlop={8}
           accessibilityRole="link"
@@ -59,21 +65,21 @@ export function MobileSourceControlHeader({
               : 'Open pull request on the web'
           }
         >
-          <ExternalLink size={18} color={colors.textSecondary} strokeWidth={2.1} />
+          <ExternalLink size={18} colorClassName="accent-muted-foreground" />
         </Pressable>
       ) : null}
       <Pressable
-        style={({ pressed }) => [
+        className={cn(
           styles.refreshButton,
           ioBusy && styles.refreshButtonDisabled,
-          pressed && styles.refreshButtonPressed
-        ]}
+          'active:bg-secondary'
+        )}
         onPress={onRefresh}
         disabled={ioBusy}
         hitSlop={8}
         accessibilityLabel="Refresh source control"
       >
-        <RefreshCw size={18} color={colors.textSecondary} strokeWidth={2.1} />
+        <RefreshCw size={18} colorClassName="accent-muted-foreground" />
       </Pressable>
     </View>
   )

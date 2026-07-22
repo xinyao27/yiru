@@ -1,8 +1,9 @@
-import { ArrowUp, Check, CircleHelp } from 'lucide-react-native'
 import { useMemo, useRef, useState } from 'react'
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Pressable, Text, TextInput, View } from 'react-native'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import { ArrowUp, Check, Question as CircleHelp } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import { formatQuestionAnswer, type MobileChatQuestion } from './mobile-native-chat-question'
 
 type Props = {
@@ -74,14 +75,14 @@ export function MobileNativeChatQuestion({ question, onAnswer }: Props): React.J
   )
 
   return (
-    <View style={styles.card}>
-      <View style={styles.header}>
-        <CircleHelp size={15} color={colors.accentBlue} strokeWidth={2.2} />
-        <Text style={styles.question}>{question.question}</Text>
+    <View className={styles.card}>
+      <View className={styles.header}>
+        <CircleHelp size={15} colorClassName="accent-primary" />
+        <Text className={styles.question}>{question.question}</Text>
       </View>
 
       {hasOptions ? (
-        <View style={styles.options}>
+        <View className={styles.options}>
           {optionRows.map(({ label, key }) => {
             const isSelected = selected.includes(label)
             return (
@@ -89,19 +90,21 @@ export function MobileNativeChatQuestion({ question, onAnswer }: Props): React.J
                 key={key}
                 accessibilityRole={question.multiSelect ? 'checkbox' : 'button'}
                 accessibilityState={question.multiSelect ? { checked: isSelected } : undefined}
-                style={({ pressed }) => [
+                className={cn(
                   styles.option,
                   isSelected && styles.optionSelected,
-                  pressed && styles.pressed
-                ]}
+                  styles.pressedActive
+                )}
                 onPress={() => (question.multiSelect ? toggle(label) : answerSingle(label))}
               >
                 {question.multiSelect ? (
-                  <View style={[styles.checkbox, isSelected && styles.checkboxOn]}>
-                    {isSelected ? <Check size={13} color={colors.bgBase} strokeWidth={3} /> : null}
+                  <View className={cn(styles.checkbox, isSelected && styles.checkboxOn)}>
+                    {isSelected ? (
+                      <Check size={13} colorClassName="accent-primary-foreground" />
+                    ) : null}
                   </View>
                 ) : null}
-                <Text style={styles.optionText}>{label}</Text>
+                <Text className={styles.optionText}>{label}</Text>
               </Pressable>
             )
           })}
@@ -111,46 +114,47 @@ export function MobileNativeChatQuestion({ question, onAnswer }: Props): React.J
       {question.multiSelect && hasOptions ? (
         <Pressable
           accessibilityLabel="Submit selected options"
-          style={({ pressed }) => [
+          className={cn(
             styles.submit,
             !canSubmitMulti && styles.submitDisabled,
-            pressed && canSubmitMulti && styles.pressed
-          ]}
+            canSubmitMulti && styles.pressedActive
+          )}
           onPress={submitMulti}
           disabled={!canSubmitMulti}
         >
-          <Text style={[styles.submitText, !canSubmitMulti && styles.submitTextDisabled]}>
+          <Text className={cn(styles.submitText, !canSubmitMulti && styles.submitTextDisabled)}>
             Submit{selected.length > 0 ? ` (${selected.length})` : ''}
           </Text>
         </Pressable>
       ) : null}
 
-      <View style={styles.freeTextRow}>
+      <View className={styles.freeTextRow}>
         <TextInput
-          style={styles.freeInput}
+          className={styles.freeInput}
           value={freeText}
           onChangeText={setFreeText}
           placeholder={hasOptions ? 'Or type a reply…' : 'Type your reply…'}
-          placeholderTextColor={colors.textMuted}
-          selectionColor={colors.accentBlue}
+          placeholderTextColorClassName="accent-muted-foreground"
+          selectionColorClassName="accent-primary"
           onSubmitEditing={submitFreeText}
           returnKeyType="send"
           multiline
         />
         <Pressable
           accessibilityLabel="Send reply"
-          style={({ pressed }) => [
+          className={cn(
             styles.freeSend,
             !canSendFreeText && styles.freeSendDisabled,
-            pressed && canSendFreeText && styles.pressed
-          ]}
+            canSendFreeText && styles.pressedActive
+          )}
           onPress={submitFreeText}
           disabled={!canSendFreeText}
         >
           <ArrowUp
             size={18}
-            color={canSendFreeText ? colors.bgBase : colors.textMuted}
-            strokeWidth={2.6}
+            colorClassName={
+              canSendFreeText ? 'accent-primary-foreground' : 'accent-muted-foreground'
+            }
           />
         </Pressable>
       </View>
@@ -158,112 +162,30 @@ export function MobileNativeChatQuestion({ question, onAnswer }: Props): React.J
   )
 }
 
-const styles = StyleSheet.create({
-  card: {
-    marginHorizontal: spacing.lg,
-    marginVertical: spacing.sm,
-    padding: spacing.md,
-    gap: spacing.sm,
-    backgroundColor: colors.bgPanel,
-    borderRadius: radii.card,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm
-  },
-  question: {
-    flex: 1,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize + 1,
-    fontWeight: '600',
-    lineHeight: typography.bodySize + 7
-  },
-  options: {
-    gap: spacing.xs
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    minHeight: 44,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.button,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle
-  },
-  optionSelected: {
-    borderColor: colors.accentBlue
-  },
-  optionText: {
-    flex: 1,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize + 1
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: radii.button,
-    borderWidth: 1.5,
-    borderColor: colors.textMuted,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  checkboxOn: {
-    backgroundColor: colors.accentBlue,
-    borderColor: colors.accentBlue
-  },
-  submit: {
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button,
-    backgroundColor: colors.accentBlue
-  },
-  submitDisabled: {
-    backgroundColor: colors.bgRaised
-  },
-  submitText: {
-    color: colors.onMergeGreen,
-    fontSize: typography.bodySize + 1,
-    fontWeight: '600'
-  },
-  submitTextDisabled: {
-    color: colors.textMuted
-  },
-  freeTextRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: spacing.sm
-  },
-  freeInput: {
-    flex: 1,
-    minHeight: 40,
-    maxHeight: 120,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize + 1,
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm
-  },
-  freeSend: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.textPrimary
-  },
-  freeSendDisabled: {
-    backgroundColor: colors.bgRaised
-  },
-  pressed: {
-    opacity: 0.7
-  }
-})
+const styles = {
+  card: cn('mx-4 my-2 p-3 gap-2 bg-card rounded-none border-hairline border-border'),
+  header: cn('flex-row items-center gap-2'),
+  question: cn('flex-1 text-foreground text-[15px] font-semibold leading-[21px]'),
+  options: cn('gap-1'),
+  option: cn(
+    'flex-row items-center gap-2 min-h-11 px-3 py-2 bg-secondary rounded-none border-hairline border-border'
+  ),
+  optionSelected: cn('border-primary'),
+  optionText: cn('flex-1 text-foreground text-[15px]'),
+  checkbox: cn(
+    'w-5 h-5 rounded-none border-[1.5px] border-muted-foreground/60 items-center justify-center'
+  ),
+  checkboxOn: cn('bg-primary border-primary'),
+  submit: cn('min-h-11 items-center justify-center rounded-none bg-primary'),
+  submitDisabled: cn('bg-secondary'),
+  submitText: cn('text-primary-foreground text-[15px] font-semibold'),
+  submitTextDisabled: cn('text-muted-foreground/60'),
+  freeTextRow: cn('flex-row items-end gap-2'),
+  freeInput: cn(
+    'flex-1 min-h-10 max-h-[120px] text-foreground text-[15px] bg-secondary rounded-none px-3 pt-2 pb-2'
+  ),
+  freeSend: cn('w-10 h-10 rounded-none items-center justify-center bg-foreground'),
+  freeSendDisabled: cn('bg-secondary'),
+  pressed: cn('opacity-[0.7]'),
+  pressedActive: cn('active:opacity-[0.7]')
+} as const

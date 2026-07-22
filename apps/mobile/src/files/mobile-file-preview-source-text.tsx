@@ -45,14 +45,14 @@ export function MobileFilePreviewSourceText({
   return (
     <ScrollView
       ref={scrollRef}
-      style={styles.scroll}
-      contentContainerStyle={styles.textContent}
+      className={styles.scroll}
+      contentContainerClassName={styles.textContent}
       onContentSizeChange={revealInitialLine}
     >
       {truncated ? (
         <MobileFilePreviewTruncatedNote byteLength={byteLength ?? content.length} />
       ) : null}
-      <Text selectable style={styles.textPreview} accessibilityLabel="File preview">
+      <Text selectable className={styles.textPreview} accessibilityLabel="File preview">
         <MobileSyntaxSegments segments={syntax.segments} />
       </Text>
     </ScrollView>
@@ -61,7 +61,7 @@ export function MobileFilePreviewSourceText({
 
 export function MobileFilePreviewTruncatedNote({ byteLength }: { byteLength: number }) {
   return (
-    <Text style={styles.truncatedNote}>
+    <Text className={styles.truncatedNote}>
       Preview truncated. File size: {formatPreviewByteLength(byteLength)}.
     </Text>
   )

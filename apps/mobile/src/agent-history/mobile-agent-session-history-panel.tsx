@@ -1,8 +1,10 @@
 import { useRouter } from 'expo-router'
-import { ChevronLeft, RefreshCw } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+
+import { CaretLeft as ChevronLeft, ArrowClockwise as RefreshCw } from '@/components/uniwind-icons'
+import { SafeAreaView } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import type { AiVaultScope, AiVaultSession } from '../../../desktop/src/shared/ai-vault-types'
 import { triggerError, triggerSuccess } from '../platform/haptics'
@@ -17,7 +19,6 @@ import {
   type MobileAiVaultResumeSettings
 } from '../session/ai-vault-resume-launch'
 import { getWorktreeLabel } from '../session/worktree-label'
-import { colors } from '../theme/mobile-theme'
 import { useHostClient } from '../transport/client-context'
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcSuccess } from '../transport/types'
@@ -237,100 +238,100 @@ export function MobileAgentSessionHistoryPanel({
   )
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView style={styles.header} edges={['top']}>
-        <View style={styles.topBar}>
+    <View className={styles.container}>
+      <SafeAreaView className={styles.header} edges={['top']}>
+        <View className={styles.topBar}>
           <Pressable
-            style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
+            className={cn(styles.backButton, styles.backButtonPressedActive)}
             onPress={() => router.back()}
             hitSlop={8}
             accessibilityLabel="Back"
           >
-            <ChevronLeft size={22} color={colors.textSecondary} strokeWidth={2.2} />
+            <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
           </Pressable>
-          <View style={styles.titleBlock}>
-            <Text style={styles.title} numberOfLines={1}>
+          <View className={styles.titleBlock}>
+            <Text className={styles.title} numberOfLines={1}>
               Agent Session History
             </Text>
-            <Text style={styles.meta} numberOfLines={1}>
+            <Text className={styles.meta} numberOfLines={1}>
               {worktreeLabel}
             </Text>
           </View>
           <Pressable
-            style={({ pressed }) => [styles.refreshButton, pressed && styles.refreshButtonPressed]}
+            className={cn(styles.refreshButton, styles.refreshButtonPressedActive)}
             onPress={() => void onRefresh()}
             hitSlop={8}
             accessibilityLabel="Refresh agent sessions"
           >
-            <RefreshCw size={18} color={colors.textSecondary} strokeWidth={2.1} />
+            <RefreshCw size={18} colorClassName="accent-muted-foreground" />
           </Pressable>
         </View>
       </SafeAreaView>
 
       {screenState.kind === 'loading' ? (
-        <View style={styles.state}>
-          <ActivityIndicator size="small" color={colors.textSecondary} />
+        <View className={styles.state}>
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
         </View>
       ) : screenState.kind === 'unsupported' ? (
-        <View style={styles.state}>
-          <Text style={styles.stateTitle}>Agent Session History Unavailable</Text>
-          <Text style={styles.stateText}>
+        <View className={styles.state}>
+          <Text className={styles.stateTitle}>Agent Session History Unavailable</Text>
+          <Text className={styles.stateText}>
             Update Yiru on this host to browse agent session history.
           </Text>
         </View>
       ) : screenState.kind === 'error' ? (
-        <View style={styles.state}>
-          <Text style={styles.stateTitle}>Unable to Load</Text>
-          <Text style={styles.stateText}>{screenState.message}</Text>
-          <Pressable style={styles.retryButton} onPress={retry}>
-            <Text style={styles.retryText}>Retry</Text>
+        <View className={styles.state}>
+          <Text className={styles.stateTitle}>Unable to Load</Text>
+          <Text className={styles.stateText}>{screenState.message}</Text>
+          <Pressable className={styles.retryButton} onPress={retry}>
+            <Text className={styles.retryText}>Retry</Text>
           </Pressable>
         </View>
       ) : (
         <>
-          <View style={styles.scopeTabs}>
+          <View className={styles.scopeTabs}>
             {SCOPE_TABS.map((tab) => {
               const active = scope === tab.scope
               return (
                 <Pressable
                   key={tab.scope}
-                  style={[styles.scopeTab, active && styles.scopeTabActive]}
+                  className={cn(styles.scopeTab, active && styles.scopeTabActive)}
                   onPress={() => onSelectScope(tab.scope)}
                 >
-                  <Text style={[styles.scopeTabText, active && styles.scopeTabTextActive]}>
+                  <Text className={cn(styles.scopeTabText, active && styles.scopeTabTextActive)}>
                     {tab.label}
                   </Text>
                 </Pressable>
               )
             })}
           </View>
-          <View style={styles.searchRow}>
+          <View className={styles.searchRow}>
             <TextInput
-              style={styles.searchInput}
+              className={styles.searchInput}
               value={query}
               onChangeText={setQuery}
               placeholder="Search sessions, repo:, path:"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColorClassName="accent-muted-foreground"
               autoCapitalize="none"
               autoCorrect={false}
             />
           </View>
           {issues.length > 0 ? (
-            <View style={styles.noticeBanner}>
-              <Text style={styles.noticeText}>
+            <View className={styles.noticeBanner}>
+              <Text className={styles.noticeText}>
                 {issues.length} {issues.length === 1 ? 'transcript' : 'transcripts'} skipped
               </Text>
             </View>
           ) : null}
           {resumeMessage ? (
-            <View style={styles.resumeBanner}>
-              <Text style={styles.resumeBannerText}>{resumeMessage}</Text>
+            <View className={styles.resumeBanner}>
+              <Text className={styles.resumeBannerText}>{resumeMessage}</Text>
             </View>
           ) : null}
           {sections.length === 0 ? (
-            <View style={styles.state}>
-              <Text style={styles.stateTitle}>No agent sessions</Text>
-              <Text style={styles.stateText}>
+            <View className={styles.state}>
+              <Text className={styles.stateTitle}>No agent sessions</Text>
+              <Text className={styles.stateText}>
                 {query ? 'No sessions match your search.' : 'No past agent sessions in this scope.'}
               </Text>
             </View>

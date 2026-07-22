@@ -1,4 +1,4 @@
-import { spacing } from '../theme/mobile-theme'
+import { spacing } from '../theme/uniwind-theme-values'
 
 // Use actual window size so narrow iPad splits keep phone-like layouts.
 const WIDE_LAYOUT_MIN_WIDTH = 700

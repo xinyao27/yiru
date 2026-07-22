@@ -1,25 +1,18 @@
 import { useRouter } from 'expo-router'
-import {
-  ChevronLeft,
-  ChevronDown,
-  ChevronUp,
-  Activity,
-  CheckCircle2,
-  ScrollText,
-  XCircle,
-  AlertTriangle
-} from 'lucide-react-native'
 import { useState, useCallback, useRef } from 'react'
+import { View, Text, Pressable, ScrollView, ActivityIndicator, Platform } from 'react-native'
+
 import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  ScrollView,
-  ActivityIndicator,
-  Platform
-} from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+  CaretLeft as ChevronLeft,
+  CaretDown as ChevronDown,
+  CaretUp as ChevronUp,
+  Pulse as Activity,
+  CheckCircle as CheckCircle2,
+  Scroll as ScrollText,
+  XCircle,
+  Warning as AlertTriangle
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import {
   startDiagnosticFetchTimeout,
@@ -31,7 +24,6 @@ import {
   unreachableHostDetail
 } from '../src/diagnostics/host-reachability'
 import { troubleshootCommonIssues } from '../src/diagnostics/troubleshoot-common-issues'
-import { colors, spacing, typography } from '../src/theme/mobile-theme'
 import { loadHosts } from '../src/transport/host-store'
 
 type DiagnosticStatus = 'idle' | 'running' | 'done'
@@ -45,17 +37,17 @@ type CheckResult = {
 function StatusIcon({ status }: { status: CheckResult['status'] }) {
   switch (status) {
     case 'pass':
-      return <CheckCircle2 size={14} color={colors.statusGreen} />
+      return <CheckCircle2 size={14} colorClassName="accent-green-500" />
     case 'fail':
-      return <XCircle size={14} color={colors.statusRed} />
+      return <XCircle size={14} colorClassName="accent-destructive" />
     case 'warn':
-      return <AlertTriangle size={14} color={colors.textMuted} />
+      return <AlertTriangle size={14} colorClassName="accent-muted-foreground" />
   }
 }
 
 export default function TroubleshootScreen() {
   const router = useRouter()
-  const insets = useSafeAreaInsets()
+
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [diagnosticStatus, setDiagnosticStatus] = useState<DiagnosticStatus>('idle')
   const [checks, setChecks] = useState<CheckResult[]>([])
@@ -176,37 +168,34 @@ export default function TroubleshootScreen() {
   }, [])
 
   return (
-    <View
-      ref={setTroubleshootRootRef}
-      style={[styles.container, { paddingTop: insets.top + spacing.sm }]}
-    >
-      <View style={styles.topRow}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} color={colors.textSecondary} />
+    <View ref={setTroubleshootRootRef} className={cn(styles.container, 'pt-safe-offset-2')}>
+      <View className={styles.topRow}>
+        <Pressable className={styles.backButton} onPress={() => router.back()}>
+          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text style={styles.heading}>Troubleshooting</Text>
+        <Text className={styles.heading}>Troubleshooting</Text>
       </View>
 
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        className={styles.scroll}
+        contentContainerClassName={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <Pressable
-          style={({ pressed }) => [
+          className={cn(
             styles.diagnosticButton,
-            pressed && styles.diagnosticButtonPressed,
+            styles.diagnosticButtonPressedActive,
             diagnosticStatus === 'running' && styles.diagnosticButtonDisabled
-          ]}
+          )}
           onPress={runDiagnostics}
           disabled={diagnosticStatus === 'running'}
         >
           {diagnosticStatus === 'running' ? (
-            <ActivityIndicator size="small" color={colors.textPrimary} />
+            <ActivityIndicator size="small" colorClassName="accent-foreground" />
           ) : (
-            <Activity size={16} color={colors.textPrimary} />
+            <Activity size={16} colorClassName="accent-foreground" />
           )}
-          <Text style={styles.diagnosticButtonLabel}>
+          <Text className={styles.diagnosticButtonLabel}>
             {diagnosticStatus === 'running'
               ? 'Running…'
               : diagnosticStatus === 'done'
@@ -216,26 +205,26 @@ export default function TroubleshootScreen() {
         </Pressable>
 
         <Pressable
-          style={({ pressed }) => [
-            styles.diagnosticButton,
-            pressed && styles.diagnosticButtonPressed
-          ]}
+          className={cn(styles.diagnosticButton, styles.diagnosticButtonPressedActive)}
           onPress={() => router.push('/connection-log')}
         >
-          <ScrollText size={16} color={colors.textPrimary} />
-          <Text style={styles.diagnosticButtonLabel}>View connection log</Text>
+          <ScrollText size={16} colorClassName="accent-foreground" />
+          <Text className={styles.diagnosticButtonLabel}>View connection log</Text>
         </Pressable>
 
         {checks.length > 0 && (
-          <View style={styles.section}>
+          <View className={styles.section}>
             {checks.map((check, i) => (
               <View key={i}>
-                {i > 0 && <View style={styles.separator} />}
-                <View style={styles.checkRow}>
+                {i > 0 && <View className={styles.separator} />}
+                <View className={styles.checkRow}>
                   <StatusIcon status={check.status} />
-                  <Text style={styles.checkLabel}>{check.label}</Text>
+                  <Text className={styles.checkLabel}>{check.label}</Text>
                   <Text
-                    style={[styles.checkDetail, check.status === 'fail' && styles.checkDetailFail]}
+                    className={cn(
+                      styles.checkDetail,
+                      check.status === 'fail' && styles.checkDetailFail
+                    )}
                   >
                     {check.detail}
                   </Text>
@@ -245,30 +234,30 @@ export default function TroubleshootScreen() {
           </View>
         )}
 
-        <Text style={styles.sectionHeading}>Common issues</Text>
+        <Text className={styles.sectionHeading}>Common issues</Text>
 
-        <View style={styles.section}>
+        <View className={styles.section}>
           {troubleshootCommonIssues.map((section, i) => (
             <View key={section.id}>
-              {i > 0 && <View style={styles.separator} />}
+              {i > 0 && <View className={styles.separator} />}
               <Pressable
-                style={({ pressed }) => [styles.accordionHeader, pressed && styles.rowPressed]}
+                className={cn(styles.accordionHeader, styles.rowPressedActive)}
                 onPress={() => toggleSection(section.id)}
               >
                 {section.icon}
-                <Text style={styles.accordionTitle}>{section.title}</Text>
+                <Text className={styles.accordionTitle}>{section.title}</Text>
                 {expandedId === section.id ? (
-                  <ChevronUp size={16} color={colors.textMuted} />
+                  <ChevronUp size={16} colorClassName="accent-muted-foreground" />
                 ) : (
-                  <ChevronDown size={16} color={colors.textMuted} />
+                  <ChevronDown size={16} colorClassName="accent-muted-foreground" />
                 )}
               </Pressable>
               {expandedId === section.id && (
-                <View style={styles.accordionBody}>
+                <View className={styles.accordionBody}>
                   {section.steps.map((step, j) => (
-                    <View key={j} style={styles.stepRow}>
-                      <Text style={styles.bullet}>•</Text>
-                      <Text style={styles.stepText}>{step}</Text>
+                    <View key={j} className={styles.stepRow}>
+                      <Text className={styles.bullet}>•</Text>
+                      <Text className={styles.stepText}>{step}</Text>
                     </View>
                   ))}
                 </View>
@@ -277,140 +266,39 @@ export default function TroubleshootScreen() {
           ))}
         </View>
 
-        <View style={{ height: spacing.xl }} />
+        <View className="h-6" />
       </ScrollView>
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase,
-    padding: spacing.lg
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.lg
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.textPrimary
-  },
-  scroll: {
-    flex: 1
-  },
-  scrollContent: {
-    paddingBottom: spacing.xl
-  },
-  diagnosticButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.bgRaised,
-    borderRadius: 10,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.lg
-  },
-  diagnosticButtonPressed: {
-    opacity: 0.7
-  },
-  diagnosticButtonDisabled: {
-    opacity: 0.5
-  },
-  diagnosticButtonLabel: {
-    fontSize: typography.bodySize,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  checkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.sm + 2,
-    paddingHorizontal: spacing.md + 2
-  },
-  checkLabel: {
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    color: colors.textPrimary
-  },
-  checkDetail: {
-    flex: 1,
-    textAlign: 'right',
-    fontSize: typography.metaSize,
-    color: colors.textMuted
-  },
-  checkDetailFail: {
-    color: colors.statusRed
-  },
-  sectionHeading: {
-    fontSize: typography.metaSize,
-    fontWeight: '600',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: spacing.sm,
-    marginTop: spacing.sm,
-    paddingHorizontal: spacing.xs
-  },
-  section: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: spacing.lg
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  },
-  rowPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  accordionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  accordionTitle: {
-    flex: 1,
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    color: colors.textPrimary
-  },
-  accordionBody: {
-    paddingHorizontal: spacing.md + 2,
-    paddingBottom: spacing.md,
-    gap: spacing.xs + 2
-  },
-  stepRow: {
-    flexDirection: 'row',
-    gap: spacing.sm
-  },
-  bullet: {
-    fontSize: typography.metaSize,
-    color: colors.textMuted,
-    lineHeight: 18
-  },
-  stepText: {
-    flex: 1,
-    fontSize: typography.metaSize,
-    color: colors.textMuted,
-    lineHeight: 18
-  }
-})
+const styles = {
+  container: cn('flex-1 bg-background p-4'),
+  topRow: cn('flex-row items-center mb-4'),
+  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
+  heading: cn('text-[20px] font-bold text-foreground'),
+  scroll: cn('flex-1'),
+  scrollContent: cn('pb-6'),
+  diagnosticButton: cn(
+    'flex-row items-center justify-center gap-2 bg-secondary rounded-none py-3 px-4 mb-4'
+  ),
+  diagnosticButtonPressedActive: cn('active:opacity-[0.7]'),
+  diagnosticButtonDisabled: cn('opacity-[0.5]'),
+  diagnosticButtonLabel: cn('text-[14px] font-semibold text-foreground'),
+  checkRow: cn('flex-row items-center gap-2 py-2.5 px-3.5'),
+  checkLabel: cn('text-[14px] font-medium text-foreground'),
+  checkDetail: cn('flex-1 text-right text-[12px] text-muted-foreground/60'),
+  checkDetailFail: cn('text-destructive'),
+  sectionHeading: cn(
+    'text-[12px] font-semibold text-muted-foreground/60 uppercase tracking-[0.5px] mb-2 mt-2 px-1'
+  ),
+  section: cn('bg-card rounded-none overflow-hidden mb-4'),
+  separator: cn('h-hairline bg-border mx-3'),
+  rowPressedActive: cn('active:bg-secondary'),
+  accordionHeader: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
+  accordionTitle: cn('flex-1 text-[14px] font-medium text-foreground'),
+  accordionBody: cn('px-3.5 pb-3 gap-1.5'),
+  stepRow: cn('flex-row gap-2'),
+  bullet: cn('text-[12px] text-muted-foreground/60 leading-[18px]'),
+  stepText: cn('flex-1 text-[12px] text-muted-foreground/60 leading-[18px]')
+} as const

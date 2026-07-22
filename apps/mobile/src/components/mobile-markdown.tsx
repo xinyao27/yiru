@@ -1,6 +1,8 @@
 import { Fragment, memo, useMemo, type ReactNode } from 'react'
 import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
 
+import { cn } from '@/style/class-names'
+
 import {
   detectFilePathSegments,
   isFilePathCodeSpan,
@@ -51,7 +53,7 @@ function renderTextRun(
       return (
         <Text
           key={`${keyPrefix}:${segmentIndex}`}
-          style={styles.link}
+          className={styles.link}
           onPress={() => onOpenFile(segment.path)}
         >
           {segment.value}
@@ -79,19 +81,19 @@ function renderInline(text: string, onOpenFile?: (relativePath: string) => void)
     const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
     if (image) {
       parts.push(
-        <Text key={key} style={styles.link} onPress={() => openMarkdownUrl(image[2]!)}>
+        <Text key={key} className={styles.link} onPress={() => openMarkdownUrl(image[2]!)}>
           {image[1] || 'image'}
         </Text>
       )
     } else if (link) {
       parts.push(
-        <Text key={key} style={styles.link} onPress={() => openMarkdownUrl(link[2]!)}>
+        <Text key={key} className={styles.link} onPress={() => openMarkdownUrl(link[2]!)}>
           {link[1]}
         </Text>
       )
     } else if (/^https?:\/\//i.test(token)) {
       parts.push(
-        <Text key={key} style={styles.link} onPress={() => openMarkdownUrl(token)}>
+        <Text key={key} className={styles.link} onPress={() => openMarkdownUrl(token)}>
           {token}
         </Text>
       )
@@ -101,7 +103,7 @@ function renderInline(text: string, onOpenFile?: (relativePath: string) => void)
         parts.push(
           <Text
             key={key}
-            style={[styles.inlineCode, styles.inlineCodeLink]}
+            className={cn(styles.inlineCode, styles.inlineCodeLink)}
             onPress={() => onOpenFile(normalizeFilePath(code.trim()))}
           >
             {code}
@@ -109,26 +111,26 @@ function renderInline(text: string, onOpenFile?: (relativePath: string) => void)
         )
       } else {
         parts.push(
-          <Text key={key} style={styles.inlineCode}>
+          <Text key={key} className={styles.inlineCode}>
             {code}
           </Text>
         )
       }
     } else if (token.startsWith('~~')) {
       parts.push(
-        <Text key={key} style={styles.strike}>
+        <Text key={key} className={styles.strike}>
           {token.slice(2, -2)}
         </Text>
       )
     } else if (token.startsWith('**') || token.startsWith('__')) {
       parts.push(
-        <Text key={key} style={styles.bold}>
+        <Text key={key} className={styles.bold}>
           {token.slice(2, -2)}
         </Text>
       )
     } else {
       parts.push(
-        <Text key={key} style={styles.italic}>
+        <Text key={key} className={styles.italic}>
           {token.slice(1, -1)}
         </Text>
       )
@@ -152,17 +154,17 @@ function MobileMarkdownInner({ content, fallback = '', textScale = 1, onOpenFile
   const proseScale = scaled(13)
   const listScale = scaled(14)
   if (!text) {
-    return fallback ? <Text style={styles.paragraph}>{fallback}</Text> : null
+    return fallback ? <Text className={styles.paragraph}>{fallback}</Text> : null
   }
 
   return (
-    <View style={styles.root}>
+    <View className={styles.root}>
       {blocks.map((block, index) => {
         if (block.type === 'heading') {
           return (
             <Text
               key={index}
-              style={[styles.heading, block.level <= 2 ? styles.headingLarge : null]}
+              className={cn(styles.heading, block.level <= 2 ? styles.headingLarge : null)}
             >
               {renderInline(block.text, onOpenFile)}
             </Text>
@@ -170,16 +172,18 @@ function MobileMarkdownInner({ content, fallback = '', textScale = 1, onOpenFile
         }
         if (block.type === 'quote') {
           return (
-            <View key={index} style={styles.quote}>
-              <Text style={styles.quoteText}>{renderInline(block.text, onOpenFile)}</Text>
+            <View key={index} className={styles.quote}>
+              <Text className={styles.quoteText}>{renderInline(block.text, onOpenFile)}</Text>
             </View>
           )
         }
         if (block.type === 'code') {
           return (
-            <View key={index} style={styles.codeBlock}>
-              {block.language ? <Text style={styles.codeLanguage}>{block.language}</Text> : null}
-              <Text style={styles.codeText}>{block.text}</Text>
+            <View key={index} className={styles.codeBlock}>
+              {block.language ? (
+                <Text className={styles.codeLanguage}>{block.language}</Text>
+              ) : null}
+              <Text className={styles.codeText}>{block.text}</Text>
             </View>
           )
         }
@@ -187,11 +191,11 @@ function MobileMarkdownInner({ content, fallback = '', textScale = 1, onOpenFile
           return (
             <Pressable
               key={index}
-              style={styles.imageFrame}
+              className={styles.imageFrame}
               onPress={() => openMarkdownUrl(block.url)}
             >
-              <Text style={styles.link}>{block.alt || 'Open image'}</Text>
-              <Text style={styles.imageCaption} numberOfLines={1}>
+              <Text className={styles.link}>{block.alt || 'Open image'}</Text>
+              <Text className={styles.imageCaption} numberOfLines={1}>
                 {block.url}
               </Text>
             </Pressable>
@@ -204,25 +208,25 @@ function MobileMarkdownInner({ content, fallback = '', textScale = 1, onOpenFile
           const hiddenColumns = Math.max(0, block.headers.length - visibleHeaders.length)
           return (
             <ScrollView key={index} horizontal showsHorizontalScrollIndicator={false}>
-              <View style={styles.table}>
-                <View style={styles.tableRow}>
+              <View className={styles.table}>
+                <View className={styles.tableRow}>
                   {visibleHeaders.map((header, cellIndex) => (
-                    <Text key={cellIndex} style={[styles.tableCell, styles.tableHeader]}>
+                    <Text key={cellIndex} className={cn(styles.tableCell, styles.tableHeader)}>
                       {renderInline(header, onOpenFile)}
                     </Text>
                   ))}
                 </View>
                 {visibleRows.map((row, rowIndex) => (
-                  <View key={rowIndex} style={styles.tableRow}>
+                  <View key={rowIndex} className={styles.tableRow}>
                     {visibleHeaders.map((_, cellIndex) => (
-                      <Text key={cellIndex} style={styles.tableCell}>
+                      <Text key={cellIndex} className={styles.tableCell}>
                         {renderInline(row[cellIndex] ?? '', onOpenFile)}
                       </Text>
                     ))}
                   </View>
                 ))}
                 {hiddenRows > 0 || hiddenColumns > 0 ? (
-                  <Text style={styles.tableTruncated}>
+                  <Text className={styles.tableTruncated}>
                     {hiddenRows > 0 ? `${hiddenRows} more rows` : ''}
                     {hiddenRows > 0 && hiddenColumns > 0 ? ' · ' : ''}
                     {hiddenColumns > 0 ? `${hiddenColumns} more columns` : ''}
@@ -234,10 +238,10 @@ function MobileMarkdownInner({ content, fallback = '', textScale = 1, onOpenFile
         }
         if (block.type === 'list') {
           return (
-            <View key={index} style={styles.list}>
+            <View key={index} className={styles.list}>
               {block.items.map((item, itemIndex) => (
-                <View key={itemIndex} style={styles.listItem}>
-                  <Text style={styles.listMarker}>
+                <View key={itemIndex} className={styles.listItem}>
+                  <Text className={styles.listMarker}>
                     {item.checked == null
                       ? block.ordered
                         ? `${itemIndex + 1}.`
@@ -246,7 +250,7 @@ function MobileMarkdownInner({ content, fallback = '', textScale = 1, onOpenFile
                         ? '[x]'
                         : '[ ]'}
                   </Text>
-                  <Text style={[styles.listText, listScale]}>
+                  <Text className={styles.listText} style={[listScale]}>
                     {renderInline(item.text, onOpenFile)}
                   </Text>
                 </View>
@@ -255,10 +259,10 @@ function MobileMarkdownInner({ content, fallback = '', textScale = 1, onOpenFile
           )
         }
         if (block.type === 'rule') {
-          return <View key={index} style={styles.rule} />
+          return <View key={index} className={styles.rule} />
         }
         return (
-          <Text key={index} style={[styles.paragraph, proseScale]}>
+          <Text key={index} className={styles.paragraph} style={[proseScale]}>
             {block.text.split('\n').map((line, lineIndex) => (
               <Fragment key={lineIndex}>
                 {lineIndex > 0 ? '\n' : null}

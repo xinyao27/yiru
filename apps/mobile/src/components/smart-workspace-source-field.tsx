@@ -1,7 +1,14 @@
-import { ExternalLink, GitBranch, GitMerge, GitPullRequest, X } from 'lucide-react-native'
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Linking, Pressable, Text, View } from 'react-native'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import {
+  ArrowSquareOut as ExternalLink,
+  GitBranch,
+  GitMerge,
+  GitPullRequest,
+  X
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import type { SmartNameSelection } from '../workspace-create/mobile-composer-source-types'
 import type { MobileComposerSource } from '../workspace-create/use-mobile-composer-source'
 
@@ -15,12 +22,12 @@ type Props = {
 
 function SelectionIcon({ kind }: { kind: SmartNameSelection['kind'] }) {
   if (kind === 'github-pr') {
-    return <GitPullRequest size={15} color={colors.textSecondary} />
+    return <GitPullRequest size={15} colorClassName="accent-muted-foreground" />
   }
   if (kind === 'gitlab-mr') {
-    return <GitMerge size={15} color={colors.textSecondary} />
+    return <GitMerge size={15} colorClassName="accent-muted-foreground" />
   }
-  return <GitBranch size={15} color={colors.textSecondary} />
+  return <GitBranch size={15} colorClassName="accent-muted-foreground" />
 }
 
 export function SmartWorkspaceSourceField({
@@ -41,14 +48,14 @@ export function SmartWorkspaceSourceField({
   }
 
   return (
-    <View style={styles.field}>
-      <Text style={styles.label}>
-        {label} <Text style={styles.labelHint}>[Optional]</Text>
+    <View className={styles.field}>
+      <Text className={styles.label}>
+        {label} <Text className={styles.labelHint}>[Optional]</Text>
       </Text>
       {selection ? (
-        <View style={styles.pill}>
+        <View className={styles.pill}>
           <SelectionIcon kind={selection.kind} />
-          <Text style={styles.pillLabel} numberOfLines={1}>
+          <Text className={styles.pillLabel} numberOfLines={1}>
             {selection.label}
           </Text>
           {selection.url ? (
@@ -56,21 +63,21 @@ export function SmartWorkspaceSourceField({
               hitSlop={6}
               onPress={() => selection.url && void Linking.openURL(selection.url).catch(() => {})}
             >
-              <ExternalLink size={15} color={colors.textMuted} />
+              <ExternalLink size={15} colorClassName="accent-muted-foreground" />
             </Pressable>
           ) : null}
           <Pressable hitSlop={6} onPress={composer.handleClearSmartNameSelection}>
-            <X size={15} color={colors.textMuted} />
+            <X size={15} colorClassName="accent-muted-foreground" />
           </Pressable>
         </View>
       ) : (
         <Pressable
-          style={[styles.input, disabled && styles.disabled]}
+          className={cn(styles.input, disabled && styles.disabled)}
           disabled={disabled}
           onPress={openDrawer}
         >
           <Text
-            style={[styles.inputText, !composer.name && styles.inputPlaceholder]}
+            className={cn(styles.inputText, !composer.name && styles.inputPlaceholder)}
             numberOfLines={1}
           >
             {composer.name || 'Type a name or search a source'}
@@ -81,52 +88,14 @@ export function SmartWorkspaceSourceField({
   )
 }
 
-const styles = StyleSheet.create({
-  field: {
-    marginBottom: spacing.md
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: colors.textSecondary,
-    marginBottom: spacing.xs
-  },
-  labelHint: {
-    fontWeight: '400',
-    color: colors.textMuted
-  },
-  input: {
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  disabled: {
-    opacity: 0.55
-  },
-  inputText: {
-    fontSize: typography.bodySize,
-    color: colors.textPrimary
-  },
-  inputPlaceholder: {
-    color: colors.textMuted
-  },
-  pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle
-  },
-  pillLabel: {
-    flex: 1,
-    fontSize: typography.bodySize,
-    color: colors.textPrimary
-  }
-})
+const styles = {
+  field: cn('mb-3'),
+  label: cn('text-[13px] font-medium text-muted-foreground mb-1'),
+  labelHint: cn('font-normal text-muted-foreground/60'),
+  input: cn('bg-secondary rounded-none px-3 py-2.5 border border-border'),
+  disabled: cn('opacity-[0.55]'),
+  inputText: cn('text-[14px] text-foreground'),
+  inputPlaceholder: cn('text-muted-foreground/60'),
+  pill: cn('flex-row items-center gap-2 bg-secondary rounded-none px-3 py-2 border border-border'),
+  pillLabel: cn('flex-1 text-[14px] text-foreground')
+} as const

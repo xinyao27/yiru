@@ -2,7 +2,7 @@
 // terminal-web-view.tsx to keep that file within the max-lines budget.
 import type { RuntimeMobileTerminalTheme } from '../../../desktop/src/shared/runtime-types'
 import { TERMINAL_TEXT_SCALES } from '../storage/preferences'
-import { colors } from '../theme/mobile-theme'
+import { colors } from '../theme/uniwind-theme-values'
 import { TERMINAL_PATH_TAP_JS } from './terminal-path-tap-injected'
 import { XTERM_ENGINE_CSS, XTERM_ENGINE_JS } from './terminal-webview-engine.generated'
 import { TERMINAL_QUERY_REPLY_JS } from './terminal-webview-query-reply-injected'
@@ -116,8 +116,8 @@ window.onerror = function(msg) {
     right: 0;
     width: 3px;
     min-height: 24px;
-    border-radius: 999px;
-    background: ${colors.textSecondary};
+    border-radius: 0;
+    background: rgba(192, 202, 245, 0.6);
     will-change: transform, height;
   }
   /* Why: selection overlay sits in unscaled viewport coords, above the
@@ -145,9 +145,8 @@ window.onerror = function(msg) {
     transform: translateX(-50%);
     width: 14px; height: 14px;
     background: #7aa2f7;
-    border-radius: 50%;
+    border-radius: 0;
     border: 2px solid #c0caf5;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   }
   .sel-handle.start::before { top: 8px; }
   .sel-handle.start::after {
@@ -171,8 +170,7 @@ window.onerror = function(msg) {
     position: absolute;
     pointer-events: auto;
     background: #2a2f4a;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    border-radius: 0;
     display: flex;
     overflow: hidden;
     transform: translateY(-100%);

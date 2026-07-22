@@ -1,6 +1,13 @@
-import { Check, CornerDownRight, ExternalLink, Undo2 } from 'lucide-react-native'
 import { memo, useState } from 'react'
 import { Image, Linking, Pressable, Text, View } from 'react-native'
+
+import {
+  Check,
+  ArrowElbowDownRight as CornerDownRight,
+  ArrowSquareOut as ExternalLink,
+  ArrowCounterClockwise as Undo2
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type {
   GitHubReaction,
@@ -8,7 +15,6 @@ import type {
   PRComment
 } from '../../../../desktop/src/shared/types'
 import { isResolvableComment } from '../../session/pr-comment-actions'
-import { colors } from '../../theme/mobile-theme'
 import { CommentMarkdown } from './comment-markdown'
 import { PRCommentComposer } from './pr-comment-composer'
 import { formatPrCommentRelativeTime } from './pr-comment-time'
@@ -40,11 +46,11 @@ function Reactions({ reactions }: { reactions?: GitHubReaction[] }) {
     return null
   }
   return (
-    <View style={styles.reactionsRow}>
+    <View className={styles.reactionsRow}>
       {visible.map((r) => (
-        <View key={r.content} style={styles.reactionChip}>
+        <View key={r.content} className={styles.reactionChip}>
           <Text>{REACTION_EMOJI[r.content]}</Text>
-          <Text style={styles.reactionText}>{r.count}</Text>
+          <Text className={styles.reactionText}>{r.count}</Text>
         </View>
       ))}
     </View>
@@ -84,64 +90,70 @@ export const PRCommentCard = memo(function PRCommentCard({
   }
 
   return (
-    <View style={[styles.card, isReply && styles.reply, comment.isResolved && styles.cardResolved]}>
-      <View style={styles.header}>
+    <View
+      className={cn(
+        styles.card,
+        isReply && styles.reply,
+        comment.isResolved && styles.cardResolved
+      )}
+    >
+      <View className={styles.header}>
         {comment.authorAvatarUrl ? (
-          <Image source={{ uri: comment.authorAvatarUrl }} style={styles.avatar} />
+          <Image source={{ uri: comment.authorAvatarUrl }} className={styles.avatar} />
         ) : (
-          <View style={styles.avatar} />
+          <View className={styles.avatar} />
         )}
         <Text
-          style={[styles.author, comment.isResolved && styles.authorResolved]}
+          className={cn(styles.author, comment.isResolved && styles.authorResolved)}
           numberOfLines={1}
         >
           {comment.author}
         </Text>
-        <Text style={styles.time}>
+        <Text className={styles.time}>
           · {formatPrCommentRelativeTime(comment.createdAt, Date.now())}
         </Text>
         {fileLabel ? (
-          <Text style={styles.path} numberOfLines={1}>
+          <Text className={styles.path} numberOfLines={1}>
             {fileLabel}
           </Text>
         ) : null}
         {comment.isResolved ? (
-          <View style={styles.resolvedChip}>
-            <Text style={styles.resolvedChipText}>resolved</Text>
+          <View className={styles.resolvedChip}>
+            <Text className={styles.resolvedChipText}>resolved</Text>
           </View>
         ) : null}
         {comment.url ? (
           <Pressable
-            style={styles.openButton}
+            className={styles.openButton}
             onPress={() => void Linking.openURL(comment.url).catch(() => {})}
             hitSlop={8}
             accessibilityRole="button"
             accessibilityLabel="Open comment on GitHub"
           >
-            <ExternalLink size={14} color={colors.textSecondary} strokeWidth={2.2} />
+            <ExternalLink size={14} colorClassName="accent-muted-foreground" />
           </Pressable>
         ) : null}
       </View>
-      <View style={styles.body}>
+      <View className={styles.body}>
         <CommentMarkdown content={comment.body} />
         <Reactions reactions={comment.reactions} />
       </View>
       {actions ? (
-        <View style={styles.actionsRow}>
+        <View className={styles.actionsRow}>
           <Pressable
-            style={({ pressed }) => [styles.actionButton, pressed && styles.actionButtonPressed]}
+            className={cn(styles.actionButton, styles.actionButtonPressedActive)}
             onPress={() => setReplyOpen((v) => !v)}
             disabled={replyBusy}
             hitSlop={6}
             accessibilityRole="button"
             accessibilityLabel="Reply to comment"
           >
-            <CornerDownRight size={13} color={colors.textSecondary} strokeWidth={2.2} />
-            <Text style={styles.actionButtonText}>Reply</Text>
+            <CornerDownRight size={13} colorClassName="accent-muted-foreground" />
+            <Text className={styles.actionButtonText}>Reply</Text>
           </Pressable>
           {canResolve ? (
             <Pressable
-              style={({ pressed }) => [styles.actionButton, pressed && styles.actionButtonPressed]}
+              className={cn(styles.actionButton, styles.actionButtonPressedActive)}
               onPress={() => void actions.toggleResolve(comment)}
               disabled={resolveBusy}
               hitSlop={6}
@@ -149,11 +161,11 @@ export const PRCommentCard = memo(function PRCommentCard({
               accessibilityLabel={comment.isResolved ? 'Unresolve thread' : 'Resolve thread'}
             >
               {comment.isResolved ? (
-                <Undo2 size={13} color={colors.textSecondary} strokeWidth={2.2} />
+                <Undo2 size={13} colorClassName="accent-muted-foreground" />
               ) : (
-                <Check size={13} color={colors.textSecondary} strokeWidth={2.2} />
+                <Check size={13} colorClassName="accent-muted-foreground" />
               )}
-              <Text style={styles.actionButtonText}>
+              <Text className={styles.actionButtonText}>
                 {resolveBusy ? '…' : comment.isResolved ? 'Unresolve' : 'Resolve'}
               </Text>
             </Pressable>
@@ -161,7 +173,7 @@ export const PRCommentCard = memo(function PRCommentCard({
         </View>
       ) : null}
       {replyOpen && actions ? (
-        <View style={styles.composer}>
+        <View className={styles.composer}>
           <PRCommentComposer
             placeholder="Write a reply…"
             submitLabel="Reply"

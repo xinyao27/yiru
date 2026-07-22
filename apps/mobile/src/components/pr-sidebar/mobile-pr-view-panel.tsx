@@ -1,9 +1,10 @@
-import { StyleSheet, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { View } from 'react-native'
+
+import { useSafeAreaInsets } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import type { MobilePrSidebarController } from '../../session/use-mobile-pr-sidebar-controller'
 import type { MobileGitStatusResult } from '../../source-control/mobile-git-status'
-import { colors } from '../../theme/mobile-theme'
 import type { RpcClient } from '../../transport/rpc-client'
 import type { ConnectionState } from '../../transport/types'
 import { MobilePRSidebar } from '../mobile-pr-sidebar'
@@ -51,7 +52,7 @@ export function MobilePrViewPanelBody({
         : controller.prSidebarState
 
   return (
-    <View style={styles.container}>
+    <View className={styles.container}>
       <MobilePRSidebar
         state={sidebarState}
         onRetry={controller.retryPRSidebar}
@@ -70,9 +71,6 @@ export function MobilePrViewPanelBody({
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase
-  }
-})
+const styles = {
+  container: cn('flex-1 bg-background')
+} as const

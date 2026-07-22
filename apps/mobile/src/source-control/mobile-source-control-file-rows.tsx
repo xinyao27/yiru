@@ -1,11 +1,21 @@
-import { ChevronRight, FileText, Minus, Plus, Trash2 } from 'lucide-react-native'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import type { SectionListRenderItem } from 'react-native'
 
-import { colors } from '../theme/mobile-theme'
+import {
+  CaretRight as ChevronRight,
+  FileText,
+  Minus,
+  Plus,
+  Trash as Trash2
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
+
 import { formatMobileBranchEntryMeta } from './mobile-branch-entry-format'
 import { MOBILE_GIT_STATUS_LABELS, type MobileSourceControlSection } from './mobile-git-status'
-import { statusColor, type MobileGitStatusEntryView } from './mobile-source-control-screen-state'
+import {
+  statusColorClassName,
+  type MobileGitStatusEntryView
+} from './mobile-source-control-screen-state'
 import { styles } from './mobile-source-control-styles'
 import type { MobileSourceControlState } from './use-mobile-source-control-state'
 
@@ -38,52 +48,48 @@ export function makeRenderFileRow(
     const ioBusy = busyAction !== null || openingPath !== null || openingBranchPath !== null
     return (
       <Pressable
-        style={({ pressed }) => [
+        className={cn(
           styles.fileRow,
-          pressed && item.canOpen && styles.fileRowPressed,
+          item.canOpen && 'active:bg-card',
           rowDisabled && styles.fileRowDisabled,
           !item.canOpen && styles.fileRowUnavailable
-        ]}
+        )}
         onPress={() => void openFile(item)}
         disabled={rowDisabled}
         accessibilityLabel={`Open changed file ${item.path}`}
       >
-        <View style={styles.statusBadge}>
-          <Text style={[styles.statusBadgeText, { color: statusColor(item.status) }]}>
+        <View className={styles.statusBadge}>
+          <Text className={cn(styles.statusBadgeText, statusColorClassName(item.status))}>
             {MOBILE_GIT_STATUS_LABELS[item.status]}
           </Text>
         </View>
-        <FileText
-          size={16}
-          color={item.canOpen ? colors.textSecondary : colors.textMuted}
-          strokeWidth={2.1}
-        />
-        <View style={styles.fileTextBlock}>
+        <FileText size={16} colorClassName="accent-muted-foreground" />
+        <View className={styles.fileTextBlock}>
           <Text
-            style={[styles.filePath, !item.canOpen && styles.filePathDisabled]}
+            className={cn(styles.filePath, !item.canOpen && styles.filePathDisabled)}
             numberOfLines={1}
           >
             {item.path}
           </Text>
           {item.oldPath ? (
-            <Text style={styles.fileMeta} numberOfLines={1}>
+            <Text className={styles.fileMeta} numberOfLines={1}>
               from {item.oldPath}
             </Text>
           ) : item.conflictStatus === 'unresolved' ? (
-            <Text style={styles.fileMeta} numberOfLines={1}>
+            <Text className={styles.fileMeta} numberOfLines={1}>
               Unresolved conflict
             </Text>
           ) : null}
         </View>
         {rowBusy ? (
-          <ActivityIndicator size="small" color={colors.textSecondary} />
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
         ) : item.area === 'staged' ? (
           <Pressable
-            style={({ pressed }) => [
+            className={cn(
               styles.iconButton,
               ioBusy && styles.iconButtonDisabled,
-              pressed && styles.iconButtonPressed
-            ]}
+              'active:bg-secondary'
+            )}
             disabled={ioBusy}
             onPress={() =>
               void runGitAction(item.unstageActionId, 'git.unstage', { filePath: item.path })
@@ -91,17 +97,17 @@ export function makeRenderFileRow(
             hitSlop={8}
             accessibilityLabel={`Unstage ${item.path}`}
           >
-            <Minus size={16} color={colors.textSecondary} strokeWidth={2.2} />
+            <Minus size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
         ) : item.canStage || item.canDiscard ? (
-          <View style={styles.rowActions}>
+          <View className={styles.rowActions}>
             {item.canStage ? (
               <Pressable
-                style={({ pressed }) => [
+                className={cn(
                   styles.iconButton,
                   ioBusy && styles.iconButtonDisabled,
-                  pressed && styles.iconButtonPressed
-                ]}
+                  'active:bg-secondary'
+                )}
                 disabled={ioBusy}
                 onPress={() =>
                   void runGitAction(item.stageActionId, 'git.stage', { filePath: item.path })
@@ -109,28 +115,28 @@ export function makeRenderFileRow(
                 hitSlop={8}
                 accessibilityLabel={`Stage ${item.path}`}
               >
-                <Plus size={16} color={colors.textSecondary} strokeWidth={2.2} />
+                <Plus size={16} colorClassName="accent-muted-foreground" />
               </Pressable>
             ) : null}
             {item.canDiscard ? (
               <Pressable
-                style={({ pressed }) => [
+                className={cn(
                   styles.iconButton,
                   ioBusy && styles.iconButtonDisabled,
-                  pressed && styles.iconButtonPressed
-                ]}
+                  'active:bg-secondary'
+                )}
                 disabled={ioBusy}
                 onPress={() => setDiscardTarget(item)}
                 hitSlop={8}
                 accessibilityLabel={`Discard ${item.path}`}
               >
-                <Trash2 size={16} color={colors.statusRed} strokeWidth={2.1} />
+                <Trash2 size={16} colorClassName="accent-destructive" />
               </Pressable>
             ) : null}
           </View>
         ) : null}
         {!rowBusy && item.canOpen ? (
-          <ChevronRight size={16} color={colors.textMuted} strokeWidth={2.1} />
+          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         ) : null}
       </Pressable>
     )
@@ -167,30 +173,30 @@ export function BranchCompareFooter({ state }: { state: FooterState }) {
   }
 
   return (
-    <View style={styles.branchCompareBlock}>
-      <View style={styles.sectionHeader}>
-        <View style={styles.branchSectionTitleBlock}>
-          <Text style={styles.sectionTitle}>Committed on Branch</Text>
+    <View className={styles.branchCompareBlock}>
+      <View className={styles.sectionHeader}>
+        <View className={styles.branchSectionTitleBlock}>
+          <Text className={styles.sectionTitle}>Committed on Branch</Text>
           {branchCompareSummaryText ? (
-            <Text style={styles.branchSectionSubtitle} numberOfLines={1}>
+            <Text className={styles.branchSectionSubtitle} numberOfLines={1}>
               {branchCompareSummaryText}
             </Text>
           ) : null}
         </View>
-        <Text style={styles.sectionCount}>{branchEntries.length}</Text>
+        <Text className={styles.sectionCount}>{branchEntries.length}</Text>
       </View>
       {branchCompareState.kind === 'loading' ? (
-        <View style={styles.branchStateRow}>
-          <ActivityIndicator size="small" color={colors.textSecondary} />
-          <Text style={styles.branchStateText}>Loading committed changes...</Text>
+        <View className={styles.branchStateRow}>
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+          <Text className={styles.branchStateText}>Loading committed changes...</Text>
         </View>
       ) : branchCompareState.kind === 'error' ? (
-        <View style={styles.branchStateRow}>
-          <Text style={styles.branchStateText}>{branchCompareState.message}</Text>
+        <View className={styles.branchStateRow}>
+          <Text className={styles.branchStateText}>{branchCompareState.message}</Text>
         </View>
       ) : branchCompareResult && branchCompareResult.summary.status !== 'ready' ? (
-        <View style={styles.branchStateRow}>
-          <Text style={styles.branchStateText}>
+        <View className={styles.branchStateRow}>
+          <Text className={styles.branchStateText}>
             {branchCompareResult.summary.errorMessage ?? 'Committed changes unavailable.'}
           </Text>
         </View>
@@ -206,43 +212,39 @@ export function BranchCompareFooter({ state }: { state: FooterState }) {
           return (
             <Pressable
               key={`${entry.path}:${entry.oldPath ?? ''}`}
-              style={({ pressed }) => [
+              className={cn(
                 styles.fileRow,
-                pressed && entry.canOpen && styles.fileRowPressed,
+                entry.canOpen && 'active:bg-card',
                 rowDisabled && styles.fileRowDisabled,
                 !entry.canOpen && styles.fileRowUnavailable
-              ]}
+              )}
               onPress={() => void openBranchDiff(entry)}
               disabled={rowDisabled}
               accessibilityLabel={`Open committed change ${entry.path}`}
             >
-              <View style={styles.statusBadge}>
-                <Text style={[styles.statusBadgeText, { color: statusColor(entry.status) }]}>
+              <View className={styles.statusBadge}>
+                <Text className={cn(styles.statusBadgeText, statusColorClassName(entry.status))}>
                   {MOBILE_GIT_STATUS_LABELS[entry.status]}
                 </Text>
               </View>
-              <FileText
-                size={16}
-                color={entry.canOpen ? colors.textSecondary : colors.textMuted}
-                strokeWidth={2.1}
-              />
-              <View style={styles.fileTextBlock}>
+              <FileText size={16} colorClassName="accent-muted-foreground" />
+              <View className={styles.fileTextBlock}>
                 <Text
-                  style={[styles.filePath, !entry.canOpen && styles.filePathDisabled]}
+                  className={cn(styles.filePath, !entry.canOpen && styles.filePathDisabled)}
                   numberOfLines={1}
                 >
                   {entry.path}
                 </Text>
                 {meta ? (
-                  <Text style={styles.fileMeta} numberOfLines={1}>
+                  <Text className={styles.fileMeta} numberOfLines={1}>
                     {meta}
                   </Text>
                 ) : null}
               </View>
               {rowBusy ? (
-                <ActivityIndicator size="small" color={colors.textSecondary} />
+                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               ) : entry.canOpen ? (
-                <ChevronRight size={16} color={colors.textMuted} strokeWidth={2.1} />
+                <ChevronRight size={16} colorClassName="accent-muted-foreground" />
               ) : null}
             </Pressable>
           )

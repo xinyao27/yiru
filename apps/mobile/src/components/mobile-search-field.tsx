@@ -1,16 +1,8 @@
-import { Search, X } from 'lucide-react-native'
 import { useEffect, useRef, useState } from 'react'
-import {
-  InteractionManager,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-  type TextInputProps
-} from 'react-native'
+import { InteractionManager, Pressable, TextInput, View, type TextInputProps } from 'react-native'
 
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import { MagnifyingGlass as Search, X } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 // Why: toolbar/list chrome paints and settles after the open tap; native
 // autoFocus alone often fails to raise the soft keyboard on iOS/Android.
@@ -93,21 +85,27 @@ export function MobileSearchField({
   }
 
   return (
-    <View style={[styles.shell, focused && styles.shellFocused, !editable && styles.shellDisabled]}>
+    <View
+      className={cn(
+        styles.shell,
+        focused && styles.shellFocused,
+        !editable && styles.shellDisabled
+      )}
+    >
       <Search
         size={15}
-        color={focused ? colors.textPrimary : colors.textSecondary}
-        strokeWidth={2.2}
+        colorClassName={focused ? 'accent-foreground' : 'accent-muted-foreground'}
       />
       <TextInput
         ref={inputRef}
-        style={styles.input}
+        className={styles.input}
+        style={{ includeFontPadding: false, textAlignVertical: 'center' }}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
         // Why: textSecondary keeps the hint readable on bgRaised; textMuted
         // disappears against the raised shell and makes the field look empty.
-        placeholderTextColor={colors.textSecondary}
+        placeholderTextColorClassName="accent-muted-foreground"
         autoCapitalize="none"
         autoCorrect={false}
         // Still request native auto-focus; the delayed ref focus is the reliable path.
@@ -123,7 +121,7 @@ export function MobileSearchField({
         }}
         clearButtonMode="never"
         accessibilityLabel={accessibilityLabel ?? placeholder}
-        selectionColor={colors.accentBlue}
+        selectionColorClassName="accent-primary"
       />
       {clearVisible ? (
         <Pressable
@@ -131,12 +129,12 @@ export function MobileSearchField({
           hitSlop={8}
           accessibilityRole="button"
           accessibilityLabel={clearAccessibilityLabel}
-          style={({ pressed }) => [styles.clearButton, pressed && styles.clearButtonPressed]}
+          className={cn(styles.clearButton, styles.clearButtonPressedActive)}
         >
           {/* Why: chip + larger hit target — a bare 14px X was hard to tap and
               read as decoration rather than a clear control. */}
-          <View style={styles.clearChip}>
-            <X size={12} color={colors.surfaceBright} strokeWidth={2.6} />
+          <View className={styles.clearChip}>
+            <X size={12} colorClassName="accent-background" />
           </View>
         </Pressable>
       ) : null}
@@ -144,59 +142,22 @@ export function MobileSearchField({
   )
 }
 
-const styles = StyleSheet.create({
-  shell: {
-    minHeight: 42,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    // Why: bgRaised lifts the field off bgBase/bgPanel so search is an obvious
-    // control, matching TextInputModal / MobilePrBasePicker input shells.
-    backgroundColor: colors.bgRaised,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.input,
-    paddingLeft: spacing.md,
-    paddingRight: spacing.xs,
-    paddingVertical: Platform.OS === 'ios' ? spacing.sm : spacing.xs + 2
-  },
-  shellFocused: {
-    // Why: monochrome focus cue without burning the blue accent token
-    // (reserved for state/selection). textMuted reads clearly on bgRaised.
-    borderColor: colors.textMuted
-  },
-  shellDisabled: {
-    opacity: 0.55
-  },
-  input: {
-    flex: 1,
-    minWidth: 0,
-    padding: 0,
-    margin: 0,
-    color: colors.textPrimary,
-    fontSize: typography.bodySize,
-    // Why: Android TextInput draws extra vertical padding that misaligns the
-    // icon/clear chip unless we zero it out.
-    includeFontPadding: false,
-    textAlignVertical: 'center'
-  },
-  clearButton: {
-    minWidth: 36,
-    minHeight: 36,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  clearButtonPressed: {
-    opacity: 0.7
-  },
-  clearChip: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    // Why: textMuted reads as a solid chip on bgRaised; borderSubtle was nearly
-    // invisible and made the clear control feel like decorative chrome.
-    backgroundColor: colors.textMuted
-  }
-})
+const styles = {
+  // Why: bgRaised lifts the field off bgBase/bgPanel so search is an obvious
+  // control, matching TextInputModal / MobilePrBasePicker input shells.
+  shell: cn(
+    'min-h-[42px] flex-row items-center gap-2 bg-secondary border border-border rounded-none pl-3 pr-1 py-1.5 ios:py-2'
+  ),
+  // Why: monochrome focus cue without burning the blue accent token
+  // (reserved for state/selection). textMuted reads clearly on bgRaised.
+  shellFocused: cn('border-muted-foreground/60'),
+  shellDisabled: cn('opacity-[0.55]'),
+  // Why: Android TextInput draws extra vertical padding that misaligns the
+  // icon/clear chip unless we zero it out.
+  input: cn('flex-1 min-w-0 p-0 m-0 text-foreground text-[14px]'),
+  clearButton: cn('min-w-9 min-h-9 items-center justify-center'),
+  clearButtonPressedActive: cn('active:opacity-[0.7]'),
+  // Why: textMuted reads as a solid chip on bgRaised; borderSubtle was nearly
+  // invisible and made the clear control feel like decorative chrome.
+  clearChip: cn('w-6 h-6 rounded-none items-center justify-center bg-muted-foreground/60')
+} as const

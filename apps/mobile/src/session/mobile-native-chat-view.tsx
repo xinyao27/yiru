@@ -1,4 +1,3 @@
-import { ArrowDown, ChevronsDownUp, ChevronsUpDown, Square } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
@@ -9,11 +8,18 @@ import {
   Text,
   View
 } from 'react-native'
-import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import {
+  ArrowDown,
+  ArrowsInLineVertical as ChevronsDownUp,
+  ArrowsOutLineVertical as ChevronsUpDown,
+  Square
+} from '@/components/uniwind-icons'
+import { GestureDetector, GestureHandlerRootView } from '@/components/uniwind-native-components'
+import { useSafeAreaInsets } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import type { NativeChatMessage } from '../../../desktop/src/shared/native-chat-types'
-import { colors } from '../theme/mobile-theme'
 import { MobileAgentWorkingIndicator } from './mobile-agent-working-indicator'
 import type { AskAnswerSelection, AskPrompt } from './mobile-native-chat-ask'
 import { MobileNativeChatAsk } from './mobile-native-chat-ask-wizard'
@@ -252,20 +258,20 @@ export function MobileNativeChatView({
   const lockReason = lockHeld ? rawLockReason : null
 
   return (
-    <View style={[styles.root, { paddingBottom: bottomPad }]}>
+    <View className={styles.root} style={[{ paddingBottom: bottomPad }]}>
       {showLoading ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={colors.textSecondary} />
+        <View className={styles.center}>
+          <ActivityIndicator colorClassName="accent-muted-foreground" />
         </View>
       ) : (
-        <GestureHandlerRootView style={styles.listWrap}>
+        <GestureHandlerRootView className={styles.listWrap}>
           <GestureDetector gesture={pinchGesture}>
             <FlatList
               ref={listRef}
               data={data}
               keyExtractor={(item) => item.id}
               renderItem={renderItem}
-              contentContainerStyle={styles.listContent}
+              contentContainerClassName={styles.listContent}
               onScroll={onScroll}
               scrollEventThrottle={32}
               onContentSizeChange={() => {
@@ -291,23 +297,23 @@ export function MobileNativeChatView({
               ListHeaderComponent={
                 hasMore ? (
                   <Pressable
-                    style={styles.loadEarlier}
+                    className={styles.loadEarlier}
                     onPress={onLoadEarlier}
                     disabled={loadingEarlier}
                   >
                     {loadingEarlier ? (
-                      <ActivityIndicator size="small" color={colors.textMuted} />
+                      <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
                     ) : (
-                      <Text style={styles.loadEarlierText}>Load earlier messages</Text>
+                      <Text className={styles.loadEarlierText}>Load earlier messages</Text>
                     )}
                   </Pressable>
                 ) : null
               }
               ListEmptyComponent={
                 emptyState ? (
-                  <View style={styles.center}>
-                    <Text style={styles.emptyTitle}>{emptyState.title}</Text>
-                    <Text style={styles.emptySubtitle}>{emptyState.subtitle}</Text>
+                  <View className={styles.center}>
+                    <Text className={styles.emptyTitle}>{emptyState.title}</Text>
+                    <Text className={styles.emptySubtitle}>{emptyState.subtitle}</Text>
                   </View>
                 ) : null
               }
@@ -318,10 +324,10 @@ export function MobileNativeChatView({
           {!atBottom ? (
             <Pressable
               accessibilityLabel="Scroll to latest"
-              style={[styles.fab, styles.fabBottom]}
+              className={cn(styles.fab, styles.fabBottom)}
               onPress={() => listRef.current?.scrollToEnd({ animated: true })}
             >
-              <ArrowDown size={18} color={colors.textPrimary} strokeWidth={2.2} />
+              <ArrowDown size={18} colorClassName="accent-foreground" />
             </Pressable>
           ) : null}
         </GestureHandlerRootView>
@@ -362,37 +368,37 @@ export function MobileNativeChatView({
       ) : null}
       {/* Chrome row above the composer: the working indicator and the global
           tool-calls expand/collapse toggle on the left, Stop in the far corner. */}
-      <View style={styles.chromeRow}>
-        <View style={styles.chromeLeft}>
+      <View className={styles.chromeRow}>
+        <View className={styles.chromeLeft}>
           {agentWorking ? <MobileAgentWorkingIndicator /> : null}
           <Pressable
-            style={({ pressed }) => [styles.chromeToggle, pressed && styles.pressed]}
+            className={cn(styles.chromeToggle, styles.pressedActive)}
             onPress={() => setToolsExpanded((v) => !v)}
             hitSlop={8}
           >
             {toolsExpanded ? (
-              <ChevronsDownUp size={14} color={colors.textMuted} strokeWidth={2} />
+              <ChevronsDownUp size={14} colorClassName="accent-muted-foreground" />
             ) : (
-              <ChevronsUpDown size={14} color={colors.textMuted} strokeWidth={2} />
+              <ChevronsUpDown size={14} colorClassName="accent-muted-foreground" />
             )}
-            <Text style={styles.chromeToggleLabel}>{toolsExpanded ? 'Collapse' : 'Tools'}</Text>
+            <Text className={styles.chromeToggleLabel}>{toolsExpanded ? 'Collapse' : 'Tools'}</Text>
           </Pressable>
         </View>
         {agentWorking ? (
           <Pressable
-            style={({ pressed }) => [styles.stopButton, pressed && styles.pressed]}
+            className={cn(styles.stopButton, styles.pressedActive)}
             onPress={onStop}
             hitSlop={8}
             accessibilityLabel="Stop the agent"
           >
-            <Square size={13} color={colors.statusRed} strokeWidth={2.4} fill={colors.statusRed} />
-            <Text style={styles.stopLabel}>Stop</Text>
+            <Square size={13} colorClassName="accent-destructive" />
+            <Text className={styles.stopLabel}>Stop</Text>
           </Pressable>
         ) : null}
       </View>
       {sendFailed ? (
-        <View style={styles.sendError}>
-          <Text style={styles.sendErrorText}>
+        <View className={styles.sendError}>
+          <Text className={styles.sendErrorText}>
             {rawLockReason === 'disconnected'
               ? 'Message not sent — reconnecting…'
               : 'Message not sent'}

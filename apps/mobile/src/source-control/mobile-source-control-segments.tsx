@@ -1,5 +1,7 @@
 import { Pressable, Text, View } from 'react-native'
 
+import { cn } from '@/style/class-names'
+
 import { hubStyles } from './mobile-source-control-hub-styles'
 import {
   SOURCE_CONTROL_HUB_TABS,
@@ -16,24 +18,24 @@ type Props = {
 // scroll position and the shared branch card persist across Changes/PR/History.
 export function MobileSourceControlSegments({ active, onSelect }: Props) {
   return (
-    <View style={hubStyles.segments} accessibilityRole="tablist">
+    <View className={hubStyles.segments} accessibilityRole="tablist">
       {SOURCE_CONTROL_HUB_TABS.map((tab) => {
         const isActive = tab === active
         return (
           <Pressable
             key={tab}
-            style={({ pressed }) => [
+            className={cn(
               hubStyles.segment,
               isActive && hubStyles.segmentActive,
-              pressed && !isActive && hubStyles.segmentPressed
-            ]}
+              !isActive && hubStyles.segmentPressedActive
+            )}
             onPress={() => onSelect(tab)}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
             accessibilityLabel={SOURCE_CONTROL_HUB_TAB_LABELS[tab]}
           >
             <Text
-              style={[hubStyles.segmentText, isActive && hubStyles.segmentTextActive]}
+              className={cn(hubStyles.segmentText, isActive && hubStyles.segmentTextActive)}
               numberOfLines={1}
             >
               {SOURCE_CONTROL_HUB_TAB_LABELS[tab]}

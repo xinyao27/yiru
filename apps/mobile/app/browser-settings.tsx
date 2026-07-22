@@ -1,8 +1,13 @@
 import { useRouter } from 'expo-router'
-import { ChevronLeft, ChevronRight, Globe } from 'lucide-react-native'
 import { useCallback, useEffect, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Pressable, ScrollView, Text, View } from 'react-native'
+
+import {
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  Globe
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import { PickerModal, type PickerOption } from '../src/components/picker-modal'
 import {
@@ -10,7 +15,6 @@ import {
   saveTerminalLinkOpenMode,
   type MobileTerminalLinkOpenMode
 } from '../src/storage/preferences'
-import { colors, radii, spacing, typography } from '../src/theme/mobile-theme'
 
 const LINK_MODE_OPTIONS: PickerOption<MobileTerminalLinkOpenMode>[] = [
   {
@@ -33,7 +37,7 @@ function linkModeLabel(mode: MobileTerminalLinkOpenMode): string {
 
 export default function BrowserSettingsScreen(): React.JSX.Element {
   const router = useRouter()
-  const insets = useSafeAreaInsets()
+
   const [linkMode, setLinkMode] = useState<MobileTerminalLinkOpenMode>('yiru-browser')
   const [pickerOpen, setPickerOpen] = useState(false)
 
@@ -47,30 +51,33 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
   }, [])
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.sm }]}>
-      <View style={styles.topRow}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <ChevronLeft size={22} color={colors.textSecondary} />
+    <View className={cn(styles.container, 'pt-safe-offset-2')}>
+      <View className={styles.topRow}>
+        <Pressable className={styles.backButton} onPress={() => router.back()}>
+          <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
         </Pressable>
-        <Text style={styles.heading}>Browser</Text>
+        <Text className={styles.heading}>Browser</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Text style={styles.groupHeading}>LINKS</Text>
-        <Text style={styles.groupDescription}>
+      <ScrollView
+        contentContainerClassName={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text className={styles.groupHeading}>LINKS</Text>
+        <Text className={styles.groupDescription}>
           Choose where HTTP(S) links tapped in terminal output open.
         </Text>
-        <View style={[styles.section, styles.sectionTopGap]}>
+        <View className={cn(styles.section, styles.sectionTopGap)}>
           <Pressable
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            className={cn(styles.row, styles.rowPressedActive)}
             onPress={() => setPickerOpen(true)}
           >
-            <Globe size={16} color={colors.textSecondary} />
-            <View style={styles.rowContent}>
-              <Text style={styles.rowLabel}>Open terminal links</Text>
-              <Text style={styles.rowSublabel}>{linkModeLabel(linkMode)}</Text>
+            <Globe size={16} colorClassName="accent-muted-foreground" />
+            <View className={styles.rowContent}>
+              <Text className={styles.rowLabel}>Open terminal links</Text>
+              <Text className={styles.rowSublabel}>{linkModeLabel(linkMode)}</Text>
             </View>
-            <ChevronRight size={16} color={colors.textMuted} />
+            <ChevronRight size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
         </View>
       </ScrollView>
@@ -87,78 +94,19 @@ export default function BrowserSettingsScreen(): React.JSX.Element {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase,
-    paddingHorizontal: spacing.lg,
-    paddingTop: 0
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.lg
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.textPrimary
-  },
-  scrollContent: {
-    paddingBottom: spacing.xl
-  },
-  groupHeading: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textMuted,
-    letterSpacing: 0.5,
-    marginBottom: spacing.xs,
-    paddingHorizontal: spacing.xs
-  },
-  groupDescription: {
-    fontSize: typography.bodySize - 1,
-    color: colors.textSecondary,
-    lineHeight: 20,
-    paddingHorizontal: spacing.xs
-  },
-  section: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: radii.card,
-    overflow: 'hidden'
-  },
-  sectionTopGap: {
-    marginTop: spacing.sm
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  rowPressed: {
-    backgroundColor: colors.bgRaised
-  },
-  rowContent: {
-    flex: 1
-  },
-  rowLabel: {
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    color: colors.textPrimary
-  },
-  rowSublabel: {
-    fontSize: typography.bodySize - 2,
-    color: colors.textSecondary,
-    marginTop: 2
-  }
-})
+const styles = {
+  container: cn('flex-1 bg-background px-4 pt-0'),
+  topRow: cn('flex-row items-center mt-2 mb-4'),
+  backButton: cn('w-9 h-9 rounded-none items-center justify-center mr-2'),
+  heading: cn('text-[20px] font-bold text-foreground'),
+  scrollContent: cn('pb-6'),
+  groupHeading: cn('text-[11px] font-semibold text-muted-foreground/60 tracking-[0.5px] mb-1 px-1'),
+  groupDescription: cn('text-[13px] text-muted-foreground leading-[20px] px-1'),
+  section: cn('bg-card rounded-none overflow-hidden'),
+  sectionTopGap: cn('mt-2'),
+  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
+  rowPressedActive: cn('active:bg-secondary'),
+  rowContent: cn('flex-1'),
+  rowLabel: cn('text-[14px] font-medium text-foreground'),
+  rowSublabel: cn('text-[12px] text-muted-foreground mt-[2px]')
+} as const

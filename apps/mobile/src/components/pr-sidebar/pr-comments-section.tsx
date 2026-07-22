@@ -1,12 +1,13 @@
-import { ChevronDown, ChevronRight } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+
+import { CaretDown as ChevronDown, CaretRight as ChevronRight } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type { GitHubWorkItemDetails, PRState } from '../../../../desktop/src/shared/types'
 import { isPrSidebarDetailsPlaceholder } from '../../session/mobile-pr-sidebar-state'
 import { canAddRootComment } from '../../session/pr-comment-actions'
 import type { MobilePrCommentActions } from '../../session/use-mobile-pr-comment-actions'
-import { colors } from '../../theme/mobile-theme'
 import { CommentMarkdown } from './comment-markdown'
 import { mobilePrSidebarStyles as shared } from './mobile-pr-sidebar-styles'
 import {
@@ -108,15 +109,15 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
     <>
       <PRSection title="Description">
         {loadingDetails ? (
-          <ActivityIndicator color={colors.textSecondary} />
+          <ActivityIndicator colorClassName="accent-muted-foreground" />
         ) : detailsFailed ? (
-          <Text style={styles.noDescription}>
+          <Text className={styles.noDescription}>
             Could not load description. Tap refresh to try again.
           </Text>
         ) : body.trim() ? (
           <CommentMarkdown content={body} variant="document" />
         ) : (
-          <Text style={styles.noDescription}>No description provided.</Text>
+          <Text className={styles.noDescription}>No description provided.</Text>
         )}
       </PRSection>
 
@@ -124,41 +125,47 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
         title="Comments"
         trailing={
           comments.length > 0 ? (
-            <View style={styles.countChip}>
-              <Text style={styles.countChipText}>{comments.length}</Text>
+            <View className={styles.countChip}>
+              <Text className={styles.countChipText}>{comments.length}</Text>
             </View>
           ) : undefined
         }
       >
         {loadingDetails ? (
-          <ActivityIndicator color={colors.textSecondary} />
+          <ActivityIndicator colorClassName="accent-muted-foreground" />
         ) : detailsFailed ? (
-          <Text style={styles.empty}>Could not load comments. Tap refresh to try again.</Text>
+          <Text className={styles.empty}>Could not load comments. Tap refresh to try again.</Text>
         ) : (
-          <View style={styles.list}>
+          <View className={styles.list}>
             {comments.length === 0 ? (
-              <Text style={styles.empty}>No comments yet.</Text>
+              <Text className={styles.empty}>No comments yet.</Text>
             ) : (
               <>
                 {isPr ? (
-                  <View style={styles.audienceTabs}>
+                  <View className={styles.audienceTabs}>
                     {PR_COMMENT_AUDIENCE_FILTERS.map((tab) => {
                       const active = tab.value === filter
                       return (
                         <Pressable
                           key={tab.value}
-                          style={[styles.audienceTab, active && styles.audienceTabActive]}
+                          className={cn(styles.audienceTab, active && styles.audienceTabActive)}
                           onPress={() => selectFilter(tab.value)}
                           accessibilityRole="button"
                           accessibilityState={{ selected: active }}
                         >
                           <Text
-                            style={[styles.audienceTabText, active && styles.audienceTabTextActive]}
+                            className={cn(
+                              styles.audienceTabText,
+                              active && styles.audienceTabTextActive
+                            )}
                           >
                             {tab.label}
                           </Text>
                           <Text
-                            style={[styles.audienceTabText, active && styles.audienceTabTextActive]}
+                            className={cn(
+                              styles.audienceTabText,
+                              active && styles.audienceTabTextActive
+                            )}
                           >
                             {counts[tab.value]}
                           </Text>
@@ -168,7 +175,7 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
                   </View>
                 ) : null}
                 {visible.length === 0 ? (
-                  <Text style={styles.empty}>{getPRCommentAudienceEmptyLabel(filter)}</Text>
+                  <Text className={styles.empty}>{getPRCommentAudienceEmptyLabel(filter)}</Text>
                 ) : (
                   <>
                     {shownGroups.map((group) => (
@@ -180,11 +187,11 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
                     ))}
                     {remaining > 0 ? (
                       <Pressable
-                        style={styles.showMore}
+                        className={styles.showMore}
                         onPress={() => setLimit((l) => l + COMMENT_PAGE)}
                         accessibilityRole="button"
                       >
-                        <Text style={styles.showMoreText}>
+                        <Text className={styles.showMoreText}>
                           Show {Math.min(remaining, COMMENT_PAGE)} more
                           {remaining > COMMENT_PAGE ? ` of ${remaining}` : ''}
                         </Text>
@@ -194,9 +201,9 @@ export function PRCommentsSection({ details, prState, actions, botAuthorOverride
                 )}
               </>
             )}
-            {actions?.error ? <Text style={styles.actionError}>{actions.error}</Text> : null}
+            {actions?.error ? <Text className={styles.actionError}>{actions.error}</Text> : null}
             {canComment && actions ? (
-              <View style={styles.rootComposer}>
+              <View className={styles.rootComposer}>
                 <PRCommentComposer
                   placeholder="Add a comment…"
                   submitLabel="Comment"
@@ -231,7 +238,7 @@ function CommentGroupView({
       : [<PRCommentCard key={group.comment.id} comment={group.comment} actions={actions} />]
 
   if (!isResolvedPRCommentGroup(group)) {
-    return <View style={styles.group}>{cards}</View>
+    return <View className={styles.group}>{cards}</View>
   }
 
   // Resolved threads collapse behind a summary row (desktop accordion parity).
@@ -239,19 +246,19 @@ function CommentGroupView({
   const count = getPRCommentGroupCount(group)
   const Chevron = expanded ? ChevronDown : ChevronRight
   return (
-    <View style={styles.group}>
+    <View className={styles.group}>
       <Pressable
-        style={styles.resolvedHeader}
+        className={styles.resolvedHeader}
         onPress={() => setExpanded((v) => !v)}
         accessibilityRole="button"
       >
-        <Chevron size={14} color={colors.textSecondary} strokeWidth={2.2} />
-        <Text style={styles.resolvedHeaderText} numberOfLines={1}>
+        <Chevron size={14} colorClassName="accent-muted-foreground" />
+        <Text className={styles.resolvedHeaderText} numberOfLines={1}>
           Resolved {group.kind === 'thread' ? 'thread' : 'comment'} by {root.author}
           {count > 1 ? ` (${count})` : ''}
         </Text>
       </Pressable>
-      {expanded ? <View style={shared.sectionBody}>{cards}</View> : null}
+      {expanded ? <View className={shared.sectionBody}>{cards}</View> : null}
     </View>
   )
 }

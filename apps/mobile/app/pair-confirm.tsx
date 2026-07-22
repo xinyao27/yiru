@@ -1,12 +1,14 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
-import { ChevronLeft } from 'lucide-react-native'
 import { useCallback, useRef, useState } from 'react'
-import { View, Text, StyleSheet, Pressable, ActivityIndicator, BackHandler } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { View, Text, Pressable, ActivityIndicator, BackHandler } from 'react-native'
+
+import { CaretLeft as ChevronLeft } from '@/components/uniwind-icons'
+import { useSafeAreaInsets } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import { ConnectionLog } from '../src/components/connection-log'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
-import { colors, spacing, radii, typography } from '../src/theme/mobile-theme'
+import { spacing } from '../src/theme/uniwind-theme-values'
 import { useCloseHost } from '../src/transport/client-context'
 import { resolvePairConfirmRouteState } from '../src/transport/pair-confirm-state'
 import {
@@ -146,24 +148,24 @@ export default function PairConfirmScreen() {
   const containerPadding = { paddingTop: insets.top + spacing.sm }
 
   return (
-    <View ref={setPairConfirmRootRef} style={[styles.container, containerPadding]}>
-      <Pressable style={styles.backButton} onPress={cancel}>
-        <ChevronLeft size={22} color={colors.textSecondary} />
+    <View ref={setPairConfirmRootRef} className={styles.container} style={[containerPadding]}>
+      <Pressable className={styles.backButton} onPress={cancel}>
+        <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
       </Pressable>
 
-      <View style={styles.content}>
+      <View className={styles.content}>
         {offer && resolvedStatus === 'awaiting-confirm' && (
           <>
-            <Text style={styles.title}>Pair with this desktop?</Text>
-            <Text style={styles.subtitle}>
+            <Text className={styles.title}>Pair with this desktop?</Text>
+            <Text className={styles.subtitle}>
               You opened a pairing link from your desktop. Confirm to add it to your hosts.
             </Text>
-            <View style={styles.actionStack}>
-              <Pressable style={styles.primaryButton} onPress={() => void confirm()}>
-                <Text style={styles.primaryButtonText}>Pair</Text>
+            <View className={styles.actionStack}>
+              <Pressable className={styles.primaryButton} onPress={() => void confirm()}>
+                <Text className={styles.primaryButtonText}>Pair</Text>
               </Pressable>
-              <Pressable style={styles.secondaryButton} onPress={cancel}>
-                <Text style={styles.secondaryButtonText}>Cancel</Text>
+              <Pressable className={styles.secondaryButton} onPress={cancel}>
+                <Text className={styles.secondaryButtonText}>Cancel</Text>
               </Pressable>
             </View>
           </>
@@ -171,9 +173,9 @@ export default function PairConfirmScreen() {
 
         {resolvedStatus === 'connecting' && (
           <>
-            <ActivityIndicator size="large" color={colors.textSecondary} />
-            <Text style={styles.connectingText}>Connecting…</Text>
-            <View style={styles.logSlot}>
+            <ActivityIndicator size="large" colorClassName="accent-muted-foreground" />
+            <Text className={styles.connectingText}>Connecting…</Text>
+            <View className={styles.logSlot}>
               <ConnectionLog entries={logs} title="Pairing log" />
             </View>
           </>
@@ -181,15 +183,15 @@ export default function PairConfirmScreen() {
 
         {resolvedStatus === 'error' && (
           <>
-            <Text style={styles.errorText}>{resolvedErrorMessage}</Text>
+            <Text className={styles.errorText}>{resolvedErrorMessage}</Text>
             {logs.length > 0 && (
-              <View style={styles.logSlot}>
+              <View className={styles.logSlot}>
                 <ConnectionLog entries={logs} title="Pairing log" />
               </View>
             )}
-            <View style={styles.actionStack}>
-              <Pressable style={styles.primaryButton} onPress={cancel}>
-                <Text style={styles.primaryButtonText}>Back to home</Text>
+            <View className={styles.actionStack}>
+              <Pressable className={styles.primaryButton} onPress={cancel}>
+                <Text className={styles.primaryButtonText}>Back to home</Text>
               </Pressable>
             </View>
           </>
@@ -199,92 +201,23 @@ export default function PairConfirmScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase,
-    padding: spacing.lg
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.sm
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
-    // Why: nudges the centered group slightly above the geometric
-    // middle so the eye reads it as visually centered above the home
-    // indicator / nav bar.
-    paddingBottom: spacing.xl * 2
-  },
-  title: {
-    fontSize: typography.titleSize,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-    textAlign: 'center'
-  },
-  subtitle: {
-    fontSize: typography.bodySize,
-    color: colors.textSecondary,
-    lineHeight: 20,
-    marginBottom: spacing.xl,
-    textAlign: 'center',
-    maxWidth: 520,
-    alignSelf: 'center'
-  },
-  actionStack: {
-    width: '100%',
-    maxWidth: 360,
-    alignSelf: 'center'
-  },
-  primaryButton: {
-    width: '100%',
-    backgroundColor: colors.textPrimary,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.sm + 2,
-    borderRadius: radii.button,
-    alignItems: 'center',
-    marginBottom: spacing.sm
-  },
-  primaryButtonText: {
-    color: colors.bgBase,
-    fontSize: typography.bodySize,
-    fontWeight: '600'
-  },
-  secondaryButton: {
-    width: '100%',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.sm + 2,
-    borderRadius: radii.button,
-    alignItems: 'center'
-  },
-  secondaryButtonText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    fontWeight: '500'
-  },
-  connectingText: {
-    color: colors.textSecondary,
-    fontSize: typography.bodySize,
-    marginTop: spacing.lg,
-    textAlign: 'center'
-  },
-  logSlot: {
-    width: '100%',
-    marginTop: spacing.lg,
-    marginBottom: spacing.md
-  },
-  errorText: {
-    color: colors.statusRed,
-    fontSize: typography.bodySize,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-    lineHeight: 20
-  }
-})
+const styles = {
+  container: cn('flex-1 bg-background p-4'),
+  backButton: cn('w-9 h-9 rounded-none items-center justify-center mb-2'),
+  // Why: nudges the centered group slightly above the geometric
+  // middle so the eye reads it as visually centered above the home
+  // indicator / nav bar.
+  content: cn('flex-1 justify-center px-2 pb-12'),
+  title: cn('text-[18px] font-semibold text-foreground mb-2 text-center'),
+  subtitle: cn(
+    'text-[14px] text-muted-foreground leading-[20px] mb-6 text-center max-w-[520px] self-center'
+  ),
+  actionStack: cn('w-full max-w-[360px] self-center'),
+  primaryButton: cn('w-full bg-foreground px-6 py-2.5 rounded-none items-center mb-2'),
+  primaryButtonText: cn('text-background text-[14px] font-semibold'),
+  secondaryButton: cn('w-full px-6 py-2.5 rounded-none items-center'),
+  secondaryButtonText: cn('text-muted-foreground text-[14px] font-medium'),
+  connectingText: cn('text-muted-foreground text-[14px] mt-4 text-center'),
+  logSlot: cn('w-full mt-4 mb-3'),
+  errorText: cn('text-destructive text-[14px] text-center mb-6 leading-[20px]')
+} as const

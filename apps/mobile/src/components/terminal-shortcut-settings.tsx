@@ -1,17 +1,11 @@
 import { useFocusEffect } from 'expo-router'
-import { ChevronRight, X } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  AppState,
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Switch,
-  type AppStateStatus
-} from 'react-native'
+import { AppState, View, Text, Pressable, Switch, type AppStateStatus } from 'react-native'
 import type Animated from 'react-native-reanimated'
 import type { AnimatedRef, SharedValue } from 'react-native-reanimated'
+
+import { CaretRight as ChevronRight, X } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import {
   TERMINAL_ACCESSORY_KEYS,
@@ -25,7 +19,6 @@ import {
   setTerminalAccessoryBuiltInVisible,
   type TerminalAccessoryLayout
 } from '../terminal/terminal-accessory-layout'
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
 import { CustomKeyModal, loadCustomKeys, saveCustomKeys, type CustomKey } from './custom-key-modal'
 import { DragReorderList } from './drag-reorder-list'
 
@@ -43,18 +36,22 @@ function ShortcutBarRow({
   onToggle: (visible: boolean) => void
 }): React.JSX.Element {
   return (
-    <View style={styles.reorderRowContent}>
-      <View style={styles.keycap}>
-        <Text style={styles.keycapText}>{shortcutKey.label}</Text>
+    <View className={styles.reorderRowContent}>
+      <View className={styles.keycap}>
+        <Text className={styles.keycapText}>{shortcutKey.label}</Text>
       </View>
-      <View style={styles.rowContent}>
-        <Text style={styles.rowLabel}>{shortcutKey.accessibilityLabel ?? shortcutKey.label}</Text>
+      <View className={styles.rowContent}>
+        <Text className={styles.rowLabel}>
+          {shortcutKey.accessibilityLabel ?? shortcutKey.label}
+        </Text>
       </View>
       <Switch
         value={visible}
         onValueChange={onToggle}
-        trackColor={{ false: colors.borderSubtle, true: colors.textSecondary }}
-        thumbColor={colors.textPrimary}
+        trackColorOffClassName="accent-border"
+        trackColorOnClassName="accent-muted-foreground"
+        thumbColorClassName="accent-foreground"
+        ios_backgroundColorClassName="accent-border"
       />
     </View>
   )
@@ -223,12 +220,12 @@ export function TerminalShortcutSettings({
 
   return (
     <>
-      <Text style={[styles.groupHeading, styles.groupTopGap]}>SHORTCUT BAR</Text>
-      <Text style={styles.groupDescription}>
+      <Text className={cn(styles.groupHeading, styles.groupTopGap)}>SHORTCUT BAR</Text>
+      <Text className={styles.groupDescription}>
         Toggle keys to show or hide them, and hold the grip to drag a key into the order you want on
         the terminal shortcut bar.
       </Text>
-      <View style={[styles.section, styles.sectionTopGap]}>
+      <View className={cn(styles.section, styles.sectionTopGap)}>
         <DragReorderList
           items={orderedAccessoryKeys}
           itemKey={(shortcutKey) => shortcutKey.id}
@@ -246,27 +243,24 @@ export function TerminalShortcutSettings({
             />
           )}
         />
-        <Pressable
-          style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-          onPress={resetBuiltInKeys}
-        >
-          <View style={styles.rowContent}>
-            <Text style={styles.rowLabel}>Reset Defaults</Text>
-            <Text style={styles.rowSublabel}>
+        <Pressable className={cn(styles.row, styles.rowPressedActive)} onPress={resetBuiltInKeys}>
+          <View className={styles.rowContent}>
+            <Text className={styles.rowLabel}>Reset Defaults</Text>
+            <Text className={styles.rowSublabel}>
               Show every built-in shortcut key in the original order
             </Text>
           </View>
         </Pressable>
       </View>
 
-      <Text style={[styles.groupHeading, styles.groupTopGap]}>CUSTOM SHORTCUTS</Text>
-      <View style={[styles.section, styles.sectionTopGap]}>
+      <Text className={cn(styles.groupHeading, styles.groupTopGap)}>CUSTOM SHORTCUTS</Text>
+      <View className={cn(styles.section, styles.sectionTopGap)}>
         {customKeys.length === 0 ? (
           <>
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No custom shortcuts defined yet.</Text>
+            <View className={styles.emptyContainer}>
+              <Text className={styles.emptyText}>No custom shortcuts defined yet.</Text>
             </View>
-            <View style={styles.separator} />
+            <View className={styles.separator} />
           </>
         ) : (
           <DragReorderList
@@ -279,38 +273,35 @@ export function TerminalShortcutSettings({
             onDragActiveChange={onDragActiveChange}
             onReorder={reorderCustomKeys}
             renderRow={(key) => (
-              <View style={styles.reorderRowContent}>
-                <View style={styles.keycap}>
-                  <Text style={styles.keycapText}>{key.label}</Text>
+              <View className={styles.reorderRowContent}>
+                <View className={styles.keycap}>
+                  <Text className={styles.keycapText}>{key.label}</Text>
                 </View>
-                <View style={styles.rowContent}>
-                  <Text style={styles.rowLabel}>{key.label}</Text>
-                  <Text style={styles.rowSublabel} numberOfLines={1} ellipsizeMode="tail">
+                <View className={styles.rowContent}>
+                  <Text className={styles.rowLabel}>{key.label}</Text>
+                  <Text className={styles.rowSublabel} numberOfLines={1} ellipsizeMode="tail">
                     {key.bytes.replace(/\r/g, ' ↵')}
                   </Text>
                 </View>
                 <Pressable
-                  style={({ pressed }) => [
-                    styles.deleteButton,
-                    pressed && styles.deleteButtonPressed
-                  ]}
+                  className={cn(styles.deleteButton, styles.deleteButtonPressedActive)}
                   onPress={() => handleDeleteCustomKey(key)}
                 >
-                  <X size={16} color={colors.statusRed} />
+                  <X size={16} colorClassName="accent-destructive" />
                 </Pressable>
               </View>
             )}
           />
         )}
         <Pressable
-          style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+          className={cn(styles.row, styles.rowPressedActive)}
           onPress={() => setShowCustomKeyModal(true)}
         >
-          <View style={styles.rowContent}>
-            <Text style={styles.rowLabel}>Add Custom Shortcut…</Text>
-            <Text style={styles.rowSublabel}>Create key combo or text macro</Text>
+          <View className={styles.rowContent}>
+            <Text className={styles.rowLabel}>Add Custom Shortcut…</Text>
+            <Text className={styles.rowSublabel}>Create key combo or text macro</Text>
           </View>
-          <ChevronRight size={16} color={colors.textMuted} />
+          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         </Pressable>
       </View>
 
@@ -328,102 +319,25 @@ export function TerminalShortcutSettings({
   )
 }
 
-const styles = StyleSheet.create({
-  groupHeading: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textMuted,
-    letterSpacing: 0.5,
-    marginBottom: spacing.xs,
-    paddingHorizontal: spacing.xs
-  },
-  groupTopGap: {
-    marginTop: spacing.xl
-  },
-  groupDescription: {
-    fontSize: typography.bodySize - 1,
-    color: colors.textSecondary,
-    lineHeight: 20,
-    paddingHorizontal: spacing.xs
-  },
-  section: {
-    backgroundColor: colors.bgPanel,
-    borderRadius: radii.card,
-    overflow: 'hidden'
-  },
-  sectionTopGap: {
-    marginTop: spacing.sm
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md + 2
-  },
-  rowPressed: {
-    backgroundColor: colors.bgRaised
-  },
+const styles = {
+  groupHeading: cn('text-[11px] font-semibold text-muted-foreground/60 tracking-[0.5px] mb-1 px-1'),
+  groupTopGap: cn('mt-6'),
+  groupDescription: cn('text-[13px] text-muted-foreground leading-[20px] px-1'),
+  section: cn('bg-card rounded-none overflow-hidden'),
+  sectionTopGap: cn('mt-2'),
+  row: cn('flex-row items-center gap-2.5 py-3 px-3.5'),
+  rowPressedActive: cn('active:bg-secondary'),
   // Why: rows inside DragReorderList get a fixed height and a trailing grip
   // handle from the list itself, so content only pads on the left.
-  reorderRowContent: {
-    flex: 1,
-    height: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2,
-    paddingLeft: spacing.md + 2
-  },
-  rowContent: {
-    flex: 1
-  },
-  rowLabel: {
-    fontSize: typography.bodySize,
-    fontWeight: '500',
-    color: colors.textPrimary
-  },
-  rowSublabel: {
-    fontSize: typography.bodySize - 2,
-    color: colors.textSecondary,
-    marginTop: 2
-  },
-  keycap: {
-    minWidth: 62,
-    alignItems: 'center',
-    backgroundColor: colors.bgRaised,
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs
-  },
-  keycapText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontFamily: typography.monoFamily
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.borderSubtle,
-    marginHorizontal: spacing.md
-  },
-  emptyContainer: {
-    padding: spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  emptyText: {
-    fontSize: typography.bodySize,
-    color: colors.textSecondary,
-    padding: spacing.md
-  },
-  deleteButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)'
-  },
-  deleteButtonPressed: {
-    backgroundColor: 'rgba(239, 68, 68, 0.2)'
-  }
-})
+  reorderRowContent: cn('flex-1 h-full flex-row items-center gap-2.5 pl-3.5'),
+  rowContent: cn('flex-1'),
+  rowLabel: cn('text-[14px] font-medium text-foreground'),
+  rowSublabel: cn('text-[12px] text-muted-foreground mt-[2px]'),
+  keycap: cn('min-w-[62px] items-center bg-secondary rounded-none px-2 py-1'),
+  keycapText: cn('text-muted-foreground text-[12px] font-mono'),
+  separator: cn('h-hairline bg-border mx-3'),
+  emptyContainer: cn('p-3 items-center justify-center'),
+  emptyText: cn('text-[14px] text-muted-foreground p-3'),
+  deleteButton: cn('w-8 h-8 rounded-none items-center justify-center bg-red-500/10'),
+  deleteButtonPressedActive: cn('active:bg-red-500/20')
+} as const

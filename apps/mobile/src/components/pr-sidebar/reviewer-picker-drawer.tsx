@@ -1,10 +1,10 @@
-import { Check } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
 
+import { Check } from '@/components/uniwind-icons'
+
 import type { GitHubAssignableUser } from '../../../../desktop/src/shared/types'
 import { fetchAssignableUsers } from '../../session/github-pr-rpc'
-import { colors } from '../../theme/mobile-theme'
 import type { RpcClient } from '../../transport/rpc-client'
 import { BottomDrawer } from '../bottom-drawer'
 import { mobilePrSidebarStyles as styles } from './mobile-pr-sidebar-styles'
@@ -92,48 +92,46 @@ export function ReviewerPickerDrawer({
 
   return (
     <BottomDrawer visible={visible} onClose={onClose} dragContentToDismiss={false}>
-      <Text style={styles.pickerTitle}>Reviewers</Text>
+      <Text className={styles.pickerTitle}>Reviewers</Text>
       <TextInput
-        style={styles.pickerSearch}
+        className={styles.pickerSearch}
         value={query}
         onChangeText={setQuery}
         placeholder="Search people"
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColorClassName="accent-muted-foreground"
         autoCapitalize="none"
         autoCorrect={false}
       />
       {load.status === 'loading' ? (
-        <View style={styles.pickerStateArea}>
-          <ActivityIndicator color={colors.textSecondary} />
+        <View className={styles.pickerStateArea}>
+          <ActivityIndicator colorClassName="accent-muted-foreground" />
         </View>
       ) : load.status === 'error' ? (
-        <View style={styles.pickerStateArea}>
-          <Text style={styles.emptyText}>{load.message}</Text>
+        <View className={styles.pickerStateArea}>
+          <Text className={styles.emptyText}>{load.message}</Text>
         </View>
       ) : ordered.length === 0 ? (
-        <View style={styles.pickerStateArea}>
-          <Text style={styles.emptyText}>No matching people</Text>
+        <View className={styles.pickerStateArea}>
+          <Text className={styles.emptyText}>No matching people</Text>
         </View>
       ) : (
-        <View style={styles.pickerList}>
+        <View className={styles.pickerList}>
           {ordered.map((item) => {
             const requested = isRequested(item.login)
             return (
               <Pressable
                 key={item.login}
-                style={styles.pickerRow}
+                className={styles.pickerRow}
                 onPress={() => onToggle(item.login)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: requested }}
                 accessibilityLabel={`${requested ? 'Remove' : 'Request'} ${item.login}`}
               >
-                <View style={styles.rowTrailing}>
-                  {requested ? (
-                    <Check size={16} color={colors.textPrimary} strokeWidth={2.4} />
-                  ) : null}
+                <View className={styles.rowTrailing}>
+                  {requested ? <Check size={16} colorClassName="accent-foreground" /> : null}
                 </View>
-                <View style={styles.pickerRowMain}>
-                  <Text style={styles.rowTitle} numberOfLines={1}>
+                <View className={styles.pickerRowMain}>
+                  <Text className={styles.rowTitle} numberOfLines={1}>
                     {item.name ? `${item.name} (${item.login})` : item.login}
                   </Text>
                 </View>

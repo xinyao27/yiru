@@ -1,6 +1,7 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
-import { colors, radii, spacing } from '../theme/mobile-theme'
+import { cn } from '@/style/class-names'
+
 import type { MobileBrowserViewMode } from './browser-screencast-request'
 
 type Props = {
@@ -20,7 +21,7 @@ export function MobileBrowserViewModeSwitch({
   onChange
 }: Props): React.JSX.Element {
   return (
-    <View style={styles.switch}>
+    <View className={styles.switch}>
       {VIEW_MODES.map((mode) => (
         <ViewModeButton
           key={mode.id}
@@ -47,55 +48,29 @@ function ViewModeButton({
 }) {
   return (
     <Pressable
-      style={({ pressed }) => [
+      className={cn(
         styles.button,
         selected && styles.buttonSelected,
-        pressed && !disabled && !selected && styles.buttonPressed,
+        !disabled && !selected && styles.buttonPressedActive,
         disabled && styles.disabled
-      ]}
+      )}
       disabled={disabled}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected, disabled }}
       accessibilityLabel={`Show ${label.toLowerCase()} website view`}
     >
-      <Text style={[styles.buttonText, selected && styles.buttonTextSelected]}>{label}</Text>
+      <Text className={cn(styles.buttonText, selected && styles.buttonTextSelected)}>{label}</Text>
     </Pressable>
   )
 }
 
-const styles = StyleSheet.create({
-  switch: {
-    minHeight: 28,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: radii.input,
-    backgroundColor: colors.bgRaised,
-    padding: 2
-  },
-  button: {
-    minHeight: 24,
-    minWidth: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.sm
-  },
-  buttonPressed: {
-    backgroundColor: colors.borderSubtle
-  },
-  buttonSelected: {
-    backgroundColor: colors.textPrimary
-  },
-  buttonText: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    fontWeight: '600'
-  },
-  buttonTextSelected: {
-    color: colors.bgBase
-  },
-  disabled: {
-    opacity: 0.35
-  }
-})
+const styles = {
+  switch: cn('min-h-7 flex-row items-center rounded-none bg-secondary p-[2px]'),
+  button: cn('min-h-6 min-w-[52px] items-center justify-center rounded-none px-2'),
+  buttonPressedActive: cn('active:bg-border'),
+  buttonSelected: cn('bg-foreground'),
+  buttonText: cn('text-muted-foreground text-[12px] font-semibold'),
+  buttonTextSelected: cn('text-background'),
+  disabled: cn('opacity-[0.35]')
+} as const

@@ -1,0 +1,155 @@
+@import 'tailwindcss';
+@import 'uniwind';
+
+/* Why: mobile uses the same closed semantic vocabulary as the desktop renderer,
+   while Uniwind needs concrete theme values to compile native color utilities. */
+@layer theme {
+  :root {
+    @variant light {
+      --color-background: #f8f8f8;
+      --color-foreground: #141414;
+      --color-card: #fcfcfc;
+      --color-card-foreground: #141414;
+      --color-popover: #fcfcfc;
+      --color-popover-foreground: #141414;
+      --color-primary: #2778c1;
+      --color-primary-foreground: #fcfcfc;
+      --color-secondary: rgba(20, 20, 20, 0.08);
+      --color-secondary-foreground: #141414;
+      --color-muted: rgba(20, 20, 20, 0.06);
+      --color-muted-foreground: rgba(20, 20, 20, 0.6);
+      --color-accent: #d8d8d8;
+      --color-accent-foreground: #141414;
+      --color-destructive: #be1744;
+      --color-destructive-foreground: #fcfcfc;
+      --color-border: rgba(20, 20, 20, 0.08);
+      --color-input: rgba(20, 20, 20, 0.12);
+      --color-ring: #2778c1;
+      --color-chart-1: #2778c1;
+      --color-chart-2: #007041;
+      --color-chart-3: #a46700;
+      --color-chart-4: #92156a;
+      --color-chart-5: #7565cc;
+      --color-sidebar: #f3f3f3;
+      --color-sidebar-foreground: #141414;
+      --color-sidebar-primary: #2778c1;
+      --color-sidebar-primary-foreground: #fcfcfc;
+      --color-sidebar-accent: rgba(20, 20, 20, 0.14);
+      --color-sidebar-accent-foreground: #141414;
+      --color-sidebar-border: rgba(20, 20, 20, 0.08);
+      --color-sidebar-ring: #2778c1;
+      --editor-surface: #fcfcfc;
+      --git-decoration-added: #007041;
+      --git-decoration-modified: #a46700;
+      --git-decoration-deleted: #be1744;
+      --git-decoration-renamed: #2778c1;
+      --git-decoration-untracked: #176c74;
+      --git-decoration-copied: #2778c1;
+      --git-decoration-ignored: rgba(20, 20, 20, 0.36);
+      --editor-diff-inserted-line-background: rgba(0, 175, 102, 0.14);
+      --editor-diff-inserted-text-background: rgba(0, 176, 104, 0.22);
+      --editor-diff-removed-line-background: rgba(255, 97, 123, 0.22);
+      --editor-diff-removed-text-background: rgba(255, 97, 123, 0.34);
+      --syntax-comment: #6a9955;
+      --syntax-function: #795e26;
+      --syntax-keyword: #0000ff;
+      --syntax-meta: #af00db;
+      --syntax-number: #098658;
+      --syntax-string: #a31515;
+      --syntax-type: #267f99;
+      --syntax-variable: #001080;
+      --terminal-background: #1a1b26;
+    }
+
+    @variant dark {
+      --color-background: #141414;
+      --color-foreground: #f0f0f0;
+      --color-card: #181818;
+      --color-card-foreground: #f0f0f0;
+      --color-popover: #181818;
+      --color-popover-foreground: #f0f0f0;
+      --color-primary: #599ce7;
+      --color-primary-foreground: #191c22;
+      --color-secondary: rgba(240, 240, 240, 0.08);
+      --color-secondary-foreground: #f0f0f0;
+      --color-muted: rgba(240, 240, 240, 0.06);
+      --color-muted-foreground: rgba(240, 240, 240, 0.6);
+      --color-accent: #333333;
+      --color-accent-foreground: #f0f0f0;
+      --color-destructive: #e34671;
+      --color-destructive-foreground: #141414;
+      --color-border: rgba(240, 240, 240, 0.08);
+      --color-input: rgba(240, 240, 240, 0.12);
+      --color-ring: #f0f0f0;
+      --color-chart-1: #7bafe9;
+      --color-chart-2: #3fa266;
+      --color-chart-3: #f1b467;
+      --color-chart-4: #b48ead;
+      --color-chart-5: #9386f2;
+      --color-sidebar: #181818;
+      --color-sidebar-foreground: #f0f0f0;
+      --color-sidebar-primary: #599ce7;
+      --color-sidebar-primary-foreground: #191c22;
+      --color-sidebar-accent: rgba(240, 240, 240, 0.14);
+      --color-sidebar-accent-foreground: #f0f0f0;
+      --color-sidebar-border: rgba(240, 240, 240, 0.08);
+      --color-sidebar-ring: #f0f0f0;
+      --editor-surface: #181818;
+      --git-decoration-added: #70b489;
+      --git-decoration-modified: #f1b467;
+      --git-decoration-deleted: #fc6b83;
+      --git-decoration-renamed: #7bafe9;
+      --git-decoration-untracked: #88c0d0;
+      --git-decoration-copied: #7bafe9;
+      --git-decoration-ignored: rgba(240, 240, 240, 0.36);
+      --editor-diff-inserted-line-background: rgba(63, 162, 102, 0.2);
+      --editor-diff-inserted-text-background: rgba(63, 162, 102, 0.13);
+      --editor-diff-removed-line-background: rgba(184, 0, 73, 0.2);
+      --editor-diff-removed-text-background: rgba(184, 0, 73, 0.13);
+      --syntax-comment: #6a9955;
+      --syntax-function: #dcdcaa;
+      --syntax-keyword: #569cd6;
+      --syntax-meta: #c586c0;
+      --syntax-number: #b5cea8;
+      --syntax-string: #ce9178;
+      --syntax-type: #4ec9b0;
+      --syntax-variable: #9cdcfe;
+      --terminal-background: #1a1b26;
+    }
+  }
+}
+
+@theme {
+  --font-mono: 'monospace';
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+}
+
+@utility border-hairline {
+  border-width: hairlineWidth();
+}
+
+@utility border-t-hairline {
+  border-top-width: hairlineWidth();
+}
+
+@utility border-b-hairline {
+  border-bottom-width: hairlineWidth();
+}
+
+@utility border-l-hairline {
+  border-left-width: hairlineWidth();
+}
+
+@utility h-hairline {
+  height: hairlineWidth();
+}
+
+@utility w-hairline {
+  width: hairlineWidth();
+}

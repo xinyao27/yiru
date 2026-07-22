@@ -1,236 +1,64 @@
-import { StyleSheet } from 'react-native'
-
-import { colors, radii, spacing, typography } from '../../theme/mobile-theme'
+import { cn } from '@/style/class-names'
 
 // Styles for the PR comments timeline (body + audience tabs + comment cards +
 // reactions). Split out of mobile-pr-sidebar-styles to keep that file under the
 // 300-line cap. Muted/monochrome to match the rest of the PR sidebar.
-export const prCommentsStyles = StyleSheet.create({
-  noDescription: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontStyle: 'italic'
-  },
+export const prCommentsStyles = {
+  noDescription: cn('text-muted-foreground text-[12px] italic'),
   // Comments header trailing count chip.
-  countChip: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.bgRaised,
-    borderRadius: 999,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 1
-  },
-  countChipText: {
-    color: colors.textSecondary,
-    fontSize: 11,
-    fontWeight: '600'
-  },
+  countChip: cn('border-hairline border-border bg-secondary rounded-none px-2 py-[1px]'),
+  countChipText: cn('text-muted-foreground text-[11px] font-semibold'),
   // Audience segmented control (All / Humans / Bots).
-  audienceTabs: {
-    flexDirection: 'row',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.row,
-    backgroundColor: colors.bgBase,
-    padding: 2,
-    gap: 2
-  },
-  audienceTab: {
-    flex: 1,
-    minHeight: 32,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    borderRadius: radii.row - 2
-  },
-  audienceTabActive: {
-    backgroundColor: colors.bgRaised
-  },
-  audienceTabText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontWeight: '600'
-  },
-  audienceTabTextActive: {
-    color: colors.textPrimary
-  },
-  list: {
-    gap: spacing.sm
-  },
-  showMore: {
-    minHeight: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.card,
-    backgroundColor: colors.bgPanel
-  },
-  showMoreText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontWeight: '600'
-  },
-  group: {
-    gap: spacing.sm
-  },
-  card: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.card,
-    backgroundColor: colors.bgPanel,
-    overflow: 'hidden'
-  },
-  cardResolved: {
-    opacity: 0.6
-  },
-  reply: {
-    marginLeft: spacing.lg
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderSubtle
-  },
-  avatar: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: colors.bgRaised
-  },
-  author: {
-    color: colors.textPrimary,
-    fontSize: 13,
-    fontWeight: '600',
-    flexShrink: 1
-  },
-  authorResolved: {
-    color: colors.textSecondary
-  },
-  time: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize
-  },
-  path: {
-    color: colors.textMuted,
-    fontSize: 11,
-    fontFamily: typography.monoFamily,
-    flexShrink: 1
-  },
-  resolvedChip: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.bgRaised,
-    borderRadius: 999,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 1
-  },
-  resolvedChipText: {
-    color: colors.textSecondary,
-    fontSize: 11
-  },
-  openButton: {
-    marginLeft: 'auto',
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  body: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm
-  },
-  reactionsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-    marginTop: spacing.xs
-  },
-  reactionChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    height: 24,
-    paddingHorizontal: spacing.sm,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.bgRaised,
-    borderRadius: 999
-  },
-  reactionText: {
-    color: colors.textPrimary,
-    fontSize: typography.metaSize
-  },
+  audienceTabs: cn(
+    'flex-row border-hairline border-border rounded-none bg-background p-[2px] gap-[2px]'
+  ),
+  audienceTab: cn('flex-1 min-h-8 flex-row items-center justify-center gap-1 rounded-none'),
+  audienceTabActive: cn('bg-secondary'),
+  audienceTabText: cn('text-muted-foreground text-[12px] font-semibold'),
+  audienceTabTextActive: cn('text-foreground'),
+  list: cn('gap-2'),
+  showMore: cn(
+    'min-h-10 items-center justify-center border-hairline border-border rounded-none bg-card'
+  ),
+  showMoreText: cn('text-muted-foreground text-[12px] font-semibold'),
+  group: cn('gap-2'),
+  card: cn('border-hairline border-border rounded-none bg-card overflow-hidden'),
+  cardResolved: cn('opacity-[0.6]'),
+  reply: cn('ml-4'),
+  header: cn('flex-row items-center gap-2 px-3 py-2 border-b-hairline border-b-border'),
+  avatar: cn('w-5 h-5 rounded-none bg-secondary'),
+  author: cn('text-foreground text-[13px] font-semibold shrink'),
+  authorResolved: cn('text-muted-foreground'),
+  time: cn('text-muted-foreground text-[12px]'),
+  path: cn('text-muted-foreground/60 text-[11px] font-mono shrink'),
+  resolvedChip: cn('border-hairline border-border bg-secondary rounded-none px-2 py-[1px]'),
+  resolvedChipText: cn('text-muted-foreground text-[11px]'),
+  openButton: cn('ml-auto w-7 h-7 items-center justify-center'),
+  body: cn('px-3 py-2'),
+  reactionsRow: cn('flex-row flex-wrap gap-1 mt-1'),
+  reactionChip: cn(
+    'flex-row items-center gap-1 h-6 px-2 border-hairline border-border bg-secondary rounded-none'
+  ),
+  reactionText: cn('text-foreground text-[12px]'),
   // Collapsible header for a resolved thread/comment group.
-  resolvedHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.card,
-    backgroundColor: colors.bgPanel
-  },
-  resolvedHeaderText: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    flexShrink: 1
-  },
-  empty: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderStyle: 'dashed',
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.card,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xl,
-    color: colors.textSecondary,
-    fontSize: 13
-  },
+  resolvedHeader: cn(
+    'flex-row items-center gap-2 px-3 py-2 border-hairline border-border rounded-none bg-card'
+  ),
+  resolvedHeaderText: cn('text-muted-foreground text-[13px] shrink'),
+  empty: cn(
+    'border-hairline border-dashed border-border rounded-none px-3 py-6 text-muted-foreground text-[13px]'
+  ),
   // Reply / Resolve toggle row under a comment body.
-  actionsRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
-    paddingTop: spacing.xs
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    minHeight: 28,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radii.button,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.bgRaised
-  },
-  actionButtonPressed: {
-    opacity: 0.7
-  },
-  actionButtonText: {
-    color: colors.textSecondary,
-    fontSize: typography.metaSize,
-    fontWeight: '600'
-  },
+  actionsRow: cn('flex-row gap-2 px-3 pb-2 pt-1'),
+  actionButton: cn(
+    'flex-row items-center gap-1 min-h-7 px-2 rounded-none border-hairline border-border bg-secondary'
+  ),
+  actionButtonPressed: cn('opacity-[0.7]'),
+  actionButtonPressedActive: cn('active:opacity-[0.7]'),
+  actionButtonText: cn('text-muted-foreground text-[12px] font-semibold'),
   // Inline reply composer mounted inside a comment card.
-  composer: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md
-  },
+  composer: cn('px-3 pb-3'),
   // Root-comment composer at the foot of the timeline (open PRs only).
-  rootComposer: {
-    gap: spacing.sm
-  },
-  actionError: {
-    color: colors.statusRed,
-    fontSize: typography.metaSize
-  }
-})
+  rootComposer: cn('gap-2'),
+  actionError: cn('text-destructive text-[12px]')
+} as const

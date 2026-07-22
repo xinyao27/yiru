@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { Animated, StyleSheet, Text, View } from 'react-native'
+import { Animated, Text, View } from 'react-native'
 
-import { colors, spacing, typography } from '../theme/mobile-theme'
+import { cn } from '@/style/class-names'
 
 /** Animated three-dot "agent is working" row, shown while the active agent is
  *  still producing a reply. Pure presentation — visibility is the caller's call. */
@@ -28,38 +28,20 @@ export function MobileAgentWorkingIndicator(): React.JSX.Element {
   }, [])
 
   return (
-    <View style={styles.row}>
-      <Text style={styles.label}>Agent is working</Text>
-      <View style={styles.dots}>
+    <View className={styles.row}>
+      <Text className={styles.label}>Agent is working</Text>
+      <View className={styles.dots}>
         {dots.map((dot, i) => (
-          <Animated.View key={i} style={[styles.dot, { opacity: dot }]} />
+          <Animated.View key={i} className={styles.dot} style={[{ opacity: dot }]} />
         ))}
       </View>
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm
-  },
-  label: {
-    color: colors.textMuted,
-    fontSize: typography.metaSize,
-    fontStyle: 'italic'
-  },
-  dots: {
-    flexDirection: 'row',
-    gap: 4
-  },
-  dot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: colors.textSecondary
-  }
-})
+const styles = {
+  row: cn('flex-row items-center gap-2 px-3 py-2'),
+  label: cn('text-muted-foreground/60 text-[12px] italic'),
+  dots: cn('flex-row gap-1'),
+  dot: cn('w-[5px] h-[5px] rounded-none bg-muted-foreground')
+} as const

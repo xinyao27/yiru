@@ -1,30 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as Clipboard from 'expo-clipboard'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
-import {
-  AlertTriangle,
-  ArrowUp,
-  Bot,
-  ChevronDown,
-  ChevronLeft,
-  ChevronsRight,
-  Copy,
-  Folder,
-  File,
-  FileText,
-  GitBranch,
-  Globe,
-  Keyboard as KeyboardIcon,
-  MessageSquare,
-  Monitor,
-  MoreHorizontal,
-  Plus,
-  RefreshCw,
-  Send,
-  Smartphone,
-  SquareTerminal,
-  X
-} from 'lucide-react-native'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Animated, AppState, Linking, type AppStateStatus } from 'react-native'
 import {
@@ -43,7 +19,33 @@ import {
   type LayoutChangeEvent,
   type ListRenderItem
 } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import {
+  Warning as AlertTriangle,
+  ArrowUp,
+  Robot as Bot,
+  CaretDown as ChevronDown,
+  CaretLeft as ChevronLeft,
+  CaretDoubleRight as ChevronsRight,
+  Copy,
+  Folder,
+  File,
+  FileText,
+  GitBranch,
+  Globe,
+  Keyboard as KeyboardIcon,
+  Chat as MessageSquare,
+  Monitor,
+  DotsThree as MoreHorizontal,
+  Plus,
+  ArrowClockwise as RefreshCw,
+  PaperPlaneTilt as Send,
+  DeviceMobile as Smartphone,
+  TerminalWindow as SquareTerminal,
+  X
+} from '@/components/uniwind-icons'
+import { SafeAreaView, useSafeAreaInsets } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import { TERMINAL_QUERY_REPLY_INPUT_RUNTIME_CAPABILITY } from '../../../../../desktop/src/shared/protocol-version'
 import type { DiffComment } from '../../../../../desktop/src/shared/types'
@@ -220,7 +222,7 @@ import type {
   TerminalWebViewHandle
 } from '../../../../src/terminal/terminal-webview-contract'
 import { useTerminalLiveInputCommit } from '../../../../src/terminal/use-terminal-live-input-commit'
-import { colors, spacing } from '../../../../src/theme/mobile-theme'
+import { spacing } from '../../../../src/theme/uniwind-theme-values'
 import { useHostClient, useForceReconnect } from '../../../../src/transport/client-context'
 import {
   useLastConnectedAt,
@@ -284,18 +286,18 @@ function MarkdownReader({
   const effectiveKeyboardLift = Math.max(keyboardLift, webviewKeyboardInset)
   if (!doc || doc.status === 'loading') {
     return (
-      <View style={styles.markdownState}>
-        <ActivityIndicator size="small" color={colors.textSecondary} />
+      <View className={styles.markdownState}>
+        <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
       </View>
     )
   }
   if (doc.status === 'error') {
     return (
-      <View style={styles.markdownState}>
-        <Text style={styles.markdownError}>{doc.message}</Text>
-        <Pressable style={styles.markdownRefreshButton} onPress={onRefresh}>
-          <RefreshCw size={14} color={colors.textPrimary} />
-          <Text style={styles.markdownRefreshText}>Retry</Text>
+      <View className={styles.markdownState}>
+        <Text className={styles.markdownError}>{doc.message}</Text>
+        <Pressable className={styles.markdownRefreshButton} onPress={onRefresh}>
+          <RefreshCw size={14} colorClassName="accent-foreground" />
+          <Text className={styles.markdownRefreshText}>Retry</Text>
         </Pressable>
       </View>
     )
@@ -314,7 +316,7 @@ function MarkdownReader({
   const showFloatingActions = statusText || showRefresh || showCopy || showSave
 
   return (
-    <View style={styles.markdownEditor}>
+    <View className={styles.markdownEditor}>
       <MobileRichMarkdownEditor
         key={documentId}
         content={doc.localContent}
@@ -325,10 +327,8 @@ function MarkdownReader({
       {showFloatingActions ? (
         <View
           pointerEvents="box-none"
+          className={styles.markdownFloatingBar}
           style={[
-            styles.markdownFloatingBar,
-            // Why: the editor focus lives inside a WebView, so keep native
-            // Save/Discard controls lifted instead of resizing that surface.
             {
               bottom: resolveMarkdownFloatingActionsBottom({
                 keyboardLift: effectiveKeyboardLift,
@@ -340,43 +340,46 @@ function MarkdownReader({
         >
           {statusText ? (
             <Text
-              style={[styles.markdownFloatingStatus, doc.saveError ? styles.markdownError : null]}
+              className={cn(
+                styles.markdownFloatingStatus,
+                doc.saveError ? styles.markdownError : null
+              )}
               numberOfLines={2}
             >
               {statusText}
             </Text>
           ) : null}
-          <View style={styles.markdownFloatingActions}>
+          <View className={styles.markdownFloatingActions}>
             {showCopy ? (
-              <Pressable style={styles.markdownFloatingButton} onPress={onCopy}>
-                <Text style={styles.markdownFloatingButtonText}>Copy</Text>
+              <Pressable className={styles.markdownFloatingButton} onPress={onCopy}>
+                <Text className={styles.markdownFloatingButtonText}>Copy</Text>
               </Pressable>
             ) : null}
             {showRefresh ? (
-              <Pressable style={styles.markdownFloatingButton} onPress={onRefresh}>
-                <RefreshCw size={13} color={colors.textPrimary} />
-                <Text style={styles.markdownFloatingButtonText}>Refresh</Text>
+              <Pressable className={styles.markdownFloatingButton} onPress={onRefresh}>
+                <RefreshCw size={13} colorClassName="accent-foreground" />
+                <Text className={styles.markdownFloatingButtonText}>Refresh</Text>
               </Pressable>
             ) : null}
             {doc.isDirty ? (
-              <Pressable style={styles.markdownFloatingButton} onPress={onDiscard}>
-                <Text style={styles.markdownFloatingButtonText}>Discard</Text>
+              <Pressable className={styles.markdownFloatingButton} onPress={onDiscard}>
+                <Text className={styles.markdownFloatingButtonText}>Discard</Text>
               </Pressable>
             ) : null}
             {showSave ? (
               <Pressable
-                style={[
+                className={cn(
                   styles.markdownFloatingButton,
                   styles.markdownSaveButton,
                   (!doc.editable || !doc.isDirty || doc.saving) && styles.markdownButtonDisabled
-                ]}
+                )}
                 disabled={!doc.editable || !doc.isDirty || doc.saving}
                 onPress={onSave}
               >
                 {doc.saving ? (
-                  <ActivityIndicator size="small" color={colors.textPrimary} />
+                  <ActivityIndicator size="small" colorClassName="accent-foreground" />
                 ) : (
-                  <Text style={styles.markdownFloatingButtonText}>Save</Text>
+                  <Text className={styles.markdownFloatingButtonText}>Save</Text>
                 )}
               </Pressable>
             ) : null}
@@ -421,26 +424,26 @@ function DiffLineRow({
   // gutter should show the same line number the note will reference.
   const gutterLineNumber = line.newLineNumber ?? line.oldLineNumber ?? ''
   return (
-    <View style={styles.diffLineBlock}>
+    <View className={styles.diffLineBlock}>
       <View
-        style={[
+        className={cn(
           styles.diffLine,
           line.kind === 'add' && styles.diffLineAdded,
           line.kind === 'delete' && styles.diffLineDeleted
-        ]}
+        )}
       >
-        <Text style={styles.diffGutter}>{gutterLineNumber}</Text>
+        <Text className={styles.diffGutter}>{gutterLineNumber}</Text>
         <Text
           selectable
-          style={styles.diffText}
+          className={styles.diffText}
           accessibilityLabel={`${title} diff line ${index + 1}`}
         >
           <Text
-            style={[
+            className={cn(
               styles.diffPrefix,
               line.kind === 'add' && styles.diffPrefixAdded,
               line.kind === 'delete' && styles.diffPrefixDeleted
-            ]}
+            )}
           >
             {line.kind === 'add' ? '+ ' : line.kind === 'delete' ? '- ' : '  '}
           </Text>
@@ -448,11 +451,11 @@ function DiffLineRow({
         </Text>
         {canComment ? (
           <Pressable
-            style={({ pressed }) => [
+            className={cn(
               styles.diffCommentAddButton,
-              pressed && styles.diffCommentAddButtonPressed,
+              'active:bg-card',
               commentsBusy && styles.diffCommentButtonDisabled
-            ]}
+            )}
             disabled={commentsBusy}
             onPress={() => {
               if (commentLine !== undefined) {
@@ -461,57 +464,57 @@ function DiffLineRow({
             }}
             accessibilityLabel={`Add note on line ${commentLine}`}
           >
-            <Plus size={12} color={colors.textSecondary} strokeWidth={2.3} />
+            <Plus size={12} colorClassName="accent-muted-foreground" />
           </Pressable>
         ) : null}
       </View>
       {comments.length > 0 ? (
-        <View style={styles.diffCommentList}>
+        <View className={styles.diffCommentList}>
           {comments.map((comment) => (
-            <View key={comment.id} style={styles.diffCommentCard}>
-              <View style={styles.diffCommentHeader}>
-                <MessageSquare size={12} color={colors.textMuted} strokeWidth={2.2} />
-                <Text style={styles.diffCommentMeta}>Line {comment.lineNumber}</Text>
+            <View key={comment.id} className={styles.diffCommentCard}>
+              <View className={styles.diffCommentHeader}>
+                <MessageSquare size={12} colorClassName="accent-muted-foreground" />
+                <Text className={styles.diffCommentMeta}>Line {comment.lineNumber}</Text>
                 <Pressable
-                  style={styles.diffCommentDeleteButton}
+                  className={styles.diffCommentDeleteButton}
                   disabled={commentsBusy}
                   onPress={() => onDeleteComment(comment.id)}
                   accessibilityLabel={`Delete note on line ${comment.lineNumber}`}
                 >
-                  <X size={12} color={colors.textMuted} strokeWidth={2.2} />
+                  <X size={12} colorClassName="accent-muted-foreground" />
                 </Pressable>
               </View>
-              <Text style={styles.diffCommentBody}>{comment.body}</Text>
+              <Text className={styles.diffCommentBody}>{comment.body}</Text>
             </View>
           ))}
         </View>
       ) : null}
       {isCommenting ? (
-        <View style={styles.diffCommentComposer}>
+        <View className={styles.diffCommentComposer}>
           <TextInput
-            style={[styles.textInput, styles.diffCommentInput]}
+            className={cn(styles.textInput, styles.diffCommentInput)}
             value={commentDraft}
             onChangeText={onDraftChange}
             placeholder="Add review note"
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColorClassName="accent-muted-foreground"
             editable={!commentsBusy}
             multiline
             textAlignVertical="top"
             autoFocus
           />
-          <View style={styles.diffCommentComposerActions}>
+          <View className={styles.diffCommentComposerActions}>
             <Pressable
-              style={styles.diffCommentSecondaryAction}
+              className={styles.diffCommentSecondaryAction}
               disabled={commentsBusy}
               onPress={onCancelComment}
             >
-              <Text style={styles.diffCommentSecondaryText}>Cancel</Text>
+              <Text className={styles.diffCommentSecondaryText}>Cancel</Text>
             </Pressable>
             <Pressable
-              style={[
+              className={cn(
                 styles.diffCommentPrimaryAction,
                 (!commentDraft.trim() || commentsBusy) && styles.diffCommentButtonDisabled
-              ]}
+              )}
               disabled={!commentDraft.trim() || commentsBusy}
               onPress={() => {
                 if (commentLine !== undefined) {
@@ -519,7 +522,7 @@ function DiffLineRow({
                 }
               }}
             >
-              <Text style={styles.diffCommentPrimaryText}>Save note</Text>
+              <Text className={styles.diffCommentPrimaryText}>Save note</Text>
             </Pressable>
           </View>
         </View>
@@ -668,15 +671,15 @@ function FileReader({
 
   if (!doc || doc.status === 'loading') {
     return (
-      <View style={styles.markdownState}>
-        <ActivityIndicator size="small" color={colors.textSecondary} />
+      <View className={styles.markdownState}>
+        <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
       </View>
     )
   }
   if (doc.status === 'error') {
     return (
-      <View style={styles.markdownState}>
-        <Text style={styles.markdownError}>{doc.message}</Text>
+      <View className={styles.markdownState}>
+        <Text className={styles.markdownError}>{doc.message}</Text>
       </View>
     )
   }
@@ -691,49 +694,49 @@ function FileReader({
     const canCopyNotes = commentCount > 0 && !commentsBusy
     const canSendNotes = unsentCommentCount > 0 && !commentsBusy
     return (
-      <View style={styles.markdownEditor}>
+      <View className={styles.markdownEditor}>
         {diffCommentActions ? (
-          <View style={styles.diffNotesToolbar}>
-            <View style={styles.diffNotesTitleRow}>
-              <MessageSquare size={14} color={colors.textSecondary} strokeWidth={2.2} />
-              <Text style={styles.diffNotesTitle}>
+          <View className={styles.diffNotesToolbar}>
+            <View className={styles.diffNotesTitleRow}>
+              <MessageSquare size={14} colorClassName="accent-muted-foreground" />
+              <Text className={styles.diffNotesTitle}>
                 {commentCount === 0
                   ? 'No review notes'
                   : `${commentCount} review ${commentCount === 1 ? 'note' : 'notes'}`}
               </Text>
             </View>
-            <View style={styles.diffNotesActions}>
+            <View className={styles.diffNotesActions}>
               <Pressable
-                style={[
+                className={cn(
                   styles.diffNotesActionButton,
                   !canCopyNotes && styles.diffCommentButtonDisabled
-                ]}
+                )}
                 disabled={!canCopyNotes}
                 onPress={() => void diffCommentActions.onCopyAll()}
                 accessibilityLabel="Copy review notes"
               >
-                <Copy size={13} color={colors.textSecondary} strokeWidth={2.2} />
-                <Text style={styles.diffNotesActionText}>Copy</Text>
+                <Copy size={13} colorClassName="accent-muted-foreground" />
+                <Text className={styles.diffNotesActionText}>Copy</Text>
               </Pressable>
               <Pressable
-                style={[
+                className={cn(
                   styles.diffNotesActionButton,
                   !canSendNotes && styles.diffCommentButtonDisabled
-                ]}
+                )}
                 disabled={!canSendNotes}
                 onPress={diffCommentActions.onSendAll}
                 accessibilityLabel="Send review notes to AI"
               >
-                <Send size={13} color={colors.textSecondary} strokeWidth={2.2} />
-                <Text style={styles.diffNotesActionText}>Send</Text>
+                <Send size={13} colorClassName="accent-muted-foreground" />
+                <Text className={styles.diffNotesActionText}>Send</Text>
               </Pressable>
             </View>
           </View>
         ) : null}
         <FlatList
           data={activeDiffSyntax ?? plainDiffLines}
-          style={styles.filePreviewScroll}
-          contentContainerStyle={styles.filePreviewContent}
+          className={styles.filePreviewScroll}
+          contentContainerClassName={styles.filePreviewContent}
           keyExtractor={(line, index) =>
             `${index}:${line.kind}:${line.oldLineNumber ?? ''}:${line.newLineNumber ?? ''}`
           }
@@ -750,17 +753,17 @@ function FileReader({
 
   if (doc.kind === 'image') {
     return (
-      <View style={styles.imagePreviewContainer}>
+      <View className={styles.imagePreviewContainer}>
         <ScrollView
-          style={styles.imagePreviewScroll}
-          contentContainerStyle={styles.imagePreviewContent}
+          className={styles.imagePreviewScroll}
+          contentContainerClassName={styles.imagePreviewContent}
           maximumZoomScale={4}
           minimumZoomScale={1}
           centerContent
         >
           <Image
             source={{ uri: doc.dataUri }}
-            style={styles.imagePreview}
+            className={styles.imagePreview}
             resizeMode="contain"
             accessibilityLabel={`${title} image`}
           />
@@ -770,12 +773,12 @@ function FileReader({
   }
 
   const renderSourceText = (content: string) => (
-    <View style={styles.markdownEditor}>
+    <View className={styles.markdownEditor}>
       <ScrollView
-        style={styles.filePreviewScroll}
-        contentContainerStyle={styles.filePreviewContent}
+        className={styles.filePreviewScroll}
+        contentContainerClassName={styles.filePreviewContent}
       >
-        <Text selectable style={styles.filePreviewText} accessibilityLabel={`${title} preview`}>
+        <Text selectable className={styles.filePreviewText} accessibilityLabel={`${title} preview`}>
           <MobileSyntaxSegments
             segments={
               fileSyntax?.doc === doc && fileSyntax.language === syntaxLanguage
@@ -790,7 +793,7 @@ function FileReader({
 
   if (doc.kind === 'html') {
     return (
-      <View style={styles.markdownEditor}>
+      <View className={styles.markdownEditor}>
         <MobileHtmlPreview html={doc.content} renderSource={() => renderSourceText(doc.content)} />
       </View>
     )
@@ -4566,25 +4569,25 @@ export default function SessionScreen() {
   const showHeaderMoreButton = showAgentSessionHistoryAction || showChecksAction
 
   return (
-    <View ref={setMobileSessionRootRef} style={styles.container}>
-      <View style={styles.kavInner}>
-        <SafeAreaView style={styles.sessionChrome} edges={['top']}>
-          <View style={styles.sessionTopBar}>
+    <View ref={setMobileSessionRootRef} className={styles.container}>
+      <View className={styles.kavInner}>
+        <SafeAreaView className={styles.sessionChrome} edges={['top']}>
+          <View className={styles.sessionTopBar}>
             <Pressable
-              style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
+              className={cn(styles.backButton, 'active:bg-secondary')}
               onPress={requestLeaveSession}
               hitSlop={8}
               accessibilityLabel="Back to worktrees"
             >
-              <ChevronLeft size={22} color={colors.textSecondary} strokeWidth={2.2} />
+              <ChevronLeft size={22} colorClassName="accent-muted-foreground" />
             </Pressable>
 
-            <View style={styles.sessionTitleBlock}>
-              <Text style={styles.sessionTitle} numberOfLines={1}>
+            <View className={styles.sessionTitleBlock}>
+              <Text className={styles.sessionTitle} numberOfLines={1}>
                 {worktreeName || 'Terminal'}
               </Text>
               <Pressable
-                style={styles.sessionMetaRow}
+                className={styles.sessionMetaRow}
                 disabled={!showConnectionRetry}
                 onPress={() => {
                   if (hostId) {
@@ -4595,7 +4598,7 @@ export default function SessionScreen() {
                 accessibilityLabel={showConnectionRetry ? 'Reconnect to desktop' : undefined}
               >
                 <StatusDot state={connState} />
-                <Text style={styles.sessionMetaText} numberOfLines={1}>
+                <Text className={styles.sessionMetaText} numberOfLines={1}>
                   {terminalSummary}
                 </Text>
               </Pressable>
@@ -4625,7 +4628,7 @@ export default function SessionScreen() {
           </View>
 
           {visibleTabs.length > 0 && (
-            <View style={styles.tabBar}>
+            <View className={styles.tabBar}>
               {/* Why: tab taps must register on the first press while the live
                   keyboard is open instead of being eaten by keyboard dismissal
                   (#5106); leaving a non-live tab still closes the keyboard
@@ -4634,8 +4637,8 @@ export default function SessionScreen() {
                 ref={tabStripRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                style={styles.tabScroll}
-                contentContainerStyle={styles.tabContent}
+                className={styles.tabScroll}
+                contentContainerClassName={styles.tabContent}
                 keyboardShouldPersistTaps="handled"
                 scrollEventThrottle={16}
                 onScroll={(e) => {
@@ -4653,7 +4656,7 @@ export default function SessionScreen() {
                 {visibleTabs.map((t) => (
                   <Pressable
                     key={t.id}
-                    style={[styles.tab, t.id === activeSessionTabId && styles.tabActive]}
+                    className={cn(styles.tab, t.id === activeSessionTabId && styles.tabActive)}
                     onLayout={(e) => {
                       const { x, width } = e.nativeEvent.layout
                       tabLayoutsRef.current.set(t.id, { x, width })
@@ -4668,15 +4671,15 @@ export default function SessionScreen() {
                     }}
                     delayLongPress={400}
                   >
-                    <View style={styles.tabLabelRow}>
+                    <View className={styles.tabLabelRow}>
                       {t.type === 'browser' && (
-                        <Globe size={13} color={colors.textSecondary} strokeWidth={2.1} />
+                        <Globe size={13} colorClassName="accent-muted-foreground" />
                       )}
                       {t.type === 'markdown' && (
-                        <FileText size={13} color={colors.textSecondary} strokeWidth={2.1} />
+                        <FileText size={13} colorClassName="accent-muted-foreground" />
                       )}
                       {t.type === 'file' && (
-                        <File size={13} color={colors.textSecondary} strokeWidth={2.1} />
+                        <File size={13} colorClassName="accent-muted-foreground" />
                       )}
                       {t.type === 'terminal' &&
                         (() => {
@@ -4684,10 +4687,10 @@ export default function SessionScreen() {
                           return agentId ? <MobileAgentIcon agentId={agentId} size={13} /> : null
                         })()}
                       <Text
-                        style={[
+                        className={cn(
                           styles.tabText,
                           t.id === activeSessionTabId && styles.tabTextActive
-                        ]}
+                        )}
                         numberOfLines={1}
                       >
                         {getMobileSessionTabTitle(t)}
@@ -4699,12 +4702,12 @@ export default function SessionScreen() {
               {/* Why: pinned outside the scroll strip so the new-agent button
                   stays reachable no matter how far the tabs scroll. */}
               <Pressable
-                style={({ pressed }) => [
+                className={cn(
                   styles.newTerminalButton,
-                  pressed && styles.newTerminalButtonPressed,
+                  'active:bg-secondary',
                   (creating || creatingBrowser || creatingMarkdown || connState !== 'connected') &&
                     styles.newTerminalButtonDisabled
-                ]}
+                )}
                 disabled={
                   creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
                 }
@@ -4714,7 +4717,7 @@ export default function SessionScreen() {
                 }}
                 accessibilityLabel="New tab"
               >
-                <Plus size={16} color={colors.textSecondary} strokeWidth={2.2} />
+                <Plus size={16} colorClassName="accent-muted-foreground" />
               </Pressable>
             </View>
           )}
@@ -4724,41 +4727,41 @@ export default function SessionScreen() {
             above; on wide the post-chrome content shares this row with the docked panel.
             There is no single terminal node, so the entire conditional block is the
             flex-1 left child. On narrow the dock never renders and layout is unchanged. */}
-        <View style={styles.sessionContentRow} onLayout={handleSessionContentRowLayout}>
-          <View style={styles.sessionContentMain}>
+        <View className={styles.sessionContentRow} onLayout={handleSessionContentRowLayout}>
+          <View className={styles.sessionContentMain}>
             {createWarning ? (
-              <View style={styles.createWarningBanner}>
-                <AlertTriangle size={16} color={colors.statusAmber} strokeWidth={2.2} />
-                <Text style={styles.createWarningText}>{createWarning}</Text>
+              <View className={styles.createWarningBanner}>
+                <AlertTriangle size={16} colorClassName="accent-amber-500" />
+                <Text className={styles.createWarningText}>{createWarning}</Text>
                 <Pressable
-                  style={styles.createWarningDismiss}
+                  className={styles.createWarningDismiss}
                   onPress={() => setCreateWarningState(dismissMobileSessionCreateWarningState)}
                   accessibilityLabel="Dismiss workspace creation warning"
                   hitSlop={8}
                 >
-                  <X size={16} color={colors.textMuted} strokeWidth={2.2} />
+                  <X size={16} colorClassName="accent-muted-foreground" />
                 </Pressable>
               </View>
             ) : null}
 
             {showLoadingState ? (
-              <View style={styles.emptyState}>
-                <ActivityIndicator size="small" color={colors.textSecondary} />
+              <View className={styles.emptyState}>
+                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
               </View>
             ) : showEmptyState ? (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No tabs in this session</Text>
-                {createError ? <Text style={styles.createError}>{createError}</Text> : null}
-                <View style={styles.emptyActions}>
+              <View className={styles.emptyState}>
+                <Text className={styles.emptyText}>No tabs in this session</Text>
+                {createError ? <Text className={styles.createError}>{createError}</Text> : null}
+                <View className={styles.emptyActions}>
                   <Pressable
-                    style={[
+                    className={cn(
                       styles.createButton,
                       (creating ||
                         creatingBrowser ||
                         creatingMarkdown ||
                         connState !== 'connected') &&
                         styles.createButtonDisabled
-                    ]}
+                    )}
                     disabled={
                       creating || creatingBrowser || creatingMarkdown || connState !== 'connected'
                     }
@@ -4767,7 +4770,7 @@ export default function SessionScreen() {
                       setShowCreateTabDrawer(true)
                     }}
                   >
-                    <Text style={styles.createButtonText}>
+                    <Text className={styles.createButtonText}>
                       {creating || creatingBrowser || creatingMarkdown
                         ? 'Creating...'
                         : 'Create Tab'}
@@ -4776,7 +4779,7 @@ export default function SessionScreen() {
                 </View>
               </View>
             ) : activeMarkdownTab ? (
-              <View style={styles.markdownFrame}>
+              <View className={styles.markdownFrame}>
                 <MarkdownReader
                   documentId={activeMarkdownTab.id}
                   doc={markdownDocs.get(activeMarkdownTab.id)}
@@ -4788,13 +4791,17 @@ export default function SessionScreen() {
                   keyboardLift={keyboardLift}
                 />
                 {toastMessage && (
-                  <Animated.View pointerEvents="none" style={[styles.toast, toastAnimatedStyle]}>
-                    <Text style={styles.toastText}>{toastMessage}</Text>
+                  <Animated.View
+                    pointerEvents="none"
+                    className={styles.toast}
+                    style={[toastAnimatedStyle]}
+                  >
+                    <Text className={styles.toastText}>{toastMessage}</Text>
                   </Animated.View>
                 )}
               </View>
             ) : activeFileTab ? (
-              <View style={styles.markdownFrame}>
+              <View className={styles.markdownFrame}>
                 <FileReader
                   doc={fileDocs.get(activeFileTab.id)}
                   title={activeFileTab.title || 'File'}
@@ -4814,13 +4821,17 @@ export default function SessionScreen() {
                   }
                 />
                 {toastMessage && (
-                  <Animated.View pointerEvents="none" style={[styles.toast, toastAnimatedStyle]}>
-                    <Text style={styles.toastText}>{toastMessage}</Text>
+                  <Animated.View
+                    pointerEvents="none"
+                    className={styles.toast}
+                    style={[toastAnimatedStyle]}
+                  >
+                    <Text className={styles.toastText}>{toastMessage}</Text>
                   </Animated.View>
                 )}
               </View>
             ) : activeBrowserTab ? (
-              <View style={styles.browserFrame}>
+              <View className={styles.browserFrame}>
                 {/* Why: the pane owns imperative frame refs; browser tabs should
             never render a stale frame while the old stream effect cleans up. */}
                 <MobileBrowserPane
@@ -4834,21 +4845,25 @@ export default function SessionScreen() {
                   onToast={showToast}
                 />
                 {toastMessage && (
-                  <Animated.View pointerEvents="none" style={[styles.toast, toastAnimatedStyle]}>
-                    <Text style={styles.toastText}>{toastMessage}</Text>
+                  <Animated.View
+                    pointerEvents="none"
+                    className={styles.toast}
+                    style={[toastAnimatedStyle]}
+                  >
+                    <Text className={styles.toastText}>{toastMessage}</Text>
                   </Animated.View>
                 )}
               </View>
             ) : activePendingTerminalTab ? (
-              <View style={styles.emptyState}>
-                <ActivityIndicator size="small" color={colors.textSecondary} />
-                <Text style={styles.emptyText}>
+              <View className={styles.emptyState}>
+                <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+                <Text className={styles.emptyText}>
                   {activePendingTerminalTab.title || 'Loading terminal'}
                 </Text>
               </View>
             ) : (
               <View
-                style={styles.terminalFrame}
+                className={styles.terminalFrame}
                 onLayout={(e) => {
                   terminalFrameHeightRef.current = e.nativeEvent.layout.height
                   // Why: notify height imperatively so dock settling re-fits the
@@ -4901,8 +4916,12 @@ export default function SessionScreen() {
                   keyboardInset={keyboardLift}
                 />
                 {toastMessage && (
-                  <Animated.View pointerEvents="none" style={[styles.toast, toastAnimatedStyle]}>
-                    <Text style={styles.toastText}>{toastMessage}</Text>
+                  <Animated.View
+                    pointerEvents="none"
+                    className={styles.toast}
+                    style={[toastAnimatedStyle]}
+                  >
+                    <Text className={styles.toastText}>{toastMessage}</Text>
                   </Animated.View>
                 )}
               </View>
@@ -4913,37 +4932,31 @@ export default function SessionScreen() {
             chat because that view supplies its own composer. */}
             {!activeMarkdownTab && !activeFileTab && !activeBrowserTab && !showNativeChat && (
               <View
+                className={styles.commandDock}
                 style={[
-                  styles.commandDock,
                   { paddingBottom: insets.bottom, transform: [{ translateY: -keyboardLift }] }
                 ]}
               >
                 {/* Accessory keys */}
-                <View style={styles.accessoryBar}>
+                <View className={styles.accessoryBar}>
                   {/* Why: a fixed, always-visible escape hatch from the open
                   keyboard. Kept outside the horizontal ScrollView so it does
                   not scroll away, and out of the terminal-byte shortcut path so
                   it cannot be hidden by user shortcut customization (#5106). */}
                   {keyboardLift > 0 && (
                     <Pressable
-                      style={({ pressed }) => [
-                        styles.keyboardDismissKey,
-                        pressed && styles.accessoryKeyPressed
-                      ]}
+                      className={cn(styles.keyboardDismissKey, 'active:bg-border')}
                       onPress={dismissSoftwareKeyboard}
                       hitSlop={8}
                       accessibilityRole="button"
                       accessibilityLabel="Dismiss keyboard"
                       accessibilityHint="Hides the software keyboard and keeps the current terminal session open."
                     >
-                      <View style={styles.keyboardDismissGlyph}>
-                        <KeyboardIcon size={15} color={colors.textSecondary} strokeWidth={2} />
-                        <ChevronDown
-                          size={10}
-                          color={colors.textSecondary}
-                          strokeWidth={2.5}
-                          style={styles.keyboardDismissChevron}
-                        />
+                      <View className={styles.keyboardDismissGlyph}>
+                        <KeyboardIcon size={15} colorClassName="accent-muted-foreground" />
+                        <View className={styles.keyboardDismissChevron}>
+                          <ChevronDown size={10} colorClassName="accent-muted-foreground" />
+                        </View>
                       </View>
                     </Pressable>
                   )}
@@ -4951,18 +4964,18 @@ export default function SessionScreen() {
                   key dismisses the open keyboard and is swallowed, so live
                   input lost its keyboard on every Esc/Tab press (#5106). */}
                   <ScrollView
-                    style={styles.accessoryScroll}
+                    className={styles.accessoryScroll}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.accessoryContent}
+                    contentContainerClassName={styles.accessoryContent}
                     keyboardShouldPersistTaps="always"
                   >
                     <Pressable
-                      style={({ pressed }) => [
+                      className={cn(
                         styles.accessoryKey,
-                        pressed && styles.accessoryKeyPressed,
+                        'active:bg-border',
                         !canSend && styles.accessoryKeyDisabled
-                      ]}
+                      )}
                       disabled={!canSend}
                       onPress={() => {
                         if (activeHandle) {
@@ -4976,24 +4989,18 @@ export default function SessionScreen() {
                       }
                     >
                       {isPhoneMode(activeHandle) ? (
-                        <Monitor
-                          size={14}
-                          color={canSend ? colors.textSecondary : colors.textMuted}
-                        />
+                        <Monitor size={14} colorClassName="accent-muted-foreground" />
                       ) : (
-                        <Smartphone
-                          size={14}
-                          color={canSend ? colors.textSecondary : colors.textMuted}
-                        />
+                        <Smartphone size={14} colorClassName="accent-muted-foreground" />
                       )}
                     </Pressable>
                     <Pressable
-                      style={({ pressed }) => [
+                      className={cn(
                         styles.accessoryKey,
                         liveInputEnabled && styles.accessoryKeyActive,
-                        pressed && styles.accessoryKeyPressed,
+                        'active:bg-border',
                         !canSend && styles.accessoryKeyDisabled
-                      ]}
+                      )}
                       disabled={!canSend}
                       onPress={toggleLiveInput}
                       accessibilityLabel={
@@ -5004,31 +5011,27 @@ export default function SessionScreen() {
                     >
                       <ChevronsRight
                         size={14}
-                        color={
-                          liveInputEnabled
-                            ? colors.bgBase
-                            : canSend
-                              ? colors.textSecondary
-                              : colors.textMuted
+                        colorClassName={
+                          liveInputEnabled ? 'accent-primary-foreground' : 'accent-muted-foreground'
                         }
                       />
                     </Pressable>
                     {canPaste && (
                       <Pressable
-                        style={({ pressed }) => [
+                        className={cn(
                           styles.accessoryKey,
-                          pressed && styles.accessoryKeyPressed,
+                          'active:bg-border',
                           !canSend && styles.accessoryKeyDisabled
-                        ]}
+                        )}
                         disabled={!canSend}
                         onPress={() => void handlePaste()}
                         accessibilityLabel="Paste from clipboard"
                       >
                         <Text
-                          style={[
+                          className={cn(
                             styles.accessoryKeyText,
                             !canSend && styles.accessoryKeyTextDisabled
-                          ]}
+                          )}
                         >
                           Paste
                         </Text>
@@ -5037,11 +5040,11 @@ export default function SessionScreen() {
                     {visibleBuiltInAccessoryKeys.map((key) => (
                       <Pressable
                         key={key.id}
-                        style={({ pressed }) => [
+                        className={cn(
                           styles.accessoryKey,
-                          pressed && styles.accessoryKeyPressed,
+                          'active:bg-border',
                           !canSend && styles.accessoryKeyDisabled
-                        ]}
+                        )}
                         disabled={!canSend}
                         onPressIn={() => {
                           if (!key.repeatable) {
@@ -5065,10 +5068,10 @@ export default function SessionScreen() {
                         accessibilityLabel={key.accessibilityLabel ?? `Send ${key.label}`}
                       >
                         <Text
-                          style={[
+                          className={cn(
                             styles.accessoryKeyText,
                             !canSend && styles.accessoryKeyTextDisabled
-                          ]}
+                          )}
                         >
                           {key.label}
                         </Text>
@@ -5077,12 +5080,12 @@ export default function SessionScreen() {
                     {customKeys.map((key) => (
                       <Pressable
                         key={key.id}
-                        style={({ pressed }) => [
+                        className={cn(
                           styles.accessoryKey,
                           styles.customAccessoryKey,
-                          pressed && styles.accessoryKeyPressed,
+                          'active:bg-border',
                           !canSend && styles.accessoryKeyDisabled
-                        ]}
+                        )}
                         disabled={!canSend}
                         onPress={() => void handleAccessoryKey({ bytes: key.bytes })}
                         onLongPress={() => {
@@ -5093,44 +5096,41 @@ export default function SessionScreen() {
                         accessibilityLabel={`Send ${key.label}`}
                       >
                         <Text
-                          style={[
+                          className={cn(
                             styles.accessoryKeyText,
                             !canSend && styles.accessoryKeyTextDisabled
-                          ]}
+                          )}
                         >
                           {key.label}
                         </Text>
                       </Pressable>
                     ))}
                     <Pressable
-                      style={({ pressed }) => [
-                        styles.accessoryKey,
-                        pressed && styles.accessoryKeyPressed
-                      ]}
+                      className={cn(styles.accessoryKey, 'active:bg-border')}
                       onPress={() => setShowCustomKeyModal(true)}
                       accessibilityLabel="Add custom shortcut"
                     >
-                      <Plus size={14} color={colors.textSecondary} strokeWidth={2.2} />
+                      <Plus size={14} colorClassName="accent-muted-foreground" />
                     </Pressable>
                   </ScrollView>
                 </View>
 
                 {/* Input bar */}
                 {liveInputEnabled ? (
-                  <View style={[styles.inputBar, styles.liveInputBar]}>
+                  <View className={cn(styles.inputBar, styles.liveInputBar)}>
                     <Pressable
-                      style={({ pressed }) => [
+                      className={cn(
                         styles.liveInputFocusTarget,
-                        pressed && styles.liveInputFocusTargetPressed,
+                        'active:bg-border',
                         !canSend && styles.liveInputFocusTargetDisabled
-                      ]}
+                      )}
                       disabled={!canSend}
                       onPress={focusLiveInput}
                       accessibilityRole="button"
                       accessibilityLabel="Show keyboard for live terminal input"
                       accessibilityHint="Typed text is sent directly to the active terminal"
                     >
-                      <KeyboardIcon size={16} color={colors.textSecondary} strokeWidth={2} />
+                      <KeyboardIcon size={16} colorClassName="accent-muted-foreground" />
                       <MobileTerminalLiveInputStatus
                         dictation={dictation}
                         isAttaching={isAttaching}
@@ -5141,9 +5141,9 @@ export default function SessionScreen() {
                       isAttaching={isAttaching}
                       dictation={dictation}
                       dictationMode={dictationMode}
-                      buttonStyle={styles.dictationButton}
-                      activeButtonStyle={styles.dictationButtonActive}
-                      disabledButtonStyle={styles.sendButtonDisabled}
+                      buttonClassName={styles.dictationButton}
+                      activeButtonClassName={styles.dictationButtonActive}
+                      disabledButtonClassName={styles.sendButtonDisabled}
                       onAttachImage={() => void attachImage('library')}
                       onAttachFile={() => void attachImage('files')}
                       onDictationToggle={handleDictationToggle}
@@ -5153,7 +5153,7 @@ export default function SessionScreen() {
                     />
                     <TextInput
                       ref={liveInputRef}
-                      style={styles.liveInputCapture}
+                      className={styles.liveInputCapture}
                       value={liveInputCapture}
                       onChangeText={handleLiveInputChange}
                       onKeyPress={handleLiveInputKeyPress}
@@ -5175,7 +5175,7 @@ export default function SessionScreen() {
                     />
                   </View>
                 ) : (
-                  <View style={styles.inputBar}>
+                  <View className={styles.inputBar}>
                     <TextInput
                       ref={commandInputRef}
                       // Why: Android caches the IME inputType at mount, so toggling
@@ -5187,14 +5187,14 @@ export default function SessionScreen() {
                             : 'cmd-input-ac-off'
                           : 'cmd-input'
                       }
-                      style={styles.textInput}
+                      className={styles.textInput}
                       value={input}
                       // Why: iOS kills an active dictation/IME session when JS
                       // writes a value that differs from the native field text;
                       // store the raw field text and normalize at send time.
                       onChangeText={setInput}
                       placeholder="Type a command…"
-                      placeholderTextColor={colors.textMuted}
+                      placeholderTextColorClassName="accent-muted-foreground"
                       autoCapitalize="none"
                       autoCorrect={autocompleteEnabled}
                       spellCheck={autocompleteEnabled}
@@ -5215,9 +5215,9 @@ export default function SessionScreen() {
                       isAttaching={isAttaching}
                       dictation={dictation}
                       dictationMode={dictationMode}
-                      buttonStyle={styles.dictationButton}
-                      activeButtonStyle={styles.dictationButtonActive}
-                      disabledButtonStyle={styles.sendButtonDisabled}
+                      buttonClassName={styles.dictationButton}
+                      activeButtonClassName={styles.dictationButtonActive}
+                      disabledButtonClassName={styles.sendButtonDisabled}
                       onAttachImage={() => void attachImage('library')}
                       onAttachFile={() => void attachImage('files')}
                       onDictationToggle={handleDictationToggle}
@@ -5226,12 +5226,12 @@ export default function SessionScreen() {
                       onDictationCancel={cancelDictation}
                     />
                     <Pressable
-                      style={[styles.sendButton, !canSend && styles.sendButtonDisabled]}
+                      className={cn(styles.sendButton, !canSend && styles.sendButtonDisabled)}
                       disabled={!canSend}
                       onPress={() => void handleSend()}
                       accessibilityLabel="Send command"
                     >
-                      <ArrowUp size={18} color={colors.textSecondary} strokeWidth={2.5} />
+                      <ArrowUp size={18} colorClassName="accent-muted-foreground" />
                     </Pressable>
                   </View>
                 )}

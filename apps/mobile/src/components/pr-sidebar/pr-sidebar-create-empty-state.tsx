@@ -1,6 +1,12 @@
-import { GitPullRequestArrow, Link2, RefreshCw } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+
+import {
+  GitPullRequest as GitPullRequestArrow,
+  LinkSimple as Link2,
+  ArrowClockwise as RefreshCw
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import { MobileCommitFailurePanel } from '../../source-control/mobile-commit-failure-panel'
 import {
@@ -16,7 +22,6 @@ import {
 } from '../../source-control/mobile-hosted-review-create-intent-runner'
 import { fetchWorktreeLinkedPR } from '../../source-control/mobile-pr-link'
 import { useMobileCommitFailureRecovery } from '../../source-control/use-mobile-commit-failure-recovery'
-import { colors } from '../../theme/mobile-theme'
 import type { RpcClient } from '../../transport/rpc-client'
 import type { ConnectionState } from '../../transport/types'
 import { openMobilePrUrl } from '../mobile-pr-compose-sheet'
@@ -142,7 +147,7 @@ export function PrSidebarCreateEmptyState({
 
   if (mode === 'link') {
     return (
-      <View style={styles.composerArea}>
+      <View className={styles.composerArea}>
         <MobileLinkPrForm
           client={client}
           worktreeId={worktreeId}
@@ -157,43 +162,46 @@ export function PrSidebarCreateEmptyState({
   }
 
   return (
-    <View style={styles.section}>
-      <View style={styles.header}>
-        <View style={styles.headerTitle}>
-          <GitPullRequestArrow size={14} color={colors.textSecondary} strokeWidth={2.2} />
-          <Text style={styles.headerLabel}>Pull request</Text>
+    <View className={styles.section}>
+      <View className={styles.header}>
+        <View className={styles.headerTitle}>
+          <GitPullRequestArrow size={14} colorClassName="accent-muted-foreground" />
+          <Text className={styles.headerLabel}>Pull request</Text>
         </View>
-        <View style={styles.headerActions}>
+        <View className={styles.headerActions}>
           <Pressable
-            style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
+            className={cn(styles.iconButton, styles.iconButtonPressedActive)}
             onPress={refreshPrState}
             accessibilityRole="button"
             accessibilityLabel="Refresh pull request"
             hitSlop={6}
           >
-            <RefreshCw size={16} color={colors.textSecondary} strokeWidth={2.2} />
+            <RefreshCw size={16} colorClassName="accent-muted-foreground" />
           </Pressable>
           <Pressable
-            style={[styles.createButton, (!canCreate || loading) && styles.createButtonDisabled]}
+            className={cn(
+              styles.createButton,
+              (!canCreate || loading) && styles.createButtonDisabled
+            )}
             onPress={() => void openComposer()}
             disabled={!canCreate || loading}
             accessibilityRole="button"
             accessibilityLabel="Create pull request"
           >
             {loading ? (
-              <ActivityIndicator color={colors.bgBase} />
+              <ActivityIndicator colorClassName="accent-primary-foreground" />
             ) : (
-              <GitPullRequestArrow size={14} color={colors.bgBase} strokeWidth={2.2} />
+              <GitPullRequestArrow size={14} colorClassName="accent-primary-foreground" />
             )}
-            <Text style={styles.createButtonText}>Create PR</Text>
+            <Text className={styles.createButtonText}>Create PR</Text>
           </Pressable>
         </View>
       </View>
-      <View style={styles.body}>
-        <Text style={styles.bodyTitle}>
+      <View className={styles.body}>
+        <Text className={styles.bodyTitle}>
           {orphanLinkedPR ? `Linked PR #${orphanLinkedPR} unavailable` : 'No open pull request'}
         </Text>
-        <Text style={styles.bodyText}>
+        <Text className={styles.bodyText}>
           {orphanLinkedPR
             ? 'Refresh to check again, or create a new PR for this branch.'
             : gitBranch
@@ -206,14 +214,14 @@ export function PrSidebarCreateEmptyState({
             action={commitFailureRecoveryAction}
           />
         ) : createWarning ? (
-          <Text style={styles.bodyText}>{createWarning}</Text>
+          <Text className={styles.bodyText}>{createWarning}</Text>
         ) : null}
         <Pressable
-          style={({ pressed }) => [
+          className={cn(
             styles.linkButton,
             !client && styles.linkButtonDisabled,
-            pressed && styles.linkButtonPressed
-          ]}
+            styles.linkButtonPressedActive
+          )}
           onPress={() => setMode('link')}
           disabled={!client}
           accessibilityRole="button"
@@ -221,12 +229,8 @@ export function PrSidebarCreateEmptyState({
           accessibilityState={{ disabled: !client }}
           hitSlop={6}
         >
-          <Link2
-            size={14}
-            color={client ? colors.textSecondary : colors.textMuted}
-            strokeWidth={2.2}
-          />
-          <Text style={styles.linkButtonText}>Link an existing PR</Text>
+          <Link2 size={14} colorClassName="accent-muted-foreground" />
+          <Text className={styles.linkButtonText}>Link an existing PR</Text>
         </Pressable>
       </View>
     </View>

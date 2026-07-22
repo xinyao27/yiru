@@ -14,7 +14,7 @@ import {
   type TerminalFrameHeightRefitState,
   type TerminalUpdateViewportCapability
 } from './terminal-viewport-refit-state'
-import type { TerminalWebViewHandle } from './terminal-web-view'
+import type { TerminalWebViewHandle } from './terminal-webview-contract'
 
 export type TerminalViewportDims = { cols: number; rows: number }
 

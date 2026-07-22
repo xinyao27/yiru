@@ -1,18 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useRouter, useFocusEffect } from 'expo-router'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { View, Text, Pressable, FlatList, Alert } from 'react-native'
+
 import {
   QrCode,
-  Settings,
-  ChevronRight,
+  Gear as Settings,
+  CaretRight as ChevronRight,
   Terminal,
   Plus,
-  RefreshCw,
-  PowerOff,
-  Edit3
-} from 'lucide-react-native'
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { View, Text, StyleSheet, Pressable, FlatList, Alert } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+  ArrowClockwise as RefreshCw,
+  Power as PowerOff,
+  PencilSimple as Edit3
+} from '@/components/uniwind-icons'
+import { SafeAreaView } from '@/components/uniwind-native-components'
+import { cn } from '@/style/class-names'
 
 import { loadHomeSnapshot, saveHomeSnapshot } from '../src/cache/home-snapshot-cache'
 import { setCachedWorktrees, getCachedWorktrees } from '../src/cache/worktree-cache'
@@ -34,7 +36,6 @@ import { useResponsiveLayout } from '../src/layout/responsive-layout'
 import { subscribeToDesktopNotifications } from '../src/notifications/mobile-notifications'
 import { shouldPresentNotificationOptIn } from '../src/notifications/notification-opt-in-gate'
 import { triggerMediumImpact } from '../src/platform/haptics'
-import { colors, spacing, radii } from '../src/theme/mobile-theme'
 import {
   useAllHostClients,
   useCloseHost,
@@ -233,7 +234,7 @@ function repoColor(name: string): string {
 
 export default function HomeScreen() {
   const router = useRouter()
-  const insets = useSafeAreaInsets()
+
   // Why: cap and center content on wide/tablet canvases so cards don't stretch
   // edge-to-edge on iPad; on phones isWideLayout is false and layout is unchanged.
   const { isWideLayout, contentMaxWidth } = useResponsiveLayout()
@@ -588,54 +589,55 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView className={styles.container} edges={['top']}>
       {/* ─── Top bar ─── */}
-      <View style={styles.topBar}>
-        <View style={styles.brandLockup}>
-          <View style={styles.logoMark}>
+      <View className={styles.topBar}>
+        <View className={styles.brandLockup}>
+          <View className={styles.logoMark}>
             <YiruLogo size={18} />
           </View>
-          <Text style={styles.brandName}>Yiru</Text>
+          <Text className={styles.brandName}>Yiru</Text>
         </View>
         <Pressable
-          style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
+          className={cn(styles.iconButton, styles.iconButtonPressedActive)}
           onPress={() => router.push('/settings')}
         >
-          <Settings size={18} color={colors.textSecondary} />
+          <Settings size={18} colorClassName="accent-muted-foreground" />
         </Pressable>
       </View>
 
       {hosts.length === 0 ? (
         /* ─── Empty state: onboarding ─── */
         <View
-          style={[
-            styles.emptyContainer,
-            { paddingBottom: insets.bottom },
-            isWideLayout && { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }
-          ]}
+          className={cn(styles.emptyContainer, 'pb-safe')}
+          style={
+            isWideLayout
+              ? { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }
+              : undefined
+          }
         >
-          <View style={styles.emptyHero}>
-            <Text style={styles.emptyTitle}>Connect your desktop</Text>
-            <Text style={styles.emptyBody}>
+          <View className={styles.emptyHero}>
+            <Text className={styles.emptyTitle}>Connect your desktop</Text>
+            <Text className={styles.emptyBody}>
               Pair with Yiru on your computer to check on your agents, jump into any terminal, and
               drive work from your phone.
             </Text>
-            <Pressable style={styles.primaryButton} onPress={() => router.push('/pair-scan')}>
-              <QrCode size={17} color={colors.bgBase} />
-              <Text style={styles.primaryButtonText}>Pair Desktop</Text>
+            <Pressable className={styles.primaryButton} onPress={() => router.push('/pair-scan')}>
+              <QrCode size={17} colorClassName="accent-primary-foreground" />
+              <Text className={styles.primaryButtonText}>Pair Desktop</Text>
             </Pressable>
           </View>
 
-          <View style={styles.stepsSection}>
-            <Text style={styles.sectionHeading}>How it works</Text>
+          <View className={styles.stepsSection}>
+            <Text className={styles.sectionHeading}>How it works</Text>
             {ONBOARDING_STEPS.map((step, i) => (
-              <View key={step.title} style={[styles.stepRow, i > 0 && styles.stepRowBorder]}>
-                <View style={styles.stepNum}>
-                  <Text style={styles.stepNumText}>{i + 1}</Text>
+              <View key={step.title} className={cn(styles.stepRow, i > 0 && styles.stepRowBorder)}>
+                <View className={styles.stepNum}>
+                  <Text className={styles.stepNumText}>{i + 1}</Text>
                 </View>
-                <View style={styles.stepText}>
-                  <Text style={styles.stepTitle}>{step.title}</Text>
-                  <Text style={styles.stepDesc}>{step.desc}</Text>
+                <View className={styles.stepText}>
+                  <Text className={styles.stepTitle}>{step.title}</Text>
+                  <Text className={styles.stepDesc}>{step.desc}</Text>
                 </View>
               </View>
             ))}
@@ -649,37 +651,42 @@ export default function HomeScreen() {
           // Why: edge-to-edge — let the list scroll under the system nav bar
           // but reserve insets.bottom so the last row stays reachable above
           // the Samsung 3-button nav / iOS home indicator.
-          contentContainerStyle={[
-            styles.list,
-            { paddingBottom: spacing.xl + insets.bottom },
-            isWideLayout && { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }
-          ]}
+          contentContainerClassName={cn(styles.list, 'pb-safe-offset-6')}
+          contentContainerStyle={
+            isWideLayout
+              ? { maxWidth: contentMaxWidth, width: '100%', alignSelf: 'center' }
+              : undefined
+          }
           ListHeaderComponent={
             <View>
-              <View style={styles.hero}>
-                <Text style={styles.heroTitle}>Welcome back</Text>
+              <View className={styles.hero}>
+                <Text className={styles.heroTitle}>Welcome back</Text>
               </View>
 
               {stats && (
-                <View style={styles.statsRow}>
-                  <View style={styles.statCard}>
-                    <Text style={styles.statValue}>
+                <View className={styles.statsRow}>
+                  <View className={styles.statCard}>
+                    <Text className={styles.statValue}>
                       {stats.totalAgentsSpawned.toLocaleString()}
                     </Text>
-                    <Text style={styles.statLabel}>Agents spawned</Text>
+                    <Text className={styles.statLabel}>Agents spawned</Text>
                   </View>
-                  <View style={styles.statCard}>
-                    <Text style={styles.statValue}>{formatDuration(stats.totalAgentTimeMs)}</Text>
-                    <Text style={styles.statLabel}>Agent time</Text>
+                  <View className={styles.statCard}>
+                    <Text className={styles.statValue}>
+                      {formatDuration(stats.totalAgentTimeMs)}
+                    </Text>
+                    <Text className={styles.statLabel}>Agent time</Text>
                   </View>
-                  <View style={styles.statCard}>
-                    <Text style={styles.statValue}>{stats.totalPRsCreated.toLocaleString()}</Text>
-                    <Text style={styles.statLabel}>PRs created</Text>
+                  <View className={styles.statCard}>
+                    <Text className={styles.statValue}>
+                      {stats.totalPRsCreated.toLocaleString()}
+                    </Text>
+                    <Text className={styles.statLabel}>PRs created</Text>
                   </View>
                 </View>
               )}
 
-              <Text style={styles.sectionHeading}>Desktops</Text>
+              <Text className={styles.sectionHeading}>Desktops</Text>
             </View>
           }
           ItemSeparatorComponent={CardGap}
@@ -716,79 +723,77 @@ export default function HomeScreen() {
               {/* ─── Resume card ─── */}
               {resumeWorktree ? (
                 <>
-                  <Text style={[styles.sectionHeading, styles.sectionHeadingTightTop]}>Resume</Text>
+                  <Text className={cn(styles.sectionHeading, styles.sectionHeadingTightTop)}>
+                    Resume
+                  </Text>
                   <Pressable
-                    style={({ pressed }) => [styles.resumeCard, pressed && styles.hostCardPressed]}
+                    className={cn(styles.resumeCard, styles.hostCardPressedActive)}
                     onPress={() =>
                       router.push(
                         `/h/${resumeWorktree.hostId}/session/${encodeURIComponent(resumeWorktree.worktree.worktreeId)}`
                       )
                     }
                   >
-                    <View style={styles.resumeIcon}>
-                      <Terminal size={18} color={colors.textSecondary} />
+                    <View className={styles.resumeIcon}>
+                      <Terminal size={18} colorClassName="accent-muted-foreground" />
                     </View>
-                    <View style={styles.resumeMain}>
-                      <Text style={styles.resumeTitle} numberOfLines={1}>
+                    <View className={styles.resumeMain}>
+                      <Text className={styles.resumeTitle} numberOfLines={1}>
                         {resumeWorktree.worktree.displayName}
                       </Text>
-                      <View style={styles.resumeSub}>
+                      <View className={styles.resumeSub}>
                         <View
-                          style={[
-                            styles.repoDot,
-                            { backgroundColor: repoColor(resumeWorktree.worktree.repo) }
-                          ]}
+                          className={styles.repoDot}
+                          style={[{ backgroundColor: repoColor(resumeWorktree.worktree.repo) }]}
                         />
-                        <Text style={styles.resumeSubText} numberOfLines={1}>
+                        <Text className={styles.resumeSubText} numberOfLines={1}>
                           {resumeWorktree.worktree.repo}
                           {'  ·  '}
                           {resumeWorktree.worktree.branch}
                         </Text>
                       </View>
                     </View>
-                    <ChevronRight size={16} color={colors.textMuted} />
+                    <ChevronRight size={16} colorClassName="accent-muted-foreground" />
                   </Pressable>
                 </>
               ) : null}
 
               {/* ─── Quick actions ─── */}
-              <Text style={[styles.sectionHeading, { marginTop: spacing.xl }]}>Quick Actions</Text>
-              <View style={styles.quickActions}>
+              <Text className={cn(styles.sectionHeading, 'mt-6')}>Quick Actions</Text>
+              <View className={styles.quickActions}>
                 <Pressable
-                  style={({ pressed }) => [styles.quickAction, pressed && styles.hostCardPressed]}
+                  className={cn(styles.quickAction, styles.hostCardPressedActive)}
                   onPress={() => router.push('/pair-scan')}
                 >
-                  <View style={styles.quickActionIcon}>
-                    <QrCode size={16} color={colors.textSecondary} />
+                  <View className={styles.quickActionIcon}>
+                    <QrCode size={16} colorClassName="accent-muted-foreground" />
                   </View>
-                  <Text style={styles.quickActionLabel}>Pair Desktop</Text>
+                  <Text className={styles.quickActionLabel}>Pair Desktop</Text>
                 </Pressable>
                 <Pressable
                   disabled={!primaryConnectedHost}
-                  style={({ pressed }) => [
+                  className={cn(
                     styles.quickAction,
                     !primaryConnectedHost && styles.quickActionDisabled,
-                    pressed && styles.hostCardPressed
-                  ]}
+                    styles.hostCardPressedActive
+                  )}
                   onPress={() => {
                     if (primaryConnectedHost) {
                       router.push(`/h/${primaryConnectedHost.id}?action=newWorktree`)
                     }
                   }}
                 >
-                  <View style={styles.quickActionIcon}>
-                    <Plus size={16} color={colors.textSecondary} />
+                  <View className={styles.quickActionIcon}>
+                    <Plus size={16} colorClassName="accent-muted-foreground" />
                   </View>
-                  <Text style={styles.quickActionLabel}>New Workspace</Text>
+                  <Text className={styles.quickActionLabel}>New Workspace</Text>
                 </Pressable>
               </View>
 
               {/* ─── Account usage ─── */}
               {accountsHosts.length > 0 ? (
                 <>
-                  <Text style={[styles.sectionHeading, { marginTop: spacing.xl }]}>
-                    Account usage
-                  </Text>
+                  <Text className={cn(styles.sectionHeading, 'mt-6')}>Account usage</Text>
                   {accountsHosts.map(({ host, snapshot }) => {
                     const claudeActiveId = snapshot.claude.activeAccountId
                     const claudeActive =
@@ -800,14 +805,11 @@ export default function HomeScreen() {
                     return (
                       <Pressable
                         key={host.id}
-                        style={({ pressed }) => [
-                          styles.accountsCard,
-                          pressed && styles.hostCardPressed
-                        ]}
+                        className={cn(styles.accountsCard, styles.hostCardPressedActive)}
                         onPress={() => router.push(`/h/${host.id}/accounts`)}
                       >
                         {showHostName ? (
-                          <Text style={styles.accountsHostLabel} numberOfLines={1}>
+                          <Text className={styles.accountsHostLabel} numberOfLines={1}>
                             {host.name}
                           </Text>
                         ) : null}
@@ -828,19 +830,19 @@ export default function HomeScreen() {
                           const sessionBar = getUsageBarState(limits, 'session')
                           const weeklyBar = getUsageBarState(limits, 'weekly')
                           return (
-                            <View key={provider} style={styles.accountsRow}>
-                              <View style={styles.accountsIcon}>
+                            <View key={provider} className={styles.accountsRow}>
+                              <View className={styles.accountsIcon}>
                                 {provider === 'claude' ? (
                                   <ClaudeIcon size={18} />
                                 ) : (
-                                  <OpenAIIcon size={18} color={colors.textPrimary} />
+                                  <OpenAIIcon size={18} colorClassName="accent-foreground" />
                                 )}
                               </View>
-                              <View style={styles.accountsInfo}>
-                                <Text style={styles.accountsEmail} numberOfLines={1}>
+                              <View className={styles.accountsInfo}>
+                                <Text className={styles.accountsEmail} numberOfLines={1}>
                                   {active?.email ?? 'System default'}
                                 </Text>
-                                <View style={styles.accountsBars}>
+                                <View className={styles.accountsBars}>
                                   <UsageBar
                                     label="5h"
                                     usedPercent={sessionBar.usedPercent}
@@ -945,7 +947,7 @@ export default function HomeScreen() {
 }
 
 function CardGap() {
-  return <View style={styles.cardGap} />
+  return <View className={styles.cardGap} />
 }
 
 const ONBOARDING_STEPS = [
@@ -963,328 +965,76 @@ const ONBOARDING_STEPS = [
   }
 ]
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bgBase
-  },
-
+const styles = {
+  container: cn('flex-1 bg-background'),
   /* ─── Top bar ─── */
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.md
-  },
-  brandLockup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minWidth: 0
-  },
-  logoMark: {
-    marginRight: spacing.sm
-  },
-  brandName: {
-    color: colors.textPrimary,
-    fontSize: 17,
-    fontWeight: '700'
-  },
-  iconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  iconButtonPressed: {
-    backgroundColor: colors.bgRaised
-  },
-
+  topBar: cn('flex-row items-center justify-between px-4 pt-2 pb-3'),
+  brandLockup: cn('flex-row items-center min-w-0'),
+  logoMark: cn('mr-2'),
+  brandName: cn('text-foreground text-[17px] font-bold'),
+  iconButton: cn('w-9 h-9 rounded-none items-center justify-center'),
+  iconButtonPressedActive: cn('active:bg-secondary'),
   /* ─── Hero / greeting ─── */
-  hero: {
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.md
-  },
-  heroTitle: {
-    color: colors.textPrimary,
-    fontSize: 24,
-    fontWeight: '800',
-    letterSpacing: -0.3
-  },
-
+  hero: cn('pt-1 pb-3'),
+  heroTitle: cn('text-foreground text-[24px] font-extrabold tracking-[-0.3px]'),
   /* ─── Stat cards ─── */
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: spacing.lg
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: 'rgba(26,26,26,0.6)',
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: spacing.md
-  },
-  statValue: {
-    color: colors.textPrimary,
-    fontSize: 18,
-    fontWeight: '700',
-    letterSpacing: -0.3
-  },
-  statLabel: {
-    color: colors.textMuted,
-    fontSize: 11,
-    fontWeight: '500',
-    marginTop: 2
-  },
-
+  statsRow: cn('flex-row gap-2.5 mb-4'),
+  statCard: cn('flex-1 bg-card/60 border border-border rounded-none py-2 px-3'),
+  statValue: cn('text-foreground text-[18px] font-bold tracking-[-0.3px]'),
+  statLabel: cn('text-muted-foreground/60 text-[11px] font-medium mt-[2px]'),
   /* ─── Section heading ─── */
-  sectionHeading: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    marginBottom: spacing.sm,
-    paddingHorizontal: spacing.xs
-  },
-  sectionHeadingTightTop: {
-    marginTop: spacing.lg
-  },
-
+  sectionHeading: cn(
+    'text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.6px] mb-2 px-1'
+  ),
+  sectionHeadingTightTop: cn('mt-4'),
   /* ─── List ─── */
-  list: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl
-  },
-  cardGap: {
-    height: spacing.sm
-  },
-
+  list: cn('px-4 pb-6'),
+  cardGap: cn('h-2'),
   /* ─── Host cards ─── */
-  hostCardPressed: {
-    backgroundColor: colors.bgRaised
-  },
-
+  hostCardPressedActive: cn('active:bg-secondary'),
   /* ─── Resume card ─── */
-  resumeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.card,
-    paddingLeft: spacing.md,
-    paddingRight: spacing.md,
-    paddingVertical: 12
-  },
-  resumeIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: 13,
-    backgroundColor: colors.bgRaised,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14
-  },
-  resumeMain: {
-    flex: 1,
-    minWidth: 0
-  },
-  resumeTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  resumeSub: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 3
-  },
-  repoDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5
-  },
-  resumeSubText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    flex: 1
-  },
-
+  resumeCard: cn('flex-row items-center bg-card border border-border rounded-none pl-3 pr-3 py-3'),
+  resumeIcon: cn('w-[46px] h-[46px] rounded-none bg-secondary items-center justify-center mr-3.5'),
+  resumeMain: cn('flex-1 min-w-0'),
+  resumeTitle: cn('text-[13px] font-semibold text-foreground'),
+  resumeSub: cn('flex-row items-center gap-1.5 mt-[3px]'),
+  repoDot: cn('w-[7px] h-[7px] rounded-none'),
+  resumeSubText: cn('text-[12px] text-muted-foreground flex-1'),
   /* ─── Account usage ─── */
-  accountsCard: {
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.card,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    gap: spacing.sm,
-    marginBottom: spacing.sm
-  },
-  accountsHostLabel: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '500',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4
-  },
-  accountsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2
-  },
-  accountsIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
-    backgroundColor: colors.bgRaised,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  accountsInfo: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2
-  },
-  accountsEmail: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textPrimary
-  },
-  accountsBars: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginTop: 4
-  },
-
+  accountsCard: cn('bg-card border border-border rounded-none px-3 py-2.5 gap-2 mb-2'),
+  accountsHostLabel: cn(
+    'text-[11px] text-muted-foreground/60 font-medium uppercase tracking-[0.4px]'
+  ),
+  accountsRow: cn('flex-row items-center gap-2.5'),
+  accountsIcon: cn('w-8 h-8 rounded-none bg-secondary items-center justify-center'),
+  accountsInfo: cn('flex-1 min-w-0 gap-[2px]'),
+  accountsEmail: cn('text-[13px] font-semibold text-foreground'),
+  accountsBars: cn('flex-row gap-3 mt-1'),
   /* ─── Quick actions ─── */
-  quickActions: {
-    flexDirection: 'row',
-    gap: spacing.sm
-  },
-  quickAction: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: colors.bgPanel,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radii.card,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    gap: 10
-  },
-  quickActionDisabled: {
-    opacity: 0.45
-  },
-  quickActionIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 9,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  quickActionLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textSecondary
-  },
-
+  quickActions: cn('flex-row gap-2'),
+  quickAction: cn(
+    'flex-1 flex-row bg-card border border-border rounded-none py-2.5 px-3 items-center gap-2.5'
+  ),
+  quickActionDisabled: cn('opacity-[0.45]'),
+  quickActionIcon: cn('w-7 h-7 rounded-none bg-white/[0.04] items-center justify-center'),
+  quickActionLabel: cn('text-[12px] font-semibold text-muted-foreground'),
   /* ─── Empty state ─── */
-  emptyContainer: {
-    flex: 1
-  },
-  emptyGreeting: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm
-  },
-  emptyHero: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    paddingBottom: 40
-  },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 10
-  },
-  emptyBody: {
-    fontSize: 15,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 32
-  },
-  primaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: colors.textPrimary,
-    paddingHorizontal: 28,
-    paddingVertical: 14,
-    borderRadius: radii.card
-  },
-  primaryButtonText: {
-    color: colors.bgBase,
-    fontSize: 15,
-    fontWeight: '700'
-  },
-
+  emptyContainer: cn('flex-1'),
+  emptyGreeting: cn('px-4 pt-3 pb-2'),
+  emptyHero: cn('flex-1 items-center justify-center px-8 pb-10'),
+  emptyTitle: cn('text-[22px] font-bold text-foreground text-center mb-2.5'),
+  emptyBody: cn('text-[15px] text-muted-foreground text-center leading-[22px] mb-8'),
+  primaryButton: cn('flex-row items-center gap-2.5 bg-foreground px-7 py-3.5 rounded-none'),
+  primaryButtonText: cn('text-background text-[15px] font-bold'),
   /* ─── Onboarding steps ─── */
-  stepsSection: {
-    paddingHorizontal: spacing.xl
-  },
-  stepRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 14,
-    paddingVertical: spacing.lg
-  },
-  stepRowBorder: {
-    borderTopWidth: 1,
-    borderTopColor: colors.borderSubtle
-  },
-  stepNum: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 1
-  },
-  stepNumText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.textSecondary
-  },
-  stepText: {
-    flex: 1
-  },
-  stepTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    marginBottom: 3
-  },
-  stepDesc: {
-    fontSize: 12,
-    color: colors.textMuted,
-    lineHeight: 17
-  }
-})
+  stepsSection: cn('px-6'),
+  stepRow: cn('flex-row items-start gap-3.5 py-4'),
+  stepRowBorder: cn('border-t border-t-border'),
+  stepNum: cn(
+    'w-7 h-7 rounded-none bg-white/[0.04] border border-border items-center justify-center mt-[1px]'
+  ),
+  stepNumText: cn('text-[12px] font-bold text-muted-foreground'),
+  stepText: cn('flex-1'),
+  stepTitle: cn('text-[14px] font-semibold text-foreground mb-[3px]'),
+  stepDesc: cn('text-[12px] text-muted-foreground/60 leading-[17px]')
+} as const

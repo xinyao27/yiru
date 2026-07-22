@@ -1,5 +1,6 @@
-import { RotateCw } from 'lucide-react-native'
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
+
+import { ArrowsClockwise as RotateCw } from '@/components/uniwind-icons'
 
 import type { PrSidebarState } from '../session/mobile-pr-sidebar-state'
 import { buildFixChecksPrompt, buildResolveConflictsPrompt } from '../session/pr-ai-triage-prompt'
@@ -15,7 +16,6 @@ import {
 } from '../session/use-mobile-pr-title-action'
 import { usePRBotAuthorOverrides } from '../session/use-pr-bot-author-overrides'
 import type { MobileGitStatusResult } from '../source-control/mobile-git-status'
-import { colors } from '../theme/mobile-theme'
 import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
 import { prSidebarRenderBranch } from './mobile-pr-sidebar-presentation'
@@ -101,8 +101,9 @@ export function MobilePRSidebar({
 
   return (
     <ScrollView
-      style={{ flex: 1 }}
-      contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomInset }]}
+      className="flex-1"
+      contentContainerClassName={styles.scrollContent}
+      contentContainerStyle={{ paddingBottom: bottomInset }}
       keyboardShouldPersistTaps="handled"
       // Why: root-comment / reply composers sit at the bottom of this scroll
       // area; without keyboard insets the focused field stays under the keyboard.
@@ -165,25 +166,25 @@ function PrSidebarContent({
 }) {
   if (branch === 'loading') {
     return (
-      <View style={styles.stateArea}>
-        <ActivityIndicator color={colors.textSecondary} />
-        <Text style={styles.stateText}>Loading pull request…</Text>
+      <View className={styles.stateArea}>
+        <ActivityIndicator colorClassName="accent-muted-foreground" />
+        <Text className={styles.stateText}>Loading pull request…</Text>
       </View>
     )
   }
   if (branch === 'error') {
     const message = state.kind === 'error' ? state.message : 'Something went wrong.'
     return (
-      <View style={styles.stateArea}>
-        <Text style={styles.stateText}>{message}</Text>
+      <View className={styles.stateArea}>
+        <Text className={styles.stateText}>{message}</Text>
         <Pressable
-          style={styles.retryButton}
+          className={styles.retryButton}
           onPress={onRetry}
           accessibilityRole="button"
           accessibilityLabel="Retry loading pull request"
         >
-          <RotateCw size={14} color={colors.textPrimary} strokeWidth={2.2} />
-          <Text style={styles.retryText}>Retry</Text>
+          <RotateCw size={14} colorClassName="accent-foreground" />
+          <Text className={styles.retryText}>Retry</Text>
         </Pressable>
       </View>
     )
@@ -197,8 +198,8 @@ function PrSidebarContent({
         ? state.message
         : 'Not permitted — your GitHub account is not connected.')
     return (
-      <View style={styles.stateArea}>
-        <Text style={styles.blockedText}>{message}</Text>
+      <View className={styles.stateArea}>
+        <Text className={styles.blockedText}>{message}</Text>
       </View>
     )
   }
@@ -290,8 +291,8 @@ function PrSidebarSections({
   // duplicate blocks (badge row, title, branches, then another action band).
   return (
     <>
-      <View style={styles.section}>
-        <View style={styles.sectionBody}>
+      <View className={styles.section}>
+        <View className={styles.sectionBody}>
           <PRSidebarHeader
             pr={data.pr}
             details={data.details}

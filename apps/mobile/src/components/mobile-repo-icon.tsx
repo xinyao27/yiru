@@ -1,35 +1,36 @@
+import { Image, Text, View } from 'react-native'
+
 import {
-  Bot,
-  Box,
-  Braces,
+  Robot as Bot,
+  Cube as Box,
+  BracketsCurly as Braces,
   Briefcase,
-  Building2,
-  Code2,
+  Buildings as Building2,
+  CodeSimple as Code2,
   Cpu,
   Database,
   Folder,
   Gauge,
   Globe,
-  Layers,
-  type LucideIcon,
+  Stack as Layers,
+  type Icon,
   Package,
   Palette,
   Rocket,
-  Server,
+  HardDrives as Server,
   Shapes,
-  Sparkles,
-  SquareTerminal,
+  Sparkle as Sparkles,
+  TerminalWindow as SquareTerminal,
   Wrench
-} from 'lucide-react-native'
-import { Image, StyleSheet, Text, View } from 'react-native'
+} from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type { RepoIcon } from '../../../desktop/src/shared/repo-icon'
-import { colors } from '../theme/mobile-theme'
+import { useThemeColors } from '../theme/uniwind-theme-values'
 
-// The lucide names the desktop repo-icon picker offers (src/renderer/src/
-// components/repo/repo-icon.tsx). Mobile renders the same glyph so the project
-// header icon matches desktop instead of a bare colored dot.
-const REPO_LUCIDE_ICONS: Record<string, LucideIcon> = {
+// The desktop payload keeps historical icon names; map them to Phosphor so
+// mobile and desktop still render the same project concept.
+const REPO_PHOSPHOR_ICONS: Record<string, Icon> = {
   Folder,
   Code2,
   SquareTerminal,
@@ -59,35 +60,38 @@ type Props = {
 }
 
 // Renders a repo/project icon matching the desktop sidebar: a custom image
-// (favicon/avatar/upload), an emoji, or a lucide glyph. Falls back to Folder,
+// (favicon/avatar/upload), an emoji, or a Phosphor glyph. Falls back to Folder,
 // the desktop default, so a project always shows an icon rather than a dot.
-export function MobileRepoIcon({ repoIcon, size = 14, color = colors.textSecondary }: Props) {
+export function MobileRepoIcon({ repoIcon, size = 14, color }: Props) {
+  const colors = useThemeColors()
+  const resolvedColor = color ?? colors.textSecondary
   if (repoIcon?.type === 'image') {
     return (
       <Image
         source={{ uri: repoIcon.src }}
-        style={{ width: size, height: size, borderRadius: 3 }}
+        className="rounded-none"
+        style={{ width: size, height: size }}
         accessibilityLabel={repoIcon.label}
       />
     )
   }
   if (repoIcon?.type === 'emoji') {
-    return <Text style={[styles.emoji, { fontSize: size }]}>{repoIcon.emoji}</Text>
+    return (
+      <Text className={styles.emoji} style={[{ fontSize: size }]}>
+        {repoIcon.emoji}
+      </Text>
+    )
   }
-  const Icon = (repoIcon?.type === 'lucide' && REPO_LUCIDE_ICONS[repoIcon.name]) || Folder
+  // Why: `lucide` is a persisted cross-client discriminator, not a runtime dependency.
+  const Icon = (repoIcon?.type === 'lucide' && REPO_PHOSPHOR_ICONS[repoIcon.name]) || Folder
   return (
-    <View style={styles.glyph}>
-      <Icon size={size} color={color} strokeWidth={2} />
+    <View className={styles.glyph}>
+      <Icon size={size} color={resolvedColor} />
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  emoji: {
-    textAlign: 'center'
-  },
-  glyph: {
-    alignItems: 'center',
-    justifyContent: 'center'
-  }
-})
+const styles = {
+  emoji: cn('text-center'),
+  glyph: cn('items-center justify-center')
+} as const

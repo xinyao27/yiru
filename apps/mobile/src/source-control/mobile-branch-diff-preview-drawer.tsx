@@ -1,9 +1,10 @@
-import { X } from 'lucide-react-native'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+
+import { X } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import { BottomDrawer } from '../components/bottom-drawer'
 import { MobileSyntaxSegments } from '../components/mobile-syntax-segments'
-import { colors } from '../theme/mobile-theme'
 import { mobileDiffLineNumber, mobileDiffLinePrefix } from './mobile-diff-format'
 import type { MobileBranchDiffPreviewState } from './mobile-source-control-screen-state'
 import { styles } from './mobile-source-control-styles'
@@ -25,52 +26,52 @@ export function MobileBranchDiffPreviewDrawer({ branchDiffPreview, onClose }: Pr
       dragContentToDismiss={false}
       zIndex={1100}
     >
-      <View style={styles.diffDrawerHeader}>
-        <View style={styles.diffDrawerTitleBlock}>
-          <Text style={styles.diffDrawerTitle} numberOfLines={1}>
+      <View className={styles.diffDrawerHeader}>
+        <View className={styles.diffDrawerTitleBlock}>
+          <Text className={styles.diffDrawerTitle} numberOfLines={1}>
             {entry.path}
           </Text>
-          <Text style={styles.diffDrawerMeta} numberOfLines={1}>
+          <Text className={styles.diffDrawerMeta} numberOfLines={1}>
             {branchDiffPreview.kind === 'ready'
               ? `${branchDiffPreview.summary.baseRef}..HEAD`
               : 'Committed on branch'}
           </Text>
         </View>
         <Pressable
-          style={({ pressed }) => [styles.diffCloseButton, pressed && styles.iconButtonPressed]}
+          className={cn(styles.diffCloseButton, 'active:bg-secondary')}
           onPress={onClose}
           hitSlop={8}
           accessibilityLabel="Close committed diff preview"
         >
-          <X size={18} color={colors.textSecondary} strokeWidth={2.1} />
+          <X size={18} colorClassName="accent-muted-foreground" />
         </Pressable>
       </View>
       {branchDiffPreview.kind === 'loading' ? (
-        <View style={styles.diffState}>
-          <ActivityIndicator size="small" color={colors.textSecondary} />
+        <View className={styles.diffState}>
+          <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
         </View>
       ) : branchDiffPreview.kind === 'error' ? (
-        <View style={styles.diffState}>
-          <Text style={styles.stateTitle}>Unable to Load Diff</Text>
-          <Text style={styles.stateText}>{branchDiffPreview.message}</Text>
+        <View className={styles.diffState}>
+          <Text className={styles.stateTitle}>Unable to Load Diff</Text>
+          <Text className={styles.stateText}>{branchDiffPreview.message}</Text>
         </View>
       ) : (
-        <View style={styles.diffLines}>
+        <View className={styles.diffLines}>
           {branchDiffPreview.truncated ? (
-            <Text style={styles.diffTruncatedText}>Diff truncated for mobile preview.</Text>
+            <Text className={styles.diffTruncatedText}>Diff truncated for mobile preview.</Text>
           ) : null}
           {branchDiffPreview.lines.map((line, index) => (
             <View
               key={`${index}:${line.kind}:${line.oldLineNumber ?? ''}:${line.newLineNumber ?? ''}`}
-              style={[
+              className={cn(
                 styles.diffLine,
                 line.kind === 'add' && styles.diffLineAdd,
                 line.kind === 'delete' && styles.diffLineDelete
-              ]}
+              )}
             >
-              <Text style={styles.diffLineNumber}>{mobileDiffLineNumber(line)}</Text>
-              <Text style={styles.diffLinePrefix}>{mobileDiffLinePrefix(line.kind)}</Text>
-              <Text style={styles.diffLineText}>
+              <Text className={styles.diffLineNumber}>{mobileDiffLineNumber(line)}</Text>
+              <Text className={styles.diffLinePrefix}>{mobileDiffLinePrefix(line.kind)}</Text>
+              <Text className={styles.diffLineText}>
                 {line.text ? <MobileSyntaxSegments segments={line.segments} /> : ' '}
               </Text>
             </View>

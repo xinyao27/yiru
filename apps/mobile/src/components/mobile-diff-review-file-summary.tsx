@@ -1,5 +1,7 @@
-import { ArrowDown, ArrowUp } from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
+
+import { ArrowDown, ArrowUp } from '@/components/uniwind-icons'
+import { cn } from '@/style/class-names'
 
 import type { DiffComment } from '../../../desktop/src/shared/types'
 import type { MobileDiffReviewQueueItem } from '../session/mobile-diff-review-queue'
@@ -9,7 +11,6 @@ import {
   type ReviewDiffState
 } from '../session/mobile-diff-review-screen-model'
 import { MOBILE_GIT_STATUS_LABELS } from '../source-control/mobile-git-status'
-import { colors } from '../theme/mobile-theme'
 import { mobileDiffReviewStyles as styles } from './mobile-diff-review-screen-styles'
 
 type Props = {
@@ -23,20 +24,21 @@ type Props = {
   onJumpHunk: (direction: 'next' | 'previous') => void
 }
 
-function statusColor(status: MobileDiffReviewQueueItem['status']): string {
+function statusColorClassName(status: MobileDiffReviewQueueItem['status']): string {
   switch (status) {
     case 'added':
+      return 'text-[var(--git-decoration-added)] border-[var(--git-decoration-added)]'
     case 'copied':
-      return colors.statusGreen
+      return 'text-[var(--git-decoration-copied)] border-[var(--git-decoration-copied)]'
     case 'deleted':
-      return colors.statusRed
+      return 'text-[var(--git-decoration-deleted)] border-[var(--git-decoration-deleted)]'
     case 'renamed':
-      return colors.accentBlue
+      return 'text-[var(--git-decoration-renamed)] border-[var(--git-decoration-renamed)]'
     case 'untracked':
-      return colors.statusAmber
+      return 'text-[var(--git-decoration-untracked)] border-[var(--git-decoration-untracked)]'
     case 'modified':
     default:
-      return colors.textSecondary
+      return 'text-[var(--git-decoration-modified)] border-[var(--git-decoration-modified)]'
   }
 }
 
@@ -51,78 +53,80 @@ export function MobileDiffReviewFileSummary({
   onJumpHunk
 }: Props) {
   const hunkDisabled = diffState.kind !== 'ready' || diffState.hunks.length === 0
-  const badgeColor = statusColor(item.status)
+  const badgeColorClassName = statusColorClassName(item.status)
   return (
-    <View style={styles.fileHeader}>
-      <View style={styles.fileTitleRow}>
-        <View style={[styles.statusBadge, { borderColor: badgeColor }]}>
-          <Text style={[styles.statusBadgeText, { color: badgeColor }]}>
+    <View className={styles.fileHeader}>
+      <View className={styles.fileTitleRow}>
+        <View className={cn(styles.statusBadge, badgeColorClassName)}>
+          <Text className={cn(styles.statusBadgeText, badgeColorClassName)}>
             {MOBILE_GIT_STATUS_LABELS[item.status]}
           </Text>
         </View>
-        <View style={styles.fileTitleBlock}>
-          <Text style={styles.filePath} numberOfLines={1}>
+        <View className={styles.fileTitleBlock}>
+          <Text className={styles.filePath} numberOfLines={1}>
             {item.filePath}
           </Text>
-          <Text style={styles.fileMeta} numberOfLines={1}>
+          <Text className={styles.fileMeta} numberOfLines={1}>
             {mobileReviewScopeLabel(item)}
             {item.oldPath ? ` from ${item.oldPath}` : ''}
           </Text>
         </View>
       </View>
-      <View style={styles.fileMetaRow}>
-        <Text style={styles.fileMeta}>
+      <View className={styles.fileMetaRow}>
+        <Text className={styles.fileMeta}>
           {currentIndex + 1}/{filteredCount}
         </Text>
-        {item.isReviewed ? <Text style={styles.reviewedPill}>Reviewed</Text> : null}
-        {item.changedSinceReview ? <Text style={styles.stalePill}>Changed</Text> : null}
+        {item.isReviewed ? <Text className={styles.reviewedPill}>Reviewed</Text> : null}
+        {item.changedSinceReview ? <Text className={styles.stalePill}>Changed</Text> : null}
         {item.noteCount > 0 ? (
-          <Text style={styles.fileMeta}>
+          <Text className={styles.fileMeta}>
             {mobileReviewCountLabel(item.noteCount, 'note', 'notes')}
           </Text>
         ) : null}
         {item.staleNoteCount > 0 ? (
-          <Text style={styles.staleText}>{item.staleNoteCount} stale</Text>
+          <Text className={styles.staleText}>{item.staleNoteCount} stale</Text>
         ) : null}
       </View>
       {fileNotes.length > 0 ? (
-        <View style={styles.fileNotes}>
+        <View className={styles.fileNotes}>
           {fileNotes.map((note) => (
             <Pressable
               key={note.id}
-              style={({ pressed }) => [styles.fileNote, pressed && styles.fileNotePressed]}
+              className={cn(styles.fileNote, 'active:bg-secondary')}
               onPress={() => onEditNote(note)}
               accessibilityRole="button"
               accessibilityLabel="Edit file note"
             >
-              <Text style={styles.fileNoteText} numberOfLines={2}>
+              <Text className={styles.fileNoteText} numberOfLines={2}>
                 {note.body}
               </Text>
-              {staleCommentIds.has(note.id) ? <Text style={styles.staleText}>Stale</Text> : null}
+              {staleCommentIds.has(note.id) ? (
+                <Text className={styles.staleText}>Stale</Text>
+              ) : null}
             </Pressable>
           ))}
         </View>
       ) : null}
-      <View style={styles.hunkRow}>
+      <View className={styles.hunkRow}>
         <Pressable
-          style={({ pressed }) => [styles.hunkButton, pressed && styles.hunkButtonPressed]}
+          className={cn(styles.hunkButton, 'active:bg-secondary')}
           disabled={hunkDisabled}
           onPress={() => onJumpHunk('previous')}
           accessibilityRole="button"
           accessibilityLabel="Previous hunk"
         >
-          <ArrowUp size={14} color={colors.textSecondary} strokeWidth={2.2} />
-          <Text style={styles.hunkButtonText}>Hunk</Text>
+          <ArrowUp size={14} colorClassName="accent-muted-foreground" />
+          <Text className={styles.hunkButtonText}>Hunk</Text>
         </Pressable>
         <Pressable
-          style={({ pressed }) => [styles.hunkButton, pressed && styles.hunkButtonPressed]}
+          className={cn(styles.hunkButton, 'active:bg-secondary')}
           disabled={hunkDisabled}
           onPress={() => onJumpHunk('next')}
           accessibilityRole="button"
           accessibilityLabel="Next hunk"
         >
-          <ArrowDown size={14} color={colors.textSecondary} strokeWidth={2.2} />
-          <Text style={styles.hunkButtonText}>Hunk</Text>
+          <ArrowDown size={14} colorClassName="accent-muted-foreground" />
+          <Text className={styles.hunkButtonText}>Hunk</Text>
         </Pressable>
       </View>
     </View>

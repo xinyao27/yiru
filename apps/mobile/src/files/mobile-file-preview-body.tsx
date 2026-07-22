@@ -1,6 +1,5 @@
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native'
 
-import { colors } from '../theme/mobile-theme'
 import { MobileFileMarkdownPreview } from './mobile-file-markdown-preview'
 import { MobileFilePreviewEditableSource } from './mobile-file-preview-editable-source'
 import type { MobileFilePreviewLineColumn } from './mobile-file-preview-line-column'
@@ -26,18 +25,18 @@ type Props = {
 export function MobileFilePreviewBody({ preview, ...options }: Props) {
   if (preview.status === 'loading') {
     return (
-      <View style={styles.state}>
-        <ActivityIndicator size="small" color={colors.textSecondary} />
-        <Text style={styles.stateText}>{preview.message}</Text>
+      <View className={styles.state}>
+        <ActivityIndicator size="small" colorClassName="accent-muted-foreground" />
+        <Text className={styles.stateText}>{preview.message}</Text>
       </View>
     )
   }
   if (preview.status === 'error' || preview.status === 'waiting') {
     return (
-      <View style={styles.state}>
-        <Text style={styles.errorText}>{preview.message}</Text>
-        <Pressable style={styles.retryButton} onPress={options.onRetry}>
-          <Text style={styles.retryText}>Retry</Text>
+      <View className={styles.state}>
+        <Text className={styles.errorText}>{preview.message}</Text>
+        <Pressable className={styles.retryButton} onPress={options.onRetry}>
+          <Text className={styles.retryText}>Retry</Text>
         </Pressable>
       </View>
     )
@@ -46,24 +45,25 @@ export function MobileFilePreviewBody({ preview, ...options }: Props) {
     return options.editable ? (
       <EditablePreviewSource {...options} />
     ) : (
-      <View style={styles.state}>
-        <Text style={styles.stateText}>Empty file</Text>
+      <View className={styles.state}>
+        <Text className={styles.stateText}>Empty file</Text>
       </View>
     )
   }
   if (preview.kind === 'image') {
     return (
-      <View style={styles.imageContainer}>
+      <View className={styles.imageContainer}>
         <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.imageScrollContent}
+          className={styles.scroll}
+          contentContainerClassName={styles.imageScrollContent}
           maximumZoomScale={4}
           minimumZoomScale={1}
           centerContent
         >
           <Image
             source={{ uri: preview.dataUri }}
-            style={[styles.image, { width: options.imageWidth, height: options.imageHeight }]}
+            className={styles.image}
+            style={[{ width: options.imageWidth, height: options.imageHeight }]}
             resizeMode="contain"
             onError={options.onImageError}
             accessibilityLabel={`${options.title} image`}

@@ -1,6 +1,9 @@
 import { Stack, useGlobalSearchParams, usePathname } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { View, StyleSheet, PanResponder } from 'react-native'
+import { View, PanResponder, type ViewStyle } from 'react-native'
+import { useResolveClassNames } from 'uniwind'
+
+import { cn } from '@/style/class-names'
 
 import { useResponsiveLayout } from '../../src/layout/responsive-layout'
 import {
@@ -10,12 +13,10 @@ import {
   loadHostSidebarWidth,
   saveHostSidebarWidth
 } from '../../src/storage/preferences'
-import { colors } from '../../src/theme/mobile-theme'
 import { HostScreen } from './[hostId]/index'
 
 // Keep at least this much room for the detail pane when resizing the sidebar.
 const MIN_DETAIL_WIDTH = 320
-const RESIZE_EDGE_WIDTH = 24
 
 // Clamp a sidebar width to the bounds and to the current window, so a width
 // saved on a larger device can't starve the detail pane on a narrower one.
@@ -28,11 +29,12 @@ function clampSidebarToWindow(width: number, windowWidth: number): number {
 }
 
 function HostStack({ animation }: { animation: 'none' | 'default' }) {
+  const contentStyle = useResolveClassNames('bg-background') as ViewStyle
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colors.bgBase },
+        contentStyle,
         // In the tablet split view the detail pane should swap instantly like
         // a desktop master-detail; the default slide animates the outgoing
         // screen and briefly reveals the one beneath it. Phones keep the slide.
@@ -138,9 +140,9 @@ export default function HostGroupLayout() {
   // changes so a fold/rotation doesn't remount the navigator and reset the
   // navigation stack — only the sidebar pane toggles in and out.
   return (
-    <View style={styles.row}>
+    <View className={styles.row}>
       {showSidebar && sidebarOpen ? (
-        <View style={[styles.sidebar, { width: sidebarWidth }]}>
+        <View className={styles.sidebar} style={[{ width: sidebarWidth }]}>
           <HostScreen
             embedded
             hostId={hostId}
@@ -148,39 +150,25 @@ export default function HostGroupLayout() {
             onHideSidebar={canCollapseSidebar ? hideSidebar : undefined}
           />
           {/* Dedicated drag handle straddling the right border — see resizer note. */}
-          <View style={styles.resizeHandle} {...resizer.panHandlers} />
+          <View
+            className={styles.resizeHandle}
+            style={{ elevation: 20 }}
+            {...resizer.panHandlers}
+          />
         </View>
       ) : null}
-      <View style={styles.detail}>
+      <View className={styles.detail}>
         <HostStack animation={showSidebar ? 'none' : 'default'} />
       </View>
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: colors.bgBase
-  },
-  sidebar: {
-    borderRightWidth: 1,
-    borderRightColor: colors.borderSubtle
-  },
+const styles = {
+  row: cn('flex-1 flex-row bg-background'),
+  sidebar: cn('border-r border-r-border'),
   // Invisible grab strip over the sidebar's right edge. Absolute + elevated so it
   // sits above the worktree list and reliably owns the drag on Android.
-  resizeHandle: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    right: 0,
-    width: RESIZE_EDGE_WIDTH,
-    zIndex: 20,
-    elevation: 20
-  },
-  detail: {
-    flex: 1,
-    minWidth: 0
-  }
-})
+  resizeHandle: cn('absolute top-0 bottom-0 right-0 w-6 z-[20]'),
+  detail: cn('flex-1 min-w-0')
+} as const
