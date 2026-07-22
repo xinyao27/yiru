@@ -24,6 +24,7 @@ import {
   nextNativeChatLimit
 } from './native-chat-pagination'
 import { getNativeChatSessionTransport } from './native-chat-session-transport'
+import { useNativeChatCompletionRefresh } from './use-native-chat-completion-refresh'
 
 export type UseNativeChatLiveSessionArgs = {
   /** Composite `${tabId}:${leafId}` key — selects the live hook entry. */
@@ -298,6 +299,25 @@ export function useNativeChatLiveSession(
     // `transport` identity changes on an owner flip, re-running this effect to
     // tear down the old host's subscription and open one against the new host.
   }, [agent, sessionId, transcriptPath, transport])
+
+  const applyCompletionRefresh = useCallback((messages: NativeChatMessage[]) => {
+    transcriptEpochRef.current += 1
+    setLoadingEarlier(false)
+    replaceList(appendMergerRef.current, [])
+    setAppended([])
+    setRead({ phase: 'ready', messages })
+    setHasMore(hasMoreNativeChatHistory(messages.length, limitRef.current))
+  }, [])
+  useNativeChatCompletionRefresh({
+    agent,
+    sessionId,
+    transcriptPath,
+    transport,
+    state: hookState,
+    stateStartedAt: hookStateStartedAt,
+    limit: limitRef.current,
+    onMessages: applyCompletionRefresh
+  })
 
   const loadEarlier = useCallback(() => {
     if (!sessionId || loadingEarlier || !hasMore || read.phase !== 'ready') {

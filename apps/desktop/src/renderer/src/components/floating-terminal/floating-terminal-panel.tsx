@@ -1,4 +1,10 @@
-import { FileText, Globe, Minus, TerminalWindow as TerminalSquare } from '@phosphor-icons/react'
+import {
+  ChatCircleDots,
+  FileText,
+  Globe,
+  Minus,
+  TerminalWindow as TerminalSquare
+} from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the floating panel owns window chrome,
  * resizing, orchestration setup, and mixed terminal/browser/editor tab
  * handling in one surface so the floating worktree does not drift from the
@@ -8,6 +14,7 @@ import { toast } from 'sonner'
 
 import { useContextualTour } from '@/components/contextual-tours/use-contextual-tour'
 import EmulatorPane from '@/components/emulator-pane/emulator-pane'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { ShortcutKeyCombo } from '@/components/shortcut-key-combo'
 import TabBar from '@/components/tab-bar/tab-bar'
 import { resolveGroupTabFromVisibleId } from '@/components/tab-group/tab-group-visible-id'
@@ -97,6 +104,9 @@ const EditorPanel = lazy(() => import('@/components/editor/editor-panel'))
 type FloatingTerminalPanelProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onOpenAssistant?: () => void
+  assistantPending?: boolean
+  assistantLoadingVisible?: boolean
   tourInteractionSnapshot?: FloatingWorkspaceTourInteractionSnapshot | null | undefined
 }
 
@@ -164,6 +174,9 @@ function setFloatingTerminalInputFocusedInMain(focused: boolean): void {
 export function FloatingTerminalPanel({
   open,
   onOpenChange,
+  onOpenAssistant,
+  assistantPending = false,
+  assistantLoadingVisible = false,
   tourInteractionSnapshot
 }: FloatingTerminalPanelProps): React.JSX.Element | null {
   const { tabs, browserTabs, groups, unifiedTabs, floatingFiles, expandedPaneByTabId } =
@@ -191,6 +204,7 @@ export function FloatingTerminalPanel({
   const newMarkdownShortcut = useShortcutKeyDetails('tab.newMarkdown')
   const openMarkdownShortcut = useShortcutKeyDetails('tab.openMarkdown')
   const closeShortcut = useShortcutKeyDetails('tab.close')
+  const assistantShortcut = useShortcutKeyDetails('assistant.toggle')
 
   const [cwd, setCwd] = useState<string | null>(null)
   const [markdownCwd, setMarkdownCwd] = useState<string | null>(null)
@@ -1584,6 +1598,9 @@ export function FloatingTerminalPanel({
               onNewMarkdown={createFloatingMarkdownTab}
               onOpenMarkdown={openFloatingMarkdownTab}
               onNewBrowser={createFloatingBrowserTab}
+              onOpenAssistant={onOpenAssistant}
+              assistantPending={assistantPending}
+              assistantLoadingVisible={assistantLoadingVisible}
               onClose={() => onOpenChange(false)}
               onFocusPanel={focusPanelForShortcuts}
               newTerminalShortcut={newTerminalShortcut}
@@ -1591,6 +1608,7 @@ export function FloatingTerminalPanel({
               newMarkdownShortcut={newMarkdownShortcut}
               openMarkdownShortcut={openMarkdownShortcut}
               closeShortcut={closeShortcut}
+              assistantShortcut={assistantShortcut}
             />
           ) : null}
         </div>
@@ -1726,18 +1744,25 @@ function FloatingTerminalEmptyState({
   onNewMarkdown,
   onOpenMarkdown,
   onNewBrowser,
+  onOpenAssistant,
+  assistantPending,
+  assistantLoadingVisible,
   onClose,
   onFocusPanel,
   newTerminalShortcut,
   newBrowserShortcut,
   newMarkdownShortcut,
   openMarkdownShortcut,
-  closeShortcut
+  closeShortcut,
+  assistantShortcut
 }: {
   onNewTerminal: () => void
   onNewMarkdown: () => void
   onOpenMarkdown: () => void
   onNewBrowser: () => void
+  onOpenAssistant?: () => void
+  assistantPending: boolean
+  assistantLoadingVisible: boolean
   onClose: () => void
   onFocusPanel: () => void
   newTerminalShortcut: ShortcutKeyComboDetails
@@ -1745,6 +1770,7 @@ function FloatingTerminalEmptyState({
   newMarkdownShortcut: ShortcutKeyComboDetails
   openMarkdownShortcut: ShortcutKeyComboDetails
   closeShortcut: ShortcutKeyComboDetails
+  assistantShortcut: ShortcutKeyComboDetails
 }): React.JSX.Element {
   return (
     <div
@@ -1754,6 +1780,27 @@ function FloatingTerminalEmptyState({
       onPointerDown={onFocusPanel}
     >
       <div className="flex w-[360px] flex-col items-center gap-1.5" data-floating-terminal-no-drag>
+        {onOpenAssistant ? (
+          <Button
+            type="button"
+            variant="ghost"
+            className="text-foreground hover:bg-accent hover:text-accent-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 px-3 py-0 text-sm font-normal"
+            onClick={onOpenAssistant}
+            disabled={assistantPending}
+          >
+            {assistantLoadingVisible ? (
+              <LoadingIndicator className="size-3.5" />
+            ) : (
+              <ChatCircleDots className="size-3.5 opacity-90" />
+            )}
+            <span className="truncate text-left leading-none">
+              {assistantLoadingVisible
+                ? translate('components.global-assistant.starting', 'Starting assistant…')
+                : translate('components.global-assistant.open', 'Open Assistant')}
+            </span>
+            <FloatingEmptyStateShortcut shortcut={assistantShortcut} />
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="ghost"

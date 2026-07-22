@@ -14,13 +14,17 @@ function isToolOnlyMessage(message: NativeChatMessage): boolean {
   )
 }
 
-/** Fold consecutive tool-only messages into their preceding assistant turn. */
+/** Fold consecutive assistant updates and tool-only records into one response turn. */
 export function foldToolMessages(messages: readonly NativeChatMessage[]): NativeChatMessage[] {
   const output: NativeChatMessage[] = []
   let mutableAssistantIndex = -1
   for (const message of messages) {
     const previous = output.at(-1)
-    if (isToolOnlyMessage(message) && previous?.role === 'assistant') {
+    // Why: providers emit commentary, tool activity, and the final answer as
+    // separate records even though they answer one user turn.
+    const continuesAssistantTurn =
+      previous?.role === 'assistant' && (message.role === 'assistant' || isToolOnlyMessage(message))
+    if (continuesAssistantTurn) {
       const index = output.length - 1
       if (mutableAssistantIndex !== index) {
         output[index] = { ...previous, blocks: [...previous.blocks] }

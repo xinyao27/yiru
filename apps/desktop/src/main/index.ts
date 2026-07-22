@@ -86,6 +86,7 @@ import { startMainThreadChurnProbe } from './diagnostics/main-thread-churn-probe
 import { setUnreadDockBadgeCount } from './dock/unread-badge'
 import { EmulatorBridge } from './emulator/emulator-bridge'
 import { moveWorktree } from './git/worktree'
+import { GlobalAssistantService } from './global-assistant/global-assistant-service'
 import { ensureMainI18n, setMainUiLanguage } from './i18n/main-i18n'
 import { closeAllWatchers } from './ipc/filesystem-watcher'
 import { registerMobileHandlers } from './ipc/mobile'
@@ -231,6 +232,7 @@ let codexRuntimeHome: CodexRuntimeHomeService | null = null
 let claudeAccounts: ClaudeAccountService | null = null
 let claudeRuntimeAuth: ClaudeRuntimeAuthService | null = null
 let runtime: YiruRuntimeService | null = null
+let globalAssistant: GlobalAssistantService | null = null
 let rateLimits: RateLimitService | null = null
 let runtimeRpc: YiruRuntimeRpcServer | null = null
 let desktopRelayService: DesktopRelayService | null = null
@@ -1087,7 +1089,8 @@ function openMainWindow(): BrowserWindow {
       // that re-fires did-finish-load, so live local sessions survive it (#5787).
       isRecoveryReloadInFlight,
       onBeforeUpdateQuit: () =>
-        preserveAgentAuthBeforeRestart({ codexRuntimeHome, claudeRuntimeAuth, store })
+        preserveAgentAuthBeforeRestart({ codexRuntimeHome, claudeRuntimeAuth, store }),
+      globalAssistant: globalAssistant ?? undefined
     }
   )
   rateLimits.attach(window)
@@ -1945,6 +1948,7 @@ app.whenReady().then(async () => {
       isAgentStatusHooksEnabled(store?.getSettings()) ? agentHookServer.buildPtyEnv() : {}
   })
   runtime = runtimeService
+  globalAssistant = new GlobalAssistantService(store, runtimeService, getCanonicalUserDataPath())
   browserManager.setBrowserGuestStateChangedListener((worktreeId) => {
     runtimeService.notifyMobileSessionTabsChanged(worktreeId)
   })
@@ -2428,6 +2432,8 @@ app.on('will-quit', (e) => {
   runtime?.getOffscreenBrowserBackend()?.destroyAll?.()
   browserManager.setBrowserGuestStateChangedListener(null)
   const emulatorShutdown = runtime?.getEmulatorBridge()?.destroyAllSessions() ?? Promise.resolve()
+  const globalAssistantShutdown = globalAssistant?.dispose() ?? Promise.resolve()
+  globalAssistant = null
   killAllPty()
   const watcherShutdown = shutdownWatchersOnce()
   store?.flush()
@@ -2490,7 +2496,8 @@ app.on('will-quit', (e) => {
       rpcStopAndClear,
       spoolStop,
       watcherShutdown,
-      emulatorShutdown
+      emulatorShutdown,
+      globalAssistantShutdown
     ])
       .then(() => shutdownTelemetry())
       .then(() => shutdownObservability())

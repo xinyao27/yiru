@@ -18,6 +18,7 @@ import { INTROSPECTION_HANDLERS } from './handlers/introspection'
 import { ORCHESTRATION_HANDLERS } from './handlers/orchestration'
 import { PROJECT_HANDLERS } from './handlers/project'
 import { REPO_HANDLERS } from './handlers/repo'
+import { SESSION_HANDLERS } from './handlers/sessions'
 import { SKILL_HANDLERS } from './handlers/skills'
 import { TERMINAL_HANDLERS } from './handlers/terminal'
 import { VM_HANDLERS } from './handlers/vm'
@@ -42,6 +43,7 @@ function buildHandlers(): Map<string, CommandHandler> {
     AUTOMATION_HANDLERS,
     PROJECT_HANDLERS,
     REPO_HANDLERS,
+    SESSION_HANDLERS,
     WORKTREE_HANDLERS,
     FILE_HANDLERS,
     TERMINAL_HANDLERS,

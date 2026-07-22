@@ -58,6 +58,7 @@ import type {
   FolderWorkspacePathStatusRequest
 } from '../shared/folder-workspace-path-status'
 import type { GitHistoryOptions, GitHistoryResult } from '../shared/git-history'
+import type { GlobalAssistantSession } from '../shared/global-assistant-types'
 /* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
 import type {
   CreateHostedReviewArgs,
@@ -2092,6 +2093,10 @@ export type PreloadApi = {
   openCodeUsage: OpenCodeUsageApi
   aiVault: AiVaultApi
   nativeChat: NativeChatApi
+  globalAssistant: {
+    getOrCreate: () => Promise<GlobalAssistantSession>
+    restart: () => Promise<GlobalAssistantSession>
+  }
   fs: {
     readDir: (args: { dirPath: string; connectionId?: string }) => Promise<DirEntry[]>
     readFile: (args: {
@@ -2451,6 +2456,7 @@ export type PreloadApi = {
     onToggleRightSidebar: (callback: () => void) => () => void
     onToggleWorktreePalette: (callback: () => void) => () => void
     onToggleFloatingTerminal: (callback: () => void) => () => void
+    onToggleAssistant: (callback: () => void) => () => void
     onTerminalShortcutCaptured: (
       callback: (data: { actionId: KeybindingActionId }) => void
     ) => () => void
@@ -2527,6 +2533,7 @@ export type PreloadApi = {
         launchToken?: string
         launchAgent?: TuiAgent
         viewMode?: 'terminal' | 'chat'
+        isGlobalAssistant?: boolean
         title?: string
         ptyId?: string
         activate?: boolean

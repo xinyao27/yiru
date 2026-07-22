@@ -12108,6 +12108,12 @@
           "githubPullRequestNumber": "PR #{{value0}}"
         }
       }
+    },
+    "global-assistant": {
+      "open": "어시스턴트 열기",
+      "startError": "글로벌 어시스턴트를 시작할 수 없습니다.",
+      "newConversation": "새 대화",
+      "starting": "어시스턴트 시작 중…"
     }
   },
   "browser": {

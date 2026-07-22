@@ -359,6 +359,13 @@ export function setupGuestShortcutForwarding(args: {
       return true
     }
 
+    if (action?.type === 'toggleAssistant') {
+      event.preventDefault()
+      const renderer = resolveRenderer(browserTabId)
+      renderer?.send('ui:toggleAssistant')
+      return true
+    }
+
     // Why: Cmd/Ctrl+Alt+[ / ] cycles across every tab type. Handled before
     // the generic modifier-chord gate below because that gate rejects Alt.
     // Mirrors the Alt-exempt branch pattern used for worktreeHistoryNavigate.

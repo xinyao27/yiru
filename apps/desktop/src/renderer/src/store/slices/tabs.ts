@@ -120,6 +120,8 @@ export type TabsSlice = {
   setTabLabel: (tabId: string, label: string) => void
   /** Set a tab's view mode (terminal vs native chat). Patches only that tab. */
   setTabViewMode: (tabId: string, mode: 'terminal' | 'chat') => void
+  /** Stamp the app-owned assistant identity onto an adopted terminal tab. */
+  markTabAsGlobalAssistant: (tabId: string) => void
   /** Flip a tab between the terminal and native chat renderings. The live
    *  TerminalPane stays mounted — this only changes which surface is shown. */
   toggleTabViewMode: (tabId: string) => void
@@ -1088,6 +1090,31 @@ export const createTabsSlice: StateCreator<AppState, [], [], TabsSlice> = (set, 
   setTabViewMode: (tabId, mode) => {
     set((state) => patchTab(state.unifiedTabsByWorktree, tabId, { viewMode: mode }) ?? {})
     mirrorTabViewModeToHost(get(), tabId, mode)
+  },
+
+  markTabAsGlobalAssistant: (tabId) => {
+    set((state) => {
+      const found = findTabAndWorktree(state.unifiedTabsByWorktree, tabId)
+      if (!found || found.tab.contentType !== 'terminal') {
+        return {}
+      }
+      // Why: runtime PTY adoption may reuse a tab created by an older renderer;
+      // stamp both models so chat eligibility and persistence agree immediately.
+      return {
+        unifiedTabsByWorktree: {
+          ...state.unifiedTabsByWorktree,
+          [found.worktreeId]: (state.unifiedTabsByWorktree[found.worktreeId] ?? []).map((tab) =>
+            tab.id === tabId ? { ...tab, isGlobalAssistant: true } : tab
+          )
+        },
+        tabsByWorktree: {
+          ...state.tabsByWorktree,
+          [found.worktreeId]: (state.tabsByWorktree[found.worktreeId] ?? []).map((tab) =>
+            tab.id === found.tab.entityId ? { ...tab, isGlobalAssistant: true } : tab
+          )
+        }
+      }
+    })
   },
 
   toggleTabViewMode: (tabId) => {
