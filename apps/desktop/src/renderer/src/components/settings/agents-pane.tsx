@@ -1,4 +1,4 @@
-import { Check, Info, Terminal } from '@phosphor-icons/react'
+import { Check, Terminal } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the Agents pane keeps catalog rows, default
    selection, per-agent controls, and runtime location together so settings
    reconciliation stays visible in one file. */
@@ -34,7 +34,6 @@ import {
 import type { GlobalSettings, TuiAgent } from '../../../../shared/types'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { AgentAwakeSetting } from './agent-awake-setting'
 import { AgentCacheTimerSection } from './agent-cache-timer-section'
 import { parseAgentDefaultEnvDraft, stringifyAgentDefaultEnvDraft } from './agent-default-env-draft'
@@ -211,37 +210,22 @@ export function AgentPermissionsSetting({
   return (
     <section className="space-y-3">
       <SettingsSubsectionHeader
-        title={
-          <span className="flex items-center gap-2">
-            {translate('auto.components.settings.AgentsPane.agentPermissions', 'Agent Permissions')}
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <button
-                    type="button"
-                    aria-label={translate(
-                      'auto.components.settings.AgentsPane.agentPermissionsInfo',
-                      'Agent permissions info'
-                    )}
-                    className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:border-ring grid size-5 place-items-center rounded-md border border-transparent transition-colors outline-none"
-                  >
-                    <Info className="size-3.5" />
-                  </button>
-                }
-              />
-              <TooltipContent side="top" sideOffset={6}>
-                {translate(
-                  'auto.components.settings.AgentsPane.agentPermissionsTooltip',
-                  "Doesn't apply to agents where you've overridden launch arguments."
-                )}
-              </TooltipContent>
-            </Tooltip>
-          </span>
-        }
-        description={translate(
-          'auto.components.settings.AgentsPane.agentPermissionsDescription',
-          'Choose whether Yiru launches agents with fewer permission prompts or with manual checks.'
+        title={translate(
+          'auto.components.settings.AgentsPane.agentPermissions',
+          'Agent Permissions'
         )}
+        description={
+          <>
+            {translate(
+              'auto.components.settings.AgentsPane.agentPermissionsDescription',
+              'Choose whether Yiru launches agents with fewer permission prompts or with manual checks.'
+            )}{' '}
+            {translate(
+              'auto.components.settings.AgentsPane.agentPermissionsTooltip',
+              "Doesn't apply to agents where you've overridden launch arguments."
+            )}
+          </>
+        }
         action={
           <SettingsSegmentedControl<AgentPermissionMode>
             value={visibleMode}
