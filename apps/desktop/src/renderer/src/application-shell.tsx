@@ -42,6 +42,7 @@ import {
   shouldMinimizeFloatingWorkspacePanelOnCloseShortcut
 } from '@/lib/floating-workspace-terminal-actions'
 import { createFloatingWorkspaceTourInteractionSnapshot } from '@/lib/floating-workspace-tour-interaction-snapshot'
+import { TOGGLE_GLOBAL_ASSISTANT_EVENT } from '@/lib/global-assistant'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
 import { getRendererAppPlatform } from '@/lib/renderer-app-platform'
@@ -386,6 +387,9 @@ const FloatingTerminalPanel = lazy(() =>
     default: module.FloatingTerminalPanel
   }))
 )
+const GlobalAssistantPanel = lazy(
+  () => import('./components/global-assistant/global-assistant-panel')
+)
 // Why: lazy-loaded so the WebP asset + overlay module aren't fetched unless
 // the user opts into the experimental flag.
 const PetOverlay = lazy(() => import('./components/pet/pet-overlay'))
@@ -440,6 +444,7 @@ function App(): React.JSX.Element {
   useWebSessionTabsSync()
   useSpoolSharingBridge()
   const [floatingTerminalOpen, setFloatingTerminalOpen] = useState(false)
+  const [globalAssistantOpen, setGlobalAssistantOpen] = useState(false)
   const floatingWorkspaceTourInteractionSnapshotRef = useRef<{
     wasPreviouslyInteracted?: boolean
     persisted?: Promise<void>
@@ -655,14 +660,30 @@ function App(): React.JSX.Element {
   )
 
   useEffect(() => {
+    // Why: both panels own global typing shortcuts and focus restoration, so
+    // opening one must close the other before its input surface mounts.
     const toggleFloatingTerminal = (): void => {
       if (floatingTerminalEnabled) {
+        setGlobalAssistantOpen(false)
         setFloatingTerminalOpenWithFocus((open) => !open)
       }
     }
     window.addEventListener(TOGGLE_FLOATING_TERMINAL_EVENT, toggleFloatingTerminal)
     return () => window.removeEventListener(TOGGLE_FLOATING_TERMINAL_EVENT, toggleFloatingTerminal)
   }, [floatingTerminalEnabled, setFloatingTerminalOpenWithFocus])
+
+  useEffect(() => {
+    // Why: keep shortcut-driven opens subject to the same one-overlay rule as
+    // the floating workspace's explicit "Open Assistant" action.
+    const toggleGlobalAssistant = (): void => {
+      if (!globalAssistantOpen) {
+        setFloatingTerminalOpenWithFocus(false)
+      }
+      setGlobalAssistantOpen((open) => !open)
+    }
+    window.addEventListener(TOGGLE_GLOBAL_ASSISTANT_EVENT, toggleGlobalAssistant)
+    return () => window.removeEventListener(TOGGLE_GLOBAL_ASSISTANT_EVENT, toggleGlobalAssistant)
+  }, [globalAssistantOpen, setFloatingTerminalOpenWithFocus])
 
   useEffect(() => {
     if (!floatingTerminalEnabled) {
@@ -2567,7 +2588,38 @@ function App(): React.JSX.Element {
                   <FloatingTerminalPanel
                     open={floatingTerminalOpen}
                     onOpenChange={setFloatingTerminalOpenWithFocus}
+                    onOpenAssistant={() => {
+                      setFloatingTerminalOpenWithFocus(false)
+                      setGlobalAssistantOpen(true)
+                    }}
                     tourInteractionSnapshot={floatingWorkspaceTourInteractionSnapshotRef.current}
+                  />
+                </RecoverableRenderErrorBoundary>
+              </Suspense>
+            ) : null}
+            {globalAssistantOpen ? (
+              <Suspense fallback={null}>
+                <RecoverableRenderErrorBoundary
+                  boundaryId="overlay.global-assistant"
+                  surface="overlay"
+                  resetKey={globalAssistantOpen}
+                  compact
+                  title={translate(
+                    'components.global-assistant.renderError',
+                    'The Global Assistant hit an error.'
+                  )}
+                  description={translate(
+                    'components.global-assistant.renderErrorDescription',
+                    'Retry the assistant or close and reopen it.'
+                  )}
+                >
+                  <GlobalAssistantPanel
+                    open={globalAssistantOpen}
+                    onOpenChange={setGlobalAssistantOpen}
+                    onShowTerminal={() => {
+                      setGlobalAssistantOpen(false)
+                      setFloatingTerminalOpenWithFocus(true)
+                    }}
                   />
                 </RecoverableRenderErrorBoundary>
               </Suspense>

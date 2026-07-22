@@ -1,4 +1,10 @@
-import { FileText, Globe, Minus, TerminalWindow as TerminalSquare } from '@phosphor-icons/react'
+import {
+  ChatCircleDots,
+  FileText,
+  Globe,
+  Minus,
+  TerminalWindow as TerminalSquare
+} from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the floating panel owns window chrome,
  * resizing, orchestration setup, and mixed terminal/browser/editor tab
  * handling in one surface so the floating worktree does not drift from the
@@ -97,6 +103,7 @@ const EditorPanel = lazy(() => import('@/components/editor/editor-panel'))
 type FloatingTerminalPanelProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onOpenAssistant: () => void
   tourInteractionSnapshot?: FloatingWorkspaceTourInteractionSnapshot | null | undefined
 }
 
@@ -164,6 +171,7 @@ function setFloatingTerminalInputFocusedInMain(focused: boolean): void {
 export function FloatingTerminalPanel({
   open,
   onOpenChange,
+  onOpenAssistant,
   tourInteractionSnapshot
 }: FloatingTerminalPanelProps): React.JSX.Element | null {
   const { tabs, browserTabs, groups, unifiedTabs, floatingFiles, expandedPaneByTabId } =
@@ -191,6 +199,7 @@ export function FloatingTerminalPanel({
   const newMarkdownShortcut = useShortcutKeyDetails('tab.newMarkdown')
   const openMarkdownShortcut = useShortcutKeyDetails('tab.openMarkdown')
   const closeShortcut = useShortcutKeyDetails('tab.close')
+  const assistantShortcut = useShortcutKeyDetails('assistant.toggle')
 
   const [cwd, setCwd] = useState<string | null>(null)
   const [markdownCwd, setMarkdownCwd] = useState<string | null>(null)
@@ -1584,6 +1593,7 @@ export function FloatingTerminalPanel({
               onNewMarkdown={createFloatingMarkdownTab}
               onOpenMarkdown={openFloatingMarkdownTab}
               onNewBrowser={createFloatingBrowserTab}
+              onOpenAssistant={onOpenAssistant}
               onClose={() => onOpenChange(false)}
               onFocusPanel={focusPanelForShortcuts}
               newTerminalShortcut={newTerminalShortcut}
@@ -1591,6 +1601,7 @@ export function FloatingTerminalPanel({
               newMarkdownShortcut={newMarkdownShortcut}
               openMarkdownShortcut={openMarkdownShortcut}
               closeShortcut={closeShortcut}
+              assistantShortcut={assistantShortcut}
             />
           ) : null}
         </div>
@@ -1726,18 +1737,21 @@ function FloatingTerminalEmptyState({
   onNewMarkdown,
   onOpenMarkdown,
   onNewBrowser,
+  onOpenAssistant,
   onClose,
   onFocusPanel,
   newTerminalShortcut,
   newBrowserShortcut,
   newMarkdownShortcut,
   openMarkdownShortcut,
-  closeShortcut
+  closeShortcut,
+  assistantShortcut
 }: {
   onNewTerminal: () => void
   onNewMarkdown: () => void
   onOpenMarkdown: () => void
   onNewBrowser: () => void
+  onOpenAssistant: () => void
   onClose: () => void
   onFocusPanel: () => void
   newTerminalShortcut: ShortcutKeyComboDetails
@@ -1745,6 +1759,7 @@ function FloatingTerminalEmptyState({
   newMarkdownShortcut: ShortcutKeyComboDetails
   openMarkdownShortcut: ShortcutKeyComboDetails
   closeShortcut: ShortcutKeyComboDetails
+  assistantShortcut: ShortcutKeyComboDetails
 }): React.JSX.Element {
   return (
     <div
@@ -1754,6 +1769,18 @@ function FloatingTerminalEmptyState({
       onPointerDown={onFocusPanel}
     >
       <div className="flex w-[360px] flex-col items-center gap-1.5" data-floating-terminal-no-drag>
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-foreground hover:bg-accent hover:text-accent-foreground grid h-8 w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2.5 px-3 py-0 text-sm font-normal"
+          onClick={onOpenAssistant}
+        >
+          <ChatCircleDots className="size-3.5 opacity-90" />
+          <span className="truncate text-left leading-none">
+            {translate('components.global-assistant.open', 'Open Assistant')}
+          </span>
+          <FloatingEmptyStateShortcut shortcut={assistantShortcut} />
+        </Button>
         <Button
           type="button"
           variant="ghost"

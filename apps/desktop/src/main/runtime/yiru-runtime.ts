@@ -64,6 +64,7 @@ import { createCommandCodeOutputStatusDetector } from '../../shared/command-code
 import {
   DEFAULT_REPO_BADGE_COLOR,
   FLOATING_TERMINAL_WORKTREE_ID,
+  GLOBAL_ASSISTANT_WORKTREE_ID,
   getDefaultVoiceSettings
 } from '../../shared/constants'
 import {
@@ -19069,6 +19070,36 @@ export class YiruRuntimeService {
     return { handle, tabId: leaf.tabId, worktreeId: leaf.worktreeId }
   }
 
+  async revealGlobalAssistantTerminal(handle: string): Promise<void> {
+    const pty = this.getLivePtyForHandle(handle)
+    if (!pty || pty.pty.worktreeId !== GLOBAL_ASSISTANT_WORKTREE_ID) {
+      throw new Error('global_assistant_terminal_not_found')
+    }
+    if (!pty.pty.connected) {
+      throw new Error('terminal_exited')
+    }
+    if (!this.notifier?.revealTerminalSession) {
+      throw new Error('runtime_unavailable')
+    }
+    const parsedPaneKey = parsePaneKey(pty.pty.paneKey ?? '')
+    // Why: raw-terminal escape adopts the hidden local PTY into the existing
+    // floating workspace without exposing the synthetic assistant workspace.
+    await this.notifier.revealTerminalSession(FLOATING_TERMINAL_WORKTREE_ID, {
+      ptyId: pty.pty.ptyId,
+      title: getLatestPtyTitle(pty.pty),
+      ...(pty.pty.launchConfig
+        ? { launchConfig: copySleepingAgentLaunchConfig(pty.pty.launchConfig) }
+        : {}),
+      ...(pty.pty.launchToken ? { launchToken: pty.pty.launchToken } : {}),
+      ...(pty.pty.launchAgent ? { launchAgent: pty.pty.launchAgent } : {}),
+      ...(pty.pty.tabId !== null ? { tabId: pty.pty.tabId } : {}),
+      ...(parsedPaneKey ? { leafId: parsedPaneKey.leafId } : {}),
+      viewMode: 'terminal',
+      activate: false,
+      presentation: 'background'
+    })
+  }
+
   async closeTerminal(handle: string): Promise<RuntimeTerminalClose> {
     const pty = this.getLivePtyForHandle(handle)
     this.claudeAgentTeams.removeTeamForLeaderHandle(handle)
@@ -19665,6 +19696,20 @@ export class YiruRuntimeService {
       // keep rejecting it because there is no backing repo/worktree record.
       return {
         id: FLOATING_TERMINAL_WORKTREE_ID,
+        path: homedir(),
+        connectionId: null,
+        repo: null,
+        folderWorkspace: null
+      }
+    }
+
+    const globalAssistantSelector =
+      selector === GLOBAL_ASSISTANT_WORKTREE_ID || selector === `id:${GLOBAL_ASSISTANT_WORKTREE_ID}`
+    if (globalAssistantSelector) {
+      // Why: the assistant is local even while the user is browsing an SSH
+      // workspace; its synthetic owner must never inherit a remote connection.
+      return {
+        id: GLOBAL_ASSISTANT_WORKTREE_ID,
         path: homedir(),
         connectionId: null,
         repo: null,

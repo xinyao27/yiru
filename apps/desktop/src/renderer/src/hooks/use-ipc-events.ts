@@ -34,6 +34,7 @@ import {
   switchFloatingWorkspaceTab
 } from '@/lib/floating-workspace-terminal-actions'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
+import { TOGGLE_GLOBAL_ASSISTANT_EVENT } from '@/lib/global-assistant'
 import { detectLanguage } from '@/lib/language-detect'
 import { planMobileTerminalTabMount } from '@/lib/mobile-terminal-tab-mount'
 import { initialAgentTabViewModeProps } from '@/lib/native-chat-initial-view-mode'
@@ -90,6 +91,7 @@ import {
   type AgentStatusIpcPayload,
   type ParsedAgentStatusPayload
 } from '../../../shared/agent-status-types'
+import { GLOBAL_ASSISTANT_WORKTREE_ID } from '../../../shared/constants'
 import type { RateLimitState } from '../../../shared/rate-limit-types'
 import { importRemoteWorkspaceSession } from '../../../shared/remote-workspace-session-projection'
 import type {
@@ -1280,6 +1282,12 @@ export function useIpcEvents(): void {
     unsubs.push(
       window.api.ui.onToggleFloatingTerminal(() => {
         window.dispatchEvent(new CustomEvent(TOGGLE_FLOATING_TERMINAL_EVENT))
+      })
+    )
+
+    unsubs.push(
+      window.api.ui.onToggleAssistant(() => {
+        window.dispatchEvent(new CustomEvent(TOGGLE_GLOBAL_ASSISTANT_EVENT))
       })
     )
 
@@ -3033,6 +3041,14 @@ export function useIpcEvents(): void {
         repoConnectionResolved,
         owningWorktreeId
       } = resolvePaneKey(store, paneKey)
+      if (!exists && data.worktreeId === GLOBAL_ASSISTANT_WORKTREE_ID) {
+        // Why: the assistant PTY deliberately has no renderer terminal tab;
+        // its native-chat transcript still needs the hook-owned provider id.
+        exists = true
+        owningWorktreeId = GLOBAL_ASSISTANT_WORKTREE_ID
+        repoConnectionId = null
+        repoConnectionResolved = true
+      }
       if (!exists && data.worktreeId && hasRuntimeBackedWorktreeAttribution(data)) {
         // Why: orchestration worker hooks can carry main-side worktree
         // attribution before this renderer has a terminal tab for the pane.

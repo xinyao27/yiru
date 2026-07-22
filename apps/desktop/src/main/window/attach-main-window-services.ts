@@ -20,6 +20,8 @@ import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/brows
 import type { ClaudeRuntimeAuthPreparation } from '../claude-accounts/runtime-auth-service'
 import type { ClaudeAccountSelectionTarget } from '../claude-accounts/runtime-selection'
 import type { CodexAccountSelectionTarget } from '../codex-accounts/runtime-selection'
+import { registerGlobalAssistantHandlers } from '../global-assistant/global-assistant-ipc'
+import type { GlobalAssistantService } from '../global-assistant/global-assistant-service'
 import { getLocalPtyProvider, registerPtyHandlers } from '../ipc/pty'
 import { registerDaemonManagementHandlers } from '../ipc/pty-management'
 import { registerRemoteWorkspaceHandlers } from '../ipc/remote-workspace'
@@ -80,6 +82,7 @@ export function attachMainWindowServices(
     // Why: lets the PTY orphan sweep skip the one crash-recovery reload (#5787).
     isRecoveryReloadInFlight?: (webContentsId: number) => boolean
     onBeforeUpdateQuit?: () => void | Promise<void>
+    globalAssistant?: GlobalAssistantService
   }
 ): void {
   registerAppReloadHandler(mainWindow, options?.onBeforeRendererReload)
@@ -101,6 +104,9 @@ export function attachMainWindowServices(
       isRecoveryReloadInFlight: options?.isRecoveryReloadInFlight
     }
   )
+  if (options?.globalAssistant) {
+    registerGlobalAssistantHandlers(mainWindow, options.globalAssistant)
+  }
   // Why: the Manage Sessions settings panel (docs/daemon-staleness-ux.md §Phase 1)
   // uses a narrow `pty:management:*` IPC surface that reads the live
   // DaemonPtyRouter via getDaemonProvider(). Registering here — after
