@@ -35,7 +35,7 @@ export function WorkspaceTabCreateMenu({
   const triggerButton = (
     <Button
       type="button"
-      variant="outline"
+      variant="ghost"
       size="icon-xs"
       className={cn(
         'ml-1 my-auto h-7 w-6 shrink-0 text-muted-foreground hover:text-accent-foreground',
