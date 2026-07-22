@@ -19072,7 +19072,7 @@ export class YiruRuntimeService {
   }
 
   async revealGlobalAssistantChat(handle: string): Promise<string> {
-    const pty = this.getLivePtyForHandle(handle)
+    const pty = this.getRuntimeOwnedPtyForHandle(handle)
     if (!pty || pty.pty.worktreeId !== GLOBAL_ASSISTANT_WORKTREE_ID) {
       throw new Error('global_assistant_terminal_not_found')
     }
@@ -20701,7 +20701,12 @@ export class YiruRuntimeService {
       return pty
     }
 
-    if (pty.worktreeId !== worktreeId) {
+    const preservesGlobalAssistantOwner =
+      pty.worktreeId === GLOBAL_ASSISTANT_WORKTREE_ID &&
+      worktreeId === FLOATING_TERMINAL_WORKTREE_ID
+    // Why: the floating workspace is only the assistant's presentation host;
+    // its runtime-owned PTY must retain the synthetic assistant owner.
+    if (pty.worktreeId !== worktreeId && !preservesGlobalAssistantOwner) {
       pty.worktreeId = worktreeId
       // Why: path/controller inference can relocate a PTY but cannot attest a new instance.
       pty.worktreeInstanceId = null
@@ -22252,6 +22257,25 @@ export class YiruRuntimeService {
     // a second handle for the same terminal.
     this.handleByPtyId.set(record.ptyId, handle)
     return { record, pty }
+  }
+
+  private getRuntimeOwnedPtyForHandle(handle: string): {
+    record: TerminalHandleRecord
+    pty: RuntimePtyWorktreeRecord
+  } | null {
+    const syntheticPty = this.getLivePtyForHandle(handle)
+    if (syntheticPty) {
+      return syntheticPty
+    }
+    try {
+      const liveLeaf = this.getLiveLeafForHandle(handle)
+      const pty = liveLeaf.leaf.ptyId ? this.ptysById.get(liveLeaf.leaf.ptyId) : null
+      // Why: renderer reload adopts the assistant's synthetic handle into the
+      // rebuilt leaf graph; reveal must follow that live handle back to its PTY.
+      return pty ? { record: liveLeaf.record, pty } : null
+    } catch {
+      return null
+    }
   }
 
   private readPtyTerminal(
